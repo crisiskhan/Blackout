@@ -13,7 +13,7 @@ concurrency:
 jobs:
   testflight:
     name: TestFlight Blackout
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 60
     permissions:
       contents: read
@@ -26,16 +26,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16
+      - name: Select Xcode 26
         run: |
           set -euo pipefail
           ls /Applications | grep -i xcode || true
-          app="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)"
+          app=""
+          if [ -d /Applications/Xcode_26.6.app ]; then
+            app="/Applications/Xcode_26.6.app"
+          else
+            app="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || true)"
+          fi
           if [ -z "${app}" ]; then
-            app="/Applications/Xcode.app"
+            echo "Xcode 26 not found. App Store Connect requires the iOS 26 SDK." >&2
+            exit 1
           fi
           sudo xcode-select -s "${app}/Contents/Developer"
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Write API key and ExportOptions
         run: |
