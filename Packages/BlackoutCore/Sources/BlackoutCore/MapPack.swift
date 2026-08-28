@@ -70,11 +70,64 @@ public struct MapPackSnapshot: Sendable {
     public var region: MapRegion
     public var pois: [MapPOI]
     public var disclaimer: String
+    public var tileCount: Int
+    public var expectedTileCount: Int
 
-    public init(rootURL: URL, region: MapRegion, pois: [MapPOI], disclaimer: String) {
+    public init(
+        rootURL: URL,
+        region: MapRegion,
+        pois: [MapPOI],
+        disclaimer: String,
+        tileCount: Int = 0,
+        expectedTileCount: Int = 0
+    ) {
         self.rootURL = rootURL
         self.region = region
         self.pois = pois
         self.disclaimer = disclaimer
+        self.tileCount = tileCount
+        self.expectedTileCount = expectedTileCount
+    }
+
+    /// Recenter / HUD line. Testers have no Mac Console; this is the runtime log.
+    public var paintDiagnostic: String {
+        let lat = String(format: "%.2f", region.centerLatitude)
+        let lon = String(format: "%.2f", region.centerLongitude)
+        if tileCount == 0 {
+            return "\(region.name) · \(lat),\(lon) · 0 tiles — pack did not copy"
+        }
+        if expectedTileCount > 0, tileCount < expectedTileCount {
+            return "\(region.name) · \(lat),\(lon) · \(tileCount)/\(expectedTileCount) tiles — short copy"
+        }
+        return "\(region.name) · \(lat),\(lon) · \(tileCount) tiles"
+    }
+}
+
+/// Layout under DefaultPack / downloaded packs: `tiles/{z}/{x}/{y}.png`.
+public enum MapPackLayout {
+    public static func tilePNGCount(root: URL) -> Int {
+        let tiles = root.appendingPathComponent("tiles", isDirectory: true)
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: tiles.path, isDirectory: &isDir), isDir.boolValue else {
+            return 0
+        }
+        guard let enumerator = FileManager.default.enumerator(
+            at: tiles,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return 0
+        }
+        var count = 0
+        for case let url as URL in enumerator {
+            if url.pathExtension.lowercased() == "png" {
+                count += 1
+            }
+        }
+        return count
+    }
+
+    public static func containsTilePNGs(root: URL) -> Bool {
+        tilePNGCount(root: root) > 0
     }
 }

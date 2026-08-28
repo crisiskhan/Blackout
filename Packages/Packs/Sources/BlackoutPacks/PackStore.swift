@@ -48,9 +48,8 @@ public final class PackStore {
     public var bundledIsReady: Bool {
         guard let bundledRoot else { return false }
         let manifest = bundledRoot.appendingPathComponent("manifest.json")
-        let tileProbe = bundledRoot.appendingPathComponent("tiles", isDirectory: true)
         return FileManager.default.fileExists(atPath: manifest.path)
-            && FileManager.default.fileExists(atPath: tileProbe.path)
+            && MapPackLayout.containsTilePNGs(root: bundledRoot)
     }
 
     public func coverageRegions(bundled: MapRegion?) -> [MapRegion] {

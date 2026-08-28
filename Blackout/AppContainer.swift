@@ -126,9 +126,11 @@ final class AppContainer {
         for candidate in candidates {
             guard let candidate else { continue }
             let manifest = candidate.appendingPathComponent("manifest.json")
-            if fileManager.fileExists(atPath: manifest.path) {
-                return candidate
+            guard fileManager.fileExists(atPath: manifest.path) else { continue }
+            if name == "DefaultPack", !MapPackLayout.containsTilePNGs(root: candidate) {
+                continue
             }
+            return candidate
         }
         return nil
     }

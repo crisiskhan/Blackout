@@ -108,6 +108,12 @@ jobs:
             CODE_SIGN_STYLE=Automatic \
             archive
 
+      - name: Probe DefaultPack tiles inside xcarchive .app
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/Blackout.xcarchive/Products/Applications/Blackout.app"
+          bash tools/probe_defaultpack_app.sh "${APP}"
+
       - name: Export and upload to App Store Connect
         run: |
           set -euo pipefail

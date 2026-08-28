@@ -31,6 +31,7 @@ public struct MapsRootView: View {
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
+    @State private var packPaintLog = ""
 
     public init(
         location: LocationService,
@@ -122,6 +123,7 @@ public struct MapsRootView: View {
                         onReturn: {
                             pinnedToPackCoverage = true
                             resetToken += 1
+                            packPaintLog = "Recenter · \(packService.paintDiagnostic)"
                         },
                         onOpenFieldPacks: onOpenFieldPacks
                     )
@@ -145,6 +147,12 @@ public struct MapsRootView: View {
                                 Text("file tiles · no Apple base map")
                                     .font(BlackoutDS.captionFont())
                                     .foregroundStyle(BlackoutDS.Silver.bright)
+                                if !packPaintLog.isEmpty {
+                                    Text(packPaintLog)
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Semantic.info)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                                 if sosOnly {
                                     Text("CRITICAL · SOS only")
                                         .font(BlackoutDS.captionFont())
@@ -314,6 +322,7 @@ public struct MapsRootView: View {
         }
         .onAppear {
             if extremeSaver { radarOn = true }
+            packPaintLog = packService.paintDiagnostic
             refreshTerrain()
             location.startUpdating()
         }

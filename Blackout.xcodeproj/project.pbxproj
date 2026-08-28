@@ -219,16 +219,19 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/Blackout/DefaultPack/manifest.json",
+				"$(SRCROOT)/Blackout/DefaultPack/tiles/10/211/387.png",
+				"$(SRCROOT)/tools/copy_defaultpack.sh",
 			);
 			name = "Copy DefaultPack into app bundle";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/manifest.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/tiles/10/211/387.png",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/DefaultPack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: DefaultPack missing at ${SRC}\" >&2\n  exit 1\nfi\nif [ ! -d \"${SRC}/tiles\" ]; then\n  echo \"error: DefaultPack tiles missing at ${SRC}/tiles\" >&2\n  exit 1\nfi\nif [ -z \"$(find \"${SRC}/tiles\" -name '*.png' | head -1)\" ]; then\n  echo \"error: DefaultPack has no tile PNGs under tiles/z/x/y.png\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied DefaultPack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\ntest -d \"${DST}/tiles\"\ntest -n \"$(find \"${DST}/tiles\" -name '*.png' | head -1)\"\n";
+			shellScript = "set -e\nexec \"${SRCROOT}/tools/copy_defaultpack.sh\"\n";
 		};
 		4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -334,7 +337,7 @@
 					CLANG_ENABLE_OBJC_ARC = YES;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 4;
+					CURRENT_PROJECT_VERSION = 5;
 					DEBUG_INFORMATION_FORMAT = dwarf;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_PREVIEWS = YES;
@@ -393,7 +396,7 @@
 					CLANG_ENABLE_OBJC_ARC = YES;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 4;
+					CURRENT_PROJECT_VERSION = 5;
 					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_NS_ASSERTIONS = NO;

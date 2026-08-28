@@ -54,9 +54,28 @@ public final class FileMapPack: MapPackServing {
         guard FileManager.default.fileExists(atPath: tilesDir.path, isDirectory: &isDir), isDir.boolValue else {
             return nil
         }
+        let tileCount = MapPackLayout.tilePNGCount(root: root)
+        guard tileCount > 0 else {
+            return nil
+        }
+        let expectedTileCount = json["tileCount"] as? Int ?? tileCount
         let pois = loadPOIs(root: root)
         let dem = loadDEM(root: root)
-        return (MapPackSnapshot(rootURL: root, region: region, pois: pois, disclaimer: disclaimer), dem)
+        return (
+            MapPackSnapshot(
+                rootURL: root,
+                region: region,
+                pois: pois,
+                disclaimer: disclaimer,
+                tileCount: tileCount,
+                expectedTileCount: expectedTileCount
+            ),
+            dem
+        )
+    }
+
+    public var paintDiagnostic: String {
+        pack?.paintDiagnostic ?? "no pack · 0 tiles — DefaultPack did not copy"
     }
 
     private static func loadPOIs(root: URL) -> [MapPOI] {

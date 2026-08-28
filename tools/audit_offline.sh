@@ -85,10 +85,25 @@ else
 fi
 
 if [[ -d "$root/Blackout/DefaultPack/tiles" ]] \
-  && find "$root/Blackout/DefaultPack/tiles" -name '*.png' | grep -q .; then
-  echo "OK   DefaultPack tiles/z/x/y.png present"
+  && [[ -f "$root/Blackout/DefaultPack/tiles/10/211/387.png" ]]; then
+  need="$(sed -n 's/.*"tileCount"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p' "$root/Blackout/DefaultPack/manifest.json" | head -1)"
+  count="$(find "$root/Blackout/DefaultPack/tiles" -name '*.png' | wc -l | tr -d '[:space:]')"
+  if [[ -n "$need" && "$count" -ge "$need" ]]; then
+    echo "OK   DefaultPack tiles/z/x/y.png present ($count, need $need)"
+  else
+    echo "FAIL DefaultPack PNG count $count (need $need)"
+    fail=1
+  fi
 else
   echo "FAIL DefaultPack tiles missing"
+  fail=1
+fi
+
+if grep -q 'copy_defaultpack.sh' "$root/Blackout.xcodeproj/project.pbxproj" \
+  && grep -q 'tiles/10/211/387.png' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   DefaultPack copy phase probes tiles/z/x/y.png count"
+else
+  echo "FAIL DefaultPack copy phase does not probe PNG count / z/x/y layout"
   fail=1
 fi
 

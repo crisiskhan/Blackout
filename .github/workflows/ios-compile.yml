@@ -41,6 +41,18 @@ jobs:
             -scheme Blackout \
             -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
+
+      - name: Probe DefaultPack tiles inside Blackout.app
+        run: |
+          set -euo pipefail
+          APP="$(find "$RUNNER_TEMP/DerivedData/Build/Products" -name 'Blackout.app' -type d | head -1)"
+          if [ -z "${APP}" ]; then
+            echo "error: Blackout.app not found under DerivedData" >&2
+            find "$RUNNER_TEMP/DerivedData/Build/Products" | head -80 >&2
+            exit 1
+          fi
+          bash tools/probe_defaultpack_app.sh "${APP}"

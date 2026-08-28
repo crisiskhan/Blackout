@@ -346,7 +346,7 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
                 "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
                 "CODE_SIGN_STYLE": "Automatic",
-                "CURRENT_PROJECT_VERSION": "4",
+                "CURRENT_PROJECT_VERSION": "5",
                 "DEVELOPMENT_TEAM": "",
                 "ENABLE_PREVIEWS": "YES",
                 "GENERATE_INFOPLIST_FILE": "YES",
@@ -448,26 +448,7 @@ def generate_xcodeproj() -> None:
     )
 
     copy_script_raw = """set -e
-SRC="${SRCROOT}/Blackout/DefaultPack"
-DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack"
-if [ ! -f "${SRC}/manifest.json" ]; then
-  echo "error: DefaultPack missing at ${SRC}" >&2
-  exit 1
-fi
-if [ ! -d "${SRC}/tiles" ]; then
-  echo "error: DefaultPack tiles missing at ${SRC}/tiles" >&2
-  exit 1
-fi
-if [ -z "$(find "${SRC}/tiles" -name '*.png' | head -1)" ]; then
-  echo "error: DefaultPack has no tile PNGs under tiles/z/x/y.png" >&2
-  exit 1
-fi
-mkdir -p "${DST}"
-ditto "${SRC}" "${DST}"
-echo "Copied DefaultPack -> ${DST}"
-test -f "${DST}/manifest.json"
-test -d "${DST}/tiles"
-test -n "$(find "${DST}/tiles" -name '*.png' | head -1)"
+exec "${SRCROOT}/tools/copy_defaultpack.sh"
 """
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
     copy_guide_raw = """set -e
@@ -665,12 +646,15 @@ test -f "${DST}/manifest.json"
 			);
 			inputPaths = (
 				"$(SRCROOT)/Blackout/DefaultPack/manifest.json",
+				"$(SRCROOT)/Blackout/DefaultPack/tiles/10/211/387.png",
+				"$(SRCROOT)/tools/copy_defaultpack.sh",
 			);
 			name = "Copy DefaultPack into app bundle";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/manifest.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/tiles/10/211/387.png",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
