@@ -3,6 +3,8 @@ xcuserdata/
 DerivedData/
 .build/
 .swiftpm/
+__pycache__/
+*.pyc
 *.xcuserstate
 *.moved-aside
 *.hmap
