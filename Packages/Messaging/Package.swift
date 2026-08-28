@@ -18,7 +18,7 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
-                "BlackoutMesh",
+                .product(name: "BlackoutMesh", package: "Mesh"),
             ]
         ),
     ]

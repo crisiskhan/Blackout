@@ -18,7 +18,7 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
-                "BlackoutLocation",
+                .product(name: "BlackoutLocation", package: "Location"),
             ]
         ),
     ]
