@@ -144,11 +144,21 @@ struct RootView: View {
         .tint(BlackoutDS.Silver.metal)
     }
 
+    /// iOS `List(selection:)` takes `Binding<SelectionValue?>`. Keep `destination` non-optional for TabView.
+    private var sidebarSelection: Binding<AppDestination?> {
+        Binding(
+            get: { destination },
+            set: { if let value = $0 { destination = value } }
+        )
+    }
+
     private var iPadSplit: some View {
         NavigationSplitView {
-            List(AppDestination.allCases, selection: $destination) { item in
-                Label(item.title, systemImage: item.symbol)
-                    .tag(item)
+            List(selection: sidebarSelection) {
+                ForEach(AppDestination.allCases) { item in
+                    Label(item.title, systemImage: item.symbol)
+                        .tag(item)
+                }
             }
             .navigationTitle("Blackout")
             .navigationSplitViewColumnWidth(min: 280, ideal: 280, max: 280)
