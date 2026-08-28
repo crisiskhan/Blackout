@@ -5,7 +5,10 @@
   "region": "rockies-denver",
   "name": "Blackout Field Guide — Rockies / Denver core",
   "articleCount": 132,
-  "sections": ["guide", "skills"],
+  "sections": [
+    "guide",
+    "skills"
+  ],
   "version": "1.0.0",
   "offline": true,
   "notes": "Fully offline field pack. No remote URLs. Plants stay Unknown unless the user already knew them."

@@ -52,10 +52,10 @@ fi
 
 if [[ -f "$root/Blackout/GuidePack/articles.jsonl" ]]; then
   count="$(grep -c . "$root/Blackout/GuidePack/articles.jsonl" || true)"
-  if [[ "$count" -ge 40 ]]; then
+  if [[ "$count" -ge 132 ]]; then
     echo "OK   GuidePack articles ($count)"
   else
-    echo "FAIL GuidePack article count $count (<40)"
+    echo "FAIL GuidePack article count $count (<132)"
     fail=1
   fi
 else
