@@ -15,6 +15,7 @@ public struct SOSFab: View {
     @State private var showConfirm = false
     @State private var isArmed = false
     @State private var showArmedPanel = false
+    @State private var storeError: String?
 
     private static let armedKey = "com.crisiskhan.blackout.sos.armed"
 
@@ -61,6 +62,7 @@ public struct SOSFab: View {
         .fullScreenCover(isPresented: $showConfirm) {
             SOSConfirmCover(
                 meshCount: mesh.nearbyPeerCount,
+                storeError: $storeError,
                 onArm: arm,
                 onDismissUnarmed: { showConfirm = false }
             )
@@ -73,23 +75,36 @@ public struct SOSFab: View {
         }
         .opacity(battery.hidesSOS ? 0 : 1)
         .allowsHitTesting(!battery.hidesSOS)
+        .overlay(alignment: .top) {
+            if let storeError, !showConfirm, !showArmedPanel {
+                StoreFailure(storeError)
+                    .frame(width: 280)
+                    .offset(y: -120)
+            }
+        }
     }
 
     private func arm() {
-        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
-        let fix = location.lastKnown
+        let fix = location.navigationFix
         let event = SOSEventRecordDTO(
             armedAt: Date(),
             latitude: fix?.latitude,
             longitude: fix?.longitude,
             note: "Armed offline. Mesh peers: \(mesh.nearbyPeerCount)."
         )
-        try? persistence.logSOS(event)
+        do {
+            try persistence.logSOS(event)
+        } catch {
+            storeError = error.localizedDescription
+            return
+        }
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
         isArmed = true
         UserDefaults.standard.set(true, forKey: Self.armedKey)
         showConfirm = false
         showArmedPanel = true
+        storeError = nil
         let envelope = Envelope(
             kind: .sosAlert,
             ciphertext: Data("sos".utf8),
@@ -104,6 +119,7 @@ public struct SOSFab: View {
 
 public struct SOSConfirmCover: View {
     var meshCount: Int
+    @Binding var storeError: String?
     var onArm: () -> Void
     var onDismissUnarmed: () -> Void
 
@@ -121,6 +137,9 @@ public struct SOSConfirmCover: View {
                 MeshPill(nearbyCount: meshCount)
                 SlideToConfirm("Slide to arm") {
                     onArm()
+                }
+                if let storeError {
+                    StoreFailure(storeError)
                 }
                 Text("X dismisses unarmed if you have not slid. Blackout never auto-dials 911.")
                     .font(BlackoutDS.captionFont())
@@ -209,6 +228,7 @@ public struct SystemEmergencySOSView: View {
 public struct SOSLogView: View {
     let persistence: any PersistenceServing
     @State private var events: [SOSEventRecordDTO] = []
+    @State private var storeError: String?
 
     public init(persistence: any PersistenceServing) {
         self.persistence = persistence
@@ -233,6 +253,18 @@ public struct SOSLogView: View {
         .scrollContentBackground(.hidden)
         .background(BlackoutDS.Surface.base)
         .navigationTitle("SOS log")
-        .task { events = (try? persistence.sosEvents()) ?? [] }
+        .safeAreaInset(edge: .top) {
+            if let storeError {
+                StoreFailure(storeError).padding(16)
+            }
+        }
+        .task {
+            do {
+                events = try persistence.sosEvents()
+                storeError = nil
+            } catch {
+                storeError = error.localizedDescription
+            }
+        }
     }
 }

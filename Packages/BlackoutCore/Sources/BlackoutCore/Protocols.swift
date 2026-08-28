@@ -25,11 +25,15 @@ public protocol CryptoServing: AnyObject {
 public protocol LocationServing: AnyObject {
     var authorization: LocationAuthorization { get }
     var lastKnown: LocationFix? { get }
+    var manualPin: LocationFix? { get }
+    var navigationFix: LocationFix? { get }
     var headingDegrees: Double? { get }
     var isUpdating: Bool { get }
     func requestWhenInUse()
     func startUpdating()
     func stopUpdating()
+    func dropManualPin(latitude: Double, longitude: Double)
+    func clearManualPin()
 }
 
 @MainActor

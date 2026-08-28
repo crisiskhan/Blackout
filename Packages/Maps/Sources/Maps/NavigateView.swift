@@ -22,7 +22,7 @@ struct NavigateView: View {
                 if location.authorization == .denied || location.authorization == .restricted {
                     PermissionDenied(
                         kind: .location,
-                        reason: "No live GPS. Bearing uses last-known when one exists. Compass-only still paints a heading."
+                        reason: "No live GPS. Bearing uses last-known or a manual pin. Compass-only still paints a heading. The app does not wait on a fix."
                     )
                 }
                 HUDPanel {
@@ -66,9 +66,9 @@ struct NavigateView: View {
     }
 
     private var bearingCopy: String {
-        guard let selected, let from = location.lastKnown, from.hasCoordinate else {
+        guard let selected, let from = location.navigationFix, from.hasCoordinate else {
             if selected == nil { return "Pick a pack point. No network routing." }
-            return "No coordinate to compute a bearing."
+            return "No coordinate to compute a bearing. Drop a manual pin on the map."
         }
         let brg = bearing(
             fromLat: from.latitude!, fromLon: from.longitude!,
@@ -78,7 +78,7 @@ struct NavigateView: View {
     }
 
     private func rangeCopy(to poi: MapPOI) -> String {
-        guard let from = location.lastKnown, from.hasCoordinate else { return "—" }
+        guard let from = location.navigationFix, from.hasCoordinate else { return "—" }
         let meters = haversine(
             from.latitude!, from.longitude!,
             poi.latitude, poi.longitude

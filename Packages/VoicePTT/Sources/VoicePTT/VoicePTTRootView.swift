@@ -38,9 +38,7 @@ public struct VoicePTTRootView: View {
             }
             .disabled(extremeSaver)
             if let error {
-                Text(error)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Semantic.warn)
+                StoreFailure(error)
             }
             ForEach(clips) { clip in
                 HStack {
@@ -63,7 +61,13 @@ public struct VoicePTTRootView: View {
         .padding(20)
         .padding(.bottom, 80)
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
-        .task { clips = (try? persistence.voiceClips()) ?? [] }
+        .task {
+            do {
+                clips = try persistence.voiceClips()
+            } catch {
+                self.error = error.localizedDescription
+            }
+        }
     }
 
     private func toggleRecord() async {
@@ -112,10 +116,15 @@ public struct VoicePTTRootView: View {
     }
 
     private func persist(url: URL) {
-        let duration = playerDuration(url) 
+        let duration = playerDuration(url)
         let dto = VoiceClipRecordDTO(fileName: url.lastPathComponent, durationSeconds: duration)
-        try? persistence.saveVoiceClip(dto)
-        clips = (try? persistence.voiceClips()) ?? []
+        do {
+            try persistence.saveVoiceClip(dto)
+            clips = try persistence.voiceClips()
+            error = nil
+        } catch {
+            self.error = error.localizedDescription
+        }
     }
 
     private func playerDuration(_ url: URL) -> Double {

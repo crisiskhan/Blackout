@@ -15,6 +15,9 @@ public struct MapsRootView: View {
 
     @State private var tool: MapTool?
     @State private var crumbs: [BreadcrumbRecordDTO] = []
+    @State private var outsidePack = false
+    @State private var resetToken = 0
+    @State private var storeError: String?
 
     public init(
         location: LocationService,
@@ -37,24 +40,67 @@ public struct MapsRootView: View {
                 OfflineMapView(
                     pack: pack,
                     selfFix: location.lastKnown,
+                    manualPin: location.manualPin,
                     breadcrumbs: crumbs,
-                    pois: pack.pois
+                    onDropPin: { lat, lon in
+                        location.dropManualPin(latitude: lat, longitude: lon)
+                    },
+                    onOutsidePack: { outside in
+                        outsidePack = outside
+                    },
+                    resetToken: resetToken
                 )
                 .ignoresSafeArea()
+                if outsidePack {
+                    NoPackCanvas(
+                        title: "Outside DefaultPack",
+                        detail: "This is the honest no-pack canvas — not a MapKit spinner and not Apple tiles. Pinch/pan back, or return to the bundled region.",
+                        location: location,
+                        onReturn: { resetToken += 1 }
+                    )
+                }
             } else {
-                NoPackCanvas(location: location)
+                NoPackCanvas(
+                    title: "No map pack",
+                    detail: "DefaultPack is missing from Blackout.app. This canvas is intentional — not a MapKit spinner waiting on WAN.",
+                    location: location,
+                    onReturn: nil
+                )
             }
             VStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
                         GPSChip(mode: gpsMode)
                         MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        Text("file tiles · no Apple base map")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
                     }
                     Spacer()
                     CompassRose(heading: location.headingDegrees)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
+                if location.authorization == .denied || location.authorization == .restricted {
+                    PermissionDenied(
+                        kind: .location,
+                        reason: "GPS denied. Long-press the map to drop a manual pin for Navigate, return-to-start, and Find Civilization. PermissionDenied stays; the app will not wait on a fix."
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                }
+                if location.manualPin?.hasCoordinate == true, location.lastKnown?.hasCoordinate != true {
+                    HStack {
+                        GhostButton("Clear pin", height: BlackoutDS.Hit.sm) {
+                            location.clearManualPin()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+                if let storeError {
+                    StoreFailure(storeError)
+                        .padding(.horizontal, 16)
+                }
                 Spacer()
                 HStack(spacing: 8) {
                     toolButton("Navigate", tool: .navigate)
@@ -82,29 +128,35 @@ public struct MapsRootView: View {
             .preferredColorScheme(.dark)
             .presentationDetents([.medium, .large])
         }
-        .task {
-            crumbs = loadCrumbs()
+        .task { reloadCrumbs() }
+    }
+
+    private func reloadCrumbs() {
+        do {
+            let expeditions = try persistence.expeditions()
+            if let open = expeditions.first(where: \.isOpen) {
+                crumbs = try persistence.breadcrumbs(expeditionID: open.id)
+            } else {
+                crumbs = []
+            }
+            storeError = nil
+        } catch {
+            storeError = error.localizedDescription
         }
     }
 
-    private func loadCrumbs() -> [BreadcrumbRecordDTO] {
-        guard let open = try? persistence.expeditions().first(where: \.isOpen) else { return [] }
-        return (try? persistence.breadcrumbs(expeditionID: open.id)) ?? []
-    }
-
     private var gpsMode: GPSChip.Mode {
+        if location.lastKnown?.hasCoordinate == true {
+            return location.authorization == .authorized ? .live : .lastKnown
+        }
+        if location.manualPin?.hasCoordinate == true { return .manual }
         switch location.authorization {
         case .denied, .restricted:
-            if location.lastKnown?.hasCoordinate == true { return .lastKnown }
-            if location.headingDegrees != nil { return .compass }
-            return .denied
+            return location.headingDegrees != nil ? .compass : .denied
         case .notDetermined:
-            if location.lastKnown?.hasCoordinate == true { return .lastKnown }
             return .none
         case .authorized:
-            if location.lastKnown?.hasCoordinate == true { return .live }
-            if location.headingDegrees != nil { return .compass }
-            return .none
+            return location.headingDegrees != nil ? .compass : .none
         }
     }
 
@@ -153,7 +205,10 @@ struct CompassRose: View {
 }
 
 struct NoPackCanvas: View {
+    var title: String
+    var detail: String
     @Bindable var location: LocationService
+    var onReturn: (() -> Void)?
 
     var body: some View {
         ZStack {
@@ -162,18 +217,22 @@ struct NoPackCanvas: View {
                 Image(systemName: "map")
                     .font(.system(size: 36, weight: .light))
                     .foregroundStyle(BlackoutDS.Silver.steel)
-                Text("No map pack")
+                Text(title)
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Silver.bright)
-                Text("DefaultPack is missing from the bundle. This canvas is intentional — not a MapKit spinner.")
+                Text(detail)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-                if let fix = location.lastKnown, fix.hasCoordinate {
-                    Text("Last known \(fix.latitude!.formatted(.number.precision(.fractionLength(4)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(4))))")
+                if let fix = location.navigationFix, fix.hasCoordinate {
+                    Text("Anchor \(fix.latitude!.formatted(.number.precision(.fractionLength(4)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(4))))")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.info)
+                }
+                if let onReturn {
+                    MetalButton("Return to pack", height: BlackoutDS.Hit.md, action: onReturn)
+                        .padding(.horizontal, 32)
                 }
             }
         }

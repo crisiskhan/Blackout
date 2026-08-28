@@ -407,6 +407,10 @@ def generate_xcodeproj() -> None:
         "proj_release": oid("proj_release"),
         "tgt_debug": oid("tgt_debug"),
         "tgt_release": oid("tgt_release"),
+        "pack_ref": oid("pack_folder_ref"),
+        "pack_build": oid("pack_in_resources"),
+        "copy_script": oid("copy_defaultpack_phase"),
+        "sync_ex": oid("sync_exceptions"),
     }
     pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
     pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in PACKAGES}
@@ -428,6 +432,23 @@ def generate_xcodeproj() -> None:
         build_files.append(
             f"\t\t{pkg_link[product]} /* {product} in Frameworks */ = {{isa = PBXBuildFile; productRef = {pkg_dep[product]} /* {product} */; }};"
         )
+    build_files.append(
+        f"\t\t{ids['pack_build']} /* DefaultPack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* DefaultPack */; }};"
+    )
+
+    copy_script_raw = """set -e
+SRC="${SRCROOT}/Blackout/DefaultPack"
+DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack"
+if [ ! -f "${SRC}/manifest.json" ]; then
+  echo "error: DefaultPack missing at ${SRC}" >&2
+  exit 1
+fi
+mkdir -p "${DST}"
+ditto "${SRC}" "${DST}"
+echo "Copied DefaultPack -> ${DST}"
+test -f "${DST}/manifest.json"
+"""
+    copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     local_refs = []
     for folder, _ in PACKAGES:
@@ -461,11 +482,15 @@ def generate_xcodeproj() -> None:
 
 /* Begin PBXFileReference section */
 		{ids['app_ref']} /* Blackout.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; }};
+		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		{ids['sync']} /* Blackout */ = {{
-			isa = PBXFileSystemSynchronizedRootGroup;
+ mar			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */,
+			);
 			path = Blackout;
 			sourceTree = "<group>";
 		}};
@@ -487,6 +512,7 @@ def generate_xcodeproj() -> None:
 			isa = PBXGroup;
 			children = (
 				{ids['sync']} /* Blackout */,
+				{ids['pack_ref']} /* DefaultPack */,
 				{ids['products']} /* Products */,
 			);
 			sourceTree = "<group>";
@@ -509,6 +535,7 @@ def generate_xcodeproj() -> None:
 				{ids['sources']} /* Sources */,
 				{ids['fw']} /* Frameworks */,
 				{ids['resources']} /* Resources */,
+				{ids['copy_script']} /* Copy DefaultPack into app bundle */,
 			);
 			buildRules = (
 			);
@@ -566,8 +593,9 @@ def generate_xcodeproj() -> None:
 /* Begin PBXResourcesBuildPhase section */
 		{ids['resources']} /* Resources */ = {{
 			isa = PBXResourcesBuildPhase;
- mar			buildActionMask = 2147483647;
+			buildActionMask = 2147483647;
 			files = (
+				{ids['pack_build']} /* DefaultPack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -582,6 +610,40 @@ def generate_xcodeproj() -> None:
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		{ids['copy_script']} /* Copy DefaultPack into app bundle */ = {{
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Blackout/DefaultPack/manifest.json",
+			);
+			name = "Copy DefaultPack into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "{copy_script}";
+		}};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */ = {{
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DefaultPack,
+			);
+			target = {ids['target']} /* Blackout */;
+		}};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin XCBuildConfiguration section */
 		{ids['proj_debug']} /* Debug */ = {{

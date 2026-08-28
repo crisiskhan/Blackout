@@ -13,7 +13,7 @@ import Settings
 @Observable
 final class AppContainer {
     let persistence: any PersistenceServing
-    let crypto: LoopbackCrypto
+    let crypto: any CryptoServing
     let location: LocationService
     let mesh: MeshFacade
     let battery: BatteryService
@@ -22,26 +22,34 @@ final class AppContainer {
     let bootError: String?
 
     init() {
-        var persistError: String?
+        var errors: [String] = []
         let opened: any PersistenceServing
-        if let disk = try? PersistenceService() {
-            opened = disk
-            persistError = nil
-        } else if let memory = try? PersistenceService.fallbackInMemory() {
-            opened = memory
-            persistError = "Local store failed; using in-memory fallback. Chrome still paints."
-        } else {
-            opened = ArrayPersistence()
-            persistError = "Local store unavailable. Session-only memory is in use."
+        do {
+            opened = try PersistenceService()
+        } catch {
+            opened = UnavailablePersistence()
+            errors.append(error.localizedDescription)
         }
         persistence = opened
-        crypto = LoopbackCrypto()
+
+        let cryptoOpened: any CryptoServing
+        do {
+            cryptoOpened = try LoopbackCrypto()
+        } catch {
+            cryptoOpened = UnavailableCrypto()
+            errors.append("Crypto keychain: \(error.localizedDescription). Old ciphertext will not be opened with a new identity.")
+        }
+        crypto = cryptoOpened
+
         location = LocationService()
         mesh = MeshFacade()
         battery = BatteryService()
         lock = AppLockService()
         pack = FileMapPack(rootURL: Self.packRoot())
-        bootError = persistError
+        if pack.pack == nil {
+            errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
+        }
+        bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
         location.applyPolicy(battery.policy)
         if location.authorization == .authorized {
             location.startUpdating()
@@ -49,14 +57,17 @@ final class AppContainer {
         mesh.start()
     }
 
-    private static func packRoot() -> URL? {
-        if let url = Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "DefaultPack") {
-            return url.deletingLastPathComponent()
-        }
-        if let root = Bundle.main.resourceURL {
-            let candidate = root.appendingPathComponent("DefaultPack", isDirectory: true)
+    static func packRoot() -> URL? {
+        let fileManager = FileManager.default
+        let candidates: [URL?] = [
+            Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "DefaultPack")?.deletingLastPathComponent(),
+            Bundle.main.resourceURL?.appendingPathComponent("DefaultPack", isDirectory: true),
+            Bundle.main.bundleURL.appendingPathComponent("DefaultPack", isDirectory: true)
+        ]
+        for candidate in candidates {
+            guard let candidate else { continue }
             let manifest = candidate.appendingPathComponent("manifest.json")
-            if FileManager.default.fileExists(atPath: manifest.path) {
+            if fileManager.fileExists(atPath: manifest.path) {
                 return candidate
             }
         }

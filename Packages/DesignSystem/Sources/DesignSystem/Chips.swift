@@ -31,6 +31,7 @@ public struct GPSChip: View {
     public enum Mode: String {
         case live = "GPS live"
         case lastKnown = "Last known"
+        case manual = "Manual pin"
         case compass = "Compass only"
         case denied = "GPS denied"
         case none = "No fix"
@@ -63,7 +64,7 @@ public struct GPSChip: View {
     private var color: Color {
         switch mode {
         case .live: return BlackoutDS.Semantic.ok
-        case .lastKnown, .compass: return BlackoutDS.Semantic.warn
+        case .lastKnown, .compass, .manual: return BlackoutDS.Semantic.warn
         case .denied, .none: return BlackoutDS.Silver.steel
         }
     }

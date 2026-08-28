@@ -12,16 +12,29 @@ public struct ExpeditionsRootView: View {
     @State private var crumbs: [BreadcrumbRecordDTO] = []
     @State private var tracking = false
     @State private var showAdmin = false
+    @State private var storeError: String?
+
+    private static let trackingKey = "com.crisiskhan.blackout.crumbs.tracking"
+    private static let trackingExpeditionKey = "com.crisiskhan.blackout.crumbs.expedition"
 
     public init(persistence: any PersistenceServing, location: LocationService) {
         self.persistence = persistence
         self.location = location
+        _tracking = State(initialValue: UserDefaults.standard.bool(forKey: Self.trackingKey))
     }
 
     public var body: some View {
         NavigationStack {
             List {
                 Section {
+                    Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
+                        .listRowBackground(Color.clear)
+                    if let storeError {
+                        StoreFailure(storeError)
+                            .listRowBackground(Color.clear)
+                    }
                     MetalButton("New expedition", height: BlackoutDS.Hit.md) {
                         editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
                     }
@@ -87,26 +100,57 @@ public struct ExpeditionsRootView: View {
     }
 
     private func reload() {
-        items = (try? persistence.expeditions()) ?? []
-        if let open = items.first(where: \.isOpen) {
-            crumbs = (try? persistence.breadcrumbs(expeditionID: open.id)) ?? []
+        do {
+            items = try persistence.expeditions()
+            if let open = items.first(where: \.isOpen) {
+                crumbs = try persistence.breadcrumbs(expeditionID: open.id)
+                restoreTracking(for: open)
+            } else {
+                crumbs = []
+                setTracking(false, expedition: nil)
+            }
+            storeError = nil
+        } catch {
+            storeError = error.localizedDescription
         }
     }
 
+    private func restoreTracking(for expedition: ExpeditionRecordDTO) {
+        let stored = UserDefaults.standard.bool(forKey: Self.trackingKey)
+        let id = UserDefaults.standard.string(forKey: Self.trackingExpeditionKey)
+        tracking = stored && id == expedition.id.rawValue.uuidString && expedition.isOpen
+    }
+
     private func toggleCrumbs(_ expedition: ExpeditionRecordDTO) {
-        tracking.toggle()
+        setTracking(!tracking, expedition: expedition)
         dropCrumb(expedition)
     }
 
+    private func setTracking(_ value: Bool, expedition: ExpeditionRecordDTO?) {
+        tracking = value
+        UserDefaults.standard.set(value, forKey: Self.trackingKey)
+        if let expedition, value {
+            UserDefaults.standard.set(expedition.id.rawValue.uuidString, forKey: Self.trackingExpeditionKey)
+        } else if !value {
+            UserDefaults.standard.removeObject(forKey: Self.trackingExpeditionKey)
+        }
+    }
+
     private func dropCrumb(_ expedition: ExpeditionRecordDTO) {
-        let fix = location.lastKnown
+        let fix = location.navigationFix
         let crumb = BreadcrumbRecordDTO(
             expeditionID: expedition.id,
             latitude: fix?.latitude,
             longitude: fix?.longitude
         )
-        try? persistence.appendBreadcrumb(crumb)
-        crumbs = (try? persistence.breadcrumbs(expeditionID: expedition.id)) ?? []
+        do {
+            try persistence.appendBreadcrumb(crumb)
+            crumbs = try persistence.breadcrumbs(expeditionID: expedition.id)
+            storeError = nil
+        } catch {
+            storeError = error.localizedDescription
+            setTracking(false, expedition: expedition)
+        }
     }
 }
 
@@ -116,11 +160,15 @@ struct ExpeditionEditor: View {
     @Bindable var location: LocationService
     var onDone: () -> Void
     @State private var crumbs: [BreadcrumbRecordDTO] = []
+    @State private var storeError: String?
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    if let storeError {
+                        StoreFailure(storeError)
+                    }
                     TextField("Name", text: $record.name)
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Silver.bright)
@@ -144,7 +192,7 @@ struct ExpeditionEditor: View {
                         drop()
                     }
                     ReturnToStartView(crumbs: crumbs, location: location)
-                    Text("\(crumbs.count) breadcrumbs. Nil coordinates are stored when GPS is denied.")
+                    Text("\(crumbs.count) breadcrumbs. Nil coordinates are stored when GPS is denied and no manual pin exists.")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
                 }
@@ -152,34 +200,51 @@ struct ExpeditionEditor: View {
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Expedition")
-            .task {
-                crumbs = (try? persistence.breadcrumbs(expeditionID: record.id)) ?? []
-            }
+            .task { loadCrumbs() }
+        }
+    }
+
+    private func loadCrumbs() {
+        do {
+            crumbs = try persistence.breadcrumbs(expeditionID: record.id)
+            storeError = nil
+        } catch {
+            storeError = error.localizedDescription
         }
     }
 
     private func save() {
-        if record.startLatitude == nil, let fix = location.lastKnown, fix.hasCoordinate {
+        if record.startLatitude == nil, let fix = location.navigationFix, fix.hasCoordinate {
             record.startLatitude = fix.latitude
             record.startLongitude = fix.longitude
         }
-        try? persistence.upsertExpedition(record)
-        onDone()
+        do {
+            try persistence.upsertExpedition(record)
+            storeError = nil
+            onDone()
+        } catch {
+            storeError = error.localizedDescription
+        }
     }
 
     private func drop() {
-        let fix = location.lastKnown
+        let fix = location.navigationFix
         let crumb = BreadcrumbRecordDTO(
             expeditionID: record.id,
             latitude: fix?.latitude,
             longitude: fix?.longitude
         )
-        try? persistence.appendBreadcrumb(crumb)
-        crumbs = (try? persistence.breadcrumbs(expeditionID: record.id)) ?? []
-        if record.startLatitude == nil {
-            record.startLatitude = crumb.latitude
-            record.startLongitude = crumb.longitude
-            try? persistence.upsertExpedition(record)
+        do {
+            try persistence.appendBreadcrumb(crumb)
+            crumbs = try persistence.breadcrumbs(expeditionID: record.id)
+            if record.startLatitude == nil {
+                record.startLatitude = crumb.latitude
+                record.startLongitude = crumb.longitude
+                try persistence.upsertExpedition(record)
+            }
+            storeError = nil
+        } catch {
+            storeError = error.localizedDescription
         }
     }
 }
@@ -190,7 +255,7 @@ struct ReturnToStartView: View {
 
     var body: some View {
         let start = crumbs.first(where: \.hasCoordinate)
-        if let start, let here = location.lastKnown, here.hasCoordinate {
+        if let start, let here = location.navigationFix, here.hasCoordinate {
             let meters = haversineLocal(here.latitude!, here.longitude!, start.latitude!, start.longitude!)
             let brg = bearingLocal(here.latitude!, here.longitude!, start.latitude!, start.longitude!)
             HUDPanel {
@@ -198,15 +263,20 @@ struct ReturnToStartView: View {
                     Text("Return to start")
                     Text(String(format: "%.0f m  ·  %d°", meters, Int(brg)))
                         .foregroundStyle(BlackoutDS.Silver.mid)
+                    if location.lastKnown?.hasCoordinate != true, location.manualPin?.hasCoordinate == true {
+                        Text("Using manual pin")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Semantic.warn)
+                    }
                 }
             }
         } else if location.authorization == .denied {
             PermissionDenied(
                 kind: .location,
-                reason: "Return-to-start needs a coordinate. Breadcrumbs without GPS remain in the log."
+                reason: "Return-to-start uses last-known or a manual pin. Breadcrumbs without coordinates remain in the log. Long-press the map to drop a pin."
             )
         } else {
-            Text("Return-to-start waits on a start fix.")
+            Text("Return-to-start waits on a start fix or manual pin.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
         }
@@ -220,6 +290,7 @@ public struct AdminDashboardView: View {
     @State private var sos = 0
     @State private var messages = 0
     @State private var crumbs = 0
+    @State private var storeError: String?
 
     public init(persistence: any PersistenceServing) {
         self.persistence = persistence
@@ -229,6 +300,9 @@ public struct AdminDashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ScreenHeader("Admin", subtitle: "On-device only. No analytics.")
+                if let storeError {
+                    StoreFailure(storeError)
+                }
                 stat("Expeditions", "\(expeditions)")
                 stat("Open", "\(open)")
                 stat("SOS events", "\(sos)")
@@ -240,13 +314,18 @@ public struct AdminDashboardView: View {
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
         .navigationTitle("Admin")
         .task {
-            let ex = (try? persistence.expeditions()) ?? []
-            expeditions = ex.count
-            open = ex.filter(\.isOpen).count
-            sos = ((try? persistence.sosEvents()) ?? []).count
-            messages = ((try? persistence.messages()) ?? []).count
-            crumbs = ex.reduce(0) { acc, item in
-                acc + ((try? persistence.breadcrumbs(expeditionID: item.id))?.count ?? 0)
+            do {
+                let ex = try persistence.expeditions()
+                expeditions = ex.count
+                open = ex.filter(\.isOpen).count
+                sos = try persistence.sosEvents().count
+                messages = try persistence.messages().count
+                crumbs = try ex.reduce(0) { acc, item in
+                    acc + (try persistence.breadcrumbs(expeditionID: item.id).count)
+                }
+                storeError = nil
+            } catch {
+                storeError = error.localizedDescription
             }
         }
     }

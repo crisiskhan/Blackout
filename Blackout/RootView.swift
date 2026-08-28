@@ -51,6 +51,15 @@ struct RootView: View {
                 LockGateView(lock: container.lock)
             } else {
                 chrome
+                if let bootError = container.bootError {
+                    VStack {
+                        StoreFailure(bootError)
+                            .padding(.horizontal, 16)
+                            .padding(.top, sizeClass == .regular ? 12 : 72)
+                        Spacer()
+                    }
+                    .allowsHitTesting(false)
+                }
                 sosOverlay
                 if sizeClass != .regular {
                     settingsOverlay
@@ -215,10 +224,17 @@ struct RootView: View {
                     battery: container.battery
                 )
                 .padding(.trailing, 18)
-                .padding(.bottom, 16)
+                .padding(.bottom, fabBottomPadding)
             }
         }
         .allowsHitTesting(true)
+    }
+
+    /// Compact: sit above the tab bar (typically 49pt) plus home indicator (~34pt), then 16pt gap.
+    /// Regular iPad split has no tab bar — 16pt above the home indicator.
+    private var fabBottomPadding: CGFloat {
+        if sizeClass == .regular { return 16 }
+        return 16 + 49 + 34
     }
 
     private var settingsOverlay: some View {

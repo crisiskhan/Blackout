@@ -8,12 +8,20 @@ import Observation
 public final class LocationService: LocationServing {
     public private(set) var authorization: LocationAuthorization = .notDetermined
     public private(set) var lastKnown: LocationFix?
+    public private(set) var manualPin: LocationFix?
     public private(set) var headingDegrees: Double?
     public private(set) var isUpdating = false
+
+    public var navigationFix: LocationFix? {
+        if let lastKnown, lastKnown.hasCoordinate { return lastKnown }
+        if let manualPin, manualPin.hasCoordinate { return manualPin }
+        return lastKnown
+    }
 
     fileprivate let manager = CLLocationManager()
     private let engine = LocationEngine()
     private static let lastKnownKey = "com.crisiskhan.blackout.location.lastKnown"
+    private static let manualPinKey = "com.crisiskhan.blackout.location.manualPin"
 
     public init() {
         engine.owner = self
@@ -21,7 +29,8 @@ public final class LocationService: LocationServing {
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         manager.headingFilter = 2
         authorization = Self.map(manager.authorizationStatus)
-        lastKnown = Self.loadLastKnown()
+        lastKnown = Self.load(Self.lastKnownKey)
+        manualPin = Self.load(Self.manualPinKey)
     }
 
     public func requestWhenInUse() {
@@ -76,11 +85,22 @@ public final class LocationService: LocationServing {
             timestamp: location.timestamp
         )
         lastKnown = fix
-        persistLastKnown(fix)
+        persist(fix, key: Self.lastKnownKey)
     }
 
     fileprivate func applyHeading(_ heading: CLHeading) {
         headingDegrees = heading.trueHeading >= 0 ? heading.trueHeading : heading.magneticHeading
+    }
+
+    public func dropManualPin(latitude: Double, longitude: Double) {
+        let fix = LocationFix(latitude: latitude, longitude: longitude, timestamp: Date())
+        manualPin = fix
+        persist(fix, key: Self.manualPinKey)
+    }
+
+    public func clearManualPin() {
+        manualPin = nil
+        UserDefaults.standard.removeObject(forKey: Self.manualPinKey)
     }
 
     private static func map(_ status: CLAuthorizationStatus) -> LocationAuthorization {
@@ -93,14 +113,14 @@ public final class LocationService: LocationServing {
         }
     }
 
-    private static func loadLastKnown() -> LocationFix? {
-        guard let data = UserDefaults.standard.data(forKey: lastKnownKey) else { return nil }
+    private static func load(_ key: String) -> LocationFix? {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(LocationFix.self, from: data)
     }
 
-    private func persistLastKnown(_ fix: LocationFix) {
+    private func persist(_ fix: LocationFix, key: String) {
         if let data = try? JSONEncoder().encode(fix) {
-            UserDefaults.standard.set(data, forKey: Self.lastKnownKey)
+            UserDefaults.standard.set(data, forKey: key)
         }
     }
 }

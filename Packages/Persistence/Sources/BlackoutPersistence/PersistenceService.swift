@@ -9,7 +9,7 @@ public final class PersistenceService: PersistenceServing {
     private let container: ModelContainer
     private var context: ModelContext { container.mainContext }
 
-    public init(inMemory: Bool = false) throws {
+    public init() throws {
         let schema = Schema([
             ExpeditionRecord.self,
             BreadcrumbRecord.self,
@@ -18,17 +18,13 @@ public final class PersistenceService: PersistenceServing {
             VoiceClipRecord.self
         ])
         let configuration = ModelConfiguration(
-            inMemory ? "BlackoutMemory" : "BlackoutLocal",
+            "BlackoutLocal",
             schema: schema,
-            isStoredInMemoryOnly: inMemory,
+            isStoredInMemoryOnly: false,
             allowsSave: true,
             cloudKitDatabase: .none
         )
         container = try ModelContainer(for: schema, configurations: configuration)
-    }
-
-    public static func fallbackInMemory() throws -> PersistenceService {
-        try PersistenceService(inMemory: true)
     }
 
     public func expeditions() throws -> [ExpeditionRecordDTO] {

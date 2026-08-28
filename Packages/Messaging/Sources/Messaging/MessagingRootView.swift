@@ -8,7 +8,7 @@ public struct MessagingRootView: View {
     let crypto: any CryptoServing
     @Bindable var mesh: MeshFacade
 
-    @State private var draft = ""
+    @State private var draft = UserDefaults.standard.string(forKey: "com.crisiskhan.blackout.comms.draft") ?? ""
     @State private var rows: [DisplayMessage] = []
     @State private var error: String?
 
@@ -48,9 +48,7 @@ public struct MessagingRootView: View {
             }
             .scrollContentBackground(.hidden)
             if let error {
-                Text(error)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Semantic.warn)
+                StoreFailure(error)
                     .padding(.horizontal, 20)
             }
             VStack(spacing: 12) {
@@ -73,6 +71,9 @@ public struct MessagingRootView: View {
             .padding(.bottom, 96)
         }
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
+        .onChange(of: draft) { _, value in
+            UserDefaults.standard.set(value, forKey: "com.crisiskhan.blackout.comms.draft")
+        }
         .task { reload() }
     }
 
@@ -117,29 +118,34 @@ public struct MessagingRootView: View {
                 )
             }
             draft = ""
+            UserDefaults.standard.removeObject(forKey: "com.crisiskhan.blackout.comms.draft")
             error = nil
             reload()
         } catch {
-            self.error = "Seal failed."
+            self.error = error.localizedDescription
         }
     }
 
     private func reload() {
-        let stored = (try? persistence.messages()) ?? []
-        rows = stored.map { record in
-            let body: String
-            if let data = try? crypto.open(record.ciphertext),
-               let text = String(data: data, encoding: .utf8) {
-                body = text
-            } else {
-                body = "(unable to open)"
+        do {
+            let stored = try persistence.messages()
+            rows = stored.map { record in
+                let body: String
+                if let data = try? crypto.open(record.ciphertext),
+                   let text = String(data: data, encoding: .utf8) {
+                    body = text
+                } else {
+                    body = "(unable to open)"
+                }
+                return DisplayMessage(
+                    id: record.id,
+                    body: body,
+                    status: record.status,
+                    createdAt: record.createdAt
+                )
             }
-            return DisplayMessage(
-                id: record.id,
-                body: body,
-                status: record.status,
-                createdAt: record.createdAt
-            )
+        } catch {
+            self.error = error.localizedDescription
         }
     }
 }

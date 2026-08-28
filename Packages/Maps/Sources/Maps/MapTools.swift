@@ -37,7 +37,7 @@ struct RadarView: View {
             if location.authorization == .denied {
                 PermissionDenied(
                     kind: .location,
-                    reason: "Radar still shows you as a self-dot when a last-known fix exists. It will not invent peers."
+                    reason: "Radar still shows a self-dot from last-known or a manual pin. It will not invent peers."
                 )
             }
             Spacer()
@@ -57,7 +57,7 @@ struct TopographyView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ScreenHeader("Topography", subtitle: "GPS altitude plus bundled DEM. Generated sample, not USGS.")
-                if let fix = location.lastKnown, fix.hasCoordinate {
+                if let fix = location.navigationFix, fix.hasCoordinate {
                     HUDPanel {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("GPS altitude: \(fix.altitudeMeters.map { "\(Int($0)) m" } ?? "unavailable")")
@@ -72,10 +72,10 @@ struct TopographyView: View {
                 } else if location.authorization == .denied || location.authorization == .restricted {
                     PermissionDenied(
                         kind: .location,
-                        reason: "No fix to sample. Bundled DEM is on disk; elevation needs a coordinate."
+                        reason: "No live GPS altitude. DEM still samples last-known or a manual pin. Drop a pin on the map if you have no fix."
                     )
                 } else {
-                    Text("No coordinate yet. DEM stays local until a last-known fix exists.")
+                    Text("No coordinate yet. Drop a manual pin on the map or wait for a last-known fix. DEM stays local.")
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Silver.dim)
                 }
@@ -101,10 +101,10 @@ struct FindCivilizationView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ScreenHeader("Find civilization", subtitle: "Bundled POIs only. No geocoder, no network.")
-                if location.authorization == .denied && location.lastKnown?.hasCoordinate != true {
+                if location.authorization == .denied && location.navigationFix?.hasCoordinate != true {
                     PermissionDenied(
                         kind: .location,
-                        reason: "Range to you is unavailable without a fix. Pack towns still list below as map data."
+                        reason: "Range to you needs last-known or a manual pin. Pack towns still list below. Long-press the map to drop a pin — no waiting on GPS."
                     )
                 }
                 ForEach(pack?.pois.filter(\.isCivilization) ?? []) { poi in
@@ -133,7 +133,7 @@ struct FindCivilizationView: View {
     }
 
     private func distance(to poi: MapPOI) -> String {
-        guard let from = location.lastKnown, from.hasCoordinate else { return "no fix" }
+        guard let from = location.navigationFix, from.hasCoordinate else { return "no fix" }
         let meters = haversine(from.latitude!, from.longitude!, poi.latitude, poi.longitude)
         if meters > 1000 { return String(format: "%.1f km", meters / 1000) }
         return String(format: "%.0f m", meters)
