@@ -74,15 +74,13 @@ struct GuideAskView: View {
             }
             ForEach(hits) { hit in
                 HUDPanel {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(hit.article.title)
                             .font(BlackoutDS.titleFont())
                         Text(hit.article.topic)
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.steel)
-                        Text(hit.snippet)
-                            .foregroundStyle(BlackoutDS.Silver.mid)
-                            .lineSpacing(6)
+                        GuideMarkdownView(source: hit.article.body)
                     }
                 }
             }
