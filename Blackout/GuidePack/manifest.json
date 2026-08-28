@@ -1,21 +1,12 @@
 {
-  "name": "Blackout GuidePack",
-  "kind": "on-device-field-guide",
-  "articleCount": 44,
-  "topics": [
-    "animals",
-    "bushcraft",
-    "fire",
-    "first-aid",
-    "food-plants",
-    "navigation",
-    "shelter",
-    "signaling",
-    "tools",
-    "water",
-    "weather"
-  ],
-  "disclaimer": "On-device field articles. Not medical advice. Plants never receive an edible verdict. No webview. No URLSession. Extra content later via Files.",
-  "articles": "articles.jsonl",
-  "index": "inverted.json"
+  "schema": 1,
+  "id": "core-rockies-denver-v1",
+  "locale": "en",
+  "region": "rockies-denver",
+  "name": "Blackout Field Guide — Rockies / Denver core",
+  "articleCount": 132,
+  "sections": ["guide", "skills"],
+  "version": "1.0.0",
+  "offline": true,
+  "notes": "Fully offline field pack. No remote URLs. Plants stay Unknown unless the user already knew them."
 }
