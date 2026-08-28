@@ -83,6 +83,7 @@ public struct MapsRootView: View {
                     showViewshed: showViewshed && extrasOn,
                     showSlope: showSlope && extrasOn,
                     centerToken: centerToken,
+                    pinCameraToPack: pinnedToPackCoverage,
                     onDropPin: { lat, lon in
                         location.dropManualPin(latitude: lat, longitude: lon)
                     },
@@ -102,7 +103,9 @@ public struct MapsRootView: View {
                         onToggleHeading: {
                             headingUp.toggle()
                             UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
-                            centerToken += 1
+                            if !pinnedToPackCoverage {
+                                centerToken += 1
+                            }
                         },
                         onToggleAudio: {
                             sweepAudio.toggle()
@@ -117,13 +120,14 @@ public struct MapsRootView: View {
                 if showLocationEmptyState {
                     NoPackCanvas(
                         title: "No tiles for this location",
-                        detail: "Texas and New Mexico packs download from Field Packs on Wi-Fi, then work airplane. Recenter to the bundled Denver sample until those files exist.",
+                        detail: "Texas and New Mexico packs download from Field Packs on Wi-Fi, then work airplane. Recenter jumps the camera to the bundled Denver sample center, not your GPS.",
                         location: location,
+                        packRegion: pack.region,
                         recenterTitle: "Recenter to pack coverage",
                         onReturn: {
                             pinnedToPackCoverage = true
                             resetToken += 1
-                            packPaintLog = "Recenter · \(packService.paintDiagnostic)"
+                            packPaintLog = "Recenter · \(packService.paintDiagnostic) · not GPS"
                         },
                         onOpenFieldPacks: onOpenFieldPacks
                     )
@@ -133,6 +137,7 @@ public struct MapsRootView: View {
                     title: "No map pack",
                     detail: "DefaultPack is missing from Blackout.app. This canvas is intentional — not a MapKit spinner waiting on WAN.",
                     location: location,
+                    packRegion: nil,
                     onReturn: nil,
                     onOpenFieldPacks: onOpenFieldPacks
                 )
@@ -147,6 +152,11 @@ public struct MapsRootView: View {
                                 Text("file tiles · no Apple base map")
                                     .font(BlackoutDS.captionFont())
                                     .foregroundStyle(BlackoutDS.Silver.bright)
+                                if let pack = packService.pack {
+                                    Text("pack center \(pack.region.centerLabel) · not GPS")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Semantic.info)
+                                }
                                 if !packPaintLog.isEmpty {
                                     Text(packPaintLog)
                                         .font(BlackoutDS.captionFont())
@@ -458,6 +468,7 @@ struct NoPackCanvas: View {
     var title: String
     var detail: String
     @Bindable var location: LocationService
+    var packRegion: MapRegion?
     var recenterTitle: String = "Recenter to pack coverage"
     var onReturn: (() -> Void)?
     var onOpenFieldPacks: (() -> Void)?
@@ -477,10 +488,18 @@ struct NoPackCanvas: View {
                     .foregroundStyle(BlackoutDS.Silver.dim)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-                if let fix = location.navigationFix, fix.hasCoordinate {
-                    Text("Anchor \(fix.latitude!.formatted(.number.precision(.fractionLength(4)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(4))))")
+                if let packRegion {
+                    Text("Pack center \(packRegion.centerLabel)")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.info)
+                    Text(packRegion.name)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.mid)
+                }
+                if let fix = location.navigationFix, fix.hasCoordinate {
+                    Text("GPS \(fix.latitude!.formatted(.number.precision(.fractionLength(2)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(2)))) — not camera")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.steel)
                 }
                 if location.isDeadReckoning {
                     Text("DEAD RECKONING")

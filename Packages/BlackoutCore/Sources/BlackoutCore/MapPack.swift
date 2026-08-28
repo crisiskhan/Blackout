@@ -57,6 +57,11 @@ public struct MapRegion: Hashable, Sendable {
     public var south: Double { centerLatitude - spanLatitude / 2 }
     public var north: Double { centerLatitude + spanLatitude / 2 }
 
+    /// Manifest center, e.g. DefaultPack Denver / Front Range. Not GPS.
+    public var centerLabel: String {
+        String(format: "%.2f,%.2f", centerLatitude, centerLongitude)
+    }
+
     public func contains(latitude: Double, longitude: Double, padFraction: Double = 0) -> Bool {
         let padLon = spanLongitude * padFraction
         let padLat = spanLatitude * padFraction
@@ -91,15 +96,13 @@ public struct MapPackSnapshot: Sendable {
 
     /// Recenter / HUD line. Testers have no Mac Console; this is the runtime log.
     public var paintDiagnostic: String {
-        let lat = String(format: "%.2f", region.centerLatitude)
-        let lon = String(format: "%.2f", region.centerLongitude)
         if tileCount == 0 {
-            return "\(region.name) · \(lat),\(lon) · 0 tiles — pack did not copy"
+            return "\(region.name) · pack \(region.centerLabel) · 0 tiles — pack did not copy"
         }
         if expectedTileCount > 0, tileCount < expectedTileCount {
-            return "\(region.name) · \(lat),\(lon) · \(tileCount)/\(expectedTileCount) tiles — short copy"
+            return "\(region.name) · pack \(region.centerLabel) · \(tileCount)/\(expectedTileCount) tiles — short copy"
         }
-        return "\(region.name) · \(lat),\(lon) · \(tileCount) tiles"
+        return "\(region.name) · pack \(region.centerLabel) · \(tileCount) tiles"
     }
 }
 

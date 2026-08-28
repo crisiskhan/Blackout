@@ -107,4 +107,13 @@ else
   fail=1
 fi
 
+if grep -q 'func recenterToPackCoverage' "$root/Packages/Maps/Sources/Maps/OfflineMapView.swift" \
+  && grep -q 'centerOn(latitude: pack.region.centerLatitude' "$root/Packages/Maps/Sources/Maps/OfflineMapView.swift" \
+  && grep -q 'pinCameraToPack' "$root/Packages/Maps/Sources/Maps/OfflineMapView.swift"; then
+  echo "OK   Recenter jumps to pack manifest center, not GPS"
+else
+  echo "FAIL Recenter missing pack-center jump (must not GPS-follow)"
+  fail=1
+fi
+
 exit "$fail"

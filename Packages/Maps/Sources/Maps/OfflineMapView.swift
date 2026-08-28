@@ -13,6 +13,9 @@ struct OfflineMapView: UIViewRepresentable {
     var showViewshed: Bool
     var showSlope: Bool
     var centerToken: Int
+    /// When true, Recenter pinned the camera to pack coverage. GPS follow
+    /// (El Paso 31.87,-106.60 etc.) must not yank the camera off Denver tiles.
+    var pinCameraToPack: Bool
     var onDropPin: (Double, Double) -> Void
     var onOutsidePack: (Bool) -> Void
     var resetToken: Int
@@ -51,11 +54,13 @@ struct OfflineMapView: UIViewRepresentable {
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
-            view.resetToPack()
+            view.recenterToPackCoverage()
         }
         if context.coordinator.lastCenterToken != centerToken {
             context.coordinator.lastCenterToken = centerToken
-            if let selfFix, selfFix.hasCoordinate {
+            // Heading-up / "center on me" only. Recenter to pack coverage
+            // never uses this path — GPS outside the sample paints void.
+            if !pinCameraToPack, let selfFix, selfFix.hasCoordinate {
                 view.centerOn(latitude: selfFix.latitude!, longitude: selfFix.longitude!)
             }
         }
@@ -145,12 +150,12 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         scroll.frame = bounds
         if !didFit, bounds.width > 0, canvas.bounds.width > 0 {
             didFit = true
-            resetToPack()
+            recenterToPackCoverage()
         }
         reportOutside()
     }
 
-    func resetToPack() {
+    func recenterToPackCoverage() {
         let fit = min(
             bounds.width / max(canvas.bounds.width, 1),
             bounds.height / max(canvas.bounds.height, 1)
@@ -158,6 +163,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         scroll.minimumZoomScale = min(0.2, max(fit * 0.5, 0.05))
         scroll.setZoomScale(max(fit, scroll.minimumZoomScale), animated: false)
         centerPack()
+        // Manifest center (Denver / Front Range). Never GPS / last-known.
+        centerOn(latitude: pack.region.centerLatitude, longitude: pack.region.centerLongitude)
         lastOutside = false
         coordinator?.onOutsidePack(false)
         reportOutside()
