@@ -351,6 +351,9 @@ private struct CriticalSOSShell: View {
             Text("CRITICAL · SOS only")
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Red.hot)
+            Text("Charge to restore Map, Comms, Field, Expedition.")
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.mid)
             lastKnownOrDropPin
             Spacer()
         }
