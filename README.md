@@ -13,6 +13,10 @@ Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compil
 - Unsigned: `CODE_SIGNING_ALLOWED=NO` `CODE_SIGNING_REQUIRED=NO` (compile only — not a device install, not TestFlight)
 - A red X on the Actions check is a compile failure. A green check is “it built.”
 
+### TestFlight (Crisis — no Mac)
+
+`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). It runs on push to this branch and on `workflow_dispatch`. Unsigned compile stays `.github/workflows/ios-compile.yml`. Do not run `xcodebuild` locally.
+
 Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
 
 ### Capabilities to enable
