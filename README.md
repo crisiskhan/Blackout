@@ -77,9 +77,9 @@ Still airplane-first. Still no `URLSession`. Still no live mesh.
 3. **Dead reckoning** — compass + step-length IMU when GPS is denied or cold. HUD chip **DEAD RECKONING**. Manual pin still works.
 4. **Viewshed + slope** — toggles on Map chrome from bundled DEM. Copy says sample-quality, not USGS.
 5. **SOS pictograms** — language-free siren, strobe, satellite/OS SOS, cancel on the confirm panel, plus existing slide. Still no auto-dial.
-6. **Last ~2% battery** — SOS-only. Radar HUD and coarse Navigate hide. SOS FAB stays. **Extreme Saver** is a separate named profile *above* 2%: SOS + coarse nav + radar on. Camera/PTT/Vision pause in both. Last-2% does **not** flip the named profile.
+6. **Last ~2% battery** — SOS-only shell. RootView reads `battery.isCritical` and **unmounts** Map, Comms, Field, and Expedition (no TabView, no iPad sidebar, no gear, no Settings sheet). Banner `CRITICAL · SOS only`, last-known line or text **Drop pin** (writes the existing manual pin, does not paint the map), existing SOS confirm, 88pt FAB (hold 1.5s presents, slide commits, tap never fires). GPS/DR sensors stop. Plug-in restores the previous tab/sidebar. **Extreme Saver** is unchanged and *above* 2%: 4-tab chrome, SOS + coarse nav + radar. Last-2% does **not** write that profile.
 7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
-8. **Missed check-in** — opt-in per expedition, default OFF. Local timer. On miss: prompt to open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
+8. **Missed check-in** — opt-in per expedition, default OFF. Timer lives on `AppContainer` so it keeps running if Expedition is unmounted (including last-2%). On miss: open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
 
 Verify GuidePack in the built app:
 

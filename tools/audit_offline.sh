@@ -71,4 +71,13 @@ else
   echo "OK   no try? on logSOS/appendBreadcrumb/saveMessage"
 fi
 
+if grep -q 'if container.battery.isCritical' "$root/Blackout/RootView.swift" \
+  && grep -q 'CriticalSOSShell' "$root/Blackout/RootView.swift" \
+  && grep -q 'iPhoneTabs' "$root/Blackout/RootView.swift"; then
+  echo "OK   RootView last-2% chrome collapse"
+else
+  echo "FAIL RootView missing isCritical unmount of four destinations"
+  fail=1
+fi
+
 exit "$fail"

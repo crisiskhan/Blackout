@@ -62,13 +62,13 @@ struct RootView: View {
                     .allowsHitTesting(false)
                 }
                 sosOverlay
-                if sizeClass != .regular {
+                if sizeClass != .regular, !container.battery.isCritical {
                     settingsOverlay
                 }
             }
         }
         .preferredColorScheme(.dark)
-        .sheet(isPresented: $showSettings) {
+        .sheet(isPresented: settingsSheetBinding) {
             SettingsRootView(
                 battery: container.battery,
                 location: container.location,
@@ -82,19 +82,47 @@ struct RootView: View {
                 container.lock.lock()
             }
             if phase == .active {
-                container.location.startUpdating()
-                container.location.applyPolicy(container.battery.policy)
+                syncSensorsToBattery()
             }
+        }
+        .onChange(of: container.battery.isCritical) { _, _ in
+            syncSensorsToBattery()
+        }
+        .onAppear {
+            syncSensorsToBattery()
         }
     }
 
+    /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
+    /// No TabView tabs, no iPad sidebar destinations, no gear overlay, no Settings sheet from this shell.
     @ViewBuilder
     private var chrome: some View {
-        if sizeClass == .regular {
+        if container.battery.isCritical {
+            CriticalSOSShell(container: container)
+        } else if sizeClass == .regular {
             iPadSplit
         } else {
             iPhoneTabs
         }
+    }
+
+    private func syncSensorsToBattery() {
+        if container.battery.isCritical {
+            showSettings = false
+            container.location.stopUpdating()
+            container.mesh.stop()
+        } else {
+            container.location.startUpdating()
+            container.location.applyPolicy(container.battery.policy)
+            container.mesh.start()
+        }
+    }
+
+    private var settingsSheetBinding: Binding<Bool> {
+        Binding(
+            get: { showSettings && !container.battery.isCritical },
+            set: { showSettings = $0 }
+        )
     }
 
     private var iPhoneTabs: some View {
@@ -214,8 +242,7 @@ struct RootView: View {
     private var expeditionDestination: some View {
         ExpeditionsRootView(
             persistence: container.persistence,
-            location: container.location,
-            onMissedCheckIn: { container.sosConfirmRequested = true }
+            location: container.location
         )
     }
 
@@ -240,11 +267,11 @@ struct RootView: View {
     }
 
     /// Measured from the physical bottom of the screen (overlay ignores the bottom safe area).
-    /// Compact: 16pt gap above the tab bar (49pt) and home indicator (~34pt) — never under the tab bar.
-    /// Regular iPad split has no tab bar: 16pt above the home indicator.
+    /// Compact 4-tab: 16pt above the tab bar (49pt) and home indicator (~34pt).
+    /// Critical SOS-only and regular iPad split have no tab bar: 16pt above the home indicator.
     private var fabBottomPadding: CGFloat {
         let home: CGFloat = 34
-        let tab: CGFloat = sizeClass == .regular ? 0 : 49
+        let tab: CGFloat = (sizeClass == .regular || container.battery.isCritical) ? 0 : 49
         return 16 + tab + home
     }
 
@@ -270,5 +297,63 @@ struct RootView: View {
             Spacer()
         }
         .allowsHitTesting(true)
+    }
+}
+
+/// Last-2% shell. Does not construct OfflineMapView, tiles, radar, DR HUD, GPS chip,
+/// Guide ask, Messages, PTT, breadcrumbs, tracking, or missed-check-in UI.
+private struct CriticalSOSShell: View {
+    @Bindable var container: AppContainer
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("CRITICAL · SOS only")
+                .font(BlackoutDS.titleFont())
+                .foregroundStyle(BlackoutDS.Red.hot)
+            lastKnownOrDropPin
+            Spacer()
+        }
+        .padding(24)
+        .padding(.bottom, 120)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(BlackoutDS.Surface.void.ignoresSafeArea())
+    }
+
+    @ViewBuilder
+    private var lastKnownOrDropPin: some View {
+        if let line = lastKnownLine {
+            Text(line)
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.mid)
+        } else {
+            Button("Drop pin") {
+                dropPinWithoutMap()
+            }
+            .font(BlackoutDS.bodyFont())
+            .foregroundStyle(BlackoutDS.Silver.metal)
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var lastKnownLine: String? {
+        let fix: LocationFix?
+        if let last = container.location.lastKnown, last.hasCoordinate {
+            fix = last
+        } else if let pin = container.location.manualPin, pin.hasCoordinate {
+            fix = pin
+        } else {
+            fix = nil
+        }
+        guard let fix, let lat = fix.latitude, let lon = fix.longitude else { return nil }
+        let coord = String(format: "%.5f, %.5f", lat, lon)
+        let age = fix.timestamp.formatted(.relative(presentation: .named))
+        return "Last-known \(coord) · \(age)"
+    }
+
+    /// Writes the existing manual-pin store. Does not paint OfflineMapView / tiles.
+    private func dropPinWithoutMap() {
+        let lat = container.pack.pack?.region.centerLatitude ?? 39.74
+        let lon = container.pack.pack?.region.centerLongitude ?? -105.25
+        container.location.dropManualPin(latitude: lat, longitude: lon)
     }
 }

@@ -73,6 +73,7 @@ public final class LocationService: LocationServing {
         manager.stopUpdatingLocation()
         manager.stopUpdatingHeading()
         stopDeadReckoningSensors()
+        isDeadReckoning = false
     }
 
     public func applyPolicy(_ policy: BatteryPolicy) {
@@ -231,6 +232,10 @@ public final class LocationService: LocationServing {
     }
 
     private func refreshDeadReckoningFlag() {
+        guard isUpdating else {
+            isDeadReckoning = false
+            return
+        }
         let gpsLive = authorization == .authorized && lastKnown?.source == .gps && isFresh(lastKnown)
         let hasOrigin = (origin ?? lastKnown ?? manualPin)?.hasCoordinate == true
         isDeadReckoning = !gpsLive && hasOrigin

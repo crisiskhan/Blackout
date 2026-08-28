@@ -22,6 +22,8 @@ final class AppContainer {
     let bootError: String?
     var sosConfirmRequested = false
     let guidePackURL: URL?
+    private var missedCheckInTask: Task<Void, Never>?
+    private var signaledMissedCheckIns: Set<String> = []
 
     init() {
         var errors: [String] = []
@@ -57,8 +59,49 @@ final class AppContainer {
         }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
         location.applyPolicy(battery.policy)
-        location.startUpdating()
-        mesh.start()
+        if battery.isCritical {
+            location.stopUpdating()
+            mesh.stop()
+        } else {
+            location.startUpdating()
+            mesh.start()
+        }
+        startMissedCheckInWatch()
+    }
+
+    /// Lives on the composition root so a missed check-in can open SOS confirm
+    /// without Expedition (or any tab) staying mounted. Never auto-arms.
+    private func startMissedCheckInWatch() {
+        missedCheckInTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                self.pollMissedCheckIns()
+                try? await Task.sleep(nanoseconds: 15_000_000_000)
+            }
+        }
+    }
+
+    private func pollMissedCheckIns() {
+        let items: [ExpeditionRecordDTO]
+        do {
+            items = try persistence.expeditions()
+        } catch {
+            return
+        }
+        let now = Date()
+        for item in items where item.isOpen && item.checkInEnabled {
+            let last = item.lastCheckInAt ?? item.createdAt
+            let overdue = now.timeIntervalSince(last) > Double(max(60, item.checkInIntervalSeconds))
+            let key = item.id.rawValue.uuidString
+            if overdue {
+                if !signaledMissedCheckIns.contains(key) {
+                    signaledMissedCheckIns.insert(key)
+                    sosConfirmRequested = true
+                }
+            } else {
+                signaledMissedCheckIns.remove(key)
+            }
+        }
     }
 
     static func packRoot() -> URL? {

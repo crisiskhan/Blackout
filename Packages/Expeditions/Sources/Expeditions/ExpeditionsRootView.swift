@@ -6,7 +6,6 @@ import SwiftUI
 public struct ExpeditionsRootView: View {
     let persistence: any PersistenceServing
     @Bindable var location: LocationService
-    var onMissedCheckIn: () -> Void
 
     @State private var items: [ExpeditionRecordDTO] = []
     @State private var editor: ExpeditionRecordDTO?
@@ -14,19 +13,16 @@ public struct ExpeditionsRootView: View {
     @State private var tracking = false
     @State private var showAdmin = false
     @State private var storeError: String?
-    @State private var missedPrompt: ExpeditionRecordDTO?
 
     private static let trackingKey = "com.crisiskhan.blackout.crumbs.tracking"
     private static let trackingExpeditionKey = "com.crisiskhan.blackout.crumbs.expedition"
 
     public init(
         persistence: any PersistenceServing,
-        location: LocationService,
-        onMissedCheckIn: @escaping () -> Void = {}
+        location: LocationService
     ) {
         self.persistence = persistence
         self.location = location
-        self.onMissedCheckIn = onMissedCheckIn
         _tracking = State(initialValue: UserDefaults.standard.bool(forKey: Self.trackingKey))
     }
 
@@ -103,24 +99,6 @@ public struct ExpeditionsRootView: View {
                     try? await Task.sleep(nanoseconds: 20_000_000_000)
                 }
             }
-            .task {
-                await watchCheckIns()
-            }
-            .sheet(item: $missedPrompt) { expedition in
-                MissedCheckInPrompt(
-                    expedition: expedition,
-                    onCheckIn: {
-                        checkIn(expedition)
-                        missedPrompt = nil
-                    },
-                    onArmSOS: {
-                        missedPrompt = nil
-                        onMissedCheckIn()
-                    },
-                    onDismiss: { missedPrompt = nil }
-                )
-                .preferredColorScheme(.dark)
-            }
         }
     }
 
@@ -177,32 +155,6 @@ public struct ExpeditionsRootView: View {
             setTracking(false, expedition: expedition)
         }
     }
-
-    private func watchCheckIns() async {
-        while !Task.isCancelled {
-            for item in items where item.isOpen && item.checkInEnabled {
-                let last = item.lastCheckInAt ?? item.createdAt
-                if Date().timeIntervalSince(last) > Double(max(60, item.checkInIntervalSeconds)) {
-                    if missedPrompt?.id != item.id {
-                        missedPrompt = item
-                    }
-                }
-            }
-            try? await Task.sleep(nanoseconds: 15_000_000_000)
-        }
-    }
-
-    private func checkIn(_ expedition: ExpeditionRecordDTO) {
-        var updated = expedition
-        updated.lastCheckInAt = Date()
-        do {
-            try persistence.upsertExpedition(updated)
-            reload()
-            storeError = nil
-        } catch {
-            storeError = error.localizedDescription
-        }
-    }
 }
 
 struct ExpeditionEditor: View {
@@ -246,7 +198,7 @@ struct ExpeditionEditor: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Missed check-in")
                                 .foregroundStyle(BlackoutDS.Silver.bright)
-                            Text("Default off. Local timer only. Miss prompts to arm SOS — never auto-arms, never auto-911, no mesh this pass.")
+                            Text("Default off. Local timer on the app container — visiting Expedition is not required. Miss opens SOS confirm. Never auto-arms, never auto-911, no mesh this pass.")
                                 .font(BlackoutDS.captionFont())
                                 .foregroundStyle(BlackoutDS.Silver.dim)
                         }
@@ -326,29 +278,6 @@ struct ExpeditionEditor: View {
         } catch {
             storeError = error.localizedDescription
         }
-    }
-}
-
-struct MissedCheckInPrompt: View {
-    var expedition: ExpeditionRecordDTO
-    var onCheckIn: () -> Void
-    var onArmSOS: () -> Void
-    var onDismiss: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ScreenHeader("Check-in missed", subtitle: expedition.name)
-            Text("The local timer elapsed. This does not arm SOS and does not call 911. Mesh notify is wave 2.")
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.mid)
-                .lineSpacing(7)
-            MetalButton("I checked in", height: BlackoutDS.Hit.md, action: onCheckIn)
-            MetalButton("Open SOS confirm", height: BlackoutDS.Hit.lg, action: onArmSOS)
-            GhostButton("Dismiss", height: BlackoutDS.Hit.sm, action: onDismiss)
-            Spacer()
-        }
-        .padding(24)
-        .background(BlackoutDS.Surface.base.ignoresSafeArea())
     }
 }
 

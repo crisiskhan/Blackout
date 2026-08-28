@@ -14,9 +14,10 @@ public final class BatteryService: BatteryServing {
 
     public var hidesSOS: Bool { false }
 
-    /// Coarse Navigate stays on in Extreme Saver. Last ~2% hides it.
+    /// Coarse Navigate stays on in Extreme Saver (above 2%). Last-2% unmounts Map, so this is false.
     public var coarseNavigateEnabled: Bool { !isCritical }
 
+    /// Last-2% lock. Does not write `policy = .extremeSaver`. Plug-in (`isCharging`) clears this.
     public var isCritical: Bool {
         level >= 0 && level <= 0.02 && !isCharging
     }

@@ -52,7 +52,7 @@ public struct SettingsRootView: View {
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
             if battery.isCritical {
-                Text("Last ~2% is SOS-only. Radar HUD and coarse Navigate are hidden. The SOS FAB stays. This is not Extreme Saver.")
+                Text("Last ~2% is SOS-only. Map, Comms, Field, and Expedition unmount. The SOS FAB stays. This is not Extreme Saver.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Red.hot)
             }
