@@ -112,18 +112,18 @@ public enum FieldPackCatalog {
     public static let newMexico = FieldPackDescriptor(
         id: "new-mexico",
         title: "New Mexico",
-        summary: "Statewide not on Releases yet. Use Las Cruces or Albuquerque.",
+        summary: "Download on Wi-Fi (~74 MB), then airplane. Statewide New Mexico.",
         downloadURL: releaseBase.appendingPathComponent("new-mexico.pack.zip"),
-        sha256: "0000000000000000000000000000000000000000000000000000000000000000",
-        byteCount: nil,
-        assetReady: false,
+        sha256: "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8",
+        byteCount: 77_478_829,
+        assetReady: true,
         isBundled: false,
         region: MapRegion(
             name: "New Mexico",
-            centerLatitude: 34.3,
-            centerLongitude: -106.0,
-            spanLatitude: 6.4,
-            spanLongitude: 6.8,
+            centerLatitude: 34.17,
+            centerLongitude: -106.03,
+            spanLatitude: 5.6681,
+            spanLongitude: 6.0483,
             minZoom: 8,
             maxZoom: 12
         )
