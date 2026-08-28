@@ -1,6 +1,7 @@
 import BlackoutBattery
 import BlackoutCore
 import BlackoutLocation
+import BlackoutPacks
 import DesignSystem
 import Expeditions
 import Field
@@ -61,8 +62,13 @@ struct RootView: View {
                     }
                     .allowsHitTesting(false)
                 }
+                if showFieldPacksOverlay {
+                    FieldPacksView(store: container.packs) {
+                        skipFieldPacks()
+                    }
+                }
                 sosOverlay
-                if sizeClass != .regular, !container.battery.isCritical {
+                if sizeClass != .regular, !container.battery.isCritical, !showFieldPacksOverlay {
                     settingsOverlay
                 }
             }
@@ -73,7 +79,11 @@ struct RootView: View {
                 battery: container.battery,
                 location: container.location,
                 mesh: container.mesh,
-                lock: container.lock
+                lock: container.lock,
+                onFieldPacks: {
+                    showSettings = false
+                    container.showFieldPacks = true
+                }
             )
             .preferredColorScheme(.dark)
         }
@@ -85,12 +95,31 @@ struct RootView: View {
                 syncSensorsToBattery()
             }
         }
-        .onChange(of: container.battery.isCritical) { _, _ in
+        .onChange(of: container.battery.isCritical) { _, critical in
+            if critical {
+                container.showFieldPacks = false
+            }
             syncSensorsToBattery()
         }
         .onAppear {
             syncSensorsToBattery()
+            if !UserDefaults.standard.bool(forKey: BlackoutKeys.fieldPacksIntroCompleted),
+               !container.battery.isCritical {
+                container.showFieldPacks = true
+            }
         }
+    }
+
+    private var showFieldPacksOverlay: Bool {
+        container.showFieldPacks
+            && !container.battery.isCritical
+            && !(container.lock.isEnabled && !container.lock.isUnlocked)
+    }
+
+    private func skipFieldPacks() {
+        container.packs.skipIntro()
+        container.showFieldPacks = false
+        destination = .map
     }
 
     /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
@@ -204,7 +233,9 @@ struct RootView: View {
             mesh: container.mesh,
             battery: container.battery,
             persistence: container.persistence,
-            packService: container.pack
+            packService: container.pack,
+            coverageRegions: container.packs.coverageRegions(bundled: container.pack.pack?.region),
+            onOpenFieldPacks: { container.showFieldPacks = true }
         )
         .swiftUIToolbar {
             if sizeClass != .regular {

@@ -51,6 +51,18 @@ public struct MapRegion: Hashable, Sendable {
         self.minZoom = minZoom
         self.maxZoom = maxZoom
     }
+
+    public var west: Double { centerLongitude - spanLongitude / 2 }
+    public var east: Double { centerLongitude + spanLongitude / 2 }
+    public var south: Double { centerLatitude - spanLatitude / 2 }
+    public var north: Double { centerLatitude + spanLatitude / 2 }
+
+    public func contains(latitude: Double, longitude: Double, padFraction: Double = 0) -> Bool {
+        let padLon = spanLongitude * padFraction
+        let padLat = spanLatitude * padFraction
+        return longitude >= west - padLon && longitude <= east + padLon
+            && latitude >= south - padLat && latitude <= north + padLat
+    }
 }
 
 public struct MapPackSnapshot: Sendable {

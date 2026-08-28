@@ -15,19 +15,24 @@ public struct SettingsRootView: View {
         battery: BatteryService,
         location: LocationService,
         mesh: MeshFacade,
-        lock: AppLockService
+        lock: AppLockService,
+        onFieldPacks: (() -> Void)? = nil
     ) {
         self.battery = battery
         self.location = location
         self.mesh = mesh
         self.lock = lock
+        self.onFieldPacks = onFieldPacks
     }
+
+    private let onFieldPacks: (() -> Void)?
 
     public var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     ScreenHeader("Settings", subtitle: "Local only. No account. No analytics.")
+                    fieldPacksBlock
                     batteryBlock
                     locationBlock
                     lockBlock
@@ -40,6 +45,20 @@ public struct SettingsRootView: View {
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Settings")
+        }
+    }
+
+    private var fieldPacksBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Field Packs")
+                .font(BlackoutDS.titleFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+            Text("Download Texas and New Mexico on Wi-Fi, then they work airplane. Skip keeps the bundled Denver sample.")
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.dim)
+            if let onFieldPacks {
+                GhostButton("Open Field Packs", height: BlackoutDS.Hit.sm, action: onFieldPacks)
+            }
         }
     }
 

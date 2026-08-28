@@ -17,6 +17,7 @@
 		F4DDBB966264344337F1328D /* Messaging in Frameworks */ = {isa = PBXBuildFile; productRef = FBC432B44ADB3FEFE4545993 /* Messaging */; };
 		FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */ = {isa = PBXBuildFile; productRef = 03B8622003259D7DCD3BB9BD /* VoicePTT */; };
 		3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */ = {isa = PBXBuildFile; productRef = 22D618336C0CB913039FE327 /* Maps */; };
+		1D52C9D705B5FC2E0E579EBB /* BlackoutPacks in Frameworks */ = {isa = PBXBuildFile; productRef = A40D7D061C3A82057D5073E8 /* BlackoutPacks */; };
 		96AA929602CB8D0BEE73B632 /* SOS in Frameworks */ = {isa = PBXBuildFile; productRef = 244B139EBFA8CAEC15CBBC8D /* SOS */; };
 		F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8646A3CDCE8F5E86C75F3A /* Expeditions */; };
 		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
@@ -62,6 +63,7 @@
 				F4DDBB966264344337F1328D /* Messaging in Frameworks */,
 				FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */,
 				3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */,
+				1D52C9D705B5FC2E0E579EBB /* BlackoutPacks in Frameworks */,
 				96AA929602CB8D0BEE73B632 /* SOS in Frameworks */,
 				F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */,
 				BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */,
@@ -122,6 +124,7 @@
 				FBC432B44ADB3FEFE4545993 /* Messaging */,
 				03B8622003259D7DCD3BB9BD /* VoicePTT */,
 				22D618336C0CB913039FE327 /* Maps */,
+				A40D7D061C3A82057D5073E8 /* BlackoutPacks */,
 				244B139EBFA8CAEC15CBBC8D /* SOS */,
 				2E8646A3CDCE8F5E86C75F3A /* Expeditions */,
 				9F9EA0AE7E7BA084D594A1C5 /* Field */,
@@ -167,6 +170,7 @@
 				EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */,
 				2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */,
 				51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */,
+				894BB10FA6BE8348933E595E /* XCLocalSwiftPackageReference "Packages/Packs" */,
 				FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */,
 				6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */,
 				3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */,
@@ -224,7 +228,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/DefaultPack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: DefaultPack missing at ${SRC}\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied DefaultPack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/DefaultPack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: DefaultPack missing at ${SRC}\" >&2\n  exit 1\nfi\nif [ ! -d \"${SRC}/tiles\" ]; then\n  echo \"error: DefaultPack tiles missing at ${SRC}/tiles\" >&2\n  exit 1\nfi\nif [ -z \"$(find \"${SRC}/tiles\" -name '*.png' | head -1)\" ]; then\n  echo \"error: DefaultPack has no tile PNGs under tiles/z/x/y.png\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied DefaultPack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\ntest -d \"${DST}/tiles\"\ntest -n \"$(find \"${DST}/tiles\" -name '*.png' | head -1)\"\n";
 		};
 		4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -330,7 +334,7 @@
 					CLANG_ENABLE_OBJC_ARC = YES;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 1;
+					CURRENT_PROJECT_VERSION = 2;
 					DEBUG_INFORMATION_FORMAT = dwarf;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_PREVIEWS = YES;
@@ -389,7 +393,7 @@
 					CLANG_ENABLE_OBJC_ARC = YES;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 1;
+					CURRENT_PROJECT_VERSION = 2;
 					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_NS_ASSERTIONS = NO;
@@ -498,6 +502,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Maps;
 		};
+		894BB10FA6BE8348933E595E /* XCLocalSwiftPackageReference "Packages/Packs" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Packs;
+		};
 		FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SOS;
@@ -566,6 +574,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */;
 			productName = Maps;
+		};
+		A40D7D061C3A82057D5073E8 /* BlackoutPacks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 894BB10FA6BE8348933E595E /* XCLocalSwiftPackageReference "Packages/Packs" */;
+			productName = BlackoutPacks;
 		};
 		244B139EBFA8CAEC15CBBC8D /* SOS */ = {
 			isa = XCSwiftPackageProductDependency;

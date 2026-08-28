@@ -11,6 +11,8 @@ public struct MapsRootView: View {
     @Bindable var battery: BatteryService
     let persistence: any PersistenceServing
     let packService: FileMapPack
+    var coverageRegions: [MapRegion]
+    var onOpenFieldPacks: (() -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -28,19 +30,24 @@ public struct MapsRootView: View {
     @State private var showLiDAR = false
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
+    @State private var pinnedToPackCoverage = false
 
     public init(
         location: LocationService,
         mesh: MeshFacade,
         battery: BatteryService,
         persistence: any PersistenceServing,
-        packService: FileMapPack
+        packService: FileMapPack,
+        coverageRegions: [MapRegion] = [],
+        onOpenFieldPacks: (() -> Void)? = nil
     ) {
         self.location = location
         self.mesh = mesh
         self.battery = battery
         self.persistence = persistence
         self.packService = packService
+        self.coverageRegions = coverageRegions
+        self.onOpenFieldPacks = onOpenFieldPacks
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -52,6 +59,14 @@ public struct MapsRootView: View {
     }
     private var extrasOn: Bool { !sosOnly && !extremeSaver }
     private var peers: [RadarBlip] { [] }
+    private var locationOutsideCoverage: Bool {
+        guard let fix = location.navigationFix, fix.hasCoordinate else { return false }
+        let regions = coverageRegions.isEmpty ? [packService.pack?.region].compactMap { $0 } : coverageRegions
+        return !regions.contains { $0.contains(latitude: fix.latitude!, longitude: fix.longitude!, padFraction: 0.08) }
+    }
+    private var showLocationEmptyState: Bool {
+        packService.pack != nil && (outsidePack || (locationOutsideCoverage && !pinnedToPackCoverage))
+    }
 
     public var body: some View {
         ZStack {
@@ -77,7 +92,7 @@ public struct MapsRootView: View {
                 )
                 .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
-                if radarVisible, !outsidePack {
+                if radarVisible, !showLocationEmptyState {
                     RadarHUDView(
                         headingUp: headingUp,
                         headingDegrees: location.headingDegrees,
@@ -98,12 +113,17 @@ public struct MapsRootView: View {
                     .padding(.top, 120)
                     .padding(.bottom, 160)
                 }
-                if outsidePack {
+                if showLocationEmptyState {
                     NoPackCanvas(
-                        title: "Outside DefaultPack",
-                        detail: "This is the honest no-pack canvas — not a MapKit spinner and not Apple tiles. Pinch/pan back, or return to the bundled region.",
+                        title: "No tiles for this location",
+                        detail: "Texas and New Mexico packs download from Field Packs on Wi-Fi, then work airplane. Recenter to the bundled Denver sample until those files exist.",
                         location: location,
-                        onReturn: { resetToken += 1 }
+                        recenterTitle: "Recenter to pack coverage",
+                        onReturn: {
+                            pinnedToPackCoverage = true
+                            resetToken += 1
+                        },
+                        onOpenFieldPacks: onOpenFieldPacks
                     )
                 }
             } else {
@@ -111,25 +131,30 @@ public struct MapsRootView: View {
                     title: "No map pack",
                     detail: "DefaultPack is missing from Blackout.app. This canvas is intentional — not a MapKit spinner waiting on WAN.",
                     location: location,
-                    onReturn: nil
+                    onReturn: nil,
+                    onOpenFieldPacks: onOpenFieldPacks
                 )
             }
             VStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
-                        GPSChip(mode: gpsMode)
-                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
-                        Text("file tiles · no Apple base map")
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.dim)
-                        if sosOnly {
-                            Text("CRITICAL · SOS only")
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Red.hot)
-                        } else if extremeSaver {
-                            Text("Extreme Saver · SOS + coarse nav + radar")
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Semantic.warn)
+                        HUDPanel {
+                            VStack(alignment: .leading, spacing: 8) {
+                                GPSChip(mode: gpsMode)
+                                MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                                Text("file tiles · no Apple base map")
+                                    .font(BlackoutDS.captionFont())
+                                    .foregroundStyle(BlackoutDS.Silver.bright)
+                                if sosOnly {
+                                    Text("CRITICAL · SOS only")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Red.hot)
+                                } else if extremeSaver {
+                                    Text("Extreme Saver · SOS + coarse nav + radar")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                                }
+                            }
                         }
                     }
                     Spacer()
@@ -177,49 +202,63 @@ public struct MapsRootView: View {
                 }
                 Spacer()
                 if extrasOn {
-                    HStack(spacing: 8) {
-                        toggleChip("Radar", on: radarOn) { radarOn.toggle() }
-                        toggleChip("Slope", on: showSlope) {
-                            showSlope.toggle()
-                            UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
-                            refreshTerrain()
-                        }
-                        toggleChip("Viewshed", on: showViewshed) {
-                            showViewshed.toggle()
-                            UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
-                            refreshTerrain()
-                        }
-                        if LiDARAvailability.isSupported {
-                            Button {
-                                showLiDAR = true
-                            } label: {
-                                Text("LiDAR")
-                                    .font(BlackoutDS.captionFont())
-                                    .foregroundStyle(BlackoutDS.Silver.bright)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: BlackoutDS.Hit.sm)
-                                    .background(BlackoutDS.Surface.raised.opacity(0.82))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                                    )
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Layers")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                            .padding(.horizontal, 4)
+                        HStack(spacing: 8) {
+                            toggleChip("Radar", on: radarOn) { radarOn.toggle() }
+                            toggleChip("Slope", on: showSlope) {
+                                showSlope.toggle()
+                                UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
+                                refreshTerrain()
                             }
-                            .buttonStyle(.plain)
+                            toggleChip("Viewshed", on: showViewshed) {
+                                showViewshed.toggle()
+                                UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
+                                refreshTerrain()
+                            }
+                            if LiDARAvailability.isSupported {
+                                Button {
+                                    showLiDAR = true
+                                } label: {
+                                    Text("LiDAR")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.bright)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: BlackoutDS.Hit.sm)
+                                        .background(BlackoutDS.Surface.raised.opacity(0.82))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
                     .padding(.horizontal, 12)
                 }
-                HStack(spacing: 8) {
-                    if battery.coarseNavigateEnabled {
-                        toolButton("Navigate", tool: .navigate)
+                if battery.coarseNavigateEnabled || extrasOn {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Tools")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                            .padding(.horizontal, 4)
+                        HStack(spacing: 8) {
+                            if battery.coarseNavigateEnabled {
+                                toolButton("Navigate", tool: .navigate)
+                            }
+                            if extrasOn {
+                                toolButton("Topo", tool: .topo)
+                                toolButton("Towns", tool: .civilization)
+                            }
+                        }
                     }
-                    if extrasOn {
-                        toolButton("Topo", tool: .topo)
-                        toolButton("Towns", tool: .civilization)
-                    }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 108)
                 }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 108)
             }
         }
         .sheet(item: $tool) { item in
@@ -258,6 +297,9 @@ public struct MapsRootView: View {
                 pointName: lidarPointName
             )
             .presentationDetents([.large])
+        }
+        .onChange(of: outsidePack) { _, outside in
+            if outside { pinnedToPackCoverage = false }
         }
         .task { reloadCrumbs() }
         .onChange(of: location.navigationFix?.latitude) { _, _ in
@@ -407,11 +449,13 @@ struct NoPackCanvas: View {
     var title: String
     var detail: String
     @Bindable var location: LocationService
+    var recenterTitle: String = "Recenter to pack coverage"
     var onReturn: (() -> Void)?
+    var onOpenFieldPacks: (() -> Void)?
 
     var body: some View {
         ZStack {
-            BlackoutDS.Surface.void
+            BlackoutDS.Surface.void.opacity(0.92)
             VStack(spacing: 16) {
                 Image(systemName: "map")
                     .font(.system(size: 36, weight: .light))
@@ -435,12 +479,16 @@ struct NoPackCanvas: View {
                         .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
                 if let onReturn {
-                    MetalButton("Return to pack", height: BlackoutDS.Hit.md, action: onReturn)
+                    MetalButton(recenterTitle, height: BlackoutDS.Hit.md, action: onReturn)
+                        .padding(.horizontal, 32)
+                }
+                if let onOpenFieldPacks {
+                    GhostButton("Field Packs", height: BlackoutDS.Hit.sm, action: onOpenFieldPacks)
                         .padding(.horizontal, 32)
                 }
                 if location.authorization == .denied || location.authorization == .restricted,
                    location.navigationFix?.hasCoordinate != true {
-                    Text("Long-press after Return to pack, or use Drop pin at pack center on the Map HUD.")
+                    Text("Long-press after Recenter, or use Drop pin at pack center on the Map HUD.")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
                         .multilineTextAlignment(.center)

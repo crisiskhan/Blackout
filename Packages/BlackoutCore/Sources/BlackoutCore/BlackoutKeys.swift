@@ -6,4 +6,5 @@ public enum BlackoutKeys {
     public static let radarHeadingUp = "com.crisiskhan.blackout.radar.headingUp"
     public static let mapViewshed = "com.crisiskhan.blackout.map.viewshed"
     public static let mapSlope = "com.crisiskhan.blackout.map.slope"
+    public static let fieldPacksIntroCompleted = "com.crisiskhan.blackout.fieldPacks.introCompleted"
 }

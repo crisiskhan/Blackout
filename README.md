@@ -15,9 +15,26 @@ Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compil
 
 ### TestFlight (Crisis — no Mac)
 
-`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). It runs on push to this branch and on `workflow_dispatch`. Unsigned compile stays `.github/workflows/ios-compile.yml`. Do not run `xcodebuild` locally.
+`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) on **macos-26 / Xcode 26** (iOS 26 SDK) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). Minimum iOS stays **18.0**. It runs on push to this branch and on `workflow_dispatch`. Unsigned compile stays `.github/workflows/ios-compile.yml` on macos-14 / Xcode 16. Do not run `xcodebuild` locally.
 
-Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
+### Field Packs (GitHub Releases)
+
+Skippable first-run overlay **Field Packs**. Skip goes to Map. **Never blocks SOS.** Copy: download Texas and New Mexico packs on Wi-Fi, then they work airplane. States: no wifi / downloading / ready / failed / skip.
+
+Downloads live only in `Packages/Packs` (`BlackoutPacks`). User-initiated from that screen, never on boot, SOS, Map paint, or Guide ask. Prefer Wi-Fi; if the Wi-Fi check is flaky, download still only starts from this screen. Integrity SHA-256. Resume via HTTP Range. Fail closed: airplane uses whatever packs are already on disk (bundled Denver + any downloaded).
+
+Host: **GitHub Releases** on `crisiskhan/Blackout` (no Blackout cloud). Placeholder assets for CoS/Systems to attach later:
+
+```
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/texas.pack.zip
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/new-mexico.pack.zip
+```
+
+Until those files exist, Download shows **failed** (“Not on GitHub Releases yet”). Skip uses the bundled Denver **DefaultPack**, which paints file tiles. Outside pack coverage, Map shows **No tiles for this location** with **Recenter to pack coverage**.
+
+When adding assets: zip a folder that contains `manifest.json` plus `tiles/z/x/y.png`, publish on tag `packs-v1`, then set `assetReady = true` and the real `sha256` on `FieldPackCatalog.texas` / `.newMexico`. Do not add paid map APIs. Do not use MapKit as the airplane base map.
+
+Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Field Packs is skippable. Local lock stays **off** until you enable it in Settings.
 
 ### Capabilities to enable
 
@@ -41,7 +58,7 @@ The target copies `Blackout/DefaultPack` two ways so a synchronized-group miss c
 1. **Copy Bundle Resources** — folder reference `Blackout/DefaultPack`.
 2. **Run Script** “Copy DefaultPack into app bundle” (`ditto` into `$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack`). The script **fails the build** if `manifest.json` is missing.
 
-Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` are in the tree; `Blackout/GuidePack/articles.jsonl` is 132 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` is missing from either pack.
+Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` (`tiles/z/x/y.png`) are in the tree; `Blackout/GuidePack/articles.jsonl` is 132 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` **or tile PNGs** are missing from DefaultPack.
 
 On device: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
 

@@ -3,6 +3,7 @@ import BlackoutCore
 import BlackoutCrypto
 import BlackoutLocation
 import BlackoutMesh
+import BlackoutPacks
 import BlackoutPersistence
 import Foundation
 import Maps
@@ -18,9 +19,11 @@ final class AppContainer {
     let mesh: MeshFacade
     let battery: BatteryService
     let pack: FileMapPack
+    let packs: PackStore
     let lock: AppLockService
     let bootError: String?
     var sosConfirmRequested = false
+    var showFieldPacks = false
     let guidePackURL: URL?
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
@@ -50,8 +53,9 @@ final class AppContainer {
         battery = BatteryService()
         lock = AppLockService()
         pack = FileMapPack(rootURL: Self.packRoot())
+        packs = PackStore(bundledRoot: Self.packRoot())
         guidePackURL = Self.guidePackRoot()
-        if pack.pack == nil {
+        if pack.pack == nil || !packs.bundledIsReady {
             errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
         }
         if guidePackURL == nil {

@@ -49,6 +49,11 @@ public final class FileMapPack: MapPackServing {
             maxZoom: json["maxZoom"] as? Int ?? 12
         )
         let disclaimer = json["disclaimer"] as? String ?? "Generated sample pack."
+        let tilesDir = root.appendingPathComponent("tiles", isDirectory: true)
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: tilesDir.path, isDirectory: &isDir), isDir.boolValue else {
+            return nil
+        }
         let pois = loadPOIs(root: root)
         let dem = loadDEM(root: root)
         return (MapPackSnapshot(rootURL: root, region: region, pois: pois, disclaimer: disclaimer), dem)

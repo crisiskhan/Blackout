@@ -8,6 +8,10 @@ check() {
   local label="$2"
   local hits
   hits="$(grep -RIn --include='*.swift' -E "$pattern" "$root/Blackout" "$root/Packages" || true)"
+  if [[ "$pattern" == "URLSession" ]]; then
+    hits="$(printf '%s\n' "$hits" | grep -v '/Packages/Packs/' || true)"
+    hits="$(printf '%s\n' "$hits" | grep -v '^$' || true)"
+  fi
   if [[ -n "$hits" ]]; then
     echo "FAIL $label"
     echo "$hits"
@@ -17,7 +21,7 @@ check() {
   fi
 }
 
-check 'URLSession' 'no URLSession'
+check 'URLSession' 'no URLSession outside Packs'
 check 'WKWebView' 'no WKWebView'
 check 'WKWebViewConfiguration' 'no WKWebView config'
 check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog|Segment\.shared' 'no analytics SDKs'
@@ -77,6 +81,14 @@ if grep -q 'if container.battery.isCritical' "$root/Blackout/RootView.swift" \
   echo "OK   RootView last-2% chrome collapse"
 else
   echo "FAIL RootView missing isCritical unmount of four destinations"
+  fail=1
+fi
+
+if [[ -d "$root/Blackout/DefaultPack/tiles" ]] \
+  && find "$root/Blackout/DefaultPack/tiles" -name '*.png' | grep -q .; then
+  echo "OK   DefaultPack tiles/z/x/y.png present"
+else
+  echo "FAIL DefaultPack tiles missing"
   fail=1
 fi
 
