@@ -346,7 +346,7 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
                 "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
                 "CODE_SIGN_STYLE": "Automatic",
-                "CURRENT_PROJECT_VERSION": "10",
+                "CURRENT_PROJECT_VERSION": "11",
                 "DEVELOPMENT_TEAM": "",
                 "ENABLE_PREVIEWS": "YES",
                 "GENERATE_INFOPLIST_FILE": "YES",
