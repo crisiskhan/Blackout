@@ -37,6 +37,10 @@
 			exceptions = (
 				CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */,
 			);
+			explicitFolders = (
+				DefaultPack,
+				GuidePack,
+			);
 			path = Blackout;
 			sourceTree = "<group>";
 		};

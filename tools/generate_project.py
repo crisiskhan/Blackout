@@ -510,9 +510,13 @@ test -f "${DST}/manifest.json"
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		{ids['sync']} /* Blackout */ = {{
- mar			isa = PBXFileSystemSynchronizedRootGroup;
+			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */,
+			);
+			explicitFolders = (
+				DefaultPack,
+				GuidePack,
 			);
 			path = Blackout;
 			sourceTree = "<group>";
