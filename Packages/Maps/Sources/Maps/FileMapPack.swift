@@ -81,10 +81,16 @@ public final class FileMapPack: MapPackServing {
     }
 }
 
-struct SlopeSample {
-    var latitude: Double
-    var longitude: Double
-    var degrees: Double
+public struct SlopeSample: Hashable, Sendable {
+    public var latitude: Double
+    public var longitude: Double
+    public var degrees: Double
+
+    public init(latitude: Double, longitude: Double, degrees: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.degrees = degrees
+    }
 }
 
 struct DEMTable {
