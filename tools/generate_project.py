@@ -417,6 +417,7 @@ def generate_xcodeproj() -> None:
         "guide_build": oid("guide_in_resources"),
         "copy_guide": oid("copy_guidepack_phase"),
         "sync_ex": oid("sync_exceptions"),
+        "sync_res_ex": oid("sync_resources_ex"),
     }
     pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
     pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in PACKAGES}
@@ -504,8 +505,8 @@ test -f "${DST}/manifest.json"
 
 /* Begin PBXFileReference section */
 		{ids['app_ref']} /* Blackout.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; }};
-		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
-		{ids['guide_ref']} /* GuidePack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; }};
+		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; explicitFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
+		{ids['guide_ref']} /* GuidePack */ = {{isa = PBXFileReference; explicitFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; }};
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -513,6 +514,7 @@ test -f "${DST}/manifest.json"
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */,
+				{ids['sync_res_ex']} /* Exceptions for "Blackout" folder in Resources */,
 			);
 			explicitFolders = (
 				DefaultPack,
@@ -696,6 +698,17 @@ test -f "${DST}/manifest.json"
 			target = {ids['target']} /* Blackout */;
 		}};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		{ids['sync_res_ex']} /* Exceptions for "Blackout" folder in Resources */ = {{
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = {ids['resources']} /* Resources */;
+			membershipExceptions = (
+				DefaultPack,
+				GuidePack,
+			);
+		}};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin XCBuildConfiguration section */
 		{ids['proj_debug']} /* Debug */ = {{
