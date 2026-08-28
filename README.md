@@ -27,7 +27,7 @@ Optional later: **Background Modes → Location** only if you add always-on brea
 ### Cold launch checks
 
 - Airplane Mode on, no Apple ID wall: Map tab, dusk chrome, bundled Front Range sample (or the honest no-pack canvas), SOS FAB above the tab bar, gear.
-- Deny location / camera / mic / Bluetooth: Guide, Skills, bundled map, messaging, and SOS still work. Gated surfaces use `DesignSystem.PermissionDenied`. Long-press the map to drop a **manual pin** when GPS is denied and there is no last-known.
+- Deny location / camera / mic / Bluetooth: Guide, Skills, bundled map, messaging, and SOS still work. Gated surfaces use `DesignSystem.PermissionDenied`. Long-press the map **or** tap **Drop pin at pack center** when GPS is denied and there is no last-known.
 - Create an expedition, start breadcrumbs, arm SOS, kill the app, relaunch: all three still present (tracking flag + trail restore).
 - Send-to-self message: decrypts after relaunch. SwiftData has ciphertext only — no plaintext body column. Compose drafts persist in UserDefaults.
 
@@ -104,7 +104,7 @@ Tokens live in `DesignSystem` as `enum BlackoutDS`. Do not fork `PermissionDenie
 
 - **iPhone:** 4-tab `TabView` — Map (cold launch default), Comms, Field, Expedition. SOS is not a tab.
 - **iPad regular:** 280pt sidebar, same four destinations. Expedition is a first-class lead surface. Compact falls back to the tab bar.
-- **SOS FAB:** 88pt red circle. On iPhone it sits **above the tab bar** (tab bar + home indicator + 16pt). On iPad, 16pt above the home indicator. Cannot hide. Extreme Saver does not hide it.
+- **SOS FAB:** 88pt red circle. Overlay ignores the bottom safe area and pads `16 + tabBar(49) + homeIndicator(34)` on iPhone so the FAB sits **above the tab bar**, not in it. iPad regular: `16 + 34` (16pt above the home indicator). Cannot hide. Extreme Saver does not hide it.
   - Hold 1.5s → confirm cover (**unarmed**, haptic light). Tap never fires. Hold alone does not arm.
   - Slide to confirm → **log first**. If `logSOS` throws, the UI shows `StoreFailure` and SOS stays **unarmed**.
   - X before slide: dismiss, still unarmed. X after slide: dismiss; the local alert already went out.

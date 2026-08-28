@@ -227,14 +227,17 @@ struct RootView: View {
                 .padding(.bottom, fabBottomPadding)
             }
         }
+        .ignoresSafeArea(edges: .bottom)
         .allowsHitTesting(true)
     }
 
-    /// Compact: sit above the tab bar (typically 49pt) plus home indicator (~34pt), then 16pt gap.
-    /// Regular iPad split has no tab bar — 16pt above the home indicator.
+    /// Measured from the physical bottom of the screen (overlay ignores the bottom safe area).
+    /// Compact: 16pt gap above the tab bar (49pt) and home indicator (~34pt) — never under the tab bar.
+    /// Regular iPad split has no tab bar: 16pt above the home indicator.
     private var fabBottomPadding: CGFloat {
-        if sizeClass == .regular { return 16 }
-        return 16 + 49 + 34
+        let home: CGFloat = 34
+        let tab: CGFloat = sizeClass == .regular ? 0 : 49
+        return 16 + tab + home
     }
 
     private var settingsOverlay: some View {

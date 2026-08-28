@@ -84,7 +84,7 @@ public struct MapsRootView: View {
                 if location.authorization == .denied || location.authorization == .restricted {
                     PermissionDenied(
                         kind: .location,
-                        reason: "GPS denied. Long-press the map to drop a manual pin for Navigate, return-to-start, and Find Civilization. PermissionDenied stays; the app will not wait on a fix."
+                        reason: "GPS denied. Long-press the map, or drop a pin at pack center, for Navigate, return-to-start, and Find Civilization. PermissionDenied stays; the app will not wait on a fix."
                     )
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
@@ -93,6 +93,18 @@ public struct MapsRootView: View {
                     HStack {
                         GhostButton("Clear pin", height: BlackoutDS.Hit.sm) {
                             location.clearManualPin()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                } else if location.navigationFix?.hasCoordinate != true,
+                          location.authorization == .denied || location.authorization == .restricted,
+                          let pack = packService.pack {
+                    HStack {
+                        GhostButton("Drop pin at pack center", height: BlackoutDS.Hit.sm) {
+                            location.dropManualPin(
+                                latitude: pack.region.centerLatitude,
+                                longitude: pack.region.centerLongitude
+                            )
                         }
                     }
                     .padding(.horizontal, 16)
@@ -232,6 +244,14 @@ struct NoPackCanvas: View {
                 }
                 if let onReturn {
                     MetalButton("Return to pack", height: BlackoutDS.Hit.md, action: onReturn)
+                        .padding(.horizontal, 32)
+                }
+                if location.authorization == .denied || location.authorization == .restricted,
+                   location.navigationFix?.hasCoordinate != true {
+                    Text("Long-press after Return to pack, or use Drop pin at pack center on the Map HUD.")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.steel)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
             }
