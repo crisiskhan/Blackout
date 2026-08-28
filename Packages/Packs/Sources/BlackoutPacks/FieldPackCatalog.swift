@@ -94,7 +94,7 @@ public enum FieldPackCatalog {
         title: "Texas",
         summary: "Download on Wi-Fi (~199 MB), then airplane. Statewide Texas.",
         downloadURL: releaseBase.appendingPathComponent("texas.pack.zip"),
-        sha256: "1ae971d530fedf396607089f876e1744036f752e823035f4cdad0ab1a1601060",
+        sha256: "dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb",
         byteCount: 208_461_647,
         assetReady: true,
         isBundled: false,
