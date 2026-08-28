@@ -69,7 +69,7 @@ public struct ExpeditionsRootView: View {
             .scrollContentBackground(.hidden)
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Expedition")
-            .toolbar {
+            .swiftUIToolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if let open = items.first(where: \.isOpen) {
                         Button(tracking ? "Stop crumbs" : "Start crumbs") {

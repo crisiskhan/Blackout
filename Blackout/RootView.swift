@@ -152,7 +152,7 @@ struct RootView: View {
             }
             .navigationTitle("Blackout")
             .navigationSplitViewColumnWidth(min: 280, ideal: 280, max: 280)
-            .toolbar {
+            .swiftUIToolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showSettings = true
@@ -165,7 +165,7 @@ struct RootView: View {
             .background(BlackoutDS.Surface.base)
         } detail: {
             detail
-                .toolbar {
+                .swiftUIToolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             showSettings = true
@@ -196,7 +196,7 @@ struct RootView: View {
             persistence: container.persistence,
             packService: container.pack
         )
-        .toolbar {
+        .swiftUIToolbar {
             if sizeClass != .regular {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -217,7 +217,7 @@ struct RootView: View {
             mesh: container.mesh,
             extremeSaver: container.battery.pausesCameraAndPTT
         )
-        .toolbar {
+        .swiftUIToolbar {
             if sizeClass != .regular {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
