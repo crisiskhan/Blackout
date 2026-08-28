@@ -43,8 +43,14 @@ public struct MapsRootView: View {
         self.packService = packService
     }
 
-    private var tight: Bool { battery.tightensToSOSNavRadar }
-    private var radarVisible: Bool { radarOn || tight }
+    private var sosOnly: Bool { battery.isCritical }
+    private var extremeSaver: Bool { battery.isExtremeSaver }
+    private var radarVisible: Bool {
+        if sosOnly { return false }
+        if extremeSaver { return true }
+        return radarOn
+    }
+    private var extrasOn: Bool { !sosOnly && !extremeSaver }
     private var peers: [RadarBlip] { [] }
 
     public var body: some View {
@@ -58,8 +64,8 @@ public struct MapsRootView: View {
                     breadcrumbs: crumbs,
                     viewshed: viewshedRays,
                     slope: slopeSamples,
-                    showViewshed: showViewshed && !tight,
-                    showSlope: showSlope && !tight,
+                    showViewshed: showViewshed && extrasOn,
+                    showSlope: showSlope && extrasOn,
                     centerToken: centerToken,
                     onDropPin: { lat, lon in
                         location.dropManualPin(latitude: lat, longitude: lon)
@@ -116,10 +122,14 @@ public struct MapsRootView: View {
                         Text("file tiles · no Apple base map")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
-                        if tight {
-                            Text("CRITICAL · SOS + coarse nav + radar")
+                        if sosOnly {
+                            Text("CRITICAL · SOS only")
                                 .font(BlackoutDS.captionFont())
                                 .foregroundStyle(BlackoutDS.Red.hot)
+                        } else if extremeSaver {
+                            Text("Extreme Saver · SOS + coarse nav + radar")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Semantic.warn)
                         }
                     }
                     Spacer()
@@ -155,7 +165,7 @@ public struct MapsRootView: View {
                     }
                     .padding(.horizontal, 16)
                 }
-                if showSlope || showViewshed, !tight {
+                if showSlope || showViewshed, extrasOn {
                     Text("Sample DEM · not USGS. Slope/viewshed are coarse.")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
@@ -166,7 +176,7 @@ public struct MapsRootView: View {
                         .padding(.horizontal, 16)
                 }
                 Spacer()
-                if !tight {
+                if extrasOn {
                     HStack(spacing: 8) {
                         toggleChip("Radar", on: radarOn) { radarOn.toggle() }
                         toggleChip("Slope", on: showSlope) {
@@ -200,8 +210,10 @@ public struct MapsRootView: View {
                     .padding(.horizontal, 12)
                 }
                 HStack(spacing: 8) {
-                    toolButton("Navigate", tool: .navigate)
-                    if !tight {
+                    if battery.coarseNavigateEnabled {
+                        toolButton("Navigate", tool: .navigate)
+                    }
+                    if extrasOn {
                         toolButton("Topo", tool: .topo)
                         toolButton("Towns", tool: .civilization)
                     }
@@ -233,7 +245,9 @@ public struct MapsRootView: View {
                 onPTT: { selectedPeer = nil },
                 onNavigate: {
                     selectedPeer = nil
-                    tool = .navigate
+                    if battery.coarseNavigateEnabled {
+                        tool = .navigate
+                    }
                 }
             )
             .presentationDetents([.medium])
@@ -249,8 +263,15 @@ public struct MapsRootView: View {
         .onChange(of: location.navigationFix?.latitude) { _, _ in
             if showViewshed { refreshTerrain() }
         }
+        .onChange(of: battery.isCritical) { _, critical in
+            if critical {
+                tool = nil
+                showLiDAR = false
+                selectedPeer = nil
+            }
+        }
         .onAppear {
-            if tight { radarOn = true }
+            if extremeSaver { radarOn = true }
             refreshTerrain()
             location.startUpdating()
         }

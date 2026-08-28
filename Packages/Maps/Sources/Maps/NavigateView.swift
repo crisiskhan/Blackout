@@ -13,48 +13,59 @@ struct NavigateView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ScreenHeader("Navigate", subtitle: "Coarse bearing. Extreme Saver does not disable this.")
-                if battery.policy == .extremeSaver {
-                    Text("Extreme Saver · coarse only")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                }
-                if location.authorization == .denied || location.authorization == .restricted {
-                    PermissionDenied(
-                        kind: .location,
-                        reason: "No live GPS. Bearing uses last-known or a manual pin. Compass-only still paints a heading. The app does not wait on a fix."
-                    )
-                }
-                HUDPanel {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(bearingCopy)
-                            .font(BlackoutDS.bodyFont())
-                        if let heading = location.headingDegrees {
-                            Text("Compass \(Int(heading))°")
-                                .foregroundStyle(BlackoutDS.Silver.mid)
-                        }
+                ScreenHeader(
+                    "Navigate",
+                    subtitle: battery.isCritical
+                        ? "Coarse Navigate is off at ~2% battery. SOS stays."
+                        : "Coarse bearing. Extreme Saver does not disable this."
+                )
+                if battery.isCritical {
+                    Text("Last-2% is SOS-only. Radar HUD and coarse nav are hidden. The SOS FAB stays.")
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Red.hot)
+                } else {
+                    if battery.isExtremeSaver {
+                        Text("Extreme Saver · coarse only")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Semantic.warn)
                     }
-                }
-                ForEach(pack?.pois ?? []) { poi in
-                    Button {
-                        selected = poi
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(poi.name)
-                                    .foregroundStyle(BlackoutDS.Silver.bright)
-                                Text(poi.kind)
-                                    .font(BlackoutDS.captionFont())
-                                    .foregroundStyle(BlackoutDS.Silver.dim)
+                    if location.authorization == .denied || location.authorization == .restricted {
+                        PermissionDenied(
+                            kind: .location,
+                            reason: "No live GPS. Bearing uses last-known or a manual pin. Compass-only still paints a heading. The app does not wait on a fix."
+                        )
+                    }
+                    HUDPanel {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(bearingCopy)
+                                .font(BlackoutDS.bodyFont())
+                            if let heading = location.headingDegrees {
+                                Text("Compass \(Int(heading))°")
+                                    .foregroundStyle(BlackoutDS.Silver.mid)
                             }
-                            Spacer()
-                            Text(rangeCopy(to: poi))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.mid)
                         }
-                        .padding(.vertical, 8)
                     }
-                    .buttonStyle(.plain)
+                    ForEach(pack?.pois ?? []) { poi in
+                        Button {
+                            selected = poi
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(poi.name)
+                                        .foregroundStyle(BlackoutDS.Silver.bright)
+                                    Text(poi.kind)
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.dim)
+                                }
+                                Spacer()
+                                Text(rangeCopy(to: poi))
+                                    .font(BlackoutDS.captionFont())
+                                    .foregroundStyle(BlackoutDS.Silver.mid)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
             .padding(20)

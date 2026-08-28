@@ -77,7 +77,7 @@ Still airplane-first. Still no `URLSession`. Still no live mesh.
 3. **Dead reckoning** — compass + step-length IMU when GPS is denied or cold. HUD chip **DEAD RECKONING**. Manual pin still works.
 4. **Viewshed + slope** — toggles on Map chrome from bundled DEM. Copy says sample-quality, not USGS.
 5. **SOS pictograms** — language-free siren, strobe, satellite/OS SOS, cancel on the confirm panel, plus existing slide. Still no auto-dial.
-6. **Critical battery (~2%)** — Extreme Saver tightens to SOS + coarse Navigate + radar HUD. SOS is not hidden. Vision/PTT pause.
+6. **Last ~2% battery** — SOS-only. Radar HUD and coarse Navigate hide. SOS FAB stays. **Extreme Saver** is a separate named profile *above* 2%: SOS + coarse nav + radar on. Camera/PTT/Vision pause in both. Last-2% does **not** flip the named profile.
 7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
 8. **Missed check-in** — opt-in per expedition, default OFF. Local timer. On miss: prompt to open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
 
@@ -126,12 +126,12 @@ Tokens live in `DesignSystem` as `enum BlackoutDS`. Do not fork `PermissionDenie
 
 - **iPhone:** 4-tab `TabView` — Map (cold launch default), Comms, Field, Expedition. SOS is not a tab.
 - **iPad regular:** 280pt sidebar, same four destinations. Expedition is a first-class lead surface. Compact falls back to the tab bar.
-- **SOS FAB:** 88pt red circle. Overlay ignores the bottom safe area and pads `16 + tabBar(49) + homeIndicator(34)` on iPhone so the FAB sits **above the tab bar**, not in it. iPad regular: `16 + 34` (16pt above the home indicator). Cannot hide. Extreme Saver does not hide it.
+- **SOS FAB:** 88pt red circle. Overlay ignores the bottom safe area and pads `16 + tabBar(49) + homeIndicator(34)` on iPhone so the FAB sits **above the tab bar**, not in it. iPad regular: `16 + 34` (16pt above the home indicator). Cannot hide. Extreme Saver and last-2% SOS-only do not hide it.
   - Hold 1.5s → confirm cover (**unarmed**, haptic light). Tap never fires. Hold alone does not arm.
   - Slide to confirm → **log first**. If `logSOS` throws, the UI shows `StoreFailure` and SOS stays **unarmed**.
   - X before slide: dismiss, still unarmed. X after slide: dismiss; the local alert already went out.
   - After arm, primary control is **user-initiated OS Emergency SOS** (side + volume hardware gesture). **Never auto-dial 911.**
-- **Field:** Ask bar first, then taxonomy, then situation cards. GuidePack is on-device. Vision never says edible. Unknown is valid. Extreme Saver pauses Vision.
+- **Field:** Ask bar first, then taxonomy, then situation cards. GuidePack is on-device. Vision never says edible. Unknown is valid. Extreme Saver and last-2% pause Vision.
 - **Radar HUD:** Default on Map. Not a tab. Not a black disc.
 - **Chat status:** Sealed | Queued | On mesh. Never delivery ticks. Message bodies are not printed or os_logged.
 - **Dark / dusk only.** No light mode. Commits use metal, not red. Red is live/danger/SOS only.
@@ -157,7 +157,8 @@ That also rewrites `Blackout.xcodeproj` and the app icon.
 - No auto-911, no fall detection / Auto-SOS. Missed check-in never auto-arms.
 - No backend, no Expo, no third-party SDKs.
 - Voice PTT is local record/playback only. Live PTT-over-mesh is wave 2.
-- Extreme Saver does not hide SOS and does not disable coarse Navigate or the radar HUD.
+- Extreme Saver (named profile, above 2%) does not hide SOS and does not disable coarse Navigate or the radar HUD.
+- Last ~2% battery is SOS-only: radar HUD and coarse nav hide; SOS FAB stays. It is not Extreme Saver and does not rewrite the named profile.
 - Breadcrumb tracking restores after kill in the foreground; it is not a Background Modes location session.
 - Foundation Models run only when the OS already reports `.available`. This Linux environment cannot prove that path.
 

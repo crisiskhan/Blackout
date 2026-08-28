@@ -51,7 +51,7 @@ public struct FieldRootView: View {
                         GuideAskView(
                             pack: pack,
                             context: guideContext,
-                            extremeSaver: battery.tightensToSOSNavRadar
+                            extremeSaver: battery.isExtremeSaver
                         )
                         Text("Situation cards")
                             .font(BlackoutDS.titleFont())
@@ -74,10 +74,19 @@ public struct FieldRootView: View {
             case .skills:
                 FieldCopyView(title: "Primitive skills", paragraphs: FieldManual.skills)
             case .vision:
-                if battery.tightensToSOSNavRadar {
+                if battery.pausesCameraAndPTT {
                     VStack(alignment: .leading, spacing: 16) {
-                        ScreenHeader("Field Vision", subtitle: "Paused in Extreme Saver / critical battery. SOS stays up.")
-                        Text("Camera stills pause so the radio stays SOS, coarse nav, and radar HUD.")
+                        ScreenHeader(
+                            "Field Vision",
+                            subtitle: battery.isCritical
+                                ? "Paused at ~2% battery. SOS stays up. Radar and coarse nav are off."
+                                : "Paused in Extreme Saver. SOS, coarse nav, and radar stay up."
+                        )
+                        Text(
+                            battery.isCritical
+                                ? "Last-2% is SOS-only. The FAB stays. Camera stills wait until you charge."
+                                : "Camera stills pause so Extreme Saver can keep SOS, coarse Navigate, and the radar HUD."
+                        )
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.mid)
                         Spacer()
@@ -102,7 +111,7 @@ public struct FieldRootView: View {
             batteryLevel: battery.level,
             sosArmed: sosArmed,
             partySize: 1,
-            extremeSaver: battery.tightensToSOSNavRadar
+            extremeSaver: battery.isExtremeSaver
         )
     }
 }

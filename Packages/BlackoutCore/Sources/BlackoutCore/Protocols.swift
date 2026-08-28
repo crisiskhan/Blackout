@@ -53,8 +53,10 @@ public protocol BatteryServing: AnyObject {
     var isCharging: Bool { get }
     var hidesSOS: Bool { get }
     var coarseNavigateEnabled: Bool { get }
+    /// ~2% and not charging. SOS-only: hide radar and coarse nav. Never hide SOS.
     var isCritical: Bool { get }
-    var tightensToSOSNavRadar: Bool { get }
+    /// Named Extreme Saver profile while above 2%. SOS + coarse nav + radar. Not last-2%.
+    var isExtremeSaver: Bool { get }
     var pausesCameraAndPTT: Bool { get }
 }
 

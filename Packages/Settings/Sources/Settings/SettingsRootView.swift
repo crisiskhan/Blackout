@@ -51,6 +51,11 @@ public struct SettingsRootView: View {
             Text(levelCopy)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
+            if battery.isCritical {
+                Text("Last ~2% is SOS-only. Radar HUD and coarse Navigate are hidden. The SOS FAB stays. This is not Extreme Saver.")
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Red.hot)
+            }
             ForEach(BatteryPolicy.allCases) { policy in
                 Button {
                     battery.policy = policy
@@ -102,7 +107,7 @@ public struct SettingsRootView: View {
                     location.startUpdating()
                 }
             } else {
-                Text("Authorized. Coarse Navigate remains on in Extreme Saver.")
+                Text("Authorized. Coarse Navigate remains on in Extreme Saver. Last ~2% hides it (SOS-only).")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Semantic.ok)
             }
