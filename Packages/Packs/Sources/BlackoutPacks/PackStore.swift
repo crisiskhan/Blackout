@@ -107,8 +107,8 @@ public final class PackStore {
                 states[pack.id] = .failed
                 messages[pack.id] = "Not on GitHub Releases yet. Skip uses the Denver sample."
             } else if states[pack.id] != .skip {
-                states[pack.id] = .failed
-                messages[pack.id] = nil
+                states[pack.id] = .available
+                messages[pack.id] = "On GitHub Releases. Tap Download. Then airplane."
             }
         }
     }

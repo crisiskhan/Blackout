@@ -1,8 +1,7 @@
 import BlackoutCore
 import Foundation
 
-/// GitHub Releases host for optional region packs. CoS replaces `sha256` and
-/// sets `assetReady` when `packs-v1` assets exist. Bundle ID stays
+/// GitHub Releases host for optional region packs. Bundle ID stays
 /// `com.crisiskhan.blackout`. No Blackout cloud.
 public enum FieldPackCatalog {
     public static let releaseTag = "packs-v1"
@@ -30,10 +29,70 @@ public enum FieldPackCatalog {
         )
     )
 
+    public static let elPaso = FieldPackDescriptor(
+        id: "el-paso",
+        title: "El Paso",
+        summary: "USGS topo, 158 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        downloadURL: releaseBase.appendingPathComponent("el-paso.pack.zip"),
+        sha256: "60ce5dd4297058e17c4a8a7992525cd363b74c1879aadda25bd1dcfcaa8b0236",
+        byteCount: 8_568_180,
+        assetReady: true,
+        isBundled: false,
+        region: MapRegion(
+            name: "El Paso",
+            centerLatitude: 31.7619,
+            centerLongitude: -106.485,
+            spanLatitude: 0.8,
+            spanLongitude: 0.8,
+            minZoom: 10,
+            maxZoom: 12
+        )
+    )
+
+    public static let lasCruces = FieldPackDescriptor(
+        id: "las-cruces",
+        title: "Las Cruces",
+        summary: "USGS topo, 124 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        downloadURL: releaseBase.appendingPathComponent("las-cruces.pack.zip"),
+        sha256: "ca4f180f6cacb3d32a063b01ee97249b9f6b3f704c1fad5150604a55c626c23a",
+        byteCount: 8_050_812,
+        assetReady: true,
+        isBundled: false,
+        region: MapRegion(
+            name: "Las Cruces",
+            centerLatitude: 32.3199,
+            centerLongitude: -106.7637,
+            spanLatitude: 0.7,
+            spanLongitude: 0.7,
+            minZoom: 10,
+            maxZoom: 12
+        )
+    )
+
+    public static let albuquerque = FieldPackDescriptor(
+        id: "albuquerque",
+        title: "Albuquerque",
+        summary: "USGS topo, 138 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        downloadURL: releaseBase.appendingPathComponent("albuquerque.pack.zip"),
+        sha256: "519a413785f8036860b806ce9c81c880e7f87ef301e156d378a80d9e75e945f6",
+        byteCount: 12_266_566,
+        assetReady: true,
+        isBundled: false,
+        region: MapRegion(
+            name: "Albuquerque",
+            centerLatitude: 35.0844,
+            centerLongitude: -106.6504,
+            spanLatitude: 0.7,
+            spanLongitude: 0.7,
+            minZoom: 10,
+            maxZoom: 12
+        )
+    )
+
     public static let texas = FieldPackDescriptor(
         id: "texas",
         title: "Texas",
-        summary: "Download on Wi-Fi, then airplane.",
+        summary: "Statewide not on Releases yet. Use El Paso for the border.",
         downloadURL: releaseBase.appendingPathComponent("texas.pack.zip"),
         sha256: "0000000000000000000000000000000000000000000000000000000000000000",
         byteCount: nil,
@@ -53,7 +112,7 @@ public enum FieldPackCatalog {
     public static let newMexico = FieldPackDescriptor(
         id: "new-mexico",
         title: "New Mexico",
-        summary: "Download on Wi-Fi, then airplane.",
+        summary: "Statewide not on Releases yet. Use Las Cruces or Albuquerque.",
         downloadURL: releaseBase.appendingPathComponent("new-mexico.pack.zip"),
         sha256: "0000000000000000000000000000000000000000000000000000000000000000",
         byteCount: nil,
@@ -70,7 +129,9 @@ public enum FieldPackCatalog {
         )
     )
 
-    public static let remotePacks: [FieldPackDescriptor] = [texas, newMexico]
+    public static let remotePacks: [FieldPackDescriptor] = [
+        elPaso, lasCruces, albuquerque, texas, newMexico
+    ]
     public static let all: [FieldPackDescriptor] = [denver] + remotePacks
 }
 
@@ -89,6 +150,7 @@ public struct FieldPackDescriptor: Identifiable, Hashable, Sendable {
 public enum FieldPackRowState: String, Sendable {
     case noWifi
     case downloading
+    case available
     case ready
     case failed
     case skip

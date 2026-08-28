@@ -25,7 +25,7 @@ public struct FieldPacksView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     ScreenHeader(
                         "Field Packs",
-                        subtitle: "Download Texas and New Mexico packs on Wi-Fi, then they work airplane. Skip uses the bundled Denver sample. SOS stays available."
+                        subtitle: "Download El Paso, Las Cruces, or Albuquerque on Wi-Fi, then they work airplane. Texas and New Mexico statewide are not on Releases yet. Skip uses the bundled Denver sample. SOS stays available."
                     )
                     if !store.onWiFi {
                         Text(store.pathSatisfied
@@ -51,7 +51,9 @@ public struct FieldPacksView: View {
     }
 
     private func packRow(_ pack: FieldPackDescriptor) -> some View {
-        let state = store.states[pack.id] ?? (pack.isBundled ? .ready : .failed)
+        let state = store.states[pack.id] ?? (
+            pack.isBundled ? .ready : (pack.assetReady ? .available : .failed)
+        )
         return HUDPanel {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
@@ -85,6 +87,7 @@ public struct FieldPacksView: View {
         switch state {
         case .noWifi: return "no wifi"
         case .downloading: return "downloading"
+        case .available: return "available"
         case .ready: return "ready"
         case .failed: return "failed"
         case .skip: return "skip"
@@ -94,7 +97,7 @@ public struct FieldPacksView: View {
     private func color(for state: FieldPackRowState) -> Color {
         switch state {
         case .ready: return BlackoutDS.Semantic.ok
-        case .downloading: return BlackoutDS.Semantic.info
+        case .available, .downloading: return BlackoutDS.Semantic.info
         case .noWifi: return BlackoutDS.Semantic.warn
         case .failed, .skip: return BlackoutDS.Silver.steel
         }
