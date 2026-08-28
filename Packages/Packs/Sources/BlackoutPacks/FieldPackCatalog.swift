@@ -92,18 +92,18 @@ public enum FieldPackCatalog {
     public static let texas = FieldPackDescriptor(
         id: "texas",
         title: "Texas",
-        summary: "Statewide not on Releases yet. Use El Paso for the border.",
+        summary: "Download on Wi-Fi (~199 MB), then airplane. Statewide Texas.",
         downloadURL: releaseBase.appendingPathComponent("texas.pack.zip"),
-        sha256: "0000000000000000000000000000000000000000000000000000000000000000",
-        byteCount: nil,
-        assetReady: false,
+        sha256: "1ae971d530fedf396607089f876e1744036f752e823035f4cdad0ab1a1601060",
+        byteCount: 208_461_647,
+        assetReady: true,
         isBundled: false,
         region: MapRegion(
             name: "Texas",
-            centerLatitude: 31.0,
-            centerLongitude: -99.9,
-            spanLatitude: 10.5,
-            spanLongitude: 13.5,
+            centerLatitude: 31.17,
+            centerLongitude: -100.08,
+            spanLatitude: 10.6636,
+            spanLongitude: 13.1378,
             minZoom: 8,
             maxZoom: 12
         )
