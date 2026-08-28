@@ -2,19 +2,18 @@
 
 Offline-first field app for iPhone and iPad. Native SwiftUI, iOS 18+, Universal, bundle ID `com.crisiskhan.blackout`.
 
-This repository is a **foundation + wave 1.5** pass: it opens in Xcode, paints file-tile Map with a radar HUD, asks a bundled field guide, and keeps expeditions / breadcrumbs / SOS / sealed messages on-device. It is **not** a v1 ship of live mesh 1/N, stranger radio, vitals, map-pack relay, or auto-911.
+This repository is a **foundation + wave 1.5** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device. It is **not** a v1 ship of live mesh 1/N, stranger radio, vitals, map-pack relay, or auto-911.
 
-## Open in Xcode (Crisis)
+## Compile (Crisis — no Mac)
 
-1. Install **Xcode 16** (iOS 18 SDK). This project uses Xcode 16 file-system synchronized groups.
-2. Open `Blackout.xcodeproj`. Do not add CocoaPods, SPM remotes, Expo, or React Native.
-3. Select the **Blackout** scheme, then an iPhone or iPad simulator / device.
-4. Signing:
-   - Target **Blackout** → Signing & Capabilities.
-   - Enable **Automatically manage signing**.
-   - Team: your Apple Developer team (Crisis Khan).
-   - Bundle Identifier is already `com.crisiskhan.blackout`.
-5. Build and run. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
+Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compile signal is GitHub Actions on this branch / PR:
+
+- Workflow: `.github/workflows/ios-compile.yml`
+- Runner: `macos-14`, Xcode 16, scheme **Blackout**
+- Unsigned: `CODE_SIGNING_ALLOWED=NO` `CODE_SIGNING_REQUIRED=NO` (compile only — not a device install, not TestFlight)
+- A red X on the Actions check is a compile failure. A green check is “it built.”
+
+Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
 
 ### Capabilities to enable
 
@@ -38,35 +37,21 @@ The target copies `Blackout/DefaultPack` two ways so a synchronized-group miss c
 1. **Copy Bundle Resources** — folder reference `Blackout/DefaultPack`.
 2. **Run Script** “Copy DefaultPack into app bundle” (`ditto` into `$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack`). The script **fails the build** if `manifest.json` is missing.
 
-After a Mac build:
+Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` are in the tree; `Blackout/GuidePack/articles.jsonl` is 132 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` is missing from either pack.
 
-```bash
-# From the built app (Product → Show Build Folder in Xcode, or):
-APP=$(find ~/Library/Developer/Xcode/DerivedData -name Blackout.app -type d | head -1)
-test -f "$APP/DefaultPack/manifest.json" && echo "PACK OK $APP/DefaultPack"
-ls "$APP/DefaultPack/tiles"
-test -f "$APP/GuidePack/manifest.json" && wc -l "$APP/GuidePack/articles.jsonl"
-```
-
-On device/simulator: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
+On device: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
 
 ## Verify airplane map / zero Apple tile traffic (H1)
 
 Map chrome does **not** instantiate Apple’s map view. Tiles come from `BundledTileOverlay` (`MKTileOverlay` subclass, `canReplaceMapContent = true`, `urlTemplate = nil`) via `loadTile` / `tileData` reading `file://` with `Data(contentsOf:)`. Pinching outside the pack swaps to the no-pack canvas (void + copy + Return to pack). Missing tiles paint void locally — never a gray spinner waiting on WAN.
 
-On a Mac, airplane mode + run:
+Source proof (no Mac / no local `xcodebuild`):
 
-1. Enable Airplane Mode (and disable Wi-Fi on the simulator if needed).
-2. Cold-launch Blackout. Map should paint DefaultPack in a few seconds.
-3. Confirm **no Apple tile hosts**:
-   - Xcode **Debug → Network** (or Instruments → Network): first-paint Map should show **no** connections to `gspe*.ls.apple.com`, `gscdn*.apple.com`, `configuration.ls.apple.com`, or `cdn*.apple-mapkit.com`.
-   - Console.app filter `Blackout` + `ls.apple` / `mapkit` while on the Map tab.
-   - Charles / Proxyman: no MapKit raster/vector tile URLs after launch onto Map.
-4. Pinch/pan past the Front Range window: you must see the honest **Outside DefaultPack** canvas, not Apple gray tiles.
+- `grep -R MKMapView Packages/Maps` is comments-only; there is no `MKMapView(` constructor.
+- `./tools/audit_offline.sh` fails if `URLSession` or `MKMapView(` appears.
+- GitHub Actions `.github/workflows/ios-compile.yml` is the compile signal.
 
-Source proof: `grep -R MKMapView Packages/Maps` is comments-only; there is no `MKMapView(` constructor. `./tools/audit_offline.sh` fails if `URLSession` or `MKMapView(` appears.
-
-This Linux environment **cannot run xcodebuild**. The checks above are what a Mac airplane test must prove.
+Device airplane-mode tile proof is a later iPhone check, not an ASUS `xcodebuild`.
 
 ## Wave 1.5 (this pass)
 
@@ -81,12 +66,10 @@ Still airplane-first. Still no `URLSession`. Still no live mesh.
 7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
 8. **Missed check-in** — opt-in per expedition, default OFF. Timer lives on `AppContainer` so it keeps running if Expedition is unmounted (including last-2%). On miss: open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
 
-Verify GuidePack in the built app:
+Verify GuidePack in the tree (132 lines; Actions copies it into the app via the same fail-if-missing ditto phase):
 
 ```bash
-APP=$(find ~/Library/Developer/Xcode/DerivedData -name Blackout.app -type d | head -1)
-test -f "$APP/GuidePack/manifest.json" && echo "GUIDE OK"
-wc -l "$APP/GuidePack/articles.jsonl"
+test -f Blackout/GuidePack/manifest.json && wc -l Blackout/GuidePack/articles.jsonl
 ```
 
 ## Architecture

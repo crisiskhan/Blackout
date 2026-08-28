@@ -1,0 +1,46 @@
+name: iOS compile
+
+on:
+  pull_request:
+  push:
+    branches:
+      - cursor/blackout-ios-foundation-7e54
+      - main
+
+concurrency:
+  group: ios-compile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    name: xcodebuild Blackout
+    runs-on: macos-14
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          set -euo pipefail
+          ls /Applications | grep -i xcode || true
+          app="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -z "${app}" ]; then
+            app="/Applications/Xcode.app"
+          fi
+          sudo xcode-select -s "${app}/Contents/Developer"
+          xcodebuild -version
+
+      - name: Compile Blackout (unsigned)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Blackout.xcodeproj \
+            -scheme Blackout \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
