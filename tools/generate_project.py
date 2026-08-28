@@ -381,7 +381,9 @@ def xc_settings(is_target: bool, debug: bool) -> str:
     lines = ["\t\t\t\tisa = XCBuildConfiguration;", "\t\t\t\tbuildSettings = {"]
     for k in sorted(common):
         v = common[k]
-        if v == "" or " " in v or "$" in v:
+        # Commas (TARGETED_DEVICE_FAMILY = 1,2) and leading dashes (-Onone)
+        # must be quoted or the OpenStep plist parser dies on xcodebuild.
+        if v == "" or any(c in v for c in ' "$,;') or v.startswith("-"):
             lines.append(f'\t\t\t\t\t{k} = "{v}";')
         else:
             lines.append(f"\t\t\t\t\t{k} = {v};")
