@@ -1,0 +1,60 @@
+import SwiftUI
+
+public enum BlackoutDS {
+    public enum Surface {
+        public static let void = Color(red: 7 / 255, green: 8 / 255, blue: 10 / 255)
+        public static let base = Color(red: 12 / 255, green: 14 / 255, blue: 18 / 255)
+        public static let raised = Color(red: 20 / 255, green: 23 / 255, blue: 29 / 255)
+        public static let overlay = Color(red: 28 / 255, green: 32 / 255, blue: 40 / 255)
+        public static let sunken = Color(red: 8 / 255, green: 9 / 255, blue: 12 / 255)
+        public static let hazard = Color(red: 26 / 255, green: 10 / 255, blue: 12 / 255)
+    }
+
+    public enum Red {
+        public static let core = Color(red: 1, green: 43 / 255, blue: 43 / 255)
+        public static let hot = Color(red: 1, green: 77 / 255, blue: 77 / 255)
+        public static let sun = Color(red: 1, green: 74 / 255, blue: 74 / 255)
+        public static let ember = Color(red: 196 / 255, green: 30 / 255, blue: 30 / 255)
+        public static let blood = Color(red: 139 / 255, green: 20 / 255, blue: 20 / 255)
+    }
+
+    public enum Silver {
+        public static let bright = Color(red: 232 / 255, green: 237 / 255, blue: 242 / 255)
+        public static let mid = Color(red: 180 / 255, green: 188 / 255, blue: 198 / 255)
+        public static let dim = Color(red: 122 / 255, green: 132 / 255, blue: 144 / 255)
+        public static let steel = Color(red: 92 / 255, green: 101 / 255, blue: 112 / 255)
+        public static let edge = Color(red: 197 / 255, green: 205 / 255, blue: 214 / 255)
+        public static let metal = Color(red: 244 / 255, green: 247 / 255, blue: 250 / 255)
+    }
+
+    public enum Semantic {
+        public static let ok = Color(red: 61 / 255, green: 1, blue: 154 / 255)
+        public static let warn = Color(red: 1, green: 176 / 255, blue: 32 / 255)
+        public static let info = Color(red: 110 / 255, green: 200 / 255, blue: 1)
+    }
+
+    public enum Hit {
+        public static let sm: CGFloat = 56
+        public static let md: CGFloat = 64
+        public static let lg: CGFloat = 72
+        public static let sos: CGFloat = 88
+    }
+
+    public enum TypeMetrics {
+        public static let body: CGFloat = 17
+        public static let bodyLine: CGFloat = 24
+        public static let floor: CGFloat = 17
+    }
+
+    public static func bodyFont() -> Font {
+        .system(size: TypeMetrics.body, weight: .regular, design: .default)
+    }
+
+    public static func titleFont() -> Font {
+        .system(size: 22, weight: .semibold, design: .default)
+    }
+
+    public static func captionFont() -> Font {
+        .system(size: 13, weight: .medium, design: .default)
+    }
+}

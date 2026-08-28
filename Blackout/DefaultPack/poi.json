@@ -1,0 +1,75 @@
+{
+  "attribution": "GENERATED SAMPLE \u2014 not a USGS or GNIS extract. Synthetic points of interest for the Denver / Front Range area, for offline UI development only.",
+  "region": {
+    "name": "Front Range sample",
+    "west": -105.6,
+    "south": 39.55,
+    "east": -104.92,
+    "north": 40.02
+  },
+  "pois": [
+    {
+      "id": "denver",
+      "name": "Denver",
+      "kind": "city",
+      "lat": 39.7392,
+      "lon": -104.9903
+    },
+    {
+      "id": "boulder",
+      "name": "Boulder",
+      "kind": "city",
+      "lat": 40.015,
+      "lon": -105.2705
+    },
+    {
+      "id": "golden",
+      "name": "Golden",
+      "kind": "city",
+      "lat": 39.7555,
+      "lon": -105.2211
+    },
+    {
+      "id": "idaho-springs",
+      "name": "Idaho Springs",
+      "kind": "town",
+      "lat": 39.7425,
+      "lon": -105.5136
+    },
+    {
+      "id": "evans",
+      "name": "Mount Evans",
+      "kind": "summit",
+      "lat": 39.5883,
+      "lon": -105.6438
+    },
+    {
+      "id": "trailhead",
+      "name": "Front Range Trailhead",
+      "kind": "trailhead",
+      "lat": 39.633,
+      "lon": -105.6
+    },
+    {
+      "id": "ranger",
+      "name": "Foothills Ranger Station",
+      "kind": "ranger",
+      "lat": 39.72,
+      "lon": -105.35
+    },
+    {
+      "id": "hospital",
+      "name": "Plains Medical Center",
+      "kind": "hospital",
+      "lat": 39.739,
+      "lon": -104.99
+    },
+    {
+      "id": "reservoir",
+      "name": "Foothills Reservoir",
+      "kind": "water",
+      "lat": 39.8,
+      "lon": -105.15
+    }
+  ]
+}

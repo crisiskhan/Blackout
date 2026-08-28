@@ -1,0 +1,506 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		726A841CF59B435A99C219CB /* BlackoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94BE6BC726994C1BE6FDB1ED /* BlackoutCore */; };
+		D15DD3B44FEFA270909AA628 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2C69B7EE0E687CB38564BBC3 /* DesignSystem */; };
+		F2B5CDAF356B9654500FC62C /* BlackoutCrypto in Frameworks */ = {isa = PBXBuildFile; productRef = E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */; };
+		FA71575A92DB3DA4582AEEC1 /* BlackoutBattery in Frameworks */ = {isa = PBXBuildFile; productRef = 9F99C72352301779F4A58527 /* BlackoutBattery */; };
+		CE537E1757AA50257828966C /* BlackoutPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 4727D8B200A97A548F694FBC /* BlackoutPersistence */; };
+		165BFA3CCBE595A5E46744CD /* BlackoutLocation in Frameworks */ = {isa = PBXBuildFile; productRef = C4830C6DFCC1B531A7117B65 /* BlackoutLocation */; };
+		E7FDC2DAC814F64AE6874E1A /* BlackoutMesh in Frameworks */ = {isa = PBXBuildFile; productRef = 75017D353F218FF9B4B088BE /* BlackoutMesh */; };
+		F4DDBB966264344337F1328D /* Messaging in Frameworks */ = {isa = PBXBuildFile; productRef = FBC432B44ADB3FEFE4545993 /* Messaging */; };
+		FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */ = {isa = PBXBuildFile; productRef = 03B8622003259D7DCD3BB9BD /* VoicePTT */; };
+		3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */ = {isa = PBXBuildFile; productRef = 22D618336C0CB913039FE327 /* Maps */; };
+		96AA929602CB8D0BEE73B632 /* SOS in Frameworks */ = {isa = PBXBuildFile; productRef = 244B139EBFA8CAEC15CBBC8D /* SOS */; };
+		F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8646A3CDCE8F5E86C75F3A /* Expeditions */; };
+		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
+		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3ECE9A2F0678B209E4A706C9 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		466304068CF247FDBD3B915E /* Blackout */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Blackout;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3323629B96A3F2337CE24535 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				726A841CF59B435A99C219CB /* BlackoutCore in Frameworks */,
+				D15DD3B44FEFA270909AA628 /* DesignSystem in Frameworks */,
+				F2B5CDAF356B9654500FC62C /* BlackoutCrypto in Frameworks */,
+				FA71575A92DB3DA4582AEEC1 /* BlackoutBattery in Frameworks */,
+				CE537E1757AA50257828966C /* BlackoutPersistence in Frameworks */,
+				165BFA3CCBE595A5E46744CD /* BlackoutLocation in Frameworks */,
+				E7FDC2DAC814F64AE6874E1A /* BlackoutMesh in Frameworks */,
+				F4DDBB966264344337F1328D /* Messaging in Frameworks */,
+				FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */,
+				3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */,
+				96AA929602CB8D0BEE73B632 /* SOS in Frameworks */,
+				F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */,
+				BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */,
+				D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8CB695B89F15D64CF154F9CA = {
+			isa = PBXGroup;
+			children = (
+				466304068CF247FDBD3B915E /* Blackout */,
+				942A9A1A63793D61082FFAA8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		942A9A1A63793D61082FFAA8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3ECE9A2F0678B209E4A706C9 /* Blackout.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8796EC6A87564C187A908CD6 /* Blackout */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9217D4CDF52D089EFBCEAA17 /* Build configuration list for PBXNativeTarget "Blackout" */;
+			buildPhases = (
+				A8845CE5F531D368403AFF88 /* Sources */,
+				3323629B96A3F2337CE24535 /* Frameworks */,
+				8E8A406124A99A2C1D9A1238 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				466304068CF247FDBD3B915E /* Blackout */,
+			);
+			name = Blackout;
+			packageProductDependencies = (
+				94BE6BC726994C1BE6FDB1ED /* BlackoutCore */,
+				2C69B7EE0E687CB38564BBC3 /* DesignSystem */,
+				E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */,
+				9F99C72352301779F4A58527 /* BlackoutBattery */,
+				4727D8B200A97A548F694FBC /* BlackoutPersistence */,
+				C4830C6DFCC1B531A7117B65 /* BlackoutLocation */,
+				75017D353F218FF9B4B088BE /* BlackoutMesh */,
+				FBC432B44ADB3FEFE4545993 /* Messaging */,
+				03B8622003259D7DCD3BB9BD /* VoicePTT */,
+				22D618336C0CB913039FE327 /* Maps */,
+				244B139EBFA8CAEC15CBBC8D /* SOS */,
+				2E8646A3CDCE8F5E86C75F3A /* Expeditions */,
+				9F9EA0AE7E7BA084D594A1C5 /* Field */,
+				945B11D319B9F346AA576637 /* Settings */,
+			);
+			productName = Blackout;
+			productReference = 3ECE9A2F0678B209E4A706C9 /* Blackout.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		59601E391B529B07AE11313D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					8796EC6A87564C187A908CD6 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 0781223A035E65BFD19ECE32 /* Build configuration list for PBXProject "Blackout" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8CB695B89F15D64CF154F9CA;
+			minimizedProjectReferenceProxies = 1;
+			compatibilityVersion = "Xcode 16.0";
+			packageReferences = (
+				E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */,
+				5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
+				69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */,
+				036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */,
+				8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */,
+				6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */,
+				26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */,
+				EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */,
+				2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */,
+				51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */,
+				FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */,
+				6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */,
+				3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */,
+				86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 942A9A1A63793D61082FFAA8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8796EC6A87564C187A908CD6 /* Blackout */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8E8A406124A99A2C1D9A1238 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A8845CE5F531D368403AFF88 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3D45766170DCCA05AF05902A /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					COPY_PHASE_STRIP = NO;
+					DEBUG_INFORMATION_FORMAT = dwarf;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_TESTABILITY = YES;
+					GCC_DYNAMIC_NO_PIC = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GCC_OPTIMIZATION_LEVEL = 0;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+					ONLY_ACTIVE_ARCH = YES;
+					SDKROOT = iphoneos;
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_OPTIMIZATION_LEVEL = -Onone;
+					SWIFT_VERSION = 5.0;
+				};
+				name = Debug;
+		};
+		006ADE022EFDAFC62B873232 /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					COPY_PHASE_STRIP = NO;
+					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+					ENABLE_NS_ASSERTIONS = NO;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					GCC_NO_COMMON_BLOCKS = YES;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					MTL_ENABLE_DEBUG_INFO = NO;
+					SDKROOT = iphoneos;
+					SWIFT_COMPILATION_MODE = wholemodule;
+					SWIFT_OPTIMIZATION_LEVEL = -O;
+					SWIFT_VERSION = 5.0;
+					VALIDATE_PRODUCT = YES;
+				};
+				name = Release;
+		};
+		368B24278E57628104DC2C43 /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+					ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf;
+					DEVELOPMENT_TEAM = "";
+					ENABLE_PREVIEWS = YES;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_TESTABILITY = YES;
+					GCC_DYNAMIC_NO_PIC = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GCC_OPTIMIZATION_LEVEL = 0;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
+					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
+					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
+					INFOPLIST_KEY_NSCameraUsageDescription = "Field Vision classifies a still on this device. Deny is supported — Guide and Skills still work.";
+					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
+					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
+					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
+					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+					INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+					INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+					INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+					ONLY_ACTIVE_ARCH = YES;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SUPPORTS_MACCATALYST = NO;
+					SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+					SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_OPTIMIZATION_LEVEL = -Onone;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = 1,2;
+				};
+				name = Debug;
+		};
+		028CF4E55748EB8D13684699 /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+					ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+					DEVELOPMENT_TEAM = "";
+					ENABLE_NS_ASSERTIONS = NO;
+					ENABLE_PREVIEWS = YES;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
+					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
+					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
+					INFOPLIST_KEY_NSCameraUsageDescription = "Field Vision classifies a still on this device. Deny is supported — Guide and Skills still work.";
+					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
+					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
+					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
+					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+					INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+					INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+					INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					MTL_ENABLE_DEBUG_INFO = NO;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SUPPORTS_MACCATALYST = NO;
+					SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+					SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+					SWIFT_COMPILATION_MODE = wholemodule;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_OPTIMIZATION_LEVEL = -O;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = 1,2;
+					VALIDATE_PRODUCT = YES;
+				};
+				name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0781223A035E65BFD19ECE32 /* Build configuration list for PBXProject "Blackout" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D45766170DCCA05AF05902A /* Debug */,
+				006ADE022EFDAFC62B873232 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9217D4CDF52D089EFBCEAA17 /* Build configuration list for PBXNativeTarget "Blackout" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				368B24278E57628104DC2C43 /* Debug */,
+				028CF4E55748EB8D13684699 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/BlackoutCore;
+		};
+		5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DesignSystem;
+		};
+		69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Crypto;
+		};
+		036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Battery;
+		};
+		8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Persistence;
+		};
+		6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Location;
+		};
+		26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Mesh;
+		};
+		EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Messaging;
+		};
+		2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/VoicePTT;
+		};
+		51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Maps;
+		};
+		FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/SOS;
+		};
+		6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Expeditions;
+		};
+		3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Field;
+		};
+		86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Settings;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		94BE6BC726994C1BE6FDB1ED /* BlackoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */;
+			productName = BlackoutCore;
+		};
+		2C69B7EE0E687CB38564BBC3 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
+			productName = DesignSystem;
+		};
+		E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */;
+			productName = BlackoutCrypto;
+		};
+		9F99C72352301779F4A58527 /* BlackoutBattery */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */;
+			productName = BlackoutBattery;
+		};
+		4727D8B200A97A548F694FBC /* BlackoutPersistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */;
+			productName = BlackoutPersistence;
+		};
+		C4830C6DFCC1B531A7117B65 /* BlackoutLocation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */;
+			productName = BlackoutLocation;
+		};
+		75017D353F218FF9B4B088BE /* BlackoutMesh */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */;
+			productName = BlackoutMesh;
+		};
+		FBC432B44ADB3FEFE4545993 /* Messaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */;
+			productName = Messaging;
+		};
+		03B8622003259D7DCD3BB9BD /* VoicePTT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */;
+			productName = VoicePTT;
+		};
+		22D618336C0CB913039FE327 /* Maps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */;
+			productName = Maps;
+		};
+		244B139EBFA8CAEC15CBBC8D /* SOS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */;
+			productName = SOS;
+		};
+		2E8646A3CDCE8F5E86C75F3A /* Expeditions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */;
+			productName = Expeditions;
+		};
+		9F9EA0AE7E7BA084D594A1C5 /* Field */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */;
+			productName = Field;
+		};
+		945B11D319B9F346AA576637 /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */;
+			productName = Settings;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 59601E391B529B07AE11313D /* Project object */;
+}
