@@ -16,19 +16,22 @@ public struct SOSFab: View {
     @State private var isArmed = false
     @State private var showArmedPanel = false
     @State private var storeError: String?
+    var presentConfirm: Binding<Bool>?
 
-    private static let armedKey = "com.crisiskhan.blackout.sos.armed"
+    private static let armedKey = BlackoutKeys.sosArmed
 
     public init(
         location: LocationService,
         persistence: any PersistenceServing,
         mesh: MeshFacade,
-        battery: BatteryService
+        battery: BatteryService,
+        presentConfirm: Binding<Bool>? = nil
     ) {
         self.location = location
         self.persistence = persistence
         self.mesh = mesh
         self.battery = battery
+        self.presentConfirm = presentConfirm
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
     }
 
@@ -82,6 +85,16 @@ public struct SOSFab: View {
                     .offset(y: -120)
             }
         }
+        .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
+            if requested {
+                if isArmed {
+                    showArmedPanel = true
+                } else {
+                    showConfirm = true
+                }
+                presentConfirm?.wrappedValue = false
+            }
+        }
     }
 
     private func arm() {
@@ -122,10 +135,14 @@ public struct SOSConfirmCover: View {
     @Binding var storeError: String?
     var onArm: () -> Void
     var onDismissUnarmed: () -> Void
+    @State private var sirenOn = false
+    @State private var strobeOn = false
+    @State private var flashWhite = false
+    @State private var showSystemSOS = false
 
     public var body: some View {
         ZStack(alignment: .topTrailing) {
-            BlackoutDS.Surface.hazard.ignoresSafeArea()
+            (flashWhite ? Color.white : BlackoutDS.Surface.hazard).ignoresSafeArea()
             VStack(alignment: .leading, spacing: 20) {
                 Text("SOS")
                     .font(BlackoutDS.titleFont())
@@ -134,20 +151,40 @@ public struct SOSConfirmCover: View {
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(7)
+                SOSPictogramBar(
+                    onSiren: {
+                        SOSLocalSignals.shared.toggleSiren()
+                        sirenOn = SOSLocalSignals.shared.sirenRunning
+                    },
+                    onStrobe: {
+                        SOSLocalSignals.shared.onStrobeTick = { flashWhite = $0 }
+                        SOSLocalSignals.shared.toggleStrobe()
+                        strobeOn = SOSLocalSignals.shared.strobeRunning
+                    },
+                    onSystemSOS: { showSystemSOS = true },
+                    onCancel: {
+                        SOSLocalSignals.shared.stopAll()
+                        onDismissUnarmed()
+                    },
+                    sirenOn: sirenOn,
+                    strobeOn: strobeOn
+                )
                 MeshPill(nearbyCount: meshCount)
                 SlideToConfirm("Slide to arm") {
+                    SOSLocalSignals.shared.stopAll()
                     onArm()
                 }
                 if let storeError {
                     StoreFailure(storeError)
                 }
-                Text("X dismisses unarmed if you have not slid. Blackout never auto-dials 911.")
+                Text("Pictograms are local siren, strobe, OS Emergency SOS, cancel. Slide still arms. Blackout never auto-dials 911.")
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.steel)
                 Spacer()
             }
             .padding(24)
             Button {
+                SOSLocalSignals.shared.stopAll()
                 onDismissUnarmed()
             } label: {
                 Image(systemName: "xmark")
@@ -157,7 +194,13 @@ public struct SOSConfirmCover: View {
             }
             .padding(12)
         }
+        .sheet(isPresented: $showSystemSOS) {
+            SystemEmergencySOSView()
+                .preferredColorScheme(.dark)
+                .presentationDetents([.medium, .large])
+        }
         .preferredColorScheme(.dark)
+        .onDisappear { SOSLocalSignals.shared.stopAll() }
     }
 }
 

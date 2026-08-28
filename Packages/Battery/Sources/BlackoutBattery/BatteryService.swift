@@ -16,11 +16,20 @@ public final class BatteryService: BatteryServing {
 
     public var coarseNavigateEnabled: Bool { true }
 
+    public var isCritical: Bool {
+        level >= 0 && level <= 0.02 && !isCharging
+    }
+
+    public var tightensToSOSNavRadar: Bool {
+        policy == .extremeSaver || isCritical
+    }
+
     public var pausesCameraAndPTT: Bool {
-        policy == .extremeSaver
+        tightensToSOSNavRadar
     }
 
     private static let policyKey = "com.crisiskhan.blackout.battery.policy"
+    private var userPickedPolicy = true
 
     public init() {
         UIDevice.current.isBatteryMonitoringEnabled = true
@@ -32,6 +41,7 @@ public final class BatteryService: BatteryServing {
         }
         level = UIDevice.current.batteryLevel
         isCharging = Self.isPlugged(UIDevice.current.batteryState)
+        applyCriticalIfNeeded()
         NotificationCenter.default.addObserver(
             forName: UIDevice.batteryLevelDidChangeNotification,
             object: nil,
@@ -39,6 +49,7 @@ public final class BatteryService: BatteryServing {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.level = UIDevice.current.batteryLevel
+                self?.applyCriticalIfNeeded()
             }
         }
         NotificationCenter.default.addObserver(
@@ -48,7 +59,14 @@ public final class BatteryService: BatteryServing {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.isCharging = Self.isPlugged(UIDevice.current.batteryState)
+                self?.applyCriticalIfNeeded()
             }
+        }
+    }
+
+    private func applyCriticalIfNeeded() {
+        if isCritical, policy != .extremeSaver {
+            policy = .extremeSaver
         }
     }
 

@@ -11,6 +11,9 @@ final class ExpeditionRecord {
     var closedAt: Date?
     var startLatitude: Double?
     var startLongitude: Double?
+    var checkInEnabled: Bool = false
+    var checkInIntervalSeconds: Int = 1800
+    var lastCheckInAt: Date?
 
     init(_ dto: ExpeditionRecordDTO) {
         id = dto.id.rawValue
@@ -20,6 +23,9 @@ final class ExpeditionRecord {
         closedAt = dto.closedAt
         startLatitude = dto.startLatitude
         startLongitude = dto.startLongitude
+        checkInEnabled = dto.checkInEnabled
+        checkInIntervalSeconds = dto.checkInIntervalSeconds
+        lastCheckInAt = dto.lastCheckInAt
     }
 
     func apply(_ dto: ExpeditionRecordDTO) {
@@ -29,6 +35,9 @@ final class ExpeditionRecord {
         closedAt = dto.closedAt
         startLatitude = dto.startLatitude
         startLongitude = dto.startLongitude
+        checkInEnabled = dto.checkInEnabled
+        checkInIntervalSeconds = dto.checkInIntervalSeconds
+        lastCheckInAt = dto.lastCheckInAt
     }
 
     func dto() -> ExpeditionRecordDTO {
@@ -39,7 +48,10 @@ final class ExpeditionRecord {
             createdAt: createdAt,
             closedAt: closedAt,
             startLatitude: startLatitude,
-            startLongitude: startLongitude
+            startLongitude: startLongitude,
+            checkInEnabled: checkInEnabled,
+            checkInIntervalSeconds: checkInIntervalSeconds,
+            lastCheckInAt: lastCheckInAt
         )
     }
 }

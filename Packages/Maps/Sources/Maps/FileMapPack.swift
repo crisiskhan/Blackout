@@ -19,6 +19,18 @@ public final class FileMapPack: MapPackServing {
         dem?.sample(latitude: latitude, longitude: longitude)
     }
 
+    public func slopeDegrees(latitude: Double, longitude: Double) -> Double? {
+        dem?.slopeDegrees(latitude: latitude, longitude: longitude)
+    }
+
+    public func viewshed(fromLatitude: Double, fromLongitude: Double, observerHeightMeters: Double) -> [ViewshedRay] {
+        dem?.viewshed(fromLatitude: fromLatitude, fromLongitude: fromLongitude, observerHeightMeters: observerHeightMeters) ?? []
+    }
+
+    public func slopeSamples() -> [SlopeSample] {
+        dem?.slopeGrid() ?? []
+    }
+
     private static func load(root: URL) -> (MapPackSnapshot, DEMTable?)? {
         let manifestURL = root.appendingPathComponent("manifest.json")
         guard let data = try? Data(contentsOf: manifestURL),
@@ -69,6 +81,12 @@ public final class FileMapPack: MapPackServing {
     }
 }
 
+struct SlopeSample {
+    var latitude: Double
+    var longitude: Double
+    var degrees: Double
+}
+
 struct DEMTable {
     let lons: [Double]
     let lats: [Double]
@@ -92,6 +110,75 @@ struct DEMTable {
         let a = v00 * (1 - tx) + v10 * tx
         let b = v01 * (1 - tx) + v11 * tx
         return a * (1 - ty) + b * ty
+    }
+
+    func slopeDegrees(latitude: Double, longitude: Double) -> Double? {
+        guard lons.count > 1, lats.count > 1 else { return nil }
+        let metersPerDegLat = 111_320.0
+        let metersPerDegLon = 111_320.0 * cos(latitude * .pi / 180)
+        let dLat = (lats.last! - lats.first!) / Double(lats.count - 1)
+        let dLon = (lons.last! - lons.first!) / Double(lons.count - 1)
+        guard let e = sample(latitude: latitude, longitude: longitude),
+              let n = sample(latitude: latitude + dLat, longitude: longitude),
+              let s = sample(latitude: latitude - dLat, longitude: longitude),
+              let east = sample(latitude: latitude, longitude: longitude + dLon),
+              let w = sample(latitude: latitude, longitude: longitude - dLon) else { return nil }
+        let dzdy = (n - s) / max(2 * dLat * metersPerDegLat, 1)
+        let dzdx = (east - w) / max(2 * dLon * metersPerDegLon, 1)
+        let slope = atan(sqrt(dzdx * dzdx + dzdy * dzdy)) * 180 / .pi
+        return slope
+    }
+
+    func slopeGrid() -> [SlopeSample] {
+        var samples: [SlopeSample] = []
+        for (iy, lat) in lats.enumerated() {
+            for (ix, lon) in lons.enumerated() {
+                if let slope = slopeDegrees(latitude: lat, longitude: lon) {
+                    samples.append(SlopeSample(latitude: lat, longitude: lon, degrees: slope))
+                } else if iy < grid.count, ix < grid[iy].count {
+                    samples.append(SlopeSample(latitude: lat, longitude: lon, degrees: 0))
+                }
+            }
+        }
+        return samples
+    }
+
+    func viewshed(fromLatitude: Double, fromLongitude: Double, observerHeightMeters: Double) -> [ViewshedRay] {
+        guard let eye = sample(latitude: fromLatitude, longitude: fromLongitude) else { return [] }
+        let observer = eye + observerHeightMeters
+        var rays: [ViewshedRay] = []
+        let steps = 18
+        let maxRange = 8_000.0
+        for i in 0..<72 {
+            let bearing = Double(i) * 5.0
+            var maxVisible = 0.0
+            var maxAngle = -Double.greatestFiniteMagnitude
+            for s in 1...steps {
+                let meters = Double(s) / Double(steps) * maxRange
+                let dest = offset(latitude: fromLatitude, longitude: fromLongitude, meters: meters, bearing: bearing)
+                guard let ground = sample(latitude: dest.0, longitude: dest.1) else { break }
+                let angle = atan2(ground - observer, meters)
+                if angle >= maxAngle {
+                    maxAngle = angle
+                    maxVisible = meters
+                }
+            }
+            rays.append(ViewshedRay(bearingDegrees: bearing, visibleMeters: maxVisible))
+        }
+        return rays
+    }
+
+    private func offset(latitude: Double, longitude: Double, meters: Double, bearing: Double) -> (Double, Double) {
+        let r = 6_371_000.0
+        let brng = bearing * .pi / 180
+        let lat1 = latitude * .pi / 180
+        let lon1 = longitude * .pi / 180
+        let lat2 = asin(sin(lat1) * cos(meters / r) + cos(lat1) * sin(meters / r) * cos(brng))
+        let lon2 = lon1 + atan2(
+            sin(brng) * sin(meters / r) * cos(lat1),
+            cos(meters / r) - sin(lat1) * sin(lat2)
+        )
+        return (lat2 * 180 / .pi, lon2 * 180 / .pi)
     }
 
     private func interpIndex(_ value: Double, in axis: [Double]) -> Double {

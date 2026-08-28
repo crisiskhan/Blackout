@@ -357,7 +357,8 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "INFOPLIST_KEY_NSFaceIDUsageDescription": "Optional on-device lock. Nothing is sent anywhere.",
                 "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.",
                 "INFOPLIST_KEY_NSMicrophoneUsageDescription": "Voice PTT records locally on this device. Deny is supported.",
-                "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading when GPS is denied or coarse. Deny is supported.",
+                    "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.",
+                    "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "On-device speech for the Field guide ask bar. If denied, type instead.",
                 "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
                 "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
                 "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
@@ -410,6 +411,9 @@ def generate_xcodeproj() -> None:
         "pack_ref": oid("pack_folder_ref"),
         "pack_build": oid("pack_in_resources"),
         "copy_script": oid("copy_defaultpack_phase"),
+        "guide_ref": oid("guide_folder_ref"),
+        "guide_build": oid("guide_in_resources"),
+        "copy_guide": oid("copy_guidepack_phase"),
         "sync_ex": oid("sync_exceptions"),
     }
     pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
@@ -435,6 +439,9 @@ def generate_xcodeproj() -> None:
     build_files.append(
         f"\t\t{ids['pack_build']} /* DefaultPack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* DefaultPack */; }};"
     )
+    build_files.append(
+        f"\t\t{ids['guide_build']} /* GuidePack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['guide_ref']} /* GuidePack */; }};"
+    )
 
     copy_script_raw = """set -e
 SRC="${SRCROOT}/Blackout/DefaultPack"
@@ -449,6 +456,19 @@ echo "Copied DefaultPack -> ${DST}"
 test -f "${DST}/manifest.json"
 """
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    copy_guide_raw = """set -e
+SRC="${SRCROOT}/Blackout/GuidePack"
+DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GuidePack"
+if [ ! -f "${SRC}/manifest.json" ]; then
+  echo "error: GuidePack missing at ${SRC}" >&2
+  exit 1
+fi
+mkdir -p "${DST}"
+ditto "${SRC}" "${DST}"
+echo "Copied GuidePack -> ${DST}"
+test -f "${DST}/manifest.json"
+"""
+    copy_guide = copy_guide_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     local_refs = []
     for folder, _ in PACKAGES:
@@ -483,6 +503,7 @@ test -f "${DST}/manifest.json"
 /* Begin PBXFileReference section */
 		{ids['app_ref']} /* Blackout.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; }};
 		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
+		{ids['guide_ref']} /* GuidePack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; }};
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -513,6 +534,7 @@ test -f "${DST}/manifest.json"
 			children = (
 				{ids['sync']} /* Blackout */,
 				{ids['pack_ref']} /* DefaultPack */,
+				{ids['guide_ref']} /* GuidePack */,
 				{ids['products']} /* Products */,
 			);
 			sourceTree = "<group>";
@@ -536,6 +558,7 @@ test -f "${DST}/manifest.json"
 				{ids['fw']} /* Frameworks */,
 				{ids['resources']} /* Resources */,
 				{ids['copy_script']} /* Copy DefaultPack into app bundle */,
+				{ids['copy_guide']} /* Copy GuidePack into app bundle */,
 			);
 			buildRules = (
 			);
@@ -596,6 +619,7 @@ test -f "${DST}/manifest.json"
 			buildActionMask = 2147483647;
 			files = (
 				{ids['pack_build']} /* DefaultPack in Resources */,
+				{ids['guide_build']} /* GuidePack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -633,6 +657,27 @@ test -f "${DST}/manifest.json"
 			shellPath = /bin/sh;
 			shellScript = "{copy_script}";
 		}};
+		{ids['copy_guide']} /* Copy GuidePack into app bundle */ = {{
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Blackout/GuidePack/manifest.json",
+			);
+			name = "Copy GuidePack into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GuidePack/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "{copy_guide}";
+		}};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -640,6 +685,7 @@ test -f "${DST}/manifest.json"
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				DefaultPack,
+				GuidePack,
 			);
 			target = {ids['target']} /* Blackout */;
 		}};
@@ -789,6 +835,8 @@ def main() -> None:
     generate_app_icon()
     generate_accent()
     generate_xcodeproj()
+    import subprocess
+    subprocess.run(["python3", str(ROOT / "tools" / "generate_guide_pack.py")], check=True)
 
 
 if __name__ == "__main__":

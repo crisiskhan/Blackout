@@ -2,7 +2,7 @@
 
 Offline-first field app for iPhone and iPad. Native SwiftUI, iOS 18+, Universal, bundle ID `com.crisiskhan.blackout`.
 
-This repository is a **foundation pass**: it opens and builds in Xcode, paints Map chrome with no account and no network, and keeps expeditions / breadcrumbs / SOS / sealed messages on-device across kill. It is **not** a v1 ship of live mesh 1/N, a world map, or auto-911.
+This repository is a **foundation + wave 1.5** pass: it opens in Xcode, paints file-tile Map with a radar HUD, asks a bundled field guide, and keeps expeditions / breadcrumbs / SOS / sealed messages on-device. It is **not** a v1 ship of live mesh 1/N, stranger radio, vitals, map-pack relay, or auto-911.
 
 ## Open in Xcode (Crisis)
 
@@ -27,7 +27,7 @@ Optional later: **Background Modes → Location** only if you add always-on brea
 ### Cold launch checks
 
 - Airplane Mode on, no Apple ID wall: Map tab, dusk chrome, bundled Front Range sample (or the honest no-pack canvas), SOS FAB above the tab bar, gear.
-- Deny location / camera / mic / Bluetooth: Guide, Skills, bundled map, messaging, and SOS still work. Gated surfaces use `DesignSystem.PermissionDenied`. Long-press the map **or** tap **Drop pin at pack center** when GPS is denied and there is no last-known.
+- Deny location / camera / mic / Bluetooth: Guide ask (type), Skills, bundled map, messaging, and SOS still work. GPS denied uses **DEAD RECKONING** (compass + step length) from last-known or a manual pin. Long-press the map **or** tap **Drop pin at pack center**.
 - Create an expedition, start breadcrumbs, arm SOS, kill the app, relaunch: all three still present (tracking flag + trail restore).
 - Send-to-self message: decrypts after relaunch. SwiftData has ciphertext only — no plaintext body column. Compose drafts persist in UserDefaults.
 
@@ -45,6 +45,7 @@ After a Mac build:
 APP=$(find ~/Library/Developer/Xcode/DerivedData -name Blackout.app -type d | head -1)
 test -f "$APP/DefaultPack/manifest.json" && echo "PACK OK $APP/DefaultPack"
 ls "$APP/DefaultPack/tiles"
+test -f "$APP/GuidePack/manifest.json" && wc -l "$APP/GuidePack/articles.jsonl"
 ```
 
 On device/simulator: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
@@ -66,6 +67,27 @@ On a Mac, airplane mode + run:
 Source proof: `grep -R MKMapView Packages/Maps` is comments-only; there is no `MKMapView(` constructor. `./tools/audit_offline.sh` fails if `URLSession` or `MKMapView(` appears.
 
 This Linux environment **cannot run xcodebuild**. The checks above are what a Mac airplane test must prove.
+
+## Wave 1.5 (this pass)
+
+Still airplane-first. Still no `URLSession`. Still no live mesh.
+
+1. **Radar HUD** on Map — polar rings + 3s red.glow sweep on the file-tile terrain (never a black disc). Pinch still zooms the map. Heading-up / north-up. 0 peers: self + sweep only, no fake people. Members would be filled silver disks; strangers hollow rings. Tap self is not a peer sheet. `RadarPeerSheet` exists for later blips. Sweep haptic only if a blip would be crossed; sweep audio default **off**.
+2. **Guide ask-engine** — Field tab: ask bar first, taxonomy chips, situation cards remain. Type now; on-device mic if permitted else type. `Blackout/GuidePack/` has 44 real articles + inverted index (water, fire, shelter, first aid, signaling, navigation, weather, food/plants, animals, tools, bushcraft). Extractive snippets from the pack. Plants never get an edible verdict. `SystemLanguageModel` only if `availability == .available`, grounded on retrieved text, never first paint, never wait/download.
+3. **Dead reckoning** — compass + step-length IMU when GPS is denied or cold. HUD chip **DEAD RECKONING**. Manual pin still works.
+4. **Viewshed + slope** — toggles on Map chrome from bundled DEM. Copy says sample-quality, not USGS.
+5. **SOS pictograms** — language-free siren, strobe, satellite/OS SOS, cancel on the confirm panel, plus existing slide. Still no auto-dial.
+6. **Critical battery (~2%)** — Extreme Saver tightens to SOS + coarse Navigate + radar HUD. SOS is not hidden. Vision/PTT pause.
+7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
+8. **Missed check-in** — opt-in per expedition, default OFF. Local timer. On miss: prompt to open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
+
+Verify GuidePack in the built app:
+
+```bash
+APP=$(find ~/Library/Developer/Xcode/DerivedData -name Blackout.app -type d | head -1)
+test -f "$APP/GuidePack/manifest.json" && echo "GUIDE OK"
+wc -l "$APP/GuidePack/articles.jsonl"
+```
 
 ## Architecture
 
@@ -109,7 +131,8 @@ Tokens live in `DesignSystem` as `enum BlackoutDS`. Do not fork `PermissionDenie
   - Slide to confirm → **log first**. If `logSOS` throws, the UI shows `StoreFailure` and SOS stays **unarmed**.
   - X before slide: dismiss, still unarmed. X after slide: dismiss; the local alert already went out.
   - After arm, primary control is **user-initiated OS Emergency SOS** (side + volume hardware gesture). **Never auto-dial 911.**
-- **Field:** segmented Guide | Skills | Vision. Vision never says edible. Unknown is valid.
+- **Field:** Ask bar first, then taxonomy, then situation cards. GuidePack is on-device. Vision never says edible. Unknown is valid. Extreme Saver pauses Vision.
+- **Radar HUD:** Default on Map. Not a tab. Not a black disc.
 - **Chat status:** Sealed | Queued | On mesh. Never delivery ticks. Message bodies are not printed or os_logged.
 - **Dark / dusk only.** No light mode. Commits use metal, not red. Red is live/danger/SOS only.
 
@@ -129,13 +152,14 @@ That also rewrites `Blackout.xcodeproj` and the app icon.
 
 ## This-pass limitations
 
-- No live Multipeer 1/N, no public BLE SOS beacon.
+- No live Multipeer 1/N, no stranger radio blips, no vitals send, no map-pack relay (wave 2).
 - No world map. Map rendering is the bundled file-tile canvas or the honest empty canvas.
-- No auto-911, no fall detection / Auto-SOS.
+- No auto-911, no fall detection / Auto-SOS. Missed check-in never auto-arms.
 - No backend, no Expo, no third-party SDKs.
 - Voice PTT is local record/playback only. Live PTT-over-mesh is wave 2.
-- Extreme Saver does not hide SOS and does not disable coarse Navigate.
+- Extreme Saver does not hide SOS and does not disable coarse Navigate or the radar HUD.
 - Breadcrumb tracking restores after kill in the foreground; it is not a Background Modes location session.
+- Foundation Models run only when the OS already reports `.available`. This Linux environment cannot prove that path.
 
 ## QA v1 musts (fail closed)
 

@@ -22,11 +22,13 @@
 		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
 		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
 		5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */ = {isa = PBXBuildFile; fileRef = E8CF23C84AF6AD06DA1E4784 /* DefaultPack */; };
+		6B3C344D587D197A7A2AEDA0 /* GuidePack in Resources */ = {isa = PBXBuildFile; fileRef = 16E5BD64BA900FD4F921032E /* GuidePack */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3ECE9A2F0678B209E4A706C9 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8CF23C84AF6AD06DA1E4784 /* DefaultPack */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; };
+		16E5BD64BA900FD4F921032E /* GuidePack */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -70,6 +72,7 @@
 			children = (
 				466304068CF247FDBD3B915E /* Blackout */,
 				E8CF23C84AF6AD06DA1E4784 /* DefaultPack */,
+				16E5BD64BA900FD4F921032E /* GuidePack */,
 				942A9A1A63793D61082FFAA8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -93,6 +96,7 @@
 				3323629B96A3F2337CE24535 /* Frameworks */,
 				8E8A406124A99A2C1D9A1238 /* Resources */,
 				2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */,
+				4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */,
 			);
 			buildRules = (
 			);
@@ -179,6 +183,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */,
+				6B3C344D587D197A7A2AEDA0 /* GuidePack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +221,27 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/DefaultPack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: DefaultPack missing at ${SRC}\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied DefaultPack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\n";
 		};
+		4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Blackout/GuidePack/manifest.json",
+			);
+			name = "Copy GuidePack into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GuidePack/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/GuidePack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GuidePack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: GuidePack missing at ${SRC}\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied GuidePack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -223,6 +249,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				DefaultPack,
+				GuidePack,
 			);
 			target = 8796EC6A87564C187A908CD6 /* Blackout */;
 		};
@@ -305,7 +332,8 @@
 					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
-					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar. If denied, type instead.";
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -361,7 +389,8 @@
 					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
-					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar. If denied, type instead.";
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;

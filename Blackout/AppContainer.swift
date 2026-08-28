@@ -20,6 +20,8 @@ final class AppContainer {
     let pack: FileMapPack
     let lock: AppLockService
     let bootError: String?
+    var sosConfirmRequested = false
+    let guidePackURL: URL?
 
     init() {
         var errors: [String] = []
@@ -46,23 +48,33 @@ final class AppContainer {
         battery = BatteryService()
         lock = AppLockService()
         pack = FileMapPack(rootURL: Self.packRoot())
+        guidePackURL = Self.guidePackRoot()
         if pack.pack == nil {
             errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
         }
+        if guidePackURL == nil {
+            errors.append("GuidePack missing from the app bundle. Field ask cannot retrieve.")
+        }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
         location.applyPolicy(battery.policy)
-        if location.authorization == .authorized {
-            location.startUpdating()
-        }
+        location.startUpdating()
         mesh.start()
     }
 
     static func packRoot() -> URL? {
+        locateFolder("DefaultPack")
+    }
+
+    static func guidePackRoot() -> URL? {
+        locateFolder("GuidePack")
+    }
+
+    private static func locateFolder(_ name: String) -> URL? {
         let fileManager = FileManager.default
         let candidates: [URL?] = [
-            Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "DefaultPack")?.deletingLastPathComponent(),
-            Bundle.main.resourceURL?.appendingPathComponent("DefaultPack", isDirectory: true),
-            Bundle.main.bundleURL.appendingPathComponent("DefaultPack", isDirectory: true)
+            Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: name)?.deletingLastPathComponent(),
+            Bundle.main.resourceURL?.appendingPathComponent(name, isDirectory: true),
+            Bundle.main.bundleURL.appendingPathComponent(name, isDirectory: true)
         ]
         for candidate in candidates {
             guard let candidate else { continue }

@@ -1,5 +1,7 @@
 import AVFoundation
+import BlackoutBattery
 import BlackoutCore
+import BlackoutLocation
 import DesignSystem
 import SwiftUI
 import UIKit
@@ -12,9 +14,25 @@ public struct FieldRootView: View {
         public var id: String { rawValue }
     }
 
-    @State private var segment: Segment = .guide
+    @Bindable var location: LocationService
+    @Bindable var battery: BatteryService
+    var packURL: URL?
+    var sosArmed: Bool
 
-    public init() {}
+    @State private var segment: Segment = .guide
+    @State private var pack: GuidePackSnapshot?
+
+    public init(
+        location: LocationService,
+        battery: BatteryService,
+        packURL: URL?,
+        sosArmed: Bool
+    ) {
+        self.location = location
+        self.battery = battery
+        self.packURL = packURL
+        self.sosArmed = sosArmed
+    }
 
     public var body: some View {
         VStack(spacing: 0) {
@@ -27,14 +45,65 @@ public struct FieldRootView: View {
             .padding(16)
             switch segment {
             case .guide:
-                FieldCopyView(title: "Field guide", paragraphs: FieldManual.guide)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        ScreenHeader("Field guide", subtitle: "Ask first. Pack only. Not a website.")
+                        GuideAskView(
+                            pack: pack,
+                            context: guideContext,
+                            extremeSaver: battery.tightensToSOSNavRadar
+                        )
+                        Text("Situation cards")
+                            .font(BlackoutDS.titleFont())
+                            .foregroundStyle(BlackoutDS.Silver.bright)
+                        ForEach(FieldManual.guide) { section in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(section.title)
+                                    .font(BlackoutDS.titleFont())
+                                    .foregroundStyle(BlackoutDS.Silver.bright)
+                                Text(section.body)
+                                    .font(BlackoutDS.bodyFont())
+                                    .foregroundStyle(BlackoutDS.Silver.mid)
+                                    .lineSpacing(7)
+                            }
+                        }
+                    }
+                    .padding(20)
+                    .padding(.bottom, 120)
+                }
             case .skills:
                 FieldCopyView(title: "Primitive skills", paragraphs: FieldManual.skills)
             case .vision:
-                FieldVisionView()
+                if battery.tightensToSOSNavRadar {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ScreenHeader("Field Vision", subtitle: "Paused in Extreme Saver / critical battery. SOS stays up.")
+                        Text("Camera stills pause so the radio stays SOS, coarse nav, and radar HUD.")
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                        Spacer()
+                    }
+                    .padding(20)
+                } else {
+                    FieldVisionView()
+                }
             }
         }
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
+        .onAppear {
+            pack = GuidePackLoader.load(rootURL: packURL)
+        }
+    }
+
+    private var guideContext: GuideQueryContext {
+        let hour = Calendar.current.component(.hour, from: Date())
+        return GuideQueryContext(
+            hour: hour,
+            elevationMeters: location.navigationFix?.altitudeMeters,
+            batteryLevel: battery.level,
+            sosArmed: sosArmed,
+            partySize: 1,
+            extremeSaver: battery.tightensToSOSNavRadar
+        )
     }
 }
 

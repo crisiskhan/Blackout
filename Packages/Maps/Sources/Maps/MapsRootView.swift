@@ -17,7 +17,17 @@ public struct MapsRootView: View {
     @State private var crumbs: [BreadcrumbRecordDTO] = []
     @State private var outsidePack = false
     @State private var resetToken = 0
+    @State private var centerToken = 0
     @State private var storeError: String?
+    @State private var radarOn = true
+    @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
+    @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
+    @State private var showViewshed = UserDefaults.standard.bool(forKey: BlackoutKeys.mapViewshed)
+    @State private var showSlope = UserDefaults.standard.bool(forKey: BlackoutKeys.mapSlope)
+    @State private var selectedPeer: RadarBlip?
+    @State private var showLiDAR = false
+    @State private var viewshedRays: [ViewshedRay] = []
+    @State private var slopeSamples: [SlopeSample] = []
 
     public init(
         location: LocationService,
@@ -33,15 +43,24 @@ public struct MapsRootView: View {
         self.packService = packService
     }
 
+    private var tight: Bool { battery.tightensToSOSNavRadar }
+    private var radarVisible: Bool { radarOn || tight }
+    private var peers: [RadarBlip] { [] }
+
     public var body: some View {
         ZStack {
             BlackoutDS.Surface.void.ignoresSafeArea()
             if let pack = packService.pack {
                 OfflineMapView(
                     pack: pack,
-                    selfFix: location.lastKnown,
+                    selfFix: location.navigationFix,
                     manualPin: location.manualPin,
                     breadcrumbs: crumbs,
+                    viewshed: viewshedRays,
+                    slope: slopeSamples,
+                    showViewshed: showViewshed && !tight,
+                    showSlope: showSlope && !tight,
+                    centerToken: centerToken,
                     onDropPin: { lat, lon in
                         location.dropManualPin(latitude: lat, longitude: lon)
                     },
@@ -50,7 +69,29 @@ public struct MapsRootView: View {
                     },
                     resetToken: resetToken
                 )
+                .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
+                if radarVisible, !outsidePack {
+                    RadarHUDView(
+                        headingUp: headingUp,
+                        headingDegrees: location.headingDegrees,
+                        peers: peers,
+                        sweepAudio: sweepAudio,
+                        onToggleHeading: {
+                            headingUp.toggle()
+                            UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
+                            centerToken += 1
+                        },
+                        onToggleAudio: {
+                            sweepAudio.toggle()
+                            UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
+                        },
+                        onSelectPeer: { selectedPeer = $0 },
+                        onSelectSelf: { selectedPeer = nil }
+                    )
+                    .padding(.top, 120)
+                    .padding(.bottom, 160)
+                }
                 if outsidePack {
                     NoPackCanvas(
                         title: "Outside DefaultPack",
@@ -75,6 +116,11 @@ public struct MapsRootView: View {
                         Text("file tiles · no Apple base map")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
+                        if tight {
+                            Text("CRITICAL · SOS + coarse nav + radar")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Red.hot)
+                        }
                     }
                     Spacer()
                     CompassRose(heading: location.headingDegrees)
@@ -84,12 +130,12 @@ public struct MapsRootView: View {
                 if location.authorization == .denied || location.authorization == .restricted {
                     PermissionDenied(
                         kind: .location,
-                        reason: "GPS denied. Long-press the map, or drop a pin at pack center, for Navigate, return-to-start, and Find Civilization. PermissionDenied stays; the app will not wait on a fix."
+                        reason: "GPS denied. Dead reckoning uses compass + steps from last-known or a manual pin. PermissionDenied stays; the app will not wait on a fix."
                     )
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                 }
-                if location.manualPin?.hasCoordinate == true, location.lastKnown?.hasCoordinate != true {
+                if location.manualPin?.hasCoordinate == true, location.lastKnown?.source != .gps {
                     HStack {
                         GhostButton("Clear pin", height: BlackoutDS.Hit.sm) {
                             location.clearManualPin()
@@ -109,16 +155,56 @@ public struct MapsRootView: View {
                     }
                     .padding(.horizontal, 16)
                 }
+                if showSlope || showViewshed, !tight {
+                    Text("Sample DEM · not USGS. Slope/viewshed are coarse.")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.steel)
+                        .padding(.horizontal, 16)
+                }
                 if let storeError {
                     StoreFailure(storeError)
                         .padding(.horizontal, 16)
                 }
                 Spacer()
+                if !tight {
+                    HStack(spacing: 8) {
+                        toggleChip("Radar", on: radarOn) { radarOn.toggle() }
+                        toggleChip("Slope", on: showSlope) {
+                            showSlope.toggle()
+                            UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
+                            refreshTerrain()
+                        }
+                        toggleChip("Viewshed", on: showViewshed) {
+                            showViewshed.toggle()
+                            UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
+                            refreshTerrain()
+                        }
+                        if LiDARAvailability.isSupported {
+                            Button {
+                                showLiDAR = true
+                            } label: {
+                                Text("LiDAR")
+                                    .font(BlackoutDS.captionFont())
+                                    .foregroundStyle(BlackoutDS.Silver.bright)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: BlackoutDS.Hit.sm)
+                                    .background(BlackoutDS.Surface.raised.opacity(0.82))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                }
                 HStack(spacing: 8) {
                     toolButton("Navigate", tool: .navigate)
-                    toolButton("Radar", tool: .radar)
-                    toolButton("Topo", tool: .topo)
-                    toolButton("Towns", tool: .civilization)
+                    if !tight {
+                        toolButton("Topo", tool: .topo)
+                        toolButton("Towns", tool: .civilization)
+                    }
                 }
                 .padding(.horizontal, 12)
                 .padding(.bottom, 108)
@@ -140,7 +226,64 @@ public struct MapsRootView: View {
             .preferredColorScheme(.dark)
             .presentationDetents([.medium, .large])
         }
+        .sheet(item: $selectedPeer) { blip in
+            RadarPeerSheet(
+                blip: blip,
+                onMessage: { selectedPeer = nil },
+                onPTT: { selectedPeer = nil },
+                onNavigate: {
+                    selectedPeer = nil
+                    tool = .navigate
+                }
+            )
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showLiDAR) {
+            LiDARRangeView(
+                mapRangeMeters: lidarMapRange,
+                pointName: lidarPointName
+            )
+            .presentationDetents([.large])
+        }
         .task { reloadCrumbs() }
+        .onChange(of: location.navigationFix?.latitude) { _, _ in
+            if showViewshed { refreshTerrain() }
+        }
+        .onAppear {
+            if tight { radarOn = true }
+            refreshTerrain()
+            location.startUpdating()
+        }
+    }
+
+    private var lidarMapRange: Double? {
+        guard let from = location.navigationFix, from.hasCoordinate,
+              let to = location.manualPin ?? packService.pack?.pois.first(where: { $0.kind == "summit" }).map({
+                  LocationFix(latitude: $0.latitude, longitude: $0.longitude)
+              }),
+              to.hasCoordinate else { return nil }
+        return haversine(from.latitude!, from.longitude!, to.latitude!, to.longitude!)
+    }
+
+    private var lidarPointName: String {
+        if location.manualPin?.hasCoordinate == true { return "Manual pin" }
+        if let peak = packService.pack?.pois.first(where: { $0.kind == "summit" }) {
+            return peak.name
+        }
+        return "Map point"
+    }
+
+    private func refreshTerrain() {
+        slopeSamples = showSlope ? packService.slopeSamples() : []
+        if showViewshed, let fix = location.navigationFix, fix.hasCoordinate {
+            viewshedRays = packService.viewshed(
+                fromLatitude: fix.latitude!,
+                fromLongitude: fix.longitude!,
+                observerHeightMeters: 2
+            )
+        } else {
+            viewshedRays = []
+        }
     }
 
     private func reloadCrumbs() {
@@ -158,8 +301,14 @@ public struct MapsRootView: View {
     }
 
     private var gpsMode: GPSChip.Mode {
-        if location.lastKnown?.hasCoordinate == true {
+        if location.isDeadReckoning, location.navigationFix?.hasCoordinate == true {
+            return .deadReckoning
+        }
+        if location.lastKnown?.source == .gps, location.lastKnown?.hasCoordinate == true {
             return location.authorization == .authorized ? .live : .lastKnown
+        }
+        if location.lastKnown?.hasCoordinate == true {
+            return .lastKnown
         }
         if location.manualPin?.hasCoordinate == true { return .manual }
         switch location.authorization {
@@ -182,6 +331,23 @@ public struct MapsRootView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: BlackoutDS.Hit.sm)
                 .background(BlackoutDS.Surface.raised.opacity(0.82))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func toggleChip(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(on ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
+                .frame(maxWidth: .infinity)
+                .frame(height: BlackoutDS.Hit.sm)
+                .background(on ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised.opacity(0.82))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
@@ -241,6 +407,11 @@ struct NoPackCanvas: View {
                     Text("Anchor \(fix.latitude!.formatted(.number.precision(.fractionLength(4)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(4))))")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.info)
+                }
+                if location.isDeadReckoning {
+                    Text("DEAD RECKONING")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
                 if let onReturn {
                     MetalButton("Return to pack", height: BlackoutDS.Hit.md, action: onReturn)

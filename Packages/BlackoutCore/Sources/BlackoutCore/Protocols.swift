@@ -29,6 +29,7 @@ public protocol LocationServing: AnyObject {
     var navigationFix: LocationFix? { get }
     var headingDegrees: Double? { get }
     var isUpdating: Bool { get }
+    var isDeadReckoning: Bool { get }
     func requestWhenInUse()
     func startUpdating()
     func stopUpdating()
@@ -52,12 +53,17 @@ public protocol BatteryServing: AnyObject {
     var isCharging: Bool { get }
     var hidesSOS: Bool { get }
     var coarseNavigateEnabled: Bool { get }
+    var isCritical: Bool { get }
+    var tightensToSOSNavRadar: Bool { get }
+    var pausesCameraAndPTT: Bool { get }
 }
 
 @MainActor
 public protocol MapPackServing: AnyObject {
     var pack: MapPackSnapshot? { get }
     func elevationMeters(latitude: Double, longitude: Double) -> Double?
+    func slopeDegrees(latitude: Double, longitude: Double) -> Double?
+    func viewshed(fromLatitude: Double, fromLongitude: Double, observerHeightMeters: Double) -> [ViewshedRay]
 }
 
 @MainActor

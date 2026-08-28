@@ -42,6 +42,27 @@ else
   fail=1
 fi
 
+if grep -q 'Copy GuidePack into app bundle' "$root/Blackout.xcodeproj/project.pbxproj" \
+  && grep -q 'GuidePack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   GuidePack explicit copy + resources"
+else
+  echo "FAIL GuidePack not in Copy Bundle Resources / script phase"
+  fail=1
+fi
+
+if [[ -f "$root/Blackout/GuidePack/articles.jsonl" ]]; then
+  count="$(grep -c . "$root/Blackout/GuidePack/articles.jsonl" || true)"
+  if [[ "$count" -ge 40 ]]; then
+    echo "OK   GuidePack articles ($count)"
+  else
+    echo "FAIL GuidePack article count $count (<40)"
+    fail=1
+  fi
+else
+  echo "FAIL GuidePack articles.jsonl missing"
+  fail=1
+fi
+
 if grep -RIn --include='*.swift' 'try? persistence.logSOS\|try? persistence.appendBreadcrumb\|try? persistence.saveMessage' \
   "$root/Blackout" "$root/Packages" >/dev/null; then
   echo "FAIL swallowed persistence writes"

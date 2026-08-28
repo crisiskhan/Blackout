@@ -10,6 +10,8 @@ let package = Package(
     dependencies: [
         .package(path: "../BlackoutCore"),
         .package(path: "../DesignSystem"),
+        .package(path: "../Location"),
+        .package(path: "../Battery"),
     ],
     targets: [
         .target(
@@ -17,6 +19,8 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
+                "BlackoutLocation",
+                "BlackoutBattery",
             ]
         ),
     ]

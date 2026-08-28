@@ -1,4 +1,5 @@
 import BlackoutBattery
+import BlackoutCore
 import BlackoutLocation
 import DesignSystem
 import Expeditions
@@ -80,7 +81,7 @@ struct RootView: View {
             if phase == .background {
                 container.lock.lock()
             }
-            if phase == .active, container.location.authorization == .authorized {
+            if phase == .active {
                 container.location.startUpdating()
                 container.location.applyPolicy(container.battery.policy)
             }
@@ -202,13 +203,19 @@ struct RootView: View {
     }
 
     private var fieldDestination: some View {
-        FieldRootView()
+        FieldRootView(
+            location: container.location,
+            battery: container.battery,
+            packURL: container.guidePackURL,
+            sosArmed: UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed)
+        )
     }
 
     private var expeditionDestination: some View {
         ExpeditionsRootView(
             persistence: container.persistence,
-            location: container.location
+            location: container.location,
+            onMissedCheckIn: { container.sosConfirmRequested = true }
         )
     }
 
@@ -221,7 +228,8 @@ struct RootView: View {
                     location: container.location,
                     persistence: container.persistence,
                     mesh: container.mesh,
-                    battery: container.battery
+                    battery: container.battery,
+                    presentConfirm: $container.sosConfirmRequested
                 )
                 .padding(.trailing, 18)
                 .padding(.bottom, fabBottomPadding)

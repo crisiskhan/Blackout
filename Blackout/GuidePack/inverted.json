@@ -1,0 +1,3587 @@
+{
+  "15": {
+    "bush-leave-no-trace": 1
+  },
+  "20": {
+    "bush-leave-no-trace": 1
+  },
+  "2000": {
+    "water-treat-source": 1
+  },
+  "45": {
+    "shelter-debris-hut": 1
+  },
+  "911": {
+    "signal-night": 1
+  },
+  "about": {
+    "bush-leave-no-trace": 1,
+    "shelter-debris-hut": 1,
+    "water-treat-source": 1
+  },
+  "above": {
+    "shelter-snow-trench": 1,
+    "water-treat-source": 1
+  },
+  "accumulates": {
+    "nav-night-stop": 1
+  },
+  "actually": {
+    "fire-tinder": 1
+  },
+  "add": {
+    "water-melt-snow": 1,
+    "water-treat-source": 1,
+    "weather-wind": 1
+  },
+  "adjacent": {
+    "nav-compass": 1
+  },
+  "admit": {
+    "fire-bow-drill": 1
+  },
+  "advice": {
+    "aid-bleeding": 1,
+    "aid-burn": 1,
+    "aid-fracture": 1,
+    "aid-hypothermia": 1
+  },
+  "after": {
+    "aid-fracture": 1,
+    "animals-ticks": 2,
+    "bush-deadfall": 1,
+    "shelter-tarp": 1,
+    "water-ration": 1,
+    "weather-afternoon": 1
+  },
+  "afternoon": {
+    "fire-site": 1,
+    "weather-afternoon": 2
+  },
+  "against": {
+    "shelter-lee": 1,
+    "signal-three": 1
+  },
+  "aid": {
+    "aid-bleeding": 2,
+    "aid-burn": 2,
+    "aid-fracture": 2,
+    "aid-hypothermia": 2
+  },
+  "aim": {
+    "nav-handrail": 1
+  },
+  "air": {
+    "aid-burn": 1,
+    "shelter-lee": 2,
+    "signal-ground": 2,
+    "signal-three": 1
+  },
+  "aircraft": {
+    "signal-ground": 1
+  },
+  "alikes": {
+    "plants-mushrooms": 1,
+    "plants-unknown": 1
+  },
+  "along": {
+    "nav-compass": 1
+  },
+  "already": {
+    "animals-bear": 1,
+    "fire-bow-drill": 1,
+    "plants-berries": 1,
+    "plants-cattail": 1,
+    "shelter-snow-trench": 1,
+    "tools-cordage": 1
+  },
+  "also": {
+    "aid-burn": 1,
+    "nav-drainage": 1,
+    "signal-night": 1
+  },
+  "angle": {
+    "weather-snow": 1
+  },
+  "animal": {
+    "animals-moose": 1
+  },
+  "animals": {
+    "animals-bear": 1,
+    "animals-cat": 1,
+    "animals-moose": 1,
+    "animals-ticks": 1
+  },
+  "ankles": {
+    "nav-night-stop": 1
+  },
+  "any": {
+    "signal-three": 1
+  },
+  "anything": {
+    "fire-signal": 1,
+    "signal-three": 2
+  },
+  "apart": {
+    "animals-bear": 1
+  },
+  "app": {
+    "animals-bear": 1,
+    "weather-snow": 1
+  },
+  "approach": {
+    "weather-heat": 1
+  },
+  "arm": {
+    "shelter-debris-hut": 1
+  },
+  "arrangement": {
+    "plants-unknown": 1
+  },
+  "arrow": {
+    "signal-ground": 1
+  },
+  "artery": {
+    "tools-knife": 1
+  },
+  "article": {
+    "plants-mushrooms": 1,
+    "plants-unknown": 1
+  },
+  "assume": {
+    "fire-site": 1,
+    "signal-three": 1
+  },
+  "auto": {
+    "signal-night": 1
+  },
+  "avalanche": {
+    "weather-snow": 2
+  },
+  "avoid": {
+    "water-find-in-dry": 1
+  },
+  "away": {
+    "animals-cat": 1,
+    "animals-moose": 1,
+    "tools-cordage": 1,
+    "tools-knife": 1,
+    "water-melt-snow": 1
+  },
+  "back": {
+    "animals-cat": 1,
+    "animals-moose": 1,
+    "tools-ferro": 1
+  },
+  "bags": {
+    "tools-pot": 1
+  },
+  "balls": {
+    "fire-tinder": 1
+  },
+  "bank": {
+    "tools-cordage": 1
+  },
+  "bark": {
+    "aid-fracture": 1,
+    "fire-tinder": 1,
+    "tools-cordage": 1
+  },
+  "barrier": {
+    "shelter-tarp": 1
+  },
+  "bath": {
+    "aid-hypothermia": 1
+  },
+  "baton": {
+    "tools-knife": 2
+  },
+  "batoning": {
+    "tools-knife": 1
+  },
+  "battery": {
+    "fire-signal": 1,
+    "signal-three": 1
+  },
+  "bear": {
+    "animals-bear": 3
+  },
+  "bearing": {
+    "nav-handrail": 3
+  },
+  "beat": {
+    "fire-bow-drill": 1,
+    "fire-tinder": 1
+  },
+  "beats": {
+    "bush-night-bivy": 1,
+    "shelter-snow-trench": 1,
+    "weather-heat": 1
+  },
+  "beautiful": {
+    "bush-deadfall": 1
+  },
+  "because": {
+    "aid-fracture": 1,
+    "plants-cattail": 1,
+    "plants-unknown": 1,
+    "water-find-in-dry": 1,
+    "water-treat-source": 1
+  },
+  "become": {
+    "fire-site": 1
+  },
+  "becomes": {
+    "fire-tinder": 1
+  },
+  "bed": {
+    "fire-signal": 1
+  },
+  "beetle": {
+    "bush-deadfall": 1,
+    "fire-bow-drill": 1
+  },
+  "before": {
+    "aid-hypothermia": 1,
+    "bush-deadfall": 1,
+    "shelter-lee": 2,
+    "signal-whistle": 1,
+    "water-find-in-dry": 1,
+    "water-ration": 1,
+    "weather-heat": 1,
+    "weather-wind": 1
+  },
+  "behavior": {
+    "animals-moose": 1
+  },
+  "behind": {
+    "nav-handrail": 1
+  },
+  "belongs": {
+    "fire-bow-drill": 1
+  },
+  "berries": {
+    "plants-berries": 2
+  },
+  "berry": {
+    "plants-berries": 1
+  },
+  "better": {
+    "animals-cat": 1,
+    "shelter-tarp": 1,
+    "tools-cordage": 1,
+    "tools-pot": 1
+  },
+  "between": {
+    "animals-moose": 1,
+    "bush-night-bivy": 1,
+    "signal-night": 1
+  },
+  "bite": {
+    "fire-bow-drill": 1
+  },
+  "bivy": {
+    "bush-night-bivy": 1,
+    "shelter-snow-trench": 1
+  },
+  "black": {
+    "weather-afternoon": 1
+  },
+  "blackout": {
+    "aid-burn": 1,
+    "bush-inventory": 1,
+    "fire-signal": 1,
+    "nav-compass": 1,
+    "nav-handrail": 1,
+    "plants-mushrooms": 1,
+    "plants-unknown": 1,
+    "signal-night": 2,
+    "water-ration": 1
+  },
+  "blade": {
+    "tools-knife": 1
+  },
+  "blank": {
+    "nav-compass": 2
+  },
+  "blanket": {
+    "shelter-tarp": 1,
+    "weather-wind": 1
+  },
+  "blasts": {
+    "fire-signal": 1,
+    "signal-whistle": 2
+  },
+  "bleed": {
+    "aid-bleeding": 1
+  },
+  "bleeding": {
+    "aid-bleeding": 2
+  },
+  "blisters": {
+    "aid-burn": 1
+  },
+  "block": {
+    "bush-deadfall": 1
+  },
+  "blog": {
+    "signal-whistle": 1
+  },
+  "blow": {
+    "fire-tinder": 1
+  },
+  "blowing": {
+    "signal-whistle": 1
+  },
+  "board": {
+    "fire-bow-drill": 1
+  },
+  "boil": {
+    "water-treat-source": 3
+  },
+  "bonfire": {
+    "fire-site": 1
+  },
+  "boring": {
+    "tools-ferro": 1
+  },
+  "bottle": {
+    "water-melt-snow": 1,
+    "water-treat-source": 1
+  },
+  "bottom": {
+    "tools-pot": 1
+  },
+  "boughs": {
+    "bush-night-bivy": 1
+  },
+  "boulder": {
+    "shelter-lee": 1
+  },
+  "bow": {
+    "fire-bow-drill": 4
+  },
+  "branches": {
+    "shelter-snow-trench": 1
+  },
+  "breath": {
+    "shelter-snow-trench": 1
+  },
+  "breathe": {
+    "bush-inventory": 1,
+    "water-ration": 1
+  },
+  "bright": {
+    "signal-three": 1
+  },
+  "brightly": {
+    "signal-ground": 1
+  },
+  "brown": {
+    "plants-cattail": 1
+  },
+  "brush": {
+    "animals-ticks": 1
+  },
+  "build": {
+    "bush-night-bivy": 1,
+    "fire-tinder": 1,
+    "shelter-tarp": 1
+  },
+  "bundle": {
+    "fire-bow-drill": 1,
+    "fire-tinder": 2,
+    "tools-ferro": 1
+  },
+  "bundled": {
+    "nav-compass": 1
+  },
+  "burn": {
+    "aid-burn": 3,
+    "animals-ticks": 1
+  },
+  "burns": {
+    "bush-inventory": 1
+  },
+  "bury": {
+    "shelter-tarp": 1
+  },
+  "bushcraft": {
+    "bush-deadfall": 1,
+    "bush-inventory": 1,
+    "bush-leave-no-trace": 1,
+    "bush-night-bivy": 1
+  },
+  "butter": {
+    "aid-burn": 1
+  },
+  "calf": {
+    "animals-moose": 1
+  },
+  "call": {
+    "signal-night": 1
+  },
+  "calorie": {
+    "plants-mushrooms": 1
+  },
+  "calories": {
+    "bush-inventory": 1
+  },
+  "calves": {
+    "animals-moose": 1
+  },
+  "camp": {
+    "bush-deadfall": 2,
+    "shelter-lee": 1
+  },
+  "cane": {
+    "plants-berries": 1
+  },
+  "canister": {
+    "animals-bear": 1
+  },
+  "cannot": {
+    "nav-drainage": 1,
+    "nav-handrail": 1,
+    "nav-night-stop": 1,
+    "plants-berries": 1,
+    "water-find-in-dry": 1
+  },
+  "canyon": {
+    "water-find-in-dry": 1
+  },
+  "canyons": {
+    "nav-drainage": 1
+  },
+  "cap": {
+    "plants-mushrooms": 1
+  },
+  "captures": {
+    "fire-bow-drill": 1
+  },
+  "carcass": {
+    "animals-bear": 1
+  },
+  "card": {
+    "plants-cattail": 1,
+    "plants-unknown": 1
+  },
+  "care": {
+    "aid-bleeding": 1,
+    "aid-hypothermia": 1
+  },
+  "carry": {
+    "animals-bear": 1,
+    "fire-bow-drill": 1
+  },
+  "cat": {
+    "animals-cat": 1,
+    "bush-leave-no-trace": 1
+  },
+  "catching": {
+    "nav-handrail": 3
+  },
+  "cathole": {
+    "bush-leave-no-trace": 1
+  },
+  "cattail": {
+    "plants-cattail": 4
+  },
+  "cattle": {
+    "water-find-in-dry": 1
+  },
+  "caught": {
+    "weather-afternoon": 1
+  },
+  "causes": {
+    "aid-fracture": 1
+  },
+  "caution": {
+    "animals-cat": 1
+  },
+  "cave": {
+    "shelter-snow-trench": 1
+  },
+  "certainty": {
+    "plants-berries": 1
+  },
+  "certificate": {
+    "water-treat-source": 1
+  },
+  "chase": {
+    "weather-afternoon": 1
+  },
+  "cheap": {
+    "tools-knife": 1
+  },
+  "check": {
+    "aid-fracture": 1,
+    "animals-ticks": 2
+  },
+  "chemical": {
+    "water-treat-source": 1
+  },
+  "chew": {
+    "tools-pot": 1
+  },
+  "class": {
+    "weather-snow": 1
+  },
+  "clean": {
+    "aid-burn": 1
+  },
+  "cleaner": {
+    "aid-burn": 1
+  },
+  "cleanest": {
+    "aid-bleeding": 1
+  },
+  "clear": {
+    "fire-site": 2,
+    "water-treat-source": 1
+  },
+  "clever": {
+    "bush-night-bivy": 1,
+    "signal-whistle": 1
+  },
+  "cleverness": {
+    "shelter-lee": 1
+  },
+  "cliff": {
+    "nav-drainage": 2
+  },
+  "cliffs": {
+    "nav-drainage": 1,
+    "nav-night-stop": 1
+  },
+  "climate": {
+    "weather-wind": 1
+  },
+  "climb": {
+    "water-find-in-dry": 1
+  },
+  "clinic": {
+    "aid-hypothermia": 1,
+    "animals-ticks": 1
+  },
+  "close": {
+    "animals-bear": 1,
+    "animals-cat": 1
+  },
+  "closed": {
+    "water-treat-source": 1
+  },
+  "cloth": {
+    "aid-bleeding": 1
+  },
+  "clothing": {
+    "shelter-lee": 1,
+    "tools-cordage": 1
+  },
+  "cloud": {
+    "weather-afternoon": 1
+  },
+  "cluster": {
+    "plants-berries": 1
+  },
+  "cm": {
+    "bush-leave-no-trace": 1
+  },
+  "coal": {
+    "fire-signal": 1
+  },
+  "coarse": {
+    "nav-handrail": 1,
+    "weather-snow": 1,
+    "weather-wind": 1
+  },
+  "coated": {
+    "tools-pot": 1
+  },
+  "coating": {
+    "tools-ferro": 1
+  },
+  "cold": {
+    "aid-fracture": 1,
+    "aid-hypothermia": 2,
+    "bush-leave-no-trace": 1,
+    "fire-site": 1,
+    "shelter-snow-trench": 1,
+    "water-melt-snow": 2,
+    "water-treat-source": 1
+  },
+  "collect": {
+    "water-find-in-dry": 1
+  },
+  "color": {
+    "aid-fracture": 1,
+    "plants-berries": 1,
+    "plants-unknown": 1
+  },
+  "colored": {
+    "signal-ground": 1
+  },
+  "combine": {
+    "shelter-tarp": 1
+  },
+  "comfort": {
+    "fire-site": 1
+  },
+  "commit": {
+    "nav-drainage": 1
+  },
+  "compass": {
+    "nav-compass": 3,
+    "nav-drainage": 1
+  },
+  "concentrate": {
+    "plants-cattail": 1
+  },
+  "confusion": {
+    "weather-heat": 1
+  },
+  "contact": {
+    "water-treat-source": 1
+  },
+  "contouring": {
+    "nav-drainage": 1
+  },
+  "contrast": {
+    "fire-signal": 1,
+    "signal-ground": 1,
+    "signal-night": 1,
+    "signal-three": 2
+  },
+  "control": {
+    "fire-signal": 1
+  },
+  "cook": {
+    "animals-bear": 1,
+    "fire-site": 1
+  },
+  "cool": {
+    "aid-burn": 3
+  },
+  "cord": {
+    "tools-cordage": 1
+  },
+  "cordage": {
+    "tools-cordage": 2,
+    "tools-knife": 1
+  },
+  "core": {
+    "shelter-lee": 1,
+    "water-melt-snow": 1
+  },
+  "costs": {
+    "water-melt-snow": 1
+  },
+  "cotton": {
+    "fire-tinder": 1,
+    "shelter-lee": 1
+  },
+  "count": {
+    "bush-inventory": 3
+  },
+  "country": {
+    "animals-bear": 1
+  },
+  "cousin": {
+    "signal-whistle": 1
+  },
+  "cover": {
+    "aid-burn": 3,
+    "water-ration": 1,
+    "weather-heat": 1
+  },
+  "cow": {
+    "animals-moose": 1
+  },
+  "cramps": {
+    "weather-heat": 1
+  },
+  "crawl": {
+    "shelter-debris-hut": 1
+  },
+  "creek": {
+    "bush-deadfall": 1,
+    "nav-handrail": 1,
+    "water-treat-source": 1
+  },
+  "crisp": {
+    "signal-three": 1
+  },
+  "crouch": {
+    "animals-cat": 1,
+    "weather-afternoon": 1
+  },
+  "cub": {
+    "animals-bear": 1
+  },
+  "cup": {
+    "signal-whistle": 1,
+    "water-melt-snow": 1
+  },
+  "curls": {
+    "fire-tinder": 1
+  },
+  "cut": {
+    "bush-leave-no-trace": 1,
+    "tools-cordage": 1,
+    "tools-knife": 2
+  },
+  "cutting": {
+    "tools-ferro": 1
+  },
+  "danger": {
+    "bush-inventory": 1
+  },
+  "dangerous": {
+    "nav-night-stop": 1,
+    "tools-knife": 1
+  },
+  "dark": {
+    "shelter-tarp": 1,
+    "water-melt-snow": 1,
+    "water-ration": 1
+  },
+  "day": {
+    "fire-signal": 1
+  },
+  "daylight": {
+    "bush-deadfall": 1,
+    "bush-inventory": 2
+  },
+  "dead": {
+    "nav-compass": 1,
+    "nav-night-stop": 1,
+    "shelter-lee": 1
+  },
+  "deadfall": {
+    "bush-deadfall": 1,
+    "bush-leave-no-trace": 1,
+    "fire-tinder": 1,
+    "tools-cordage": 1
+  },
+  "deadman": {
+    "shelter-tarp": 1
+  },
+  "debris": {
+    "bush-leave-no-trace": 1,
+    "shelter-debris-hut": 3,
+    "shelter-tarp": 2
+  },
+  "dedicated": {
+    "tools-ferro": 1
+  },
+  "deep": {
+    "shelter-snow-trench": 1
+  },
+  "deformity": {
+    "aid-fracture": 1
+  },
+  "degrees": {
+    "shelter-debris-hut": 1
+  },
+  "dem": {
+    "weather-snow": 1
+  },
+  "denied": {
+    "nav-compass": 1
+  },
+  "dense": {
+    "shelter-lee": 1
+  },
+  "denver": {
+    "nav-compass": 1
+  },
+  "descend": {
+    "water-find-in-dry": 1
+  },
+  "description": {
+    "plants-cattail": 1
+  },
+  "desert": {
+    "shelter-snow-trench": 1
+  },
+  "deterrent": {
+    "animals-bear": 1
+  },
+  "device": {
+    "bush-inventory": 1
+  },
+  "dew": {
+    "water-find-in-dry": 2
+  },
+  "diagnose": {
+    "aid-bleeding": 1
+  },
+  "diagnosis": {
+    "animals-ticks": 1
+  },
+  "dials": {
+    "signal-night": 1
+  },
+  "dies": {
+    "tools-knife": 1
+  },
+  "difference": {
+    "bush-night-bivy": 1
+  },
+  "different": {
+    "tools-knife": 1,
+    "weather-wind": 2
+  },
+  "digits": {
+    "aid-fracture": 1
+  },
+  "direct": {
+    "aid-bleeding": 2
+  },
+  "direction": {
+    "signal-ground": 1
+  },
+  "dirt": {
+    "fire-site": 1,
+    "tools-ferro": 1,
+    "tools-knife": 1
+  },
+  "disk": {
+    "signal-three": 1
+  },
+  "distance": {
+    "animals-moose": 1
+  },
+  "distress": {
+    "fire-signal": 2,
+    "signal-three": 1
+  },
+  "ditch": {
+    "plants-cattail": 1
+  },
+  "divide": {
+    "weather-afternoon": 2
+  },
+  "dogs": {
+    "animals-moose": 1
+  },
+  "door": {
+    "shelter-debris-hut": 1
+  },
+  "dose": {
+    "aid-burn": 1
+  },
+  "down": {
+    "bush-deadfall": 1,
+    "shelter-lee": 1
+  },
+  "downed": {
+    "shelter-debris-hut": 1
+  },
+  "downhill": {
+    "nav-drainage": 1,
+    "water-find-in-dry": 1
+  },
+  "download": {
+    "weather-wind": 1
+  },
+  "drainage": {
+    "bush-leave-no-trace": 1,
+    "nav-drainage": 2,
+    "shelter-lee": 1,
+    "water-find-in-dry": 1,
+    "water-ration": 1
+  },
+  "drainages": {
+    "nav-drainage": 1,
+    "water-find-in-dry": 1
+  },
+  "drill": {
+    "fire-bow-drill": 3
+  },
+  "drink": {
+    "aid-hypothermia": 1,
+    "weather-heat": 1
+  },
+  "drinkable": {
+    "water-treat-source": 1
+  },
+  "drops": {
+    "water-melt-snow": 1,
+    "water-treat-source": 1,
+    "weather-afternoon": 1
+  },
+  "drown": {
+    "fire-site": 2
+  },
+  "dry": {
+    "fire-bow-drill": 2,
+    "fire-tinder": 1,
+    "shelter-lee": 1,
+    "tools-knife": 1,
+    "water-find-in-dry": 1
+  },
+  "duff": {
+    "fire-site": 2,
+    "tools-ferro": 1
+  },
+  "dull": {
+    "tools-knife": 1
+  },
+  "during": {
+    "water-ration": 1
+  },
+  "dusk": {
+    "shelter-snow-trench": 1
+  },
+  "each": {
+    "bush-deadfall": 1
+  },
+  "early": {
+    "weather-heat": 1
+  },
+  "ears": {
+    "animals-moose": 1
+  },
+  "east": {
+    "weather-afternoon": 1,
+    "weather-heat": 1
+  },
+  "eat": {
+    "plants-cattail": 1,
+    "plants-mushrooms": 1,
+    "plants-unknown": 1,
+    "water-melt-snow": 1
+  },
+  "eating": {
+    "water-melt-snow": 1
+  },
+  "economy": {
+    "water-ration": 1
+  },
+  "edge": {
+    "tools-ferro": 1,
+    "tools-knife": 1
+  },
+  "edges": {
+    "signal-ground": 1
+  },
+  "edible": {
+    "plants-berries": 1,
+    "plants-unknown": 2
+  },
+  "either": {
+    "plants-unknown": 1
+  },
+  "electrolyte": {
+    "weather-heat": 1
+  },
+  "elevate": {
+    "aid-bleeding": 1
+  },
+  "ember": {
+    "fire-bow-drill": 2,
+    "fire-tinder": 1
+  },
+  "emergency": {
+    "signal-night": 1,
+    "weather-wind": 1
+  },
+  "enough": {
+    "fire-bow-drill": 1,
+    "fire-signal": 1,
+    "shelter-debris-hut": 1,
+    "tools-cordage": 1
+  },
+  "error": {
+    "nav-night-stop": 1
+  },
+  "escalate": {
+    "animals-moose": 1
+  },
+  "estimate": {
+    "nav-compass": 1
+  },
+  "evacuate": {
+    "aid-fracture": 1
+  },
+  "even": {
+    "plants-berries": 1,
+    "signal-three": 1,
+    "water-melt-snow": 1
+  },
+  "event": {
+    "signal-night": 1
+  },
+  "every": {
+    "water-treat-source": 2
+  },
+  "exist": {
+    "plants-mushrooms": 1
+  },
+  "exists": {
+    "bush-leave-no-trace": 1,
+    "water-find-in-dry": 1
+  },
+  "exit": {
+    "animals-bear": 1
+  },
+  "exposed": {
+    "weather-afternoon": 1
+  },
+  "extreme": {
+    "bush-night-bivy": 1,
+    "weather-wind": 1
+  },
+  "face": {
+    "signal-whistle": 1
+  },
+  "fading": {
+    "water-find-in-dry": 1
+  },
+  "fail": {
+    "weather-wind": 1
+  },
+  "fails": {
+    "fire-bow-drill": 1,
+    "plants-berries": 1
+  },
+  "family": {
+    "plants-unknown": 1
+  },
+  "far": {
+    "bush-leave-no-trace": 1
+  },
+  "farther": {
+    "signal-night": 1
+  },
+  "fast": {
+    "tools-pot": 1,
+    "weather-afternoon": 1
+  },
+  "faster": {
+    "fire-bow-drill": 1,
+    "shelter-lee": 1,
+    "shelter-tarp": 1
+  },
+  "fatal": {
+    "plants-mushrooms": 1
+  },
+  "fatwood": {
+    "fire-bow-drill": 1,
+    "fire-tinder": 2
+  },
+  "feather": {
+    "fire-tinder": 2
+  },
+  "feature": {
+    "nav-handrail": 3
+  },
+  "feet": {
+    "shelter-debris-hut": 1
+  },
+  "femoral": {
+    "tools-knife": 1
+  },
+  "ferro": {
+    "fire-bow-drill": 2,
+    "tools-ferro": 2
+  },
+  "fetch": {
+    "bush-inventory": 1,
+    "water-ration": 1
+  },
+  "fever": {
+    "animals-ticks": 1
+  },
+  "field": {
+    "aid-bleeding": 1,
+    "animals-cat": 1,
+    "fire-bow-drill": 1,
+    "plants-cattail": 1,
+    "plants-unknown": 1,
+    "signal-three": 1
+  },
+  "file": {
+    "nav-drainage": 1
+  },
+  "fill": {
+    "shelter-debris-hut": 1
+  },
+  "filter": {
+    "water-treat-source": 3
+  },
+  "find": {
+    "tools-knife": 1,
+    "water-find-in-dry": 1
+  },
+  "finds": {
+    "bush-leave-no-trace": 1
+  },
+  "fine": {
+    "water-ration": 1
+  },
+  "fingers": {
+    "aid-fracture": 1
+  },
+  "finished": {
+    "shelter-debris-hut": 1
+  },
+  "fire": {
+    "bush-leave-no-trace": 2,
+    "fire-bow-drill": 1,
+    "fire-signal": 3,
+    "fire-site": 6,
+    "fire-tinder": 1,
+    "signal-night": 1,
+    "tools-ferro": 1,
+    "water-melt-snow": 1
+  },
+  "fires": {
+    "fire-signal": 2
+  },
+  "first": {
+    "aid-bleeding": 2,
+    "aid-burn": 2,
+    "aid-fracture": 2,
+    "aid-hypothermia": 3,
+    "bush-deadfall": 1,
+    "fire-tinder": 1,
+    "shelter-debris-hut": 1,
+    "water-melt-snow": 1,
+    "water-ration": 1,
+    "water-treat-source": 1
+  },
+  "fist": {
+    "fire-tinder": 1
+  },
+  "fixed": {
+    "tools-knife": 1
+  },
+  "flame": {
+    "fire-signal": 1,
+    "fire-tinder": 1
+  },
+  "flash": {
+    "shelter-lee": 1,
+    "signal-night": 1,
+    "signal-three": 1
+  },
+  "flashes": {
+    "fire-signal": 1,
+    "signal-night": 1
+  },
+  "flat": {
+    "shelter-tarp": 1
+  },
+  "flips": {
+    "weather-afternoon": 1
+  },
+  "floor": {
+    "bush-night-bivy": 1
+  },
+  "folder": {
+    "tools-knife": 1
+  },
+  "folk": {
+    "animals-ticks": 1
+  },
+  "folklore": {
+    "plants-berries": 1
+  },
+  "follow": {
+    "water-find-in-dry": 1
+  },
+  "food": {
+    "animals-bear": 2,
+    "plants-berries": 1,
+    "plants-cattail": 1,
+    "plants-mushrooms": 2,
+    "plants-unknown": 2,
+    "tools-pot": 1
+  },
+  "foot": {
+    "bush-deadfall": 1
+  },
+  "foothills": {
+    "weather-heat": 1
+  },
+  "forage": {
+    "plants-cattail": 1
+  },
+  "forecast": {
+    "weather-snow": 1,
+    "weather-wind": 1
+  },
+  "forever": {
+    "nav-handrail": 1
+  },
+  "front": {
+    "fire-site": 1,
+    "plants-unknown": 1,
+    "shelter-snow-trench": 1,
+    "water-treat-source": 1,
+    "weather-afternoon": 1
+  },
+  "fuel": {
+    "tools-pot": 1,
+    "water-melt-snow": 1
+  },
+  "gallery": {
+    "bush-deadfall": 1
+  },
+  "gamble": {
+    "plants-mushrooms": 1
+  },
+  "game": {
+    "animals-cat": 1,
+    "water-find-in-dry": 1
+  },
+  "gasping": {
+    "water-ration": 1
+  },
+  "gesture": {
+    "signal-night": 1
+  },
+  "get": {
+    "aid-bleeding": 1,
+    "aid-hypothermia": 1,
+    "plants-berries": 1,
+    "shelter-lee": 1,
+    "weather-afternoon": 1,
+    "weather-heat": 1,
+    "weather-snow": 1
+  },
+  "giardia": {
+    "water-treat-source": 1
+  },
+  "gills": {
+    "plants-mushrooms": 1
+  },
+  "give": {
+    "animals-moose": 1
+  },
+  "go": {
+    "nav-drainage": 1,
+    "tools-ferro": 1,
+    "weather-snow": 1
+  },
+  "goes": {
+    "fire-bow-drill": 1,
+    "nav-drainage": 1
+  },
+  "gps": {
+    "nav-compass": 1
+  },
+  "grade": {
+    "bush-night-bivy": 1
+  },
+  "grass": {
+    "animals-ticks": 1,
+    "fire-tinder": 1,
+    "shelter-debris-hut": 1,
+    "water-find-in-dry": 1
+  },
+  "green": {
+    "bush-leave-no-trace": 1
+  },
+  "greener": {
+    "water-find-in-dry": 1
+  },
+  "greens": {
+    "fire-signal": 1
+  },
+  "ground": {
+    "animals-moose": 1,
+    "bush-night-bivy": 2,
+    "nav-night-stop": 1,
+    "shelter-debris-hut": 1,
+    "signal-ground": 1,
+    "signal-three": 1
+  },
+  "group": {
+    "animals-cat": 1
+  },
+  "grove": {
+    "bush-deadfall": 1
+  },
+  "guarantee": {
+    "animals-cat": 1
+  },
+  "guess": {
+    "nav-compass": 2
+  },
+  "guessing": {
+    "plants-unknown": 1
+  },
+  "habitat": {
+    "plants-berries": 1,
+    "plants-unknown": 1
+  },
+  "habits": {
+    "animals-bear": 1
+  },
+  "had": {
+    "plants-berries": 1
+  },
+  "hair": {
+    "fire-tinder": 1
+  },
+  "hand": {
+    "bush-leave-no-trace": 1,
+    "fire-site": 1
+  },
+  "handrail": {
+    "nav-handrail": 2
+  },
+  "hang": {
+    "animals-bear": 1,
+    "bush-deadfall": 1,
+    "tools-pot": 1
+  },
+  "happen": {
+    "nav-night-stop": 1
+  },
+  "hard": {
+    "aid-hypothermia": 1,
+    "plants-berries": 1
+  },
+  "have": {
+    "aid-bleeding": 1,
+    "bush-inventory": 1,
+    "fire-signal": 1,
+    "nav-drainage": 1,
+    "signal-whistle": 1,
+    "tools-cordage": 1,
+    "water-find-in-dry": 1,
+    "water-melt-snow": 1
+  },
+  "head": {
+    "animals-ticks": 1,
+    "weather-heat": 1
+  },
+  "heading": {
+    "nav-compass": 4
+  },
+  "headlamp": {
+    "animals-cat": 1,
+    "nav-night-stop": 1,
+    "signal-night": 2
+  },
+  "hear": {
+    "signal-three": 1,
+    "water-find-in-dry": 1
+  },
+  "heat": {
+    "shelter-lee": 1,
+    "tools-pot": 1,
+    "weather-heat": 3
+  },
+  "help": {
+    "animals-cat": 1
+  },
+  "here": {
+    "plants-berries": 1,
+    "weather-wind": 1
+  },
+  "high": {
+    "shelter-debris-hut": 1,
+    "weather-afternoon": 1
+  },
+  "highway": {
+    "bush-deadfall": 1,
+    "plants-cattail": 1
+  },
+  "hit": {
+    "nav-handrail": 1
+  },
+  "hold": {
+    "animals-moose": 1
+  },
+  "hole": {
+    "bush-leave-no-trace": 1
+  },
+  "home": {
+    "fire-bow-drill": 1,
+    "tools-ferro": 1
+  },
+  "honest": {
+    "aid-bleeding": 1,
+    "fire-tinder": 1
+  },
+  "horizon": {
+    "nav-night-stop": 1,
+    "signal-three": 1
+  },
+  "hot": {
+    "aid-hypothermia": 1,
+    "fire-signal": 1,
+    "water-ration": 1
+  },
+  "hours": {
+    "water-ration": 1
+  },
+  "how": {
+    "aid-fracture": 2,
+    "animals-bear": 1,
+    "nav-night-stop": 1,
+    "tools-knife": 1
+  },
+  "hunger": {
+    "plants-unknown": 1,
+    "shelter-lee": 1
+  },
+  "hut": {
+    "bush-leave-no-trace": 1,
+    "shelter-debris-hut": 1,
+    "shelter-tarp": 1
+  },
+  "hypothermia": {
+    "aid-hypothermia": 2,
+    "weather-afternoon": 1
+  },
+  "ice": {
+    "shelter-snow-trench": 1
+  },
+  "id": {
+    "plants-mushrooms": 1,
+    "plants-unknown": 1
+  },
+  "idea": {
+    "animals-cat": 1
+  },
+  "immediate": {
+    "bush-inventory": 1
+  },
+  "increase": {
+    "aid-bleeding": 1
+  },
+  "injuries": {
+    "bush-inventory": 1
+  },
+  "inner": {
+    "fire-tinder": 1,
+    "tools-cordage": 1
+  },
+  "inside": {
+    "shelter-snow-trench": 1
+  },
+  "instagram": {
+    "bush-night-bivy": 1
+  },
+  "insulating": {
+    "weather-afternoon": 1
+  },
+  "insulation": {
+    "bush-night-bivy": 1,
+    "shelter-lee": 2
+  },
+  "intact": {
+    "aid-burn": 1
+  },
+  "inventory": {
+    "bush-inventory": 2
+  },
+  "jewelry": {
+    "tools-ferro": 1
+  },
+  "judgment": {
+    "bush-inventory": 1
+  },
+  "just": {
+    "fire-bow-drill": 1,
+    "water-find-in-dry": 1,
+    "water-ration": 1
+  },
+  "keep": {
+    "aid-bleeding": 1,
+    "fire-site": 1,
+    "shelter-lee": 1,
+    "shelter-snow-trench": 1,
+    "tools-knife": 1,
+    "water-melt-snow": 1
+  },
+  "keeps": {
+    "nav-handrail": 1
+  },
+  "kids": {
+    "animals-cat": 1
+  },
+  "kill": {
+    "bush-deadfall": 1,
+    "bush-leave-no-trace": 1,
+    "fire-bow-drill": 1,
+    "shelter-lee": 1
+  },
+  "kindling": {
+    "tools-knife": 1
+  },
+  "kit": {
+    "fire-tinder": 1,
+    "tools-ferro": 1
+  },
+  "kitesail": {
+    "weather-wind": 1
+  },
+  "knew": {
+    "plants-cattail": 1
+  },
+  "knife": {
+    "tools-ferro": 1,
+    "tools-knife": 5
+  },
+  "know": {
+    "aid-bleeding": 1,
+    "animals-bear": 1,
+    "nav-handrail": 1,
+    "shelter-snow-trench": 1,
+    "weather-snow": 1
+  },
+  "known": {
+    "nav-compass": 2,
+    "nav-drainage": 1,
+    "plants-mushrooms": 1
+  },
+  "large": {
+    "animals-cat": 2,
+    "signal-ground": 1
+  },
+  "lashings": {
+    "bush-night-bivy": 1
+  },
+  "last": {
+    "aid-bleeding": 1,
+    "bush-night-bivy": 1,
+    "fire-site": 1,
+    "nav-compass": 2
+  },
+  "late": {
+    "water-ration": 1
+  },
+  "later": {
+    "animals-ticks": 1
+  },
+  "lay": {
+    "signal-ground": 1
+  },
+  "layer": {
+    "fire-tinder": 1,
+    "weather-wind": 2
+  },
+  "layers": {
+    "aid-hypothermia": 1
+  },
+  "leaf": {
+    "plants-berries": 1,
+    "plants-unknown": 1
+  },
+  "leaner": {
+    "bush-deadfall": 1
+  },
+  "leaning": {
+    "bush-deadfall": 1
+  },
+  "leave": {
+    "aid-burn": 1,
+    "bush-leave-no-trace": 1,
+    "fire-site": 1,
+    "plants-berries": 1,
+    "shelter-debris-hut": 1,
+    "shelter-tarp": 1,
+    "signal-ground": 1
+  },
+  "leaves": {
+    "plants-cattail": 1,
+    "shelter-debris-hut": 2,
+    "weather-wind": 1
+  },
+  "lee": {
+    "shelter-lee": 1
+  },
+  "less": {
+    "animals-moose": 1
+  },
+  "lesson": {
+    "fire-tinder": 1
+  },
+  "liability": {
+    "shelter-lee": 1
+  },
+  "license": {
+    "bush-leave-no-trace": 1
+  },
+  "lid": {
+    "tools-cordage": 1,
+    "tools-pot": 2,
+    "water-melt-snow": 1
+  },
+  "lies": {
+    "aid-fracture": 2
+  },
+  "light": {
+    "bush-night-bivy": 1,
+    "nav-night-stop": 1,
+    "shelter-debris-hut": 1,
+    "water-find-in-dry": 1
+  },
+  "lightning": {
+    "weather-afternoon": 2
+  },
+  "like": {
+    "animals-cat": 1,
+    "bush-deadfall": 1
+  },
+  "likely": {
+    "signal-whistle": 1
+  },
+  "limb": {
+    "aid-bleeding": 1,
+    "aid-fracture": 2,
+    "shelter-debris-hut": 1
+  },
+  "limbs": {
+    "aid-hypothermia": 2
+  },
+  "line": {
+    "nav-handrail": 1,
+    "shelter-tarp": 1,
+    "tools-cordage": 2
+  },
+  "linear": {
+    "nav-handrail": 1
+  },
+  "lion": {
+    "animals-cat": 3
+  },
+  "liquid": {
+    "water-melt-snow": 1
+  },
+  "listed": {
+    "plants-unknown": 1
+  },
+  "litre": {
+    "water-find-in-dry": 1
+  },
+  "litter": {
+    "fire-tinder": 1
+  },
+  "live": {
+    "bush-leave-no-trace": 1,
+    "nav-drainage": 1,
+    "tools-knife": 1
+  },
+  "load": {
+    "tools-cordage": 1
+  },
+  "loading": {
+    "weather-snow": 1
+  },
+  "logged": {
+    "signal-night": 1
+  },
+  "logic": {
+    "shelter-snow-trench": 1
+  },
+  "lone": {
+    "weather-afternoon": 1
+  },
+  "long": {
+    "shelter-debris-hut": 1
+  },
+  "longer": {
+    "shelter-debris-hut": 1
+  },
+  "look": {
+    "animals-cat": 2,
+    "bush-deadfall": 2,
+    "plants-mushrooms": 1,
+    "plants-unknown": 1,
+    "shelter-lee": 2
+  },
+  "lookalike": {
+    "plants-berries": 1
+  },
+  "looks": {
+    "aid-fracture": 1,
+    "water-treat-source": 1
+  },
+  "loosely": {
+    "aid-burn": 1
+  },
+  "loosen": {
+    "water-ration": 1
+  },
+  "lose": {
+    "nav-night-stop": 1
+  },
+  "lost": {
+    "nav-compass": 1,
+    "water-melt-snow": 1
+  },
+  "lot": {
+    "shelter-snow-trench": 1
+  },
+  "loud": {
+    "bush-inventory": 1,
+    "nav-night-stop": 1
+  },
+  "low": {
+    "shelter-tarp": 1
+  },
+  "lung": {
+    "aid-burn": 1
+  },
+  "make": {
+    "animals-bear": 1,
+    "fire-site": 1,
+    "signal-three": 1
+  },
+  "manual": {
+    "nav-compass": 1,
+    "nav-drainage": 1
+  },
+  "many": {
+    "plants-unknown": 1
+  },
+  "map": {
+    "nav-compass": 1,
+    "nav-drainage": 1,
+    "water-find-in-dry": 1
+  },
+  "march": {
+    "weather-heat": 1
+  },
+  "margin": {
+    "plants-berries": 1
+  },
+  "mark": {
+    "nav-night-stop": 1,
+    "shelter-debris-hut": 1,
+    "shelter-snow-trench": 1,
+    "water-treat-source": 1
+  },
+  "matches": {
+    "fire-tinder": 1
+  },
+  "matters": {
+    "shelter-lee": 1
+  },
+  "may": {
+    "bush-leave-no-trace": 1
+  },
+  "meal": {
+    "plants-cattail": 1
+  },
+  "mean": {
+    "animals-moose": 1,
+    "signal-night": 1
+  },
+  "medical": {
+    "aid-bleeding": 1,
+    "aid-burn": 1,
+    "aid-fracture": 1,
+    "aid-hypothermia": 1
+  },
+  "medicine": {
+    "aid-burn": 1
+  },
+  "melt": {
+    "shelter-debris-hut": 1,
+    "tools-pot": 1,
+    "water-melt-snow": 4
+  },
+  "melter": {
+    "tools-pot": 1
+  },
+  "melts": {
+    "water-melt-snow": 1
+  },
+  "mentioned": {
+    "plants-cattail": 1
+  },
+  "mesh": {
+    "signal-three": 1
+  },
+  "metal": {
+    "signal-whistle": 1,
+    "tools-pot": 1,
+    "water-melt-snow": 1
+  },
+  "mice": {
+    "tools-pot": 1
+  },
+  "mineral": {
+    "fire-site": 2
+  },
+  "minute": {
+    "water-treat-source": 2
+  },
+  "mirror": {
+    "fire-signal": 1,
+    "signal-three": 2,
+    "tools-pot": 1
+  },
+  "miss": {
+    "nav-handrail": 1
+  },
+  "mistake": {
+    "bush-night-bivy": 1
+  },
+  "moose": {
+    "animals-moose": 4
+  },
+  "more": {
+    "nav-compass": 1,
+    "nav-night-stop": 1,
+    "signal-whistle": 1,
+    "water-melt-snow": 1
+  },
+  "morning": {
+    "nav-night-stop": 1,
+    "water-find-in-dry": 1
+  },
+  "motion": {
+    "tools-ferro": 1
+  },
+  "mountain": {
+    "animals-cat": 1
+  },
+  "mouth": {
+    "water-treat-source": 1
+  },
+  "move": {
+    "aid-burn": 1,
+    "aid-fracture": 1,
+    "signal-ground": 1,
+    "water-ration": 1
+  },
+  "moving": {
+    "aid-fracture": 1,
+    "nav-night-stop": 2,
+    "shelter-lee": 1,
+    "water-find-in-dry": 1
+  },
+  "much": {
+    "nav-compass": 1,
+    "shelter-lee": 1
+  },
+  "mud": {
+    "aid-burn": 1
+  },
+  "mumbling": {
+    "aid-hypothermia": 1
+  },
+  "mushroom": {
+    "plants-mushrooms": 1
+  },
+  "mushrooms": {
+    "plants-mushrooms": 3
+  },
+  "must": {
+    "fire-bow-drill": 1,
+    "shelter-lee": 1,
+    "tools-pot": 1,
+    "weather-snow": 1
+  },
+  "name": {
+    "bush-inventory": 1,
+    "plants-berries": 1,
+    "plants-mushrooms": 1
+  },
+  "natural": {
+    "signal-three": 1
+  },
+  "navigate": {
+    "nav-handrail": 1,
+    "weather-wind": 1
+  },
+  "navigation": {
+    "nav-compass": 1,
+    "nav-drainage": 1,
+    "nav-handrail": 1,
+    "nav-night-stop": 1
+  },
+  "nearby": {
+    "signal-three": 1
+  },
+  "neck": {
+    "weather-heat": 1
+  },
+  "need": {
+    "water-treat-source": 1,
+    "weather-wind": 1
+  },
+  "needles": {
+    "shelter-debris-hut": 1
+  },
+  "needs": {
+    "shelter-snow-trench": 1
+  },
+  "never": {
+    "fire-site": 1,
+    "plants-unknown": 2,
+    "signal-night": 1,
+    "tools-ferro": 1
+  },
+  "new": {
+    "tools-ferro": 1
+  },
+  "next": {
+    "bush-leave-no-trace": 1,
+    "plants-cattail": 1
+  },
+  "night": {
+    "animals-cat": 1,
+    "bush-deadfall": 1,
+    "bush-night-bivy": 1,
+    "fire-signal": 3,
+    "nav-night-stop": 2,
+    "signal-night": 4,
+    "signal-three": 1,
+    "tools-knife": 1
+  },
+  "no": {
+    "bush-leave-no-trace": 1,
+    "nav-drainage": 1,
+    "plants-berries": 1,
+    "signal-whistle": 1,
+    "water-melt-snow": 1,
+    "weather-wind": 1
+  },
+  "nobody": {
+    "shelter-debris-hut": 1
+  },
+  "noise": {
+    "animals-bear": 2,
+    "animals-cat": 1
+  },
+  "nonstick": {
+    "tools-pot": 1
+  },
+  "noon": {
+    "weather-heat": 1
+  },
+  "north": {
+    "nav-compass": 1
+  },
+  "nose": {
+    "water-ration": 1
+  },
+  "notch": {
+    "fire-bow-drill": 1
+  },
+  "note": {
+    "plants-berries": 1
+  },
+  "novel": {
+    "signal-ground": 1
+  },
+  "numbness": {
+    "aid-fracture": 1
+  },
+  "off": {
+    "nav-handrail": 1,
+    "tools-ferro": 1,
+    "weather-afternoon": 1,
+    "weather-snow": 1,
+    "weather-wind": 1
+  },
+  "often": {
+    "fire-signal": 1,
+    "nav-drainage": 2,
+    "plants-berries": 1,
+    "plants-cattail": 1
+  },
+  "once": {
+    "fire-signal": 1,
+    "water-find-in-dry": 1
+  },
+  "one": {
+    "aid-bleeding": 1,
+    "animals-cat": 1,
+    "bush-inventory": 1,
+    "bush-leave-no-trace": 1,
+    "fire-signal": 1,
+    "nav-night-stop": 1,
+    "shelter-snow-trench": 1,
+    "shelter-tarp": 1,
+    "signal-whistle": 1,
+    "tools-knife": 1,
+    "water-ration": 1,
+    "water-treat-source": 1,
+    "weather-snow": 1
+  },
+  "only": {
+    "aid-bleeding": 1,
+    "plants-unknown": 1,
+    "tools-cordage": 1,
+    "tools-ferro": 1
+  },
+  "onto": {
+    "tools-ferro": 1
+  },
+  "open": {
+    "shelter-snow-trench": 1,
+    "weather-snow": 1
+  },
+  "opened": {
+    "tools-ferro": 1
+  },
+  "os": {
+    "signal-night": 1
+  },
+  "out": {
+    "aid-hypothermia": 1,
+    "bush-inventory": 1,
+    "bush-leave-no-trace": 1,
+    "nav-drainage": 1,
+    "nav-night-stop": 1,
+    "shelter-lee": 1,
+    "weather-heat": 1
+  },
+  "outlasts": {
+    "signal-whistle": 1
+  },
+  "over": {
+    "animals-bear": 1,
+    "nav-compass": 1,
+    "shelter-lee": 1,
+    "water-melt-snow": 1
+  },
+  "own": {
+    "aid-hypothermia": 1,
+    "animals-bear": 1,
+    "tools-pot": 1
+  },
+  "pace": {
+    "water-ration": 1
+  },
+  "pack": {
+    "aid-bleeding": 1,
+    "aid-burn": 1,
+    "aid-fracture": 1,
+    "bush-inventory": 1,
+    "bush-leave-no-trace": 1,
+    "nav-compass": 1,
+    "nav-drainage": 1,
+    "plants-mushrooms": 1,
+    "signal-ground": 1,
+    "tools-cordage": 1,
+    "tools-pot": 1,
+    "water-melt-snow": 1
+  },
+  "packout": {
+    "bush-leave-no-trace": 1
+  },
+  "pad": {
+    "bush-night-bivy": 3
+  },
+  "padding": {
+    "aid-fracture": 1
+  },
+  "pain": {
+    "aid-bleeding": 1,
+    "aid-burn": 1,
+    "aid-fracture": 1
+  },
+  "pair": {
+    "tools-cordage": 1
+  },
+  "panel": {
+    "signal-ground": 1
+  },
+  "panic": {
+    "bush-inventory": 1
+  },
+  "pants": {
+    "animals-ticks": 1
+  },
+  "paper": {
+    "nav-handrail": 1
+  },
+  "party": {
+    "animals-cat": 1,
+    "bush-inventory": 2,
+    "bush-leave-no-trace": 1,
+    "nav-night-stop": 1,
+    "shelter-tarp": 1,
+    "signal-whistle": 1,
+    "water-ration": 1
+  },
+  "pass": {
+    "signal-three": 1
+  },
+  "patient": {
+    "animals-moose": 1
+  },
+  "pattern": {
+    "fire-signal": 2,
+    "signal-night": 1,
+    "signal-three": 1
+  },
+  "peer": {
+    "signal-three": 1
+  },
+  "people": {
+    "bush-inventory": 1,
+    "fire-bow-drill": 1,
+    "nav-drainage": 3
+  },
+  "perfect": {
+    "shelter-tarp": 1
+  },
+  "perform": {
+    "weather-heat": 1
+  },
+  "permission": {
+    "plants-cattail": 1
+  },
+  "person": {
+    "aid-bleeding": 1,
+    "aid-hypothermia": 2
+  },
+  "petroleum": {
+    "fire-tinder": 1
+  },
+  "phd": {
+    "animals-moose": 1
+  },
+  "phone": {
+    "fire-signal": 1,
+    "signal-night": 1
+  },
+  "photo": {
+    "animals-moose": 1
+  },
+  "pick": {
+    "animals-cat": 1,
+    "nav-handrail": 1
+  },
+  "pile": {
+    "bush-night-bivy": 1,
+    "shelter-debris-hut": 1
+  },
+  "pilots": {
+    "signal-ground": 1
+  },
+  "pin": {
+    "animals-moose": 1,
+    "nav-compass": 1,
+    "nav-drainage": 1,
+    "nav-night-stop": 1,
+    "water-find-in-dry": 1
+  },
+  "pine": {
+    "bush-deadfall": 1,
+    "fire-tinder": 1
+  },
+  "pinecones": {
+    "signal-ground": 1
+  },
+  "pink": {
+    "water-melt-snow": 1
+  },
+  "pit": {
+    "shelter-tarp": 1,
+    "weather-wind": 1
+  },
+  "pitch": {
+    "shelter-tarp": 1
+  },
+  "placed": {
+    "fire-signal": 1
+  },
+  "plains": {
+    "weather-heat": 1
+  },
+  "plan": {
+    "aid-fracture": 1,
+    "bush-inventory": 2,
+    "nav-drainage": 1,
+    "nav-night-stop": 1,
+    "tools-cordage": 1,
+    "water-find-in-dry": 1,
+    "water-ration": 1
+  },
+  "plant": {
+    "aid-burn": 1,
+    "animals-ticks": 1,
+    "plants-cattail": 2,
+    "plants-unknown": 1
+  },
+  "plants": {
+    "aid-bleeding": 1,
+    "plants-berries": 1,
+    "plants-cattail": 2,
+    "plants-mushrooms": 1,
+    "plants-unknown": 1
+  },
+  "plug": {
+    "shelter-debris-hut": 1
+  },
+  "plus": {
+    "aid-fracture": 2,
+    "fire-signal": 1,
+    "nav-drainage": 1,
+    "nav-night-stop": 1,
+    "shelter-tarp": 1,
+    "weather-heat": 1,
+    "weather-wind": 1
+  },
+  "ply": {
+    "tools-cordage": 1
+  },
+  "pocket": {
+    "tools-knife": 1
+  },
+  "pockets": {
+    "bush-inventory": 1
+  },
+  "points": {
+    "weather-afternoon": 1
+  },
+  "pole": {
+    "aid-fracture": 1,
+    "shelter-debris-hut": 1
+  },
+  "ponds": {
+    "water-find-in-dry": 1
+  },
+  "poor": {
+    "signal-whistle": 1
+  },
+  "pot": {
+    "tools-pot": 3,
+    "water-melt-snow": 1
+  },
+  "potability": {
+    "water-treat-source": 1
+  },
+  "poultice": {
+    "animals-ticks": 1
+  },
+  "powder": {
+    "fire-bow-drill": 1
+  },
+  "power": {
+    "nav-handrail": 1
+  },
+  "practice": {
+    "fire-bow-drill": 1,
+    "tools-ferro": 1
+  },
+  "prescription": {
+    "weather-heat": 1
+  },
+  "pressure": {
+    "aid-bleeding": 3
+  },
+  "prey": {
+    "animals-cat": 1
+  },
+  "pride": {
+    "fire-bow-drill": 1,
+    "fire-tinder": 1
+  },
+  "print": {
+    "plants-mushrooms": 1
+  },
+  "probe": {
+    "shelter-snow-trench": 1
+  },
+  "problem": {
+    "aid-burn": 1,
+    "animals-ticks": 1,
+    "weather-heat": 1
+  },
+  "protozoa": {
+    "water-treat-source": 1
+  },
+  "pull": {
+    "animals-ticks": 1
+  },
+  "pulp": {
+    "aid-burn": 1
+  },
+  "punch": {
+    "weather-afternoon": 1
+  },
+  "punish": {
+    "plants-unknown": 1
+  },
+  "put": {
+    "aid-hypothermia": 1,
+    "animals-moose": 1,
+    "animals-ticks": 1,
+    "nav-compass": 1,
+    "signal-ground": 1,
+    "water-find-in-dry": 1
+  },
+  "quiet": {
+    "aid-hypothermia": 1,
+    "bush-deadfall": 1
+  },
+  "rainfly": {
+    "shelter-tarp": 1
+  },
+  "range": {
+    "animals-cat": 1,
+    "fire-site": 1,
+    "nav-handrail": 1,
+    "plants-unknown": 1,
+    "shelter-snow-trench": 1,
+    "water-treat-source": 1,
+    "weather-afternoon": 1
+  },
+  "rash": {
+    "animals-ticks": 1
+  },
+  "rated": {
+    "water-treat-source": 1
+  },
+  "ration": {
+    "water-ration": 2,
+    "water-treat-source": 1
+  },
+  "read": {
+    "fire-signal": 1,
+    "nav-night-stop": 1
+  },
+  "reads": {
+    "signal-ground": 1,
+    "signal-night": 1
+  },
+  "real": {
+    "aid-bleeding": 1,
+    "aid-hypothermia": 1
+  },
+  "reason": {
+    "aid-fracture": 1
+  },
+  "reasons": {
+    "weather-snow": 1
+  },
+  "recent": {
+    "weather-snow": 1
+  },
+  "reckon": {
+    "nav-compass": 1
+  },
+  "reckoning": {
+    "nav-night-stop": 1
+  },
+  "record": {
+    "plants-unknown": 1
+  },
+  "remaining": {
+    "nav-night-stop": 1
+  },
+  "remains": {
+    "aid-burn": 1,
+    "plants-cattail": 1
+  },
+  "remove": {
+    "animals-ticks": 1
+  },
+  "replace": {
+    "tools-cordage": 1
+  },
+  "rescue": {
+    "bush-inventory": 1
+  },
+  "resort": {
+    "aid-bleeding": 1,
+    "fire-site": 1
+  },
+  "rest": {
+    "water-ration": 1
+  },
+  "restrictions": {
+    "fire-site": 1
+  },
+  "result": {
+    "plants-cattail": 1,
+    "plants-unknown": 1
+  },
+  "returns": {
+    "water-melt-snow": 1
+  },
+  "reverse": {
+    "tools-cordage": 1
+  },
+  "rewarm": {
+    "aid-hypothermia": 3
+  },
+  "ribs": {
+    "shelter-debris-hut": 1
+  },
+  "ridge": {
+    "fire-signal": 1,
+    "nav-handrail": 1,
+    "shelter-debris-hut": 1,
+    "shelter-lee": 1,
+    "shelter-tarp": 2,
+    "signal-ground": 1,
+    "tools-cordage": 1,
+    "weather-wind": 3
+  },
+  "ridgeline": {
+    "nav-compass": 1
+  },
+  "ridgelines": {
+    "nav-compass": 1
+  },
+  "ridgepole": {
+    "shelter-debris-hut": 1
+  },
+  "rigid": {
+    "aid-fracture": 1
+  },
+  "ring": {
+    "fire-site": 1,
+    "plants-mushrooms": 1
+  },
+  "road": {
+    "nav-drainage": 1,
+    "nav-handrail": 1
+  },
+  "rock": {
+    "fire-site": 1,
+    "signal-three": 1,
+    "weather-afternoon": 1
+  },
+  "rockies": {
+    "plants-mushrooms": 1
+  },
+  "rocks": {
+    "fire-site": 1
+  },
+  "rod": {
+    "fire-bow-drill": 2,
+    "tools-ferro": 3
+  },
+  "rolling": {
+    "water-treat-source": 1
+  },
+  "roof": {
+    "bush-night-bivy": 2,
+    "shelter-debris-hut": 1,
+    "shelter-snow-trench": 2
+  },
+  "roughly": {
+    "nav-compass": 1
+  },
+  "rub": {
+    "aid-hypothermia": 1
+  },
+  "ruin": {
+    "tools-pot": 1
+  },
+  "ruining": {
+    "signal-night": 1
+  },
+  "rule": {
+    "plants-berries": 1
+  },
+  "run": {
+    "animals-cat": 2,
+    "animals-moose": 1,
+    "nav-compass": 1
+  },
+  "safe": {
+    "fire-site": 1
+  },
+  "safer": {
+    "nav-drainage": 1
+  },
+  "safety": {
+    "plants-berries": 1
+  },
+  "sage": {
+    "animals-ticks": 1
+  },
+  "sail": {
+    "shelter-tarp": 1
+  },
+  "salt": {
+    "water-ration": 1
+  },
+  "sample": {
+    "nav-compass": 2,
+    "weather-snow": 1
+  },
+  "sap": {
+    "plants-unknown": 1
+  },
+  "save": {
+    "fire-signal": 1,
+    "signal-three": 1
+  },
+  "saver": {
+    "bush-night-bivy": 1,
+    "weather-wind": 1
+  },
+  "saves": {
+    "tools-pot": 1
+  },
+  "say": {
+    "bush-inventory": 1
+  },
+  "scorch": {
+    "water-melt-snow": 1
+  },
+  "scrape": {
+    "fire-site": 1,
+    "tools-ferro": 1
+  },
+  "scream": {
+    "aid-fracture": 1
+  },
+  "screen": {
+    "signal-night": 1
+  },
+  "season": {
+    "plants-unknown": 1,
+    "weather-wind": 1
+  },
+  "second": {
+    "fire-tinder": 1,
+    "weather-afternoon": 1
+  },
+  "see": {
+    "animals-bear": 1,
+    "fire-site": 1,
+    "nav-drainage": 1,
+    "shelter-debris-hut": 1,
+    "signal-ground": 1
+  },
+  "seek": {
+    "aid-hypothermia": 1,
+    "plants-mushrooms": 1
+  },
+  "seep": {
+    "water-find-in-dry": 1
+  },
+  "seeps": {
+    "water-find-in-dry": 1
+  },
+  "set": {
+    "fire-signal": 1
+  },
+  "severely": {
+    "aid-hypothermia": 1
+  },
+  "shade": {
+    "water-ration": 2,
+    "water-treat-source": 1,
+    "weather-heat": 1
+  },
+  "shape": {
+    "plants-berries": 1,
+    "signal-three": 1
+  },
+  "sharp": {
+    "nav-handrail": 1
+  },
+  "shed": {
+    "shelter-tarp": 1
+  },
+  "sheds": {
+    "shelter-tarp": 1
+  },
+  "shelter": {
+    "nav-compass": 1,
+    "shelter-debris-hut": 1,
+    "shelter-lee": 2,
+    "shelter-snow-trench": 1,
+    "shelter-tarp": 1,
+    "water-find-in-dry": 1
+  },
+  "shield": {
+    "signal-night": 1
+  },
+  "shifts": {
+    "bush-deadfall": 1,
+    "fire-site": 1
+  },
+  "shiver": {
+    "bush-night-bivy": 1
+  },
+  "shock": {
+    "tools-cordage": 1
+  },
+  "shoelace": {
+    "tools-cordage": 1
+  },
+  "shoelaces": {
+    "tools-cordage": 1
+  },
+  "shortcut": {
+    "water-melt-snow": 1
+  },
+  "shout": {
+    "signal-night": 1
+  },
+  "show": {
+    "water-find-in-dry": 1
+  },
+  "showing": {
+    "signal-ground": 1
+  },
+  "shows": {
+    "bush-night-bivy": 1
+  },
+  "shredded": {
+    "fire-bow-drill": 1
+  },
+  "side": {
+    "fire-tinder": 1,
+    "shelter-tarp": 1
+  },
+  "siesta": {
+    "weather-heat": 2
+  },
+  "sign": {
+    "water-ration": 1
+  },
+  "signal": {
+    "fire-signal": 1,
+    "fire-site": 1,
+    "tools-pot": 2
+  },
+  "signaling": {
+    "signal-ground": 1,
+    "signal-night": 1,
+    "signal-three": 2,
+    "signal-whistle": 1
+  },
+  "signs": {
+    "weather-heat": 1
+  },
+  "sipping": {
+    "water-ration": 1
+  },
+  "sips": {
+    "water-ration": 1
+  },
+  "sit": {
+    "bush-inventory": 1,
+    "bush-night-bivy": 1,
+    "fire-site": 1,
+    "nav-night-stop": 1
+  },
+  "site": {
+    "shelter-debris-hut": 1
+  },
+  "size": {
+    "bush-inventory": 1
+  },
+  "sized": {
+    "fire-tinder": 1
+  },
+  "skill": {
+    "animals-moose": 1,
+    "fire-bow-drill": 1,
+    "shelter-snow-trench": 1
+  },
+  "skin": {
+    "water-ration": 1
+  },
+  "skis": {
+    "shelter-snow-trench": 1
+  },
+  "sky": {
+    "signal-three": 1
+  },
+  "slab": {
+    "shelter-snow-trench": 1,
+    "weather-snow": 1
+  },
+  "slack": {
+    "fire-bow-drill": 1
+  },
+  "sleep": {
+    "animals-bear": 1,
+    "bush-night-bivy": 1
+  },
+  "sleeping": {
+    "shelter-snow-trench": 1
+  },
+  "slope": {
+    "nav-night-stop": 1,
+    "water-find-in-dry": 1,
+    "weather-snow": 4
+  },
+  "slot": {
+    "nav-drainage": 1
+  },
+  "slow": {
+    "signal-three": 1,
+    "water-treat-source": 1
+  },
+  "slower": {
+    "plants-unknown": 1,
+    "water-melt-snow": 1,
+    "water-treat-source": 1
+  },
+  "small": {
+    "fire-site": 1
+  },
+  "smell": {
+    "plants-unknown": 1
+  },
+  "smoke": {
+    "aid-burn": 1,
+    "fire-signal": 2
+  },
+  "snag": {
+    "weather-afternoon": 1
+  },
+  "snow": {
+    "fire-bow-drill": 1,
+    "shelter-lee": 1,
+    "shelter-snow-trench": 4,
+    "shelter-tarp": 1,
+    "signal-ground": 1,
+    "signal-three": 1,
+    "tools-pot": 2,
+    "water-melt-snow": 5,
+    "weather-snow": 2
+  },
+  "so": {
+    "fire-signal": 1,
+    "nav-handrail": 1,
+    "shelter-debris-hut": 1,
+    "tools-ferro": 1,
+    "water-melt-snow": 1
+  },
+  "soaking": {
+    "weather-afternoon": 1
+  },
+  "soil": {
+    "fire-site": 1,
+    "shelter-tarp": 1
+  },
+  "someone": {
+    "water-ration": 1
+  },
+  "soot": {
+    "tools-pot": 2
+  },
+  "sos": {
+    "bush-night-bivy": 1,
+    "fire-signal": 1,
+    "signal-night": 2,
+    "signal-three": 1,
+    "weather-wind": 1
+  },
+  "sounds": {
+    "bush-deadfall": 1
+  },
+  "source": {
+    "water-treat-source": 1
+  },
+  "south": {
+    "nav-compass": 1
+  },
+  "sow": {
+    "animals-bear": 1
+  },
+  "space": {
+    "animals-moose": 2,
+    "fire-signal": 1,
+    "shelter-tarp": 1,
+    "weather-wind": 1
+  },
+  "spark": {
+    "fire-tinder": 2,
+    "tools-ferro": 1
+  },
+  "sparks": {
+    "fire-site": 1,
+    "tools-ferro": 1
+  },
+  "species": {
+    "plants-mushrooms": 1
+  },
+  "spend": {
+    "bush-night-bivy": 1
+  },
+  "spike": {
+    "plants-cattail": 1
+  },
+  "spindle": {
+    "fire-bow-drill": 2
+  },
+  "spinning": {
+    "nav-drainage": 1
+  },
+  "splash": {
+    "water-melt-snow": 1
+  },
+  "splint": {
+    "aid-fracture": 3
+  },
+  "split": {
+    "tools-knife": 1
+  },
+  "spore": {
+    "plants-mushrooms": 2
+  },
+  "sports": {
+    "weather-heat": 1
+  },
+  "spots": {
+    "animals-ticks": 1
+  },
+  "spray": {
+    "animals-bear": 1
+  },
+  "spring": {
+    "water-ration": 1
+  },
+  "sprint": {
+    "animals-cat": 1,
+    "water-ration": 1
+  },
+  "spruce": {
+    "shelter-lee": 1
+  },
+  "stack": {
+    "weather-afternoon": 1
+  },
+  "stagnant": {
+    "water-find-in-dry": 1
+  },
+  "stake": {
+    "shelter-tarp": 2
+  },
+  "stand": {
+    "animals-bear": 1
+  },
+  "staring": {
+    "animals-cat": 1
+  },
+  "start": {
+    "fire-signal": 1,
+    "shelter-snow-trench": 1
+  },
+  "starts": {
+    "aid-hypothermia": 1
+  },
+  "starving": {
+    "plants-mushrooms": 1
+  },
+  "state": {
+    "signal-three": 1
+  },
+  "stay": {
+    "aid-fracture": 2,
+    "nav-compass": 1,
+    "nav-drainage": 1,
+    "water-find-in-dry": 1
+  },
+  "stays": {
+    "bush-inventory": 1,
+    "tools-knife": 1
+  },
+  "steady": {
+    "animals-ticks": 1
+  },
+  "steam": {
+    "water-melt-snow": 1
+  },
+  "steep": {
+    "shelter-tarp": 1,
+    "weather-snow": 1
+  },
+  "steps": {
+    "nav-compass": 1,
+    "weather-wind": 1
+  },
+  "stick": {
+    "animals-cat": 1,
+    "fire-tinder": 1,
+    "signal-whistle": 1
+  },
+  "sticks": {
+    "shelter-tarp": 1
+  },
+  "still": {
+    "bush-inventory": 1,
+    "bush-night-bivy": 1,
+    "nav-night-stop": 1,
+    "plants-berries": 1,
+    "plants-cattail": 1,
+    "plants-mushrooms": 1,
+    "water-melt-snow": 1,
+    "weather-wind": 1
+  },
+  "stir": {
+    "fire-site": 1
+  },
+  "stones": {
+    "signal-ground": 1
+  },
+  "stop": {
+    "aid-fracture": 1,
+    "bush-inventory": 2,
+    "nav-night-stop": 4,
+    "weather-heat": 1
+  },
+  "storm": {
+    "weather-afternoon": 1
+  },
+  "storms": {
+    "weather-afternoon": 2
+  },
+  "story": {
+    "tools-cordage": 1
+  },
+  "stove": {
+    "tools-pot": 1,
+    "water-melt-snow": 3
+  },
+  "straighten": {
+    "aid-fracture": 1
+  },
+  "strap": {
+    "plants-cattail": 1
+  },
+  "stress": {
+    "bush-leave-no-trace": 1
+  },
+  "striker": {
+    "tools-ferro": 2
+  },
+  "strips": {
+    "tools-cordage": 1
+  },
+  "strobe": {
+    "signal-night": 3
+  },
+  "stuff": {
+    "fire-tinder": 1,
+    "weather-afternoon": 1
+  },
+  "stumble": {
+    "aid-hypothermia": 1
+  },
+  "stumbling": {
+    "aid-hypothermia": 1
+  },
+  "stumps": {
+    "fire-tinder": 1
+  },
+  "summit": {
+    "weather-afternoon": 1
+  },
+  "summon": {
+    "signal-ground": 1
+  },
+  "sun": {
+    "signal-three": 1,
+    "water-melt-snow": 1,
+    "weather-heat": 1
+  },
+  "sunrise": {
+    "water-find-in-dry": 1
+  },
+  "surface": {
+    "fire-tinder": 1,
+    "shelter-snow-trench": 1
+  },
+  "surprised": {
+    "animals-bear": 1
+  },
+  "survey": {
+    "nav-compass": 1
+  },
+  "survival": {
+    "bush-leave-no-trace": 1
+  },
+  "suspect": {
+    "weather-snow": 1
+  },
+  "swallow": {
+    "aid-hypothermia": 1
+  },
+  "swap": {
+    "aid-hypothermia": 1
+  },
+  "sweat": {
+    "water-ration": 3,
+    "water-treat-source": 1
+  },
+  "sweep": {
+    "signal-three": 1
+  },
+  "sweet": {
+    "aid-hypothermia": 1
+  },
+  "tablets": {
+    "water-ration": 1
+  },
+  "take": {
+    "water-ration": 1
+  },
+  "takes": {
+    "fire-tinder": 1,
+    "weather-afternoon": 1
+  },
+  "tallest": {
+    "weather-afternoon": 1
+  },
+  "talus": {
+    "bush-deadfall": 1
+  },
+  "tape": {
+    "bush-leave-no-trace": 1,
+    "tools-knife": 1
+  },
+  "target": {
+    "nav-handrail": 1
+  },
+  "tarp": {
+    "shelter-snow-trench": 1,
+    "shelter-tarp": 3,
+    "signal-ground": 1,
+    "water-find-in-dry": 1
+  },
+  "taste": {
+    "water-melt-snow": 1
+  },
+  "taught": {
+    "plants-cattail": 1
+  },
+  "tell": {
+    "nav-night-stop": 1,
+    "plants-unknown": 1,
+    "water-ration": 1
+  },
+  "temperature": {
+    "water-melt-snow": 1,
+    "weather-afternoon": 1
+  },
+  "tent": {
+    "shelter-tarp": 1
+  },
+  "terrain": {
+    "nav-night-stop": 2,
+    "weather-snow": 3
+  },
+  "test": {
+    "bush-deadfall": 1
+  },
+  "their": {
+    "aid-hypothermia": 1,
+    "animals-cat": 1
+  },
+  "them": {
+    "aid-hypothermia": 1,
+    "animals-moose": 1,
+    "fire-signal": 1,
+    "tools-cordage": 1
+  },
+  "there": {
+    "weather-wind": 1
+  },
+  "they": {
+    "aid-hypothermia": 1,
+    "fire-signal": 1
+  },
+  "thick": {
+    "aid-fracture": 1,
+    "animals-bear": 1,
+    "shelter-debris-hut": 2
+  },
+  "thin": {
+    "bush-night-bivy": 1,
+    "fire-tinder": 1
+  },
+  "thorns": {
+    "plants-berries": 1
+  },
+  "three": {
+    "fire-signal": 7,
+    "signal-night": 1,
+    "signal-three": 3,
+    "signal-whistle": 3
+  },
+  "throat": {
+    "signal-whistle": 1
+  },
+  "through": {
+    "nav-drainage": 1,
+    "shelter-debris-hut": 2,
+    "water-ration": 1
+  },
+  "throws": {
+    "tools-ferro": 1
+  },
+  "tick": {
+    "animals-ticks": 2
+  },
+  "ticket": {
+    "plants-cattail": 1
+  },
+  "ticks": {
+    "animals-ticks": 1
+  },
+  "tightening": {
+    "aid-fracture": 1
+  },
+  "tiles": {
+    "nav-drainage": 1
+  },
+  "timber": {
+    "signal-ground": 1
+  },
+  "time": {
+    "animals-cat": 1,
+    "shelter-snow-trench": 1,
+    "water-treat-source": 1,
+    "weather-snow": 1
+  },
+  "timeline": {
+    "weather-afternoon": 1
+  },
+  "tinder": {
+    "fire-tinder": 4
+  },
+  "tint": {
+    "weather-snow": 1
+  },
+  "tiny": {
+    "water-melt-snow": 1
+  },
+  "titanium": {
+    "tools-pot": 1
+  },
+  "toes": {
+    "aid-fracture": 1
+  },
+  "too": {
+    "animals-bear": 1
+  },
+  "tools": {
+    "tools-cordage": 1,
+    "tools-ferro": 1,
+    "tools-knife": 1,
+    "tools-pot": 1
+  },
+  "torso": {
+    "aid-hypothermia": 2
+  },
+  "tourniquet": {
+    "aid-bleeding": 1
+  },
+  "toward": {
+    "animals-moose": 1,
+    "tools-cordage": 1
+  },
+  "toxin": {
+    "plants-unknown": 1
+  },
+  "trace": {
+    "bush-leave-no-trace": 1
+  },
+  "trail": {
+    "animals-cat": 1,
+    "signal-whistle": 1
+  },
+  "trails": {
+    "animals-bear": 1,
+    "water-find-in-dry": 1
+  },
+  "trained": {
+    "aid-bleeding": 1
+  },
+  "trait": {
+    "plants-cattail": 1
+  },
+  "traits": {
+    "plants-cattail": 2,
+    "plants-unknown": 3
+  },
+  "trample": {
+    "signal-ground": 1
+  },
+  "trampled": {
+    "signal-ground": 1
+  },
+  "travel": {
+    "animals-cat": 1,
+    "water-treat-source": 1,
+    "weather-heat": 1,
+    "weather-snow": 1
+  },
+  "traverse": {
+    "nav-drainage": 1
+  },
+  "tread": {
+    "nav-night-stop": 1
+  },
+  "treat": {
+    "water-treat-source": 2
+  },
+  "treated": {
+    "water-find-in-dry": 1
+  },
+  "tree": {
+    "animals-moose": 1
+  },
+  "trees": {
+    "weather-afternoon": 1
+  },
+  "trekking": {
+    "aid-fracture": 1
+  },
+  "trench": {
+    "shelter-lee": 1,
+    "shelter-snow-trench": 3
+  },
+  "trick": {
+    "animals-ticks": 1,
+    "signal-whistle": 1
+  },
+  "trickle": {
+    "water-find-in-dry": 2
+  },
+  "trunks": {
+    "bush-deadfall": 1
+  },
+  "trust": {
+    "nav-compass": 1
+  },
+  "tuck": {
+    "animals-ticks": 2
+  },
+  "turn": {
+    "nav-handrail": 3
+  },
+  "twenty": {
+    "weather-wind": 1
+  },
+  "twice": {
+    "bush-inventory": 1
+  },
+  "twist": {
+    "animals-ticks": 1,
+    "tools-cordage": 1
+  },
+  "two": {
+    "tools-cordage": 1
+  },
+  "under": {
+    "bush-deadfall": 1,
+    "bush-leave-no-trace": 1,
+    "bush-night-bivy": 1,
+    "fire-tinder": 1,
+    "nav-drainage": 1,
+    "shelter-lee": 1,
+    "weather-afternoon": 1
+  },
+  "unknown": {
+    "aid-bleeding": 1,
+    "aid-burn": 1,
+    "fire-site": 1,
+    "nav-night-stop": 1,
+    "plants-berries": 2,
+    "plants-cattail": 1,
+    "plants-mushrooms": 3,
+    "plants-unknown": 2,
+    "weather-snow": 1
+  },
+  "unless": {
+    "nav-night-stop": 1,
+    "plants-cattail": 1,
+    "shelter-snow-trench": 1
+  },
+  "unsafe": {
+    "water-treat-source": 1
+  },
+  "until": {
+    "bush-leave-no-trace": 1,
+    "fire-site": 2,
+    "fire-tinder": 1,
+    "shelter-debris-hut": 1,
+    "tools-cordage": 1
+  },
+  "untreated": {
+    "water-treat-source": 2
+  },
+  "up": {
+    "animals-cat": 1,
+    "bush-deadfall": 1,
+    "shelter-lee": 1
+  },
+  "upwind": {
+    "fire-site": 1
+  },
+  "urine": {
+    "water-ration": 1
+  },
+  "urlsession": {
+    "weather-wind": 1
+  },
+  "use": {
+    "aid-bleeding": 1,
+    "animals-bear": 1,
+    "nav-night-stop": 1,
+    "shelter-lee": 1,
+    "signal-night": 1,
+    "tools-ferro": 1,
+    "weather-wind": 1
+  },
+  "using": {
+    "nav-compass": 1
+  },
+  "valid": {
+    "aid-burn": 1,
+    "signal-three": 1,
+    "weather-snow": 1
+  },
+  "valley": {
+    "aid-burn": 1
+  },
+  "vapor": {
+    "shelter-tarp": 1
+  },
+  "vent": {
+    "shelter-snow-trench": 2
+  },
+  "verdict": {
+    "plants-berries": 1,
+    "plants-unknown": 1
+  },
+  "vibe": {
+    "weather-snow": 1
+  },
+  "virus": {
+    "water-treat-source": 1
+  },
+  "visible": {
+    "signal-night": 1
+  },
+  "vision": {
+    "aid-bleeding": 1,
+    "plants-unknown": 1,
+    "signal-night": 1
+  },
+  "voice": {
+    "signal-whistle": 2
+  },
+  "volva": {
+    "plants-mushrooms": 1
+  },
+  "wait": {
+    "nav-night-stop": 1,
+    "signal-whistle": 1,
+    "weather-wind": 1
+  },
+  "walk": {
+    "bush-deadfall": 1,
+    "weather-afternoon": 1
+  },
+  "walking": {
+    "nav-handrail": 1
+  },
+  "walks": {
+    "animals-moose": 1,
+    "shelter-debris-hut": 1
+  },
+  "wall": {
+    "shelter-tarp": 1
+  },
+  "walls": {
+    "shelter-debris-hut": 2
+  },
+  "wander": {
+    "signal-whistle": 1
+  },
+  "wants": {
+    "animals-bear": 1,
+    "fire-signal": 2
+  },
+  "warm": {
+    "aid-bleeding": 1,
+    "aid-hypothermia": 1,
+    "animals-ticks": 1
+  },
+  "water": {
+    "aid-burn": 1,
+    "bush-leave-no-trace": 1,
+    "nav-drainage": 2,
+    "plants-cattail": 2,
+    "tools-pot": 1,
+    "water-find-in-dry": 3,
+    "water-melt-snow": 4,
+    "water-ration": 3,
+    "water-treat-source": 3,
+    "weather-heat": 1
+  },
+  "way": {
+    "nav-handrail": 1
+  },
+  "weak": {
+    "signal-night": 1,
+    "tools-pot": 1
+  },
+  "weather": {
+    "fire-bow-drill": 1,
+    "shelter-tarp": 1,
+    "weather-afternoon": 1,
+    "weather-heat": 1,
+    "weather-snow": 1,
+    "weather-wind": 1
+  },
+  "well": {
+    "fire-signal": 1,
+    "shelter-snow-trench": 1
+  },
+  "wet": {
+    "aid-hypothermia": 1,
+    "fire-bow-drill": 1,
+    "fire-signal": 1,
+    "fire-tinder": 2,
+    "shelter-lee": 3,
+    "tools-ferro": 1,
+    "weather-wind": 1
+  },
+  "wetland": {
+    "plants-cattail": 3
+  },
+  "what": {
+    "bush-inventory": 1
+  },
+  "whatever": {
+    "animals-bear": 1,
+    "plants-cattail": 1
+  },
+  "when": {
+    "aid-bleeding": 2,
+    "nav-compass": 1,
+    "nav-handrail": 1,
+    "nav-night-stop": 1,
+    "water-find-in-dry": 1
+  },
+  "which": {
+    "nav-handrail": 1
+  },
+  "while": {
+    "bush-night-bivy": 1,
+    "signal-whistle": 1
+  },
+  "whistle": {
+    "signal-whistle": 5
+  },
+  "white": {
+    "plants-berries": 1
+  },
+  "whoomph": {
+    "weather-snow": 1
+  },
+  "widowmaker": {
+    "bush-deadfall": 1
+  },
+  "widowmakers": {
+    "bush-deadfall": 1,
+    "shelter-lee": 1
+  },
+  "wild": {
+    "aid-bleeding": 1,
+    "plants-mushrooms": 1
+  },
+  "wildfire": {
+    "fire-site": 2,
+    "signal-night": 1
+  },
+  "wildfires": {
+    "fire-signal": 1
+  },
+  "wind": {
+    "aid-hypothermia": 1,
+    "bush-deadfall": 1,
+    "fire-site": 1,
+    "shelter-lee": 2,
+    "shelter-tarp": 2,
+    "signal-whistle": 1,
+    "weather-afternoon": 1,
+    "weather-snow": 1,
+    "weather-wind": 3
+  },
+  "windchill": {
+    "weather-wind": 1
+  },
+  "winter": {
+    "shelter-snow-trench": 1
+  },
+  "without": {
+    "bush-night-bivy": 1,
+    "signal-three": 1,
+    "tools-knife": 1,
+    "water-find-in-dry": 1,
+    "water-ration": 1
+  },
+  "works": {
+    "signal-three": 1
+  },
+  "world": {
+    "nav-compass": 1
+  },
+  "worth": {
+    "signal-whistle": 1
+  },
+  "wound": {
+    "aid-bleeding": 1
+  },
+  "wounds": {
+    "aid-bleeding": 1
+  },
+  "wrap": {
+    "tools-cordage": 3
+  },
+  "wrappers": {
+    "bush-leave-no-trace": 1
+  },
+  "wreck": {
+    "bush-leave-no-trace": 1
+  },
+  "wrecking": {
+    "tools-knife": 1
+  },
+  "wrist": {
+    "shelter-debris-hut": 1
+  },
+  "write": {
+    "nav-handrail": 1,
+    "signal-ground": 1
+  },
+  "written": {
+    "water-treat-source": 1
+  },
+  "wrong": {
+    "aid-fracture": 1,
+    "plants-mushrooms": 1
+  },
+  "yard": {
+    "fire-bow-drill": 1
+  },
+  "yellow": {
+    "plants-berries": 1,
+    "water-melt-snow": 1
+  },
+  "yes": {
+    "plants-berries": 1
+  },
+  "zero": {
+    "signal-three": 1
+  },
+  "zip": {
+    "tools-knife": 1
+  },
+  "zipper": {
+    "signal-whistle": 1
+  }
+}

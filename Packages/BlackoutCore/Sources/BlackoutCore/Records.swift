@@ -10,6 +10,10 @@ public struct ExpeditionRecordDTO: Hashable, Codable, Sendable, Identifiable {
     public var closedAt: Date?
     public var startLatitude: Double?
     public var startLongitude: Double?
+    /// Opt-in missed check-in. Default OFF. Local timer only — never auto-arms SOS.
+    public var checkInEnabled: Bool
+    public var checkInIntervalSeconds: Int
+    public var lastCheckInAt: Date?
 
     public init(
         id: BlackoutID = BlackoutID(),
@@ -18,7 +22,10 @@ public struct ExpeditionRecordDTO: Hashable, Codable, Sendable, Identifiable {
         createdAt: Date = Date(),
         closedAt: Date? = nil,
         startLatitude: Double? = nil,
-        startLongitude: Double? = nil
+        startLongitude: Double? = nil,
+        checkInEnabled: Bool = false,
+        checkInIntervalSeconds: Int = 1800,
+        lastCheckInAt: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -27,6 +34,9 @@ public struct ExpeditionRecordDTO: Hashable, Codable, Sendable, Identifiable {
         self.closedAt = closedAt
         self.startLatitude = startLatitude
         self.startLongitude = startLongitude
+        self.checkInEnabled = checkInEnabled
+        self.checkInIntervalSeconds = checkInIntervalSeconds
+        self.lastCheckInAt = lastCheckInAt
     }
 
     public var isOpen: Bool { closedAt == nil }

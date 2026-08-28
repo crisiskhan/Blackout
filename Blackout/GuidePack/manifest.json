@@ -1,0 +1,21 @@
+{
+  "name": "Blackout GuidePack",
+  "kind": "on-device-field-guide",
+  "articleCount": 44,
+  "topics": [
+    "animals",
+    "bushcraft",
+    "fire",
+    "first-aid",
+    "food-plants",
+    "navigation",
+    "shelter",
+    "signaling",
+    "tools",
+    "water",
+    "weather"
+  ],
+  "disclaimer": "On-device field articles. Not medical advice. Plants never receive an edible verdict. No webview. No URLSession. Extra content later via Files.",
+  "articles": "articles.jsonl",
+  "index": "inverted.json"
+}

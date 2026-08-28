@@ -8,6 +8,11 @@ struct OfflineMapView: UIViewRepresentable {
     var selfFix: LocationFix?
     var manualPin: LocationFix?
     var breadcrumbs: [BreadcrumbRecordDTO]
+    var viewshed: [ViewshedRay]
+    var slope: [SlopeSample]
+    var showViewshed: Bool
+    var showSlope: Bool
+    var centerToken: Int
     var onDropPin: (Double, Double) -> Void
     var onOutsidePack: (Bool) -> Void
     var resetToken: Int
@@ -19,7 +24,15 @@ struct OfflineMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> OfflineTileScrollView {
         let view = OfflineTileScrollView(pack: pack)
         view.coordinator = context.coordinator
-        view.applyOverlays(selfFix: selfFix, manualPin: manualPin, breadcrumbs: breadcrumbs)
+        view.applyOverlays(
+            selfFix: selfFix,
+            manualPin: manualPin,
+            breadcrumbs: breadcrumbs,
+            viewshed: viewshed,
+            slope: slope,
+            showViewshed: showViewshed,
+            showSlope: showSlope
+        )
         return view
     }
 
@@ -27,10 +40,24 @@ struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onDropPin = onDropPin
         context.coordinator.onOutsidePack = onOutsidePack
         view.coordinator = context.coordinator
-        view.applyOverlays(selfFix: selfFix, manualPin: manualPin, breadcrumbs: breadcrumbs)
+        view.applyOverlays(
+            selfFix: selfFix,
+            manualPin: manualPin,
+            breadcrumbs: breadcrumbs,
+            viewshed: viewshed,
+            slope: slope,
+            showViewshed: showViewshed,
+            showSlope: showSlope
+        )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
             view.resetToPack()
+        }
+        if context.coordinator.lastCenterToken != centerToken {
+            context.coordinator.lastCenterToken = centerToken
+            if let selfFix, selfFix.hasCoordinate {
+                view.centerOn(latitude: selfFix.latitude!, longitude: selfFix.longitude!)
+            }
         }
     }
 
@@ -38,6 +65,7 @@ struct OfflineMapView: UIViewRepresentable {
         var onDropPin: (Double, Double) -> Void
         var onOutsidePack: (Bool) -> Void
         var lastResetToken = 0
+        var lastCenterToken = 0
 
         init(onDropPin: @escaping (Double, Double) -> Void, onOutsidePack: @escaping (Bool) -> Void) {
             self.onDropPin = onDropPin
@@ -135,11 +163,32 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         reportOutside()
     }
 
-    func applyOverlays(selfFix: LocationFix?, manualPin: LocationFix?, breadcrumbs: [BreadcrumbRecordDTO]) {
+    func applyOverlays(
+        selfFix: LocationFix?,
+        manualPin: LocationFix?,
+        breadcrumbs: [BreadcrumbRecordDTO],
+        viewshed: [ViewshedRay],
+        slope: [SlopeSample],
+        showViewshed: Bool,
+        showSlope: Bool
+    ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
         canvas.breadcrumbs = breadcrumbs
+        canvas.viewshed = viewshed
+        canvas.slope = slope
+        canvas.showViewshed = showViewshed
+        canvas.showSlope = showSlope
         canvas.setNeedsDisplay()
+    }
+
+    func centerOn(latitude: Double, longitude: Double) {
+        let fix = LocationFix(latitude: latitude, longitude: longitude)
+        guard let point = canvas.point(for: fix) else { return }
+        let scaled = CGPoint(x: point.x * scroll.zoomScale, y: point.y * scroll.zoomScale)
+        let x = scaled.x - scroll.bounds.width / 2 + scroll.contentInset.left
+        let y = scaled.y - scroll.bounds.height / 2 + scroll.contentInset.top
+        scroll.setContentOffset(CGPoint(x: max(-scroll.contentInset.left, x), y: max(-scroll.contentInset.top, y)), animated: false)
     }
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? { canvas }
@@ -204,6 +253,10 @@ final class TileCanvasLayer: UIView {
     var selfFix: LocationFix?
     var manualPin: LocationFix?
     var breadcrumbs: [BreadcrumbRecordDTO] = []
+    var viewshed: [ViewshedRay] = []
+    var slope: [SlopeSample] = []
+    var showViewshed = false
+    var showSlope = false
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -238,6 +291,12 @@ final class TileCanvasLayer: UIView {
             let fix = LocationFix(latitude: crumb.latitude, longitude: crumb.longitude)
             drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
         }
+        if showSlope {
+            drawSlope(in: ctx)
+        }
+        if showViewshed, let selfFix {
+            drawViewshed(from: selfFix, in: ctx)
+        }
     }
 
     func coordinate(at point: CGPoint) -> (Double, Double) {
@@ -248,11 +307,63 @@ final class TileCanvasLayer: UIView {
         return (lat, lon)
     }
 
-    private func point(for fix: LocationFix) -> CGPoint? {
+    func point(for fix: LocationFix) -> CGPoint? {
         guard let lat = fix.latitude, let lon = fix.longitude else { return nil }
         let px = (WebMercator.tileX(longitude: lon, zoom: zMax) - Double(x0)) * 256
         let py = (WebMercator.tileY(latitude: lat, zoom: zMax) - Double(y0)) * 256
         return CGPoint(x: px, y: py)
+    }
+
+    private func drawSlope(in ctx: CGContext) {
+        for sample in slope {
+            let fix = LocationFix(latitude: sample.latitude, longitude: sample.longitude)
+            guard let point = point(for: fix) else { continue }
+            let t = min(1, sample.degrees / 45)
+            ctx.setFillColor(UIColor(red: t, green: 0.2, blue: 0.15, alpha: 0.22).cgColor)
+            ctx.fill(CGRect(x: point.x - 8, y: point.y - 8, width: 16, height: 16))
+        }
+    }
+
+    private func drawViewshed(from origin: LocationFix, in ctx: CGContext) {
+        guard let start = point(for: origin), origin.hasCoordinate else { return }
+        ctx.setFillColor(UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.12).cgColor)
+        ctx.beginPath()
+        ctx.move(to: start)
+        for ray in viewshed {
+            let dest = offset(latitude: origin.latitude!, longitude: origin.longitude!, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
+            let fix = LocationFix(latitude: dest.0, longitude: dest.1)
+            if let p = point(for: fix) {
+                ctx.addLine(to: p)
+            }
+        }
+        ctx.closePath()
+        ctx.fillPath()
+        ctx.setStrokeColor(UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.45).cgColor)
+        ctx.setLineWidth(1)
+        ctx.beginPath()
+        ctx.move(to: start)
+        for ray in viewshed {
+            let dest = offset(latitude: origin.latitude!, longitude: origin.longitude!, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
+            let fix = LocationFix(latitude: dest.0, longitude: dest.1)
+            if let p = point(for: fix) {
+                ctx.addLine(to: p)
+            }
+        }
+        ctx.closePath()
+        ctx.strokePath()
+    }
+
+    private func offset(latitude: Double, longitude: Double, meters: Double, bearing: Double) -> (Double, Double) {
+        let r = 6_371_000.0
+        let brng = bearing * .pi / 180
+        let lat1 = latitude * .pi / 180
+        let lon1 = longitude * .pi / 180
+        let lat2 = asin(sin(lat1) * cos(meters / r) + cos(lat1) * sin(meters / r) * cos(brng))
+        let lon2 = lon1 + atan2(
+            sin(brng) * sin(meters / r) * cos(lat1),
+            cos(meters / r) - sin(lat1) * sin(lat2)
+        )
+        return (lat2 * 180 / .pi, lon2 * 180 / .pi)
     }
 
     private func drawMark(_ fix: LocationFix?, color: UIColor, in ctx: CGContext, radius: CGFloat = 7) {
