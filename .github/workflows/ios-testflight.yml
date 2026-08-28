@@ -79,6 +79,7 @@ jobs:
                       "method": "app-store-connect",
                       "destination": "upload",
                       "signingStyle": "automatic",
+                      "signingCertificate": "Apple Distribution",
                       "teamID": os.environ["APPLE_TEAM_ID"],
                       "uploadSymbols": True,
                   },
@@ -106,6 +107,7 @@ jobs:
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             archive
 
       - name: Probe DefaultPack tiles inside xcarchive .app
@@ -128,7 +130,8 @@ jobs:
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-            CODE_SIGN_STYLE=Automatic
+            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Remove API key
         if: always()
