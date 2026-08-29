@@ -77,15 +77,8 @@ def test_pbx_single_copy() -> None:
         fail("expected CURRENT_PROJECT_VERSION = 18 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
-    ident = 'CODE_SIGN_IDENTITY = "Apple Distribution"'
-    idx = pbx.find(ident)
-    if idx < 0:
-        fail("Release must Automatic-sign with Apple Distribution")
-    around = pbx[idx : idx + 500]
-    if "DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;" not in around:
-        fail("Apple Distribution is not on the Release target")
-    if "ENABLE_TESTABILITY" in pbx[max(0, idx - 400) : idx]:
-        fail("Debug config must not force Apple Distribution")
+    if "Apple Distribution" in pbx:
+        fail("pbxproj must not set Apple Distribution (Automatic conflict)")
     ok("pbxproj is ditto-only, version 18, no alwaysOutOfDate")
 
 
@@ -101,8 +94,8 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost GuidePack ditto phase")
     if '"CURRENT_PROJECT_VERSION": "18",' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
-    if 'common["CODE_SIGN_IDENTITY"] = "Apple Distribution"' not in src:
-        fail("generate_project.py Release would not set Apple Distribution")
+    if "Apple Distribution" in src:
+        fail("generate_project.py must not set Apple Distribution")
     if "generated-sample" in src:
         fail("generate_project.py would restore synthetic DefaultPack stubs")
     ok("generate_project.py regen stays ditto-only at version 18")
