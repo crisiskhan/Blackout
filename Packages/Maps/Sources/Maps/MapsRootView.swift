@@ -20,7 +20,6 @@ public struct MapsRootView: View {
     @State private var outsidePack = false
     @State private var resetToken = 0
     @State private var centerToken = 0
-    @State private var storeError: String?
     @State private var radarOn = true
     @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
     @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
@@ -28,10 +27,10 @@ public struct MapsRootView: View {
     @State private var showSlope = UserDefaults.standard.bool(forKey: BlackoutKeys.mapSlope)
     @State private var selectedPeer: RadarBlip?
     @State private var showLiDAR = false
+    @State private var showLayers = false
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
-    @State private var packPaintLog = ""
 
     public init(
         location: LocationService,
@@ -53,13 +52,11 @@ public struct MapsRootView: View {
 
     private var sosOnly: Bool { battery.isCritical }
     private var extremeSaver: Bool { battery.isExtremeSaver }
-    private var radarVisible: Bool {
-        if sosOnly { return false }
-        if extremeSaver { return true }
-        return radarOn
-    }
     private var extrasOn: Bool { !sosOnly && !extremeSaver }
     private var peers: [RadarBlip] { [] }
+    private var locationDenied: Bool {
+        location.authorization == .denied || location.authorization == .restricted
+    }
     private var locationOutsideCoverage: Bool {
         guard let fix = location.navigationFix, fix.hasCoordinate else { return false }
         let regions = coverageRegions.isEmpty ? [packService.pack?.region].compactMap { $0 } : coverageRegions
@@ -67,6 +64,19 @@ public struct MapsRootView: View {
     }
     private var showLocationEmptyState: Bool {
         packService.pack != nil && (outsidePack || (locationOutsideCoverage && !pinnedToPackCoverage))
+    }
+    /// One raised card for a missing pack, GPS deny, or no tiles.
+    /// Never a watermark and never stacked HUD warnings.
+    private var showEmptyCard: Bool {
+        packService.pack == nil || locationDenied || showLocationEmptyState
+    }
+    private var radarVisible: Bool {
+        if sosOnly || showEmptyCard { return false }
+        if extremeSaver { return true }
+        return radarOn
+    }
+    private var showChipRow: Bool {
+        packService.pack != nil && !showEmptyCard && !sosOnly
     }
 
     public var body: some View {
@@ -94,188 +104,49 @@ public struct MapsRootView: View {
                 )
                 .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
-                if radarVisible, !showLocationEmptyState {
+                if radarVisible {
                     RadarHUDView(
                         headingUp: headingUp,
                         headingDegrees: location.headingDegrees,
                         peers: peers,
                         sweepAudio: sweepAudio,
-                        onToggleHeading: {
-                            headingUp.toggle()
-                            UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
-                            if !pinnedToPackCoverage {
-                                centerToken += 1
-                            }
-                        },
-                        onToggleAudio: {
-                            sweepAudio.toggle()
-                            UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
-                        },
                         onSelectPeer: { selectedPeer = $0 },
                         onSelectSelf: { selectedPeer = nil }
                     )
-                    .padding(.top, 120)
-                    .padding(.bottom, 160)
+                    .padding(.top, 80)
+                    .padding(.bottom, 180)
+                    .allowsHitTesting(true)
                 }
-                if showLocationEmptyState {
-                    NoPackCanvas(
-                        title: "No tiles for this location",
-                        detail: "Texas and New Mexico packs download from Field Packs on Wi-Fi, then work airplane. Recenter jumps the camera to the bundled Denver sample center, not your GPS.",
-                        location: location,
-                        packRegion: pack.region,
-                        recenterTitle: "Recenter to pack coverage",
-                        onReturn: {
-                            pinnedToPackCoverage = true
-                            resetToken += 1
-                            packPaintLog = "Recenter · \(packService.paintDiagnostic) · not GPS"
-                        },
-                        onOpenFieldPacks: onOpenFieldPacks
-                    )
-                }
-            } else {
-                NoPackCanvas(
-                    title: "No map pack",
-                    detail: "DefaultPack is missing from Blackout.app. This canvas is intentional — not a MapKit spinner waiting on WAN.",
-                    location: location,
-                    packRegion: nil,
-                    onReturn: nil,
+            }
+            if showEmptyCard {
+                MapEmptyCard(
+                    title: emptyCardTitle,
+                    detail: emptyCardDetail,
+                    showRecenter: packService.pack != nil,
+                    onRecenter: packService.pack == nil ? nil : recenterToPack,
                     onOpenFieldPacks: onOpenFieldPacks
                 )
             }
-            VStack {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HUDPanel {
-                            VStack(alignment: .leading, spacing: 8) {
-                                GPSChip(mode: gpsMode)
-                                MeshPill(nearbyCount: mesh.nearbyPeerCount)
-                                Text("file tiles · no Apple base map")
-                                    .font(BlackoutDS.captionFont())
-                                    .foregroundStyle(BlackoutDS.Silver.bright)
-                                if let pack = packService.pack {
-                                    Text("pack center \(pack.region.centerLabel) · not GPS")
-                                        .font(BlackoutDS.captionFont())
-                                        .foregroundStyle(BlackoutDS.Semantic.info)
-                                }
-                                if !packPaintLog.isEmpty {
-                                    Text(packPaintLog)
-                                        .font(BlackoutDS.captionFont())
-                                        .foregroundStyle(BlackoutDS.Semantic.info)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                                if sosOnly {
-                                    Text("CRITICAL · SOS only")
-                                        .font(BlackoutDS.captionFont())
-                                        .foregroundStyle(BlackoutDS.Red.hot)
-                                } else if extremeSaver {
-                                    Text("Extreme Saver · SOS + coarse nav + radar")
-                                        .font(BlackoutDS.captionFont())
-                                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                                }
-                            }
-                        }
+            VStack(spacing: 0) {
+                MapLockHUD(
+                    accuracyMeters: gpsAccuracyMeters,
+                    headingDegrees: location.headingDegrees,
+                    onNorthUp: {
+                        headingUp = false
+                        UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                     }
-                    Spacer()
-                    CompassRose(heading: location.headingDegrees)
-                }
+                )
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
-                if location.authorization == .denied || location.authorization == .restricted {
-                    PermissionDenied(
-                        kind: .location,
-                        reason: "GPS denied. Dead reckoning uses compass + steps from last-known or a manual pin. PermissionDenied stays; the app will not wait on a fix."
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                }
-                if location.manualPin?.hasCoordinate == true, location.lastKnown?.source != .gps {
-                    HStack {
-                        GhostButton("Clear pin", height: BlackoutDS.Hit.sm) {
-                            location.clearManualPin()
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                } else if location.navigationFix?.hasCoordinate != true,
-                          location.authorization == .denied || location.authorization == .restricted,
-                          let pack = packService.pack {
-                    HStack {
-                        GhostButton("Drop pin at pack center", height: BlackoutDS.Hit.sm) {
-                            location.dropManualPin(
-                                latitude: pack.region.centerLatitude,
-                                longitude: pack.region.centerLongitude
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-                if showSlope || showViewshed, extrasOn {
-                    Text("Sample DEM · not USGS. Slope/viewshed are coarse.")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.steel)
-                        .padding(.horizontal, 16)
-                }
-                if let storeError {
-                    StoreFailure(storeError)
-                        .padding(.horizontal, 16)
-                }
                 Spacer()
-                if extrasOn {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Layers")
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.mid)
-                            .padding(.horizontal, 4)
-                        HStack(spacing: 8) {
-                            toggleChip("Radar", on: radarOn) { radarOn.toggle() }
-                            toggleChip("Slope", on: showSlope) {
-                                showSlope.toggle()
-                                UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
-                                refreshTerrain()
-                            }
-                            toggleChip("Viewshed", on: showViewshed) {
-                                showViewshed.toggle()
-                                UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
-                                refreshTerrain()
-                            }
-                            if LiDARAvailability.isSupported {
-                                Button {
-                                    showLiDAR = true
-                                } label: {
-                                    Text("LiDAR")
-                                        .font(BlackoutDS.captionFont())
-                                        .foregroundStyle(BlackoutDS.Silver.bright)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: BlackoutDS.Hit.sm)
-                                        .background(BlackoutDS.Surface.raised.opacity(0.82))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                                        )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
+                if showChipRow {
+                    HStack(spacing: 8) {
+                        MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
+                        MetalButton("Layers", height: BlackoutDS.Hit.md) { showLayers = true }
+                        MetalButton("Packs", height: BlackoutDS.Hit.md) { onOpenFieldPacks?() }
                     }
                     .padding(.horizontal, 12)
-                }
-                if battery.coarseNavigateEnabled || extrasOn {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Tools")
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.mid)
-                            .padding(.horizontal, 4)
-                        HStack(spacing: 8) {
-                            if battery.coarseNavigateEnabled {
-                                toolButton("Navigate", tool: .navigate)
-                            }
-                            if extrasOn {
-                                toolButton("Topo", tool: .topo)
-                                toolButton("Towns", tool: .civilization)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 108)
+                    .padding(.bottom, 120)
                 }
             }
         }
@@ -294,6 +165,45 @@ public struct MapsRootView: View {
             }
             .preferredColorScheme(.dark)
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showLayers) {
+            MapLayersSheet(
+                radarOn: $radarOn,
+                headingUp: $headingUp,
+                sweepAudio: $sweepAudio,
+                showSlope: $showSlope,
+                showViewshed: $showViewshed,
+                extrasOn: extrasOn,
+                navigateEnabled: battery.coarseNavigateEnabled,
+                lidarSupported: LiDARAvailability.isSupported,
+                onToggleSlope: {
+                    UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
+                    refreshTerrain()
+                },
+                onToggleViewshed: {
+                    UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
+                    refreshTerrain()
+                },
+                onToggleHeading: {
+                    UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
+                    if headingUp, !pinnedToPackCoverage {
+                        centerToken += 1
+                    }
+                },
+                onToggleAudio: {
+                    UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
+                },
+                onOpenLiDAR: {
+                    showLayers = false
+                    showLiDAR = true
+                },
+                onOpenTool: { item in
+                    showLayers = false
+                    tool = item
+                }
+            )
+            .presentationDetents([.medium])
+            .preferredColorScheme(.dark)
         }
         .sheet(item: $selectedPeer) { blip in
             RadarPeerSheet(
@@ -327,15 +237,43 @@ public struct MapsRootView: View {
             if critical {
                 tool = nil
                 showLiDAR = false
+                showLayers = false
                 selectedPeer = nil
             }
         }
         .onAppear {
             if extremeSaver { radarOn = true }
-            packPaintLog = packService.paintDiagnostic
             refreshTerrain()
             location.startUpdating()
         }
+    }
+
+    private var emptyCardTitle: String {
+        if packService.pack == nil { return "No map pack" }
+        if locationDenied { return "GPS denied" }
+        return "No tiles here"
+    }
+
+    private var emptyCardDetail: String {
+        if packService.pack == nil {
+            return "Download a Field Pack for dusk tiles."
+        }
+        if locationDenied {
+            return "Recenter to pack coverage, or open Field Packs."
+        }
+        return "Recenter to the Denver sample, or download a Field Pack."
+    }
+
+    private var gpsAccuracyMeters: Double? {
+        guard let fix = location.navigationFix, fix.hasCoordinate,
+              let meters = fix.horizontalAccuracyMeters,
+              meters >= 0, meters.isFinite else { return nil }
+        return meters
+    }
+
+    private func recenterToPack() {
+        pinnedToPackCoverage = true
+        resetToken += 1
     }
 
     private var lidarMapRange: Double? {
@@ -376,67 +314,9 @@ public struct MapsRootView: View {
             } else {
                 crumbs = []
             }
-            storeError = nil
         } catch {
-            storeError = error.localizedDescription
+            crumbs = []
         }
-    }
-
-    private var gpsMode: GPSChip.Mode {
-        if location.isDeadReckoning, location.navigationFix?.hasCoordinate == true {
-            return .deadReckoning
-        }
-        if location.lastKnown?.source == .gps, location.lastKnown?.hasCoordinate == true {
-            return location.authorization == .authorized ? .live : .lastKnown
-        }
-        if location.lastKnown?.hasCoordinate == true {
-            return .lastKnown
-        }
-        if location.manualPin?.hasCoordinate == true { return .manual }
-        switch location.authorization {
-        case .denied, .restricted:
-            return location.headingDegrees != nil ? .compass : .denied
-        case .notDetermined:
-            return .none
-        case .authorized:
-            return location.headingDegrees != nil ? .compass : .none
-        }
-    }
-
-    private func toolButton(_ title: String, tool: MapTool) -> some View {
-        Button {
-            self.tool = tool
-        } label: {
-            Text(title)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
-                .frame(maxWidth: .infinity)
-                .frame(height: BlackoutDS.Hit.sm)
-                .background(BlackoutDS.Surface.raised.opacity(0.82))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func toggleChip(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(on ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
-                .frame(maxWidth: .infinity)
-                .frame(height: BlackoutDS.Hit.sm)
-                .background(on ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised.opacity(0.82))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -445,85 +325,172 @@ enum MapTool: String, Identifiable {
     var id: String { rawValue }
 }
 
-struct CompassRose: View {
-    var heading: Double?
+/// 56h GPS lock + accuracy, and a compass that taps to north-up. No grid-ref.
+struct MapLockHUD: View {
+    var accuracyMeters: Double?
+    var headingDegrees: Double?
+    var onNorthUp: () -> Void
 
     var body: some View {
-        HUDPanel {
-            VStack(spacing: 4) {
-                Image(systemName: "location.north.line")
-                    .font(.system(size: 22, weight: .semibold))
-                    .rotationEffect(.degrees(-(heading ?? 0)))
-                    .foregroundStyle(BlackoutDS.Silver.metal)
-                Text(heading.map { "\(Int($0))°" } ?? "—")
+        HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: accuracyMeters == nil ? "lock.open" : "lock.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(accuracyMeters == nil ? BlackoutDS.Silver.steel : BlackoutDS.Semantic.ok)
+                Text(accuracyLabel)
                     .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                    .accessibilityLabel(accuracyMeters == nil ? "NO FIX" : accuracyLabel)
             }
-            .frame(width: 56)
+            Spacer(minLength: 8)
+            Button(action: onNorthUp) {
+                HStack(spacing: 6) {
+                    Image(systemName: "location.north.line")
+                        .font(.system(size: 18, weight: .semibold))
+                        .rotationEffect(.degrees(-(headingDegrees ?? 0)))
+                    Text(headingDegrees.map { "\(Int($0.rounded()))°" } ?? "—")
+                        .font(BlackoutDS.captionFont())
+                }
+                .foregroundStyle(BlackoutDS.Silver.metal)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("North-up")
         }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+        .frame(height: BlackoutDS.Hit.sm)
+        .background(BlackoutDS.Surface.raised.opacity(0.82))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var accuracyLabel: String {
+        guard let meters = accuracyMeters else { return "NO FIX" }
+        return "\(Int(meters.rounded())) m"
     }
 }
 
-struct NoPackCanvas: View {
+/// One raised card. Two actions max: Recenter, Field Packs.
+struct MapEmptyCard: View {
     var title: String
     var detail: String
-    @Bindable var location: LocationService
-    var packRegion: MapRegion?
-    var recenterTitle: String = "Recenter to pack coverage"
-    var onReturn: (() -> Void)?
+    var showRecenter: Bool
+    var onRecenter: (() -> Void)?
     var onOpenFieldPacks: (() -> Void)?
 
     var body: some View {
-        ZStack {
-            BlackoutDS.Surface.void.opacity(0.92)
-            VStack(spacing: 16) {
-                Image(systemName: "map")
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundStyle(BlackoutDS.Silver.steel)
+        VStack {
+            Spacer()
+            VStack(alignment: .leading, spacing: 12) {
                 Text(title)
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Silver.bright)
                 Text(detail)
                     .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                if let packRegion {
-                    Text("Pack center \(packRegion.centerLabel)")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.info)
-                    Text(packRegion.name)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.mid)
-                }
-                if let fix = location.navigationFix, fix.hasCoordinate {
-                    Text("GPS \(fix.latitude!.formatted(.number.precision(.fractionLength(2)))), \(fix.longitude!.formatted(.number.precision(.fractionLength(2)))) — not camera")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.steel)
-                }
-                if location.isDeadReckoning {
-                    Text("DEAD RECKONING")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                }
-                if let onReturn {
-                    MetalButton(recenterTitle, height: BlackoutDS.Hit.md, action: onReturn)
-                        .padding(.horizontal, 32)
+                    .foregroundStyle(BlackoutDS.Silver.mid)
+                    .fixedSize(horizontal: false, vertical: true)
+                if showRecenter, let onRecenter {
+                    MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)
                 }
                 if let onOpenFieldPacks {
-                    GhostButton("Field Packs", height: BlackoutDS.Hit.sm, action: onOpenFieldPacks)
-                        .padding(.horizontal, 32)
-                }
-                if location.authorization == .denied || location.authorization == .restricted,
-                   location.navigationFix?.hasCoordinate != true {
-                    Text("Long-press after Recenter, or use Drop pin at pack center on the Map HUD.")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.steel)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                    GhostButton("Field Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
                 }
             }
+            .padding(20)
+            .frame(maxWidth: 400, alignment: .leading)
+            .background(BlackoutDS.Surface.raised)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal, 24)
+            Spacer()
         }
-        .ignoresSafeArea()
+        .padding(.bottom, 100)
+    }
+}
+
+struct MapLayersSheet: View {
+    @Binding var radarOn: Bool
+    @Binding var headingUp: Bool
+    @Binding var sweepAudio: Bool
+    @Binding var showSlope: Bool
+    @Binding var showViewshed: Bool
+    var extrasOn: Bool
+    var navigateEnabled: Bool
+    var lidarSupported: Bool
+    var onToggleSlope: () -> Void
+    var onToggleViewshed: () -> Void
+    var onToggleHeading: () -> Void
+    var onToggleAudio: () -> Void
+    var onOpenLiDAR: () -> Void
+    var onOpenTool: (MapTool) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ScreenHeader("Layers")
+                    layerToggle("Radar", on: $radarOn, enabled: extrasOn, persist: {})
+                    layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
+                    layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn, persist: onToggleViewshed)
+                    if lidarSupported, extrasOn {
+                        GhostButton("LiDAR", height: BlackoutDS.Hit.md, action: onOpenLiDAR)
+                    }
+                    if navigateEnabled {
+                        GhostButton("Navigate", height: BlackoutDS.Hit.md) { onOpenTool(.navigate) }
+                    }
+                    if extrasOn {
+                        GhostButton("Topo", height: BlackoutDS.Hit.md) { onOpenTool(.topo) }
+                        GhostButton("Towns", height: BlackoutDS.Hit.md) { onOpenTool(.civilization) }
+                    }
+                    layerToggle("Heading-up", on: $headingUp, enabled: true, persist: onToggleHeading)
+                    layerToggle("Sweep audio", on: $sweepAudio, enabled: extrasOn, persist: onToggleAudio)
+                }
+                .padding(20)
+            }
+            .background(BlackoutDS.Surface.base.ignoresSafeArea())
+            .navigationTitle("Layers")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func layerToggle(
+        _ title: String,
+        on: Binding<Bool>,
+        enabled: Bool,
+        persist: @escaping () -> Void
+    ) -> some View {
+        Button {
+            guard enabled else { return }
+            on.wrappedValue.toggle()
+            persist()
+        } label: {
+            HStack {
+                Text(title)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(enabled ? BlackoutDS.Silver.bright : BlackoutDS.Silver.steel)
+                Spacer()
+                Text(on.wrappedValue ? "On" : "Off")
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(on.wrappedValue && enabled ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.mid)
+            }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .frame(height: BlackoutDS.Hit.md)
+            .background(BlackoutDS.Surface.raised.opacity(0.82))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.55)
     }
 }

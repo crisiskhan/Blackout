@@ -62,13 +62,8 @@ struct RootView: View {
                     }
                     .allowsHitTesting(false)
                 }
-                if showFieldPacksOverlay {
-                    FieldPacksView(store: container.packs) {
-                        skipFieldPacks()
-                    }
-                }
                 sosOverlay
-                if sizeClass != .regular, !container.battery.isCritical, !showFieldPacksOverlay {
+                if sizeClass != .regular, !container.battery.isCritical {
                     settingsOverlay
                 }
             }
@@ -85,6 +80,13 @@ struct RootView: View {
                     container.showFieldPacks = true
                 }
             )
+            .preferredColorScheme(.dark)
+        }
+        .sheet(isPresented: fieldPacksSheetBinding) {
+            FieldPacksView(store: container.packs) {
+                skipFieldPacks()
+            }
+            .presentationDetents([.medium, .large])
             .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
@@ -110,10 +112,21 @@ struct RootView: View {
         }
     }
 
-    private var showFieldPacksOverlay: Bool {
-        container.showFieldPacks
-            && !container.battery.isCritical
-            && !(container.lock.isEnabled && !container.lock.isUnlocked)
+    private var fieldPacksSheetBinding: Binding<Bool> {
+        Binding(
+            get: {
+                container.showFieldPacks
+                    && !container.battery.isCritical
+                    && !(container.lock.isEnabled && !container.lock.isUnlocked)
+            },
+            set: { newValue in
+                if newValue {
+                    container.showFieldPacks = true
+                } else {
+                    skipFieldPacks()
+                }
+            }
+        )
     }
 
     private func skipFieldPacks() {

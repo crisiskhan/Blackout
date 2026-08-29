@@ -64,13 +64,13 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in pbx:
         fail("pbxproj lost GuidePack ditto phase")
-    if "CURRENT_PROJECT_VERSION = 11" not in pbx:
-        fail("CURRENT_PROJECT_VERSION is no longer 11")
-    if pbx.count("CURRENT_PROJECT_VERSION = 11") < 2:
-        fail("expected CURRENT_PROJECT_VERSION = 11 on Debug and Release")
+    if "CURRENT_PROJECT_VERSION = 12" not in pbx:
+        fail("CURRENT_PROJECT_VERSION is no longer 12")
+    if pbx.count("CURRENT_PROJECT_VERSION = 12") < 2:
+        fail("expected CURRENT_PROJECT_VERSION = 12 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
-    ok("pbxproj is ditto-only, version 11, no alwaysOutOfDate")
+    ok("pbxproj is ditto-only, version 12, no alwaysOutOfDate")
 
 
 def test_generator_does_not_restore_double_copy() -> None:
@@ -83,9 +83,45 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in src:
         fail("generate_project.py lost GuidePack ditto phase")
-    if '"CURRENT_PROJECT_VERSION": "11"' not in src:
+    if '"CURRENT_PROJECT_VERSION": "12"' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
-    ok("generate_project.py regen stays ditto-only at version 11")
+    ok("generate_project.py regen stays ditto-only at version 12")
+
+
+def test_map_chrome_lock() -> None:
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    radar = (ROOT / "Packages/Maps/Sources/Maps/RadarHUDView.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    for banned in (
+        "packPaintLog",
+        "file tiles",
+        "NoPackCanvas",
+        "CompassRose",
+        "MeshPill",
+        "PermissionDenied",
+        "GPSChip",
+    ):
+        if banned in maps:
+            fail(f"MapsRootView still paints {banned}")
+    if "MapLockHUD" not in maps or "NO FIX" not in maps:
+        fail("MapsRootView lost the 56h GPS lock HUD")
+    if 'MetalButton("Recenter"' not in maps or 'MetalButton("Layers"' not in maps:
+        fail("MapsRootView lost Recenter / Layers metal chips")
+    if 'MetalButton("Packs"' not in maps:
+        fail("MapsRootView lost Packs metal chip")
+    if "MapEmptyCard" not in maps:
+        fail("MapsRootView lost the single empty card")
+    if "showFieldPacksOverlay" in root:
+        fail("Field Packs is still a ZStack overlay")
+    if "fieldPacksSheetBinding" not in root or "FieldPacksView" not in root:
+        fail("Field Packs sheet missing from RootView")
+    if "Heading-up" in radar or "Sweep audio" in radar or "0 peers · self only" in radar:
+        fail("RadarHUDView still floats heading/audio/peer chrome")
+    if "MKMapView(" in maps:
+        fail("MapsRootView must not construct MKMapView")
+    if "URLSession" in maps:
+        fail("MapsRootView must not use URLSession")
+    ok("Map chrome is HUD + Recenter/Layers/Packs, Field Packs sheet")
 
 
 def test_assign_script_requires_secrets() -> None:
@@ -120,6 +156,7 @@ def main() -> None:
     test_pbx_single_copy()
     test_generator_does_not_restore_double_copy()
     test_assign_script_requires_secrets()
+    test_map_chrome_lock()
     print("all ci-opt checks passed")
 
 

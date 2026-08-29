@@ -11,8 +11,6 @@ struct RadarHUDView: View {
     var headingDegrees: Double?
     var peers: [RadarBlip]
     var sweepAudio: Bool
-    var onToggleHeading: () -> Void
-    var onToggleAudio: () -> Void
     var onSelectPeer: (RadarBlip) -> Void
     var onSelectSelf: () -> Void
 
@@ -44,21 +42,6 @@ struct RadarHUDView: View {
             .onChange(of: sweep) { _, angle in
                 hapticIfSweepHits(angle)
             }
-        }
-        .overlay(alignment: .bottom) {
-            HStack(spacing: 8) {
-                GhostButton(headingUp ? "Heading-up" : "North-up", height: BlackoutDS.Hit.sm, action: onToggleHeading)
-                    .frame(width: 148)
-                GhostButton(sweepAudio ? "Sweep audio on" : "Sweep audio off", height: BlackoutDS.Hit.sm, action: onToggleAudio)
-                    .frame(width: 188)
-            }
-            .padding(.bottom, 8)
-        }
-        .overlay(alignment: .top) {
-            Text(peers.isEmpty ? "0 peers · self only · no fake returns" : "\(peers.count) blips")
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.dim)
-                .padding(.top, 8)
         }
         .accessibilityElement(children: .contain)
     }
