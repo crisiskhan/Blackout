@@ -4,10 +4,19 @@ import SwiftUI
 
 public struct FieldPacksView: View {
     @Bindable var store: PackStore
+    var nearbyCount: Int
+    var onSendToPeer: ((String) -> Void)?
     var onSkip: () -> Void
 
-    public init(store: PackStore, onSkip: @escaping () -> Void) {
+    public init(
+        store: PackStore,
+        nearbyCount: Int = 0,
+        onSendToPeer: ((String) -> Void)? = nil,
+        onSkip: @escaping () -> Void
+    ) {
         self.store = store
+        self.nearbyCount = nearbyCount
+        self.onSendToPeer = onSendToPeer
         self.onSkip = onSkip
     }
 
@@ -25,7 +34,7 @@ public struct FieldPacksView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     ScreenHeader(
                         "Field Packs",
-                        subtitle: "Download Texas (~199 MB) or New Mexico (~74 MB) statewide, or El Paso, Las Cruces, or Albuquerque, on Wi-Fi — then they work airplane. Skip uses the bundled Denver sample. SOS stays available."
+                        subtitle: "Download Texas (~199 MB) or New Mexico (~74 MB) statewide, or El Paso, Las Cruces, or Albuquerque, on Wi-Fi — then they work airplane. City packs can also go to one nearby phone on the local radio. Skip uses the bundled Denver sample. SOS stays available."
                     )
                     if !store.onWiFi {
                         Text(store.pathSatisfied
@@ -72,12 +81,31 @@ public struct FieldPacksView: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.mid)
                 }
+                if let fraction = store.progress[pack.id] {
+                    Text("\(Int(fraction * 100))%")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.steel)
+                }
                 if !pack.isBundled, state != .ready {
                     MetalButton(state == .downloading ? "Downloading" : "Download", height: BlackoutDS.Hit.sm) {
                         store.download(pack.id)
                     }
                     .disabled(state == .downloading)
                     .opacity(state == .downloading ? 0.6 : 1)
+                }
+                if FieldPackCatalog.isCityRelay(pack.id), state == .ready {
+                    if nearbyCount > 0 {
+                        let sending = store.progress[pack.id] != nil
+                        MetalButton(sending ? "Sending" : "Send to nearby phone", height: BlackoutDS.Hit.sm) {
+                            onSendToPeer?(pack.id)
+                        }
+                        .disabled(sending)
+                        .opacity(sending ? 0.6 : 1)
+                    } else {
+                        Text("Send waits for one nearby phone.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
                 }
             }
         }

@@ -22,5 +22,9 @@ let package = Package(
                 .linkedLibrary("z"),
             ]
         ),
+        .testTarget(
+            name: "PacksTests",
+            dependencies: ["BlackoutPacks"]
+        ),
     ]
 )

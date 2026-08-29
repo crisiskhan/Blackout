@@ -15,6 +15,9 @@ public final class MeshFacade: MeshServing {
     public private(set) var inboundSequence: UInt64 = 0
 
     public var onInbound: ((MeshInbound) -> Void)?
+    public var onFileProgress: ((String, Double) -> Void)?
+    public var onFileReceiveStarted: ((String) -> Void)?
+    public var onSendComplete: ((String, Bool) -> Void)?
 
     private let localPeer: MCPeerID
     private var advertisement: Data = Data()
@@ -40,6 +43,15 @@ public final class MeshFacade: MeshServing {
         radio.onInbound = { [weak self] event in
             self?.receive(event)
         }
+        radio.onFileProgress = { [weak self] name, value in
+            self?.onFileProgress?(name, value)
+        }
+        radio.onFileReceiveStarted = { [weak self] name in
+            self?.onFileReceiveStarted?(name)
+        }
+        radio.onSendComplete = { [weak self] name, failed in
+            self?.onSendComplete?(name, failed)
+        }
         radio.setAdvertisement(advertisement)
         radio.start()
         pipe = radio
@@ -56,6 +68,10 @@ public final class MeshFacade: MeshServing {
         lastOutbound = envelope
         guard let frame = MeshWire.encodeEnvelope(envelope) else { return }
         pipe?.send(frame: frame)
+    }
+
+    public func sendFile(at url: URL, named name: String) {
+        pipe?.sendFile(at: url, named: name)
     }
 
     private func receive(_ inbound: MeshInbound) {

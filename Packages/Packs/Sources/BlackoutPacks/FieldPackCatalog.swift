@@ -133,6 +133,13 @@ public enum FieldPackCatalog {
         elPaso, lasCruces, albuquerque, texas, newMexico
     ]
     public static let all: [FieldPackDescriptor] = [denver] + remotePacks
+
+    /// v1 radio relay. Statewide Texas / New Mexico stay download-only.
+    public static let cityRelayIDs: Set<String> = ["el-paso", "las-cruces", "albuquerque"]
+
+    public static func isCityRelay(_ id: String) -> Bool {
+        cityRelayIDs.contains(id)
+    }
 }
 
 public struct FieldPackDescriptor: Identifiable, Hashable, Sendable {

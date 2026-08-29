@@ -66,6 +66,15 @@ final class AppContainer {
         mesh.onInbound = { [weak self] event in
             self?.handleMeshInbound(event)
         }
+        mesh.onFileProgress = { [weak self] name, value in
+            self?.packs.updateRelayProgress(name, value)
+        }
+        mesh.onFileReceiveStarted = { [weak self] name in
+            self?.packs.noteReceiving(name)
+        }
+        mesh.onSendComplete = { [weak self] name, failed in
+            self?.packs.finishRelaySend(name, failed: failed)
+        }
         location.applyPolicy(battery.policy)
         if battery.isCritical {
             location.stopUpdating()
@@ -84,6 +93,22 @@ final class AppContainer {
             crypto.registerPeerAdvertisement(data)
         case .envelope(let envelope):
             ingestEnvelope(envelope)
+        case .resource(let name, let fileURL):
+            packs.installRelayedZip(id: name, zipURL: fileURL)
+        }
+    }
+
+    func relayPack(_ id: String) {
+        guard mesh.nearbyPeerCount > 0 else {
+            packs.noteRelayBlocked(id)
+            return
+        }
+        do {
+            let url = try packs.prepareRelayZip(id)
+            packs.beginRelaySend(id)
+            mesh.sendFile(at: url, named: id)
+        } catch {
+            packs.finishRelaySend(id, failed: true)
         }
     }
 

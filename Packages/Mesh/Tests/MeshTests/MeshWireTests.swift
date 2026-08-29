@@ -34,4 +34,13 @@ final class MeshWireTests: XCTestCase {
         XCTAssertNil(MeshWire.decode(Data("not-a-frame".utf8)))
         XCTAssertNil(MeshWire.decode(Data()))
     }
+
+    func testSafeResourceNames() {
+        XCTAssertTrue(MeshRadio.isSafeResourceName("el-paso"))
+        XCTAssertTrue(MeshRadio.isSafeResourceName("las-cruces"))
+        XCTAssertTrue(MeshRadio.isSafeResourceName("albuquerque"))
+        XCTAssertFalse(MeshRadio.isSafeResourceName("../secret"))
+        XCTAssertFalse(MeshRadio.isSafeResourceName("el paso"))
+        XCTAssertFalse(MeshRadio.isSafeResourceName(""))
+    }
 }

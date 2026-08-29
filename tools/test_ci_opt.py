@@ -244,6 +244,43 @@ def test_live_mesh_1n() -> None:
     ok("live mesh 1/N is Multipeer, no WAN, radar still empty, version 15")
 
 
+def test_pack_relay_1n() -> None:
+    pipe = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MultipeerPipe.swift").read_text()
+    facade = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshFacade.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    zip_src = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackZip.swift").read_text()
+    catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
+    sheet = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").read_text()
+    packs_pkg = (ROOT / "Packages/Packs/Package.swift").read_text()
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    if "sendResource" not in pipe:
+        fail("MultipeerPipe is not using sendResource")
+    if "func sendFile" not in facade:
+        fail("MeshFacade missing sendFile")
+    if "URLSession" in pipe or "URLSession" in facade:
+        fail("Mesh relay must not use URLSession")
+    if "prepareRelayZip" not in store or "installRelayedZip" not in store:
+        fail("PackStore missing relay zip prepare/install")
+    if "func archive" not in zip_src:
+        fail("PackZip cannot archive a folder for relay")
+    if "cityRelayIDs" not in catalog or "el-paso" not in catalog:
+        fail("city relay allowlist missing")
+    if "Send to nearby phone" not in sheet:
+        fail("Field Packs sheet missing Send to nearby phone")
+    if "import BlackoutMesh" in packs_pkg or "import BlackoutMesh" in store:
+        fail("Packs must not import Mesh")
+    if "relayPack" not in app or "installRelayedZip" not in app:
+        fail("AppContainer does not glue pack relay")
+    if "session.download" in store.split("installRelayedZip")[-1][:2000]:
+        fail("installRelayedZip must not download")
+    if "CURRENT_PROJECT_VERSION = 15" not in pbx:
+        fail("version was bumped")
+    if "MARKETING_VERSION = 0.1.0" not in pbx:
+        fail("MARKETING_VERSION changed")
+    ok("city pack relay uses sendResource, Packs owns zip/hash, version 15")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -254,6 +291,7 @@ def main() -> None:
     test_map_pack_resolver()
     test_usgs_defaultpack()
     test_live_mesh_1n()
+    test_pack_relay_1n()
     print("all ci-opt checks passed")
 
 

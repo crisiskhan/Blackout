@@ -13,6 +13,92 @@ enum PackZip {
         try extract(data: data, to: destination)
     }
 
+    /// Store-only zip of a pack folder. Used when the original GitHub zip was not kept.
+    /// Receiver still extracts via `extract`. Catalog SHA-256 matches only the kept GitHub zip.
+    static func archive(directory: URL, to zipURL: URL) throws {
+        let fm = FileManager.default
+        let root = directory.standardizedFileURL
+        guard let enumerator = fm.enumerator(
+            at: root,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            throw PackZipError.invalidArchive
+        }
+        var entries: [(name: String, data: Data)] = []
+        for case let file as URL in enumerator {
+            let values = try file.resourceValues(forKeys: [.isRegularFileKey])
+            guard values.isRegularFile == true else { continue }
+            let full = file.standardizedFileURL.path
+            let prefix = root.path
+            guard full.hasPrefix(prefix + "/") else { continue }
+            let rel = String(full.dropFirst(prefix.count + 1)).replacingOccurrences(of: "\\", with: "/")
+            guard !rel.isEmpty, !rel.hasPrefix(".") else { continue }
+            entries.append((rel, try Data(contentsOf: file, options: [.mappedIfSafe])))
+        }
+        guard !entries.isEmpty else { throw PackZipError.invalidArchive }
+        entries.sort { $0.name < $1.name }
+
+        var local = Data()
+        var central = Data()
+        for entry in entries {
+            let nameData = Data(entry.name.utf8)
+            let crc = zipCRC32(entry.data)
+            let size = UInt32(entry.data.count)
+            let offset = UInt32(local.count)
+            var header = Data()
+            header.append(contentsOf: [0x50, 0x4B, 0x03, 0x04])
+            header.append(contentsOf: u16bytes(20))
+            header.append(contentsOf: u16bytes(0))
+            header.append(contentsOf: u16bytes(0))
+            header.append(contentsOf: u16bytes(0))
+            header.append(contentsOf: u16bytes(0))
+            header.append(contentsOf: u32bytes(crc))
+            header.append(contentsOf: u32bytes(size))
+            header.append(contentsOf: u32bytes(size))
+            header.append(contentsOf: u16bytes(UInt16(nameData.count)))
+            header.append(contentsOf: u16bytes(0))
+            local.append(header)
+            local.append(nameData)
+            local.append(entry.data)
+
+            var dir = Data()
+            dir.append(contentsOf: [0x50, 0x4B, 0x01, 0x02])
+            dir.append(contentsOf: u16bytes(20))
+            dir.append(contentsOf: u16bytes(20))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u32bytes(crc))
+            dir.append(contentsOf: u32bytes(size))
+            dir.append(contentsOf: u32bytes(size))
+            dir.append(contentsOf: u16bytes(UInt16(nameData.count)))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u16bytes(0))
+            dir.append(contentsOf: u32bytes(0))
+            dir.append(contentsOf: u32bytes(offset))
+            central.append(dir)
+            central.append(nameData)
+        }
+        var eocd = Data()
+        eocd.append(contentsOf: [0x50, 0x4B, 0x05, 0x06])
+        eocd.append(contentsOf: u16bytes(0))
+        eocd.append(contentsOf: u16bytes(0))
+        eocd.append(contentsOf: u16bytes(UInt16(entries.count)))
+        eocd.append(contentsOf: u16bytes(UInt16(entries.count)))
+        eocd.append(contentsOf: u32bytes(UInt32(central.count)))
+        eocd.append(contentsOf: u32bytes(UInt32(local.count)))
+        eocd.append(contentsOf: u16bytes(0))
+        var zip = local
+        zip.append(central)
+        zip.append(eocd)
+        try fm.createDirectory(at: zipURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try zip.write(to: zipURL, options: .atomic)
+    }
+
     static func extract(data: Data, to destination: URL) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: destination, withIntermediateDirectories: true)
@@ -61,6 +147,26 @@ enum PackZip {
             return dest
         }
         throw PackZipError.pathTraversal
+    }
+
+    private static func u16bytes(_ value: UInt16) -> [UInt8] {
+        [UInt8(value & 0xFF), UInt8((value >> 8) & 0xFF)]
+    }
+
+    private static func u32bytes(_ value: UInt32) -> [UInt8] {
+        [
+            UInt8(value & 0xFF),
+            UInt8((value >> 8) & 0xFF),
+            UInt8((value >> 16) & 0xFF),
+            UInt8((value >> 24) & 0xFF)
+        ]
+    }
+
+    private static func zipCRC32(_ data: Data) -> UInt32 {
+        data.withUnsafeBytes { raw -> UInt32 in
+            let ptr = raw.bindMemory(to: Bytef.self).baseAddress
+            return UInt32(crc32(0, ptr, uInt(data.count)))
+        }
     }
 
     private static func u16(_ data: Data, _ offset: Int) -> UInt16 {

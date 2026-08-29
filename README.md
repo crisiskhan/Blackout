@@ -110,7 +110,7 @@ Blackout app          composition root only (wires protocols)
 
 - **Feature → Core + kits it needs.** Features talk persistence through `PersistenceServing`. SwiftData `@Model` types stay inside Persistence.
 - **Kit → Core only.**
-- **Mesh is a dumb pipe** (`Envelope` is opaque). Isolated `BlackoutMesh` / `MeshFacade` uses MultipeerConnectivity only (local radio, no WAN). **1/N:** MeshPill goes 0→1 for one connected phone; N>1 routing is out of scope. Zero nearby is still calm success. Crypto peer hello + ECDH stay in Crypto; inbound persist stays in Persistence via the composition root.
+- **Mesh is a dumb pipe** (`Envelope` is opaque). Isolated `BlackoutMesh` / `MeshFacade` uses MultipeerConnectivity only (local radio, no WAN). **1/N:** MeshPill goes 0→1 for one connected phone; N>1 routing is out of scope. Zero nearby is still calm success. Crypto peer hello + ECDH stay in Crypto; inbound persist stays in Persistence via the composition root. City Field Packs (El Paso / Las Cruces / Albuquerque) relay as `MCSession.sendResource` zip bytes; Packs owns zip, catalog SHA-256, and install. Crypto does not re-box the ~8MB pack — the Multipeer session is already encrypted.
 - **No URLSession** on the critical path.
 - **No WKWebView, no analytics, no accounts, no CloudKit.** SwiftData `cloudKitDatabase: .none`.
 - If SwiftData cannot open **on disk**, the UI shows `StoreFailure`. There is **no** in-memory fallback (a kill would wipe SOS / expeditions / messages).

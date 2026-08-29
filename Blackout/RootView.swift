@@ -83,7 +83,11 @@ struct RootView: View {
             .preferredColorScheme(.dark)
         }
         .sheet(isPresented: fieldPacksSheetBinding) {
-            FieldPacksView(store: container.packs) {
+            FieldPacksView(
+                store: container.packs,
+                nearbyCount: container.mesh.nearbyPeerCount,
+                onSendToPeer: { container.relayPack($0) }
+            ) {
                 skipFieldPacks()
             }
             .presentationDetents([.medium, .large])

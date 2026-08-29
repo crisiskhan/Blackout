@@ -17,6 +17,7 @@ public final class PackStore {
     private let bundledRoot: URL?
     private let diskRoot: URL
     private let workRoot: URL
+    private let relayRoot: URL
     private let monitor = NWPathMonitor()
     private let session: URLSession
     private var tasks: [String: Task<Void, Never>] = [:]
@@ -27,6 +28,7 @@ public final class PackStore {
             .appendingPathComponent("FieldPacks", isDirectory: true)
         self.diskRoot = base
         self.workRoot = base.appendingPathComponent(".partial", isDirectory: true)
+        self.relayRoot = base.appendingPathComponent(".relay", isDirectory: true)
         let config = URLSessionConfiguration.ephemeral
         config.allowsCellularAccess = true
         config.timeoutIntervalForRequest = 60
@@ -34,6 +36,7 @@ public final class PackStore {
         self.session = URLSession(configuration: config)
         try? FileManager.default.createDirectory(at: self.diskRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.workRoot, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: self.relayRoot, withIntermediateDirectories: true)
         monitor.pathUpdateHandler = { [weak self] path in
             Task { @MainActor in
                 self?.pathSatisfied = path.status == .satisfied
@@ -176,6 +179,7 @@ public final class PackStore {
                 try? FileManager.default.removeItem(at: dest)
                 throw PackStoreError.missingManifest
             }
+            keepRelayZip(id: id, from: zipURL)
             try? FileManager.default.removeItem(at: zipURL)
             states[id] = .ready
             messages[id] = "Ready. Works airplane."
@@ -231,6 +235,113 @@ public final class PackStore {
         }
         return partial
     }
+
+    /// Zip bytes for the 1/N radio. Prefers the kept GitHub zip (catalog SHA-256).
+    /// Already-extracted city packs are re-zipped; that archive cannot match the catalog hash.
+    public func prepareRelayZip(_ id: String) throws -> URL {
+        guard FieldPackCatalog.isCityRelay(id) else { throw PackStoreError.notCityRelay }
+        guard isInstalled(id) else { throw PackStoreError.notInstalled }
+        let kept = relayZipURL(id)
+        if FileManager.default.fileExists(atPath: kept.path) {
+            return kept
+        }
+        let dest = workRoot.appendingPathComponent("\(id).relay.zip")
+        try? FileManager.default.removeItem(at: dest)
+        try PackZip.archive(directory: diskRoot.appendingPathComponent(id, isDirectory: true), to: dest)
+        return dest
+    }
+
+    public func beginRelaySend(_ id: String) {
+        progress[id] = 0
+        messages[id] = "Sending to nearby phone…"
+    }
+
+    public func updateRelayProgress(_ id: String, _ value: Double) {
+        progress[id] = min(1, max(0, value))
+    }
+
+    public func finishRelaySend(_ id: String, failed: Bool) {
+        progress[id] = nil
+        if isInstalled(id) {
+            states[id] = .ready
+            messages[id] = failed
+                ? "Send failed. Pack stays on this phone. Map, SOS, and Guide unchanged."
+                : "Sent to nearby phone. Still on this phone."
+        }
+    }
+
+    public func noteRelayBlocked(_ id: String) {
+        messages[id] = "No nearby phone. Connect 1/N, then send."
+    }
+
+    public func noteReceiving(_ id: String) {
+        guard FieldPackCatalog.isCityRelay(id) else { return }
+        if isInstalled(id) { return }
+        states[id] = .downloading
+        messages[id] = "Receiving from nearby phone…"
+        progress[id] = 0
+    }
+
+    /// Local radio only. No GitHub, no URLSession. Fail leaves Denver / SOS / Guide alone.
+    public func installRelayedZip(id: String, zipURL: URL) {
+        guard FieldPackCatalog.isCityRelay(id) else {
+            try? FileManager.default.removeItem(at: zipURL)
+            return
+        }
+        if isInstalled(id) {
+            states[id] = .ready
+            messages[id] = "Ready. Works airplane."
+            progress[id] = nil
+            try? FileManager.default.removeItem(at: zipURL)
+            return
+        }
+        states[id] = .downloading
+        messages[id] = "Installing from nearby phone…"
+        do {
+            let data = try Data(contentsOf: zipURL, options: [.mappedIfSafe])
+            let hex = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+            let expected = FieldPackCatalog.remotePacks.first(where: { $0.id == id })?.sha256?.lowercased()
+            let catalogMatch = expected?.count == 64 && hex == expected
+
+            let dest = diskRoot.appendingPathComponent(id, isDirectory: true)
+            try? FileManager.default.removeItem(at: dest)
+            try PackZip.extract(data: data, to: dest)
+            let manifest = dest.appendingPathComponent("manifest.json")
+            guard FileManager.default.fileExists(atPath: manifest.path),
+                  MapPackLayout.containsTilePNGs(root: dest) else {
+                try? FileManager.default.removeItem(at: dest)
+                throw PackStoreError.missingManifest
+            }
+            keepRelayZip(id: id, from: zipURL)
+            try? FileManager.default.removeItem(at: zipURL)
+            states[id] = .ready
+            progress[id] = 1
+            messages[id] = catalogMatch
+                ? "Ready from nearby phone. Checksum matches catalog."
+                : "Ready from nearby phone. Tiles verified on disk."
+        } catch {
+            try? FileManager.default.removeItem(at: zipURL)
+            if isInstalled(id) {
+                states[id] = .ready
+                messages[id] = "Ready. Works airplane."
+            } else {
+                states[id] = .failed
+                messages[id] = "Nearby pack failed. Map, SOS, and Guide still work."
+            }
+            progress[id] = nil
+        }
+    }
+
+    private func relayZipURL(_ id: String) -> URL {
+        relayRoot.appendingPathComponent("\(id).zip")
+    }
+
+    private func keepRelayZip(id: String, from zipURL: URL) {
+        guard FieldPackCatalog.isCityRelay(id) else { return }
+        let kept = relayZipURL(id)
+        try? FileManager.default.removeItem(at: kept)
+        try? FileManager.default.copyItem(at: zipURL, to: kept)
+    }
 }
 
 public enum PackStoreError: Error {
@@ -238,4 +349,6 @@ public enum PackStoreError: Error {
     case notOnReleases
     case checksum
     case missingManifest
+    case notCityRelay
+    case notInstalled
 }

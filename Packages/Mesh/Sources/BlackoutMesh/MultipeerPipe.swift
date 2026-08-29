@@ -13,6 +13,10 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
 
     var onPeerCount: ((Int) -> Void)?
     var onInbound: ((MeshInbound) -> Void)?
+    var onFileProgress: ((String, Double) -> Void)?
+    var onFileReceiveStarted: ((String) -> Void)?
+    var onSendComplete: ((String, Bool) -> Void)?
+    private var progressObservations: [String: NSKeyValueObservation] = [:]
 
     init(localPeer: MCPeerID) {
         self.localPeer = localPeer
@@ -53,6 +57,34 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         let peers = session.connectedPeers
         guard !peers.isEmpty else { return }
         _ = try? session.send(frame, toPeers: peers, with: .reliable)
+    }
+
+    func sendFile(at url: URL, named name: String) {
+        guard MeshRadio.isSafeResourceName(name) else {
+            Task { @MainActor [onSendComplete] in onSendComplete?(name, true) }
+            return
+        }
+        guard let peer = session.connectedPeers.first else {
+            Task { @MainActor [onSendComplete] in onSendComplete?(name, true) }
+            return
+        }
+        let progress = session.sendResource(at: url, withName: name, toPeer: peer) { [weak self] error in
+            Task { @MainActor [weak self] in
+                self?.progressObservations[name] = nil
+                self?.onSendComplete?(name, error != nil)
+            }
+        }
+        observe(progress, name: name)
+    }
+
+    private func observe(_ progress: Progress?, name: String) {
+        guard let progress else { return }
+        progressObservations[name] = progress.observe(\.fractionCompleted, options: [.new]) { [weak self] item, _ in
+            let value = item.fractionCompleted
+            Task { @MainActor [weak self] in
+                self?.onFileProgress?(name, value)
+            }
+        }
     }
 
     private func flushAdvertisement() {
@@ -97,7 +129,12 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         fromPeer peerID: MCPeerID,
         with progress: Progress
     ) {
-        _ = (resourceName, peerID, progress)
+        _ = peerID
+        guard MeshRadio.isSafeResourceName(resourceName) else { return }
+        Task { @MainActor [onFileReceiveStarted] in
+            onFileReceiveStarted?(resourceName)
+        }
+        observe(progress, name: resourceName)
     }
 
     func session(
@@ -107,7 +144,22 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         at localURL: URL?,
         withError error: Error?
     ) {
-        _ = (resourceName, peerID, localURL, error)
+        _ = peerID
+        progressObservations[resourceName] = nil
+        guard MeshRadio.isSafeResourceName(resourceName) else { return }
+        if error != nil || localURL == nil {
+            return
+        }
+        // MCSession deletes the temp file after this returns. Copy first.
+        let dest = FileManager.default.temporaryDirectory
+            .appendingPathComponent("blackout-relay-\(resourceName).zip")
+        try? FileManager.default.removeItem(at: dest)
+        do {
+            try FileManager.default.copyItem(at: localURL!, to: dest)
+            deliver(.resource(name: resourceName, fileURL: dest))
+        } catch {
+            return
+        }
     }
 
     func advertiser(

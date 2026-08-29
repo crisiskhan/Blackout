@@ -5,11 +5,18 @@ import Foundation
 public enum MeshInbound: Equatable, Sendable {
     case advertisement(Data)
     case envelope(Envelope)
+    case resource(name: String, fileURL: URL)
 }
 
 enum MeshRadio {
     /// MCNearbyServiceAdvertiser service type: 1–15 ASCII letters / digits / hyphen.
     static let serviceType = "blckout-mesh"
+
+    /// Resource names are pack ids only (`el-paso`). Mesh does not parse zip bytes.
+    static func isSafeResourceName(_ name: String) -> Bool {
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-")
+        return !name.isEmpty && name.count <= 32 && name.unicodeScalars.allSatisfy { allowed.contains($0) }
+    }
 }
 
 enum MeshWire {
