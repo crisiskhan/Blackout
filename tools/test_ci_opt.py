@@ -228,7 +228,110 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign_internal.sh must skip builds uploaded before this archive")
     if 'params["filter[version]"]' not in src and "filter[version]" not in src:
         fail("asc_assign_internal.sh must filter ASC builds by CFBundleVersion")
+    if "FALLBACK assign existing VALID missing-compliance" not in src:
+        fail("asc_assign_internal.sh must log FALLBACK assign existing VALID missing-compliance")
+    if "def pick_assign_match" not in src:
+        fail("asc_assign_internal.sh must expose pick_assign_match")
+    if 'raise SystemExit(2)' not in src or "FAILED_STATE" not in src:
+        fail("asc_assign_internal.sh must still fail closed on FAILED/INVALID")
     ok("asc_assign_internal.sh fails closed without secrets")
+
+
+def _assign_helpers():
+    src = (ROOT / "tools/asc_assign_internal.sh").read_text()
+    start = src.index("def parse_iso")
+    end = src.index("\nnot_before = parse_iso(not_before_raw)")
+    ns: dict = {}
+    exec("from datetime import datetime, timezone\n" + src[start:end], ns)
+    return ns
+
+
+def test_assign_pick_prefers_fresh_then_fallback() -> None:
+    helpers = _assign_helpers()
+    parse_iso = helpers["parse_iso"]
+    pick = helpers["pick_assign_match"]
+    not_before = parse_iso("2026-08-29T18:46:45Z")
+    stale_valid = {
+        "id": "0ae23432-d3af-4c91-9b36-55cf5f6baf00",
+        "version": "19",
+        "processingState": "VALID",
+        "usesNonExemptEncryption": None,
+        "uploadedDate": "2026-08-29T10:17:14-07:00",
+        "internalBuildState": "MISSING_EXPORT_COMPLIANCE",
+    }
+    fresh_processing = {
+        "id": "fresh-19",
+        "version": "19",
+        "processingState": "PROCESSING",
+        "usesNonExemptEncryption": None,
+        "uploadedDate": "2026-08-29T18:50:00Z",
+        "internalBuildState": None,
+    }
+    kind, rec = pick([stale_valid], not_before)
+    if kind != "fallback" or rec is not stale_valid:
+        fail(f"expected fallback to stale VALID missing-compliance, got {kind} {rec}")
+    kind, rec = pick([fresh_processing, stale_valid], not_before)
+    if kind != "fresh" or rec is not fresh_processing:
+        fail(f"expected fresh preference over fallback, got {kind} {rec}")
+    failed = dict(stale_valid, processingState="FAILED", id="failed-19")
+    kind, rec = pick([failed], not_before)
+    if kind != "none" or rec is not None:
+        fail(f"FAILED must not be a fallback target, got {kind} {rec}")
+    invalid = dict(stale_valid, processingState="INVALID", id="invalid-19")
+    kind, rec = pick([invalid], not_before)
+    if kind != "none" or rec is not None:
+        fail(f"INVALID must not be a fallback target, got {kind} {rec}")
+    enc_null = dict(stale_valid, id="enc-null-19", internalBuildState="PROCESSING")
+    kind, rec = pick([enc_null], not_before)
+    if kind != "fallback" or rec is not enc_null:
+        fail(f"usesNonExemptEncryption null must fallback, got {kind} {rec}")
+    missing_only = dict(stale_valid, id="missing-only-19", usesNonExemptEncryption=False)
+    kind, rec = pick([missing_only], not_before)
+    if kind != "fallback" or rec is not missing_only:
+        fail(f"MISSING_EXPORT_COMPLIANCE must fallback, got {kind} {rec}")
+    already_assigned = dict(
+        stale_valid,
+        usesNonExemptEncryption=False,
+        internalBuildState="IN_BETA_TESTING",
+    )
+    kind, rec = pick([already_assigned], not_before)
+    if kind != "none" or rec is not None:
+        fail(f"already-compliant stale VALID must not fallback, got {kind} {rec}")
+    ok("pick_assign_match prefers fresh, falls back to VALID missing-compliance")
+
+
+def test_assign_existing_workflow() -> None:
+    path = ROOT / ".github/workflows/asc-assign-existing.yml"
+    if not path.is_file():
+        fail("missing .github/workflows/asc-assign-existing.yml")
+    text = path.read_text()
+    if "workflow_dispatch:" not in text:
+        fail("asc-assign-existing.yml must be workflow_dispatch")
+    for banned in ("push:", "pull_request:", "schedule:"):
+        if banned in text:
+            fail(f"asc-assign-existing.yml must not trigger on {banned}")
+    if "want_build" not in text:
+        fail("asc-assign-existing.yml missing optional want_build input")
+    if "2000-01-01T00:00:00Z" not in text:
+        fail("asc-assign-existing.yml must set ASC_NOT_BEFORE=2000-01-01T00:00:00Z")
+    if "tools/asc_assign_internal.sh" not in text:
+        fail("asc-assign-existing.yml must call tools/asc_assign_internal.sh")
+    if "python3 -m venv" not in text:
+        fail("asc-assign-existing.yml must use a venv like ios-testflight.yml")
+    if "6806388963" not in text:
+        fail("asc-assign-existing.yml missing ASC_APP_ID 6806388963")
+    if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
+        fail("asc-assign-existing.yml missing Internal group id")
+    for secret in (
+        "APP_STORE_CONNECT_API_KEY",
+        "APP_STORE_CONNECT_KEY_ID",
+        "APP_STORE_CONNECT_ISSUER_ID",
+    ):
+        if secret not in text:
+            fail(f"asc-assign-existing.yml missing secret {secret}")
+    if "CURRENT_PROJECT_VERSION" in text and "bump" in text.lower():
+        fail("asc-assign-existing.yml must not bump CURRENT_PROJECT_VERSION")
+    ok("asc-assign-existing.yml is dispatch-only assign of an existing build")
 
 
 def test_prune_script_requires_secrets() -> None:
@@ -386,6 +489,8 @@ def main() -> None:
     test_pbx_single_copy()
     test_generator_does_not_restore_double_copy()
     test_assign_script_requires_secrets()
+    test_assign_pick_prefers_fresh_then_fallback()
+    test_assign_existing_workflow()
     test_prune_script_requires_secrets()
     test_map_chrome_lock()
     test_map_pack_resolver()

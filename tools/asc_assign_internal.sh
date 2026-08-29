@@ -2,7 +2,9 @@
 # Poll App Store Connect, PATCH usesNonExemptEncryption false, assign Internal.
 # Requires APP_STORE_CONNECT_API_KEY, APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID.
 # In GitHub Actions, ASC_NOT_BEFORE (ISO-8601) is required so a same-number
-# build uploaded before this archive cannot be assigned by mistake.
+# build uploaded before this archive is not preferred. If that filter leaves
+# zero matches, a WANT_BUILD that is VALID and still missing export compliance
+# is assigned as a fallback (ASC never showed a fresher same-number build).
 set -euo pipefail
 
 missing=()
@@ -71,6 +73,28 @@ def parse_iso(raw):
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
+
+
+def pick_assign_match(candidates, not_before):
+    if not candidates:
+        return "none", None
+    fresh = candidates
+    if not_before:
+        fresh = []
+        for rec in candidates:
+            uploaded = parse_iso(rec.get("uploadedDate") or "")
+            if uploaded is None or uploaded < not_before:
+                continue
+            fresh.append(rec)
+    if fresh:
+        return "fresh", fresh[0]
+    for rec in candidates:
+        if rec.get("processingState") == "VALID" and (
+            rec.get("usesNonExemptEncryption") is None
+            or rec.get("internalBuildState") == "MISSING_EXPORT_COMPLIANCE"
+        ):
+            return "fallback", rec
+    return "none", None
 
 
 not_before = parse_iso(not_before_raw)
@@ -183,10 +207,9 @@ while time.time() < deadline:
         last_tok = token()
         last_tok_at = time.time()
     builds = list_builds(last_tok)
-    match = [b for b in builds if b["version"] == want] if want else builds[:1]
+    candidates = [b for b in builds if b["version"] == want] if want else builds[:1]
     if not_before:
-        fresh = []
-        for rec in match:
+        for rec in candidates:
             uploaded = parse_iso(rec.get("uploadedDate") or "")
             if uploaded is None or uploaded < not_before:
                 print(
@@ -196,11 +219,17 @@ while time.time() < deadline:
                     rec.get("uploadedDate"),
                     flush=True,
                 )
-                continue
-            fresh.append(rec)
-        match = fresh
-    if match:
-        target = match[0]
+    kind, chosen = pick_assign_match(candidates, not_before)
+    if kind == "fallback":
+        print(
+            "FALLBACK assign existing VALID missing-compliance",
+            chosen.get("version"),
+            chosen.get("id"),
+            chosen.get("uploadedDate"),
+            flush=True,
+        )
+    if chosen:
+        target = chosen
         if target["processingState"] == "VALID":
             det = sync(target, last_tok)
             state = (det or {}).get("internalBuildState")
