@@ -2,9 +2,7 @@
 # Poll App Store Connect, PATCH usesNonExemptEncryption false, assign Internal.
 # Requires APP_STORE_CONNECT_API_KEY, APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID.
 # In GitHub Actions, ASC_NOT_BEFORE (ISO-8601) is required so a same-number
-# build uploaded before this archive is not preferred. If that filter leaves
-# zero matches, a WANT_BUILD that is VALID and still missing export compliance
-# is assigned as a fallback (ASC never showed a fresher same-number build).
+# build uploaded before this archive cannot be assigned by mistake.
 set -euo pipefail
 
 missing=()
@@ -88,12 +86,6 @@ def pick_assign_match(candidates, not_before):
             fresh.append(rec)
     if fresh:
         return "fresh", fresh[0]
-    for rec in candidates:
-        if rec.get("processingState") == "VALID" and (
-            rec.get("usesNonExemptEncryption") is None
-            or rec.get("internalBuildState") == "MISSING_EXPORT_COMPLIANCE"
-        ):
-            return "fallback", rec
     return "none", None
 
 
@@ -221,13 +213,7 @@ while time.time() < deadline:
                 )
     kind, chosen = pick_assign_match(candidates, not_before)
     if kind == "fallback":
-        print(
-            "FALLBACK assign existing VALID missing-compliance",
-            chosen.get("version"),
-            chosen.get("id"),
-            chosen.get("uploadedDate"),
-            flush=True,
-        )
+        raise SystemExit("refusing FALLBACK assign of a stale same-number build")
     if chosen:
         target = chosen
         if target["processingState"] == "VALID":

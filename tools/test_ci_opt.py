@@ -228,8 +228,8 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign_internal.sh must skip builds uploaded before this archive")
     if 'params["filter[version]"]' not in src and "filter[version]" not in src:
         fail("asc_assign_internal.sh must filter ASC builds by CFBundleVersion")
-    if "FALLBACK assign existing VALID missing-compliance" not in src:
-        fail("asc_assign_internal.sh must log FALLBACK assign existing VALID missing-compliance")
+    if "FALLBACK assign existing VALID missing-compliance" in src and "refusing FALLBACK" not in src:
+        fail("asc_assign_internal.sh must not assign a stale same-number build")
     if "def pick_assign_match" not in src:
         fail("asc_assign_internal.sh must expose pick_assign_match")
     if 'raise SystemExit(2)' not in src or "FAILED_STATE" not in src:
@@ -268,36 +268,16 @@ def test_assign_pick_prefers_fresh_then_fallback() -> None:
         "internalBuildState": None,
     }
     kind, rec = pick([stale_valid], not_before)
-    if kind != "fallback" or rec is not stale_valid:
-        fail(f"expected fallback to stale VALID missing-compliance, got {kind} {rec}")
+    if kind != "none" or rec is not None:
+        fail(f"stale VALID missing-compliance must not be assigned, got {kind} {rec}")
     kind, rec = pick([fresh_processing, stale_valid], not_before)
     if kind != "fresh" or rec is not fresh_processing:
-        fail(f"expected fresh preference over fallback, got {kind} {rec}")
+        fail(f"expected fresh preference, got {kind} {rec}")
     failed = dict(stale_valid, processingState="FAILED", id="failed-19")
     kind, rec = pick([failed], not_before)
     if kind != "none" or rec is not None:
-        fail(f"FAILED must not be a fallback target, got {kind} {rec}")
-    invalid = dict(stale_valid, processingState="INVALID", id="invalid-19")
-    kind, rec = pick([invalid], not_before)
-    if kind != "none" or rec is not None:
-        fail(f"INVALID must not be a fallback target, got {kind} {rec}")
-    enc_null = dict(stale_valid, id="enc-null-19", internalBuildState="PROCESSING")
-    kind, rec = pick([enc_null], not_before)
-    if kind != "fallback" or rec is not enc_null:
-        fail(f"usesNonExemptEncryption null must fallback, got {kind} {rec}")
-    missing_only = dict(stale_valid, id="missing-only-19", usesNonExemptEncryption=False)
-    kind, rec = pick([missing_only], not_before)
-    if kind != "fallback" or rec is not missing_only:
-        fail(f"MISSING_EXPORT_COMPLIANCE must fallback, got {kind} {rec}")
-    already_assigned = dict(
-        stale_valid,
-        usesNonExemptEncryption=False,
-        internalBuildState="IN_BETA_TESTING",
-    )
-    kind, rec = pick([already_assigned], not_before)
-    if kind != "none" or rec is not None:
-        fail(f"already-compliant stale VALID must not fallback, got {kind} {rec}")
-    ok("pick_assign_match prefers fresh, falls back to VALID missing-compliance")
+        fail(f"FAILED must not be assigned, got {kind} {rec}")
+    ok("pick_assign_match assigns only builds uploaded after ASC_NOT_BEFORE")
 
 
 def test_assign_existing_workflow() -> None:
