@@ -9,7 +9,6 @@ on:
       - "Blackout/**"
       - "Packages/**"
       - "Blackout.xcodeproj/**"
-      - "tools/**"
 
 concurrency:
   group: ios-testflight
