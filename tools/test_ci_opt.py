@@ -75,15 +75,15 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in pbx:
         fail("pbxproj lost GuidePack ditto phase")
-    if "CURRENT_PROJECT_VERSION = 18" not in pbx:
-        fail("CURRENT_PROJECT_VERSION is no longer 18")
-    if pbx.count("CURRENT_PROJECT_VERSION = 18") < 2:
-        fail("expected CURRENT_PROJECT_VERSION = 18 on Debug and Release")
+    if "CURRENT_PROJECT_VERSION = 19" not in pbx:
+        fail("CURRENT_PROJECT_VERSION is no longer 19")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("expected CURRENT_PROJECT_VERSION = 19 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
     if "Apple Distribution" in pbx:
         fail("pbxproj must not set Apple Distribution (Automatic conflict)")
-    ok("pbxproj is ditto-only, version 18, no alwaysOutOfDate")
+    ok("pbxproj is ditto-only, version 19, no alwaysOutOfDate")
 
 
 def test_generator_does_not_restore_double_copy() -> None:
@@ -96,7 +96,7 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in src:
         fail("generate_project.py lost GuidePack ditto phase")
-    if '"CURRENT_PROJECT_VERSION": "18",' not in src:
+    if '"CURRENT_PROJECT_VERSION": "19",' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
     if "Apple Distribution" in src:
         fail("generate_project.py must not set Apple Distribution")
@@ -106,7 +106,7 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py would restore the synthetic red-disc AppIcon")
     if "brand/emblem.jpeg" not in src and 'brand" / "emblem.jpeg' not in src:
         fail("generate_project.py does not render AppIcon from brand/emblem.jpeg")
-    ok("generate_project.py regen stays ditto-only at version 18")
+    ok("generate_project.py regen stays ditto-only at version 19")
 
 
 def test_map_chrome_lock() -> None:
@@ -292,11 +292,11 @@ def test_live_mesh_1n() -> None:
             fail(f"{label} missing Local Network usage string")
         if "NSBonjourServices" not in src or "blckout-mesh" not in src:
             fail(f"{label} missing Bonjour mesh service")
-    if "CURRENT_PROJECT_VERSION = 18" not in pbx:
-        fail("version was bumped")
+    if "CURRENT_PROJECT_VERSION = 19" not in pbx:
+        fail("version was bumped off 19")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
-    ok("live mesh 1/N is Multipeer, no WAN, radar still empty, version 18")
+    ok("live mesh 1/N is Multipeer, no WAN, radar still empty, version 19")
 
 
 def test_pack_relay_1n() -> None:
@@ -329,11 +329,11 @@ def test_pack_relay_1n() -> None:
         fail("AppContainer does not glue pack relay")
     if "session.download" in store.split("installRelayedZip")[-1][:2000]:
         fail("installRelayedZip must not download")
-    if "CURRENT_PROJECT_VERSION = 18" not in pbx:
-        fail("version was bumped")
+    if "CURRENT_PROJECT_VERSION = 19" not in pbx:
+        fail("version was bumped off 19")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
-    ok("city pack relay uses sendResource, Packs owns zip/hash, version 18")
+    ok("city pack relay uses sendResource, Packs owns zip/hash, version 19")
 
 
 def test_locked_app_icon() -> None:
@@ -375,8 +375,8 @@ def test_locked_app_icon() -> None:
         fail("lockup must not be wired into the app icon")
     if "CURRENT_PROJECT_VERSION" in (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text():
         pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
-        if pbx.count("CURRENT_PROJECT_VERSION = 18") < 2:
-            fail("version was bumped while landing the emblem")
+        if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+            fail("version was bumped off 19 while landing the emblem")
     ok("AppIcon is the locked emblem PNG; wordmark is catalog-only")
 
 
