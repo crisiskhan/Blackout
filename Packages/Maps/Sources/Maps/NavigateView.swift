@@ -17,7 +17,7 @@ struct NavigateView: View {
                     "Navigate",
                     subtitle: battery.isCritical
                         ? "Coarse Navigate is off at ~2% battery. SOS stays."
-                        : "Coarse bearing. Extreme Saver does not disable this."
+                        : "Bearing only. Walk / Drive turns live on the Map tab when the pack has routing/."
                 )
                 if battery.isCritical {
                     Text("Last-2% is SOS-only. Radar HUD and coarse nav are hidden. The SOS FAB stays.")

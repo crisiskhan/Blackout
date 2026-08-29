@@ -1,4 +1,5 @@
 import BlackoutCore
+import MapsRouting
 import SwiftUI
 import UIKit
 
@@ -16,12 +17,17 @@ struct OfflineMapView: UIViewRepresentable {
     /// When true, Recenter pinned the camera to pack coverage. GPS follow
     /// (El Paso 31.87,-106.60 etc.) must not yank the camera off Denver tiles.
     var pinCameraToPack: Bool
+    var routing: RoutingPack?
+    var routeLine: [RoutingCoordinate]
+    var destination: RoutingCoordinate?
+    var showPackTiles: Bool
     var onDropPin: (Double, Double) -> Void
+    var onTap: ((Double, Double) -> Void)?
     var onOutsidePack: (Bool) -> Void
     var resetToken: Int
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onDropPin: onDropPin, onOutsidePack: onOutsidePack)
+        Coordinator(onDropPin: onDropPin, onTap: onTap, onOutsidePack: onOutsidePack)
     }
 
     func makeUIView(context: Context) -> OfflineTileScrollView {
@@ -34,13 +40,18 @@ struct OfflineMapView: UIViewRepresentable {
             viewshed: viewshed,
             slope: slope,
             showViewshed: showViewshed,
-            showSlope: showSlope
+            showSlope: showSlope,
+            routing: routing,
+            routeLine: routeLine,
+            destination: destination,
+            showPackTiles: showPackTiles
         )
         return view
     }
 
     func updateUIView(_ view: OfflineTileScrollView, context: Context) {
         context.coordinator.onDropPin = onDropPin
+        context.coordinator.onTap = onTap
         context.coordinator.onOutsidePack = onOutsidePack
         view.coordinator = context.coordinator
         view.applyOverlays(
@@ -50,7 +61,11 @@ struct OfflineMapView: UIViewRepresentable {
             viewshed: viewshed,
             slope: slope,
             showViewshed: showViewshed,
-            showSlope: showSlope
+            showSlope: showSlope,
+            routing: routing,
+            routeLine: routeLine,
+            destination: destination,
+            showPackTiles: showPackTiles
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
@@ -68,12 +83,18 @@ struct OfflineMapView: UIViewRepresentable {
 
     final class Coordinator {
         var onDropPin: (Double, Double) -> Void
+        var onTap: ((Double, Double) -> Void)?
         var onOutsidePack: (Bool) -> Void
         var lastResetToken = 0
         var lastCenterToken = 0
 
-        init(onDropPin: @escaping (Double, Double) -> Void, onOutsidePack: @escaping (Bool) -> Void) {
+        init(
+            onDropPin: @escaping (Double, Double) -> Void,
+            onTap: ((Double, Double) -> Void)?,
+            onOutsidePack: @escaping (Bool) -> Void
+        ) {
             self.onDropPin = onDropPin
+            self.onTap = onTap
             self.onOutsidePack = onOutsidePack
         }
     }
@@ -139,6 +160,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let press = UILongPressGestureRecognizer(target: self, action: #selector(handlePress(_:)))
         press.minimumPressDuration = 0.55
         canvas.addGestureRecognizer(press)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        canvas.addGestureRecognizer(tap)
         canvas.isUserInteractionEnabled = true
     }
 
@@ -177,7 +200,11 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         viewshed: [ViewshedRay],
         slope: [SlopeSample],
         showViewshed: Bool,
-        showSlope: Bool
+        showSlope: Bool,
+        routing: RoutingPack?,
+        routeLine: [RoutingCoordinate],
+        destination: RoutingCoordinate?,
+        showPackTiles: Bool
     ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
@@ -186,6 +213,10 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.slope = slope
         canvas.showViewshed = showViewshed
         canvas.showSlope = showSlope
+        canvas.routing = routing
+        canvas.routeLine = routeLine
+        canvas.destination = destination
+        canvas.showPackTiles = showPackTiles
         canvas.setNeedsDisplay()
     }
 
@@ -217,6 +248,13 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let point = gesture.location(in: canvas)
         let lonlat = canvas.coordinate(at: point)
         coordinator?.onDropPin(lonlat.0, lonlat.1)
+    }
+
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        guard gesture.state == .ended else { return }
+        let point = gesture.location(in: canvas)
+        let lonlat = canvas.coordinate(at: point)
+        coordinator?.onTap?(lonlat.0, lonlat.1)
     }
 
     private func centerPack() {
@@ -264,6 +302,10 @@ final class TileCanvasLayer: UIView {
     var slope: [SlopeSample] = []
     var showViewshed = false
     var showSlope = false
+    var routing: RoutingPack?
+    var routeLine: [RoutingCoordinate] = []
+    var destination: RoutingCoordinate?
+    var showPackTiles = true
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -282,15 +324,27 @@ final class TileCanvasLayer: UIView {
         let shift = zMax - z
         let worldX0 = x0 >> shift
         let worldY0 = y0 >> shift
-        for ty in minY...max(minY, maxY) {
-            for tx in minX...max(minX, maxX) {
-                let tileX = worldX0 + tx
-                let tileY = worldY0 + ty
-                let dest = CGRect(x: CGFloat(tx) * tileSize, y: CGFloat(ty) * tileSize, width: tileSize, height: tileSize)
-                if let image = image(z: z, x: tileX, y: tileY) {
-                    image.draw(in: dest)
+        if showPackTiles {
+            for ty in minY...max(minY, maxY) {
+                for tx in minX...max(minX, maxX) {
+                    let tileX = worldX0 + tx
+                    let tileY = worldY0 + ty
+                    let dest = CGRect(x: CGFloat(tx) * tileSize, y: CGFloat(ty) * tileSize, width: tileSize, height: tileSize)
+                    if let image = image(z: z, x: tileX, y: tileY) {
+                        image.draw(in: dest)
+                    }
                 }
             }
+        }
+        drawStreets(in: ctx)
+        drawRoute(in: ctx)
+        drawStreetNames(in: ctx)
+        if let destination {
+            drawMark(
+                LocationFix(latitude: destination.latitude, longitude: destination.longitude),
+                color: UIColor(red: 1, green: 176 / 255, blue: 32 / 255, alpha: 1),
+                in: ctx
+            )
         }
         drawMark(selfFix, color: UIColor(red: 110 / 255, green: 200 / 255, blue: 1, alpha: 1), in: ctx)
         drawMark(manualPin, color: UIColor(red: 244 / 255, green: 247 / 255, blue: 250 / 255, alpha: 1), in: ctx)
@@ -316,9 +370,99 @@ final class TileCanvasLayer: UIView {
 
     func point(for fix: LocationFix) -> CGPoint? {
         guard let lat = fix.latitude, let lon = fix.longitude else { return nil }
-        let px = (WebMercator.tileX(longitude: lon, zoom: zMax) - Double(x0)) * 256
-        let py = (WebMercator.tileY(latitude: lat, zoom: zMax) - Double(y0)) * 256
+        return point(latitude: lat, longitude: lon)
+    }
+
+    func point(latitude: Double, longitude: Double) -> CGPoint? {
+        let px = (WebMercator.tileX(longitude: longitude, zoom: zMax) - Double(x0)) * 256
+        let py = (WebMercator.tileY(latitude: latitude, zoom: zMax) - Double(y0)) * 256
         return CGPoint(x: px, y: py)
+    }
+
+    private func drawStreets(in ctx: CGContext) {
+        guard let routing else { return }
+        let visible = visibleBounds()
+        let indexes = routing.grid.edges(in: visible.west, south: visible.south, east: visible.east, north: visible.north)
+        ctx.setStrokeColor(UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: showPackTiles ? 0.28 : 0.55).cgColor)
+        ctx.setLineWidth(1.2)
+        ctx.setLineJoin(.round)
+        ctx.setLineCap(.round)
+        var drawn = 0
+        for edgeIndex in indexes {
+            guard drawn < 900 else { break }
+            let points = routing.geometries[edgeIndex]
+            guard points.count >= 2 else { continue }
+            ctx.beginPath()
+            var started = false
+            for coord in points {
+                guard let p = point(latitude: coord.latitude, longitude: coord.longitude) else { continue }
+                if started {
+                    ctx.addLine(to: p)
+                } else {
+                    ctx.move(to: p)
+                    started = true
+                }
+            }
+            if started {
+                ctx.strokePath()
+                drawn += 1
+            }
+        }
+    }
+
+    private func drawRoute(in ctx: CGContext) {
+        guard routeLine.count >= 2 else { return }
+        ctx.setStrokeColor(UIColor(red: 110 / 255, green: 200 / 255, blue: 1, alpha: 0.95).cgColor)
+        ctx.setLineWidth(4)
+        ctx.setLineJoin(.round)
+        ctx.setLineCap(.round)
+        ctx.beginPath()
+        var started = false
+        for coord in routeLine {
+            guard let p = point(latitude: coord.latitude, longitude: coord.longitude) else { continue }
+            if started {
+                ctx.addLine(to: p)
+            } else {
+                ctx.move(to: p)
+                started = true
+            }
+        }
+        if started { ctx.strokePath() }
+    }
+
+    private func drawStreetNames(in ctx: CGContext) {
+        guard let routing else { return }
+        let visible = visibleBounds()
+        let indexes = routing.grid.edges(in: visible.west, south: visible.south, east: visible.east, north: visible.north)
+        var seen = Set<UInt32>()
+        var labels = 0
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
+            .foregroundColor: UIColor(red: 232 / 255, green: 237 / 255, blue: 242 / 255, alpha: 0.92)
+        ]
+        for edgeIndex in indexes {
+            guard labels < 28 else { break }
+            let edge = routing.edges[edgeIndex]
+            guard edge.nameId > 0, seen.insert(edge.nameId).inserted,
+                  let name = routing.name(for: edge.nameId) else { continue }
+            let geom = routing.geometries[edgeIndex]
+            guard !geom.isEmpty else { continue }
+            let mid = geom[geom.count / 2]
+            guard let p = point(latitude: mid.latitude, longitude: mid.longitude) else { continue }
+            (name as NSString).draw(at: CGPoint(x: p.x + 4, y: p.y + 2), withAttributes: attrs)
+            labels += 1
+        }
+    }
+
+    private func visibleBounds() -> (west: Double, south: Double, east: Double, north: Double) {
+        let nw = coordinate(at: bounds.origin)
+        let se = coordinate(at: CGPoint(x: bounds.maxX, y: bounds.maxY))
+        return (
+            west: min(nw.1, se.1),
+            south: min(nw.0, se.0),
+            east: max(nw.1, se.1),
+            north: max(nw.0, se.0)
+        )
     }
 
     private func drawSlope(in ctx: CGContext) {

@@ -16,14 +16,23 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "MapsRouting",
+            dependencies: []
+        ),
+        .target(
             name: "Maps",
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
+                "MapsRouting",
                 .product(name: "BlackoutLocation", package: "Location"),
                 .product(name: "BlackoutMesh", package: "Mesh"),
                 .product(name: "BlackoutBattery", package: "Battery"),
             ]
+        ),
+        .testTarget(
+            name: "MapsTests",
+            dependencies: ["MapsRouting"]
         ),
     ]
 )

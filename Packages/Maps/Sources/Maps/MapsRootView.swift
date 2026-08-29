@@ -3,6 +3,7 @@ import BlackoutBattery
 import BlackoutLocation
 import BlackoutMesh
 import DesignSystem
+import MapsRouting
 import SwiftUI
 
 public struct MapsRootView: View {
@@ -29,6 +30,8 @@ public struct MapsRootView: View {
     @State private var selectedPeer: RadarBlip?
     @State private var showLiDAR = false
     @State private var showLayers = false
+    @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
+    @State private var navigate = NavigateSession()
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
@@ -75,10 +78,10 @@ public struct MapsRootView: View {
     private var showLocationEmptyState: Bool {
         packService.pack != nil && locationOutsideCoverage && !pinnedToPackCoverage
     }
-    /// One raised card for a missing pack, GPS deny, or no tiles.
-    /// Never a watermark and never stacked HUD warnings.
+    /// One raised card for a missing pack or no tiles.
+    /// GPS deny is Feature 1 “No GPS.” on the Navigate chrome — preview from a pin still works.
     private var showEmptyCard: Bool {
-        packService.pack == nil || locationDenied || showLocationEmptyState
+        packService.pack == nil || showLocationEmptyState
     }
     private var radarVisible: Bool {
         if sosOnly || showEmptyCard { return false }
@@ -104,8 +107,21 @@ public struct MapsRootView: View {
                     showSlope: showSlope && extrasOn,
                     centerToken: centerToken,
                     pinCameraToPack: pinnedToPackCoverage,
+                    routing: packService.routing,
+                    routeLine: navigate.routePolyline,
+                    destination: navigate.destination,
+                    showPackTiles: packService.routing == nil || showTopoTiles,
                     onDropPin: { lat, lon in
                         location.dropManualPin(latitude: lat, longitude: lon)
+                    },
+                    onTap: { lat, lon in
+                        guard battery.coarseNavigateEnabled, navigate.phase != .guidance else { return }
+                        navigate.pickMap(
+                            latitude: lat,
+                            longitude: lon,
+                            origin: originCoordinate,
+                            pack: packService.routing
+                        )
                     },
                     onOutsidePack: { outside in
                         outsidePack = outside
@@ -137,6 +153,18 @@ public struct MapsRootView: View {
                     onRecenter: packService.pack == nil ? nil : recenterToPack,
                     onOpenFieldPacks: onOpenFieldPacks
                 )
+            } else if let empty = navigate.empty, navigate.phase != .guidance {
+                VStack {
+                    Spacer()
+                    NavigateEmptyCard(
+                        empty: empty,
+                        onBearing: { tool = .navigate },
+                        onPacks: onOpenFieldPacks
+                    )
+                    .padding(.horizontal, 24)
+                    Spacer()
+                }
+                .padding(.bottom, 100)
             }
             VStack(spacing: 0) {
                 MapLockHUD(
@@ -149,6 +177,11 @@ public struct MapsRootView: View {
                 )
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
+                if showChipRow, battery.coarseNavigateEnabled {
+                    navigateChrome
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                }
                 Spacer()
                 if showChipRow {
                     HStack(spacing: 8) {
@@ -185,6 +218,8 @@ public struct MapsRootView: View {
                 showSlope: $showSlope,
                 showViewshed: $showViewshed,
                 extrasOn: extrasOn,
+                showTopoTiles: $showTopoTiles,
+                hasRouting: packService.routing != nil,
                 navigateEnabled: battery.coarseNavigateEnabled,
                 lidarSupported: LiDARAvailability.isSupported,
                 onToggleSlope: {
@@ -203,6 +238,9 @@ public struct MapsRootView: View {
                 },
                 onToggleAudio: {
                     UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
+                },
+                onToggleTopo: {
+                    UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
                 },
                 onOpenLiDAR: {
                     showLayers = false
@@ -244,9 +282,17 @@ public struct MapsRootView: View {
         .onChange(of: location.navigationFix?.latitude) { _, _ in
             resolvePaintPack()
             if showViewshed { refreshTerrain() }
+            refreshGuidance()
         }
         .onChange(of: location.navigationFix?.longitude) { _, _ in
             resolvePaintPack()
+            refreshGuidance()
+        }
+        .onChange(of: navigate.profile) { _, _ in
+            navigate.refreshPreview(origin: originCoordinate, pack: packService.routing)
+        }
+        .onChange(of: location.authorization) { _, _ in
+            refreshGuidance()
         }
         .onChange(of: location.lastKnown?.latitude) { _, _ in
             resolvePaintPack()
@@ -263,6 +309,7 @@ public struct MapsRootView: View {
                 showLiDAR = false
                 showLayers = false
                 selectedPeer = nil
+                navigate.end()
             }
         }
         .onAppear {
@@ -271,6 +318,70 @@ public struct MapsRootView: View {
             refreshTerrain()
             location.startUpdating()
         }
+    }
+
+    private var originCoordinate: RoutingCoordinate? {
+        guard let fix = location.navigationFix, fix.hasCoordinate else { return nil }
+        return RoutingCoordinate(latitude: fix.latitude!, longitude: fix.longitude!)
+    }
+
+    private var canFollowGuidance: Bool {
+        location.authorization == .authorized && location.navigationFix?.hasCoordinate == true
+    }
+
+    @ViewBuilder
+    private var navigateChrome: some View {
+        let nav = Bindable(navigate)
+        VStack(alignment: .leading, spacing: 8) {
+            if navigate.phase == .guidance {
+                NavigateGuidanceBar(
+                    tick: navigate.tick,
+                    route: navigate.activeRoute,
+                    muted: navigate.muted,
+                    noGPS: !canFollowGuidance,
+                    onMute: { navigate.toggleMute() },
+                    onEnd: { navigate.end() }
+                )
+            } else {
+                NavigateBar(
+                    profile: nav.profile,
+                    query: nav.query,
+                    enabled: battery.coarseNavigateEnabled,
+                    onSubmit: {
+                        navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
+                    }
+                )
+                if !navigate.hits.isEmpty {
+                    NavigateHitsList(hits: navigate.hits) { hit in
+                        navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
+                    }
+                }
+                if navigate.phase == .preview, let route = navigate.preview {
+                    NavigatePreviewCard(
+                        route: route,
+                        label: navigate.destinationLabel ?? "Destination",
+                        attribution: packService.routing?.manifest.attribution,
+                        canStart: canFollowGuidance,
+                        noGPS: location.authorization == .denied || location.authorization == .restricted,
+                        onStart: {
+                            headingUp = true
+                            UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
+                            navigate.start(canFollow: canFollowGuidance)
+                            refreshGuidance()
+                        },
+                        onCancel: { navigate.end() }
+                    )
+                }
+            }
+        }
+    }
+
+    private func refreshGuidance() {
+        navigate.update(
+            position: originCoordinate,
+            pack: packService.routing,
+            canFollow: canFollowGuidance
+        )
     }
 
     private var emptyCardTitle: String {
@@ -465,12 +576,15 @@ struct MapLayersSheet: View {
     @Binding var showSlope: Bool
     @Binding var showViewshed: Bool
     var extrasOn: Bool
+    @Binding var showTopoTiles: Bool
+    var hasRouting: Bool
     var navigateEnabled: Bool
     var lidarSupported: Bool
     var onToggleSlope: () -> Void
     var onToggleViewshed: () -> Void
     var onToggleHeading: () -> Void
     var onToggleAudio: () -> Void
+    var onToggleTopo: () -> Void
     var onOpenLiDAR: () -> Void
     var onOpenTool: (MapTool) -> Void
 
@@ -480,6 +594,7 @@ struct MapLayersSheet: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
                     layerToggle("Radar", on: $radarOn, enabled: extrasOn, persist: {})
+                    layerToggle("Topo tiles", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
                     layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
                     layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn, persist: onToggleViewshed)
                     if lidarSupported, extrasOn {

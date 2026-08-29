@@ -1,11 +1,14 @@
 import BlackoutCore
 import Foundation
+import MapsRouting
 import Observation
 
 @MainActor
 @Observable
 public final class FileMapPack: MapPackServing {
     public private(set) var pack: MapPackSnapshot?
+    /// On-pack `routing/` graph. Nil when the mounted pack has no routing — honest empty.
+    public private(set) var routing: RoutingPack?
     /// Bundled DefaultPack region. Recenter always pins here, even when GPS
     /// is inside a downloaded Field Pack.
     public var bundledRegion: MapRegion? { bundledEntry?.0.region }
@@ -18,6 +21,7 @@ public final class FileMapPack: MapPackServing {
             bundledEntry = snapshot
             pack = snapshot.0
             dem = snapshot.1
+            routing = RoutingPackLoader.load(packRoot: snapshot.0.rootURL)
         }
     }
 
@@ -59,6 +63,7 @@ public final class FileMapPack: MapPackServing {
         if pack?.rootURL.standardizedFileURL.path == next { return }
         pack = entry.0
         dem = entry.1
+        routing = RoutingPackLoader.load(packRoot: entry.0.rootURL)
     }
 
     private func area(_ region: MapRegion) -> Double {

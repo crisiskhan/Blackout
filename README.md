@@ -93,6 +93,31 @@ Verify GuidePack in the tree (132 lines; Actions copies it into the app via the 
 test -f Blackout/GuidePack/manifest.json && wc -l Blackout/GuidePack/articles.jsonl
 ```
 
+## Feature 1 — Navigate (on-pack)
+
+Walk / Drive turn-by-turn lives on the **Map tab** (not a fifth tab). Isolated `MapsRouting` owns the graph reader, A\*, search, maneuvers, and spoken prompt text. Mesh stays a dumb pipe; the router never imports it.
+
+There is no Apple offline routing API. No `MKDirections`, no `MKLocalSearch`, no Apple tiles, no `URLSession` on search / route / guidance / reroute. Display stays the existing file-tile canvas (`BundledTileOverlay` + `file://`). Voice is `AVSpeechSynthesizer`, on-device voices only. Background audio stays off.
+
+### Pack contract (reader, not generator)
+
+When a mounted Field Pack has `routing/`, load:
+
+```
+routing/graph.bin
+routing/names.bin
+routing/geometry.bin
+routing/routing.json
+```
+
+`manifest.json` key: `"routing": "routing/routing.json"`.
+
+Format is **`blackout-routing-v1`**. Layouts (little-endian, packed) are in `Packages/Maps/ROUTING.md`. El Paso (`us-tx-el-paso`) is first: bbox W−106.885 S31.3619 E−106.085 N32.1619, center 31.7619, −106.485, profiles `[walk, drive]`.
+
+Denver `DefaultPack` does **not** ship a routing graph. A later El Paso zip that includes `routing/` lights up without another code change. Missing `routing/` or a magic mismatch is honest empty — never a fake turn list, never a WAN call.
+
+ODbL attribution is already in `routing.json`; it is surfaced as a caption. No new legal screen.
+
 ## Architecture
 
 ```
