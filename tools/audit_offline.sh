@@ -39,19 +39,26 @@ else
 fi
 
 if grep -q 'Copy DefaultPack into app bundle' "$root/Blackout.xcodeproj/project.pbxproj" \
-  && grep -q 'DefaultPack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
-  echo "OK   DefaultPack explicit copy + resources"
+  && ! grep -q 'DefaultPack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   DefaultPack ditto-only (not Resources)"
 else
-  echo "FAIL DefaultPack not in Copy Bundle Resources / script phase"
+  echo "FAIL DefaultPack missing ditto phase or still in Resources"
   fail=1
 fi
 
 if grep -q 'Copy GuidePack into app bundle' "$root/Blackout.xcodeproj/project.pbxproj" \
-  && grep -q 'GuidePack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
-  echo "OK   GuidePack explicit copy + resources"
+  && ! grep -q 'GuidePack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   GuidePack ditto-only (not Resources)"
 else
-  echo "FAIL GuidePack not in Copy Bundle Resources / script phase"
+  echo "FAIL GuidePack missing ditto phase or still in Resources"
   fail=1
+fi
+
+if grep -q 'alwaysOutOfDate' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "FAIL pack copy phases still alwaysOutOfDate"
+  fail=1
+else
+  echo "OK   pack copy phases are incremental"
 fi
 
 if [[ -f "$root/Blackout/GuidePack/articles.jsonl" ]]; then

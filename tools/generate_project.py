@@ -412,10 +412,8 @@ def generate_xcodeproj() -> None:
         "tgt_debug": oid("tgt_debug"),
         "tgt_release": oid("tgt_release"),
         "pack_ref": oid("pack_folder_ref"),
-        "pack_build": oid("pack_in_resources"),
         "copy_script": oid("copy_defaultpack_phase"),
         "guide_ref": oid("guide_folder_ref"),
-        "guide_build": oid("guide_in_resources"),
         "copy_guide": oid("copy_guidepack_phase"),
         "sync_ex": oid("sync_exceptions"),
         "sync_res_ex": oid("sync_resources_ex"),
@@ -440,12 +438,6 @@ def generate_xcodeproj() -> None:
         build_files.append(
             f"\t\t{pkg_link[product]} /* {product} in Frameworks */ = {{isa = PBXBuildFile; productRef = {pkg_dep[product]} /* {product} */; }};"
         )
-    build_files.append(
-        f"\t\t{ids['pack_build']} /* DefaultPack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* DefaultPack */; }};"
-    )
-    build_files.append(
-        f"\t\t{ids['guide_build']} /* GuidePack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['guide_ref']} /* GuidePack */; }};"
-    )
 
     copy_script_raw = """set -e
 exec "${SRCROOT}/tools/copy_defaultpack.sh"
@@ -618,8 +610,6 @@ test -f "${DST}/manifest.json"
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				{ids['pack_build']} /* DefaultPack in Resources */,
-				{ids['guide_build']} /* GuidePack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -638,7 +628,6 @@ test -f "${DST}/manifest.json"
 /* Begin PBXShellScriptBuildPhase section */
 		{ids['copy_script']} /* Copy DefaultPack into app bundle */ = {{
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -662,7 +651,6 @@ test -f "${DST}/manifest.json"
 		}};
 		{ids['copy_guide']} /* Copy GuidePack into app bundle */ = {{
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);

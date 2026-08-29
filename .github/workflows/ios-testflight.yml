@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - cursor/blackout-ios-foundation-7e54
+    paths:
+      - "Blackout/**"
+      - "Packages/**"
+      - "Blackout.xcodeproj/**"
+      - "tools/**"
 
 concurrency:
   group: ios-testflight
@@ -129,6 +134,15 @@ jobs:
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Automatic
+
+      - name: Poll ASC, clear compliance, assign Internal
+        env:
+          ASC_APP_ID: "6806388963"
+          ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q PyJWT cryptography
+          bash tools/asc_assign_internal.sh
 
       - name: Remove API key
         if: always()

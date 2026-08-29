@@ -22,8 +22,6 @@
 		F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8646A3CDCE8F5E86C75F3A /* Expeditions */; };
 		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
 		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
-		5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */ = {isa = PBXBuildFile; fileRef = E8CF23C84AF6AD06DA1E4784 /* DefaultPack */; };
-		6B3C344D587D197A7A2AEDA0 /* GuidePack in Resources */ = {isa = PBXBuildFile; fileRef = 16E5BD64BA900FD4F921032E /* GuidePack */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -191,8 +189,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */,
-				6B3C344D587D197A7A2AEDA0 /* GuidePack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,7 +207,6 @@
 /* Begin PBXShellScriptBuildPhase section */
 		2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -235,7 +230,6 @@
 		};
 		4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);

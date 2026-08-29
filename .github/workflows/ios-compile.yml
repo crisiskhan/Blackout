@@ -4,7 +4,6 @@ on:
   pull_request:
   push:
     branches:
-      - cursor/blackout-ios-foundation-7e54
       - main
 
 concurrency:
