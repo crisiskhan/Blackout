@@ -1,8 +1,18 @@
 import BlackoutCore
+import Darwin
 import DesignSystem
 import MapsRouting
 import SwiftUI
 import UIKit
+
+private func darwinCos(_ radians: Double) -> CGFloat { CGFloat(Darwin.cos(radians)) }
+private func darwinSin(_ radians: Double) -> CGFloat { CGFloat(Darwin.sin(radians)) }
+private func darwinHypot(_ x: CGFloat, _ y: CGFloat) -> CGFloat {
+    CGFloat(Darwin.hypot(Double(x), Double(y)))
+}
+private func darwinAtan2(_ y: CGFloat, _ x: CGFloat) -> Double {
+    Darwin.atan2(Double(y), Double(x))
+}
 
 /// File-tile map. Does **not** create MKMapView, so Apple raster/CDN is not on first paint.
 struct OfflineMapView: UIViewRepresentable {
@@ -584,14 +594,17 @@ final class TileCanvasLayer: UIView {
         if let headingDegrees {
             let blade = pt(BlackoutDS.Map.blade)
             let radians = (headingDegrees - 90) * .pi / 180
-            let tip = CGPoint(x: origin.x + cos(radians) * (radius + blade), y: origin.y + sin(radians) * (radius + blade))
+            let tip = CGPoint(
+                x: origin.x + darwinCos(radians) * (radius + blade),
+                y: origin.y + darwinSin(radians) * (radius + blade)
+            )
             let left = CGPoint(
-                x: origin.x + cos(radians + 2.4) * (blade * 0.45),
-                y: origin.y + sin(radians + 2.4) * (blade * 0.45)
+                x: origin.x + darwinCos(radians + 2.4) * (blade * 0.45),
+                y: origin.y + darwinSin(radians + 2.4) * (blade * 0.45)
             )
             let right = CGPoint(
-                x: origin.x + cos(radians - 2.4) * (blade * 0.45),
-                y: origin.y + sin(radians - 2.4) * (blade * 0.45)
+                x: origin.x + darwinCos(radians - 2.4) * (blade * 0.45),
+                y: origin.y + darwinSin(radians - 2.4) * (blade * 0.45)
             )
             ctx.setFillColor(UIColor(BlackoutDS.Silver.bright).withAlphaComponent(opacity).cgColor)
             ctx.beginPath()
@@ -641,10 +654,10 @@ final class TileCanvasLayer: UIView {
                 cursor -= 1
                 continue
             }
-            let seg = hypot(pa.x - pb.x, pa.y - pb.y)
-            leftover += seg
-            if leftover >= gap {
-                let heading = atan2(pa.y - pb.y, pa.x - pb.x) * 180 / .pi
+            let seg = darwinHypot(pa.x - pb.x, pa.y - pb.y)
+            leftover += Double(seg)
+            if leftover >= Double(gap) {
+                let heading = darwinAtan2(pa.y - pb.y, pa.x - pb.x) * 180 / .pi
                 anchors.append((pa, heading))
                 leftover = 0
             }
@@ -657,7 +670,10 @@ final class TileCanvasLayer: UIView {
         let size = pt(BlackoutDS.Map.chevron)
         let radians = heading * .pi / 180
         func vertex(_ angle: Double, _ length: CGFloat) -> CGPoint {
-            CGPoint(x: origin.x + cos(radians + angle) * length, y: origin.y + sin(radians + angle) * length)
+            CGPoint(
+                x: origin.x + darwinCos(radians + angle) * length,
+                y: origin.y + darwinSin(radians + angle) * length
+            )
         }
         ctx.setFillColor(color.cgColor)
         ctx.beginPath()
@@ -706,7 +722,7 @@ final class TileCanvasLayer: UIView {
               let a = point(latitude: latitude, longitude: lon) else { return pt(20) }
         let dest = offset(latitude: latitude, longitude: lon, meters: meters, bearing: 0)
         guard let b = point(latitude: dest.0, longitude: dest.1) else { return pt(20) }
-        return hypot(b.x - a.x, b.y - a.y)
+        return darwinHypot(b.x - a.x, b.y - a.y)
     }
 
     private func visibleBounds() -> (west: Double, south: Double, east: Double, north: Double) {
@@ -764,10 +780,13 @@ final class TileCanvasLayer: UIView {
         let brng = bearing * .pi / 180
         let lat1 = latitude * .pi / 180
         let lon1 = longitude * .pi / 180
-        let lat2 = asin(sin(lat1) * cos(meters / r) + cos(lat1) * sin(meters / r) * cos(brng))
-        let lon2 = lon1 + atan2(
-            sin(brng) * sin(meters / r) * cos(lat1),
-            cos(meters / r) - sin(lat1) * sin(lat2)
+        let lat2 = Darwin.asin(
+            Darwin.sin(lat1) * Darwin.cos(meters / r)
+                + Darwin.cos(lat1) * Darwin.sin(meters / r) * Darwin.cos(brng)
+        )
+        let lon2 = lon1 + Darwin.atan2(
+            Darwin.sin(brng) * Darwin.sin(meters / r) * Darwin.cos(lat1),
+            Darwin.cos(meters / r) - Darwin.sin(lat1) * Darwin.sin(lat2)
         )
         return (lat2 * 180 / .pi, lon2 * 180 / .pi)
     }
