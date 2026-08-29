@@ -120,8 +120,6 @@ jobs:
           bash tools/probe_defaultpack_app.sh "${APP}"
 
       - name: Export and upload to App Store Connect
-        id: export
-        continue-on-error: true
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/BlackoutExport"
@@ -143,13 +141,9 @@ jobs:
           ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
         run: |
           set -euo pipefail
-          # macos-26 Python is PEP 668; do not pip-install into the system interpreter.
           python3 -m venv "$RUNNER_TEMP/asc-venv"
           "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
           PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_assign_internal.sh
-          if [[ "${{ steps.export.outcome }}" != "success" ]]; then
-            echo "Export/upload did not succeed; assign used the existing ASC build." >&2
-          fi
 
       - name: Remove API key
         if: always()
