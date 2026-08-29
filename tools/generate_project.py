@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Xcode project, DefaultPack tiles, and AppIcon. No network."""
+"""Generate Xcode project and AppIcon. Verify DefaultPack USGS tiles. No network."""
 from __future__ import annotations
 
 import hashlib
@@ -95,116 +95,24 @@ def make_tile_pixels(z: int, x: int, y: int, size: int = 256) -> bytes:
 
 
 def generate_default_pack() -> None:
+    """Do not rewrite USGS field-pack tiles. generate_project.py is offline."""
     pack = ROOT / "Blackout" / "DefaultPack"
+    manifest_path = pack / "manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit("DefaultPack/manifest.json missing")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("kind") != "field-pack":
+        raise SystemExit("DefaultPack must stay USGS field-pack tiles; will not generate stubs")
     tiles_root = pack / "tiles"
-    # Denver-adjacent Front Range window
-    west, south, east, north = -105.60, 39.55, -104.92, 40.02
-    zooms = (10, 11, 12)
-    written = []
-    for z in zooms:
-        x0, y1 = lonlat_to_tile(west, south, z)
-        x1, y0 = lonlat_to_tile(east, north, z)
-        if x0 > x1:
-            x0, x1 = x1, x0
-        if y0 > y1:
-            y0, y1 = y1, y0
-        for x in range(x0, x1 + 1):
-            for y in range(y0, y1 + 1):
-                path = tiles_root / str(z) / str(x) / f"{y}.png"
-                write_png(path, 256, 256, make_tile_pixels(z, x, y))
-                written.append({"z": z, "x": x, "y": y})
-
-    pois = {
-        "attribution": (
-            "GENERATED SAMPLE — not a USGS or GNIS extract. Synthetic points of interest "
-            "for the Denver / Front Range area, for offline UI development only."
-        ),
-        "region": {
-            "name": "Front Range sample",
-            "west": west,
-            "south": south,
-            "east": east,
-            "north": north,
-        },
-        "pois": [
-            {"id": "denver", "name": "Denver", "kind": "city", "lat": 39.7392, "lon": -104.9903},
-            {"id": "boulder", "name": "Boulder", "kind": "city", "lat": 40.0150, "lon": -105.2705},
-            {"id": "golden", "name": "Golden", "kind": "city", "lat": 39.7555, "lon": -105.2211},
-            {"id": "idaho-springs", "name": "Idaho Springs", "kind": "town", "lat": 39.7425, "lon": -105.5136},
-            {"id": "evans", "name": "Mount Evans", "kind": "summit", "lat": 39.5883, "lon": -105.6438},
-            {"id": "trailhead", "name": "Front Range Trailhead", "kind": "trailhead", "lat": 39.633, "lon": -105.60},
-            {"id": "ranger", "name": "Foothills Ranger Station", "kind": "ranger", "lat": 39.72, "lon": -105.35},
-            {"id": "hospital", "name": "Plains Medical Center", "kind": "hospital", "lat": 39.739, "lon": -104.990},
-            {"id": "reservoir", "name": "Foothills Reservoir", "kind": "water", "lat": 39.80, "lon": -105.15},
-        ],
-    }
-    (pack / "poi.json").write_text(json.dumps(pois, indent=2) + "\n")
-
-    cell = 0.05
-    lons = []
-    lon = west
-    while lon <= east + 1e-9:
-        lons.append(round(lon, 4))
-        lon += cell
-    lats = []
-    lat = south
-    while lat <= north + 1e-9:
-        lats.append(round(lat, 4))
-        lat += cell
-    grid = [[round(sample_elevation(lo, la), 1) for lo in lons] for la in lats]
-    dem = {
-        "attribution": (
-            "GENERATED SAMPLE — not a USGS DEM. Synthetic altitude table covering a "
-            "Denver-adjacent Front Range window, for offline topography UI only."
-        ),
-        "west": west,
-        "south": south,
-        "east": east,
-        "north": north,
-        "cellDegrees": cell,
-        "unit": "meters",
-        "lons": lons,
-        "lats": lats,
-        "grid": grid,
-    }
-    (pack / "dem.json").write_text(json.dumps(dem, indent=2) + "\n")
-
-    manifest = {
-        "name": "Front Range sample",
-        "kind": "generated-sample",
-        "disclaimer": (
-            "This is a tiny generated Rockies / Denver-adjacent sample pack, NOT a world map "
-            "and NOT a USGS extract. Tiles, DEM, and POIs are synthetic. Extra regions later "
-            "via Files, never URLSession."
-        ),
-        "center": {"lat": 39.74, "lon": -105.25},
-        "span": {"lat": 0.48, "lon": 0.70},
-        "minZoom": 10,
-        "maxZoom": 12,
-        "tileTemplate": "tiles/{z}/{x}/{y}.png",
-        "poi": "poi.json",
-        "dem": "dem.json",
-        "tileCount": len(written),
-        "tiles": written,
-    }
-    (pack / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    (pack / "README.md").write_text(
-        """# DefaultPack — generated Front Range sample
-
-This folder is a **generated sample**, not a USGS, OpenStreetMap, or commercial map extract.
-
-- Region: Denver-adjacent Colorado Front Range (synthetic)
-- Tiles: a handful of z/x/y PNGs at zooms 10–12
-- DEM: small altitude table (`dem.json`)
-- POI: a handful of labeled sample points (`poi.json`)
-
-Blackout loads these over `file://` via `MKTileOverlay.loadTile` using local `Data(contentsOf:)`.
-It does **not** fetch tiles at runtime. Extra regions are a later Files-based pass.
-
-Do not treat elevations, POIs, or tile colors as authoritative.
-"""
-    )
-    print(f"DefaultPack: {len(written)} tiles -> {pack}")
+    need = int(manifest.get("tileCount") or 0)
+    pngs = list(tiles_root.rglob("*.png")) if tiles_root.is_dir() else []
+    if len(pngs) < need:
+        raise SystemExit(f"DefaultPack has {len(pngs)} PNGs, manifest tileCount is {need}")
+    for rel in ("tiles/10/211/387.png", "tiles/12/848/1553.png"):
+        path = pack / rel
+        if not path.is_file() or path.stat().st_size < 8000:
+            raise SystemExit(f"DefaultPack probe missing or stub: {rel}")
+    print(f"DefaultPack: kept {len(pngs)} USGS field-pack tiles")
 
 
 def generate_app_icon() -> None:
@@ -346,7 +254,7 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
                 "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
                 "CODE_SIGN_STYLE": "Automatic",
-                "CURRENT_PROJECT_VERSION": "13",
+                "CURRENT_PROJECT_VERSION": "14",
                 "DEVELOPMENT_TEAM": "",
                 "ENABLE_PREVIEWS": "YES",
                 "GENERATE_INFOPLIST_FILE": "YES",

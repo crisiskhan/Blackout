@@ -2,6 +2,7 @@
 """CI opt + single-copy pack invariants. No network."""
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -66,13 +67,13 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in pbx:
         fail("pbxproj lost GuidePack ditto phase")
-    if "CURRENT_PROJECT_VERSION = 13" not in pbx:
-        fail("CURRENT_PROJECT_VERSION is no longer 13")
-    if pbx.count("CURRENT_PROJECT_VERSION = 13") < 2:
-        fail("expected CURRENT_PROJECT_VERSION = 13 on Debug and Release")
+    if "CURRENT_PROJECT_VERSION = 14" not in pbx:
+        fail("CURRENT_PROJECT_VERSION is no longer 14")
+    if pbx.count("CURRENT_PROJECT_VERSION = 14") < 2:
+        fail("expected CURRENT_PROJECT_VERSION = 14 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
-    ok("pbxproj is ditto-only, version 13, no alwaysOutOfDate")
+    ok("pbxproj is ditto-only, version 14, no alwaysOutOfDate")
 
 
 def test_generator_does_not_restore_double_copy() -> None:
@@ -85,9 +86,11 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in src:
         fail("generate_project.py lost GuidePack ditto phase")
-    if '"CURRENT_PROJECT_VERSION": "13"' not in src:
+    if '"CURRENT_PROJECT_VERSION": "14"' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
-    ok("generate_project.py regen stays ditto-only at version 13")
+    if "generated-sample" in src:
+        fail("generate_project.py would restore synthetic DefaultPack stubs")
+    ok("generate_project.py regen stays ditto-only at version 14")
 
 
 def test_map_chrome_lock() -> None:
@@ -139,9 +142,40 @@ def test_map_pack_resolver() -> None:
         fail("RootView does not pass installed pack roots / bundled region")
     if "resolvePaintPack" not in maps:
         fail("MapsRootView lost resolvePaintPack")
+    if "lastKnown" not in maps:
+        fail("MapsRootView resolve must fall back to last-known on NO FIX")
     if "MKMapView(" in pack or "URLSession" in pack:
         fail("FileMapPack must not use MapKit or URLSession")
     ok("Map paints one covering installed pack; Recenter stays bundled")
+
+
+def test_usgs_defaultpack() -> None:
+    pack = ROOT / "Blackout" / "DefaultPack"
+    man = json.loads((pack / "manifest.json").read_text())
+    if man.get("kind") != "field-pack":
+        fail("DefaultPack kind is not field-pack")
+    if man.get("kind") == "generated-sample":
+        fail("DefaultPack is still generated-sample stubs")
+    pngs = list((pack / "tiles").rglob("*.png"))
+    need = int(man.get("tileCount") or 0)
+    if len(pngs) < need:
+        fail(f"DefaultPack has {len(pngs)} PNGs, tileCount {need}")
+    for rel in ("tiles/10/211/387.png", "tiles/12/848/1553.png"):
+        path = pack / rel
+        if not path.is_file():
+            fail(f"DefaultPack missing probe {rel}")
+        raw = path.read_bytes()
+        if not raw.startswith(b"\x89PNG\r\n\x1a\n"):
+            fail(f"{rel} is not a PNG")
+        if path.stat().st_size < 8000:
+            fail(f"{rel} is still a stub ({path.stat().st_size} bytes)")
+    copy = (ROOT / "tools/copy_defaultpack.sh").read_text()
+    probe = (ROOT / "tools/probe_defaultpack_app.sh").read_text()
+    if "tiles/10/211/387.png" not in copy or "tiles/12/848/1553.png" not in copy:
+        fail("copy_defaultpack.sh lost probe paths")
+    if "tiles/10/211/387.png" not in probe or "tiles/12/848/1553.png" not in probe:
+        fail("probe_defaultpack_app.sh lost probe paths")
+    ok("DefaultPack is USGS field-pack topo, probes exist")
 
 
 def test_assign_script_requires_secrets() -> None:
@@ -183,6 +217,7 @@ def main() -> None:
     test_assign_script_requires_secrets()
     test_map_chrome_lock()
     test_map_pack_resolver()
+    test_usgs_defaultpack()
     print("all ci-opt checks passed")
 
 

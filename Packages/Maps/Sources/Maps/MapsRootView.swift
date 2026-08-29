@@ -61,9 +61,16 @@ public struct MapsRootView: View {
         location.authorization == .denied || location.authorization == .restricted
     }
     private var locationOutsideCoverage: Bool {
-        guard let fix = location.navigationFix, fix.hasCoordinate else { return false }
+        guard let fix = resolveCoordinate, fix.hasCoordinate else { return false }
         let regions = coverageRegions.isEmpty ? [packService.pack?.region].compactMap { $0 } : coverageRegions
         return !regions.contains { $0.contains(latitude: fix.latitude!, longitude: fix.longitude!, padFraction: 0.08) }
+    }
+
+    /// Live fix, else last-known. NO FIX still paints an installed pack that covers last-known.
+    private var resolveCoordinate: LocationFix? {
+        if let live = location.navigationFix, live.hasCoordinate { return live }
+        if let last = location.lastKnown, last.hasCoordinate { return last }
+        return nil
     }
     private var showLocationEmptyState: Bool {
         packService.pack != nil && locationOutsideCoverage && !pinnedToPackCoverage
@@ -241,6 +248,9 @@ public struct MapsRootView: View {
         .onChange(of: location.navigationFix?.longitude) { _, _ in
             resolvePaintPack()
         }
+        .onChange(of: location.lastKnown?.latitude) { _, _ in
+            resolvePaintPack()
+        }
         .onChange(of: installedPackRoots) { _, _ in
             resolvePaintPack()
         }
@@ -295,7 +305,7 @@ public struct MapsRootView: View {
     private func resolvePaintPack() {
         packService.replaceInstalledRoots(installedPackRoots)
         let before = packService.pack?.rootURL.standardizedFileURL.path
-        let fix = location.navigationFix
+        let fix = resolveCoordinate
         packService.resolve(
             latitude: fix?.hasCoordinate == true ? fix?.latitude : nil,
             longitude: fix?.hasCoordinate == true ? fix?.longitude : nil,
