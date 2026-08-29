@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Poll App Store Connect, PATCH usesNonExemptEncryption false, assign Internal.
 # Requires APP_STORE_CONNECT_API_KEY, APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID.
+# In GitHub Actions, ASC_NOT_BEFORE (ISO-8601) is required so a same-number
+# build uploaded before this archive cannot be assigned by mistake.
 set -euo pipefail
 
 missing=()
@@ -32,6 +34,7 @@ if [[ -z "${WANT_BUILD:-}" ]]; then
   fi
 fi
 export WANT_BUILD
+export ASC_NOT_BEFORE="${ASC_NOT_BEFORE:-}"
 
 PY=python3
 if ! python3 -c 'import jwt' >/dev/null 2>&1; then
@@ -44,6 +47,7 @@ fi
 
 exec "$PY" - <<'PY'
 import json, os, time, urllib.error, urllib.parse, urllib.request
+from datetime import datetime, timezone
 import jwt
 
 key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
@@ -52,6 +56,26 @@ iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
 app = os.environ["ASC_APP_ID"]
 group = os.environ["ASC_INTERNAL_GROUP_ID"]
 want = (os.environ.get("WANT_BUILD") or "").strip()
+not_before_raw = (os.environ.get("ASC_NOT_BEFORE") or "").strip()
+if os.environ.get("GITHUB_ACTIONS") == "true" and not not_before_raw:
+    raise SystemExit("ASC_NOT_BEFORE is required in GitHub Actions")
+
+
+def parse_iso(raw):
+    if not raw:
+        return None
+    text = raw.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    dt = datetime.fromisoformat(text)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+not_before = parse_iso(not_before_raw)
+if not_before_raw:
+    print("NOT_BEFORE", not_before.isoformat(), flush=True)
 
 
 def token():
@@ -91,7 +115,13 @@ def req(method, url, body=None, tok=None):
 
 
 def list_builds(tok):
-    q = urllib.parse.urlencode({"filter[app]": app, "limit": "20", "sort": "-uploadedDate"})
+    params = {"limit": "50", "sort": "-uploadedDate"}
+    if want:
+        params["filter[app]"] = app
+        params["filter[version]"] = want
+    else:
+        params["filter[app]"] = app
+    q = urllib.parse.urlencode(params)
     st, data = req("GET", "https://api.appstoreconnect.apple.com/v1/builds?" + q, tok=tok)
     if st != 200:
         raise SystemExit(f"list {st} {data}")
@@ -154,6 +184,21 @@ while time.time() < deadline:
         last_tok_at = time.time()
     builds = list_builds(last_tok)
     match = [b for b in builds if b["version"] == want] if want else builds[:1]
+    if not_before:
+        fresh = []
+        for rec in match:
+            uploaded = parse_iso(rec.get("uploadedDate") or "")
+            if uploaded is None or uploaded < not_before:
+                print(
+                    "SKIP stale",
+                    rec.get("version"),
+                    rec.get("id"),
+                    rec.get("uploadedDate"),
+                    flush=True,
+                )
+                continue
+            fresh.append(rec)
+        match = fresh
     if match:
         target = match[0]
         if target["processingState"] == "VALID":
@@ -168,7 +213,7 @@ while time.time() < deadline:
         else:
             print("WAIT", target["processingState"], target.get("uploadedDate"), flush=True)
     else:
-        print("WAIT no build", want, flush=True)
+        print("WAIT no fresh build", want, flush=True)
     time.sleep(30)
 print("TIMEOUT", json.dumps(target), flush=True)
 raise SystemExit(1)

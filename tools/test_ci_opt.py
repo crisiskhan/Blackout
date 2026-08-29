@@ -56,6 +56,10 @@ def test_testflight_paths_and_assign() -> None:
         fail("ios-testflight.yml missing app id 6806388963")
     if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
         fail("ios-testflight.yml missing Internal group id")
+    if "ASC_NOT_BEFORE=" not in text:
+        fail("ios-testflight.yml does not stamp ASC_NOT_BEFORE before archive")
+    if 'if [ -z "${ASC_NOT_BEFORE:-}" ]' not in text:
+        fail("ios-testflight.yml does not refuse assign without ASC_NOT_BEFORE")
     ok("ios-testflight.yml path-filters archive + assigns Internal")
 
 
@@ -214,6 +218,12 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign_internal.sh must install PyJWT in a venv")
     if "python3 -m pip install -q PyJWT" in src:
         fail("asc_assign_internal.sh still pip-installs into system Python")
+    if "ASC_NOT_BEFORE is required in GitHub Actions" not in src:
+        fail("asc_assign_internal.sh must require ASC_NOT_BEFORE in Actions")
+    if "SKIP stale" not in src:
+        fail("asc_assign_internal.sh must skip builds uploaded before this archive")
+    if 'params["filter[version]"]' not in src and "filter[version]" not in src:
+        fail("asc_assign_internal.sh must filter ASC builds by CFBundleVersion")
     ok("asc_assign_internal.sh fails closed without secrets")
 
 

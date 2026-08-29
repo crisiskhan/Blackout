@@ -106,6 +106,7 @@ jobs:
       - name: Archive Blackout (Release, device)
         run: |
           set -euo pipefail
+          echo "ASC_NOT_BEFORE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
           xcodebuild \
             -project Blackout.xcodeproj \
             -scheme Blackout \
@@ -148,6 +149,10 @@ jobs:
           ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
         run: |
           set -euo pipefail
+          if [ -z "${ASC_NOT_BEFORE:-}" ]; then
+            echo "ASC_NOT_BEFORE missing; refusing to assign a stale build" >&2
+            exit 1
+          fi
           python3 -m venv "$RUNNER_TEMP/asc-venv"
           "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
           PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_assign_internal.sh
