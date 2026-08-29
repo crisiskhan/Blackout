@@ -45,6 +45,8 @@ def test_testflight_paths_and_assign() -> None:
         fail("ios-testflight.yml lost cancel-in-progress")
     if "tools/asc_assign_internal.sh" not in text:
         fail("ios-testflight.yml does not call tools/asc_assign_internal.sh")
+    if "python3 -m pip install" in text:
+        fail("ios-testflight.yml still pip-installs into system Python")
     if "6806388963" not in text:
         fail("ios-testflight.yml missing app id 6806388963")
     if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
@@ -147,6 +149,11 @@ def test_assign_script_requires_secrets() -> None:
     combined = (proc.stdout + proc.stderr).lower()
     if "missing" not in combined:
         fail("asc_assign_internal.sh did not report missing secrets")
+    src = script.read_text()
+    if "python3 -m venv" not in src:
+        fail("asc_assign_internal.sh must install PyJWT in a venv")
+    if "python3 -m pip install -q PyJWT" in src:
+        fail("asc_assign_internal.sh still pip-installs into system Python")
     ok("asc_assign_internal.sh fails closed without secrets")
 
 

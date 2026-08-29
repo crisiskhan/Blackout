@@ -33,11 +33,16 @@ if [[ -z "${WANT_BUILD:-}" ]]; then
 fi
 export WANT_BUILD
 
+PY=python3
 if ! python3 -c 'import jwt' >/dev/null 2>&1; then
-  python3 -m pip install -q PyJWT cryptography
+  # macos-26 Python is PEP 668; never pip-install into the system interpreter.
+  venv="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/blackout-asc-venv"
+  python3 -m venv "$venv"
+  "$venv/bin/pip" install -q PyJWT cryptography
+  PY="$venv/bin/python3"
 fi
 
-exec python3 - <<'PY'
+exec "$PY" - <<'PY'
 import json, os, time, urllib.error, urllib.parse, urllib.request
 import jwt
 
