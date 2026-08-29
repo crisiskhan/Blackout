@@ -141,8 +141,10 @@ jobs:
           ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
         run: |
           set -euo pipefail
-          python3 -m pip install -q PyJWT cryptography
-          bash tools/asc_assign_internal.sh
+          # macos-26 Python is PEP 668; do not pip-install into the system interpreter.
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
+          PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_assign_internal.sh
 
       - name: Remove API key
         if: always()
