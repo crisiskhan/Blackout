@@ -21,7 +21,7 @@ public struct MessagingRootView: View {
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
-                ScreenHeader("Comms", subtitle: "Seal to self. Ciphertext only on disk.")
+                ScreenHeader("Comms", subtitle: "Local radio. Ciphertext on disk.")
                 Spacer()
                 MeshPill(nearbyCount: mesh.nearbyPeerCount)
             }
@@ -52,7 +52,7 @@ public struct MessagingRootView: View {
                     .padding(.horizontal, 20)
             }
             VStack(spacing: 12) {
-                TextField("Message to self", text: $draft, axis: .vertical)
+                TextField("Message", text: $draft, axis: .vertical)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.bright)
                     .padding(14)
@@ -74,6 +74,9 @@ public struct MessagingRootView: View {
         .onChange(of: draft) { _, value in
             UserDefaults.standard.set(value, forKey: "com.crisiskhan.blackout.comms.draft")
         }
+        .onChange(of: mesh.inboundSequence) { _, _ in
+            reload()
+        }
         .task { reload() }
     }
 
@@ -86,23 +89,26 @@ public struct MessagingRootView: View {
     }
 
     private func sendToSelf() {
-        commit(status: .sealed)
+        commit(status: .sealed, recipient: crypto.localIdentity)
     }
 
     private func queueMesh() {
-        commit(status: mesh.nearbyPeerCount > 0 ? .onMesh : .queued)
+        let recipient = crypto.preferredRecipient
+        let sealedToPeer = recipient != crypto.localIdentity
+        let status: MessageStatus = (mesh.nearbyPeerCount > 0 && sealedToPeer) ? .onMesh : .queued
+        commit(status: status, recipient: recipient)
     }
 
-    private func commit(status: MessageStatus) {
+    private func commit(status: MessageStatus, recipient: BlackoutID) {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, let plaintext = text.data(using: .utf8) else { return }
         do {
-            let sealed = try crypto.seal(plaintext, to: crypto.localIdentity)
+            let sealed = try crypto.seal(plaintext, to: recipient)
             let record = MessageRecordDTO(
                 ciphertext: sealed,
                 status: status,
                 senderID: crypto.localIdentity,
-                recipientID: crypto.localIdentity
+                recipientID: recipient
             )
             try persistence.saveMessage(record)
             if status != .sealed {

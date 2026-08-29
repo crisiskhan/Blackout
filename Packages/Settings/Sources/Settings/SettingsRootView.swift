@@ -157,7 +157,7 @@ public struct SettingsRootView: View {
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
             MeshPill(nearbyCount: mesh.nearbyPeerCount)
-            Text("Façade only this pass. Live 1/N is not included. Zero nearby is calm success.")
+            Text("Local radio, no WAN, no account. One nearby phone can take a sealed message. Zero nearby is calm success. Stranger Radar stays off.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
         }
@@ -180,7 +180,7 @@ public struct SettingsRootView: View {
             Text("This pass")
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
-            Text("No live mesh, no world map, no auto-911, no fall detection, no backend. DefaultPack is a generated Front Range sample, not a USGS extract.")
+            Text("Mesh is one nearby phone on the same local radio — no WAN, no account, no N>1 routing. No world map, no auto-911, no fall detection, no backend. DefaultPack is a generated Front Range sample, not a USGS extract.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.mid)
                 .lineSpacing(7)

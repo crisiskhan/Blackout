@@ -17,6 +17,11 @@ public protocol PersistenceServing: AnyObject {
 @MainActor
 public protocol CryptoServing: AnyObject {
     var localIdentity: BlackoutID { get }
+    /// Opaque local-radio hello (identity + agreement public). Mesh transports this blindly.
+    var localAdvertisement: Data { get }
+    /// First registered radio peer, else self. Used to seal one message to one nearby phone.
+    var preferredRecipient: BlackoutID { get }
+    func registerPeerAdvertisement(_ data: Data)
     func seal(_ plaintext: Data, to recipient: BlackoutID) throws -> Data
     func open(_ ciphertext: Data) throws -> Data
 }
@@ -41,9 +46,11 @@ public protocol LocationServing: AnyObject {
 public protocol MeshServing: AnyObject {
     var nearbyPeerCount: Int { get }
     var statusLine: String { get }
+    var inboundSequence: UInt64 { get }
     func start()
     func stop()
     func send(_ envelope: Envelope)
+    func setLocalAdvertisement(_ data: Data)
 }
 
 @MainActor

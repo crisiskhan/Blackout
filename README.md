@@ -2,7 +2,7 @@
 
 Offline-first field app for iPhone and iPad. Native SwiftUI, iOS 18+, Universal, bundle ID `com.crisiskhan.blackout`.
 
-This repository is a **foundation + wave 1.5** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device. It is **not** a v1 ship of live mesh 1/N, stranger radio, vitals, map-pack relay, or auto-911.
+This repository is a **foundation + wave 2 slice 1** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device, and a **1-peer local-radio mesh** (Multipeer, no WAN). It is **not** a v1 ship of stranger Radar, vitals, pack relay, N>1 routing, or auto-911.
 
 ## Compile (Crisis — no Mac)
 
@@ -76,7 +76,7 @@ Device airplane-mode tile proof is a later iPhone check, not an ASUS `xcodebuild
 
 ## Wave 1.5 (this pass)
 
-Still airplane-first. Still no `URLSession`. Still no live mesh.
+Still airplane-first. Still no `URLSession` on Map / SOS / Guide. Live mesh is **1 nearby phone** on the same local radio.
 
 1. **Radar HUD** on Map — polar rings + 3s red.glow sweep on the file-tile terrain (never a black disc). Pinch still zooms the map. Heading-up / north-up. 0 peers: self + sweep only, no fake people. Members would be filled silver disks; strangers hollow rings. Tap self is not a peer sheet. `RadarPeerSheet` exists for later blips. Sweep haptic only if a blip would be crossed; sweep audio default **off**.
 2. **Guide ask-engine** — Field tab: ask bar first, taxonomy chips, situation cards remain. Type now; on-device mic if permitted else type. `Blackout/GuidePack/` has **132** Rockies/Denver articles + inverted index (situation, water, fire, shelter, first aid, signaling, navigation, weather, plants/food, animals, tools, bushcraft, skills). Extractive snippets from the pack. Plants never get an edible verdict. `SystemLanguageModel` only if `availability == .available`, grounded on retrieved text, never first paint, never wait/download.
@@ -110,7 +110,7 @@ Blackout app          composition root only (wires protocols)
 
 - **Feature → Core + kits it needs.** Features talk persistence through `PersistenceServing`. SwiftData `@Model` types stay inside Persistence.
 - **Kit → Core only.**
-- **Mesh is a dumb pipe** (`Envelope` is opaque). This pass’s façade always reports **0 nearby** and treats that as success.
+- **Mesh is a dumb pipe** (`Envelope` is opaque). Isolated `BlackoutMesh` / `MeshFacade` uses MultipeerConnectivity only (local radio, no WAN). **1/N:** MeshPill goes 0→1 for one connected phone; N>1 routing is out of scope. Zero nearby is still calm success. Crypto peer hello + ECDH stay in Crypto; inbound persist stays in Persistence via the composition root.
 - **No URLSession** on the critical path.
 - **No WKWebView, no analytics, no accounts, no CloudKit.** SwiftData `cloudKitDatabase: .none`.
 - If SwiftData cannot open **on disk**, the UI shows `StoreFailure`. There is **no** in-memory fallback (a kill would wipe SOS / expeditions / messages).

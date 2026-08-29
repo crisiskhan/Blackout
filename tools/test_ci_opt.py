@@ -209,6 +209,41 @@ def test_assign_script_requires_secrets() -> None:
     ok("asc_assign_internal.sh fails closed without secrets")
 
 
+def test_live_mesh_1n() -> None:
+    mesh = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshFacade.swift").read_text()
+    pipe = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MultipeerPipe.swift").read_text()
+    wire = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshWire.swift").read_text()
+    crypto = (ROOT / "Packages/Crypto/Sources/BlackoutCrypto/LoopbackCrypto.swift").read_text()
+    proto = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/Protocols.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    gen = (ROOT / "tools/generate_project.py").read_text()
+    if "MultipeerConnectivity" not in mesh or "MultipeerConnectivity" not in pipe:
+        fail("Mesh is not using MultipeerConnectivity")
+    if "func start() {}" in mesh:
+        fail("MeshFacade start is still a no-op")
+    if "URLSession" in mesh or "URLSession" in pipe or "URLSession" in wire:
+        fail("Mesh must not use URLSession")
+    if "localAdvertisement" not in proto or "registerPeerAdvertisement" not in proto:
+        fail("CryptoServing missing peer advertisement hooks")
+    if "preferredRecipient" not in proto:
+        fail("CryptoServing missing preferredRecipient")
+    if "sharedSecretFromKeyAgreement" not in crypto:
+        fail("LoopbackCrypto missing ECDH peer seal")
+    if "private var peers: [RadarBlip] { [] }" not in maps:
+        fail("Radar peers path changed — do not invent a social layer")
+    for src, label in ((pbx, "pbxproj"), (gen, "generate_project.py")):
+        if "NSLocalNetworkUsageDescription" not in src:
+            fail(f"{label} missing Local Network usage string")
+        if "NSBonjourServices" not in src or "blckout-mesh" not in src:
+            fail(f"{label} missing Bonjour mesh service")
+    if "CURRENT_PROJECT_VERSION = 15" not in pbx:
+        fail("version was bumped")
+    if "MARKETING_VERSION = 0.1.0" not in pbx:
+        fail("MARKETING_VERSION changed")
+    ok("live mesh 1/N is Multipeer, no WAN, radar still empty, version 15")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -218,6 +253,7 @@ def main() -> None:
     test_map_chrome_lock()
     test_map_pack_resolver()
     test_usgs_defaultpack()
+    test_live_mesh_1n()
     print("all ci-opt checks passed")
 
 

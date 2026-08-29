@@ -1,0 +1,37 @@
+import BlackoutCore
+@testable import BlackoutMesh
+import XCTest
+
+final class MeshWireTests: XCTestCase {
+    func testEnvelopeRoundtrip() throws {
+        let envelope = Envelope(
+            kind: .message,
+            ciphertext: Data([0xAA, 0xBB]),
+            sender: BlackoutID(),
+            recipient: BlackoutID()
+        )
+        let frame = try XCTUnwrap(MeshWire.encodeEnvelope(envelope))
+        guard case .envelope(let decoded) = MeshWire.decode(frame) else {
+            return XCTFail("expected envelope frame")
+        }
+        XCTAssertEqual(decoded.id, envelope.id)
+        XCTAssertEqual(decoded.kind, .message)
+        XCTAssertEqual(decoded.ciphertext, envelope.ciphertext)
+        XCTAssertEqual(decoded.sender, envelope.sender)
+        XCTAssertEqual(decoded.recipient, envelope.recipient)
+    }
+
+    func testAdvertisementRoundtrip() {
+        let payload = Data([1, 2, 3, 4])
+        let frame = MeshWire.encodeAdvertisement(payload)
+        guard case .advertisement(let decoded) = MeshWire.decode(frame) else {
+            return XCTFail("expected advertisement frame")
+        }
+        XCTAssertEqual(decoded, payload)
+    }
+
+    func testRejectsGarbage() {
+        XCTAssertNil(MeshWire.decode(Data("not-a-frame".utf8)))
+        XCTAssertNil(MeshWire.decode(Data()))
+    }
+}

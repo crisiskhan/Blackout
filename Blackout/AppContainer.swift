@@ -62,6 +62,10 @@ final class AppContainer {
             errors.append("GuidePack missing from the app bundle. Field ask cannot retrieve.")
         }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
+        mesh.setLocalAdvertisement(crypto.localAdvertisement)
+        mesh.onInbound = { [weak self] event in
+            self?.handleMeshInbound(event)
+        }
         location.applyPolicy(battery.policy)
         if battery.isCritical {
             location.stopUpdating()
@@ -71,6 +75,37 @@ final class AppContainer {
             mesh.start()
         }
         startMissedCheckInWatch()
+    }
+
+    /// Composition root only. Mesh stays a dumb pipe; Crypto and Persistence stay in their kits.
+    func handleMeshInbound(_ event: MeshInbound) {
+        switch event {
+        case .advertisement(let data):
+            crypto.registerPeerAdvertisement(data)
+        case .envelope(let envelope):
+            ingestEnvelope(envelope)
+        }
+    }
+
+    private func ingestEnvelope(_ envelope: Envelope) {
+        guard envelope.kind == .message else { return }
+        guard envelope.sender != crypto.localIdentity else { return }
+        do {
+            let existing = try persistence.messages()
+            if existing.contains(where: { $0.id == envelope.id }) { return }
+            try persistence.saveMessage(
+                MessageRecordDTO(
+                    id: envelope.id,
+                    createdAt: envelope.timestamp,
+                    ciphertext: envelope.ciphertext,
+                    status: .onMesh,
+                    senderID: envelope.sender,
+                    recipientID: envelope.recipient
+                )
+            )
+        } catch {
+            return
+        }
     }
 
     /// Lives on the composition root so a missed check-in can open SOS confirm
