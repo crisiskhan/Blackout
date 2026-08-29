@@ -33,6 +33,22 @@ public enum BlackoutDS {
         public static let info = Color(red: 110 / 255, green: 200 / 255, blue: 1)
     }
 
+    /// DS v1 §10.2 navigator LOOK. Aliases only — hexes unchanged.
+    public enum Map {
+        public static let land = Surface.base
+        public static let water = Surface.sunken
+        public static let trail = Silver.dim
+        public static let grid = Silver.steel
+        public static let selfDot = Red.core
+        public static let label: CGFloat = 12
+        public static let callout: CGFloat = 16
+        public static let shield: CGFloat = 24
+        public static let puck: CGFloat = 36
+        public static let chevron: CGFloat = 16
+        public static let chevronGap: CGFloat = 12
+        public static let blade: CGFloat = 10
+    }
+
     public enum Hit {
         public static let sm: CGFloat = 56
         public static let md: CGFloat = 64

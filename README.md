@@ -97,6 +97,8 @@ test -f Blackout/GuidePack/manifest.json && wc -l Blackout/GuidePack/articles.js
 
 Walk / Drive turn-by-turn lives on the **Map tab** (not a fifth tab). Isolated `MapsRouting` owns the graph reader, A\*, search, maneuvers, and spoken prompt text. Mesh stays a dumb pipe; the router never imports it.
 
+Navigator LOOK is DS v1 §10.2: default canvas is vector streets from `geometry.bin` (`map.land`, not USGS topo). Topo is a Layers toggle, default off. Streets cannot be turned off. Tokens are aliases of locked hexes — no invented greens or MUTCD shield colors. Follow-puck is `map.self` (`red.core`). Turn chevrons draw only for a live next maneuver.
+
 There is no Apple offline routing API. No `MKDirections`, no `MKLocalSearch`, no Apple tiles, no `URLSession` on search / route / guidance / reroute. Display stays the existing file-tile canvas (`BundledTileOverlay` + `file://`). Voice is `AVSpeechSynthesizer`, on-device voices only. Background audio stays off.
 
 ### Pack contract (reader, not generator)

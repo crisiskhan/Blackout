@@ -31,6 +31,7 @@ public struct MapsRootView: View {
     @State private var showLiDAR = false
     @State private var showLayers = false
     @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
+    @State private var showTrails = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTrails)
     @State private var navigate = NavigateSession()
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
@@ -111,6 +112,11 @@ public struct MapsRootView: View {
                     routeLine: navigate.routePolyline,
                     destination: navigate.destination,
                     showPackTiles: packService.routing == nil || showTopoTiles,
+                    showTrails: showTrails,
+                    headingDegrees: location.headingDegrees,
+                    accuracyMeters: gpsAccuracyMeters,
+                    packContainsSelf: packContainsSelf,
+                    activeManeuver: liveManeuver,
                     onDropPin: { lat, lon in
                         location.dropManualPin(latitude: lat, longitude: lon)
                     },
@@ -177,7 +183,7 @@ public struct MapsRootView: View {
                 )
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
-                if showChipRow, battery.coarseNavigateEnabled {
+                if showChipRow, battery.coarseNavigateEnabled, showsNavigateBanner {
                     navigateChrome
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
@@ -219,7 +225,10 @@ public struct MapsRootView: View {
                 showViewshed: $showViewshed,
                 extrasOn: extrasOn,
                 showTopoTiles: $showTopoTiles,
+                showTrails: $showTrails,
                 hasRouting: packService.routing != nil,
+                searchQuery: navQueryBinding,
+                searchHits: navigate.hits,
                 navigateEnabled: battery.coarseNavigateEnabled,
                 lidarSupported: LiDARAvailability.isSupported,
                 onToggleSlope: {
@@ -241,6 +250,16 @@ public struct MapsRootView: View {
                 },
                 onToggleTopo: {
                     UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
+                },
+                onToggleTrails: {
+                    UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
+                },
+                onSearch: {
+                    navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
+                },
+                onPickSearch: { hit in
+                    showLayers = false
+                    navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
                 },
                 onOpenLiDAR: {
                     showLayers = false
@@ -329,6 +348,26 @@ public struct MapsRootView: View {
         location.authorization == .authorized && location.navigationFix?.hasCoordinate == true
     }
 
+    private var packContainsSelf: Bool {
+        guard let pack = packService.pack, let fix = location.navigationFix, fix.hasCoordinate else {
+            return false
+        }
+        return pack.region.contains(latitude: fix.latitude!, longitude: fix.longitude!)
+    }
+
+    private var liveManeuver: Maneuver? {
+        guard navigate.phase == .guidance,
+              let maneuver = navigate.tick?.nextManeuver,
+              RoadLook.isActiveTurn(maneuver.kind) else {
+            return nil
+        }
+        return maneuver
+    }
+
+    private var showsNavigateBanner: Bool {
+        navigate.phase == .preview || navigate.phase == .guidance || navigate.empty != nil || !navigate.hits.isEmpty
+    }
+
     @ViewBuilder
     private var navigateChrome: some View {
         let nav = Bindable(navigate)
@@ -342,38 +381,35 @@ public struct MapsRootView: View {
                     onMute: { navigate.toggleMute() },
                     onEnd: { navigate.end() }
                 )
-            } else {
-                NavigateBar(
+            } else if navigate.phase == .preview, let route = navigate.preview {
+                NavigatePreviewCard(
                     profile: nav.profile,
-                    query: nav.query,
-                    enabled: battery.coarseNavigateEnabled,
-                    onSubmit: {
-                        navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
-                    }
+                    route: route,
+                    label: navigate.destinationLabel ?? "Destination",
+                    attribution: packService.routing?.manifest.attribution,
+                    canStart: canFollowGuidance,
+                    noGPS: location.authorization == .denied || location.authorization == .restricted,
+                    onStart: {
+                        headingUp = true
+                        UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
+                        navigate.start(canFollow: canFollowGuidance)
+                        refreshGuidance()
+                    },
+                    onCancel: { navigate.end() }
                 )
-                if !navigate.hits.isEmpty {
-                    NavigateHitsList(hits: navigate.hits) { hit in
-                        navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
-                    }
-                }
-                if navigate.phase == .preview, let route = navigate.preview {
-                    NavigatePreviewCard(
-                        route: route,
-                        label: navigate.destinationLabel ?? "Destination",
-                        attribution: packService.routing?.manifest.attribution,
-                        canStart: canFollowGuidance,
-                        noGPS: location.authorization == .denied || location.authorization == .restricted,
-                        onStart: {
-                            headingUp = true
-                            UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
-                            navigate.start(canFollow: canFollowGuidance)
-                            refreshGuidance()
-                        },
-                        onCancel: { navigate.end() }
-                    )
+            } else if !navigate.hits.isEmpty {
+                NavigateHitsList(hits: navigate.hits) { hit in
+                    navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
                 }
             }
         }
+    }
+
+    private var navQueryBinding: Binding<String> {
+        Binding(
+            get: { navigate.query },
+            set: { navigate.query = $0 }
+        )
     }
 
     private func refreshGuidance() {
@@ -382,6 +418,9 @@ public struct MapsRootView: View {
             pack: packService.routing,
             canFollow: canFollowGuidance
         )
+        if navigate.phase == .guidance, packContainsSelf, !pinnedToPackCoverage {
+            centerToken += 1
+        }
     }
 
     private var emptyCardTitle: String {
@@ -577,7 +616,10 @@ struct MapLayersSheet: View {
     @Binding var showViewshed: Bool
     var extrasOn: Bool
     @Binding var showTopoTiles: Bool
+    @Binding var showTrails: Bool
     var hasRouting: Bool
+    @Binding var searchQuery: String
+    var searchHits: [PackSearchHit]
     var navigateEnabled: Bool
     var lidarSupported: Bool
     var onToggleSlope: () -> Void
@@ -585,6 +627,9 @@ struct MapLayersSheet: View {
     var onToggleHeading: () -> Void
     var onToggleAudio: () -> Void
     var onToggleTopo: () -> Void
+    var onToggleTrails: () -> Void
+    var onSearch: () -> Void
+    var onPickSearch: (PackSearchHit) -> Void
     var onOpenLiDAR: () -> Void
     var onOpenTool: (MapTool) -> Void
 
@@ -594,9 +639,30 @@ struct MapLayersSheet: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
                     layerToggle("Radar", on: $radarOn, enabled: extrasOn, persist: {})
-                    layerToggle("Topo tiles", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
+                    layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
+                    layerToggle("Trail", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
                     layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
                     layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn, persist: onToggleViewshed)
+                    if hasRouting, extrasOn {
+                        TextField("Search this pack", text: $searchQuery)
+                            .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.bright)
+                            .submitLabel(.search)
+                            .onSubmit(onSearch)
+                            .padding(.horizontal, 16)
+                            .frame(height: BlackoutDS.Hit.md)
+                            .background(BlackoutDS.Surface.raised.opacity(0.82))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        if !searchHits.isEmpty {
+                            NavigateHitsList(hits: searchHits, onPick: onPickSearch)
+                        }
+                    }
                     if lidarSupported, extrasOn {
                         GhostButton("LiDAR", height: BlackoutDS.Hit.md, action: onOpenLiDAR)
                     }

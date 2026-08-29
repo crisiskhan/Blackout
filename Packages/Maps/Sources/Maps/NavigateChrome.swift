@@ -2,73 +2,8 @@ import DesignSystem
 import MapsRouting
 import SwiftUI
 
-struct NavigateBar: View {
-    @Binding var profile: NavigateProfile
-    @Binding var query: String
-    var enabled: Bool
-    var onSubmit: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                profileButton(.walk)
-                profileButton(.drive)
-            }
-            HStack(spacing: 8) {
-                TextField("Search this pack", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                    .submitLabel(.search)
-                    .onSubmit(onSubmit)
-                    .disabled(!enabled)
-                GhostButton("Go", height: BlackoutDS.Hit.sm, action: onSubmit)
-                    .frame(width: 72)
-                    .disabled(!enabled)
-            }
-            .padding(.horizontal, 12)
-            .frame(height: BlackoutDS.Hit.md)
-            .background(BlackoutDS.Surface.raised.opacity(0.82))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-    }
-
-    private func profileButton(_ value: NavigateProfile) -> some View {
-        Button {
-            profile = value
-        } label: {
-            Text(title(value))
-                .font(BlackoutDS.bodyFont())
-                .fontWeight(.semibold)
-                .foregroundStyle(profile == value ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
-                .frame(maxWidth: .infinity)
-                .frame(height: BlackoutDS.Hit.sm)
-                .background(profile == value ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised.opacity(0.82))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .accessibilityLabel(title(value))
-    }
-
-    private func title(_ value: NavigateProfile) -> String {
-        switch value {
-        case .walk: return "Walk"
-        case .drive: return "Drive"
-        }
-    }
-}
-
 struct NavigatePreviewCard: View {
+    @Binding var profile: NavigateProfile
     var route: Route
     var label: String
     var attribution: String?
@@ -79,6 +14,10 @@ struct NavigatePreviewCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                profileChip(.walk)
+                profileChip(.drive)
+            }
             Text(label)
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
@@ -115,6 +54,33 @@ struct NavigatePreviewCard: View {
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func profileChip(_ value: NavigateProfile) -> some View {
+        Button {
+            profile = value
+        } label: {
+            Text(title(value))
+                .font(BlackoutDS.captionFont())
+                .fontWeight(.semibold)
+                .foregroundStyle(profile == value ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
+                .frame(maxWidth: .infinity)
+                .frame(height: 32)
+                .background(profile == value ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func title(_ value: NavigateProfile) -> String {
+        switch value {
+        case .walk: return "Walk"
+        case .drive: return "Drive"
+        }
     }
 }
 
