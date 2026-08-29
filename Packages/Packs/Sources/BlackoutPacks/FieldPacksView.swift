@@ -34,7 +34,7 @@ public struct FieldPacksView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     ScreenHeader(
                         "Field Packs",
-                        subtitle: "Download Texas (~199 MB) or New Mexico (~74 MB) statewide, or El Paso, Las Cruces, or Albuquerque, on Wi-Fi — then they work airplane. City packs can also go to one nearby phone on the local radio. Skip uses the bundled Denver sample. SOS stays available."
+                        subtitle: "Florida, Texas, New York, and New Mexico are already on this phone — Ready, no download. Optional extras: El Paso, Las Cruces, or Albuquerque on Wi-Fi or one nearby phone. Denver is the fallback outside those states. SOS stays available."
                     )
                     if !store.onWiFi {
                         Text(store.pathSatisfied

@@ -11,3 +11,6 @@ __pycache__/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.pack.zip
+BundledFieldPacks/
+Blackout/FieldPacks/

@@ -25,7 +25,7 @@ public final class FileMapPack: MapPackServing {
         }
     }
 
-    /// File roots under Application Support/FieldPacks/<id>/. Local files only.
+    /// File roots under bundle FieldPacks/<id>/ or Application Support/FieldPacks/<id>/. Local files only.
     public func replaceInstalledRoots(_ roots: [URL]) {
         let normalized = roots.map { $0.standardizedFileURL }
         let next = normalized.compactMap { Self.load(root: $0) }

@@ -54,6 +54,14 @@ else
   fail=1
 fi
 
+if grep -q 'Copy FieldPacks into app bundle' "$root/Blackout.xcodeproj/project.pbxproj" \
+  && ! grep -q 'FieldPacks in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   FieldPacks ditto-only (not Resources)"
+else
+  echo "FAIL FieldPacks missing ditto phase or still in Resources"
+  fail=1
+fi
+
 if grep -q 'alwaysOutOfDate' "$root/Blackout.xcodeproj/project.pbxproj"; then
   echo "FAIL pack copy phases still alwaysOutOfDate"
   fail=1

@@ -53,7 +53,7 @@ final class AppContainer {
         battery = BatteryService()
         lock = AppLockService()
         pack = FileMapPack(rootURL: Self.packRoot())
-        packs = PackStore(bundledRoot: Self.packRoot())
+        packs = PackStore(bundledRoot: Self.packRoot(), bundledPacksRoot: Self.fieldPacksRoot())
         guidePackURL = Self.guidePackRoot()
         if pack.pack == nil || !packs.bundledIsReady {
             errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
@@ -170,6 +170,25 @@ final class AppContainer {
 
     static func packRoot() -> URL? {
         locateFolder("DefaultPack")
+    }
+
+    static func fieldPacksRoot() -> URL? {
+        let fileManager = FileManager.default
+        let candidates: [URL?] = [
+            Bundle.main.resourceURL?.appendingPathComponent("FieldPacks", isDirectory: true),
+            Bundle.main.bundleURL.appendingPathComponent("FieldPacks", isDirectory: true)
+        ]
+        for candidate in candidates {
+            guard let candidate else { continue }
+            let hasStatewide = FieldPackCatalog.bundledStatewide.contains { pack in
+                fileManager.fileExists(
+                    atPath: candidate.appendingPathComponent(pack.id, isDirectory: true)
+                        .appendingPathComponent("manifest.json").path
+                )
+            }
+            if hasStatewide { return candidate }
+        }
+        return nil
     }
 
     static func guidePackRoot() -> URL? {

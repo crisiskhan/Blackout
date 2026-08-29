@@ -15,25 +15,22 @@ public final class PackStore {
     public private(set) var progress: [String: Double] = [:]
 
     private let bundledRoot: URL?
+    private let bundledPacksRoot: URL?
     private let diskRoot: URL
     private let workRoot: URL
     private let relayRoot: URL
     private let monitor = NWPathMonitor()
-    private let session: URLSession
+    private var session: URLSession?
     private var tasks: [String: Task<Void, Never>] = [:]
 
-    public init(bundledRoot: URL?, diskRoot: URL? = nil) {
+    public init(bundledRoot: URL?, bundledPacksRoot: URL? = nil, diskRoot: URL? = nil) {
         self.bundledRoot = bundledRoot
+        self.bundledPacksRoot = bundledPacksRoot
         let base = diskRoot ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("FieldPacks", isDirectory: true)
         self.diskRoot = base
         self.workRoot = base.appendingPathComponent(".partial", isDirectory: true)
         self.relayRoot = base.appendingPathComponent(".relay", isDirectory: true)
-        let config = URLSessionConfiguration.ephemeral
-        config.allowsCellularAccess = true
-        config.timeoutIntervalForRequest = 60
-        config.waitsForConnectivity = false
-        self.session = URLSession(configuration: config)
         try? FileManager.default.createDirectory(at: self.diskRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.workRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.relayRoot, withIntermediateDirectories: true)
@@ -48,6 +45,18 @@ public final class PackStore {
         refreshStates()
     }
 
+    /// Created only when the user taps Download on an optional extra. Never on boot.
+    private func httpSession() -> URLSession {
+        if let session { return session }
+        let config = URLSessionConfiguration.ephemeral
+        config.allowsCellularAccess = true
+        config.timeoutIntervalForRequest = 60
+        config.waitsForConnectivity = false
+        let created = URLSession(configuration: config)
+        session = created
+        return created
+    }
+
     public var bundledIsReady: Bool {
         guard let bundledRoot else { return false }
         let manifest = bundledRoot.appendingPathComponent("manifest.json")
@@ -58,27 +67,36 @@ public final class PackStore {
     public func coverageRegions(bundled: MapRegion?) -> [MapRegion] {
         var regions: [MapRegion] = []
         if let bundled { regions.append(bundled) }
-        for pack in FieldPackCatalog.remotePacks where isInstalled(pack.id) {
+        for pack in FieldPackCatalog.installablePacks where isInstalled(pack.id) {
             regions.append(regionOnDisk(pack.id) ?? pack.region)
         }
         return regions
     }
 
-    /// Tile roots for installed remote packs. Reads `states` so SwiftUI reloads after download.
+    /// Tile roots for bundled statewide + downloaded extras. Reads `states` so SwiftUI reloads.
     public var installedPackRoots: [URL] {
         _ = states
-        return FieldPackCatalog.remotePacks.compactMap { pack in
-            guard isInstalled(pack.id) else { return nil }
-            let root = diskRoot.appendingPathComponent(pack.id, isDirectory: true)
+        return FieldPackCatalog.installablePacks.compactMap { pack in
+            guard let root = packRoot(for: pack.id) else { return nil }
             guard MapPackLayout.containsTilePNGs(root: root) else { return nil }
             return root
         }
     }
 
+    public func packRoot(for id: String) -> URL? {
+        if id == FieldPackCatalog.denver.id {
+            return bundledIsReady ? bundledRoot : nil
+        }
+        if let bundled = bundledPacksRoot?.appendingPathComponent(id, isDirectory: true),
+           packLooksReady(bundled) {
+            return bundled
+        }
+        let disk = diskRoot.appendingPathComponent(id, isDirectory: true)
+        return packLooksReady(disk) ? disk : nil
+    }
+
     public func isInstalled(_ id: String) -> Bool {
-        if id == FieldPackCatalog.denver.id { return bundledIsReady }
-        let manifest = diskRoot.appendingPathComponent(id, isDirectory: true).appendingPathComponent("manifest.json")
-        return FileManager.default.fileExists(atPath: manifest.path)
+        packRoot(for: id) != nil
     }
 
     public func skipIntro() {
@@ -104,6 +122,15 @@ public final class PackStore {
             states[FieldPackCatalog.denver.id] = .failed
             messages[FieldPackCatalog.denver.id] = "Bundled Denver pack is missing from the app."
         }
+        for pack in FieldPackCatalog.bundledStatewide {
+            if isInstalled(pack.id) {
+                states[pack.id] = .ready
+                messages[pack.id] = "Bundled. Ready. Works airplane."
+            } else {
+                states[pack.id] = .failed
+                messages[pack.id] = "Statewide pack missing from this IPA."
+            }
+        }
         for pack in FieldPackCatalog.remotePacks {
             if states[pack.id] == .downloading { continue }
             if isInstalled(pack.id) {
@@ -127,8 +154,15 @@ public final class PackStore {
         }
     }
 
+    private func packLooksReady(_ root: URL) -> Bool {
+        let manifest = root.appendingPathComponent("manifest.json")
+        return FileManager.default.fileExists(atPath: manifest.path)
+            && MapPackLayout.containsTilePNGs(root: root)
+    }
+
     private func regionOnDisk(_ id: String) -> MapRegion? {
-        let url = diskRoot.appendingPathComponent(id, isDirectory: true).appendingPathComponent("manifest.json")
+        guard let root = packRoot(for: id) else { return nil }
+        let url = root.appendingPathComponent("manifest.json")
         guard let data = try? Data(contentsOf: url),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
@@ -208,7 +242,7 @@ public final class PackStore {
         if existing > 0 {
             request.setValue("bytes=\(existing)-", forHTTPHeaderField: "Range")
         }
-        let (temp, response) = try await session.download(for: request)
+        let (temp, response) = try await httpSession().download(for: request)
         guard let http = response as? HTTPURLResponse else { throw PackStoreError.badResponse }
         if http.statusCode == 404 || http.statusCode == 403 {
             throw PackStoreError.notOnReleases
@@ -300,7 +334,7 @@ public final class PackStore {
         do {
             let data = try Data(contentsOf: zipURL, options: [.mappedIfSafe])
             let hex = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-            let expected = FieldPackCatalog.remotePacks.first(where: { $0.id == id })?.sha256?.lowercased()
+            let expected = FieldPackCatalog.descriptor(id: id)?.sha256?.lowercased()
             let catalogMatch = expected?.count == 64 && hex == expected
 
             let dest = diskRoot.appendingPathComponent(id, isDirectory: true)

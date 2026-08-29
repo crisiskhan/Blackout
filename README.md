@@ -19,22 +19,26 @@ Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compil
 
 ### Field Packs (GitHub Releases)
 
-Skippable first-run overlay **Field Packs**. Skip goes to Map. **Never blocks SOS.** Copy: download Texas and New Mexico packs on Wi-Fi, then they work airplane. States: no wifi / downloading / ready / failed / skip.
+First-open catalog shows **Florida, Texas, New York, and New Mexico as Ready** — they are copied into the IPA at TestFlight archive time. No skippable download gate for those four. Optional extras (El Paso, Las Cruces, Albuquerque) can still be downloaded later. **Never blocks SOS.** Denver **DefaultPack** stays the tiny fallback when GPS is outside the four. States: no wifi / downloading / ready / failed / skip.
 
-Downloads live only in `Packages/Packs` (`BlackoutPacks`). User-initiated from that screen, never on boot, SOS, Map paint, or Guide ask. Prefer Wi-Fi; if the Wi-Fi check is flaky, download still only starts from this screen. Integrity SHA-256. Resume via HTTP Range. Fail closed: airplane uses whatever packs are already on disk (bundled Denver + any downloaded).
+Archive-only fetch (not the unsigned compile job): `tools/fetch_bundled_field_packs.sh` curls the four zips, verifies sha256, ROOT-flattens into `BundledFieldPacks/us-tx` `us-nm` `us-fl` `us-ny`. Packs stay in separate folders so tile `z/x/y.png` names cannot collide. City-only zips are not copied into the IPA. Pack zips are **not** committed to git.
 
-Host: **GitHub Releases** on `crisiskhan/Blackout` (no Blackout cloud). Placeholder assets for CoS/Systems to attach later:
+Host: **GitHub Releases** tag `packs-v1` on `crisiskhan/Blackout` (no Blackout cloud):
 
 ```
 https://github.com/crisiskhan/Blackout/releases/download/packs-v1/texas.pack.zip
+  208461647 B  sha256 dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb
 https://github.com/crisiskhan/Blackout/releases/download/packs-v1/new-mexico.pack.zip
+  77478829 B   sha256 2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/florida.pack.zip
+  79093063 B   sha256 49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/new-york.pack.zip
+  130327390 B  sha256 928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500
 ```
 
-Until those files exist, Download shows **failed** (“Not on GitHub Releases yet”). Skip uses the bundled Denver **DefaultPack**, which paints file tiles. Outside pack coverage, Map shows **No tiles for this location** with **Recenter to pack coverage**.
+Optional city-pack downloads live only in `Packages/Packs` (`BlackoutPacks`). User-initiated from Field Packs, never on boot, SOS, Map paint, or Guide ask. Integrity SHA-256. Resume via HTTP Range. Fail closed: airplane uses whatever packs are already on disk (bundled Denver + the four statewide + any extra).
 
-When adding assets: zip a folder that contains `manifest.json` plus `tiles/z/x/y.png`, publish on tag `packs-v1`, then set `assetReady = true` and the real `sha256` on `FieldPackCatalog.texas` / `.newMexico`. Do not add paid map APIs. Do not use MapKit as the airplane base map.
-
-Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Field Packs is skippable. Local lock stays **off** until you enable it in Settings.
+Do not add paid map APIs. Do not use MapKit as the airplane base map. Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
 
 ### Capabilities to enable
 

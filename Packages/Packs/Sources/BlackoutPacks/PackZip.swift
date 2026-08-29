@@ -137,6 +137,35 @@ enum PackZip {
                 throw PackZipError.invalidArchive
             }
         }
+        try flattenRoot(destination)
+    }
+
+    /// If the zip wrapped the pack in one folder, promote `manifest.json` + `tiles/` to dest.
+    static func flattenRoot(_ destination: URL) throws {
+        let fm = FileManager.default
+        let manifest = destination.appendingPathComponent("manifest.json")
+        if fm.fileExists(atPath: manifest.path) { return }
+        let contents = try fm.contentsOfDirectory(
+            at: destination,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        )
+        let dirs = contents.filter { url in
+            let name = url.lastPathComponent
+            if name == "__MACOSX" { return false }
+            return (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+        }
+        guard dirs.count == 1 else { return }
+        let nested = dirs[0]
+        guard fm.fileExists(atPath: nested.appendingPathComponent("manifest.json").path) else { return }
+        for item in try fm.contentsOfDirectory(at: nested, includingPropertiesForKeys: nil) {
+            let target = destination.appendingPathComponent(item.lastPathComponent)
+            if fm.fileExists(atPath: target.path) {
+                try fm.removeItem(at: target)
+            }
+            try fm.moveItem(at: item, to: target)
+        }
+        try fm.removeItem(at: nested)
     }
 
     private static func safeFileURL(destination: URL, entry: String) throws -> URL {

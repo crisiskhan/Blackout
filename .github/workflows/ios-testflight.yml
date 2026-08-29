@@ -9,6 +9,7 @@ on:
       - "Blackout/**"
       - "Packages/**"
       - "Blackout.xcodeproj/**"
+      - "tools/**"
 
 concurrency:
   group: ios-testflight
@@ -18,7 +19,7 @@ jobs:
   testflight:
     name: TestFlight Blackout
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 120
     permissions:
       contents: read
     env:
@@ -102,7 +103,14 @@ jobs:
           "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
           PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_prune_development_certs.sh
 
+      - name: Fetch statewide Field Packs (FL TX NY NM)
+        run: |
+          set -euo pipefail
+          bash tools/fetch_bundled_field_packs.sh
+
       - name: Archive Blackout (Release, device)
+        env:
+          FIELD_PACKS_REQUIRED: "1"
         run: |
           set -euo pipefail
           echo "ASC_NOT_BEFORE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
@@ -125,6 +133,7 @@ jobs:
           set -euo pipefail
           APP="$RUNNER_TEMP/Blackout.xcarchive/Products/Applications/Blackout.app"
           bash tools/probe_defaultpack_app.sh "${APP}"
+          bash tools/probe_fieldpacks_app.sh "${APP}"
 
       - name: Export and upload to App Store Connect
         run: |

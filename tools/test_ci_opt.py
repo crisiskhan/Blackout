@@ -20,6 +20,34 @@ def ok(msg: str) -> None:
     print(f"OK   {msg}")
 
 
+STATEWIDE_PACKS = (
+    (
+        "us-tx",
+        "texas.pack.zip",
+        "208461647",
+        "dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb",
+    ),
+    (
+        "us-nm",
+        "new-mexico.pack.zip",
+        "77478829",
+        "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8",
+    ),
+    (
+        "us-fl",
+        "florida.pack.zip",
+        "79093063",
+        "49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d",
+    ),
+    (
+        "us-ny",
+        "new-york.pack.zip",
+        "130327390",
+        "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500",
+    ),
+)
+
+
 def test_compile_workflow_drops_feature_branch_push() -> None:
     text = (ROOT / ".github/workflows/ios-compile.yml").read_text()
     if "cursor/blackout-ios-foundation-7e54" in text:
@@ -75,6 +103,10 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in pbx:
         fail("pbxproj lost GuidePack ditto phase")
+    if "Copy FieldPacks into app bundle" not in pbx:
+        fail("pbxproj lost FieldPacks ditto phase")
+    if "FieldPacks in Resources" in pbx:
+        fail("pbxproj copies FieldPacks via Resources (tile collision)")
     if "CURRENT_PROJECT_VERSION = 19" not in pbx:
         fail("CURRENT_PROJECT_VERSION is no longer 19")
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
@@ -96,6 +128,10 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in src:
         fail("generate_project.py lost GuidePack ditto phase")
+    if "Copy FieldPacks into app bundle" not in src:
+        fail("generate_project.py lost FieldPacks ditto phase")
+    if "copy_fieldpacks.sh" not in src:
+        fail("generate_project.py lost copy_fieldpacks.sh")
     if '"CURRENT_PROJECT_VERSION": "19",' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
     if "Apple Distribution" in src:
@@ -419,6 +455,129 @@ def test_pack_relay_1n() -> None:
     ok("city pack relay uses sendResource, Packs owns zip/hash, version 19")
 
 
+def test_bundled_statewide_archive_only() -> None:
+    compile_yml = (ROOT / ".github/workflows/ios-compile.yml").read_text()
+    flight = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    fetch = (ROOT / "tools/fetch_bundled_field_packs.sh").read_text()
+    copy = (ROOT / "tools/copy_fieldpacks.sh").read_text()
+    probe = (ROOT / "tools/probe_fieldpacks_app.sh").read_text()
+    catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    guide = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
+    gitignore = (ROOT / ".gitignore").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+
+    if "fetch_bundled_field_packs" in compile_yml or "florida.pack.zip" in compile_yml:
+        fail("ios-compile.yml must not fetch statewide pack zips")
+    if "FIELD_PACKS_REQUIRED" in compile_yml:
+        fail("ios-compile.yml must not require Field Packs in the unsigned app")
+    if "tools/fetch_bundled_field_packs.sh" not in flight:
+        fail("ios-testflight.yml does not fetch statewide packs before archive")
+    if "FIELD_PACKS_REQUIRED" not in flight:
+        fail("ios-testflight.yml archive does not require staged Field Packs")
+    if "probe_fieldpacks_app.sh" not in flight:
+        fail("ios-testflight.yml does not probe FieldPacks inside the xcarchive")
+    for _id, filename, size, digest in STATEWIDE_PACKS:
+        if filename not in fetch or digest not in fetch or size not in fetch:
+            fail(f"fetch script missing {_id} {filename} {size} {digest}")
+        if digest not in catalog:
+            fail(f"catalog missing sha256 for {_id}")
+        if f'id: "{_id}"' not in catalog:
+            fail(f"catalog missing pack id {_id}")
+        if _id not in copy or _id not in probe:
+            fail(f"copy/probe missing {_id}")
+    for city in ("el-paso.pack.zip", "las-cruces.pack.zip", "albuquerque.pack.zip"):
+        if city in fetch:
+            fail(f"fetch script must not download city pack {city}")
+    if "isBundled: true" not in catalog or "bundledStatewide" not in catalog:
+        fail("catalog lost bundledStatewide Ready flags")
+    if "bundledPacksRoot" not in store or "httpSession" not in store:
+        fail("PackStore must resolve bundled statewide without boot URLSession")
+    if "let session: URLSession" in store:
+        fail("PackStore still constructs URLSession on init")
+    if "URLSession" in maps or "URLSession" in sos or "URLSession" in guide:
+        fail("Map/SOS/Guide must not use URLSession")
+    if "*.pack.zip" not in gitignore or "BundledFieldPacks/" not in gitignore:
+        fail(".gitignore must exclude pack zips and BundledFieldPacks")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("CURRENT_PROJECT_VERSION was bumped off 19")
+    ok("archive fetches FL/TX/NY/NM; compile does not; catalog is bundled Ready")
+
+
+def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
+    import tempfile
+
+    copy = ROOT / "tools/copy_fieldpacks.sh"
+    probe = ROOT / "tools/probe_fieldpacks_app.sh"
+    with tempfile.TemporaryDirectory() as tmp:
+        srcroot = Path(tmp) / "src"
+        built = Path(tmp) / "built"
+        resources = built / "Blackout.app"
+        srcroot.mkdir()
+        resources.mkdir(parents=True)
+        env = {
+            **os.environ,
+            "SRCROOT": str(srcroot),
+            "BUILT_PRODUCTS_DIR": str(built),
+            "UNLOCALIZED_RESOURCES_FOLDER_PATH": "Blackout.app",
+        }
+        subprocess.check_call(["bash", str(copy)], env=env)
+        if (resources / "FieldPacks").exists():
+            fail("unsigned compile copied FieldPacks without staging")
+
+        env["FIELD_PACKS_REQUIRED"] = "1"
+        missing = subprocess.run(["bash", str(copy)], env=env, capture_output=True, text=True)
+        if missing.returncode == 0:
+            fail("archive copy must fail when staging is missing")
+
+        staging = srcroot / "BundledFieldPacks"
+        for pack_id in ("us-tx", "us-nm", "us-fl", "us-ny"):
+            tiles = staging / pack_id / "tiles" / "8" / "1"
+            tiles.mkdir(parents=True)
+            (staging / pack_id / "manifest.json").write_text(
+                f'{{"id":"{pack_id}","tileCount":1}}', encoding="utf-8"
+            )
+            (tiles / "1.png").write_bytes(b"\x89PNG")
+        subprocess.check_call(["bash", str(copy)], env=env)
+        app = resources
+        subprocess.check_call(["bash", str(probe), str(app)])
+        if (app / "FieldPacks" / "tiles").exists():
+            fail("copy flattened four states into FieldPacks/tiles")
+        if (app / "FieldPacks" / "el-paso").exists():
+            fail("copy staged a city pack")
+    ok("copy no-ops on compile and requires four separate statewide folders on archive")
+
+
+def test_fieldpack_root_flatten_fixture() -> None:
+    import tempfile
+    import zipfile
+
+    script = ROOT / "tools/fetch_bundled_field_packs.sh"
+    with tempfile.TemporaryDirectory() as tmp:
+        wrapped = Path(tmp) / "wrap"
+        inner = wrapped / "us-fl"
+        tiles = inner / "tiles" / "8" / "1"
+        tiles.mkdir(parents=True)
+        (inner / "manifest.json").write_text('{"id":"us-fl"}', encoding="utf-8")
+        (tiles / "1.png").write_bytes(b"\x89PNG")
+        zip_path = Path(tmp) / "florida-wrap.zip"
+        with zipfile.ZipFile(zip_path, "w") as zf:
+            for path in inner.rglob("*"):
+                if path.is_file():
+                    zf.write(path, path.relative_to(wrapped).as_posix())
+        dest = Path(tmp) / "us-fl"
+        subprocess.check_call(["bash", str(script), "--stage-zip", str(zip_path), str(dest)])
+        if not (dest / "manifest.json").is_file():
+            fail("ROOT-flatten did not promote manifest.json")
+        if not (dest / "tiles" / "8" / "1" / "1.png").is_file():
+            fail("ROOT-flatten did not promote tiles/")
+        if (dest / "us-fl" / "manifest.json").exists():
+            fail("ROOT-flatten left a nested us-fl/ wrapper")
+    ok("ROOT-flatten promotes a wrapped pack zip")
+
+
 def test_locked_app_icon() -> None:
     import struct
 
@@ -478,6 +637,9 @@ def main() -> None:
     test_live_mesh_1n()
     test_pack_relay_1n()
     test_locked_app_icon()
+    test_bundled_statewide_archive_only()
+    test_copy_fieldpacks_compile_noop_and_archive_required()
+    test_fieldpack_root_flatten_fixture()
     print("all ci-opt checks passed")
 
 

@@ -29,6 +29,86 @@ public enum FieldPackCatalog {
         )
     )
 
+    public static let texas = FieldPackDescriptor(
+        id: "us-tx",
+        title: "Texas",
+        summary: "Bundled. Ready. Statewide Texas. Works airplane.",
+        downloadURL: releaseBase.appendingPathComponent("texas.pack.zip"),
+        sha256: "dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb",
+        byteCount: 208_461_647,
+        assetReady: true,
+        isBundled: true,
+        region: MapRegion(
+            name: "Texas",
+            centerLatitude: 31.17,
+            centerLongitude: -100.08,
+            spanLatitude: 10.6636,
+            spanLongitude: 13.1378,
+            minZoom: 8,
+            maxZoom: 12
+        )
+    )
+
+    public static let newMexico = FieldPackDescriptor(
+        id: "us-nm",
+        title: "New Mexico",
+        summary: "Bundled. Ready. Statewide New Mexico. Works airplane.",
+        downloadURL: releaseBase.appendingPathComponent("new-mexico.pack.zip"),
+        sha256: "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8",
+        byteCount: 77_478_829,
+        assetReady: true,
+        isBundled: true,
+        region: MapRegion(
+            name: "New Mexico",
+            centerLatitude: 34.17,
+            centerLongitude: -106.03,
+            spanLatitude: 5.6681,
+            spanLongitude: 6.0483,
+            minZoom: 8,
+            maxZoom: 12
+        )
+    )
+
+    public static let florida = FieldPackDescriptor(
+        id: "us-fl",
+        title: "Florida",
+        summary: "Bundled. Ready. Statewide Florida. Works airplane.",
+        downloadURL: releaseBase.appendingPathComponent("florida.pack.zip"),
+        sha256: "49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d",
+        byteCount: 79_093_063,
+        assetReady: true,
+        isBundled: true,
+        region: MapRegion(
+            name: "Florida",
+            centerLatitude: 27.6986,
+            centerLongitude: -83.8046,
+            spanLatitude: 6.6047,
+            spanLongitude: 7.6606,
+            minZoom: 8,
+            maxZoom: 12
+        )
+    )
+
+    public static let newYork = FieldPackDescriptor(
+        id: "us-ny",
+        title: "New York",
+        summary: "Bundled. Ready. Statewide New York. Works airplane.",
+        downloadURL: releaseBase.appendingPathComponent("new-york.pack.zip"),
+        sha256: "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500",
+        byteCount: 130_327_390,
+        assetReady: true,
+        isBundled: true,
+        region: MapRegion(
+            name: "New York",
+            centerLatitude: 42.7466,
+            centerLongitude: -75.7569,
+            spanLatitude: 4.5385,
+            spanLongitude: 8.0114,
+            minZoom: 8,
+            maxZoom: 12
+        )
+    )
+
     public static let elPaso = FieldPackDescriptor(
         id: "el-paso",
         title: "El Paso",
@@ -89,56 +169,28 @@ public enum FieldPackCatalog {
         )
     )
 
-    public static let texas = FieldPackDescriptor(
-        id: "texas",
-        title: "Texas",
-        summary: "Download on Wi-Fi (~199 MB), then airplane. Statewide Texas.",
-        downloadURL: releaseBase.appendingPathComponent("texas.pack.zip"),
-        sha256: "dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb",
-        byteCount: 208_461_647,
-        assetReady: true,
-        isBundled: false,
-        region: MapRegion(
-            name: "Texas",
-            centerLatitude: 31.17,
-            centerLongitude: -100.08,
-            spanLatitude: 10.6636,
-            spanLongitude: 13.1378,
-            minZoom: 8,
-            maxZoom: 12
-        )
-    )
-
-    public static let newMexico = FieldPackDescriptor(
-        id: "new-mexico",
-        title: "New Mexico",
-        summary: "Download on Wi-Fi (~74 MB), then airplane. Statewide New Mexico.",
-        downloadURL: releaseBase.appendingPathComponent("new-mexico.pack.zip"),
-        sha256: "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8",
-        byteCount: 77_478_829,
-        assetReady: true,
-        isBundled: false,
-        region: MapRegion(
-            name: "New Mexico",
-            centerLatitude: 34.17,
-            centerLongitude: -106.03,
-            spanLatitude: 5.6681,
-            spanLongitude: 6.0483,
-            minZoom: 8,
-            maxZoom: 12
-        )
-    )
-
-    public static let remotePacks: [FieldPackDescriptor] = [
-        elPaso, lasCruces, albuquerque, texas, newMexico
+    /// IPA-ready statewide packs. Archive fetches these; compile does not.
+    public static let bundledStatewide: [FieldPackDescriptor] = [
+        florida, texas, newYork, newMexico
     ]
-    public static let all: [FieldPackDescriptor] = [denver] + remotePacks
 
-    /// v1 radio relay. Statewide Texas / New Mexico stay download-only.
+    /// Optional extras. User-initiated download or 1/N radio only.
+    public static let remotePacks: [FieldPackDescriptor] = [
+        elPaso, lasCruces, albuquerque
+    ]
+
+    public static let installablePacks: [FieldPackDescriptor] = bundledStatewide + remotePacks
+    public static let all: [FieldPackDescriptor] = [denver] + installablePacks
+
+    /// v1 radio relay. Statewide packs stay bundled, not radio-sent.
     public static let cityRelayIDs: Set<String> = ["el-paso", "las-cruces", "albuquerque"]
 
     public static func isCityRelay(_ id: String) -> Bool {
         cityRelayIDs.contains(id)
+    }
+
+    public static func descriptor(id: String) -> FieldPackDescriptor? {
+        all.first(where: { $0.id == id })
     }
 }
 

@@ -332,6 +332,7 @@ def generate_xcodeproj() -> None:
         "copy_script": oid("copy_defaultpack_phase"),
         "guide_ref": oid("guide_folder_ref"),
         "copy_guide": oid("copy_guidepack_phase"),
+        "copy_fieldpacks": oid("copy_fieldpacks_phase"),
         "sync_ex": oid("sync_exceptions"),
         "sync_res_ex": oid("sync_resources_ex"),
     }
@@ -373,6 +374,10 @@ echo "Copied GuidePack -> ${DST}"
 test -f "${DST}/manifest.json"
 """
     copy_guide = copy_guide_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    copy_fieldpacks_raw = """set -e
+exec "${SRCROOT}/tools/copy_fieldpacks.sh"
+"""
+    copy_fieldpacks = copy_fieldpacks_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     local_refs = []
     for folder, _ in PACKAGES:
@@ -468,6 +473,7 @@ test -f "${DST}/manifest.json"
 				{ids['resources']} /* Resources */,
 				{ids['copy_script']} /* Copy DefaultPack into app bundle */,
 				{ids['copy_guide']} /* Copy GuidePack into app bundle */,
+				{ids['copy_fieldpacks']} /* Copy FieldPacks into app bundle */,
 			);
 			buildRules = (
 			);
@@ -585,6 +591,25 @@ test -f "${DST}/manifest.json"
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "{copy_guide}";
+		}};
+		{ids['copy_fieldpacks']} /* Copy FieldPacks into app bundle */ = {{
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/tools/copy_fieldpacks.sh",
+			);
+			name = "Copy FieldPacks into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "{copy_fieldpacks}";
 		}};
 /* End PBXShellScriptBuildPhase section */
 
