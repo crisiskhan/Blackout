@@ -247,7 +247,8 @@ struct RootView: View {
             battery: container.battery,
             persistence: container.persistence,
             packService: container.pack,
-            coverageRegions: container.packs.coverageRegions(bundled: container.pack.pack?.region),
+            coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
+            installedPackRoots: container.packs.installedPackRoots,
             onOpenFieldPacks: { container.showFieldPacks = true }
         )
         .swiftUIToolbar {

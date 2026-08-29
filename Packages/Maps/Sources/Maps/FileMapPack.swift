@@ -6,13 +6,63 @@ import Observation
 @Observable
 public final class FileMapPack: MapPackServing {
     public private(set) var pack: MapPackSnapshot?
+    /// Bundled DefaultPack region. Recenter always pins here, even when GPS
+    /// is inside a downloaded Field Pack.
+    public var bundledRegion: MapRegion? { bundledEntry?.0.region }
     private var dem: DEMTable?
+    private var bundledEntry: (MapPackSnapshot, DEMTable?)?
+    private var installedEntries: [(MapPackSnapshot, DEMTable?)] = []
 
     public init(rootURL: URL?) {
         if let rootURL, let snapshot = Self.load(root: rootURL) {
+            bundledEntry = snapshot
             pack = snapshot.0
             dem = snapshot.1
         }
+    }
+
+    /// File roots under Application Support/FieldPacks/<id>/. Local files only.
+    public func replaceInstalledRoots(_ roots: [URL]) {
+        let normalized = roots.map { $0.standardizedFileURL }
+        let next = normalized.compactMap { Self.load(root: $0) }
+        let nextPaths = next.map { $0.0.rootURL.standardizedFileURL.path }
+        let currentPaths = installedEntries.map { $0.0.rootURL.standardizedFileURL.path }
+        if nextPaths == currentPaths { return }
+        installedEntries = next
+    }
+
+    /// One covering pack. No mosaic. Recenter (`pinToBundled`) always paints DefaultPack.
+    public func resolve(latitude: Double?, longitude: Double?, pinToBundled: Bool) {
+        if pinToBundled, let bundledEntry {
+            apply(bundledEntry)
+            return
+        }
+        if let latitude, let longitude {
+            let hits = allEntries.filter { $0.0.region.contains(latitude: latitude, longitude: longitude) }
+            if let best = hits.min(by: { area($0.0.region) < area($1.0.region) }) {
+                apply(best)
+                return
+            }
+            return
+        }
+        if let bundledEntry {
+            apply(bundledEntry)
+        }
+    }
+
+    private var allEntries: [(MapPackSnapshot, DEMTable?)] {
+        (bundledEntry.map { [$0] } ?? []) + installedEntries
+    }
+
+    private func apply(_ entry: (MapPackSnapshot, DEMTable?)) {
+        let next = entry.0.rootURL.standardizedFileURL.path
+        if pack?.rootURL.standardizedFileURL.path == next { return }
+        pack = entry.0
+        dem = entry.1
+    }
+
+    private func area(_ region: MapRegion) -> Double {
+        region.spanLatitude * region.spanLongitude
     }
 
     public func elevationMeters(latitude: Double, longitude: Double) -> Double? {

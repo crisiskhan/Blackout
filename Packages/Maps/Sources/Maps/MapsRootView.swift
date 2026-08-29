@@ -10,8 +10,9 @@ public struct MapsRootView: View {
     @Bindable var mesh: MeshFacade
     @Bindable var battery: BatteryService
     let persistence: any PersistenceServing
-    let packService: FileMapPack
+    @Bindable var packService: FileMapPack
     var coverageRegions: [MapRegion]
+    var installedPackRoots: [URL]
     var onOpenFieldPacks: (() -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
@@ -39,6 +40,7 @@ public struct MapsRootView: View {
         persistence: any PersistenceServing,
         packService: FileMapPack,
         coverageRegions: [MapRegion] = [],
+        installedPackRoots: [URL] = [],
         onOpenFieldPacks: (() -> Void)? = nil
     ) {
         self.location = location
@@ -47,6 +49,7 @@ public struct MapsRootView: View {
         self.persistence = persistence
         self.packService = packService
         self.coverageRegions = coverageRegions
+        self.installedPackRoots = installedPackRoots
         self.onOpenFieldPacks = onOpenFieldPacks
     }
 
@@ -63,7 +66,7 @@ public struct MapsRootView: View {
         return !regions.contains { $0.contains(latitude: fix.latitude!, longitude: fix.longitude!, padFraction: 0.08) }
     }
     private var showLocationEmptyState: Bool {
-        packService.pack != nil && (outsidePack || (locationOutsideCoverage && !pinnedToPackCoverage))
+        packService.pack != nil && locationOutsideCoverage && !pinnedToPackCoverage
     }
     /// One raised card for a missing pack, GPS deny, or no tiles.
     /// Never a watermark and never stacked HUD warnings.
@@ -102,6 +105,7 @@ public struct MapsRootView: View {
                     },
                     resetToken: resetToken
                 )
+                .id(pack.rootURL.standardizedFileURL.path)
                 .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
                 if radarVisible {
@@ -231,7 +235,17 @@ public struct MapsRootView: View {
         }
         .task { reloadCrumbs() }
         .onChange(of: location.navigationFix?.latitude) { _, _ in
+            resolvePaintPack()
             if showViewshed { refreshTerrain() }
+        }
+        .onChange(of: location.navigationFix?.longitude) { _, _ in
+            resolvePaintPack()
+        }
+        .onChange(of: installedPackRoots) { _, _ in
+            resolvePaintPack()
+        }
+        .onChange(of: pinnedToPackCoverage) { _, _ in
+            resolvePaintPack()
         }
         .onChange(of: battery.isCritical) { _, critical in
             if critical {
@@ -243,6 +257,7 @@ public struct MapsRootView: View {
         }
         .onAppear {
             if extremeSaver { radarOn = true }
+            resolvePaintPack()
             refreshTerrain()
             location.startUpdating()
         }
@@ -273,7 +288,26 @@ public struct MapsRootView: View {
 
     private func recenterToPack() {
         pinnedToPackCoverage = true
+        resolvePaintPack()
         resetToken += 1
+    }
+
+    private func resolvePaintPack() {
+        packService.replaceInstalledRoots(installedPackRoots)
+        let before = packService.pack?.rootURL.standardizedFileURL.path
+        let fix = location.navigationFix
+        packService.resolve(
+            latitude: fix?.hasCoordinate == true ? fix?.latitude : nil,
+            longitude: fix?.hasCoordinate == true ? fix?.longitude : nil,
+            pinToBundled: pinnedToPackCoverage
+        )
+        let after = packService.pack?.rootURL.standardizedFileURL.path
+        if before != after {
+            refreshTerrain()
+            if !pinnedToPackCoverage {
+                centerToken += 1
+            }
+        }
     }
 
     private var lidarMapRange: Double? {

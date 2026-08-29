@@ -61,6 +61,17 @@ public final class PackStore {
         return regions
     }
 
+    /// Tile roots for installed remote packs. Reads `states` so SwiftUI reloads after download.
+    public var installedPackRoots: [URL] {
+        _ = states
+        return FieldPackCatalog.remotePacks.compactMap { pack in
+            guard isInstalled(pack.id) else { return nil }
+            let root = diskRoot.appendingPathComponent(pack.id, isDirectory: true)
+            guard MapPackLayout.containsTilePNGs(root: root) else { return nil }
+            return root
+        }
+    }
+
     public func isInstalled(_ id: String) -> Bool {
         if id == FieldPackCatalog.denver.id { return bundledIsReady }
         let manifest = diskRoot.appendingPathComponent(id, isDirectory: true).appendingPathComponent("manifest.json")
