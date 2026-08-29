@@ -96,6 +96,13 @@ jobs:
               fh.write(f"EXPORT_OPTIONS_PATH={export_path}\n")
           PY
 
+      - name: Prune leftover Apple Development certs
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
+          PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_prune_development_certs.sh
+
       - name: Archive Blackout (Release, device)
         run: |
           set -euo pipefail

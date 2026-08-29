@@ -46,6 +46,10 @@ def test_testflight_paths_and_assign() -> None:
         fail("ios-testflight.yml lost cancel-in-progress")
     if "tools/asc_assign_internal.sh" not in text:
         fail("ios-testflight.yml does not call tools/asc_assign_internal.sh")
+    if "tools/asc_prune_development_certs.sh" not in text:
+        fail("ios-testflight.yml does not prune leftover Development certs")
+    if "CODE_SIGN_IDENTITY=" in text:
+        fail("ios-testflight.yml must not pass CODE_SIGN_IDENTITY on the CLI")
     if "python3 -m pip install" in text:
         fail("ios-testflight.yml still pip-installs into system Python")
     if "6806388963" not in text:
@@ -73,6 +77,15 @@ def test_pbx_single_copy() -> None:
         fail("expected CURRENT_PROJECT_VERSION = 18 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
+    ident = 'CODE_SIGN_IDENTITY = "Apple Distribution"'
+    idx = pbx.find(ident)
+    if idx < 0:
+        fail("Release must Automatic-sign with Apple Distribution")
+    around = pbx[idx : idx + 500]
+    if "DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;" not in around:
+        fail("Apple Distribution is not on the Release target")
+    if "ENABLE_TESTABILITY" in pbx[max(0, idx - 400) : idx]:
+        fail("Debug config must not force Apple Distribution")
     ok("pbxproj is ditto-only, version 18, no alwaysOutOfDate")
 
 
@@ -88,6 +101,8 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost GuidePack ditto phase")
     if '"CURRENT_PROJECT_VERSION": "18",' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
+    if 'common["CODE_SIGN_IDENTITY"] = "Apple Distribution"' not in src:
+        fail("generate_project.py Release would not set Apple Distribution")
     if "generated-sample" in src:
         fail("generate_project.py would restore synthetic DefaultPack stubs")
     ok("generate_project.py regen stays ditto-only at version 18")
@@ -209,6 +224,39 @@ def test_assign_script_requires_secrets() -> None:
     ok("asc_assign_internal.sh fails closed without secrets")
 
 
+def test_prune_script_requires_secrets() -> None:
+    script = ROOT / "tools/asc_prune_development_certs.sh"
+    if not script.is_file():
+        fail("tools/asc_prune_development_certs.sh missing")
+    src = script.read_text()
+    if "IOS_DISTRIBUTION" in src and "REVOKE_TYPES" in src and "IOS_DISTRIBUTION" in src.split("REVOKE_TYPES")[1][:400]:
+        fail("prune script must not revoke Distribution certs")
+    if "DEVELOPMENT" not in src or "IOS_DEVELOPMENT" not in src:
+        fail("prune script must target Apple Development / iOS Development")
+    if "DISTRIBUTION" not in src or "KEEP" not in src:
+        fail("prune script must keep Distribution certs")
+    env = os.environ.copy()
+    for name in (
+        "APP_STORE_CONNECT_API_KEY",
+        "APP_STORE_CONNECT_KEY_ID",
+        "APP_STORE_CONNECT_ISSUER_ID",
+    ):
+        env.pop(name, None)
+    proc = subprocess.run(
+        ["bash", str(script)],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode == 0:
+        fail("asc_prune_development_certs.sh succeeded without secrets")
+    combined = (proc.stdout + proc.stderr).lower()
+    if "missing" not in combined:
+        fail("asc_prune_development_certs.sh did not report missing secrets")
+    ok("asc_prune_development_certs.sh fails closed without secrets")
+
+
 def test_live_mesh_1n() -> None:
     mesh = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshFacade.swift").read_text()
     pipe = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MultipeerPipe.swift").read_text()
@@ -287,6 +335,7 @@ def main() -> None:
     test_pbx_single_copy()
     test_generator_does_not_restore_double_copy()
     test_assign_script_requires_secrets()
+    test_prune_script_requires_secrets()
     test_map_chrome_lock()
     test_map_pack_resolver()
     test_usgs_defaultpack()
