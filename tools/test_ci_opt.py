@@ -102,6 +102,10 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py must not set Apple Distribution")
     if "generated-sample" in src:
         fail("generate_project.py would restore synthetic DefaultPack stubs")
+    if "SOS red core" in src or "if r < 280" in src:
+        fail("generate_project.py would restore the synthetic red-disc AppIcon")
+    if "brand/emblem.jpeg" not in src and 'brand" / "emblem.jpeg' not in src:
+        fail("generate_project.py does not render AppIcon from brand/emblem.jpeg")
     ok("generate_project.py regen stays ditto-only at version 18")
 
 
@@ -332,6 +336,50 @@ def test_pack_relay_1n() -> None:
     ok("city pack relay uses sendResource, Packs owns zip/hash, version 18")
 
 
+def test_locked_app_icon() -> None:
+    import struct
+
+    emblem = ROOT / "brand" / "emblem.jpeg"
+    wordmark = ROOT / "brand" / "wordmark.jpeg"
+    lockup = ROOT / "brand" / "lockup.jpeg"
+    icon = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon.png"
+    catalog = (ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "Contents.json").read_text()
+    wordset = ROOT / "Blackout" / "Assets.xcassets" / "Wordmark.imageset"
+    gen = (ROOT / "tools" / "generate_project.py").read_text()
+    if not emblem.is_file() or emblem.stat().st_size < 100_000:
+        fail("brand/emblem.jpeg missing or too small")
+    if not wordmark.is_file() or not lockup.is_file():
+        fail("brand wordmark/lockup missing")
+    if not icon.is_file():
+        fail("AppIcon.png missing")
+    if icon.stat().st_size < 50_000:
+        fail("AppIcon.png is still the synthetic red disc")
+    raw = icon.read_bytes()
+    if raw[:8] != b"\x89PNG\r\n\x1a\n":
+        fail("AppIcon.png is not a PNG")
+    ln = struct.unpack(">I", raw[8:12])[0]
+    tag = raw[12:16]
+    data = raw[16 : 16 + ln]
+    if tag != b"IHDR":
+        fail("AppIcon.png missing IHDR")
+    w, h, bit, ct = struct.unpack(">IIBB", data[:10])
+    if (w, h) != (1024, 1024):
+        fail(f"AppIcon.png is {w}x{h}, need 1024x1024")
+    if ct != 2:
+        fail(f"AppIcon.png color type {ct} is not opaque RGB (no alpha)")
+    if "AppIcon.png" not in catalog or "1024x1024" not in catalog:
+        fail("AppIcon Contents.json does not point at the single 1024")
+    if not (wordset / "Wordmark.jpeg").is_file() and not (wordset / "Wordmark.png").is_file():
+        fail("Wordmark is not in the asset catalog")
+    if "Image(" in gen and "lockup" in gen:
+        fail("lockup must not be wired into the app icon")
+    if "CURRENT_PROJECT_VERSION" in (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text():
+        pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+        if pbx.count("CURRENT_PROJECT_VERSION = 18") < 2:
+            fail("version was bumped while landing the emblem")
+    ok("AppIcon is the locked emblem PNG; wordmark is catalog-only")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -344,6 +392,7 @@ def main() -> None:
     test_usgs_defaultpack()
     test_live_mesh_1n()
     test_pack_relay_1n()
+    test_locked_app_icon()
     print("all ci-opt checks passed")
 
 

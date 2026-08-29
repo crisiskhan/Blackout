@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Xcode project and AppIcon. Verify DefaultPack USGS tiles. No network."""
+"""Generate Xcode project. AppIcon comes from brand/emblem.jpeg. Verify DefaultPack USGS tiles. No network."""
 from __future__ import annotations
 
 import hashlib
@@ -116,31 +116,37 @@ def generate_default_pack() -> None:
 
 
 def generate_app_icon() -> None:
-    size = 1024
-    pix = bytearray(size * size * 4)
-    cx = cy = size / 2
-    for py in range(size):
-        for px in range(size):
-            dx = px - cx
-            dy = py - cy
-            r = math.hypot(dx, dy)
-            i = (py * size + px) * 4
-            # void background
-            rr, gg, bb = 7, 8, 10
-            # faint raised disc
-            if r < 430:
-                rr, gg, bb = 12, 14, 18
-            # silver ring
-            if 390 < r < 420:
-                rr, gg, bb = 197, 205, 214
-            # SOS red core (icon only — product chrome uses the FAB for live red)
-            if r < 280:
-                rr, gg, bb = 255, 43, 43
-            if r < 210:
-                rr, gg, bb = 139, 20, 20
-            pix[i : i + 4] = bytes((rr, gg, bb, 255))
+    """Rasterize the locked emblem. Never synthesize the old red-disc placeholder."""
+    import shutil
+    import subprocess
+
+    emblem = ROOT / "brand" / "emblem.jpeg"
     icon_dir = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
-    write_png(icon_dir / "AppIcon.png", size, size, bytes(pix))
+    dest = icon_dir / "AppIcon.png"
+    if not emblem.is_file():
+        raise SystemExit("brand/emblem.jpeg missing; will not synthesize a red-disc AppIcon")
+    icon_dir.mkdir(parents=True, exist_ok=True)
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg:
+        subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-i",
+                str(emblem),
+                "-vf",
+                "scale=1024:1024:flags=lanczos",
+                "-pix_fmt",
+                "rgb24",
+                str(dest),
+            ],
+            check=True,
+            capture_output=True,
+        )
+    elif dest.is_file() and dest.stat().st_size > 50_000:
+        print("AppIcon: kept existing emblem PNG (ffmpeg not available)")
+    else:
+        raise SystemExit("ffmpeg required to render AppIcon from brand/emblem.jpeg")
     (icon_dir / "Contents.json").write_text(
         json.dumps(
             {
@@ -158,6 +164,7 @@ def generate_app_icon() -> None:
         )
         + "\n"
     )
+    print(f"AppIcon: {dest.stat().st_size} bytes from brand/emblem.jpeg")
 
 
 def generate_accent() -> None:
