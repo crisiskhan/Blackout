@@ -112,6 +112,9 @@ def test_pbx_single_copy() -> None:
         fail("BlackoutWidgets lost INFOPLIST_FILE on Debug or Release")
     if "INFOPLIST_FILE = BlackoutWidgets/Info.plist" in pbx:
         fail("widget Info.plist must stay outside the synced BlackoutWidgets folder")
+    widget_plist = (ROOT / "Supporting/BlackoutWidgets-Info.plist").read_text()
+    if "$(PRODUCT_BUNDLE_IDENTIFIER)" not in widget_plist:
+        fail("widget Info.plist must expand PRODUCT_BUNDLE_IDENTIFIER (parent prefix check)")
     if "CURRENT_PROJECT_VERSION = 19" not in pbx:
         fail("CURRENT_PROJECT_VERSION is no longer 19")
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
