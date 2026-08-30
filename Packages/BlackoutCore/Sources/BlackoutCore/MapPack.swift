@@ -117,6 +117,33 @@ public struct MapPackSnapshot: Sendable {
 
 /// Layout under DefaultPack / downloaded packs: `tiles/{z}/{x}/{y}.png`.
 public enum MapPackLayout {
+    /// Field-pack manifest layout. Missing `schema` is this SHA's v1.
+    public static let schema = 1
+    public static let tooNewCopy = "Pack too new."
+
+    public static func schema(from json: [String: Any]) -> Int {
+        if let value = json["schema"] as? Int { return value }
+        if let value = json["schema"] as? Double { return Int(value) }
+        return schema
+    }
+
+    public static func isSupported(_ value: Int) -> Bool {
+        value == schema
+    }
+
+    public static func isSupported(json: [String: Any]) -> Bool {
+        isSupported(schema(from: json))
+    }
+
+    public static func readManifestJSON(root: URL) -> [String: Any]? {
+        let url = root.appendingPathComponent("manifest.json")
+        guard let data = try? Data(contentsOf: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return json
+    }
+
     public static func tilePNGCount(root: URL) -> Int {
         let tiles = root.appendingPathComponent("tiles", isDirectory: true)
         var isDir: ObjCBool = false

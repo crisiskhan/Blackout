@@ -140,14 +140,18 @@ final class PackFindTests: XCTestCase {
         XCTAssertEqual(MapEmptyCopy.noTurns, "No turns for this area")
         XCTAssertEqual(MapEmptyCopy.noCivilization, "No civilization in this pack")
         XCTAssertEqual(MapEmptyCopy.noWater, "No water mapped here")
+        XCTAssertEqual(MapEmptyCopy.packTooNew, "Pack too new.")
         XCTAssertEqual(MapEmptyKind.noPack.title, MapEmptyCopy.noPack)
         XCTAssertTrue(MapEmptyKind.noPack.showsRedEyeO)
         XCTAssertFalse(MapEmptyKind.noTurns.showsRedEyeO)
         XCTAssertFalse(MapEmptyKind.noCivilization.showsRedEyeO)
         XCTAssertFalse(MapEmptyKind.noWater.showsRedEyeO)
+        XCTAssertFalse(MapEmptyKind.packTooNew.showsRedEyeO)
+        XCTAssertEqual(MapEmptyKind.packTooNew.title, "Pack too new.")
         XCTAssertEqual(NavigateEmpty.noGraph.mapKind, .noTurns)
         XCTAssertEqual(NavigateEmpty.noCivilization.mapKind, .noCivilization)
         XCTAssertEqual(NavigateEmpty.noWater.mapKind, .noWater)
+        XCTAssertEqual(NavigateEmpty.packTooNew.mapKind, .packTooNew)
     }
 
     func testSteerRoutesWhenRoutingCoversOtherwiseLockOn() throws {

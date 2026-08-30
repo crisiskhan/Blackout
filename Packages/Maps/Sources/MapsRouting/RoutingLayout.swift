@@ -1,11 +1,38 @@
 import Foundation
 
 /// `blackout-routing-v1` on-disk contract. Reader only — packs supply the bytes.
+public enum RoutingVersionStatus: Equatable, Sendable {
+    case compatible
+    case tooNew
+    case unreadable
+}
+
+public enum RoutingInspect: Equatable, Sendable {
+    case compatible
+    case tooNew
+    case missing
+    case unreadable
+}
+
 public enum RoutingLayout {
     public static let format = "blackout-routing-v1"
     public static let graphMagic = "BLRG0001"
     public static let namesMagic = "BLNM0001"
     public static let geometryMagic = "BLGM0001"
+    public static let tooNewCopy = "Pack too new."
+
+    public static func formatStatus(_ format: String) -> RoutingVersionStatus {
+        if format == Self.format { return .compatible }
+        if format.isEmpty { return .unreadable }
+        return .tooNew
+    }
+
+    public static func magicStatus(_ magic: String, expected: String) -> RoutingVersionStatus {
+        if magic == expected { return .compatible }
+        let prefix = String(expected.prefix(4))
+        if magic.count == 8, magic.hasPrefix(prefix) { return .tooNew }
+        return .unreadable
+    }
     public static let headerBytes = 16
     public static let nodeStride = 8
     public static let edgeStride = 26
@@ -84,6 +111,7 @@ public enum NavigateCopy {
     public static let noGPS = "No GPS."
     public static let bearingOnly = "Bearing only"
     public static let packManager = "Pack manager"
+    public static let packTooNew = RoutingLayout.tooNewCopy
 }
 
 public enum MapEmptyCopy {
@@ -93,6 +121,7 @@ public enum MapEmptyCopy {
     public static let noTurns = "No turns for this area"
     public static let noCivilization = "No civilization in this pack"
     public static let noWater = "No water mapped here"
+    public static let packTooNew = RoutingLayout.tooNewCopy
 }
 
 public enum MapEmptyKind: Equatable, Sendable {
@@ -100,6 +129,7 @@ public enum MapEmptyKind: Equatable, Sendable {
     case noTurns
     case noCivilization
     case noWater
+    case packTooNew
 
     public var title: String {
         switch self {
@@ -107,6 +137,7 @@ public enum MapEmptyKind: Equatable, Sendable {
         case .noTurns: return MapEmptyCopy.noTurns
         case .noCivilization: return MapEmptyCopy.noCivilization
         case .noWater: return MapEmptyCopy.noWater
+        case .packTooNew: return MapEmptyCopy.packTooNew
         }
     }
 
@@ -114,7 +145,7 @@ public enum MapEmptyKind: Equatable, Sendable {
     public var showsRedEyeO: Bool {
         switch self {
         case .noPack: return true
-        case .noTurns, .noCivilization, .noWater: return false
+        case .noTurns, .noCivilization, .noWater, .packTooNew: return false
         }
     }
 }
@@ -126,6 +157,7 @@ public enum NavigateEmpty: Equatable, Sendable {
     case noGPS
     case noCivilization
     case noWater
+    case packTooNew
 
     public var title: String {
         switch self {
@@ -135,13 +167,14 @@ public enum NavigateEmpty: Equatable, Sendable {
         case .noGPS: return NavigateCopy.noGPS
         case .noCivilization: return MapEmptyCopy.noCivilization
         case .noWater: return MapEmptyCopy.noWater
+        case .packTooNew: return NavigateCopy.packTooNew
         }
     }
 
     public var body: String? {
         switch self {
         case .noGraph: return NavigateCopy.noGraphBody
-        case .offGraph, .searchMiss, .noGPS, .noCivilization, .noWater: return nil
+        case .offGraph, .searchMiss, .noGPS, .noCivilization, .noWater, .packTooNew: return nil
         }
     }
 
@@ -150,6 +183,7 @@ public enum NavigateEmpty: Equatable, Sendable {
         case .noGraph: return .noTurns
         case .noCivilization: return .noCivilization
         case .noWater: return .noWater
+        case .packTooNew: return .packTooNew
         case .offGraph, .searchMiss, .noGPS: return nil
         }
     }

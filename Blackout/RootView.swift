@@ -278,7 +278,7 @@ struct RootView: View {
             persistence: container.persistence,
             packService: container.pack,
             coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
-            installedPackRoots: container.packs.readyRoots,
+            installedPackRoots: container.packs.diskPackRoots,
             packReady: container.packs.readySnapshot,
             onOpenFieldPacks: { destination = .expedition },
             externalSheetOpen: showSettings,

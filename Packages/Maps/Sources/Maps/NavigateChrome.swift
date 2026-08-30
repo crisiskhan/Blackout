@@ -158,8 +158,10 @@ struct NavigateEmptyCard: View {
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            if empty == .noGraph {
-                GhostButton(NavigateCopy.bearingOnly, height: BlackoutDS.Hit.md, action: onBearing)
+            if empty == .noGraph || empty == .packTooNew {
+                if empty == .noGraph {
+                    GhostButton(NavigateCopy.bearingOnly, height: BlackoutDS.Hit.md, action: onBearing)
+                }
                 if let onPacks {
                     MetalButton(NavigateCopy.packManager, height: BlackoutDS.Hit.md, action: onPacks)
                 }

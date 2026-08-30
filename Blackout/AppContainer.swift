@@ -75,9 +75,17 @@ final class AppContainer {
         packs = PackStore(bundledRoot: Self.packRoot(), bundledPacksRoot: Self.fieldPacksRoot())
         guidePackURL = Self.guidePackRoot()
         if !packs.bundledIsReady {
-            errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
+            if packs.packOnDisk(FieldPackCatalog.denver.id) != nil {
+                errors.append(MapPackLayout.tooNewCopy)
+            } else {
+                errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
+            }
         }
-        if guidePackURL == nil {
+        if let guidePackURL,
+           let json = MapPackLayout.readManifestJSON(root: guidePackURL),
+           GuidePackSchema.inspect(manifest: json, articles: [], inverted: [:]) == .tooNew {
+            errors.append(GuidePackSchema.tooNewCopy)
+        } else if guidePackURL == nil {
             errors.append("GuidePack missing from the app bundle. Field ask cannot retrieve.")
         }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
@@ -339,6 +347,8 @@ final class AppContainer {
             packs.installRelayedZip(id: name, zipURL: fileURL)
         case .pttFrame(let payload):
             ptt.receive(payload)
+        case .unsupportedVersion:
+            return
         }
     }
 

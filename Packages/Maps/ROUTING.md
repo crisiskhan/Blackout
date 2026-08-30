@@ -22,7 +22,8 @@ routing/geometry.bin
 
 If `routing/` is missing, `routing.json` is missing, magic mismatches, or the
 binaries are truncated / count-mismatched: **honest empty**. Never invent a turn list.
-Never WAN.
+Never WAN. A newer `format` (`blackout-routing-v2`) or family magic (`BLRG0002`)
+is **pack too new** — fail closed, not a silent skip.
 
 Denver `DefaultPack` has no `routing/`. El Paso metro (`us-tx-el-paso` bbox) is first — same `routing/` clip in `el-paso.pack.zip` and `texas.pack.zip`, not a statewide Texas graph. Archive/CI ditto copies `routing/` when the staged pack has it.
 

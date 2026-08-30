@@ -1,4 +1,5 @@
 {
+  "schema": 1,
   "name": "Front Range sample",
   "kind": "field-pack",
   "disclaimer": "USGS National Map topo sample for the Denver / Front Range window. Not a world map. Extra regions come from Field Packs on disk, never from Map paint.",

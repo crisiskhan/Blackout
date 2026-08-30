@@ -31,6 +31,7 @@ public struct FieldRootView: View {
 
     @State private var segment: Segment = .guide
     @State private var pack: GuidePackSnapshot?
+    @State private var packTooNew = false
 
     public init(
         location: LocationService,
@@ -101,6 +102,7 @@ public struct FieldRootView: View {
                         }
                         GuideAskView(
                             pack: pack,
+                            packTooNew: packTooNew,
                             context: guideContext,
                             extremeSaver: battery.isExtremeSaver,
                             focusArticleID: inboundArticleID,
@@ -155,6 +157,7 @@ public struct FieldRootView: View {
         }
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
         .onAppear {
+            packTooNew = GuidePackLoader.status(rootURL: packURL) == .tooNew
             pack = GuidePackLoader.load(rootURL: packURL)
         }
     }

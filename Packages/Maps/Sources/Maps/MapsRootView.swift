@@ -566,7 +566,9 @@ public struct MapsRootView: View {
 
     @ViewBuilder
     private var emptyOverlay: some View {
-        if showEmptyCard {
+        if packService.packTooNew {
+            MapEmptyCard(kind: .packTooNew, onPacks: onOpenFieldPacks, onRecenter: recenterToPack)
+        } else if showEmptyCard {
             MapEmptyCard(kind: .noPack, onPacks: onOpenFieldPacks, onRecenter: recenterToPack)
         } else if let kind = navigate.empty?.mapKind, navigate.phase != .guidance {
             MapEmptyCard(kind: kind)
@@ -1097,6 +1099,7 @@ public struct MapsRootView: View {
             latitude: fix?.hasCoordinate == true ? fix?.latitude : nil,
             longitude: fix?.hasCoordinate == true ? fix?.longitude : nil
         )
+        navigate.routingTooNew = packService.routingTooNew
         let after = packService.pack?.rootURL.standardizedFileURL.path
         if before != after {
             refreshTerrain()
@@ -1415,11 +1418,13 @@ struct MapEmptyCard: View {
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
                 .fixedSize(horizontal: false, vertical: true)
-            if kind == .noPack {
-                Text(MapEmptyCopy.noTiles)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
-                    .fixedSize(horizontal: false, vertical: true)
+            if kind == .noPack || kind == .packTooNew {
+                if kind == .noPack {
+                    Text(MapEmptyCopy.noTiles)
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Silver.mid)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 HStack(spacing: 8) {
                     if let onRecenter {
                         MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)

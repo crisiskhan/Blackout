@@ -1079,6 +1079,7 @@ def main() -> None:
     test_pack_find_civ_water()
     test_hits_23()
     test_offline_10()
+    test_format_version_insurance()
     print("all ci-opt checks passed")
 
 
@@ -1093,6 +1094,7 @@ def test_offline_10() -> None:
     wave_tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/OfflineWaveTests.swift").read_text()
     maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
     field = (ROOT / "Packages/Field/Sources/Field/GuideAskView.swift").read_text()
+    field_tree = (ROOT / "Packages/Field/Sources/Field/GuideTreePlate.swift").read_text()
     catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
     expedition = (ROOT / "Packages/Expeditions/Sources/Expeditions/ExpeditionsRootView.swift").read_text()
     root = (ROOT / "Blackout/RootView.swift").read_text()
@@ -1116,7 +1118,7 @@ def test_offline_10() -> None:
         fail("store-and-forward tests missing")
     if "testGuideSendIsIdOnly" not in wave_tests or "testSearchPatternStaysInPackBBox" not in wave_tests:
         fail("offline-10 focused tests missing")
-    if "Send to party" not in field and "GuideCardWire.sendLabel" not in field:
+    if "Send to party" not in field and "GuideCardWire.sendLabel" not in field and "GuideCardWire.sendLabel" not in field_tree:
         fail("Guide lost Send to party")
     if "Stay as relay" not in expedition and "LeaveBehindRelayPolicy.control" not in expedition:
         fail("Expedition lost Stay as relay")
@@ -1147,6 +1149,50 @@ def test_offline_10() -> None:
     if (ROOT / "Blackout/GuidePack/manifest.json").read_text().count('"articleCount": 284') < 1:
         fail("GuidePack articleCount drifted off 284")
     ok("offline 10: hop+queue, pack relay, track, viewshed, DR, guide id, search, relay, night, party mode")
+
+
+def test_format_version_insurance() -> None:
+    pack = json.loads((ROOT / "Blackout/DefaultPack/manifest.json").read_text())
+    guide = json.loads((ROOT / "Blackout/GuidePack/manifest.json").read_text())
+    routing = (ROOT / "Packages/Maps/Sources/MapsRouting/RoutingLayout.swift").read_text()
+    mesh = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshWire.swift").read_text()
+    guide_loader = (ROOT / "Packages/Field/Sources/Field/GuideEngine.swift").read_text()
+    ask = (ROOT / "Packages/Field/Sources/Field/GuideAskView.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    inbound = (ROOT / "Blackout/AppContainer.swift").read_text()
+    articles = (ROOT / "Blackout/GuidePack/articles.jsonl").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    if pack.get("schema") not in (None, 1):
+        fail("DefaultPack schema must be missing (v1) or 1")
+    if guide.get("schema") != 1:
+        fail("GuidePack must keep manifest schema 1")
+    if '"blackout-routing-v1"' not in routing or "tooNewCopy" not in routing:
+        fail("routing format v1 / too-new copy missing")
+    if "0x42, 0x4B, 0x31" not in mesh or "unsupportedVersion" not in mesh:
+        fail("mesh BK1 / unsupportedVersion missing")
+    if "GuidePackSchema.tooNewCopy" not in ask or "GuidePackSchema.inspect" not in guide_loader:
+        fail("guide schema fail-closed line missing")
+    if 'tooNewCopy = "Guide schema too new."' not in (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/GuidePackSchema.swift").read_text():
+        fail("guide too-new copy drifted")
+    if "MapPackLayout.tooNewCopy" not in store:
+        fail("pack too new catalog line missing")
+    if 'tooNewCopy = "Pack too new."' not in (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapPack.swift").read_text():
+        fail("pack too-new copy drifted")
+    if "unsupportedVersion" not in inbound:
+        fail("AppContainer must handle mesh unsupportedVersion")
+    if articles.count("\n") < 284:
+        fail("GuidePack articles drifted")
+    if "_ingest" in articles:
+        fail("GuidePack gained _ingest")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    ok("format-version insurance: pack/mesh/guide v1, fail closed, version 19")
 
 
 def test_hits_23() -> None:

@@ -6,6 +6,7 @@ import SwiftUI
 
 struct GuideAskView: View {
     var pack: GuidePackSnapshot?
+    var packTooNew = false
     var context: GuideQueryContext
     var extremeSaver: Bool
     var focusArticleID: String? = nil
@@ -92,7 +93,11 @@ struct GuideAskView: View {
                     )
                 }
             }
-            if pack == nil {
+            if packTooNew {
+                Text(GuidePackSchema.tooNewCopy)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Semantic.warn)
+            } else if pack == nil {
                 Text("GuidePack missing from the app bundle. Ask cannot retrieve.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Semantic.warn)
@@ -176,7 +181,7 @@ struct GuideAskView: View {
 
     private func runAsk() {
         guard let pack else {
-            error = "GuidePack missing."
+            error = packTooNew ? GuidePackSchema.tooNewCopy : "GuidePack missing."
             hits = []
             return
         }

@@ -178,6 +178,7 @@ def main() -> None:
     jsonl.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records))
     (PACK / "inverted.json").write_text(json.dumps(index, indent=2, sort_keys=True) + "\n")
     manifest = {
+        "schema": 1,
         "name": "Blackout GuidePack",
         "kind": "on-device-field-guide",
         "articleCount": len(records),

@@ -3,6 +3,7 @@ import Foundation
 enum RoutingReadError: Error, Equatable {
     case truncated
     case magic
+    case tooNew
     case count
 }
 

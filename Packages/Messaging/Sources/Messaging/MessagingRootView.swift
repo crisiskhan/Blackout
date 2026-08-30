@@ -48,6 +48,10 @@ public struct MessagingRootView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
+                if case .unsupportedVersion = mesh.lastEvent {
+                    StoreFailure(MeshInbound.versionUnknownCopy)
+                        .padding(.horizontal, 20)
+                }
                 if let error {
                     StoreFailure(error)
                         .padding(.horizontal, 20)

@@ -27,6 +27,7 @@ final class NavigateSession {
     }
     var tick: GuidanceTick?
     var attribution: String?
+    var routingTooNew = false
 
     private var lastPrompt: String?
     private let speech = OnDeviceSpeech()
@@ -56,6 +57,14 @@ final class NavigateSession {
     }
 
     func search(pack: RoutingPack?, pois: [MapPOI]) {
+        if routingTooNew, pack == nil {
+            hits = []
+            empty = .packTooNew
+            preview = nil
+            destination = nil
+            phase = .idle
+            return
+        }
         let result = PackSearch.query(query, pack: pack, pois: routingPOIs(pois))
         hits = result.hits
         empty = result.empty
@@ -210,7 +219,7 @@ final class NavigateSession {
         destination = coordinate
         destinationLabel = label
         guard let pack else {
-            empty = .noGraph
+            empty = routingTooNew ? .packTooNew : .noGraph
             preview = nil
             phase = .idle
             return

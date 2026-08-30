@@ -58,10 +58,17 @@ public final class PackStore {
     }
 
     public var bundledIsReady: Bool {
+        bundledFilesPresent && bundledSchemaOK
+    }
+
+    private var bundledFilesPresent: Bool {
         guard let bundledRoot else { return false }
-        let manifest = bundledRoot.appendingPathComponent("manifest.json")
-        return FileManager.default.fileExists(atPath: manifest.path)
-            && MapPackLayout.containsTilePNGs(root: bundledRoot)
+        return packFilesPresent(bundledRoot)
+    }
+
+    private var bundledSchemaOK: Bool {
+        guard let bundledRoot else { return false }
+        return packSchemaOK(bundledRoot)
     }
 
     public func coverageRegions(bundled: MapRegion?) -> [MapRegion] {
@@ -83,16 +90,28 @@ public final class PackStore {
         }
     }
 
+    /// On-disk pack roots including too-new schema. Map fail-closes; Ready stays schema-ok.
+    public var diskPackRoots: [URL] {
+        _ = states
+        return FieldPackCatalog.installablePacks.compactMap { packOnDisk($0.id) }
+    }
+
     public func packRoot(for id: String) -> URL? {
+        guard let root = packOnDisk(id), packSchemaOK(root) else { return nil }
+        return root
+    }
+
+    /// Files on disk, including a too-new schema we must not call Ready.
+    public func packOnDisk(_ id: String) -> URL? {
         if id == FieldPackCatalog.denver.id {
-            return bundledIsReady ? bundledRoot : nil
+            return bundledFilesPresent ? bundledRoot : nil
         }
         if let bundled = bundledPacksRoot?.appendingPathComponent(id, isDirectory: true),
-           packLooksReady(bundled) {
+           packFilesPresent(bundled) {
             return bundled
         }
         let disk = diskRoot.appendingPathComponent(id, isDirectory: true)
-        return packLooksReady(disk) ? disk : nil
+        return packFilesPresent(disk) ? disk : nil
     }
 
     public func isInstalled(_ id: String) -> Bool {
@@ -124,63 +143,60 @@ public final class PackStore {
         if bundledIsReady {
             states[FieldPackCatalog.denver.id] = .ready
             messages[FieldPackCatalog.denver.id] = "On this device. Works airplane."
+        } else if bundledFilesPresent {
+            states[FieldPackCatalog.denver.id] = .failed
+            messages[FieldPackCatalog.denver.id] = MapPackLayout.tooNewCopy
         } else {
             states[FieldPackCatalog.denver.id] = .failed
             messages[FieldPackCatalog.denver.id] = "Bundled Denver pack is missing from the app."
         }
         for pack in FieldPackCatalog.bundledStatewide {
-            let installed = isInstalled(pack.id)
-            if let state = FieldPackHonesty.rowState(
-                isInstalled: installed,
-                downloading: false,
-                isRemote: false,
-                assetReady: pack.assetReady,
-                pathSatisfied: pathSatisfied,
-                onWiFi: onWiFi
-            ) {
-                states[pack.id] = state
-            } else {
-                states.removeValue(forKey: pack.id)
-            }
-            messages[pack.id] = FieldPackHonesty.message(
-                isInstalled: installed,
-                isBundled: true,
-                isRemote: false,
-                assetReady: pack.assetReady,
-                pathSatisfied: pathSatisfied,
-                onWiFi: onWiFi
-            )
+            applyCatalogState(pack, isBundled: true, isRemote: false)
         }
         for pack in FieldPackCatalog.remotePacks {
             if states[pack.id] == .downloading { continue }
-            let installed = isInstalled(pack.id)
-            if let state = FieldPackHonesty.rowState(
-                isInstalled: installed,
-                downloading: false,
-                isRemote: true,
-                assetReady: pack.assetReady,
-                pathSatisfied: pathSatisfied,
-                onWiFi: onWiFi
-            ) {
-                states[pack.id] = state
-            } else {
-                states.removeValue(forKey: pack.id)
-            }
-            messages[pack.id] = FieldPackHonesty.message(
-                isInstalled: installed,
-                isBundled: false,
-                isRemote: true,
-                assetReady: pack.assetReady,
-                pathSatisfied: pathSatisfied,
-                onWiFi: onWiFi
-            )
+            applyCatalogState(pack, isBundled: false, isRemote: true)
         }
     }
 
-    private func packLooksReady(_ root: URL) -> Bool {
+    private func applyCatalogState(_ pack: FieldPackDescriptor, isBundled: Bool, isRemote: Bool) {
+        if packOnDisk(pack.id) != nil, !isInstalled(pack.id) {
+            states[pack.id] = .failed
+            messages[pack.id] = MapPackLayout.tooNewCopy
+            return
+        }
+        let installed = isInstalled(pack.id)
+        if let state = FieldPackHonesty.rowState(
+            isInstalled: installed,
+            downloading: false,
+            isRemote: isRemote,
+            assetReady: pack.assetReady,
+            pathSatisfied: pathSatisfied,
+            onWiFi: onWiFi
+        ) {
+            states[pack.id] = state
+        } else {
+            states.removeValue(forKey: pack.id)
+        }
+        messages[pack.id] = FieldPackHonesty.message(
+            isInstalled: installed,
+            isBundled: isBundled,
+            isRemote: isRemote,
+            assetReady: pack.assetReady,
+            pathSatisfied: pathSatisfied,
+            onWiFi: onWiFi
+        )
+    }
+
+    private func packFilesPresent(_ root: URL) -> Bool {
         let manifest = root.appendingPathComponent("manifest.json")
         return FileManager.default.fileExists(atPath: manifest.path)
             && MapPackLayout.containsTilePNGs(root: root)
+    }
+
+    private func packSchemaOK(_ root: URL) -> Bool {
+        guard let json = MapPackLayout.readManifestJSON(root: root) else { return false }
+        return MapPackLayout.isSupported(json: json)
     }
 
     private func regionOnDisk(_ id: String) -> MapRegion? {
@@ -236,6 +252,10 @@ public final class PackStore {
                 try? FileManager.default.removeItem(at: dest)
                 throw PackStoreError.missingManifest
             }
+            guard packSchemaOK(dest) else {
+                try? FileManager.default.removeItem(at: dest)
+                throw PackStoreError.tooNew
+            }
             keepRelayZip(id: id, from: zipURL)
             try? FileManager.default.removeItem(at: zipURL)
             states[id] = .ready
@@ -243,6 +263,9 @@ public final class PackStore {
             progress[id] = 1
         } catch is CancellationError {
             refreshStates()
+        } catch PackStoreError.tooNew {
+            states[id] = .failed
+            messages[id] = MapPackLayout.tooNewCopy
         } catch {
             if isInstalled(id) {
                 states[id] = .ready
@@ -369,6 +392,10 @@ public final class PackStore {
                 try? FileManager.default.removeItem(at: dest)
                 throw PackStoreError.missingManifest
             }
+            guard packSchemaOK(dest) else {
+                try? FileManager.default.removeItem(at: dest)
+                throw PackStoreError.tooNew
+            }
             keepRelayZip(id: id, from: zipURL)
             try? FileManager.default.removeItem(at: zipURL)
             states[id] = .ready
@@ -376,6 +403,11 @@ public final class PackStore {
             messages[id] = catalogMatch
                 ? "Ready from nearby phone. Checksum matches catalog."
                 : "Ready from nearby phone. Tiles verified on disk."
+        } catch PackStoreError.tooNew {
+            try? FileManager.default.removeItem(at: zipURL)
+            states[id] = .failed
+            messages[id] = MapPackLayout.tooNewCopy
+            progress[id] = nil
         } catch {
             try? FileManager.default.removeItem(at: zipURL)
             if isInstalled(id) {
@@ -406,6 +438,7 @@ public enum PackStoreError: Error {
     case notOnReleases
     case checksum
     case missingManifest
+    case tooNew
     case notCityRelay
     case notInstalled
 }

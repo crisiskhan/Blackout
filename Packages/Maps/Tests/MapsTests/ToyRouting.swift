@@ -10,6 +10,7 @@ enum ToyRouting {
         to root: URL,
         onewayFirstEdge: Bool = false,
         badGraphMagic: Bool = false,
+        newerGraphMagic: Bool = false,
         bbox: RoutingBBox? = nil,
         checksums: [String: String] = [:]
     ) throws {
@@ -75,6 +76,9 @@ enum ToyRouting {
         var graph = RoutingBinary.writeGraph(nodes: nodes, edges: edges)
         if badGraphMagic {
             graph.replaceSubrange(0..<8, with: Array("XXXX0001".utf8))
+        }
+        if newerGraphMagic {
+            graph.replaceSubrange(0..<8, with: Array("BLRG0002".utf8))
         }
         try graph.write(to: routing.appendingPathComponent("graph.bin"))
         try RoutingBinary.writeNames(["", "Mesa Street", "Arroyo Path"])

@@ -22,30 +22,71 @@ struct GuidePackSnapshot: Sendable {
     var disclaimer: String
 }
 
+enum GuidePackLoad: Equatable {
+    case ready
+    case missing
+    case tooNew
+}
+
 enum GuidePackLoader {
     static func load(rootURL: URL?) -> GuidePackSnapshot? {
+        switch inspect(rootURL: rootURL) {
+        case .ready(let snap):
+            return snap
+        case .missing, .tooNew:
+            return nil
+        }
+    }
+
+    static func status(rootURL: URL?) -> GuidePackLoad {
+        switch inspect(rootURL: rootURL) {
+        case .ready:
+            return .ready
+        case .missing:
+            return .missing
+        case .tooNew:
+            return .tooNew
+        }
+    }
+
+    private enum Inspect {
+        case ready(GuidePackSnapshot)
+        case missing
+        case tooNew
+    }
+
+    private static func inspect(rootURL: URL?) -> Inspect {
         let candidates: [URL?] = [
             rootURL,
             Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "GuidePack")?.deletingLastPathComponent(),
             Bundle.main.resourceURL?.appendingPathComponent("GuidePack", isDirectory: true),
             Bundle.main.bundleURL.appendingPathComponent("GuidePack", isDirectory: true)
         ]
+        var sawTooNew = false
         for candidate in candidates {
             guard let candidate else { continue }
-            if let snap = load(from: candidate) { return snap }
+            switch inspect(from: candidate) {
+            case .ready(let snap):
+                return .ready(snap)
+            case .tooNew:
+                sawTooNew = true
+            case .missing:
+                continue
+            }
         }
-        return nil
+        return sawTooNew ? .tooNew : .missing
     }
 
-    private static func load(from root: URL) -> GuidePackSnapshot? {
+    private static func inspect(from root: URL) -> Inspect {
         let manifestURL = root.appendingPathComponent("manifest.json")
         guard let data = try? Data(contentsOf: manifestURL),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return nil
+            return .missing
         }
         let articlesURL = root.appendingPathComponent("articles.jsonl")
-        guard let raw = try? String(contentsOf: articlesURL, encoding: .utf8) else { return nil }
+        guard let raw = try? String(contentsOf: articlesURL, encoding: .utf8) else { return .missing }
         var articles: [GuideArticle] = []
+        var records: [[String: Any]] = []
         for line in raw.split(whereSeparator: \.isNewline) {
             guard let lineData = String(line).data(using: .utf8),
                   let obj = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
@@ -53,18 +94,28 @@ enum GuidePackLoader {
                   let title = obj["title"] as? String,
                   let topic = obj["topic"] as? String,
                   let body = obj["body"] as? String else { continue }
+            records.append(obj)
             let tags = obj["tags"] as? [String] ?? []
             articles.append(GuideArticle(id: id, title: title, topic: topic, tags: tags, body: body))
         }
-        guard !articles.isEmpty else { return nil }
+        guard !articles.isEmpty else { return .missing }
         var index: [String: [String: Int]] = [:]
+        var invertedJSON: [String: Any] = [:]
         let indexURL = root.appendingPathComponent("inverted.json")
         if let indexData = try? Data(contentsOf: indexURL),
-           let obj = try? JSONSerialization.jsonObject(with: indexData) as? [String: [String: Int]] {
-            index = obj
+           let obj = try? JSONSerialization.jsonObject(with: indexData) as? [String: Any] {
+            invertedJSON = obj
+            if let postings = obj as? [String: [String: Int]] {
+                index = postings
+            } else if let terms = obj["terms"] as? [String: [String: Int]] {
+                index = terms
+            }
+        }
+        if GuidePackSchema.inspect(manifest: json, articles: records, inverted: invertedJSON) == .tooNew {
+            return .tooNew
         }
         let disclaimer = json["disclaimer"] as? String ?? "On-device guide."
-        return GuidePackSnapshot(articles: articles, index: index, disclaimer: disclaimer)
+        return .ready(GuidePackSnapshot(articles: articles, index: index, disclaimer: disclaimer))
     }
 }
 

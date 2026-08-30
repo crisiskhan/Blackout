@@ -133,7 +133,7 @@ public enum RoutingPackLoader {
         var ranked: [(url: URL, area: Double)] = []
         for root in roots {
             guard let manifest = peekManifest(packRoot: root) else { continue }
-            guard manifest.format == RoutingLayout.format else { continue }
+            guard RoutingLayout.formatStatus(manifest.format) == .compatible else { continue }
             guard manifest.bbox.contains(coordinate) else { continue }
             if manifest.checksums.isEmpty {
                 guard binariesPresent(packRoot: root) else { continue }
@@ -159,14 +159,65 @@ public enum RoutingPackLoader {
     public static func peekManifest(packRoot: URL) -> RoutingManifest? {
         guard let urls = routingURLs(packRoot: packRoot) else { return nil }
         guard let manifest = readManifest(urls.json) else { return nil }
-        if manifest.format != RoutingLayout.format { return nil }
+        if RoutingLayout.formatStatus(manifest.format) != .compatible { return nil }
         return manifest
     }
 
+    public static func inspect(packRoot: URL) -> RoutingInspect {
+        guard let urls = routingURLs(packRoot: packRoot) else { return .missing }
+        guard let manifest = readManifest(urls.json) else { return .unreadable }
+        switch RoutingLayout.formatStatus(manifest.format) {
+        case .tooNew:
+            return .tooNew
+        case .unreadable:
+            return .unreadable
+        case .compatible:
+            break
+        }
+        let graphURL = urls.dir.appendingPathComponent("graph.bin")
+        guard let graphData = try? Data(contentsOf: graphURL, options: [.mappedIfSafe]) else {
+            return binariesPresent(packRoot: packRoot) ? .unreadable : .missing
+        }
+        do {
+            var reader = LEReader(data: graphData)
+            let magic = try reader.magic8()
+            switch RoutingLayout.magicStatus(magic, expected: RoutingLayout.graphMagic) {
+            case .compatible:
+                return .compatible
+            case .tooNew:
+                return .tooNew
+            case .unreadable:
+                return .unreadable
+            }
+        } catch {
+            return .unreadable
+        }
+    }
+
+    /// Tightest covering pack, including too-new routing so the map can fail closed.
+    public static func coveringInspect(
+        among roots: [URL],
+        latitude: Double,
+        longitude: Double
+    ) -> (url: URL, status: RoutingInspect)? {
+        let coordinate = RoutingCoordinate(latitude: latitude, longitude: longitude)
+        var ranked: [(url: URL, area: Double, status: RoutingInspect)] = []
+        for root in roots {
+            guard let urls = routingURLs(packRoot: root),
+                  let manifest = readManifest(urls.json) else { continue }
+            guard manifest.bbox.contains(coordinate) else { continue }
+            let status = inspect(packRoot: root)
+            if status == .missing { continue }
+            ranked.append((root.standardizedFileURL, manifest.bbox.area, status))
+        }
+        return ranked.min(by: { $0.area < $1.area }).map { ($0.url, $0.status) }
+    }
+
     public static func load(packRoot: URL) -> RoutingPack? {
+        guard inspect(packRoot: packRoot) == .compatible else { return nil }
         guard let urls = routingURLs(packRoot: packRoot) else { return nil }
         guard let manifest = readManifest(urls.json) else { return nil }
-        if manifest.format != RoutingLayout.format { return nil }
+        if RoutingLayout.formatStatus(manifest.format) != .compatible { return nil }
 
         let graphURL = urls.dir.appendingPathComponent("graph.bin")
         let namesURL = urls.dir.appendingPathComponent("names.bin")
@@ -327,7 +378,15 @@ public enum RoutingBinary {
 
     public static func readGraph(_ data: Data) throws -> (nodes: [RoutingNode], edges: [RoutingEdge]) {
         var reader = LEReader(data: data)
-        guard try reader.magic8() == RoutingLayout.graphMagic else { throw RoutingReadError.magic }
+        let magic = try reader.magic8()
+        switch RoutingLayout.magicStatus(magic, expected: RoutingLayout.graphMagic) {
+        case .compatible:
+            break
+        case .tooNew:
+            throw RoutingReadError.tooNew
+        case .unreadable:
+            throw RoutingReadError.magic
+        }
         let nodeCount = Int(try reader.u32())
         let edgeCount = Int(try reader.u32())
         var nodes: [RoutingNode] = []
@@ -358,7 +417,15 @@ public enum RoutingBinary {
 
     public static func readNames(_ data: Data) throws -> [String] {
         var reader = LEReader(data: data)
-        guard try reader.magic8() == RoutingLayout.namesMagic else { throw RoutingReadError.magic }
+        let magic = try reader.magic8()
+        switch RoutingLayout.magicStatus(magic, expected: RoutingLayout.namesMagic) {
+        case .compatible:
+            break
+        case .tooNew:
+            throw RoutingReadError.tooNew
+        case .unreadable:
+            throw RoutingReadError.magic
+        }
         let count = Int(try reader.u32())
         var names: [String] = []
         names.reserveCapacity(count)
@@ -372,7 +439,15 @@ public enum RoutingBinary {
 
     public static func readGeometry(_ data: Data, edgeCount: Int) throws -> [[RoutingCoordinate]] {
         var reader = LEReader(data: data)
-        guard try reader.magic8() == RoutingLayout.geometryMagic else { throw RoutingReadError.magic }
+        let magic = try reader.magic8()
+        switch RoutingLayout.magicStatus(magic, expected: RoutingLayout.geometryMagic) {
+        case .compatible:
+            break
+        case .tooNew:
+            throw RoutingReadError.tooNew
+        case .unreadable:
+            throw RoutingReadError.magic
+        }
         let count = Int(try reader.u32())
         if count != edgeCount { throw RoutingReadError.count }
         var geoms: [[RoutingCoordinate]] = []

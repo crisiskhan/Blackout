@@ -9,27 +9,54 @@ public final class FileMapPack: MapPackServing {
     public private(set) var pack: MapPackSnapshot?
     /// On-pack `routing/` graph. Nil when the mounted pack has no routing — honest empty.
     public private(set) var routing: RoutingPack?
+    /// Covering pack is on disk but newer than this app.
+    public private(set) var packTooNew = false
+    /// Covering routing/ is present but newer than this app.
+    public private(set) var routingTooNew = false
     /// Bundled DefaultPack region. Recenter pins a covering pack, not this by default.
     public var bundledRegion: MapRegion? { bundledEntry?.0.region }
+    /// Recenter / paint never force Denver. `pinToBundled` stays false.
+    public static let pinToBundled = false
     private var dem: DEMTable?
     private var bundledEntry: (MapPackSnapshot, DEMTable?)?
+    private var bundledTooNewRegion: MapRegion?
     private var installedEntries: [(MapPackSnapshot, DEMTable?)] = []
+    private var installedTooNewRegions: [MapRegion] = []
     private var routingRootPath: String?
 
     public init(rootURL: URL?) {
-        if let rootURL, let snapshot = Self.load(root: rootURL) {
-            bundledEntry = snapshot
+        if let rootURL {
+            switch Self.inspect(root: rootURL) {
+            case .ready(let snapshot):
+                bundledEntry = snapshot
+            case .tooNew(let region):
+                bundledTooNewRegion = region
+            case .unreadable:
+                break
+            }
         }
     }
 
     /// File roots under bundle FieldPacks/<id>/ or Application Support/FieldPacks/<id>/. Local files only.
     public func replaceInstalledRoots(_ roots: [URL]) {
         let normalized = roots.map { $0.standardizedFileURL }
-        let next = normalized.compactMap { Self.load(root: $0) }
+        var next: [(MapPackSnapshot, DEMTable?)] = []
+        var tooNew: [MapRegion] = []
+        for root in normalized {
+            switch Self.inspect(root: root) {
+            case .ready(let snapshot):
+                next.append(snapshot)
+            case .tooNew(let region):
+                tooNew.append(region)
+            case .unreadable:
+                continue
+            }
+        }
         let nextPaths = next.map { $0.0.rootURL.standardizedFileURL.path }
         let currentPaths = installedEntries.map { $0.0.rootURL.standardizedFileURL.path }
-        if nextPaths == currentPaths { return }
+        if nextPaths == currentPaths, tooNew == installedTooNewRegions { return }
         installedEntries = next
+        installedTooNewRegions = tooNew
         routingRootPath = nil
     }
 
@@ -44,8 +71,13 @@ public final class FileMapPack: MapPackServing {
             latitude: latitude,
             longitude: longitude
         ) {
+            packTooNew = false
             applyTiles(allEntries[index])
+        } else if coveringTooNew(latitude: latitude, longitude: longitude) {
+            packTooNew = true
+            clearTiles()
         } else {
+            packTooNew = false
             clearTiles()
         }
         reloadRouting(latitude: latitude, longitude: longitude)
@@ -55,9 +87,21 @@ public final class FileMapPack: MapPackServing {
         (bundledEntry.map { [$0] } ?? []) + installedEntries
     }
 
+    private var allTooNewRegions: [MapRegion] {
+        (bundledTooNewRegion.map { [$0] } ?? []) + installedTooNewRegions
+    }
+
+    private func coveringTooNew(latitude: Double?, longitude: Double?) -> Bool {
+        PackPaintPolicy.coveringIndex(
+            regions: allTooNewRegions,
+            latitude: latitude,
+            longitude: longitude
+        ) != nil
+    }
+
     private func applyTiles(_ entry: (MapPackSnapshot, DEMTable?)) {
         let next = entry.0.rootURL.standardizedFileURL.path
-        if pack?.rootURL.standardizedFileURL.path == next { return }
+        if pack?.rootURL.standardizedFileURL.path == next, !packTooNew { return }
         pack = entry.0
         dem = entry.1
     }
@@ -70,35 +114,57 @@ public final class FileMapPack: MapPackServing {
 
     private func reloadRouting(latitude: Double?, longitude: Double?) {
         guard let latitude, let longitude else {
-            if routing != nil {
+            if routing != nil || routingTooNew {
                 routing = nil
+                routingTooNew = false
                 routingRootPath = nil
             }
             return
         }
         let coordinate = RoutingCoordinate(latitude: latitude, longitude: longitude)
         let roots = allEntries.map { $0.0.rootURL }
-        if let routing,
-           let routingRootPath,
-           routing.manifest.bbox.contains(coordinate),
-           roots.contains(where: { $0.standardizedFileURL.path == routingRootPath }) {
-            return
-        }
-        guard let root = RoutingPackLoader.coveringRoot(
+        if let hit = RoutingPackLoader.coveringInspect(
             among: roots,
             latitude: latitude,
             longitude: longitude
-        ) else {
-            if routing != nil {
+        ) {
+            switch hit.status {
+            case .tooNew:
                 routing = nil
+                routingTooNew = true
                 routingRootPath = nil
+                return
+            case .compatible:
+                if let routing,
+                   let routingRootPath,
+                   routing.manifest.bbox.contains(coordinate),
+                   hit.url.standardizedFileURL.path == routingRootPath {
+                    routingTooNew = false
+                    return
+                }
+                routing = RoutingPackLoader.load(packRoot: hit.url)
+                routingTooNew = false
+                routingRootPath = routing == nil ? nil : hit.url.standardizedFileURL.path
+                return
+            case .missing, .unreadable:
+                break
             }
+        }
+        if let root = RoutingPackLoader.coveringRoot(
+            among: roots,
+            latitude: latitude,
+            longitude: longitude
+        ) {
+            routing = RoutingPackLoader.load(packRoot: root)
+            routingTooNew = false
+            routingRootPath = routing == nil ? nil : root.standardizedFileURL.path
             return
         }
-        let path = root.standardizedFileURL.path
-        if path == routingRootPath, routing != nil { return }
-        routing = RoutingPackLoader.load(packRoot: root)
-        routingRootPath = routing == nil ? nil : path
+        if routing != nil || routingTooNew {
+            routing = nil
+            routingTooNew = false
+            routingRootPath = nil
+        }
     }
 
     public func elevationMeters(latitude: Double, longitude: Double) -> Double? {
@@ -119,12 +185,14 @@ public final class FileMapPack: MapPackServing {
         dem?.slopeGrid() ?? []
     }
 
-    private static func load(root: URL) -> (MapPackSnapshot, DEMTable?)? {
-        let manifestURL = root.appendingPathComponent("manifest.json")
-        guard let data = try? Data(contentsOf: manifestURL),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return nil
-        }
+    private enum PackInspect {
+        case ready((MapPackSnapshot, DEMTable?))
+        case tooNew(MapRegion)
+        case unreadable
+    }
+
+    private static func inspect(root: URL) -> PackInspect {
+        guard let json = MapPackLayout.readManifestJSON(root: root) else { return .unreadable }
         let center = json["center"] as? [String: Any]
         let span = json["span"] as? [String: Any]
         let region = MapRegion(
@@ -136,20 +204,23 @@ public final class FileMapPack: MapPackServing {
             minZoom: json["minZoom"] as? Int ?? 10,
             maxZoom: json["maxZoom"] as? Int ?? 12
         )
+        if !MapPackLayout.isSupported(json: json) {
+            return .tooNew(region)
+        }
         let disclaimer = json["disclaimer"] as? String ?? "Generated sample pack."
         let tilesDir = root.appendingPathComponent("tiles", isDirectory: true)
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: tilesDir.path, isDirectory: &isDir), isDir.boolValue else {
-            return nil
+            return .unreadable
         }
         let tileCount = MapPackLayout.tilePNGCount(root: root)
         guard tileCount > 0 else {
-            return nil
+            return .unreadable
         }
         let expectedTileCount = json["tileCount"] as? Int ?? tileCount
         let pois = loadPOIs(root: root)
         let dem = loadDEM(root: root)
-        return (
+        return .ready((
             MapPackSnapshot(
                 rootURL: root,
                 region: region,
@@ -159,7 +230,7 @@ public final class FileMapPack: MapPackServing {
                 expectedTileCount: expectedTileCount
             ),
             dem
-        )
+        ))
     }
 
     public var paintDiagnostic: String {

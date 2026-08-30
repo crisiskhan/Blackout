@@ -8,6 +8,10 @@ public enum MeshInbound: Equatable, Sendable {
     case resource(name: String, fileURL: URL)
     /// Opaque live PTT bytes. Mesh must not inspect the payload.
     case pttFrame(Data)
+    /// BK2+ or unknown kind on BK1. Not a silent skip.
+    case unsupportedVersion
+
+    public static let versionUnknownCopy = "Mesh version unknown."
 }
 
 enum MeshRadio {
@@ -44,7 +48,9 @@ enum MeshRadio {
 }
 
 enum MeshWire {
+    /// Frame magic is the envelope version. BK1 is v1. Do not add a second field.
     static let magic = Data([0x42, 0x4B, 0x31]) // BK1
+    static let unsupportedVersionCopy = MeshInbound.versionUnknownCopy
 
     enum Kind: UInt8 {
         case advertisement = 1
@@ -68,20 +74,27 @@ enum MeshWire {
     }
 
     static func decode(_ data: Data) -> MeshInbound? {
-        guard data.count >= 4, data.prefix(3) == magic else { return nil }
-        guard let kind = Kind(rawValue: data[3]) else { return nil }
-        let payload = Data(data.dropFirst(4))
-        switch kind {
-        case .advertisement:
-            return .advertisement(payload)
-        case .envelope:
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .millisecondsSince1970
-            guard let envelope = try? decoder.decode(Envelope.self, from: payload) else { return nil }
-            return .envelope(envelope)
-        case .pttFrame:
-            return .pttFrame(payload)
+        guard data.count >= 4 else { return nil }
+        let prefix = data.prefix(3)
+        if prefix == magic {
+            guard let kind = Kind(rawValue: data[3]) else { return .unsupportedVersion }
+            let payload = Data(data.dropFirst(4))
+            switch kind {
+            case .advertisement:
+                return .advertisement(payload)
+            case .envelope:
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .millisecondsSince1970
+                guard let envelope = try? decoder.decode(Envelope.self, from: payload) else { return nil }
+                return .envelope(envelope)
+            case .pttFrame:
+                return .pttFrame(payload)
+            }
         }
+        if prefix.count == 3, prefix[prefix.startIndex] == 0x42, prefix[prefix.startIndex + 1] == 0x4B {
+            return .unsupportedVersion
+        }
+        return nil
     }
 
     private static func frame(kind: Kind, payload: Data) -> Data {
