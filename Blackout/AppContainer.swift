@@ -74,7 +74,7 @@ final class AppContainer {
         pack = FileMapPack(rootURL: Self.packRoot())
         packs = PackStore(bundledRoot: Self.packRoot(), bundledPacksRoot: Self.fieldPacksRoot())
         guidePackURL = Self.guidePackRoot()
-        if pack.pack == nil || !packs.bundledIsReady {
+        if !packs.bundledIsReady {
             errors.append("DefaultPack missing from the app bundle. Map shows the honest no-pack canvas.")
         }
         if guidePackURL == nil {

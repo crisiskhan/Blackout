@@ -139,33 +139,26 @@ public struct MapsRootView: View {
     private var gpsLive: Bool {
         location.authorization == .authorized && location.navigationFix?.source == .gps
     }
-    private var locationOutsideCoverage: Bool {
-        guard let fix = resolveCoordinate, fix.hasCoordinate else { return false }
-        let regions = coverageRegions.isEmpty ? [packService.pack?.region].compactMap { $0 } : coverageRegions
-        return !regions.contains { $0.contains(latitude: fix.latitude!, longitude: fix.longitude!, padFraction: 0.08) }
-    }
-
-    /// Live fix, else last-known. NO FIX still paints an installed pack that covers last-known.
+    /// Live fix, else last-known. A covering pack paints; none cover is the empty card.
     private var resolveCoordinate: LocationFix? {
         if let live = location.navigationFix, live.hasCoordinate { return live }
         if let last = location.lastKnown, last.hasCoordinate { return last }
         return nil
     }
-    private var showLocationEmptyState: Bool {
-        packService.pack != nil && locationOutsideCoverage && !pinnedToPackCoverage
-    }
-    /// One raised card for a missing pack or no tiles.
-    /// GPS deny is Feature 1 “No GPS.” on the Navigate chrome — preview from a pin still works.
+    /// One raised card. No file-tile canvas underneath. GPS deny stays Feature 1 “No GPS.”
     private var showEmptyCard: Bool {
-        packService.pack == nil || showLocationEmptyState
+        MapEmptyPolicy.showsEmptyCard(packMounted: packService.pack != nil)
     }
     private var radarVisible: Bool {
-        if sosOnly || showEmptyCard { return false }
-        if extremeSaver { return true }
-        return radarOn
+        MapEmptyPolicy.showsRadar(
+            packMounted: packService.pack != nil,
+            sosOnly: sosOnly,
+            radarOn: radarOn,
+            extremeSaver: extremeSaver
+        )
     }
     private var showChipRow: Bool {
-        packService.pack != nil && !showEmptyCard && !sosOnly
+        MapEmptyPolicy.showsChips(packMounted: packService.pack != nil, sosOnly: sosOnly)
     }
     private var liveRec: Bool {
         UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking)
@@ -496,7 +489,7 @@ public struct MapsRootView: View {
 
     @ViewBuilder
     private var mapCanvas: some View {
-        if let pack = packService.pack {
+        if MapEmptyPolicy.paintsCanvas(packMounted: packService.pack != nil), let pack = packService.pack {
             offlineMap(pack)
                 .id(pack.rootURL.standardizedFileURL.path)
                 .rotationEffect(.degrees(radarVisible && fieldHeadingUp ? -(location.headingDegrees ?? 0) : 0))
@@ -574,7 +567,7 @@ public struct MapsRootView: View {
     @ViewBuilder
     private var emptyOverlay: some View {
         if showEmptyCard {
-            MapEmptyCard(kind: .noPack, onPacks: onOpenFieldPacks)
+            MapEmptyCard(kind: .noPack, onPacks: onOpenFieldPacks, onRecenter: recenterToPack)
         } else if let kind = navigate.empty?.mapKind, navigate.phase != .guidance {
             MapEmptyCard(kind: kind)
         } else if let empty = navigate.empty, navigate.phase != .guidance {
@@ -1099,10 +1092,10 @@ public struct MapsRootView: View {
         packService.replaceInstalledRoots(installedPackRoots)
         let before = packService.pack?.rootURL.standardizedFileURL.path
         let fix = resolveCoordinate
+        _ = coverageRegions
         packService.resolve(
             latitude: fix?.hasCoordinate == true ? fix?.latitude : nil,
-            longitude: fix?.hasCoordinate == true ? fix?.longitude : nil,
-            pinToBundled: pinnedToPackCoverage
+            longitude: fix?.hasCoordinate == true ? fix?.longitude : nil
         )
         let after = packService.pack?.rootURL.standardizedFileURL.path
         if before != after {
@@ -1391,6 +1384,7 @@ struct MapLockHUD: View {
 struct MapEmptyCard: View {
     var kind: MapEmptyKind
     var onPacks: (() -> Void)? = nil
+    var onRecenter: (() -> Void)? = nil
     var fillsSpace: Bool = true
 
     var body: some View {
@@ -1421,8 +1415,19 @@ struct MapEmptyCard: View {
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
                 .fixedSize(horizontal: false, vertical: true)
-            if kind == .noPack, let onPacks {
-                MetalButton("Packs", height: BlackoutDS.Hit.md, action: onPacks)
+            if kind == .noPack {
+                Text(MapEmptyCopy.noTiles)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.mid)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 8) {
+                    if let onRecenter {
+                        MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)
+                    }
+                    if let onPacks {
+                        MetalButton("Packs", height: BlackoutDS.Hit.md, action: onPacks)
+                    }
+                }
             }
         }
         .padding(20)

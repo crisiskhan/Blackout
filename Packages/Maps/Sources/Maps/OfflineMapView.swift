@@ -27,8 +27,8 @@ struct OfflineMapView: UIViewRepresentable {
     var viewshedOrigin: LocationFix? = nil
     var showSlope: Bool
     var centerToken: Int
-    /// When true, Recenter pinned the camera to pack coverage. GPS follow
-    /// (El Paso 31.87,-106.60 etc.) must not yank the camera off Denver tiles.
+    /// When true, Recenter pinned the camera to the covering pack. GPS follow
+    /// must not yank the camera off those tiles or into a void.
     var pinCameraToPack: Bool
     var routing: RoutingPack?
     var routeLine: [RoutingCoordinate]
@@ -125,9 +125,10 @@ struct OfflineMapView: UIViewRepresentable {
         }
         if context.coordinator.lastCenterToken != centerToken {
             context.coordinator.lastCenterToken = centerToken
-            // Heading-up / "center on me" only. Recenter to pack coverage
-            // never uses this path — GPS outside the sample paints void.
-            if !pinCameraToPack, let selfFix, selfFix.hasCoordinate {
+            // Heading-up / follow-puck only while GPS is on this pack.
+            // Recenter pins coverage. GPS outside the pack never yanks the camera.
+            if MapEmptyPolicy.followGPS(pinToPack: pinCameraToPack, packContainsSelf: packContainsSelf),
+               let selfFix, selfFix.hasCoordinate {
                 view.centerOn(latitude: selfFix.latitude!, longitude: selfFix.longitude!)
             }
         }

@@ -136,6 +136,7 @@ final class PackFindTests: XCTestCase {
     func testMapEmptyCopyIsExact() {
         XCTAssertEqual(MapEmptyCopy.eyebrow, "MAP")
         XCTAssertEqual(MapEmptyCopy.noPack, "No pack for this area")
+        XCTAssertEqual(MapEmptyCopy.noTiles, "No tiles for this location")
         XCTAssertEqual(MapEmptyCopy.noTurns, "No turns for this area")
         XCTAssertEqual(MapEmptyCopy.noCivilization, "No civilization in this pack")
         XCTAssertEqual(MapEmptyCopy.noWater, "No water mapped here")

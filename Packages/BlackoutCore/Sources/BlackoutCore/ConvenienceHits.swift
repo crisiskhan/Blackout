@@ -124,6 +124,13 @@ public struct MeshRadioBannerPolicy: Equatable, Sendable {
     }
 }
 
+/// Airplane + Wi-Fi on (no SSID / no WAN) is not wifi-off. Mesh is local radio.
+public enum MeshRadioPathHonesty {
+    public static func wifiRadioOff(wifiDenied: Bool) -> Bool {
+        wifiDenied
+    }
+}
+
 public enum MapQuickNav {
     public static let disabledOpacity: Double = 0.38
 

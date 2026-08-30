@@ -169,7 +169,8 @@ public enum FieldPackCatalog {
         )
     )
 
-    /// IPA-ready statewide packs. Archive fetches these; compile does not.
+    /// Designated statewide packs. Archive fetches these; compile does not.
+    /// UI Ready is disk-only — see FieldPackHonesty.
     public static let bundledStatewide: [FieldPackDescriptor] = [
         florida, texas, newYork, newMexico
     ]

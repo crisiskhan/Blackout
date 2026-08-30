@@ -37,6 +37,20 @@ final class PackStoreBundledTests: XCTestCase {
         XCTAssertEqual(store.readyRoots.map(\.lastPathComponent).sorted(), roots.map(\.lastPathComponent).sorted())
     }
 
+    func testMissingStatewideIsAvailableNotFailed() {
+        let fm = FileManager.default
+        let disk = fm.temporaryDirectory.appendingPathComponent("fp-empty-\(UUID().uuidString)", isDirectory: true)
+        try? fm.createDirectory(at: disk, withIntermediateDirectories: true)
+        let store = PackStore(bundledRoot: nil, bundledPacksRoot: nil, diskRoot: disk)
+        store.refreshStates()
+        for id in ["us-tx", "us-nm", "us-fl", "us-ny"] {
+            XCTAssertNotEqual(store.states[id], .ready)
+            XCTAssertNotEqual(store.states[id], .failed)
+            XCTAssertFalse(store.isInstalled(id))
+            XCTAssertEqual(store.messages[id], "Available. Not installed on this device.")
+        }
+    }
+
     func testFourStatesOnDiskNoSkip() {
         XCTAssertEqual(
             Set(FieldPackRowState.allCases),

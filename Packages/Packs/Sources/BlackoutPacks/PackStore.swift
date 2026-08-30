@@ -129,34 +129,51 @@ public final class PackStore {
             messages[FieldPackCatalog.denver.id] = "Bundled Denver pack is missing from the app."
         }
         for pack in FieldPackCatalog.bundledStatewide {
-            if isInstalled(pack.id) {
-                states[pack.id] = .ready
-                messages[pack.id] = "Bundled. Ready. Works airplane."
+            let installed = isInstalled(pack.id)
+            if let state = FieldPackHonesty.rowState(
+                isInstalled: installed,
+                downloading: false,
+                isRemote: false,
+                assetReady: pack.assetReady,
+                pathSatisfied: pathSatisfied,
+                onWiFi: onWiFi
+            ) {
+                states[pack.id] = state
             } else {
-                states[pack.id] = .failed
-                messages[pack.id] = "Statewide pack missing from this IPA."
+                states.removeValue(forKey: pack.id)
             }
+            messages[pack.id] = FieldPackHonesty.message(
+                isInstalled: installed,
+                isBundled: true,
+                isRemote: false,
+                assetReady: pack.assetReady,
+                pathSatisfied: pathSatisfied,
+                onWiFi: onWiFi
+            )
         }
         for pack in FieldPackCatalog.remotePacks {
             if states[pack.id] == .downloading { continue }
-            if isInstalled(pack.id) {
-                states[pack.id] = .ready
-                messages[pack.id] = "Ready. Works airplane."
-                continue
-            }
-            if !pathSatisfied {
-                states[pack.id] = .noWifi
-                messages[pack.id] = "No network. Airplane uses packs already on disk."
-            } else if !onWiFi {
-                states[pack.id] = .noWifi
-                messages[pack.id] = "Prefers Wi-Fi. Tap Download to try anyway from this screen."
-            } else if !pack.assetReady {
-                states[pack.id] = .failed
-                messages[pack.id] = "Not on GitHub Releases yet. Denver stays the fallback."
+            let installed = isInstalled(pack.id)
+            if let state = FieldPackHonesty.rowState(
+                isInstalled: installed,
+                downloading: false,
+                isRemote: true,
+                assetReady: pack.assetReady,
+                pathSatisfied: pathSatisfied,
+                onWiFi: onWiFi
+            ) {
+                states[pack.id] = state
             } else {
                 states.removeValue(forKey: pack.id)
-                messages[pack.id] = "Tap Download. Then airplane."
             }
+            messages[pack.id] = FieldPackHonesty.message(
+                isInstalled: installed,
+                isBundled: false,
+                isRemote: true,
+                assetReady: pack.assetReady,
+                pathSatisfied: pathSatisfied,
+                onWiFi: onWiFi
+            )
         }
     }
 

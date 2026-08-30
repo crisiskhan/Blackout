@@ -71,6 +71,25 @@ final class ConvenienceHitsTests: XCTestCase {
         )
     }
 
+    func testAirplaneWifiOnWithoutWANIsNotWifiOff() {
+        XCTAssertFalse(MeshRadioPathHonesty.wifiRadioOff(wifiDenied: false))
+        XCTAssertTrue(MeshRadioPathHonesty.wifiRadioOff(wifiDenied: true))
+        XCTAssertFalse(
+            MeshRadioBannerPolicy.cannotRun(
+                bluetoothOff: false,
+                wifiOff: MeshRadioPathHonesty.wifiRadioOff(wifiDenied: false),
+                localNetworkDenied: false
+            )
+        )
+        XCTAssertTrue(
+            MeshRadioBannerPolicy.cannotRun(
+                bluetoothOff: true,
+                wifiOff: false,
+                localNetworkDenied: false
+            )
+        )
+    }
+
     func testBannerDismissedPersistenceUntilRadiosRecover() {
         var policy = MeshRadioBannerPolicy()
         XCTAssertTrue(policy.shouldShow(cannotRun: true))

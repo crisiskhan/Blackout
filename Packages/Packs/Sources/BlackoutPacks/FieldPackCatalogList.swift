@@ -2,7 +2,7 @@ import BlackoutCore
 import DesignSystem
 import SwiftUI
 
-/// Existing pack catalog. FL/TX/NY/NM Ready bundled. Extras later.
+/// Existing pack catalog. Ready only when the zip is on this device. Extras later.
 public struct FieldPackCatalogList: View {
     @Bindable var store: PackStore
     var nearbyCount: Int
@@ -28,7 +28,7 @@ public struct FieldPackCatalogList: View {
     }
 
     private func packRow(_ pack: FieldPackDescriptor) -> some View {
-        let state = store.states[pack.id] ?? (pack.isBundled ? .ready : nil)
+        let state = store.states[pack.id]
         return HUDPanel {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
@@ -41,9 +41,11 @@ public struct FieldPackCatalogList: View {
                             .foregroundStyle(color(for: state))
                     }
                 }
-                Text(pack.summary)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
+                if FieldPackHonesty.showsCatalogSummary(isReady: store.isReady(pack.id)) {
+                    Text(pack.summary)
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
+                }
                 if let message = store.messages[pack.id], !message.isEmpty {
                     Text(message)
                         .font(BlackoutDS.captionFont())

@@ -42,19 +42,22 @@ public final class MeshRadioProbe: NSObject {
     }
 
     private func apply(_ path: NWPath) {
-        wifiOff = !path.usesInterfaceType(.wifi)
+        var wifiDenied = false
         if path.status == .unsatisfied {
             switch path.unsatisfiedReason {
             case .localNetworkDenied:
                 localNetworkDenied = true
             case .wifiDenied:
-                wifiOff = true
-            default:
+                wifiDenied = true
+            case .notAvailable, .cellularDenied:
+                break
+            @unknown default:
                 break
             }
         } else {
             localNetworkDenied = false
         }
+        wifiOff = MeshRadioPathHonesty.wifiRadioOff(wifiDenied: wifiDenied)
     }
 }
 

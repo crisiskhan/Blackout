@@ -9,8 +9,7 @@ public final class FileMapPack: MapPackServing {
     public private(set) var pack: MapPackSnapshot?
     /// On-pack `routing/` graph. Nil when the mounted pack has no routing — honest empty.
     public private(set) var routing: RoutingPack?
-    /// Bundled DefaultPack region. Recenter always pins here, even when GPS
-    /// is inside a downloaded Field Pack.
+    /// Bundled DefaultPack region. Recenter pins a covering pack, not this by default.
     public var bundledRegion: MapRegion? { bundledEntry?.0.region }
     private var dem: DEMTable?
     private var bundledEntry: (MapPackSnapshot, DEMTable?)?
@@ -20,8 +19,6 @@ public final class FileMapPack: MapPackServing {
     public init(rootURL: URL?) {
         if let rootURL, let snapshot = Self.load(root: rootURL) {
             bundledEntry = snapshot
-            pack = snapshot.0
-            dem = snapshot.1
         }
     }
 
@@ -36,19 +33,20 @@ public final class FileMapPack: MapPackServing {
         routingRootPath = nil
     }
 
-    /// One covering pack. No mosaic. Recenter (`pinToBundled`) always paints DefaultPack tiles.
+    /// One covering pack. Tightest bbox. Recenter does not force DefaultPack.
+    /// GPS / last-known outside every on-disk pack clears tiles (empty card).
     /// Routing loads from the mounted Field Pack whose `routing/` bbox covers the fix — never
     /// from Denver DefaultPack, and not from the painted tile root when that root has no graph.
-    public func resolve(latitude: Double?, longitude: Double?, pinToBundled: Bool) {
-        if pinToBundled, let bundledEntry {
-            applyTiles(bundledEntry)
-        } else if let latitude, let longitude {
-            let hits = allEntries.filter { $0.0.region.contains(latitude: latitude, longitude: longitude) }
-            if let best = hits.min(by: { area($0.0.region) < area($1.0.region) }) {
-                applyTiles(best)
-            }
-        } else if let bundledEntry {
-            applyTiles(bundledEntry)
+    public func resolve(latitude: Double?, longitude: Double?) {
+        let regions = allEntries.map(\.0.region)
+        if let index = PackPaintPolicy.coveringIndex(
+            regions: regions,
+            latitude: latitude,
+            longitude: longitude
+        ) {
+            applyTiles(allEntries[index])
+        } else {
+            clearTiles()
         }
         reloadRouting(latitude: latitude, longitude: longitude)
     }
@@ -64,8 +62,20 @@ public final class FileMapPack: MapPackServing {
         dem = entry.1
     }
 
+    private func clearTiles() {
+        guard pack != nil || dem != nil else { return }
+        pack = nil
+        dem = nil
+    }
+
     private func reloadRouting(latitude: Double?, longitude: Double?) {
-        guard let latitude, let longitude else { return }
+        guard let latitude, let longitude else {
+            if routing != nil {
+                routing = nil
+                routingRootPath = nil
+            }
+            return
+        }
         let coordinate = RoutingCoordinate(latitude: latitude, longitude: longitude)
         let roots = allEntries.map { $0.0.rootURL }
         if let routing,
@@ -89,10 +99,6 @@ public final class FileMapPack: MapPackServing {
         if path == routingRootPath, routing != nil { return }
         routing = RoutingPackLoader.load(packRoot: root)
         routingRootPath = routing == nil ? nil : path
-    }
-
-    private func area(_ region: MapRegion) -> Double {
-        region.spanLatitude * region.spanLongitude
     }
 
     public func elevationMeters(latitude: Double, longitude: Double) -> Double? {

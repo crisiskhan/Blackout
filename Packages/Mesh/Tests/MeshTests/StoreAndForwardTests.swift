@@ -43,6 +43,31 @@ final class StoreAndForwardTests: XCTestCase {
         XCTAssertEqual(reloaded.acceptInbound(envelope), .duplicate)
     }
 
+    func testHopTTLDropsAtMaxHops() {
+        let expired = Envelope(
+            kind: .message,
+            ciphertext: Data([0xCC]),
+            sender: BlackoutID(),
+            recipient: BlackoutID(),
+            hopCount: StoreAndForwardQueue.maxHops
+        )
+        XCTAssertEqual(StoreAndForwardQueue(fileURL: tempURL()).acceptInbound(expired), .duplicate)
+
+        let live = Envelope(
+            kind: .message,
+            ciphertext: Data([0xCD]),
+            sender: BlackoutID(),
+            recipient: BlackoutID(),
+            hopCount: StoreAndForwardQueue.maxHops - 1
+        )
+        switch StoreAndForwardQueue(fileURL: tempURL()).acceptInbound(live) {
+        case .deliverAndForward(let next):
+            XCTAssertEqual(next.hopCount, StoreAndForwardQueue.maxHops)
+        case .duplicate:
+            XCTFail("hop \(StoreAndForwardQueue.maxHops - 1) should forward once")
+        }
+    }
+
     func testSafeResourceNamesIncludeStatewide() {
         XCTAssertTrue(MeshRadio.isSafeResourceName("el-paso"))
         XCTAssertTrue(MeshRadio.isSafeResourceName("us-tx"))

@@ -89,6 +89,7 @@ public enum NavigateCopy {
 public enum MapEmptyCopy {
     public static let eyebrow = "MAP"
     public static let noPack = "No pack for this area"
+    public static let noTiles = "No tiles for this location"
     public static let noTurns = "No turns for this area"
     public static let noCivilization = "No civilization in this pack"
     public static let noWater = "No water mapped here"
