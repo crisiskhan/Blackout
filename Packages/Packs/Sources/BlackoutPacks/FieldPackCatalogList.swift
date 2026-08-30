@@ -54,14 +54,14 @@ public struct FieldPackCatalogList: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
                 }
-                if !pack.isBundled, state != .ready {
+                if !pack.isBundled, !store.isReady(pack.id) {
                     MetalButton(state == .downloading ? "Downloading" : "Download", height: BlackoutDS.Hit.sm) {
                         store.download(pack.id)
                     }
                     .disabled(state == .downloading)
                     .opacity(state == .downloading ? 0.6 : 1)
                 }
-                if FieldPackCatalog.isCityRelay(pack.id), state == .ready {
+                if FieldPackCatalog.isCityRelay(pack.id), store.isReady(pack.id) {
                     if nearbyCount > 0 {
                         let sending = store.progress[pack.id] != nil
                         MetalButton(sending ? "Sending" : "Send to nearby phone", height: BlackoutDS.Hit.sm) {

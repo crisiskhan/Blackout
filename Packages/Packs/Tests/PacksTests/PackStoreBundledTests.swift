@@ -30,5 +30,10 @@ final class PackStoreBundledTests: XCTestCase {
         XCTAssertFalse(roots.contains(where: { $0.lastPathComponent == "tiles" }))
         XCTAssertFalse(store.isInstalled("el-paso"))
         XCTAssertNotEqual(store.states["el-paso"], .ready)
+        XCTAssertTrue(store.isReady("us-tx"))
+        XCTAssertFalse(store.isReady("el-paso"))
+        let snapshot = store.readySnapshot
+        XCTAssertTrue(snapshot.isReady("us-fl"))
+        XCTAssertEqual(store.readyRoots.map(\.lastPathComponent).sorted(), roots.map(\.lastPathComponent).sorted())
     }
 }

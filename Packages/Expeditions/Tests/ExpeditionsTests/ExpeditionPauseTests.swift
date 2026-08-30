@@ -44,6 +44,16 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(PartyVitalsCopy.notOK, "I AM NOT OK")
     }
 
+    func testRosterPlateOwnsCallsignAndPartyCode() {
+        XCTAssertEqual(PartyIdentityCopy.callsign, "Callsign")
+        XCTAssertEqual(PartyIdentityCopy.create, "Create")
+        XCTAssertEqual(PartyIdentityCopy.join, "Join")
+        XCTAssertEqual(PartyIdentityCopy.leave, "Leave")
+        XCTAssertEqual(PartyIdentityCopy.end, "End")
+        XCTAssertEqual(Callsign.defaultValue, "YOU")
+        XCTAssertEqual(Callsign.maxLength, 12)
+    }
+
     func testVitalsChipIs56AndSOSStays88() {
         XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
         XCTAssertEqual(PartyVitalsCopy.sosHeight, 88)

@@ -99,6 +99,19 @@ public final class PackStore {
         packRoot(for: id) != nil
     }
 
+    /// One Ready query. Map / Field / Navigate ask this store.
+    public func isReady(_ id: String) -> Bool {
+        states[id] == .ready
+    }
+
+    public var readyRoots: [URL] { installedPackRoots }
+
+    public var readySnapshot: PackReadySnapshot {
+        PackReadySnapshot(
+            readyIDs: FieldPackCatalog.all.compactMap { isReady($0.id) ? $0.id : nil }
+        )
+    }
+
     public func skipIntro() {
         UserDefaults.standard.set(true, forKey: BlackoutKeys.fieldPacksIntroCompleted)
         for pack in FieldPackCatalog.remotePacks where states[pack.id] != .ready && states[pack.id] != .downloading {

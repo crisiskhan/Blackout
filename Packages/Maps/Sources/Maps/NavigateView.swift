@@ -8,6 +8,7 @@ struct NavigateView: View {
     @Bindable var location: LocationService
     var pack: MapPackSnapshot?
     @Bindable var battery: BatteryService
+    var packReady: PackReadySnapshot = .empty
     @State private var selected: MapPOI?
 
     var body: some View {
@@ -24,6 +25,11 @@ struct NavigateView: View {
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Red.hot)
                 } else {
+                    if pack == nil, !packReady.readyIDs.isEmpty {
+                        Text("Field pack Ready on this phone. Open Packs to paint coverage.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                    }
                     if battery.isExtremeSaver {
                         Text("Extreme Saver · coarse only")
                             .font(BlackoutDS.captionFont())

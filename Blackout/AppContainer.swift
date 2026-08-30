@@ -27,6 +27,7 @@ final class AppContainer {
     var sosCoverOpen = false
     var showFieldPacks = false
     let guidePackURL: URL?
+    let identity: LocalIdentityStore
     let party: PartyRoster
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
@@ -65,8 +66,14 @@ final class AppContainer {
             errors.append("GuidePack missing from the app bundle. Field ask cannot retrieve.")
         }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
-        party = PartyRoster(localID: crypto.localIdentity, recipientID: crypto.preferredRecipient)
+        identity = LocalIdentityStore(deviceID: crypto.localIdentity)
+        party = PartyRoster(
+            localID: identity.deviceID,
+            recipientID: crypto.preferredRecipient,
+            identity: identity
+        )
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
+        mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
         mesh.onInbound = { [weak self] event in
             self?.handleMeshInbound(event)
         }
@@ -85,9 +92,44 @@ final class AppContainer {
             mesh.stop()
         } else {
             location.startUpdating()
-            mesh.start()
+            syncMeshToParty()
         }
         startMissedCheckInWatch()
+    }
+
+    func syncMeshToParty() {
+        mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
+        if battery.isCritical || !MeshGate.allowsTraffic(partyCode: identity.partyCode) {
+            mesh.stop()
+        } else {
+            mesh.start()
+        }
+    }
+
+    func commitCallsign(_ raw: String) {
+        _ = party.commitCallsign(raw)
+        syncMeshToParty()
+        if let envelope = party.broadcastSelf(fix: location.navigationFix) {
+            sendPartyStatus(envelope)
+        }
+    }
+
+    func createParty() {
+        _ = party.createParty()
+        syncMeshToParty()
+    }
+
+    func joinParty(_ code: String) -> Bool {
+        let ok = party.joinParty(code)
+        if ok {
+            syncMeshToParty()
+        }
+        return ok
+    }
+
+    func leaveParty() {
+        party.leaveParty()
+        mesh.stop()
     }
 
     /// Composition root only. Mesh stays a dumb pipe; Crypto and Persistence stay in their kits.

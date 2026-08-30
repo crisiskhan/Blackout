@@ -14,4 +14,8 @@ public enum BlackoutKeys {
     public static let crumbsTracking = "com.crisiskhan.blackout.crumbs.tracking"
     public static let crumbsExpedition = "com.crisiskhan.blackout.crumbs.expedition"
     public static let partySelfStatus = "com.crisiskhan.blackout.party.selfStatus"
+    /// LocalIdentity blob. Format name is the key.
+    public static let fieldIdentityV1 = "blackout-field-v1"
+    /// Previous field blob. Copied once on first launch, then v1 is written.
+    public static let fieldIdentityLegacyV3 = "redline-field-v3"
 }

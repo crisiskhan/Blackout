@@ -1,13 +1,12 @@
 import BlackoutCore
 import BlackoutLocation
-import BlackoutMesh
 import DesignSystem
 import SwiftUI
 
 struct RadarView: View {
     @Bindable var location: LocationService
-    @Bindable var mesh: MeshFacade
     var pack: MapPackSnapshot?
+    @Bindable var roster: PartyRoster
 
     var body: some View {
         VStack(spacing: 20) {
@@ -22,7 +21,7 @@ struct RadarView: View {
                 Circle()
                     .fill(BlackoutDS.Semantic.info)
                     .frame(width: 14, height: 14)
-                if mesh.nearbyPeerCount == 0 {
+                if roster.peerCount == 0 {
                     VStack {
                         Spacer()
                         Text("0 peers")
@@ -33,7 +32,7 @@ struct RadarView: View {
                     .frame(width: 260, height: 260)
                 }
             }
-            MeshPill(nearbyCount: mesh.nearbyPeerCount)
+            MeshPill(nearbyCount: roster.peerCount)
             if location.authorization == .denied {
                 PermissionDenied(
                     kind: .location,

@@ -51,6 +51,16 @@ final class MeshWireTests: XCTestCase {
         XCTAssertEqual(PartyStatusWire.decode(decoded.ciphertext)?.band, .red)
     }
 
+    func testPartyDiscoveryMatchesSameCodeOnly() {
+        let id = BlackoutID()
+        let info = MeshRadio.discoveryInfo(partyCode: "AB12CD", deviceID: id)
+        XCTAssertTrue(MeshRadio.matchesParty(info, partyCode: "AB12CD"))
+        XCTAssertFalse(MeshRadio.matchesParty(info, partyCode: "ZZZZZZ"))
+        XCTAssertFalse(MeshRadio.matchesParty(nil, partyCode: "AB12CD"))
+        XCTAssertFalse(MeshGate.allowsTraffic(partyCode: nil))
+        XCTAssertTrue(MeshGate.allowsTraffic(partyCode: "AB12CD"))
+    }
+
     func testSafeResourceNames() {
         XCTAssertTrue(MeshRadio.isSafeResourceName("el-paso"))
         XCTAssertTrue(MeshRadio.isSafeResourceName("las-cruces"))

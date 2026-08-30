@@ -55,9 +55,13 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertEqual(SOSConfirm.meshKind.rawValue, "sosAlert")
         XCTAssertTrue(SOSConfirm.shouldSendMesh(peerCount: 1))
         XCTAssertFalse(SOSConfirm.shouldSendMesh(peerCount: 0))
-        let envelope = SOSConfirm.meshEnvelope(sender: BlackoutID(), recipient: BlackoutID())
+        let envelope = SOSConfirm.meshEnvelope(
+            sender: BlackoutID(),
+            recipient: BlackoutID(),
+            callsign: "RIDGE"
+        )
         XCTAssertEqual(envelope.kind, .sosAlert)
-        XCTAssertEqual(envelope.ciphertext, Data("sos".utf8))
+        XCTAssertEqual(SOSMeshBody.callsign(in: envelope.ciphertext), "RIDGE")
     }
 
     @MainActor

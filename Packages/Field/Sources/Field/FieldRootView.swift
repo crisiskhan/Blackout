@@ -18,6 +18,8 @@ public struct FieldRootView: View {
     @Bindable var battery: BatteryService
     var packURL: URL?
     var sosArmed: Bool
+    var packReady: PackReadySnapshot
+    var partySize: Int
 
     @State private var segment: Segment = .guide
     @State private var pack: GuidePackSnapshot?
@@ -26,12 +28,16 @@ public struct FieldRootView: View {
         location: LocationService,
         battery: BatteryService,
         packURL: URL?,
-        sosArmed: Bool
+        sosArmed: Bool,
+        packReady: PackReadySnapshot = .empty,
+        partySize: Int = 1
     ) {
         self.location = location
         self.battery = battery
         self.packURL = packURL
         self.sosArmed = sosArmed
+        self.packReady = packReady
+        self.partySize = partySize
     }
 
     public var body: some View {
@@ -47,7 +53,12 @@ public struct FieldRootView: View {
             case .guide:
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        ScreenHeader("Field guide", subtitle: "Ask first. Pack only. Not a website.")
+                        ScreenHeader(
+                            "Field guide",
+                            subtitle: packReady.readyIDs.isEmpty
+                                ? "Ask first. Pack only. Not a website."
+                                : "Ask first. Pack only. \(packReady.readyIDs.count) field packs Ready."
+                        )
                         GuideAskView(
                             pack: pack,
                             context: guideContext,
@@ -110,7 +121,7 @@ public struct FieldRootView: View {
             elevationMeters: location.navigationFix?.altitudeMeters,
             batteryLevel: battery.level,
             sosArmed: sosArmed,
-            partySize: 1,
+            partySize: partySize,
             extremeSaver: battery.isExtremeSaver
         )
     }

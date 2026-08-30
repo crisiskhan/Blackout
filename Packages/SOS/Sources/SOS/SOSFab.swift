@@ -115,7 +115,7 @@ public struct SOSFab: View {
             armedAt: Date(),
             latitude: fix?.latitude,
             longitude: fix?.longitude,
-            note: "Armed offline. Mesh peers: \(mesh.nearbyPeerCount)."
+            note: "Armed offline. Party peers: \(roster.peerCount)."
         )
         do {
             try persistence.logSOS(event)
@@ -132,7 +132,11 @@ public struct SOSFab: View {
         storeError = nil
         if SOSConfirm.shouldSendMesh(peerCount: mesh.nearbyPeerCount) {
             mesh.send(
-                SOSConfirm.meshEnvelope(sender: roster.localID, recipient: roster.recipientID)
+                SOSConfirm.meshEnvelope(
+                    sender: roster.localID,
+                    recipient: roster.recipientID,
+                    callsign: roster.identity.callsign
+                )
             )
         }
     }
@@ -176,7 +180,7 @@ public struct SOSConfirmCover: View {
                         MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
                             showSystemSOS = true
                         }
-                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        MeshPill(nearbyCount: roster.peerCount)
                         SlideToConfirm("Slide to arm") {
                             controller?.stopSpeech()
                             onArm()
@@ -246,7 +250,7 @@ public struct SOSArmedPanel: View {
                 Text("SOS armed")
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Logged on-device. Mesh peers: \(mesh.nearbyPeerCount). Closing this panel does not disarm. The alert already went out locally.")
+                Text("Logged on-device. Party peers: \(roster.peerCount). Closing this panel does not disarm. The alert already went out locally.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(7)
@@ -255,7 +259,7 @@ public struct SOSArmedPanel: View {
                         SOSConfirmActionList(strobeOn: strobeOn) { action in
                             perform(action)
                         }
-                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        MeshPill(nearbyCount: roster.peerCount)
                         MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
                             showSystemSOS = true
                         }

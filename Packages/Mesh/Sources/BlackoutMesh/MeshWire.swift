@@ -11,11 +11,33 @@ public enum MeshInbound: Equatable, Sendable {
 enum MeshRadio {
     /// MCNearbyServiceAdvertiser service type: 1–15 ASCII letters / digits / hyphen.
     static let serviceType = "blckout-mesh"
+    static let partyInfoKey = "p"
+    static let deviceInfoKey = "i"
 
     /// Resource names are pack ids only (`el-paso`). Mesh does not parse zip bytes.
     static func isSafeResourceName(_ name: String) -> Bool {
         let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-")
         return !name.isEmpty && name.count <= 32 && name.unicodeScalars.allSatisfy { allowed.contains($0) }
+    }
+
+    static func discoveryInfo(partyCode: String, deviceID: BlackoutID) -> [String: String] {
+        [
+            partyInfoKey: partyCode,
+            deviceInfoKey: deviceID.rawValue.uuidString
+        ]
+    }
+
+    static func matchesParty(_ info: [String: String]?, partyCode: String) -> Bool {
+        info?[partyInfoKey] == partyCode
+    }
+
+    static func shouldInvite(
+        localID: BlackoutID,
+        peerInfo: [String: String]?,
+        peerDisplayName: String
+    ) -> Bool {
+        let peerKey = peerInfo?[deviceInfoKey] ?? peerDisplayName
+        return localID.rawValue.uuidString < peerKey
     }
 }
 
