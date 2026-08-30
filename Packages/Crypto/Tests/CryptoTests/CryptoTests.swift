@@ -36,4 +36,18 @@ final class CryptoTests: XCTestCase {
         crypto.registerPeerAdvertisement(crypto.localAdvertisement)
         XCTAssertEqual(crypto.preferredRecipient, crypto.localIdentity)
     }
+
+    func testPartyCodeSealRoundtripBetweenDevices() throws {
+        let alice = LoopbackCrypto(inMemoryForTesting: true)
+        let bob = LoopbackCrypto(inMemoryForTesting: true)
+        alice.setPartyCode("AB12CD")
+        bob.setPartyCode("AB12CD")
+        let box = try alice.seal(Data("group".utf8), partyCode: "AB12CD")
+        XCTAssertEqual(box.first, 3)
+        XCTAssertEqual(try bob.open(box), Data("group".utf8))
+        XCTAssertEqual(try alice.open(box), Data("group".utf8))
+        let stranger = LoopbackCrypto(inMemoryForTesting: true)
+        stranger.setPartyCode("ZZZZ99")
+        XCTAssertThrowsError(try stranger.open(box))
+    }
 }

@@ -35,6 +35,15 @@ final class MeshWireTests: XCTestCase {
         XCTAssertNil(MeshWire.decode(Data()))
     }
 
+    func testPTTFrameRoundtripIsOpaque() {
+        let payload = Data([0x01, 0x02, 0x03, 0x04])
+        let frame = MeshWire.encodePTTFrame(payload)
+        guard case .pttFrame(let decoded) = MeshWire.decode(frame) else {
+            return XCTFail("expected ptt frame")
+        }
+        XCTAssertEqual(decoded, payload)
+    }
+
     func testPartyStatusEnvelopeRoundtrip() throws {
         let status = PartyMemberStatus(id: BlackoutID(), band: .red, injury: true)
         let envelope = PartyStatusWire.envelope(
@@ -59,6 +68,20 @@ final class MeshWireTests: XCTestCase {
         XCTAssertFalse(MeshRadio.matchesParty(nil, partyCode: "AB12CD"))
         XCTAssertFalse(MeshGate.allowsTraffic(partyCode: nil))
         XCTAssertTrue(MeshGate.allowsTraffic(partyCode: "AB12CD"))
+    }
+
+    @MainActor
+    func testSendWhileDownIsNotRunningNotDroppedByCaller() {
+        let mesh = MeshFacade()
+        let envelope = Envelope(
+            kind: .message,
+            ciphertext: Data([0xAA]),
+            sender: BlackoutID(),
+            recipient: BlackoutID()
+        )
+        XCTAssertEqual(mesh.send(envelope), .notRunning)
+        XCTAssertFalse(mesh.isRunning)
+        XCTAssertFalse(mesh.sendPTTFrame(Data([0x01])))
     }
 
     func testSafeResourceNames() {

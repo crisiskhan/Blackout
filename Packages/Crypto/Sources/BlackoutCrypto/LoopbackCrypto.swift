@@ -11,6 +11,7 @@ public final class LoopbackCrypto: CryptoServing {
     private let key: SymmetricKey
     private let agreement: Curve25519.KeyAgreement.PrivateKey
     private var peers: [BlackoutID: Curve25519.KeyAgreement.PublicKey] = [:]
+    private var partyCode: String?
 
     public init() throws {
         let blob = try Self.loadOrCreateBlob()
@@ -44,11 +45,25 @@ public final class LoopbackCrypto: CryptoServing {
         peers[parsed.id] = pub
     }
 
+    public func setPartyCode(_ code: String?) {
+        partyCode = PartyCode.isValid(code) ? code : nil
+    }
+
     public func seal(_ plaintext: Data, to recipient: BlackoutID) throws -> Data {
         if recipient != localIdentity, let peerPublic = peers[recipient] {
             return try sealToPeer(plaintext, peerPublic: peerPublic)
         }
         return try sealLocal(plaintext)
+    }
+
+    public func seal(_ plaintext: Data, partyCode: String) throws -> Data {
+        guard PartyCode.isValid(partyCode) else { throw CryptoLoopbackError.malformed }
+        let box = try ChaChaPoly.seal(plaintext, using: Self.partyKey(partyCode))
+        var packed = Data([3])
+        packed.append(box.nonce.withUnsafeBytes { Data($0) })
+        packed.append(box.ciphertext)
+        packed.append(box.tag)
+        return packed
     }
 
     public func open(_ ciphertext: Data) throws -> Data {
@@ -58,6 +73,8 @@ public final class LoopbackCrypto: CryptoServing {
             return try openLocal(ciphertext)
         case 2:
             return try openPeer(ciphertext)
+        case 3:
+            return try openParty(ciphertext)
         default:
             throw CryptoLoopbackError.malformed
         }
@@ -117,6 +134,26 @@ public final class LoopbackCrypto: CryptoServing {
             sharedInfo: Data(),
             outputByteCount: 32
         )
+    }
+
+    private static func partyKey(_ partyCode: String) -> SymmetricKey {
+        var material = Data("blackout-party-v1:".utf8)
+        material.append(Data(partyCode.utf8))
+        let digest = SHA256.hash(data: material)
+        return SymmetricKey(data: Data(digest))
+    }
+
+    private func openParty(_ ciphertext: Data) throws -> Data {
+        guard ciphertext.count > 1 + 12 + 16, ciphertext[0] == 3 else {
+            throw CryptoLoopbackError.malformed
+        }
+        guard let partyCode else { throw CryptoLoopbackError.malformed }
+        let nonceData = ciphertext[1..<13]
+        let tag = ciphertext.suffix(16)
+        let body = ciphertext[13..<(ciphertext.count - 16)]
+        let nonce = try ChaChaPoly.Nonce(data: nonceData)
+        let box = try ChaChaPoly.SealedBox(nonce: nonce, ciphertext: body, tag: tag)
+        return try ChaChaPoly.open(box, using: Self.partyKey(partyCode))
     }
 
     static func encodeAdvertisement(id: BlackoutID, agreementPublic: Data) -> Data {
@@ -306,7 +343,15 @@ public final class UnavailableCrypto: CryptoServing {
         _ = data
     }
 
+    public func setPartyCode(_ code: String?) {
+        _ = code
+    }
+
     public func seal(_ plaintext: Data, to recipient: BlackoutID) throws -> Data {
+        throw CryptoLoopbackError.keychainUnavailable
+    }
+
+    public func seal(_ plaintext: Data, partyCode: String) throws -> Data {
         throw CryptoLoopbackError.keychainUnavailable
     }
 

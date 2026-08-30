@@ -21,5 +21,9 @@ let package = Package(
                 .product(name: "BlackoutMesh", package: "Mesh"),
             ]
         ),
+        .testTarget(
+            name: "MessagingTests",
+            dependencies: ["Messaging"]
+        ),
     ]
 )

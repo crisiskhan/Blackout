@@ -6,6 +6,8 @@ public enum MeshInbound: Equatable, Sendable {
     case advertisement(Data)
     case envelope(Envelope)
     case resource(name: String, fileURL: URL)
+    /// Opaque live PTT bytes. Mesh must not inspect the payload.
+    case pttFrame(Data)
 }
 
 enum MeshRadio {
@@ -47,6 +49,7 @@ enum MeshWire {
     enum Kind: UInt8 {
         case advertisement = 1
         case envelope = 2
+        case pttFrame = 3
     }
 
     static func encodeAdvertisement(_ payload: Data) -> Data {
@@ -58,6 +61,10 @@ enum MeshWire {
         encoder.dateEncodingStrategy = .millisecondsSince1970
         guard let payload = try? encoder.encode(envelope) else { return nil }
         return frame(kind: .envelope, payload: payload)
+    }
+
+    static func encodePTTFrame(_ payload: Data) -> Data {
+        frame(kind: .pttFrame, payload: payload)
     }
 
     static func decode(_ data: Data) -> MeshInbound? {
@@ -72,6 +79,8 @@ enum MeshWire {
             decoder.dateDecodingStrategy = .millisecondsSince1970
             guard let envelope = try? decoder.decode(Envelope.self, from: payload) else { return nil }
             return .envelope(envelope)
+        case .pttFrame:
+            return .pttFrame(payload)
         }
     }
 

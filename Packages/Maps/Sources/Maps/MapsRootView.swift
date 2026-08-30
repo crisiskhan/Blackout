@@ -20,7 +20,7 @@ public struct MapsRootView: View {
     var externalSheetOpen: Bool
     var sosCoverOpen: Bool
     @Bindable var roster: PartyRoster
-    var onMessagePeer: (() -> Void)?
+    var onMessagePeer: ((BlackoutID) -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -61,7 +61,7 @@ public struct MapsRootView: View {
         externalSheetOpen: Bool = false,
         sosCoverOpen: Bool = false,
         roster: PartyRoster,
-        onMessagePeer: (() -> Void)? = nil
+        onMessagePeer: ((BlackoutID) -> Void)? = nil
     ) {
         self.location = location
         self.mesh = mesh
@@ -342,7 +342,7 @@ public struct MapsRootView: View {
             blip: blip,
             onMessage: {
                 selectedPeer = nil
-                onMessagePeer?()
+                onMessagePeer?(blip.id)
             },
             onNavigate: {
                 selectedPeer = nil

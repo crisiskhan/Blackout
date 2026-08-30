@@ -44,6 +44,7 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var destination: AppDestination = .map
     @State private var showSettings = false
+    @State private var pendingDM: BlackoutID?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -119,9 +120,11 @@ struct RootView: View {
             showSettings = false
             container.location.stopUpdating()
             container.mesh.stop()
+            container.ptt.stop()
         } else {
             container.location.startUpdating()
             container.location.applyPolicy(container.battery.policy)
+            container.ptt.extremeSaver = container.battery.isExtremeSaver
             container.syncMeshToParty()
         }
     }
@@ -220,7 +223,10 @@ struct RootView: View {
             externalSheetOpen: showSettings,
             sosCoverOpen: container.sosCoverOpen,
             roster: container.party,
-            onMessagePeer: { destination = .comms }
+            onMessagePeer: { id in
+                pendingDM = id
+                destination = .comms
+            }
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -238,11 +244,13 @@ struct RootView: View {
 
     private var commsDestination: some View {
         CommsRootView(
-            persistence: container.persistence,
-            crypto: container.crypto,
+            outbox: container.outbox,
             mesh: container.mesh,
             roster: container.party,
-            extremeSaver: container.battery.pausesCameraAndPTT
+            location: container.location,
+            ptt: container.ptt,
+            onOpenExpedition: { destination = .expedition },
+            pendingDM: $pendingDM
         )
         .swiftUIToolbar {
             if sizeClass != .regular {

@@ -118,6 +118,7 @@ final class MessageRecord {
     var statusRaw: String
     var senderID: UUID
     var recipientID: UUID
+    var wireCiphertext: Data?
 
     init(_ dto: MessageRecordDTO) {
         id = dto.id.rawValue
@@ -126,6 +127,16 @@ final class MessageRecord {
         statusRaw = dto.status.rawValue
         senderID = dto.senderID.rawValue
         recipientID = dto.recipientID.rawValue
+        wireCiphertext = dto.wireCiphertext
+    }
+
+    func apply(_ dto: MessageRecordDTO) {
+        createdAt = dto.createdAt
+        ciphertext = dto.ciphertext
+        statusRaw = dto.status.rawValue
+        senderID = dto.senderID.rawValue
+        recipientID = dto.recipientID.rawValue
+        wireCiphertext = dto.wireCiphertext
     }
 
     func dto() -> MessageRecordDTO {
@@ -135,7 +146,8 @@ final class MessageRecord {
             ciphertext: ciphertext,
             status: MessageStatus(rawValue: statusRaw) ?? .sealed,
             senderID: BlackoutID(senderID),
-            recipientID: BlackoutID(recipientID)
+            recipientID: BlackoutID(recipientID),
+            wireCiphertext: wireCiphertext
         )
     }
 }

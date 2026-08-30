@@ -6,7 +6,7 @@ import UIKit
 
 /// Polar HUD on top of the file-tile map. Transparent — never a black disc.
 /// Wave 1.5: 0 peers. Members would be filled silver disks; strangers hollow rings.
-struct RadarHUDView: View {
+public struct RadarHUDView: View {
     var headingUp: Bool
     var headingDegrees: Double?
     var peers: [RadarBlip]
@@ -16,7 +16,23 @@ struct RadarHUDView: View {
 
     @State private var lastHapticIDs: Set<BlackoutID> = []
 
-    var body: some View {
+    public init(
+        headingUp: Bool,
+        headingDegrees: Double?,
+        peers: [RadarBlip],
+        sweepAudio: Bool,
+        onSelectPeer: @escaping (RadarBlip) -> Void,
+        onSelectSelf: @escaping () -> Void
+    ) {
+        self.headingUp = headingUp
+        self.headingDegrees = headingDegrees
+        self.peers = peers
+        self.sweepAudio = sweepAudio
+        self.onSelectPeer = onSelectPeer
+        self.onSelectSelf = onSelectSelf
+    }
+
+    public var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { timeline in
             let sweep = sweepAngle(at: timeline.date)
             ZStack {
@@ -194,12 +210,18 @@ enum RadarSweepClick {
 }
 
 /// Peer sheet. Message + Navigate-to. Tap self does not present this.
-struct RadarPeerSheet: View {
+public struct RadarPeerSheet: View {
     var blip: RadarBlip
     var onMessage: () -> Void
     var onNavigate: () -> Void
 
-    var body: some View {
+    public init(blip: RadarBlip, onMessage: @escaping () -> Void, onNavigate: @escaping () -> Void) {
+        self.blip = blip
+        self.onMessage = onMessage
+        self.onNavigate = onNavigate
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ScreenHeader(
                 blip.displayName ?? Callsign.defaultValue,

@@ -13,6 +13,7 @@ public final class MeshFacade: MeshServing {
     public private(set) var lastOutbound: Envelope?
     public private(set) var lastEvent: MeshInbound?
     public private(set) var inboundSequence: UInt64 = 0
+    public private(set) var isRunning = false
 
     public var onInbound: ((MeshInbound) -> Void)?
     public var onNearbyCount: ((Int) -> Void)?
@@ -22,7 +23,6 @@ public final class MeshFacade: MeshServing {
 
     private var advertisement: Data = Data()
     private var pipe: MultipeerPipe?
-    private var running = false
     private var partyCode: String?
     private var callsign: String = Callsign.defaultValue
     private var deviceID = BlackoutID()
@@ -42,16 +42,16 @@ public final class MeshFacade: MeshServing {
         partyCode = nextCode
         self.callsign = nextSign
         self.deviceID = deviceID
-        if running, changed {
+        if isRunning, changed {
             stop()
             start()
         }
     }
 
     public func start() {
-        if running { return }
+        if isRunning { return }
         guard MeshGate.allowsTraffic(partyCode: partyCode), let partyCode else { return }
-        running = true
+        isRunning = true
         let localPeer = MCPeerID(displayName: Callsign.radioName(callsign, id: deviceID))
         let radio = MultipeerPipe(
             localPeer: localPeer,
@@ -80,21 +80,32 @@ public final class MeshFacade: MeshServing {
     }
 
     public func stop() {
-        running = false
+        isRunning = false
         pipe?.stop()
         pipe = nil
         nearbyPeerCount = 0
     }
 
-    public func send(_ envelope: Envelope) {
-        guard running, MeshGate.allowsTraffic(partyCode: partyCode) else { return }
+    @discardableResult
+    public func send(_ envelope: Envelope) -> MeshSendResult {
+        guard isRunning, MeshGate.allowsTraffic(partyCode: partyCode) else { return .notRunning }
         lastOutbound = envelope
-        guard let frame = MeshWire.encodeEnvelope(envelope) else { return }
-        pipe?.send(frame: frame)
+        guard let frame = MeshWire.encodeEnvelope(envelope) else { return .failed }
+        guard nearbyPeerCount > 0 else { return .noPeers }
+        guard pipe?.send(frame: frame) == true else { return .failed }
+        return .sent
+    }
+
+    @discardableResult
+    public func sendPTTFrame(_ payload: Data) -> Bool {
+        guard isRunning, MeshGate.allowsTraffic(partyCode: partyCode), nearbyPeerCount > 0 else {
+            return false
+        }
+        return pipe?.send(frame: MeshWire.encodePTTFrame(payload), reliable: false) == true
     }
 
     public func sendFile(at url: URL, named name: String) {
-        guard running, MeshGate.allowsTraffic(partyCode: partyCode) else {
+        guard isRunning, MeshGate.allowsTraffic(partyCode: partyCode) else {
             onSendComplete?(name, true)
             return
         }
@@ -103,7 +114,7 @@ public final class MeshFacade: MeshServing {
 
     private func receive(_ inbound: MeshInbound) {
         lastEvent = inbound
-        inboundSequence &+= 1
         onInbound?(inbound)
+        inboundSequence &+= 1
     }
 }

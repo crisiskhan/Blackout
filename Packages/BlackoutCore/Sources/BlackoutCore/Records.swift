@@ -95,6 +95,8 @@ public struct MessageRecordDTO: Hashable, Codable, Sendable, Identifiable {
     public var status: MessageStatus
     public var senderID: BlackoutID
     public var recipientID: BlackoutID
+    /// Bytes actually handed to the pipe. Optional so older rows still load.
+    public var wireCiphertext: Data?
 
     public init(
         id: BlackoutID = BlackoutID(),
@@ -102,7 +104,8 @@ public struct MessageRecordDTO: Hashable, Codable, Sendable, Identifiable {
         ciphertext: Data,
         status: MessageStatus,
         senderID: BlackoutID,
-        recipientID: BlackoutID
+        recipientID: BlackoutID,
+        wireCiphertext: Data? = nil
     ) {
         self.id = id
         self.createdAt = createdAt
@@ -110,7 +113,10 @@ public struct MessageRecordDTO: Hashable, Codable, Sendable, Identifiable {
         self.status = status
         self.senderID = senderID
         self.recipientID = recipientID
+        self.wireCiphertext = wireCiphertext
     }
+
+    public var meshBytes: Data { wireCiphertext ?? ciphertext }
 }
 
 public struct VoiceClipRecordDTO: Hashable, Codable, Sendable, Identifiable {

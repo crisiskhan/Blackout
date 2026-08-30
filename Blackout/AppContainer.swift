@@ -7,9 +7,11 @@ import BlackoutPacks
 import BlackoutPersistence
 import Foundation
 import Maps
+import Messaging
 import Observation
 import Settings
 import UIKit
+import VoicePTT
 
 @MainActor
 @Observable
@@ -28,8 +30,11 @@ final class AppContainer {
     let guidePackURL: URL?
     let identity: LocalIdentityStore
     let party: PartyRoster
+    let outbox: CommsOutbox
+    let ptt: LivePTTHub
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
+    private var lastNearbyCount = 0
 
     init() {
         var errors: [String] = []
@@ -71,6 +76,19 @@ final class AppContainer {
             recipientID: crypto.preferredRecipient,
             identity: identity
         )
+        crypto.setPartyCode(identity.partyCode)
+        let meshRef = mesh
+        let cryptoRef = crypto
+        let persistenceRef = persistence
+        outbox = CommsOutbox(
+            persistence: persistenceRef,
+            crypto: cryptoRef,
+            transmit: { meshRef.send($0) },
+            meshState: { (meshRef.isRunning, meshRef.nearbyPeerCount) }
+        )
+        ptt = LivePTTHub()
+        ptt.bindSender { meshRef.sendPTTFrame($0) }
+        ptt.extremeSaver = battery.isExtremeSaver
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
         mesh.onInbound = { [weak self] event in
@@ -78,6 +96,7 @@ final class AppContainer {
         }
         mesh.onNearbyCount = { [weak self] count in
             self?.broadcastSelfIfRadioUp(count)
+            self?.flushQueuedIfPeerAppeared(count)
         }
         mesh.onFileProgress = { [weak self] name, value in
             self?.packs.updateRelayProgress(name, value)
@@ -92,6 +111,7 @@ final class AppContainer {
         if battery.isCritical {
             location.stopUpdating()
             mesh.stop()
+            ptt.stop()
         } else {
             location.startUpdating()
             syncMeshToParty()
@@ -100,9 +120,12 @@ final class AppContainer {
     }
 
     func syncMeshToParty() {
+        crypto.setPartyCode(identity.partyCode)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
+        ptt.extremeSaver = battery.isExtremeSaver
         if battery.isCritical || !MeshGate.allowsTraffic(partyCode: identity.partyCode) {
             mesh.stop()
+            ptt.stop()
         } else {
             mesh.start()
             broadcastSelfIfRadioUp(mesh.nearbyPeerCount)
@@ -152,6 +175,8 @@ final class AppContainer {
             ingestEnvelope(envelope)
         case .resource(let name, let fileURL):
             packs.installRelayedZip(id: name, zipURL: fileURL)
+        case .pttFrame(let payload):
+            ptt.receive(payload)
         }
     }
 
@@ -195,23 +220,18 @@ final class AppContainer {
     }
 
     private func ingestMessage(_ envelope: Envelope) {
-        guard envelope.sender != crypto.localIdentity else { return }
         do {
-            let existing = try persistence.messages()
-            if existing.contains(where: { $0.id == envelope.id }) { return }
-            try persistence.saveMessage(
-                MessageRecordDTO(
-                    id: envelope.id,
-                    createdAt: envelope.timestamp,
-                    ciphertext: envelope.ciphertext,
-                    status: .onMesh,
-                    senderID: envelope.sender,
-                    recipientID: envelope.recipient
-                )
-            )
+            _ = try outbox.ingest(envelope)
         } catch {
             return
         }
+    }
+
+    private func flushQueuedIfPeerAppeared(_ count: Int) {
+        if lastNearbyCount == 0, count > 0 {
+            try? outbox.flushQueued()
+        }
+        lastNearbyCount = count
     }
 
     /// Lives on the composition root so a missed check-in can open SOS confirm

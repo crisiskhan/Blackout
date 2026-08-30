@@ -19,5 +19,9 @@ let package = Package(
                 "DesignSystem",
             ]
         ),
+        .testTarget(
+            name: "VoicePTTTests",
+            dependencies: ["VoicePTT"]
+        ),
     ]
 )

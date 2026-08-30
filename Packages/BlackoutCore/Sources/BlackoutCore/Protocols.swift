@@ -22,7 +22,9 @@ public protocol CryptoServing: AnyObject {
     /// First registered radio peer, else self. Used to seal one message to one nearby phone.
     var preferredRecipient: BlackoutID { get }
     func registerPeerAdvertisement(_ data: Data)
+    func setPartyCode(_ code: String?)
     func seal(_ plaintext: Data, to recipient: BlackoutID) throws -> Data
+    func seal(_ plaintext: Data, partyCode: String) throws -> Data
     func open(_ ciphertext: Data) throws -> Data
 }
 
@@ -47,9 +49,11 @@ public protocol MeshServing: AnyObject {
     var nearbyPeerCount: Int { get }
     var statusLine: String { get }
     var inboundSequence: UInt64 { get }
+    var isRunning: Bool { get }
     func start()
     func stop()
-    func send(_ envelope: Envelope)
+    @discardableResult
+    func send(_ envelope: Envelope) -> MeshSendResult
     func setLocalAdvertisement(_ data: Data)
 }
 

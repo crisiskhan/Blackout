@@ -17,6 +17,21 @@ public enum BlackoutDS {
         public static let sun = Color(red: 1, green: 74 / 255, blue: 74 / 255)
         public static let ember = Color(red: 196 / 255, green: 30 / 255, blue: 30 / 255)
         public static let blood = Color(red: 139 / 255, green: 20 / 255, blue: 20 / 255)
+        public static let wash = Color(red: 1, green: 43 / 255, blue: 43 / 255).opacity(0.28)
+    }
+
+    public enum Comms {
+        public static let bubbleWidth: CGFloat = 0.78
+        public static let lockShield: CGFloat = 10
+        public static let pttSOSGap: CGFloat = 16
+        public static let composeClearance: CGFloat = Hit.sos + Vitals.sosGap + 4
+        public static let dimmed: Double = 0.38
+        public static let pttPressScale: CGFloat = 0.96
+        public static let pttPressSeconds: Double = 0.080
+        public static let liveTracking: CGFloat = 1.6
+        public static let waveform: CGFloat = 28
+        public static let rosterRow: CGFloat = 64
+        public static let staleSeconds: TimeInterval = 90
     }
 
     public enum Silver {

@@ -58,10 +58,16 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         flushAdvertisement()
     }
 
-    func send(frame: Data) {
+    @discardableResult
+    func send(frame: Data, reliable: Bool = true) -> Bool {
         let peers = session.connectedPeers
-        guard !peers.isEmpty else { return }
-        _ = try? session.send(frame, toPeers: peers, with: .reliable)
+        guard !peers.isEmpty else { return false }
+        do {
+            try session.send(frame, toPeers: peers, with: reliable ? .reliable : .unreliable)
+            return true
+        } catch {
+            return false
+        }
     }
 
     func sendFile(at url: URL, named name: String) {
