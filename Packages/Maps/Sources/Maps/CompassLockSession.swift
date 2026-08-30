@@ -74,6 +74,21 @@ final class CompassLockSession {
         syncVoiceLoop()
     }
 
+    func markSearchHit(_ hit: PackSearchHit) {
+        let point = CompassLockWaypoint(
+            id: "mark-\(hit.id)",
+            name: hit.title,
+            latitude: hit.coordinate.latitude,
+            longitude: hit.coordinate.longitude,
+            kind: .mark
+        )
+        if !marks.contains(where: { $0.id == point.id }) {
+            marks.append(point)
+            persistMarks()
+        }
+        emptyCopy = nil
+    }
+
     func lockOn(_ point: CompassLockWaypoint) -> Bool {
         target = point
         emptyCopy = nil

@@ -23,7 +23,8 @@ public enum PackFind {
         switch mode {
         case .civilization:
             switch normalize(kind) {
-            case "road", "rail", "town", "mill", "city", "hospital", "ranger":
+            case "road", "rail", "town", "mill", "city", "hospital", "ranger",
+                 "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
                 return true
             default:
                 return false
@@ -110,6 +111,8 @@ public enum PackFind {
                 return 80
             case "hospital", "ranger":
                 return 70
+            case "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
+                return 65
             case "rail":
                 return 50
             case "road":

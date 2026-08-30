@@ -20,6 +20,17 @@ final class MapPOIKindTests: XCTestCase {
         XCTAssertFalse(poi("road").isWater)
     }
 
+    func testAmenityKindsAreStoresNotAddresses() {
+        XCTAssertTrue(poi("restaurant").isAmenity)
+        XCTAssertTrue(poi("cafe").isAmenity)
+        XCTAssertTrue(poi("grocery").isAmenity)
+        XCTAssertTrue(poi("fuel").isAmenity)
+        XCTAssertTrue(poi("lodging").isAmenity)
+        XCTAssertTrue(poi("restaurant").isCivilization)
+        XCTAssertFalse(poi("summit").isAmenity)
+        XCTAssertFalse(poi("address").isAmenity)
+    }
+
     private func poi(_ kind: String) -> MapPOI {
         MapPOI(id: kind, name: kind, kind: kind, latitude: 0, longitude: 0)
     }

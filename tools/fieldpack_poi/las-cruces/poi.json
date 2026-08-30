@@ -1,0 +1,2183 @@
+{
+  "schema": 1,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "pois": [
+    {
+      "id": "osm:n366378329",
+      "name": "Picacho Lodge",
+      "kind": "lodging",
+      "lat": 32.304019,
+      "lon": -106.846461
+    },
+    {
+      "id": "osm:n627334385",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.2884,
+      "lon": -106.73708
+    },
+    {
+      "id": "osm:n628231066",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.284142,
+      "lon": -106.756799
+    },
+    {
+      "id": "osm:n630424392",
+      "name": "Milagro's Coffee",
+      "kind": "cafe",
+      "lat": 32.287343,
+      "lon": -106.74512
+    },
+    {
+      "id": "osm:n630424395",
+      "name": "Toucan",
+      "kind": "grocery",
+      "lat": 32.286955,
+      "lon": -106.746936
+    },
+    {
+      "id": "osm:n636978882",
+      "name": "De La Vega's",
+      "kind": "restaurant",
+      "lat": 32.3146,
+      "lon": -106.744543
+    },
+    {
+      "id": "osm:n636978891",
+      "name": "Hooters",
+      "kind": "restaurant",
+      "lat": 32.314415,
+      "lon": -106.73861
+    },
+    {
+      "id": "osm:n636978940",
+      "name": "Cattlebaron",
+      "kind": "restaurant",
+      "lat": 32.308702,
+      "lon": -106.740225
+    },
+    {
+      "id": "osm:n652423036",
+      "name": "Sakura",
+      "kind": "restaurant",
+      "lat": 32.320454,
+      "lon": -106.733187
+    },
+    {
+      "id": "osm:n654905691",
+      "name": "Albertsons",
+      "kind": "grocery",
+      "lat": 32.298155,
+      "lon": -106.770206
+    },
+    {
+      "id": "osm:n654905704",
+      "name": "Zeffiro's Pizzeria Napoletana",
+      "kind": "restaurant",
+      "lat": 32.309971,
+      "lon": -106.77952
+    },
+    {
+      "id": "osm:n656938882",
+      "name": "Chilito's",
+      "kind": "restaurant",
+      "lat": 32.319916,
+      "lon": -106.736316
+    },
+    {
+      "id": "osm:n657465471",
+      "name": "The Bean",
+      "kind": "cafe",
+      "lat": 32.277447,
+      "lon": -106.795569
+    },
+    {
+      "id": "osm:n657465474",
+      "name": "Andele Restaurante",
+      "kind": "restaurant",
+      "lat": 32.277159,
+      "lon": -106.796467
+    },
+    {
+      "id": "osm:n658947298",
+      "name": "Hurricane Alley",
+      "kind": "bar",
+      "lat": 32.295008,
+      "lon": -106.75705
+    },
+    {
+      "id": "osm:n663130707",
+      "name": "Fina",
+      "kind": "fuel",
+      "lat": 32.300208,
+      "lon": -106.737258
+    },
+    {
+      "id": "osm:n976454706",
+      "name": "Nellie's Cafe",
+      "kind": "restaurant",
+      "lat": 32.309926,
+      "lon": -106.794265
+    },
+    {
+      "id": "osm:n1003327165",
+      "name": "Lemongrass",
+      "kind": "restaurant",
+      "lat": 32.284338,
+      "lon": -106.762458
+    },
+    {
+      "id": "osm:n1011913935",
+      "name": "A Blend of Nutrition",
+      "kind": "cafe",
+      "lat": 32.313552,
+      "lon": -106.794386
+    },
+    {
+      "id": "osm:n1011913950",
+      "name": "Zeebs",
+      "kind": "restaurant",
+      "lat": 32.32406,
+      "lon": -106.801381
+    },
+    {
+      "id": "osm:n1012977617",
+      "name": "Lujan's Bakery",
+      "kind": "shop",
+      "lat": 32.30691,
+      "lon": -106.773425
+    },
+    {
+      "id": "osm:n1012977622",
+      "name": "A Bite of Belgium",
+      "kind": "restaurant",
+      "lat": 32.315193,
+      "lon": -106.783397
+    },
+    {
+      "id": "osm:n1012977624",
+      "name": "Mountain View Market Kitchen",
+      "kind": "restaurant",
+      "lat": 32.30887,
+      "lon": -106.779609
+    },
+    {
+      "id": "osm:n1012977637",
+      "name": "Albertsons",
+      "kind": "grocery",
+      "lat": 32.333657,
+      "lon": -106.783175
+    },
+    {
+      "id": "osm:n1012977640",
+      "name": "Tortilleria La Moderna",
+      "kind": "restaurant",
+      "lat": 32.403794,
+      "lon": -106.662647
+    },
+    {
+      "id": "osm:n1012977646",
+      "name": "Sunset Grill",
+      "kind": "restaurant",
+      "lat": 32.340403,
+      "lon": -106.737113
+    },
+    {
+      "id": "osm:n1012985388",
+      "name": "DG's Deli",
+      "kind": "restaurant",
+      "lat": 32.28505,
+      "lon": -106.752672
+    },
+    {
+      "id": "osm:n1027422019",
+      "name": "Cupcake Hut & Rock n Roll Gift Shop",
+      "kind": "shop",
+      "lat": 32.311838,
+      "lon": -106.756829
+    },
+    {
+      "id": "osm:n1027713450",
+      "name": "Osito\u2019s Biscochitos",
+      "kind": "shop",
+      "lat": 32.302035,
+      "lon": -106.792549
+    },
+    {
+      "id": "osm:n1032243804",
+      "name": "Keva Juice",
+      "kind": "cafe",
+      "lat": 32.284521,
+      "lon": -106.755885
+    },
+    {
+      "id": "osm:n1238037510",
+      "name": "Wild West Espresso",
+      "kind": "cafe",
+      "lat": 32.274315,
+      "lon": -106.795075
+    },
+    {
+      "id": "osm:n1238037512",
+      "name": "Double Eagle",
+      "kind": "restaurant",
+      "lat": 32.274545,
+      "lon": -106.795282
+    },
+    {
+      "id": "osm:n1238037513",
+      "name": "Peppers",
+      "kind": "restaurant",
+      "lat": 32.274505,
+      "lon": -106.795247
+    },
+    {
+      "id": "osm:n1239287585",
+      "name": "Emilia's on the Plaza",
+      "kind": "cafe",
+      "lat": 32.273819,
+      "lon": -106.795396
+    },
+    {
+      "id": "osm:n1239287586",
+      "name": "El Patio Cantina",
+      "kind": "bar",
+      "lat": 32.27392,
+      "lon": -106.795214
+    },
+    {
+      "id": "osm:n1239287588",
+      "name": "Josefina's",
+      "kind": "cafe",
+      "lat": 32.275361,
+      "lon": -106.795985
+    },
+    {
+      "id": "osm:n1239365373",
+      "name": "La Posta",
+      "kind": "restaurant",
+      "lat": 32.274165,
+      "lon": -106.794729
+    },
+    {
+      "id": "osm:n1240462684",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.311038,
+      "lon": -106.814811
+    },
+    {
+      "id": "osm:n1240462689",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.311383,
+      "lon": -106.814661
+    },
+    {
+      "id": "osm:n1240462692",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.310322,
+      "lon": -106.815019
+    },
+    {
+      "id": "osm:n1240462703",
+      "name": "Fina",
+      "kind": "fuel",
+      "lat": 32.307771,
+      "lon": -106.837984
+    },
+    {
+      "id": "osm:n1240462704",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.307994,
+      "lon": -106.838184
+    },
+    {
+      "id": "osm:n1240503966",
+      "name": "Pizza Hut",
+      "kind": "restaurant",
+      "lat": 32.294351,
+      "lon": -106.767428
+    },
+    {
+      "id": "osm:n1255807617",
+      "name": "Chinese Kitchen",
+      "kind": "restaurant",
+      "lat": 32.300466,
+      "lon": -106.737842
+    },
+    {
+      "id": "osm:n1366304159",
+      "name": "Wingdaddy's",
+      "kind": "restaurant",
+      "lat": 32.310839,
+      "lon": -106.740375
+    },
+    {
+      "id": "osm:n1369649628",
+      "name": "Pro's Ranch Market",
+      "kind": "grocery",
+      "lat": 32.300794,
+      "lon": -106.772725
+    },
+    {
+      "id": "osm:n1378231984",
+      "name": "Pho Saigon",
+      "kind": "restaurant",
+      "lat": 32.300142,
+      "lon": -106.771921
+    },
+    {
+      "id": "osm:n1378231985",
+      "name": "Saigon Express",
+      "kind": "restaurant",
+      "lat": 32.300186,
+      "lon": -106.771975
+    },
+    {
+      "id": "osm:n1881516493",
+      "name": "Mix Express",
+      "kind": "restaurant",
+      "lat": 32.284465,
+      "lon": -106.756066
+    },
+    {
+      "id": "osm:n1881516500",
+      "name": "Mix Pacific Rim Cuisine",
+      "kind": "restaurant",
+      "lat": 32.284451,
+      "lon": -106.756135
+    },
+    {
+      "id": "osm:n1881516523",
+      "name": "Santorini",
+      "kind": "restaurant",
+      "lat": 32.284421,
+      "lon": -106.756342
+    },
+    {
+      "id": "osm:n1881892558",
+      "name": "Corner Store",
+      "kind": "shop",
+      "lat": 32.309404,
+      "lon": -106.763769
+    },
+    {
+      "id": "osm:n1914737946",
+      "name": "Corner Store",
+      "kind": "shop",
+      "lat": 32.310233,
+      "lon": -106.814914
+    },
+    {
+      "id": "osm:n2112853156",
+      "name": "Cafe A Go Go",
+      "kind": "restaurant",
+      "lat": 32.346648,
+      "lon": -106.764295
+    },
+    {
+      "id": "osm:n2152494431",
+      "name": "Lowe's Fiesta Foods",
+      "kind": "grocery",
+      "lat": 32.327561,
+      "lon": -106.782341
+    },
+    {
+      "id": "osm:n2191669510",
+      "name": "Eagle Qwik Mart",
+      "kind": "shop",
+      "lat": 32.316152,
+      "lon": -106.785226
+    },
+    {
+      "id": "osm:n2191669556",
+      "name": "La Fiesta Bakery",
+      "kind": "shop",
+      "lat": 32.307737,
+      "lon": -106.795633
+    },
+    {
+      "id": "osm:n2191669902",
+      "name": "One Stop",
+      "kind": "fuel",
+      "lat": 32.296259,
+      "lon": -106.788249
+    },
+    {
+      "id": "osm:n2191670032",
+      "name": "Old Mesilla Pastry Cafe",
+      "kind": "restaurant",
+      "lat": 32.298161,
+      "lon": -106.789539
+    },
+    {
+      "id": "osm:n2191670033",
+      "name": "The Shed",
+      "kind": "restaurant",
+      "lat": 32.298297,
+      "lon": -106.789582
+    },
+    {
+      "id": "osm:n2217045780",
+      "name": "Picacho Plaza",
+      "kind": "restaurant",
+      "lat": 32.310376,
+      "lon": -106.8159
+    },
+    {
+      "id": "osm:n2510097475",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.333622,
+      "lon": -106.781788
+    },
+    {
+      "id": "osm:n3036068988",
+      "name": "Chilitos",
+      "kind": "restaurant",
+      "lat": 32.284054,
+      "lon": -106.77111
+    },
+    {
+      "id": "osm:n3036071259",
+      "name": "Dick's Cafe",
+      "kind": "restaurant",
+      "lat": 32.284893,
+      "lon": -106.77366
+    },
+    {
+      "id": "osm:n3468857970",
+      "name": "Bravo's Cafe",
+      "kind": "cafe",
+      "lat": 32.276389,
+      "lon": -106.766953
+    },
+    {
+      "id": "osm:n4664173789",
+      "name": "Pho A Dong",
+      "kind": "restaurant",
+      "lat": 32.307891,
+      "lon": -106.773265
+    },
+    {
+      "id": "osm:n5032776409",
+      "name": "Rudy's Country Store & Bar-B-Q",
+      "kind": "restaurant",
+      "lat": 32.334032,
+      "lon": -106.758635
+    },
+    {
+      "id": "osm:n5315596692",
+      "name": "Walmart Neighborhood Market",
+      "kind": "grocery",
+      "lat": 32.328138,
+      "lon": -106.721734
+    },
+    {
+      "id": "osm:n6226306764",
+      "name": "Mi Pueblito",
+      "kind": "restaurant",
+      "lat": 32.299746,
+      "lon": -106.761534
+    },
+    {
+      "id": "osm:n6348117819",
+      "name": "China Express",
+      "kind": "restaurant",
+      "lat": 32.33076,
+      "lon": -106.78399
+    },
+    {
+      "id": "osm:n6348295576",
+      "name": "Icebox Brewing Company",
+      "kind": "restaurant",
+      "lat": 32.310573,
+      "lon": -106.817429
+    },
+    {
+      "id": "osm:n7130700005",
+      "name": "Los Compas Mexican Food",
+      "kind": "restaurant",
+      "lat": 32.308806,
+      "lon": -106.761787
+    },
+    {
+      "id": "osm:n7549991232",
+      "name": "Truth or Consequences Brewing Co",
+      "kind": "bar",
+      "lat": 32.311584,
+      "lon": -106.757273
+    },
+    {
+      "id": "osm:n8691246875",
+      "name": "Santa Fe Grill Catering Co.",
+      "kind": "restaurant",
+      "lat": 32.26772,
+      "lon": -106.760779
+    },
+    {
+      "id": "osm:n8691246877",
+      "name": "pic Quik Treats",
+      "kind": "restaurant",
+      "lat": 32.267827,
+      "lon": -106.760859
+    },
+    {
+      "id": "osm:n8830687696",
+      "name": "Aqua Reef",
+      "kind": "restaurant",
+      "lat": 32.32303,
+      "lon": -106.735341
+    },
+    {
+      "id": "osm:n9008474704",
+      "name": "Speedway",
+      "kind": "fuel",
+      "lat": 32.286036,
+      "lon": -106.747938
+    },
+    {
+      "id": "osm:n9008474705",
+      "name": "Speedway",
+      "kind": "shop",
+      "lat": 32.286292,
+      "lon": -106.74806
+    },
+    {
+      "id": "osm:n9008481478",
+      "name": "Speedway",
+      "kind": "shop",
+      "lat": 32.311765,
+      "lon": -106.754176
+    },
+    {
+      "id": "osm:n9008481479",
+      "name": "Speedway",
+      "kind": "fuel",
+      "lat": 32.311961,
+      "lon": -106.754251
+    },
+    {
+      "id": "osm:n9309225780",
+      "name": "Pilot",
+      "kind": "shop",
+      "lat": 32.296503,
+      "lon": -106.810262
+    },
+    {
+      "id": "osm:n9309225781",
+      "name": "Pilot",
+      "kind": "fuel",
+      "lat": 32.296661,
+      "lon": -106.810341
+    },
+    {
+      "id": "osm:n9579996657",
+      "name": "Sprouts Farmers Market",
+      "kind": "grocery",
+      "lat": 32.311444,
+      "lon": -106.75002
+    },
+    {
+      "id": "osm:n10141582305",
+      "name": "Vic's Flautas y Tortas",
+      "kind": "restaurant",
+      "lat": 31.999249,
+      "lon": -106.605508
+    },
+    {
+      "id": "osm:n10788732513",
+      "name": "Santa Fe Restaurant",
+      "kind": "restaurant",
+      "lat": 32.307812,
+      "lon": -106.856549
+    },
+    {
+      "id": "osm:n10840937514",
+      "name": "Elephant Ranch",
+      "kind": "bar",
+      "lat": 32.306862,
+      "lon": -106.838833
+    },
+    {
+      "id": "osm:n11460195429",
+      "name": "Dutch Bros. Coffee",
+      "kind": "cafe",
+      "lat": 32.341016,
+      "lon": -106.77479
+    },
+    {
+      "id": "osm:n11493847131",
+      "name": "Roasted Rooster Coffee & Waffles",
+      "kind": "restaurant",
+      "lat": 32.29653,
+      "lon": -106.812299
+    },
+    {
+      "id": "osm:n11739729305",
+      "name": "Little Toad Creek Brewery & Distillery Las Cruces",
+      "kind": "bar",
+      "lat": 32.310042,
+      "lon": -106.778867
+    },
+    {
+      "id": "osm:n11740077470",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.333433,
+      "lon": -106.783277
+    },
+    {
+      "id": "osm:n11741533417",
+      "name": "Tacos el Torito",
+      "kind": "restaurant",
+      "lat": 32.114476,
+      "lon": -106.664066
+    },
+    {
+      "id": "osm:n12207248401",
+      "name": "Nessa's Cafe",
+      "kind": "cafe",
+      "lat": 32.31426,
+      "lon": -106.791325
+    },
+    {
+      "id": "osm:n12216750201",
+      "name": "K Mart",
+      "kind": "fuel",
+      "lat": 32.315095,
+      "lon": -106.788076
+    },
+    {
+      "id": "osm:n12216760101",
+      "name": "Taste of India",
+      "kind": "restaurant",
+      "lat": 32.31604,
+      "lon": -106.780615
+    },
+    {
+      "id": "osm:n12216871135",
+      "name": "Le Rendez-vous Cafe",
+      "kind": "restaurant",
+      "lat": 32.310592,
+      "lon": -106.816238
+    },
+    {
+      "id": "osm:n12217257701",
+      "name": "Cafe de Mesilla",
+      "kind": "cafe",
+      "lat": 32.276324,
+      "lon": -106.7955
+    },
+    {
+      "id": "osm:n12233221640",
+      "name": "El Chanate",
+      "kind": "cafe",
+      "lat": 32.274895,
+      "lon": -106.795384
+    },
+    {
+      "id": "osm:n12396988322",
+      "name": "Asian Buffet",
+      "kind": "restaurant",
+      "lat": 32.316721,
+      "lon": -106.750848
+    },
+    {
+      "id": "osm:n12817536180",
+      "name": "Taqueria El Cometa",
+      "kind": "restaurant",
+      "lat": 32.300091,
+      "lon": -106.773859
+    },
+    {
+      "id": "osm:n12817751739",
+      "name": "Dion's Pizza",
+      "kind": "restaurant",
+      "lat": 32.298807,
+      "lon": -106.773478
+    },
+    {
+      "id": "osm:n13383503189",
+      "name": "Maverik",
+      "kind": "fuel",
+      "lat": 32.382877,
+      "lon": -106.718261
+    },
+    {
+      "id": "osm:n13647276473",
+      "name": "Lucky's Convenience Store",
+      "kind": "shop",
+      "lat": 32.330137,
+      "lon": -106.788611
+    },
+    {
+      "id": "osm:n13647416282",
+      "name": "Proofed Bread",
+      "kind": "shop",
+      "lat": 32.309164,
+      "lon": -106.778621
+    },
+    {
+      "id": "osm:n13647416292",
+      "name": "Grounded",
+      "kind": "cafe",
+      "lat": 32.311442,
+      "lon": -106.778902
+    },
+    {
+      "id": "osm:n14125435311",
+      "name": "RareTea Sonoma Ranch",
+      "kind": "cafe",
+      "lat": 32.370654,
+      "lon": -106.738509
+    },
+    {
+      "id": "osm:w50030893",
+      "name": "Walmart Supercenter",
+      "kind": "grocery",
+      "lat": 32.314686,
+      "lon": -106.749977
+    },
+    {
+      "id": "osm:w50060358",
+      "name": "Albertsons",
+      "kind": "grocery",
+      "lat": 32.317398,
+      "lon": -106.743416
+    },
+    {
+      "id": "osm:w50127748",
+      "name": "Sam's Club",
+      "kind": "fuel",
+      "lat": 32.347658,
+      "lon": -106.766112
+    },
+    {
+      "id": "osm:w50431360",
+      "name": "Mountain View Regional Medical Center",
+      "kind": "hospital",
+      "lat": 32.323603,
+      "lon": -106.72894
+    },
+    {
+      "id": "osm:w50437803",
+      "name": "Empire Habachi Grill & Supreme Buffet",
+      "kind": "restaurant",
+      "lat": 32.314096,
+      "lon": -106.745122
+    },
+    {
+      "id": "osm:w50437804",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.316246,
+      "lon": -106.744021
+    },
+    {
+      "id": "osm:w50437805",
+      "name": "Village Inn",
+      "kind": "restaurant",
+      "lat": 32.315948,
+      "lon": -106.744983
+    },
+    {
+      "id": "osm:w50437811",
+      "name": "Applebee's",
+      "kind": "restaurant",
+      "lat": 32.316105,
+      "lon": -106.744404
+    },
+    {
+      "id": "osm:w50834740",
+      "name": "Texas Roadhouse",
+      "kind": "restaurant",
+      "lat": 32.312107,
+      "lon": -106.75311
+    },
+    {
+      "id": "osm:w51065097",
+      "name": "Memorial Medical Center",
+      "kind": "hospital",
+      "lat": 32.291647,
+      "lon": -106.737056
+    },
+    {
+      "id": "osm:w51327753",
+      "name": "Ruby Tuesday",
+      "kind": "restaurant",
+      "lat": 32.345316,
+      "lon": -106.767083
+    },
+    {
+      "id": "osm:w51327754",
+      "name": "Uno's Chicago Pizzaria",
+      "kind": "restaurant",
+      "lat": 32.343443,
+      "lon": -106.765168
+    },
+    {
+      "id": "osm:w51327760",
+      "name": "Hampton",
+      "kind": "lodging",
+      "lat": 32.316977,
+      "lon": -106.750089
+    },
+    {
+      "id": "osm:w51392165",
+      "name": "Dion's",
+      "kind": "restaurant",
+      "lat": 32.319132,
+      "lon": -106.733682
+    },
+    {
+      "id": "osm:w51460249",
+      "name": "Chili's",
+      "kind": "restaurant",
+      "lat": 32.315241,
+      "lon": -106.746308
+    },
+    {
+      "id": "osm:w51462442",
+      "name": "Walmart Supercenter",
+      "kind": "grocery",
+      "lat": 32.288386,
+      "lon": -106.785381
+    },
+    {
+      "id": "osm:w51462447",
+      "name": "Ramada Palms",
+      "kind": "lodging",
+      "lat": 32.2829,
+      "lon": -106.767766
+    },
+    {
+      "id": "osm:w51462505",
+      "name": "Comfort Suites",
+      "kind": "lodging",
+      "lat": 32.287737,
+      "lon": -106.740673
+    },
+    {
+      "id": "osm:w51462506",
+      "name": "Sleep Inn",
+      "kind": "lodging",
+      "lat": 32.287308,
+      "lon": -106.741518
+    },
+    {
+      "id": "osm:w51475264",
+      "name": "Fairfield Inn Las Cruces",
+      "kind": "lodging",
+      "lat": 32.342767,
+      "lon": -106.764705
+    },
+    {
+      "id": "osm:w51475267",
+      "name": "Outback Steakhouse",
+      "kind": "restaurant",
+      "lat": 32.332195,
+      "lon": -106.757193
+    },
+    {
+      "id": "osm:w51475270",
+      "name": "Speedway",
+      "kind": "shop",
+      "lat": 32.35128,
+      "lon": -106.76497
+    },
+    {
+      "id": "osm:w51475272",
+      "name": "Peter Piper Pizza",
+      "kind": "restaurant",
+      "lat": 32.352721,
+      "lon": -106.762808
+    },
+    {
+      "id": "osm:w51475279",
+      "name": "IHOP",
+      "kind": "restaurant",
+      "lat": 32.351838,
+      "lon": -106.764145
+    },
+    {
+      "id": "osm:w51714839",
+      "name": "Weck's Breakfast and Lunch",
+      "kind": "restaurant",
+      "lat": 32.286497,
+      "lon": -106.747095
+    },
+    {
+      "id": "osm:w56125731",
+      "name": "Hilton Garden Inn",
+      "kind": "lodging",
+      "lat": 32.288792,
+      "lon": -106.737807
+    },
+    {
+      "id": "osm:w58945657",
+      "name": "Village Inn",
+      "kind": "restaurant",
+      "lat": 32.298618,
+      "lon": -106.772356
+    },
+    {
+      "id": "osm:w58945754",
+      "name": "Empire Express",
+      "kind": "restaurant",
+      "lat": 32.299447,
+      "lon": -106.773091
+    },
+    {
+      "id": "osm:w58946786",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.290935,
+      "lon": -106.784449
+    },
+    {
+      "id": "osm:w59039312",
+      "name": "Rehabilitation Hospital of Southern New Mexico",
+      "kind": "hospital",
+      "lat": 32.325819,
+      "lon": -106.724496
+    },
+    {
+      "id": "osm:w59263948",
+      "name": "Staybridge Suites Las Cruces",
+      "kind": "lodging",
+      "lat": 32.351941,
+      "lon": -106.76356
+    },
+    {
+      "id": "osm:w59825668",
+      "name": "Hotel Encanto de Las Cruces",
+      "kind": "lodging",
+      "lat": 32.312697,
+      "lon": -106.740427
+    },
+    {
+      "id": "osm:w67292617",
+      "name": "Shell",
+      "kind": "fuel",
+      "lat": 32.315543,
+      "lon": -106.743515
+    },
+    {
+      "id": "osm:w67292620",
+      "name": "Shell",
+      "kind": "shop",
+      "lat": 32.315371,
+      "lon": -106.743694
+    },
+    {
+      "id": "osm:w67292629",
+      "name": "Red Lobster",
+      "kind": "restaurant",
+      "lat": 32.314399,
+      "lon": -106.742551
+    },
+    {
+      "id": "osm:w67292639",
+      "name": "Farley's",
+      "kind": "restaurant",
+      "lat": 32.314031,
+      "lon": -106.740382
+    },
+    {
+      "id": "osm:w82331731",
+      "name": "Aggie Express",
+      "kind": "shop",
+      "lat": 32.273523,
+      "lon": -106.748896
+    },
+    {
+      "id": "osm:w83888416",
+      "name": "Lorenzo's Mesilla",
+      "kind": "restaurant",
+      "lat": 32.28059,
+      "lon": -106.794505
+    },
+    {
+      "id": "osm:w86094776",
+      "name": "Fina",
+      "kind": "fuel",
+      "lat": 32.28852,
+      "lon": -106.736789
+    },
+    {
+      "id": "osm:w87788129",
+      "name": "Jake's Cafe",
+      "kind": "restaurant",
+      "lat": 32.308636,
+      "lon": -106.764211
+    },
+    {
+      "id": "osm:w87788133",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.30939,
+      "lon": -106.763714
+    },
+    {
+      "id": "osm:w87788158",
+      "name": "Delicias Cafe",
+      "kind": "restaurant",
+      "lat": 32.310098,
+      "lon": -106.764697
+    },
+    {
+      "id": "osm:w87788190",
+      "name": "El Sombrero Patio Cafe",
+      "kind": "restaurant",
+      "lat": 32.309366,
+      "lon": -106.768341
+    },
+    {
+      "id": "osm:w88775100",
+      "name": "Lorenzo's",
+      "kind": "restaurant",
+      "lat": 32.286766,
+      "lon": -106.744098
+    },
+    {
+      "id": "osm:w88951289",
+      "name": "The Game",
+      "kind": "bar",
+      "lat": 32.284959,
+      "lon": -106.756399
+    },
+    {
+      "id": "osm:w90776665",
+      "name": "Shell",
+      "kind": "fuel",
+      "lat": 32.339709,
+      "lon": -106.77711
+    },
+    {
+      "id": "osm:w90776666",
+      "name": "Shell",
+      "kind": "shop",
+      "lat": 32.339821,
+      "lon": -106.777201
+    },
+    {
+      "id": "osm:w90776671",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.342605,
+      "lon": -106.775016
+    },
+    {
+      "id": "osm:w90776685",
+      "name": "Chevron",
+      "kind": "fuel",
+      "lat": 32.341352,
+      "lon": -106.774412
+    },
+    {
+      "id": "osm:w90776695",
+      "name": "Spanish Kitchen",
+      "kind": "restaurant",
+      "lat": 32.339446,
+      "lon": -106.775879
+    },
+    {
+      "id": "osm:w90940482",
+      "name": "Century 21 Motel",
+      "kind": "lodging",
+      "lat": 32.330188,
+      "lon": -106.782877
+    },
+    {
+      "id": "osm:w90942977",
+      "name": "Grandy's",
+      "kind": "restaurant",
+      "lat": 32.296538,
+      "lon": -106.769831
+    },
+    {
+      "id": "osm:w90942978",
+      "name": "Delicias del Mar",
+      "kind": "restaurant",
+      "lat": 32.296055,
+      "lon": -106.769385
+    },
+    {
+      "id": "osm:w100235370",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.352822,
+      "lon": -106.764945
+    },
+    {
+      "id": "osm:w100235373",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.35263,
+      "lon": -106.765164
+    },
+    {
+      "id": "osm:w102040585",
+      "name": "Chope's Bar",
+      "kind": "bar",
+      "lat": 32.119475,
+      "lon": -106.706265
+    },
+    {
+      "id": "osm:w102040592",
+      "name": "Chope's",
+      "kind": "restaurant",
+      "lat": 32.11913,
+      "lon": -106.706057
+    },
+    {
+      "id": "osm:w105198917",
+      "name": "Chevron",
+      "kind": "fuel",
+      "lat": 32.304036,
+      "lon": -106.793366
+    },
+    {
+      "id": "osm:w105691809",
+      "name": "Blue Moon Bar",
+      "kind": "bar",
+      "lat": 32.498219,
+      "lon": -106.932382
+    },
+    {
+      "id": "osm:w106595779",
+      "name": "Commissary",
+      "kind": "shop",
+      "lat": 32.385491,
+      "lon": -106.484808
+    },
+    {
+      "id": "osm:w106595791",
+      "name": "IHG Army BOQ",
+      "kind": "lodging",
+      "lat": 32.380853,
+      "lon": -106.487161
+    },
+    {
+      "id": "osm:w107775217",
+      "name": "Chachi's",
+      "kind": "restaurant",
+      "lat": 32.287363,
+      "lon": -106.748785
+    },
+    {
+      "id": "osm:w108059717",
+      "name": "Save Mart",
+      "kind": "grocery",
+      "lat": 32.30856,
+      "lon": -106.796164
+    },
+    {
+      "id": "osm:w109646031",
+      "name": "McAllister's Deli",
+      "kind": "restaurant",
+      "lat": 32.30774,
+      "lon": -106.740146
+    },
+    {
+      "id": "osm:w109646032",
+      "name": "Buffalo Wild Wings",
+      "kind": "restaurant",
+      "lat": 32.307147,
+      "lon": -106.741881
+    },
+    {
+      "id": "osm:w109646040",
+      "name": "Fidencio's Mexican Food",
+      "kind": "restaurant",
+      "lat": 32.307942,
+      "lon": -106.739672
+    },
+    {
+      "id": "osm:w109650650",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.300442,
+      "lon": -106.737382
+    },
+    {
+      "id": "osm:w110175909",
+      "name": "El Jacalito Restaurant",
+      "kind": "restaurant",
+      "lat": 32.298042,
+      "lon": -106.747265
+    },
+    {
+      "id": "osm:w110175910",
+      "name": "Robert's Mexican Restaurant",
+      "kind": "restaurant",
+      "lat": 32.308669,
+      "lon": -106.76908
+    },
+    {
+      "id": "osm:w110175914",
+      "name": "Pizza Hut",
+      "kind": "restaurant",
+      "lat": 32.297885,
+      "lon": -106.74784
+    },
+    {
+      "id": "osm:w110504004",
+      "name": "Nopalito's Restaurant",
+      "kind": "restaurant",
+      "lat": 32.299412,
+      "lon": -106.740657
+    },
+    {
+      "id": "osm:w111662789",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.297534,
+      "lon": -106.747071
+    },
+    {
+      "id": "osm:w111662791",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.371307,
+      "lon": -106.740202
+    },
+    {
+      "id": "osm:w111662792",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.370873,
+      "lon": -106.739938
+    },
+    {
+      "id": "osm:w111662793",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.297232,
+      "lon": -106.747122
+    },
+    {
+      "id": "osm:w126582818",
+      "name": "Peter Piper Pizza",
+      "kind": "restaurant",
+      "lat": 32.305084,
+      "lon": -106.776885
+    },
+    {
+      "id": "osm:w126749882",
+      "name": "Terayaki Chicken House",
+      "kind": "restaurant",
+      "lat": 32.302397,
+      "lon": -106.776733
+    },
+    {
+      "id": "osm:w127575192",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.346943,
+      "lon": -106.765119
+    },
+    {
+      "id": "osm:w145644888",
+      "name": "India Hut",
+      "kind": "restaurant",
+      "lat": 32.296125,
+      "lon": -106.759664
+    },
+    {
+      "id": "osm:w145644891",
+      "name": "Integrity Bagels",
+      "kind": "cafe",
+      "lat": 32.297188,
+      "lon": -106.760273
+    },
+    {
+      "id": "osm:w145652004",
+      "name": "Lowes Foods",
+      "kind": "grocery",
+      "lat": 32.294599,
+      "lon": -106.758183
+    },
+    {
+      "id": "osm:w148269928",
+      "name": "Alon",
+      "kind": "fuel",
+      "lat": 32.267635,
+      "lon": -106.761282
+    },
+    {
+      "id": "osm:w151423082",
+      "name": "Shell",
+      "kind": "fuel",
+      "lat": 32.299152,
+      "lon": -106.761831
+    },
+    {
+      "id": "osm:w157473931",
+      "name": "Alon",
+      "kind": "fuel",
+      "lat": 32.309805,
+      "lon": -106.763019
+    },
+    {
+      "id": "osm:w157473932",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.310126,
+      "lon": -106.763086
+    },
+    {
+      "id": "osm:w157473933",
+      "name": "Si Se\u00f1or",
+      "kind": "restaurant",
+      "lat": 32.309903,
+      "lon": -106.762428
+    },
+    {
+      "id": "osm:w172112244",
+      "name": "Mesilla Valley Hospital",
+      "kind": "hospital",
+      "lat": 32.35652,
+      "lon": -106.77329
+    },
+    {
+      "id": "osm:w172245438",
+      "name": "Cattleman's Steak House",
+      "kind": "restaurant",
+      "lat": 32.360465,
+      "lon": -106.755651
+    },
+    {
+      "id": "osm:w172245446",
+      "name": "Super 8 Las Cruces/White Sands Area",
+      "kind": "lodging",
+      "lat": 32.360931,
+      "lon": -106.755107
+    },
+    {
+      "id": "osm:w172245459",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.342558,
+      "lon": -106.776279
+    },
+    {
+      "id": "osm:w173878750",
+      "name": "Motel 6 Las Cruces - Telshor",
+      "kind": "lodging",
+      "lat": 32.342289,
+      "lon": -106.763231
+    },
+    {
+      "id": "osm:w173878921",
+      "name": "TownePlace Suites Las Cruces",
+      "kind": "lodging",
+      "lat": 32.345261,
+      "lon": -106.764416
+    },
+    {
+      "id": "osm:w173909143",
+      "name": "Si Se\u00f1or Express",
+      "kind": "restaurant",
+      "lat": 32.308385,
+      "lon": -106.765327
+    },
+    {
+      "id": "osm:w174267252",
+      "name": "Old Town Restaurant",
+      "kind": "restaurant",
+      "lat": 32.29433,
+      "lon": -106.78585
+    },
+    {
+      "id": "osm:w174267266",
+      "name": "SpringHill Suites Las Cruces",
+      "kind": "lodging",
+      "lat": 32.291339,
+      "lon": -106.79106
+    },
+    {
+      "id": "osm:w174267367",
+      "name": "Applebee's",
+      "kind": "restaurant",
+      "lat": 32.291619,
+      "lon": -106.789602
+    },
+    {
+      "id": "osm:w174267380",
+      "name": "Bosa Donuts",
+      "kind": "restaurant",
+      "lat": 32.296546,
+      "lon": -106.78161
+    },
+    {
+      "id": "osm:w174267392",
+      "name": "Drury Inn & Suites Las Cruces",
+      "kind": "lodging",
+      "lat": 32.291563,
+      "lon": -106.792295
+    },
+    {
+      "id": "osm:w174267403",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.291754,
+      "lon": -106.787514
+    },
+    {
+      "id": "osm:w174267627",
+      "name": "Tokyo Sushi",
+      "kind": "restaurant",
+      "lat": 32.299637,
+      "lon": -106.774423
+    },
+    {
+      "id": "osm:w174267665",
+      "name": "WoodSpring Suites",
+      "kind": "lodging",
+      "lat": 32.289576,
+      "lon": -106.740522
+    },
+    {
+      "id": "osm:w174414098",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.297142,
+      "lon": -106.770596
+    },
+    {
+      "id": "osm:w174717846",
+      "name": "Super 8",
+      "kind": "lodging",
+      "lat": 32.284441,
+      "lon": -106.768981
+    },
+    {
+      "id": "osm:w174717871",
+      "name": "Motel 6",
+      "kind": "lodging",
+      "lat": 32.284145,
+      "lon": -106.769747
+    },
+    {
+      "id": "osm:w176274216",
+      "name": "Royal Host Motel",
+      "kind": "lodging",
+      "lat": 32.311891,
+      "lon": -106.808546
+    },
+    {
+      "id": "osm:w176295206",
+      "name": "Desert Oasis Inn",
+      "kind": "lodging",
+      "lat": 32.311331,
+      "lon": -106.801964
+    },
+    {
+      "id": "osm:w176295208",
+      "name": "Desert Lodge Motel",
+      "kind": "lodging",
+      "lat": 32.312086,
+      "lon": -106.806722
+    },
+    {
+      "id": "osm:w176295217",
+      "name": "The Big Chile Inn",
+      "kind": "lodging",
+      "lat": 32.312263,
+      "lon": -106.807665
+    },
+    {
+      "id": "osm:w176295221",
+      "name": "Imperial Sky Motel",
+      "kind": "lodging",
+      "lat": 32.311134,
+      "lon": -106.804011
+    },
+    {
+      "id": "osm:w176295222",
+      "name": "Comfort Inn & Suites Las Cruces",
+      "kind": "lodging",
+      "lat": 32.287227,
+      "lon": -106.793154
+    },
+    {
+      "id": "osm:w176295225",
+      "name": "Kilby Motel",
+      "kind": "lodging",
+      "lat": 32.300608,
+      "lon": -106.77779
+    },
+    {
+      "id": "osm:w176295227",
+      "name": "Comfort Inn",
+      "kind": "lodging",
+      "lat": 32.283353,
+      "lon": -106.769331
+    },
+    {
+      "id": "osm:w176295228",
+      "name": "Town House Motel",
+      "kind": "lodging",
+      "lat": 32.310988,
+      "lon": -106.807645
+    },
+    {
+      "id": "osm:w176295230",
+      "name": "A Day's End Lodge",
+      "kind": "lodging",
+      "lat": 32.311672,
+      "lon": -106.797165
+    },
+    {
+      "id": "osm:w176295235",
+      "name": "Quality Inn & Suites",
+      "kind": "lodging",
+      "lat": 32.284403,
+      "lon": -106.775314
+    },
+    {
+      "id": "osm:w176295242",
+      "name": "Sands Motel",
+      "kind": "lodging",
+      "lat": 32.294488,
+      "lon": -106.778112
+    },
+    {
+      "id": "osm:w176295243",
+      "name": "Best Western Mission Inn",
+      "kind": "lodging",
+      "lat": 32.293414,
+      "lon": -106.776999
+    },
+    {
+      "id": "osm:w176295259",
+      "name": "Meson de Mesilla",
+      "kind": "lodging",
+      "lat": 32.279945,
+      "lon": -106.79531
+    },
+    {
+      "id": "osm:w176295262",
+      "name": "Bruce Motel",
+      "kind": "lodging",
+      "lat": 32.301748,
+      "lon": -106.777531
+    },
+    {
+      "id": "osm:w176295264",
+      "name": "Budget Inn",
+      "kind": "lodging",
+      "lat": 32.310945,
+      "lon": -106.808571
+    },
+    {
+      "id": "osm:w176295266",
+      "name": "The Coachlight Inn",
+      "kind": "lodging",
+      "lat": 32.292376,
+      "lon": -106.807182
+    },
+    {
+      "id": "osm:w176295267",
+      "name": "Holiday Inn Express Hotel & Suites",
+      "kind": "lodging",
+      "lat": 32.28389,
+      "lon": -106.770676
+    },
+    {
+      "id": "osm:w176406242",
+      "name": "Renoo's Thai Time",
+      "kind": "restaurant",
+      "lat": 32.42584,
+      "lon": -106.597987
+    },
+    {
+      "id": "osm:w176915745",
+      "name": "Thai Delight",
+      "kind": "restaurant",
+      "lat": 32.276767,
+      "lon": -106.795862
+    },
+    {
+      "id": "osm:w178573486",
+      "name": "Alon",
+      "kind": "fuel",
+      "lat": 32.34267,
+      "lon": -106.77596
+    },
+    {
+      "id": "osm:w199755055",
+      "name": "El Vagon Tacos",
+      "kind": "restaurant",
+      "lat": 32.295795,
+      "lon": -106.760034
+    },
+    {
+      "id": "osm:w203302822",
+      "name": "Casitas de Mesilla",
+      "kind": "lodging",
+      "lat": 32.269917,
+      "lon": -106.792716
+    },
+    {
+      "id": "osm:w203463436",
+      "name": "Best Western Anthony / West El Paso",
+      "kind": "lodging",
+      "lat": 31.99639,
+      "lon": -106.584244
+    },
+    {
+      "id": "osm:w203540356",
+      "name": "Big 8",
+      "kind": "grocery",
+      "lat": 31.99888,
+      "lon": -106.586102
+    },
+    {
+      "id": "osm:w205410369",
+      "name": "Eagle Qwik Mart",
+      "kind": "shop",
+      "lat": 32.26797,
+      "lon": -106.745062
+    },
+    {
+      "id": "osm:w205410370",
+      "name": "Eagle Qwik Mart",
+      "kind": "fuel",
+      "lat": 32.267987,
+      "lon": -106.744723
+    },
+    {
+      "id": "osm:w205410372",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.291915,
+      "lon": -106.787749
+    },
+    {
+      "id": "osm:w205410373",
+      "name": "Murphy USA",
+      "kind": "shop",
+      "lat": 32.293608,
+      "lon": -106.786731
+    },
+    {
+      "id": "osm:w205410374",
+      "name": "Murphy USA",
+      "kind": "fuel",
+      "lat": 32.293762,
+      "lon": -106.786505
+    },
+    {
+      "id": "osm:w225718775",
+      "name": "Love's",
+      "kind": "shop",
+      "lat": 31.998596,
+      "lon": -106.581243
+    },
+    {
+      "id": "osm:w225718776",
+      "name": "Love's",
+      "kind": "fuel",
+      "lat": 31.998197,
+      "lon": -106.581222
+    },
+    {
+      "id": "osm:w225718777",
+      "name": "Love's",
+      "kind": "fuel",
+      "lat": 31.999012,
+      "lon": -106.581151
+    },
+    {
+      "id": "osm:w226933936",
+      "name": "Shell",
+      "kind": "fuel",
+      "lat": 32.297406,
+      "lon": -106.811809
+    },
+    {
+      "id": "osm:w236034976",
+      "name": "D. H. Lescombes Winery & Bistro",
+      "kind": "restaurant",
+      "lat": 32.28184,
+      "lon": -106.796378
+    },
+    {
+      "id": "osm:w236124446",
+      "name": "Pilot",
+      "kind": "shop",
+      "lat": 31.996705,
+      "lon": -106.586158
+    },
+    {
+      "id": "osm:w236124449",
+      "name": "Pilot",
+      "kind": "fuel",
+      "lat": 31.997132,
+      "lon": -106.586203
+    },
+    {
+      "id": "osm:w320149374",
+      "name": "Natural Grocers",
+      "kind": "grocery",
+      "lat": 32.319333,
+      "lon": -106.732814
+    },
+    {
+      "id": "osm:w336603538",
+      "name": "Holiday Inn Express & Suites Las Cruces North",
+      "kind": "lodging",
+      "lat": 32.344203,
+      "lon": -106.763457
+    },
+    {
+      "id": "osm:w339675082",
+      "name": "Los Compas",
+      "kind": "cafe",
+      "lat": 32.308746,
+      "lon": -106.762771
+    },
+    {
+      "id": "osm:w361796358",
+      "name": "Murphy Express",
+      "kind": "fuel",
+      "lat": 32.361424,
+      "lon": -106.748472
+    },
+    {
+      "id": "osm:w471010858",
+      "name": "Hampton Inn & Suites Las Cruces I-10",
+      "kind": "lodging",
+      "lat": 32.291978,
+      "lon": -106.793179
+    },
+    {
+      "id": "osm:w507463921",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.316406,
+      "lon": -106.79771
+    },
+    {
+      "id": "osm:w514364335",
+      "name": "Walmart Supercenter",
+      "kind": "grocery",
+      "lat": 32.360327,
+      "lon": -106.746001
+    },
+    {
+      "id": "osm:w534151323",
+      "name": "Alon",
+      "kind": "fuel",
+      "lat": 31.997819,
+      "lon": -106.585401
+    },
+    {
+      "id": "osm:w534151326",
+      "name": "7-Eleven",
+      "kind": "shop",
+      "lat": 31.998072,
+      "lon": -106.585405
+    },
+    {
+      "id": "osm:w597121843",
+      "name": "Chucky's Food Mart",
+      "kind": "shop",
+      "lat": 32.389303,
+      "lon": -106.808542
+    },
+    {
+      "id": "osm:w597121844",
+      "name": "Chucky's Food Mart",
+      "kind": "fuel",
+      "lat": 32.389491,
+      "lon": -106.808752
+    },
+    {
+      "id": "osm:w597121845",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.389965,
+      "lon": -106.809145
+    },
+    {
+      "id": "osm:w597121846",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 32.390162,
+      "lon": -106.809335
+    },
+    {
+      "id": "osm:w778700719",
+      "name": "Porter Convenience Store",
+      "kind": "shop",
+      "lat": 32.391132,
+      "lon": -106.700728
+    },
+    {
+      "id": "osm:w778700720",
+      "name": "Chucky's Gas",
+      "kind": "fuel",
+      "lat": 32.390895,
+      "lon": -106.70062
+    },
+    {
+      "id": "osm:w798543827",
+      "name": "Brewer",
+      "kind": "fuel",
+      "lat": 32.282959,
+      "lon": -106.769076
+    },
+    {
+      "id": "osm:w798543828",
+      "name": "Brewer",
+      "kind": "shop",
+      "lat": 32.283118,
+      "lon": -106.769062
+    },
+    {
+      "id": "osm:w799467935",
+      "name": "Brewer Fleet Vehicle Fueling",
+      "kind": "fuel",
+      "lat": 32.30523,
+      "lon": -106.787908
+    },
+    {
+      "id": "osm:w801377635",
+      "name": "Denny's",
+      "kind": "restaurant",
+      "lat": 32.371016,
+      "lon": -106.742657
+    },
+    {
+      "id": "osm:w801377636",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 32.372585,
+      "lon": -106.741444
+    },
+    {
+      "id": "osm:w857936555",
+      "name": "Walmart",
+      "kind": "fuel",
+      "lat": 32.327293,
+      "lon": -106.721912
+    },
+    {
+      "id": "osm:w888301086",
+      "name": "Alon",
+      "kind": "fuel",
+      "lat": 32.316358,
+      "lon": -106.79801
+    },
+    {
+      "id": "osm:w929107628",
+      "name": "Cracker Barrel",
+      "kind": "restaurant",
+      "lat": 32.289823,
+      "lon": -106.788162
+    },
+    {
+      "id": "osm:w929107629",
+      "name": "La Quinta Inn & Suites Las Cruces Organ Mountain",
+      "kind": "lodging",
+      "lat": 32.290238,
+      "lon": -106.787424
+    },
+    {
+      "id": "osm:w929426668",
+      "name": "Bravo's Cafe",
+      "kind": "cafe",
+      "lat": 32.276428,
+      "lon": -106.766883
+    },
+    {
+      "id": "osm:w930009024",
+      "name": "Pic Quick",
+      "kind": "shop",
+      "lat": 32.27505,
+      "lon": -106.764585
+    },
+    {
+      "id": "osm:w930009049",
+      "name": "Pastaggio's Italian Restaurant",
+      "kind": "restaurant",
+      "lat": 32.278735,
+      "lon": -106.770127
+    },
+    {
+      "id": "osm:w938140210",
+      "name": "Pic Quik Stores Inc",
+      "kind": "shop",
+      "lat": 32.267743,
+      "lon": -106.760913
+    },
+    {
+      "id": "osm:w984923228",
+      "name": "El Camaron Pelao",
+      "kind": "restaurant",
+      "lat": 32.000625,
+      "lon": -106.606287
+    },
+    {
+      "id": "osm:w1021755038",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.307868,
+      "lon": -106.76851
+    },
+    {
+      "id": "osm:w1021756719",
+      "name": "Lohman Avenue Food Mart",
+      "kind": "shop",
+      "lat": 32.307739,
+      "lon": -106.768507
+    },
+    {
+      "id": "osm:w1023717615",
+      "name": "International Delights",
+      "kind": "cafe",
+      "lat": 32.299078,
+      "lon": -106.770854
+    },
+    {
+      "id": "osm:w1023717636",
+      "name": "Burritos Victoria",
+      "kind": "restaurant",
+      "lat": 32.297825,
+      "lon": -106.771445
+    },
+    {
+      "id": "osm:w1024005767",
+      "name": "Sunoco",
+      "kind": "fuel",
+      "lat": 32.297586,
+      "lon": -106.77209
+    },
+    {
+      "id": "osm:w1024005768",
+      "name": "Sunoco",
+      "kind": "shop",
+      "lat": 32.297486,
+      "lon": -106.772223
+    },
+    {
+      "id": "osm:w1024658666",
+      "name": "Three Crosses Regional Hospital",
+      "kind": "hospital",
+      "lat": 32.33448,
+      "lon": -106.776405
+    },
+    {
+      "id": "osm:w1108399345",
+      "name": "Lowes Mercado",
+      "kind": "grocery",
+      "lat": 31.998133,
+      "lon": -106.603961
+    },
+    {
+      "id": "osm:w1108399352",
+      "name": "La Jefa",
+      "kind": "restaurant",
+      "lat": 31.999822,
+      "lon": -106.60714
+    },
+    {
+      "id": "osm:w1108406279",
+      "name": "Anthony Inn",
+      "kind": "lodging",
+      "lat": 31.995952,
+      "lon": -106.580808
+    },
+    {
+      "id": "osm:w1108406287",
+      "name": "Great American Steakhouse",
+      "kind": "restaurant",
+      "lat": 31.975073,
+      "lon": -106.583585
+    },
+    {
+      "id": "osm:w1201212009",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 31.99579,
+      "lon": -106.605593
+    },
+    {
+      "id": "osm:w1201212010",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.995788,
+      "lon": -106.605261
+    },
+    {
+      "id": "osm:w1227607233",
+      "name": "Home2 Suites by Hilton Las Cruces",
+      "kind": "lodging",
+      "lat": 32.336291,
+      "lon": -106.759934
+    },
+    {
+      "id": "osm:w1244977563",
+      "name": "Marathon",
+      "kind": "fuel",
+      "lat": 32.325766,
+      "lon": -106.782795
+    },
+    {
+      "id": "osm:w1244977564",
+      "name": "Dylan's Food Mart",
+      "kind": "shop",
+      "lat": 32.325776,
+      "lon": -106.782545
+    },
+    {
+      "id": "osm:w1263579030",
+      "name": "The Bean on Mesquite",
+      "kind": "cafe",
+      "lat": 32.311067,
+      "lon": -106.774351
+    },
+    {
+      "id": "osm:w1263766543",
+      "name": "Chala's Wood Fire Grill",
+      "kind": "restaurant",
+      "lat": 32.27237,
+      "lon": -106.792106
+    },
+    {
+      "id": "osm:w1263766544",
+      "name": "Spotted Dog Brew and Food",
+      "kind": "restaurant",
+      "lat": 32.271088,
+      "lon": -106.7913
+    },
+    {
+      "id": "osm:w1263777379",
+      "name": "Pic Quik",
+      "kind": "shop",
+      "lat": 32.113075,
+      "lon": -106.66302
+    },
+    {
+      "id": "osm:w1268400807",
+      "name": "Speedway",
+      "kind": "fuel",
+      "lat": 32.351242,
+      "lon": -106.764936
+    },
+    {
+      "id": "osm:w1299081285",
+      "name": "Chachi",
+      "kind": "restaurant",
+      "lat": 32.38914,
+      "lon": -106.809745
+    },
+    {
+      "id": "osm:w1384291245",
+      "name": "Corner Bakery",
+      "kind": "cafe",
+      "lat": 32.313544,
+      "lon": -106.752517
+    },
+    {
+      "id": "osm:w1385358682",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.122486,
+      "lon": -106.63942
+    },
+    {
+      "id": "osm:w1385358683",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 32.12309,
+      "lon": -106.638977
+    },
+    {
+      "id": "osm:w1385358692",
+      "name": "Mi Casa Cafe",
+      "kind": "restaurant",
+      "lat": 32.122692,
+      "lon": -106.638823
+    },
+    {
+      "id": "osm:w1459313562",
+      "name": "Maverik",
+      "kind": "shop",
+      "lat": 32.382953,
+      "lon": -106.717902
+    },
+    {
+      "id": "osm:w1528297431",
+      "name": "Maverik",
+      "kind": "shop",
+      "lat": 32.290853,
+      "lon": -106.788041
+    },
+    {
+      "id": "osm:w1528327013",
+      "name": "Dutch Bros. Coffee",
+      "kind": "cafe",
+      "lat": 32.292002,
+      "lon": -106.7841
+    },
+    {
+      "id": "osm:w1528327028",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 32.297213,
+      "lon": -106.770767
+    },
+    {
+      "id": "osm:w1540825582",
+      "name": "La Nueva Casita Cafe",
+      "kind": "restaurant",
+      "lat": 32.31121,
+      "lon": -106.774465
+    },
+    {
+      "id": "osm:r6935747",
+      "name": "Days Inn Las Cruces",
+      "kind": "lodging",
+      "lat": 32.292194,
+      "lon": -106.78682
+    },
+    {
+      "id": "osm:r9343631",
+      "name": "La Quinta Inn Las Cruces Mesilla Valley",
+      "kind": "lodging",
+      "lat": 32.292944,
+      "lon": -106.788691
+    },
+    {
+      "id": "osm:r13427345",
+      "name": "Plaza Suites",
+      "kind": "lodging",
+      "lat": 32.28306,
+      "lon": -106.766341
+    },
+    {
+      "id": "osm:r20354880",
+      "name": "Western Inn",
+      "kind": "lodging",
+      "lat": 32.311011,
+      "lon": -106.807167
+    },
+    {
+      "id": "osm:r20963237",
+      "name": "Maverik",
+      "kind": "fuel",
+      "lat": 32.290912,
+      "lon": -106.788357
+    }
+  ]
+}

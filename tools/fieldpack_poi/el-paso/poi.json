@@ -1,0 +1,1987 @@
+{
+  "schema": 1,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "pois": [
+    {
+      "id": "osm:n245842371",
+      "name": "Holiday Inn Express",
+      "kind": "lodging",
+      "lat": 31.737472,
+      "lon": -106.451091
+    },
+    {
+      "id": "osm:n470062845",
+      "name": "Casita Linda Mexican Restaurant",
+      "kind": "restaurant",
+      "lat": 31.87026,
+      "lon": -106.415728
+    },
+    {
+      "id": "osm:n763647391",
+      "name": "Wingers Chicken Wings",
+      "kind": "restaurant",
+      "lat": 31.903952,
+      "lon": -106.422025
+    },
+    {
+      "id": "osm:n764455276",
+      "name": "7-Eleven",
+      "kind": "shop",
+      "lat": 31.915096,
+      "lon": -106.421689
+    },
+    {
+      "id": "osm:n880963315",
+      "name": "OXXO",
+      "kind": "shop",
+      "lat": 31.693777,
+      "lon": -106.374282
+    },
+    {
+      "id": "osm:n880963328",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.69453,
+      "lon": -106.374985
+    },
+    {
+      "id": "osm:n880973522",
+      "name": "Soriana",
+      "kind": "grocery",
+      "lat": 31.692515,
+      "lon": -106.379318
+    },
+    {
+      "id": "osm:n1010148082",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 31.899739,
+      "lon": -106.440389
+    },
+    {
+      "id": "osm:n1013658195",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 31.785245,
+      "lon": -106.41291
+    },
+    {
+      "id": "osm:n1243936566",
+      "name": "DK",
+      "kind": "shop",
+      "lat": 31.843716,
+      "lon": -106.536063
+    },
+    {
+      "id": "osm:n1243936568",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.844355,
+      "lon": -106.549173
+    },
+    {
+      "id": "osm:n1298771227",
+      "name": "S-Mart",
+      "kind": "grocery",
+      "lat": 31.67633,
+      "lon": -106.42191
+    },
+    {
+      "id": "osm:n1337824842",
+      "name": "Lucy's Restaurant",
+      "kind": "restaurant",
+      "lat": 31.791314,
+      "lon": -106.508148
+    },
+    {
+      "id": "osm:n1337824849",
+      "name": "The King's X",
+      "kind": "bar",
+      "lat": 31.791194,
+      "lon": -106.50807
+    },
+    {
+      "id": "osm:n1381837928",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.598478,
+      "lon": -106.197363
+    },
+    {
+      "id": "osm:n1381837931",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.683366,
+      "lon": -106.187324
+    },
+    {
+      "id": "osm:n1381837934",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.74472,
+      "lon": -106.331237
+    },
+    {
+      "id": "osm:n1438478064",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.614709,
+      "lon": -106.522064
+    },
+    {
+      "id": "osm:n1438478069",
+      "name": "Pemex E08438",
+      "kind": "fuel",
+      "lat": 31.614476,
+      "lon": -106.52237
+    },
+    {
+      "id": "osm:n1501317175",
+      "name": "Village Inn",
+      "kind": "restaurant",
+      "lat": 31.788914,
+      "lon": -106.395176
+    },
+    {
+      "id": "osm:n1550227194",
+      "name": "San Isidro",
+      "kind": "restaurant",
+      "lat": 31.847751,
+      "lon": -106.611587
+    },
+    {
+      "id": "osm:n1550227300",
+      "name": "Hello Pizza",
+      "kind": "restaurant",
+      "lat": 31.847751,
+      "lon": -106.611501
+    },
+    {
+      "id": "osm:n1550240562",
+      "name": "Billy Crews",
+      "kind": "bar",
+      "lat": 31.846001,
+      "lon": -106.621042
+    },
+    {
+      "id": "osm:n1550240709",
+      "name": "Billy Crews",
+      "kind": "restaurant",
+      "lat": 31.846263,
+      "lon": -106.62116
+    },
+    {
+      "id": "osm:n1550244504",
+      "name": "Gomez",
+      "kind": "shop",
+      "lat": 31.864788,
+      "lon": -106.625747
+    },
+    {
+      "id": "osm:n1607246055",
+      "name": "MEGA Soriana",
+      "kind": "grocery",
+      "lat": 31.677535,
+      "lon": -106.426092
+    },
+    {
+      "id": "osm:n1609784236",
+      "name": "Pemex E01152",
+      "kind": "fuel",
+      "lat": 31.60767,
+      "lon": -106.452391
+    },
+    {
+      "id": "osm:n1609784268",
+      "name": "Pemex E07371",
+      "kind": "fuel",
+      "lat": 31.662963,
+      "lon": -106.42825
+    },
+    {
+      "id": "osm:n1609784272",
+      "name": "Pemex E03468",
+      "kind": "fuel",
+      "lat": 31.721396,
+      "lon": -106.443095
+    },
+    {
+      "id": "osm:n1609784273",
+      "name": "Pemex E01248",
+      "kind": "fuel",
+      "lat": 31.706833,
+      "lon": -106.405361
+    },
+    {
+      "id": "osm:n1609784274",
+      "name": "Pemex E06722",
+      "kind": "fuel",
+      "lat": 31.692193,
+      "lon": -106.405433
+    },
+    {
+      "id": "osm:n1609784276",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.719425,
+      "lon": -106.443572
+    },
+    {
+      "id": "osm:n1727047159",
+      "name": "Peking Express",
+      "kind": "restaurant",
+      "lat": 31.7788,
+      "lon": -106.504022
+    },
+    {
+      "id": "osm:n1728723018",
+      "name": "Caf\u00e9 Italia",
+      "kind": "restaurant",
+      "lat": 31.833776,
+      "lon": -106.543177
+    },
+    {
+      "id": "osm:n1842137605",
+      "name": "Pei Wei",
+      "kind": "restaurant",
+      "lat": 31.839114,
+      "lon": -106.565264
+    },
+    {
+      "id": "osm:n1906493349",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.715293,
+      "lon": -106.43272
+    },
+    {
+      "id": "osm:n1906493350",
+      "name": "El G\u00fciri G\u00fciri",
+      "kind": "shop",
+      "lat": 31.717376,
+      "lon": -106.432133
+    },
+    {
+      "id": "osm:n1906493367",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.716784,
+      "lon": -106.432801
+    },
+    {
+      "id": "osm:n1906496337",
+      "name": "Rapidito's Bip Bip",
+      "kind": "shop",
+      "lat": 31.717089,
+      "lon": -106.428753
+    },
+    {
+      "id": "osm:n1906504776",
+      "name": "La Villita",
+      "kind": "lodging",
+      "lat": 31.716058,
+      "lon": -106.424736
+    },
+    {
+      "id": "osm:n1929944268",
+      "name": "Delicias Cafe",
+      "kind": "restaurant",
+      "lat": 31.858491,
+      "lon": -106.558796
+    },
+    {
+      "id": "osm:n1938901069",
+      "name": "Speedway",
+      "kind": "shop",
+      "lat": 31.909514,
+      "lon": -106.584792
+    },
+    {
+      "id": "osm:n2143191798",
+      "name": "NYC Deli",
+      "kind": "restaurant",
+      "lat": 31.776615,
+      "lon": -106.502408
+    },
+    {
+      "id": "osm:n2143191959",
+      "name": "Pizza Hut",
+      "kind": "restaurant",
+      "lat": 31.910831,
+      "lon": -106.584293
+    },
+    {
+      "id": "osm:n2203835391",
+      "name": "Valero",
+      "kind": "fuel",
+      "lat": 31.782685,
+      "lon": -106.33858
+    },
+    {
+      "id": "osm:n2221473012",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 31.799617,
+      "lon": -106.395933
+    },
+    {
+      "id": "osm:n2253399198",
+      "name": "Diamond Shamrock /Corner Store",
+      "kind": "fuel",
+      "lat": 31.812828,
+      "lon": -106.556918
+    },
+    {
+      "id": "osm:n2253399234",
+      "name": "Speedway",
+      "kind": "fuel",
+      "lat": 31.813428,
+      "lon": -106.557484
+    },
+    {
+      "id": "osm:n2272150446",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 31.865388,
+      "lon": -106.576617
+    },
+    {
+      "id": "osm:n2324900956",
+      "name": "Starbucks",
+      "kind": "cafe",
+      "lat": 31.800169,
+      "lon": -106.39365
+    },
+    {
+      "id": "osm:n2390640435",
+      "name": "Cuartito Azul",
+      "kind": "restaurant",
+      "lat": 31.853402,
+      "lon": -106.570851
+    },
+    {
+      "id": "osm:n2390699675",
+      "name": "Ardovino's Pizza",
+      "kind": "restaurant",
+      "lat": 31.858655,
+      "lon": -106.558808
+    },
+    {
+      "id": "osm:n2390711433",
+      "name": "Ripe Eatery",
+      "kind": "restaurant",
+      "lat": 31.862501,
+      "lon": -106.548262
+    },
+    {
+      "id": "osm:n2390741557",
+      "name": "Mancora Peruvian Restaurant",
+      "kind": "restaurant",
+      "lat": 31.837202,
+      "lon": -106.55527
+    },
+    {
+      "id": "osm:n2588234531",
+      "name": "Vanilla Heaven",
+      "kind": "cafe",
+      "lat": 31.722418,
+      "lon": -106.44409
+    },
+    {
+      "id": "osm:n2588272146",
+      "name": "MAKISU",
+      "kind": "restaurant",
+      "lat": 31.732025,
+      "lon": -106.4127
+    },
+    {
+      "id": "osm:n2588275435",
+      "name": "Sushigada",
+      "kind": "restaurant",
+      "lat": 31.726269,
+      "lon": -106.432203
+    },
+    {
+      "id": "osm:n2629248426",
+      "name": "Pemex E04159",
+      "kind": "fuel",
+      "lat": 31.648599,
+      "lon": -106.388152
+    },
+    {
+      "id": "osm:n2656438192",
+      "name": "Tamales el Sinaloense",
+      "kind": "restaurant",
+      "lat": 31.740981,
+      "lon": -106.424139
+    },
+    {
+      "id": "osm:n2667613928",
+      "name": "Pemex E09101",
+      "kind": "fuel",
+      "lat": 31.692209,
+      "lon": -106.424905
+    },
+    {
+      "id": "osm:n2667723543",
+      "name": "Mariscos Villa del Mar",
+      "kind": "restaurant",
+      "lat": 31.710214,
+      "lon": -106.408498
+    },
+    {
+      "id": "osm:n2703403531",
+      "name": "Pemex E09261",
+      "kind": "fuel",
+      "lat": 31.606435,
+      "lon": -106.452852
+    },
+    {
+      "id": "osm:n2704237000",
+      "name": "Pemex E05909",
+      "kind": "fuel",
+      "lat": 31.698693,
+      "lon": -106.412383
+    },
+    {
+      "id": "osm:n2711385335",
+      "name": "Katsura",
+      "kind": "restaurant",
+      "lat": 31.818385,
+      "lon": -106.515073
+    },
+    {
+      "id": "osm:n2711385337",
+      "name": "Jerusalem Grill",
+      "kind": "restaurant",
+      "lat": 31.817291,
+      "lon": -106.513928
+    },
+    {
+      "id": "osm:n2711385340",
+      "name": "India Palace",
+      "kind": "restaurant",
+      "lat": 31.817838,
+      "lon": -106.514461
+    },
+    {
+      "id": "osm:n2791714493",
+      "name": "La Pasadita",
+      "kind": "shop",
+      "lat": 31.596697,
+      "lon": -106.478368
+    },
+    {
+      "id": "osm:n2791715274",
+      "name": "Don Epi",
+      "kind": "restaurant",
+      "lat": 31.607066,
+      "lon": -106.469231
+    },
+    {
+      "id": "osm:n2915045267",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.720835,
+      "lon": -106.439269
+    },
+    {
+      "id": "osm:n2915045268",
+      "name": "Superette",
+      "kind": "shop",
+      "lat": 31.727403,
+      "lon": -106.436991
+    },
+    {
+      "id": "osm:n2920633859",
+      "name": "OXO",
+      "kind": "shop",
+      "lat": 31.629625,
+      "lon": -106.374008
+    },
+    {
+      "id": "osm:n2980138302",
+      "name": "2 Amigos",
+      "kind": "restaurant",
+      "lat": 31.40937,
+      "lon": -106.461542
+    },
+    {
+      "id": "osm:n3033564669",
+      "name": "Express",
+      "kind": "fuel",
+      "lat": 31.813323,
+      "lon": -106.431631
+    },
+    {
+      "id": "osm:n3036069911",
+      "name": "La Valentina Cafe",
+      "kind": "restaurant",
+      "lat": 31.766326,
+      "lon": -106.461051
+    },
+    {
+      "id": "osm:n3036071943",
+      "name": "Ram / Super Stop",
+      "kind": "fuel",
+      "lat": 31.767057,
+      "lon": -106.461848
+    },
+    {
+      "id": "osm:n3044384588",
+      "name": "Javics",
+      "kind": "restaurant",
+      "lat": 31.697564,
+      "lon": -106.411071
+    },
+    {
+      "id": "osm:n3083194732",
+      "name": "Pemex E09893",
+      "kind": "fuel",
+      "lat": 31.764264,
+      "lon": -106.514164
+    },
+    {
+      "id": "osm:n3099727947",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.671068,
+      "lon": -106.440009
+    },
+    {
+      "id": "osm:n3099727961",
+      "name": "Pemex E04417",
+      "kind": "fuel",
+      "lat": 31.660404,
+      "lon": -106.447596
+    },
+    {
+      "id": "osm:n3099727978",
+      "name": "Pemex E07362",
+      "kind": "fuel",
+      "lat": 31.65617,
+      "lon": -106.446971
+    },
+    {
+      "id": "osm:n3099727989",
+      "name": "Pemex E07476",
+      "kind": "fuel",
+      "lat": 31.683129,
+      "lon": -106.436106
+    },
+    {
+      "id": "osm:n3099728016",
+      "name": "El Conquistador",
+      "kind": "lodging",
+      "lat": 31.69231,
+      "lon": -106.403326
+    },
+    {
+      "id": "osm:n3099728026",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.66753,
+      "lon": -106.349693
+    },
+    {
+      "id": "osm:n3099728027",
+      "name": "Pemex E07227",
+      "kind": "fuel",
+      "lat": 31.667552,
+      "lon": -106.350223
+    },
+    {
+      "id": "osm:n3102995039",
+      "name": "Speedway",
+      "kind": "shop",
+      "lat": 31.797137,
+      "lon": -106.244226
+    },
+    {
+      "id": "osm:n3103790938",
+      "name": "Pemex E06514",
+      "kind": "fuel",
+      "lat": 31.66788,
+      "lon": -106.395674
+    },
+    {
+      "id": "osm:n3119570912",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.698244,
+      "lon": -106.404058
+    },
+    {
+      "id": "osm:n3119584550",
+      "name": "Pasti Gel",
+      "kind": "shop",
+      "lat": 31.744124,
+      "lon": -106.460562
+    },
+    {
+      "id": "osm:n3129913904",
+      "name": "Pemex E06978",
+      "kind": "shop",
+      "lat": 31.740992,
+      "lon": -106.401718
+    },
+    {
+      "id": "osm:n3131679256",
+      "name": "Katsura",
+      "kind": "restaurant",
+      "lat": 31.762831,
+      "lon": -106.266189
+    },
+    {
+      "id": "osm:n3131679259",
+      "name": "Pemex E04457",
+      "kind": "fuel",
+      "lat": 31.687213,
+      "lon": -106.375068
+    },
+    {
+      "id": "osm:n3131679260",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.687338,
+      "lon": -106.375295
+    },
+    {
+      "id": "osm:n3154351758",
+      "name": "Pemex E08546",
+      "kind": "fuel",
+      "lat": 31.664971,
+      "lon": -106.427624
+    },
+    {
+      "id": "osm:n3154351760",
+      "name": "Pemex E07464",
+      "kind": "fuel",
+      "lat": 31.621467,
+      "lon": -106.445863
+    },
+    {
+      "id": "osm:n3154357714",
+      "name": "Abarrotes y papeleria Oly",
+      "kind": "shop",
+      "lat": 31.583981,
+      "lon": -106.488284
+    },
+    {
+      "id": "osm:n3164636284",
+      "name": "Pemex E01212",
+      "kind": "fuel",
+      "lat": 31.733672,
+      "lon": -106.449194
+    },
+    {
+      "id": "osm:n3165276848",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.692169,
+      "lon": -106.405623
+    },
+    {
+      "id": "osm:n3166997450",
+      "name": "Consulado Inn",
+      "kind": "lodging",
+      "lat": 31.692197,
+      "lon": -106.402286
+    },
+    {
+      "id": "osm:n3168624441",
+      "name": "Del R\u00edo",
+      "kind": "shop",
+      "lat": 31.729323,
+      "lon": -106.408061
+    },
+    {
+      "id": "osm:n3168639418",
+      "name": "Del R\u00edo",
+      "kind": "shop",
+      "lat": 31.736272,
+      "lon": -106.409592
+    },
+    {
+      "id": "osm:n3169535755",
+      "name": "La Guera",
+      "kind": "restaurant",
+      "lat": 31.572881,
+      "lon": -106.467562
+    },
+    {
+      "id": "osm:n3172831952",
+      "name": "Ardovino's Desert Crossing",
+      "kind": "restaurant",
+      "lat": 31.791483,
+      "lon": -106.557791
+    },
+    {
+      "id": "osm:n3177934081",
+      "name": "Pemex E08792",
+      "kind": "fuel",
+      "lat": 31.725541,
+      "lon": -106.428256
+    },
+    {
+      "id": "osm:n3177945413",
+      "name": "Carl\u00b4s Junior",
+      "kind": "restaurant",
+      "lat": 31.656982,
+      "lon": -106.430073
+    },
+    {
+      "id": "osm:n3177956961",
+      "name": "Pemex E05270",
+      "kind": "fuel",
+      "lat": 31.607008,
+      "lon": -106.464208
+    },
+    {
+      "id": "osm:n3177956982",
+      "name": "Pemex E07486",
+      "kind": "fuel",
+      "lat": 31.613971,
+      "lon": -106.533879
+    },
+    {
+      "id": "osm:n3177989213",
+      "name": "Tacofish",
+      "kind": "restaurant",
+      "lat": 31.708021,
+      "lon": -106.429244
+    },
+    {
+      "id": "osm:n3180060788",
+      "name": "Days Inn",
+      "kind": "lodging",
+      "lat": 31.841344,
+      "lon": -106.572125
+    },
+    {
+      "id": "osm:n3203889459",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.742264,
+      "lon": -106.498266
+    },
+    {
+      "id": "osm:n3213529457",
+      "name": "Pemex E01225",
+      "kind": "fuel",
+      "lat": 31.675135,
+      "lon": -106.438268
+    },
+    {
+      "id": "osm:n3213534977",
+      "name": "Toro Quintaco",
+      "kind": "restaurant",
+      "lat": 31.684059,
+      "lon": -106.424167
+    },
+    {
+      "id": "osm:n3220614152",
+      "name": "Las Chorreadas",
+      "kind": "bar",
+      "lat": 31.622238,
+      "lon": -106.400826
+    },
+    {
+      "id": "osm:n3260929770",
+      "name": "Restaurant Happy",
+      "kind": "restaurant",
+      "lat": 31.412758,
+      "lon": -106.461547
+    },
+    {
+      "id": "osm:n3260929771",
+      "name": "Pemex",
+      "kind": "fuel",
+      "lat": 31.408843,
+      "lon": -106.461633
+    },
+    {
+      "id": "osm:n3264659433",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.625202,
+      "lon": -106.46136
+    },
+    {
+      "id": "osm:n3264705910",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.595886,
+      "lon": -106.42991
+    },
+    {
+      "id": "osm:n3268329364",
+      "name": "Case de Torta",
+      "kind": "restaurant",
+      "lat": 31.922972,
+      "lon": -106.438133
+    },
+    {
+      "id": "osm:n3304623519",
+      "name": "Don Jose Mexican Grill",
+      "kind": "restaurant",
+      "lat": 31.760403,
+      "lon": -106.271786
+    },
+    {
+      "id": "osm:n3341120937",
+      "name": "Antonio's Deli",
+      "kind": "restaurant",
+      "lat": 31.713829,
+      "lon": -106.411421
+    },
+    {
+      "id": "osm:n3341120938",
+      "name": "Barrigas",
+      "kind": "restaurant",
+      "lat": 31.714395,
+      "lon": -106.411928
+    },
+    {
+      "id": "osm:n3341120950",
+      "name": "El corralito",
+      "kind": "restaurant",
+      "lat": 31.718161,
+      "lon": -106.415175
+    },
+    {
+      "id": "osm:n3370665825",
+      "name": "Circle K",
+      "kind": "fuel",
+      "lat": 31.785835,
+      "lon": -106.413198
+    },
+    {
+      "id": "osm:n3370665834",
+      "name": "K",
+      "kind": "fuel",
+      "lat": 31.783872,
+      "lon": -106.395115
+    },
+    {
+      "id": "osm:n3407446706",
+      "name": "Pemex E01149",
+      "kind": "fuel",
+      "lat": 31.742762,
+      "lon": -106.481109
+    },
+    {
+      "id": "osm:n3407497252",
+      "name": "Gas LP",
+      "kind": "fuel",
+      "lat": 31.645053,
+      "lon": -106.445789
+    },
+    {
+      "id": "osm:n3407519271",
+      "name": "Pemex E04331",
+      "kind": "fuel",
+      "lat": 31.677509,
+      "lon": -106.370352
+    },
+    {
+      "id": "osm:n3443041775",
+      "name": "Do\u00f1a Ana",
+      "kind": "lodging",
+      "lat": 31.699325,
+      "lon": -106.41353
+    },
+    {
+      "id": "osm:n3451119057",
+      "name": "Corner Store Valero",
+      "kind": "shop",
+      "lat": 31.775836,
+      "lon": -106.252373
+    },
+    {
+      "id": "osm:n3547498040",
+      "name": "Motel Regis",
+      "kind": "lodging",
+      "lat": 31.696339,
+      "lon": -106.439123
+    },
+    {
+      "id": "osm:n3547502015",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.703366,
+      "lon": -106.430959
+    },
+    {
+      "id": "osm:n3581474747",
+      "name": "OXXO",
+      "kind": "shop",
+      "lat": 31.676566,
+      "lon": -106.379004
+    },
+    {
+      "id": "osm:n3581478106",
+      "name": "Superette San Carlos (157)",
+      "kind": "shop",
+      "lat": 31.665827,
+      "lon": -106.382271
+    },
+    {
+      "id": "osm:n3581478107",
+      "name": "OXXO",
+      "kind": "shop",
+      "lat": 31.665975,
+      "lon": -106.381425
+    },
+    {
+      "id": "osm:n3581494614",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.680195,
+      "lon": -106.388735
+    },
+    {
+      "id": "osm:n3581501896",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.660141,
+      "lon": -106.443229
+    },
+    {
+      "id": "osm:n3602734418",
+      "name": "La Choza",
+      "kind": "restaurant",
+      "lat": 31.696636,
+      "lon": -106.40381
+    },
+    {
+      "id": "osm:n3631044184",
+      "name": "Extra",
+      "kind": "grocery",
+      "lat": 31.660463,
+      "lon": -106.362092
+    },
+    {
+      "id": "osm:n3684272821",
+      "name": "Pemex E08373",
+      "kind": "fuel",
+      "lat": 31.644364,
+      "lon": -106.375248
+    },
+    {
+      "id": "osm:n3684286129",
+      "name": "Del Rio Mx",
+      "kind": "shop",
+      "lat": 31.621113,
+      "lon": -106.351186
+    },
+    {
+      "id": "osm:n3780393557",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.728686,
+      "lon": -106.450598
+    },
+    {
+      "id": "osm:n3891891097",
+      "name": "El Puente",
+      "kind": "restaurant",
+      "lat": 31.724484,
+      "lon": -106.425718
+    },
+    {
+      "id": "osm:n3969426570",
+      "name": "Centro de Salud # 14",
+      "kind": "hospital",
+      "lat": 31.685336,
+      "lon": -106.370873
+    },
+    {
+      "id": "osm:n3974633690",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.718063,
+      "lon": -106.462407
+    },
+    {
+      "id": "osm:n3974637273",
+      "name": "Pemex E01151",
+      "kind": "fuel",
+      "lat": 31.713893,
+      "lon": -106.453611
+    },
+    {
+      "id": "osm:n3974660891",
+      "name": "Pemex E01148",
+      "kind": "fuel",
+      "lat": 31.698332,
+      "lon": -106.442975
+    },
+    {
+      "id": "osm:n3998454051",
+      "name": "Speedway",
+      "kind": "fuel",
+      "lat": 31.938716,
+      "lon": -106.408312
+    },
+    {
+      "id": "osm:n3999837503",
+      "name": "7-Eleven",
+      "kind": "shop",
+      "lat": 31.928782,
+      "lon": -106.407029
+    },
+    {
+      "id": "osm:n3999837513",
+      "name": "Carnitas \"Tio Juan\"",
+      "kind": "restaurant",
+      "lat": 31.901976,
+      "lon": -106.407395
+    },
+    {
+      "id": "osm:n4010336940",
+      "name": "Pemex E06941",
+      "kind": "fuel",
+      "lat": 31.626254,
+      "lon": -106.392112
+    },
+    {
+      "id": "osm:n4015258882",
+      "name": "Pemex E04571",
+      "kind": "fuel",
+      "lat": 31.675724,
+      "lon": -106.445822
+    },
+    {
+      "id": "osm:n4045454121",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.60607,
+      "lon": -106.453246
+    },
+    {
+      "id": "osm:n4045454122",
+      "name": "La Caba\u00f1a",
+      "kind": "restaurant",
+      "lat": 31.60988,
+      "lon": -106.451154
+    },
+    {
+      "id": "osm:n4045454142",
+      "name": "Extra",
+      "kind": "shop",
+      "lat": 31.66504,
+      "lon": -106.426884
+    },
+    {
+      "id": "osm:n4045494409",
+      "name": "Pemex E06452",
+      "kind": "fuel",
+      "lat": 31.643398,
+      "lon": -106.346376
+    },
+    {
+      "id": "osm:n4056293071",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.59932,
+      "lon": -106.427261
+    },
+    {
+      "id": "osm:n4059538124",
+      "name": "Pemex E08434",
+      "kind": "fuel",
+      "lat": 31.602366,
+      "lon": -106.386771
+    },
+    {
+      "id": "osm:n4072179999",
+      "name": "Twin Peaks",
+      "kind": "restaurant",
+      "lat": 31.767904,
+      "lon": -106.36891
+    },
+    {
+      "id": "osm:n4076358331",
+      "name": "Quality Inn Airport",
+      "kind": "lodging",
+      "lat": 31.782719,
+      "lon": -106.405959
+    },
+    {
+      "id": "osm:n4076371474",
+      "name": "Lone Star Inn",
+      "kind": "lodging",
+      "lat": 31.78769,
+      "lon": -106.408862
+    },
+    {
+      "id": "osm:n4131777630",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.599354,
+      "lon": -106.455849
+    },
+    {
+      "id": "osm:n4145420932",
+      "name": "El Tenampa",
+      "kind": "restaurant",
+      "lat": 31.738103,
+      "lon": -106.434911
+    },
+    {
+      "id": "osm:n4145420940",
+      "name": "Roberto's Steak House",
+      "kind": "restaurant",
+      "lat": 31.740613,
+      "lon": -106.424552
+    },
+    {
+      "id": "osm:n4145420941",
+      "name": "Casa de Empeno",
+      "kind": "restaurant",
+      "lat": 31.740115,
+      "lon": -106.424812
+    },
+    {
+      "id": "osm:n4163651234",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.690186,
+      "lon": -106.354292
+    },
+    {
+      "id": "osm:n4190535339",
+      "name": "Pemex E03820",
+      "kind": "fuel",
+      "lat": 31.671245,
+      "lon": -106.474565
+    },
+    {
+      "id": "osm:n4241791773",
+      "name": "El Paso Psychiatric Center",
+      "kind": "hospital",
+      "lat": 31.772,
+      "lon": -106.43622
+    },
+    {
+      "id": "osm:n4375786281",
+      "name": "Carnitas Mezquital",
+      "kind": "restaurant",
+      "lat": 31.746883,
+      "lon": -106.473073
+    },
+    {
+      "id": "osm:n4375814170",
+      "name": "Isla Grande",
+      "kind": "restaurant",
+      "lat": 31.524249,
+      "lon": -106.472851
+    },
+    {
+      "id": "osm:n4452641920",
+      "name": "CUSTODIA DE SAN PABLO RESTAURANT MUSEO TEATRO",
+      "kind": "restaurant",
+      "lat": 31.737983,
+      "lon": -106.462523
+    },
+    {
+      "id": "osm:n4537491582",
+      "name": "Pemex E09138",
+      "kind": "fuel",
+      "lat": 31.604146,
+      "lon": -106.374356
+    },
+    {
+      "id": "osm:n4537520294",
+      "name": "Pemex E08650",
+      "kind": "fuel",
+      "lat": 31.606006,
+      "lon": -106.435956
+    },
+    {
+      "id": "osm:n4537520295",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.605754,
+      "lon": -106.435853
+    },
+    {
+      "id": "osm:n4538961245",
+      "name": "Pemex E01245",
+      "kind": "fuel",
+      "lat": 31.647662,
+      "lon": -106.353301
+    },
+    {
+      "id": "osm:n4540655666",
+      "name": "Xtreme Pizza & Wings",
+      "kind": "restaurant",
+      "lat": 31.75679,
+      "lon": -106.34143
+    },
+    {
+      "id": "osm:n4542855531",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.562621,
+      "lon": -106.339652
+    },
+    {
+      "id": "osm:n4542855547",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.570862,
+      "lon": -106.348856
+    },
+    {
+      "id": "osm:n4542855576",
+      "name": "Pemex E10109",
+      "kind": "fuel",
+      "lat": 31.588399,
+      "lon": -106.371904
+    },
+    {
+      "id": "osm:n4542855577",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.588253,
+      "lon": -106.372038
+    },
+    {
+      "id": "osm:n4547754662",
+      "name": "Plaza M\u00e9xico",
+      "kind": "shop",
+      "lat": 31.622091,
+      "lon": -106.343402
+    },
+    {
+      "id": "osm:n4567897096",
+      "name": "Burritos Tony",
+      "kind": "restaurant",
+      "lat": 31.610297,
+      "lon": -106.386348
+    },
+    {
+      "id": "osm:n4628007481",
+      "name": "Hayes Mini Mart",
+      "kind": "shop",
+      "lat": 31.82126,
+      "lon": -106.45092
+    },
+    {
+      "id": "osm:n4649157090",
+      "name": "Hotel Flamingo",
+      "kind": "lodging",
+      "lat": 31.739352,
+      "lon": -106.430781
+    },
+    {
+      "id": "osm:n4705730730",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.669461,
+      "lon": -106.419423
+    },
+    {
+      "id": "osm:n4780086521",
+      "name": "Pemex E01202",
+      "kind": "fuel",
+      "lat": 31.734485,
+      "lon": -106.478297
+    },
+    {
+      "id": "osm:n4781698821",
+      "name": "Juaritoz Caf\u00e9",
+      "kind": "cafe",
+      "lat": 31.738495,
+      "lon": -106.426702
+    },
+    {
+      "id": "osm:n4783685369",
+      "name": "BioGas",
+      "kind": "fuel",
+      "lat": 31.628918,
+      "lon": -106.332694
+    },
+    {
+      "id": "osm:n4783685391",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.637415,
+      "lon": -106.336826
+    },
+    {
+      "id": "osm:n4783715007",
+      "name": "Pemex E09205",
+      "kind": "fuel",
+      "lat": 31.614552,
+      "lon": -106.336039
+    },
+    {
+      "id": "osm:n4783715332",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.62398,
+      "lon": -106.327259
+    },
+    {
+      "id": "osm:n4783734242",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.626598,
+      "lon": -106.324924
+    },
+    {
+      "id": "osm:n4794566623",
+      "name": "King Crab",
+      "kind": "restaurant",
+      "lat": 31.749554,
+      "lon": -106.280063
+    },
+    {
+      "id": "osm:n4814405406",
+      "name": "Del R\u00edo",
+      "kind": "shop",
+      "lat": 31.660537,
+      "lon": -106.449801
+    },
+    {
+      "id": "osm:n4943294007",
+      "name": "Pizza Hut",
+      "kind": "restaurant",
+      "lat": 31.778704,
+      "lon": -106.250547
+    },
+    {
+      "id": "osm:n4953855094",
+      "name": "Peking Kitchen",
+      "kind": "restaurant",
+      "lat": 31.78338,
+      "lon": -106.429345
+    },
+    {
+      "id": "osm:n5101453439",
+      "name": "Los Arturos",
+      "kind": "restaurant",
+      "lat": 31.705575,
+      "lon": -106.480958
+    },
+    {
+      "id": "osm:n5102321178",
+      "name": "Pemex E03485",
+      "kind": "fuel",
+      "lat": 31.703525,
+      "lon": -106.458615
+    },
+    {
+      "id": "osm:n5115978620",
+      "name": "Albercas los Monos",
+      "kind": "restaurant",
+      "lat": 31.366349,
+      "lon": -106.461995
+    },
+    {
+      "id": "osm:n5201027544",
+      "name": "Mirai Bowl",
+      "kind": "restaurant",
+      "lat": 31.776537,
+      "lon": -106.503226
+    },
+    {
+      "id": "osm:n5282774371",
+      "name": "Pemex E05677",
+      "kind": "fuel",
+      "lat": 31.649953,
+      "lon": -106.407032
+    },
+    {
+      "id": "osm:n5296154046",
+      "name": "Applebee's",
+      "kind": "restaurant",
+      "lat": 31.686705,
+      "lon": -106.410145
+    },
+    {
+      "id": "osm:n5296154047",
+      "name": "Peter Piper Pizza Las Misiones",
+      "kind": "restaurant",
+      "lat": 31.686892,
+      "lon": -106.410039
+    },
+    {
+      "id": "osm:n5315596491",
+      "name": "Walmart Neighborhood Market",
+      "kind": "grocery",
+      "lat": 31.811191,
+      "lon": -106.557777
+    },
+    {
+      "id": "osm:n5315597801",
+      "name": "Walmart Neighborhood Market",
+      "kind": "grocery",
+      "lat": 31.783243,
+      "lon": -106.282976
+    },
+    {
+      "id": "osm:n5315598044",
+      "name": "Walmart Neighborhood Market",
+      "kind": "grocery",
+      "lat": 31.728537,
+      "lon": -106.345055
+    },
+    {
+      "id": "osm:n5315598132",
+      "name": "Walmart Neighborhood Market",
+      "kind": "grocery",
+      "lat": 31.861894,
+      "lon": -106.586847
+    },
+    {
+      "id": "osm:n5341863199",
+      "name": "Super El Roble",
+      "kind": "shop",
+      "lat": 31.613274,
+      "lon": -106.531411
+    },
+    {
+      "id": "osm:n5341865117",
+      "name": "Pemex E04070",
+      "kind": "fuel",
+      "lat": 31.668898,
+      "lon": -106.416658
+    },
+    {
+      "id": "osm:n5448493408",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.764059,
+      "lon": -106.513928
+    },
+    {
+      "id": "osm:n5483629452",
+      "name": "El Arrancadero",
+      "kind": "restaurant",
+      "lat": 31.685795,
+      "lon": -106.428518
+    },
+    {
+      "id": "osm:n5540981098",
+      "name": "Pemex E01195",
+      "kind": "fuel",
+      "lat": 31.730912,
+      "lon": -106.462078
+    },
+    {
+      "id": "osm:n5541010085",
+      "name": "Superette",
+      "kind": "shop",
+      "lat": 31.735679,
+      "lon": -106.489141
+    },
+    {
+      "id": "osm:n5541010087",
+      "name": "Pemex E01177",
+      "kind": "fuel",
+      "lat": 31.741397,
+      "lon": -106.495546
+    },
+    {
+      "id": "osm:n5541010088",
+      "name": "Pemex E01128",
+      "kind": "fuel",
+      "lat": 31.742301,
+      "lon": -106.49875
+    },
+    {
+      "id": "osm:n5541054522",
+      "name": "Pemex E01180",
+      "kind": "fuel",
+      "lat": 31.732165,
+      "lon": -106.457287
+    },
+    {
+      "id": "osm:n5541054529",
+      "name": "El Cometa",
+      "kind": "restaurant",
+      "lat": 31.733445,
+      "lon": -106.472521
+    },
+    {
+      "id": "osm:n5700544350",
+      "name": "El Paso Children's Hospital",
+      "kind": "hospital",
+      "lat": 31.771455,
+      "lon": -106.433956
+    },
+    {
+      "id": "osm:n5730900081",
+      "name": "Pemex E04225",
+      "kind": "fuel",
+      "lat": 31.639574,
+      "lon": -106.367027
+    },
+    {
+      "id": "osm:n5910771676",
+      "name": "Ju\u00e1rez",
+      "kind": "lodging",
+      "lat": 31.737995,
+      "lon": -106.480961
+    },
+    {
+      "id": "osm:n5910771681",
+      "name": "Continental",
+      "kind": "lodging",
+      "lat": 31.738581,
+      "lon": -106.481398
+    },
+    {
+      "id": "osm:n5949811373",
+      "name": "Pemex E01222",
+      "kind": "fuel",
+      "lat": 31.493513,
+      "lon": -106.236965
+    },
+    {
+      "id": "osm:n5949841283",
+      "name": "Pemex E01227",
+      "kind": "fuel",
+      "lat": 31.389391,
+      "lon": -106.108437
+    },
+    {
+      "id": "osm:n5949843993",
+      "name": "Pemex E01240",
+      "kind": "fuel",
+      "lat": 31.55064,
+      "lon": -106.279562
+    },
+    {
+      "id": "osm:n5950025179",
+      "name": "Pemex E08470",
+      "kind": "fuel",
+      "lat": 31.665339,
+      "lon": -106.408854
+    },
+    {
+      "id": "osm:n5950026195",
+      "name": "J01095",
+      "kind": "fuel",
+      "lat": 31.692438,
+      "lon": -106.436028
+    },
+    {
+      "id": "osm:n5950026196",
+      "name": "J01288",
+      "kind": "fuel",
+      "lat": 31.693908,
+      "lon": -106.438283
+    },
+    {
+      "id": "osm:n5950027169",
+      "name": "Pemex E05904",
+      "kind": "fuel",
+      "lat": 31.708489,
+      "lon": -106.432193
+    },
+    {
+      "id": "osm:n5950046791",
+      "name": "Pemex E06111",
+      "kind": "fuel",
+      "lat": 31.742787,
+      "lon": -106.514647
+    },
+    {
+      "id": "osm:n5950047354",
+      "name": "Pemex E08669",
+      "kind": "fuel",
+      "lat": 31.725734,
+      "lon": -106.508921
+    },
+    {
+      "id": "osm:n5950047566",
+      "name": "Pemex E07118",
+      "kind": "fuel",
+      "lat": 31.716593,
+      "lon": -106.488033
+    },
+    {
+      "id": "osm:n5950047785",
+      "name": "Pemex E07116",
+      "kind": "fuel",
+      "lat": 31.662816,
+      "lon": -106.473417
+    },
+    {
+      "id": "osm:n5950047786",
+      "name": "Pemex E10220",
+      "kind": "fuel",
+      "lat": 31.647678,
+      "lon": -106.463411
+    },
+    {
+      "id": "osm:n5950047985",
+      "name": "J01351",
+      "kind": "fuel",
+      "lat": 31.611062,
+      "lon": -106.469566
+    },
+    {
+      "id": "osm:n5950051460",
+      "name": "Pemex E10257",
+      "kind": "fuel",
+      "lat": 31.574001,
+      "lon": -106.396704
+    },
+    {
+      "id": "osm:n5950143876",
+      "name": "Pemex E01211",
+      "kind": "fuel",
+      "lat": 31.73716,
+      "lon": -106.494251
+    },
+    {
+      "id": "osm:n5950143877",
+      "name": "Pemex E01186",
+      "kind": "fuel",
+      "lat": 31.736137,
+      "lon": -106.492
+    },
+    {
+      "id": "osm:n5950144756",
+      "name": "Peme E07119",
+      "kind": "fuel",
+      "lat": 31.731431,
+      "lon": -106.485871
+    },
+    {
+      "id": "osm:n5950150985",
+      "name": "J01394",
+      "kind": "fuel",
+      "lat": 31.633533,
+      "lon": -106.445279
+    },
+    {
+      "id": "osm:n5950169527",
+      "name": "Pemex E01172",
+      "kind": "fuel",
+      "lat": 31.744219,
+      "lon": -106.473298
+    },
+    {
+      "id": "osm:n5950169528",
+      "name": "Pemex E01189",
+      "kind": "fuel",
+      "lat": 31.743381,
+      "lon": -106.464053
+    },
+    {
+      "id": "osm:n5950169529",
+      "name": "Pemex E05704",
+      "kind": "fuel",
+      "lat": 31.738316,
+      "lon": -106.466959
+    },
+    {
+      "id": "osm:n5950170200",
+      "name": "Pemex E07299",
+      "kind": "fuel",
+      "lat": 31.734535,
+      "lon": -106.460244
+    },
+    {
+      "id": "osm:n5950170201",
+      "name": "Pemex E01216",
+      "kind": "fuel",
+      "lat": 31.733914,
+      "lon": -106.458965
+    },
+    {
+      "id": "osm:n5950172891",
+      "name": "Pemex E05170",
+      "kind": "fuel",
+      "lat": 31.711138,
+      "lon": -106.445722
+    },
+    {
+      "id": "osm:n5950181074",
+      "name": "J01189",
+      "kind": "fuel",
+      "lat": 31.617447,
+      "lon": -106.445409
+    },
+    {
+      "id": "osm:n5950190336",
+      "name": "Pemex E07724",
+      "kind": "fuel",
+      "lat": 31.74156,
+      "lon": -106.441569
+    },
+    {
+      "id": "osm:n5950195015",
+      "name": "Pemex E04624",
+      "kind": "fuel",
+      "lat": 31.660176,
+      "lon": -106.390503
+    },
+    {
+      "id": "osm:n5950195016",
+      "name": "Oxxo",
+      "kind": "fuel",
+      "lat": 31.660067,
+      "lon": -106.391519
+    },
+    {
+      "id": "osm:n5950198752",
+      "name": "Pemex E08244",
+      "kind": "fuel",
+      "lat": 31.602039,
+      "lon": -106.385814
+    },
+    {
+      "id": "osm:n5950199670",
+      "name": "Pemex E08917",
+      "kind": "fuel",
+      "lat": 31.60072,
+      "lon": -106.308257
+    },
+    {
+      "id": "osm:n5950199998",
+      "name": "Pemex E01243",
+      "kind": "fuel",
+      "lat": 31.674589,
+      "lon": -106.368334
+    },
+    {
+      "id": "osm:n5950210800",
+      "name": "Pemex E05613",
+      "kind": "fuel",
+      "lat": 31.633643,
+      "lon": -106.37843
+    },
+    {
+      "id": "osm:n5950212399",
+      "name": "Pemex E10441",
+      "kind": "fuel",
+      "lat": 31.656095,
+      "lon": -106.340118
+    },
+    {
+      "id": "osm:n5972830823",
+      "name": "FoodSnacks",
+      "kind": "cafe",
+      "lat": 31.493644,
+      "lon": -106.413894
+    },
+    {
+      "id": "osm:n5976681233",
+      "name": "La Bodeguita",
+      "kind": "bar",
+      "lat": 31.631265,
+      "lon": -106.393649
+    },
+    {
+      "id": "osm:n5976681237",
+      "name": "MaConnys Pizza",
+      "kind": "restaurant",
+      "lat": 31.631327,
+      "lon": -106.394083
+    },
+    {
+      "id": "osm:n5976681250",
+      "name": "Smart",
+      "kind": "grocery",
+      "lat": 31.606916,
+      "lon": -106.3997
+    },
+    {
+      "id": "osm:n6001908272",
+      "name": "Chicken Joint",
+      "kind": "restaurant",
+      "lat": 31.628973,
+      "lon": -106.394067
+    },
+    {
+      "id": "osm:n6001908276",
+      "name": "Taquer\u00eda Ajij\u00ed",
+      "kind": "restaurant",
+      "lat": 31.629941,
+      "lon": -106.394247
+    },
+    {
+      "id": "osm:n6001908277",
+      "name": "San Mart\u00edn",
+      "kind": "bar",
+      "lat": 31.630104,
+      "lon": -106.394219
+    },
+    {
+      "id": "osm:n6009006252",
+      "name": "MEGA Soriana",
+      "kind": "grocery",
+      "lat": 31.657062,
+      "lon": -106.444491
+    },
+    {
+      "id": "osm:n6009007232",
+      "name": "Pockets",
+      "kind": "bar",
+      "lat": 31.657628,
+      "lon": -106.441031
+    },
+    {
+      "id": "osm:n6009008016",
+      "name": "S-Mart",
+      "kind": "grocery",
+      "lat": 31.660135,
+      "lon": -106.441128
+    },
+    {
+      "id": "osm:n6094213934",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.678125,
+      "lon": -106.369821
+    },
+    {
+      "id": "osm:n6141335785",
+      "name": "Smart Terranova",
+      "kind": "grocery",
+      "lat": 31.59286,
+      "lon": -106.411264
+    },
+    {
+      "id": "osm:n6141335786",
+      "name": "Litle Ceasar",
+      "kind": "restaurant",
+      "lat": 31.599415,
+      "lon": -106.404555
+    },
+    {
+      "id": "osm:n6143259453",
+      "name": "Del r\u00edo",
+      "kind": "shop",
+      "lat": 31.721252,
+      "lon": -106.416873
+    },
+    {
+      "id": "osm:n6202172486",
+      "name": "Los pollos",
+      "kind": "restaurant",
+      "lat": 31.601923,
+      "lon": -106.427124
+    },
+    {
+      "id": "osm:n6202209985",
+      "name": "Carniseria y tienda",
+      "kind": "shop",
+      "lat": 31.599008,
+      "lon": -106.432746
+    },
+    {
+      "id": "osm:n6219496878",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.919625,
+      "lon": -106.423472
+    },
+    {
+      "id": "osm:n6219585015",
+      "name": "Circle K",
+      "kind": "shop",
+      "lat": 31.921405,
+      "lon": -106.406697
+    },
+    {
+      "id": "osm:n6219586258",
+      "name": "Sabrosos Tamales",
+      "kind": "restaurant",
+      "lat": 31.902425,
+      "lon": -106.423139
+    },
+    {
+      "id": "osm:n6219595276",
+      "name": "Melogros",
+      "kind": "shop",
+      "lat": 31.905572,
+      "lon": -106.40638
+    },
+    {
+      "id": "osm:n6307388080",
+      "name": "Los Girasoles",
+      "kind": "restaurant",
+      "lat": 31.715324,
+      "lon": -106.445085
+    },
+    {
+      "id": "osm:n6374581427",
+      "name": "Hungry Brothers",
+      "kind": "restaurant",
+      "lat": 31.725304,
+      "lon": -106.428853
+    },
+    {
+      "id": "osm:n6426910342",
+      "name": "Black Coffe Gallery",
+      "kind": "cafe",
+      "lat": 31.741415,
+      "lon": -106.443281
+    },
+    {
+      "id": "osm:n6426910343",
+      "name": "Border Brewing CO.",
+      "kind": "bar",
+      "lat": 31.741384,
+      "lon": -106.443164
+    },
+    {
+      "id": "osm:n6426910353",
+      "name": "Foro Caf\u00e9",
+      "kind": "cafe",
+      "lat": 31.741795,
+      "lon": -106.441887
+    },
+    {
+      "id": "osm:n6428818265",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.742976,
+      "lon": -106.484074
+    },
+    {
+      "id": "osm:n6428818273",
+      "name": "Oxxo",
+      "kind": "shop",
+      "lat": 31.738801,
+      "lon": -106.483663
+    },
+    {
+      "id": "osm:n6428818900",
+      "name": "Del R\u00edo",
+      "kind": "shop",
+      "lat": 31.739182,
+      "lon": -106.485367
+    },
+    {
+      "id": "osm:n6434881413",
+      "name": "Del Rio",
+      "kind": "shop",
+      "lat": 31.720447,
+      "lon": -106.460225
+    },
+    {
+      "id": "osm:n6465580475",
+      "name": "El Pueblito de Don Cuco",
+      "kind": "restaurant",
+      "lat": 31.702565,
+      "lon": -106.401971
+    },
+    {
+      "id": "osm:n6484359986",
+      "name": "Hotel Impala",
+      "kind": "lodging",
+      "lat": 31.742943,
+      "lon": -106.480294
+    }
+  ]
+}

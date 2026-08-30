@@ -1085,7 +1085,61 @@ def main() -> None:
     test_offline_10()
     test_format_version_insurance()
     test_update_maps_one_tap()
+    test_pack_amenity_address_search()
     print("all ci-opt checks passed")
+
+
+def test_pack_amenity_address_search() -> None:
+    search = (ROOT / "Packages/Maps/Sources/MapsRouting/PackSearch.swift").read_text()
+    amenity = (ROOT / "Packages/Maps/Sources/MapsRouting/PackAmenity.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
+    poi = json.loads((ROOT / "Blackout/DefaultPack/poi.json").read_text())
+    addr = json.loads((ROOT / "Blackout/DefaultPack/address.json").read_text())
+    tests = (ROOT / "Packages/Maps/Tests/MapsTests/PackAmenityTests.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    for banned in ("MKLocalSearch", "MKMapView", "URLSession", "MKDirections"):
+        if banned in search or banned in amenity:
+            fail(f"pack amenity search must stay airplane: no {banned}")
+    if "RoutingAddress" not in search or "matchesAddress" not in search:
+        fail("PackSearch must hit house+street from the pack address index")
+    if "isAmenity" not in amenity or "pinZoom = 11" not in amenity:
+        fail("amenity pins must be close-zoom only")
+    if "paintsOnMap" not in amenity or 'address' not in amenity:
+        fail("addresses must stay searchable and not paint a statewide dot field")
+    if "amenityPins" not in maps or "markSearchHit" not in maps:
+        fail("Map must pin amenities and MARK a search result")
+    if "func updateAllMaps" not in store or "updateMapsLabel" not in catalog_list:
+        fail("do not add a second pack updater")
+    if poi.get("schema") != 1:
+        fail("DefaultPack poi.json schema must stay v1")
+    kinds = {row.get("kind") for row in poi.get("pois", [])}
+    if not {"cafe", "grocery", "fuel", "lodging", "restaurant"} <= kinds:
+        fail("DefaultPack lost the Front Range amenity sample")
+    if addr.get("schema") != 1 or not addr.get("addresses"):
+        fail("DefaultPack address fixture missing")
+    if "testSearchHitsRestaurantAndHouseNumberWithoutLiveGeocoder" not in tests:
+        fail("amenity/address search tests missing")
+    if "testNewerPOISchemaFailsClosed" not in tests:
+        fail("poi schema fail-closed test missing")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    copy = (ROOT / "tools/copy_fieldpacks.sh").read_text()
+    compile_yml = (ROOT / ".github/workflows/ios-compile.yml").read_text()
+    if "fieldpack_poi" in copy or "seed_fieldpack_poi" in compile_yml:
+        fail("city OSM overlays must not copy into the unsigned app or compile job")
+    for city in ("el-paso", "las-cruces", "albuquerque"):
+        city_poi = json.loads((ROOT / "tools" / "fieldpack_poi" / city / "poi.json").read_text())
+        if city_poi.get("schema") != 1 or len(city_poi.get("pois") or []) < 50:
+            fail(f"{city} publish overlay is missing or too thin")
+    ok("pack amenity+address search is file-only, Update maps stays the one button, version 19")
 
 
 def test_update_maps_one_tap() -> None:

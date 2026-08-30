@@ -39,9 +39,12 @@ final class EmptyStateTests: XCTestCase {
         let miss = PackSearch.query("zzzz", pack: pack, pois: pois)
         XCTAssertTrue(miss.hits.isEmpty)
         XCTAssertEqual(miss.empty, .searchMiss)
-        let noGraph = PackSearch.query("mesa", pack: nil, pois: pois)
-        XCTAssertEqual(noGraph.empty, .noGraph)
-        XCTAssertTrue(noGraph.hits.isEmpty)
+        let noGraphStreet = PackSearch.query("mesa", pack: nil, pois: pois)
+        XCTAssertEqual(noGraphStreet.empty, .searchMiss)
+        XCTAssertTrue(noGraphStreet.hits.isEmpty)
+        let poiWithoutGraph = PackSearch.query("civic", pack: nil, pois: pois)
+        XCTAssertEqual(poiWithoutGraph.hits.first?.title, "Civic Center")
+        XCTAssertNil(poiWithoutGraph.empty)
     }
 
     func testVoicePromptDoesNotInventTurns() {

@@ -43,6 +43,7 @@ struct OfflineMapView: UIViewRepresentable {
     var inboundPingHue: FieldPingHue? = nil
     var searchPattern: [(Double, Double)] = []
     var sharedTrack: [FollowTrackWire.Point] = []
+    var amenityPins: [RoutingPOI] = []
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
     var onUserInteract: (() -> Void)?
@@ -84,7 +85,8 @@ struct OfflineMapView: UIViewRepresentable {
             inboundPing: inboundPing,
             inboundPingHue: inboundPingHue,
             searchPattern: searchPattern,
-            sharedTrack: sharedTrack
+            sharedTrack: sharedTrack,
+            amenityPins: amenityPins
         )
         return view
     }
@@ -117,7 +119,8 @@ struct OfflineMapView: UIViewRepresentable {
             inboundPing: inboundPing,
             inboundPingHue: inboundPingHue,
             searchPattern: searchPattern,
-            sharedTrack: sharedTrack
+            sharedTrack: sharedTrack,
+            amenityPins: amenityPins
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
@@ -274,7 +277,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         inboundPing: LocationFix?,
         inboundPingHue: FieldPingHue?,
         searchPattern: [(Double, Double)],
-        sharedTrack: [FollowTrackWire.Point]
+        sharedTrack: [FollowTrackWire.Point],
+        amenityPins: [RoutingPOI]
     ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
@@ -297,6 +301,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.inboundPingHue = inboundPingHue
         canvas.searchPattern = searchPattern
         canvas.sharedTrack = sharedTrack
+        canvas.amenityPins = amenityPins
         canvas.setNeedsDisplay()
     }
 
@@ -435,6 +440,7 @@ final class TileCanvasLayer: UIView {
     var inboundPingHue: FieldPingHue?
     var searchPattern: [(Double, Double)] = []
     var sharedTrack: [FollowTrackWire.Point] = []
+    var amenityPins: [RoutingPOI] = []
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -489,6 +495,7 @@ final class TileCanvasLayer: UIView {
                 drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
             }
         }
+        drawAmenityPins(in: ctx)
         drawPolyline(searchPattern, color: UIColor(BlackoutDS.Semantic.info), dashed: false, in: ctx)
         drawPolyline(sharedTrack.map { ($0.latitude, $0.longitude) }, color: UIColor(BlackoutDS.Red.sun), dashed: true, in: ctx)
         if let inboundPing, inboundPing.hasCoordinate {
@@ -868,6 +875,26 @@ final class TileCanvasLayer: UIView {
             Darwin.cos(meters / r) - Darwin.sin(lat1) * Darwin.sin(lat2)
         )
         return (lat2 * 180 / .pi, lon2 * 180 / .pi)
+    }
+
+    private func drawAmenityPins(in ctx: CGContext) {
+        let visible = PackAmenityPolicy.visiblePins(pois: amenityPins, zoom: currentZoom())
+        for poi in visible {
+            let color: UIColor
+            if poi.kind == "hospital" {
+                color = UIColor(BlackoutDS.Semantic.warn)
+            } else if poi.kind == "water" || poi.kind == "spring" || poi.kind == "tank" {
+                color = UIColor(BlackoutDS.Semantic.info)
+            } else {
+                color = UIColor(BlackoutDS.Silver.metal)
+            }
+            drawMark(
+                LocationFix(latitude: poi.coordinate.latitude, longitude: poi.coordinate.longitude),
+                color: color,
+                in: ctx,
+                radius: 4
+            )
+        }
     }
 
     private func drawMark(_ fix: LocationFix?, color: UIColor, in ctx: CGContext, radius: CGFloat = 7) {

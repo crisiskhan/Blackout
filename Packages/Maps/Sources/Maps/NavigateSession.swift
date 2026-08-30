@@ -56,7 +56,7 @@ final class NavigateSession {
         return preview
     }
 
-    func search(pack: RoutingPack?, pois: [MapPOI]) {
+    func search(pack: RoutingPack?, pois: [MapPOI], addresses: [MapAddress] = []) {
         if routingTooNew, pack == nil {
             hits = []
             empty = .packTooNew
@@ -65,7 +65,19 @@ final class NavigateSession {
             phase = .idle
             return
         }
-        let result = PackSearch.query(query, pack: pack, pois: routingPOIs(pois))
+        let result = PackSearch.query(
+            query,
+            pack: pack,
+            pois: routingPOIs(pois),
+            addresses: addresses.map {
+                RoutingAddress(
+                    id: $0.id,
+                    house: $0.house,
+                    street: $0.street,
+                    coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+                )
+            }
+        )
         hits = result.hits
         empty = result.empty
         if result.empty != nil {

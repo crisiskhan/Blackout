@@ -219,12 +219,14 @@ public final class FileMapPack: MapPackServing {
         }
         let expectedTileCount = json["tileCount"] as? Int ?? tileCount
         let pois = loadPOIs(root: root)
+        let addresses = loadAddresses(root: root)
         let dem = loadDEM(root: root)
         return .ready((
             MapPackSnapshot(
                 rootURL: root,
                 region: region,
                 pois: pois,
+                addresses: addresses,
                 disclaimer: disclaimer,
                 tileCount: tileCount,
                 expectedTileCount: expectedTileCount
@@ -240,15 +242,31 @@ public final class FileMapPack: MapPackServing {
     private static func loadPOIs(root: URL) -> [MapPOI] {
         let url = root.appendingPathComponent("poi.json")
         guard let data = try? Data(contentsOf: url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let rows = json["pois"] as? [[String: Any]] else { return [] }
-        return rows.compactMap { row in
-            guard let id = row["id"] as? String,
-                  let name = row["name"] as? String,
-                  let kind = row["kind"] as? String,
-                  let lat = row["lat"] as? Double,
-                  let lon = row["lon"] as? Double else { return nil }
-            return MapPOI(id: id, name: name, kind: kind, latitude: lat, longitude: lon)
+              let places = PackPOIFile.places(from: data) else { return [] }
+        return places.map {
+            MapPOI(
+                id: $0.id,
+                name: $0.name,
+                kind: $0.kind,
+                latitude: $0.coordinate.latitude,
+                longitude: $0.coordinate.longitude
+            )
+        }
+    }
+
+    private static func loadAddresses(root: URL) -> [MapAddress] {
+        let url = root.appendingPathComponent("address.json")
+        guard FileManager.default.fileExists(atPath: url.path),
+              let data = try? Data(contentsOf: url),
+              let rows = PackPOIFile.addresses(from: data) else { return [] }
+        return rows.map {
+            MapAddress(
+                id: $0.id,
+                house: $0.house,
+                street: $0.street,
+                latitude: $0.coordinate.latitude,
+                longitude: $0.coordinate.longitude
+            )
         }
     }
 

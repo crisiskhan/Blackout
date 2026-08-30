@@ -5,11 +5,9 @@ public enum PackSearch {
         _ raw: String,
         pack: RoutingPack?,
         pois: [RoutingPOI],
+        addresses: [RoutingAddress] = [],
         limit: Int = 12
     ) -> (hits: [PackSearchHit], empty: NavigateEmpty?) {
-        guard let pack else {
-            return ([], .noGraph)
-        }
         let needle = normalize(raw)
         if needle.isEmpty { return ([], nil) }
 
@@ -28,20 +26,51 @@ public enum PackSearch {
             if hits.count >= limit { return (hits, nil) }
         }
 
-        for (nameId, name) in pack.names.enumerated() where nameId > 0 {
-            if normalize(name).contains(needle) {
-                let id = "name:\(nameId)"
-                if seen.insert(id).inserted, let coord = coordinate(forNameId: UInt32(nameId), pack: pack) {
+        for address in addresses {
+            if matchesAddress(needle, house: address.house, street: address.street) {
+                let id = "addr:\(address.id)"
+                if seen.insert(id).inserted {
                     hits.append(
-                        PackSearchHit(id: id, title: name, kind: "street", coordinate: coord)
+                        PackSearchHit(
+                            id: id,
+                            title: address.title,
+                            kind: "address",
+                            coordinate: address.coordinate
+                        )
                     )
                 }
             }
-            if hits.count >= limit { break }
+            if hits.count >= limit { return (hits, nil) }
+        }
+
+        if let pack {
+            for (nameId, name) in pack.names.enumerated() where nameId > 0 {
+                if normalize(name).contains(needle) {
+                    let id = "name:\(nameId)"
+                    if seen.insert(id).inserted, let coord = coordinate(forNameId: UInt32(nameId), pack: pack) {
+                        hits.append(
+                            PackSearchHit(id: id, title: name, kind: "street", coordinate: coord)
+                        )
+                    }
+                }
+                if hits.count >= limit { break }
+            }
         }
 
         if hits.isEmpty { return ([], .searchMiss) }
         return (hits, nil)
+    }
+
+    private static func matchesAddress(_ needle: String, house: String, street: String) -> Bool {
+        let houseKey = normalize(house)
+        let streetKey = normalize(street)
+        let title = normalize("\(house) \(street)")
+        if title.contains(needle) { return true }
+        let parts = needle.split(separator: " ").map(String.init)
+        if parts.count >= 2, parts[0] == houseKey {
+            return streetKey.contains(parts.dropFirst().joined(separator: " "))
+        }
+        return streetKey.contains(needle) && needle.count >= 3
     }
 
     private static func coordinate(forNameId nameId: UInt32, pack: RoutingPack) -> RoutingCoordinate? {

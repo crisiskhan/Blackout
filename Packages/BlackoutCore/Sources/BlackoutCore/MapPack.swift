@@ -17,7 +17,8 @@ public struct MapPOI: Hashable, Codable, Sendable, Identifiable {
 
     public var isCivilization: Bool {
         switch kind {
-        case "city", "town", "hospital", "ranger", "road", "rail", "mill":
+        case "city", "town", "hospital", "ranger", "road", "rail", "mill",
+             "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
             return true
         default:
             return false
@@ -31,6 +32,35 @@ public struct MapPOI: Hashable, Codable, Sendable, Identifiable {
         default:
             return false
         }
+    }
+
+    public var isAmenity: Bool {
+        switch kind {
+        case "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "hospital", "bar":
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+public struct MapAddress: Hashable, Sendable, Identifiable {
+    public var id: String
+    public var house: String
+    public var street: String
+    public var latitude: Double
+    public var longitude: Double
+
+    public init(id: String, house: String, street: String, latitude: Double, longitude: Double) {
+        self.id = id
+        self.house = house
+        self.street = street
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+
+    public var title: String {
+        "\(house) \(street)".trimmingCharacters(in: .whitespaces)
     }
 }
 
@@ -83,6 +113,7 @@ public struct MapPackSnapshot: Sendable {
     public var rootURL: URL
     public var region: MapRegion
     public var pois: [MapPOI]
+    public var addresses: [MapAddress]
     public var disclaimer: String
     public var tileCount: Int
     public var expectedTileCount: Int
@@ -91,6 +122,7 @@ public struct MapPackSnapshot: Sendable {
         rootURL: URL,
         region: MapRegion,
         pois: [MapPOI],
+        addresses: [MapAddress] = [],
         disclaimer: String,
         tileCount: Int = 0,
         expectedTileCount: Int = 0
@@ -98,6 +130,7 @@ public struct MapPackSnapshot: Sendable {
         self.rootURL = rootURL
         self.region = region
         self.pois = pois
+        self.addresses = addresses
         self.disclaimer = disclaimer
         self.tileCount = tileCount
         self.expectedTileCount = expectedTileCount

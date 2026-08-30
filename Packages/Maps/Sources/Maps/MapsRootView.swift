@@ -411,7 +411,11 @@ public struct MapsRootView: View {
                 UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
             },
             onSearch: {
-                navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
+                navigate.search(
+                    pack: packService.routing,
+                    pois: packService.pack?.pois ?? [],
+                    addresses: packService.pack?.addresses ?? []
+                )
             },
             onPickSearch: { hit in
                 showLayers = false
@@ -542,6 +546,14 @@ public struct MapsRootView: View {
             inboundPingHue: openInbound?.hue,
             searchPattern: searchActive ? searchLine : [],
             sharedTrack: sharedTrack,
+            amenityPins: (packService.pack?.pois ?? []).map {
+                RoutingPOI(
+                    id: $0.id,
+                    name: $0.name,
+                    kind: $0.kind,
+                    coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+                )
+            },
             onDropPin: { lat, lon in
                 location.dropManualPin(latitude: lat, longitude: lon)
             },
@@ -945,6 +957,7 @@ public struct MapsRootView: View {
     private func pickFound(_ hit: PackSearchHit) {
         tool = nil
         showLayers = false
+        compass.markSearchHit(hit)
         switch PackFind.action(
             destination: hit.coordinate,
             origin: originCoordinate,
@@ -1502,7 +1515,7 @@ struct MapLayersSheet: View {
                             }
                         }
                     }
-                    if hasRouting, extrasOn {
+                    if extrasOn {
                         TextField("Search this pack", text: $searchQuery)
                             .textInputAutocapitalization(.never)
                             .disableAutocorrection(true)
