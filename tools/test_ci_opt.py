@@ -1334,6 +1334,11 @@ def test_hits_23() -> None:
     intents = (ROOT / "Blackout/PTTIntents.swift").read_text()
     widget = (ROOT / "Supporting/BlackoutWidgets-Info.plist").read_text()
     info = (ROOT / "Supporting/Blackout-Info.plist").read_text()
+    entitlements = (ROOT / "Supporting/Blackout.entitlements").read_text()
+    if "<string>NDEF</string>" in entitlements:
+        fail("ASC 90778: NDEF is disallowed in nfc.readersession.formats on SDK 26")
+    if "<string>TAG</string>" not in entitlements:
+        fail("NFC entitlement must keep TAG so party NDEF read/write still works")
     if "NFCReaderUsageDescription" not in pbx or "NFCReaderUsageDescription" not in info:
         fail("NFC usage string missing")
     entitlements = (ROOT / "Supporting/Blackout.entitlements").read_text()
