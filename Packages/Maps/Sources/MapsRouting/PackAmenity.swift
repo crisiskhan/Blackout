@@ -1,24 +1,34 @@
 import Foundation
 
-/// Store / restaurant / address layer. Pack files only. No live search.
+/// Shop / civic / field amenity layer. Pack files only. No live search.
 public enum PackAmenityPolicy {
     public static let pinZoom = 11
     public static let densityCap = 48
 
+    public static let amenityKinds: Set<String> = [
+        "shop", "grocery", "supermarket", "convenience", "mall", "hardware", "clothes",
+        "fuel", "pharmacy", "hospital", "clinic", "dentist", "dentists",
+        "police", "fire_station", "post_office", "school", "bank", "atm",
+        "cafe", "fast_food", "restaurant", "bar", "pub",
+        "toilets", "parking", "charging_station",
+        "hotel", "motel", "lodging", "camp_site", "information",
+        "office", "craft"
+    ]
+
+    public static let fieldKinds: Set<String> = [
+        "town", "city", "ranger", "road", "rail", "mill",
+        "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond"
+    ]
+
     public static func isAmenity(_ kind: String) -> Bool {
-        switch normalize(kind) {
-        case "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "hospital", "bar":
-            return true
-        default:
-            return false
-        }
+        amenityKinds.contains(normalize(kind))
     }
 
     /// Addresses stay searchable. They do not paint a statewide dot field.
     public static func paintsOnMap(_ kind: String) -> Bool {
         let key = normalize(kind)
         if key == "address" || key == "house" { return false }
-        return isAmenity(key) || isFieldPoint(key)
+        return isAmenity(key) || fieldKinds.contains(key)
     }
 
     public static func showsPins(zoom: Int) -> Bool {
@@ -32,16 +42,6 @@ public enum PackAmenityPolicy {
     public static func visiblePins(pois: [RoutingPOI], zoom: Int, limit: Int = densityCap) -> [RoutingPOI] {
         guard showsPins(zoom: zoom) else { return [] }
         return cap(pois.filter { paintsOnMap($0.kind) }, limit: limit)
-    }
-
-    private static func isFieldPoint(_ kind: String) -> Bool {
-        switch kind {
-        case "town", "city", "hospital", "ranger", "road", "rail", "mill",
-             "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond":
-            return true
-        default:
-            return false
-        }
     }
 
     private static func normalize(_ kind: String) -> String {

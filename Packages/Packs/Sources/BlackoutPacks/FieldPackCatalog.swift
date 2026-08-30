@@ -112,10 +112,10 @@ public enum FieldPackCatalog {
     public static let elPaso = FieldPackDescriptor(
         id: "el-paso",
         title: "El Paso",
-        summary: "USGS topo, 158 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        summary: "USGS topo + OSM shops, civic, and field points. Download on Wi-Fi, then airplane.",
         downloadURL: releaseBase.appendingPathComponent("el-paso.pack.zip"),
-        sha256: "60ce5dd4297058e17c4a8a7992525cd363b74c1879aadda25bd1dcfcaa8b0236",
-        byteCount: 8_568_180,
+        sha256: "883158ef09620500b06eaf564f43c02a95fbb71ac9bf11592e325e644c72f34b",
+        byteCount: 20_215_735,
         assetReady: true,
         isBundled: false,
         region: MapRegion(
@@ -132,10 +132,10 @@ public enum FieldPackCatalog {
     public static let lasCruces = FieldPackDescriptor(
         id: "las-cruces",
         title: "Las Cruces",
-        summary: "USGS topo, 124 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        summary: "USGS topo + OSM shops, civic, and field points. Download on Wi-Fi, then airplane.",
         downloadURL: releaseBase.appendingPathComponent("las-cruces.pack.zip"),
-        sha256: "ca4f180f6cacb3d32a063b01ee97249b9f6b3f704c1fad5150604a55c626c23a",
-        byteCount: 8_050_812,
+        sha256: "f26b8675adb9fe0e8b09161f28659f208e609d201104d4c185728060508ddad4",
+        byteCount: 8_076_313,
         assetReady: true,
         isBundled: false,
         region: MapRegion(
@@ -152,10 +152,10 @@ public enum FieldPackCatalog {
     public static let albuquerque = FieldPackDescriptor(
         id: "albuquerque",
         title: "Albuquerque",
-        summary: "USGS topo, 138 tiles z10–z12. Download on Wi-Fi, then airplane.",
+        summary: "USGS topo + OSM shops, civic, and field points. Download on Wi-Fi, then airplane.",
         downloadURL: releaseBase.appendingPathComponent("albuquerque.pack.zip"),
-        sha256: "519a413785f8036860b806ce9c81c880e7f87ef301e156d378a80d9e75e945f6",
-        byteCount: 12_266_566,
+        sha256: "29a8dc25e0d923df6845f26a30569393b707297a1ab73ea43f3d72e50756d01d",
+        byteCount: 12_308_725,
         assetReady: true,
         isBundled: false,
         region: MapRegion(

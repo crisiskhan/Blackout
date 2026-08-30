@@ -22,9 +22,10 @@ public enum PackFind {
     public static func matches(kind: String, mode: PackFindMode) -> Bool {
         switch mode {
         case .civilization:
-            switch normalize(kind) {
-            case "road", "rail", "town", "mill", "city", "hospital", "ranger",
-                 "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
+            let key = normalize(kind)
+            if PackAmenityPolicy.amenityKinds.contains(key) { return true }
+            switch key {
+            case "road", "rail", "town", "mill", "city", "ranger":
                 return true
             default:
                 return false
@@ -109,9 +110,9 @@ public enum PackFind {
                 return 100
             case "mill":
                 return 80
-            case "hospital", "ranger":
+            case "hospital", "clinic", "pharmacy", "police", "fire_station", "ranger":
                 return 70
-            case "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
+            case let key where PackAmenityPolicy.amenityKinds.contains(key):
                 return 65
             case "rail":
                 return 50

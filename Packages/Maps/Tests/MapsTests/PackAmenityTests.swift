@@ -18,6 +18,32 @@ final class PackAmenityTests: XCTestCase {
         XCTAssertTrue(PackAmenityPolicy.paintsOnMap("town"))
     }
 
+    func testFullCivicShopAndFieldKindsPaintAtCloseZoom() {
+        let kinds = [
+            "shop", "grocery", "supermarket", "convenience", "mall", "hardware", "clothes",
+            "fuel", "pharmacy", "hospital", "clinic", "dentist", "dentists",
+            "police", "fire_station", "post_office", "school", "bank", "atm",
+            "cafe", "fast_food", "restaurant", "bar", "pub",
+            "toilets", "parking", "charging_station",
+            "hotel", "motel", "lodging", "camp_site", "information",
+            "office", "craft",
+            "water", "spring", "town", "ranger", "mill", "road", "rail"
+        ]
+        for kind in kinds {
+            XCTAssertTrue(PackAmenityPolicy.paintsOnMap(kind), kind)
+            XCTAssertTrue(PackAmenityPolicy.showsPins(zoom: 11))
+        }
+        XCTAssertFalse(PackAmenityPolicy.paintsOnMap("address"))
+        let pharmacy = RoutingPOI(
+            id: "rx-1",
+            name: "Mesa Pharmacy",
+            kind: "pharmacy",
+            coordinate: RoutingCoordinate(latitude: 31.76, longitude: -106.48)
+        )
+        let hit = PackSearch.query("mesa pharmacy", pack: nil, pois: [pharmacy], addresses: [])
+        XCTAssertEqual(hit.hits.first?.kind, "pharmacy")
+    }
+
     func testPinsOnlyAtCloseZoomAndDensityCap() {
         XCTAssertFalse(PackAmenityPolicy.showsPins(zoom: 10))
         XCTAssertTrue(PackAmenityPolicy.showsPins(zoom: 11))
@@ -73,6 +99,12 @@ final class PackAmenityTests: XCTestCase {
     func testFindCivilizationIncludesStores() {
         XCTAssertTrue(PackFind.matches(kind: "restaurant", mode: .civilization))
         XCTAssertTrue(PackFind.matches(kind: "grocery", mode: .civilization))
+        XCTAssertTrue(PackFind.matches(kind: "pharmacy", mode: .civilization))
+        XCTAssertTrue(PackFind.matches(kind: "school", mode: .civilization))
+        XCTAssertTrue(PackFind.matches(kind: "police", mode: .civilization))
+        XCTAssertTrue(PackFind.matches(kind: "hotel", mode: .civilization))
+        XCTAssertTrue(PackFind.matches(kind: "office", mode: .civilization))
         XCTAssertFalse(PackFind.matches(kind: "address", mode: .civilization))
+        XCTAssertFalse(PackFind.matches(kind: "spring", mode: .civilization))
     }
 }

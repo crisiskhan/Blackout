@@ -26,9 +26,18 @@ final class MapPOIKindTests: XCTestCase {
         XCTAssertTrue(poi("grocery").isAmenity)
         XCTAssertTrue(poi("fuel").isAmenity)
         XCTAssertTrue(poi("lodging").isAmenity)
+        XCTAssertTrue(poi("pharmacy").isAmenity)
+        XCTAssertTrue(poi("school").isAmenity)
+        XCTAssertTrue(poi("police").isAmenity)
+        XCTAssertTrue(poi("hardware").isAmenity)
+        XCTAssertTrue(poi("fast_food").isAmenity)
+        XCTAssertTrue(poi("hotel").isAmenity)
+        XCTAssertTrue(poi("office").isAmenity)
         XCTAssertTrue(poi("restaurant").isCivilization)
+        XCTAssertTrue(poi("pharmacy").isCivilization)
         XCTAssertFalse(poi("summit").isAmenity)
         XCTAssertFalse(poi("address").isAmenity)
+        XCTAssertFalse(poi("spring").isCivilization)
     }
 
     private func poi(_ kind: String) -> MapPOI {

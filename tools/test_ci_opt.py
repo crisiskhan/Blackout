@@ -1117,8 +1117,10 @@ def test_pack_amenity_address_search() -> None:
     if poi.get("schema") != 1:
         fail("DefaultPack poi.json schema must stay v1")
     kinds = {row.get("kind") for row in poi.get("pois", [])}
-    if not {"cafe", "grocery", "fuel", "lodging", "restaurant"} <= kinds:
+    if not {"cafe", "grocery", "fuel", "lodging", "restaurant", "pharmacy", "school", "hardware"} <= kinds:
         fail("DefaultPack lost the Front Range amenity sample")
+    if "pharmacy" not in amenity or "fire_station" not in amenity or "camp_site" not in amenity:
+        fail("PackAmenityPolicy must paint the full civic/shop set, not restaurants only")
     if addr.get("schema") != 1 or not addr.get("addresses"):
         fail("DefaultPack address fixture missing")
     if "testSearchHitsRestaurantAndHouseNumberWithoutLiveGeocoder" not in tests:
@@ -1135,10 +1137,25 @@ def test_pack_amenity_address_search() -> None:
     compile_yml = (ROOT / ".github/workflows/ios-compile.yml").read_text()
     if "fieldpack_poi" in copy or "seed_fieldpack_poi" in compile_yml:
         fail("city OSM overlays must not copy into the unsigned app or compile job")
+    families = {
+        "shop": {"shop", "grocery", "supermarket", "convenience", "mall", "hardware", "clothes"},
+        "health": {"pharmacy", "hospital", "clinic", "dentist"},
+        "civic": {"police", "fire_station", "post_office", "school", "bank", "fuel"},
+        "food": {"cafe", "fast_food", "restaurant", "bar", "pub"},
+        "stay": {"hotel", "motel", "lodging", "camp_site"},
+    }
     for city in ("el-paso", "las-cruces", "albuquerque"):
         city_poi = json.loads((ROOT / "tools" / "fieldpack_poi" / city / "poi.json").read_text())
-        if city_poi.get("schema") != 1 or len(city_poi.get("pois") or []) < 50:
+        rows = city_poi.get("pois") or []
+        if city_poi.get("schema") != 1 or len(rows) < 50:
             fail(f"{city} publish overlay is missing or too thin")
+        city_kinds = {row.get("kind") for row in rows}
+        missing = [name for name, group in families.items() if not (city_kinds & group)]
+        if missing:
+            fail(f"{city} overlay is restaurant-only / missing families {missing}")
+        food_n = sum(1 for row in rows if row.get("kind") in {"restaurant", "fast_food", "cafe"})
+        if food_n / max(len(rows), 1) > 0.45:
+            fail(f"{city} overlay is food-heavy ({food_n}/{len(rows)})")
     ok("pack amenity+address search is file-only, Update maps stays the one button, version 19")
 
 

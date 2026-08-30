@@ -16,32 +16,35 @@ public struct MapPOI: Hashable, Codable, Sendable, Identifiable {
     }
 
     public var isCivilization: Bool {
-        switch kind {
-        case "city", "town", "hospital", "ranger", "road", "rail", "mill",
-             "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "bar":
-            return true
-        default:
-            return false
-        }
+        if isWater { return false }
+        return isAmenity || Self.fieldCivilization.contains(kind)
     }
 
     public var isWater: Bool {
-        switch kind {
-        case "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond":
-            return true
-        default:
-            return false
-        }
+        Self.waterKinds.contains(kind)
     }
 
     public var isAmenity: Bool {
-        switch kind {
-        case "restaurant", "cafe", "shop", "grocery", "fuel", "lodging", "hospital", "bar":
-            return true
-        default:
-            return false
-        }
+        Self.amenityKinds.contains(kind)
     }
+
+    private static let amenityKinds: Set<String> = [
+        "shop", "grocery", "supermarket", "convenience", "mall", "hardware", "clothes",
+        "fuel", "pharmacy", "hospital", "clinic", "dentist", "dentists",
+        "police", "fire_station", "post_office", "school", "bank", "atm",
+        "cafe", "fast_food", "restaurant", "bar", "pub",
+        "toilets", "parking", "charging_station",
+        "hotel", "motel", "lodging", "camp_site", "information",
+        "office", "craft"
+    ]
+
+    private static let fieldCivilization: Set<String> = [
+        "city", "town", "ranger", "road", "rail", "mill"
+    ]
+
+    private static let waterKinds: Set<String> = [
+        "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond"
+    ]
 }
 
 public struct MapAddress: Hashable, Sendable, Identifiable {

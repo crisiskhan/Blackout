@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "attribution": "\u00a9 OpenStreetMap contributors",
+  "attribution": "© OpenStreetMap contributors",
   "addresses": [
     {
       "id": "osm:n356738514",
@@ -411,7 +411,7 @@
     {
       "id": "osm:n1984556846",
       "house": "8681",
-      "street": "Blvd. Te\u00f3filo Borunda",
+      "street": "Blvd. Teófilo Borunda",
       "lat": 31.686085,
       "lon": -106.40763
     },
@@ -516,14 +516,14 @@
     {
       "id": "osm:n2592185311",
       "house": "2689",
-      "street": "Boulevard Licenciado Oscar Flores S\u00e1nchez",
+      "street": "Boulevard Licenciado Oscar Flores Sánchez",
       "lat": 31.706456,
       "lon": -106.447746
     },
     {
       "id": "osm:n2667655304",
       "house": "1650",
-      "street": "Avenida Belisario Dom\u00ednguez",
+      "street": "Avenida Belisario Domínguez",
       "lat": 31.727388,
       "lon": -106.485116
     },
@@ -796,14 +796,14 @@
     {
       "id": "osm:n3581478106",
       "house": "5155",
-      "street": "Prolongaci\u00f3n Camino Ortiz Rubio",
+      "street": "Prolongación Camino Ortiz Rubio",
       "lat": 31.665827,
       "lon": -106.382271
     },
     {
       "id": "osm:n3581478107",
       "house": "5155",
-      "street": "Prolongaci\u00f3n Camino Ortiz Rubio",
+      "street": "Prolongación Camino Ortiz Rubio",
       "lat": 31.665975,
       "lon": -106.381425
     },
@@ -852,7 +852,7 @@
     {
       "id": "osm:n3750036355",
       "house": "8183",
-      "street": "Avenida Ej\u00e9rcito Nacional",
+      "street": "Avenida Ejército Nacional",
       "lat": 31.698677,
       "lon": -106.411548
     },
@@ -1055,7 +1055,7 @@
     {
       "id": "osm:n4557933255",
       "house": "4728",
-      "street": "Avenida Paseo Triunfo de la Rep\u00fablicaw",
+      "street": "Avenida Paseo Triunfo de la Repúblicaw",
       "lat": 31.736953,
       "lon": -106.442864
     },
@@ -1223,21 +1223,21 @@
     {
       "id": "osm:n5238660522",
       "house": "2850",
-      "street": "Mar\u00eda del C\u00e1rmen Mart\u00ednez",
+      "street": "María del Cármen Martínez",
       "lat": 31.698713,
       "lon": -106.43112
     },
     {
       "id": "osm:n5282668147",
       "house": "620",
-      "street": "Arroyo las V\u00edboras",
+      "street": "Arroyo las Víboras",
       "lat": 31.754025,
       "lon": -106.522029
     },
     {
       "id": "osm:n5282679328",
       "house": "4323",
-      "street": "Calle Fidel \u00c1vila",
+      "street": "Calle Fidel Ávila",
       "lat": 31.710297,
       "lon": -106.496247
     },
@@ -1265,7 +1265,7 @@
     {
       "id": "osm:n5285008179",
       "house": "402",
-      "street": "Calle M\u00e1rmol",
+      "street": "Calle Mármol",
       "lat": 31.677644,
       "lon": -106.480484
     },
@@ -1321,7 +1321,7 @@
     {
       "id": "osm:n5345611921",
       "house": "6232",
-      "street": "R\u00f3mulo Gallegos",
+      "street": "Rómulo Gallegos",
       "lat": 31.700757,
       "lon": -106.434079
     },
@@ -1440,7 +1440,7 @@
     {
       "id": "osm:n6094213934",
       "house": "1481",
-      "street": "Avenida Manuel G\u00f3mez Mor\u00edn",
+      "street": "Avenida Manuel Gómez Morín",
       "lat": 31.678125,
       "lon": -106.369821
     },
@@ -1461,7 +1461,7 @@
     {
       "id": "osm:n6143259452",
       "house": "7446-6",
-      "street": "Avenida Manuel G\u00f3mez Mor\u00edn",
+      "street": "Avenida Manuel Gómez Morín",
       "lat": 31.72135,
       "lon": -106.416935
     },
@@ -1706,7 +1706,7 @@
     {
       "id": "osm:n7740520844",
       "house": "354",
-      "street": "Calle Art\u00edculo 3ro",
+      "street": "Calle Artículo 3ro",
       "lat": 31.734088,
       "lon": -106.439844
     },
@@ -1741,7 +1741,7 @@
     {
       "id": "osm:n7949648354",
       "house": "5747",
-      "street": "Calle Jos\u00e9 Rosas Romero",
+      "street": "Calle José Rosas Romero",
       "lat": 31.70606,
       "lon": -106.438001
     },
@@ -2238,7 +2238,7 @@
     {
       "id": "osm:n9115068377",
       "house": "7930",
-      "street": "Boulevard Tom\u00e1s Fern\u00e1ndez",
+      "street": "Boulevard Tomás Fernández",
       "lat": 31.728802,
       "lon": -106.409788
     },
@@ -2343,21 +2343,21 @@
     {
       "id": "osm:n9234122817",
       "house": "1410",
-      "street": "Pascual Ort\u00edz Rubio",
+      "street": "Pascual Ortíz Rubio",
       "lat": 31.66411,
       "lon": -106.377999
     },
     {
       "id": "osm:n9356824983",
       "house": "1440",
-      "street": "Avenida Licenciado Adolfo L\u00f3pez Mateos",
+      "street": "Avenida Licenciado Adolfo López Mateos",
       "lat": 31.720874,
       "lon": -106.450689
     },
     {
       "id": "osm:n9368651628",
       "house": "5300",
-      "street": "Avenida Tecnol\u00f3gico",
+      "street": "Avenida Tecnológico",
       "lat": 31.679385,
       "lon": -106.424289
     },
@@ -2371,14 +2371,14 @@
     {
       "id": "osm:n9400449281",
       "house": "871",
-      "street": "Blvd. Manuel G\u00f3mez Mor\u00edn",
+      "street": "Blvd. Manuel Gómez Morín",
       "lat": 31.663229,
       "lon": -106.364207
     },
     {
       "id": "osm:n9496066923",
       "house": "2715",
-      "street": "Boulevard Licenciado Oscar Flores S\u00e1nchez",
+      "street": "Boulevard Licenciado Oscar Flores Sánchez",
       "lat": 31.705835,
       "lon": -106.447391
     },
@@ -2392,7 +2392,7 @@
     {
       "id": "osm:n9511075897",
       "house": "13015",
-      "street": "Calle V\u00eda De La Caba\u00f1a Norte",
+      "street": "Calle Vía De La Cabaña Norte",
       "lat": 31.712947,
       "lon": -106.376357
     },
@@ -2504,14 +2504,14 @@
     {
       "id": "osm:n9859954917",
       "house": "4835",
-      "street": "Prolongaci\u00f3n Texcoco",
+      "street": "Prolongación Texcoco",
       "lat": 31.739784,
       "lon": -106.442636
     },
     {
       "id": "osm:n9859963117",
       "house": "Rio Grande Mall",
-      "street": "Avenida Paseo Triunfo de la Rep\u00fablica",
+      "street": "Avenida Paseo Triunfo de la República",
       "lat": 31.735988,
       "lon": -106.446393
     },
@@ -3260,7 +3260,7 @@
     {
       "id": "osm:n10073140488",
       "house": "480",
-      "street": "Calle Per\u00fa",
+      "street": "Calle Perú",
       "lat": 31.741372,
       "lon": -106.469571
     },
@@ -3470,7 +3470,7 @@
     {
       "id": "osm:n10793689009",
       "house": "5805-22",
-      "street": "Calle V\u00eda Fidi",
+      "street": "Calle Vía Fidi",
       "lat": 31.680399,
       "lon": -106.403678
     },

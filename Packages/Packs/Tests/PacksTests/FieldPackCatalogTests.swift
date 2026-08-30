@@ -38,5 +38,20 @@ final class FieldPackCatalogTests: XCTestCase {
             Set(FieldPackCatalog.remotePacks.map(\.id)),
             ["el-paso", "las-cruces", "albuquerque"]
         )
+        XCTAssertEqual(
+            FieldPackCatalog.elPaso.sha256,
+            "883158ef09620500b06eaf564f43c02a95fbb71ac9bf11592e325e644c72f34b"
+        )
+        XCTAssertEqual(FieldPackCatalog.elPaso.byteCount, 20_215_735)
+        XCTAssertEqual(
+            FieldPackCatalog.lasCruces.sha256,
+            "f26b8675adb9fe0e8b09161f28659f208e609d201104d4c185728060508ddad4"
+        )
+        XCTAssertEqual(FieldPackCatalog.lasCruces.byteCount, 8_076_313)
+        XCTAssertEqual(
+            FieldPackCatalog.albuquerque.sha256,
+            "29a8dc25e0d923df6845f26a30569393b707297a1ab73ea43f3d72e50756d01d"
+        )
+        XCTAssertEqual(FieldPackCatalog.albuquerque.byteCount, 12_308_725)
     }
 }

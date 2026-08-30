@@ -1,13 +1,314 @@
 {
   "schema": 1,
-  "attribution": "\u00a9 OpenStreetMap contributors",
+  "attribution": "© OpenStreetMap contributors",
   "pois": [
     {
-      "id": "osm:n245842371",
-      "name": "Holiday Inn Express",
-      "kind": "lodging",
-      "lat": 31.737472,
-      "lon": -106.451091
+      "id": "osm:n356728437",
+      "name": "Alta Vista School",
+      "kind": "school",
+      "lat": 31.783997,
+      "lon": -106.451653
+    },
+    {
+      "id": "osm:n356730275",
+      "name": "Cadwallader School",
+      "kind": "school",
+      "lat": 31.725388,
+      "lon": -106.357761
+    },
+    {
+      "id": "osm:n356730423",
+      "name": "Camp School",
+      "kind": "school",
+      "lat": 31.511506,
+      "lon": -106.152198
+    },
+    {
+      "id": "osm:n356733286",
+      "name": "Dudley School",
+      "kind": "school",
+      "lat": 31.776775,
+      "lon": -106.49971
+    },
+    {
+      "id": "osm:n356736827",
+      "name": "Holy Family School",
+      "kind": "school",
+      "lat": 31.759844,
+      "lon": -106.499975
+    },
+    {
+      "id": "osm:n356737025",
+      "name": "Raymond Telles Academy",
+      "kind": "school",
+      "lat": 31.78565,
+      "lon": -106.463008
+    },
+    {
+      "id": "osm:n356738514",
+      "name": "Lamar Elementary School",
+      "kind": "school",
+      "lat": 31.772886,
+      "lon": -106.476931
+    },
+    {
+      "id": "osm:n356739430",
+      "name": "Loretto Academy",
+      "kind": "school",
+      "lat": 31.787189,
+      "lon": -106.434247
+    },
+    {
+      "id": "osm:n356744258",
+      "name": "Remcon School",
+      "kind": "school",
+      "lat": 31.782331,
+      "lon": -106.42943
+    },
+    {
+      "id": "osm:n356744938",
+      "name": "Saint Anthony Seminary",
+      "kind": "school",
+      "lat": 31.793209,
+      "lon": -106.434834
+    },
+    {
+      "id": "osm:n356745361",
+      "name": "Saint Marys School",
+      "kind": "school",
+      "lat": 31.762886,
+      "lon": -106.503598
+    },
+    {
+      "id": "osm:n356745815",
+      "name": "San Jacinto School",
+      "kind": "school",
+      "lat": 31.762331,
+      "lon": -106.474987
+    },
+    {
+      "id": "osm:n356745859",
+      "name": "San Juan School",
+      "kind": "school",
+      "lat": 31.777331,
+      "lon": -106.418874
+    },
+    {
+      "id": "osm:n356746625",
+      "name": "Socorro School",
+      "kind": "school",
+      "lat": 31.650946,
+      "lon": -106.288592
+    },
+    {
+      "id": "osm:n356749032",
+      "name": "Ysleta Jesuit College",
+      "kind": "school",
+      "lat": 31.733999,
+      "lon": -106.338594
+    },
+    {
+      "id": "osm:n356797717",
+      "name": "Socorro Middle School",
+      "kind": "school",
+      "lat": 31.637808,
+      "lon": -106.284798
+    },
+    {
+      "id": "osm:n356797733",
+      "name": "Tejas School of Choice",
+      "kind": "school",
+      "lat": 31.738214,
+      "lon": -106.376874
+    },
+    {
+      "id": "osm:n356797741",
+      "name": "Roosevelt Elementary School",
+      "kind": "school",
+      "lat": 31.753418,
+      "lon": -106.481842
+    },
+    {
+      "id": "osm:n356797744",
+      "name": "Rosa Guerrero Elementary School",
+      "kind": "school",
+      "lat": 31.851217,
+      "lon": -106.560545
+    },
+    {
+      "id": "osm:n356797757",
+      "name": "Sageland Elementary School",
+      "kind": "school",
+      "lat": 31.74622,
+      "lon": -106.34995
+    },
+    {
+      "id": "osm:n356797767",
+      "name": "San Elizario Alternative Center",
+      "kind": "school",
+      "lat": 31.590281,
+      "lon": -106.273094
+    },
+    {
+      "id": "osm:n356797770",
+      "name": "Lorenzo G Alarcon Elementary School",
+      "kind": "school",
+      "lat": 31.586517,
+      "lon": -106.271448
+    },
+    {
+      "id": "osm:n356797782",
+      "name": "Sierra Vista Elementary School",
+      "kind": "school",
+      "lat": 31.732611,
+      "lon": -106.276371
+    },
+    {
+      "id": "osm:n356797785",
+      "name": "Silva Health Magnet School",
+      "kind": "school",
+      "lat": 31.76892,
+      "lon": -106.433169
+    },
+    {
+      "id": "osm:n356797801",
+      "name": "Vista del Sol Elementary School",
+      "kind": "school",
+      "lat": 31.746499,
+      "lon": -106.289427
+    },
+    {
+      "id": "osm:n356797815",
+      "name": "William David Surratt Elementary School",
+      "kind": "school",
+      "lat": 31.603725,
+      "lon": -106.247201
+    },
+    {
+      "id": "osm:n356797819",
+      "name": "William Slider Middle School",
+      "kind": "school",
+      "lat": 31.763132,
+      "lon": -106.286175
+    },
+    {
+      "id": "osm:n356797822",
+      "name": "Ysleta District Homebound School",
+      "kind": "school",
+      "lat": 31.76372,
+      "lon": -106.357484
+    },
+    {
+      "id": "osm:n356797832",
+      "name": "Ysleta Middle School",
+      "kind": "school",
+      "lat": 31.696884,
+      "lon": -106.342341
+    },
+    {
+      "id": "osm:n356797873",
+      "name": "Marian Manor Elementary School",
+      "kind": "school",
+      "lat": 31.717129,
+      "lon": -106.340537
+    },
+    {
+      "id": "osm:n356797889",
+      "name": "Montana Vista Primary School",
+      "kind": "school",
+      "lat": 31.805387,
+      "lon": -106.167757
+    },
+    {
+      "id": "osm:n356797914",
+      "name": "O'Shea Keleher Elementary School",
+      "kind": "school",
+      "lat": 31.758165,
+      "lon": -106.291927
+    },
+    {
+      "id": "osm:n356797928",
+      "name": "Parkland Middle School",
+      "kind": "school",
+      "lat": 31.897071,
+      "lon": -106.399788
+    },
+    {
+      "id": "osm:n356797935",
+      "name": "Pebble Hills Elementary School",
+      "kind": "school",
+      "lat": 31.791775,
+      "lon": -106.320817
+    },
+    {
+      "id": "osm:n356797938",
+      "name": "Polk Elementary School",
+      "kind": "school",
+      "lat": 31.851671,
+      "lon": -106.542814
+    },
+    {
+      "id": "osm:n356797948",
+      "name": "Ramona Elementary School",
+      "kind": "school",
+      "lat": 31.757609,
+      "lon": -106.388596
+    },
+    {
+      "id": "osm:n356797958",
+      "name": "Regional Deaf Day School",
+      "kind": "school",
+      "lat": 31.785664,
+      "lon": -106.406096
+    },
+    {
+      "id": "osm:n356797976",
+      "name": "Robert Rojas Elementary School",
+      "kind": "school",
+      "lat": 31.634836,
+      "lon": -106.248869
+    },
+    {
+      "id": "osm:n356797993",
+      "name": "Lincoln Middle School",
+      "kind": "school",
+      "lat": 31.854827,
+      "lon": -106.595823
+    },
+    {
+      "id": "osm:n356797997",
+      "name": "Lindbergh Elementary School",
+      "kind": "school",
+      "lat": 31.848994,
+      "lon": -106.586934
+    },
+    {
+      "id": "osm:n356814651",
+      "name": "Texas Tech Medical Center El Paso",
+      "kind": "clinic",
+      "lat": 31.77319,
+      "lon": -106.434456
+    },
+    {
+      "id": "osm:n356852493",
+      "name": "Downtown Post Office",
+      "kind": "post_office",
+      "lat": 31.760106,
+      "lon": -106.487339
+    },
+    {
+      "id": "osm:n357616031",
+      "name": "Jal Post Office",
+      "kind": "post_office",
+      "lat": 32.113157,
+      "lon": -106.193593
+    },
+    {
+      "id": "osm:n357617144",
+      "name": "Anthony Post Office",
+      "kind": "post_office",
+      "lat": 32.003943,
+      "lon": -106.605854
     },
     {
       "id": "osm:n470062845",
@@ -17,6 +318,41 @@
       "lon": -106.415728
     },
     {
+      "id": "osm:n501926914",
+      "name": "Park and Ride",
+      "kind": "parking",
+      "lat": 31.997795,
+      "lon": -106.586117
+    },
+    {
+      "id": "osm:n501926936",
+      "name": "Subway",
+      "kind": "fast_food",
+      "lat": 31.996799,
+      "lon": -106.586284
+    },
+    {
+      "id": "osm:n660581660",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 32.137807,
+      "lon": -106.605583
+    },
+    {
+      "id": "osm:n763647389",
+      "name": "Burger King",
+      "kind": "fast_food",
+      "lat": 31.904243,
+      "lon": -106.422232
+    },
+    {
+      "id": "osm:n763647390",
+      "name": "Little Caesars",
+      "kind": "fast_food",
+      "lat": 31.903842,
+      "lon": -106.421948
+    },
+    {
       "id": "osm:n763647391",
       "name": "Wingers Chicken Wings",
       "kind": "restaurant",
@@ -24,32 +360,18 @@
       "lon": -106.422025
     },
     {
-      "id": "osm:n764455276",
-      "name": "7-Eleven",
-      "kind": "shop",
-      "lat": 31.915096,
-      "lon": -106.421689
+      "id": "osm:n764457006",
+      "name": "Papa John's",
+      "kind": "fast_food",
+      "lat": 31.903447,
+      "lon": -106.421957
     },
     {
-      "id": "osm:n880963315",
-      "name": "OXXO",
-      "kind": "shop",
-      "lat": 31.693777,
-      "lon": -106.374282
-    },
-    {
-      "id": "osm:n880963328",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.69453,
-      "lon": -106.374985
-    },
-    {
-      "id": "osm:n880973522",
-      "name": "Soriana",
-      "kind": "grocery",
-      "lat": 31.692515,
-      "lon": -106.379318
+      "id": "osm:n814934255",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.836773,
+      "lon": -106.579509
     },
     {
       "id": "osm:n1010148082",
@@ -66,25 +388,39 @@
       "lon": -106.41291
     },
     {
-      "id": "osm:n1243936566",
-      "name": "DK",
-      "kind": "shop",
-      "lat": 31.843716,
-      "lon": -106.536063
+      "id": "osm:n1068946947",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.805233,
+      "lon": -106.483081
     },
     {
-      "id": "osm:n1243936568",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.844355,
-      "lon": -106.549173
+      "id": "osm:n1154269950",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 32.007865,
+      "lon": -106.517251
     },
     {
-      "id": "osm:n1298771227",
-      "name": "S-Mart",
-      "kind": "grocery",
-      "lat": 31.67633,
-      "lon": -106.42191
+      "id": "osm:n1227618567",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.884857,
+      "lon": -106.41659
+    },
+    {
+      "id": "osm:n1227618745",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.854607,
+      "lon": -106.447416
+    },
+    {
+      "id": "osm:n1298775492",
+      "name": "Wendy's",
+      "kind": "fast_food",
+      "lat": 31.675639,
+      "lon": -106.424114
     },
     {
       "id": "osm:n1337824842",
@@ -99,6 +435,48 @@
       "kind": "bar",
       "lat": 31.791194,
       "lon": -106.50807
+    },
+    {
+      "id": "osm:n1360486117",
+      "name": "Subway",
+      "kind": "fast_food",
+      "lat": 31.760278,
+      "lon": -106.264263
+    },
+    {
+      "id": "osm:n1360503736",
+      "name": "Jack in the Box",
+      "kind": "fast_food",
+      "lat": 31.761004,
+      "lon": -106.266107
+    },
+    {
+      "id": "osm:n1381799440",
+      "name": "Mobil",
+      "kind": "fuel",
+      "lat": 31.836899,
+      "lon": -106.559143
+    },
+    {
+      "id": "osm:n1381837915",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.446786,
+      "lon": -106.087033
+    },
+    {
+      "id": "osm:n1381837917",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.58637,
+      "lon": -106.232304
+    },
+    {
+      "id": "osm:n1381837919",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.597763,
+      "lon": -106.27405
     },
     {
       "id": "osm:n1381837928",
@@ -122,11 +500,18 @@
       "lon": -106.331237
     },
     {
-      "id": "osm:n1438478064",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.614709,
-      "lon": -106.522064
+      "id": "osm:n1381837936",
+      "name": "Exxon",
+      "kind": "fuel",
+      "lat": 31.764123,
+      "lon": -106.365107
+    },
+    {
+      "id": "osm:n1428401606",
+      "name": "Subway",
+      "kind": "fast_food",
+      "lat": 31.848738,
+      "lon": -106.625507
     },
     {
       "id": "osm:n1438478069",
@@ -171,20 +556,6 @@
       "lon": -106.62116
     },
     {
-      "id": "osm:n1550244504",
-      "name": "Gomez",
-      "kind": "shop",
-      "lat": 31.864788,
-      "lon": -106.625747
-    },
-    {
-      "id": "osm:n1607246055",
-      "name": "MEGA Soriana",
-      "kind": "grocery",
-      "lat": 31.677535,
-      "lon": -106.426092
-    },
-    {
       "id": "osm:n1609784236",
       "name": "Pemex E01152",
       "kind": "fuel",
@@ -192,11 +563,39 @@
       "lon": -106.452391
     },
     {
+      "id": "osm:n1609784237",
+      "name": "Banregio",
+      "kind": "bank",
+      "lat": 31.657226,
+      "lon": -106.430325
+    },
+    {
+      "id": "osm:n1609784238",
+      "name": "BBVA México",
+      "kind": "bank",
+      "lat": 31.658137,
+      "lon": -106.429875
+    },
+    {
       "id": "osm:n1609784268",
       "name": "Pemex E07371",
       "kind": "fuel",
       "lat": 31.662963,
       "lon": -106.42825
+    },
+    {
+      "id": "osm:n1609784270",
+      "name": "Hospital",
+      "kind": "hospital",
+      "lat": 31.708221,
+      "lon": -106.429548
+    },
+    {
+      "id": "osm:n1609784271",
+      "name": "Bancomer",
+      "kind": "bank",
+      "lat": 31.722217,
+      "lon": -106.443481
     },
     {
       "id": "osm:n1609784272",
@@ -220,11 +619,25 @@
       "lon": -106.405433
     },
     {
-      "id": "osm:n1609784276",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.719425,
-      "lon": -106.443572
+      "id": "osm:n1671246466",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.98245,
+      "lon": -106.584381
+    },
+    {
+      "id": "osm:n1727047089",
+      "name": "Chipotle",
+      "kind": "fast_food",
+      "lat": 31.778902,
+      "lon": -106.504107
+    },
+    {
+      "id": "osm:n1727047136",
+      "name": "Pizza Joint",
+      "kind": "fast_food",
+      "lat": 31.779007,
+      "lon": -106.504195
     },
     {
       "id": "osm:n1727047159",
@@ -234,11 +647,25 @@
       "lon": -106.504022
     },
     {
+      "id": "osm:n1727047174",
+      "name": "Wingstop",
+      "kind": "fast_food",
+      "lat": 31.778845,
+      "lon": -106.504061
+    },
+    {
       "id": "osm:n1728723018",
-      "name": "Caf\u00e9 Italia",
+      "name": "Café Italia",
       "kind": "restaurant",
       "lat": 31.833776,
       "lon": -106.543177
+    },
+    {
+      "id": "osm:n1828301122",
+      "name": "Farmacia La Victoria",
+      "kind": "pharmacy",
+      "lat": 31.668841,
+      "lon": -106.412399
     },
     {
       "id": "osm:n1842137605",
@@ -248,39 +675,32 @@
       "lon": -106.565264
     },
     {
-      "id": "osm:n1906493349",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.715293,
-      "lon": -106.43272
+      "id": "osm:n1853707293",
+      "name": "Five Guys",
+      "kind": "fast_food",
+      "lat": 31.820586,
+      "lon": -106.540579
     },
     {
-      "id": "osm:n1906493350",
-      "name": "El G\u00fciri G\u00fciri",
-      "kind": "shop",
-      "lat": 31.717376,
-      "lon": -106.432133
+      "id": "osm:n1887788696",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 32.006262,
+      "lon": -106.581898
     },
     {
-      "id": "osm:n1906493367",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.716784,
-      "lon": -106.432801
+      "id": "osm:n1906496339",
+      "name": "Bancomer",
+      "kind": "atm",
+      "lat": 31.717091,
+      "lon": -106.428849
     },
     {
-      "id": "osm:n1906496337",
-      "name": "Rapidito's Bip Bip",
-      "kind": "shop",
-      "lat": 31.717089,
-      "lon": -106.428753
-    },
-    {
-      "id": "osm:n1906504776",
-      "name": "La Villita",
-      "kind": "lodging",
-      "lat": 31.716058,
-      "lon": -106.424736
+      "id": "osm:n1906504775",
+      "name": "HSBC",
+      "kind": "atm",
+      "lat": 31.713507,
+      "lon": -106.42502
     },
     {
       "id": "osm:n1929944268",
@@ -290,11 +710,18 @@
       "lon": -106.558796
     },
     {
-      "id": "osm:n1938901069",
-      "name": "Speedway",
-      "kind": "shop",
-      "lat": 31.909514,
-      "lon": -106.584792
+      "id": "osm:n1938901072",
+      "name": "McDonald's",
+      "kind": "fast_food",
+      "lat": 31.909415,
+      "lon": -106.584806
+    },
+    {
+      "id": "osm:n2143191766",
+      "name": "Papa John's",
+      "kind": "fast_food",
+      "lat": 31.776534,
+      "lon": -106.50231
     },
     {
       "id": "osm:n2143191798",
@@ -311,6 +738,13 @@
       "lon": -106.584293
     },
     {
+      "id": "osm:n2145031946",
+      "name": "Wells Fargo",
+      "kind": "atm",
+      "lat": 31.795439,
+      "lon": -106.510697
+    },
+    {
       "id": "osm:n2203835391",
       "name": "Valero",
       "kind": "fuel",
@@ -323,6 +757,13 @@
       "kind": "cafe",
       "lat": 31.799617,
       "lon": -106.395933
+    },
+    {
+      "id": "osm:n2253399046",
+      "name": "Church's Chicken",
+      "kind": "fast_food",
+      "lat": 31.886937,
+      "lon": -106.583698
     },
     {
       "id": "osm:n2253399198",
@@ -346,11 +787,32 @@
       "lon": -106.576617
     },
     {
+      "id": "osm:n2276469941",
+      "name": "Subway",
+      "kind": "fast_food",
+      "lat": 31.763818,
+      "lon": -106.493887
+    },
+    {
       "id": "osm:n2324900956",
       "name": "Starbucks",
       "kind": "cafe",
       "lat": 31.800169,
       "lon": -106.39365
+    },
+    {
+      "id": "osm:n2324901259",
+      "name": "Quiznos",
+      "kind": "fast_food",
+      "lat": 31.800189,
+      "lon": -106.3936
+    },
+    {
+      "id": "osm:n2324901923",
+      "name": "Pizza Hut Express",
+      "kind": "fast_food",
+      "lat": 31.800189,
+      "lon": -106.393515
     },
     {
       "id": "osm:n2390640435",
@@ -402,6 +864,20 @@
       "lon": -106.432203
     },
     {
+      "id": "osm:n2592200796",
+      "name": "Beer Box",
+      "kind": "pub",
+      "lat": 31.713504,
+      "lon": -106.425097
+    },
+    {
+      "id": "osm:n2592200847",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.707686,
+      "lon": -106.427978
+    },
+    {
       "id": "osm:n2629248426",
       "name": "Pemex E04159",
       "kind": "fuel",
@@ -428,6 +904,48 @@
       "kind": "restaurant",
       "lat": 31.710214,
       "lon": -106.408498
+    },
+    {
+      "id": "osm:n2697003932",
+      "name": "Taco Bell",
+      "kind": "fast_food",
+      "lat": 31.772611,
+      "lon": -106.499785
+    },
+    {
+      "id": "osm:n2698854200",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.769294,
+      "lon": -106.44417
+    },
+    {
+      "id": "osm:n2698854202",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.769088,
+      "lon": -106.44494
+    },
+    {
+      "id": "osm:n2698854218",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.76868,
+      "lon": -106.442197
+    },
+    {
+      "id": "osm:n2698854220",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.769368,
+      "lon": -106.443592
+    },
+    {
+      "id": "osm:n2702888391",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.409176,
+      "lon": -106.471611
     },
     {
       "id": "osm:n2703403531",
@@ -465,11 +983,18 @@
       "lon": -106.514461
     },
     {
-      "id": "osm:n2791714493",
-      "name": "La Pasadita",
-      "kind": "shop",
-      "lat": 31.596697,
-      "lon": -106.478368
+      "id": "osm:n2711661425",
+      "name": "Chipotle",
+      "kind": "fast_food",
+      "lat": 31.770976,
+      "lon": -106.374614
+    },
+    {
+      "id": "osm:n2738214008",
+      "name": "Schlotzsky's",
+      "kind": "fast_food",
+      "lat": 31.767069,
+      "lon": -106.318429
     },
     {
       "id": "osm:n2791715274",
@@ -479,25 +1004,11 @@
       "lon": -106.469231
     },
     {
-      "id": "osm:n2915045267",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.720835,
-      "lon": -106.439269
-    },
-    {
-      "id": "osm:n2915045268",
-      "name": "Superette",
-      "kind": "shop",
-      "lat": 31.727403,
-      "lon": -106.436991
-    },
-    {
-      "id": "osm:n2920633859",
-      "name": "OXO",
-      "kind": "shop",
-      "lat": 31.629625,
-      "lon": -106.374008
+      "id": "osm:n2936253907",
+      "name": "Chase",
+      "kind": "bank",
+      "lat": 31.830105,
+      "lon": -106.526856
     },
     {
       "id": "osm:n2980138302",
@@ -512,6 +1023,20 @@
       "kind": "fuel",
       "lat": 31.813323,
       "lon": -106.431631
+    },
+    {
+      "id": "osm:n3033564671",
+      "name": "Burger King",
+      "kind": "fast_food",
+      "lat": 31.81224,
+      "lon": -106.43332
+    },
+    {
+      "id": "osm:n3033564672",
+      "name": "Popeyes",
+      "kind": "fast_food",
+      "lat": 31.812248,
+      "lon": -106.433458
     },
     {
       "id": "osm:n3036069911",
@@ -542,13 +1067,6 @@
       "lon": -106.514164
     },
     {
-      "id": "osm:n3099727947",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.671068,
-      "lon": -106.440009
-    },
-    {
       "id": "osm:n3099727961",
       "name": "Pemex E04417",
       "kind": "fuel",
@@ -570,32 +1088,11 @@
       "lon": -106.436106
     },
     {
-      "id": "osm:n3099728016",
-      "name": "El Conquistador",
-      "kind": "lodging",
-      "lat": 31.69231,
-      "lon": -106.403326
-    },
-    {
-      "id": "osm:n3099728026",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.66753,
-      "lon": -106.349693
-    },
-    {
       "id": "osm:n3099728027",
       "name": "Pemex E07227",
       "kind": "fuel",
       "lat": 31.667552,
       "lon": -106.350223
-    },
-    {
-      "id": "osm:n3102995039",
-      "name": "Speedway",
-      "kind": "shop",
-      "lat": 31.797137,
-      "lon": -106.244226
     },
     {
       "id": "osm:n3103790938",
@@ -605,25 +1102,18 @@
       "lon": -106.395674
     },
     {
-      "id": "osm:n3119570912",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.698244,
-      "lon": -106.404058
+      "id": "osm:n3104621729",
+      "name": "Fuel",
+      "kind": "fuel",
+      "lat": 31.86403,
+      "lon": -106.576127
     },
     {
-      "id": "osm:n3119584550",
-      "name": "Pasti Gel",
-      "kind": "shop",
-      "lat": 31.744124,
-      "lon": -106.460562
-    },
-    {
-      "id": "osm:n3129913904",
-      "name": "Pemex E06978",
-      "kind": "shop",
-      "lat": 31.740992,
-      "lon": -106.401718
+      "id": "osm:n3129913903",
+      "name": "Fuel",
+      "kind": "fuel",
+      "lat": 31.741167,
+      "lon": -106.401583
     },
     {
       "id": "osm:n3131679256",
@@ -640,11 +1130,18 @@
       "lon": -106.375068
     },
     {
-      "id": "osm:n3131679260",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.687338,
-      "lon": -106.375295
+      "id": "osm:n3131681727",
+      "name": "Wendy's",
+      "kind": "fast_food",
+      "lat": 31.691765,
+      "lon": -106.381674
+    },
+    {
+      "id": "osm:n3141099366",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.736765,
+      "lon": -106.44988
     },
     {
       "id": "osm:n3154351758",
@@ -661,11 +1158,32 @@
       "lon": -106.445863
     },
     {
-      "id": "osm:n3154357714",
-      "name": "Abarrotes y papeleria Oly",
-      "kind": "shop",
-      "lat": 31.583981,
-      "lon": -106.488284
+      "id": "osm:n3164619306",
+      "name": "Bank",
+      "kind": "bank",
+      "lat": 31.745079,
+      "lon": -106.456754
+    },
+    {
+      "id": "osm:n3164631044",
+      "name": "Fuel",
+      "kind": "fuel",
+      "lat": 31.757837,
+      "lon": -106.478779
+    },
+    {
+      "id": "osm:n3164631045",
+      "name": "Fuel",
+      "kind": "fuel",
+      "lat": 31.759211,
+      "lon": -106.474152
+    },
+    {
+      "id": "osm:n3164636283",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.733702,
+      "lon": -106.449671
     },
     {
       "id": "osm:n3164636284",
@@ -675,32 +1193,11 @@
       "lon": -106.449194
     },
     {
-      "id": "osm:n3165276848",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.692169,
-      "lon": -106.405623
-    },
-    {
-      "id": "osm:n3166997450",
-      "name": "Consulado Inn",
-      "kind": "lodging",
-      "lat": 31.692197,
-      "lon": -106.402286
-    },
-    {
-      "id": "osm:n3168624441",
-      "name": "Del R\u00edo",
-      "kind": "shop",
-      "lat": 31.729323,
-      "lon": -106.408061
-    },
-    {
-      "id": "osm:n3168639418",
-      "name": "Del R\u00edo",
-      "kind": "shop",
-      "lat": 31.736272,
-      "lon": -106.409592
+      "id": "osm:n3168642992",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.718058,
+      "lon": -106.397639
     },
     {
       "id": "osm:n3169535755",
@@ -725,7 +1222,7 @@
     },
     {
       "id": "osm:n3177945413",
-      "name": "Carl\u00b4s Junior",
+      "name": "Carl´s Junior",
       "kind": "restaurant",
       "lat": 31.656982,
       "lon": -106.430073
@@ -752,25 +1249,32 @@
       "lon": -106.429244
     },
     {
-      "id": "osm:n3180060788",
-      "name": "Days Inn",
-      "kind": "lodging",
-      "lat": 31.841344,
-      "lon": -106.572125
+      "id": "osm:n3180117415",
+      "name": "Banco Santander",
+      "kind": "bank",
+      "lat": 31.666777,
+      "lon": -106.42633
     },
     {
-      "id": "osm:n3203889459",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.742264,
-      "lon": -106.498266
+      "id": "osm:n3180117416",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.676046,
+      "lon": -106.424183
     },
     {
-      "id": "osm:n3213529457",
-      "name": "Pemex E01225",
-      "kind": "fuel",
-      "lat": 31.675135,
-      "lon": -106.438268
+      "id": "osm:n3180117435",
+      "name": "Scotiabank",
+      "kind": "bank",
+      "lat": 31.704822,
+      "lon": -106.422447
+    },
+    {
+      "id": "osm:n3203889460",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.742076,
+      "lon": -106.498629
     },
     {
       "id": "osm:n3213534977",
@@ -778,6 +1282,13 @@
       "kind": "restaurant",
       "lat": 31.684059,
       "lon": -106.424167
+    },
+    {
+      "id": "osm:n3213534996",
+      "name": "Banco Santander",
+      "kind": "bank",
+      "lat": 31.693154,
+      "lon": -106.425086
     },
     {
       "id": "osm:n3220614152",
@@ -794,27 +1305,6 @@
       "lon": -106.461547
     },
     {
-      "id": "osm:n3260929771",
-      "name": "Pemex",
-      "kind": "fuel",
-      "lat": 31.408843,
-      "lon": -106.461633
-    },
-    {
-      "id": "osm:n3264659433",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.625202,
-      "lon": -106.46136
-    },
-    {
-      "id": "osm:n3264705910",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.595886,
-      "lon": -106.42991
-    },
-    {
       "id": "osm:n3268329364",
       "name": "Case de Torta",
       "kind": "restaurant",
@@ -822,11 +1312,25 @@
       "lon": -106.438133
     },
     {
+      "id": "osm:n3304623452",
+      "name": "Wendy's",
+      "kind": "fast_food",
+      "lat": 31.75949,
+      "lon": -106.269846
+    },
+    {
       "id": "osm:n3304623519",
       "name": "Don Jose Mexican Grill",
       "kind": "restaurant",
       "lat": 31.760403,
       "lon": -106.271786
+    },
+    {
+      "id": "osm:n3304630061",
+      "name": "McDonald's",
+      "kind": "fast_food",
+      "lat": 31.759853,
+      "lon": -106.269431
     },
     {
       "id": "osm:n3341120937",
@@ -850,102 +1354,74 @@
       "lon": -106.415175
     },
     {
-      "id": "osm:n3370665825",
-      "name": "Circle K",
-      "kind": "fuel",
-      "lat": 31.785835,
-      "lon": -106.413198
+      "id": "osm:n3341120967",
+      "name": "Venadito te ll",
+      "kind": "fast_food",
+      "lat": 31.721263,
+      "lon": -106.417676
     },
     {
-      "id": "osm:n3370665834",
-      "name": "K",
-      "kind": "fuel",
-      "lat": 31.783872,
-      "lon": -106.395115
+      "id": "osm:n3341120969",
+      "name": "Benavides",
+      "kind": "pharmacy",
+      "lat": 31.721574,
+      "lon": -106.417338
     },
     {
-      "id": "osm:n3407446706",
-      "name": "Pemex E01149",
-      "kind": "fuel",
-      "lat": 31.742762,
-      "lon": -106.481109
+      "id": "osm:n3370654211",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.744774,
+      "lon": -106.45669
     },
     {
-      "id": "osm:n3407497252",
-      "name": "Gas LP",
-      "kind": "fuel",
-      "lat": 31.645053,
-      "lon": -106.445789
+      "id": "osm:n3407455480",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.691298,
+      "lon": -106.403344
     },
     {
-      "id": "osm:n3407519271",
-      "name": "Pemex E04331",
-      "kind": "fuel",
-      "lat": 31.677509,
-      "lon": -106.370352
+      "id": "osm:n3407493911",
+      "name": "Estacion de Bomberos Numero 8",
+      "kind": "fire_station",
+      "lat": 31.642042,
+      "lon": -106.452646
     },
     {
-      "id": "osm:n3443041775",
-      "name": "Do\u00f1a Ana",
-      "kind": "lodging",
-      "lat": 31.699325,
-      "lon": -106.41353
+      "id": "osm:n3443041750",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.711096,
+      "lon": -106.42525
     },
     {
-      "id": "osm:n3451119057",
-      "name": "Corner Store Valero",
-      "kind": "shop",
-      "lat": 31.775836,
-      "lon": -106.252373
+      "id": "osm:n3451119045",
+      "name": "Five Guys",
+      "kind": "fast_food",
+      "lat": 31.72538,
+      "lon": -106.304661
     },
     {
-      "id": "osm:n3547498040",
-      "name": "Motel Regis",
-      "kind": "lodging",
-      "lat": 31.696339,
-      "lon": -106.439123
+      "id": "osm:n3542530118",
+      "name": "Las Palmas",
+      "kind": "dentist",
+      "lat": 31.746949,
+      "lon": -106.458859
     },
     {
-      "id": "osm:n3547502015",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.703366,
-      "lon": -106.430959
+      "id": "osm:n3542530119",
+      "name": "Cirujano Dentista",
+      "kind": "dentist",
+      "lat": 31.747227,
+      "lon": -106.458746
     },
     {
-      "id": "osm:n3581474747",
-      "name": "OXXO",
-      "kind": "shop",
-      "lat": 31.676566,
-      "lon": -106.379004
-    },
-    {
-      "id": "osm:n3581478106",
-      "name": "Superette San Carlos (157)",
-      "kind": "shop",
-      "lat": 31.665827,
-      "lon": -106.382271
-    },
-    {
-      "id": "osm:n3581478107",
-      "name": "OXXO",
-      "kind": "shop",
-      "lat": 31.665975,
-      "lon": -106.381425
-    },
-    {
-      "id": "osm:n3581494614",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.680195,
-      "lon": -106.388735
-    },
-    {
-      "id": "osm:n3581501896",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.660141,
-      "lon": -106.443229
+      "id": "osm:n3569490806",
+      "name": "Walgreens",
+      "kind": "pharmacy",
+      "lat": 31.842066,
+      "lon": -106.579046
     },
     {
       "id": "osm:n3602734418",
@@ -955,32 +1431,32 @@
       "lon": -106.40381
     },
     {
-      "id": "osm:n3631044184",
-      "name": "Extra",
-      "kind": "grocery",
-      "lat": 31.660463,
-      "lon": -106.362092
+      "id": "osm:n3649184772",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.694341,
+      "lon": -106.374291
     },
     {
-      "id": "osm:n3684272821",
-      "name": "Pemex E08373",
-      "kind": "fuel",
-      "lat": 31.644364,
-      "lon": -106.375248
+      "id": "osm:n3799953800",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.673528,
+      "lon": -106.415822
     },
     {
-      "id": "osm:n3684286129",
-      "name": "Del Rio Mx",
-      "kind": "shop",
-      "lat": 31.621113,
-      "lon": -106.351186
+      "id": "osm:n3886392063",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.701335,
+      "lon": -106.42503
     },
     {
-      "id": "osm:n3780393557",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.728686,
-      "lon": -106.450598
+      "id": "osm:n3891882830",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.737983,
+      "lon": -106.440668
     },
     {
       "id": "osm:n3891891097",
@@ -990,6 +1466,13 @@
       "lon": -106.425718
     },
     {
+      "id": "osm:n3958894652",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.764197,
+      "lon": -106.513539
+    },
+    {
       "id": "osm:n3969426570",
       "name": "Centro de Salud # 14",
       "kind": "hospital",
@@ -997,39 +1480,46 @@
       "lon": -106.370873
     },
     {
-      "id": "osm:n3974633690",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.718063,
-      "lon": -106.462407
+      "id": "osm:n3974637323",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.712047,
+      "lon": -106.451727
     },
     {
-      "id": "osm:n3974637273",
-      "name": "Pemex E01151",
-      "kind": "fuel",
-      "lat": 31.713893,
-      "lon": -106.453611
+      "id": "osm:n3982822781",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.738004,
+      "lon": -106.458419
     },
     {
-      "id": "osm:n3974660891",
-      "name": "Pemex E01148",
-      "kind": "fuel",
-      "lat": 31.698332,
-      "lon": -106.442975
+      "id": "osm:n3997765798",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.737152,
+      "lon": -106.447714
     },
     {
-      "id": "osm:n3998454051",
-      "name": "Speedway",
-      "kind": "fuel",
-      "lat": 31.938716,
-      "lon": -106.408312
+      "id": "osm:n3998454052",
+      "name": "McDonald's",
+      "kind": "fast_food",
+      "lat": 31.938381,
+      "lon": -106.408326
     },
     {
-      "id": "osm:n3999837503",
-      "name": "7-Eleven",
-      "kind": "shop",
-      "lat": 31.928782,
-      "lon": -106.407029
+      "id": "osm:n3998454157",
+      "name": "ATM",
+      "kind": "atm",
+      "lat": 31.938136,
+      "lon": -106.40799
+    },
+    {
+      "id": "osm:n3999837509",
+      "name": "Domino's",
+      "kind": "fast_food",
+      "lat": 31.900929,
+      "lon": -106.407224
     },
     {
       "id": "osm:n3999837513",
@@ -1039,60 +1529,60 @@
       "lon": -106.407395
     },
     {
-      "id": "osm:n4010336940",
-      "name": "Pemex E06941",
-      "kind": "fuel",
-      "lat": 31.626254,
-      "lon": -106.392112
+      "id": "osm:n3999837514",
+      "name": "Sunny Smiles",
+      "kind": "dentist",
+      "lat": 31.901275,
+      "lon": -106.407948
     },
     {
-      "id": "osm:n4015258882",
-      "name": "Pemex E04571",
-      "kind": "fuel",
-      "lat": 31.675724,
-      "lon": -106.445822
+      "id": "osm:n4010327168",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.732697,
+      "lon": -106.413192
     },
     {
-      "id": "osm:n4045454121",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.60607,
-      "lon": -106.453246
+      "id": "osm:n4010327171",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.718802,
+      "lon": -106.396527
+    },
+    {
+      "id": "osm:n4010348949",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.650284,
+      "lon": -106.38775
+    },
+    {
+      "id": "osm:n4015251054",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.722208,
+      "lon": -106.471582
     },
     {
       "id": "osm:n4045454122",
-      "name": "La Caba\u00f1a",
+      "name": "La Cabaña",
       "kind": "restaurant",
       "lat": 31.60988,
       "lon": -106.451154
     },
     {
-      "id": "osm:n4045454142",
-      "name": "Extra",
-      "kind": "shop",
-      "lat": 31.66504,
-      "lon": -106.426884
+      "id": "osm:n4063106771",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.578775,
+      "lon": -106.668263
     },
     {
-      "id": "osm:n4045494409",
-      "name": "Pemex E06452",
-      "kind": "fuel",
-      "lat": 31.643398,
-      "lon": -106.346376
-    },
-    {
-      "id": "osm:n4056293071",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.59932,
-      "lon": -106.427261
-    },
-    {
-      "id": "osm:n4059538124",
-      "name": "Pemex E08434",
-      "kind": "fuel",
-      "lat": 31.602366,
-      "lon": -106.386771
+      "id": "osm:n4063106776",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.576019,
+      "lon": -106.666198
     },
     {
       "id": "osm:n4072179999",
@@ -1102,25 +1592,11 @@
       "lon": -106.36891
     },
     {
-      "id": "osm:n4076358331",
-      "name": "Quality Inn Airport",
-      "kind": "lodging",
-      "lat": 31.782719,
-      "lon": -106.405959
-    },
-    {
-      "id": "osm:n4076371474",
-      "name": "Lone Star Inn",
-      "kind": "lodging",
-      "lat": 31.78769,
-      "lon": -106.408862
-    },
-    {
-      "id": "osm:n4131777630",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.599354,
-      "lon": -106.455849
+      "id": "osm:n4102982158",
+      "name": "Güinumoss",
+      "kind": "fast_food",
+      "lat": 31.719096,
+      "lon": -106.443107
     },
     {
       "id": "osm:n4145420932",
@@ -1144,18 +1620,18 @@
       "lon": -106.424812
     },
     {
-      "id": "osm:n4163651234",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.690186,
-      "lon": -106.354292
+      "id": "osm:n4190553672",
+      "name": "The District",
+      "kind": "pub",
+      "lat": 31.781996,
+      "lon": -106.505815
     },
     {
-      "id": "osm:n4190535339",
-      "name": "Pemex E03820",
-      "kind": "fuel",
-      "lat": 31.671245,
-      "lon": -106.474565
+      "id": "osm:n4232358498",
+      "name": "Einstein Bros. Bagels",
+      "kind": "fast_food",
+      "lat": 31.769121,
+      "lon": -106.507395
     },
     {
       "id": "osm:n4241791773",
@@ -1165,11 +1641,32 @@
       "lon": -106.43622
     },
     {
+      "id": "osm:n4375784300",
+      "name": "Sun City West Emergency Room",
+      "kind": "clinic",
+      "lat": 31.864256,
+      "lon": -106.578521
+    },
+    {
       "id": "osm:n4375786281",
       "name": "Carnitas Mezquital",
       "kind": "restaurant",
       "lat": 31.746883,
       "lon": -106.473073
+    },
+    {
+      "id": "osm:n4375798816",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.728917,
+      "lon": -106.442507
+    },
+    {
+      "id": "osm:n4375798822",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.727742,
+      "lon": -106.437574
     },
     {
       "id": "osm:n4375814170",
@@ -1179,6 +1676,27 @@
       "lon": -106.472851
     },
     {
+      "id": "osm:n4407534830",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.693887,
+      "lon": -106.404341
+    },
+    {
+      "id": "osm:n4407635383",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.697928,
+      "lon": -106.393388
+    },
+    {
+      "id": "osm:n4407635386",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.692614,
+      "lon": -106.384604
+    },
+    {
       "id": "osm:n4452641920",
       "name": "CUSTODIA DE SAN PABLO RESTAURANT MUSEO TEATRO",
       "kind": "restaurant",
@@ -1186,326 +1704,109 @@
       "lon": -106.462523
     },
     {
-      "id": "osm:n4537491582",
-      "name": "Pemex E09138",
-      "kind": "fuel",
-      "lat": 31.604146,
-      "lon": -106.374356
+      "id": "osm:n4537520296",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.606042,
+      "lon": -106.436406
     },
     {
-      "id": "osm:n4537520294",
-      "name": "Pemex E08650",
-      "kind": "fuel",
-      "lat": 31.606006,
-      "lon": -106.435956
+      "id": "osm:n4538724927",
+      "name": "Little Caesars",
+      "kind": "fast_food",
+      "lat": 31.601408,
+      "lon": -106.385948
     },
     {
-      "id": "osm:n4537520295",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.605754,
-      "lon": -106.435853
+      "id": "osm:n4557933254",
+      "name": "Bank",
+      "kind": "bank",
+      "lat": 31.737049,
+      "lon": -106.442876
     },
     {
-      "id": "osm:n4538961245",
-      "name": "Pemex E01245",
-      "kind": "fuel",
-      "lat": 31.647662,
-      "lon": -106.353301
+      "id": "osm:n4567897098",
+      "name": "Farmacia Similares",
+      "kind": "pharmacy",
+      "lat": 31.610278,
+      "lon": -106.386477
     },
     {
-      "id": "osm:n4540655666",
-      "name": "Xtreme Pizza & Wings",
-      "kind": "restaurant",
-      "lat": 31.75679,
-      "lon": -106.34143
+      "id": "osm:n4570852732",
+      "name": "GECU",
+      "kind": "atm",
+      "lat": 31.781958,
+      "lon": -106.390366
     },
     {
-      "id": "osm:n4542855531",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.562621,
-      "lon": -106.339652
+      "id": "osm:n4638902579",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.758866,
+      "lon": -106.487353
     },
     {
-      "id": "osm:n4542855547",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.570862,
-      "lon": -106.348856
+      "id": "osm:n4638902584",
+      "name": "CVS Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.858941,
+      "lon": -106.558842
     },
     {
-      "id": "osm:n4542855576",
-      "name": "Pemex E10109",
-      "kind": "fuel",
-      "lat": 31.588399,
-      "lon": -106.371904
+      "id": "osm:n4649157089",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.739275,
+      "lon": -106.430299
     },
     {
-      "id": "osm:n4542855577",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.588253,
-      "lon": -106.372038
+      "id": "osm:n4831292406",
+      "name": "Post office",
+      "kind": "post_office",
+      "lat": 31.588519,
+      "lon": -106.233219
     },
     {
-      "id": "osm:n4547754662",
-      "name": "Plaza M\u00e9xico",
-      "kind": "shop",
-      "lat": 31.622091,
-      "lon": -106.343402
+      "id": "osm:n4906165550",
+      "name": "Walmart Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.796121,
+      "lon": -106.22953
     },
     {
-      "id": "osm:n4567897096",
-      "name": "Burritos Tony",
-      "kind": "restaurant",
-      "lat": 31.610297,
-      "lon": -106.386348
+      "id": "osm:n5102313837",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.713538,
+      "lon": -106.445605
     },
     {
-      "id": "osm:n4628007481",
-      "name": "Hayes Mini Mart",
-      "kind": "shop",
-      "lat": 31.82126,
-      "lon": -106.45092
+      "id": "osm:n5102313838",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.716142,
+      "lon": -106.451143
     },
     {
-      "id": "osm:n4649157090",
-      "name": "Hotel Flamingo",
-      "kind": "lodging",
-      "lat": 31.739352,
-      "lon": -106.430781
+      "id": "osm:n5102317557",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.707812,
+      "lon": -106.482016
     },
     {
-      "id": "osm:n4705730730",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.669461,
-      "lon": -106.419423
+      "id": "osm:n5143832576",
+      "name": "GECU",
+      "kind": "bank",
+      "lat": 31.824451,
+      "lon": -106.522303
     },
     {
-      "id": "osm:n4780086521",
-      "name": "Pemex E01202",
-      "kind": "fuel",
-      "lat": 31.734485,
-      "lon": -106.478297
-    },
-    {
-      "id": "osm:n4781698821",
-      "name": "Juaritoz Caf\u00e9",
-      "kind": "cafe",
-      "lat": 31.738495,
-      "lon": -106.426702
-    },
-    {
-      "id": "osm:n4783685369",
-      "name": "BioGas",
-      "kind": "fuel",
-      "lat": 31.628918,
-      "lon": -106.332694
-    },
-    {
-      "id": "osm:n4783685391",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.637415,
-      "lon": -106.336826
-    },
-    {
-      "id": "osm:n4783715007",
-      "name": "Pemex E09205",
-      "kind": "fuel",
-      "lat": 31.614552,
-      "lon": -106.336039
-    },
-    {
-      "id": "osm:n4783715332",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.62398,
-      "lon": -106.327259
-    },
-    {
-      "id": "osm:n4783734242",
-      "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.626598,
-      "lon": -106.324924
-    },
-    {
-      "id": "osm:n4794566623",
-      "name": "King Crab",
-      "kind": "restaurant",
-      "lat": 31.749554,
-      "lon": -106.280063
-    },
-    {
-      "id": "osm:n4814405406",
-      "name": "Del R\u00edo",
-      "kind": "shop",
-      "lat": 31.660537,
-      "lon": -106.449801
-    },
-    {
-      "id": "osm:n4943294007",
-      "name": "Pizza Hut",
-      "kind": "restaurant",
-      "lat": 31.778704,
-      "lon": -106.250547
-    },
-    {
-      "id": "osm:n4953855094",
-      "name": "Peking Kitchen",
-      "kind": "restaurant",
-      "lat": 31.78338,
-      "lon": -106.429345
-    },
-    {
-      "id": "osm:n5101453439",
-      "name": "Los Arturos",
-      "kind": "restaurant",
-      "lat": 31.705575,
-      "lon": -106.480958
-    },
-    {
-      "id": "osm:n5102321178",
-      "name": "Pemex E03485",
-      "kind": "fuel",
-      "lat": 31.703525,
-      "lon": -106.458615
-    },
-    {
-      "id": "osm:n5115978620",
-      "name": "Albercas los Monos",
-      "kind": "restaurant",
-      "lat": 31.366349,
-      "lon": -106.461995
-    },
-    {
-      "id": "osm:n5201027544",
-      "name": "Mirai Bowl",
-      "kind": "restaurant",
-      "lat": 31.776537,
-      "lon": -106.503226
-    },
-    {
-      "id": "osm:n5282774371",
-      "name": "Pemex E05677",
-      "kind": "fuel",
-      "lat": 31.649953,
-      "lon": -106.407032
-    },
-    {
-      "id": "osm:n5296154046",
-      "name": "Applebee's",
-      "kind": "restaurant",
-      "lat": 31.686705,
-      "lon": -106.410145
-    },
-    {
-      "id": "osm:n5296154047",
-      "name": "Peter Piper Pizza Las Misiones",
-      "kind": "restaurant",
-      "lat": 31.686892,
-      "lon": -106.410039
-    },
-    {
-      "id": "osm:n5315596491",
-      "name": "Walmart Neighborhood Market",
-      "kind": "grocery",
-      "lat": 31.811191,
-      "lon": -106.557777
-    },
-    {
-      "id": "osm:n5315597801",
-      "name": "Walmart Neighborhood Market",
-      "kind": "grocery",
-      "lat": 31.783243,
-      "lon": -106.282976
-    },
-    {
-      "id": "osm:n5315598044",
-      "name": "Walmart Neighborhood Market",
-      "kind": "grocery",
-      "lat": 31.728537,
-      "lon": -106.345055
-    },
-    {
-      "id": "osm:n5315598132",
-      "name": "Walmart Neighborhood Market",
-      "kind": "grocery",
-      "lat": 31.861894,
-      "lon": -106.586847
-    },
-    {
-      "id": "osm:n5341863199",
-      "name": "Super El Roble",
-      "kind": "shop",
-      "lat": 31.613274,
-      "lon": -106.531411
-    },
-    {
-      "id": "osm:n5341865117",
-      "name": "Pemex E04070",
-      "kind": "fuel",
-      "lat": 31.668898,
-      "lon": -106.416658
-    },
-    {
-      "id": "osm:n5448493408",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.764059,
-      "lon": -106.513928
-    },
-    {
-      "id": "osm:n5483629452",
-      "name": "El Arrancadero",
-      "kind": "restaurant",
-      "lat": 31.685795,
-      "lon": -106.428518
-    },
-    {
-      "id": "osm:n5540981098",
-      "name": "Pemex E01195",
-      "kind": "fuel",
-      "lat": 31.730912,
-      "lon": -106.462078
-    },
-    {
-      "id": "osm:n5541010085",
-      "name": "Superette",
-      "kind": "shop",
-      "lat": 31.735679,
-      "lon": -106.489141
-    },
-    {
-      "id": "osm:n5541010087",
-      "name": "Pemex E01177",
-      "kind": "fuel",
-      "lat": 31.741397,
-      "lon": -106.495546
-    },
-    {
-      "id": "osm:n5541010088",
-      "name": "Pemex E01128",
-      "kind": "fuel",
-      "lat": 31.742301,
-      "lon": -106.49875
-    },
-    {
-      "id": "osm:n5541054522",
-      "name": "Pemex E01180",
-      "kind": "fuel",
-      "lat": 31.732165,
-      "lon": -106.457287
-    },
-    {
-      "id": "osm:n5541054529",
-      "name": "El Cometa",
-      "kind": "restaurant",
-      "lat": 31.733445,
-      "lon": -106.472521
+      "id": "osm:n5653038279",
+      "name": "GECU",
+      "kind": "bank",
+      "lat": 31.879127,
+      "lon": -106.611223
     },
     {
       "id": "osm:n5700544350",
@@ -1515,263 +1816,11 @@
       "lon": -106.433956
     },
     {
-      "id": "osm:n5730900081",
-      "name": "Pemex E04225",
-      "kind": "fuel",
-      "lat": 31.639574,
-      "lon": -106.367027
-    },
-    {
-      "id": "osm:n5910771676",
-      "name": "Ju\u00e1rez",
-      "kind": "lodging",
-      "lat": 31.737995,
-      "lon": -106.480961
-    },
-    {
-      "id": "osm:n5910771681",
-      "name": "Continental",
-      "kind": "lodging",
-      "lat": 31.738581,
-      "lon": -106.481398
-    },
-    {
-      "id": "osm:n5949811373",
-      "name": "Pemex E01222",
-      "kind": "fuel",
-      "lat": 31.493513,
-      "lon": -106.236965
-    },
-    {
-      "id": "osm:n5949841283",
-      "name": "Pemex E01227",
-      "kind": "fuel",
-      "lat": 31.389391,
-      "lon": -106.108437
-    },
-    {
-      "id": "osm:n5949843993",
-      "name": "Pemex E01240",
-      "kind": "fuel",
-      "lat": 31.55064,
-      "lon": -106.279562
-    },
-    {
-      "id": "osm:n5950025179",
-      "name": "Pemex E08470",
-      "kind": "fuel",
-      "lat": 31.665339,
-      "lon": -106.408854
-    },
-    {
-      "id": "osm:n5950026195",
-      "name": "J01095",
-      "kind": "fuel",
-      "lat": 31.692438,
-      "lon": -106.436028
-    },
-    {
-      "id": "osm:n5950026196",
-      "name": "J01288",
-      "kind": "fuel",
-      "lat": 31.693908,
-      "lon": -106.438283
-    },
-    {
-      "id": "osm:n5950027169",
-      "name": "Pemex E05904",
-      "kind": "fuel",
-      "lat": 31.708489,
-      "lon": -106.432193
-    },
-    {
-      "id": "osm:n5950046791",
-      "name": "Pemex E06111",
-      "kind": "fuel",
-      "lat": 31.742787,
-      "lon": -106.514647
-    },
-    {
-      "id": "osm:n5950047354",
-      "name": "Pemex E08669",
-      "kind": "fuel",
-      "lat": 31.725734,
-      "lon": -106.508921
-    },
-    {
-      "id": "osm:n5950047566",
-      "name": "Pemex E07118",
-      "kind": "fuel",
-      "lat": 31.716593,
-      "lon": -106.488033
-    },
-    {
-      "id": "osm:n5950047785",
-      "name": "Pemex E07116",
-      "kind": "fuel",
-      "lat": 31.662816,
-      "lon": -106.473417
-    },
-    {
-      "id": "osm:n5950047786",
-      "name": "Pemex E10220",
-      "kind": "fuel",
-      "lat": 31.647678,
-      "lon": -106.463411
-    },
-    {
-      "id": "osm:n5950047985",
-      "name": "J01351",
-      "kind": "fuel",
-      "lat": 31.611062,
-      "lon": -106.469566
-    },
-    {
-      "id": "osm:n5950051460",
-      "name": "Pemex E10257",
-      "kind": "fuel",
-      "lat": 31.574001,
-      "lon": -106.396704
-    },
-    {
-      "id": "osm:n5950143876",
-      "name": "Pemex E01211",
-      "kind": "fuel",
-      "lat": 31.73716,
-      "lon": -106.494251
-    },
-    {
-      "id": "osm:n5950143877",
-      "name": "Pemex E01186",
-      "kind": "fuel",
-      "lat": 31.736137,
-      "lon": -106.492
-    },
-    {
-      "id": "osm:n5950144756",
-      "name": "Peme E07119",
-      "kind": "fuel",
-      "lat": 31.731431,
-      "lon": -106.485871
-    },
-    {
-      "id": "osm:n5950150985",
-      "name": "J01394",
-      "kind": "fuel",
-      "lat": 31.633533,
-      "lon": -106.445279
-    },
-    {
-      "id": "osm:n5950169527",
-      "name": "Pemex E01172",
-      "kind": "fuel",
-      "lat": 31.744219,
-      "lon": -106.473298
-    },
-    {
-      "id": "osm:n5950169528",
-      "name": "Pemex E01189",
-      "kind": "fuel",
-      "lat": 31.743381,
-      "lon": -106.464053
-    },
-    {
-      "id": "osm:n5950169529",
-      "name": "Pemex E05704",
-      "kind": "fuel",
-      "lat": 31.738316,
-      "lon": -106.466959
-    },
-    {
-      "id": "osm:n5950170200",
-      "name": "Pemex E07299",
-      "kind": "fuel",
-      "lat": 31.734535,
-      "lon": -106.460244
-    },
-    {
-      "id": "osm:n5950170201",
-      "name": "Pemex E01216",
-      "kind": "fuel",
-      "lat": 31.733914,
-      "lon": -106.458965
-    },
-    {
-      "id": "osm:n5950172891",
-      "name": "Pemex E05170",
-      "kind": "fuel",
-      "lat": 31.711138,
-      "lon": -106.445722
-    },
-    {
-      "id": "osm:n5950181074",
-      "name": "J01189",
-      "kind": "fuel",
-      "lat": 31.617447,
-      "lon": -106.445409
-    },
-    {
-      "id": "osm:n5950190336",
-      "name": "Pemex E07724",
-      "kind": "fuel",
-      "lat": 31.74156,
-      "lon": -106.441569
-    },
-    {
-      "id": "osm:n5950195015",
-      "name": "Pemex E04624",
-      "kind": "fuel",
-      "lat": 31.660176,
-      "lon": -106.390503
-    },
-    {
-      "id": "osm:n5950195016",
-      "name": "Oxxo",
-      "kind": "fuel",
-      "lat": 31.660067,
-      "lon": -106.391519
-    },
-    {
-      "id": "osm:n5950198752",
-      "name": "Pemex E08244",
-      "kind": "fuel",
-      "lat": 31.602039,
-      "lon": -106.385814
-    },
-    {
-      "id": "osm:n5950199670",
-      "name": "Pemex E08917",
-      "kind": "fuel",
-      "lat": 31.60072,
-      "lon": -106.308257
-    },
-    {
-      "id": "osm:n5950199998",
-      "name": "Pemex E01243",
-      "kind": "fuel",
-      "lat": 31.674589,
-      "lon": -106.368334
-    },
-    {
-      "id": "osm:n5950210800",
-      "name": "Pemex E05613",
-      "kind": "fuel",
-      "lat": 31.633643,
-      "lon": -106.37843
-    },
-    {
-      "id": "osm:n5950212399",
-      "name": "Pemex E10441",
-      "kind": "fuel",
-      "lat": 31.656095,
-      "lon": -106.340118
-    },
-    {
-      "id": "osm:n5972830823",
-      "name": "FoodSnacks",
-      "kind": "cafe",
-      "lat": 31.493644,
-      "lon": -106.413894
+      "id": "osm:n5885261426",
+      "name": "Post office",
+      "kind": "post_office",
+      "lat": 32.119347,
+      "lon": -106.705705
     },
     {
       "id": "osm:n5976681233",
@@ -1781,46 +1830,25 @@
       "lon": -106.393649
     },
     {
-      "id": "osm:n5976681237",
-      "name": "MaConnys Pizza",
-      "kind": "restaurant",
-      "lat": 31.631327,
-      "lon": -106.394083
+      "id": "osm:n5976681263",
+      "name": "Banco Azteca",
+      "kind": "bank",
+      "lat": 31.607145,
+      "lon": -106.398578
     },
     {
-      "id": "osm:n5976681250",
-      "name": "Smart",
-      "kind": "grocery",
-      "lat": 31.606916,
-      "lon": -106.3997
-    },
-    {
-      "id": "osm:n6001908272",
-      "name": "Chicken Joint",
-      "kind": "restaurant",
-      "lat": 31.628973,
-      "lon": -106.394067
-    },
-    {
-      "id": "osm:n6001908276",
-      "name": "Taquer\u00eda Ajij\u00ed",
-      "kind": "restaurant",
-      "lat": 31.629941,
-      "lon": -106.394247
+      "id": "osm:n6001908274",
+      "name": "HSBC",
+      "kind": "bank",
+      "lat": 31.629315,
+      "lon": -106.393521
     },
     {
       "id": "osm:n6001908277",
-      "name": "San Mart\u00edn",
+      "name": "San Martín",
       "kind": "bar",
       "lat": 31.630104,
       "lon": -106.394219
-    },
-    {
-      "id": "osm:n6009006252",
-      "name": "MEGA Soriana",
-      "kind": "grocery",
-      "lat": 31.657062,
-      "lon": -106.444491
     },
     {
       "id": "osm:n6009007232",
@@ -1830,102 +1858,32 @@
       "lon": -106.441031
     },
     {
-      "id": "osm:n6009008016",
-      "name": "S-Mart",
-      "kind": "grocery",
-      "lat": 31.660135,
-      "lon": -106.441128
+      "id": "osm:n6009007233",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.657682,
+      "lon": -106.442173
     },
     {
-      "id": "osm:n6094213934",
-      "name": "Del Rio",
-      "kind": "shop",
-      "lat": 31.678125,
-      "lon": -106.369821
+      "id": "osm:n6009007234",
+      "name": "HSBC",
+      "kind": "bank",
+      "lat": 31.657274,
+      "lon": -106.439976
     },
     {
-      "id": "osm:n6141335785",
-      "name": "Smart Terranova",
-      "kind": "grocery",
-      "lat": 31.59286,
-      "lon": -106.411264
+      "id": "osm:n6009008015",
+      "name": "Banorte",
+      "kind": "atm",
+      "lat": 31.660066,
+      "lon": -106.441413
     },
     {
-      "id": "osm:n6141335786",
-      "name": "Litle Ceasar",
-      "kind": "restaurant",
-      "lat": 31.599415,
-      "lon": -106.404555
-    },
-    {
-      "id": "osm:n6143259453",
-      "name": "Del r\u00edo",
-      "kind": "shop",
-      "lat": 31.721252,
-      "lon": -106.416873
-    },
-    {
-      "id": "osm:n6202172486",
-      "name": "Los pollos",
-      "kind": "restaurant",
-      "lat": 31.601923,
-      "lon": -106.427124
-    },
-    {
-      "id": "osm:n6202209985",
-      "name": "Carniseria y tienda",
-      "kind": "shop",
-      "lat": 31.599008,
-      "lon": -106.432746
-    },
-    {
-      "id": "osm:n6219496878",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.919625,
-      "lon": -106.423472
-    },
-    {
-      "id": "osm:n6219585015",
-      "name": "Circle K",
-      "kind": "shop",
-      "lat": 31.921405,
-      "lon": -106.406697
-    },
-    {
-      "id": "osm:n6219586258",
-      "name": "Sabrosos Tamales",
-      "kind": "restaurant",
-      "lat": 31.902425,
-      "lon": -106.423139
-    },
-    {
-      "id": "osm:n6219595276",
-      "name": "Melogros",
-      "kind": "shop",
-      "lat": 31.905572,
-      "lon": -106.40638
-    },
-    {
-      "id": "osm:n6307388080",
-      "name": "Los Girasoles",
-      "kind": "restaurant",
-      "lat": 31.715324,
-      "lon": -106.445085
-    },
-    {
-      "id": "osm:n6374581427",
-      "name": "Hungry Brothers",
-      "kind": "restaurant",
-      "lat": 31.725304,
-      "lon": -106.428853
-    },
-    {
-      "id": "osm:n6426910342",
-      "name": "Black Coffe Gallery",
-      "kind": "cafe",
-      "lat": 31.741415,
-      "lon": -106.443281
+      "id": "osm:n6009008019",
+      "name": "Similares",
+      "kind": "pharmacy",
+      "lat": 31.660325,
+      "lon": -106.441921
     },
     {
       "id": "osm:n6426910343",
@@ -1935,53 +1893,5625 @@
       "lon": -106.443164
     },
     {
-      "id": "osm:n6426910353",
-      "name": "Foro Caf\u00e9",
-      "kind": "cafe",
-      "lat": 31.741795,
-      "lon": -106.441887
+      "id": "osm:n6428818279",
+      "name": "Benavides",
+      "kind": "pharmacy",
+      "lat": 31.738549,
+      "lon": -106.484705
     },
     {
-      "id": "osm:n6428818265",
+      "id": "osm:n6428818909",
+      "name": "Benavides",
+      "kind": "pharmacy",
+      "lat": 31.739059,
+      "lon": -106.485886
+    },
+    {
+      "id": "osm:n6547857186",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.757049,
+      "lon": -106.490089
+    },
+    {
+      "id": "osm:n6547862587",
+      "name": "ATM",
+      "kind": "atm",
+      "lat": 31.756604,
+      "lon": -106.489946
+    },
+    {
+      "id": "osm:n6573863737",
+      "name": "Erin's Bar",
+      "kind": "bar",
+      "lat": 31.832584,
+      "lon": -106.533694
+    },
+    {
+      "id": "osm:n6786725062",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 32.113349,
+      "lon": -106.702071
+    },
+    {
+      "id": "osm:n6786727195",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 32.122458,
+      "lon": -106.707209
+    },
+    {
+      "id": "osm:n6786755969",
+      "name": "Post office",
+      "kind": "post_office",
+      "lat": 32.153386,
+      "lon": -106.733057
+    },
+    {
+      "id": "osm:n6836272829",
+      "name": "Walgreens",
+      "kind": "pharmacy",
+      "lat": 31.858867,
+      "lon": -106.556746
+    },
+    {
+      "id": "osm:n7034072224",
+      "name": "Banorte",
+      "kind": "atm",
+      "lat": 31.776288,
+      "lon": -106.55803
+    },
+    {
+      "id": "osm:n7230656046",
+      "name": "Estacion De Bomberos 5",
+      "kind": "fire_station",
+      "lat": 31.706249,
+      "lon": -106.456149
+    },
+    {
+      "id": "osm:n7230656047",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.717541,
+      "lon": -106.472965
+    },
+    {
+      "id": "osm:n7230656049",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.66886,
+      "lon": -106.342674
+    },
+    {
+      "id": "osm:n7243683412",
+      "name": "Chopo",
+      "kind": "pharmacy",
+      "lat": 31.635114,
+      "lon": -106.410497
+    },
+    {
+      "id": "osm:n7243683414",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.634918,
+      "lon": -106.410645
+    },
+    {
+      "id": "osm:n7360674398",
+      "name": "Santander",
+      "kind": "bank",
+      "lat": 31.620005,
+      "lon": -106.443761
+    },
+    {
+      "id": "osm:n7373942138",
+      "name": "Santander",
+      "kind": "bank",
+      "lat": 31.719211,
+      "lon": -106.396982
+    },
+    {
+      "id": "osm:n7373965878",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.724952,
+      "lon": -106.400945
+    },
+    {
+      "id": "osm:n7373965964",
+      "name": "BBVA",
+      "kind": "bank",
+      "lat": 31.731364,
+      "lon": -106.412013
+    },
+    {
+      "id": "osm:n7373965965",
+      "name": "Actinver",
+      "kind": "bank",
+      "lat": 31.731441,
+      "lon": -106.411913
+    },
+    {
+      "id": "osm:n7373966096",
+      "name": "Banregio",
+      "kind": "bank",
+      "lat": 31.730241,
+      "lon": -106.410413
+    },
+    {
+      "id": "osm:n7373966098",
+      "name": "HSBC",
+      "kind": "bank",
+      "lat": 31.729804,
+      "lon": -106.410872
+    },
+    {
+      "id": "osm:n7374677835",
+      "name": "CVS Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.818701,
+      "lon": -106.547635
+    },
+    {
+      "id": "osm:n7391431129",
+      "name": "Santander",
+      "kind": "atm",
+      "lat": 31.623421,
+      "lon": -106.396319
+    },
+    {
+      "id": "osm:n7391431130",
+      "name": "BBVA",
+      "kind": "atm",
+      "lat": 31.62373,
+      "lon": -106.39626
+    },
+    {
+      "id": "osm:n7391431131",
+      "name": "Inbursa",
+      "kind": "atm",
+      "lat": 31.623429,
+      "lon": -106.396355
+    },
+    {
+      "id": "osm:n7391431132",
+      "name": "Banorte",
+      "kind": "atm",
+      "lat": 31.623723,
+      "lon": -106.396222
+    },
+    {
+      "id": "osm:n7391431135",
+      "name": "Bancoppel",
+      "kind": "bank",
+      "lat": 31.623767,
+      "lon": -106.395671
+    },
+    {
+      "id": "osm:n7391431142",
+      "name": "BBVA",
+      "kind": "bank",
+      "lat": 31.623925,
+      "lon": -106.395548
+    },
+    {
+      "id": "osm:n7391431143",
+      "name": "Santander",
+      "kind": "bank",
+      "lat": 31.624158,
+      "lon": -106.395424
+    },
+    {
+      "id": "osm:n7391431144",
+      "name": "Banamex",
+      "kind": "bank",
+      "lat": 31.624287,
+      "lon": -106.395401
+    },
+    {
+      "id": "osm:n7391431150",
+      "name": "BBVA",
+      "kind": "atm",
+      "lat": 31.62482,
+      "lon": -106.395762
+    },
+    {
+      "id": "osm:n7391440447",
+      "name": "Farmacia Benavides",
+      "kind": "pharmacy",
+      "lat": 31.635938,
+      "lon": -106.399642
+    },
+    {
+      "id": "osm:n7391442681",
+      "name": "Afore XXI Banorte",
+      "kind": "bank",
+      "lat": 31.622125,
+      "lon": -106.396982
+    },
+    {
+      "id": "osm:n7391442682",
+      "name": "Banorte",
+      "kind": "bank",
+      "lat": 31.622079,
+      "lon": -106.396862
+    },
+    {
+      "id": "osm:n7391442687",
+      "name": "Famsa",
+      "kind": "bank",
+      "lat": 31.622154,
+      "lon": -106.395926
+    },
+    {
+      "id": "osm:n7555387773",
+      "name": "Banco Santander",
+      "kind": "atm",
+      "lat": 31.738977,
+      "lon": -106.470165
+    },
+    {
+      "id": "osm:n7555391017",
+      "name": "Banorte",
+      "kind": "atm",
+      "lat": 31.7391,
+      "lon": -106.480661
+    },
+    {
+      "id": "osm:n7555391024",
+      "name": "Banco del Bienestar",
+      "kind": "bank",
+      "lat": 31.739361,
+      "lon": -106.480603
+    },
+    {
+      "id": "osm:n7614023414",
+      "name": "De la Salud",
+      "kind": "pharmacy",
+      "lat": 31.739874,
+      "lon": -106.486641
+    },
+    {
+      "id": "osm:n7617185538",
+      "name": "Estafeta",
+      "kind": "post_office",
+      "lat": 31.739102,
+      "lon": -106.480335
+    },
+    {
+      "id": "osm:n7617185540",
+      "name": "Eugenio",
+      "kind": "bar",
+      "lat": 31.739333,
+      "lon": -106.480327
+    },
+    {
+      "id": "osm:n7868871501",
+      "name": "Pharmacy",
+      "kind": "pharmacy",
+      "lat": 31.670935,
+      "lon": -106.474463
+    },
+    {
+      "id": "osm:n8263336213",
+      "name": "Walgreens",
+      "kind": "pharmacy",
+      "lat": 31.766383,
+      "lon": -106.319713
+    },
+    {
+      "id": "osm:n8581086118",
+      "name": "Cruz roja mexicana",
+      "kind": "hospital",
+      "lat": 31.680666,
+      "lon": -106.443602
+    },
+    {
+      "id": "osm:n8630879776",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.774216,
+      "lon": -106.374672
+    },
+    {
+      "id": "osm:n8630879779",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.793358,
+      "lon": -106.402085
+    },
+    {
+      "id": "osm:n8630879781",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.782224,
+      "lon": -106.282211
+    },
+    {
+      "id": "osm:n8630879782",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.783899,
+      "lon": -106.260306
+    },
+    {
+      "id": "osm:n8630879783",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.785683,
+      "lon": -106.260118
+    },
+    {
+      "id": "osm:n8631005860",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.811667,
+      "lon": -106.242827
+    },
+    {
+      "id": "osm:n9008112684",
+      "name": "Walgreens",
+      "kind": "pharmacy",
+      "lat": 31.760775,
+      "lon": -106.353729
+    },
+    {
+      "id": "osm:n9150529087",
+      "name": "Walgreens",
+      "kind": "pharmacy",
+      "lat": 31.922433,
+      "lon": -106.438211
+    },
+    {
+      "id": "osm:n9181310174",
+      "name": "United Bank of El Paso",
+      "kind": "bank",
+      "lat": 31.760952,
+      "lon": -106.357494
+    },
+    {
+      "id": "osm:n9233676317",
+      "name": "Scotiabank",
+      "kind": "bank",
+      "lat": 31.648186,
+      "lon": -106.387902
+    },
+    {
+      "id": "osm:n9622812285",
+      "name": "HSBC",
+      "kind": "atm",
+      "lat": 31.677605,
+      "lon": -106.423366
+    },
+    {
+      "id": "osm:n9623034354",
+      "name": "DHL",
+      "kind": "post_office",
+      "lat": 31.6314,
+      "lon": -106.39396
+    },
+    {
+      "id": "osm:n9655094251",
+      "name": "Three Pints Pub",
+      "kind": "pub",
+      "lat": 31.92196,
+      "lon": -106.438064
+    },
+    {
+      "id": "osm:n9713089828",
+      "name": "Banregio",
+      "kind": "atm",
+      "lat": 31.730279,
+      "lon": -106.410388
+    },
+    {
+      "id": "osm:n9811900865",
+      "name": "FCI La Tuna",
+      "kind": "charging_station",
+      "lat": 31.982912,
+      "lon": -106.59101
+    },
+    {
+      "id": "osm:n9830961731",
+      "name": "Mail Boxes Etc.",
+      "kind": "post_office",
+      "lat": 31.683526,
+      "lon": -106.235027
+    },
+    {
+      "id": "osm:n9869946436",
+      "name": "San Elizario Clinic",
+      "kind": "clinic",
+      "lat": 31.596677,
+      "lon": -106.273305
+    },
+    {
+      "id": "osm:n9871265148",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.567899,
+      "lon": -106.240941
+    },
+    {
+      "id": "osm:n9871265149",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.566151,
+      "lon": -106.241368
+    },
+    {
+      "id": "osm:n9875428565",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.825766,
+      "lon": -106.423951
+    },
+    {
+      "id": "osm:n9972797542",
+      "name": "Estacion de Policia Distrito Delicias",
+      "kind": "police",
+      "lat": 31.740696,
+      "lon": -106.493203
+    },
+    {
+      "id": "osm:n9988818594",
+      "name": "St. Andrews Family Medicine Clinic",
+      "kind": "clinic",
+      "lat": 31.697852,
+      "lon": -106.195744
+    },
+    {
+      "id": "osm:n10080315140",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.929258,
+      "lon": -106.63115
+    },
+    {
+      "id": "osm:n10109919964",
+      "name": "El Paso Fire Station 5",
+      "kind": "fire_station",
+      "lat": 31.776397,
+      "lon": -106.429864
+    },
+    {
+      "id": "osm:n10125274856",
+      "name": "Correos de México",
+      "kind": "post_office",
+      "lat": 31.686868,
+      "lon": -106.426148
+    },
+    {
+      "id": "osm:n10141582307",
+      "name": "Anthony Smiles Dental",
+      "kind": "dentist",
+      "lat": 31.998963,
+      "lon": -106.605509
+    },
+    {
+      "id": "osm:n10214381904",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.757016,
+      "lon": -106.490079
+    },
+    {
+      "id": "osm:n10229733419",
+      "name": "Wells Fargo",
+      "kind": "atm",
+      "lat": 31.683094,
+      "lon": -106.313796
+    },
+    {
+      "id": "osm:n10607118470",
+      "name": "Sun City Sports Medicine Family Clinic",
+      "kind": "clinic",
+      "lat": 31.796368,
+      "lon": -106.246494
+    },
+    {
+      "id": "osm:n10607118499",
+      "name": "El Paso Fire Station 37",
+      "kind": "fire_station",
+      "lat": 31.796822,
+      "lon": -106.248515
+    },
+    {
+      "id": "osm:n10623516879",
+      "name": "Artística",
+      "kind": "bar",
+      "lat": 31.712509,
+      "lon": -106.408325
+    },
+    {
+      "id": "osm:n10754611553",
+      "name": "El Paso Post Office",
+      "kind": "post_office",
+      "lat": 31.794392,
+      "lon": -106.376723
+    },
+    {
+      "id": "osm:n10754699111",
+      "name": "El Paso County Sheriff's Office Patrol Station",
+      "kind": "police",
+      "lat": 31.808836,
+      "lon": -106.255947
+    },
+    {
+      "id": "osm:n10755214331",
+      "name": "El Paso Police Department Northeast Regional Command Center",
+      "kind": "police",
+      "lat": 31.887378,
+      "lon": -106.41548
+    },
+    {
+      "id": "osm:n10759782382",
+      "name": "UTEP Police",
+      "kind": "police",
+      "lat": 31.780144,
+      "lon": -106.507634
+    },
+    {
+      "id": "osm:n10844805979",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.930974,
+      "lon": -106.513802
+    },
+    {
+      "id": "osm:n10844833883",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.787895,
+      "lon": -106.487144
+    },
+    {
+      "id": "osm:n10868029961",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.882927,
+      "lon": -106.549609
+    },
+    {
+      "id": "osm:n10916244581",
+      "name": "Rio Vista Behavioral Health",
+      "kind": "hospital",
+      "lat": 31.880101,
+      "lon": -106.573722
+    },
+    {
+      "id": "osm:n10916989048",
+      "name": "The Hospitals Of Providence Northeast Campus",
+      "kind": "hospital",
+      "lat": 31.937823,
+      "lon": -106.406799
+    },
+    {
+      "id": "osm:n10917010967",
+      "name": "Las Palmas Rehabilitation Hospital",
+      "kind": "hospital",
+      "lat": 31.789053,
+      "lon": -106.508826
+    },
+    {
+      "id": "osm:n11156114351",
+      "name": "Dentalia",
+      "kind": "dentist",
+      "lat": 31.685938,
+      "lon": -106.408086
+    },
+    {
+      "id": "osm:n11281904178",
+      "name": "DHL",
+      "kind": "post_office",
+      "lat": 31.711587,
+      "lon": -106.425431
+    },
+    {
+      "id": "osm:n11493828805",
+      "name": "Tesla Supercharger",
+      "kind": "charging_station",
+      "lat": 31.688601,
+      "lon": -106.264796
+    },
+    {
+      "id": "osm:n11493828929",
+      "name": "Tesla Supercharger",
+      "kind": "charging_station",
+      "lat": 31.886443,
+      "lon": -106.580789
+    },
+    {
+      "id": "osm:n11585776499",
+      "name": "RockItCoin Bitcoin ATM",
+      "kind": "atm",
+      "lat": 31.765159,
+      "lon": -106.339311
+    },
+    {
+      "id": "osm:n11595169948",
+      "name": "HSBC",
+      "kind": "atm",
+      "lat": 31.635723,
+      "lon": -106.435948
+    },
+    {
+      "id": "osm:n11595169949",
+      "name": "Scotiabank",
+      "kind": "atm",
+      "lat": 31.635725,
+      "lon": -106.435926
+    },
+    {
+      "id": "osm:n11595169950",
+      "name": "HSBC",
+      "kind": "atm",
+      "lat": 31.635751,
+      "lon": -106.435671
+    },
+    {
+      "id": "osm:n11900198224",
+      "name": "Aspen Dental",
+      "kind": "dentist",
+      "lat": 31.768733,
+      "lon": -106.370111
+    },
+    {
+      "id": "osm:n11989134488",
+      "name": "The UPS Store",
+      "kind": "post_office",
+      "lat": 31.815644,
+      "lon": -106.427599
+    },
+    {
+      "id": "osm:n11991385130",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.799815,
+      "lon": -106.241629
+    },
+    {
+      "id": "osm:n12084767526",
+      "name": "JT Orthodontics",
+      "kind": "dentist",
+      "lat": 31.820621,
+      "lon": -106.519271
+    },
+    {
+      "id": "osm:n12084998576",
+      "name": "JT Orthodontics",
+      "kind": "dentist",
+      "lat": 31.764929,
+      "lon": -106.299313
+    },
+    {
+      "id": "osm:n12143867994",
+      "name": "Postage Depot",
+      "kind": "post_office",
+      "lat": 31.791778,
+      "lon": -106.261705
+    },
+    {
+      "id": "osm:n12401404311",
+      "name": "Vision En Accion Mision Rescate AC",
+      "kind": "clinic",
+      "lat": 31.610342,
+      "lon": -106.608851
+    },
+    {
+      "id": "osm:n12486946893",
+      "name": "El Paso Police Department",
+      "kind": "police",
+      "lat": 31.714001,
+      "lon": -106.308097
+    },
+    {
+      "id": "osm:n12555874388",
+      "name": "Women's Reproductive Clinic of New Mexico",
+      "kind": "clinic",
+      "lat": 31.849113,
+      "lon": -106.624811
+    },
+    {
+      "id": "osm:n12653999450",
+      "name": "Northgate Station",
+      "kind": "post_office",
+      "lat": 31.880905,
+      "lon": -106.418073
+    },
+    {
+      "id": "osm:n12657489138",
+      "name": "Pockets",
+      "kind": "bar",
+      "lat": 31.879466,
+      "lon": -106.421148
+    },
+    {
+      "id": "osm:n12691433657",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.865757,
+      "lon": -106.410478
+    },
+    {
+      "id": "osm:n12717055401",
+      "name": "Oasis Dental",
+      "kind": "dentist",
+      "lat": 31.770612,
+      "lon": -106.425784
+    },
+    {
+      "id": "osm:n12839860701",
+      "name": "Rockhouse Bar & Grill",
+      "kind": "bar",
+      "lat": 31.794915,
+      "lon": -106.353088
+    },
+    {
+      "id": "osm:n12842603425",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.793196,
+      "lon": -106.396168
+    },
+    {
+      "id": "osm:n12974773153",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.736743,
+      "lon": -106.423637
+    },
+    {
+      "id": "osm:n12988714920",
+      "name": "Tesla Supercharger",
+      "kind": "charging_station",
+      "lat": 31.797373,
+      "lon": -106.267376
+    },
+    {
+      "id": "osm:n13037120022",
+      "name": "Redd Road Family Dental",
+      "kind": "dentist",
+      "lat": 31.882001,
+      "lon": -106.550544
+    },
+    {
+      "id": "osm:n13093003501",
+      "name": "The UPS Store",
+      "kind": "post_office",
+      "lat": 31.703434,
+      "lon": -106.317947
+    },
+    {
+      "id": "osm:n13136697177",
+      "name": "Passport Health El Paso Travel Clinic",
+      "kind": "clinic",
+      "lat": 31.840575,
+      "lon": -106.566482
+    },
+    {
+      "id": "osm:n13189169396",
+      "name": "Blizzard Jr William",
+      "kind": "dentist",
+      "lat": 31.765327,
+      "lon": -106.328566
+    },
+    {
+      "id": "osm:n13231763925",
+      "name": "Instituto Regional del Tratamiento del Cancer",
+      "kind": "clinic",
+      "lat": 31.743007,
+      "lon": -106.447054
+    },
+    {
+      "id": "osm:n13259545108",
+      "name": "Clinica IMSS 66",
+      "kind": "clinic",
+      "lat": 31.619572,
+      "lon": -106.384541
+    },
+    {
+      "id": "osm:n13286170041",
+      "name": "Ysleta Del Sur Pueblo Tribal Fire Station",
+      "kind": "fire_station",
+      "lat": 31.621247,
+      "lon": -106.29347
+    },
+    {
+      "id": "osm:n13289548264",
+      "name": "Action Behavior Centers - ABA Therapy for Autism",
+      "kind": "clinic",
+      "lat": 31.7324,
+      "lon": -106.300871
+    },
+    {
+      "id": "osm:n13291335838",
+      "name": "Action Behavior Centers - ABA Therapy for Autism",
+      "kind": "clinic",
+      "lat": 31.697973,
+      "lon": -106.242898
+    },
+    {
+      "id": "osm:n13294865316",
+      "name": "Ysleta Del Sur Tribal Police Department",
+      "kind": "police",
+      "lat": 31.616821,
+      "lon": -106.292906
+    },
+    {
+      "id": "osm:n13300251777",
+      "name": "GECU",
+      "kind": "atm",
+      "lat": 31.753428,
+      "lon": -106.489458
+    },
+    {
+      "id": "osm:n13318463754",
+      "name": "GECU",
+      "kind": "atm",
+      "lat": 31.782921,
+      "lon": -106.395855
+    },
+    {
+      "id": "osm:n13331561840",
+      "name": "Clínica Médica Internacional",
+      "kind": "clinic",
+      "lat": 31.686899,
+      "lon": -106.405273
+    },
+    {
+      "id": "osm:n13331561841",
+      "name": "Servicios Médicos de la Frontera",
+      "kind": "clinic",
+      "lat": 31.687005,
+      "lon": -106.404169
+    },
+    {
+      "id": "osm:n13360281674",
+      "name": "Tesla Supercharger",
+      "kind": "charging_station",
+      "lat": 31.751415,
+      "lon": -106.3446
+    },
+    {
+      "id": "osm:n13360616735",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.738302,
+      "lon": -106.487177
+    },
+    {
+      "id": "osm:n13379239191",
+      "name": "BBVA",
+      "kind": "atm",
+      "lat": 31.705324,
+      "lon": -106.428214
+    },
+    {
+      "id": "osm:n13382415101",
+      "name": "USPS Summit Heights Station",
+      "kind": "post_office",
+      "lat": 31.813751,
+      "lon": -106.444424
+    },
+    {
+      "id": "osm:n13416831996",
+      "name": "Broken Rules Brewing",
+      "kind": "pub",
+      "lat": 31.765765,
+      "lon": -106.476706
+    },
+    {
+      "id": "osm:n13417005334",
+      "name": "Wells Fargo",
+      "kind": "atm",
+      "lat": 31.759929,
+      "lon": -106.486634
+    },
+    {
+      "id": "osm:n13577270001",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.819822,
+      "lon": -106.462736
+    },
+    {
+      "id": "osm:n13578237301",
+      "name": "Thirty 5ive Tavern",
+      "kind": "bar",
+      "lat": 31.771814,
+      "lon": -106.338707
+    },
+    {
+      "id": "osm:n13669875717",
+      "name": "ATM",
+      "kind": "atm",
+      "lat": 31.783042,
+      "lon": -106.461741
+    },
+    {
+      "id": "osm:n13669875718",
+      "name": "ATM",
+      "kind": "atm",
+      "lat": 31.783085,
+      "lon": -106.461617
+    },
+    {
+      "id": "osm:n13669875747",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.782463,
+      "lon": -106.462306
+    },
+    {
+      "id": "osm:n13669875748",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.782533,
+      "lon": -106.462203
+    },
+    {
+      "id": "osm:n13669875749",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.782233,
+      "lon": -106.462725
+    },
+    {
+      "id": "osm:n13694362932",
+      "name": "Dome Bar",
+      "kind": "bar",
+      "lat": 31.757552,
+      "lon": -106.489282
+    },
+    {
+      "id": "osm:n13733965466",
+      "name": "2626",
+      "kind": "bar",
+      "lat": 31.776979,
+      "lon": -106.502802
+    },
+    {
+      "id": "osm:n13733965468",
+      "name": "Querida",
+      "kind": "bar",
+      "lat": 31.777272,
+      "lon": -106.502395
+    },
+    {
+      "id": "osm:n13733965487",
+      "name": "Kyoshi",
+      "kind": "bar",
+      "lat": 31.777615,
+      "lon": -106.503255
+    },
+    {
+      "id": "osm:n13766824685",
+      "name": "Trinity ER",
+      "kind": "clinic",
+      "lat": 31.764294,
+      "lon": -106.300372
+    },
+    {
+      "id": "osm:n13766824844",
+      "name": "Tin Man",
+      "kind": "bar",
+      "lat": 31.744018,
+      "lon": -106.302501
+    },
+    {
+      "id": "osm:n13766825445",
+      "name": "Upper Valley Urgent Care Center - Eastlake",
+      "kind": "clinic",
+      "lat": 31.684303,
+      "lon": -106.266632
+    },
+    {
+      "id": "osm:n13768621719",
+      "name": "DaVita Dialysis",
+      "kind": "clinic",
+      "lat": 31.654409,
+      "lon": -106.269205
+    },
+    {
+      "id": "osm:n13778291002",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.767923,
+      "lon": -106.506034
+    },
+    {
+      "id": "osm:n13796408646",
+      "name": "Police",
+      "kind": "police",
+      "lat": 31.389936,
+      "lon": -106.104907
+    },
+    {
+      "id": "osm:n13910298904",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.737845,
+      "lon": -106.452951
+    },
+    {
+      "id": "osm:n13932504644",
+      "name": "El Calico Bar",
+      "kind": "bar",
+      "lat": 31.772772,
+      "lon": -106.425361
+    },
+    {
+      "id": "osm:n13937022705",
+      "name": "CHASE",
+      "kind": "atm",
+      "lat": 31.783227,
+      "lon": -106.450586
+    },
+    {
+      "id": "osm:n13966765159",
+      "name": "Ysleta del Sur Pueblo Health Clinic",
+      "kind": "clinic",
+      "lat": 31.683982,
+      "lon": -106.322146
+    },
+    {
+      "id": "osm:n13982281018",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.776928,
+      "lon": -106.50426
+    },
+    {
+      "id": "osm:n13982281019",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.776824,
+      "lon": -106.504168
+    },
+    {
+      "id": "osm:n14021753446",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.958013,
+      "lon": -106.586582
+    },
+    {
+      "id": "osm:n14021753447",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.959222,
+      "lon": -106.585826
+    },
+    {
+      "id": "osm:n14057659950",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.75918,
+      "lon": -106.488126
+    },
+    {
+      "id": "osm:n14125475579",
+      "name": "Electrify America",
+      "kind": "charging_station",
+      "lat": 31.75204,
+      "lon": -106.34095
+    },
+    {
+      "id": "osm:n14127383447",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.763745,
+      "lon": -106.493183
+    },
+    {
+      "id": "osm:w41399461",
+      "name": "Chamberino Fire Station 16",
+      "kind": "fire_station",
+      "lat": 32.036214,
+      "lon": -106.685314
+    },
+    {
+      "id": "osm:w41433030",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 32.038673,
+      "lon": -106.68555
+    },
+    {
+      "id": "osm:w42240039",
+      "name": "Chamberino Post Office",
+      "kind": "post_office",
+      "lat": 32.043373,
+      "lon": -106.673632
+    },
+    {
+      "id": "osm:w42735058",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.738232,
+      "lon": -106.49122
+    },
+    {
+      "id": "osm:w43928870",
+      "name": "El Paso Fire Department Airport ARFF Station 32",
+      "kind": "fire_station",
+      "lat": 31.810882,
+      "lon": -106.372452
+    },
+    {
+      "id": "osm:w43977186",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.833643,
+      "lon": -106.38491
+    },
+    {
+      "id": "osm:w58336239",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.747384,
+      "lon": -106.412278
+    },
+    {
+      "id": "osm:w59195062",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.736317,
+      "lon": -106.439167
+    },
+    {
+      "id": "osm:w60970578",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.689741,
+      "lon": -106.422209
+    },
+    {
+      "id": "osm:w62642667",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 32.023872,
+      "lon": -106.583957
+    },
+    {
+      "id": "osm:w72116241",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.755229,
+      "lon": -106.440447
+    },
+    {
+      "id": "osm:w72116854",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.754,
+      "lon": -106.43682
+    },
+    {
+      "id": "osm:w82212851",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.688238,
+      "lon": -106.428877
+    },
+    {
+      "id": "osm:w82212860",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.685376,
+      "lon": -106.426588
+    },
+    {
+      "id": "osm:w84829782",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.637692,
+      "lon": -106.439932
+    },
+    {
+      "id": "osm:w101346536",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.93241,
+      "lon": -106.448705
+    },
+    {
+      "id": "osm:w102040585",
+      "name": "Chope's Bar",
+      "kind": "bar",
+      "lat": 32.119475,
+      "lon": -106.706265
+    },
+    {
+      "id": "osm:w102722630",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.927274,
+      "lon": -106.406919
+    },
+    {
+      "id": "osm:w105696648",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.878039,
+      "lon": -106.493326
+    },
+    {
+      "id": "osm:w114076602",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.86566,
+      "lon": -106.605322
+    },
+    {
+      "id": "osm:w136892656",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.757714,
+      "lon": -106.450439
+    },
+    {
+      "id": "osm:w137318563",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.505878,
+      "lon": -106.120908
+    },
+    {
+      "id": "osm:w137318564",
+      "name": "Rest Area I-10 (West Bound)",
+      "kind": "parking",
+      "lat": 31.504519,
+      "lon": -106.116876
+    },
+    {
+      "id": "osm:w154599746",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.982079,
+      "lon": -106.584819
+    },
+    {
+      "id": "osm:w154599756",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.981874,
+      "lon": -106.585176
+    },
+    {
+      "id": "osm:w154599796",
+      "name": "Parking",
+      "kind": "parking",
+      "lat": 31.98216,
+      "lon": -106.584186
+    },
+    {
+      "id": "osm:w161027971",
+      "name": "El Paso Endodontics",
+      "kind": "dentist",
+      "lat": 31.839475,
+      "lon": -106.564487
+    },
+    {
+      "id": "osm:w161137698",
+      "name": "United States Postal Service",
+      "kind": "post_office",
+      "lat": 31.839046,
+      "lon": -106.560673
+    },
+    {
+      "id": "osm:w171326379",
+      "name": "E.P. Dentistry 4 Kids",
+      "kind": "dentist",
+      "lat": 31.738507,
+      "lon": -106.290827
+    },
+    {
+      "id": "osm:w171326380",
+      "name": "Brew Sports Pub & Grill East",
+      "kind": "pub",
+      "lat": 31.7361,
+      "lon": -106.293865
+    },
+    {
+      "id": "osm:w183123905",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.931207,
+      "lon": -106.513075
+    },
+    {
+      "id": "osm:w221555389",
+      "name": "El Paso Fire Station 30",
+      "kind": "fire_station",
+      "lat": 31.941008,
+      "lon": -106.442357
+    },
+    {
+      "id": "osm:w249044425",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.766088,
+      "lon": -106.454732
+    },
+    {
+      "id": "osm:w252706064",
+      "name": "Pensiones Civles del Estado",
+      "kind": "hospital",
+      "lat": 31.73687,
+      "lon": -106.442452
+    },
+    {
+      "id": "osm:w252706067",
+      "name": "Cruz Roja",
+      "kind": "hospital",
+      "lat": 31.741101,
+      "lon": -106.44726
+    },
+    {
+      "id": "osm:w252706068",
+      "name": "IMSS UMF 46",
+      "kind": "hospital",
+      "lat": 31.741976,
+      "lon": -106.447549
+    },
+    {
+      "id": "osm:w252838831",
+      "name": "Estación de Bomberos",
+      "kind": "fire_station",
+      "lat": 31.710514,
+      "lon": -106.407008
+    },
+    {
+      "id": "osm:w252838836",
+      "name": "Poliplaza Médica",
+      "kind": "hospital",
+      "lat": 31.713851,
+      "lon": -106.419385
+    },
+    {
+      "id": "osm:w252838837",
+      "name": "Poliplaza Médica",
+      "kind": "hospital",
+      "lat": 31.713252,
+      "lon": -106.419529
+    },
+    {
+      "id": "osm:w253720555",
+      "name": "IMSS Clínica 35 (Seguro Nuevo)",
+      "kind": "hospital",
+      "lat": 31.705394,
+      "lon": -106.435585
+    },
+    {
+      "id": "osm:w278809160",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.914281,
+      "lon": -106.51748
+    },
+    {
+      "id": "osm:w283123417",
+      "name": "American Renal",
+      "kind": "clinic",
+      "lat": 31.758603,
+      "lon": -106.353433
+    },
+    {
+      "id": "osm:w287949352",
+      "name": "Hospital Angeles",
+      "kind": "hospital",
+      "lat": 31.714185,
+      "lon": -106.392424
+    },
+    {
+      "id": "osm:w293354124",
+      "name": "Policia Federal Preventiva",
+      "kind": "police",
+      "lat": 31.532049,
+      "lon": -106.47608
+    },
+    {
+      "id": "osm:w293385484",
+      "name": "Pebble Hills Police",
+      "kind": "police",
+      "lat": 31.782886,
+      "lon": -106.326193
+    },
+    {
+      "id": "osm:w304320205",
+      "name": "Estación de Bomberos Aeropuerto",
+      "kind": "fire_station",
+      "lat": 31.634114,
+      "lon": -106.436662
+    },
+    {
+      "id": "osm:w310961010",
+      "name": "Hospital de la Familia",
+      "kind": "hospital",
+      "lat": 31.745082,
+      "lon": -106.483149
+    },
+    {
+      "id": "osm:w355196402",
+      "name": "Central Regional Command",
+      "kind": "police",
+      "lat": 31.75798,
+      "lon": -106.483314
+    },
+    {
+      "id": "osm:w395366658",
+      "name": "Centro Medico de Especialidades",
+      "kind": "hospital",
+      "lat": 31.739031,
+      "lon": -106.458944
+    },
+    {
+      "id": "osm:w395366662",
+      "name": "Torre Medica de Especialidades",
+      "kind": "hospital",
+      "lat": 31.74022,
+      "lon": -106.457127
+    },
+    {
+      "id": "osm:w395366669",
+      "name": "Hospital General de Ciudad Juárez",
+      "kind": "hospital",
+      "lat": 31.738179,
+      "lon": -106.456278
+    },
+    {
+      "id": "osm:w415088989",
+      "name": "El Paso VA Health Care Clinic",
+      "kind": "hospital",
+      "lat": 31.820679,
+      "lon": -106.462236
+    },
+    {
+      "id": "osm:w468606177",
+      "name": "Del Sol Medical Center",
+      "kind": "hospital",
+      "lat": 31.756819,
+      "lon": -106.349839
+    },
+    {
+      "id": "osm:w480508983",
+      "name": "Post office",
+      "kind": "post_office",
+      "lat": 31.760201,
+      "lon": -106.487427
+    },
+    {
+      "id": "osm:w537017994",
+      "name": "El Paso Day Surgery",
+      "kind": "clinic",
+      "lat": 31.778149,
+      "lon": -106.486408
+    },
+    {
+      "id": "osm:w537017995",
+      "name": "El Paso Kidney Specialists",
+      "kind": "clinic",
+      "lat": 31.778259,
+      "lon": -106.485871
+    },
+    {
+      "id": "osm:w537018001",
+      "name": "Southwest NeuroSpine Institute",
+      "kind": "clinic",
+      "lat": 31.777928,
+      "lon": -106.487539
+    },
+    {
+      "id": "osm:w537018009",
+      "name": "Fresenius Kidney Care Cliffview",
+      "kind": "clinic",
+      "lat": 31.776242,
+      "lon": -106.487642
+    },
+    {
+      "id": "osm:w537018026",
+      "name": "LabCorp",
+      "kind": "clinic",
+      "lat": 31.776843,
+      "lon": -106.478856
+    },
+    {
+      "id": "osm:w537018028",
+      "name": "Harmony Women's Clinic",
+      "kind": "clinic",
+      "lat": 31.777324,
+      "lon": -106.479392
+    },
+    {
+      "id": "osm:w537018032",
+      "name": "El Paso Orthopedic Specialty Group",
+      "kind": "clinic",
+      "lat": 31.779918,
+      "lon": -106.478773
+    },
+    {
+      "id": "osm:w537018034",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.781079,
+      "lon": -106.476466
+    },
+    {
+      "id": "osm:w537018036",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.782978,
+      "lon": -106.473982
+    },
+    {
+      "id": "osm:w537018054",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.770965,
+      "lon": -106.497358
+    },
+    {
+      "id": "osm:w547800865",
+      "name": "Providence Montwood",
+      "kind": "hospital",
+      "lat": 31.768871,
+      "lon": -106.302989
+    },
+    {
+      "id": "osm:w562875873",
+      "name": "Las Palmas Medical Center",
+      "kind": "hospital",
+      "lat": 31.769994,
+      "lon": -106.498315
+    },
+    {
+      "id": "osm:w562875878",
+      "name": "Providence Memorial Hospital",
+      "kind": "hospital",
+      "lat": 31.770516,
+      "lon": -106.500905
+    },
+    {
+      "id": "osm:w562910998",
+      "name": "Kindred Hospital El Paso",
+      "kind": "hospital",
+      "lat": 31.778864,
+      "lon": -106.477232
+    },
+    {
+      "id": "osm:w562911008",
+      "name": "Sierra Medical Center",
+      "kind": "hospital",
+      "lat": 31.7785,
+      "lon": -106.480816
+    },
+    {
+      "id": "osm:w562914539",
+      "name": "VA Medical Center",
+      "kind": "hospital",
+      "lat": 31.82139,
+      "lon": -106.462031
+    },
+    {
+      "id": "osm:w562916651",
+      "name": "University Medical Center",
+      "kind": "hospital",
+      "lat": 31.772192,
+      "lon": -106.435142
+    },
+    {
+      "id": "osm:w562931987",
+      "name": "Las Palmas Del Sol Rehab East",
+      "kind": "hospital",
+      "lat": 31.732548,
+      "lon": -106.303016
+    },
+    {
+      "id": "osm:w563026692",
+      "name": "The Hospitals of Providence - East Campus",
+      "kind": "hospital",
+      "lat": 31.79034,
+      "lon": -106.26458
+    },
+    {
+      "id": "osm:w565871539",
+      "name": "Dona Ana County Fire Station 14",
+      "kind": "fire_station",
+      "lat": 31.854734,
+      "lon": -106.64248
+    },
+    {
+      "id": "osm:w565871540",
+      "name": "Santa Teresa Fire Department Station Two",
+      "kind": "fire_station",
+      "lat": 31.875329,
+      "lon": -106.700009
+    },
+    {
+      "id": "osm:w597762240",
+      "name": "Foundation Surgical Hospital of El Paso",
+      "kind": "hospital",
+      "lat": 31.734399,
+      "lon": -106.300121
+    },
+    {
+      "id": "osm:w602656161",
+      "name": "The Hospitals of Providence Transmountain Campus",
+      "kind": "hospital",
+      "lat": 31.904645,
+      "lon": -106.564751
+    },
+    {
+      "id": "osm:w603817904",
+      "name": "Clinica Familiar I.M.S.S No.64",
+      "kind": "hospital",
+      "lat": 31.647013,
+      "lon": -106.383876
+    },
+    {
+      "id": "osm:w614122212",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.628435,
+      "lon": -106.408724
+    },
+    {
+      "id": "osm:w626069742",
+      "name": "CE.RE.CI.TO.",
+      "kind": "police",
+      "lat": 31.751003,
+      "lon": -106.494849
+    },
+    {
+      "id": "osm:w626069782",
+      "name": "Centro de Salud Bellavista",
+      "kind": "clinic",
+      "lat": 31.737904,
+      "lon": -106.484184
+    },
+    {
+      "id": "osm:w626069834",
+      "name": "World Famous Kentucky Bar and Grill",
+      "kind": "bar",
+      "lat": 31.744146,
+      "lon": -106.486218
+    },
+    {
+      "id": "osm:w626069844",
+      "name": "Don Félix",
+      "kind": "bar",
+      "lat": 31.743467,
+      "lon": -106.485438
+    },
+    {
+      "id": "osm:w626069845",
+      "name": "Yankees",
+      "kind": "bar",
+      "lat": 31.743237,
+      "lon": -106.485443
+    },
+    {
+      "id": "osm:w634087657",
+      "name": "Policía Federal",
+      "kind": "police",
+      "lat": 31.651944,
+      "lon": -106.432943
+    },
+    {
+      "id": "osm:w636462663",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.495524,
+      "lon": -106.414333
+    },
+    {
+      "id": "osm:w651380325",
+      "name": "Estación de Bomberos #2",
+      "kind": "fire_station",
+      "lat": 31.7375,
+      "lon": -106.459521
+    },
+    {
+      "id": "osm:w652567677",
+      "name": "US Post Office",
+      "kind": "post_office",
+      "lat": 31.772737,
+      "lon": -106.302835
+    },
+    {
+      "id": "osm:w668193437",
+      "name": "Instituto Mexicano del Seguro Social Clinica 62",
+      "kind": "clinic",
+      "lat": 31.736711,
+      "lon": -106.509847
+    },
+    {
+      "id": "osm:w669556864",
+      "name": "Hospital Infantil de Especialidades de Ciudad Juárez",
+      "kind": "hospital",
+      "lat": 31.734328,
+      "lon": -106.406176
+    },
+    {
+      "id": "osm:w693274701",
+      "name": "El Paso Behavioral Health System",
+      "kind": "hospital",
+      "lat": 31.780916,
+      "lon": -106.476255
+    },
+    {
+      "id": "osm:w706816732",
+      "name": "Northeast Cornerstone Pediatrics",
+      "kind": "clinic",
+      "lat": 31.920364,
+      "lon": -106.439031
+    },
+    {
+      "id": "osm:w723617059",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.833621,
+      "lon": -106.537288
+    },
+    {
+      "id": "osm:w734896071",
+      "name": "El Paso Police Department Headquarters",
+      "kind": "police",
+      "lat": 31.783464,
+      "lon": -106.460877
+    },
+    {
+      "id": "osm:w734928612",
+      "name": "United States Post Office",
+      "kind": "post_office",
+      "lat": 31.707613,
+      "lon": -106.313581
+    },
+    {
+      "id": "osm:w736282553",
+      "name": "Estacion de bomberos No. 7",
+      "kind": "fire_station",
+      "lat": 31.645766,
+      "lon": -106.381683
+    },
+    {
+      "id": "osm:w736354594",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.565441,
+      "lon": -106.34452
+    },
+    {
+      "id": "osm:w736547251",
+      "name": "Instituto de Seguridad y Servicios Sociales de los Trabajadores del Estado",
+      "kind": "hospital",
+      "lat": 31.594106,
+      "lon": -106.398963
+    },
+    {
+      "id": "osm:w736547255",
+      "name": "Hospital Juárez",
+      "kind": "hospital",
+      "lat": 31.677093,
+      "lon": -106.438594
+    },
+    {
+      "id": "osm:w737652956",
+      "name": "United States Postal Service",
+      "kind": "post_office",
+      "lat": 31.656852,
+      "lon": -106.272615
+    },
+    {
+      "id": "osm:w745359833",
+      "name": "Ranchland Post Office",
+      "kind": "post_office",
+      "lat": 31.764978,
+      "lon": -106.368003
+    },
+    {
+      "id": "osm:w745960295",
+      "name": "El Paso Fire Station 21",
+      "kind": "fire_station",
+      "lat": 31.899492,
+      "lon": -106.40812
+    },
+    {
+      "id": "osm:w756300844",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.830506,
+      "lon": -106.371485
+    },
+    {
+      "id": "osm:w776358589",
+      "name": "Tres Guerras",
+      "kind": "post_office",
+      "lat": 31.634404,
+      "lon": -106.412774
+    },
+    {
+      "id": "osm:w787324337",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.618915,
+      "lon": -106.442347
+    },
+    {
+      "id": "osm:w788725436",
+      "name": "Mail Boxes Etc.",
+      "kind": "post_office",
+      "lat": 31.731699,
+      "lon": -106.412585
+    },
+    {
+      "id": "osm:w815602246",
+      "name": "Bajari",
+      "kind": "bar",
+      "lat": 31.738767,
+      "lon": -106.479774
+    },
+    {
+      "id": "osm:w815602255",
+      "name": "París",
+      "kind": "bar",
+      "lat": 31.739127,
+      "lon": -106.479467
+    },
+    {
+      "id": "osm:w818285887",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.885391,
+      "lon": -106.57069
+    },
+    {
+      "id": "osm:w818285898",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.877731,
+      "lon": -106.56867
+    },
+    {
+      "id": "osm:w833370920",
+      "name": "Estáción de Bomberos #1",
+      "kind": "fire_station",
+      "lat": 31.749529,
+      "lon": -106.472446
+    },
+    {
+      "id": "osm:w880004059",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.608565,
+      "lon": -106.685479
+    },
+    {
+      "id": "osm:w883271177",
+      "name": "IMSS Hospital Zona No 6",
+      "kind": "hospital",
+      "lat": 31.739709,
+      "lon": -106.450512
+    },
+    {
+      "id": "osm:w887546939",
+      "name": "ISSSTE",
+      "kind": "clinic",
+      "lat": 31.705686,
+      "lon": -106.416908
+    },
+    {
+      "id": "osm:w893937472",
+      "name": "Hospital de la Mujer",
+      "kind": "hospital",
+      "lat": 31.736749,
+      "lon": -106.452545
+    },
+    {
+      "id": "osm:w894761777",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.50612,
+      "lon": -106.121609
+    },
+    {
+      "id": "osm:w894761778",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.504312,
+      "lon": -106.116308
+    },
+    {
+      "id": "osm:w913723015",
+      "name": "Horizon Fire Department Station 2",
+      "kind": "fire_station",
+      "lat": 31.703137,
+      "lon": -106.250125
+    },
+    {
+      "id": "osm:w929529863",
+      "name": "The UPS Store",
+      "kind": "post_office",
+      "lat": 31.924671,
+      "lon": -106.44059
+    },
+    {
+      "id": "osm:w990196474",
+      "name": "Last Round-Up Bar",
+      "kind": "bar",
+      "lat": 31.999458,
+      "lon": -106.325373
+    },
+    {
+      "id": "osm:w990706516",
+      "name": "University Medical Center of El Paso - Northeast",
+      "kind": "hospital",
+      "lat": 31.894007,
+      "lon": -106.434376
+    },
+    {
+      "id": "osm:w990713463",
+      "name": "Ronald W Care DDS",
+      "kind": "dentist",
+      "lat": 31.895388,
+      "lon": -106.433634
+    },
+    {
+      "id": "osm:w990962698",
+      "name": "DaVita Dialysis",
+      "kind": "clinic",
+      "lat": 31.925179,
+      "lon": -106.583801
+    },
+    {
+      "id": "osm:w990962723",
+      "name": "El Paso Fire Station 2",
+      "kind": "fire_station",
+      "lat": 31.886274,
+      "lon": -106.594621
+    },
+    {
+      "id": "osm:w992337897",
+      "name": "Tornillo Post Office",
+      "kind": "post_office",
+      "lat": 31.443228,
+      "lon": -106.087779
+    },
+    {
+      "id": "osm:w992376909",
+      "name": "Fort Bliss Post Office",
+      "kind": "post_office",
+      "lat": 31.820489,
+      "lon": -106.427172
+    },
+    {
+      "id": "osm:w994032084",
+      "name": "Pebble Hills Post Office",
+      "kind": "post_office",
+      "lat": 31.78463,
+      "lon": -106.335227
+    },
+    {
+      "id": "osm:w1013619118",
+      "name": "Sharon's/Hallmark",
+      "kind": "post_office",
+      "lat": 31.767273,
+      "lon": -106.317451
+    },
+    {
+      "id": "osm:w1029413217",
+      "name": "Grupo Dental Integral",
+      "kind": "dentist",
+      "lat": 31.74195,
+      "lon": -106.467965
+    },
+    {
+      "id": "osm:w1030836663",
+      "name": "Cervecería 19",
+      "kind": "pub",
+      "lat": 31.635172,
+      "lon": -106.411966
+    },
+    {
+      "id": "osm:w1030836664",
+      "name": "Cervecería Roma",
+      "kind": "pub",
+      "lat": 31.634887,
+      "lon": -106.411478
+    },
+    {
+      "id": "osm:w1036179543",
+      "name": "Pockets La Cuesta",
+      "kind": "bar",
+      "lat": 31.677772,
+      "lon": -106.424181
+    },
+    {
+      "id": "osm:w1046411746",
+      "name": "DHL",
+      "kind": "post_office",
+      "lat": 31.659099,
+      "lon": -106.432983
+    },
+    {
+      "id": "osm:w1050674865",
+      "name": "Three Pints Pub",
+      "kind": "pub",
+      "lat": 31.92195,
+      "lon": -106.438003
+    },
+    {
+      "id": "osm:w1062746455",
+      "name": "Policia Riveras",
+      "kind": "police",
+      "lat": 31.626792,
+      "lon": -106.309065
+    },
+    {
+      "id": "osm:w1076202087",
+      "name": "Post office",
+      "kind": "post_office",
+      "lat": 31.588434,
+      "lon": -106.233159
+    },
+    {
+      "id": "osm:w1076269642",
+      "name": "United States Postal Service",
+      "kind": "post_office",
+      "lat": 31.588227,
+      "lon": -106.273241
+    },
+    {
+      "id": "osm:w1076269646",
+      "name": "San Elizario Volunteer Fire Rescue, El Paso County E.S.D. #2",
+      "kind": "fire_station",
+      "lat": 31.58909,
+      "lon": -106.272726
+    },
+    {
+      "id": "osm:w1076290499",
+      "name": "Clinic",
+      "kind": "clinic",
+      "lat": 31.596612,
+      "lon": -106.273336
+    },
+    {
+      "id": "osm:w1106485941",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.686349,
+      "lon": -106.426144
+    },
+    {
+      "id": "osm:w1108047980",
+      "name": "DaVita Dialysis",
+      "kind": "clinic",
+      "lat": 31.688568,
+      "lon": -106.297606
+    },
+    {
+      "id": "osm:w1112431981",
+      "name": "Family Dental Care",
+      "kind": "dentist",
+      "lat": 31.769368,
+      "lon": -106.299141
+    },
+    {
+      "id": "osm:w1112431988",
+      "name": "Johnny Cash Beer Garden",
+      "kind": "bar",
+      "lat": 31.769897,
+      "lon": -106.300259
+    },
+    {
+      "id": "osm:w1112432003",
+      "name": "Jack's Beach House",
+      "kind": "bar",
+      "lat": 31.768726,
+      "lon": -106.306677
+    },
+    {
+      "id": "osm:w1112432005",
+      "name": "Sun City Dental",
+      "kind": "dentist",
+      "lat": 31.768037,
+      "lon": -106.305934
+    },
+    {
+      "id": "osm:w1112432008",
+      "name": "El Muerte Grill",
+      "kind": "bar",
+      "lat": 31.768363,
+      "lon": -106.305393
+    },
+    {
+      "id": "osm:w1112439076",
+      "name": "Fanatics Sports Bar & Grill",
+      "kind": "bar",
+      "lat": 31.768539,
+      "lon": -106.316744
+    },
+    {
+      "id": "osm:w1112439080",
+      "name": "Pinova Dental",
+      "kind": "dentist",
+      "lat": 31.766893,
+      "lon": -106.31758
+    },
+    {
+      "id": "osm:w1112577210",
+      "name": "German Pub",
+      "kind": "pub",
+      "lat": 31.766035,
+      "lon": -106.363836
+    },
+    {
+      "id": "osm:w1112589869",
+      "name": "Trawood Family Dental",
+      "kind": "dentist",
+      "lat": 31.765679,
+      "lon": -106.298107
+    },
+    {
+      "id": "osm:w1112589872",
+      "name": "F.R.I.E.N.D.Z",
+      "kind": "bar",
+      "lat": 31.764241,
+      "lon": -106.301527
+    },
+    {
+      "id": "osm:w1112813492",
+      "name": "PostalAnnex",
+      "kind": "post_office",
+      "lat": 31.760207,
+      "lon": -106.264303
+    },
+    {
+      "id": "osm:w1112818211",
+      "name": "El Paso Fire Station 6",
+      "kind": "fire_station",
+      "lat": 31.760994,
+      "lon": -106.273901
+    },
+    {
+      "id": "osm:w1113075089",
+      "name": "PostalAnnex",
+      "kind": "post_office",
+      "lat": 31.743704,
+      "lon": -106.301115
+    },
+    {
+      "id": "osm:w1118504816",
+      "name": "Flying Y Bar",
+      "kind": "bar",
+      "lat": 31.683979,
+      "lon": -106.319878
+    },
+    {
+      "id": "osm:w1137521218",
+      "name": "Tin Man",
+      "kind": "bar",
+      "lat": 31.810441,
+      "lon": -106.512277
+    },
+    {
+      "id": "osm:w1156436084",
+      "name": "U.S. Customs and Border Protection - El Paso Border Patrol Station",
+      "kind": "police",
+      "lat": 31.871948,
+      "lon": -106.443536
+    },
+    {
+      "id": "osm:w1157077629",
+      "name": "El Paso County Sheriff's Office Headquarters",
+      "kind": "police",
+      "lat": 31.811358,
+      "lon": -106.259188
+    },
+    {
+      "id": "osm:w1177933094",
+      "name": "El Paso Fire Station 19",
+      "kind": "fire_station",
+      "lat": 31.771362,
+      "lon": -106.356348
+    },
+    {
+      "id": "osm:w1200022816",
+      "name": "Fabens Post Office",
+      "kind": "post_office",
+      "lat": 31.507617,
+      "lon": -106.162368
+    },
+    {
+      "id": "osm:w1200022824",
+      "name": "Fabens Volunteer Fire Department",
+      "kind": "fire_station",
+      "lat": 31.50459,
+      "lon": -106.160053
+    },
+    {
+      "id": "osm:w1200031349",
+      "name": "Clint Volunteer Fire Department",
+      "kind": "fire_station",
+      "lat": 31.595392,
+      "lon": -106.201963
+    },
+    {
+      "id": "osm:w1271546173",
+      "name": "USPS",
+      "kind": "post_office",
+      "lat": 31.767175,
+      "lon": -106.438441
+    },
+    {
+      "id": "osm:w1279208269",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.802149,
+      "lon": -106.560901
+    },
+    {
+      "id": "osm:w1279208297",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.803485,
+      "lon": -106.561551
+    },
+    {
+      "id": "osm:w1279208309",
+      "name": "Toilets",
+      "kind": "toilets",
+      "lat": 31.803069,
+      "lon": -106.560671
+    },
+    {
+      "id": "osm:w1307115587",
+      "name": "Guardia Nacional",
+      "kind": "police",
+      "lat": 31.760394,
+      "lon": -106.550172
+    },
+    {
+      "id": "osm:w1395937240",
+      "name": "Old Anthony Fire Department",
+      "kind": "fire_station",
+      "lat": 32.025289,
+      "lon": -106.597943
+    },
+    {
+      "id": "osm:w1395946685",
+      "name": "Dona Ana County Fire Station 2 -",
+      "kind": "fire_station",
+      "lat": 32.048731,
+      "lon": -106.602301
+    },
+    {
+      "id": "osm:w1435994194",
+      "name": "TX DPS El Paso",
+      "kind": "police",
+      "lat": 31.74532,
+      "lon": -106.299993
+    },
+    {
+      "id": "osm:w1448066137",
+      "name": "Ysleta Del Sur Pueblo Tribal Fire Station",
+      "kind": "fire_station",
+      "lat": 31.621203,
+      "lon": -106.293479
+    },
+    {
+      "id": "osm:w1452989208",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.7765,
+      "lon": -106.429878
+    },
+    {
+      "id": "osm:w1496379542",
+      "name": "Lucky Boy",
+      "kind": "bar",
+      "lat": 31.800825,
+      "lon": -106.461151
+    },
+    {
+      "id": "osm:w1496379543",
+      "name": "the Coyote",
+      "kind": "bar",
+      "lat": 31.801174,
+      "lon": -106.461173
+    },
+    {
+      "id": "osm:w1500111279",
+      "name": "El Paso Fire Station 27",
+      "kind": "fire_station",
+      "lat": 31.862138,
+      "lon": -106.547335
+    },
+    {
+      "id": "osm:w1504712692",
+      "name": "Rio Grande Family Dental",
+      "kind": "dentist",
+      "lat": 31.615257,
+      "lon": -106.28301
+    },
+    {
+      "id": "osm:w1545731429",
+      "name": "Fire station",
+      "kind": "fire_station",
+      "lat": 31.794217,
+      "lon": -106.277137
+    },
+    {
+      "id": "osm:r15695620",
+      "name": "El Paso Intelligence Center",
+      "kind": "police",
+      "lat": 31.8299,
+      "lon": -106.374418
+    },
+    {
+      "id": "osm:n245842371",
+      "name": "Holiday Inn Express",
+      "kind": "hotel",
+      "lat": 31.737472,
+      "lon": -106.451091
+    },
+    {
+      "id": "osm:n764455276",
+      "name": "7-Eleven",
+      "kind": "convenience",
+      "lat": 31.915096,
+      "lon": -106.421689
+    },
+    {
+      "id": "osm:n764464078",
+      "name": "Good Will",
+      "kind": "mall",
+      "lat": 31.902517,
+      "lon": -106.42196
+    },
+    {
+      "id": "osm:n880963315",
+      "name": "OXXO",
+      "kind": "convenience",
+      "lat": 31.693777,
+      "lon": -106.374282
+    },
+    {
+      "id": "osm:n880963328",
+      "name": "Del Rio",
+      "kind": "convenience",
+      "lat": 31.69453,
+      "lon": -106.374985
+    },
+    {
+      "id": "osm:n880973522",
+      "name": "Soriana",
+      "kind": "supermarket",
+      "lat": 31.692515,
+      "lon": -106.379318
+    },
+    {
+      "id": "osm:n986020502",
+      "name": "Dillard's",
+      "kind": "mall",
+      "lat": 31.815075,
+      "lon": -106.544365
+    },
+    {
+      "id": "osm:n1010148084",
+      "name": "State Farm",
+      "kind": "office",
+      "lat": 31.899913,
+      "lon": -106.440393
+    },
+    {
+      "id": "osm:n1243936566",
+      "name": "DK",
+      "kind": "convenience",
+      "lat": 31.843716,
+      "lon": -106.536063
+    },
+    {
+      "id": "osm:n1243936568",
+      "name": "Circle K",
+      "kind": "convenience",
+      "lat": 31.844355,
+      "lon": -106.549173
+    },
+    {
+      "id": "osm:n1298771227",
+      "name": "S-Mart",
+      "kind": "supermarket",
+      "lat": 31.67633,
+      "lon": -106.42191
+    },
+    {
+      "id": "osm:n1438478064",
       "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.742976,
-      "lon": -106.484074
+      "kind": "convenience",
+      "lat": 31.614709,
+      "lon": -106.522064
     },
     {
-      "id": "osm:n6428818273",
+      "id": "osm:n1550226470",
+      "name": "Upper Valley Automotive",
+      "kind": "shop",
+      "lat": 31.846472,
+      "lon": -106.612405
+    },
+    {
+      "id": "osm:n1550240626",
+      "name": "Billy Crews",
+      "kind": "shop",
+      "lat": 31.846,
+      "lon": -106.621172
+    },
+    {
+      "id": "osm:n1550242213",
+      "name": "Santa Teresa Motorsports",
+      "kind": "shop",
+      "lat": 31.84609,
+      "lon": -106.60814
+    },
+    {
+      "id": "osm:n1550244504",
+      "name": "Gomez",
+      "kind": "convenience",
+      "lat": 31.864788,
+      "lon": -106.625747
+    },
+    {
+      "id": "osm:n1607246055",
+      "name": "MEGA Soriana",
+      "kind": "supermarket",
+      "lat": 31.677535,
+      "lon": -106.426092
+    },
+    {
+      "id": "osm:n1609784276",
       "name": "Oxxo",
-      "kind": "shop",
-      "lat": 31.738801,
-      "lon": -106.483663
+      "kind": "convenience",
+      "lat": 31.719425,
+      "lon": -106.443572
     },
     {
-      "id": "osm:n6428818900",
-      "name": "Del R\u00edo",
+      "id": "osm:n1672419231",
+      "name": "J. Edwards Diamonds",
       "kind": "shop",
-      "lat": 31.739182,
-      "lon": -106.485367
+      "lat": 31.756269,
+      "lon": -106.266857
     },
     {
-      "id": "osm:n6434881413",
+      "id": "osm:n1828301126",
+      "name": "Supermercado González",
+      "kind": "supermarket",
+      "lat": 31.668804,
+      "lon": -106.412136
+    },
+    {
+      "id": "osm:n1833666567",
+      "name": "Mattress Firm",
+      "kind": "shop",
+      "lat": 31.900082,
+      "lon": -106.440396
+    },
+    {
+      "id": "osm:n1843449827",
+      "name": "Competition Audio & Tinting",
+      "kind": "shop",
+      "lat": 31.737787,
+      "lon": -106.2936
+    },
+    {
+      "id": "osm:n1857588930",
+      "name": "Banana Republic Outlet",
+      "kind": "clothes",
+      "lat": 31.912782,
+      "lon": -106.586646
+    },
+    {
+      "id": "osm:n1857588931",
+      "name": "Gap Outlet",
+      "kind": "clothes",
+      "lat": 31.912591,
+      "lon": -106.585646
+    },
+    {
+      "id": "osm:n1906493349",
+      "name": "Del Rio",
+      "kind": "convenience",
+      "lat": 31.715293,
+      "lon": -106.43272
+    },
+    {
+      "id": "osm:n1906493350",
+      "name": "El Güiri Güiri",
+      "kind": "convenience",
+      "lat": 31.717376,
+      "lon": -106.432133
+    },
+    {
+      "id": "osm:n1906493359",
+      "name": "Carniceria El 9",
+      "kind": "shop",
+      "lat": 31.717532,
+      "lon": -106.43213
+    },
+    {
+      "id": "osm:n1906493367",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.716784,
+      "lon": -106.432801
+    },
+    {
+      "id": "osm:n1906496337",
+      "name": "Rapidito's Bip Bip",
+      "kind": "convenience",
+      "lat": 31.717089,
+      "lon": -106.428753
+    },
+    {
+      "id": "osm:n1906504774",
+      "name": "Toxa",
+      "kind": "shop",
+      "lat": 31.714305,
+      "lon": -106.424999
+    },
+    {
+      "id": "osm:n1906504776",
+      "name": "La Villita",
+      "kind": "motel",
+      "lat": 31.716058,
+      "lon": -106.424736
+    },
+    {
+      "id": "osm:n1906504778",
+      "name": "La Francesa",
+      "kind": "shop",
+      "lat": 31.713498,
+      "lon": -106.424752
+    },
+    {
+      "id": "osm:n1938901069",
+      "name": "Speedway",
+      "kind": "convenience",
+      "lat": 31.909514,
+      "lon": -106.584792
+    },
+    {
+      "id": "osm:n1984556846",
+      "name": "Liverpool",
+      "kind": "mall",
+      "lat": 31.686085,
+      "lon": -106.40763
+    },
+    {
+      "id": "osm:n2143191884",
+      "name": "Family Dollar",
+      "kind": "shop",
+      "lat": 31.795686,
+      "lon": -106.510578
+    },
+    {
+      "id": "osm:n2143191942",
+      "name": "Hobby Lobby",
+      "kind": "shop",
+      "lat": 31.84143,
+      "lon": -106.57409
+    },
+    {
+      "id": "osm:n2591014692",
+      "name": "JMAS Conejos Medanos",
+      "kind": "office",
+      "lat": 31.708622,
+      "lon": -106.374861
+    },
+    {
+      "id": "osm:n2592185309",
+      "name": "Bicicletas Guerrero",
+      "kind": "shop",
+      "lat": 31.720826,
+      "lon": -106.433155
+    },
+    {
+      "id": "osm:n2592185310",
+      "name": "Power Shots Cyclery",
+      "kind": "shop",
+      "lat": 31.728867,
+      "lon": -106.437816
+    },
+    {
+      "id": "osm:n2592185311",
+      "name": "Bicicletas El Pedal",
+      "kind": "shop",
+      "lat": 31.706456,
+      "lon": -106.447746
+    },
+    {
+      "id": "osm:n2657837063",
+      "name": "HP Enterprise Services",
+      "kind": "shop",
+      "lat": 31.747415,
+      "lon": -106.426528
+    },
+    {
+      "id": "osm:n2657839617",
+      "name": "Intense Spinning",
+      "kind": "shop",
+      "lat": 31.732207,
+      "lon": -106.405841
+    },
+    {
+      "id": "osm:n2710167541",
+      "name": "DESS México",
+      "kind": "shop",
+      "lat": 31.736487,
+      "lon": -106.426624
+    },
+    {
+      "id": "osm:n2711661665",
+      "name": "AT&T",
+      "kind": "shop",
+      "lat": 31.771059,
+      "lon": -106.374788
+    },
+    {
+      "id": "osm:n2791714493",
+      "name": "La Pasadita",
+      "kind": "convenience",
+      "lat": 31.596697,
+      "lon": -106.478368
+    },
+    {
+      "id": "osm:n2903361781",
+      "name": "Ojo de la Casa",
+      "kind": "camp_site",
+      "lat": 31.366315,
+      "lon": -106.533645
+    },
+    {
+      "id": "osm:n2915045267",
+      "name": "Del Rio",
+      "kind": "convenience",
+      "lat": 31.720835,
+      "lon": -106.439269
+    },
+    {
+      "id": "osm:n2915045268",
+      "name": "Superette",
+      "kind": "convenience",
+      "lat": 31.727403,
+      "lon": -106.436991
+    },
+    {
+      "id": "osm:n2920633859",
+      "name": "OXO",
+      "kind": "convenience",
+      "lat": 31.629625,
+      "lon": -106.374008
+    },
+    {
+      "id": "osm:n2966031348",
+      "name": "AFA Lock & Safe",
+      "kind": "craft",
+      "lat": 31.873793,
+      "lon": -106.556176
+    },
+    {
+      "id": "osm:n2978224803",
+      "name": "El Abuelo",
+      "kind": "shop",
+      "lat": 31.607127,
+      "lon": -106.398501
+    },
+    {
+      "id": "osm:n2979484583",
+      "name": "Instituto Nacional de Geografia e Informacion",
+      "kind": "office",
+      "lat": 31.745564,
+      "lon": -106.441296
+    },
+    {
+      "id": "osm:n3099727947",
+      "name": "Del Rio",
+      "kind": "convenience",
+      "lat": 31.671068,
+      "lon": -106.440009
+    },
+    {
+      "id": "osm:n3099728016",
+      "name": "El Conquistador",
+      "kind": "hotel",
+      "lat": 31.69231,
+      "lon": -106.403326
+    },
+    {
+      "id": "osm:n3099728026",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.66753,
+      "lon": -106.349693
+    },
+    {
+      "id": "osm:n3102995039",
+      "name": "Speedway",
+      "kind": "convenience",
+      "lat": 31.797137,
+      "lon": -106.244226
+    },
+    {
+      "id": "osm:n3119570912",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.698244,
+      "lon": -106.404058
+    },
+    {
+      "id": "osm:n3119584550",
+      "name": "Pasti Gel",
+      "kind": "shop",
+      "lat": 31.744124,
+      "lon": -106.460562
+    },
+    {
+      "id": "osm:n3129913904",
+      "name": "Pemex E06978",
+      "kind": "convenience",
+      "lat": 31.740992,
+      "lon": -106.401718
+    },
+    {
+      "id": "osm:n3131679260",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.687338,
+      "lon": -106.375295
+    },
+    {
+      "id": "osm:n3131681955",
+      "name": "Coppel",
+      "kind": "mall",
+      "lat": 31.69147,
+      "lon": -106.380618
+    },
+    {
+      "id": "osm:n3141107314",
+      "name": "Funeraria Latinoamericana",
+      "kind": "shop",
+      "lat": 31.73771,
+      "lon": -106.437394
+    },
+    {
+      "id": "osm:n3154357714",
+      "name": "Abarrotes y papeleria Oly",
+      "kind": "convenience",
+      "lat": 31.583981,
+      "lon": -106.488284
+    },
+    {
+      "id": "osm:n3158591115",
+      "name": "Blass Perches",
+      "kind": "shop",
+      "lat": 31.737409,
+      "lon": -106.472785
+    },
+    {
+      "id": "osm:n3158595835",
+      "name": "Jardines Eternos",
+      "kind": "shop",
+      "lat": 31.697364,
+      "lon": -106.392933
+    },
+    {
+      "id": "osm:n3165276848",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.692169,
+      "lon": -106.405623
+    },
+    {
+      "id": "osm:n3165342688",
+      "name": "Volkswagen",
+      "kind": "shop",
+      "lat": 31.701007,
+      "lon": -106.399045
+    },
+    {
+      "id": "osm:n3166997450",
+      "name": "Consulado Inn",
+      "kind": "hotel",
+      "lat": 31.692197,
+      "lon": -106.402286
+    },
+    {
+      "id": "osm:n3168624441",
+      "name": "Del Río",
+      "kind": "convenience",
+      "lat": 31.729323,
+      "lon": -106.408061
+    },
+    {
+      "id": "osm:n3168639418",
+      "name": "Del Río",
+      "kind": "convenience",
+      "lat": 31.736272,
+      "lon": -106.409592
+    },
+    {
+      "id": "osm:n3168990570",
+      "name": "SHCP",
+      "kind": "office",
+      "lat": 31.683869,
+      "lon": -106.410048
+    },
+    {
+      "id": "osm:n3177956981",
+      "name": "Leña",
+      "kind": "hardware",
+      "lat": 31.613387,
+      "lon": -106.534021
+    },
+    {
+      "id": "osm:n3180060788",
+      "name": "Days Inn",
+      "kind": "hotel",
+      "lat": 31.841344,
+      "lon": -106.572125
+    },
+    {
+      "id": "osm:n3192268371",
+      "name": "Sportman's Elite",
+      "kind": "shop",
+      "lat": 31.828963,
+      "lon": -106.569916
+    },
+    {
+      "id": "osm:n3203889459",
+      "name": "Del Rio",
+      "kind": "convenience",
+      "lat": 31.742264,
+      "lon": -106.498266
+    },
+    {
+      "id": "osm:n3213557687",
+      "name": "The professional tire shop",
+      "kind": "shop",
+      "lat": 31.766658,
+      "lon": -106.418096
+    },
+    {
+      "id": "osm:n3213558281",
+      "name": "Guarnicion militar y Registro",
+      "kind": "office",
+      "lat": 31.640705,
+      "lon": -106.461425
+    },
+    {
+      "id": "osm:n3213558379",
+      "name": "Passage Supply",
+      "kind": "hardware",
+      "lat": 31.773343,
+      "lon": -106.425275
+    },
+    {
+      "id": "osm:n3216932344",
+      "name": "El Paso Del Rio Del Norte",
+      "kind": "information",
+      "lat": 31.787218,
+      "lon": -106.527638
+    },
+    {
+      "id": "osm:n3220613817",
       "name": "Del Rio",
       "kind": "shop",
-      "lat": 31.720447,
-      "lon": -106.460225
+      "lat": 31.621916,
+      "lon": -106.399444
     },
     {
-      "id": "osm:n6465580475",
-      "name": "El Pueblito de Don Cuco",
-      "kind": "restaurant",
-      "lat": 31.702565,
-      "lon": -106.401971
+      "id": "osm:n3220614090",
+      "name": "papeleria del tio pancho",
+      "kind": "shop",
+      "lat": 31.622227,
+      "lon": -106.399142
+    },
+    {
+      "id": "osm:n3220614718",
+      "name": "Un Solo Precio",
+      "kind": "shop",
+      "lat": 31.622309,
+      "lon": -106.399925
+    },
+    {
+      "id": "osm:n3264659433",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.625202,
+      "lon": -106.46136
+    },
+    {
+      "id": "osm:n3264705910",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.595886,
+      "lon": -106.42991
+    },
+    {
+      "id": "osm:n3268328946",
+      "name": "El Paso Nails",
+      "kind": "shop",
+      "lat": 31.920529,
+      "lon": -106.437393
+    },
+    {
+      "id": "osm:n3340860768",
+      "name": "Batteries Plus Bulbs",
+      "kind": "shop",
+      "lat": 31.7765,
+      "lon": -106.389663
+    },
+    {
+      "id": "osm:n3341120959",
+      "name": "Atlas",
+      "kind": "shop",
+      "lat": 31.719656,
+      "lon": -106.41632
+    },
+    {
+      "id": "osm:n3383004580",
+      "name": "Perches",
+      "kind": "shop",
+      "lat": 31.733531,
+      "lon": -106.450117
+    },
+    {
+      "id": "osm:n3443041775",
+      "name": "Doña Ana",
+      "kind": "motel",
+      "lat": 31.699325,
+      "lon": -106.41353
+    },
+    {
+      "id": "osm:n3451092028",
+      "name": "Harbor Freight Tools",
+      "kind": "hardware",
+      "lat": 31.828944,
+      "lon": -106.530184
+    },
+    {
+      "id": "osm:n3451092762",
+      "name": "GameStop",
+      "kind": "shop",
+      "lat": 31.770629,
+      "lon": -106.318782
+    },
+    {
+      "id": "osm:n3451119057",
+      "name": "Corner Store Valero",
+      "kind": "convenience",
+      "lat": 31.775836,
+      "lon": -106.252373
+    },
+    {
+      "id": "osm:n3547498040",
+      "name": "Motel Regis",
+      "kind": "motel",
+      "lat": 31.696339,
+      "lon": -106.439123
+    },
+    {
+      "id": "osm:n3547501101",
+      "name": "Auto climas",
+      "kind": "shop",
+      "lat": 31.692418,
+      "lon": -106.444277
+    },
+    {
+      "id": "osm:n3547502015",
+      "name": "Circle K",
+      "kind": "convenience",
+      "lat": 31.703366,
+      "lon": -106.430959
+    },
+    {
+      "id": "osm:n3581474747",
+      "name": "OXXO",
+      "kind": "convenience",
+      "lat": 31.676566,
+      "lon": -106.379004
+    },
+    {
+      "id": "osm:n3581478106",
+      "name": "Superette San Carlos (157)",
+      "kind": "convenience",
+      "lat": 31.665827,
+      "lon": -106.382271
+    },
+    {
+      "id": "osm:n3581478107",
+      "name": "OXXO",
+      "kind": "convenience",
+      "lat": 31.665975,
+      "lon": -106.381425
+    },
+    {
+      "id": "osm:n3581494614",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.680195,
+      "lon": -106.388735
+    },
+    {
+      "id": "osm:n3581501896",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.660141,
+      "lon": -106.443229
+    },
+    {
+      "id": "osm:n3613471176",
+      "name": "Paul L. Foster School of Medicine",
+      "kind": "office",
+      "lat": 31.771826,
+      "lon": -106.43085
+    },
+    {
+      "id": "osm:n3613546194",
+      "name": "Graduate School of Biomedical Sciences (GSBS)",
+      "kind": "office",
+      "lat": 31.77045,
+      "lon": -106.430905
+    },
+    {
+      "id": "osm:n3613548588",
+      "name": "Gayle Greve Hunt School of Nursing",
+      "kind": "office",
+      "lat": 31.772557,
+      "lon": -106.431407
+    },
+    {
+      "id": "osm:n3613600280",
+      "name": "Academic Education Center (AEC)",
+      "kind": "office",
+      "lat": 31.77236,
+      "lon": -106.434553
+    },
+    {
+      "id": "osm:n3631044184",
+      "name": "Extra",
+      "kind": "supermarket",
+      "lat": 31.660463,
+      "lon": -106.362092
+    },
+    {
+      "id": "osm:n3652954331",
+      "name": "Gold and Silver Exchange",
+      "kind": "shop",
+      "lat": 31.773437,
+      "lon": -106.477487
+    },
+    {
+      "id": "osm:n3652964744",
+      "name": "Quality Coin and Jewelry",
+      "kind": "shop",
+      "lat": 31.767225,
+      "lon": -106.486208
+    },
+    {
+      "id": "osm:n3684286129",
+      "name": "Del Rio Mx",
+      "kind": "convenience",
+      "lat": 31.621113,
+      "lon": -106.351186
+    },
+    {
+      "id": "osm:n3684289256",
+      "name": "Maderas de la Sierra",
+      "kind": "hardware",
+      "lat": 31.660785,
+      "lon": -106.363045
+    },
+    {
+      "id": "osm:n3692026690",
+      "name": "Llaveria Villahermosa",
+      "kind": "shop",
+      "lat": 31.718253,
+      "lon": -106.432156
+    },
+    {
+      "id": "osm:n3750036355",
+      "name": "Honda CLEBER Juárez",
+      "kind": "shop",
+      "lat": 31.698677,
+      "lon": -106.411548
+    },
+    {
+      "id": "osm:n3775464112",
+      "name": "Servicompactos",
+      "kind": "shop",
+      "lat": 31.733761,
+      "lon": -106.424147
+    },
+    {
+      "id": "osm:n3780393557",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.728686,
+      "lon": -106.450598
+    },
+    {
+      "id": "osm:n3792960975",
+      "name": "Stanton Street",
+      "kind": "office",
+      "lat": 31.755486,
+      "lon": -106.493155
+    },
+    {
+      "id": "osm:n3869539908",
+      "name": "Leña",
+      "kind": "hardware",
+      "lat": 31.613573,
+      "lon": -106.52592
+    },
+    {
+      "id": "osm:n3884000591",
+      "name": "D'Rosel",
+      "kind": "clothes",
+      "lat": 31.753295,
+      "lon": -106.447965
+    },
+    {
+      "id": "osm:n3926581700",
+      "name": "Banjercito Vehicle Permit Return Office",
+      "kind": "office",
+      "lat": 31.783134,
+      "lon": -106.679393
+    },
+    {
+      "id": "osm:n3974633690",
+      "name": "Oxxo",
+      "kind": "convenience",
+      "lat": 31.718063,
+      "lon": -106.462407
+    },
+    {
+      "id": "osm:n4076358331",
+      "name": "Quality Inn Airport",
+      "kind": "hotel",
+      "lat": 31.782719,
+      "lon": -106.405959
+    },
+    {
+      "id": "osm:n4076371474",
+      "name": "Lone Star Inn",
+      "kind": "hotel",
+      "lat": 31.78769,
+      "lon": -106.408862
+    },
+    {
+      "id": "osm:n4208430018",
+      "name": "U.S. Citizenship and Immigration Services",
+      "kind": "office",
+      "lat": 31.791716,
+      "lon": -106.372522
+    },
+    {
+      "id": "osm:n4208448010",
+      "name": "USCIS Application Support Center",
+      "kind": "office",
+      "lat": 31.771728,
+      "lon": -106.336088
+    },
+    {
+      "id": "osm:n4325144617",
+      "name": "Israel Parra Attorney At Law",
+      "kind": "office",
+      "lat": 31.783555,
+      "lon": -106.45887
+    },
+    {
+      "id": "osm:n4464510627",
+      "name": "AAA Bail Bonds",
+      "kind": "office",
+      "lat": 31.756963,
+      "lon": -106.483531
+    },
+    {
+      "id": "osm:n4547717345",
+      "name": "Bodega Aurrera",
+      "kind": "mall",
+      "lat": 31.613844,
+      "lon": -106.337266
+    },
+    {
+      "id": "osm:n4550506138",
+      "name": "DH Electrical Services",
+      "kind": "craft",
+      "lat": 31.777078,
+      "lon": -106.449844
+    },
+    {
+      "id": "osm:n4553889127",
+      "name": "Secure Contractors Inc",
+      "kind": "craft",
+      "lat": 31.722556,
+      "lon": -106.321336
+    },
+    {
+      "id": "osm:n4586443918",
+      "name": "Romero Tax Service",
+      "kind": "office",
+      "lat": 31.791657,
+      "lon": -106.378195
+    },
+    {
+      "id": "osm:n4649157090",
+      "name": "Hotel Flamingo",
+      "kind": "hotel",
+      "lat": 31.739352,
+      "lon": -106.430781
+    },
+    {
+      "id": "osm:n5043293073",
+      "name": "El Paso Traffic Ticket Firm - Attorney Robert Navar",
+      "kind": "office",
+      "lat": 31.745268,
+      "lon": -106.28801
+    },
+    {
+      "id": "osm:n5043805746",
+      "name": "Law Office of Robert Andrew Navar Esq.",
+      "kind": "office",
+      "lat": 31.78812,
+      "lon": -106.261015
+    },
+    {
+      "id": "osm:n5201027550",
+      "name": "Uptown Cheapskate",
+      "kind": "clothes",
+      "lat": 31.784508,
+      "lon": -106.505475
+    },
+    {
+      "id": "osm:n5315596491",
+      "name": "Walmart Neighborhood Market",
+      "kind": "supermarket",
+      "lat": 31.811191,
+      "lon": -106.557777
+    },
+    {
+      "id": "osm:n5315597801",
+      "name": "Walmart Neighborhood Market",
+      "kind": "supermarket",
+      "lat": 31.783243,
+      "lon": -106.282976
+    },
+    {
+      "id": "osm:n5315598044",
+      "name": "Walmart Neighborhood Market",
+      "kind": "supermarket",
+      "lat": 31.728537,
+      "lon": -106.345055
+    },
+    {
+      "id": "osm:n5315598132",
+      "name": "Walmart Neighborhood Market",
+      "kind": "supermarket",
+      "lat": 31.861894,
+      "lon": -106.586847
+    },
+    {
+      "id": "osm:n5341841921",
+      "name": "Leña",
+      "kind": "hardware",
+      "lat": 31.671548,
+      "lon": -106.440576
+    },
+    {
+      "id": "osm:n5341863194",
+      "name": "Leña",
+      "kind": "hardware",
+      "lat": 31.61378,
+      "lon": -106.521111
+    },
+    {
+      "id": "osm:n5730862598",
+      "name": "Junta Municipal de Aguas y Saneamiento (JMAS)",
+      "kind": "office",
+      "lat": 31.646589,
+      "lon": -106.382049
+    },
+    {
+      "id": "osm:n5742736248",
+      "name": "NM Solar Group",
+      "kind": "office",
+      "lat": 31.861667,
+      "lon": -106.570081
+    },
+    {
+      "id": "osm:n5880430959",
+      "name": "Advantage Insurance Agency",
+      "kind": "office",
+      "lat": 31.742599,
+      "lon": -106.285682
+    },
+    {
+      "id": "osm:n5910771659",
+      "name": "Telecomm-Telégrafos",
+      "kind": "office",
+      "lat": 31.738162,
+      "lon": -106.482281
+    },
+    {
+      "id": "osm:n5910771676",
+      "name": "Juárez",
+      "kind": "hotel",
+      "lat": 31.737995,
+      "lon": -106.480961
+    },
+    {
+      "id": "osm:n5910771681",
+      "name": "Continental",
+      "kind": "hotel",
+      "lat": 31.738581,
+      "lon": -106.481398
+    },
+    {
+      "id": "osm:n5910771682",
+      "name": "JMAS Junta municipal de aguas y saneamiento",
+      "kind": "office",
+      "lat": 31.73867,
+      "lon": -106.481208
+    },
+    {
+      "id": "osm:n5933803925",
+      "name": "Patricia's Bookkeeping Services",
+      "kind": "office",
+      "lat": 31.665288,
+      "lon": -106.30877
+    },
+    {
+      "id": "osm:n5976681250",
+      "name": "Smart",
+      "kind": "supermarket",
+      "lat": 31.606916,
+      "lon": -106.3997
+    },
+    {
+      "id": "osm:n5976681251",
+      "name": "Coppel",
+      "kind": "clothes",
+      "lat": 31.606467,
+      "lon": -106.39998
+    },
+    {
+      "id": "osm:n5976681252",
+      "name": "Hágalo",
+      "kind": "hardware",
+      "lat": 31.606111,
+      "lon": -106.399994
+    },
+    {
+      "id": "osm:n6009006252",
+      "name": "MEGA Soriana",
+      "kind": "supermarket",
+      "lat": 31.657062,
+      "lon": -106.444491
+    },
+    {
+      "id": "osm:n6009007238",
+      "name": "Hágalo",
+      "kind": "hardware",
+      "lat": 31.657825,
+      "lon": -106.442563
+    },
+    {
+      "id": "osm:n6009007241",
+      "name": "Walmart",
+      "kind": "mall",
+      "lat": 31.65719,
+      "lon": -106.442191
+    },
+    {
+      "id": "osm:n6009008016",
+      "name": "S-Mart",
+      "kind": "supermarket",
+      "lat": 31.660135,
+      "lon": -106.441128
+    },
+    {
+      "id": "osm:n6137138532",
+      "name": "Perfect Weather Heating & Cooling",
+      "kind": "craft",
+      "lat": 31.818953,
+      "lon": -106.223014
+    },
+    {
+      "id": "osm:n6141335785",
+      "name": "Smart Terranova",
+      "kind": "supermarket",
+      "lat": 31.59286,
+      "lon": -106.411264
+    },
+    {
+      "id": "osm:n6143228646",
+      "name": "Estafeta",
+      "kind": "office",
+      "lat": 31.708402,
+      "lon": -106.449036
+    },
+    {
+      "id": "osm:n6143259452",
+      "name": "Estafeta",
+      "kind": "office",
+      "lat": 31.72135,
+      "lon": -106.416935
+    },
+    {
+      "id": "osm:n6350638097",
+      "name": "Gobierno del estado",
+      "kind": "office",
+      "lat": 31.749465,
+      "lon": -106.45241
+    },
+    {
+      "id": "osm:n6354216743",
+      "name": "Villa Sierra Apartments",
+      "kind": "office",
+      "lat": 31.810516,
+      "lon": -106.469036
+    },
+    {
+      "id": "osm:n6405774292",
+      "name": "Going Solar in The Sun City",
+      "kind": "office",
+      "lat": 31.758412,
+      "lon": -106.382446
+    },
+    {
+      "id": "osm:n6428818887",
+      "name": "Moda Vaquera Teja's",
+      "kind": "clothes",
+      "lat": 31.738289,
+      "lon": -106.485251
+    },
+    {
+      "id": "osm:n6428818894",
+      "name": "Boleros",
+      "kind": "craft",
+      "lat": 31.738531,
+      "lon": -106.485629
+    },
+    {
+      "id": "osm:n6428818897",
+      "name": "XTown PC",
+      "kind": "craft",
+      "lat": 31.7391,
+      "lon": -106.485189
+    },
+    {
+      "id": "osm:n6428818901",
+      "name": "Zoe Fashion",
+      "kind": "clothes",
+      "lat": 31.738999,
+      "lon": -106.485244
+    },
+    {
+      "id": "osm:n6428818904",
+      "name": "Coppel",
+      "kind": "mall",
+      "lat": 31.739104,
+      "lon": -106.485615
+    },
+    {
+      "id": "osm:n6428818911",
+      "name": "Milano",
+      "kind": "clothes",
+      "lat": 31.739088,
+      "lon": -106.486229
+    },
+    {
+      "id": "osm:n6428818913",
+      "name": "Artículos de PIel Chava",
+      "kind": "clothes",
+      "lat": 31.739402,
+      "lon": -106.486307
+    },
+    {
+      "id": "osm:n6428818914",
+      "name": "Divas",
+      "kind": "clothes",
+      "lat": 31.739571,
+      "lon": -106.486296
+    },
+    {
+      "id": "osm:n6440740886",
+      "name": "Exigo Architecture",
+      "kind": "office",
+      "lat": 31.761064,
+      "lon": -106.483943
     },
     {
       "id": "osm:n6484359986",
       "name": "Hotel Impala",
-      "kind": "lodging",
+      "kind": "hotel",
       "lat": 31.742943,
       "lon": -106.480294
+    },
+    {
+      "id": "osm:n6484359987",
+      "name": "S-Mart - Galerías",
+      "kind": "supermarket",
+      "lat": 31.71425,
+      "lon": -106.421747
+    },
+    {
+      "id": "osm:n6541091385",
+      "name": "Venden maquinas de pelar",
+      "kind": "hardware",
+      "lat": 31.736438,
+      "lon": -106.484934
+    },
+    {
+      "id": "osm:n6543560107",
+      "name": "Abarrotes y carnicería Rosales",
+      "kind": "supermarket",
+      "lat": 31.636602,
+      "lon": -106.415248
+    },
+    {
+      "id": "osm:n6722603453",
+      "name": "El Paso Low Cost Auto Insurance",
+      "kind": "office",
+      "lat": 31.783345,
+      "lon": -106.450177
+    },
+    {
+      "id": "osm:n6786725063",
+      "name": "Berino Mini Mart",
+      "kind": "grocery",
+      "lat": 32.064529,
+      "lon": -106.633231
+    },
+    {
+      "id": "osm:n6786755968",
+      "name": "City Market",
+      "kind": "grocery",
+      "lat": 32.155175,
+      "lon": -106.73453
+    },
+    {
+      "id": "osm:n7013396160",
+      "name": "Royal Estates of El Paso",
+      "kind": "office",
+      "lat": 31.819331,
+      "lon": -106.530422
+    },
+    {
+      "id": "osm:n7313735685",
+      "name": "pride center",
+      "kind": "office",
+      "lat": 31.767515,
+      "lon": -106.485777
+    },
+    {
+      "id": "osm:n7360141420",
+      "name": "Uniformes Alamo",
+      "kind": "clothes",
+      "lat": 31.620107,
+      "lon": -106.390714
+    },
+    {
+      "id": "osm:n7360141423",
+      "name": "Labcell",
+      "kind": "craft",
+      "lat": 31.620058,
+      "lon": -106.390285
+    },
+    {
+      "id": "osm:n7360674447",
+      "name": "Aeropuerto",
+      "kind": "hotel",
+      "lat": 31.622472,
+      "lon": -106.445503
+    },
+    {
+      "id": "osm:n7373942164",
+      "name": "Datamark de México",
+      "kind": "office",
+      "lat": 31.719491,
+      "lon": -106.39614
+    },
+    {
+      "id": "osm:n7373942165",
+      "name": "Xerox",
+      "kind": "office",
+      "lat": 31.719685,
+      "lon": -106.396626
+    },
+    {
+      "id": "osm:n7373965877",
+      "name": "Vector Casa de Bolsa",
+      "kind": "office",
+      "lat": 31.725156,
+      "lon": -106.40105
+    },
+    {
+      "id": "osm:n7391431122",
+      "name": "Ashley",
+      "kind": "clothes",
+      "lat": 31.622799,
+      "lon": -106.396452
+    },
+    {
+      "id": "osm:n7391431133",
+      "name": "Izzi",
+      "kind": "office",
+      "lat": 31.623279,
+      "lon": -106.396021
+    },
+    {
+      "id": "osm:n7391431134",
+      "name": "Coppel",
+      "kind": "mall",
+      "lat": 31.623632,
+      "lon": -106.395653
+    },
+    {
+      "id": "osm:n7391431137",
+      "name": "Boca Rosa",
+      "kind": "clothes",
+      "lat": 31.623663,
+      "lon": -106.39589
+    },
+    {
+      "id": "osm:n7391431146",
+      "name": "Whoolworth",
+      "kind": "mall",
+      "lat": 31.624684,
+      "lon": -106.395417
+    },
+    {
+      "id": "osm:n7391431147",
+      "name": "Sixty",
+      "kind": "clothes",
+      "lat": 31.624774,
+      "lon": -106.395494
+    },
+    {
+      "id": "osm:n7391442666",
+      "name": "Soriana",
+      "kind": "supermarket",
+      "lat": 31.623563,
+      "lon": -106.396585
+    },
+    {
+      "id": "osm:n7391442683",
+      "name": "Oficina de Gestión Municipal",
+      "kind": "office",
+      "lat": 31.622119,
+      "lon": -106.396544
+    },
+    {
+      "id": "osm:n7391442685",
+      "name": "CFE",
+      "kind": "office",
+      "lat": 31.622002,
+      "lon": -106.396228
+    },
+    {
+      "id": "osm:n7391442686",
+      "name": "Famsa",
+      "kind": "mall",
+      "lat": 31.62199,
+      "lon": -106.395973
+    },
+    {
+      "id": "osm:n7391442690",
+      "name": "El Diario",
+      "kind": "office",
+      "lat": 31.622649,
+      "lon": -106.39591
+    },
+    {
+      "id": "osm:n7614023436",
+      "name": "Skeleto Rock & Skate",
+      "kind": "clothes",
+      "lat": 31.739453,
+      "lon": -106.485311
+    },
+    {
+      "id": "osm:n7652306126",
+      "name": "Total Air",
+      "kind": "craft",
+      "lat": 31.836226,
+      "lon": -106.574024
+    },
+    {
+      "id": "osm:n7865769005",
+      "name": "Food City",
+      "kind": "supermarket",
+      "lat": 31.767129,
+      "lon": -106.425306
+    },
+    {
+      "id": "osm:n7949648354",
+      "name": "Abarrotes Casa Verde",
+      "kind": "grocery",
+      "lat": 31.70606,
+      "lon": -106.438001
+    },
+    {
+      "id": "osm:n8251967722",
+      "name": "Mueblerías Portillo Suc. Ejército Nacional",
+      "kind": "mall",
+      "lat": 31.705026,
+      "lon": -106.418214
+    },
+    {
+      "id": "osm:n8581086119",
+      "name": "Soriana",
+      "kind": "supermarket",
+      "lat": 31.658055,
+      "lon": -106.359588
+    },
+    {
+      "id": "osm:n8631005863",
+      "name": "TJ Maxx",
+      "kind": "mall",
+      "lat": 31.769732,
+      "lon": -106.369168
+    },
+    {
+      "id": "osm:n8631005869",
+      "name": "Versona",
+      "kind": "clothes",
+      "lat": 31.769986,
+      "lon": -106.371164
+    },
+    {
+      "id": "osm:n8631005884",
+      "name": "Nordstrom Rack",
+      "kind": "clothes",
+      "lat": 31.769927,
+      "lon": -106.369606
+    },
+    {
+      "id": "osm:n8631005888",
+      "name": "OshKosh B'gosh",
+      "kind": "clothes",
+      "lat": 31.771007,
+      "lon": -106.371756
+    },
+    {
+      "id": "osm:n8633567296",
+      "name": "Centro Comercial El Paseo",
+      "kind": "mall",
+      "lat": 31.712498,
+      "lon": -106.450236
+    },
+    {
+      "id": "osm:n8633605638",
+      "name": "Coppel López Mateos",
+      "kind": "mall",
+      "lat": 31.715038,
+      "lon": -106.452787
+    },
+    {
+      "id": "osm:n8633609016",
+      "name": "Elektra",
+      "kind": "mall",
+      "lat": 31.713077,
+      "lon": -106.454647
+    },
+    {
+      "id": "osm:n9005485256",
+      "name": "Sunland Park Grocery",
+      "kind": "supermarket",
+      "lat": 31.798292,
+      "lon": -106.575478
+    },
+    {
+      "id": "osm:n9006571781",
+      "name": "San Eli Supermarket",
+      "kind": "supermarket",
+      "lat": 31.509417,
+      "lon": -106.147805
+    },
+    {
+      "id": "osm:n9234061417",
+      "name": "Plaza Vitattoria",
+      "kind": "supermarket",
+      "lat": 31.675403,
+      "lon": -106.379501
+    },
+    {
+      "id": "osm:n9561758859",
+      "name": "COMERCIAL FERRETERA",
+      "kind": "hardware",
+      "lat": 31.711084,
+      "lon": -106.410398
+    },
+    {
+      "id": "osm:n9563328180",
+      "name": "Soriana",
+      "kind": "supermarket",
+      "lat": 31.70484,
+      "lon": -106.429658
+    },
+    {
+      "id": "osm:n9563328181",
+      "name": "Hagalo",
+      "kind": "hardware",
+      "lat": 31.705505,
+      "lon": -106.430485
+    },
+    {
+      "id": "osm:n9563329918",
+      "name": "Luxor",
+      "kind": "clothes",
+      "lat": 31.7183,
+      "lon": -106.432396
+    },
+    {
+      "id": "osm:n9569372730",
+      "name": "S-Mart",
+      "kind": "supermarket",
+      "lat": 31.666243,
+      "lon": -106.403681
+    },
+    {
+      "id": "osm:n9622984913",
+      "name": "Ferretería Leo",
+      "kind": "hardware",
+      "lat": 31.662349,
+      "lon": -106.467203
+    },
+    {
+      "id": "osm:n9624057549",
+      "name": "Mercantil LAVI de Ciudad Juárez S.A. de C.V.",
+      "kind": "craft",
+      "lat": 31.704562,
+      "lon": -106.446044
+    },
+    {
+      "id": "osm:n9625565846",
+      "name": "Cofiasa Juárez Sur",
+      "kind": "hardware",
+      "lat": 31.679321,
+      "lon": -106.437773
+    },
+    {
+      "id": "osm:n9650839685",
+      "name": "FERRETERIAY REFACCIONARIA HERRERA",
+      "kind": "hardware",
+      "lat": 31.659989,
+      "lon": -106.428415
+    },
+    {
+      "id": "osm:n9650853348",
+      "name": "ELECTRONICA EN GENERAL",
+      "kind": "craft",
+      "lat": 31.668538,
+      "lon": -106.416894
+    },
+    {
+      "id": "osm:n9691350155",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.722779,
+      "lon": -106.305285
+    },
+    {
+      "id": "osm:n9691350161",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.769717,
+      "lon": -106.424311
+    },
+    {
+      "id": "osm:n9691350163",
+      "name": "dd's Discounts",
+      "kind": "mall",
+      "lat": 31.769056,
+      "lon": -106.422527
+    },
+    {
+      "id": "osm:n9713037091",
+      "name": "C&A",
+      "kind": "clothes",
+      "lat": 31.687032,
+      "lon": -106.409531
+    },
+    {
+      "id": "osm:n9859974317",
+      "name": "Los Cedros Hotel Inn",
+      "kind": "hotel",
+      "lat": 31.739914,
+      "lon": -106.442949
+    },
+    {
+      "id": "osm:n9869072272",
+      "name": "San Eli Supermarket",
+      "kind": "supermarket",
+      "lat": 31.564317,
+      "lon": -106.244855
+    },
+    {
+      "id": "osm:n9869210076",
+      "name": "Clint Laundromat",
+      "kind": "clothes",
+      "lat": 31.58789,
+      "lon": -106.233794
+    },
+    {
+      "id": "osm:n9869501758",
+      "name": "Ortiz Produce and Groceries",
+      "kind": "supermarket",
+      "lat": 31.570407,
+      "lon": -106.274658
+    },
+    {
+      "id": "osm:n9972768324",
+      "name": "Coppel",
+      "kind": "mall",
+      "lat": 31.704706,
+      "lon": -106.428369
+    },
+    {
+      "id": "osm:n9988832348",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.690459,
+      "lon": -106.26602
+    },
+    {
+      "id": "osm:n10125166629",
+      "name": "Carlos Villarreal",
+      "kind": "hotel",
+      "lat": 31.738605,
+      "lon": -106.481698
+    },
+    {
+      "id": "osm:n10229712352",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.681406,
+      "lon": -106.315257
+    },
+    {
+      "id": "osm:n10229712353",
+      "name": "Lids",
+      "kind": "clothes",
+      "lat": 31.681354,
+      "lon": -106.315504
+    },
+    {
+      "id": "osm:n10231346485",
+      "name": "Naturista Hierberia Julia",
+      "kind": "supermarket",
+      "lat": 31.669269,
+      "lon": -106.345444
+    },
+    {
+      "id": "osm:n10231375661",
+      "name": "Gelish Uñas y Mas",
+      "kind": "supermarket",
+      "lat": 31.669282,
+      "lon": -106.3454
+    },
+    {
+      "id": "osm:n10622090567",
+      "name": "Wine Club",
+      "kind": "supermarket",
+      "lat": 31.731604,
+      "lon": -106.41131
+    },
+    {
+      "id": "osm:n10623516885",
+      "name": "Sugarland",
+      "kind": "supermarket",
+      "lat": 31.712557,
+      "lon": -106.408467
+    },
+    {
+      "id": "osm:n10623516887",
+      "name": "Casa Canela",
+      "kind": "supermarket",
+      "lat": 31.711575,
+      "lon": -106.407719
+    },
+    {
+      "id": "osm:n10721037005",
+      "name": "Burlington",
+      "kind": "mall",
+      "lat": 31.753691,
+      "lon": -106.342619
+    },
+    {
+      "id": "osm:n10962173386",
+      "name": "la tiendita productos de limpieza",
+      "kind": "supermarket",
+      "lat": 31.657608,
+      "lon": -106.416005
+    },
+    {
+      "id": "osm:n11287167790",
+      "name": "Rachel's Boutique",
+      "kind": "clothes",
+      "lat": 31.73548,
+      "lon": -106.443327
+    },
+    {
+      "id": "osm:n11287167794",
+      "name": "Moda Masculina",
+      "kind": "clothes",
+      "lat": 31.735177,
+      "lon": -106.443328
+    },
+    {
+      "id": "osm:n11432505494",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.836126,
+      "lon": -106.560816
+    },
+    {
+      "id": "osm:n11461375631",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.898461,
+      "lon": -106.527353
+    },
+    {
+      "id": "osm:n11461375632",
+      "name": "El Refri",
+      "kind": "information",
+      "lat": 31.898582,
+      "lon": -106.546293
+    },
+    {
+      "id": "osm:n11461389077",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.894019,
+      "lon": -106.515286
+    },
+    {
+      "id": "osm:n11461389078",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.890746,
+      "lon": -106.548427
+    },
+    {
+      "id": "osm:n11461389082",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.900468,
+      "lon": -106.535123
+    },
+    {
+      "id": "osm:n11461389083",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.900507,
+      "lon": -106.535057
+    },
+    {
+      "id": "osm:n11461389089",
+      "name": "Borderland Mountain Bike Association",
+      "kind": "information",
+      "lat": 31.883134,
+      "lon": -106.549328
+    },
+    {
+      "id": "osm:n11463508260",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.892533,
+      "lon": -106.550796
+    },
+    {
+      "id": "osm:n11463508263",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.892846,
+      "lon": -106.551763
+    },
+    {
+      "id": "osm:n11463528169",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.88751,
+      "lon": -106.546651
+    },
+    {
+      "id": "osm:n11463528170",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.890801,
+      "lon": -106.54856
+    },
+    {
+      "id": "osm:n11463528171",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.885697,
+      "lon": -106.546796
+    },
+    {
+      "id": "osm:n11463528172",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.898484,
+      "lon": -106.546261
+    },
+    {
+      "id": "osm:n11463528173",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.894715,
+      "lon": -106.546806
+    },
+    {
+      "id": "osm:n11463528175",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.890641,
+      "lon": -106.54792
+    },
+    {
+      "id": "osm:n11463528177",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.888256,
+      "lon": -106.546216
+    },
+    {
+      "id": "osm:n11464418690",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.884602,
+      "lon": -106.548776
+    },
+    {
+      "id": "osm:n11464500364",
+      "name": "Soriana",
+      "kind": "supermarket",
+      "lat": 31.711635,
+      "lon": -106.443375
+    },
+    {
+      "id": "osm:n11471956351",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.892085,
+      "lon": -106.540634
+    },
+    {
+      "id": "osm:n11471956353",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.892078,
+      "lon": -106.548693
+    },
+    {
+      "id": "osm:n11471956357",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.892297,
+      "lon": -106.548705
+    },
+    {
+      "id": "osm:n11471956358",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.891669,
+      "lon": -106.535621
+    },
+    {
+      "id": "osm:n11471956359",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.891674,
+      "lon": -106.529548
+    },
+    {
+      "id": "osm:n11471956362",
+      "name": "The Frontera Land Alliance",
+      "kind": "information",
+      "lat": 31.894241,
+      "lon": -106.553867
+    },
+    {
+      "id": "osm:n11471956364",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.888048,
+      "lon": -106.529115
+    },
+    {
+      "id": "osm:n11471970671",
+      "name": "Texas Parks & Wildlife Department",
+      "kind": "information",
+      "lat": 31.884624,
+      "lon": -106.525423
+    },
+    {
+      "id": "osm:n11741516390",
+      "name": "Highway 28 Brewery",
+      "kind": "craft",
+      "lat": 32.049174,
+      "lon": -106.674943
+    },
+    {
+      "id": "osm:n11755949772",
+      "name": "Hero Athletic",
+      "kind": "clothes",
+      "lat": 31.757402,
+      "lon": -106.488662
+    },
+    {
+      "id": "osm:n11870554179",
+      "name": "Fajas, Fajas Y Fajas",
+      "kind": "clothes",
+      "lat": 31.676565,
+      "lon": -106.422756
+    },
+    {
+      "id": "osm:n11900198243",
+      "name": "Apricot Lane Boutique",
+      "kind": "clothes",
+      "lat": 31.770094,
+      "lon": -106.371399
+    },
+    {
+      "id": "osm:n11900198244",
+      "name": "Loft",
+      "kind": "clothes",
+      "lat": 31.770147,
+      "lon": -106.371524
+    },
+    {
+      "id": "osm:n11900198245",
+      "name": "Torrid",
+      "kind": "clothes",
+      "lat": 31.770232,
+      "lon": -106.371731
+    },
+    {
+      "id": "osm:n11900198258",
+      "name": "Carter's",
+      "kind": "clothes",
+      "lat": 31.770949,
+      "lon": -106.371623
+    },
+    {
+      "id": "osm:n11900198259",
+      "name": "DXL Men's Apparel",
+      "kind": "clothes",
+      "lat": 31.770851,
+      "lon": -106.371411
+    },
+    {
+      "id": "osm:n11920634632",
+      "name": "H&M",
+      "kind": "clothes",
+      "lat": 31.774632,
+      "lon": -106.37849
+    },
+    {
+      "id": "osm:n11920634633",
+      "name": "Victoria's Secret",
+      "kind": "clothes",
+      "lat": 31.774693,
+      "lon": -106.378622
+    },
+    {
+      "id": "osm:n11920634634",
+      "name": "Guess",
+      "kind": "clothes",
+      "lat": 31.774763,
+      "lon": -106.378772
+    },
+    {
+      "id": "osm:n11920634636",
+      "name": "Michael Kors",
+      "kind": "clothes",
+      "lat": 31.774794,
+      "lon": -106.379051
+    },
+    {
+      "id": "osm:n11920634638",
+      "name": "Dolce Vita",
+      "kind": "clothes",
+      "lat": 31.774967,
+      "lon": -106.379466
+    },
+    {
+      "id": "osm:n11920634640",
+      "name": "Abercrombie & Fitch",
+      "kind": "clothes",
+      "lat": 31.775058,
+      "lon": -106.379669
+    },
+    {
+      "id": "osm:n11920634653",
+      "name": "Lids",
+      "kind": "clothes",
+      "lat": 31.775501,
+      "lon": -106.379882
+    },
+    {
+      "id": "osm:n11920634654",
+      "name": "Galliano Boutique",
+      "kind": "clothes",
+      "lat": 31.775688,
+      "lon": -106.379975
+    },
+    {
+      "id": "osm:n11920634655",
+      "name": "Windsor",
+      "kind": "clothes",
+      "lat": 31.775768,
+      "lon": -106.379922
+    },
+    {
+      "id": "osm:n11920699920",
+      "name": "Evolution Cell Phone Repairs",
+      "kind": "craft",
+      "lat": 31.775195,
+      "lon": -106.380558
+    },
+    {
+      "id": "osm:n11989134490",
+      "name": "PX Plaza",
+      "kind": "supermarket",
+      "lat": 31.815738,
+      "lon": -106.428119
+    },
+    {
+      "id": "osm:n12046318082",
+      "name": "Woolworth",
+      "kind": "mall",
+      "lat": 31.711269,
+      "lon": -106.441047
+    },
+    {
+      "id": "osm:n12051751251",
+      "name": "Texas Parks and Wildlife Department",
+      "kind": "information",
+      "lat": 31.92812,
+      "lon": -106.50939
+    },
+    {
+      "id": "osm:n12051751252",
+      "name": "Texas Parks and Wildlife Department",
+      "kind": "information",
+      "lat": 31.921657,
+      "lon": -106.513067
+    },
+    {
+      "id": "osm:n12163512101",
+      "name": "Ferretería Corona",
+      "kind": "hardware",
+      "lat": 31.664918,
+      "lon": -106.41706
+    },
+    {
+      "id": "osm:n12163512102",
+      "name": "Ferreteria Ronko",
+      "kind": "hardware",
+      "lat": 31.667334,
+      "lon": -106.417967
+    },
+    {
+      "id": "osm:n12392615899",
+      "name": "Ross",
+      "kind": "mall",
+      "lat": 31.782492,
+      "lon": -106.408927
+    },
+    {
+      "id": "osm:n12392615900",
+      "name": "Marshalls",
+      "kind": "mall",
+      "lat": 31.782354,
+      "lon": -106.409847
+    },
+    {
+      "id": "osm:n12466378414",
+      "name": "Rio Bosque Visitor Center",
+      "kind": "information",
+      "lat": 31.637915,
+      "lon": -106.301919
+    },
+    {
+      "id": "osm:n12579270940",
+      "name": "Everhome Suites",
+      "kind": "hotel",
+      "lat": 31.798115,
+      "lon": -106.327325
+    },
+    {
+      "id": "osm:n12653706532",
+      "name": "Food King",
+      "kind": "supermarket",
+      "lat": 31.854741,
+      "lon": -106.439215
+    },
+    {
+      "id": "osm:n12654225034",
+      "name": "Food King",
+      "kind": "supermarket",
+      "lat": 31.894669,
+      "lon": -106.413496
+    },
+    {
+      "id": "osm:n12657554597",
+      "name": "Valley Supermarket",
+      "kind": "supermarket",
+      "lat": 31.903468,
+      "lon": -106.423133
+    },
+    {
+      "id": "osm:n13019744175",
+      "name": "Explosion Shops",
+      "kind": "supermarket",
+      "lat": 31.667612,
+      "lon": -106.473739
+    },
+    {
+      "id": "osm:n13162191501",
+      "name": "Liverpool",
+      "kind": "mall",
+      "lat": 31.736275,
+      "lon": -106.447046
+    },
+    {
+      "id": "osm:n13185152174",
+      "name": "Five Points Ace Hardware",
+      "kind": "hardware",
+      "lat": 31.784668,
+      "lon": -106.461841
+    },
+    {
+      "id": "osm:n13256703176",
+      "name": "Extended Suites Ciudad Juárez Consulado",
+      "kind": "hotel",
+      "lat": 31.688105,
+      "lon": -106.408163
+    },
+    {
+      "id": "osm:n13307091620",
+      "name": "Lonas",
+      "kind": "craft",
+      "lat": 31.669857,
+      "lon": -106.421353
+    },
+    {
+      "id": "osm:n13322130306",
+      "name": "Brown Street Market",
+      "kind": "supermarket",
+      "lat": 31.773026,
+      "lon": -106.483534
+    },
+    {
+      "id": "osm:n13331561837",
+      "name": "Hotel Mesaluna Short & Long Stay",
+      "kind": "hotel",
+      "lat": 31.687553,
+      "lon": -106.405077
+    },
+    {
+      "id": "osm:n13331561839",
+      "name": "Ibis Juarez Consulado",
+      "kind": "hotel",
+      "lat": 31.685874,
+      "lon": -106.403826
+    },
+    {
+      "id": "osm:n13341109916",
+      "name": "S-Mart",
+      "kind": "supermarket",
+      "lat": 31.649969,
+      "lon": -106.35674
+    },
+    {
+      "id": "osm:n13341322021",
+      "name": "Supermercado Gonzalez",
+      "kind": "supermarket",
+      "lat": 31.661042,
+      "lon": -106.473868
+    },
+    {
+      "id": "osm:n13357543599",
+      "name": "Motel Lebaron",
+      "kind": "motel",
+      "lat": 31.712092,
+      "lon": -106.423879
+    },
+    {
+      "id": "osm:n13376008030",
+      "name": "Hotel Victoria Inn",
+      "kind": "motel",
+      "lat": 31.69675,
+      "lon": -106.403568
+    },
+    {
+      "id": "osm:n13381601201",
+      "name": "El Nuevo Sol Market",
+      "kind": "grocery",
+      "lat": 31.817117,
+      "lon": -106.452035
+    },
+    {
+      "id": "osm:n13381601202",
+      "name": "High Desert Native Plants, LLC",
+      "kind": "craft",
+      "lat": 31.820114,
+      "lon": -106.563623
+    },
+    {
+      "id": "osm:n13414214801",
+      "name": "Juárez Hidro Pool",
+      "kind": "craft",
+      "lat": 31.690046,
+      "lon": -106.380706
+    },
+    {
+      "id": "osm:n13453454876",
+      "name": "Los Girasoles",
+      "kind": "motel",
+      "lat": 31.655864,
+      "lon": -106.429613
+    },
+    {
+      "id": "osm:n13453454877",
+      "name": "La Calesa",
+      "kind": "motel",
+      "lat": 31.654816,
+      "lon": -106.429874
+    },
+    {
+      "id": "osm:n13598820425",
+      "name": "Tornillos y Tuercas",
+      "kind": "hardware",
+      "lat": 31.72308,
+      "lon": -106.420917
+    },
+    {
+      "id": "osm:n13598820426",
+      "name": "Mikel's",
+      "kind": "hardware",
+      "lat": 31.703638,
+      "lon": -106.419865
+    },
+    {
+      "id": "osm:n13614826119",
+      "name": "Tamales y Taquizas",
+      "kind": "craft",
+      "lat": 31.699903,
+      "lon": -106.219321
+    },
+    {
+      "id": "osm:n13670732739",
+      "name": "Plaza Don Pancho",
+      "kind": "mall",
+      "lat": 31.698231,
+      "lon": -106.392939
+    },
+    {
+      "id": "osm:n13680960941",
+      "name": "Aloft",
+      "kind": "hotel",
+      "lat": 31.759699,
+      "lon": -106.486155
+    },
+    {
+      "id": "osm:n13691531452",
+      "name": "Renowned Repairs",
+      "kind": "craft",
+      "lat": 31.814395,
+      "lon": -106.544053
+    },
+    {
+      "id": "osm:n13726956421",
+      "name": "Number",
+      "kind": "craft",
+      "lat": 31.762243,
+      "lon": -106.481492
+    },
+    {
+      "id": "osm:n13766825430",
+      "name": "Burlington",
+      "kind": "mall",
+      "lat": 31.691004,
+      "lon": -106.267195
+    },
+    {
+      "id": "osm:n13766825436",
+      "name": "dd's Discounts",
+      "kind": "mall",
+      "lat": 31.690349,
+      "lon": -106.265524
+    },
+    {
+      "id": "osm:n13768622345",
+      "name": "Watermill Express",
+      "kind": "water",
+      "lat": 31.682487,
+      "lon": -106.196543
+    },
+    {
+      "id": "osm:n14039780204",
+      "name": "Sears Watch & Jewelry Repairs",
+      "kind": "craft",
+      "lat": 31.776792,
+      "lon": -106.378966
+    },
+    {
+      "id": "osm:n14127001301",
+      "name": "Amigo Market",
+      "kind": "grocery",
+      "lat": 31.805684,
+      "lon": -106.454185
+    },
+    {
+      "id": "osm:w78508915",
+      "name": "Comfort Inn & Suites I-10 Airport",
+      "kind": "hotel",
+      "lat": 31.78025,
+      "lon": -106.394114
+    },
+    {
+      "id": "osm:w78508993",
+      "name": "Best Western Plus El Paso Airport Hotel & Conference Center",
+      "kind": "hotel",
+      "lat": 31.779845,
+      "lon": -106.39337
+    },
+    {
+      "id": "osm:w83313668",
+      "name": "Galerias Tec",
+      "kind": "mall",
+      "lat": 31.714435,
+      "lon": -106.421778
+    },
+    {
+      "id": "osm:w161021373",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.835885,
+      "lon": -106.5642
+    },
+    {
+      "id": "osm:w161021396",
+      "name": "Fairfield Inn & Suites El Paso",
+      "kind": "hotel",
+      "lat": 31.833299,
+      "lon": -106.566058
+    },
+    {
+      "id": "osm:w161021422",
+      "name": "La Quinta Inn El Paso West",
+      "kind": "hotel",
+      "lat": 31.837623,
+      "lon": -106.568149
+    },
+    {
+      "id": "osm:w161021424",
+      "name": "Red Roof Inn - El Paso West",
+      "kind": "hotel",
+      "lat": 31.835963,
+      "lon": -106.56781
+    },
+    {
+      "id": "osm:w161021428",
+      "name": "SpringHill Suites El Paso",
+      "kind": "hotel",
+      "lat": 31.834081,
+      "lon": -106.566164
+    },
+    {
+      "id": "osm:w161021429",
+      "name": "Econo Lodge Inn & Suites",
+      "kind": "motel",
+      "lat": 31.838082,
+      "lon": -106.568567
+    },
+    {
+      "id": "osm:w161027972",
+      "name": "La Quinta Inn & Suites El Paso West Bartlett",
+      "kind": "hotel",
+      "lat": 31.839998,
+      "lon": -106.567513
+    },
+    {
+      "id": "osm:w161027977",
+      "name": "Comfort Suites El Paso West",
+      "kind": "hotel",
+      "lat": 31.84149,
+      "lon": -106.56841
+    },
+    {
+      "id": "osm:w166559970",
+      "name": "Boxtel",
+      "kind": "hotel",
+      "lat": 31.757465,
+      "lon": -106.493562
+    },
+    {
+      "id": "osm:w166559973",
+      "name": "Courtyard El Paso Downtown",
+      "kind": "hotel",
+      "lat": 31.760748,
+      "lon": -106.492396
+    },
+    {
+      "id": "osm:w170305463",
+      "name": "Burlington",
+      "kind": "mall",
+      "lat": 31.832238,
+      "lon": -106.528512
+    },
+    {
+      "id": "osm:w170305488",
+      "name": "Sunland Park Mall",
+      "kind": "mall",
+      "lat": 31.814992,
+      "lon": -106.544459
+    },
+    {
+      "id": "osm:w170305497",
+      "name": "Target",
+      "kind": "mall",
+      "lat": 31.818931,
+      "lon": -106.548076
+    },
+    {
+      "id": "osm:w172344109",
+      "name": "Lowe's",
+      "kind": "hardware",
+      "lat": 31.804736,
+      "lon": -106.264817
+    },
+    {
+      "id": "osm:w173386111",
+      "name": "Red Roof Inn - El Paso East",
+      "kind": "hotel",
+      "lat": 31.731448,
+      "lon": -106.313317
+    },
+    {
+      "id": "osm:w175453655",
+      "name": "Centro Comercial Soriana Zaragoza",
+      "kind": "mall",
+      "lat": 31.657093,
+      "lon": -106.444431
+    },
+    {
+      "id": "osm:w187814794",
+      "name": "Centro Comercial Las Misiones",
+      "kind": "mall",
+      "lat": 31.686813,
+      "lon": -106.409104
+    },
+    {
+      "id": "osm:w203463436",
+      "name": "Best Western Anthony / West El Paso",
+      "kind": "hotel",
+      "lat": 31.99639,
+      "lon": -106.584244
+    },
+    {
+      "id": "osm:w203578590",
+      "name": "Kohl's",
+      "kind": "mall",
+      "lat": 31.867237,
+      "lon": -106.576806
+    },
+    {
+      "id": "osm:w204314447",
+      "name": "Hampton Inn & Suites",
+      "kind": "hotel",
+      "lat": 31.884323,
+      "lon": -106.583756
+    },
+    {
+      "id": "osm:w204314448",
+      "name": "Holiday Inn Express & Suites El Paso West",
+      "kind": "hotel",
+      "lat": 31.883446,
+      "lon": -106.585017
+    },
+    {
+      "id": "osm:w233625061",
+      "name": "JCPenney",
+      "kind": "mall",
+      "lat": 31.766617,
+      "lon": -106.266646
+    },
+    {
+      "id": "osm:w233625063",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.762156,
+      "lon": -106.263611
+    },
+    {
+      "id": "osm:w249044427",
+      "name": "Chamizal N.M. Visitor Center",
+      "kind": "information",
+      "lat": 31.767945,
+      "lon": -106.454171
+    },
+    {
+      "id": "osm:w251860968",
+      "name": "Walmart",
+      "kind": "mall",
+      "lat": 31.704671,
+      "lon": -106.418527
+    },
+    {
+      "id": "osm:w252218142",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.703853,
+      "lon": -106.421657
+    },
+    {
+      "id": "osm:w252704977",
+      "name": "Rio Grande Mall",
+      "kind": "mall",
+      "lat": 31.735145,
+      "lon": -106.446745
+    },
+    {
+      "id": "osm:w252797420",
+      "name": "SOLFUTURO",
+      "kind": "hardware",
+      "lat": 31.731328,
+      "lon": -106.438822
+    },
+    {
+      "id": "osm:w262818916",
+      "name": "Hotel Paso Del Norte, Autograph Collection",
+      "kind": "hotel",
+      "lat": 31.757707,
+      "lon": -106.489531
+    },
+    {
+      "id": "osm:w262818918",
+      "name": "Plaza Hotel 1930",
+      "kind": "hotel",
+      "lat": 31.758756,
+      "lon": -106.488565
+    },
+    {
+      "id": "osm:w287949350",
+      "name": "Holiday Inn Express",
+      "kind": "hotel",
+      "lat": 31.684858,
+      "lon": -106.406109
+    },
+    {
+      "id": "osm:w287949351",
+      "name": "Hotel Mesaluna",
+      "kind": "hotel",
+      "lat": 31.691159,
+      "lon": -106.404307
+    },
+    {
+      "id": "osm:w301953946",
+      "name": "Casitas Veronica",
+      "kind": "hotel",
+      "lat": 31.732617,
+      "lon": -106.455729
+    },
+    {
+      "id": "osm:w305986955",
+      "name": "Days Inn El Paso East",
+      "kind": "hotel",
+      "lat": 31.752414,
+      "lon": -106.34355
+    },
+    {
+      "id": "osm:w305986985",
+      "name": "La Quinta Inn & Suites El Paso East",
+      "kind": "hotel",
+      "lat": 31.751842,
+      "lon": -106.346926
+    },
+    {
+      "id": "osm:w305986986",
+      "name": "Quality Inn Airport East",
+      "kind": "hotel",
+      "lat": 31.75057,
+      "lon": -106.344921
+    },
+    {
+      "id": "osm:w311413639",
+      "name": "Centro de Informacion Turistica El Chamizal",
+      "kind": "information",
+      "lat": 31.76021,
+      "lon": -106.4526
+    },
+    {
+      "id": "osm:w311416319",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.648105,
+      "lon": -106.385828
+    },
+    {
+      "id": "osm:w315278725",
+      "name": "Texas Travel Information Center at Anthony",
+      "kind": "information",
+      "lat": 31.982134,
+      "lon": -106.584298
+    },
+    {
+      "id": "osm:w374643512",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.722137,
+      "lon": -106.451923
+    },
+    {
+      "id": "osm:w438588567",
+      "name": "Lowe's",
+      "kind": "hardware",
+      "lat": 31.861935,
+      "lon": -106.572636
+    },
+    {
+      "id": "osm:w482493085",
+      "name": "Mesa Inn",
+      "kind": "motel",
+      "lat": 31.792454,
+      "lon": -106.509742
+    },
+    {
+      "id": "osm:w553384259",
+      "name": "Construtodo",
+      "kind": "hardware",
+      "lat": 31.696287,
+      "lon": -106.408349
+    },
+    {
+      "id": "osm:w584636368",
+      "name": "Lowe's",
+      "kind": "hardware",
+      "lat": 31.727283,
+      "lon": -106.305314
+    },
+    {
+      "id": "osm:w636462674",
+      "name": "Campamento del mirador",
+      "kind": "camp_site",
+      "lat": 31.53765,
+      "lon": -106.473182
+    },
+    {
+      "id": "osm:w665367010",
+      "name": "Ferreteria Unión",
+      "kind": "hardware",
+      "lat": 31.669046,
+      "lon": -106.417416
+    },
+    {
+      "id": "osm:w667344282",
+      "name": "Undisputed Craft House",
+      "kind": "craft",
+      "lat": 31.76625,
+      "lon": -106.285592
+    },
+    {
+      "id": "osm:w727506816",
+      "name": "La Quinta Inn El Paso - Airport",
+      "kind": "motel",
+      "lat": 31.780504,
+      "lon": -106.408723
+    },
+    {
+      "id": "osm:w734895845",
+      "name": "Americas Best Value Inn El Paso Medical Center Airport",
+      "kind": "motel",
+      "lat": 31.776352,
+      "lon": -106.432504
+    },
+    {
+      "id": "osm:w734895964",
+      "name": "The Soluna Hotel",
+      "kind": "motel",
+      "lat": 31.779671,
+      "lon": -106.420771
+    },
+    {
+      "id": "osm:w734907118",
+      "name": "The Home Depot",
+      "kind": "hardware",
+      "lat": 31.739392,
+      "lon": -106.32039
+    },
+    {
+      "id": "osm:w734910460",
+      "name": "Motel 6 El Paso, TX - East",
+      "kind": "motel",
+      "lat": 31.745934,
+      "lon": -106.329738
+    },
+    {
+      "id": "osm:w734910472",
+      "name": "Studio 6 El Paso, TX - East",
+      "kind": "motel",
+      "lat": 31.745827,
+      "lon": -106.331675
+    },
+    {
+      "id": "osm:w753038990",
+      "name": "La Posta Motor Lodge",
+      "kind": "motel",
+      "lat": 31.790291,
+      "lon": -106.50804
+    },
+    {
+      "id": "osm:w757071239",
+      "name": "Motel 6 El Paso, TX - West",
+      "kind": "motel",
+      "lat": 31.840982,
+      "lon": -106.572523
+    },
+    {
+      "id": "osm:w789055583",
+      "name": "Real Stone Work",
+      "kind": "craft",
+      "lat": 31.805832,
+      "lon": -106.544273
+    },
+    {
+      "id": "osm:w794278838",
+      "name": "Traffic Control Booth 1",
+      "kind": "information",
+      "lat": 31.772191,
+      "lon": -106.501813
+    },
+    {
+      "id": "osm:w923310149",
+      "name": "Motel 6 El Paso, TX - Airport - Fort Bliss",
+      "kind": "motel",
+      "lat": 31.788779,
+      "lon": -106.407043
+    },
+    {
+      "id": "osm:w923324666",
+      "name": "Americas Best Value Inn Suites - El Paso West",
+      "kind": "motel",
+      "lat": 31.794639,
+      "lon": -106.516995
+    },
+    {
+      "id": "osm:w924039779",
+      "name": "Cortez Motel",
+      "kind": "motel",
+      "lat": 31.750399,
+      "lon": -106.388824
+    },
+    {
+      "id": "osm:w929529852",
+      "name": "Cell Phone Repair",
+      "kind": "craft",
+      "lat": 31.924647,
+      "lon": -106.440083
+    },
+    {
+      "id": "osm:w935736857",
+      "name": "Sands Motel",
+      "kind": "motel",
+      "lat": 31.761544,
+      "lon": -106.400244
+    },
+    {
+      "id": "osm:w935757064",
+      "name": "Del Norte Courts Motel",
+      "kind": "motel",
+      "lat": 31.77372,
+      "lon": -106.444262
+    },
+    {
+      "id": "osm:w940869408",
+      "name": "Franklin Mountains State Park Visitor Center",
+      "kind": "information",
+      "lat": 31.910552,
+      "lon": -106.518131
+    },
+    {
+      "id": "osm:w990210983",
+      "name": "Lowe's",
+      "kind": "hardware",
+      "lat": 31.900989,
+      "lon": -106.438776
+    },
+    {
+      "id": "osm:w990962700",
+      "name": "True Value",
+      "kind": "hardware",
+      "lat": 31.924793,
+      "lon": -106.600385
+    },
+    {
+      "id": "osm:w990962707",
+      "name": "Ace Hardware",
+      "kind": "hardware",
+      "lat": 31.918682,
+      "lon": -106.601105
+    },
+    {
+      "id": "osm:w1030124375",
+      "name": "Ace Hardware",
+      "kind": "hardware",
+      "lat": 31.767284,
+      "lon": -106.427038
+    },
+    {
+      "id": "osm:w1036060567",
+      "name": "Oasa Oxígeno y Soldaduras de Juárez Sa. De C.v (OASA)",
+      "kind": "hardware",
+      "lat": 31.706333,
+      "lon": -106.447685
+    },
+    {
+      "id": "osm:w1038143409",
+      "name": "Ferrejuárez",
+      "kind": "hardware",
+      "lat": 31.675564,
+      "lon": -106.41614
+    },
+    {
+      "id": "osm:w1058030719",
+      "name": "Madecentro",
+      "kind": "craft",
+      "lat": 31.680894,
+      "lon": -106.436299
+    },
+    {
+      "id": "osm:w1095805336",
+      "name": "DeadBeach Brewery",
+      "kind": "craft",
+      "lat": 31.755383,
+      "lon": -106.492492
+    },
+    {
+      "id": "osm:w1108406279",
+      "name": "Anthony Inn",
+      "kind": "motel",
+      "lat": 31.995952,
+      "lon": -106.580808
+    },
+    {
+      "id": "osm:w1112431984",
+      "name": "RoofNow",
+      "kind": "craft",
+      "lat": 31.769923,
+      "lon": -106.299339
+    },
+    {
+      "id": "osm:w1157013868",
+      "name": "Budget Lodge",
+      "kind": "motel",
+      "lat": 31.766729,
+      "lon": -106.49477
+    },
+    {
+      "id": "osm:w1199637664",
+      "name": "Rio Seco Ag and Supply",
+      "kind": "hardware",
+      "lat": 31.514618,
+      "lon": -106.16901
+    },
+    {
+      "id": "osm:w1199663153",
+      "name": "Fabens Inn",
+      "kind": "motel",
+      "lat": 31.518628,
+      "lon": -106.133373
+    },
+    {
+      "id": "osm:w1200022826",
+      "name": "Do it Best",
+      "kind": "hardware",
+      "lat": 31.503266,
+      "lon": -106.157274
+    },
+    {
+      "id": "osm:w1263781907",
+      "name": "Mesa Vista Winery Tasting Room",
+      "kind": "craft",
+      "lat": 31.956675,
+      "lon": -106.645022
+    },
+    {
+      "id": "osm:w1501558093",
+      "name": "Motel La Cuesta",
+      "kind": "motel",
+      "lat": 31.676603,
+      "lon": -106.42555
+    },
+    {
+      "id": "osm:r13340406",
+      "name": "Super 8 by Wyndham El Paso Airport",
+      "kind": "motel",
+      "lat": 31.768799,
+      "lon": -106.374616
+    },
+    {
+      "id": "osm:n50688894",
+      "name": "El Paso",
+      "kind": "city",
+      "lat": 31.7601,
+      "lon": -106.487048
+    },
+    {
+      "id": "osm:n151331817",
+      "name": "Horizon City",
+      "kind": "town",
+      "lat": 31.692612,
+      "lon": -106.207479
+    },
+    {
+      "id": "osm:n151345195",
+      "name": "Fabens",
+      "kind": "town",
+      "lat": 31.504431,
+      "lon": -106.15084
+    },
+    {
+      "id": "osm:n151363611",
+      "name": "La Mesa",
+      "kind": "town",
+      "lat": 32.122042,
+      "lon": -106.707775
+    },
+    {
+      "id": "osm:n151400185",
+      "name": "San Miguel",
+      "kind": "town",
+      "lat": 32.155375,
+      "lon": -106.734999
+    },
+    {
+      "id": "osm:n151415684",
+      "name": "Tornillo",
+      "kind": "town",
+      "lat": 31.445394,
+      "lon": -106.088304
+    },
+    {
+      "id": "osm:n151453333",
+      "name": "Berino",
+      "kind": "town",
+      "lat": 32.069263,
+      "lon": -106.619329
+    },
+    {
+      "id": "osm:n151462208",
+      "name": "Chaparral",
+      "kind": "town",
+      "lat": 32.02387,
+      "lon": -106.40895
+    },
+    {
+      "id": "osm:n151466937",
+      "name": "Clint",
+      "kind": "town",
+      "lat": 31.590074,
+      "lon": -106.227871
+    },
+    {
+      "id": "osm:n151600915",
+      "name": "Socorro",
+      "kind": "town",
+      "lat": 31.654557,
+      "lon": -106.303315
+    },
+    {
+      "id": "osm:n151638305",
+      "name": "San Elizario",
+      "kind": "town",
+      "lat": 31.586983,
+      "lon": -106.266011
+    },
+    {
+      "id": "osm:n151644466",
+      "name": "Santa Teresa",
+      "kind": "town",
+      "lat": 31.858873,
+      "lon": -106.646571
+    },
+    {
+      "id": "osm:n151653912",
+      "name": "Vinton",
+      "kind": "town",
+      "lat": 31.956262,
+      "lon": -106.595383
+    },
+    {
+      "id": "osm:n151686158",
+      "name": "Vado",
+      "kind": "town",
+      "lat": 32.111765,
+      "lon": -106.662495
+    },
+    {
+      "id": "osm:n151687256",
+      "name": "Sunland Park",
+      "kind": "town",
+      "lat": 31.796496,
+      "lon": -106.579989
+    },
+    {
+      "id": "osm:n151742121",
+      "name": "Anthony",
+      "kind": "town",
+      "lat": 32.005908,
+      "lon": -106.596857
+    },
+    {
+      "id": "osm:n151847093",
+      "name": "La Union",
+      "kind": "town",
+      "lat": 31.949673,
+      "lon": -106.663132
+    },
+    {
+      "id": "osm:n151925625",
+      "name": "Canutillo",
+      "kind": "town",
+      "lat": 31.912468,
+      "lon": -106.598098
+    },
+    {
+      "id": "osm:n506444216",
+      "name": "Chamberino",
+      "kind": "town",
+      "lat": 32.037007,
+      "lon": -106.68618
+    },
+    {
+      "id": "osm:n697971736",
+      "name": "Puerto de Anapra",
+      "kind": "town",
+      "lat": 31.775239,
+      "lon": -106.560451
+    },
+    {
+      "id": "osm:n1671222576",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.505804,
+      "lon": -106.121431
+    },
+    {
+      "id": "osm:n1671222589",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.504777,
+      "lon": -106.11657
+    },
+    {
+      "id": "osm:n1671246497",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.982589,
+      "lon": -106.584638
+    },
+    {
+      "id": "osm:n2656685409",
+      "name": "Ojo de Enmedio",
+      "kind": "spring",
+      "lat": 31.379358,
+      "lon": -106.5853
+    },
+    {
+      "id": "osm:n2660046868",
+      "name": "Anthony",
+      "kind": "town",
+      "lat": 31.995653,
+      "lon": -106.596817
+    },
+    {
+      "id": "osm:n2704818119",
+      "name": "San Agustín",
+      "kind": "town",
+      "lat": 31.515956,
+      "lon": -106.2569
+    },
+    {
+      "id": "osm:n2704818123",
+      "name": "San Isidro",
+      "kind": "town",
+      "lat": 31.547988,
+      "lon": -106.280429
+    },
+    {
+      "id": "osm:n2704820559",
+      "name": "Jesús Carranza",
+      "kind": "town",
+      "lat": 31.491542,
+      "lon": -106.236896
+    },
+    {
+      "id": "osm:n2903361750",
+      "name": "Ojo de la Punta",
+      "kind": "spring",
+      "lat": 31.385921,
+      "lon": -106.602185
+    },
+    {
+      "id": "osm:n2978000590",
+      "name": "Tom Mays Unit Entrance",
+      "kind": "ranger",
+      "lat": 31.916027,
+      "lon": -106.515166
+    },
+    {
+      "id": "osm:n3092347610",
+      "name": "Guadalupe",
+      "kind": "town",
+      "lat": 31.388662,
+      "lon": -106.105813
+    },
+    {
+      "id": "osm:n3521385888",
+      "name": "Doctor Porfirio Parra",
+      "kind": "town",
+      "lat": 31.424937,
+      "lon": -106.140156
+    },
+    {
+      "id": "osm:n3522713108",
+      "name": "Barreales",
+      "kind": "town",
+      "lat": 31.399285,
+      "lon": -106.139738
+    },
+    {
+      "id": "osm:n3557094968",
+      "name": "Juárez y Reforma",
+      "kind": "town",
+      "lat": 31.441698,
+      "lon": -106.172024
+    },
+    {
+      "id": "osm:n3557216713",
+      "name": "El Millón",
+      "kind": "town",
+      "lat": 31.456492,
+      "lon": -106.200892
+    },
+    {
+      "id": "osm:n3558675199",
+      "name": "San Francisco",
+      "kind": "town",
+      "lat": 31.472544,
+      "lon": -106.222397
+    },
+    {
+      "id": "osm:n3559560527",
+      "name": "Loma Blanca",
+      "kind": "town",
+      "lat": 31.578408,
+      "lon": -106.297511
+    },
+    {
+      "id": "osm:n3998454158",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.938917,
+      "lon": -106.40822
+    },
+    {
+      "id": "osm:n4145208823",
+      "name": "Ciudad Juárez",
+      "kind": "city",
+      "lat": 31.690798,
+      "lon": -106.425321
+    },
+    {
+      "id": "osm:n5799164131",
+      "name": "El Paso",
+      "kind": "rail",
+      "lat": 31.757373,
+      "lon": -106.495919
+    },
+    {
+      "id": "osm:n6141335885",
+      "name": "House Water",
+      "kind": "water",
+      "lat": 31.592297,
+      "lon": -106.415061
+    },
+    {
+      "id": "osm:n6277414422",
+      "name": "El Pocito",
+      "kind": "water",
+      "lat": 31.707473,
+      "lon": -106.513001
+    },
+    {
+      "id": "osm:n9356487345",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.759588,
+      "lon": -106.401565
+    },
+    {
+      "id": "osm:n9820562538",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.782851,
+      "lon": -106.497346
+    },
+    {
+      "id": "osm:n10214381899",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.756995,
+      "lon": -106.490083
+    },
+    {
+      "id": "osm:n11460177756",
+      "name": "Raiz",
+      "kind": "water",
+      "lat": 31.885006,
+      "lon": -106.571479
+    },
+    {
+      "id": "osm:n12660062910",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.932505,
+      "lon": -106.449247
+    },
+    {
+      "id": "osm:n13669875711",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.782199,
+      "lon": -106.462754
+    },
+    {
+      "id": "osm:n13793104466",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.758286,
+      "lon": -106.489045
+    },
+    {
+      "id": "osm:n14116313571",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.807868,
+      "lon": -106.49975
+    },
+    {
+      "id": "osm:n14116486161",
+      "name": "Drinking water",
+      "kind": "water",
+      "lat": 31.85152,
+      "lon": -106.509535
+    },
+    {
+      "id": "osm:r171077",
+      "name": "Sunland Park",
+      "kind": "city",
+      "lat": 31.835715,
+      "lon": -106.603021
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "attribution": "\u00a9 OpenStreetMap contributors",
+  "attribution": "© OpenStreetMap contributors",
   "addresses": [
     {
       "id": "osm:n140745356",
@@ -873,14 +873,14 @@
     {
       "id": "osm:n1464580909",
       "house": "1450",
-      "street": "Monta\u00f1o Road Northeast",
+      "street": "Montaño Road Northeast",
       "lat": 35.133782,
       "lon": -106.612124
     },
     {
       "id": "osm:n1464580914",
       "house": "1450",
-      "street": "Monta\u00f1o Road Northeast",
+      "street": "Montaño Road Northeast",
       "lat": 35.13375,
       "lon": -106.612202
     },
