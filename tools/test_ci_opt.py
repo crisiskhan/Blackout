@@ -420,6 +420,11 @@ def test_live_mesh_1n() -> None:
         fail("version was bumped off 19")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
+    tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
+    if "MeshPill(nearbyCount: roster.peerCount)" in tools:
+        fail("tools Radar MeshPill must use radio nearbyPeerCount, not roster.peerCount")
+    if "MeshPill(nearbyCount: nearbyPeerCount)" not in tools:
+        fail("tools Radar lost the radio MeshPill")
     ok("live mesh 1/N is Multipeer, no WAN, radar peers from roster, version 19")
 
 

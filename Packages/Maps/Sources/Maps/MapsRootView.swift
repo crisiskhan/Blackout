@@ -231,7 +231,12 @@ public struct MapsRootView: View {
                     packReady: packReady
                 )
             case .radar:
-                RadarView(location: location, pack: packService.pack, roster: roster)
+                RadarView(
+                    location: location,
+                    pack: packService.pack,
+                    roster: roster,
+                    nearbyPeerCount: mesh.nearbyPeerCount
+                )
             case .topo:
                 TopographyView(location: location, packService: packService)
             case .civilization:

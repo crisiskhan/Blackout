@@ -7,6 +7,7 @@ struct RadarView: View {
     @Bindable var location: LocationService
     var pack: MapPackSnapshot?
     @Bindable var roster: PartyRoster
+    var nearbyPeerCount: Int
 
     var body: some View {
         VStack(spacing: 20) {
@@ -32,7 +33,7 @@ struct RadarView: View {
                     .frame(width: 260, height: 260)
                 }
             }
-            MeshPill(nearbyCount: roster.peerCount)
+            MeshPill(nearbyCount: nearbyPeerCount)
             if let footnote = roster.selfLabel.footnote {
                 Text(footnote)
                     .font(BlackoutDS.captionFont())
