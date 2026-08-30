@@ -6,6 +6,7 @@ import SwiftUI
 public struct ExpeditionsRootView: View {
     let persistence: any PersistenceServing
     @Bindable var location: LocationService
+    var onOpenFieldPacks: (() -> Void)?
 
     @State private var items: [ExpeditionRecordDTO] = []
     @State private var editor: ExpeditionRecordDTO?
@@ -19,54 +20,85 @@ public struct ExpeditionsRootView: View {
 
     public init(
         persistence: any PersistenceServing,
-        location: LocationService
+        location: LocationService,
+        onOpenFieldPacks: (() -> Void)? = nil
     ) {
         self.persistence = persistence
         self.location = location
+        self.onOpenFieldPacks = onOpenFieldPacks
         _tracking = State(initialValue: UserDefaults.standard.bool(forKey: Self.trackingKey))
     }
 
     public var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.dim)
-                        .listRowBackground(Color.clear)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ScreenHeader(ExpeditionPauseCopy.title, subtitle: ExpeditionPauseCopy.subtitle)
                     if let storeError {
                         StoreFailure(storeError)
-                            .listRowBackground(Color.clear)
                     }
-                    MetalButton("New expedition", height: BlackoutDS.Hit.md) {
-                        editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
+                    pausePanel("Roster") {
+                        Text(ExpeditionPauseCopy.rosterEmpty)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
                     }
-                    GhostButton("Admin dashboard", height: BlackoutDS.Hit.sm) {
-                        showAdmin = true
-                    }
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                ForEach(items) { item in
-                    Button {
-                        editor = item
-                    } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(item.name)
+                    pausePanel("Gear") {
+                        Text(ExpeditionPauseCopy.gearStub)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        ForEach(DefaultOutingGear.items, id: \.self) { item in
+                            Text(item)
                                 .font(BlackoutDS.bodyFont())
                                 .foregroundStyle(BlackoutDS.Silver.bright)
-                            Text(item.isOpen ? "Open" : "Closed")
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(item.isOpen ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.dim)
-                            Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.steel)
                         }
                     }
-                    .listRowBackground(BlackoutDS.Surface.raised)
+                    pausePanel("Packs") {
+                        Text(ExpeditionPauseCopy.packsReady)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        GhostButton(ExpeditionPauseCopy.packManager, height: BlackoutDS.Hit.md) {
+                            onOpenFieldPacks?()
+                        }
+                    }
+                    pausePanel("Settings") {
+                        Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        MetalButton("New expedition", height: BlackoutDS.Hit.md) {
+                            editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
+                        }
+                        GhostButton("Admin dashboard", height: BlackoutDS.Hit.sm) {
+                            showAdmin = true
+                        }
+                        if items.isEmpty {
+                            Text("No expeditions yet.")
+                                .font(BlackoutDS.bodyFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
+                        ForEach(items) { item in
+                            Button {
+                                editor = item
+                            } label: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(item.name)
+                                        .font(BlackoutDS.bodyFont())
+                                        .foregroundStyle(BlackoutDS.Silver.bright)
+                                    Text(item.isOpen ? "Open" : "Closed")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(item.isOpen ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.dim)
+                                    Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.steel)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
+                .padding(20)
+                .padding(.bottom, 120)
             }
-            .scrollContentBackground(.hidden)
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Expedition")
             .swiftUIToolbar {
@@ -99,6 +131,19 @@ public struct ExpeditionsRootView: View {
                     try? await Task.sleep(nanoseconds: 20_000_000_000)
                 }
             }
+        }
+    }
+
+    private func pausePanel<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        HUDPanel {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(BlackoutDS.titleFont())
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                content()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
         }
     }
 

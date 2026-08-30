@@ -39,11 +39,17 @@ struct OfflineMapView: UIViewRepresentable {
     var activeManeuver: Maneuver?
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
+    var onUserInteract: (() -> Void)?
     var onOutsidePack: (Bool) -> Void
     var resetToken: Int
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onDropPin: onDropPin, onTap: onTap, onOutsidePack: onOutsidePack)
+        Coordinator(
+            onDropPin: onDropPin,
+            onTap: onTap,
+            onUserInteract: onUserInteract,
+            onOutsidePack: onOutsidePack
+        )
     }
 
     func makeUIView(context: Context) -> OfflineTileScrollView {
@@ -73,6 +79,7 @@ struct OfflineMapView: UIViewRepresentable {
     func updateUIView(_ view: OfflineTileScrollView, context: Context) {
         context.coordinator.onDropPin = onDropPin
         context.coordinator.onTap = onTap
+        context.coordinator.onUserInteract = onUserInteract
         context.coordinator.onOutsidePack = onOutsidePack
         view.coordinator = context.coordinator
         view.applyOverlays(
@@ -110,6 +117,7 @@ struct OfflineMapView: UIViewRepresentable {
     final class Coordinator {
         var onDropPin: (Double, Double) -> Void
         var onTap: ((Double, Double) -> Void)?
+        var onUserInteract: (() -> Void)?
         var onOutsidePack: (Bool) -> Void
         var lastResetToken = 0
         var lastCenterToken = 0
@@ -117,10 +125,12 @@ struct OfflineMapView: UIViewRepresentable {
         init(
             onDropPin: @escaping (Double, Double) -> Void,
             onTap: ((Double, Double) -> Void)?,
+            onUserInteract: (() -> Void)?,
             onOutsidePack: @escaping (Bool) -> Void
         ) {
             self.onDropPin = onDropPin
             self.onTap = onTap
+            self.onUserInteract = onUserInteract
             self.onOutsidePack = onOutsidePack
         }
     }
@@ -267,6 +277,14 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? { canvas }
 
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        coordinator?.onUserInteract?()
+    }
+
+    func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+        coordinator?.onUserInteract?()
+    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         canvas.zoomScale = scrollView.zoomScale
         canvas.setNeedsDisplay()
@@ -283,6 +301,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     @objc private func handlePress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began else { return }
+        coordinator?.onUserInteract?()
         let point = gesture.location(in: canvas)
         let lonlat = canvas.coordinate(at: point)
         coordinator?.onDropPin(lonlat.0, lonlat.1)
@@ -290,6 +309,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
         guard gesture.state == .ended else { return }
+        coordinator?.onUserInteract?()
         let point = gesture.location(in: canvas)
         let lonlat = canvas.coordinate(at: point)
         coordinator?.onTap?(lonlat.0, lonlat.1)

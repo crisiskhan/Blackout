@@ -301,7 +301,8 @@ struct RootView: View {
     private var expeditionDestination: some View {
         ExpeditionsRootView(
             persistence: container.persistence,
-            location: container.location
+            location: container.location,
+            onOpenFieldPacks: { container.showFieldPacks = true }
         )
     }
 

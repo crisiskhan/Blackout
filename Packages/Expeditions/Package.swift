@@ -21,5 +21,9 @@ let package = Package(
                 .product(name: "BlackoutLocation", package: "Location"),
             ]
         ),
+        .testTarget(
+            name: "ExpeditionsTests",
+            dependencies: ["Expeditions"]
+        ),
     ]
 )

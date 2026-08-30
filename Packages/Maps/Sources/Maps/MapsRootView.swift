@@ -3,6 +3,7 @@ import BlackoutBattery
 import BlackoutLocation
 import BlackoutMesh
 import DesignSystem
+import MapsChrome
 import MapsRouting
 import SwiftUI
 
@@ -36,6 +37,8 @@ public struct MapsRootView: View {
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
+    @State private var chrome = MapChromeRecede()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
         location: LocationService,
@@ -121,6 +124,7 @@ public struct MapsRootView: View {
                         location.dropManualPin(latitude: lat, longitude: lon)
                     },
                     onTap: { lat, lon in
+                        noteMapActivity()
                         guard battery.coarseNavigateEnabled, navigate.phase != .guidance else { return }
                         navigate.pickMap(
                             latitude: lat,
@@ -129,6 +133,7 @@ public struct MapsRootView: View {
                             pack: packService.routing
                         )
                     },
+                    onUserInteract: noteMapActivity,
                     onOutsidePack: { outside in
                         outsidePack = outside
                     },
@@ -143,8 +148,14 @@ public struct MapsRootView: View {
                         headingDegrees: location.headingDegrees,
                         peers: peers,
                         sweepAudio: sweepAudio,
-                        onSelectPeer: { selectedPeer = $0 },
-                        onSelectSelf: { selectedPeer = nil }
+                        onSelectPeer: {
+                            noteMapActivity()
+                            selectedPeer = $0
+                        },
+                        onSelectSelf: {
+                            noteMapActivity()
+                            selectedPeer = nil
+                        }
                     )
                     .padding(.top, 80)
                     .padding(.bottom, 180)
@@ -177,12 +188,14 @@ public struct MapsRootView: View {
                     accuracyMeters: gpsAccuracyMeters,
                     headingDegrees: location.headingDegrees,
                     onNorthUp: {
+                        noteMapActivity()
                         headingUp = false
                         UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                     }
                 )
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
+                .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
                 if showChipRow, battery.coarseNavigateEnabled, showsNavigateBanner {
                     navigateChrome
                         .padding(.horizontal, 16)
@@ -192,11 +205,18 @@ public struct MapsRootView: View {
                 if showChipRow {
                     HStack(spacing: 8) {
                         MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
-                        MetalButton("Layers", height: BlackoutDS.Hit.md) { showLayers = true }
-                        MetalButton("Packs", height: BlackoutDS.Hit.md) { onOpenFieldPacks?() }
+                        MetalButton("Layers", height: BlackoutDS.Hit.md) {
+                            noteMapActivity()
+                            showLayers = true
+                        }
+                        MetalButton("Packs", height: BlackoutDS.Hit.md) {
+                            noteMapActivity()
+                            onOpenFieldPacks?()
+                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 120)
+                    .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
                 }
             }
         }
@@ -336,6 +356,29 @@ public struct MapsRootView: View {
             resolvePaintPack()
             refreshTerrain()
             location.startUpdating()
+            applyChrome {
+                $0.reduceMotion = reduceMotion
+                $0.noteActivity(at: nowOffset)
+            }
+        }
+        .onChange(of: reduceMotion) { _, value in
+            applyChrome {
+                $0.reduceMotion = value
+                $0.tick(at: nowOffset)
+            }
+        }
+        .task {
+            applyChrome {
+                $0.reduceMotion = reduceMotion
+                $0.tick(at: nowOffset)
+            }
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                applyChrome {
+                    $0.reduceMotion = reduceMotion
+                    $0.tick(at: nowOffset)
+                }
+            }
         }
     }
 
@@ -446,7 +489,24 @@ public struct MapsRootView: View {
         return meters
     }
 
+    private var nowOffset: TimeInterval {
+        Date().timeIntervalSinceReferenceDate
+    }
+
+    private func noteMapActivity() {
+        applyChrome { $0.noteActivity(at: nowOffset) }
+    }
+
+    private func applyChrome(_ mutate: (inout MapChromeRecede) -> Void) {
+        var next = chrome
+        mutate(&next)
+        if next != chrome {
+            chrome = next
+        }
+    }
+
     private func recenterToPack() {
+        noteMapActivity()
         pinnedToPackCoverage = true
         resolvePaintPack()
         resetToken += 1
@@ -517,6 +577,19 @@ public struct MapsRootView: View {
 enum MapTool: String, Identifiable {
     case navigate, radar, topo, civilization
     var id: String { rawValue }
+}
+
+/// Fade chrome in place. Do not remove it from the tree — SOS layout stays put.
+private struct RecedingMapChrome: ViewModifier {
+    var isReceded: Bool
+    var reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isReceded ? 0 : 1)
+            .allowsHitTesting(!isReceded)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: isReceded)
+    }
 }
 
 /// 56h GPS lock + accuracy, and a compass that taps to north-up. No grid-ref.
