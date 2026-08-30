@@ -1117,6 +1117,8 @@ def test_hits_23() -> None:
         fail("do not add torch to CriticalSOSShell")
     if "Start PTT" not in intents or "Stop PTT" not in intents:
         fail("PTT App Intents missing")
+    if "static var appShortcuts: [AppShortcut] {\n        [" in intents:
+        fail("AppShortcutsBuilder takes AppShortcut statements, not an array literal")
     if "testPTTAppIntentRefusesZeroPeers" not in tests:
         fail("PTT App Intent zero-peer test missing")
     if "GENERATE_INFOPLIST_FILE = NO" not in pbx:
