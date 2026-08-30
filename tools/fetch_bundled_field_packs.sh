@@ -11,7 +11,7 @@ BASE="https://github.com/crisiskhan/Blackout/releases/download/packs-v1"
 
 # id|filename|bytes|sha256
 PACKS=(
-  "us-tx|texas.pack.zip|208461647|dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb"
+  "us-tx|texas.pack.zip|220512882|6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade"
   "us-nm|new-mexico.pack.zip|77478829|2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8"
   "us-fl|florida.pack.zip|79093063|49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d"
   "us-ny|new-york.pack.zip|130327390|928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500"

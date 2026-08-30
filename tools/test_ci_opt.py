@@ -24,8 +24,8 @@ STATEWIDE_PACKS = (
     (
         "us-tx",
         "texas.pack.zip",
-        "208461647",
-        "dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb",
+        "220512882",
+        "6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade",
     ),
     (
         "us-nm",
