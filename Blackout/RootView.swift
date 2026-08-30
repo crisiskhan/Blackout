@@ -67,6 +67,9 @@ struct RootView: View {
                     .allowsHitTesting(false)
                 }
                 sosOverlay
+                if container.showRadioBanner {
+                    radioBannerOverlay
+                }
                 if sizeClass != .regular, !container.battery.isCritical {
                     settingsOverlay
                 }
@@ -93,14 +96,63 @@ struct RootView: View {
             }
             if phase == .active {
                 syncSensorsToBattery()
+                container.refreshRadiosBanner()
+                container.refreshLiveActivity()
+                container.applyIdleTimer()
             }
         }
         .onChange(of: container.battery.isCritical) { _, _ in
             syncSensorsToBattery()
         }
+        .onChange(of: container.sosCoverOpen) { _, _ in
+            container.applyIdleTimer()
+        }
+        .onChange(of: container.ptt.isTransmitting) { _, _ in
+            container.applyIdleTimer()
+        }
+        .onChange(of: container.ptt.lastHeardAt) { _, _ in
+            container.applyIdleTimer()
+        }
+        .onChange(of: container.radios.cannotRun) { _, _ in
+            container.refreshRadiosBanner()
+        }
+        .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
+            container.refreshLiveActivity()
+        }
+        .onOpenURL { url in
+            if let next = container.applyDeepLink(url) {
+                destination = next
+            }
+        }
         .onAppear {
             syncSensorsToBattery()
+            container.refreshRadiosBanner()
+            container.refreshLiveActivity()
+            container.applyIdleTimer()
         }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                container.expireInboundIfNeeded()
+                container.refreshLiveActivity()
+                container.applyIdleTimer()
+            }
+        }
+    }
+
+    private var radioBannerOverlay: some View {
+        VStack {
+            MeshRadioBannerView(
+                title: container.radioBanner.title,
+                bodyText: container.radioBanner.body,
+                onOpenSettings: { AppSettingsLink.open() },
+                onDismiss: { container.dismissRadioBanner() }
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, sizeClass == .regular ? 12 : 72)
+            Spacer()
+        }
+        .allowsHitTesting(true)
     }
 
     /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
@@ -228,7 +280,13 @@ struct RootView: View {
                 pendingDM = id
                 destination = .comms
             },
-            pendingPingNav: $pendingPingNav
+            pendingPingNav: $pendingPingNav,
+            latestInbound: container.latestInbound,
+            onPingReply: { container.replyToLatest($0) },
+            onNavLockChange: { on in
+                container.navLockActive = on
+                container.applyIdleTimer()
+            }
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -256,6 +314,7 @@ struct RootView: View {
                 pendingPingNav = nav
                 destination = .map
             },
+            onPingReplied: { container.acknowledgeLatestPing() },
             pendingDM: $pendingDM
         )
         .swiftUIToolbar {

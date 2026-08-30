@@ -2,6 +2,7 @@ import BlackoutCore
 import BlackoutMesh
 import DesignSystem
 import SwiftUI
+import UIKit
 
 public struct MessagingRootView: View {
     let outbox: CommsOutbox
@@ -10,6 +11,7 @@ public struct MessagingRootView: View {
     var locationFix: LocationFix?
     var onOpenExpedition: () -> Void
     var onNavigatePing: (FieldPingNav) -> Void
+    var onPingReplied: (() -> Void)?
     @Binding var pendingDM: BlackoutID?
 
     @State private var threads: [ChatThreadSummary] = []
@@ -23,6 +25,7 @@ public struct MessagingRootView: View {
         locationFix: LocationFix?,
         onOpenExpedition: @escaping () -> Void,
         onNavigatePing: @escaping (FieldPingNav) -> Void,
+        onPingReplied: (() -> Void)? = nil,
         pendingDM: Binding<BlackoutID?>
     ) {
         self.outbox = outbox
@@ -31,6 +34,7 @@ public struct MessagingRootView: View {
         self.locationFix = locationFix
         self.onOpenExpedition = onOpenExpedition
         self.onNavigatePing = onNavigatePing
+        self.onPingReplied = onPingReplied
         self._pendingDM = pendingDM
     }
 
@@ -72,7 +76,8 @@ public struct MessagingRootView: View {
                     title: threads.first(where: { $0.ref == thread })?.title ?? threadTitle(thread),
                     locationFix: locationFix,
                     composeEnabled: composeEnabled(for: thread),
-                    onNavigatePing: onNavigatePing
+                    onNavigatePing: onNavigatePing,
+                    onPingReplied: onPingReplied
                 )
             }
         }
@@ -197,6 +202,7 @@ private struct ChatDetailView: View {
     var locationFix: LocationFix?
     var composeEnabled: Bool
     var onNavigatePing: (FieldPingNav) -> Void
+    var onPingReplied: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var rows: [DisplayMessage] = []
@@ -204,6 +210,7 @@ private struct ChatDetailView: View {
     @State private var pinOn = false
     @State private var error: String?
     @State private var selectedPingID: BlackoutID?
+    @State private var dictateHint: String?
 
     private var draftKey: String {
         "com.crisiskhan.blackout.comms.draft.\(thread.id.rawValue.uuidString)"
@@ -335,6 +342,11 @@ private struct ChatDetailView: View {
                     onReply: sendReply
                 )
             }
+            if let dictateHint {
+                Text(dictateHint)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Semantic.warn)
+            }
             HStack(alignment: .bottom, spacing: 8) {
                 TextField("Message", text: $draft, axis: .vertical)
                     .font(BlackoutDS.bodyFont())
@@ -357,7 +369,17 @@ private struct ChatDetailView: View {
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .disabled(!composeEnabled || locationFix?.hasCoordinate != true)
+                    .disabled(!composeEnabled || locationFix?.hasCoordinate != true)
+                ComposeDictationButton(
+                    text: $draft,
+                    enabled: true,
+                    onDenied: {
+                        dictateHint = ConvenienceCopy.dictationDenied
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                )
                 Button(action: send) {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 20, weight: .bold))
@@ -391,6 +413,7 @@ private struct ChatDetailView: View {
             _ = try outbox.sendReply(reply, fix: locationFix, thread: thread)
             selectedPingID = nil
             error = nil
+            onPingReplied?()
             reload()
         } catch {
             self.error = error.localizedDescription

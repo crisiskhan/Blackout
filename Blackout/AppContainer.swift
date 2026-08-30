@@ -32,6 +32,10 @@ final class AppContainer {
     let party: PartyRoster
     let outbox: CommsOutbox
     let ptt: LivePTTHub
+    let radios = MeshRadioProbe()
+    var latestInbound: LatestInboundPing?
+    var navLockActive = false
+    var radioBanner = MeshRadioBannerPolicy()
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
     private var lastNearbyCount = 0
@@ -89,6 +93,14 @@ final class AppContainer {
         ptt = LivePTTHub()
         ptt.bindSender { meshRef.sendPTTFrame($0) }
         ptt.extremeSaver = battery.isExtremeSaver
+        radioBanner.dismissed = UserDefaults.standard.bool(forKey: BlackoutKeys.meshRadioBannerDismissed)
+        ptt.installRemoteCommands { [ptt, mesh, identity] in
+            ptt.decision(
+                nearbyPeerCount: mesh.nearbyPeerCount,
+                partyCode: identity.partyCode,
+                meshRunning: mesh.isRunning
+            )
+        }
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
         mesh.onInbound = { [weak self] event in
@@ -130,6 +142,8 @@ final class AppContainer {
             mesh.start()
             broadcastSelfIfRadioUp(mesh.nearbyPeerCount)
         }
+        refreshLiveActivity()
+        applyIdleTimer()
     }
 
     private func broadcastSelfIfRadioUp(_ count: Int) {
@@ -163,6 +177,86 @@ final class AppContainer {
     func leaveParty() {
         party.leaveParty()
         mesh.stop()
+        LiveActivityHub.end()
+        latestInbound = nil
+        applyIdleTimer()
+    }
+
+    func acknowledgeLatestPing() {
+        latestInbound?.acknowledged = true
+        latestInbound = nil
+        refreshLiveActivity()
+        applyIdleTimer()
+    }
+
+    func replyToLatest(_ reply: FieldReplyID) {
+        guard let inbound = latestInbound, inbound.isOpen() else { return }
+        do {
+            _ = try outbox.sendReply(reply, fix: location.navigationFix ?? location.lastKnown, thread: inbound.thread)
+        } catch {
+            return
+        }
+        acknowledgeLatestPing()
+    }
+
+    var inboundImDownOpen: Bool {
+        latestInbound?.keepsScreenAwake() == true
+    }
+
+    var shouldDisableIdleTimer: Bool {
+        IdleTimerPolicy.shouldDisable(
+            navLockOn: navLockActive,
+            pttTransmitting: ptt.isTransmitting,
+            pttLastHeard: ptt.lastHeardAt,
+            sosCoverPresented: sosCoverOpen,
+            inboundImDownOpen: inboundImDownOpen
+        )
+    }
+
+    func applyIdleTimer() {
+        UIApplication.shared.isIdleTimerDisabled = shouldDisableIdleTimer
+    }
+
+    func refreshRadiosBanner() {
+        radioBanner.applyRadios(cannotRun: radios.cannotRun)
+        persistBanner()
+    }
+
+    func dismissRadioBanner() {
+        radioBanner.dismiss()
+        persistBanner()
+    }
+
+    var showRadioBanner: Bool {
+        radioBanner.shouldShow(cannotRun: radios.cannotRun)
+    }
+
+    func persistBanner() {
+        UserDefaults.standard.set(radioBanner.dismissed, forKey: BlackoutKeys.meshRadioBannerDismissed)
+    }
+
+    func refreshLiveActivity() {
+        expireInboundIfNeeded()
+        LiveActivityHub.sync(
+            partyCode: identity.partyCode,
+            inbound: latestInbound,
+            peerCount: mesh.nearbyPeerCount,
+            callsign: identity.callsign
+        )
+    }
+
+    func expireInboundIfNeeded() {
+        if let latestInbound, !latestInbound.isOpen() {
+            self.latestInbound = nil
+        }
+    }
+
+    func applyDeepLink(_ url: URL) -> AppDestination? {
+        switch url.host {
+        case "map": return .map
+        case "comms": return .comms
+        default: return nil
+        }
     }
 
     /// Composition root only. Mesh stays a dumb pipe; Crypto and Persistence stay in their kits.
@@ -221,10 +315,36 @@ final class AppContainer {
 
     private func ingestMessage(_ envelope: Envelope) {
         do {
-            _ = try outbox.ingest(envelope)
+            guard let record = try outbox.ingest(envelope) else { return }
+            noteInboundIfPing(record)
         } catch {
             return
         }
+    }
+
+    private func noteInboundIfPing(_ record: MessageRecordDTO) {
+        let body = outbox.openBody(record)
+        guard let ping = body.fieldPing else { return }
+        let thread: ChatThreadRef
+        if let code = identity.partyCode, PartyThread.isGroupRecipient(record.recipientID, partyCode: code) {
+            thread = .group(partyCode: code)
+        } else {
+            thread = .dm(peerID: record.senderID)
+        }
+        let inbound = LatestInboundPing(
+            id: record.id,
+            ping: ping,
+            callsign: party.peers.first(where: { $0.id == record.senderID })?.callsign
+                ?? Callsign.defaultValue,
+            createdAt: record.createdAt,
+            latitude: body.latitude,
+            longitude: body.longitude,
+            thread: thread
+        )
+        latestInbound = inbound
+        PingAlert.announce(inbound, reduceMotion: UIAccessibility.isReduceMotionEnabled)
+        refreshLiveActivity()
+        applyIdleTimer()
     }
 
     private func flushQueuedIfPeerAppeared(_ count: Int) {

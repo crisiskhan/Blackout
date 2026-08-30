@@ -23,6 +23,7 @@ struct CommsRootView: View {
     @Bindable var ptt: LivePTTHub
     var onOpenExpedition: () -> Void
     var onNavigatePing: (FieldPingNav) -> Void
+    var onPingReplied: (() -> Void)?
     @Binding var pendingDM: BlackoutID?
 
     @State private var segment: Segment = .threads
@@ -49,6 +50,7 @@ struct CommsRootView: View {
                         locationFix: location.navigationFix ?? location.lastKnown,
                         onOpenExpedition: onOpenExpedition,
                         onNavigatePing: onNavigatePing,
+                        onPingReplied: onPingReplied,
                         pendingDM: $pendingDM
                     )
                 case .radar:

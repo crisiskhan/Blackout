@@ -38,6 +38,8 @@ struct OfflineMapView: UIViewRepresentable {
     var accuracyMeters: Double?
     var packContainsSelf: Bool
     var activeManeuver: Maneuver?
+    var inboundPing: LocationFix? = nil
+    var inboundPingHue: FieldPingHue? = nil
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
     var onUserInteract: (() -> Void)?
@@ -74,7 +76,9 @@ struct OfflineMapView: UIViewRepresentable {
             headingDegrees: headingDegrees,
             accuracyMeters: accuracyMeters,
             packContainsSelf: packContainsSelf,
-            activeManeuver: activeManeuver
+            activeManeuver: activeManeuver,
+            inboundPing: inboundPing,
+            inboundPingHue: inboundPingHue
         )
         return view
     }
@@ -102,7 +106,9 @@ struct OfflineMapView: UIViewRepresentable {
             headingDegrees: headingDegrees,
             accuracyMeters: accuracyMeters,
             packContainsSelf: packContainsSelf,
-            activeManeuver: activeManeuver
+            activeManeuver: activeManeuver,
+            inboundPing: inboundPing,
+            inboundPingHue: inboundPingHue
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
@@ -253,7 +259,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         headingDegrees: Double?,
         accuracyMeters: Double?,
         packContainsSelf: Bool,
-        activeManeuver: Maneuver?
+        activeManeuver: Maneuver?,
+        inboundPing: LocationFix?,
+        inboundPingHue: FieldPingHue?
     ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
@@ -271,6 +279,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.accuracyMeters = accuracyMeters
         canvas.packContainsSelf = packContainsSelf
         canvas.activeManeuver = activeManeuver
+        canvas.inboundPing = inboundPing
+        canvas.inboundPingHue = inboundPingHue
         canvas.setNeedsDisplay()
     }
 
@@ -404,6 +414,8 @@ final class TileCanvasLayer: UIView {
     var accuracyMeters: Double?
     var packContainsSelf = false
     var activeManeuver: Maneuver?
+    var inboundPing: LocationFix?
+    var inboundPingHue: FieldPingHue?
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -453,6 +465,9 @@ final class TileCanvasLayer: UIView {
         for crumb in breadcrumbs where crumb.hasCoordinate {
             let fix = LocationFix(latitude: crumb.latitude, longitude: crumb.longitude)
             drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
+        }
+        if let inboundPing, inboundPing.hasCoordinate {
+            drawPingPip(inboundPing, hue: inboundPingHue ?? .red, in: ctx)
         }
         if showSlope {
             drawSlope(in: ctx)
@@ -834,6 +849,22 @@ final class TileCanvasLayer: UIView {
         guard let fix, let point = point(for: fix) else { return }
         ctx.setFillColor(color.cgColor)
         ctx.fillEllipse(in: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2))
+    }
+
+    private func drawPingPip(_ fix: LocationFix, hue: FieldPingHue, in ctx: CGContext) {
+        guard let point = point(for: fix) else { return }
+        let color: UIColor
+        switch hue {
+        case .ok: color = UIColor(BlackoutDS.Semantic.ok)
+        case .warn: color = UIColor(BlackoutDS.Semantic.warn)
+        case .red: color = UIColor(BlackoutDS.Red.core)
+        }
+        let radius: CGFloat = 8
+        ctx.setStrokeColor(color.cgColor)
+        ctx.setLineWidth(pt(3))
+        ctx.strokeEllipse(in: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2))
+        ctx.setFillColor(color.withAlphaComponent(0.35).cgColor)
+        ctx.fillEllipse(in: CGRect(x: point.x - 4, y: point.y - 4, width: 8, height: 8))
     }
 
     private func currentZoom() -> Int {

@@ -37,10 +37,12 @@ final class FieldPingTests: XCTestCase {
         XCTAssertFalse(FieldPing.requiresSenderPin(.cant))
     }
 
-    func testHapticsAreLightGreenMediumYellowRed() {
+    func testHapticsAreLightGreenMediumYellowHeavyRed() {
         XCTAssertEqual(FieldPing.haptic(.ok), .light)
         XCTAssertEqual(FieldPing.haptic(.warn), .medium)
-        XCTAssertEqual(FieldPing.haptic(.red), .medium)
+        XCTAssertEqual(FieldPing.haptic(.red), .heavy)
+        XCTAssertEqual(FieldPing.hapticRepeats(.down), 2)
+        XCTAssertEqual(FieldPing.hapticRepeats(.danger), 1)
     }
 
     func testImDownIsCommsOnlyNotSOS() {

@@ -168,12 +168,19 @@ enum FieldPingChrome {
         }
     }
 
-    static func playHaptic(_ hue: FieldPingHue) {
+    static func playHaptic(_ hue: FieldPingHue, repeats: Int = 1) {
         let style: UIImpactFeedbackGenerator.FeedbackStyle
         switch FieldPing.haptic(hue) {
         case .light: style = .light
         case .medium: style = .medium
+        case .heavy: style = .heavy
         }
-        UIImpactFeedbackGenerator(style: style).impactOccurred()
+        let gen = UIImpactFeedbackGenerator(style: style)
+        gen.prepare()
+        for index in 0..<max(1, repeats) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.12) {
+                gen.impactOccurred()
+            }
+        }
     }
 }

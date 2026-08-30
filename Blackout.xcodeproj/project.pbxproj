@@ -22,10 +22,13 @@
 		F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8646A3CDCE8F5E86C75F3A /* Expeditions */; };
 		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
 		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
+		F93D9F3002F2E7BA8A1E0DB5 /* BlackoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0EF801150577B69F1E6C2DC2 /* BlackoutCore */; };
+		F12F6D0E48F8AD3FE4382694 /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3ECE9A2F0678B209E4A706C9 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BlackoutWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8CF23C84AF6AD06DA1E4784 /* DefaultPack */ = {isa = PBXFileReference; explicitFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; };
 		16E5BD64BA900FD4F921032E /* GuidePack */ = {isa = PBXFileReference; explicitFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -42,6 +45,15 @@
 				GuidePack,
 			);
 			path = Blackout;
+			sourceTree = "<group>";
+		};
+		0A96592D18865060108F3CCC /* BlackoutWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C1D2E3F405162738495A6B7C /* Exceptions for "BlackoutWidgets" folder in "BlackoutWidgets" target */,
+				D2E3F405162738495A6B7C8D /* Exceptions for "BlackoutWidgets" folder in Resources */,
+			);
+			path = BlackoutWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +81,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6D782FD88D51C2107CC36E10 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F93D9F3002F2E7BA8A1E0DB5 /* BlackoutCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,6 +98,7 @@
 				466304068CF247FDBD3B915E /* Blackout */,
 				E8CF23C84AF6AD06DA1E4784 /* DefaultPack */,
 				16E5BD64BA900FD4F921032E /* GuidePack */,
+				0A96592D18865060108F3CCC /* BlackoutWidgets */,
 				942A9A1A63793D61082FFAA8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -86,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				3ECE9A2F0678B209E4A706C9 /* Blackout.app */,
+				1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,10 +125,12 @@
 				2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */,
 				4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */,
 				B8719EE0E94A635E5A7667A7 /* Copy FieldPacks into app bundle */,
+				BC55DAC5CB72489762A721EE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				443C676FB48EC5BF3B5BED25 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				466304068CF247FDBD3B915E /* Blackout */,
@@ -133,6 +157,29 @@
 			productReference = 3ECE9A2F0678B209E4A706C9 /* Blackout.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4A33CE8067C626636E3DE224 /* BlackoutWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEBA9BC0F8665364952CD3BB /* Build configuration list for PBXNativeTarget "BlackoutWidgets" */;
+			buildPhases = (
+				F74E86680F67E61E22AD18E3 /* Sources */,
+				6D782FD88D51C2107CC36E10 /* Frameworks */,
+				9C42FFFC2E57C81406E46080 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0A96592D18865060108F3CCC /* BlackoutWidgets */,
+			);
+			name = BlackoutWidgets;
+			packageProductDependencies = (
+				0EF801150577B69F1E6C2DC2 /* BlackoutCore */,
+			);
+			productName = BlackoutWidgets;
+			productReference = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -144,6 +191,9 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					8796EC6A87564C187A908CD6 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					4A33CE8067C626636E3DE224 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -181,6 +231,7 @@
 			projectRoot = "";
 			targets = (
 				8796EC6A87564C187A908CD6 /* Blackout */,
+				4A33CE8067C626636E3DE224 /* BlackoutWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -193,10 +244,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9C42FFFC2E57C81406E46080 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A8845CE5F531D368403AFF88 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F74E86680F67E61E22AD18E3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -270,14 +335,55 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		BC55DAC5CB72489762A721EE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F12F6D0E48F8AD3FE4382694 /* BlackoutWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		3F19E977FE6399992DCB2876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 59601E391B529B07AE11313D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A33CE8067C626636E3DE224;
+			remoteInfo = BlackoutWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		443C676FB48EC5BF3B5BED25 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A33CE8067C626636E3DE224 /* BlackoutWidgets */;
+			targetProxy = 3F19E977FE6399992DCB2876 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
 			);
 			target = 8796EC6A87564C187A908CD6 /* Blackout */;
+		};
+		C1D2E3F405162738495A6B7C /* Exceptions for "BlackoutWidgets" folder in "BlackoutWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4A33CE8067C626636E3DE224 /* BlackoutWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -286,8 +392,16 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 8E8A406124A99A2C1D9A1238 /* Resources */;
 			membershipExceptions = (
+				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
+			);
+		};
+		D2E3F405162738495A6B7C8D /* Exceptions for "BlackoutWidgets" folder in Resources */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 9C42FFFC2E57C81406E46080 /* Resources */;
+			membershipExceptions = (
+				Info.plist,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -361,6 +475,7 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = "Blackout/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
@@ -372,7 +487,8 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
-					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar. If denied, type instead.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -420,6 +536,7 @@
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = "Blackout/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
@@ -431,7 +548,8 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
-					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar. If denied, type instead.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -459,6 +577,61 @@
 				};
 				name = Release;
 		};
+		38F7EB72A03913A012A47B55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 19;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget;
+					PRODUCT_NAME = BlackoutWidgets;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SUPPORTS_MACCATALYST = NO;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				};
+				name = Debug;
+		};
+		D2F7974108FF61BBD177A14A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 19;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget;
+					PRODUCT_NAME = BlackoutWidgets;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SUPPORTS_MACCATALYST = NO;
+					SWIFT_EMIT_LOC_STRINGS = YES;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+					SWIFT_COMPILATION_MODE = wholemodule;
+					SWIFT_OPTIMIZATION_LEVEL = "-O";
+					VALIDATE_PRODUCT = YES;
+				};
+				name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -476,6 +649,15 @@
 			buildConfigurations = (
 				368B24278E57628104DC2C43 /* Debug */,
 				028CF4E55748EB8D13684699 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEBA9BC0F8665364952CD3BB /* Build configuration list for PBXNativeTarget "BlackoutWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				38F7EB72A03913A012A47B55 /* Debug */,
+				D2F7974108FF61BBD177A14A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -620,6 +802,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */;
 			productName = Settings;
+		};
+		0EF801150577B69F1E6C2DC2 /* BlackoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */;
+			productName = BlackoutCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

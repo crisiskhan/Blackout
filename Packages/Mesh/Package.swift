@@ -18,6 +18,8 @@ let package = Package(
             ],
             linkerSettings: [
                 .linkedFramework("MultipeerConnectivity"),
+                .linkedFramework("CoreBluetooth"),
+                .linkedFramework("Network"),
             ]
         ),
         .testTarget(

@@ -6,6 +6,7 @@ import DesignSystem
 import MapsChrome
 import MapsRouting
 import SwiftUI
+import UIKit
 
 public struct MapsRootView: View {
     @Bindable var location: LocationService
@@ -22,6 +23,9 @@ public struct MapsRootView: View {
     @Bindable var roster: PartyRoster
     var onMessagePeer: ((BlackoutID) -> Void)?
     var pendingPingNav: Binding<FieldPingNav?>
+    var latestInbound: LatestInboundPing?
+    var onPingReply: ((FieldReplyID) -> Void)?
+    var onNavLockChange: ((Bool) -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -47,6 +51,9 @@ public struct MapsRootView: View {
     @State private var chrome = MapChromeRecede()
     @State private var metersPerPoint = 10.0
     @State private var openOutingName: String?
+    @State private var outingStartLatitude: Double?
+    @State private var outingStartLongitude: Double?
+    @State private var toolHint: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
@@ -63,7 +70,10 @@ public struct MapsRootView: View {
         sosCoverOpen: Bool = false,
         roster: PartyRoster,
         onMessagePeer: ((BlackoutID) -> Void)? = nil,
-        pendingPingNav: Binding<FieldPingNav?> = .constant(nil)
+        pendingPingNav: Binding<FieldPingNav?> = .constant(nil),
+        latestInbound: LatestInboundPing? = nil,
+        onPingReply: ((FieldReplyID) -> Void)? = nil,
+        onNavLockChange: ((Bool) -> Void)? = nil
     ) {
         self.location = location
         self.mesh = mesh
@@ -79,6 +89,9 @@ public struct MapsRootView: View {
         self.roster = roster
         self.onMessagePeer = onMessagePeer
         self.pendingPingNav = pendingPingNav
+        self.latestInbound = latestInbound
+        self.onPingReply = onPingReply
+        self.onNavLockChange = onNavLockChange
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -239,6 +252,7 @@ public struct MapsRootView: View {
         guard let nav else { return }
         pendingPingNav.wrappedValue = nil
         guard battery.coarseNavigateEnabled else { return }
+        UserDefaults.standard.set(true, forKey: BlackoutKeys.lastUsedTBT)
         navigate.navigateToPeer(
             latitude: nav.latitude,
             longitude: nav.longitude,
@@ -455,6 +469,8 @@ public struct MapsRootView: View {
             accuracyMeters: gpsAccuracyMeters,
             packContainsSelf: packContainsSelf,
             activeManeuver: liveManeuver,
+            inboundPing: openInboundPingFix,
+            inboundPingHue: openInbound?.hue,
             onDropPin: { lat, lon in
                 location.dropManualPin(latitude: lat, longitude: lon)
             },
@@ -538,10 +554,15 @@ public struct MapsRootView: View {
             }
             if showChipRow {
                 scaleBarRow
+                quickNavRow
                 chipRow
             }
+            pingStrip
             vitalsRow
         }
+        .onChange(of: compass.isLocked) { _, _ in reportNavLock() }
+        .onChange(of: navigate.phase) { _, _ in reportNavLock() }
+        .onAppear { reportNavLock() }
     }
 
     private var lockHudStack: some View {
@@ -621,6 +642,159 @@ public struct MapsRootView: View {
         }
     }
 
+    private var outingStart: (latitude: Double, longitude: Double)? {
+        MapQuickNav.outingStart(
+            crumbs: crumbs.map { ($0.latitude, $0.longitude) },
+            startLatitude: outingStartLatitude,
+            startLongitude: outingStartLongitude
+        )
+    }
+
+    private var lastMark: CompassLockWaypoint? {
+        compass.marks.last
+    }
+
+    private var openInbound: LatestInboundPing? {
+        guard let latestInbound, latestInbound.showsMapStrip() else { return nil }
+        return latestInbound
+    }
+
+    private var openInboundPingFix: LocationFix? {
+        guard let openInbound, let lat = openInbound.latitude, let lon = openInbound.longitude else {
+            return nil
+        }
+        return LocationFix(latitude: lat, longitude: lon)
+    }
+
+    private var quickNavRow: some View {
+        receding {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    mapToolButton(ConvenienceCopy.shareCoords, enabled: true) {
+                        shareCoords()
+                    }
+                    mapToolButton(
+                        ConvenienceCopy.returnToStart,
+                        enabled: MapQuickNav.returnEnabled(hasStart: outingStart != nil)
+                    ) {
+                        guard let start = outingStart else {
+                            toolHint = MapQuickNav.returnDisabledReason(hasStart: false)
+                            return
+                        }
+                        toolHint = nil
+                        lockOrRoute(latitude: start.latitude, longitude: start.longitude, label: "Return")
+                    }
+                    mapToolButton(
+                        ConvenienceCopy.lastMark,
+                        enabled: MapQuickNav.lastMarkEnabled(hasMark: lastMark != nil)
+                    ) {
+                        guard let mark = lastMark else {
+                            toolHint = MapQuickNav.lastMarkDisabledReason(hasMark: false)
+                            return
+                        }
+                        toolHint = nil
+                        lockOrRoute(latitude: mark.latitude, longitude: mark.longitude, label: mark.name)
+                    }
+                }
+                if let toolHint {
+                    Text(toolHint)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+        }
+    }
+
+    private func mapToolButton(_ title: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        MetalButton(title, height: BlackoutDS.Hit.sm) {
+            noteMapActivity()
+            action()
+        }
+        .opacity(enabled ? 1 : MapQuickNav.disabledOpacity)
+        .disabled(false)
+        .accessibilityLabel(title)
+    }
+
+    @ViewBuilder
+    private var pingStrip: some View {
+        if let openInbound {
+            let strip = HStack(spacing: 8) {
+                MetalButton(ConvenienceCopy.coming, height: BlackoutDS.Hit.sm) {
+                    noteMapActivity()
+                    onPingReply?(.coming)
+                }
+                MetalButton(ConvenienceCopy.hold, height: BlackoutDS.Hit.sm) {
+                    noteMapActivity()
+                    onPingReply?(.hold)
+                }
+                MetalButton(ConvenienceCopy.navigate, height: BlackoutDS.Hit.sm) {
+                    noteMapActivity()
+                    if let nav = openInbound.navigation {
+                        consumePingNav(nav)
+                    } else {
+                        toolHint = SOSConfirm.noFix
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 4)
+            if openInbound.holdsMapChrome() {
+                strip
+            } else {
+                receding { strip }
+            }
+        }
+    }
+
+    private func shareCoords() {
+        let live = location.navigationFix?.source == .gps || location.navigationFix?.source == .deadReckoning
+            ? location.navigationFix : nil
+        let last = location.lastKnown
+        let text = BlackoutCoordShare.message(live: live, lastKnown: last)
+        if BlackoutCoordShare.shareFix(live: live, lastKnown: last) == nil {
+            toolHint = ConvenienceCopy.noFixShare
+        } else {
+            toolHint = nil
+        }
+        UIPasteboard.general.string = text
+        MapShareSheet.present(text)
+    }
+
+    private func lockOrRoute(latitude: Double, longitude: Double, label: String) {
+        guard battery.coarseNavigateEnabled else { return }
+        let lastTBT = UserDefaults.standard.bool(forKey: BlackoutKeys.lastUsedTBT)
+        if lastTBT {
+            navigate.navigateToPeer(
+                latitude: latitude,
+                longitude: longitude,
+                label: label,
+                origin: originCoordinate,
+                pack: packService.routing
+            )
+            reportNavLock()
+            return
+        }
+        UserDefaults.standard.set(false, forKey: BlackoutKeys.lastUsedTBT)
+        navigate.end()
+        let point = CompassLockWaypoint(
+            id: "quick-\(label)",
+            name: label,
+            latitude: latitude,
+            longitude: longitude,
+            kind: .poi
+        )
+        _ = compass.lockOn(point)
+        applyLockHeading()
+        reportNavLock()
+    }
+
+    private func reportNavLock() {
+        let on = compass.isLocked || navigate.phase == .guidance
+        onNavLockChange?(on)
+    }
+
     private func receding<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
             .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
@@ -662,8 +836,10 @@ public struct MapsRootView: View {
                 longitude: hit.coordinate.longitude,
                 kind: .poi
             )
+            UserDefaults.standard.set(false, forKey: BlackoutKeys.lastUsedTBT)
             _ = compass.lockOn(point)
             applyLockHeading()
+            reportNavLock()
         }
     }
 
@@ -715,8 +891,10 @@ public struct MapsRootView: View {
                     onStart: {
                         headingUp = true
                         UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
+                        UserDefaults.standard.set(true, forKey: BlackoutKeys.lastUsedTBT)
                         navigate.start(canFollow: canFollowGuidance)
                         refreshGuidance()
+                        reportNavLock()
                     },
                     onCancel: { navigate.end() }
                 )
@@ -838,13 +1016,19 @@ public struct MapsRootView: View {
             let expeditions = try persistence.expeditions()
             if let open = expeditions.first(where: \.isOpen) {
                 openOutingName = open.name
+                outingStartLatitude = open.startLatitude
+                outingStartLongitude = open.startLongitude
                 crumbs = try persistence.breadcrumbs(expeditionID: open.id)
             } else {
                 openOutingName = nil
+                outingStartLatitude = nil
+                outingStartLongitude = nil
                 crumbs = []
             }
         } catch {
             openOutingName = nil
+            outingStartLatitude = nil
+            outingStartLongitude = nil
             crumbs = []
         }
     }
@@ -1131,5 +1315,25 @@ struct MapLayersSheet: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.55)
+    }
+}
+
+enum MapShareSheet {
+    static func present(_ text: String) {
+        let activity = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }),
+            let root = scene.keyWindow?.rootViewController ?? scene.windows.first?.rootViewController
+        else { return }
+        var top = root
+        while let presented = top.presentedViewController {
+            top = presented
+        }
+        if let pop = activity.popoverPresentationController {
+            pop.sourceView = top.view
+            pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 1, height: 1)
+        }
+        top.present(activity, animated: true)
     }
 }

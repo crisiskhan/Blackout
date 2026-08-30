@@ -24,6 +24,7 @@ public enum FieldPingHue: String, Sendable, CaseIterable {
 public enum FieldPingHaptic: String, Sendable {
     case light
     case medium
+    case heavy
 }
 
 public enum FieldPing {
@@ -34,6 +35,11 @@ public enum FieldPing {
     public static let chipHeight: Double = 56
     public static let cardHeight: Double = 64
     public static let pip: Double = 8
+    public static let openWindow: TimeInterval = 15 * 60
+    /// Same band as NAV lock (`CompassLockMath.speechRate`).
+    public static let speechRate: Float = 0.50
+    public static let speechRateMin: Float = 0.47
+    public static let speechRateMax: Float = 0.52
 
     public static func label(_ id: FieldPingID) -> String {
         switch id {
@@ -72,8 +78,36 @@ public enum FieldPing {
     public static func haptic(_ hue: FieldPingHue) -> FieldPingHaptic {
         switch hue {
         case .ok: return .light
-        case .warn, .red: return .medium
+        case .warn: return .medium
+        case .red: return .heavy
         }
+    }
+
+    /// I'm down double-taps so it is not identical to Danger here (both red / heavy).
+    public static func hapticRepeats(_ id: FieldPingID) -> Int {
+        switch id {
+        case .down: return 2
+        case .rally, .escort, .danger: return 1
+        }
+    }
+
+    public static func holdsMapChrome(_ id: FieldPingID) -> Bool {
+        switch id {
+        case .danger, .down: return true
+        case .rally, .escort: return false
+        }
+    }
+
+    public static func announcePhrase(callsign: String, id: FieldPingID) -> String {
+        "\(Callsign.commit(callsign)). \(label(id))."
+    }
+
+    public static func shouldSpeak(isOutbound: Bool) -> Bool {
+        !isOutbound
+    }
+
+    public static func shouldPlayHaptic(supportsHaptics: Bool) -> Bool {
+        supportsHaptics
     }
 
     public static func requiresSenderPin(_ id: FieldReplyID) -> Bool {

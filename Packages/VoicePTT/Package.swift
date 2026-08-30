@@ -17,6 +17,10 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
+            ],
+            linkerSettings: [
+                .linkedFramework("AVFoundation"),
+                .linkedFramework("MediaPlayer"),
             ]
         ),
         .testTarget(

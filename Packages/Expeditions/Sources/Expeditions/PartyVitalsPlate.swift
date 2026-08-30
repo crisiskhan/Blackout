@@ -16,6 +16,9 @@ struct PartyVitalsPlate: View {
     @State private var callsignDraft = ""
     @State private var joinDraft = ""
     @State private var joinFailed = false
+    @State private var showQR = false
+    @State private var scanQR = false
+    @State private var cameraDenied = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -49,6 +52,26 @@ struct PartyVitalsPlate: View {
         .onChange(of: roster.identity.callsign) { _, value in
             callsignDraft = value
         }
+        .sheet(isPresented: $showQR) {
+            if let code = roster.identity.partyCode {
+                NavigationStack {
+                    PartyQRSheet(code: code)
+                }
+                .preferredColorScheme(.dark)
+            }
+        }
+        .sheet(isPresented: $scanQR) {
+            NavigationStack {
+                PartyQRScanSheet { code in
+                    joinDraft = code
+                    joinFailed = !onJoinParty(code)
+                    if joinFailed {
+                        cameraDenied = false
+                    }
+                }
+            }
+            .preferredColorScheme(.dark)
+        }
     }
 
     private var identityBlock: some View {
@@ -80,6 +103,19 @@ struct PartyVitalsPlate: View {
                         if !joinFailed { joinDraft = "" }
                     }
                 }
+                HStack(spacing: 10) {
+                    MetalButton(PartyQR.scanTitle, height: BlackoutDS.Hit.sm) {
+                        scanQR = true
+                    }
+                }
+                if !joinDraft.isEmpty {
+                    Text(joinDraft)
+                        .font(.system(size: 36, weight: .bold, design: .default))
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
+                }
                 TextField(PartyIdentityCopy.partyCode, text: $joinDraft)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.bright)
@@ -97,11 +133,25 @@ struct PartyVitalsPlate: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
+                if cameraDenied {
+                    Text(PartyQR.cameraDenied)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                }
                 Text(PartyIdentityCopy.soloValid)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
             } else {
+                if let code = roster.identity.partyCode {
+                    Text(code)
+                        .font(.system(size: 36, weight: .bold, design: .default))
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 HStack(spacing: 10) {
+                    MetalButton(PartyQR.showTitle, height: BlackoutDS.Hit.sm) {
+                        showQR = true
+                    }
                     GhostButton(PartyIdentityCopy.leave, height: BlackoutDS.Hit.sm, action: onLeaveParty)
                     GhostButton(PartyIdentityCopy.end, height: BlackoutDS.Hit.sm, action: onLeaveParty)
                 }

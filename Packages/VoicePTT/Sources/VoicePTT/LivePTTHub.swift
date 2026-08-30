@@ -1,6 +1,7 @@
 import AVFoundation
 import BlackoutCore
 import Foundation
+import MediaPlayer
 import Observation
 
 /// Live half-duplex PTT. No clip list. No queued audio. Fail closed if the engine cannot start.
@@ -11,11 +12,14 @@ public final class LivePTTHub {
     public private(set) var isReceiving = false
     public private(set) var microphoneAllowed = true
     public private(set) var lastRefusal: String?
+    public private(set) var lastHeardAt: Date?
     public var extremeSaver = false
 
     private var engine: AVAudioEngine?
     private var player: AVAudioPlayerNode?
     private var sendFrame: ((Data) -> Bool)?
+    private var remoteInstalled = false
+    private var remoteDecision: (() -> PTTDecision)?
 
     public init() {}
 
@@ -75,6 +79,7 @@ public final class LivePTTHub {
     public func receive(_ payload: Data) {
         guard !isTransmitting else { return }
         guard let packet = PTTAudioPacket.decode(payload) else { return }
+        lastHeardAt = Date()
         do {
             try startEngine(transmit: false)
             isReceiving = true
@@ -112,6 +117,68 @@ public final class LivePTTHub {
         isReceiving = false
         engine?.inputNode.removeTap(onBus: 0)
         stopEngine()
+        uninstallRemoteCommands()
+    }
+
+    /// Headset / lock-screen play-pause via `MPRemoteCommandCenter`.
+    /// Hardware volume-up cannot be used as PTT without a private API
+    /// (`SystemVolumeDidChange` / `MPVolumeView` hijack). Headset / remote only.
+    public func installRemoteCommands(decision: @escaping () -> PTTDecision) {
+        remoteDecision = decision
+        guard !remoteInstalled else { return }
+        remoteInstalled = true
+        let center = MPRemoteCommandCenter.shared()
+        center.togglePlayPauseCommand.isEnabled = true
+        center.playCommand.isEnabled = true
+        center.pauseCommand.isEnabled = true
+        center.togglePlayPauseCommand.addTarget { [weak self] _ in
+            self?.handleRemoteToggle() ?? .commandFailed
+        }
+        center.playCommand.addTarget { [weak self] _ in
+            self?.handleRemoteBegin() ?? .commandFailed
+        }
+        center.pauseCommand.addTarget { [weak self] _ in
+            self?.handleRemoteEnd() ?? .commandFailed
+        }
+        var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+        info[MPMediaItemPropertyTitle] = "BLACKOUT PTT"
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+    }
+
+    public func uninstallRemoteCommands() {
+        guard remoteInstalled else { return }
+        remoteInstalled = false
+        let center = MPRemoteCommandCenter.shared()
+        center.togglePlayPauseCommand.removeTarget(nil)
+        center.playCommand.removeTarget(nil)
+        center.pauseCommand.removeTarget(nil)
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        remoteDecision = nil
+    }
+
+    @discardableResult
+    private func handleRemoteToggle() -> MPRemoteCommandHandlerStatus {
+        if isTransmitting {
+            return handleRemoteEnd()
+        }
+        return handleRemoteBegin()
+    }
+
+    @discardableResult
+    private func handleRemoteBegin() -> MPRemoteCommandHandlerStatus {
+        let decision = remoteDecision?() ?? PTTDecision.evaluate(
+            nearbyPeerCount: 0,
+            partyCode: nil,
+            meshRunning: false,
+            microphoneAllowed: microphoneAllowed
+        )
+        return pressBegan(decision: decision) ? .success : .commandFailed
+    }
+
+    @discardableResult
+    private func handleRemoteEnd() -> MPRemoteCommandHandlerStatus {
+        pressEnded()
+        return .success
     }
 
     private func startEngine(transmit: Bool) throws {
