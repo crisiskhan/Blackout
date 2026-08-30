@@ -30,8 +30,18 @@ final class MapChromeRecedeTests: XCTestCase {
         chrome.tick(at: 2)
         XCTAssertTrue(chrome.isReceded)
         chrome.reduceMotion = true
+        XCTAssertFalse(chrome.shouldHide)
         chrome.tick(at: 3)
         XCTAssertFalse(chrome.isReceded)
+        XCTAssertFalse(chrome.shouldHide)
+    }
+
+    func testReduceMotionKeepsImOKChipVisible() {
+        var chrome = MapChromeRecede(now: 0)
+        chrome.tick(at: 2)
+        XCTAssertTrue(chrome.shouldHide)
+        chrome.reduceMotion = true
+        XCTAssertFalse(chrome.shouldHide)
     }
 
     func testIdleIntervalIsTwoSeconds() {

@@ -25,11 +25,11 @@ public enum SOSConfirmAction: String, CaseIterable, Sendable, Hashable {
 
 public enum SOSConfirmCopy {
     public static let speakSOS = "SPEAK SOS"
-    public static let speakLocation = "SPEAK MY LOCATION"
-    public static let sharePosition = "SHARE POSITION"
-    public static let copyCoords = "COPY COORDS"
+    public static let speakLocation = "SPEAK LOCATION"
+    public static let sharePosition = "SHARE"
+    public static let copyCoords = "COPY"
     public static let call911 = "CALL 911"
-    public static let visualStrobe = "VISUAL SOS STROBE"
+    public static let visualStrobe = "STROBE"
     public static let stop = "STOP"
 }
 

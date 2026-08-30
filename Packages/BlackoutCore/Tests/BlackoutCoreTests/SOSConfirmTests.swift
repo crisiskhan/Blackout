@@ -5,11 +5,11 @@ final class SOSConfirmTests: XCTestCase {
     func testConfirmActionsStayInSpecOrder() {
         XCTAssertEqual(SOSConfirmAction.allCases.map(\.title), [
             "SPEAK SOS",
-            "SPEAK MY LOCATION",
-            "SHARE POSITION",
-            "COPY COORDS",
+            "SPEAK LOCATION",
+            "SHARE",
+            "COPY",
             "CALL 911",
-            "VISUAL SOS STROBE",
+            "STROBE",
         ])
         XCTAssertEqual(SOSConfirmAction.visualStrobe.stopTitle, "STOP")
     }

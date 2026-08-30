@@ -13,6 +13,8 @@ public struct MapChromeRecede: Equatable, Sendable {
     public var reduceMotion: Bool
     public var hold: Bool
     public private(set) var isReceded: Bool
+    /// I’m-OK chip and HUD stay when Reduce Motion is on, even if idle already receded.
+    public var shouldHide: Bool { isReceded && !reduceMotion }
     private var lastActivity: TimeInterval
 
     public init(

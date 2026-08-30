@@ -339,9 +339,9 @@ struct RootView: View {
         .allowsHitTesting(true)
     }
 
-    /// Measured from the physical bottom of the screen (overlay ignores the bottom safe area).
+    /// Same 88pt SOS on Map / Comms / Field / Expedition — not Map-only, not a nav-bar chip, not a tab.
     /// Compact 4-tab: 8pt above the tab bar, 16pt trailing. Critical / iPad: 8pt above home indicator.
-    /// SOS never recedes with Map HUD. Last-2% still shows the 88pt FAB.
+    /// Never recedes with Map HUD. Last-2% CriticalSOSShell still shows the FAB.
     private var fabBottomPadding: CGFloat {
         let hasTabBar = sizeClass != .regular && !container.battery.isCritical
         return BlackoutDS.Vitals.sosGap

@@ -676,14 +676,22 @@ def test_sos_confirm_panel() -> None:
     chrome = (ROOT / "Packages/Maps/Sources/MapsChrome/MapChromeRecede.swift").read_text()
     pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
     tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
-    if "SPEAK SOS" not in core or "SPEAK MY LOCATION" not in core:
-        fail("confirm panel missing SPEAK SOS / SPEAK MY LOCATION")
-    if "SHARE POSITION" not in core or "COPY COORDS" not in core:
-        fail("confirm panel missing SHARE POSITION / COPY COORDS")
-    if "CALL 911" not in core or "VISUAL SOS STROBE" not in core or "STOP" not in core:
-        fail("confirm panel missing CALL 911 / VISUAL SOS STROBE / STOP")
+    if "SPEAK SOS" not in core or 'speakLocation = "SPEAK LOCATION"' not in core:
+        fail("confirm panel missing SPEAK SOS / SPEAK LOCATION")
+    if "SPEAK MY LOCATION" in core:
+        fail("confirm label is SPEAK LOCATION, not SPEAK MY LOCATION")
+    if 'sharePosition = "SHARE"' not in core or 'copyCoords = "COPY"' not in core:
+        fail("confirm panel missing SHARE / COPY")
+    if "SHARE POSITION" in core or "COPY COORDS" in core:
+        fail("confirm labels are SHARE and COPY")
+    if "CALL 911" not in core or 'visualStrobe = "STROBE"' not in core:
+        fail("confirm panel missing CALL 911 / STROBE")
+    if "VISUAL SOS STROBE" in core:
+        fail("confirm label is STROBE")
+    if '"BLACKOUT \\(coordsLine(fix))"' not in core and "BLACKOUT \\(coordsLine" not in core:
+        fail("SHARE message must be BLACKOUT {coords}")
     if "BLACKOUT" not in core:
-        fail("SHARE POSITION must start with BLACKOUT")
+        fail("SHARE must start with BLACKOUT")
     if "tel:911" not in core or "autoDials911 = false" not in core:
         fail("CALL 911 must be tel:911 and must not auto-dial")
     if "strobePeriodMs = 330" not in core or "reduceMotionOpacity = 0.55" not in core:
@@ -725,6 +733,16 @@ def test_sos_confirm_panel() -> None:
         fail("Map recede must not include the SOS FAB")
     if root.count("tabItem") != 4:
         fail("do not make SOS a tab")
+    if "sosOverlay" not in root or root.count("SOSFab") != 1:
+        fail("SOS must be one RootView overlay on all four tabs")
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
+    field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
+    expedition = (ROOT / "Packages/Expeditions/Sources/Expeditions/ExpeditionsRootView.swift").read_text()
+    if "SOSFab" in maps or "SOSFab" in comms or "SOSFab" in field or "SOSFab" in expedition:
+        fail("SOS must not be a per-tab or nav-bar control")
+    if "isReceded && !reduceMotion" not in maps:
+        fail("I AM OK chip must stay when Reduce Motion is on")
     if "CriticalSOSShell" not in root or "SOSFab" not in root:
         fail("last-2% must still show the 88pt SOS FAB")
     if "push:" in tf or "pull_request:" in tf:

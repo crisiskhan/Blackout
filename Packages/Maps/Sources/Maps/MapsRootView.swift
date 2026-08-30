@@ -464,7 +464,7 @@ public struct MapsRootView: View {
     }
 
     /// Bottom-leading 56h metal chip. Same 8pt-above-tab-bar baseline as SOS.
-    /// ≥8pt horizontal gap to the 88pt disk. Recedes with HUD. Never a disk.
+    /// ≥8pt horizontal gap to the 88pt disk. Recedes with HUD. Reduce Motion: stays. Never a disk.
     private var vitalsRow: some View {
         receding {
             HStack(alignment: .bottom, spacing: 0) {
@@ -733,8 +733,8 @@ private struct RecedingMapChrome: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .opacity(isReceded ? 0 : 1)
-            .allowsHitTesting(!isReceded)
+            .opacity(isReceded && !reduceMotion ? 0 : 1)
+            .allowsHitTesting(!(isReceded && !reduceMotion))
             .animation(
                 reduceMotion ? nil : (isReceded ? BlackoutDS.Motion.move : BlackoutDS.Motion.snap),
                 value: isReceded
