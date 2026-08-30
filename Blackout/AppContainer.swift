@@ -101,6 +101,7 @@ final class AppContainer {
                 meshRunning: mesh.isRunning
             )
         }
+        PTTIntentBridge.bind(hub: ptt)
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
         mesh.onInbound = { [weak self] event in

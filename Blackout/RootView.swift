@@ -67,6 +67,9 @@ struct RootView: View {
                     .allowsHitTesting(false)
                 }
                 sosOverlay
+                CameraControlPTTCatcher()
+                    .frame(width: 0, height: 0)
+                    .allowsHitTesting(false)
                 if container.showRadioBanner {
                     radioBannerOverlay
                 }

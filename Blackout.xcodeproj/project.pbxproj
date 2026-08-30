@@ -461,6 +461,7 @@
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_ENTITLEMENTS = Supporting/Blackout.entitlements;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
 					CURRENT_PROJECT_VERSION = 19;
@@ -476,6 +477,7 @@
 					INFOPLIST_FILE = "Supporting/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
+					INFOPLIST_KEY_NFCReaderUsageDescription = "Blackout shares a local party code over NFC. No account. Deny still lets you type or scan the 4–8 code.";
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
 					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
 					INFOPLIST_KEY_NSBonjourServices = "_blckout-mesh._tcp";
@@ -524,6 +526,7 @@
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_ENTITLEMENTS = Supporting/Blackout.entitlements;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
 					CURRENT_PROJECT_VERSION = 19;
@@ -537,6 +540,7 @@
 					INFOPLIST_FILE = "Supporting/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
+					INFOPLIST_KEY_NFCReaderUsageDescription = "Blackout shares a local party code over NFC. No account. Deny still lets you type or scan the 4–8 code.";
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
 					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
 					INFOPLIST_KEY_NSBonjourServices = "_blckout-mesh._tcp";

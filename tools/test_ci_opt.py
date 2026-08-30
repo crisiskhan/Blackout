@@ -112,6 +112,8 @@ def test_pbx_single_copy() -> None:
         fail("BlackoutWidgets lost INFOPLIST_FILE on Debug or Release")
     if "INFOPLIST_FILE = BlackoutWidgets/Info.plist" in pbx:
         fail("widget Info.plist must stay outside the synced BlackoutWidgets folder")
+    if pbx.count("GENERATE_INFOPLIST_FILE = NO;") < 2:
+        fail("BlackoutWidgets GENERATE_INFOPLIST_FILE must stay NO")
     if (ROOT / "BlackoutWidgets" / "Info.plist").is_file():
         fail("BlackoutWidgets/Info.plist in the sync root is copied onto the appex Info.plist")
     widget_plist = (ROOT / "Supporting" / "BlackoutWidgets-Info.plist").read_text()
@@ -1075,7 +1077,55 @@ def main() -> None:
     test_fieldpack_root_flatten_fixture()
     test_compass_lock_on()
     test_pack_find_civ_water()
+    test_hits_23()
     print("all ci-opt checks passed")
+
+
+def test_hits_23() -> None:
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    core = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/ConvenienceHits.swift").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/ConvenienceHitsTests.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    torch = (ROOT / "Packages/Maps/Sources/Maps/MapTorch.swift").read_text()
+    nfc = (ROOT / "Packages/Expeditions/Sources/Expeditions/PartyNFCViews.swift").read_text()
+    plate = (ROOT / "Packages/Expeditions/Sources/Expeditions/PartyVitalsPlate.swift").read_text()
+    shell = (ROOT / "Blackout/RootView.swift").read_text()
+    intents = (ROOT / "Blackout/PTTIntents.swift").read_text()
+    widget = (ROOT / "Supporting/BlackoutWidgets-Info.plist").read_text()
+    info = (ROOT / "Supporting/Blackout-Info.plist").read_text()
+    if "NFCReaderUsageDescription" not in pbx or "NFCReaderUsageDescription" not in info:
+        fail("NFC usage string missing")
+    if "Hold to share" not in core or "Tap to join" not in core:
+        fail("NFC roster copy missing")
+    if "PartyNFC.tapToJoin" not in plate or "PartyNFC.holdToShare" not in plate:
+        fail("NFC roster controls missing")
+    if "showsControls(readingAvailable: false)" not in tests:
+        fail("NFC missing-hardware hide test missing")
+    if "webview" in nfc.lower() or "WKWebView" in nfc:
+        fail("NFC must not use a webview")
+    if "emitsSOS = false" not in core:
+        fail("Map torch policy must not emit SOS")
+    if "testFlashlightDoesNotEmitSOS" not in tests:
+        fail("flashlight SOS test missing")
+    if "ConvenienceCopy.flashlight" not in maps or "BlackoutDS.Hit.md" not in maps:
+        fail("Map flashlight 64 metal tool missing")
+    if "torchMode" not in torch or "sosAlert" in torch:
+        fail("Map torch must set AVCaptureDevice.torch and not emit sos")
+    if "MapTorch" in shell.split("CriticalSOSShell", 1)[-1] or "flashlight" in shell.split("CriticalSOSShell", 1)[-1].lower():
+        fail("do not add torch to CriticalSOSShell")
+    if "Start PTT" not in intents or "Stop PTT" not in intents:
+        fail("PTT App Intents missing")
+    if "testPTTAppIntentRefusesZeroPeers" not in tests:
+        fail("PTT App Intent zero-peer test missing")
+    if "GENERATE_INFOPLIST_FILE = NO" not in pbx:
+        fail("widget GENERATE_INFOPLIST_FILE must stay NO")
+    if "$(PRODUCT_BUNDLE_IDENTIFIER)" not in widget:
+        fail("widget CFBundleIdentifier must stay PRODUCT_BUNDLE_IDENTIFIER")
+    if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
+        fail("widget bundle id drifted")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("version bumped off 19")
+    ok("hits 23: NFC + Map torch + PTT intent, widget id locked, version 19")
 
 
 if __name__ == "__main__":

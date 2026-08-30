@@ -13,6 +13,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>NFCReaderUsageDescription</key>
+	<string>Blackout shares a local party code over NFC. No account. Deny still lets you type or scan the 4–8 code.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 </dict>

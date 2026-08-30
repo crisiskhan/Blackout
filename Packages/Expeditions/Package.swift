@@ -19,6 +19,9 @@ let package = Package(
                 "BlackoutCore",
                 "DesignSystem",
                 .product(name: "BlackoutLocation", package: "Location"),
+            ],
+            linkerSettings: [
+                .linkedFramework("CoreNFC"),
             ]
         ),
         .testTarget(

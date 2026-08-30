@@ -19,6 +19,8 @@ struct PartyVitalsPlate: View {
     @State private var showQR = false
     @State private var scanQR = false
     @State private var cameraDenied = false
+    @State private var nfc = PartyNFCCoordinator()
+    @State private var nfcCopy: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -45,6 +47,9 @@ struct PartyVitalsPlate: View {
         }
         .onAppear {
             callsignDraft = roster.identity.callsign
+            nfc.onFail = { message in
+                nfcCopy = message
+            }
         }
         .onDisappear {
             commitCallsign()
@@ -107,6 +112,15 @@ struct PartyVitalsPlate: View {
                     MetalButton(PartyQR.scanTitle, height: BlackoutDS.Hit.sm) {
                         scanQR = true
                     }
+                    if PartyNFC.showsControls(readingAvailable: PartyNFCCoordinator.hardwareAvailable) {
+                        MetalButton(PartyNFC.tapToJoin, height: BlackoutDS.Hit.sm) {
+                            nfcCopy = nil
+                            nfc.join { code in
+                                joinDraft = code
+                                joinFailed = !onJoinParty(code)
+                            }
+                        }
+                    }
                 }
                 if !joinDraft.isEmpty {
                     Text(joinDraft)
@@ -138,6 +152,11 @@ struct PartyVitalsPlate: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
+                if let nfcCopy {
+                    Text(nfcCopy)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                }
                 Text(PartyIdentityCopy.soloValid)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
@@ -152,8 +171,21 @@ struct PartyVitalsPlate: View {
                     MetalButton(PartyQR.showTitle, height: BlackoutDS.Hit.sm) {
                         showQR = true
                     }
+                    if PartyNFC.showsControls(readingAvailable: PartyNFCCoordinator.hardwareAvailable) {
+                        MetalButton(PartyNFC.holdToShare, height: BlackoutDS.Hit.sm) {
+                            nfcCopy = nil
+                            if let code = roster.identity.partyCode {
+                                nfc.share(code: code)
+                            }
+                        }
+                    }
                     GhostButton(PartyIdentityCopy.leave, height: BlackoutDS.Hit.sm, action: onLeaveParty)
                     GhostButton(PartyIdentityCopy.end, height: BlackoutDS.Hit.sm, action: onLeaveParty)
+                }
+                if let nfcCopy, roster.identity.partyCode != nil {
+                    Text(nfcCopy)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
                 if roster.isFrozen {
                     Text("Party ended. Roster frozen.")

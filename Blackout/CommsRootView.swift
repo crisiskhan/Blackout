@@ -28,6 +28,9 @@ struct CommsRootView: View {
 
     @State private var segment: Segment = .threads
     @State private var radarPeer: RadarBlip?
+    @State private var actionHint = ActionButtonHintPolicy(
+        dismissed: UserDefaults.standard.bool(forKey: BlackoutKeys.actionButtonHintDismissed)
+    )
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
@@ -112,13 +115,26 @@ struct CommsRootView: View {
         VStack {
             Spacer()
             HStack(alignment: .bottom) {
-                VoicePTTRootView(
-                    hub: ptt,
-                    nearbyPeerCount: mesh.nearbyPeerCount,
-                    partyCode: roster.identity.partyCode,
-                    meshRunning: mesh.isRunning,
-                    onOpenSettings: openSettings
-                )
+                VStack(alignment: .leading, spacing: 8) {
+                    if actionHint.shouldShow() {
+                        Button(PTTIntentPolicy.actionHint) {
+                            actionHint.dismiss()
+                            UserDefaults.standard.set(true, forKey: BlackoutKeys.actionButtonHintDismissed)
+                            openActionButtonSettings()
+                        }
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: 200, alignment: .leading)
+                    }
+                    VoicePTTRootView(
+                        hub: ptt,
+                        nearbyPeerCount: mesh.nearbyPeerCount,
+                        partyCode: roster.identity.partyCode,
+                        meshRunning: mesh.isRunning,
+                        onOpenSettings: openSettings
+                    )
+                }
                 .onChange(of: mesh.nearbyPeerCount) { _, _ in
                     if !ptt.decision(
                         nearbyPeerCount: mesh.nearbyPeerCount,
@@ -147,6 +163,12 @@ struct CommsRootView: View {
 
     private func openSettings() {
         ptt.noteRefusal(PTTCopy.micDenied)
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+
+    /// Action Button assignment has no public deep link. App Settings is the public door.
+    private func openActionButtonSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }

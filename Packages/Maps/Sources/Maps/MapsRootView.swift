@@ -54,6 +54,7 @@ public struct MapsRootView: View {
     @State private var outingStartLatitude: Double?
     @State private var outingStartLongitude: Double?
     @State private var toolHint: String?
+    @State private var torch = MapTorchController()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
@@ -149,9 +150,11 @@ public struct MapsRootView: View {
     }
 
     public var body: some View {
-        mapWithSheets.modifier(
-            MapPackLifecycleModifier(pack: packObservers, chrome: chromeObservers)
-        )
+        mapWithSheets
+            .modifier(
+                MapPackLifecycleModifier(pack: packObservers, chrome: chromeObservers)
+            )
+            .onDisappear { torch.turnOff() }
     }
 
     private var packObservers: MapsPackObservers {
@@ -636,10 +639,40 @@ public struct MapsRootView: View {
                     noteMapActivity()
                     onOpenFieldPacks?()
                 }
+                if MapTorchPolicy.showsControl(hasTorch: torch.hasHardware) {
+                    flashlightButton
+                }
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 8)
         }
+    }
+
+    private var flashlightButton: some View {
+        Button {
+            noteMapActivity()
+            torch.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                if torch.isOn {
+                    Circle()
+                        .fill(BlackoutDS.Silver.bright)
+                        .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
+                }
+                Text(ConvenienceCopy.flashlight)
+                    .font(BlackoutDS.bodyFont())
+                    .fontWeight(.semibold)
+            }
+            .foregroundStyle(BlackoutDS.Surface.void)
+            .frame(maxWidth: .infinity)
+            .frame(height: BlackoutDS.Hit.md)
+            .background(BlackoutDS.Silver.metal)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(ConvenienceCopy.flashlight)
+        .accessibilityAddTraits(torch.isOn ? .isSelected : [])
+        .accessibilityValue(torch.isOn ? "On" : "Off")
     }
 
     private var outingStart: (latitude: Double, longitude: Double)? {

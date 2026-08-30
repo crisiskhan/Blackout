@@ -185,6 +185,97 @@ public enum PartyQR {
     }
 }
 
+/// NFC join uses the same 4–8 code as QR / type-in. Hide controls when hardware is missing.
+public enum PartyNFC {
+    public static let holdToShare = "Hold to share"
+    public static let tapToJoin = "Tap to join"
+    public static let sessionFailed = "NFC failed. Type the 4–8 code."
+    public static let denied = "NFC denied. Type the 4–8 code."
+
+    public static func showsControls(readingAvailable: Bool) -> Bool {
+        readingAvailable
+    }
+
+    public static func payload(code: String) -> String {
+        PartyQR.payload(code: code)
+    }
+
+    public static func parse(_ raw: String) -> String? {
+        if let code = PartyQR.parse(raw) { return code }
+        return parseEmbedded(raw)
+    }
+
+    public static func parseMessagePayloads(_ payloads: [String]) -> String? {
+        for raw in payloads {
+            if let code = parse(raw) { return code }
+        }
+        return nil
+    }
+
+    private static func parseEmbedded(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasPrefix("blackout://join/") {
+            return PartyQR.parse(String(trimmed.dropFirst("blackout://join/".count)))
+        }
+        if let last = trimmed.split(separator: "/").last {
+            return PartyQR.parse(String(last))
+        }
+        return nil
+    }
+}
+
+/// Rear torch on Map. Not SOS, not the SOS strobe, not on the 2% shell.
+public enum MapTorchPolicy {
+    public static let emitsSOS = false
+    public static let armsSOS = false
+    public static let startsSOSStrobe = false
+    public static let allowedInExtremeSaver = true
+    public static let showsOnCriticalShell = false
+    public static let envelopeKind: PayloadKind? = nil
+
+    public static func showsControl(hasTorch: Bool) -> Bool {
+        hasTorch
+    }
+}
+
+/// Action Button / Camera Control / App Shortcut use the same PTT decision as the 72 disk.
+public enum PTTIntentPolicy {
+    public static let startTitle = "Start PTT"
+    public static let stopTitle = "Stop PTT"
+    public static let toggleTitle = "Toggle PTT"
+    public static let actionHint = "Set Action Button to PTT in Settings"
+    public static let firesSOS = false
+    public static let sendsImDown = false
+
+    public static func evaluate(
+        nearbyPeerCount: Int,
+        partyCode: String?,
+        meshRunning: Bool,
+        microphoneAllowed: Bool
+    ) -> PTTDecision {
+        PTTDecision.evaluate(
+            nearbyPeerCount: nearbyPeerCount,
+            partyCode: partyCode,
+            meshRunning: meshRunning,
+            microphoneAllowed: microphoneAllowed
+        )
+    }
+}
+
+public struct ActionButtonHintPolicy: Equatable, Sendable {
+    public var dismissed: Bool
+
+    public init(dismissed: Bool = false) {
+        self.dismissed = dismissed
+    }
+
+    public func shouldShow() -> Bool { !dismissed }
+
+    public mutating func dismiss() {
+        dismissed = true
+    }
+}
+
 public enum LiveActivityPolicy {
     public static func shouldBeActive(
         partyCode: String?,
@@ -207,4 +298,5 @@ public enum ConvenienceCopy {
     public static let dictation = "Dictate"
     public static let dictationDenied = "Mic denied. Type instead. Open Settings to dictate."
     public static let noFixShare = "NO FIX. Nothing to share."
+    public static let flashlight = "Light"
 }

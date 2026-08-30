@@ -182,4 +182,56 @@ final class ConvenienceHitsTests: XCTestCase {
         XCTAssertEqual(PartyQR.parse("AB12CD"), "AB12CD")
         XCTAssertNil(PartyQR.parse("no"))
     }
+
+    func testFlashlightDoesNotEmitSOS() {
+        XCTAssertFalse(MapTorchPolicy.emitsSOS)
+        XCTAssertFalse(MapTorchPolicy.armsSOS)
+        XCTAssertFalse(MapTorchPolicy.startsSOSStrobe)
+        XCTAssertTrue(MapTorchPolicy.allowedInExtremeSaver)
+        XCTAssertFalse(MapTorchPolicy.showsOnCriticalShell)
+        XCTAssertNil(MapTorchPolicy.envelopeKind)
+        XCTAssertNotEqual(MapTorchPolicy.envelopeKind, .sosAlert)
+        XCTAssertNotEqual(MapTorchPolicy.envelopeKind, SOSConfirm.meshKind)
+        XCTAssertTrue(MapTorchPolicy.showsControl(hasTorch: true))
+        XCTAssertFalse(MapTorchPolicy.showsControl(hasTorch: false))
+    }
+
+    func testNFCMissingHardwareHidesControls() {
+        XCTAssertFalse(PartyNFC.showsControls(readingAvailable: false))
+        XCTAssertTrue(PartyNFC.showsControls(readingAvailable: true))
+        XCTAssertEqual(PartyNFC.payload(code: "ab-12"), PartyQR.payload(code: "ab-12"))
+        XCTAssertEqual(PartyNFC.parse("AB12CD"), "AB12CD")
+        XCTAssertEqual(PartyNFC.parse("blackout://join/AB12CD"), "AB12CD")
+        XCTAssertEqual(PartyNFC.parseMessagePayloads(["no", "AB12CD"]), "AB12CD")
+        XCTAssertNil(PartyNFC.parse("no"))
+        XCTAssertEqual(PartyNFC.holdToShare, "Hold to share")
+        XCTAssertEqual(PartyNFC.tapToJoin, "Tap to join")
+    }
+
+    func testPTTAppIntentRefusesZeroPeers() {
+        let refused = PTTIntentPolicy.evaluate(
+            nearbyPeerCount: 0,
+            partyCode: "AB12CD",
+            meshRunning: true,
+            microphoneAllowed: true
+        )
+        XCTAssertFalse(refused.allowsTransmit)
+        XCTAssertFalse(refused.shouldBuffer)
+        XCTAssertEqual(refused.pressMessage, PTTCopy.noMeshPress)
+        XCTAssertFalse(PTTIntentPolicy.firesSOS)
+        XCTAssertFalse(PTTIntentPolicy.sendsImDown)
+        let ok = PTTIntentPolicy.evaluate(
+            nearbyPeerCount: 1,
+            partyCode: "AB12CD",
+            meshRunning: true,
+            microphoneAllowed: true
+        )
+        XCTAssertTrue(ok.allowsTransmit)
+        XCTAssertFalse(ok.shouldBuffer)
+        var hint = ActionButtonHintPolicy()
+        XCTAssertTrue(hint.shouldShow())
+        hint.dismiss()
+        XCTAssertFalse(hint.shouldShow())
+        XCTAssertEqual(PTTIntentPolicy.actionHint, "Set Action Button to PTT in Settings")
+    }
 }

@@ -3,6 +3,7 @@ import BlackoutCore
 import Foundation
 import MediaPlayer
 import Observation
+import UIKit
 
 /// Live half-duplex PTT. No clip list. No queued audio. Fail closed if the engine cannot start.
 @MainActor
@@ -154,6 +155,44 @@ public final class LivePTTHub {
         center.pauseCommand.removeTarget(nil)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         remoteDecision = nil
+    }
+
+    /// Action Button / Camera Control / App Intent. Same fail-fast as the 72 disk.
+    @discardableResult
+    public func toggleFromExternal() -> Bool {
+        if isTransmitting {
+            endFromExternal()
+            return true
+        }
+        return beginFromExternal()
+    }
+
+    @discardableResult
+    public func beginFromExternal() -> Bool {
+        let decision = currentDecision()
+        if !decision.allowsTransmit {
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            lastRefusal = decision.pressMessage
+            return false
+        }
+        let ok = pressBegan(decision: decision)
+        UIImpactFeedbackGenerator(style: ok ? .medium : .rigid).impactOccurred()
+        return ok
+    }
+
+    public func endFromExternal() {
+        guard isTransmitting else { return }
+        pressEnded()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    private func currentDecision() -> PTTDecision {
+        remoteDecision?() ?? PTTDecision.evaluate(
+            nearbyPeerCount: 0,
+            partyCode: nil,
+            meshRunning: false,
+            microphoneAllowed: microphoneAllowed
+        )
     }
 
     @discardableResult
