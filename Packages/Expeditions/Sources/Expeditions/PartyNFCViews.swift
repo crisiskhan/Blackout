@@ -142,9 +142,8 @@ final class PartyNFCCoordinator: NSObject, NFCNDEFReaderSessionDelegate {
     }
 
     private static func string(from record: NFCNDEFPayload) -> String? {
-        if let (text, _) = record.wellKnownTypeTextPayload() {
-            return text
-        }
+        let (text, _) = record.wellKnownTypeTextPayload()
+        if let text { return text }
         if let url = record.wellKnownTypeURIPayload() {
             return url.absoluteString
         }
