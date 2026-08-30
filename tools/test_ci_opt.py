@@ -106,6 +106,10 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj lost FieldPacks ditto phase")
     if "FieldPacks in Resources" in pbx:
         fail("pbxproj copies FieldPacks via Resources (tile collision)")
+    if "GENERATE_INFOPLIST_FILE = YES;\n\t\t\t\t\tINFOPLIST_FILE = BlackoutWidgets/Info.plist" in pbx:
+        fail("BlackoutWidgets GENERATE_INFOPLIST_FILE + INFOPLIST_FILE collide on Xcode 16")
+    if pbx.count("INFOPLIST_FILE = BlackoutWidgets/Info.plist") < 2:
+        fail("BlackoutWidgets lost INFOPLIST_FILE on Debug or Release")
     if "CURRENT_PROJECT_VERSION = 19" not in pbx:
         fail("CURRENT_PROJECT_VERSION is no longer 19")
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
