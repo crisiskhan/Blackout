@@ -54,14 +54,32 @@ public struct SealedChatBody: Hashable, Codable, Sendable {
     public var text: String
     public var latitude: Double?
     public var longitude: Double?
+    public var pingId: String?
+    public var replyId: String?
+    public var noFix: Bool
+    public var fixAgeSeconds: Double?
 
-    public init(text: String, latitude: Double? = nil, longitude: Double? = nil) {
+    public init(
+        text: String,
+        latitude: Double? = nil,
+        longitude: Double? = nil,
+        pingId: String? = nil,
+        replyId: String? = nil,
+        noFix: Bool = false,
+        fixAgeSeconds: Double? = nil
+    ) {
         self.text = text
         self.latitude = latitude
         self.longitude = longitude
+        self.pingId = pingId
+        self.replyId = replyId
+        self.noFix = noFix
+        self.fixAgeSeconds = fixAgeSeconds
     }
 
     public var hasPin: Bool { latitude != nil && longitude != nil }
+    public var fieldPing: FieldPingID? { pingId.flatMap(FieldPingID.init(rawValue:)) }
+    public var fieldReply: FieldReplyID? { replyId.flatMap(FieldReplyID.init(rawValue:)) }
 
     public func encodePlaintext() -> Data {
         (try? JSONEncoder().encode(self)) ?? Data(text.utf8)
@@ -72,6 +90,43 @@ public struct SealedChatBody: Hashable, Codable, Sendable {
             return body
         }
         return SealedChatBody(text: String(data: data, encoding: .utf8) ?? "")
+    }
+
+    public func pinFootnote() -> String {
+        if noFix || !hasPin { return SOSConfirm.noFix }
+        guard let latitude, let longitude else { return SOSConfirm.noFix }
+        var line = String(format: "%.5f, %.5f", latitude, longitude)
+        if let fixAgeSeconds, fixAgeSeconds > 0 {
+            let seconds = Int(fixAgeSeconds.rounded())
+            line += " · \(seconds)s"
+        }
+        return line
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case text, latitude, longitude, pingId, replyId, noFix, fixAgeSeconds
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        text = try container.decodeIfPresent(String.self, forKey: .text) ?? ""
+        latitude = try container.decodeIfPresent(Double.self, forKey: .latitude)
+        longitude = try container.decodeIfPresent(Double.self, forKey: .longitude)
+        pingId = try container.decodeIfPresent(String.self, forKey: .pingId)
+        replyId = try container.decodeIfPresent(String.self, forKey: .replyId)
+        noFix = try container.decodeIfPresent(Bool.self, forKey: .noFix) ?? false
+        fixAgeSeconds = try container.decodeIfPresent(Double.self, forKey: .fixAgeSeconds)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(text, forKey: .text)
+        try container.encodeIfPresent(latitude, forKey: .latitude)
+        try container.encodeIfPresent(longitude, forKey: .longitude)
+        try container.encodeIfPresent(pingId, forKey: .pingId)
+        try container.encodeIfPresent(replyId, forKey: .replyId)
+        if noFix { try container.encode(true, forKey: .noFix) }
+        try container.encodeIfPresent(fixAgeSeconds, forKey: .fixAgeSeconds)
     }
 }
 

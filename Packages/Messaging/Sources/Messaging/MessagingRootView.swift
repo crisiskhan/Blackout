@@ -9,6 +9,7 @@ public struct MessagingRootView: View {
     @Bindable var roster: PartyRoster
     var locationFix: LocationFix?
     var onOpenExpedition: () -> Void
+    var onNavigatePing: (FieldPingNav) -> Void
     @Binding var pendingDM: BlackoutID?
 
     @State private var threads: [ChatThreadSummary] = []
@@ -21,6 +22,7 @@ public struct MessagingRootView: View {
         roster: PartyRoster,
         locationFix: LocationFix?,
         onOpenExpedition: @escaping () -> Void,
+        onNavigatePing: @escaping (FieldPingNav) -> Void,
         pendingDM: Binding<BlackoutID?>
     ) {
         self.outbox = outbox
@@ -28,6 +30,7 @@ public struct MessagingRootView: View {
         self.roster = roster
         self.locationFix = locationFix
         self.onOpenExpedition = onOpenExpedition
+        self.onNavigatePing = onNavigatePing
         self._pendingDM = pendingDM
     }
 
@@ -68,7 +71,8 @@ public struct MessagingRootView: View {
                     thread: thread,
                     title: threads.first(where: { $0.ref == thread })?.title ?? threadTitle(thread),
                     locationFix: locationFix,
-                    composeEnabled: composeEnabled(for: thread)
+                    composeEnabled: composeEnabled(for: thread),
+                    onNavigatePing: onNavigatePing
                 )
             }
         }
@@ -192,11 +196,14 @@ private struct ChatDetailView: View {
     var title: String
     var locationFix: LocationFix?
     var composeEnabled: Bool
+    var onNavigatePing: (FieldPingNav) -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var rows: [DisplayMessage] = []
     @State private var draft: String = ""
     @State private var pinOn = false
     @State private var error: String?
+    @State private var selectedPingID: BlackoutID?
 
     private var draftKey: String {
         "com.crisiskhan.blackout.comms.draft.\(thread.id.rawValue.uuidString)"
@@ -215,10 +222,7 @@ private struct ChatDetailView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     ForEach(rows) { row in
-                        MessageBubble(
-                            row: row,
-                            onRetry: row.status == .failed ? { retry(row.id) } : nil
-                        )
+                        threadRow(row)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -243,6 +247,72 @@ private struct ChatDetailView: View {
         !mesh.isRunning || mesh.nearbyPeerCount == 0
     }
 
+    private var activeInboundPing: DisplayMessage? {
+        if let selectedPingID, let row = rows.first(where: { $0.id == selectedPingID }),
+           !row.isMine, row.ping != nil {
+            return row
+        }
+        return rows.last(where: { !$0.isMine && $0.ping != nil })
+    }
+
+    private var showReplyRow: Bool {
+        guard let latest = rows.last else { return false }
+        if let selected = activeInboundPing, selected.id == latest.id { return true }
+        return !latest.isMine && latest.ping != nil
+    }
+
+    @ViewBuilder
+    private func threadRow(_ row: DisplayMessage) -> some View {
+        if let ping = row.ping {
+            VStack(alignment: .leading, spacing: 8) {
+                FieldPingCard(
+                    title: FieldPing.label(ping),
+                    callsign: row.callsign,
+                    createdAt: row.createdAt,
+                    footnote: row.pinFootnote,
+                    hue: FieldPing.hue(ping),
+                    status: row.status,
+                    onTap: { selectPing(row) },
+                    onRetry: row.status == .failed ? { retry(row.id) } : nil
+                )
+                if !row.isMine, activeInboundPing?.id == row.id, rows.last?.id != row.id {
+                    FieldReplyRow(
+                        enabled: composeEnabled,
+                        reduceMotion: reduceMotion,
+                        onReply: sendReply
+                    )
+                }
+            }
+        } else if let reply = row.reply {
+            FieldPingCard(
+                title: FieldPing.label(reply),
+                callsign: row.callsign,
+                createdAt: row.createdAt,
+                footnote: row.hasPin || row.noFix ? row.pinFootnote : FieldPing.label(reply),
+                hue: FieldPing.hue(reply),
+                status: row.status,
+                onTap: {
+                    if let nav = row.navigation {
+                        onNavigatePing(nav)
+                    }
+                },
+                onRetry: row.status == .failed ? { retry(row.id) } : nil
+            )
+        } else {
+            MessageBubble(
+                row: row,
+                onRetry: row.status == .failed ? { retry(row.id) } : nil
+            )
+        }
+    }
+
+    private func selectPing(_ row: DisplayMessage) {
+        if !row.isMine { selectedPingID = row.id }
+        if let nav = row.navigation {
+            onNavigatePing(nav)
+        }
+    }
+
     private var composeBar: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let error {
@@ -252,6 +322,18 @@ private struct ChatDetailView: View {
                 Text(CommsCopy.noPeersInRange)
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
+            }
+            FieldPingGrid(
+                enabled: composeEnabled,
+                reduceMotion: reduceMotion,
+                onPing: sendPing
+            )
+            if showReplyRow, activeInboundPing != nil {
+                FieldReplyRow(
+                    enabled: composeEnabled,
+                    reduceMotion: reduceMotion,
+                    onReply: sendReply
+                )
             }
             HStack(alignment: .bottom, spacing: 8) {
                 TextField("Message", text: $draft, axis: .vertical)
@@ -294,6 +376,27 @@ private struct ChatDetailView: View {
         .padding(.bottom, BlackoutDS.Comms.composeClearance)
     }
 
+    private func sendPing(_ ping: FieldPingID) {
+        do {
+            _ = try outbox.sendPing(ping, fix: locationFix, thread: thread)
+            error = nil
+            reload()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    private func sendReply(_ reply: FieldReplyID) {
+        do {
+            _ = try outbox.sendReply(reply, fix: locationFix, thread: thread)
+            selectedPingID = nil
+            error = nil
+            reload()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
     private func send() {
         do {
             _ = try outbox.send(
@@ -330,7 +433,14 @@ private struct ChatDetailView: View {
                     id: record.id,
                     body: body.text,
                     hasPin: body.hasPin,
+                    noFix: body.noFix,
+                    pinFootnote: body.pinFootnote(),
+                    ping: body.fieldPing,
+                    reply: body.fieldReply,
+                    latitude: body.latitude,
+                    longitude: body.longitude,
                     senderID: record.senderID,
+                    callsign: callsign(for: record.senderID),
                     isMine: record.senderID == roster.localID || record.senderID == outboxIdentity,
                     status: record.status,
                     createdAt: record.createdAt
@@ -342,6 +452,16 @@ private struct ChatDetailView: View {
     }
 
     private var outboxIdentity: BlackoutID { roster.identity.deviceID }
+
+    private func callsign(for id: BlackoutID) -> String {
+        if id == roster.localID || id == roster.identity.deviceID {
+            return roster.selfLabel.name
+        }
+        if let peer = roster.peers.first(where: { $0.id == id }) {
+            return roster.label(for: peer).name
+        }
+        return Callsign.defaultValue
+    }
 }
 
 private struct MessageBubble: View {
@@ -396,8 +516,21 @@ private struct DisplayMessage: Identifiable {
     var id: BlackoutID
     var body: String
     var hasPin: Bool
+    var noFix: Bool
+    var pinFootnote: String
+    var ping: FieldPingID?
+    var reply: FieldReplyID?
+    var latitude: Double?
+    var longitude: Double?
     var senderID: BlackoutID
+    var callsign: String
     var isMine: Bool
     var status: MessageStatus
     var createdAt: Date
+
+    var navigation: FieldPingNav? {
+        guard let latitude, let longitude else { return nil }
+        let title = ping.map(FieldPing.label) ?? reply.map(FieldPing.label) ?? body
+        return FieldPingNav(latitude: latitude, longitude: longitude, label: "\(callsign) · \(title)")
+    }
 }

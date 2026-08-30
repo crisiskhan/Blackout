@@ -105,6 +105,146 @@ final class CommsOutboxTests: XCTestCase {
         XCTAssertEqual(try store.messages().first?.status, .onMesh)
     }
 
+    func testPingPersistsWithCoords() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        var sent: [Envelope] = []
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { envelope in
+                sent.append(envelope)
+                return .sent
+            },
+            meshState: { (true, 1) }
+        )
+        let fix = LocationFix(latitude: 31.76190, longitude: -106.48500, source: .gps)
+        let saved = try outbox.sendPing(.rally, fix: fix, thread: .group(partyCode: "AB12CD"))
+        let body = outbox.openBody(saved)
+        XCTAssertEqual(body.pingId, FieldPingID.rally.rawValue)
+        XCTAssertEqual(body.text, FieldPing.label(.rally))
+        XCTAssertEqual(body.latitude, 31.76190)
+        XCTAssertEqual(body.longitude, -106.48500)
+        XCTAssertFalse(body.noFix)
+        XCTAssertEqual(try store.messages().count, 1)
+        XCTAssertEqual(sent.first?.kind, .message)
+        XCTAssertNotEqual(sent.first?.kind, .sosAlert)
+    }
+
+    func testMeshOffPingIsQueued() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        var sent: [Envelope] = []
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { envelope in
+                sent.append(envelope)
+                return .notRunning
+            },
+            meshState: { (false, 0) }
+        )
+        let saved = try outbox.sendPing(
+            .escort,
+            fix: LocationFix(latitude: 31.76, longitude: -106.48),
+            thread: .group(partyCode: "AB12CD")
+        )
+        XCTAssertEqual(saved.status, .queued)
+        XCTAssertTrue(sent.isEmpty)
+        XCTAssertEqual(try store.messages().count, 1)
+        XCTAssertEqual(outbox.openBody(saved).pingId, FieldPingID.escort.rawValue)
+    }
+
+    func testReplyComingIncludesSenderCoords() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { _ in .sent },
+            meshState: { (true, 1) }
+        )
+        let mine = LocationFix(latitude: 31.80, longitude: -106.50, source: .gps)
+        let saved = try outbox.sendReply(
+            .coming,
+            fix: mine,
+            thread: .group(partyCode: "AB12CD")
+        )
+        let body = outbox.openBody(saved)
+        XCTAssertEqual(body.replyId, FieldReplyID.coming.rawValue)
+        XCTAssertEqual(body.text, FieldPing.label(.coming))
+        XCTAssertEqual(body.latitude, 31.80)
+        XCTAssertEqual(body.longitude, -106.50)
+        XCTAssertFalse(body.noFix)
+    }
+
+    func testPingWithoutFixPersistsHonestNoFix() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { _ in .queued },
+            meshState: { (false, 0) }
+        )
+        let saved = try outbox.sendPing(.danger, fix: nil, thread: .group(partyCode: "AB12CD"))
+        let body = outbox.openBody(saved)
+        XCTAssertTrue(body.noFix)
+        XCTAssertEqual(body.pinFootnote(), SOSConfirm.noFix)
+        XCTAssertNil(body.latitude)
+        XCTAssertEqual(body.pingId, FieldPingID.danger.rawValue)
+    }
+
+    func testCopyReplyDoesNotRequirePin() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { _ in .sent },
+            meshState: { (true, 1) }
+        )
+        let saved = try outbox.sendReply(
+            .copy,
+            fix: LocationFix(latitude: 31.80, longitude: -106.50),
+            thread: .group(partyCode: "AB12CD")
+        )
+        let body = outbox.openBody(saved)
+        XCTAssertEqual(body.replyId, FieldReplyID.copy.rawValue)
+        XCTAssertNil(body.latitude)
+        XCTAssertFalse(body.noFix)
+    }
+
+    func testImDownDoesNotEmitSOSOrAuto911() throws {
+        let store = MemoryPersistence()
+        let crypto = FakeCrypto()
+        var sent: [Envelope] = []
+        let outbox = CommsOutbox(
+            persistence: store,
+            crypto: crypto,
+            transmit: { envelope in
+                sent.append(envelope)
+                return .sent
+            },
+            meshState: { (true, 1) }
+        )
+        let saved = try outbox.sendPing(
+            .down,
+            fix: LocationFix(latitude: 31.76, longitude: -106.48),
+            thread: .group(partyCode: "AB12CD")
+        )
+        let body = outbox.openBody(saved)
+        XCTAssertEqual(body.pingId, FieldPingID.down.rawValue)
+        XCTAssertEqual(sent.first?.kind, FieldPing.envelopeKind)
+        XCTAssertNotEqual(sent.first?.kind, .sosAlert)
+        XCTAssertNotEqual(sent.first?.kind, SOSConfirm.meshKind)
+        XCTAssertFalse(FieldPing.armsSOS)
+        XCTAssertFalse(FieldPing.autoDials911)
+        XCTAssertFalse(FieldPing.downSetsInjury)
+        XCTAssertFalse(body.text.localizedCaseInsensitiveContains("911"))
+        XCTAssertFalse(body.text.localizedCaseInsensitiveContains("sos"))
+    }
+
     func testSendFailureIsFailedWithRetry() throws {
         let store = MemoryPersistence()
         let crypto = FakeCrypto()

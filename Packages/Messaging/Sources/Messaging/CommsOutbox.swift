@@ -33,6 +33,51 @@ public final class CommsOutbox {
             latitude: pin?.hasCoordinate == true ? pin?.latitude : nil,
             longitude: pin?.hasCoordinate == true ? pin?.longitude : nil
         )
+        return try commit(body, thread: thread)
+    }
+
+    @discardableResult
+    public func sendPing(
+        _ ping: FieldPingID,
+        fix: LocationFix?,
+        thread: ChatThreadRef,
+        now: Date = Date()
+    ) throws -> MessageRecordDTO {
+        let payload = Self.locationPayload(fix: fix, required: true, now: now)
+        let body = SealedChatBody(
+            text: FieldPing.label(ping),
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+            pingId: ping.rawValue,
+            noFix: payload.noFix,
+            fixAgeSeconds: payload.fixAgeSeconds
+        )
+        return try commit(body, thread: thread)
+    }
+
+    @discardableResult
+    public func sendReply(
+        _ reply: FieldReplyID,
+        fix: LocationFix?,
+        thread: ChatThreadRef,
+        now: Date = Date()
+    ) throws -> MessageRecordDTO {
+        let attachPin = FieldPing.requiresSenderPin(reply)
+        let payload = attachPin
+            ? Self.locationPayload(fix: fix, required: true, now: now)
+            : (latitude: Optional<Double>.none, longitude: Optional<Double>.none, noFix: false, fixAgeSeconds: Optional<Double>.none)
+        let body = SealedChatBody(
+            text: FieldPing.label(reply),
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+            replyId: reply.rawValue,
+            noFix: payload.noFix,
+            fixAgeSeconds: payload.fixAgeSeconds
+        )
+        return try commit(body, thread: thread)
+    }
+
+    private func commit(_ body: SealedChatBody, thread: ChatThreadRef) throws -> MessageRecordDTO {
         let plaintext = body.encodePlaintext()
         let display = try crypto.seal(plaintext, to: crypto.localIdentity)
         let wire = try wireSeal(plaintext, thread: thread)
@@ -55,6 +100,24 @@ public final class CommsOutbox {
         saved.status = status
         try persistence.saveMessage(saved)
         return saved
+    }
+
+    static func locationPayload(
+        fix: LocationFix?,
+        required: Bool,
+        now: Date
+    ) -> (latitude: Double?, longitude: Double?, noFix: Bool, fixAgeSeconds: Double?) {
+        _ = required
+        guard let fix, fix.hasCoordinate else {
+            return (nil, nil, true, nil)
+        }
+        let age: Double?
+        if fix.source == .lastKnown {
+            age = max(0, now.timeIntervalSince(fix.timestamp))
+        } else {
+            age = nil
+        }
+        return (fix.latitude, fix.longitude, false, age)
     }
 
     public func ingest(_ envelope: Envelope) throws -> MessageRecordDTO? {

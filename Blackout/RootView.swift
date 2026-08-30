@@ -45,6 +45,7 @@ struct RootView: View {
     @State private var destination: AppDestination = .map
     @State private var showSettings = false
     @State private var pendingDM: BlackoutID?
+    @State private var pendingPingNav: FieldPingNav?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -226,7 +227,8 @@ struct RootView: View {
             onMessagePeer: { id in
                 pendingDM = id
                 destination = .comms
-            }
+            },
+            pendingPingNav: $pendingPingNav
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -250,6 +252,10 @@ struct RootView: View {
             location: container.location,
             ptt: container.ptt,
             onOpenExpedition: { destination = .expedition },
+            onNavigatePing: { nav in
+                pendingPingNav = nav
+                destination = .map
+            },
             pendingDM: $pendingDM
         )
         .swiftUIToolbar {

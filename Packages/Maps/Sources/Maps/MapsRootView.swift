@@ -21,6 +21,7 @@ public struct MapsRootView: View {
     var sosCoverOpen: Bool
     @Bindable var roster: PartyRoster
     var onMessagePeer: ((BlackoutID) -> Void)?
+    var pendingPingNav: Binding<FieldPingNav?>
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -61,7 +62,8 @@ public struct MapsRootView: View {
         externalSheetOpen: Bool = false,
         sosCoverOpen: Bool = false,
         roster: PartyRoster,
-        onMessagePeer: ((BlackoutID) -> Void)? = nil
+        onMessagePeer: ((BlackoutID) -> Void)? = nil,
+        pendingPingNav: Binding<FieldPingNav?> = .constant(nil)
     ) {
         self.location = location
         self.mesh = mesh
@@ -76,6 +78,7 @@ public struct MapsRootView: View {
         self.sosCoverOpen = sosCoverOpen
         self.roster = roster
         self.onMessagePeer = onMessagePeer
+        self.pendingPingNav = pendingPingNav
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -226,6 +229,23 @@ public struct MapsRootView: View {
             .sheet(item: $selectedPeer, content: peerSheet)
             .sheet(isPresented: $showLiDAR, content: lidarSheet)
             .sheet(isPresented: Bindable(compass).showMarkSheet, content: markSheet)
+            .onChange(of: pendingPingNav.wrappedValue) { _, nav in
+                consumePingNav(nav)
+            }
+            .onAppear { consumePingNav(pendingPingNav.wrappedValue) }
+    }
+
+    private func consumePingNav(_ nav: FieldPingNav?) {
+        guard let nav else { return }
+        pendingPingNav.wrappedValue = nil
+        guard battery.coarseNavigateEnabled else { return }
+        navigate.navigateToPeer(
+            latitude: nav.latitude,
+            longitude: nav.longitude,
+            label: nav.label,
+            origin: originCoordinate,
+            pack: packService.routing
+        )
     }
 
     @ViewBuilder
