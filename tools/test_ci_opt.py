@@ -197,6 +197,15 @@ def test_map_pack_resolver() -> None:
         fail("MapsRootView resolve must fall back to last-known on NO FIX")
     if "MKMapView(" in pack or "URLSession" in pack:
         fail("FileMapPack must not use MapKit or URLSession")
+    routing_loader = (ROOT / "Packages/Maps/Sources/MapsRouting/RoutingPack.swift").read_text()
+    if "func coveringRoot" not in routing_loader or "func loadCovering" not in routing_loader:
+        fail("RoutingPackLoader must resolve covering Field Pack routing/")
+    if "RoutingPackLoader.load(packRoot: snapshot" in pack:
+        fail("FileMapPack still loads routing only from DefaultPack at init")
+    if "reloadRouting" not in pack or "coveringRoot" not in pack:
+        fail("FileMapPack must load routing/ from the covering pack, not the painted tile root")
+    if "MKDirections" in pack or "URLSession" in routing_loader:
+        fail("routing loader must not use MKDirections or URLSession")
     ok("Map paints one covering installed pack; Recenter stays bundled")
 
 
@@ -226,6 +235,12 @@ def test_usgs_defaultpack() -> None:
         fail("copy_defaultpack.sh lost probe paths")
     if "tiles/10/211/387.png" not in probe or "tiles/12/848/1553.png" not in probe:
         fail("probe_defaultpack_app.sh lost probe paths")
+    if (pack / "routing").exists() or (pack / "routing" / "graph.bin").exists():
+        fail("DefaultPack must not ship routing/")
+    if "routing" in man:
+        fail("DefaultPack manifest must not declare a routing graph")
+    if "must not ship routing" not in copy or "must not ship routing" not in probe:
+        fail("DefaultPack copy/probe must refuse routing/")
     ok("DefaultPack is USGS field-pack topo, probes exist")
 
 
@@ -503,6 +518,8 @@ def test_bundled_statewide_archive_only() -> None:
         fail("Map/SOS/Guide must not use URLSession")
     if "*.pack.zip" not in gitignore or "BundledFieldPacks/" not in gitignore:
         fail(".gitignore must exclude pack zips and BundledFieldPacks")
+    if "routing/graph.bin" not in gitignore:
+        fail(".gitignore must exclude routing binaries")
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
         fail("CURRENT_PROJECT_VERSION was bumped off 19")
     ok("archive fetches FL/TX/NY/NM; compile does not; catalog is bundled Ready")
@@ -538,17 +555,54 @@ def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
         for pack_id in ("us-tx", "us-nm", "us-fl", "us-ny"):
             tiles = staging / pack_id / "tiles" / "8" / "1"
             tiles.mkdir(parents=True)
+            manifest = {
+                "id": pack_id,
+                "tileCount": 1,
+            }
+            if pack_id == "us-tx":
+                manifest["routing"] = "routing/routing.json"
+                manifest["attribution"] = "© OpenStreetMap contributors"
+                routing = staging / pack_id / "routing"
+                routing.mkdir()
+                (routing / "routing.json").write_text(
+                    '{"format":"blackout-routing-v1","profiles":["walk","drive"]}',
+                    encoding="utf-8",
+                )
+                (routing / "graph.bin").write_bytes(b"BLRG0001")
+                (routing / "names.bin").write_bytes(b"BLNM0001")
+                (routing / "geometry.bin").write_bytes(b"BLGM0001")
             (staging / pack_id / "manifest.json").write_text(
-                f'{{"id":"{pack_id}","tileCount":1}}', encoding="utf-8"
+                json.dumps(manifest), encoding="utf-8"
             )
             (tiles / "1.png").write_bytes(b"\x89PNG")
-        subprocess.check_call(["bash", str(copy)], env=env)
+        copied = subprocess.run(
+            ["bash", str(copy)], env=env, capture_output=True, text=True, check=True
+        )
         app = resources
         subprocess.check_call(["bash", str(probe), str(app)])
         if (app / "FieldPacks" / "tiles").exists():
             fail("copy flattened four states into FieldPacks/tiles")
         if (app / "FieldPacks" / "el-paso").exists():
             fail("copy staged a city pack")
+        tx_routing = app / "FieldPacks" / "us-tx" / "routing"
+        if not (tx_routing / "graph.bin").is_file() or not (tx_routing / "routing.json").is_file():
+            fail("archive ditto dropped us-tx routing/")
+        man = json.loads((app / "FieldPacks" / "us-tx" / "manifest.json").read_text())
+        if man.get("routing") != "routing/routing.json":
+            fail("copied us-tx manifest lost routing key")
+        if man.get("attribution") != "© OpenStreetMap contributors":
+            fail("copied us-tx manifest lost ODbL attribution")
+        if (app / "FieldPacks" / "us-fl" / "routing").exists():
+            fail("copy invented routing/ on a pack that had none")
+        if "routing/" not in copied.stdout:
+            fail("copy did not report routing/ when present")
+        if "BLRG0001" not in probe.read_text():
+            fail("probe_fieldpacks_app.sh does not check routing magic when present")
+
+        (staging / "us-tx" / "routing" / "graph.bin").write_bytes(b"XXXX0001")
+        bad = subprocess.run(["bash", str(copy)], env=env, capture_output=True, text=True)
+        if bad.returncode == 0:
+            fail("copy must fail when routing/ magic mismatches")
     ok("copy no-ops on compile and requires four separate statewide folders on archive")
 
 
@@ -562,21 +616,42 @@ def test_fieldpack_root_flatten_fixture() -> None:
         inner = wrapped / "us-fl"
         tiles = inner / "tiles" / "8" / "1"
         tiles.mkdir(parents=True)
-        (inner / "manifest.json").write_text('{"id":"us-fl"}', encoding="utf-8")
+        (inner / "manifest.json").write_text(
+            '{"id":"us-tx","routing":"routing/routing.json","attribution":"© OpenStreetMap contributors"}',
+            encoding="utf-8",
+        )
         (tiles / "1.png").write_bytes(b"\x89PNG")
-        zip_path = Path(tmp) / "florida-wrap.zip"
+        routing = inner / "routing"
+        routing.mkdir()
+        (routing / "routing.json").write_text("{}", encoding="utf-8")
+        (routing / "graph.bin").write_bytes(b"BLRG0001")
+        (routing / "names.bin").write_bytes(b"BLNM0001")
+        (routing / "geometry.bin").write_bytes(b"BLGM0001")
+        zip_path = Path(tmp) / "texas-wrap.zip"
         with zipfile.ZipFile(zip_path, "w") as zf:
             for path in inner.rglob("*"):
                 if path.is_file():
                     zf.write(path, path.relative_to(wrapped).as_posix())
-        dest = Path(tmp) / "us-fl"
-        subprocess.check_call(["bash", str(script), "--stage-zip", str(zip_path), str(dest)])
+        dest = Path(tmp) / "us-tx"
+        staged = subprocess.run(
+            ["bash", str(script), "--stage-zip", str(zip_path), str(dest)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         if not (dest / "manifest.json").is_file():
             fail("ROOT-flatten did not promote manifest.json")
         if not (dest / "tiles" / "8" / "1" / "1.png").is_file():
             fail("ROOT-flatten did not promote tiles/")
-        if (dest / "us-fl" / "manifest.json").exists():
-            fail("ROOT-flatten left a nested us-fl/ wrapper")
+        if (dest / "us-fl" / "manifest.json").exists() or (dest / "us-tx" / "manifest.json").exists():
+            fail("ROOT-flatten left a nested wrapper")
+        if not (dest / "routing" / "graph.bin").is_file():
+            fail("ROOT-flatten dropped routing/graph.bin")
+        man = json.loads((dest / "manifest.json").read_text())
+        if man.get("attribution") != "© OpenStreetMap contributors":
+            fail("ROOT-flatten dropped pack-manifest ODbL attribution")
+        if "routing/" not in staged.stdout:
+            fail("ROOT-flatten did not report staged routing/")
     ok("ROOT-flatten promotes a wrapped pack zip")
 
 

@@ -6,24 +6,37 @@ enum ToyRouting {
     static let n1 = RoutingCoordinate(latitude: 31.7620, longitude: -106.4840)
     static let n2 = RoutingCoordinate(latitude: 31.7629, longitude: -106.4830)
 
-    static func writePack(to root: URL, onewayFirstEdge: Bool = false, badGraphMagic: Bool = false) throws {
+    static func writePack(
+        to root: URL,
+        onewayFirstEdge: Bool = false,
+        badGraphMagic: Bool = false,
+        bbox: RoutingBBox? = nil,
+        checksums: [String: String] = [:]
+    ) throws {
         let fm = FileManager.default
         let routing = root.appendingPathComponent("routing", isDirectory: true)
         try fm.createDirectory(at: routing, withIntermediateDirectories: true)
+        let box = bbox ?? RoutingBBox(
+            west: RoutingLayout.ElPaso.west,
+            south: RoutingLayout.ElPaso.south,
+            east: RoutingLayout.ElPaso.east,
+            north: RoutingLayout.ElPaso.north
+        )
         let manifest: [String: Any] = [
             "name": "Toy",
-            "routing": "routing/routing.json"
+            "routing": "routing/routing.json",
+            "attribution": "© OpenStreetMap contributors"
         ]
         try JSONSerialization.data(withJSONObject: manifest).write(to: root.appendingPathComponent("manifest.json"))
 
-        let routingJSON: [String: Any] = [
+        var routingJSON: [String: Any] = [
             "format": RoutingLayout.format,
             "profiles": ["walk", "drive"],
             "bbox": [
-                "west": RoutingLayout.ElPaso.west,
-                "south": RoutingLayout.ElPaso.south,
-                "east": RoutingLayout.ElPaso.east,
-                "north": RoutingLayout.ElPaso.north
+                "west": box.west,
+                "south": box.south,
+                "east": box.east,
+                "north": box.north
             ],
             "center": ["lat": RoutingLayout.ElPaso.centerLat, "lon": RoutingLayout.ElPaso.centerLon],
             "packId": RoutingLayout.ElPaso.packId,
@@ -33,6 +46,9 @@ enum ToyRouting {
             "bidirectionalIfNotOneway": true,
             "attribution": "© OpenStreetMap contributors"
         ]
+        if !checksums.isEmpty {
+            routingJSON["checksums"] = checksums
+        }
         try JSONSerialization.data(withJSONObject: routingJSON).write(
             to: routing.appendingPathComponent("routing.json")
         )

@@ -21,6 +21,34 @@ copy_tree() {
   fi
 }
 
+# Whole-tree ditto already copies routing/ when present. Re-ditto that folder
+# and fail if the source graph was dropped. Packs without routing/ stay honest-empty.
+copy_routing_if_present() {
+  local from="$1"
+  local to="$2"
+  local id="$3"
+  if [ ! -d "${from}/routing" ]; then
+    return 0
+  fi
+  copy_tree "${from}/routing" "${to}/routing"
+  local f
+  for f in routing.json graph.bin names.bin geometry.bin; do
+    if [ ! -f "${to}/routing/${f}" ]; then
+      echo "error: ${id} source has routing/ but copied tree is missing routing/${f}" >&2
+      exit 1
+    fi
+  done
+  local graph_magic names_magic geom_magic
+  graph_magic="$(dd if="${to}/routing/graph.bin" bs=8 count=1 2>/dev/null || true)"
+  names_magic="$(dd if="${to}/routing/names.bin" bs=8 count=1 2>/dev/null || true)"
+  geom_magic="$(dd if="${to}/routing/geometry.bin" bs=8 count=1 2>/dev/null || true)"
+  if [ "${graph_magic}" != "BLRG0001" ] || [ "${names_magic}" != "BLNM0001" ] || [ "${geom_magic}" != "BLGM0001" ]; then
+    echo "error: ${id} routing/ magic mismatch (need BLRG0001 / BLNM0001 / BLGM0001)" >&2
+    exit 1
+  fi
+  echo "Copied FieldPacks/${id} routing/ (graph+names+geometry)"
+}
+
 if [ ! -d "${SRC}" ]; then
   if [ "${REQUIRED}" = "1" ]; then
     echo "error: Field Packs staging missing at ${SRC} (archive must fetch first)" >&2
@@ -46,6 +74,7 @@ for id in ${IDS}; do
     echo "error: copied ${id} is missing manifest.json or tiles/" >&2
     exit 1
   fi
+  copy_routing_if_present "${pack}" "${DST}/${id}" "${id}"
   count="$(find "${DST}/${id}/tiles" -name '*.png' | wc -l | tr -d '[:space:]')"
   if [ "${count}" -lt 1 ]; then
     echo "error: copied ${id} has no PNG tiles" >&2

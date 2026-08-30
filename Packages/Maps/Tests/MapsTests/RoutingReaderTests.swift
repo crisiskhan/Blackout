@@ -65,6 +65,78 @@ final class RoutingReaderTests: XCTestCase {
         XCTAssertNil(RoutingPackLoader.load(packRoot: root))
     }
 
+    func testChecksumMismatchIsHonestEmpty() throws {
+        let root = makeTemp()
+        try ToyRouting.writePack(to: root, checksums: ["graph.bin": "deadbeef"])
+        XCTAssertNil(RoutingPackLoader.load(packRoot: root))
+        XCTAssertNil(
+            RoutingPackLoader.coveringRoot(
+                among: [root],
+                latitude: RoutingLayout.ElPaso.centerLat,
+                longitude: RoutingLayout.ElPaso.centerLon
+            )
+        )
+    }
+
+    func testCoveringRootReadsFieldPackNotDefaultPack() throws {
+        let denver = makeTemp()
+        try Data("{\"name\":\"Front Range sample\"}".utf8)
+            .write(to: denver.appendingPathComponent("manifest.json"))
+        let elPaso = makeTemp()
+        try ToyRouting.writePack(to: elPaso)
+        let root = RoutingPackLoader.coveringRoot(
+            among: [denver, elPaso],
+            latitude: RoutingLayout.ElPaso.centerLat,
+            longitude: RoutingLayout.ElPaso.centerLon
+        )
+        XCTAssertEqual(root?.standardizedFileURL.path, elPaso.standardizedFileURL.path)
+        XCTAssertNil(
+            RoutingPackLoader.coveringRoot(
+                among: [denver, elPaso],
+                latitude: 39.74,
+                longitude: -105.3
+            )
+        )
+        let pack = try XCTUnwrap(
+            RoutingPackLoader.loadCovering(
+                among: [denver, elPaso],
+                latitude: RoutingLayout.ElPaso.centerLat,
+                longitude: RoutingLayout.ElPaso.centerLon
+            )
+        )
+        XCTAssertEqual(pack.manifest.packId, RoutingLayout.ElPaso.packId)
+        XCTAssertEqual(pack.manifest.attribution, "© OpenStreetMap contributors")
+        XCTAssertTrue(pack.manifest.profiles.contains(.walk))
+        XCTAssertTrue(pack.manifest.profiles.contains(.drive))
+    }
+
+    func testCoveringRootUsesRoutingBBoxNotTileSpan() throws {
+        let texas = makeTemp()
+        try ToyRouting.writePack(to: texas)
+        let westElPaso = RoutingPackLoader.coveringRoot(
+            among: [texas],
+            latitude: 31.7619,
+            longitude: -106.88
+        )
+        XCTAssertEqual(westElPaso?.standardizedFileURL.path, texas.standardizedFileURL.path)
+    }
+
+    func testCoveringRootPrefersSmallerRoutingBBox() throws {
+        let metro = makeTemp()
+        try ToyRouting.writePack(to: metro)
+        let wide = makeTemp()
+        try ToyRouting.writePack(
+            to: wide,
+            bbox: RoutingBBox(west: -110, south: 29, east: -100, north: 35)
+        )
+        let root = RoutingPackLoader.coveringRoot(
+            among: [wide, metro],
+            latitude: RoutingLayout.ElPaso.centerLat,
+            longitude: RoutingLayout.ElPaso.centerLon
+        )
+        XCTAssertEqual(root?.standardizedFileURL.path, metro.standardizedFileURL.path)
+    }
+
     private func makeTemp() -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("rt-\(UUID().uuidString)", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)

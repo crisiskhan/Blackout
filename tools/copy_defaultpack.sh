@@ -11,6 +11,10 @@ if [ ! -f "${SRC}/manifest.json" ]; then
   echo "error: DefaultPack missing at ${SRC}" >&2
   exit 1
 fi
+if [ -d "${SRC}/routing" ] || [ -f "${SRC}/routing/graph.bin" ]; then
+  echo "error: DefaultPack must not ship routing/ — El Paso graph lives in Field Packs" >&2
+  exit 1
+fi
 if [ ! -d "${SRC}/tiles" ]; then
   echo "error: DefaultPack tiles missing at ${SRC}/tiles" >&2
   exit 1

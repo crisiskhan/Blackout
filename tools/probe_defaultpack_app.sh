@@ -47,5 +47,9 @@ if [ "${COUNT}" -lt "${NEED}" ]; then
   echo "error: Blackout.app has ${COUNT} DefaultPack PNGs, manifest tileCount is ${NEED}" >&2
   exit 1
 fi
+if [ -d "${PACK}/routing" ] || [ -f "${PACK}/routing/graph.bin" ]; then
+  echo "error: DefaultPack must not ship routing/" >&2
+  exit 1
+fi
 
 echo "DefaultPack in .app ok: Front Range sample tiles/${NEED} PNGs, including tiles/10/211/387.png"

@@ -144,6 +144,10 @@ public struct RoutingBBox: Hashable, Sendable {
         coordinate.longitude >= west && coordinate.longitude <= east
             && coordinate.latitude >= south && coordinate.latitude <= north
     }
+
+    public var area: Double {
+        max(east - west, 0) * max(north - south, 0)
+    }
 }
 
 public struct RoutingManifest: Hashable, Sendable {

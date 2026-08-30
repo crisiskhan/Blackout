@@ -33,6 +33,22 @@ for id in us-tx us-nm us-fl us-ny; do
     exit 1
   fi
   echo "FieldPacks/${id} ready: ${count} PNG tiles"
+  if [ -d "${ROOT}/${id}/routing" ]; then
+    for f in routing.json graph.bin names.bin geometry.bin; do
+      if [ ! -f "${ROOT}/${id}/routing/${f}" ]; then
+        echo "error: ${APP} FieldPacks/${id}/routing missing ${f}" >&2
+        exit 1
+      fi
+    done
+    graph_magic="$(dd if="${ROOT}/${id}/routing/graph.bin" bs=8 count=1 2>/dev/null || true)"
+    names_magic="$(dd if="${ROOT}/${id}/routing/names.bin" bs=8 count=1 2>/dev/null || true)"
+    geom_magic="$(dd if="${ROOT}/${id}/routing/geometry.bin" bs=8 count=1 2>/dev/null || true)"
+    if [ "${graph_magic}" != "BLRG0001" ] || [ "${names_magic}" != "BLNM0001" ] || [ "${geom_magic}" != "BLGM0001" ]; then
+      echo "error: ${APP} FieldPacks/${id}/routing magic mismatch" >&2
+      exit 1
+    fi
+    echo "FieldPacks/${id} routing/ present (BLRG0001 / BLNM0001 / BLGM0001)"
+  fi
 done
 
 for city in el-paso las-cruces albuquerque; do

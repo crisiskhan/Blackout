@@ -84,6 +84,16 @@ stage_zip() {
     echo "error: ROOT-flatten failed for ${zip} -> ${dest}" >&2
     exit 1
   fi
+  if [ -d "${dest}/routing" ]; then
+    local rf
+    for rf in routing.json graph.bin names.bin geometry.bin; do
+      if [ ! -f "${dest}/routing/${rf}" ]; then
+        echo "error: ROOT-flatten dropped routing/${rf} for ${zip}" >&2
+        exit 1
+      fi
+    done
+    echo "Staged routing/ under ${dest}"
+  fi
 }
 
 if [ "${1:-}" = "--stage-zip" ]; then

@@ -122,30 +122,55 @@ public struct EdgeGrid: Sendable {
 }
 
 public enum RoutingPackLoader {
-    public static func load(packRoot: URL) -> RoutingPack? {
-        let fm = FileManager.default
-        let manifestURL = packRoot.appendingPathComponent("manifest.json")
-        let relative: String
-        if let data = try? Data(contentsOf: manifestURL),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let key = json["routing"] as? String, !key.isEmpty {
-            relative = key
-        } else {
-            relative = RoutingLayout.defaultManifestKey
+    /// Smallest mounted pack whose `routing/` bbox covers the coordinate.
+    /// Painted DefaultPack / Recenter pin is ignored — Field Packs on disk only.
+    public static func coveringRoot(
+        among roots: [URL],
+        latitude: Double,
+        longitude: Double
+    ) -> URL? {
+        let coordinate = RoutingCoordinate(latitude: latitude, longitude: longitude)
+        var ranked: [(url: URL, area: Double)] = []
+        for root in roots {
+            guard let manifest = peekManifest(packRoot: root) else { continue }
+            guard manifest.format == RoutingLayout.format else { continue }
+            guard manifest.bbox.contains(coordinate) else { continue }
+            if manifest.checksums.isEmpty {
+                guard binariesPresent(packRoot: root) else { continue }
+            } else if !binariesReadable(packRoot: root, manifest: manifest) {
+                continue
+            }
+            ranked.append((root.standardizedFileURL, manifest.bbox.area))
         }
-        let routingJSON = packRoot.appendingPathComponent(relative)
-        let routingDir = routingJSON.deletingLastPathComponent()
-        var isDir: ObjCBool = false
-        guard fm.fileExists(atPath: routingDir.path, isDirectory: &isDir), isDir.boolValue else {
+        return ranked.min(by: { $0.area < $1.area })?.url
+    }
+
+    public static func loadCovering(
+        among roots: [URL],
+        latitude: Double,
+        longitude: Double
+    ) -> RoutingPack? {
+        guard let root = coveringRoot(among: roots, latitude: latitude, longitude: longitude) else {
             return nil
         }
-        guard fm.fileExists(atPath: routingJSON.path) else { return nil }
-        guard let manifest = readManifest(routingJSON) else { return nil }
+        return load(packRoot: root)
+    }
+
+    public static func peekManifest(packRoot: URL) -> RoutingManifest? {
+        guard let urls = routingURLs(packRoot: packRoot) else { return nil }
+        guard let manifest = readManifest(urls.json) else { return nil }
+        if manifest.format != RoutingLayout.format { return nil }
+        return manifest
+    }
+
+    public static func load(packRoot: URL) -> RoutingPack? {
+        guard let urls = routingURLs(packRoot: packRoot) else { return nil }
+        guard let manifest = readManifest(urls.json) else { return nil }
         if manifest.format != RoutingLayout.format { return nil }
 
-        let graphURL = routingDir.appendingPathComponent("graph.bin")
-        let namesURL = routingDir.appendingPathComponent("names.bin")
-        let geometryURL = routingDir.appendingPathComponent("geometry.bin")
+        let graphURL = urls.dir.appendingPathComponent("graph.bin")
+        let namesURL = urls.dir.appendingPathComponent("names.bin")
+        let geometryURL = urls.dir.appendingPathComponent("geometry.bin")
         guard let graphData = try? Data(contentsOf: graphURL, options: [.mappedIfSafe]),
               let namesData = try? Data(contentsOf: namesURL, options: [.mappedIfSafe]),
               let geometryData = try? Data(contentsOf: geometryURL, options: [.mappedIfSafe]) else {
@@ -178,6 +203,50 @@ public enum RoutingPackLoader {
     public static func readManifest(_ url: URL) -> RoutingManifest? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return parseManifest(data)
+    }
+
+    private static func routingURLs(packRoot: URL) -> (json: URL, dir: URL)? {
+        let fm = FileManager.default
+        let manifestURL = packRoot.appendingPathComponent("manifest.json")
+        let relative: String
+        if let data = try? Data(contentsOf: manifestURL),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let key = json["routing"] as? String, !key.isEmpty {
+            relative = key
+        } else {
+            relative = RoutingLayout.defaultManifestKey
+        }
+        let routingJSON = packRoot.appendingPathComponent(relative)
+        let routingDir = routingJSON.deletingLastPathComponent()
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: routingDir.path, isDirectory: &isDir), isDir.boolValue else {
+            return nil
+        }
+        guard fm.fileExists(atPath: routingJSON.path) else { return nil }
+        return (routingJSON, routingDir)
+    }
+
+    private static func binariesPresent(packRoot: URL) -> Bool {
+        guard let urls = routingURLs(packRoot: packRoot) else { return false }
+        let fm = FileManager.default
+        return fm.fileExists(atPath: urls.dir.appendingPathComponent("graph.bin").path)
+            && fm.fileExists(atPath: urls.dir.appendingPathComponent("names.bin").path)
+            && fm.fileExists(atPath: urls.dir.appendingPathComponent("geometry.bin").path)
+    }
+
+    private static func binariesReadable(packRoot: URL, manifest: RoutingManifest) -> Bool {
+        guard let urls = routingURLs(packRoot: packRoot) else { return false }
+        let files = [
+            "graph.bin": urls.dir.appendingPathComponent("graph.bin"),
+            "names.bin": urls.dir.appendingPathComponent("names.bin"),
+            "geometry.bin": urls.dir.appendingPathComponent("geometry.bin")
+        ]
+        var blobs: [String: Data] = [:]
+        for (name, url) in files {
+            guard let data = try? Data(contentsOf: url, options: [.mappedIfSafe]) else { return false }
+            blobs[name] = data
+        }
+        return checksumsMatch(manifest.checksums, files: blobs)
     }
 
     public static func parseManifest(_ data: Data) -> RoutingManifest? {

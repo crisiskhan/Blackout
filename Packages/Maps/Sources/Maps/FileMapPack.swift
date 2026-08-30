@@ -15,13 +15,13 @@ public final class FileMapPack: MapPackServing {
     private var dem: DEMTable?
     private var bundledEntry: (MapPackSnapshot, DEMTable?)?
     private var installedEntries: [(MapPackSnapshot, DEMTable?)] = []
+    private var routingRootPath: String?
 
     public init(rootURL: URL?) {
         if let rootURL, let snapshot = Self.load(root: rootURL) {
             bundledEntry = snapshot
             pack = snapshot.0
             dem = snapshot.1
-            routing = RoutingPackLoader.load(packRoot: snapshot.0.rootURL)
         }
     }
 
@@ -33,37 +33,62 @@ public final class FileMapPack: MapPackServing {
         let currentPaths = installedEntries.map { $0.0.rootURL.standardizedFileURL.path }
         if nextPaths == currentPaths { return }
         installedEntries = next
+        routingRootPath = nil
     }
 
-    /// One covering pack. No mosaic. Recenter (`pinToBundled`) always paints DefaultPack.
+    /// One covering pack. No mosaic. Recenter (`pinToBundled`) always paints DefaultPack tiles.
+    /// Routing loads from the mounted Field Pack whose `routing/` bbox covers the fix — never
+    /// from Denver DefaultPack, and not from the painted tile root when that root has no graph.
     public func resolve(latitude: Double?, longitude: Double?, pinToBundled: Bool) {
         if pinToBundled, let bundledEntry {
-            apply(bundledEntry)
-            return
-        }
-        if let latitude, let longitude {
+            applyTiles(bundledEntry)
+        } else if let latitude, let longitude {
             let hits = allEntries.filter { $0.0.region.contains(latitude: latitude, longitude: longitude) }
             if let best = hits.min(by: { area($0.0.region) < area($1.0.region) }) {
-                apply(best)
-                return
+                applyTiles(best)
             }
-            return
+        } else if let bundledEntry {
+            applyTiles(bundledEntry)
         }
-        if let bundledEntry {
-            apply(bundledEntry)
-        }
+        reloadRouting(latitude: latitude, longitude: longitude)
     }
 
     private var allEntries: [(MapPackSnapshot, DEMTable?)] {
         (bundledEntry.map { [$0] } ?? []) + installedEntries
     }
 
-    private func apply(_ entry: (MapPackSnapshot, DEMTable?)) {
+    private func applyTiles(_ entry: (MapPackSnapshot, DEMTable?)) {
         let next = entry.0.rootURL.standardizedFileURL.path
         if pack?.rootURL.standardizedFileURL.path == next { return }
         pack = entry.0
         dem = entry.1
-        routing = RoutingPackLoader.load(packRoot: entry.0.rootURL)
+    }
+
+    private func reloadRouting(latitude: Double?, longitude: Double?) {
+        guard let latitude, let longitude else { return }
+        let coordinate = RoutingCoordinate(latitude: latitude, longitude: longitude)
+        let roots = allEntries.map { $0.0.rootURL }
+        if let routing,
+           let routingRootPath,
+           routing.manifest.bbox.contains(coordinate),
+           roots.contains(where: { $0.standardizedFileURL.path == routingRootPath }) {
+            return
+        }
+        guard let root = RoutingPackLoader.coveringRoot(
+            among: roots,
+            latitude: latitude,
+            longitude: longitude
+        ) else {
+            if routing != nil {
+                routing = nil
+                routingRootPath = nil
+            }
+            return
+        }
+        let path = root.standardizedFileURL.path
+        if path == routingRootPath, routing != nil { return }
+        routing = RoutingPackLoader.load(packRoot: root)
+        routingRootPath = routing == nil ? nil : path
     }
 
     private func area(_ region: MapRegion) -> Double {

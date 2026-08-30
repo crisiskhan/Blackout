@@ -107,7 +107,7 @@ There is no Apple offline routing API. No `MKDirections`, no `MKLocalSearch`, no
 
 ### Pack contract (reader, not generator)
 
-When a mounted Field Pack has `routing/`, load:
+When a mounted covering Field Pack has `routing/`, load it from that pack root on disk (not Denver DefaultPack, not a URL):
 
 ```
 routing/graph.bin
@@ -120,7 +120,7 @@ routing/routing.json
 
 Format is **`blackout-routing-v1`**. Layouts (little-endian, packed) are in `Packages/Maps/ROUTING.md`. El Paso (`us-tx-el-paso`) is first: bbox W−106.885 S31.3619 E−106.085 N32.1619, center 31.7619, −106.485, profiles `[walk, drive]`.
 
-Denver `DefaultPack` does **not** ship a routing graph. A later El Paso zip that includes `routing/` lights up without another code change. Missing `routing/` or a magic mismatch is honest empty — never a fake turn list, never a WAN call.
+Denver `DefaultPack` does **not** ship a routing graph. Archive ditto copies `routing/` from packs-v1 when the staged zip has it (El Paso metro clip in `texas.pack.zip` / `el-paso.pack.zip`). Missing `routing/` or a checksum / magic fail is honest empty — never a fake turn list, never a WAN call.
 
 ODbL attribution is already in `routing.json`; it is surfaced as a caption. No new legal screen.
 

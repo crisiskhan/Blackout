@@ -9,7 +9,8 @@ A later El Paso zip that includes `routing/` lights up without another code chan
 
 ## Discovery
 
-Mounted pack root (Files / Field Packs / radio relay), not the app bundle sample.
+Mounted covering Field Pack root on disk (Files / bundled `FieldPacks/<id>/` / radio relay).
+Not the painted tile pack when Recenter has pinned Denver DefaultPack. Not a URL.
 
 ```
 manifest.json          key "routing": "routing/routing.json"
@@ -23,7 +24,7 @@ If `routing/` is missing, `routing.json` is missing, magic mismatches, or the
 binaries are truncated / count-mismatched: **honest empty**. Never invent a turn list.
 Never WAN.
 
-Denver `DefaultPack` has no `routing/`. El Paso Field Pack (`us-tx-el-paso`) is first.
+Denver `DefaultPack` has no `routing/`. El Paso metro (`us-tx-el-paso` bbox) is first — same `routing/` clip in `el-paso.pack.zip` and `texas.pack.zip`, not a statewide Texas graph. Archive/CI ditto copies `routing/` when the staged pack has it.
 
 ## `routing.json` (`format`: `blackout-routing-v1`)
 
