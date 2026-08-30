@@ -51,7 +51,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				C1D2E3F405162738495A6B7C /* Exceptions for "BlackoutWidgets" folder in "BlackoutWidgets" target */,
-				D2E3F405162738495A6B7C8D /* Exceptions for "BlackoutWidgets" folder in Resources */,
 			);
 			path = BlackoutWidgets;
 			sourceTree = "<group>";
@@ -393,13 +392,6 @@
 			membershipExceptions = (
 				DefaultPack,
 				GuidePack,
-			);
-		};
-		D2E3F405162738495A6B7C8D /* Exceptions for "BlackoutWidgets" folder in Resources */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 9C42FFFC2E57C81406E46080 /* Resources */;
-			membershipExceptions = (
-				Info.plist,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
