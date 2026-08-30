@@ -41,12 +41,15 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(ExpeditionPauseCopy.rosterEmpty, "Solo outing. Roster is empty.")
         XCTAssertEqual(PartyVitalsCopy.drank, "DRANK")
         XCTAssertEqual(PartyVitalsCopy.ate, "ATE")
-        XCTAssertEqual(PartyVitalsCopy.notOK, "I'M NOT OK")
+        XCTAssertEqual(PartyVitalsCopy.notOK, "I AM NOT OK")
     }
 
     func testVitalsChipIs56AndSOSStays88() {
         XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
         XCTAssertEqual(PartyVitalsCopy.sosHeight, 88)
+        XCTAssertEqual(BlackoutDS.Vitals.chip, 56)
+        XCTAssertEqual(BlackoutDS.Vitals.pip, 6)
+        XCTAssertEqual(BlackoutDS.Vitals.sosGap, 8)
         XCTAssertEqual(BlackoutDS.Hit.sm, 56)
         XCTAssertEqual(BlackoutDS.Hit.sos, 88)
     }

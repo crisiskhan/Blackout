@@ -440,6 +440,7 @@ public struct MapsRootView: View {
                 scaleBarRow
                 chipRow
             }
+            vitalsRow
         }
     }
 
@@ -456,23 +457,36 @@ public struct MapsRootView: View {
                     }
                 )
                 MapExpeditionBanner(title: openOutingName ?? "No open expedition")
-                HStack {
-                    VitalsChip(
-                        band: roster.selfStatus.band,
-                        pending: roster.pending
-                    ) {
-                        noteMapActivity()
-                        let action: PartyVitalAction = roster.isRed ? .imOK : .notOK
-                        if let envelope = roster.tap(action, fix: location.navigationFix),
-                           mesh.nearbyPeerCount > 0 {
-                            mesh.send(envelope)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                }
             }
             .padding(.horizontal, 16)
             .padding(.top, sizeClass == .regular ? 8 : 64)
+        }
+    }
+
+    /// Bottom-leading. 8pt above SOS clearance. Trailing spacer keeps the 88pt disk clear.
+    private var vitalsRow: some View {
+        receding {
+            HStack(spacing: 0) {
+                VitalsChip(
+                    isOKLatched: !roster.isRed,
+                    isNotLatched: roster.isRed,
+                    pending: roster.pending,
+                    onOK: { commitVitals(.imOK) },
+                    onNot: { commitVitals(.notOK) }
+                )
+                Spacer(minLength: BlackoutDS.Hit.sos + 18)
+            }
+            .padding(.leading, 16)
+            .padding(.trailing, 18)
+            .padding(.bottom, BlackoutDS.Vitals.sosClearance + BlackoutDS.Vitals.sosGap)
+        }
+    }
+
+    private func commitVitals(_ action: PartyVitalAction) {
+        noteMapActivity()
+        if let envelope = roster.tap(action, fix: location.navigationFix),
+           mesh.nearbyPeerCount > 0 {
+            mesh.send(envelope)
         }
     }
 
@@ -501,7 +515,7 @@ public struct MapsRootView: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.bottom, 120)
+            .padding(.bottom, 8)
         }
     }
 

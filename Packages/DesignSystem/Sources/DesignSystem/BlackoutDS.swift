@@ -65,6 +65,22 @@ public enum BlackoutDS {
         public static var snap: Animation { .easeOut(duration: snapDuration) }
     }
 
+    /// DS v1 §10.4 party vitals. Metrics and aliases only — hexes unchanged.
+    public enum Vitals {
+        public static let chip: CGFloat = 56
+        public static let pip: CGFloat = 6
+        /// Gap above the reserved SOS clearance. Chip never covers the 88pt disk.
+        public static let sosGap: CGFloat = 8
+        /// Map chrome bottom inset that keeps tools off the 88pt SOS FAB.
+        public static let sosClearance: CGFloat = 120
+    }
+
+    /// Commit plates. `primary` is SOS/hazard fill only — vitals stay `metal`.
+    public enum Btn {
+        public static let metal = Silver.metal
+        public static let primary = Red.core
+    }
+
     public enum TypeMetrics {
         public static let body: CGFloat = 17
         public static let bodyLine: CGFloat = 24

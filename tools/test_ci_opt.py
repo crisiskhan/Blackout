@@ -595,22 +595,45 @@ def test_party_vitals_red_loop() -> None:
     pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
     if "case partyStatus" not in kind:
         fail("PayloadKind missing partyStatus")
+    ds = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/BlackoutDS.swift").read_text()
     if "injury = true" not in core or "band = .red" not in core:
-        fail("I'M NOT OK must set injury and red")
+        fail("I AM NOT OK must set injury and red")
     if "import HealthKit" in core or "import HealthKit" in plate or "import HealthKit" in chip:
         fail("manual vitals must not import HealthKit")
     if "tel:911" in core or "tel:911" in plate or "tel:911" in app:
         fail("party red must not auto-dial 911")
-    if "VitalsChip" not in maps:
-        fail("Map lost the I'm-OK / I'm-not chip")
-    if "BlackoutDS.Hit.sm" not in chip:
-        fail("I'm-not chip is not 56pt")
+    if "VitalsChip" not in maps or "vitalsRow" not in maps:
+        fail("Map lost the bottom-leading §10.4 vitals chip")
+    if "sosClearance + BlackoutDS.Vitals.sosGap" not in maps:
+        fail("vitals chip is not 8pt above SOS clearance")
+    if "BlackoutDS.Hit.sos + 18" not in maps:
+        fail("vitals row must leave trailing clearance for the 88pt SOS disk")
+    if "BlackoutDS.Vitals.chip" not in chip:
+        fail("I AM NOT chip is not 56h")
+    if "BlackoutDS.Btn.metal" not in chip or "Btn.primary" in chip:
+        fail("vitals chip must be Btn.metal, not Btn.primary")
+    if "clipShape(Circle" in chip or "clipShape(Capsule" in chip:
+        fail("vitals chip must not be a disk")
+    if "SOSFab" in chip or "sosAlert" in chip or "sosConfirm" in chip:
+        fail("vitals chip must not present or arm SOS")
+    if "BlackoutDS.Vitals.pip" not in chip or "BlackoutDS.Semantic.warn" not in chip:
+        fail("I AM NOT must use 6pt red.core pip + warn label on metal")
+    if "§10.4" not in ds or "public static let pip: CGFloat = 6" not in ds:
+        fail("DS §10.4 vitals metrics missing")
+    if "Color(red: 1, green: 43 / 255, blue: 43 / 255)" not in ds:
+        fail("Red.core hex changed")
     if "BlackoutDS.Hit.sos" not in sos:
         fail("SOS FAB lost 88pt hit")
     if "PartyVitalsPlate" not in pause:
         fail("Expedition roster lost two-tap vitals")
-    if "DRANK" not in plate or "ATE" not in plate or "I'M NOT OK" not in plate:
-        fail("roster missing DRANK / ATE / I'M NOT OK")
+    if "DRANK" not in plate or "ATE" not in plate or "I AM NOT OK" not in plate:
+        fail("roster missing DRANK / ATE / I AM NOT OK")
+    if "Btn.metal" not in plate or "Vitals.chip" not in plate:
+        fail("roster buttons must be Btn.metal 56")
+    if "drankLatched" not in plate or "ateLatched" not in plate:
+        fail("DRANK / ATE must keep independent ok pips")
+    if "BlackoutDS.Red.core" in plate and ".background(BlackoutDS.Red.core)" in plate:
+        fail("I AM NOT OK roster button must stay metal, not primary")
     if "Navigate-to" not in radar and 'PartyVitalsCopy.navigateTo' not in radar:
         fail("peer sheet missing Navigate-to")
     if 'MetalButton("PTT"' in radar:

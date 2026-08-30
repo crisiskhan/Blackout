@@ -1,8 +1,8 @@
 import Foundation
 
-/// Idle clock for Map chrome. Recedes GPS + chips (incl. 56pt I'm-OK) + scale
-/// bar after 2s without pan / zoom / tap. Hold (sheets, dest, deny, live Rec,
-/// SOS) and Reduce Motion keep chrome static. SOS FAB is not part of this flag.
+/// Idle clock for Map chrome. Recedes GPS + chips (incl. §10.4 56h vitals) +
+/// scale bar after 2s without pan / zoom / tap. Hold (sheets, dest, deny, live
+/// Rec, SOS) and Reduce Motion keep chrome static. SOS FAB is not part of this flag.
 public struct MapChromeRecede: Equatable, Sendable {
     public static let idleInterval: TimeInterval = 2
     /// DS §10.3 motion.move

@@ -2,7 +2,7 @@ import BlackoutCore
 import DesignSystem
 import SwiftUI
 
-/// Two-tap DRANK / ATE / I'M NOT OK on the Pause roster plate. Manual only.
+/// DRANK / ATE / I AM NOT OK — each Btn.metal 56. I AM NOT OK shares Map chip state.
 struct PartyVitalsPlate: View {
     @Bindable var roster: PartyRoster
     var fix: LocationFix?
@@ -10,19 +10,24 @@ struct PartyVitalsPlate: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(bandColor(roster.selfStatus.band))
-                    .frame(width: 10, height: 10)
-                Text(roster.isRed ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(roster.isRed ? BlackoutDS.Red.hot : BlackoutDS.Silver.bright)
-            }
-            HStack(spacing: 8) {
-                vitalButton(.drank, title: PartyVitalsCopy.drank)
-                vitalButton(.ate, title: PartyVitalsCopy.ate)
-            }
-            notOKButton
+            metalButton(
+                title: PartyVitalsCopy.drank,
+                action: .drank,
+                pip: roster.selfStatus.drankLatched ? .ok : nil,
+                warnLabel: false
+            )
+            metalButton(
+                title: PartyVitalsCopy.ate,
+                action: .ate,
+                pip: roster.selfStatus.ateLatched ? .ok : nil,
+                warnLabel: false
+            )
+            metalButton(
+                title: PartyVitalsCopy.notOK,
+                action: .notOK,
+                pip: roster.isRed ? .red : nil,
+                warnLabel: roster.isRed
+            )
             if roster.peers.isEmpty {
                 Text(ExpeditionPauseCopy.rosterEmpty)
                     .font(BlackoutDS.bodyFont())
@@ -32,70 +37,73 @@ struct PartyVitalsPlate: View {
                     HStack(spacing: 8) {
                         Circle()
                             .fill(bandColor(peer.band))
-                            .frame(width: 10, height: 10)
+                            .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
                         Text(peer.shortName)
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.bright)
                         Spacer()
                         Text(peer.band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
                             .font(BlackoutDS.captionFont())
-                            .foregroundStyle(peer.band == .red ? BlackoutDS.Red.hot : BlackoutDS.Silver.dim)
+                            .foregroundStyle(peer.band == .red ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
                     }
                 }
             }
         }
     }
 
-    private var notOKButton: some View {
-        Button {
-            commit(.notOK)
-        } label: {
-            VStack(spacing: 2) {
-                Text(PartyVitalsCopy.notOK)
-                    .font(BlackoutDS.bodyFont())
-                    .fontWeight(.semibold)
-                if roster.pending == .notOK {
-                    Text(PartyVitalsCopy.tapAgain)
-                        .font(BlackoutDS.captionFont())
-                }
-            }
-            .foregroundStyle(BlackoutDS.Silver.metal)
-            .frame(maxWidth: .infinity)
-            .frame(height: BlackoutDS.Hit.sm)
-            .background(BlackoutDS.Red.core)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(PartyVitalsCopy.notOK)
-        .accessibilityHint(roster.pending == .notOK ? PartyVitalsCopy.tapAgain : "Two-tap to mark not OK")
+    private enum Pip {
+        case ok
+        case red
     }
 
-    private func vitalButton(_ action: PartyVitalAction, title: String) -> some View {
+    private func metalButton(
+        title: String,
+        action: PartyVitalAction,
+        pip: Pip?,
+        warnLabel: Bool
+    ) -> some View {
         Button {
             commit(action)
         } label: {
-            VStack(spacing: 2) {
-                Text(title)
-                    .font(BlackoutDS.bodyFont())
-                    .fontWeight(.semibold)
-                if roster.pending == action {
-                    Text(PartyVitalsCopy.tapAgain)
-                        .font(BlackoutDS.captionFont())
+            HStack(spacing: 8) {
+                if let pip {
+                    Circle()
+                        .fill(pipColor(pip))
+                        .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
                 }
+                VStack(spacing: 2) {
+                    Text(title)
+                        .font(BlackoutDS.bodyFont())
+                        .fontWeight(.semibold)
+                    if roster.pending == action {
+                        Text(PartyVitalsCopy.tapAgain)
+                            .font(BlackoutDS.captionFont())
+                    }
+                }
+                Spacer(minLength: 0)
             }
-            .foregroundStyle(BlackoutDS.Surface.void)
-            .frame(maxWidth: .infinity)
-            .frame(height: BlackoutDS.Hit.sm)
-            .background(BlackoutDS.Silver.metal)
+            .foregroundStyle(warnLabel ? BlackoutDS.Semantic.warn : BlackoutDS.Surface.void)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: BlackoutDS.Vitals.chip)
+            .background(BlackoutDS.Btn.metal)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
+        .accessibilityAddTraits(pip != nil ? .isSelected : [])
     }
 
     private func commit(_ action: PartyVitalAction) {
         if let envelope = roster.tap(action, fix: fix) {
             onBroadcast(envelope)
+        }
+    }
+
+    private func pipColor(_ pip: Pip) -> Color {
+        switch pip {
+        case .ok: return BlackoutDS.Semantic.ok
+        case .red: return BlackoutDS.Red.core
         }
     }
 

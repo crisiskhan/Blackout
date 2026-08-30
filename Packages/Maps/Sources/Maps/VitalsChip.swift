@@ -2,56 +2,88 @@ import BlackoutCore
 import DesignSystem
 import SwiftUI
 
-/// 56pt I'm-OK / I'm-not. Recedes with Map HUD. Not a second SOS disk.
+/// DS §10.4 segmented metal chip. 56h. Metal plate, not a disk. Does not arm SOS.
 struct VitalsChip: View {
-    var band: PartyBand
+    var isOKLatched: Bool
+    var isNotLatched: Bool
     var pending: PartyVitalAction?
-    var onTap: () -> Void
+    var onOK: () -> Void
+    var onNot: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 2) {
-                Text(band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-                    .font(BlackoutDS.captionFont())
-                    .fontWeight(.semibold)
-                if showsConfirm {
-                    Text(PartyVitalsCopy.tapAgain)
-                        .font(.system(size: 11, weight: .medium))
+        HStack(spacing: 0) {
+            segment(
+                title: PartyVitalsCopy.imOK,
+                pip: isOKLatched ? .ok : nil,
+                warnLabel: false,
+                pending: pending == .imOK,
+                action: onOK
+            )
+            Rectangle()
+                .fill(BlackoutDS.Silver.edge)
+                .frame(width: 0.5, height: 28)
+            segment(
+                title: PartyVitalsCopy.imNot,
+                pip: isNotLatched ? .red : nil,
+                warnLabel: isNotLatched,
+                pending: pending == .notOK,
+                action: onNot
+            )
+        }
+        .frame(height: BlackoutDS.Vitals.chip)
+        .background(BlackoutDS.Btn.metal)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .contain)
+    }
+
+    private enum Pip {
+        case ok
+        case red
+    }
+
+    private func segment(
+        title: String,
+        pip: Pip?,
+        warnLabel: Bool,
+        pending: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let pip {
+                    Circle()
+                        .fill(pipColor(pip))
+                        .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
+                }
+                VStack(spacing: 2) {
+                    Text(title)
+                        .font(BlackoutDS.captionFont())
+                        .fontWeight(.semibold)
+                    if pending {
+                        Text(PartyVitalsCopy.tapAgain)
+                            .font(.system(size: 11, weight: .medium))
+                    }
                 }
             }
-            .foregroundStyle(labelColor)
-            .padding(.horizontal, 16)
-            .frame(height: BlackoutDS.Hit.sm)
-            .background(fill)
-            .overlay(
-                Capsule().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(Capsule())
+            .foregroundStyle(warnLabel ? BlackoutDS.Semantic.warn : BlackoutDS.Surface.void)
+            .padding(.horizontal, 12)
+            .frame(height: BlackoutDS.Vitals.chip)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-        .accessibilityHint(showsConfirm ? PartyVitalsCopy.tapAgain : "Two-tap to change status")
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(pip != nil ? .isSelected : [])
+        .accessibilityHint(pending ? PartyVitalsCopy.tapAgain : "Two-tap to change status")
     }
 
-    private var showsConfirm: Bool {
-        switch band {
-        case .red: return pending == .imOK
-        case .green, .yellow: return pending == .notOK
-        }
-    }
-
-    private var fill: Color {
-        switch band {
+    private func pipColor(_ pip: Pip) -> Color {
+        switch pip {
+        case .ok: return BlackoutDS.Semantic.ok
         case .red: return BlackoutDS.Red.core
-        case .yellow: return BlackoutDS.Surface.raised.opacity(0.82)
-        case .green: return BlackoutDS.Surface.raised.opacity(0.82)
-        }
-    }
-
-    private var labelColor: Color {
-        switch band {
-        case .red: return BlackoutDS.Silver.metal
-        case .yellow, .green: return BlackoutDS.Silver.bright
         }
     }
 }

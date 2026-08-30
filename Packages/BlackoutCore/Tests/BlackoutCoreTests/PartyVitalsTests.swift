@@ -30,6 +30,17 @@ final class PartyVitalsTests: XCTestCase {
         XCTAssertTrue(status.injury)
     }
 
+    func testDrankAndAtePipsStayIndependentOfRed() {
+        var status = PartyMemberStatus(id: BlackoutID())
+        let now = Date(timeIntervalSince1970: 40)
+        PartyVitals.apply(.drank, to: &status, at: now)
+        PartyVitals.apply(.ate, to: &status, at: now)
+        PartyVitals.apply(.notOK, to: &status, at: now)
+        XCTAssertTrue(status.drankLatched)
+        XCTAssertTrue(status.ateLatched)
+        XCTAssertEqual(status.band, .red)
+    }
+
     func testImOKClearsInjuryToGreen() {
         var status = PartyMemberStatus(id: BlackoutID(), band: .red, injury: true)
         PartyVitals.apply(.imOK, to: &status, at: Date())
@@ -119,9 +130,9 @@ final class PartyVitalsTests: XCTestCase {
     func testCopyLocksManualButtonsAndSheet() {
         XCTAssertEqual(PartyVitalsCopy.drank, "DRANK")
         XCTAssertEqual(PartyVitalsCopy.ate, "ATE")
-        XCTAssertEqual(PartyVitalsCopy.notOK, "I'M NOT OK")
-        XCTAssertEqual(PartyVitalsCopy.imOK, "I'M OK")
-        XCTAssertEqual(PartyVitalsCopy.imNot, "I'M NOT")
+        XCTAssertEqual(PartyVitalsCopy.notOK, "I AM NOT OK")
+        XCTAssertEqual(PartyVitalsCopy.imOK, "I AM OK")
+        XCTAssertEqual(PartyVitalsCopy.imNot, "I AM NOT")
         XCTAssertEqual(PartyVitalsCopy.message, "Message")
         XCTAssertEqual(PartyVitalsCopy.navigateTo, "Navigate-to")
         XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)

@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// Party lane. Manual DRANK / ATE / I'M NOT OK always work. Heart-rate opt-in is not a gate.
+/// Party lane. Manual DRANK / ATE / I AM NOT OK always work. Heart-rate opt-in is not a gate.
 public enum PartyBand: String, Codable, Sendable, CaseIterable {
     case green
     case yellow
@@ -18,9 +18,9 @@ public enum PartyVitalAction: String, Sendable, CaseIterable {
 public enum PartyVitalsCopy {
     public static let drank = "DRANK"
     public static let ate = "ATE"
-    public static let notOK = "I'M NOT OK"
-    public static let imOK = "I'M OK"
-    public static let imNot = "I'M NOT"
+    public static let notOK = "I AM NOT OK"
+    public static let imOK = "I AM OK"
+    public static let imNot = "I AM NOT"
     public static let tapAgain = "Tap again"
     public static let message = "Message"
     public static let navigateTo = "Navigate-to"
@@ -65,6 +65,9 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         if let displayName, !displayName.isEmpty { return displayName }
         return String(id.rawValue.uuidString.prefix(8))
     }
+
+    public var drankLatched: Bool { drankAt != nil }
+    public var ateLatched: Bool { ateAt != nil }
 }
 
 /// First tap arms, same control again commits. Accidental red is expensive.
