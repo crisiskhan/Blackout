@@ -2,14 +2,6 @@ name: iOS TestFlight
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - cursor/blackout-ios-foundation-7e54
-    paths:
-      - "Blackout/**"
-      - "Packages/**"
-      - "Blackout.xcodeproj/**"
-      - "tools/**"
 
 concurrency:
   group: ios-testflight
