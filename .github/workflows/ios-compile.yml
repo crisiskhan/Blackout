@@ -2,6 +2,8 @@ name: iOS compile
 
 on:
   pull_request:
+    paths-ignore:
+      - 'Blackout/GuidePack/**'
   push:
     branches:
       - main
