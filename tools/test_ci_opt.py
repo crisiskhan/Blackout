@@ -116,8 +116,8 @@ def test_pbx_single_copy() -> None:
         fail("BlackoutWidgets GENERATE_INFOPLIST_FILE must stay NO")
     if (ROOT / "BlackoutWidgets" / "Info.plist").is_file():
         fail("BlackoutWidgets/Info.plist in the sync root is copied onto the appex Info.plist")
-    if 'Exceptions for "BlackoutWidgets" folder in Resources' in pbx:
-        fail("Xcode 26 archive copies widget Info.plist when it is in the Resources exception")
+    if 'Exceptions for "BlackoutWidgets"' in pbx:
+        fail("BlackoutWidgets sync group must not list Info.plist exceptions (Xcode 26 archive copies them)")
     widget_plist = (ROOT / "Supporting" / "BlackoutWidgets-Info.plist").read_text()
     if "CFBundleIdentifier" not in widget_plist:
         fail("widget Info.plist missing CFBundleIdentifier — ValidateEmbeddedBinary sees (null)")

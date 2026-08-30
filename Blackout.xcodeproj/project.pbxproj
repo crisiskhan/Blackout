@@ -49,9 +49,6 @@
 		};
 		0A96592D18865060108F3CCC /* BlackoutWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C1D2E3F405162738495A6B7C /* Exceptions for "BlackoutWidgets" folder in "BlackoutWidgets" target */,
-			);
 			path = BlackoutWidgets;
 			sourceTree = "<group>";
 		};
@@ -375,13 +372,6 @@
 				GuidePack,
 			);
 			target = 8796EC6A87564C187A908CD6 /* Blackout */;
-		};
-		C1D2E3F405162738495A6B7C /* Exceptions for "BlackoutWidgets" folder in "BlackoutWidgets" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 4A33CE8067C626636E3DE224 /* BlackoutWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 

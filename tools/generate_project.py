@@ -317,12 +317,11 @@ def xc_settings(is_target: bool, debug: bool) -> str:
 
 def generate_xcodeproj() -> None:
     # BlackoutWidgets (Live Activity) is maintained in Blackout.xcodeproj/project.pbxproj.
-    # Do not put widget Info.plist in a Resources exception — Xcode 26 archive
-    # copies BlackoutWidgets/Info.plist onto the appex while ProcessInfoPlistFile
-    # writes Supporting/BlackoutWidgets-Info.plist.
-    # Re-add that target after a full regen. Keep its Info.plist out of the
-    # BlackoutWidgets sync root. GENERATE_INFOPLIST_FILE = NO requires
-    # CFBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER) in that plist.
+    # Re-add that target after a full regen. Keep Info.plist out of the
+    # BlackoutWidgets sync root and out of sync exceptions — Xcode 26 archive
+    # copies those onto the appex while ProcessInfoPlistFile writes
+    # Supporting/BlackoutWidgets-Info.plist. GENERATE_INFOPLIST_FILE = NO
+    # requires CFBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER) in Supporting/.
     ids = {
         "app_ref": oid("app_ref"),
         "sync": oid("sync_blackout"),
