@@ -149,9 +149,6 @@ final class AppContainer {
             location.stopUpdating()
             mesh.stop()
             ptt.stop()
-        } else {
-            location.startUpdating()
-            syncMeshToParty()
         }
         startMissedCheckInWatch()
     }

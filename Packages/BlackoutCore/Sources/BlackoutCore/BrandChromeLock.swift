@@ -1,11 +1,13 @@
 import Foundation
 
-/// Logo-as-chrome contract. Locked wordmark + red-eye O crop only. No lockup. No SF Symbol O.
+/// Logo-as-chrome contract. Lock-gate uses the lockup Image. SOS confirm stays red-eye O. No SF Symbol O.
 public enum BrandChromeLock {
     public static let wordmarkAsset = "Wordmark"
     public static let redEyeOAsset = "RedEyeO"
+    public static let lockupAsset = "Lockup"
+    public static let lockupMaxPoint: Double = 280
     public static let redEyeOIsTemplate = false
-    public static let usesLockupInApp = false
+    public static let usesLockupInApp = true
     public static let typesetsBlackoutInSFPro = false
     public static let substitutesSFSymbolForO = false
 
@@ -41,7 +43,7 @@ public enum BrandChromeLock {
     public static let noPackRedEye: Double = 24
     public static let fabShowsRedEyeO = false
 
-    public static let markSurfaces = ["splash-wordmark", "about-wordmark", "sos-confirm", "map-empty-no-pack"]
+    public static let markSurfaces = ["splash-wordmark", "about-wordmark", "sos-confirm", "map-empty-no-pack", "lock-gate"]
     public static let forbiddenMarkSurfaces = [
         "tab-bar",
         "sos-fab-disk",

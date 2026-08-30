@@ -5,8 +5,11 @@ final class BrandChromeLockTests: XCTestCase {
     func testLockedAssetsStayOriginalWordmarkAndRedEyeO() {
         XCTAssertEqual(BrandChromeLock.wordmarkAsset, "Wordmark")
         XCTAssertEqual(BrandChromeLock.redEyeOAsset, "RedEyeO")
+        XCTAssertEqual(BrandChromeLock.lockupAsset, "Lockup")
+        XCTAssertEqual(BrandChromeLock.lockupMaxPoint, 280)
         XCTAssertFalse(BrandChromeLock.redEyeOIsTemplate)
-        XCTAssertFalse(BrandChromeLock.usesLockupInApp)
+        XCTAssertTrue(BrandChromeLock.usesLockupInApp)
+        XCTAssertTrue(LaunchLock.usesLockupImage)
         XCTAssertFalse(BrandChromeLock.typesetsBlackoutInSFPro)
         XCTAssertFalse(BrandChromeLock.substitutesSFSymbolForO)
     }
@@ -49,7 +52,8 @@ final class BrandChromeLockTests: XCTestCase {
         XCTAssertFalse(BrandChromeLock.sosConfirmStacksSOSDiskUnderEye)
         XCTAssertFalse(BrandChromeLock.sosConfirmUsesLockup)
         XCTAssertFalse(BrandChromeLock.sosConfirmUsesEmblem)
-        XCTAssertFalse(BrandChromeLock.usesLockupInApp)
+        XCTAssertTrue(BrandChromeLock.usesLockupInApp)
+        XCTAssertEqual(BrandChromeLock.lockupAsset, "Lockup")
         XCTAssertEqual(BrandChromeLock.noPackRedEye, 24)
         XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
         XCTAssertEqual(SOSChrome.fab, 88)
@@ -57,7 +61,8 @@ final class BrandChromeLockTests: XCTestCase {
             "splash-wordmark",
             "about-wordmark",
             "sos-confirm",
-            "map-empty-no-pack"
+            "map-empty-no-pack",
+            "lock-gate"
         ])
         XCTAssertTrue(BrandChromeLock.forbiddenMarkSurfaces.contains("sos-fab-disk"))
         XCTAssertTrue(BrandChromeLock.forbiddenMarkSurfaces.contains("tab-bar"))

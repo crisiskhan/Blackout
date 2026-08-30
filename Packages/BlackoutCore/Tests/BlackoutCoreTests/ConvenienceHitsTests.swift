@@ -170,6 +170,8 @@ final class ConvenienceHitsTests: XCTestCase {
         XCTAssertTrue(inbound.keepsScreenAwake())
         XCTAssertTrue(inbound.holdsMapChrome())
         XCTAssertTrue(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: inbound))
+        XCTAssertFalse(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: nil))
+        XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
     }
 
     func testBLACKOUTCoordStringMatchesSOSFormat() {

@@ -102,8 +102,28 @@ public final class FileMapPack: MapPackServing {
     private func applyTiles(_ entry: (MapPackSnapshot, DEMTable?)) {
         let next = entry.0.rootURL.standardizedFileURL.path
         if pack?.rootURL.standardizedFileURL.path == next, !packTooNew { return }
-        pack = entry.0
-        dem = entry.1
+        let hydrated = Self.hydrate(entry)
+        pack = hydrated.0
+        dem = hydrated.1
+    }
+
+    private static func hydrate(_ entry: (MapPackSnapshot, DEMTable?)) -> (MapPackSnapshot, DEMTable?) {
+        let snap = entry.0
+        let pois = snap.pois.isEmpty ? loadPOIs(root: snap.rootURL) : snap.pois
+        let addresses = snap.addresses.isEmpty ? loadAddresses(root: snap.rootURL) : snap.addresses
+        let dem = entry.1 ?? loadDEM(root: snap.rootURL)
+        return (
+            MapPackSnapshot(
+                rootURL: snap.rootURL,
+                region: snap.region,
+                pois: pois,
+                addresses: addresses,
+                disclaimer: snap.disclaimer,
+                tileCount: snap.tileCount,
+                expectedTileCount: snap.expectedTileCount
+            ),
+            dem
+        )
     }
 
     private func clearTiles() {
@@ -208,30 +228,22 @@ public final class FileMapPack: MapPackServing {
             return .tooNew(region)
         }
         let disclaimer = json["disclaimer"] as? String ?? "Generated sample pack."
-        let tilesDir = root.appendingPathComponent("tiles", isDirectory: true)
-        var isDir: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: tilesDir.path, isDirectory: &isDir), isDir.boolValue else {
+        guard MapPackLayout.containsTilePNGs(root: root) else {
             return .unreadable
         }
-        let tileCount = MapPackLayout.tilePNGCount(root: root)
-        guard tileCount > 0 else {
-            return .unreadable
-        }
-        let expectedTileCount = json["tileCount"] as? Int ?? tileCount
-        let pois = loadPOIs(root: root)
-        let addresses = loadAddresses(root: root)
-        let dem = loadDEM(root: root)
+        let expectedTileCount = json["tileCount"] as? Int ?? 0
+        let tileCount = expectedTileCount > 0 ? expectedTileCount : 1
         return .ready((
             MapPackSnapshot(
                 rootURL: root,
                 region: region,
-                pois: pois,
-                addresses: addresses,
+                pois: [],
+                addresses: [],
                 disclaimer: disclaimer,
                 tileCount: tileCount,
-                expectedTileCount: expectedTileCount
+                expectedTileCount: tileCount
             ),
-            dem
+            nil
         ))
     }
 
@@ -300,31 +312,17 @@ struct DEMTable {
     let grid: [[Double]]
 
     func sample(latitude: Double, longitude: Double) -> Double? {
-        guard latitude >= lats.first! && latitude <= lats.last!,
-              longitude >= lons.first! && longitude <= lons.last! else { return nil }
-        let x = interpIndex(longitude, in: lons)
-        let y = interpIndex(latitude, in: lats)
-        let x0 = Int(floor(x))
-        let y0 = Int(floor(y))
-        let x1 = min(x0 + 1, lons.count - 1)
-        let y1 = min(y0 + 1, lats.count - 1)
-        let tx = x - Double(x0)
-        let ty = y - Double(y0)
-        let v00 = grid[y0][x0]
-        let v10 = grid[y0][x1]
-        let v01 = grid[y1][x0]
-        let v11 = grid[y1][x1]
-        let a = v00 * (1 - tx) + v10 * tx
-        let b = v01 * (1 - tx) + v11 * tx
-        return a * (1 - ty) + b * ty
+        DEMGrid.sample(latitude: latitude, longitude: longitude, lons: lons, lats: lats, grid: grid)
     }
 
     func slopeDegrees(latitude: Double, longitude: Double) -> Double? {
-        guard lons.count > 1, lats.count > 1 else { return nil }
+        guard lons.count > 1, lats.count > 1,
+              let firstLat = lats.first, let lastLat = lats.last,
+              let firstLon = lons.first, let lastLon = lons.last else { return nil }
         let metersPerDegLat = 111_320.0
         let metersPerDegLon = 111_320.0 * cos(latitude * .pi / 180)
-        let dLat = (lats.last! - lats.first!) / Double(lats.count - 1)
-        let dLon = (lons.last! - lons.first!) / Double(lons.count - 1)
+        let dLat = (lastLat - firstLat) / Double(lats.count - 1)
+        let dLon = (lastLon - firstLon) / Double(lons.count - 1)
         guard let e = sample(latitude: latitude, longitude: longitude),
               let n = sample(latitude: latitude + dLat, longitude: longitude),
               let s = sample(latitude: latitude - dLat, longitude: longitude),
@@ -386,17 +384,5 @@ struct DEMTable {
             cos(meters / r) - sin(lat1) * sin(lat2)
         )
         return (lat2 * 180 / .pi, lon2 * 180 / .pi)
-    }
-
-    private func interpIndex(_ value: Double, in axis: [Double]) -> Double {
-        guard axis.count > 1 else { return 0 }
-        for i in 0..<(axis.count - 1) {
-            if value >= axis[i] && value <= axis[i + 1] {
-                let span = axis[i + 1] - axis[i]
-                guard span != 0 else { return Double(i) }
-                return Double(i) + (value - axis[i]) / span
-            }
-        }
-        return Double(axis.count - 1)
     }
 }

@@ -51,8 +51,9 @@ public final class PackStore {
     ) {
         self.bundledRoot = bundledRoot
         self.bundledPacksRoot = bundledPacksRoot
-        let base = diskRoot ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("FieldPacks", isDirectory: true)
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let base = diskRoot ?? support.appendingPathComponent("FieldPacks", isDirectory: true)
         self.diskRoot = base
         self.workRoot = base.appendingPathComponent(".partial", isDirectory: true)
         self.relayRoot = base.appendingPathComponent(".relay", isDirectory: true)

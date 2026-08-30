@@ -101,7 +101,15 @@ struct RootView: View {
             if phase == .background {
                 container.lock.lock()
             }
-            if phase == .active {
+            if phase == .active, container.lock.isUnlocked {
+                syncSensorsToBattery()
+                container.refreshRadiosBanner()
+                container.refreshLiveActivity()
+                container.applyIdleTimer()
+            }
+        }
+        .onChange(of: container.lock.isUnlocked) { _, unlocked in
+            if unlocked {
                 syncSensorsToBattery()
                 container.refreshRadiosBanner()
                 container.refreshLiveActivity()
@@ -109,7 +117,9 @@ struct RootView: View {
             }
         }
         .onChange(of: container.battery.isCritical) { _, _ in
-            syncSensorsToBattery()
+            if container.lock.isUnlocked {
+                syncSensorsToBattery()
+            }
         }
         .onChange(of: container.sosCoverOpen) { _, _ in
             container.applyIdleTimer()
@@ -124,7 +134,9 @@ struct RootView: View {
             container.refreshRadiosBanner()
         }
         .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
-            container.refreshLiveActivity()
+            if container.lock.isUnlocked {
+                container.refreshLiveActivity()
+            }
         }
         .onOpenURL { url in
             if let next = container.applyDeepLink(url) {
@@ -132,6 +144,7 @@ struct RootView: View {
             }
         }
         .onAppear {
+            guard container.lock.isUnlocked else { return }
             syncSensorsToBattery()
             container.refreshRadiosBanner()
             container.refreshLiveActivity()
@@ -140,6 +153,7 @@ struct RootView: View {
         .task {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard container.lock.isUnlocked else { continue }
                 container.expireInboundIfNeeded()
                 container.refreshLiveActivity()
                 container.applyIdleTimer()

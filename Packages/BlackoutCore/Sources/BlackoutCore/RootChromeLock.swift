@@ -13,17 +13,22 @@ public enum RootChromeLock {
     public static let coldLaunchDestination = LaunchLock.destination
 }
 
-/// First-open lock chrome. Real SwiftUI only — no full-screen lock/SOS bitmap.
+/// First-open lock chrome. SwiftUI slider + lockup Image emblem. Not a full-screen still.
 public enum LaunchLock {
     public static let destination = "unlock"
     public static let usesBitmapLockUI = false
     public static let usesFullScreenLockImage = false
-    public static let metalRingIsSwiftUI = true
+    public static let usesLockupImage = true
+    public static let metalRingIsSwiftUI = false
     public static let sliderHasSOSTwin = true
     public static let sosTwinIsMapFAB = false
-    public static let sosTwinHit: Double = 64
+    public static let sosTwinHit: Double = 56
     public static let handleIsMetal = true
     public static let phrase = "SLIDE TO UNLOCK"
+    public static let slideArmsSOS = false
     public static let persistedSOSArmedStealsFirstOpen = false
     public static let coldLaunchShowsSplash = false
+    public static let startsSensorsBeforeUnlock = false
+    public static let startsLiveActivityBeforeUnlock = false
+    public static let walksAllTilesOnBoot = false
 }

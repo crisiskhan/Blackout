@@ -220,7 +220,7 @@ public struct LockGateView: View {
     public var body: some View {
         VStack(spacing: 28) {
             Spacer()
-            MetalRingLockup(diameter: 200)
+            MetalRingLockup(diameter: CGFloat(BrandChromeLock.lockupMaxPoint))
             Text("On-device lock. Nothing to sign in to.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)

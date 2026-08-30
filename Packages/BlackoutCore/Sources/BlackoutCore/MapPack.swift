@@ -203,6 +203,23 @@ public enum MapPackLayout {
     }
 
     public static func containsTilePNGs(root: URL) -> Bool {
-        tilePNGCount(root: root) > 0
+        let tiles = root.appendingPathComponent("tiles", isDirectory: true)
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: tiles.path, isDirectory: &isDir), isDir.boolValue else {
+            return false
+        }
+        guard let enumerator = FileManager.default.enumerator(
+            at: tiles,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return false
+        }
+        for case let url as URL in enumerator {
+            if url.pathExtension.lowercased() == "png" {
+                return true
+            }
+        }
+        return false
     }
 }

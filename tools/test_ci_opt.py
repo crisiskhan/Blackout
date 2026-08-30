@@ -1173,16 +1173,44 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("cold launch must land on unlock")
     if "usesBitmapLockUI = false" not in launch or "usesFullScreenLockImage = false" not in launch:
         fail("unlock chrome must not be a painted lock/SOS bitmap")
+    if "usesLockupImage = true" not in launch or "metalRingIsSwiftUI = false" not in launch:
+        fail("unlock emblem must be the lockup Image, not empty SwiftUI rings")
+    if "sosTwinHit: Double = 56" not in launch:
+        fail("unlock handle/SOS twins must be 56pt")
+    if "slideArmsSOS = false" not in launch:
+        fail("slide to unlock must not arm SOS")
+    if "startsSensorsBeforeUnlock = false" not in launch:
+        fail("cold launch must not start GPS/motion before unlock")
+    if "startsLiveActivityBeforeUnlock = false" not in launch:
+        fail("cold launch must not start Live Activity before unlock")
+    if "walksAllTilesOnBoot = false" not in launch:
+        fail("boot must not walk every pack tile")
     if "MetalRingLockup" not in lock_view or "SlideToUnlock" not in lock_view:
-        fail("LockGateView lost the metal-ring lockup or SOS-twin slider")
-    if "Image(" in ring or "UIImage" in ring or "jpeg" in ring.lower() or "png" in ring.lower():
-        fail("metal-ring lockup must stay SwiftUI, not a bitmap")
+        fail("LockGateView lost the lockup or SOS-twin slider")
+    if "On-device lock. Nothing to sign in to." not in lock_view:
+        fail("LockGateView lost the on-device lock copy")
+    if "Circle(" in ring or "Circle()" in ring:
+        fail("lockup must not redraw Crisis's ring as empty Circle() chrome")
+    if "BrandChromeLock.lockupAsset" not in ring or "Image(" not in ring:
+        fail("MetalRingLockup must render the Lockup catalog Image")
+    if "lockupMaxPoint" not in ring and "280" not in lock_view:
+        fail("lockup Image must stay at most 280pt")
+    lockup_set = ROOT / "Blackout/Assets.xcassets/Lockup.imageset/Lockup.jpeg"
+    brand_lockup = ROOT / "brand/lockup.jpeg"
+    if not lockup_set.is_file() or lockup_set.stat().st_size < 50_000:
+        fail("Lockup.imageset is missing Crisis's lockup.jpeg")
+    if not brand_lockup.is_file():
+        fail("brand/lockup.jpeg missing")
+    if lockup_set.stat().st_size != brand_lockup.stat().st_size:
+        fail("catalog Lockup.jpeg is not brand/lockup.jpeg")
     if "LaunchLock.sosTwinHit" not in slide or "88" in slide.split("sosTwin", 1)[-1][:200]:
         fail("unlock SOS twin must not be the 88pt Map FAB")
     if "SplashChromeView" in shell_app:
         fail("cold launch must not paint a splash bitmap over the unlock gate")
     if "unlockSession" not in lock_view:
         fail("slider must unlock the session without Face ID as the first frame")
+    if "sosArmed" in lock_view.split("SlideToUnlock", 1)[-1][:200]:
+        fail("LockGateView slider must not write sosArmed")
     if "if !container.lock.isUnlocked" not in root:
         fail("RootView must show the unlock gate on every cold launch")
     if "isEnabled && !container.lock.isUnlocked" in root:
@@ -1226,7 +1254,56 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "workflow_dispatch:" not in tf or "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight from this fix")
-    ok("SOS armed restore: no new-binary trap, idle appear, dismiss keeps arm, version 31")
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    file_pack = (ROOT / "Packages/Maps/Sources/Maps/FileMapPack.swift").read_text()
+    layout = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapPack.swift").read_text()
+    dem = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/DEMGrid.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    loc = (ROOT / "Packages/Location/Sources/BlackoutLocation/LocationService.swift").read_text()
+    if "location.startUpdating()" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
+        fail("AppContainer.init must not start GPS/motion before the unlock gate")
+    if "syncMeshToParty()" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
+        fail("AppContainer.init must not start mesh/Live Activity before unlock")
+    if "guard container.lock.isUnlocked else { return }" not in root.split(".onAppear")[1][:240]:
+        fail("RootView.onAppear must not start sensors while the lock is up")
+    if "container.lock.isUnlocked" not in root.split("onChange(of: scenePhase)")[1][:500]:
+        fail("foreground restore must not start sensors while locked")
+    if "onChange(of: container.lock.isUnlocked)" not in root:
+        fail("unlock must start Map sensors only after the slide")
+    task = root.split(".task {", 1)[-1][:400]
+    if "guard container.lock.isUnlocked else { continue }" not in task:
+        fail("RootView.task must not refresh Live Activity on the lock gate")
+    if "return true" not in layout.split("public static func containsTilePNGs")[1][:800]:
+        fail("containsTilePNGs must return on the first PNG")
+    if "tilePNGCount(root: root) > 0" in layout:
+        fail("containsTilePNGs still walks every tile")
+    if "tilePNGCount(root: root)" in file_pack.split("private static func inspect")[1][:900]:
+        fail("FileMapPack.inspect must not count every tile on boot")
+    if "loadPOIs(root: root)" in file_pack.split("private static func inspect")[1][:900]:
+        fail("FileMapPack.inspect must not parse poi.json for every pack on appear")
+    if ".first!" in dem or ".last!" in dem:
+        fail("DEMGrid must not force-unwrap axis ends")
+    if "urls(for: .applicationSupportDirectory, in: .userDomainMask).first!" in store:
+        fail("PackStore must not force-unwrap Application Support")
+    if "lats.first!" in file_pack or "lons.first!" in file_pack:
+        fail("FileMapPack DEM still force-unwraps axis ends")
+    if "testContainsTilePNGsReturnsOnFirstPNG" not in (
+        ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/MapPackSchemaTests.swift"
+    ).read_text():
+        fail("missing containsTilePNGs short-circuit test")
+    if "testEmptyAxesReturnNil" not in (
+        ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/DEMGridTests.swift"
+    ).read_text():
+        fail("missing DEM empty/jagged regression")
+    if "NSLocationWhenInUseUsageDescription" not in pbx or "NSMotionUsageDescription" not in pbx:
+        fail("location/motion usage strings must stay in the generated Info.plist keys")
+    if "TAG" not in (ROOT / "Supporting/Blackout.entitlements").read_text():
+        fail("NFC entitlement must stay TAG-only")
+    if "NDEF" in (ROOT / "Supporting/Blackout.entitlements").read_text():
+        fail("do not restore NDEF")
+    if "startUpdatingLocation()" not in loc.split("if authorization == .authorized")[1][:200]:
+        fail("denied/not-determined GPS must not force startUpdatingLocation")
+    ok("SOS armed restore + lockup first-open + launch crash sweep, version 31")
 
 
 def test_pack_amenity_address_search() -> None:
