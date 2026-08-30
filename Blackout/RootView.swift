@@ -53,6 +53,8 @@ struct RootView: View {
                 LockGateView(lock: container.lock)
             } else {
                 chrome
+                // SOS stays a ZStack sibling of TabView (`RootChromeLock.sosPlacement`).
+                // Tab switches must not remount the 88pt disk.
                 if let bootError = container.bootError {
                     VStack {
                         StoreFailure(bootError)
@@ -77,20 +79,9 @@ struct RootView: View {
                 lock: container.lock,
                 onFieldPacks: {
                     showSettings = false
-                    container.showFieldPacks = true
+                    destination = .expedition
                 }
             )
-            .preferredColorScheme(.dark)
-        }
-        .sheet(isPresented: fieldPacksSheetBinding) {
-            FieldPacksView(
-                store: container.packs,
-                nearbyCount: container.mesh.nearbyPeerCount,
-                onSendToPeer: { container.relayPack($0) }
-            ) {
-                skipFieldPacks()
-            }
-            .presentationDetents([.medium, .large])
             .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
@@ -101,42 +92,12 @@ struct RootView: View {
                 syncSensorsToBattery()
             }
         }
-        .onChange(of: container.battery.isCritical) { _, critical in
-            if critical {
-                container.showFieldPacks = false
-            }
+        .onChange(of: container.battery.isCritical) { _, _ in
             syncSensorsToBattery()
         }
         .onAppear {
             syncSensorsToBattery()
-            if !UserDefaults.standard.bool(forKey: BlackoutKeys.fieldPacksIntroCompleted),
-               !container.battery.isCritical {
-                container.showFieldPacks = true
-            }
         }
-    }
-
-    private var fieldPacksSheetBinding: Binding<Bool> {
-        Binding(
-            get: {
-                container.showFieldPacks
-                    && !container.battery.isCritical
-                    && !(container.lock.isEnabled && !container.lock.isUnlocked)
-            },
-            set: { newValue in
-                if newValue {
-                    container.showFieldPacks = true
-                } else {
-                    skipFieldPacks()
-                }
-            }
-        )
-    }
-
-    private func skipFieldPacks() {
-        container.packs.skipIntro()
-        container.showFieldPacks = false
-        destination = .map
     }
 
     /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
@@ -160,7 +121,7 @@ struct RootView: View {
         } else {
             container.location.startUpdating()
             container.location.applyPolicy(container.battery.policy)
-            container.mesh.start()
+            container.syncMeshToParty()
         }
     }
 
@@ -252,9 +213,10 @@ struct RootView: View {
             persistence: container.persistence,
             packService: container.pack,
             coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
-            installedPackRoots: container.packs.installedPackRoots,
-            onOpenFieldPacks: { container.showFieldPacks = true },
-            externalSheetOpen: showSettings || container.showFieldPacks,
+            installedPackRoots: container.packs.readyRoots,
+            packReady: container.packs.readySnapshot,
+            onOpenFieldPacks: { destination = .expedition },
+            externalSheetOpen: showSettings,
             sosCoverOpen: container.sosCoverOpen,
             roster: container.party,
             onMessagePeer: { destination = .comms }
@@ -278,6 +240,7 @@ struct RootView: View {
             persistence: container.persistence,
             crypto: container.crypto,
             mesh: container.mesh,
+            roster: container.party,
             extremeSaver: container.battery.pausesCameraAndPTT
         )
         .swiftUIToolbar {
@@ -298,7 +261,9 @@ struct RootView: View {
             location: container.location,
             battery: container.battery,
             packURL: container.guidePackURL,
-            sosArmed: UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed)
+            sosArmed: UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed),
+            packReady: container.packs.readySnapshot,
+            partySize: 1 + container.party.peerCount
         )
     }
 
@@ -307,7 +272,11 @@ struct RootView: View {
             persistence: container.persistence,
             location: container.location,
             roster: container.party,
-            onBroadcast: { container.sendPartyStatus($0) }
+            onBroadcast: { container.sendPartyStatus($0) },
+            onCommitCallsign: { container.commitCallsign($0) },
+            onCreateParty: { container.createParty() },
+            onJoinParty: { container.joinParty($0) },
+            onLeaveParty: { container.leaveParty() }
         ) {
             FieldPackCatalogList(
                 store: container.packs,
@@ -339,7 +308,8 @@ struct RootView: View {
         .allowsHitTesting(true)
     }
 
-    /// Same 88pt SOS on Map / Comms / Field / Expedition — not Map-only, not a nav-bar chip, not a tab.
+    /// Same 88pt SOS on Map / Comms / Field / Expedition — RootView sibling, not inside TabView.
+    /// Not Map-only, not a nav-bar chip, not a tab. `RootChromeLock.sosIsRootViewSibling`.
     /// Compact 4-tab: 8pt above the tab bar, 16pt trailing. Critical / iPad: 8pt above home indicator.
     /// Never recedes with Map HUD. Last-2% CriticalSOSShell still shows the FAB.
     private var fabBottomPadding: CGFloat {

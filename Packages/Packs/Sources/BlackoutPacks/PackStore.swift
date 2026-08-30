@@ -99,11 +99,17 @@ public final class PackStore {
         packRoot(for: id) != nil
     }
 
-    public func skipIntro() {
-        UserDefaults.standard.set(true, forKey: BlackoutKeys.fieldPacksIntroCompleted)
-        for pack in FieldPackCatalog.remotePacks where states[pack.id] != .ready && states[pack.id] != .downloading {
-            states[pack.id] = .skip
-        }
+    /// One Ready query. Map / Field / Navigate ask this store.
+    public func isReady(_ id: String) -> Bool {
+        states[id] == .ready
+    }
+
+    public var readyRoots: [URL] { installedPackRoots }
+
+    public var readySnapshot: PackReadySnapshot {
+        PackReadySnapshot(
+            readyIDs: FieldPackCatalog.all.compactMap { isReady($0.id) ? $0.id : nil }
+        )
     }
 
     public func download(_ id: String) {
@@ -146,10 +152,10 @@ public final class PackStore {
                 messages[pack.id] = "Prefers Wi-Fi. Tap Download to try anyway from this screen."
             } else if !pack.assetReady {
                 states[pack.id] = .failed
-                messages[pack.id] = "Not on GitHub Releases yet. Skip uses the Denver sample."
-            } else if states[pack.id] != .skip {
-                states[pack.id] = .available
-                messages[pack.id] = "On GitHub Releases. Tap Download. Then airplane."
+                messages[pack.id] = "Not on GitHub Releases yet. Denver stays the fallback."
+            } else {
+                states.removeValue(forKey: pack.id)
+                messages[pack.id] = "Tap Download. Then airplane."
             }
         }
     }
@@ -194,7 +200,7 @@ public final class PackStore {
 
         guard descriptor.assetReady, let url = descriptor.downloadURL else {
             states[id] = .failed
-            messages[id] = "Not on GitHub Releases yet. Skip uses the Denver sample."
+            messages[id] = "Not on GitHub Releases yet. Denver stays the fallback."
             return
         }
         if !pathSatisfied {

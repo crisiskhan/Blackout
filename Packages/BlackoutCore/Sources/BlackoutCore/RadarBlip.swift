@@ -13,6 +13,8 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
     public var id: BlackoutID
     public var kind: RadarBlipKind
     public var displayName: String?
+    /// YOU · last-4 when two live identities are still YOU. Not a second person name.
+    public var footnote: String?
     public var bearingDegrees: Double
     public var rangeMeters: Double
     public var pingAge: TimeInterval?
@@ -25,6 +27,7 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
         id: BlackoutID = BlackoutID(),
         kind: RadarBlipKind,
         displayName: String? = nil,
+        footnote: String? = nil,
         bearingDegrees: Double,
         rangeMeters: Double,
         pingAge: TimeInterval? = nil,
@@ -36,6 +39,7 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
         self.id = id
         self.kind = kind
         self.displayName = displayName
+        self.footnote = footnote
         self.bearingDegrees = bearingDegrees
         self.rangeMeters = rangeMeters
         self.pingAge = pingAge

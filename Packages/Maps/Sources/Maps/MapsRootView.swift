@@ -15,6 +15,7 @@ public struct MapsRootView: View {
     @Bindable var packService: FileMapPack
     var coverageRegions: [MapRegion]
     var installedPackRoots: [URL]
+    var packReady: PackReadySnapshot
     var onOpenFieldPacks: (() -> Void)?
     var externalSheetOpen: Bool
     var sosCoverOpen: Bool
@@ -54,6 +55,7 @@ public struct MapsRootView: View {
         packService: FileMapPack,
         coverageRegions: [MapRegion] = [],
         installedPackRoots: [URL] = [],
+        packReady: PackReadySnapshot = .empty,
         onOpenFieldPacks: (() -> Void)? = nil,
         externalSheetOpen: Bool = false,
         sosCoverOpen: Bool = false,
@@ -67,6 +69,7 @@ public struct MapsRootView: View {
         self.packService = packService
         self.coverageRegions = coverageRegions
         self.installedPackRoots = installedPackRoots
+        self.packReady = packReady
         self.onOpenFieldPacks = onOpenFieldPacks
         self.externalSheetOpen = externalSheetOpen
         self.sosCoverOpen = sosCoverOpen
@@ -186,7 +189,7 @@ public struct MapsRootView: View {
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
-                    $0.noteActivity(at: nowOffset)
+                    $0.tick(at: nowOffset)
                 }
             },
             onChromeInputs: {
@@ -221,9 +224,19 @@ public struct MapsRootView: View {
         NavigationStack {
             switch item {
             case .navigate:
-                NavigateView(location: location, pack: packService.pack, battery: battery)
+                NavigateView(
+                    location: location,
+                    pack: packService.pack,
+                    battery: battery,
+                    packReady: packReady
+                )
             case .radar:
-                RadarView(location: location, mesh: mesh, pack: packService.pack)
+                RadarView(
+                    location: location,
+                    pack: packService.pack,
+                    roster: roster,
+                    nearbyPeerCount: mesh.nearbyPeerCount
+                )
             case .topo:
                 TopographyView(location: location, packService: packService)
             case .civilization:
@@ -486,8 +499,7 @@ public struct MapsRootView: View {
 
     private func commitVitals(_ action: PartyVitalAction) {
         noteMapActivity()
-        if let envelope = roster.tap(action, fix: location.navigationFix),
-           mesh.nearbyPeerCount > 0 {
+        if let envelope = roster.tap(action, fix: location.navigationFix) {
             mesh.send(envelope)
         }
     }
@@ -860,7 +872,7 @@ struct MapEmptyCard: View {
                     MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)
                 }
                 if let onOpenFieldPacks {
-                    GhostButton("Field Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
+                    GhostButton("Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
                 }
             }
             .padding(20)

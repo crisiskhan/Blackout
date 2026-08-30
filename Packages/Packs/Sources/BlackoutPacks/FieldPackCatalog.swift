@@ -206,11 +206,10 @@ public struct FieldPackDescriptor: Identifiable, Hashable, Sendable {
     public var region: MapRegion
 }
 
-public enum FieldPackRowState: String, Sendable {
+/// Four states on disk. Skip and first-run available are gone.
+public enum FieldPackRowState: String, Sendable, CaseIterable {
     case noWifi
     case downloading
-    case available
     case ready
     case failed
-    case skip
 }

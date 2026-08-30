@@ -1,3 +1,4 @@
+import BlackoutCore
 import Foundation
 import MultipeerConnectivity
 
@@ -5,6 +6,8 @@ import MultipeerConnectivity
 /// 1/N: at most one connected peer. Discovery is local Bonjour + P2P only.
 final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate {
     private let localPeer: MCPeerID
+    private let partyCode: String
+    private let deviceID: BlackoutID
     private var session: MCSession
     private var advertiser: MCNearbyServiceAdvertiser
     private var browser: MCNearbyServiceBrowser
@@ -18,12 +21,14 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
     var onSendComplete: ((String, Bool) -> Void)?
     private var progressObservations: [String: NSKeyValueObservation] = [:]
 
-    init(localPeer: MCPeerID) {
+    init(localPeer: MCPeerID, partyCode: String, deviceID: BlackoutID) {
         self.localPeer = localPeer
+        self.partyCode = partyCode
+        self.deviceID = deviceID
         session = MCSession(peer: localPeer, securityIdentity: nil, encryptionPreference: .required)
         advertiser = MCNearbyServiceAdvertiser(
             peer: localPeer,
-            discoveryInfo: nil,
+            discoveryInfo: MeshRadio.discoveryInfo(partyCode: partyCode, deviceID: deviceID),
             serviceType: MeshRadio.serviceType
         )
         browser = MCNearbyServiceBrowser(peer: localPeer, serviceType: MeshRadio.serviceType)
@@ -168,8 +173,10 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         withContext context: Data?,
         invitationHandler: @escaping (Bool, MCSession?) -> Void
     ) {
-        _ = (peerID, context)
-        if session.connectedPeers.isEmpty {
+        _ = peerID
+        let invitedCode = context.flatMap { String(data: $0, encoding: .utf8) }
+        let sameParty = invitedCode == nil || invitedCode == partyCode
+        if sameParty, session.connectedPeers.isEmpty {
             invitationHandler(true, session)
         } else {
             invitationHandler(false, nil)
@@ -177,11 +184,16 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
-        _ = info
+        guard MeshRadio.matchesParty(info, partyCode: partyCode) else { return }
         guard session.connectedPeers.isEmpty else { return }
         // One side invites so both phones do not double-handshake.
-        guard localPeer.displayName < peerID.displayName else { return }
-        browser.invitePeer(peerID, to: session, withContext: nil, timeout: 12)
+        guard MeshRadio.shouldInvite(
+            localID: deviceID,
+            peerInfo: info,
+            peerDisplayName: peerID.displayName
+        ) else { return }
+        let context = partyCode.data(using: .utf8)
+        browser.invitePeer(peerID, to: session, withContext: context, timeout: 12)
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {

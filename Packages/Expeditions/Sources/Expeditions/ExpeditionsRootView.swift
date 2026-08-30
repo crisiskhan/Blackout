@@ -8,6 +8,10 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
     @Bindable var location: LocationService
     @Bindable var roster: PartyRoster
     var onBroadcast: (Envelope) -> Void
+    var onCommitCallsign: (String) -> Void
+    var onCreateParty: () -> Void
+    var onJoinParty: (String) -> Bool
+    var onLeaveParty: () -> Void
     var packsPlate: PacksPlate
 
     @State private var items: [ExpeditionRecordDTO] = []
@@ -22,12 +26,20 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
         location: LocationService,
         roster: PartyRoster,
         onBroadcast: @escaping (Envelope) -> Void = { _ in },
+        onCommitCallsign: @escaping (String) -> Void = { _ in },
+        onCreateParty: @escaping () -> Void = {},
+        onJoinParty: @escaping (String) -> Bool = { _ in false },
+        onLeaveParty: @escaping () -> Void = {},
         @ViewBuilder packsPlate: () -> PacksPlate
     ) {
         self.persistence = persistence
         self.location = location
         self.roster = roster
         self.onBroadcast = onBroadcast
+        self.onCommitCallsign = onCommitCallsign
+        self.onCreateParty = onCreateParty
+        self.onJoinParty = onJoinParty
+        self.onLeaveParty = onLeaveParty
         self.packsPlate = packsPlate()
         _tracking = State(initialValue: UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking))
     }
@@ -44,13 +56,21 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                         PartyVitalsPlate(
                             roster: roster,
                             fix: location.navigationFix,
-                            onBroadcast: onBroadcast
+                            onBroadcast: onBroadcast,
+                            onCommitCallsign: onCommitCallsign,
+                            onCreateParty: onCreateParty,
+                            onJoinParty: onJoinParty,
+                            onLeaveParty: onLeaveParty
                         )
                     }
                     pausePanel("Gear") {
                         Text(ExpeditionPauseCopy.gearStub)
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
+                        Text(roster.identity.callsign)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.bright)
+                            .accessibilityLabel("Callsign \(roster.identity.callsign)")
                         ForEach(DefaultOutingGear.items, id: \.self) { item in
                             Text(item)
                                 .font(BlackoutDS.bodyFont())
@@ -210,13 +230,21 @@ extension ExpeditionsRootView where PacksPlate == EmptyView {
         persistence: any PersistenceServing,
         location: LocationService,
         roster: PartyRoster,
-        onBroadcast: @escaping (Envelope) -> Void = { _ in }
+        onBroadcast: @escaping (Envelope) -> Void = { _ in },
+        onCommitCallsign: @escaping (String) -> Void = { _ in },
+        onCreateParty: @escaping () -> Void = {},
+        onJoinParty: @escaping (String) -> Bool = { _ in false },
+        onLeaveParty: @escaping () -> Void = {}
     ) {
         self.init(
             persistence: persistence,
             location: location,
             roster: roster,
             onBroadcast: onBroadcast,
+            onCommitCallsign: onCommitCallsign,
+            onCreateParty: onCreateParty,
+            onJoinParty: onJoinParty,
+            onLeaveParty: onLeaveParty,
             packsPlate: { EmptyView() }
         )
     }
@@ -243,6 +271,9 @@ struct ExpeditionEditor: View {
                         .padding(14)
                         .frame(height: BlackoutDS.Hit.sm)
                         .background(BlackoutDS.Surface.sunken)
+                    Text(PartyIdentityCopy.outingNameHint)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
                     TextField("Notes", text: $record.notes, axis: .vertical)
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Silver.mid)

@@ -28,18 +28,18 @@ public struct FieldPackCatalogList: View {
     }
 
     private func packRow(_ pack: FieldPackDescriptor) -> some View {
-        let state = store.states[pack.id] ?? (
-            pack.isBundled ? .ready : (pack.assetReady ? .available : .failed)
-        )
+        let state = store.states[pack.id] ?? (pack.isBundled ? .ready : nil)
         return HUDPanel {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text(pack.title)
                         .font(BlackoutDS.titleFont())
                     Spacer()
-                    Text(label(for: state))
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(color(for: state))
+                    if let state {
+                        Text(label(for: state))
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(color(for: state))
+                    }
                 }
                 Text(pack.summary)
                     .font(BlackoutDS.bodyFont())
@@ -54,14 +54,14 @@ public struct FieldPackCatalogList: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
                 }
-                if !pack.isBundled, state != .ready {
+                if !pack.isBundled, !store.isReady(pack.id) {
                     MetalButton(state == .downloading ? "Downloading" : "Download", height: BlackoutDS.Hit.sm) {
                         store.download(pack.id)
                     }
                     .disabled(state == .downloading)
                     .opacity(state == .downloading ? 0.6 : 1)
                 }
-                if FieldPackCatalog.isCityRelay(pack.id), state == .ready {
+                if FieldPackCatalog.isCityRelay(pack.id), store.isReady(pack.id) {
                     if nearbyCount > 0 {
                         let sending = store.progress[pack.id] != nil
                         MetalButton(sending ? "Sending" : "Send to nearby phone", height: BlackoutDS.Hit.sm) {
@@ -81,21 +81,19 @@ public struct FieldPackCatalogList: View {
 
     private func label(for state: FieldPackRowState) -> String {
         switch state {
-        case .noWifi: return "no wifi"
-        case .downloading: return "downloading"
-        case .available: return "available"
-        case .ready: return "ready"
-        case .failed: return "failed"
-        case .skip: return "skip"
+        case .noWifi: return "No wifi"
+        case .downloading: return "Downloading"
+        case .ready: return "Ready"
+        case .failed: return "Failed"
         }
     }
 
     private func color(for state: FieldPackRowState) -> Color {
         switch state {
         case .ready: return BlackoutDS.Semantic.ok
-        case .available, .downloading: return BlackoutDS.Semantic.info
+        case .downloading: return BlackoutDS.Semantic.info
         case .noWifi: return BlackoutDS.Semantic.warn
-        case .failed, .skip: return BlackoutDS.Silver.steel
+        case .failed: return BlackoutDS.Silver.steel
         }
     }
 }

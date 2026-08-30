@@ -13,7 +13,10 @@ final class ExpeditionPauseTests: XCTestCase {
     }
 
     func testPacksPlateIsCatalogNotDownloadWall() {
-        XCTAssertEqual(ExpeditionPauseCopy.packsReady, "Florida, Texas, New York, and New Mexico are Ready on this phone.")
+        XCTAssertEqual(
+            ExpeditionPauseCopy.packsReady,
+            "Florida, Texas, New York, and New Mexico are Ready on this phone. 4 states on disk."
+        )
         XCTAssertFalse(ExpeditionPauseCopy.packsReady.localizedCaseInsensitiveContains("download"))
     }
 
@@ -44,6 +47,19 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(PartyVitalsCopy.notOK, "I AM NOT OK")
     }
 
+    func testRosterPlateOwnsCallsignAndPartyCode() {
+        XCTAssertEqual(PartyIdentityCopy.callsign, "Callsign")
+        XCTAssertEqual(PartyIdentityCopy.create, "Create")
+        XCTAssertEqual(PartyIdentityCopy.join, "Join")
+        XCTAssertEqual(PartyIdentityCopy.leave, "Leave")
+        XCTAssertEqual(PartyIdentityCopy.end, "End")
+        XCTAssertEqual(PartyIdentityCopy.noParty, "No party")
+        XCTAssertEqual(PartyIdentityCopy.soloValid, "Solo. Mesh is off until you Create or Join.")
+        XCTAssertEqual(PartyIdentityCopy.outingNameHint, "Outing name. Not your callsign.")
+        XCTAssertEqual(Callsign.defaultValue, "YOU")
+        XCTAssertEqual(Callsign.maxLength, 12)
+    }
+
     func testVitalsChipIs56AndSOSStays88() {
         XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
         XCTAssertEqual(PartyVitalsCopy.sosHeight, 88)
@@ -54,5 +70,7 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(BlackoutDS.Vitals.tabBar, 49)
         XCTAssertEqual(BlackoutDS.Hit.sm, 56)
         XCTAssertEqual(BlackoutDS.Hit.sos, 88)
+        XCTAssertEqual(BlackoutDS.Motion.moveDuration, 0.220)
+        XCTAssertEqual(BlackoutDS.Motion.snapDuration, 0.120)
     }
 }

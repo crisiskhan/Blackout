@@ -202,9 +202,14 @@ struct RadarPeerSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ScreenHeader(
-                blip.displayName ?? "Unknown",
+                blip.displayName ?? Callsign.defaultValue,
                 subtitle: subtitle
             )
+            if let footnote = blip.footnote {
+                Text(footnote)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+            }
             HUDPanel {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Ping age: \(blip.pingAge.map { "\(Int($0))s" } ?? "—")")

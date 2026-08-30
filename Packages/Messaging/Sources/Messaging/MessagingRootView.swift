@@ -7,15 +7,22 @@ public struct MessagingRootView: View {
     let persistence: any PersistenceServing
     let crypto: any CryptoServing
     @Bindable var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
 
     @State private var draft = UserDefaults.standard.string(forKey: "com.crisiskhan.blackout.comms.draft") ?? ""
     @State private var rows: [DisplayMessage] = []
     @State private var error: String?
 
-    public init(persistence: any PersistenceServing, crypto: any CryptoServing, mesh: MeshFacade) {
+    public init(
+        persistence: any PersistenceServing,
+        crypto: any CryptoServing,
+        mesh: MeshFacade,
+        roster: PartyRoster
+    ) {
         self.persistence = persistence
         self.crypto = crypto
         self.mesh = mesh
+        self.roster = roster
     }
 
     public var body: some View {
@@ -33,6 +40,14 @@ public struct MessagingRootView: View {
                         Text(row.body)
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.bright)
+                        Text("from \(fromLabel(sender: row.senderID).0)")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                        if let footnote = fromLabel(sender: row.senderID).1 {
+                            Text(footnote)
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
                         HStack {
                             Text(row.status.rawValue)
                                 .font(BlackoutDS.captionFont())
@@ -132,6 +147,18 @@ public struct MessagingRootView: View {
         }
     }
 
+    private func fromLabel(sender: BlackoutID) -> (String, String?) {
+        if sender == roster.localID || sender == crypto.localIdentity {
+            let shown = roster.selfLabel
+            return (shown.name, shown.footnote)
+        }
+        if let peer = roster.peers.first(where: { $0.id == sender }) {
+            let shown = roster.label(for: peer)
+            return (shown.name, shown.footnote)
+        }
+        return (Callsign.defaultValue, nil)
+    }
+
     private func reload() {
         do {
             let stored = try persistence.messages()
@@ -146,6 +173,7 @@ public struct MessagingRootView: View {
                 return DisplayMessage(
                     id: record.id,
                     body: body,
+                    senderID: record.senderID,
                     status: record.status,
                     createdAt: record.createdAt
                 )
@@ -159,6 +187,7 @@ public struct MessagingRootView: View {
 private struct DisplayMessage: Identifiable {
     var id: BlackoutID
     var body: String
+    var senderID: BlackoutID
     var status: MessageStatus
     var createdAt: Date
 }

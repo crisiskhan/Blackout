@@ -169,15 +169,30 @@ def test_map_chrome_lock() -> None:
         fail("MapsRootView lost the single empty card")
     if "showFieldPacksOverlay" in root:
         fail("Field Packs is still a ZStack overlay")
-    if "fieldPacksSheetBinding" not in root or "FieldPacksView" not in root:
-        fail("Field Packs sheet missing from RootView")
+    if "fieldPacksSheetBinding" in root or "FieldPacksView" in root:
+        fail("first-run Field Packs sheet must stay dead")
+    if "fieldPacksIntroCompleted" in root:
+        fail("RootView still auto-presents the pack intro")
+    if (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").exists():
+        fail("FieldPacksView skip sheet must stay deleted")
+    catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    if "func skipIntro" in store or "Skip uses" in store or 'case skip' in (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text():
+        fail("Skip-as-gate still lives in the pack catalog")
+    for label in ('"No wifi"', '"Downloading"', '"Ready"', '"Failed"'):
+        if label not in catalog_list:
+            fail(f"Expedition catalog lost state {label}")
+    if 'case .available' in catalog_list or 'case .skip' in catalog_list:
+        fail("catalog still paints available/skip")
+    if "destination = .expedition" not in root:
+        fail("Packs must open the Expedition plate, not a modal")
     if "Heading-up" in radar or "Sweep audio" in radar or "0 peers · self only" in radar:
         fail("RadarHUDView still floats heading/audio/peer chrome")
     if "MKMapView(" in maps:
         fail("MapsRootView must not construct MKMapView")
     if "URLSession" in maps:
         fail("MapsRootView must not use URLSession")
-    ok("Map chrome is HUD + Recenter/Layers/Packs, Field Packs sheet")
+    ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
 
 
 def test_map_pack_resolver() -> None:
@@ -431,6 +446,11 @@ def test_live_mesh_1n() -> None:
         fail("version was bumped off 19")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
+    tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
+    if "MeshPill(nearbyCount: roster.peerCount)" in tools:
+        fail("tools Radar MeshPill must use radio nearbyPeerCount, not roster.peerCount")
+    if "MeshPill(nearbyCount: nearbyPeerCount)" not in tools:
+        fail("tools Radar lost the radio MeshPill")
     ok("live mesh 1/N is Multipeer, no WAN, radar peers from roster, version 19")
 
 
@@ -440,7 +460,6 @@ def test_pack_relay_1n() -> None:
     store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
     zip_src = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackZip.swift").read_text()
     catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
-    sheet = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").read_text()
     catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
     packs_pkg = (ROOT / "Packages/Packs/Package.swift").read_text()
     app = (ROOT / "Blackout/AppContainer.swift").read_text()
@@ -457,8 +476,8 @@ def test_pack_relay_1n() -> None:
         fail("PackZip cannot archive a folder for relay")
     if "cityRelayIDs" not in catalog or "el-paso" not in catalog:
         fail("city relay allowlist missing")
-    if "Send to nearby phone" not in sheet and "Send to nearby phone" not in catalog_list:
-        fail("Field Packs sheet missing Send to nearby phone")
+    if "Send to nearby phone" not in catalog_list:
+        fail("Expedition pack catalog missing Send to nearby phone")
     if "import BlackoutMesh" in packs_pkg or "import BlackoutMesh" in store:
         fail("Packs must not import Mesh")
     if "relayPack" not in app or "installRelayedZip" not in app:
@@ -715,6 +734,15 @@ def test_party_vitals_red_loop() -> None:
         fail("Expedition roster lost two-tap vitals")
     if "DRANK" not in plate or "ATE" not in plate or "I AM NOT OK" not in plate:
         fail("roster missing DRANK / ATE / I AM NOT OK")
+    comms = (ROOT / "Packages/Messaging/Sources/Messaging/MessagingRootView.swift").read_text()
+    if "selfLabel.footnote" not in plate or "Silver.dim" not in plate:
+        fail("roster lost YOU last-4 silver.dim footnote")
+    if "blip.footnote" not in radar or "Silver.dim" not in radar:
+        fail("Radar lost YOU last-4 silver.dim footnote")
+    if "fromLabel" not in comms or "Silver.dim" not in comms:
+        fail("Comms lost live YOU last-4 silver.dim footnote")
+    if "footnote" in sos:
+        fail("YOU last-4 must not appear on SOS")
     if "Btn.metal" not in plate or "Vitals.chip" not in plate:
         fail("roster buttons must be Btn.metal 56")
     if "drankLatched" not in plate or "ateLatched" not in plate:

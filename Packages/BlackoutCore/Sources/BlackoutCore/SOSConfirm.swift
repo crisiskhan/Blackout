@@ -88,12 +88,37 @@ public enum SOSConfirm {
         peerCount > 0
     }
 
-    public static func meshEnvelope(sender: BlackoutID, recipient: BlackoutID) -> Envelope {
+    public static func meshEnvelope(
+        sender: BlackoutID,
+        recipient: BlackoutID,
+        callsign: String = Callsign.defaultValue
+    ) -> Envelope {
         Envelope(
             kind: meshKind,
-            ciphertext: Data("sos".utf8),
+            ciphertext: SOSMeshBody.encode(callsign: callsign),
             sender: sender,
             recipient: recipient
         )
+    }
+}
+
+/// SOS mesh body. Sender callsign lives here so the pipe stays opaque.
+public enum SOSMeshBody {
+    public static func encode(callsign: String) -> Data {
+        let wire = Wire(v: 1, callsign: Callsign.commit(callsign))
+        return (try? JSONEncoder().encode(wire)) ?? Data("sos".utf8)
+    }
+
+    public static func callsign(in ciphertext: Data) -> String {
+        if let wire = try? JSONDecoder().decode(Wire.self, from: ciphertext),
+           !wire.callsign.isEmpty {
+            return Callsign.commit(wire.callsign)
+        }
+        return Callsign.defaultValue
+    }
+
+    private struct Wire: Codable {
+        var v: Int
+        var callsign: String
     }
 }

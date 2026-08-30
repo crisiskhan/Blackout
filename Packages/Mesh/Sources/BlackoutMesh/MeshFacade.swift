@@ -15,30 +15,52 @@ public final class MeshFacade: MeshServing {
     public private(set) var inboundSequence: UInt64 = 0
 
     public var onInbound: ((MeshInbound) -> Void)?
+    public var onNearbyCount: ((Int) -> Void)?
     public var onFileProgress: ((String, Double) -> Void)?
     public var onFileReceiveStarted: ((String) -> Void)?
     public var onSendComplete: ((String, Bool) -> Void)?
 
-    private let localPeer: MCPeerID
     private var advertisement: Data = Data()
     private var pipe: MultipeerPipe?
     private var running = false
+    private var partyCode: String?
+    private var callsign: String = Callsign.defaultValue
+    private var deviceID = BlackoutID()
 
-    public init() {
-        localPeer = MCPeerID(displayName: String(UUID().uuidString.prefix(8)))
-    }
+    public init() {}
 
     public func setLocalAdvertisement(_ data: Data) {
         advertisement = data
         pipe?.setAdvertisement(data)
     }
 
+    /// Same-code parties auto-join. No code means the radio stays down.
+    public func setParty(code: String?, callsign: String, deviceID: BlackoutID) {
+        let nextCode = PartyCode.isValid(code) ? code : nil
+        let nextSign = Callsign.commit(callsign)
+        let changed = partyCode != nextCode || self.callsign != nextSign || self.deviceID != deviceID
+        partyCode = nextCode
+        self.callsign = nextSign
+        self.deviceID = deviceID
+        if running, changed {
+            stop()
+            start()
+        }
+    }
+
     public func start() {
         if running { return }
+        guard MeshGate.allowsTraffic(partyCode: partyCode), let partyCode else { return }
         running = true
-        let radio = MultipeerPipe(localPeer: localPeer)
+        let localPeer = MCPeerID(displayName: Callsign.radioName(callsign, id: deviceID))
+        let radio = MultipeerPipe(
+            localPeer: localPeer,
+            partyCode: partyCode,
+            deviceID: deviceID
+        )
         radio.onPeerCount = { [weak self] count in
             self?.nearbyPeerCount = count
+            self?.onNearbyCount?(count)
         }
         radio.onInbound = { [weak self] event in
             self?.receive(event)
@@ -65,12 +87,17 @@ public final class MeshFacade: MeshServing {
     }
 
     public func send(_ envelope: Envelope) {
+        guard running, MeshGate.allowsTraffic(partyCode: partyCode) else { return }
         lastOutbound = envelope
         guard let frame = MeshWire.encodeEnvelope(envelope) else { return }
         pipe?.send(frame: frame)
     }
 
     public func sendFile(at url: URL, named name: String) {
+        guard running, MeshGate.allowsTraffic(partyCode: partyCode) else {
+            onSendComplete?(name, true)
+            return
+        }
         pipe?.sendFile(at: url, named: name)
     }
 

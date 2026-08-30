@@ -53,7 +53,11 @@ final class SOSConfirmController {
         }
         guard SOSConfirm.shouldSendMesh(peerCount: mesh.nearbyPeerCount) else { return }
         mesh.send(
-            SOSConfirm.meshEnvelope(sender: roster.localID, recipient: roster.recipientID)
+            SOSConfirm.meshEnvelope(
+                sender: roster.localID,
+                recipient: roster.recipientID,
+                callsign: roster.identity.callsign
+            )
         )
     }
 

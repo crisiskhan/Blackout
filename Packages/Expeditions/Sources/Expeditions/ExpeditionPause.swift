@@ -6,7 +6,7 @@ public enum ExpeditionPauseCopy {
     public static let subtitle = "This outing. Local only."
     public static let rosterEmpty = "Solo outing. Roster is empty."
     public static let gearStub = "No custom kit. Default outing list."
-    public static let packsReady = "Florida, Texas, New York, and New Mexico are Ready on this phone."
+    public static let packsReady = "Florida, Texas, New York, and New Mexico are Ready on this phone. 4 states on disk."
     public static let mapBannerEmpty = "No open expedition"
     public static let sections = ["Roster", "Gear", "Packs", "Settings"]
 }

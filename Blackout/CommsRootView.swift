@@ -15,6 +15,7 @@ struct CommsRootView: View {
     let persistence: any PersistenceServing
     let crypto: any CryptoServing
     var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
     var extremeSaver: Bool
     @State private var segment: Segment = .messages
 
@@ -30,7 +31,12 @@ struct CommsRootView: View {
             .padding(.top, 8)
             switch segment {
             case .messages:
-                MessagingRootView(persistence: persistence, crypto: crypto, mesh: mesh)
+                MessagingRootView(
+                    persistence: persistence,
+                    crypto: crypto,
+                    mesh: mesh,
+                    roster: roster
+                )
             case .ptt:
                 VoicePTTRootView(persistence: persistence, extremeSaver: extremeSaver)
             }
