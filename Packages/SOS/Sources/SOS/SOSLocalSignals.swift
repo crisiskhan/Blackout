@@ -13,26 +13,12 @@ struct SOSPictogramBar: View {
     var strobeOn: Bool
 
     var body: some View {
-        HStack(spacing: 12) {
-            picto(system: "speaker.wave.3.fill", on: sirenOn, action: onSiren, label: "Siren")
-            picto(system: "flashlight.on.fill", on: strobeOn, action: onStrobe, label: "Strobe")
-            picto(system: "satellite.fill", on: false, action: onSystemSOS, label: "OS SOS")
-            picto(system: "xmark", on: false, action: onCancel, label: "Cancel")
-        }
-    }
-
-    private func picto(system: String, on: Bool, action: @escaping () -> Void, label: String) -> some View {
-        Button(action: action) {
-            Image(systemName: system)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(on ? BlackoutDS.Red.hot : BlackoutDS.Silver.metal)
-                .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-                .background(BlackoutDS.Surface.raised)
-                .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        PictogramBar(items: [
+            .init(id: "siren", systemName: "speaker.wave.3.fill", on: sirenOn, label: "Siren", action: onSiren),
+            .init(id: "strobe", systemName: "flashlight.on.fill", on: strobeOn, label: "Strobe", action: onStrobe),
+            .init(id: "ossos", systemName: "satellite.fill", on: false, label: "OS SOS", action: onSystemSOS),
+            .init(id: "cancel", systemName: "xmark", on: false, label: "Cancel", action: onCancel)
+        ])
     }
 }
 

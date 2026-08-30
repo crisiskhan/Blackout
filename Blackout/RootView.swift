@@ -46,6 +46,7 @@ struct RootView: View {
     @State private var showSettings = false
     @State private var pendingDM: BlackoutID?
     @State private var pendingPingNav: FieldPingNav?
+    @State private var pendingGuideJob: GuideMapJob?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -303,7 +304,8 @@ struct RootView: View {
                 container.inboundGuideID = id
                 destination = .field
             },
-            onNightRedChange: { container.setNightRed($0) }
+            onNightRedChange: { container.setNightRed($0) },
+            pendingGuideJob: $pendingGuideJob
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -355,6 +357,7 @@ struct RootView: View {
             sosArmed: UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed),
             packReady: container.packs.readySnapshot,
             partySize: 1 + container.party.peerCount,
+            openExpeditionID: container.openExpeditionID,
             inboundArticleID: container.inboundGuideID,
             inboundMissing: container.inboundGuideMissing,
             nearbyPeerCount: container.mesh.nearbyPeerCount,
@@ -363,7 +366,11 @@ struct RootView: View {
                 container.startFieldMode(mode)
                 destination = .map
             },
-            onRelayPack: { container.relayPack($0) }
+            onRelayPack: { container.relayPack($0) },
+            onOpenMapJob: { job in
+                pendingGuideJob = job
+                destination = .map
+            }
         )
     }
 

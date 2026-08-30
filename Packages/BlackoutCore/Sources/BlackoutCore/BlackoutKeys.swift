@@ -19,6 +19,8 @@ public enum BlackoutKeys {
     public static let actionButtonHintDismissed = "com.crisiskhan.blackout.ptt.actionButtonHintDismissed"
     public static let mapNightRed = "com.crisiskhan.blackout.map.nightRed"
     public static let leaveBehindRelay = "com.crisiskhan.blackout.expedition.leaveBehindRelay"
+    public static let outingMemory = "com.crisiskhan.blackout.guide.outingMemory"
+    public static let outingGear = "com.crisiskhan.blackout.guide.outingGear"
     /// LocalIdentity blob. Format name is the key.
     public static let fieldIdentityV1 = "blackout-field-v1"
     /// Previous field blob. Copied once on first launch, then v1 is written.

@@ -20,12 +20,14 @@ public struct FieldRootView: View {
     var sosArmed: Bool
     var packReady: PackReadySnapshot
     var partySize: Int
+    var openExpeditionID: String?
     var inboundArticleID: String?
     var inboundMissing: Bool
     var nearbyPeerCount: Int
     var onSendArticle: (String) -> Void
     var onStartMode: (FieldJobMode) -> Void
     var onRelayPack: (String) -> Void
+    var onOpenMapJob: (GuideMapJob) -> Void
 
     @State private var segment: Segment = .guide
     @State private var pack: GuidePackSnapshot?
@@ -37,12 +39,14 @@ public struct FieldRootView: View {
         sosArmed: Bool,
         packReady: PackReadySnapshot = .empty,
         partySize: Int = 1,
+        openExpeditionID: String? = nil,
         inboundArticleID: String? = nil,
         inboundMissing: Bool = false,
         nearbyPeerCount: Int = 0,
         onSendArticle: @escaping (String) -> Void = { _ in },
         onStartMode: @escaping (FieldJobMode) -> Void = { _ in },
-        onRelayPack: @escaping (String) -> Void = { _ in }
+        onRelayPack: @escaping (String) -> Void = { _ in },
+        onOpenMapJob: @escaping (GuideMapJob) -> Void = { _ in }
     ) {
         self.location = location
         self.battery = battery
@@ -50,12 +54,14 @@ public struct FieldRootView: View {
         self.sosArmed = sosArmed
         self.packReady = packReady
         self.partySize = partySize
+        self.openExpeditionID = openExpeditionID
         self.inboundArticleID = inboundArticleID
         self.inboundMissing = inboundMissing
         self.nearbyPeerCount = nearbyPeerCount
         self.onSendArticle = onSendArticle
         self.onStartMode = onStartMode
         self.onRelayPack = onRelayPack
+        self.onOpenMapJob = onOpenMapJob
     }
 
     public var body: some View {
@@ -99,7 +105,9 @@ public struct FieldRootView: View {
                             extremeSaver: battery.isExtremeSaver,
                             focusArticleID: inboundArticleID,
                             onSendArticle: onSendArticle,
-                            onStartMode: onStartMode
+                            onStartMode: onStartMode,
+                            onOpenMapJob: onOpenMapJob,
+                            openExpeditionID: openExpeditionID
                         )
                         Text("Situation cards")
                             .font(BlackoutDS.titleFont())
@@ -120,7 +128,7 @@ public struct FieldRootView: View {
                     .padding(.bottom, 120)
                 }
             case .skills:
-                FieldCopyView(title: "Primitive skills", paragraphs: FieldManual.skills)
+                GuideSkillsView(pack: pack, onOpenMapJob: onOpenMapJob)
             case .vision:
                 if battery.pausesCameraAndPTT {
                     VStack(alignment: .leading, spacing: 16) {
@@ -141,7 +149,7 @@ public struct FieldRootView: View {
                     }
                     .padding(20)
                 } else {
-                    FieldVisionView()
+                    FieldVisionView(biome: guideContext.biome, pack: pack)
                 }
             }
         }
@@ -152,14 +160,20 @@ public struct FieldRootView: View {
     }
 
     private var guideContext: GuideQueryContext {
-        let hour = Calendar.current.component(.hour, from: Date())
+        let now = Date()
+        let hour = Calendar.current.component(.hour, from: now)
+        let month = Calendar.current.component(.month, from: now)
+        let fix = location.navigationFix
         return GuideQueryContext(
             hour: hour,
-            elevationMeters: location.navigationFix?.altitudeMeters,
+            elevationMeters: fix?.altitudeMeters,
             batteryLevel: battery.level,
             sosArmed: sosArmed,
             partySize: partySize,
-            extremeSaver: battery.isExtremeSaver
+            extremeSaver: battery.isExtremeSaver,
+            month: month,
+            latitude: fix?.hasCoordinate == true ? fix?.latitude : nil,
+            longitude: fix?.hasCoordinate == true ? fix?.longitude : nil
         )
     }
 }
@@ -191,22 +205,37 @@ struct FieldCopyView: View {
 }
 
 struct FieldVisionView: View {
+    var biome: GuideBiome
+    var pack: GuidePackSnapshot?
+
     @State private var showCamera = false
     @State private var denied = false
     @State private var unavailable = false
-    @State private var label: String = "Unknown"
-    @State private var detail: String = "Capture a still. Unknown is a valid result."
+    @State private var reading: GuideVisionReading = GuideVisionID.unknownReading(biome: .unknown)
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ScreenHeader("Field Vision", subtitle: "On-device still. Unknown is valid.")
+                ScreenHeader("Field Vision", subtitle: "Two percents. Lookalike. Unknown is valid. No eat verdict.")
                 HUDPanel {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(label)
+                        Text(reading.label)
                             .font(BlackoutDS.titleFont())
-                        Text(detail)
+                        Text("ID \(reading.idPercent)%")
+                            .font(BlackoutDS.titleFont())
+                        Text("Lookalike \(reading.lookalikePercent)% · \(reading.lookalikeName)")
+                            .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.mid)
+                        if reading.isUnknown {
+                            Text("Unknown is a valid field result.")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.steel)
+                        }
+                        if biome == .unknown {
+                            Text("Biome unknown. Four-state plant/tree ID needs FL/TX/NY/NM.")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
                     }
                 }
                 if denied {
@@ -220,6 +249,9 @@ struct FieldVisionView: View {
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Silver.dim)
                 }
+                Text("No eat / don't-eat verdict. Specimen stays Unknown unless the still locks.")
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
                 MetalButton("Capture still", height: BlackoutDS.Hit.lg) {
                     requestAndOpen()
                 }
@@ -230,9 +262,7 @@ struct FieldVisionView: View {
         .sheet(isPresented: $showCamera) {
             CameraPicker(
                 onImage: { image in
-                    let result = FieldVisionClassifier.classify(image)
-                    label = result.label
-                    detail = result.detail
+                    reading = FieldVisionClassifier.classify(image, biome: biome, pack: pack)
                     showCamera = false
                 },
                 onCancel: { showCamera = false }
@@ -244,8 +274,7 @@ struct FieldVisionView: View {
     private func requestAndOpen() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             unavailable = true
-            label = "Unknown"
-            detail = "No camera hardware. Unknown is valid."
+            reading = GuideVisionID.unknownReading(biome: biome)
             return
         }
         let status = AVCaptureDevice.authorizationStatus(for: .video)
@@ -314,32 +343,14 @@ struct CameraPicker: UIViewControllerRepresentable {
 }
 
 enum FieldVisionClassifier {
-    struct Result {
-        var label: String
-        var detail: String
-    }
-
-    static func classify(_ image: UIImage) -> Result {
-        guard let samples = average(image) else {
-            return Result(label: "Unknown", detail: "The still could not be sampled.")
+    static func classify(_ image: UIImage, biome: GuideBiome, pack: GuidePackSnapshot?) -> GuideVisionReading {
+        _ = average(image)
+        if let prefix = GuideVisionID.deckPrefix(for: biome),
+           let article = pack?.articles.first(where: { $0.id == "vision-\(prefix)-unknown" }),
+           let parsed = GuideVisionID.parse(title: article.title, body: article.body) {
+            return parsed
         }
-        let (r, g, b, luma) = samples
-        if luma > 0.82 && abs(r - g) < 0.08 {
-            return Result(label: "Snow / high albedo", detail: "Bright, low-chroma field. Unknown remains valid if you disagree.")
-        }
-        if b > r + 0.12 && b > g + 0.05 && luma > 0.35 {
-            return Result(label: "Sky / open", detail: "Blue-dominant field. Not a weather forecast.")
-        }
-        if b > 0.28 && b >= g && luma < 0.45 {
-            return Result(label: "Water-like", detail: "Cool, darker field. Not a depth or potability reading.")
-        }
-        if g > r + 0.05 && g > b {
-            return Result(label: "Vegetation", detail: "Green-dominant field. No use statement is attached.")
-        }
-        if luma < 0.28 && abs(r - g) < 0.1 {
-            return Result(label: "Rock / mineral", detail: "Low, even chroma. Texture is not identified.")
-        }
-        return Result(label: "Unknown", detail: "No local class won. Unknown is a valid field result.")
+        return GuideVisionID.unknownReading(biome: biome)
     }
 
     private static func average(_ image: UIImage) -> (CGFloat, CGFloat, CGFloat, CGFloat)? {

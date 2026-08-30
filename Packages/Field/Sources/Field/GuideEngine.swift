@@ -93,7 +93,8 @@ enum GuideSearch {
                 }
             }
         }
-        applyContext(context, to: &scores, pack: pack)
+        let articles = pack.articles.map { (id: $0.id, topic: $0.topic, tags: $0.tags) }
+        GuideAskRanker.apply(context, to: &scores, articles: articles)
         if let topic {
             for article in pack.articles where article.topic == topic.rawValue {
                 scores[article.id, default: 0] += 2.5
@@ -107,44 +108,6 @@ enum GuideSearch {
                 score: score,
                 snippet: snippet(article.body, terms: terms)
             )
-        }
-    }
-
-    private static func applyContext(_ context: GuideQueryContext, to scores: inout [String: Double], pack: GuidePackSnapshot) {
-        func boost(_ topic: String, _ amount: Double) {
-            for article in pack.articles where article.topic == topic {
-                scores[article.id, default: 0] += amount
-            }
-        }
-        if context.isNight {
-            boost("shelter", 2)
-            boost("fire", 1.5)
-            boost("signaling", 1.5)
-        } else if context.hour >= 11 && context.hour <= 16 {
-            boost("weather", 1.2)
-            boost("water", 0.8)
-        }
-        if let elev = context.elevationMeters, elev > 2800 {
-            boost("weather", 1.8)
-            boost("shelter", 1.0)
-            boost("first-aid", 0.6)
-        }
-        if context.batteryLevel >= 0, context.batteryLevel <= 0.15 {
-            boost("signaling", 2)
-            boost("navigation", 1.2)
-        }
-        if context.sosArmed {
-            boost("signaling", 2.5)
-            boost("first-aid", 1.5)
-        }
-        if context.partySize <= 1 {
-            boost("signaling", 1)
-            boost("navigation", 0.8)
-            boost("bushcraft", 0.5)
-        }
-        if context.extremeSaver {
-            boost("signaling", 1)
-            boost("navigation", 1)
         }
     }
 

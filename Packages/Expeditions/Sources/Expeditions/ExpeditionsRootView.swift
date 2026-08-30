@@ -93,18 +93,7 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                         )
                     }
                     pausePanel("Gear") {
-                        Text(ExpeditionPauseCopy.gearStub)
-                            .font(BlackoutDS.bodyFont())
-                            .foregroundStyle(BlackoutDS.Silver.dim)
-                        Text(roster.identity.callsign)
-                            .font(BlackoutDS.bodyFont())
-                            .foregroundStyle(BlackoutDS.Silver.bright)
-                            .accessibilityLabel("Callsign \(roster.identity.callsign)")
-                        ForEach(DefaultOutingGear.items, id: \.self) { item in
-                            Text(item)
-                                .font(BlackoutDS.bodyFont())
-                                .foregroundStyle(BlackoutDS.Silver.bright)
-                        }
+                        OutingGearPlate()
                     }
                     pausePanel("Packs") {
                         Text(ExpeditionPauseCopy.packsReady)
@@ -233,6 +222,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                 crumbs = []
                 setTracking(false, expedition: nil)
                 onLeaveBehind(false)
+                OutingMemoryStore.clearIfOutingEnded(openExpeditionID: nil)
+                OutingGearStore.clearIfOutingEnded(openExpeditionID: nil)
+            }
+            if let open = items.first(where: \.isOpen) {
+                OutingMemoryStore.clearIfOutingEnded(openExpeditionID: open.id.rawValue.uuidString)
             }
             storeError = nil
         } catch {

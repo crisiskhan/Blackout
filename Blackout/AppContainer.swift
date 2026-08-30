@@ -195,6 +195,10 @@ final class AppContainer {
         (try? persistence.expeditions().contains(where: \.isOpen)) ?? false
     }
 
+    var openExpeditionID: String? {
+        (try? persistence.expeditions().first(where: \.isOpen))?.id.rawValue.uuidString
+    }
+
     func setLeaveBehindRelay(_ on: Bool) {
         if LeaveBehindRelayPolicy.shouldStop(leaveOrEnd: !hasOpenExpedition, batteryCritical: battery.isCritical) {
             leaveBehindRelay = false

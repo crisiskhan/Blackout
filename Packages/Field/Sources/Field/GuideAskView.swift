@@ -11,6 +11,8 @@ struct GuideAskView: View {
     var focusArticleID: String? = nil
     var onSendArticle: (String) -> Void = { _ in }
     var onStartMode: (FieldJobMode) -> Void = { _ in }
+    var onOpenMapJob: (GuideMapJob) -> Void = { _ in }
+    var openExpeditionID: String? = nil
 
     @State private var query = ""
     @State private var topic: GuideTopic?
@@ -27,6 +29,7 @@ struct GuideAskView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            medicalLostEntry
             HStack(spacing: 8) {
                 TextField("Ask the field guide", text: $query)
                     .font(BlackoutDS.bodyFont())
@@ -51,6 +54,9 @@ struct GuideAskView: View {
                 }
             }
             MetalButton("Ask", height: BlackoutDS.Hit.md, action: runAsk)
+            Text(GuideAskRanker.honestyLine(context))
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.steel)
             if micDenied {
                 PermissionDenied(kind: .microphone, reason: "Mic denied. Type the ask. Guide still works.")
             }
@@ -77,22 +83,13 @@ struct GuideAskView: View {
             }
             ForEach(hits) { hit in
                 HUDPanel {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(hit.article.title)
-                            .font(BlackoutDS.titleFont())
-                        Text(hit.article.topic)
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.steel)
-                        GuideMarkdownView(source: hit.article.body)
-                        MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
-                            onSendArticle(hit.article.id)
-                        }
-                        if let mode = FieldJobMode.from(articleID: hit.article.id) {
-                            MetalButton(mode.title, height: BlackoutDS.Hit.sm) {
-                                onStartMode(mode)
-                            }
-                        }
-                    }
+                    GuideTreePlate(
+                        article: hit.article,
+                        onSendArticle: onSendArticle,
+                        onStartMode: onStartMode,
+                        onOpenMapJob: onOpenMapJob,
+                        openExpeditionID: openExpeditionID
+                    )
                 }
             }
             if pack == nil {
@@ -116,6 +113,38 @@ struct GuideAskView: View {
         .onChange(of: topic) { _, _ in
             runAsk()
         }
+    }
+
+    private var medicalLostEntry: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Medical / lost")
+                .font(BlackoutDS.titleFont())
+            Text("Adult / Kid / Party-split first. Then the tree.")
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.mid)
+            HStack(spacing: 8) {
+                MetalButton("Injury", height: BlackoutDS.Hit.sm) {
+                    openTree(id: "situation-injury")
+                }
+                MetalButton("Lost", height: BlackoutDS.Hit.sm) {
+                    openTree(id: "situation-lost")
+                }
+                MetalButton("Split", height: BlackoutDS.Hit.sm) {
+                    openTree(id: "party-split")
+                }
+            }
+        }
+    }
+
+    private func openTree(id: String) {
+        guard let pack, let article = pack.articles.first(where: { $0.id == id }) else {
+            topic = .firstAid
+            query = id == "situation-lost" ? "lost" : "injury"
+            runAsk()
+            return
+        }
+        hits = [GuideHit(article: article, score: 1, snippet: article.body)]
+        error = nil
     }
 
     private var onDeviceSpeechAvailable: Bool {

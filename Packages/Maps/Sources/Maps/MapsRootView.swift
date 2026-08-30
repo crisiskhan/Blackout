@@ -33,6 +33,7 @@ public struct MapsRootView: View {
     var onSendPack: ((String) -> Void)?
     var onOpenGuide: ((String) -> Void)?
     var onNightRedChange: ((Bool) -> Void)?
+    @Binding var pendingGuideJob: GuideMapJob?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -91,7 +92,8 @@ public struct MapsRootView: View {
         onShareTrack: (([BreadcrumbRecordDTO]) -> Void)? = nil,
         onSendPack: ((String) -> Void)? = nil,
         onOpenGuide: ((String) -> Void)? = nil,
-        onNightRedChange: ((Bool) -> Void)? = nil
+        onNightRedChange: ((Bool) -> Void)? = nil,
+        pendingGuideJob: Binding<GuideMapJob?> = .constant(nil)
     ) {
         self.location = location
         self.mesh = mesh
@@ -117,6 +119,7 @@ public struct MapsRootView: View {
         self.onSendPack = onSendPack
         self.onOpenGuide = onOpenGuide
         self.onNightRedChange = onNightRedChange
+        self._pendingGuideJob = pendingGuideJob
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -285,7 +288,31 @@ public struct MapsRootView: View {
             .onChange(of: pendingPingNav.wrappedValue) { _, nav in
                 consumePingNav(nav)
             }
-            .onAppear { consumePingNav(pendingPingNav.wrappedValue) }
+            .onChange(of: pendingGuideJob) { _, job in
+                consumeGuideJob(job)
+            }
+            .onAppear {
+                consumePingNav(pendingPingNav.wrappedValue)
+                consumeGuideJob(pendingGuideJob)
+            }
+    }
+
+    private func consumeGuideJob(_ job: GuideMapJob?) {
+        guard let job else { return }
+        pendingGuideJob = nil
+        switch job {
+        case .findWater:
+            tool = .water
+        case .findCivilization:
+            tool = .civilization
+        case .lastMark:
+            guard let mark = lastMark else {
+                toolHint = MapQuickNav.lastMarkDisabledReason(hasMark: false)
+                return
+            }
+            toolHint = nil
+            lockOrRoute(latitude: mark.latitude, longitude: mark.longitude, label: mark.name)
+        }
     }
 
     private func consumePingNav(_ nav: FieldPingNav?) {
