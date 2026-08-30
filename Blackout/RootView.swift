@@ -255,7 +255,9 @@ struct RootView: View {
             installedPackRoots: container.packs.installedPackRoots,
             onOpenFieldPacks: { container.showFieldPacks = true },
             externalSheetOpen: showSettings || container.showFieldPacks,
-            sosCoverOpen: container.sosCoverOpen
+            sosCoverOpen: container.sosCoverOpen,
+            roster: container.party,
+            onMessagePeer: { destination = .comms }
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -303,7 +305,9 @@ struct RootView: View {
     private var expeditionDestination: some View {
         ExpeditionsRootView(
             persistence: container.persistence,
-            location: container.location
+            location: container.location,
+            roster: container.party,
+            onBroadcast: { container.sendPartyStatus($0) }
         ) {
             FieldPackCatalogList(
                 store: container.packs,

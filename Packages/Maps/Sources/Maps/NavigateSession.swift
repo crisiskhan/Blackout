@@ -91,6 +91,32 @@ final class NavigateSession {
         )
     }
 
+    /// Last-used Walk / Drive (`profile`). Missing graph falls through to bearing-only.
+    func navigateToPeer(
+        latitude: Double,
+        longitude: Double,
+        label: String,
+        origin: RoutingCoordinate?,
+        pack: RoutingPack?
+    ) {
+        query = ""
+        hits = []
+        setDestination(
+            RoutingCoordinate(latitude: latitude, longitude: longitude),
+            label: label,
+            origin: origin,
+            pack: pack
+        )
+    }
+
+    func markNoCoordinate() {
+        empty = .noGPS
+        preview = nil
+        destination = nil
+        destinationLabel = nil
+        phase = .idle
+    }
+
     func refreshPreview(origin: RoutingCoordinate?, pack: RoutingPack?) {
         guard let destination, phase != .guidance else { return }
         setDestination(destination, label: destinationLabel ?? "Destination", origin: origin, pack: pack)

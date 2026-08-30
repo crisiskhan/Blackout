@@ -59,15 +59,40 @@ struct RadarHUDView: View {
                 onSelectPeer(blip)
             } label: {
                 Circle()
-                    .fill(blip.kind == .member ? BlackoutDS.Silver.metal : Color.clear)
+                    .fill(pipFill(blip))
                     .overlay(
-                        Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 2)
+                        Circle().stroke(pipStroke(blip), lineWidth: 2)
                     )
                     .frame(width: 16, height: 16)
             }
             .position(x: x, y: y)
         }
         .allowsHitTesting(true)
+    }
+
+    private func pipFill(_ blip: RadarBlip) -> Color {
+        switch blip.band {
+        case .red:
+            return BlackoutDS.Red.core
+        case .yellow:
+            return BlackoutDS.Semantic.warn
+        case .green:
+            switch blip.kind {
+            case .member, .selfDot:
+                return BlackoutDS.Silver.metal
+            case .stranger:
+                return Color.clear
+            }
+        }
+    }
+
+    private func pipStroke(_ blip: RadarBlip) -> Color {
+        switch blip.band {
+        case .red:
+            return BlackoutDS.Red.hot
+        case .yellow, .green:
+            return BlackoutDS.Silver.edge
+        }
     }
 
     private func sweepAngle(at date: Date) -> Double {
@@ -168,42 +193,54 @@ enum RadarSweepClick {
     }
 }
 
-/// Exists for wave 2. Not presented when you tap self. No vitals for unknown.
+/// Peer sheet. Message + Navigate-to. Tap self does not present this.
 struct RadarPeerSheet: View {
     var blip: RadarBlip
     var onMessage: () -> Void
-    var onPTT: () -> Void
     var onNavigate: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ScreenHeader(
                 blip.displayName ?? "Unknown",
-                subtitle: blip.kind == .stranger ? "Stranger · hollow ring" : "Member · filled disk"
+                subtitle: subtitle
             )
             HUDPanel {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Ping age: \(blip.pingAge.map { "\(Int($0))s" } ?? "—")")
                     Text("Hops: \(blip.hops.map(String.init) ?? "—")")
                     Text(String(format: "Range %.0f m  ·  %d°", blip.rangeMeters, Int(blip.bearingDegrees)))
+                    if blip.band == .red {
+                        Text(PartyVitalsCopy.imNot)
+                            .foregroundStyle(BlackoutDS.Red.hot)
+                    }
+                    if blip.latitude == nil || blip.longitude == nil {
+                        Text("No GPS for this peer.")
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                    }
                     if blip.isUnknown {
                         Text("No vitals for unknown.")
                             .foregroundStyle(BlackoutDS.Silver.dim)
                     }
                 }
             }
-            HStack(spacing: 8) {
-                MetalButton("Message", height: BlackoutDS.Hit.sm, action: onMessage)
-                MetalButton("PTT", height: BlackoutDS.Hit.sm, action: onPTT)
-            }
-            MetalButton("Navigate", height: BlackoutDS.Hit.md, action: onNavigate)
-            Text("Live mesh 1/N is wave 2. This sheet is the later blip language.")
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.steel)
+            MetalButton(PartyVitalsCopy.message, height: BlackoutDS.Hit.sm, action: onMessage)
+            MetalButton(PartyVitalsCopy.navigateTo, height: BlackoutDS.Hit.md, action: onNavigate)
             Spacer()
         }
         .padding(20)
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
         .preferredColorScheme(.dark)
+    }
+
+    private var subtitle: String {
+        switch blip.kind {
+        case .member:
+            return blip.band == .red ? "Member · red" : "Member · filled disk"
+        case .stranger:
+            return "Stranger · hollow ring"
+        case .selfDot:
+            return "Self. Not a peer."
+        }
     }
 }

@@ -6,6 +6,8 @@ import SwiftUI
 public struct ExpeditionsRootView<PacksPlate: View>: View {
     let persistence: any PersistenceServing
     @Bindable var location: LocationService
+    @Bindable var roster: PartyRoster
+    var onBroadcast: (Envelope) -> Void
     var packsPlate: PacksPlate
 
     @State private var items: [ExpeditionRecordDTO] = []
@@ -18,10 +20,14 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
     public init(
         persistence: any PersistenceServing,
         location: LocationService,
+        roster: PartyRoster,
+        onBroadcast: @escaping (Envelope) -> Void = { _ in },
         @ViewBuilder packsPlate: () -> PacksPlate
     ) {
         self.persistence = persistence
         self.location = location
+        self.roster = roster
+        self.onBroadcast = onBroadcast
         self.packsPlate = packsPlate()
         _tracking = State(initialValue: UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking))
     }
@@ -35,9 +41,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                         StoreFailure(storeError)
                     }
                     pausePanel("Roster") {
-                        Text(ExpeditionPauseCopy.rosterEmpty)
-                            .font(BlackoutDS.bodyFont())
-                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        PartyVitalsPlate(
+                            roster: roster,
+                            fix: location.navigationFix,
+                            onBroadcast: onBroadcast
+                        )
                     }
                     pausePanel("Gear") {
                         Text(ExpeditionPauseCopy.gearStub)
@@ -200,9 +208,17 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
 extension ExpeditionsRootView where PacksPlate == EmptyView {
     public init(
         persistence: any PersistenceServing,
-        location: LocationService
+        location: LocationService,
+        roster: PartyRoster,
+        onBroadcast: @escaping (Envelope) -> Void = { _ in }
     ) {
-        self.init(persistence: persistence, location: location, packsPlate: { EmptyView() })
+        self.init(
+            persistence: persistence,
+            location: location,
+            roster: roster,
+            onBroadcast: onBroadcast,
+            packsPlate: { EmptyView() }
+        )
     }
 }
 

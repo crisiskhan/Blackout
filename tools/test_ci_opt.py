@@ -65,11 +65,10 @@ def test_testflight_paths_and_assign() -> None:
     text = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
     if "workflow_dispatch:" not in text:
         fail("ios-testflight.yml missing workflow_dispatch")
-    if "cursor/blackout-ios-foundation-7e54" not in text:
-        fail("ios-testflight.yml missing feature-branch push")
-    for path in ("Blackout/**", "Packages/**", "Blackout.xcodeproj/**", "tools/**"):
-        if path not in text:
-            fail(f"ios-testflight.yml missing path filter {path}")
+    if "push:" in text or "pull_request:" in text:
+        fail("ios-testflight.yml must stay dispatch-only")
+    if "cursor/blackout-ios-foundation-7e54" in text:
+        fail("ios-testflight.yml must not auto-run on the feature branch")
     if "cancel-in-progress: true" not in text:
         fail("ios-testflight.yml lost cancel-in-progress")
     if "tools/asc_assign_internal.sh" not in text:
@@ -404,8 +403,10 @@ def test_live_mesh_1n() -> None:
         fail("CryptoServing missing preferredRecipient")
     if "sharedSecretFromKeyAgreement" not in crypto:
         fail("LoopbackCrypto missing ECDH peer seal")
-    if "private var peers: [RadarBlip] { [] }" not in maps:
-        fail("Radar peers path changed — do not invent a social layer")
+    if "roster.radarBlips" not in maps:
+        fail("Radar peers must come from the party roster")
+    if "kind: .stranger" in maps:
+        fail("do not invent stranger radar blips")
     for src, label in ((pbx, "pbxproj"), (gen, "generate_project.py")):
         if "NSLocalNetworkUsageDescription" not in src:
             fail(f"{label} missing Local Network usage string")
@@ -415,7 +416,7 @@ def test_live_mesh_1n() -> None:
         fail("version was bumped off 19")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
-    ok("live mesh 1/N is Multipeer, no WAN, radar still empty, version 19")
+    ok("live mesh 1/N is Multipeer, no WAN, radar peers from roster, version 19")
 
 
 def test_pack_relay_1n() -> None:
@@ -425,6 +426,7 @@ def test_pack_relay_1n() -> None:
     zip_src = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackZip.swift").read_text()
     catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
     sheet = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").read_text()
+    catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
     packs_pkg = (ROOT / "Packages/Packs/Package.swift").read_text()
     app = (ROOT / "Blackout/AppContainer.swift").read_text()
     pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
@@ -440,7 +442,7 @@ def test_pack_relay_1n() -> None:
         fail("PackZip cannot archive a folder for relay")
     if "cityRelayIDs" not in catalog or "el-paso" not in catalog:
         fail("city relay allowlist missing")
-    if "Send to nearby phone" not in sheet:
+    if "Send to nearby phone" not in sheet and "Send to nearby phone" not in catalog_list:
         fail("Field Packs sheet missing Send to nearby phone")
     if "import BlackoutMesh" in packs_pkg or "import BlackoutMesh" in store:
         fail("Packs must not import Mesh")
@@ -578,6 +580,54 @@ def test_fieldpack_root_flatten_fixture() -> None:
     ok("ROOT-flatten promotes a wrapped pack zip")
 
 
+def test_party_vitals_red_loop() -> None:
+    core = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/PartyVitals.swift").read_text()
+    kind = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/PayloadKind.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    chip = (ROOT / "Packages/Maps/Sources/Maps/VitalsChip.swift").read_text()
+    radar = (ROOT / "Packages/Maps/Sources/Maps/RadarHUDView.swift").read_text()
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    mesh = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshFacade.swift").read_text()
+    pause = (ROOT / "Packages/Expeditions/Sources/Expeditions/ExpeditionsRootView.swift").read_text()
+    plate = (ROOT / "Packages/Expeditions/Sources/Expeditions/PartyVitalsPlate.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    if "case partyStatus" not in kind:
+        fail("PayloadKind missing partyStatus")
+    if "injury = true" not in core or "band = .red" not in core:
+        fail("I'M NOT OK must set injury and red")
+    if "import HealthKit" in core or "import HealthKit" in plate or "import HealthKit" in chip:
+        fail("manual vitals must not import HealthKit")
+    if "tel:911" in core or "tel:911" in plate or "tel:911" in app:
+        fail("party red must not auto-dial 911")
+    if "VitalsChip" not in maps:
+        fail("Map lost the I'm-OK / I'm-not chip")
+    if "BlackoutDS.Hit.sm" not in chip:
+        fail("I'm-not chip is not 56pt")
+    if "BlackoutDS.Hit.sos" not in sos:
+        fail("SOS FAB lost 88pt hit")
+    if "PartyVitalsPlate" not in pause:
+        fail("Expedition roster lost two-tap vitals")
+    if "DRANK" not in plate or "ATE" not in plate or "I'M NOT OK" not in plate:
+        fail("roster missing DRANK / ATE / I'M NOT OK")
+    if "Navigate-to" not in radar and 'PartyVitalsCopy.navigateTo' not in radar:
+        fail("peer sheet missing Navigate-to")
+    if 'MetalButton("PTT"' in radar:
+        fail("peer sheet must stay Message + Navigate-to")
+    if "becameRed" not in app:
+        fail("AppContainer does not haptic on peer red")
+    if "envelope.kind" in mesh:
+        fail("MeshFacade must stay a dumb pipe")
+    if "case expedition" not in root or "case field" not in root:
+        fail("4-tab chrome missing")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("CURRENT_PROJECT_VERSION was bumped off 19")
+    ok("party vitals two-tap + red packet, SOS 88, chip 56, no 911")
+
+
 def test_locked_app_icon() -> None:
     import struct
 
@@ -636,6 +686,7 @@ def main() -> None:
     test_usgs_defaultpack()
     test_live_mesh_1n()
     test_pack_relay_1n()
+    test_party_vitals_red_loop()
     test_locked_app_icon()
     test_bundled_statewide_archive_only()
     test_copy_fieldpacks_compile_noop_and_archive_required()

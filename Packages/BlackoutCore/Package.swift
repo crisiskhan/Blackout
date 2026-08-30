@@ -17,5 +17,9 @@ let package = Package(
 
             ]
         ),
+        .testTarget(
+            name: "BlackoutCoreTests",
+            dependencies: ["BlackoutCore"]
+        ),
     ]
 )

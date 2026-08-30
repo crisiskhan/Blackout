@@ -23,7 +23,11 @@ let package = Package(
         ),
         .testTarget(
             name: "ExpeditionsTests",
-            dependencies: ["Expeditions"]
+            dependencies: [
+                "Expeditions",
+                "BlackoutCore",
+                "DesignSystem",
+            ]
         ),
     ]
 )

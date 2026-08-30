@@ -9,6 +9,7 @@ import Foundation
 import Maps
 import Observation
 import Settings
+import UIKit
 
 @MainActor
 @Observable
@@ -26,6 +27,7 @@ final class AppContainer {
     var sosCoverOpen = false
     var showFieldPacks = false
     let guidePackURL: URL?
+    let party: PartyRoster
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
 
@@ -63,6 +65,7 @@ final class AppContainer {
             errors.append("GuidePack missing from the app bundle. Field ask cannot retrieve.")
         }
         bootError = errors.isEmpty ? nil : errors.joined(separator: "\n\n")
+        party = PartyRoster(localID: crypto.localIdentity, recipientID: crypto.preferredRecipient)
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
         mesh.onInbound = { [weak self] event in
             self?.handleMeshInbound(event)
@@ -92,6 +95,7 @@ final class AppContainer {
         switch event {
         case .advertisement(let data):
             crypto.registerPeerAdvertisement(data)
+            party.recipientID = crypto.preferredRecipient
         case .envelope(let envelope):
             ingestEnvelope(envelope)
         case .resource(let name, let fileURL):
@@ -113,8 +117,32 @@ final class AppContainer {
         }
     }
 
+    func sendPartyStatus(_ envelope: Envelope) {
+        guard mesh.nearbyPeerCount > 0 else { return }
+        mesh.send(envelope)
+    }
+
     private func ingestEnvelope(_ envelope: Envelope) {
-        guard envelope.kind == .message else { return }
+        switch envelope.kind {
+        case .partyStatus:
+            ingestPartyStatus(envelope)
+        case .message:
+            ingestMessage(envelope)
+        case .sosAlert, .pttClip, .locationFix, .breadcrumb:
+            return
+        }
+    }
+
+    private func ingestPartyStatus(_ envelope: Envelope) {
+        switch party.ingest(envelope) {
+        case .becameRed:
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        case .ignored, .updated:
+            break
+        }
+    }
+
+    private func ingestMessage(_ envelope: Envelope) {
         guard envelope.sender != crypto.localIdentity else { return }
         do {
             let existing = try persistence.messages()

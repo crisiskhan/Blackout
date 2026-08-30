@@ -35,6 +35,22 @@ final class MeshWireTests: XCTestCase {
         XCTAssertNil(MeshWire.decode(Data()))
     }
 
+    func testPartyStatusEnvelopeRoundtrip() throws {
+        let status = PartyMemberStatus(id: BlackoutID(), band: .red, injury: true)
+        let envelope = PartyStatusWire.envelope(
+            status: status,
+            sender: BlackoutID(),
+            recipient: BlackoutID()
+        )
+        XCTAssertEqual(envelope.kind, .partyStatus)
+        let frame = try XCTUnwrap(MeshWire.encodeEnvelope(envelope))
+        guard case .envelope(let decoded) = MeshWire.decode(frame) else {
+            return XCTFail("expected envelope frame")
+        }
+        XCTAssertEqual(decoded.kind, .partyStatus)
+        XCTAssertEqual(PartyStatusWire.decode(decoded.ciphertext)?.band, .red)
+    }
+
     func testSafeResourceNames() {
         XCTAssertTrue(MeshRadio.isSafeResourceName("el-paso"))
         XCTAssertTrue(MeshRadio.isSafeResourceName("las-cruces"))

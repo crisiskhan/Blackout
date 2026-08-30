@@ -17,6 +17,9 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
     public var rangeMeters: Double
     public var pingAge: TimeInterval?
     public var hops: Int?
+    public var band: PartyBand
+    public var latitude: Double?
+    public var longitude: Double?
 
     public init(
         id: BlackoutID = BlackoutID(),
@@ -25,7 +28,10 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
         bearingDegrees: Double,
         rangeMeters: Double,
         pingAge: TimeInterval? = nil,
-        hops: Int? = nil
+        hops: Int? = nil,
+        band: PartyBand = .green,
+        latitude: Double? = nil,
+        longitude: Double? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -34,6 +40,9 @@ public struct RadarBlip: Hashable, Sendable, Identifiable {
         self.rangeMeters = rangeMeters
         self.pingAge = pingAge
         self.hops = hops
+        self.band = band
+        self.latitude = latitude
+        self.longitude = longitude
     }
 
     public var isUnknown: Bool { displayName == nil || displayName?.isEmpty == true }

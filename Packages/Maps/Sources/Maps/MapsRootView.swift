@@ -18,6 +18,8 @@ public struct MapsRootView: View {
     var onOpenFieldPacks: (() -> Void)?
     var externalSheetOpen: Bool
     var sosCoverOpen: Bool
+    @Bindable var roster: PartyRoster
+    var onMessagePeer: (() -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -54,7 +56,9 @@ public struct MapsRootView: View {
         installedPackRoots: [URL] = [],
         onOpenFieldPacks: (() -> Void)? = nil,
         externalSheetOpen: Bool = false,
-        sosCoverOpen: Bool = false
+        sosCoverOpen: Bool = false,
+        roster: PartyRoster,
+        onMessagePeer: (() -> Void)? = nil
     ) {
         self.location = location
         self.mesh = mesh
@@ -66,12 +70,14 @@ public struct MapsRootView: View {
         self.onOpenFieldPacks = onOpenFieldPacks
         self.externalSheetOpen = externalSheetOpen
         self.sosCoverOpen = sosCoverOpen
+        self.roster = roster
+        self.onMessagePeer = onMessagePeer
     }
 
     private var sosOnly: Bool { battery.isCritical }
     private var extremeSaver: Bool { battery.isExtremeSaver }
     private var extrasOn: Bool { !sosOnly && !extremeSaver }
-    private var peers: [RadarBlip] { [] }
+    private var peers: [RadarBlip] { roster.radarBlips(selfFix: location.navigationFix) }
     private var locationDenied: Bool {
         location.authorization == .denied || location.authorization == .restricted
     }
@@ -289,16 +295,31 @@ public struct MapsRootView: View {
     private func peerSheet(_ blip: RadarBlip) -> some View {
         RadarPeerSheet(
             blip: blip,
-            onMessage: { selectedPeer = nil },
-            onPTT: { selectedPeer = nil },
+            onMessage: {
+                selectedPeer = nil
+                onMessagePeer?()
+            },
             onNavigate: {
                 selectedPeer = nil
-                if battery.coarseNavigateEnabled {
-                    tool = .navigate
-                }
+                navigateToPeer(blip)
             }
         )
         .presentationDetents([.medium])
+    }
+
+    private func navigateToPeer(_ blip: RadarBlip) {
+        guard battery.coarseNavigateEnabled else { return }
+        if let lat = blip.latitude, let lon = blip.longitude {
+            navigate.navigateToPeer(
+                latitude: lat,
+                longitude: lon,
+                label: blip.displayName ?? "Peer",
+                origin: originCoordinate,
+                pack: packService.routing
+            )
+        } else {
+            navigate.markNoCoordinate()
+        }
     }
 
     private func lidarSheet() -> some View {
@@ -435,6 +456,20 @@ public struct MapsRootView: View {
                     }
                 )
                 MapExpeditionBanner(title: openOutingName ?? "No open expedition")
+                HStack {
+                    VitalsChip(
+                        band: roster.selfStatus.band,
+                        pending: roster.pending
+                    ) {
+                        noteMapActivity()
+                        let action: PartyVitalAction = roster.isRed ? .imOK : .notOK
+                        if let envelope = roster.tap(action, fix: location.navigationFix),
+                           mesh.nearbyPeerCount > 0 {
+                            mesh.send(envelope)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, sizeClass == .regular ? 8 : 64)

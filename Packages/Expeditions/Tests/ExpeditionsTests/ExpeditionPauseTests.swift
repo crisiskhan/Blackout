@@ -1,3 +1,5 @@
+import BlackoutCore
+import DesignSystem
 import XCTest
 @testable import Expeditions
 
@@ -33,5 +35,19 @@ final class ExpeditionPauseTests: XCTestCase {
 
     func testPauseSectionsStayFour() {
         XCTAssertEqual(ExpeditionPauseCopy.sections, ["Roster", "Gear", "Packs", "Settings"])
+    }
+
+    func testRosterKeepsHonestEmptyAndTwoTapVitals() {
+        XCTAssertEqual(ExpeditionPauseCopy.rosterEmpty, "Solo outing. Roster is empty.")
+        XCTAssertEqual(PartyVitalsCopy.drank, "DRANK")
+        XCTAssertEqual(PartyVitalsCopy.ate, "ATE")
+        XCTAssertEqual(PartyVitalsCopy.notOK, "I'M NOT OK")
+    }
+
+    func testVitalsChipIs56AndSOSStays88() {
+        XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
+        XCTAssertEqual(PartyVitalsCopy.sosHeight, 88)
+        XCTAssertEqual(BlackoutDS.Hit.sm, 56)
+        XCTAssertEqual(BlackoutDS.Hit.sos, 88)
     }
 }
