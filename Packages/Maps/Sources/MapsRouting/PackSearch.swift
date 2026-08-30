@@ -77,7 +77,7 @@ public enum PackSearch {
         for (index, edge) in pack.edges.enumerated() where edge.nameId == nameId {
             let geom = pack.geometries[index]
             if let mid = geom[safe: geom.count / 2] { return mid }
-            return pack.nodes[Int(edge.from)].coordinate
+            return pack.node(at: edge.from)?.coordinate
         }
         return nil
     }

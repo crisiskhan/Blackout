@@ -173,14 +173,19 @@ public enum SOSArmedRestore {
         presentRequested: Bool,
         newBinaryLaunch: Bool
     ) -> Bool {
-        persistedArmed && presentRequested && !newBinaryLaunch
+        // First open is the unlock gate. Armed overlay is never the launch screen.
+        _ = persistedArmed
+        _ = presentRequested
+        _ = newBinaryLaunch
+        return false
     }
 
     public static func shouldRequestConfirmAfterMissedCheckIn(
         persistedArmed: Bool,
         newBinaryLaunch: Bool
     ) -> Bool {
-        !(persistedArmed && newBinaryLaunch)
+        _ = newBinaryLaunch
+        return !persistedArmed
     }
 }
 

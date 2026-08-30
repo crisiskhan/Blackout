@@ -52,7 +52,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             BlackoutDS.Surface.void.ignoresSafeArea()
-            if container.lock.isEnabled && !container.lock.isUnlocked {
+            if !container.lock.isUnlocked {
                 LockGateView(lock: container.lock)
             } else {
                 chrome

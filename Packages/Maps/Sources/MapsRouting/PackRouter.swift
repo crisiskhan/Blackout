@@ -17,7 +17,7 @@ public enum PackRouter {
             return .offGraph
         }
         if start == goal {
-            let dest = pack.nodes[Int(goal)].coordinate
+            guard let dest = pack.node(at: goal)?.coordinate else { return .offGraph }
             return .routed(
                 Route(
                     profile: profile,
@@ -52,12 +52,13 @@ public enum PackRouter {
         profile: NavigateProfile,
         pack: RoutingPack
     ) -> Path? {
-        let goalCoord = pack.nodes[Int(goal)].coordinate
+        guard let goalCoord = pack.node(at: goal)?.coordinate,
+              let startCoord = pack.node(at: start)?.coordinate else { return nil }
         var gScore = [UInt32: Int]()
         gScore[start] = 0
         var cameEdge = [UInt32: (from: UInt32, edge: Int, reverse: Bool)]()
         var heap = MinHeap()
-        heap.push(key: heuristicMs(from: pack.nodes[Int(start)].coordinate, to: goalCoord, profile: profile), id: start)
+        heap.push(key: heuristicMs(from: startCoord, to: goalCoord, profile: profile), id: start)
 
         var visited = Set<UInt32>()
         while let current = heap.pop() {
@@ -68,7 +69,7 @@ public enum PackRouter {
             let currentG = gScore[current] ?? Int.max
             let arcs = Int(current) < pack.outgoing.count ? pack.outgoing[Int(current)] : []
             for arc in arcs {
-                let edge = pack.edges[arc.edgeIndex]
+                guard let edge = pack.edge(at: arc.edgeIndex) else { continue }
                 guard profile.allows(edge.flags) else { continue }
                 let step = profile.costMs(edge)
                 guard step >= 0 else { continue }
@@ -77,8 +78,9 @@ public enum PackRouter {
                 if tentative < (gScore[next] ?? Int.max) {
                     gScore[next] = tentative
                     cameEdge[next] = (current, arc.edgeIndex, arc.reverse)
+                    guard let nextCoord = pack.node(at: next)?.coordinate else { continue }
                     let f = tentative + heuristicMs(
-                        from: pack.nodes[Int(next)].coordinate,
+                        from: nextCoord,
                         to: goalCoord,
                         profile: profile
                     )
@@ -115,16 +117,16 @@ public enum PackRouter {
         var polyline: [RoutingCoordinate] = []
         var lengthCm: UInt32 = 0
         for (i, edgeIndex) in path.edges.enumerated() {
-            let edge = pack.edges[edgeIndex]
+            guard let edge = pack.edge(at: edgeIndex) else { continue }
             lengthCm += edge.lengthCm
-            var geom = pack.geometry(edgeIndex: edgeIndex, reverse: path.reversed[i])
+            var geom = pack.geometry(edgeIndex: edgeIndex, reverse: i < path.reversed.count ? path.reversed[i] : false)
             if !polyline.isEmpty, !geom.isEmpty {
                 geom.removeFirst()
             }
             polyline.append(contentsOf: geom)
         }
-        if polyline.isEmpty, let last = path.nodes.last {
-            polyline = [pack.nodes[Int(last)].coordinate]
+        if polyline.isEmpty, let last = path.nodes.last, let coord = pack.node(at: last)?.coordinate {
+            polyline = [coord]
         }
         let distance = Double(lengthCm) / 100
         let eta = Double(path.costMs) / 1000

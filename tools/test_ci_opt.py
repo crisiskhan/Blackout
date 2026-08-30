@@ -1121,24 +1121,24 @@ def test_sos_armed_restore_no_crash() -> None:
     tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
 
     def should_auto_present(armed: bool, requested: bool, new_binary: bool) -> bool:
-        return armed and requested and not new_binary
+        return False
 
     def is_new_binary(current: str, last: str | None) -> bool:
         return current == "" or current != last
 
     def should_request_confirm(armed: bool, new_binary: bool) -> bool:
-        return not (armed and new_binary)
+        return not armed
 
     if should_auto_present(True, True, True):
         fail("new TestFlight binary must not auto-present a persisted armed overlay")
     if should_auto_present(True, False, False):
         fail("cold launch must not present armed overlay from the persist flag alone")
-    if not should_auto_present(True, True, False):
-        fail("same-build missed check-in may still present the armed panel")
+    if should_auto_present(True, True, False):
+        fail("persisted armed overlay must not steal first open after unlock")
     if not is_new_binary("30", None) or not is_new_binary("30", "25") or is_new_binary("30", "30"):
         fail("new-binary launch detection drifted")
     if should_request_confirm(True, True) or not should_request_confirm(False, True):
-        fail("missed check-in must not reopen armed overlay on a new binary")
+        fail("missed check-in must not reopen armed overlay")
 
     if "enum SOSArmedRestore" not in core:
         fail("SOSArmedRestore policy missing")
@@ -1150,8 +1150,33 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("armed appear must stay speech/strobe idle")
     if "appearRequiresPeers = false" not in core or "appearRequiresLocation = false" not in core:
         fail("armed appear must not require peers or a fix")
-    if "persistedArmed && presentRequested && !newBinaryLaunch" not in core:
-        fail("auto-present policy drifted")
+    if "return false" not in core.split("shouldAutoPresentArmedOverlay", 1)[-1][:400]:
+        fail("auto-present policy must stay off so first open is unlock")
+    launch = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift").read_text()
+    shell_app = (ROOT / "Blackout/BlackoutApp.swift").read_text()
+    lock_view = (ROOT / "Packages/Settings/Sources/Settings/SettingsRootView.swift").read_text()
+    ring = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MetalRingLockup.swift").read_text()
+    slide = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/SlideToUnlock.swift").read_text()
+    if 'destination = "unlock"' not in launch:
+        fail("cold launch must land on unlock")
+    if "usesBitmapLockUI = false" not in launch or "usesFullScreenLockImage = false" not in launch:
+        fail("unlock chrome must not be a painted lock/SOS bitmap")
+    if "MetalRingLockup" not in lock_view or "SlideToUnlock" not in lock_view:
+        fail("LockGateView lost the metal-ring lockup or SOS-twin slider")
+    if "Image(" in ring or "UIImage" in ring or "jpeg" in ring.lower() or "png" in ring.lower():
+        fail("metal-ring lockup must stay SwiftUI, not a bitmap")
+    if "LaunchLock.sosTwinHit" not in slide or "88" in slide.split("sosTwin", 1)[-1][:200]:
+        fail("unlock SOS twin must not be the 88pt Map FAB")
+    if "SplashChromeView" in shell_app:
+        fail("cold launch must not paint a splash bitmap over the unlock gate")
+    if "unlockSession" not in lock_view:
+        fail("slider must unlock the session without Face ID as the first frame")
+    if "if !container.lock.isUnlocked" not in root:
+        fail("RootView must show the unlock gate on every cold launch")
+    if "isEnabled && !container.lock.isUnlocked" in root:
+        fail("unlock gate must not depend on Settings local-lock being on")
+    if "testColdLaunchLandsOnUnlockNotArmedOrBitmap" not in tests:
+        fail("missing first-open unlock regression")
     if "sosLastSeenBuild" not in keys:
         fail("missing last-seen build key")
     if "testNewBinaryLaunchDoesNotAutoPresentPersistedArmedOverlay" not in tests:

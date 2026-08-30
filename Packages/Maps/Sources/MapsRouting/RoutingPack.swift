@@ -30,6 +30,17 @@ public final class RoutingPack: @unchecked Sendable {
         self.grid = EdgeGrid(bbox: manifest.bbox, geometries: geometries)
     }
 
+    public func node(at id: UInt32) -> RoutingNode? {
+        let index = Int(id)
+        guard index >= 0, index < nodes.count else { return nil }
+        return nodes[index]
+    }
+
+    public func edge(at index: Int) -> RoutingEdge? {
+        guard index >= 0, index < edges.count else { return nil }
+        return edges[index]
+    }
+
     public func name(for nameId: UInt32) -> String? {
         guard nameId > 0, nameId < names.count else { return nil }
         let value = names[Int(nameId)]

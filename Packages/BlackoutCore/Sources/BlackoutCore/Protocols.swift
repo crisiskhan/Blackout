@@ -87,6 +87,7 @@ public protocol AppLockServing: AnyObject {
     var isUnlocked: Bool { get }
     func lock()
     func unlock() async -> Bool
+    func unlockSession()
 }
 
 @MainActor

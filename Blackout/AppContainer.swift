@@ -476,6 +476,7 @@ final class AppContainer {
     }
 
     private func pollMissedCheckIns() {
+        guard lock.isUnlocked else { return }
         let items: [ExpeditionRecordDTO]
         do {
             items = try persistence.expeditions()

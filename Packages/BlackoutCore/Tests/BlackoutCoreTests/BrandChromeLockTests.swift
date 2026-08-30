@@ -18,7 +18,9 @@ final class BrandChromeLockTests: XCTestCase {
         XCTAssertFalse(BrandChromeLock.splashHasEmblem)
         XCTAssertFalse(BrandChromeLock.splashHasLockup)
         XCTAssertFalse(BrandChromeLock.splashUsesStandaloneRedEyeO)
-        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "map")
+        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "unlock")
+        XCTAssertFalse(LaunchLock.coldLaunchShowsSplash)
+        XCTAssertFalse(LaunchLock.usesBitmapLockUI)
     }
 
     func testReduceMotionNeverPulsesTheO() {

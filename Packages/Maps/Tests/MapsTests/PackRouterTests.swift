@@ -46,6 +46,16 @@ final class PackRouterTests: XCTestCase {
         XCTAssertEqual(reverse, .offGraph)
     }
 
+    func testCorruptNodeOrEdgeIndexDoesNotTrap() throws {
+        let pack = try loadToy()
+        XCTAssertNil(pack.node(at: 9_999))
+        XCTAssertNil(pack.edge(at: 9_999))
+        XCTAssertEqual(
+            ManeuverBuilder.make(nodeIds: [9_999], edgeIndexes: [0], reversed: [false], pack: pack),
+            []
+        )
+    }
+
     func testMissingPackIsNoGraph() {
         XCTAssertEqual(
             PackRouter.route(from: ToyRouting.n0, to: ToyRouting.n1, profile: .walk, pack: nil),

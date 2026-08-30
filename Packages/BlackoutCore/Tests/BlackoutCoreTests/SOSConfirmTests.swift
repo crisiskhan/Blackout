@@ -145,12 +145,13 @@ final class SOSConfirmTests: XCTestCase {
             presentRequested: true,
             newBinaryLaunch: false
         ))
-        XCTAssertTrue(SOSArmedRestore.shouldAutoPresentArmedOverlay(
+        XCTAssertFalse(SOSArmedRestore.shouldAutoPresentArmedOverlay(
             persistedArmed: true,
             presentRequested: true,
             newBinaryLaunch: false
         ))
         XCTAssertFalse(SOSArmedRestore.autoPresentOnColdLaunch)
+        XCTAssertFalse(LaunchLock.persistedSOSArmedStealsFirstOpen)
         XCTAssertFalse(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
             persistedArmed: true,
             newBinaryLaunch: true
@@ -159,10 +160,29 @@ final class SOSConfirmTests: XCTestCase {
             persistedArmed: false,
             newBinaryLaunch: true
         ))
-        XCTAssertTrue(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+        XCTAssertFalse(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
             persistedArmed: true,
             newBinaryLaunch: false
         ))
+    }
+
+    func testColdLaunchLandsOnUnlockNotArmedOrBitmap() {
+        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "unlock")
+        XCTAssertEqual(LaunchLock.destination, "unlock")
+        XCTAssertFalse(LaunchLock.usesBitmapLockUI)
+        XCTAssertFalse(LaunchLock.usesFullScreenLockImage)
+        XCTAssertTrue(LaunchLock.metalRingIsSwiftUI)
+        XCTAssertTrue(LaunchLock.sliderHasSOSTwin)
+        XCTAssertTrue(LaunchLock.handleIsMetal)
+        XCTAssertFalse(LaunchLock.sosTwinIsMapFAB)
+        XCTAssertEqual(LaunchLock.sosTwinHit, 64)
+        XCTAssertNotEqual(LaunchLock.sosTwinHit, SOSChrome.fab)
+        XCTAssertEqual(LaunchLock.phrase, "SLIDE TO UNLOCK")
+        XCTAssertFalse(LaunchLock.coldLaunchShowsSplash)
+        XCTAssertFalse(LaunchLock.persistedSOSArmedStealsFirstOpen)
+        XCTAssertFalse(SOSConfirm.autoDials911)
+        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(SOSChrome.fab, 88)
     }
 
     func testDismissArmedPanelDoesNotDisarm() {

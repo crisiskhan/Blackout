@@ -212,38 +212,29 @@ public struct SettingsRootView: View {
 
 public struct LockGateView: View {
     @Bindable var lock: AppLockService
-    @State private var failed = false
 
     public init(lock: AppLockService) {
         self.lock = lock
     }
 
     public var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 28) {
             Spacer()
-            Text("Blackout")
-                .font(BlackoutDS.titleFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
+            MetalRingLockup(diameter: 200)
             Text("On-device lock. Nothing to sign in to.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
-            MetalButton("Unlock", height: BlackoutDS.Hit.lg) {
-                Task {
-                    let ok = await lock.unlock()
-                    failed = !ok
-                }
-            }
-            if failed {
-                PermissionDenied(
-                    kind: .localAuthentication,
-                    reason: "Device authentication failed or is unavailable. Data stays on disk; it was not uploaded."
-                )
-                .padding(.horizontal, 20)
-            }
+                .multilineTextAlignment(.center)
             Spacer()
+            SlideToUnlock {
+                lock.unlockSession()
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 36)
         }
-        .padding(24)
+        .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BlackoutDS.Surface.void.ignoresSafeArea())
+        .accessibilityLabel("Blackout lock. Slide to unlock.")
     }
 }
