@@ -10,10 +10,13 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(ExpeditionPauseCopy.gearStub, "No custom kit. Default outing list.")
     }
 
-    func testPacksRowOpensManagerNotDownloadWall() {
+    func testPacksPlateIsCatalogNotDownloadWall() {
         XCTAssertEqual(ExpeditionPauseCopy.packsReady, "Florida, Texas, New York, and New Mexico are Ready on this phone.")
-        XCTAssertEqual(ExpeditionPauseCopy.packManager, "Pack manager")
         XCTAssertFalse(ExpeditionPauseCopy.packsReady.localizedCaseInsensitiveContains("download"))
+    }
+
+    func testMapBannerIsThinHonestEmpty() {
+        XCTAssertEqual(ExpeditionPauseCopy.mapBannerEmpty, "No open expedition")
     }
 
     func testDefaultGearIsToolsListNotGrid() {

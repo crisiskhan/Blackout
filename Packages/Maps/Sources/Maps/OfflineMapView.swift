@@ -1,6 +1,7 @@
 import BlackoutCore
 import Darwin
 import DesignSystem
+import MapsChrome
 import MapsRouting
 import SwiftUI
 import UIKit
@@ -40,6 +41,7 @@ struct OfflineMapView: UIViewRepresentable {
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
     var onUserInteract: (() -> Void)?
+    var onScaleChange: ((Double) -> Void)?
     var onOutsidePack: (Bool) -> Void
     var resetToken: Int
 
@@ -48,6 +50,7 @@ struct OfflineMapView: UIViewRepresentable {
             onDropPin: onDropPin,
             onTap: onTap,
             onUserInteract: onUserInteract,
+            onScaleChange: onScaleChange,
             onOutsidePack: onOutsidePack
         )
     }
@@ -80,6 +83,7 @@ struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onDropPin = onDropPin
         context.coordinator.onTap = onTap
         context.coordinator.onUserInteract = onUserInteract
+        context.coordinator.onScaleChange = onScaleChange
         context.coordinator.onOutsidePack = onOutsidePack
         view.coordinator = context.coordinator
         view.applyOverlays(
@@ -118,6 +122,7 @@ struct OfflineMapView: UIViewRepresentable {
         var onDropPin: (Double, Double) -> Void
         var onTap: ((Double, Double) -> Void)?
         var onUserInteract: (() -> Void)?
+        var onScaleChange: ((Double) -> Void)?
         var onOutsidePack: (Bool) -> Void
         var lastResetToken = 0
         var lastCenterToken = 0
@@ -126,11 +131,13 @@ struct OfflineMapView: UIViewRepresentable {
             onDropPin: @escaping (Double, Double) -> Void,
             onTap: ((Double, Double) -> Void)?,
             onUserInteract: (() -> Void)?,
+            onScaleChange: ((Double) -> Void)?,
             onOutsidePack: @escaping (Bool) -> Void
         ) {
             self.onDropPin = onDropPin
             self.onTap = onTap
             self.onUserInteract = onUserInteract
+            self.onScaleChange = onScaleChange
             self.onOutsidePack = onOutsidePack
         }
     }
@@ -212,6 +219,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
             recenterToPackCoverage()
         }
         reportOutside()
+        reportScale()
     }
 
     func recenterToPackCoverage() {
@@ -290,6 +298,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.setNeedsDisplay()
         clampCamera()
         reportOutside()
+        reportScale()
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -297,6 +306,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.setNeedsDisplay()
         clampCamera()
         reportOutside()
+        reportScale()
     }
 
     @objc private func handlePress(_ gesture: UILongPressGestureRecognizer) {
@@ -313,6 +323,15 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let point = gesture.location(in: canvas)
         let lonlat = canvas.coordinate(at: point)
         coordinator?.onTap?(lonlat.0, lonlat.1)
+    }
+
+    private func reportScale() {
+        let zoom = Double(zMax) + Darwin.log2(Double(max(scroll.zoomScale, 0.01)))
+        let meters = MapScaleBarMath.metersPerPoint(
+            latitude: pack.region.centerLatitude,
+            zoom: zoom
+        )
+        coordinator?.onScaleChange?(meters)
     }
 
     private func centerPack() {

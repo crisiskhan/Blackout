@@ -37,4 +37,35 @@ final class MapChromeRecedeTests: XCTestCase {
     func testIdleIntervalIsTwoSeconds() {
         XCTAssertEqual(MapChromeRecede.idleInterval, 2)
     }
+
+    func testMotionDurationsMatchDesignLock() {
+        XCTAssertEqual(MapChromeRecede.fadeDuration, 0.220)
+        XCTAssertEqual(MapChromeRecede.restoreDuration, 0.120)
+    }
+
+    func testHoldBlocksRecede() {
+        var chrome = MapChromeRecede(now: 0)
+        chrome.hold = true
+        chrome.tick(at: 10)
+        XCTAssertFalse(chrome.isReceded)
+    }
+
+    func testHoldRestartsIdleAfterRelease() {
+        var chrome = MapChromeRecede(now: 0)
+        chrome.hold = true
+        chrome.tick(at: 5)
+        chrome.hold = false
+        chrome.tick(at: 5)
+        XCTAssertFalse(chrome.isReceded)
+        chrome.tick(at: 6.9)
+        XCTAssertFalse(chrome.isReceded)
+        chrome.tick(at: 7)
+        XCTAssertTrue(chrome.isReceded)
+    }
+
+    func testScaleBarNiceMeters() {
+        XCTAssertEqual(MapScaleBarMath.niceMeters(metersPerPoint: 1, targetPoints: 80), 50)
+        XCTAssertEqual(MapScaleBarMath.niceMeters(metersPerPoint: 10, targetPoints: 80), 500)
+        XCTAssertEqual(MapScaleBarMath.niceMeters(metersPerPoint: 20, targetPoints: 80), 1_000)
+    }
 }

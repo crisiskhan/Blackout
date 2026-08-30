@@ -17,6 +17,7 @@ public struct SOSFab: View {
     @State private var showArmedPanel = false
     @State private var storeError: String?
     var presentConfirm: Binding<Bool>?
+    var coverOpen: Binding<Bool>?
 
     private static let armedKey = BlackoutKeys.sosArmed
 
@@ -25,13 +26,15 @@ public struct SOSFab: View {
         persistence: any PersistenceServing,
         mesh: MeshFacade,
         battery: BatteryService,
-        presentConfirm: Binding<Bool>? = nil
+        presentConfirm: Binding<Bool>? = nil,
+        coverOpen: Binding<Bool>? = nil
     ) {
         self.location = location
         self.persistence = persistence
         self.mesh = mesh
         self.battery = battery
         self.presentConfirm = presentConfirm
+        self.coverOpen = coverOpen
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
     }
 
@@ -95,6 +98,8 @@ public struct SOSFab: View {
                 presentConfirm?.wrappedValue = false
             }
         }
+        .onChange(of: showConfirm) { _, _ in publishCover() }
+        .onChange(of: showArmedPanel) { _, _ in publishCover() }
     }
 
     private func arm() {
@@ -127,6 +132,10 @@ public struct SOSFab: View {
         if mesh.nearbyPeerCount > 0 {
             mesh.send(envelope)
         }
+    }
+
+    private func publishCover() {
+        coverOpen?.wrappedValue = showConfirm || showArmedPanel
     }
 }
 

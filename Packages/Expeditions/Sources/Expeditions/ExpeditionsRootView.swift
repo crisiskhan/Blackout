@@ -3,10 +3,10 @@ import BlackoutLocation
 import DesignSystem
 import SwiftUI
 
-public struct ExpeditionsRootView: View {
+public struct ExpeditionsRootView<PacksPlate: View>: View {
     let persistence: any PersistenceServing
     @Bindable var location: LocationService
-    var onOpenFieldPacks: (() -> Void)?
+    var packsPlate: PacksPlate
 
     @State private var items: [ExpeditionRecordDTO] = []
     @State private var editor: ExpeditionRecordDTO?
@@ -15,18 +15,15 @@ public struct ExpeditionsRootView: View {
     @State private var showAdmin = false
     @State private var storeError: String?
 
-    private static let trackingKey = "com.crisiskhan.blackout.crumbs.tracking"
-    private static let trackingExpeditionKey = "com.crisiskhan.blackout.crumbs.expedition"
-
     public init(
         persistence: any PersistenceServing,
         location: LocationService,
-        onOpenFieldPacks: (() -> Void)? = nil
+        @ViewBuilder packsPlate: () -> PacksPlate
     ) {
         self.persistence = persistence
         self.location = location
-        self.onOpenFieldPacks = onOpenFieldPacks
-        _tracking = State(initialValue: UserDefaults.standard.bool(forKey: Self.trackingKey))
+        self.packsPlate = packsPlate()
+        _tracking = State(initialValue: UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking))
     }
 
     public var body: some View {
@@ -56,9 +53,7 @@ public struct ExpeditionsRootView: View {
                         Text(ExpeditionPauseCopy.packsReady)
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
-                        GhostButton(ExpeditionPauseCopy.packManager, height: BlackoutDS.Hit.md) {
-                            onOpenFieldPacks?()
-                        }
+                        packsPlate
                     }
                     pausePanel("Settings") {
                         Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
@@ -164,8 +159,8 @@ public struct ExpeditionsRootView: View {
     }
 
     private func restoreTracking(for expedition: ExpeditionRecordDTO) {
-        let stored = UserDefaults.standard.bool(forKey: Self.trackingKey)
-        let id = UserDefaults.standard.string(forKey: Self.trackingExpeditionKey)
+        let stored = UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking)
+        let id = UserDefaults.standard.string(forKey: BlackoutKeys.crumbsExpedition)
         tracking = stored && id == expedition.id.rawValue.uuidString && expedition.isOpen
     }
 
@@ -176,11 +171,11 @@ public struct ExpeditionsRootView: View {
 
     private func setTracking(_ value: Bool, expedition: ExpeditionRecordDTO?) {
         tracking = value
-        UserDefaults.standard.set(value, forKey: Self.trackingKey)
+        UserDefaults.standard.set(value, forKey: BlackoutKeys.crumbsTracking)
         if let expedition, value {
-            UserDefaults.standard.set(expedition.id.rawValue.uuidString, forKey: Self.trackingExpeditionKey)
+            UserDefaults.standard.set(expedition.id.rawValue.uuidString, forKey: BlackoutKeys.crumbsExpedition)
         } else if !value {
-            UserDefaults.standard.removeObject(forKey: Self.trackingExpeditionKey)
+            UserDefaults.standard.removeObject(forKey: BlackoutKeys.crumbsExpedition)
         }
     }
 
@@ -199,6 +194,15 @@ public struct ExpeditionsRootView: View {
             storeError = error.localizedDescription
             setTracking(false, expedition: expedition)
         }
+    }
+}
+
+extension ExpeditionsRootView where PacksPlate == EmptyView {
+    public init(
+        persistence: any PersistenceServing,
+        location: LocationService
+    ) {
+        self.init(persistence: persistence, location: location, packsPlate: { EmptyView() })
     }
 }
 

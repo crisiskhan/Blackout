@@ -207,7 +207,7 @@ struct RootView: View {
                 }
             }
             .navigationTitle("Blackout")
-            .navigationSplitViewColumnWidth(min: 280, ideal: 280, max: 280)
+            .navigationSplitViewColumnWidth(min: 320, ideal: 320, max: 320)
             .swiftUIToolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -253,7 +253,9 @@ struct RootView: View {
             packService: container.pack,
             coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
             installedPackRoots: container.packs.installedPackRoots,
-            onOpenFieldPacks: { container.showFieldPacks = true }
+            onOpenFieldPacks: { container.showFieldPacks = true },
+            externalSheetOpen: showSettings || container.showFieldPacks,
+            sosCoverOpen: container.sosCoverOpen
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -301,9 +303,14 @@ struct RootView: View {
     private var expeditionDestination: some View {
         ExpeditionsRootView(
             persistence: container.persistence,
-            location: container.location,
-            onOpenFieldPacks: { container.showFieldPacks = true }
-        )
+            location: container.location
+        ) {
+            FieldPackCatalogList(
+                store: container.packs,
+                nearbyCount: container.mesh.nearbyPeerCount,
+                onSendToPeer: { container.relayPack($0) }
+            )
+        }
     }
 
     private var sosOverlay: some View {
@@ -316,7 +323,8 @@ struct RootView: View {
                     persistence: container.persistence,
                     mesh: container.mesh,
                     battery: container.battery,
-                    presentConfirm: $container.sosConfirmRequested
+                    presentConfirm: $container.sosConfirmRequested,
+                    coverOpen: $container.sosCoverOpen
                 )
                 .padding(.trailing, 18)
                 .padding(.bottom, fabBottomPadding)

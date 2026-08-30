@@ -23,6 +23,7 @@ final class AppContainer {
     let lock: AppLockService
     let bootError: String?
     var sosConfirmRequested = false
+    var sosCoverOpen = false
     var showFieldPacks = false
     let guidePackURL: URL?
     private var missedCheckInTask: Task<Void, Never>?

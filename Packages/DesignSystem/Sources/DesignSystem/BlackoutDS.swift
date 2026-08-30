@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 public enum BlackoutDS {
@@ -54,6 +55,14 @@ public enum BlackoutDS {
         public static let md: CGFloat = 64
         public static let lg: CGFloat = 72
         public static let sos: CGFloat = 88
+    }
+
+    /// DS v1 §10.3 motion. Durations only — hexes unchanged.
+    public enum Motion {
+        public static let moveDuration: TimeInterval = 0.220
+        public static let snapDuration: TimeInterval = 0.120
+        public static var move: Animation { .easeInOut(duration: moveDuration) }
+        public static var snap: Animation { .easeOut(duration: snapDuration) }
     }
 
     public enum TypeMetrics {

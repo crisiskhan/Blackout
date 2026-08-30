@@ -11,4 +11,6 @@ public enum BlackoutKeys {
     public static let navigateProfile = "com.crisiskhan.blackout.navigate.profile"
     public static let navigateMute = "com.crisiskhan.blackout.navigate.mute"
     public static let fieldPacksIntroCompleted = "com.crisiskhan.blackout.fieldPacks.introCompleted"
+    public static let crumbsTracking = "com.crisiskhan.blackout.crumbs.tracking"
+    public static let crumbsExpedition = "com.crisiskhan.blackout.crumbs.expedition"
 }

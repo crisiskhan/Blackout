@@ -16,6 +16,8 @@ public struct MapsRootView: View {
     var coverageRegions: [MapRegion]
     var installedPackRoots: [URL]
     var onOpenFieldPacks: (() -> Void)?
+    var externalSheetOpen: Bool
+    var sosCoverOpen: Bool
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -38,6 +40,8 @@ public struct MapsRootView: View {
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
     @State private var chrome = MapChromeRecede()
+    @State private var metersPerPoint = 10.0
+    @State private var openOutingName: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
@@ -48,7 +52,9 @@ public struct MapsRootView: View {
         packService: FileMapPack,
         coverageRegions: [MapRegion] = [],
         installedPackRoots: [URL] = [],
-        onOpenFieldPacks: (() -> Void)? = nil
+        onOpenFieldPacks: (() -> Void)? = nil,
+        externalSheetOpen: Bool = false,
+        sosCoverOpen: Bool = false
     ) {
         self.location = location
         self.mesh = mesh
@@ -58,6 +64,8 @@ public struct MapsRootView: View {
         self.coverageRegions = coverageRegions
         self.installedPackRoots = installedPackRoots
         self.onOpenFieldPacks = onOpenFieldPacks
+        self.externalSheetOpen = externalSheetOpen
+        self.sosCoverOpen = sosCoverOpen
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -94,6 +102,21 @@ public struct MapsRootView: View {
     }
     private var showChipRow: Bool {
         packService.pack != nil && !showEmptyCard && !sosOnly
+    }
+    private var liveRec: Bool {
+        UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking)
+    }
+    /// Sheets, dest preview, deny card, live Rec, SOS cover. Reduce Motion is separate.
+    private var holdsChrome: Bool {
+        externalSheetOpen
+            || sosCoverOpen
+            || tool != nil
+            || showLayers
+            || showLiDAR
+            || selectedPeer != nil
+            || showEmptyCard
+            || navigate.phase == .preview
+            || liveRec
     }
 
     public var body: some View {
@@ -134,6 +157,7 @@ public struct MapsRootView: View {
                         )
                     },
                     onUserInteract: noteMapActivity,
+                    onScaleChange: { metersPerPoint = $0 },
                     onOutsidePack: { outside in
                         outsidePack = outside
                     },
@@ -184,15 +208,18 @@ public struct MapsRootView: View {
                 .padding(.bottom, 100)
             }
             VStack(spacing: 0) {
-                MapLockHUD(
-                    accuracyMeters: gpsAccuracyMeters,
-                    headingDegrees: location.headingDegrees,
-                    onNorthUp: {
-                        noteMapActivity()
-                        headingUp = false
-                        UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
-                    }
-                )
+                VStack(spacing: 8) {
+                    MapLockHUD(
+                        accuracyMeters: gpsAccuracyMeters,
+                        headingDegrees: location.headingDegrees,
+                        onNorthUp: {
+                            noteMapActivity()
+                            headingUp = false
+                            UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
+                        }
+                    )
+                    MapExpeditionBanner(title: openOutingName ?? "No open expedition")
+                }
                 .padding(.horizontal, 16)
                 .padding(.top, sizeClass == .regular ? 8 : 64)
                 .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
@@ -203,6 +230,13 @@ public struct MapsRootView: View {
                 }
                 Spacer()
                 if showChipRow {
+                    HStack(alignment: .bottom, spacing: 8) {
+                        MapScaleBar(metersPerPoint: metersPerPoint)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                    .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
                     HStack(spacing: 8) {
                         MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
                         MetalButton("Layers", height: BlackoutDS.Hit.md) {
@@ -358,26 +392,39 @@ public struct MapsRootView: View {
             location.startUpdating()
             applyChrome {
                 $0.reduceMotion = reduceMotion
+                $0.hold = holdsChrome
                 $0.noteActivity(at: nowOffset)
             }
         }
         .onChange(of: reduceMotion) { _, value in
             applyChrome {
                 $0.reduceMotion = value
+                $0.hold = holdsChrome
                 $0.tick(at: nowOffset)
             }
         }
-        .task {
+        .onChange(of: holdsChrome) { _, held in
             applyChrome {
                 $0.reduceMotion = reduceMotion
+                $0.hold = held
                 $0.tick(at: nowOffset)
             }
+        }
+        .task(id: reduceMotion) {
+            applyChrome {
+                $0.reduceMotion = reduceMotion
+                $0.hold = holdsChrome
+                $0.tick(at: nowOffset)
+            }
+            guard !reduceMotion else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 applyChrome {
                     $0.reduceMotion = reduceMotion
+                    $0.hold = holdsChrome
                     $0.tick(at: nowOffset)
                 }
+                if reduceMotion { break }
             }
         }
     }
@@ -564,11 +611,14 @@ public struct MapsRootView: View {
         do {
             let expeditions = try persistence.expeditions()
             if let open = expeditions.first(where: \.isOpen) {
+                openOutingName = open.name
                 crumbs = try persistence.breadcrumbs(expeditionID: open.id)
             } else {
+                openOutingName = nil
                 crumbs = []
             }
         } catch {
+            openOutingName = nil
             crumbs = []
         }
     }
@@ -579,7 +629,7 @@ enum MapTool: String, Identifiable {
     var id: String { rawValue }
 }
 
-/// Fade chrome in place. Do not remove it from the tree — SOS layout stays put.
+/// Fade chrome in place. Opacity only — VoiceOver keeps the controls in the tree.
 private struct RecedingMapChrome: ViewModifier {
     var isReceded: Bool
     var reduceMotion: Bool
@@ -588,7 +638,57 @@ private struct RecedingMapChrome: ViewModifier {
         content
             .opacity(isReceded ? 0 : 1)
             .allowsHitTesting(!isReceded)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: isReceded)
+            .animation(
+                reduceMotion ? nil : (isReceded ? BlackoutDS.Motion.move : BlackoutDS.Motion.snap),
+                value: isReceded
+            )
+    }
+}
+
+/// Thin outing strip. Recedes with the GPS HUD. Members stay on Map radar.
+struct MapExpeditionBanner: View {
+    var title: String
+
+    var body: some View {
+        Text(title)
+            .font(BlackoutDS.captionFont())
+            .foregroundStyle(BlackoutDS.Silver.bright)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .frame(height: 28)
+            .background(BlackoutDS.Surface.raised.opacity(0.82))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .accessibilityLabel(title)
+    }
+}
+
+struct MapScaleBar: View {
+    var metersPerPoint: Double
+
+    var body: some View {
+        let meters = MapScaleBarMath.niceMeters(metersPerPoint: metersPerPoint)
+        let width = CGFloat(meters / max(metersPerPoint, 0.001))
+        VStack(alignment: .leading, spacing: 4) {
+            Rectangle()
+                .fill(BlackoutDS.Silver.edge)
+                .frame(width: min(max(width, 24), 120), height: 2)
+            Text(label)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+        }
+        .accessibilityLabel("Scale \(label)")
+    }
+
+    private var label: String {
+        let meters = MapScaleBarMath.niceMeters(metersPerPoint: metersPerPoint)
+        if meters >= 1_000 {
+            return "\(Int((meters / 1_000).rounded())) km"
+        }
+        return "\(Int(meters.rounded())) m"
     }
 }
 
