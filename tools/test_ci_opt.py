@@ -112,9 +112,15 @@ def test_pbx_single_copy() -> None:
         fail("BlackoutWidgets lost INFOPLIST_FILE on Debug or Release")
     if "INFOPLIST_FILE = BlackoutWidgets/Info.plist" in pbx:
         fail("widget Info.plist must stay outside the synced BlackoutWidgets folder")
-    widget_plist = (ROOT / "Supporting/BlackoutWidgets-Info.plist").read_text()
+    if (ROOT / "BlackoutWidgets" / "Info.plist").is_file():
+        fail("BlackoutWidgets/Info.plist in the sync root is copied onto the appex Info.plist")
+    widget_plist = (ROOT / "Supporting" / "BlackoutWidgets-Info.plist").read_text()
+    if "CFBundleIdentifier" not in widget_plist:
+        fail("widget Info.plist missing CFBundleIdentifier — ValidateEmbeddedBinary sees (null)")
     if "$(PRODUCT_BUNDLE_IDENTIFIER)" not in widget_plist:
         fail("widget Info.plist must expand PRODUCT_BUNDLE_IDENTIFIER (parent prefix check)")
+    if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
+        fail("widget bundle id must stay com.crisiskhan.blackout.widget on Debug and Release")
     if "CURRENT_PROJECT_VERSION = 19" not in pbx:
         fail("CURRENT_PROJECT_VERSION is no longer 19")
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
@@ -743,12 +749,12 @@ def test_party_vitals_red_loop() -> None:
         fail("Expedition roster lost two-tap vitals")
     if "DRANK" not in plate or "ATE" not in plate or "I AM NOT OK" not in plate:
         fail("roster missing DRANK / ATE / I AM NOT OK")
-    comms = (ROOT / "Packages/Messaging/Sources/Messaging/MessagingRootView.swift").read_text()
+    comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
     if "selfLabel.footnote" not in plate or "Silver.dim" not in plate:
         fail("roster lost YOU last-4 silver.dim footnote")
     if "blip.footnote" not in radar or "Silver.dim" not in radar:
         fail("Radar lost YOU last-4 silver.dim footnote")
-    if "fromLabel" not in comms or "Silver.dim" not in comms:
+    if "shown.footnote" not in comms or "Silver.dim" not in comms:
         fail("Comms lost live YOU last-4 silver.dim footnote")
     if "footnote" in sos:
         fail("YOU last-4 must not appear on SOS")
