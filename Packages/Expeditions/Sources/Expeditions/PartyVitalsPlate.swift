@@ -12,6 +12,7 @@ struct PartyVitalsPlate: View {
     var onCreateParty: () -> Void
     var onJoinParty: (String) -> Bool
     var onLeaveParty: () -> Void
+    var onStartFieldMode: (FieldJobMode) -> Void = { _ in }
 
     @State private var callsignDraft = ""
     @State private var joinDraft = ""
@@ -222,6 +223,7 @@ struct PartyVitalsPlate: View {
         } else {
             ForEach(roster.peers) { peer in
                 let shown = roster.label(for: peer)
+                let stale = PartyThread.isStale(lastHeard: peer.updatedAt)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 8) {
                         Circle()
@@ -231,14 +233,24 @@ struct PartyVitalsPlate: View {
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.bright)
                         Spacer()
-                        Text(peer.band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
+                        if peer.hops > 0 {
+                            Text("\(peer.hops) hop\(peer.hops == 1 ? "" : "s")")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
+                        Text(stale ? CommsCopy.stale : (peer.band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK))
                             .font(BlackoutDS.captionFont())
-                            .foregroundStyle(peer.band == .red ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
+                            .foregroundStyle(stale || peer.band == .red ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
                     }
                     if let footnote = shown.footnote {
                         Text(footnote)
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
+                    }
+                    if stale {
+                        MetalButton("Party-split", height: BlackoutDS.Hit.sm) {
+                            onStartFieldMode(.partySplit)
+                        }
                     }
                 }
             }

@@ -107,6 +107,8 @@ public final class FileMapPack: MapPackServing {
         dem?.viewshed(fromLatitude: fromLatitude, fromLongitude: fromLongitude, observerHeightMeters: observerHeightMeters) ?? []
     }
 
+    public var hasDEM: Bool { dem != nil }
+
     public func slopeSamples() -> [SlopeSample] {
         dem?.slopeGrid() ?? []
     }

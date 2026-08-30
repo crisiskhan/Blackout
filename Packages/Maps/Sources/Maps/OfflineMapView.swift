@@ -24,6 +24,7 @@ struct OfflineMapView: UIViewRepresentable {
     var viewshed: [ViewshedRay]
     var slope: [SlopeSample]
     var showViewshed: Bool
+    var viewshedOrigin: LocationFix? = nil
     var showSlope: Bool
     var centerToken: Int
     /// When true, Recenter pinned the camera to pack coverage. GPS follow
@@ -40,6 +41,8 @@ struct OfflineMapView: UIViewRepresentable {
     var activeManeuver: Maneuver?
     var inboundPing: LocationFix? = nil
     var inboundPingHue: FieldPingHue? = nil
+    var searchPattern: [(Double, Double)] = []
+    var sharedTrack: [FollowTrackWire.Point] = []
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
     var onUserInteract: (() -> Void)?
@@ -67,6 +70,7 @@ struct OfflineMapView: UIViewRepresentable {
             viewshed: viewshed,
             slope: slope,
             showViewshed: showViewshed,
+            viewshedOrigin: viewshedOrigin,
             showSlope: showSlope,
             routing: routing,
             routeLine: routeLine,
@@ -78,7 +82,9 @@ struct OfflineMapView: UIViewRepresentable {
             packContainsSelf: packContainsSelf,
             activeManeuver: activeManeuver,
             inboundPing: inboundPing,
-            inboundPingHue: inboundPingHue
+            inboundPingHue: inboundPingHue,
+            searchPattern: searchPattern,
+            sharedTrack: sharedTrack
         )
         return view
     }
@@ -97,6 +103,7 @@ struct OfflineMapView: UIViewRepresentable {
             viewshed: viewshed,
             slope: slope,
             showViewshed: showViewshed,
+            viewshedOrigin: viewshedOrigin,
             showSlope: showSlope,
             routing: routing,
             routeLine: routeLine,
@@ -108,7 +115,9 @@ struct OfflineMapView: UIViewRepresentable {
             packContainsSelf: packContainsSelf,
             activeManeuver: activeManeuver,
             inboundPing: inboundPing,
-            inboundPingHue: inboundPingHue
+            inboundPingHue: inboundPingHue,
+            searchPattern: searchPattern,
+            sharedTrack: sharedTrack
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
@@ -250,6 +259,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         viewshed: [ViewshedRay],
         slope: [SlopeSample],
         showViewshed: Bool,
+        viewshedOrigin: LocationFix?,
         showSlope: Bool,
         routing: RoutingPack?,
         routeLine: [RoutingCoordinate],
@@ -261,7 +271,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         packContainsSelf: Bool,
         activeManeuver: Maneuver?,
         inboundPing: LocationFix?,
-        inboundPingHue: FieldPingHue?
+        inboundPingHue: FieldPingHue?,
+        searchPattern: [(Double, Double)],
+        sharedTrack: [FollowTrackWire.Point]
     ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
@@ -269,6 +281,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.viewshed = viewshed
         canvas.slope = slope
         canvas.showViewshed = showViewshed
+        canvas.viewshedOrigin = viewshedOrigin
         canvas.showSlope = showSlope
         canvas.routing = routing
         canvas.routeLine = routeLine
@@ -281,6 +294,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.activeManeuver = activeManeuver
         canvas.inboundPing = inboundPing
         canvas.inboundPingHue = inboundPingHue
+        canvas.searchPattern = searchPattern
+        canvas.sharedTrack = sharedTrack
         canvas.setNeedsDisplay()
     }
 
@@ -404,6 +419,7 @@ final class TileCanvasLayer: UIView {
     var viewshed: [ViewshedRay] = []
     var slope: [SlopeSample] = []
     var showViewshed = false
+    var viewshedOrigin: LocationFix?
     var showSlope = false
     var routing: RoutingPack?
     var routeLine: [RoutingCoordinate] = []
@@ -416,6 +432,8 @@ final class TileCanvasLayer: UIView {
     var activeManeuver: Maneuver?
     var inboundPing: LocationFix?
     var inboundPingHue: FieldPingHue?
+    var searchPattern: [(Double, Double)] = []
+    var sharedTrack: [FollowTrackWire.Point] = []
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -464,16 +482,22 @@ final class TileCanvasLayer: UIView {
         }
         for crumb in breadcrumbs where crumb.hasCoordinate {
             let fix = LocationFix(latitude: crumb.latitude, longitude: crumb.longitude)
-            drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
+            if crumb.estimated {
+                drawDashedMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx)
+            } else {
+                drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
+            }
         }
+        drawPolyline(searchPattern, color: UIColor(BlackoutDS.Semantic.info), dashed: false, in: ctx)
+        drawPolyline(sharedTrack.map { ($0.latitude, $0.longitude) }, color: UIColor(BlackoutDS.Red.sun), dashed: true, in: ctx)
         if let inboundPing, inboundPing.hasCoordinate {
             drawPingPip(inboundPing, hue: inboundPingHue ?? .red, in: ctx)
         }
         if showSlope {
             drawSlope(in: ctx)
         }
-        if showViewshed, let selfFix {
-            drawViewshed(from: selfFix, in: ctx)
+        if showViewshed, let origin = viewshedOrigin ?? selfFix {
+            drawViewshed(from: origin, in: ctx)
         }
     }
 
@@ -849,6 +873,32 @@ final class TileCanvasLayer: UIView {
         guard let fix, let point = point(for: fix) else { return }
         ctx.setFillColor(color.cgColor)
         ctx.fillEllipse(in: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2))
+    }
+
+    private func drawDashedMark(_ fix: LocationFix?, color: UIColor, in ctx: CGContext) {
+        guard let fix, let point = point(for: fix) else { return }
+        ctx.setStrokeColor(color.cgColor)
+        ctx.setLineWidth(pt(2))
+        ctx.setLineDash(phase: 0, lengths: [pt(3), pt(3)])
+        ctx.strokeEllipse(in: CGRect(x: point.x - 5, y: point.y - 5, width: 10, height: 10))
+        ctx.setLineDash(phase: 0, lengths: [])
+    }
+
+    private func drawPolyline(_ coords: [(Double, Double)], color: UIColor, dashed: Bool, in ctx: CGContext) {
+        let points = coords.compactMap { point(latitude: $0.0, longitude: $0.1) }
+        guard points.count >= 2 else { return }
+        ctx.setStrokeColor(color.cgColor)
+        ctx.setLineWidth(pt(2))
+        if dashed {
+            ctx.setLineDash(phase: 0, lengths: [pt(6), pt(4)])
+        }
+        ctx.beginPath()
+        ctx.move(to: points[0])
+        for p in points.dropFirst() {
+            ctx.addLine(to: p)
+        }
+        ctx.strokePath()
+        ctx.setLineDash(phase: 0, lengths: [])
     }
 
     private func drawPingPip(_ fix: LocationFix, hue: FieldPingHue, in ctx: CGContext) {

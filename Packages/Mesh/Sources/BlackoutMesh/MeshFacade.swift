@@ -26,8 +26,17 @@ public final class MeshFacade: MeshServing {
     private var partyCode: String?
     private var callsign: String = Callsign.defaultValue
     private var deviceID = BlackoutID()
+    let storeQueue: StoreAndForwardQueue
 
-    public init() {}
+    public init(storeURL: URL? = nil) {
+        storeQueue = StoreAndForwardQueue(fileURL: storeURL ?? Self.defaultStoreURL())
+    }
+
+    private static func defaultStoreURL() -> URL {
+        let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        return root.appendingPathComponent("blackout-store-forward.json")
+    }
 
     public func setLocalAdvertisement(_ data: Data) {
         advertisement = data
@@ -61,6 +70,9 @@ public final class MeshFacade: MeshServing {
         radio.onPeerCount = { [weak self] count in
             self?.nearbyPeerCount = count
             self?.onNearbyCount?(count)
+            if count > 0 {
+                self?.flushStore()
+            }
         }
         radio.onInbound = { [weak self] event in
             self?.receive(event)
@@ -88,9 +100,10 @@ public final class MeshFacade: MeshServing {
 
     @discardableResult
     public func send(_ envelope: Envelope) -> MeshSendResult {
-        guard isRunning, MeshGate.allowsTraffic(partyCode: partyCode) else { return .notRunning }
         lastOutbound = envelope
         guard let frame = MeshWire.encodeEnvelope(envelope) else { return .failed }
+        storeQueue.noteOutbound(envelope)
+        guard isRunning, MeshGate.allowsTraffic(partyCode: partyCode) else { return .notRunning }
         guard nearbyPeerCount > 0 else { return .noPeers }
         guard pipe?.send(frame: frame) == true else { return .failed }
         return .sent
@@ -113,8 +126,30 @@ public final class MeshFacade: MeshServing {
     }
 
     private func receive(_ inbound: MeshInbound) {
+        if case .envelope(let envelope) = inbound {
+            switch storeQueue.acceptInbound(envelope) {
+            case .duplicate:
+                return
+            case .deliverAndForward(let next):
+                lastEvent = .envelope(next)
+                onInbound?(.envelope(next))
+                inboundSequence &+= 1
+                if nearbyPeerCount > 0, let frame = MeshWire.encodeEnvelope(next) {
+                    _ = pipe?.send(frame: frame)
+                }
+                return
+            }
+        }
         lastEvent = inbound
         onInbound?(inbound)
         inboundSequence &+= 1
+    }
+
+    private func flushStore() {
+        guard isRunning, nearbyPeerCount > 0 else { return }
+        for envelope in storeQueue.flushPending() {
+            guard let frame = MeshWire.encodeEnvelope(envelope) else { continue }
+            _ = pipe?.send(frame: frame)
+        }
     }
 }

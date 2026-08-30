@@ -37,6 +37,7 @@ public protocol LocationServing: AnyObject {
     var headingDegrees: Double? { get }
     var isUpdating: Bool { get }
     var isDeadReckoning: Bool { get }
+    var motionDenied: Bool { get }
     func requestWhenInUse()
     func startUpdating()
     func stopUpdating()
@@ -77,6 +78,7 @@ public protocol MapPackServing: AnyObject {
     func elevationMeters(latitude: Double, longitude: Double) -> Double?
     func slopeDegrees(latitude: Double, longitude: Double) -> Double?
     func viewshed(fromLatitude: Double, fromLongitude: Double, observerHeightMeters: Double) -> [ViewshedRay]
+    var hasDEM: Bool { get }
 }
 
 @MainActor

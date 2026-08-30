@@ -26,6 +26,13 @@ public struct MapsRootView: View {
     var latestInbound: LatestInboundPing?
     var onPingReply: ((FieldReplyID) -> Void)?
     var onNavLockChange: ((Bool) -> Void)?
+    @Binding var fieldMode: FieldJobMode?
+    @Binding var nightRed: Bool
+    var sharedTrack: [FollowTrackWire.Point]
+    var onShareTrack: (([BreadcrumbRecordDTO]) -> Void)?
+    var onSendPack: ((String) -> Void)?
+    var onOpenGuide: ((String) -> Void)?
+    var onNightRedChange: ((Bool) -> Void)?
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
@@ -55,6 +62,9 @@ public struct MapsRootView: View {
     @State private var outingStartLongitude: Double?
     @State private var toolHint: String?
     @State private var torch = MapTorchController()
+    @State private var searchKind: SearchPatternKind = .expandingSquare
+    @State private var searchActive = false
+    @State private var searchLine: [(Double, Double)] = []
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
@@ -74,7 +84,14 @@ public struct MapsRootView: View {
         pendingPingNav: Binding<FieldPingNav?> = .constant(nil),
         latestInbound: LatestInboundPing? = nil,
         onPingReply: ((FieldReplyID) -> Void)? = nil,
-        onNavLockChange: ((Bool) -> Void)? = nil
+        onNavLockChange: ((Bool) -> Void)? = nil,
+        fieldMode: Binding<FieldJobMode?> = .constant(nil),
+        nightRed: Binding<Bool> = .constant(false),
+        sharedTrack: [FollowTrackWire.Point] = [],
+        onShareTrack: (([BreadcrumbRecordDTO]) -> Void)? = nil,
+        onSendPack: ((String) -> Void)? = nil,
+        onOpenGuide: ((String) -> Void)? = nil,
+        onNightRedChange: ((Bool) -> Void)? = nil
     ) {
         self.location = location
         self.mesh = mesh
@@ -93,6 +110,13 @@ public struct MapsRootView: View {
         self.latestInbound = latestInbound
         self.onPingReply = onPingReply
         self.onNavLockChange = onNavLockChange
+        self._fieldMode = fieldMode
+        self._nightRed = nightRed
+        self.sharedTrack = sharedTrack
+        self.onShareTrack = onShareTrack
+        self.onSendPack = onSendPack
+        self.onOpenGuide = onOpenGuide
+        self.onNightRedChange = onNightRedChange
     }
 
     private var sosOnly: Bool { battery.isCritical }
@@ -101,6 +125,16 @@ public struct MapsRootView: View {
     private var peers: [RadarBlip] { roster.radarBlips(selfFix: location.navigationFix) }
     private var locationDenied: Bool {
         location.authorization == .denied || location.authorization == .restricted
+    }
+    private var viewshedOrigin: LocationFix? {
+        ViewshedPolicy.origin(
+            locationDenied: locationDenied,
+            navigationFix: location.navigationFix,
+            droppedPin: location.manualPin
+        )
+    }
+    private var gpsLive: Bool {
+        location.authorization == .authorized && location.navigationFix?.source == .gps
     }
     private var locationOutsideCoverage: Bool {
         guard let fix = resolveCoordinate, fix.hasCoordinate else { return false }
@@ -234,8 +268,11 @@ public struct MapsRootView: View {
             BlackoutDS.Surface.void.ignoresSafeArea()
             mapCanvas
             emptyOverlay
+                .colorMultiply(nightRed ? Color(red: 1, green: 0.55, blue: 0.55) : .white)
             mapLockChrome
+                .colorMultiply(nightRed ? Color(red: 1, green: 0.55, blue: 0.55) : .white)
         }
+        .preferredColorScheme(.dark)
     }
 
     private var mapWithSheets: some View {
@@ -315,6 +352,14 @@ public struct MapsRootView: View {
             showSlope: $showSlope,
             showViewshed: $showViewshed,
             extrasOn: extrasOn,
+            hasDEM: packService.hasDEM,
+            nightRed: $nightRed,
+            nearbyPeerCount: mesh.nearbyPeerCount,
+            relayableReadyIDs: packReady.readyIDs.filter { PackRelayPolicy.isRelayable($0) },
+            onToggleNightRed: {
+                onNightRedChange?(nightRed)
+            },
+            onSendPack: onSendPack,
             showTopoTiles: $showTopoTiles,
             showTrails: $showTrails,
             hasRouting: packService.routing != nil,
@@ -459,7 +504,8 @@ public struct MapsRootView: View {
             breadcrumbs: crumbs,
             viewshed: viewshedRays,
             slope: slopeSamples,
-            showViewshed: showViewshed && extrasOn,
+            showViewshed: showViewshed && extrasOn && packService.hasDEM,
+            viewshedOrigin: viewshedOrigin,
             showSlope: showSlope && extrasOn,
             centerToken: centerToken,
             pinCameraToPack: pinnedToPackCoverage,
@@ -474,6 +520,8 @@ public struct MapsRootView: View {
             activeManeuver: liveManeuver,
             inboundPing: openInboundPingFix,
             inboundPingHue: openInbound?.hue,
+            searchPattern: searchActive ? searchLine : [],
+            sharedTrack: sharedTrack,
             onDropPin: { lat, lon in
                 location.dropManualPin(latitude: lat, longitude: lon)
             },
@@ -565,7 +613,13 @@ public struct MapsRootView: View {
         }
         .onChange(of: compass.isLocked) { _, _ in reportNavLock() }
         .onChange(of: navigate.phase) { _, _ in reportNavLock() }
-        .onAppear { reportNavLock() }
+        .onAppear {
+            reportNavLock()
+            applySharedTrackIfNeeded()
+        }
+        .onChange(of: sharedTrack.count) { _, _ in
+            applySharedTrackIfNeeded()
+        }
     }
 
     private var lockHudStack: some View {
@@ -581,7 +635,25 @@ public struct MapsRootView: View {
                         UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                     }
                 )
+                if DeadReckoningHonesty.chipVisible(gpsLive: gpsLive, isDeadReckoning: location.isDeadReckoning) {
+                    Text(DeadReckoningHonesty.chip)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                } else if location.motionDenied, !gpsLive {
+                    Text(DeadReckoningHonesty.motionDeniedCopy)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                }
+                if showViewshed, !packService.hasDEM {
+                    Text(ViewshedPolicy.noDEM)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.steel)
+                }
                 MapExpeditionBanner(title: openOutingName ?? "No open expedition")
+                if let fieldMode {
+                    fieldModePlate(fieldMode)
+                }
+                fieldToolsRow
             }
             .padding(.horizontal, 16)
             .padding(.top, sizeClass == .regular ? 8 : 64)
@@ -1033,7 +1105,7 @@ public struct MapsRootView: View {
 
     private func refreshTerrain() {
         slopeSamples = showSlope ? packService.slopeSamples() : []
-        if showViewshed, let fix = location.navigationFix, fix.hasCoordinate {
+        if showViewshed, packService.hasDEM, let fix = viewshedOrigin, fix.hasCoordinate {
             viewshedRays = packService.viewshed(
                 fromLatitude: fix.latitude!,
                 fromLongitude: fix.longitude!,
@@ -1064,6 +1136,111 @@ public struct MapsRootView: View {
             outingStartLongitude = nil
             crumbs = []
         }
+    }
+
+    private var fieldToolsRow: some View {
+        HStack(spacing: 8) {
+            let canShare = FollowTrackWire.canShare(crumbs: crumbs)
+            MetalButton(FollowTrackWire.shareLabel, height: BlackoutDS.Hit.sm) {
+                onShareTrack?(crumbs)
+            }
+            .disabled(!canShare)
+            .opacity(canShare ? 1 : FollowTrackWire.disabledOpacity)
+            MetalButton(searchKind.title, height: BlackoutDS.Hit.sm) {
+                let all = SearchPatternKind.allCases
+                if let idx = all.firstIndex(of: searchKind) {
+                    searchKind = all[(idx + 1) % all.count]
+                }
+            }
+            MetalButton(searchActive ? "Stop search" : "Start search", height: BlackoutDS.Hit.sm) {
+                toggleSearch()
+            }
+            MetalButton(nightRed ? "Night on" : "Night red", height: BlackoutDS.Hit.sm) {
+                nightRed.toggle()
+                onNightRedChange?(nightRed)
+            }
+        }
+    }
+
+    private func fieldModePlate(_ mode: FieldJobMode) -> some View {
+        HUDPanel {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(mode.title)
+                    .font(BlackoutDS.titleFont())
+                ForEach(mode.steps, id: \.self) { step in
+                    Text(step)
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Silver.mid)
+                }
+                HStack(spacing: 8) {
+                    MetalButton(FieldPing.label(.coming), height: BlackoutDS.Hit.sm) {
+                        onPingReply?(.coming)
+                    }
+                    MetalButton(FieldPing.label(.hold), height: BlackoutDS.Hit.sm) {
+                        onPingReply?(.hold)
+                    }
+                    MetalButton(FieldPing.label(.cant), height: BlackoutDS.Hit.sm) {
+                        onPingReply?(.cant)
+                    }
+                }
+                MetalButton("Navigate to last pin", height: BlackoutDS.Hit.sm) {
+                    if let pin = location.manualPin ?? lastPeerPin, pin.hasCoordinate {
+                        lockOrRoute(latitude: pin.latitude!, longitude: pin.longitude!, label: mode.title)
+                    }
+                }
+                MetalButton("Field Guide", height: BlackoutDS.Hit.sm) {
+                    onOpenGuide?(mode.articleID)
+                }
+                GhostButton("Exit", height: BlackoutDS.Hit.sm) {
+                    fieldMode = nil
+                }
+            }
+        }
+    }
+
+    private var lastPeerPin: LocationFix? {
+        if let inbound = latestInbound, inbound.hasCoordinate {
+            return LocationFix(latitude: inbound.latitude, longitude: inbound.longitude)
+        }
+        if let stale = roster.peers.first(where: { PartyThread.isStale(lastHeard: $0.updatedAt) }),
+           stale.latitude != nil {
+            return LocationFix(latitude: stale.latitude, longitude: stale.longitude)
+        }
+        return nil
+    }
+
+    private func toggleSearch() {
+        if searchActive {
+            searchActive = false
+            searchLine = []
+            return
+        }
+        guard let region = packService.pack?.region else { return }
+        guard let origin = searchOrigin, origin.hasCoordinate else { return }
+        searchLine = SearchPattern.polyline(
+            kind: searchKind,
+            originLatitude: origin.latitude!,
+            originLongitude: origin.longitude!,
+            region: region
+        )
+        searchActive = true
+    }
+
+    private var searchOrigin: LocationFix? {
+        if let inbound = latestInbound, inbound.hasCoordinate {
+            return LocationFix(latitude: inbound.latitude, longitude: inbound.longitude)
+        }
+        if let stale = roster.peers.first(where: { PartyThread.isStale(lastHeard: $0.updatedAt) }),
+           let lat = stale.latitude, let lon = stale.longitude {
+            return LocationFix(latitude: lat, longitude: lon)
+        }
+        if let pin = location.manualPin, pin.hasCoordinate { return pin }
+        return location.navigationFix
+    }
+
+    private func applySharedTrackIfNeeded() {
+        guard sharedTrack.count >= 2, let last = sharedTrack.last else { return }
+        lockOrRoute(latitude: last.latitude, longitude: last.longitude, label: "Shared track")
     }
 }
 
@@ -1240,6 +1417,12 @@ struct MapLayersSheet: View {
     @Binding var showSlope: Bool
     @Binding var showViewshed: Bool
     var extrasOn: Bool
+    var hasDEM: Bool
+    @Binding var nightRed: Bool
+    var nearbyPeerCount: Int
+    var relayableReadyIDs: [String]
+    var onToggleNightRed: () -> Void
+    var onSendPack: ((String) -> Void)?
     @Binding var showTopoTiles: Bool
     @Binding var showTrails: Bool
     var hasRouting: Bool
@@ -1268,7 +1451,20 @@ struct MapLayersSheet: View {
                     layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
                     layerToggle("Trail", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
                     layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
-                    layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn, persist: onToggleViewshed)
+                    layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn && hasDEM, persist: onToggleViewshed)
+                    if extrasOn, !hasDEM {
+                        Text(ViewshedPolicy.noDEM)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
+                    layerToggle("Night red", on: $nightRed, enabled: true, persist: onToggleNightRed)
+                    if extrasOn, PackRelayPolicy.sendEnabled(nearbyPeerCount: nearbyPeerCount) {
+                        ForEach(relayableReadyIDs, id: \.self) { id in
+                            MetalButton("\(PackRelayPolicy.sendLabel) \(id)", height: BlackoutDS.Hit.sm) {
+                                onSendPack?(id)
+                            }
+                        }
+                    }
                     if hasRouting, extrasOn {
                         TextField("Search this pack", text: $searchQuery)
                             .textInputAutocapitalization(.never)

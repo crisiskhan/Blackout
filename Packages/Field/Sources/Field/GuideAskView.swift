@@ -8,6 +8,9 @@ struct GuideAskView: View {
     var pack: GuidePackSnapshot?
     var context: GuideQueryContext
     var extremeSaver: Bool
+    var focusArticleID: String? = nil
+    var onSendArticle: (String) -> Void = { _ in }
+    var onStartMode: (FieldJobMode) -> Void = { _ in }
 
     @State private var query = ""
     @State private var topic: GuideTopic?
@@ -81,6 +84,14 @@ struct GuideAskView: View {
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.steel)
                         GuideMarkdownView(source: hit.article.body)
+                        MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
+                            onSendArticle(hit.article.id)
+                        }
+                        if let mode = FieldJobMode.from(articleID: hit.article.id) {
+                            MetalButton(mode.title, height: BlackoutDS.Hit.sm) {
+                                onStartMode(mode)
+                            }
+                        }
                     }
                 }
             }
@@ -96,7 +107,11 @@ struct GuideAskView: View {
         .onChange(of: pack?.articles.count) { _, _ in
             if hits.isEmpty, let pack {
                 hits = GuideSearch.retrieve(query: query, topic: topic, pack: pack, context: context)
+                focusInbound(in: pack)
             }
+        }
+        .onChange(of: focusArticleID) { _, _ in
+            if let pack { focusInbound(in: pack) }
         }
         .onChange(of: topic) { _, _ in
             runAsk()
@@ -122,6 +137,12 @@ struct GuideAskView: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+    }
+
+    private func focusInbound(in pack: GuidePackSnapshot) {
+        guard let focusArticleID,
+              let article = pack.articles.first(where: { $0.id == focusArticleID }) else { return }
+        hits = [GuideHit(article: article, score: 1, snippet: article.body)]
     }
 
     private func runAsk() {

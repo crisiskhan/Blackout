@@ -182,11 +182,15 @@ public enum FieldPackCatalog {
     public static let installablePacks: [FieldPackDescriptor] = bundledStatewide + remotePacks
     public static let all: [FieldPackDescriptor] = [denver] + installablePacks
 
-    /// v1 radio relay. Statewide packs stay bundled, not radio-sent.
+    /// City extras plus statewide zips. Mesh carries opaque zip bytes only.
     public static let cityRelayIDs: Set<String> = ["el-paso", "las-cruces", "albuquerque"]
 
     public static func isCityRelay(_ id: String) -> Bool {
         cityRelayIDs.contains(id)
+    }
+
+    public static func isRelayable(_ id: String) -> Bool {
+        PackRelayPolicy.isRelayable(id)
     }
 
     public static func descriptor(id: String) -> FieldPackDescriptor? {

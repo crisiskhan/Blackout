@@ -20,6 +20,7 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
     var onFileReceiveStarted: ((String) -> Void)?
     var onSendComplete: ((String, Bool) -> Void)?
     private var progressObservations: [String: NSKeyValueObservation] = [:]
+    static let maxConnectedPeers = StoreAndForwardQueue.designPeerLoad
 
     init(localPeer: MCPeerID, partyCode: String, deviceID: BlackoutID) {
         self.localPeer = localPeer
@@ -75,17 +76,25 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
             Task { @MainActor [onSendComplete] in onSendComplete?(name, true) }
             return
         }
-        guard let peer = session.connectedPeers.first else {
+        let peers = Array(session.connectedPeers.prefix(Self.maxConnectedPeers))
+        guard !peers.isEmpty else {
             Task { @MainActor [onSendComplete] in onSendComplete?(name, true) }
             return
         }
-        let progress = session.sendResource(at: url, withName: name, toPeer: peer) { [weak self] error in
-            Task { @MainActor [weak self] in
-                self?.progressObservations[name] = nil
-                self?.onSendComplete?(name, error != nil)
+        let tally = FileSendTally(remaining: peers.count)
+        for peer in peers {
+            let progress = session.sendResource(at: url, withName: name, toPeer: peer) { [weak self] error in
+                Task { @MainActor [weak self] in
+                    tally.remaining -= 1
+                    if error != nil { tally.failed = true }
+                    if tally.remaining == 0 {
+                        self?.progressObservations[name] = nil
+                        self?.onSendComplete?(name, tally.failed)
+                    }
+                }
             }
+            observe(progress, name: name)
         }
-        observe(progress, name: name)
     }
 
     private func observe(_ progress: Progress?, name: String) {
@@ -104,7 +113,7 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
     }
 
     private func publishCount() {
-        let count = min(session.connectedPeers.count, 1)
+        let count = min(session.connectedPeers.count, Self.maxConnectedPeers)
         Task { @MainActor [onPeerCount] in
             onPeerCount?(count)
         }
@@ -182,7 +191,7 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
         _ = peerID
         let invitedCode = context.flatMap { String(data: $0, encoding: .utf8) }
         let sameParty = invitedCode == nil || invitedCode == partyCode
-        if sameParty, session.connectedPeers.isEmpty {
+        if sameParty, session.connectedPeers.count < Self.maxConnectedPeers {
             invitationHandler(true, session)
         } else {
             invitationHandler(false, nil)
@@ -191,7 +200,7 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
 
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         guard MeshRadio.matchesParty(info, partyCode: partyCode) else { return }
-        guard session.connectedPeers.isEmpty else { return }
+        guard session.connectedPeers.count < Self.maxConnectedPeers else { return }
         // One side invites so both phones do not double-handshake.
         guard MeshRadio.shouldInvite(
             localID: deviceID,
@@ -204,5 +213,14 @@ final class MultipeerPipe: NSObject, MCSessionDelegate, MCNearbyServiceAdvertise
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         _ = peerID
+    }
+}
+
+private final class FileSendTally: @unchecked Sendable {
+    var remaining: Int
+    var failed = false
+
+    init(remaining: Int) {
+        self.remaining = remaining
     }
 }

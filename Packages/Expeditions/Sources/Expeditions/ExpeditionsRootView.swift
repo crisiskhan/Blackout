@@ -12,6 +12,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
     var onCreateParty: () -> Void
     var onJoinParty: (String) -> Bool
     var onLeaveParty: () -> Void
+    var leaveBehindOn: Bool
+    var nightRed: Bool
+    var onLeaveBehind: (Bool) -> Void
+    var onNightRed: (Bool) -> Void
+    var onStartFieldMode: (FieldJobMode) -> Void
     var packsPlate: PacksPlate
 
     @State private var items: [ExpeditionRecordDTO] = []
@@ -31,6 +36,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
         onCreateParty: @escaping () -> Void = {},
         onJoinParty: @escaping (String) -> Bool = { _ in false },
         onLeaveParty: @escaping () -> Void = {},
+        leaveBehindOn: Bool = false,
+        nightRed: Bool = false,
+        onLeaveBehind: @escaping (Bool) -> Void = { _ in },
+        onNightRed: @escaping (Bool) -> Void = { _ in },
+        onStartFieldMode: @escaping (FieldJobMode) -> Void = { _ in },
         @ViewBuilder packsPlate: () -> PacksPlate
     ) {
         self.persistence = persistence
@@ -41,6 +51,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
         self.onCreateParty = onCreateParty
         self.onJoinParty = onJoinParty
         self.onLeaveParty = onLeaveParty
+        self.leaveBehindOn = leaveBehindOn
+        self.nightRed = nightRed
+        self.onLeaveBehind = onLeaveBehind
+        self.onNightRed = onNightRed
+        self.onStartFieldMode = onStartFieldMode
         self.packsPlate = packsPlate()
         _tracking = State(initialValue: UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking))
     }
@@ -53,6 +68,15 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                     if let storeError {
                         StoreFailure(storeError)
                     }
+                    if LeaveBehindRelayPolicy.isActive(
+                        enabled: leaveBehindOn,
+                        expeditionOpen: items.contains(where: \.isOpen),
+                        batteryCritical: false
+                    ) {
+                        Text(LeaveBehindRelayPolicy.banner)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Red.sun)
+                    }
                     pausePanel("Roster") {
                         PartyVitalsPlate(
                             roster: roster,
@@ -61,7 +85,11 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                             onCommitCallsign: onCommitCallsign,
                             onCreateParty: onCreateParty,
                             onJoinParty: onJoinParty,
-                            onLeaveParty: onLeaveParty
+                            onLeaveParty: {
+                                onLeaveBehind(false)
+                                onLeaveParty()
+                            },
+                            onStartFieldMode: onStartFieldMode
                         )
                     }
                     pausePanel("Gear") {
@@ -88,6 +116,22 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                         Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.dim)
+                        let relayOn = LeaveBehindRelayPolicy.isActive(
+                            enabled: leaveBehindOn,
+                            expeditionOpen: items.contains(where: \.isOpen),
+                            batteryCritical: false
+                        )
+                        MetalButton(
+                            relayOn ? "Relay on" : LeaveBehindRelayPolicy.control,
+                            height: BlackoutDS.Hit.sm
+                        ) {
+                            onLeaveBehind(!leaveBehindOn)
+                        }
+                        .opacity(items.contains(where: \.isOpen) ? 1 : 0.38)
+                        .disabled(!items.contains(where: \.isOpen))
+                        MetalButton(nightRed ? "Night red on" : "Night red", height: BlackoutDS.Hit.sm) {
+                            onNightRed(!nightRed)
+                        }
                         MetalButton("New expedition", height: BlackoutDS.Hit.md) {
                             editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
                         }
@@ -127,6 +171,8 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                 .padding(.bottom, 120)
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
+            .colorMultiply(nightRed ? Color(red: 1, green: 0.55, blue: 0.55) : .white)
+            .preferredColorScheme(.dark)
             .navigationTitle("Expedition")
             .swiftUIToolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -186,6 +232,7 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
             } else {
                 crumbs = []
                 setTracking(false, expedition: nil)
+                onLeaveBehind(false)
             }
             storeError = nil
         } catch {
@@ -219,7 +266,8 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
         let crumb = BreadcrumbRecordDTO(
             expeditionID: expedition.id,
             latitude: fix?.latitude,
-            longitude: fix?.longitude
+            longitude: fix?.longitude,
+            estimated: DeadReckoningHonesty.crumbEstimated(fix: fix)
         )
         do {
             try persistence.appendBreadcrumb(crumb)
@@ -252,6 +300,11 @@ extension ExpeditionsRootView where PacksPlate == EmptyView {
             onCreateParty: onCreateParty,
             onJoinParty: onJoinParty,
             onLeaveParty: onLeaveParty,
+            leaveBehindOn: false,
+            nightRed: false,
+            onLeaveBehind: { _ in },
+            onNightRed: { _ in },
+            onStartFieldMode: { _ in },
             packsPlate: { EmptyView() }
         )
     }
@@ -367,7 +420,8 @@ struct ExpeditionEditor: View {
         let crumb = BreadcrumbRecordDTO(
             expeditionID: record.id,
             latitude: fix?.latitude,
-            longitude: fix?.longitude
+            longitude: fix?.longitude,
+            estimated: DeadReckoningHonesty.crumbEstimated(fix: fix)
         )
         do {
             try persistence.appendBreadcrumb(crumb)

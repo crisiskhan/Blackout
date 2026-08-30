@@ -279,7 +279,7 @@ public final class PackStore {
     /// Zip bytes for the 1/N radio. Prefers the kept GitHub zip (catalog SHA-256).
     /// Already-extracted city packs are re-zipped; that archive cannot match the catalog hash.
     public func prepareRelayZip(_ id: String) throws -> URL {
-        guard FieldPackCatalog.isCityRelay(id) else { throw PackStoreError.notCityRelay }
+        guard FieldPackCatalog.isRelayable(id) else { throw PackStoreError.notCityRelay }
         guard isInstalled(id) else { throw PackStoreError.notInstalled }
         let kept = relayZipURL(id)
         if FileManager.default.fileExists(atPath: kept.path) {
@@ -315,7 +315,7 @@ public final class PackStore {
     }
 
     public func noteReceiving(_ id: String) {
-        guard FieldPackCatalog.isCityRelay(id) else { return }
+        guard FieldPackCatalog.isRelayable(id) else { return }
         if isInstalled(id) { return }
         states[id] = .downloading
         messages[id] = "Receiving from nearby phone…"
@@ -324,7 +324,7 @@ public final class PackStore {
 
     /// Local radio only. No GitHub, no URLSession. Fail leaves Denver / SOS / Guide alone.
     public func installRelayedZip(id: String, zipURL: URL) {
-        guard FieldPackCatalog.isCityRelay(id) else {
+        guard FieldPackCatalog.isRelayable(id) else {
             try? FileManager.default.removeItem(at: zipURL)
             return
         }
@@ -377,7 +377,7 @@ public final class PackStore {
     }
 
     private func keepRelayZip(id: String, from zipURL: URL) {
-        guard FieldPackCatalog.isCityRelay(id) else { return }
+        guard FieldPackCatalog.isRelayable(id) else { return }
         let kept = relayZipURL(id)
         try? FileManager.default.removeItem(at: kept)
         try? FileManager.default.copyItem(at: zipURL, to: kept)

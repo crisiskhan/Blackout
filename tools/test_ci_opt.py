@@ -493,8 +493,8 @@ def test_pack_relay_1n() -> None:
         fail("PackZip cannot archive a folder for relay")
     if "cityRelayIDs" not in catalog or "el-paso" not in catalog:
         fail("city relay allowlist missing")
-    if "Send to nearby phone" not in catalog_list:
-        fail("Expedition pack catalog missing Send to nearby phone")
+    if "Send pack" not in catalog_list and 'PackRelayPolicy.sendLabel' not in catalog_list:
+        fail("Expedition pack catalog missing Send pack")
     if "import BlackoutMesh" in packs_pkg or "import BlackoutMesh" in store:
         fail("Packs must not import Mesh")
     if "relayPack" not in app or "installRelayedZip" not in app:
@@ -1078,7 +1078,75 @@ def main() -> None:
     test_compass_lock_on()
     test_pack_find_civ_water()
     test_hits_23()
+    test_offline_10()
     print("all ci-opt checks passed")
+
+
+def test_offline_10() -> None:
+    wave = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/OfflineWave.swift").read_text()
+    envelope = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/Envelope.swift").read_text()
+    kind = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/PayloadKind.swift").read_text()
+    mesh = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshFacade.swift").read_text()
+    pipe = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MultipeerPipe.swift").read_text()
+    queue = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/StoreAndForward.swift").read_text()
+    tests = (ROOT / "Packages/Mesh/Tests/MeshTests/StoreAndForwardTests.swift").read_text()
+    wave_tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/OfflineWaveTests.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    field = (ROOT / "Packages/Field/Sources/Field/GuideAskView.swift").read_text()
+    catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
+    expedition = (ROOT / "Packages/Expeditions/Sources/Expeditions/ExpeditionsRootView.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    compile = (ROOT / ".github/workflows/ios-compile.yml").read_text()
+    chips = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/Chips.swift").read_text()
+    if "isLightMode = false" not in wave:
+        fail("NightRedMode must stay not light mode")
+    if "hopCount" not in envelope:
+        fail("Envelope lost hopCount pipe metadata")
+    if "case guideCard" not in kind or "case followTrack" not in kind:
+        fail("PayloadKind missing guideCard / followTrack")
+    if "StoreAndForwardQueue" not in mesh or "flushStore" not in mesh:
+        fail("MeshFacade is not store-and-forwarding")
+    if "maxConnectedPeers" not in pipe or "connectedPeers.isEmpty" in pipe and "invitationHandler(true" in pipe.split("connectedPeers.isEmpty")[-1][:200]:
+        if "maxConnectedPeers" not in pipe:
+            fail("MultipeerPipe still 1-peer")
+    if "duplicate" not in tests or "flushPending" not in tests:
+        fail("store-and-forward tests missing")
+    if "testGuideSendIsIdOnly" not in wave_tests or "testSearchPatternStaysInPackBBox" not in wave_tests:
+        fail("offline-10 focused tests missing")
+    if "Send to party" not in field and "GuideCardWire.sendLabel" not in field:
+        fail("Guide lost Send to party")
+    if "Stay as relay" not in expedition and "LeaveBehindRelayPolicy.control" not in expedition:
+        fail("Expedition lost Stay as relay")
+    if "Night red" not in maps:
+        fail("Map lost Night red")
+    if ".preferredColorScheme(.light)" in maps or ".preferredColorScheme(.light)" in root:
+        fail("night red must not enable light mode")
+    if "Dead reckoning, GPS lost." not in chips and "DeadReckoningHonesty.chip" not in maps:
+        fail("honest dead-reckon chip missing")
+    if "Start search" not in maps:
+        fail("search pattern start/stop missing")
+    if "PackRelayPolicy.sendLabel" not in catalog_list:
+        fail("Send pack row missing")
+    if "setLeaveBehindRelay(false)" not in app and "setLeaveBehindRelay(false)" not in root:
+        fail("2% / leave must stop relay")
+    if "URLSession" in mesh or "URLSession" in queue:
+        fail("store-and-forward must not use WAN")
+    if "ciphertext" in queue and "open(" in queue:
+        fail("queue must not inspect ciphertext")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if "cursor/blackout-ios-foundation-7e54" in compile:
+        fail("compile must not push on the feature branch")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if (ROOT / "Blackout/GuidePack/manifest.json").read_text().count('"articleCount": 284') < 1:
+        fail("GuidePack articleCount drifted off 284")
+    ok("offline 10: hop+queue, pack relay, track, viewshed, DR, guide id, search, relay, night, party mode")
 
 
 def test_hits_23() -> None:

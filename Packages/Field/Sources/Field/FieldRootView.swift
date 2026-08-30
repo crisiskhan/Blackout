@@ -20,6 +20,12 @@ public struct FieldRootView: View {
     var sosArmed: Bool
     var packReady: PackReadySnapshot
     var partySize: Int
+    var inboundArticleID: String?
+    var inboundMissing: Bool
+    var nearbyPeerCount: Int
+    var onSendArticle: (String) -> Void
+    var onStartMode: (FieldJobMode) -> Void
+    var onRelayPack: (String) -> Void
 
     @State private var segment: Segment = .guide
     @State private var pack: GuidePackSnapshot?
@@ -30,7 +36,13 @@ public struct FieldRootView: View {
         packURL: URL?,
         sosArmed: Bool,
         packReady: PackReadySnapshot = .empty,
-        partySize: Int = 1
+        partySize: Int = 1,
+        inboundArticleID: String? = nil,
+        inboundMissing: Bool = false,
+        nearbyPeerCount: Int = 0,
+        onSendArticle: @escaping (String) -> Void = { _ in },
+        onStartMode: @escaping (FieldJobMode) -> Void = { _ in },
+        onRelayPack: @escaping (String) -> Void = { _ in }
     ) {
         self.location = location
         self.battery = battery
@@ -38,6 +50,12 @@ public struct FieldRootView: View {
         self.sosArmed = sosArmed
         self.packReady = packReady
         self.partySize = partySize
+        self.inboundArticleID = inboundArticleID
+        self.inboundMissing = inboundMissing
+        self.nearbyPeerCount = nearbyPeerCount
+        self.onSendArticle = onSendArticle
+        self.onStartMode = onStartMode
+        self.onRelayPack = onRelayPack
     }
 
     public var body: some View {
@@ -59,10 +77,29 @@ public struct FieldRootView: View {
                                 ? "Ask first. Pack only. Not a website."
                                 : "Ask first. Pack only. \(packReady.readyIDs.count) field packs Ready."
                         )
+                        if inboundMissing, let inboundArticleID {
+                            HUDPanel {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(GuideCardWire.missingCopy)
+                                        .font(BlackoutDS.titleFont())
+                                    Text(inboundArticleID)
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.steel)
+                                    if nearbyPeerCount >= 1 {
+                                        MetalButton("Send pack", height: BlackoutDS.Hit.sm) {
+                                            onRelayPack("el-paso")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         GuideAskView(
                             pack: pack,
                             context: guideContext,
-                            extremeSaver: battery.isExtremeSaver
+                            extremeSaver: battery.isExtremeSaver,
+                            focusArticleID: inboundArticleID,
+                            onSendArticle: onSendArticle,
+                            onStartMode: onStartMode
                         )
                         Text("Situation cards")
                             .font(BlackoutDS.titleFont())

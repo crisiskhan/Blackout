@@ -70,8 +70,10 @@ public enum IdleTimerPolicy {
         pttLastHeard: Date?,
         sosCoverPresented: Bool,
         inboundImDownOpen: Bool,
+        leaveBehindRelay: Bool = false,
         now: Date = Date()
     ) -> Bool {
+        if leaveBehindRelay { return true }
         if navLockOn { return true }
         if pttTransmitting { return true }
         if sosCoverPresented { return true }

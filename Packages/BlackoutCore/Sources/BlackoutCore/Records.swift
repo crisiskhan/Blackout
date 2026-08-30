@@ -48,19 +48,23 @@ public struct BreadcrumbRecordDTO: Hashable, Codable, Sendable, Identifiable {
     public var recordedAt: Date
     public var latitude: Double?
     public var longitude: Double?
+    /// Dead-reckon / estimated. Never drawn as a GPS-quality point.
+    public var estimated: Bool
 
     public init(
         id: BlackoutID = BlackoutID(),
         expeditionID: BlackoutID,
         recordedAt: Date = Date(),
         latitude: Double? = nil,
-        longitude: Double? = nil
+        longitude: Double? = nil,
+        estimated: Bool = false
     ) {
         self.id = id
         self.expeditionID = expeditionID
         self.recordedAt = recordedAt
         self.latitude = latitude
         self.longitude = longitude
+        self.estimated = estimated
     }
 
     public var hasCoordinate: Bool { latitude != nil && longitude != nil }

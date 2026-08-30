@@ -35,7 +35,7 @@ public struct GPSChip: View {
         case compass = "Compass only"
         case denied = "GPS denied"
         case none = "No fix"
-        case deadReckoning = "DEAD RECKONING"
+        case deadReckoning = "Dead reckoning, GPS lost."
     }
 
     private let mode: Mode

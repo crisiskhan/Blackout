@@ -13,6 +13,7 @@ public final class LocationService: LocationServing {
     public private(set) var headingDegrees: Double?
     public private(set) var isUpdating = false
     public private(set) var isDeadReckoning = false
+    public private(set) var motionDenied = false
     public private(set) var deadReckoned: LocationFix?
 
     public var navigationFix: LocationFix? {
@@ -144,6 +145,8 @@ public final class LocationService: LocationServing {
     }
 
     private func startDeadReckoningSensors() {
+        refreshMotionAuthorization()
+        guard DeadReckoningHonesty.canDeadReckon(motionDenied: motionDenied) else { return }
         if CMPedometer.isStepCountingAvailable() {
             let from = Date().addingTimeInterval(-1)
             pedometer.startUpdates(from: from) { [weak self] data, _ in
@@ -236,13 +239,27 @@ public final class LocationService: LocationServing {
             isDeadReckoning = false
             return
         }
+        refreshMotionAuthorization()
         let gpsLive = authorization == .authorized && lastKnown?.source == .gps && isFresh(lastKnown)
         let hasOrigin = (origin ?? lastKnown ?? manualPin)?.hasCoordinate == true
-        isDeadReckoning = !gpsLive && hasOrigin
+        isDeadReckoning = !gpsLive && hasOrigin && DeadReckoningHonesty.canDeadReckon(motionDenied: motionDenied)
         if !isDeadReckoning {
             deadReckoned = nil
         } else if origin == nil {
             origin = lastKnown ?? manualPin
+        }
+    }
+
+    private func refreshMotionAuthorization() {
+        if #available(iOS 11.0, *) {
+            switch CMPedometer.authorizationStatus() {
+            case .denied, .restricted:
+                motionDenied = true
+            case .authorized, .notDetermined:
+                motionDenied = false
+            @unknown default:
+                motionDenied = false
+            }
         }
     }
 

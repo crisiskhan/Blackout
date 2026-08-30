@@ -63,6 +63,7 @@ final class BreadcrumbRecord {
     var recordedAt: Date
     var latitude: Double?
     var longitude: Double?
+    var estimated: Bool = false
 
     init(_ dto: BreadcrumbRecordDTO) {
         id = dto.id.rawValue
@@ -70,6 +71,7 @@ final class BreadcrumbRecord {
         recordedAt = dto.recordedAt
         latitude = dto.latitude
         longitude = dto.longitude
+        estimated = dto.estimated
     }
 
     func dto() -> BreadcrumbRecordDTO {
@@ -78,7 +80,8 @@ final class BreadcrumbRecord {
             expeditionID: BlackoutID(expeditionID),
             recordedAt: recordedAt,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            estimated: estimated
         )
     }
 }

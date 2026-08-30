@@ -79,6 +79,9 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onChange(of: container.nightRed) { _, _ in
+            // Night red is not light mode. Scheme stays dark.
+        }
         .sheet(isPresented: settingsSheetBinding) {
             SettingsRootView(
                 battery: container.battery,
@@ -174,6 +177,7 @@ struct RootView: View {
     private func syncSensorsToBattery() {
         if container.battery.isCritical {
             showSettings = false
+            container.setLeaveBehindRelay(false)
             container.location.stopUpdating()
             container.mesh.stop()
             container.ptt.stop()
@@ -289,7 +293,17 @@ struct RootView: View {
             onNavLockChange: { on in
                 container.navLockActive = on
                 container.applyIdleTimer()
-            }
+            },
+            fieldMode: $container.fieldMode,
+            nightRed: $container.nightRed,
+            sharedTrack: container.sharedTrack,
+            onShareTrack: { container.sendFollowTrack($0) },
+            onSendPack: { container.relayPack($0) },
+            onOpenGuide: { id in
+                container.inboundGuideID = id
+                destination = .field
+            },
+            onNightRedChange: { container.setNightRed($0) }
         )
         .swiftUIToolbar {
             if sizeClass != .regular {
@@ -340,7 +354,16 @@ struct RootView: View {
             packURL: container.guidePackURL,
             sosArmed: UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed),
             packReady: container.packs.readySnapshot,
-            partySize: 1 + container.party.peerCount
+            partySize: 1 + container.party.peerCount,
+            inboundArticleID: container.inboundGuideID,
+            inboundMissing: container.inboundGuideMissing,
+            nearbyPeerCount: container.mesh.nearbyPeerCount,
+            onSendArticle: { container.sendGuideCard($0) },
+            onStartMode: { mode in
+                container.startFieldMode(mode)
+                destination = .map
+            },
+            onRelayPack: { container.relayPack($0) }
         )
     }
 
@@ -353,7 +376,15 @@ struct RootView: View {
             onCommitCallsign: { container.commitCallsign($0) },
             onCreateParty: { container.createParty() },
             onJoinParty: { container.joinParty($0) },
-            onLeaveParty: { container.leaveParty() }
+            onLeaveParty: { container.leaveParty() },
+            leaveBehindOn: container.leaveBehindRelay,
+            nightRed: container.nightRed,
+            onLeaveBehind: { container.setLeaveBehindRelay($0) },
+            onNightRed: { container.setNightRed($0) },
+            onStartFieldMode: { mode in
+                container.startFieldMode(mode)
+                destination = .map
+            }
         ) {
             FieldPackCatalogList(
                 store: container.packs,

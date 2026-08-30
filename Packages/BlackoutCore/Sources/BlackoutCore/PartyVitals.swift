@@ -45,6 +45,8 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
     public var latitude: Double?
     public var longitude: Double?
     public var updatedAt: Date
+    /// Honest radio hops from the pipe. Not ciphertext.
+    public var hops: Int
 
     public init(
         id: BlackoutID = BlackoutID(),
@@ -58,7 +60,8 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         dizzyAt: Date? = nil,
         latitude: Double? = nil,
         longitude: Double? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        hops: Int = 1
     ) {
         self.id = id
         self.displayName = displayName
@@ -72,6 +75,7 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         self.latitude = latitude
         self.longitude = longitude
         self.updatedAt = updatedAt
+        self.hops = hops
     }
 
     /// Person name is the callsign. There is no second display-name field.
@@ -431,6 +435,7 @@ public final class PartyRoster {
             guard var member = PartyStatusWire.decode(envelope.ciphertext) else { return .ignored }
             member.id = envelope.sender
             member.displayName = Callsign.commit(member.displayName ?? "")
+            member.hops = max(1, envelope.hopCount)
             return upsertPeer(member)
         case .sosAlert:
             var member = peers.first(where: { $0.id == envelope.sender })
@@ -439,9 +444,10 @@ public final class PartyRoster {
                     displayName: SOSMeshBody.callsign(in: envelope.ciphertext)
                 )
             member.displayName = SOSMeshBody.callsign(in: envelope.ciphertext)
+            member.hops = max(1, envelope.hopCount)
             PartyVitals.apply(.notOK, to: &member)
             return upsertPeer(member)
-        case .message, .pttClip, .locationFix, .breadcrumb:
+        case .message, .pttClip, .locationFix, .breadcrumb, .guideCard, .followTrack:
             return .ignored
         }
     }
@@ -462,7 +468,7 @@ public final class PartyRoster {
                 bearingDegrees: bearing,
                 rangeMeters: range,
                 pingAge: now.timeIntervalSince(peer.updatedAt),
-                hops: 1,
+                hops: peer.hops,
                 band: peer.band,
                 latitude: lat,
                 longitude: lon

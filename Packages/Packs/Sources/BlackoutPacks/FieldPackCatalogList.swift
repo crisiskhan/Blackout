@@ -61,16 +61,16 @@ public struct FieldPackCatalogList: View {
                     .disabled(state == .downloading)
                     .opacity(state == .downloading ? 0.6 : 1)
                 }
-                if FieldPackCatalog.isCityRelay(pack.id), store.isReady(pack.id) {
-                    if nearbyCount > 0 {
+                if FieldPackCatalog.isRelayable(pack.id), store.isReady(pack.id) {
+                    if PackRelayPolicy.sendEnabled(nearbyPeerCount: nearbyCount) {
                         let sending = store.progress[pack.id] != nil
-                        MetalButton(sending ? "Sending" : "Send to nearby phone", height: BlackoutDS.Hit.sm) {
+                        MetalButton(sending ? "Sending" : PackRelayPolicy.sendLabel, height: BlackoutDS.Hit.sm) {
                             onSendToPeer?(pack.id)
                         }
                         .disabled(sending)
                         .opacity(sending ? 0.6 : 1)
                     } else {
-                        Text("Send waits for one nearby phone.")
+                        Text("Send pack waits for a nearby phone.")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.steel)
                     }

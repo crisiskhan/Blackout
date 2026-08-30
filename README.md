@@ -2,7 +2,7 @@
 
 Offline-first field app for iPhone and iPad. Native SwiftUI, iOS 18+, Universal, bundle ID `com.crisiskhan.blackout`.
 
-This repository is a **foundation + wave 2 slice 1** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device, and a **1-peer local-radio mesh** (Multipeer, no WAN). It is **not** a v1 ship of stranger Radar, vitals, pack relay, N>1 routing, or auto-911.
+This repository is a **foundation + wave 2 slice 1** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device, and a **same-party hopping mesh** (Multipeer, store-and-forward, no WAN). It is **not** a v1 ship of stranger Radar, satellite, or auto-911.
 
 ## Compile (Crisis — no Mac)
 
@@ -15,7 +15,7 @@ Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compil
 
 ### TestFlight (Crisis — no Mac)
 
-`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) on **macos-26 / Xcode 26** (iOS 26 SDK) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). Minimum iOS stays **18.0**. It runs on push to this branch and on `workflow_dispatch`. Unsigned compile stays `.github/workflows/ios-compile.yml` on macos-14 / Xcode 16. Do not run `xcodebuild` locally.
+`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) on **macos-26 / Xcode 26** (iOS 26 SDK) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). Minimum iOS stays **18.0**. It is **`workflow_dispatch` only** — it does not run on push. Unsigned compile stays `.github/workflows/ios-compile.yml` (`pull_request` + push `main`). Do not run `xcodebuild` locally.
 
 ### Field Packs (GitHub Releases)
 
@@ -62,7 +62,7 @@ The target copies `Blackout/DefaultPack` two ways so a synchronized-group miss c
 1. **Copy Bundle Resources** — folder reference `Blackout/DefaultPack`.
 2. **Run Script** “Copy DefaultPack into app bundle” (`ditto` into `$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack`). The script **fails the build** if `manifest.json` is missing.
 
-Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` (`tiles/z/x/y.png`) are in the tree; `Blackout/GuidePack/articles.jsonl` is 132 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` **or tile PNGs** are missing from DefaultPack.
+Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` (`tiles/z/x/y.png`) are in the tree; `Blackout/GuidePack/articles.jsonl` is 284 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` **or tile PNGs** are missing from DefaultPack.
 
 On device: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
 
@@ -83,7 +83,7 @@ Device airplane-mode tile proof is a later iPhone check, not an ASUS `xcodebuild
 Still airplane-first. Still no `URLSession` on Map / SOS / Guide. Live mesh is **1 nearby phone** on the same local radio.
 
 1. **Radar HUD** on Map — polar rings + 3s red.glow sweep on the file-tile terrain (never a black disc). Pinch still zooms the map. Heading-up / north-up. 0 peers: self + sweep only, no fake people. Members would be filled silver disks; strangers hollow rings. Tap self is not a peer sheet. `RadarPeerSheet` exists for later blips. Sweep haptic only if a blip would be crossed; sweep audio default **off**.
-2. **Guide ask-engine** — Field tab: ask bar first, taxonomy chips, situation cards remain. Type now; on-device mic if permitted else type. `Blackout/GuidePack/` has **132** Rockies/Denver articles + inverted index (situation, water, fire, shelter, first aid, signaling, navigation, weather, plants/food, animals, tools, bushcraft, skills). Extractive snippets from the pack. Plants never get an edible verdict. `SystemLanguageModel` only if `availability == .available`, grounded on retrieved text, never first paint, never wait/download.
+2. **Guide ask-engine** — Field tab: ask bar first, taxonomy chips, situation cards remain. Type now; on-device mic if permitted else type. `Blackout/GuidePack/` has **284** Rockies/Denver articles + inverted index (situation, water, fire, shelter, first aid, signaling, navigation, weather, plants/food, animals, tools, bushcraft, skills). Extractive snippets from the pack. Plants never get an edible verdict. `SystemLanguageModel` only if `availability == .available`, grounded on retrieved text, never first paint, never wait/download.
 3. **Dead reckoning** — compass + step-length IMU when GPS is denied or cold. HUD chip **DEAD RECKONING**. Manual pin still works.
 4. **Viewshed + slope** — toggles on Map chrome from bundled DEM. Copy says sample-quality, not USGS.
 5. **SOS pictograms** — language-free siren, strobe, satellite/OS SOS, cancel on the confirm panel, plus existing slide. Still no auto-dial.
@@ -91,7 +91,7 @@ Still airplane-first. Still no `URLSession` on Map / SOS / Guide. Live mesh is *
 7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
 8. **Missed check-in** — opt-in per expedition, default OFF. Timer lives on `AppContainer` so it keeps running if Expedition is unmounted (including last-2%). On miss: open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
 
-Verify GuidePack in the tree (132 lines; Actions copies it into the app via the same fail-if-missing ditto phase):
+Verify GuidePack in the tree (284 articles; Actions copies it into the app via the same fail-if-missing ditto phase):
 
 ```bash
 test -f Blackout/GuidePack/manifest.json && wc -l Blackout/GuidePack/articles.jsonl

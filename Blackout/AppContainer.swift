@@ -36,6 +36,13 @@ final class AppContainer {
     var latestInbound: LatestInboundPing?
     var navLockActive = false
     var radioBanner = MeshRadioBannerPolicy()
+    var fieldMode: FieldJobMode?
+    var inboundGuideID: String?
+    var inboundGuideMissing = false
+    var inboundGuideMissingNeedsPack = false
+    var leaveBehindRelay = UserDefaults.standard.bool(forKey: BlackoutKeys.leaveBehindRelay)
+    var nightRed = UserDefaults.standard.bool(forKey: BlackoutKeys.mapNightRed)
+    var sharedTrack: [FollowTrackWire.Point] = []
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
     private var lastNearbyCount = 0
@@ -177,10 +184,61 @@ final class AppContainer {
 
     func leaveParty() {
         party.leaveParty()
+        setLeaveBehindRelay(false)
         mesh.stop()
         LiveActivityHub.end()
         latestInbound = nil
         applyIdleTimer()
+    }
+
+    var hasOpenExpedition: Bool {
+        (try? persistence.expeditions().contains(where: \.isOpen)) ?? false
+    }
+
+    func setLeaveBehindRelay(_ on: Bool) {
+        if LeaveBehindRelayPolicy.shouldStop(leaveOrEnd: !hasOpenExpedition, batteryCritical: battery.isCritical) {
+            leaveBehindRelay = false
+        } else {
+            leaveBehindRelay = on
+        }
+        UserDefaults.standard.set(leaveBehindRelay, forKey: BlackoutKeys.leaveBehindRelay)
+        applyIdleTimer()
+    }
+
+    func setNightRed(_ on: Bool) {
+        nightRed = on
+        UserDefaults.standard.set(on, forKey: BlackoutKeys.mapNightRed)
+    }
+
+    func sendGuideCard(_ articleID: String) {
+        let envelope = GuideCardWire.envelope(
+            articleID: articleID,
+            sender: crypto.localIdentity,
+            recipient: crypto.preferredRecipient
+        )
+        mesh.send(envelope)
+    }
+
+    func startFieldMode(_ mode: FieldJobMode) {
+        fieldMode = mode
+    }
+
+    func exitFieldMode() {
+        fieldMode = nil
+    }
+
+    func sendFollowTrack(_ crumbs: [BreadcrumbRecordDTO]) {
+        guard FollowTrackWire.canShare(crumbs: crumbs) else { return }
+        let envelope = FollowTrackWire.envelope(
+            points: FollowTrackWire.points(from: crumbs),
+            sender: crypto.localIdentity,
+            recipient: crypto.preferredRecipient
+        )
+        mesh.send(envelope)
+    }
+
+    func applySharedTrack(_ points: [FollowTrackWire.Point]) {
+        sharedTrack = points
     }
 
     func acknowledgeLatestPing() {
@@ -210,7 +268,12 @@ final class AppContainer {
             pttTransmitting: ptt.isTransmitting,
             pttLastHeard: ptt.lastHeardAt,
             sosCoverPresented: sosCoverOpen,
-            inboundImDownOpen: inboundImDownOpen
+            inboundImDownOpen: inboundImDownOpen,
+            leaveBehindRelay: LeaveBehindRelayPolicy.isActive(
+                enabled: leaveBehindRelay,
+                expeditionOpen: hasOpenExpedition,
+                batteryCritical: battery.isCritical
+            )
         )
     }
 
@@ -290,7 +353,6 @@ final class AppContainer {
     }
 
     func sendPartyStatus(_ envelope: Envelope) {
-        guard mesh.nearbyPeerCount > 0 else { return }
         mesh.send(envelope)
     }
 
@@ -300,9 +362,32 @@ final class AppContainer {
             ingestPartyStatus(envelope)
         case .message:
             ingestMessage(envelope)
+        case .guideCard:
+            ingestGuideCard(envelope)
+        case .followTrack:
+            ingestFollowTrack(envelope)
         case .pttClip, .locationFix, .breadcrumb:
             return
         }
+    }
+
+    private func ingestGuideCard(_ envelope: Envelope) {
+        guard let id = GuideCardWire.decode(envelope.ciphertext) else { return }
+        inboundGuideID = id
+        inboundGuideMissing = !localGuideHasArticle(id)
+        inboundGuideMissingNeedsPack = inboundGuideMissing
+    }
+
+    private func localGuideHasArticle(_ id: String) -> Bool {
+        guard let root = guidePackURL else { return false }
+        let articles = root.appendingPathComponent("articles.jsonl")
+        guard let raw = try? String(contentsOf: articles, encoding: .utf8) else { return false }
+        return raw.contains("\"id\":\"\(id)\"")
+    }
+
+    private func ingestFollowTrack(_ envelope: Envelope) {
+        guard let points = FollowTrackWire.decode(envelope.ciphertext), points.count >= 2 else { return }
+        sharedTrack = points
     }
 
     private func ingestPartyStatus(_ envelope: Envelope) {
