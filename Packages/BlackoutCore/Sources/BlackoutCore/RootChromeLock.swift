@@ -22,10 +22,15 @@ public enum LaunchLock {
     public static let metalRingIsSwiftUI = false
     public static let sliderHasSOSTwin = true
     public static let sosTwinIsMapFAB = false
+    public static let trackHit: Double = 56
+    public static let handleHit: Double = 56
     public static let sosTwinHit: Double = 56
     public static let handleIsMetal = true
     public static let phrase = "SLIDE TO UNLOCK"
     public static let slideArmsSOS = false
+    public static let twinHoldPresentsUnarmedCover = true
+    public static let twinHoldArmsSOS = false
+    public static let twinHoldSeconds: Double = 1.5
     public static let persistedSOSArmedStealsFirstOpen = false
     public static let coldLaunchShowsSplash = false
     public static let startsSensorsBeforeUnlock = false

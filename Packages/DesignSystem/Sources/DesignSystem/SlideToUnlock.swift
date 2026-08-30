@@ -1,42 +1,45 @@
 import BlackoutCore
 import SwiftUI
 
-/// Unlock track. Metal handle slides to a fixed SOS twin on the right. Not the 88pt Map FAB.
+/// Unlock track. 56 metal capsule, 56 metal handle, 56 red.core SOS twin.
+/// Slide unlocks. Hold the twin 1.5s presents the unarmed cover. Not the 88pt Map FAB.
 public struct SlideToUnlock: View {
     private let phrase: String
     private let knobSize: CGFloat
     private let onUnlock: () -> Void
+    private let onHoldSOS: (() -> Void)?
     @State private var offset: CGFloat = 0
 
     public init(
         _ phrase: String = LaunchLock.phrase,
         knobSize: CGFloat = CGFloat(LaunchLock.sosTwinHit),
+        onHoldSOS: (() -> Void)? = nil,
         onUnlock: @escaping () -> Void
     ) {
         self.phrase = phrase
         self.knobSize = knobSize
+        self.onHoldSOS = onHoldSOS
         self.onUnlock = onUnlock
     }
 
     public var body: some View {
         GeometryReader { geo in
             let knob = knobSize
-            let maxTravel = max(0, geo.size.width - knob - 8)
+            let maxTravel = max(0, geo.size.width - knob)
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(BlackoutDS.Surface.sunken)
+                    .fill(BlackoutDS.Surface.raised)
                 Text(phrase)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal, knob + 8)
+                    .padding(.horizontal, knob)
+                    .allowsHitTesting(false)
                 HStack {
                     Spacer(minLength: 0)
                     sosTwin
                 }
-                .padding(4)
                 metalHandle
-                    .padding(4)
                     .offset(x: offset)
                     .gesture(
                         DragGesture()
@@ -55,7 +58,7 @@ public struct SlideToUnlock: View {
                     .accessibilityLabel(phrase)
             }
         }
-        .frame(height: knobSize + 8)
+        .frame(height: CGFloat(LaunchLock.trackHit))
         .overlay(
             Capsule()
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
@@ -76,11 +79,13 @@ public struct SlideToUnlock: View {
             Circle()
                 .stroke(BlackoutDS.Red.hot, lineWidth: 2)
             Text("SOS")
-                .font(.system(size: knobSize >= 64 ? 14 : 12, weight: .bold))
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(BlackoutDS.Silver.metal)
         }
         .frame(width: knobSize, height: knobSize)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
+        .onLongPressGesture(minimumDuration: SOSChrome.holdSeconds) {
+            onHoldSOS?()
+        }
+        .accessibilityLabel("SOS. Hold to confirm.")
     }
 }

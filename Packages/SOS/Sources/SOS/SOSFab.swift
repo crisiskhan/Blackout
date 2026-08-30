@@ -20,6 +20,7 @@ public struct SOSFab: View {
     var presentConfirm: Binding<Bool>?
     var coverOpen: Binding<Bool>?
     var suppressPersistedArmedAutoPresent: Bool
+    var showsDisk: Bool
 
     private static let armedKey = BlackoutKeys.sosArmed
 
@@ -31,7 +32,8 @@ public struct SOSFab: View {
         roster: PartyRoster,
         presentConfirm: Binding<Bool>? = nil,
         coverOpen: Binding<Bool>? = nil,
-        suppressPersistedArmedAutoPresent: Bool = false
+        suppressPersistedArmedAutoPresent: Bool = false,
+        showsDisk: Bool = true
     ) {
         self.location = location
         self.persistence = persistence
@@ -41,10 +43,70 @@ public struct SOSFab: View {
         self.presentConfirm = presentConfirm
         self.coverOpen = coverOpen
         self.suppressPersistedArmedAutoPresent = suppressPersistedArmedAutoPresent
+        self.showsDisk = showsDisk
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
     }
 
     public var body: some View {
+        Group {
+            if showsDisk {
+                disk
+            } else {
+                Color.clear.frame(width: 0, height: 0)
+            }
+        }
+        .fullScreenCover(isPresented: $showConfirm) {
+            SOSConfirmCover(
+                location: location,
+                mesh: mesh,
+                roster: roster,
+                storeError: $storeError,
+                onArm: arm,
+                onDismissUnarmed: { showConfirm = false }
+            )
+        }
+        .fullScreenCover(isPresented: $showArmedPanel) {
+            SOSArmedPanel(
+                location: location,
+                mesh: mesh,
+                roster: roster,
+                onDismiss: { showArmedPanel = false }
+            )
+        }
+        .opacity(showsDisk && battery.hidesSOS ? 0 : 1)
+        .allowsHitTesting(!showsDisk || !battery.hidesSOS)
+        .overlay(alignment: .top) {
+            if let storeError, !showConfirm, !showArmedPanel, showsDisk {
+                StoreFailure(storeError)
+                    .frame(width: 280)
+                    .offset(y: -120)
+            }
+        }
+        .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
+            if requested {
+                if showsDisk {
+                    if isArmed {
+                        if SOSArmedRestore.shouldAutoPresentArmedOverlay(
+                            persistedArmed: true,
+                            presentRequested: true,
+                            newBinaryLaunch: suppressPersistedArmedAutoPresent
+                        ) {
+                            showArmedPanel = true
+                        }
+                    } else {
+                        showConfirm = true
+                    }
+                } else {
+                    showConfirm = true
+                }
+                presentConfirm?.wrappedValue = false
+            }
+        }
+        .onChange(of: showConfirm) { _, _ in publishCover() }
+        .onChange(of: showArmedPanel) { _, _ in publishCover() }
+    }
+
+    private var disk: some View {
         Button(action: {}) {
             ZStack {
                 Circle()
@@ -71,51 +133,6 @@ public struct SOSFab: View {
                     }
                 }
         )
-        .fullScreenCover(isPresented: $showConfirm) {
-            SOSConfirmCover(
-                location: location,
-                mesh: mesh,
-                roster: roster,
-                storeError: $storeError,
-                onArm: arm,
-                onDismissUnarmed: { showConfirm = false }
-            )
-        }
-        .fullScreenCover(isPresented: $showArmedPanel) {
-            SOSArmedPanel(
-                location: location,
-                mesh: mesh,
-                roster: roster,
-                onDismiss: { showArmedPanel = false }
-            )
-        }
-        .opacity(battery.hidesSOS ? 0 : 1)
-        .allowsHitTesting(!battery.hidesSOS)
-        .overlay(alignment: .top) {
-            if let storeError, !showConfirm, !showArmedPanel {
-                StoreFailure(storeError)
-                    .frame(width: 280)
-                    .offset(y: -120)
-            }
-        }
-        .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
-            if requested {
-                if isArmed {
-                    if SOSArmedRestore.shouldAutoPresentArmedOverlay(
-                        persistedArmed: true,
-                        presentRequested: true,
-                        newBinaryLaunch: suppressPersistedArmedAutoPresent
-                    ) {
-                        showArmedPanel = true
-                    }
-                } else {
-                    showConfirm = true
-                }
-                presentConfirm?.wrappedValue = false
-            }
-        }
-        .onChange(of: showConfirm) { _, _ in publishCover() }
-        .onChange(of: showArmedPanel) { _, _ in publishCover() }
     }
 
     private func arm() {

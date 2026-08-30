@@ -53,11 +53,11 @@ struct RootView: View {
         ZStack {
             BlackoutDS.Surface.void.ignoresSafeArea()
             if !container.lock.isUnlocked {
-                LockGateView(lock: container.lock)
+                LockGateView(lock: container.lock, onHoldSOS: {
+                    container.sosConfirmRequested = true
+                })
             } else {
                 chrome
-                // SOS stays a ZStack sibling of TabView (`RootChromeLock.sosPlacement`).
-                // Tab switches must not remount the 88pt disk.
                 if let bootError = container.bootError {
                     VStack {
                         StoreFailure(bootError)
@@ -67,7 +67,6 @@ struct RootView: View {
                     }
                     .allowsHitTesting(false)
                 }
-                sosOverlay
                 CameraControlPTTCatcher()
                     .frame(width: 0, height: 0)
                     .allowsHitTesting(false)
@@ -78,6 +77,9 @@ struct RootView: View {
                     settingsOverlay
                 }
             }
+            // SOS stays a ZStack sibling of TabView (`RootChromeLock.sosPlacement`).
+            // Tab switches must not remount the 88pt disk. Lock hides the disk.
+            sosOverlay
         }
         .preferredColorScheme(.dark)
         .onChange(of: container.nightRed) { _, _ in
@@ -430,14 +432,19 @@ struct RootView: View {
                     roster: container.party,
                     presentConfirm: $container.sosConfirmRequested,
                     coverOpen: $container.sosCoverOpen,
-                    suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent
+                    suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent,
+                    showsDisk: container.lock.isUnlocked
                 )
                 .padding(.trailing, 16)
                 .padding(.bottom, fabBottomPadding)
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .allowsHitTesting(true)
+        // Locked: pass hits through to the slider. Cover-open: the unarmed twin-hold
+        // sheet must stay tappable. Unlocked: the 88pt FAB as usual.
+        .allowsHitTesting(
+            container.lock.isUnlocked || container.sosCoverOpen || container.sosConfirmRequested
+        )
     }
 
     /// Same 88pt SOS on Map / Comms / Field / Expedition — RootView sibling, not inside TabView.

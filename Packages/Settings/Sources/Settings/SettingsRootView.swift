@@ -212,9 +212,11 @@ public struct SettingsRootView: View {
 
 public struct LockGateView: View {
     @Bindable var lock: AppLockService
+    private let onHoldSOS: (() -> Void)?
 
-    public init(lock: AppLockService) {
+    public init(lock: AppLockService, onHoldSOS: (() -> Void)? = nil) {
         self.lock = lock
+        self.onHoldSOS = onHoldSOS
     }
 
     public var body: some View {
@@ -226,7 +228,7 @@ public struct LockGateView: View {
                 .foregroundStyle(BlackoutDS.Silver.dim)
                 .multilineTextAlignment(.center)
             Spacer()
-            SlideToUnlock {
+            SlideToUnlock(onHoldSOS: onHoldSOS) {
                 lock.unlockSession()
             }
             .padding(.horizontal, 20)
