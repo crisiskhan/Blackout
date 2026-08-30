@@ -596,9 +596,19 @@ def test_party_vitals_red_loop() -> None:
     if "case partyStatus" not in kind:
         fail("PayloadKind missing partyStatus")
     ds = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/BlackoutDS.swift").read_text()
-    if "injury = true" not in core or "band = .red" not in core:
+    if "injury = true" not in core or "return .red" not in core:
         fail("I AM NOT OK must set injury and red")
-    if "import HealthKit" in core or "import HealthKit" in plate or "import HealthKit" in chip:
+    if "case .rested" not in core or "case .dizzy" not in core:
+        fail("RESTED / DIZZY missing from vitals math")
+    if "RESTED" in chip or "DIZZY" in chip or "RESTED" in maps or "DIZZY" in maps:
+        fail("RESTED / DIZZY must stay in vitals math — no extra Map chips")
+    if "RESTED" in plate or "DIZZY" in plate:
+        fail("RESTED / DIZZY must not grow roster chips")
+    if "redFiresSOS = false" not in core:
+        fail("going red must stay not-an-SOS-fire")
+    if "sosConfirmRequested" in maps or "sosAlert" in maps or "kind: .sosAlert" in core:
+        fail("going red must not fire SOS")
+    if "import HealthKit" in core or "import HealthKit" in plate or "import HealthKit" in chip or "import HealthKit" in maps or "import HealthKit" in root:
         fail("manual vitals must not import HealthKit")
     if "tel:911" in core or "tel:911" in plate or "tel:911" in app:
         fail("party red must not auto-dial 911")
@@ -636,8 +646,12 @@ def test_party_vitals_red_loop() -> None:
         fail("I AM NOT OK roster button must stay metal, not primary")
     if "Navigate-to" not in radar and 'PartyVitalsCopy.navigateTo' not in radar:
         fail("peer sheet missing Navigate-to")
+    if "PartyVitalsCopy.message" not in radar:
+        fail("tap pip must offer Message")
     if 'MetalButton("PTT"' in radar:
         fail("peer sheet must stay Message + Navigate-to")
+    if "enum AppDestination" in root and root.count("case ") < 4:
+        fail("4-tab chrome missing cases")
     if "becameRed" not in app:
         fail("AppContainer does not haptic on peer red")
     if "envelope.kind" in mesh:

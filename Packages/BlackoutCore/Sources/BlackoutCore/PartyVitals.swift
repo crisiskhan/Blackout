@@ -11,6 +11,8 @@ public enum PartyBand: String, Codable, Sendable, CaseIterable {
 public enum PartyVitalAction: String, Sendable, CaseIterable {
     case drank
     case ate
+    case rested
+    case dizzy
     case notOK
     case imOK
 }
@@ -18,6 +20,8 @@ public enum PartyVitalAction: String, Sendable, CaseIterable {
 public enum PartyVitalsCopy {
     public static let drank = "DRANK"
     public static let ate = "ATE"
+    public static let rested = "RESTED"
+    public static let dizzy = "DIZZY"
     public static let notOK = "I AM NOT OK"
     public static let imOK = "I AM OK"
     public static let imNot = "I AM NOT"
@@ -35,6 +39,9 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
     public var injury: Bool
     public var drankAt: Date?
     public var ateAt: Date?
+    public var restedAt: Date?
+    public var dizzy: Bool
+    public var dizzyAt: Date?
     public var latitude: Double?
     public var longitude: Double?
     public var updatedAt: Date
@@ -46,6 +53,9 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         injury: Bool = false,
         drankAt: Date? = nil,
         ateAt: Date? = nil,
+        restedAt: Date? = nil,
+        dizzy: Bool = false,
+        dizzyAt: Date? = nil,
         latitude: Double? = nil,
         longitude: Double? = nil,
         updatedAt: Date = Date()
@@ -56,6 +66,9 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         self.injury = injury
         self.drankAt = drankAt
         self.ateAt = ateAt
+        self.restedAt = restedAt
+        self.dizzy = dizzy
+        self.dizzyAt = dizzyAt
         self.latitude = latitude
         self.longitude = longitude
         self.updatedAt = updatedAt
@@ -88,25 +101,44 @@ public struct PartyTapState: Equatable, Sendable {
     }
 }
 
-/// Existing G/Y/R rules are absent — injury=true → red. DRANK / ATE stamp only.
+/// G/Y/R math. RESTED / DIZZY stay here — not Map chips. Red is not an SOS fire.
 public enum PartyVitals {
+    public static let redFiresSOS = false
+
+    public static func isMapChip(_ action: PartyVitalAction) -> Bool {
+        switch action {
+        case .imOK, .notOK:
+            return true
+        case .drank, .ate, .rested, .dizzy:
+            return false
+        }
+    }
+
+    public static func resolveBand(_ status: PartyMemberStatus) -> PartyBand {
+        if status.injury { return .red }
+        if status.dizzy { return .yellow }
+        return .green
+    }
+
     public static func apply(_ action: PartyVitalAction, to status: inout PartyMemberStatus, at now: Date = Date()) {
         switch action {
         case .drank:
             status.drankAt = now
-            status.updatedAt = now
         case .ate:
             status.ateAt = now
-            status.updatedAt = now
+        case .rested:
+            status.restedAt = now
+        case .dizzy:
+            status.dizzy = true
+            status.dizzyAt = now
         case .notOK:
             status.injury = true
-            status.band = .red
-            status.updatedAt = now
         case .imOK:
             status.injury = false
-            status.band = .green
-            status.updatedAt = now
+            status.dizzy = false
         }
+        status.updatedAt = now
+        status.band = resolveBand(status)
     }
 
     public static func shouldBroadcast(before: PartyMemberStatus, after: PartyMemberStatus) -> Bool {
@@ -155,6 +187,9 @@ public enum PartyStatusWire {
         var injury: Bool
         var drankAt: Date?
         var ateAt: Date?
+        var restedAt: Date?
+        var dizzy: Bool
+        var dizzyAt: Date?
         var latitude: Double?
         var longitude: Double?
         var updatedAt: Date
@@ -167,6 +202,9 @@ public enum PartyStatusWire {
             injury = status.injury
             drankAt = status.drankAt
             ateAt = status.ateAt
+            restedAt = status.restedAt
+            dizzy = status.dizzy
+            dizzyAt = status.dizzyAt
             latitude = status.latitude
             longitude = status.longitude
             updatedAt = status.updatedAt
@@ -180,6 +218,9 @@ public enum PartyStatusWire {
                 injury: injury,
                 drankAt: drankAt,
                 ateAt: ateAt,
+                restedAt: restedAt,
+                dizzy: dizzy,
+                dizzyAt: dizzyAt,
                 latitude: latitude,
                 longitude: longitude,
                 updatedAt: updatedAt

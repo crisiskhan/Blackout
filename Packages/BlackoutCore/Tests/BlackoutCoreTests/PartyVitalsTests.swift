@@ -48,6 +48,57 @@ final class PartyVitalsTests: XCTestCase {
         XCTAssertFalse(status.injury)
     }
 
+    func testRestedStaysInMathAndDoesNotGoRed() {
+        var status = PartyMemberStatus(id: BlackoutID())
+        let now = Date(timeIntervalSince1970: 50)
+        PartyVitals.apply(.rested, to: &status, at: now)
+        XCTAssertEqual(status.restedAt, now)
+        XCTAssertEqual(status.band, .green)
+        XCTAssertFalse(status.injury)
+        XCTAssertFalse(PartyVitals.isMapChip(.rested))
+    }
+
+    func testDizzySetsYellowNotRedAndNotSOS() {
+        var status = PartyMemberStatus(id: BlackoutID())
+        let now = Date(timeIntervalSince1970: 60)
+        PartyVitals.apply(.dizzy, to: &status, at: now)
+        XCTAssertTrue(status.dizzy)
+        XCTAssertEqual(status.dizzyAt, now)
+        XCTAssertEqual(status.band, .yellow)
+        XCTAssertFalse(status.injury)
+        XCTAssertFalse(PartyVitals.isMapChip(.dizzy))
+        XCTAssertFalse(PartyVitals.redFiresSOS)
+        let envelope = PartyStatusWire.envelope(
+            status: status,
+            sender: BlackoutID(),
+            recipient: BlackoutID()
+        )
+        XCTAssertEqual(envelope.kind, .partyStatus)
+        XCTAssertNotEqual(envelope.kind, .sosAlert)
+    }
+
+    func testDizzyDoesNotOverrideInjuryRed() {
+        var status = PartyMemberStatus(id: BlackoutID(), band: .red, injury: true)
+        PartyVitals.apply(.dizzy, to: &status, at: Date())
+        XCTAssertEqual(status.band, .red)
+        XCTAssertTrue(status.injury)
+        XCTAssertTrue(status.dizzy)
+    }
+
+    func testGoingRedIsPartyStatusNotSOSFire() {
+        var status = PartyMemberStatus(id: BlackoutID())
+        PartyVitals.apply(.notOK, to: &status, at: Date())
+        XCTAssertEqual(status.band, .red)
+        XCTAssertFalse(PartyVitals.redFiresSOS)
+        let envelope = PartyStatusWire.envelope(
+            status: status,
+            sender: BlackoutID(),
+            recipient: BlackoutID()
+        )
+        XCTAssertEqual(envelope.kind, .partyStatus)
+        XCTAssertNotEqual(envelope.kind, .sosAlert)
+    }
+
     func testTwoTapRequiresSecondTapToCommit() {
         var taps = PartyTapState()
         XCTAssertFalse(taps.tap(.notOK))
@@ -130,6 +181,10 @@ final class PartyVitalsTests: XCTestCase {
     func testCopyLocksManualButtonsAndSheet() {
         XCTAssertEqual(PartyVitalsCopy.drank, "DRANK")
         XCTAssertEqual(PartyVitalsCopy.ate, "ATE")
+        XCTAssertEqual(PartyVitalsCopy.rested, "RESTED")
+        XCTAssertEqual(PartyVitalsCopy.dizzy, "DIZZY")
+        XCTAssertFalse(PartyVitals.isMapChip(.rested))
+        XCTAssertFalse(PartyVitals.isMapChip(.dizzy))
         XCTAssertEqual(PartyVitalsCopy.notOK, "I AM NOT OK")
         XCTAssertEqual(PartyVitalsCopy.imOK, "I AM OK")
         XCTAssertEqual(PartyVitalsCopy.imNot, "I AM NOT")
