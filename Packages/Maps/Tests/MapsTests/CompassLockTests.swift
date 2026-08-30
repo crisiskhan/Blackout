@@ -11,6 +11,14 @@ final class CompassLockTests: XCTestCase {
         XCTAssertEqual(CompassLockStandards.waypoints[1].kind, .standard)
         XCTAssertFalse(CompassLockStandards.waypoints[0].canDelete)
         XCTAssertFalse(CompassLockStandards.waypoints[1].canDelete)
+        let packPOI = CompassLockWaypoint(
+            id: "poi:town",
+            name: "Anthony",
+            latitude: 31.7889,
+            longitude: -106.5983,
+            kind: .poi
+        )
+        XCTAssertFalse(packPOI.canDelete)
     }
 
     func testRelBearingFormula() {

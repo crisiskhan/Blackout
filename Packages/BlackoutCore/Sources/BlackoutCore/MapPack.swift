@@ -17,7 +17,16 @@ public struct MapPOI: Hashable, Codable, Sendable, Identifiable {
 
     public var isCivilization: Bool {
         switch kind {
-        case "city", "town", "hospital", "ranger":
+        case "city", "town", "hospital", "ranger", "road", "rail", "mill":
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isWater: Bool {
+        switch kind {
+        case "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond":
             return true
         default:
             return false

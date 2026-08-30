@@ -1,6 +1,7 @@
 import BlackoutCore
 import BlackoutLocation
 import DesignSystem
+import MapsRouting
 import SwiftUI
 
 struct RadarView: View {
@@ -98,34 +99,67 @@ struct TopographyView: View {
     }
 }
 
-struct FindCivilizationView: View {
-    @Bindable var location: LocationService
+struct PackFindSheet: View {
+    var mode: PackFindMode
+    var origin: RoutingCoordinate?
     var pack: MapPackSnapshot?
+    var locationDenied: Bool
+    var onPick: (PackSearchHit) -> Void
+
+    private var result: (hits: [PackSearchHit], empty: NavigateEmpty?) {
+        let bounds = pack.map {
+            RoutingBBox(
+                west: $0.region.west,
+                south: $0.region.south,
+                east: $0.region.east,
+                north: $0.region.north
+            )
+        }
+        let pois = (pack?.pois ?? []).map {
+            RoutingPOI(
+                id: $0.id,
+                name: $0.name,
+                kind: $0.kind,
+                coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+            )
+        }
+        return PackFind.query(mode: mode, origin: origin, packBounds: bounds, pois: pois)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ScreenHeader("Find civilization", subtitle: "Bundled POIs only. No geocoder, no network.")
-                if location.authorization == .denied && location.navigationFix?.hasCoordinate != true {
+                ScreenHeader(title, subtitle: PackFindCopy.subtitle)
+                if locationDenied, origin == nil {
                     PermissionDenied(
                         kind: .location,
-                        reason: "Range to you needs last-known or a manual pin. Pack towns still list below. Long-press the map to drop a pin — no waiting on GPS."
+                        reason: "Range to you needs last-known or a manual pin. Pack points still list when this pack has them. Long-press the map to drop a pin — no waiting on GPS."
                     )
                 }
-                ForEach(pack?.pois.filter(\.isCivilization) ?? []) { poi in
-                    HUDPanel {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(poi.name)
-                                Text(poi.kind.capitalized)
-                                    .font(BlackoutDS.captionFont())
-                                    .foregroundStyle(BlackoutDS.Silver.dim)
+                if let kind = result.empty?.mapKind {
+                    MapEmptyCard(kind: kind, fillsSpace: false)
+                } else {
+                    ForEach(result.hits) { hit in
+                        Button {
+                            onPick(hit)
+                        } label: {
+                            HUDPanel {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(hit.title)
+                                            .foregroundStyle(BlackoutDS.Silver.bright)
+                                        Text(hit.kind.capitalized)
+                                            .font(BlackoutDS.captionFont())
+                                            .foregroundStyle(BlackoutDS.Silver.dim)
+                                    }
+                                    Spacer()
+                                    Text(distanceCopy(hit.meters))
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.mid)
+                                }
                             }
-                            Spacer()
-                            Text(distance(to: poi))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.mid)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -133,14 +167,21 @@ struct FindCivilizationView: View {
             .padding(.bottom, 80)
         }
         .background(BlackoutDS.Surface.base.ignoresSafeArea())
-        .navigationTitle("Civilization")
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func distance(to poi: MapPOI) -> String {
-        guard let from = location.navigationFix, from.hasCoordinate else { return "no fix" }
-        let meters = haversine(from.latitude!, from.longitude!, poi.latitude, poi.longitude)
-        if meters > 1000 { return String(format: "%.1f km", meters / 1000) }
-        return String(format: "%.0f m", meters)
+    private var title: String {
+        switch mode {
+        case .civilization:
+            return PackFindCopy.civilization
+        case .water:
+            return PackFindCopy.water
+        }
+    }
+
+    private func distanceCopy(_ meters: Double?) -> String {
+        guard let meters else { return "—" }
+        return Formatters.distance(meters)
     }
 }

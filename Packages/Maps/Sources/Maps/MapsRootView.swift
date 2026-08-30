@@ -126,6 +126,7 @@ public struct MapsRootView: View {
             || selectedPeer != nil
             || showEmptyCard
             || navigate.phase == .preview
+            || !navigate.hits.isEmpty
             || liveRec
             || compass.showMarkSheet
     }
@@ -247,7 +248,21 @@ public struct MapsRootView: View {
             case .topo:
                 TopographyView(location: location, packService: packService)
             case .civilization:
-                FindCivilizationView(location: location, pack: packService.pack)
+                PackFindSheet(
+                    mode: .civilization,
+                    origin: originCoordinate,
+                    pack: packService.pack,
+                    locationDenied: locationDenied,
+                    onPick: pickFound
+                )
+            case .water:
+                PackFindSheet(
+                    mode: .water,
+                    origin: originCoordinate,
+                    pack: packService.pack,
+                    locationDenied: locationDenied,
+                    onPick: pickFound
+                )
             }
         }
         .preferredColorScheme(.dark)
@@ -297,7 +312,7 @@ public struct MapsRootView: View {
             },
             onPickSearch: { hit in
                 showLayers = false
-                navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
+                pickFound(hit)
             },
             onOpenLiDAR: {
                 showLayers = false
@@ -306,6 +321,15 @@ public struct MapsRootView: View {
             onOpenTool: { item in
                 showLayers = false
                 tool = item
+            },
+            onFind: { mode in
+                showLayers = false
+                navigate.findPack(
+                    mode: mode,
+                    origin: originCoordinate,
+                    bounds: packBounds,
+                    pois: packService.pack?.pois ?? []
+                )
             }
         )
         .presentationDetents([.medium])
@@ -435,13 +459,9 @@ public struct MapsRootView: View {
     @ViewBuilder
     private var emptyOverlay: some View {
         if showEmptyCard {
-            MapEmptyCard(
-                title: emptyCardTitle,
-                detail: emptyCardDetail,
-                showRecenter: packService.pack != nil,
-                onRecenter: packService.pack == nil ? nil : recenterToPack,
-                onOpenFieldPacks: onOpenFieldPacks
-            )
+            MapEmptyCard(kind: .noPack, onPacks: onOpenFieldPacks)
+        } else if let kind = navigate.empty?.mapKind, navigate.phase != .guidance {
+            MapEmptyCard(kind: kind)
         } else if let empty = navigate.empty, navigate.phase != .guidance {
             VStack {
                 Spacer()
@@ -590,6 +610,41 @@ public struct MapsRootView: View {
         return RoutingCoordinate(latitude: fix.latitude!, longitude: fix.longitude!)
     }
 
+    private var packBounds: RoutingBBox? {
+        guard let region = packService.pack?.region else { return nil }
+        return RoutingBBox(
+            west: region.west,
+            south: region.south,
+            east: region.east,
+            north: region.north
+        )
+    }
+
+    private func pickFound(_ hit: PackSearchHit) {
+        tool = nil
+        showLayers = false
+        switch PackFind.action(
+            destination: hit.coordinate,
+            origin: originCoordinate,
+            pack: packService.routing,
+            profile: navigate.profile
+        ) {
+        case .route:
+            navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
+        case .lockOn:
+            navigate.end()
+            let point = CompassLockWaypoint(
+                id: hit.id,
+                name: hit.title,
+                latitude: hit.coordinate.latitude,
+                longitude: hit.coordinate.longitude,
+                kind: .poi
+            )
+            _ = compass.lockOn(point)
+            applyLockHeading()
+        }
+    }
+
     private var canFollowGuidance: Bool {
         location.authorization == .authorized && location.navigationFix?.hasCoordinate == true
     }
@@ -644,9 +699,7 @@ public struct MapsRootView: View {
                     onCancel: { navigate.end() }
                 )
             } else if !navigate.hits.isEmpty {
-                NavigateHitsList(hits: navigate.hits) { hit in
-                    navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
-                }
+                NavigateHitsList(hits: navigate.hits, onPick: pickFound)
             }
         }
     }
@@ -678,22 +731,6 @@ public struct MapsRootView: View {
         if navigate.phase == .guidance, packContainsSelf, !pinnedToPackCoverage {
             centerToken += 1
         }
-    }
-
-    private var emptyCardTitle: String {
-        if packService.pack == nil { return "No map pack" }
-        if locationDenied { return "GPS denied" }
-        return "No tiles here"
-    }
-
-    private var emptyCardDetail: String {
-        if packService.pack == nil {
-            return "Download a Field Pack for dusk tiles."
-        }
-        if locationDenied {
-            return "Recenter to pack coverage, or open Field Packs."
-        }
-        return "Recenter to the Denver sample, or download a Field Pack."
     }
 
     private var gpsAccuracyMeters: Double? {
@@ -792,7 +829,7 @@ public struct MapsRootView: View {
 }
 
 enum MapTool: String, Identifiable {
-    case navigate, radar, topo, civilization
+    case navigate, radar, topo, civilization, water
     var id: String { rawValue }
 }
 
@@ -907,44 +944,50 @@ struct MapLockHUD: View {
     }
 }
 
-/// One raised card. Two actions max: Recenter, Field Packs.
+/// Native metal notice. Eyebrow MAP. One card. No PNG chrome, no logo, no Skip, no shadow.
 struct MapEmptyCard: View {
-    var title: String
-    var detail: String
-    var showRecenter: Bool
-    var onRecenter: (() -> Void)?
-    var onOpenFieldPacks: (() -> Void)?
+    var kind: MapEmptyKind
+    var onPacks: (() -> Void)? = nil
+    var fillsSpace: Bool = true
 
     var body: some View {
-        VStack {
-            Spacer()
-            VStack(alignment: .leading, spacing: 12) {
-                Text(title)
-                    .font(BlackoutDS.titleFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                Text(detail)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
-                    .fixedSize(horizontal: false, vertical: true)
-                if showRecenter, let onRecenter {
-                    MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)
+        Group {
+            if fillsSpace {
+                VStack {
+                    Spacer()
+                    plate
+                    Spacer()
                 }
-                if let onOpenFieldPacks {
-                    GhostButton("Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
-                }
+                .padding(.bottom, BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap + 4)
+            } else {
+                plate
             }
-            .padding(20)
-            .frame(maxWidth: 400, alignment: .leading)
-            .background(BlackoutDS.Surface.raised)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.horizontal, 24)
-            Spacer()
         }
-        .padding(.bottom, 100)
+        .animation(nil, value: kind)
+    }
+
+    private var plate: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(MapEmptyCopy.eyebrow)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.dim)
+            Text(kind.title)
+                .font(BlackoutDS.titleFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+                .fixedSize(horizontal: false, vertical: true)
+            if kind == .noPack, let onPacks {
+                MetalButton("Packs", height: BlackoutDS.Hit.md, action: onPacks)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: 400, alignment: .leading)
+        .background(BlackoutDS.Surface.raised)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 24)
     }
 }
 
@@ -972,6 +1015,7 @@ struct MapLayersSheet: View {
     var onPickSearch: (PackSearchHit) -> Void
     var onOpenLiDAR: () -> Void
     var onOpenTool: (MapTool) -> Void
+    var onFind: (PackFindMode) -> Void
 
     var body: some View {
         NavigationStack {
@@ -1011,7 +1055,12 @@ struct MapLayersSheet: View {
                     }
                     if extrasOn {
                         GhostButton("Topo", height: BlackoutDS.Hit.md) { onOpenTool(.topo) }
-                        GhostButton("Towns", height: BlackoutDS.Hit.md) { onOpenTool(.civilization) }
+                        GhostButton(PackFindCopy.civilization, height: BlackoutDS.Hit.md) {
+                            onFind(.civilization)
+                        }
+                        GhostButton(PackFindCopy.water, height: BlackoutDS.Hit.md) {
+                            onFind(.water)
+                        }
                     }
                     layerToggle("Heading-up", on: $headingUp, enabled: true, persist: onToggleHeading)
                     layerToggle("Sweep audio", on: $sweepAudio, enabled: extrasOn, persist: onToggleAudio)

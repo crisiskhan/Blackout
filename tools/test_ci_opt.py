@@ -971,6 +971,69 @@ def test_compass_lock_on() -> None:
     ok("compass lock is SPEAK/STEER/MARK/LOCK, 2.2s voice, one standards list")
 
 
+def test_pack_find_civ_water() -> None:
+    find = ROOT / "Packages/Maps/Sources/MapsRouting/PackFind.swift"
+    tests = (ROOT / "Packages/Maps/Tests/MapsTests/PackFindTests.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
+    session = (ROOT / "Packages/Maps/Sources/Maps/NavigateSession.swift").read_text()
+    lock = (ROOT / "Packages/Maps/Sources/MapsRouting/CompassLock.swift").read_text()
+    poi = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapPack.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    if not find.is_file():
+        fail("PackFind.swift missing — Find civ/water must score pack POIs")
+    src = find.read_text()
+    for banned in ("MKLocalSearch", "MKMapView", "URLSession", "MKDirections"):
+        if banned in src or banned in maps or banned in tools or banned in session:
+            fail(f"Find civ/water must stay airplane: no {banned}")
+    for kind in ('"road"', '"rail"', '"town"', '"mill"', '"spring"', '"tank"', '"water"'):
+        if kind not in src:
+            fail(f"PackFind lost pack kind {kind}")
+    layout = (ROOT / "Packages/Maps/Sources/MapsRouting/RoutingLayout.swift").read_text()
+    for copy in (
+        "No pack for this area",
+        "No turns for this area",
+        "No civilization in this pack",
+        "No water mapped here",
+    ):
+        if f'"{copy}"' not in layout:
+            fail(f"Map empty lost locked copy: {copy}")
+    if 'eyebrow = "MAP"' not in layout:
+        fail("Map empty lost eyebrow MAP")
+    if "No civilization in this pack" not in tests or "No water mapped here" not in tests:
+        fail("Find civ/water tests lost the honest empty")
+    if "NeverInvent" not in tests and "neverInvent" not in tests:
+        fail("Find civ/water tests must refuse invented cities")
+    if ".shadow(" in maps:
+        fail("Map empty / chrome must not drop-shadow in sun mode")
+    if "Skip" in (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text() and 'GhostButton("Skip"' in maps:
+        fail("Map empty must not grow a Skip control")
+    if "PackFindCopy.civilization" not in maps or "PackFindCopy.water" not in maps:
+        fail("Layers lost Find civilization / Find water")
+    if 'GhostButton("Towns"' in maps:
+        fail("Towns must become Find civilization + Find water")
+    if "pickFound" not in maps or "PackFind.action" not in maps:
+        fail("tapping a pack POI must STEER / Feature 1 route or lock-on")
+    if "case .poi" not in lock:
+        fail("compass lock-on from a pack POI needs kind .poi")
+    if "func findPack" not in session:
+        fail("NavigateSession must find from pack POIs, not a geocoder")
+    if "isWater" not in poi:
+        fail("MapPOI lost isWater")
+    if "logo" in maps.lower() and "watermark" in maps.lower():
+        fail("do not put a logo on Map")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if (ROOT / "Blackout/RootView.swift").read_text().count("tabItem") != 4:
+        fail("do not restore 6 tabs")
+    if "BlackoutDS.Hit.sos" not in (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text():
+        fail("do not move SOS")
+    ok("Map Find civilization / Find water scores pack POIs only")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -992,6 +1055,7 @@ def main() -> None:
     test_copy_fieldpacks_compile_noop_and_archive_required()
     test_fieldpack_root_flatten_fixture()
     test_compass_lock_on()
+    test_pack_find_civ_water()
     print("all ci-opt checks passed")
 
 

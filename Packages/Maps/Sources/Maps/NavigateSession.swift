@@ -56,15 +56,7 @@ final class NavigateSession {
     }
 
     func search(pack: RoutingPack?, pois: [MapPOI]) {
-        let mapped = pois.map {
-            RoutingPOI(
-                id: $0.id,
-                name: $0.name,
-                kind: $0.kind,
-                coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
-            )
-        }
-        let result = PackSearch.query(query, pack: pack, pois: mapped)
+        let result = PackSearch.query(query, pack: pack, pois: routingPOIs(pois))
         hits = result.hits
         empty = result.empty
         if result.empty != nil {
@@ -72,6 +64,28 @@ final class NavigateSession {
             destination = nil
             phase = .idle
         }
+    }
+
+    func findPack(
+        mode: PackFindMode,
+        origin: RoutingCoordinate?,
+        bounds: RoutingBBox?,
+        pois: [MapPOI]
+    ) {
+        query = ""
+        let result = PackFind.query(
+            mode: mode,
+            origin: origin,
+            packBounds: bounds,
+            pois: routingPOIs(pois)
+        )
+        hits = result.hits
+        empty = result.empty
+        preview = nil
+        destination = nil
+        destinationLabel = nil
+        phase = .idle
+        tick = nil
     }
 
     func pick(_ hit: PackSearchHit, origin: RoutingCoordinate?, pack: RoutingPack?) {
@@ -226,5 +240,16 @@ final class NavigateSession {
     private func speak(_ text: String) {
         lastPrompt = text
         speech.speak(text)
+    }
+
+    private func routingPOIs(_ pois: [MapPOI]) -> [RoutingPOI] {
+        pois.map {
+            RoutingPOI(
+                id: $0.id,
+                name: $0.name,
+                kind: $0.kind,
+                coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+            )
+        }
     }
 }

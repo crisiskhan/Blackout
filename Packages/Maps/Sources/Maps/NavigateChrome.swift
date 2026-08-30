@@ -196,6 +196,11 @@ struct NavigateHitsList: View {
                                 .foregroundStyle(BlackoutDS.Silver.dim)
                         }
                         Spacer()
+                        if let meters = hit.meters {
+                            Text(Formatters.distance(meters))
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.mid)
+                        }
                     }
                     .padding(.vertical, 10)
                 }

@@ -24,6 +24,7 @@ public enum CompassLockKind: String, Codable, Sendable {
     case standard
     case mark
     case peer
+    case poi
 }
 
 public struct CompassLockWaypoint: Hashable, Codable, Sendable, Identifiable {
@@ -54,6 +55,8 @@ public struct CompassLockWaypoint: Hashable, Codable, Sendable, Identifiable {
     public var canDelete: Bool {
         switch kind {
         case .standard, .peer:
+            return false
+        case .poi:
             return false
         case .mark:
             return true

@@ -15,6 +15,8 @@ final class EmptyStateTests: XCTestCase {
         XCTAssertEqual(NavigateEmpty.offGraph.title, "Off pack. Bearing to destination.")
         XCTAssertEqual(NavigateEmpty.searchMiss.title, "No matches in this pack.")
         XCTAssertEqual(NavigateEmpty.noGPS.title, "No GPS.")
+        XCTAssertEqual(NavigateEmpty.noCivilization.title, "No civilization in this pack")
+        XCTAssertEqual(NavigateEmpty.noWater.title, "No water mapped here")
     }
 
     func testSearchHitAndMissWithoutNetwork() throws {

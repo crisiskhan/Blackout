@@ -86,11 +86,37 @@ public enum NavigateCopy {
     public static let packManager = "Pack manager"
 }
 
+public enum MapEmptyCopy {
+    public static let eyebrow = "MAP"
+    public static let noPack = "No pack for this area"
+    public static let noTurns = "No turns for this area"
+    public static let noCivilization = "No civilization in this pack"
+    public static let noWater = "No water mapped here"
+}
+
+public enum MapEmptyKind: Equatable, Sendable {
+    case noPack
+    case noTurns
+    case noCivilization
+    case noWater
+
+    public var title: String {
+        switch self {
+        case .noPack: return MapEmptyCopy.noPack
+        case .noTurns: return MapEmptyCopy.noTurns
+        case .noCivilization: return MapEmptyCopy.noCivilization
+        case .noWater: return MapEmptyCopy.noWater
+        }
+    }
+}
+
 public enum NavigateEmpty: Equatable, Sendable {
     case noGraph
     case offGraph
     case searchMiss
     case noGPS
+    case noCivilization
+    case noWater
 
     public var title: String {
         switch self {
@@ -98,12 +124,23 @@ public enum NavigateEmpty: Equatable, Sendable {
         case .offGraph: return NavigateCopy.offGraph
         case .searchMiss: return NavigateCopy.searchMiss
         case .noGPS: return NavigateCopy.noGPS
+        case .noCivilization: return MapEmptyCopy.noCivilization
+        case .noWater: return MapEmptyCopy.noWater
         }
     }
 
     public var body: String? {
         switch self {
         case .noGraph: return NavigateCopy.noGraphBody
+        case .offGraph, .searchMiss, .noGPS, .noCivilization, .noWater: return nil
+        }
+    }
+
+    public var mapKind: MapEmptyKind? {
+        switch self {
+        case .noGraph: return .noTurns
+        case .noCivilization: return .noCivilization
+        case .noWater: return .noWater
         case .offGraph, .searchMiss, .noGPS: return nil
         }
     }
@@ -244,6 +281,21 @@ public struct PackSearchHit: Hashable, Sendable, Identifiable {
     public var title: String
     public var kind: String
     public var coordinate: RoutingCoordinate
+    public var meters: Double?
+
+    public init(
+        id: String,
+        title: String,
+        kind: String,
+        coordinate: RoutingCoordinate,
+        meters: Double? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.kind = kind
+        self.coordinate = coordinate
+        self.meters = meters
+    }
 }
 
 public enum ManeuverKind: String, Sendable {
