@@ -344,7 +344,6 @@ def generate_xcodeproj() -> None:
         "copy_guide": oid("copy_guidepack_phase"),
         "copy_fieldpacks": oid("copy_fieldpacks_phase"),
         "sync_ex": oid("sync_exceptions"),
-        "sync_res_ex": oid("sync_resources_ex"),
     }
     pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
     pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in PACKAGES}
@@ -430,7 +429,6 @@ exec "${SRCROOT}/tools/copy_fieldpacks.sh"
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */,
-				{ids['sync_res_ex']} /* Exceptions for "Blackout" folder in Resources */,
 			);
 			explicitFolders = (
 				DefaultPack,
@@ -633,17 +631,6 @@ exec "${SRCROOT}/tools/copy_fieldpacks.sh"
 			target = {ids['target']} /* Blackout */;
 		}};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		{ids['sync_res_ex']} /* Exceptions for "Blackout" folder in Resources */ = {{
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = {ids['resources']} /* Resources */;
-			membershipExceptions = (
-				DefaultPack,
-				GuidePack,
-			);
-		}};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin XCBuildConfiguration section */
 		{ids['proj_debug']} /* Debug */ = {{

@@ -100,6 +100,12 @@ def test_pbx_single_copy() -> None:
         fail("pbxproj still copies DefaultPack via Resources")
     if "GuidePack in Resources" in pbx:
         fail("pbxproj still copies GuidePack via Resources")
+    if 'Exceptions for "Blackout" folder in Resources' in pbx:
+        fail("pbxproj still lists DefaultPack/GuidePack in the Resources exception set")
+    if "PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet" in pbx:
+        fail("pbxproj still has a Resources group membership exception set")
+    if "PBXFileSystemSynchronizedBuildFileExceptionSet" not in pbx:
+        fail("pbxproj lost target-level exceptions that keep packs out of Sources")
     if "alwaysOutOfDate = 1" in pbx:
         fail("pbxproj still has alwaysOutOfDate = 1")
     if "Copy DefaultPack into app bundle" not in pbx:
@@ -146,6 +152,12 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py would restore alwaysOutOfDate")
     if "DefaultPack in Resources" in src or "GuidePack in Resources" in src:
         fail("generate_project.py would put packs back into Resources")
+    if 'Exceptions for "Blackout" folder in Resources' in src:
+        fail("generate_project.py would restore the Resources exception set")
+    if "PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet" in src:
+        fail("generate_project.py would restore a Resources group membership exception set")
+    if "PBXFileSystemSynchronizedBuildFileExceptionSet" not in src:
+        fail("generate_project.py lost target-level exceptions that keep packs out of Sources")
     if "Copy DefaultPack into app bundle" not in src:
         fail("generate_project.py lost DefaultPack ditto phase")
     if "Copy GuidePack into app bundle" not in src:

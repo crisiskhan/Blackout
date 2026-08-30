@@ -38,7 +38,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */,
-				96CB3A17D5763D0764046472 /* Exceptions for "Blackout" folder in Resources */,
 			);
 			explicitFolders = (
 				DefaultPack,
@@ -374,17 +373,6 @@
 			target = 8796EC6A87564C187A908CD6 /* Blackout */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		96CB3A17D5763D0764046472 /* Exceptions for "Blackout" folder in Resources */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 8E8A406124A99A2C1D9A1238 /* Resources */;
-			membershipExceptions = (
-				DefaultPack,
-				GuidePack,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin XCBuildConfiguration section */
 		3D45766170DCCA05AF05902A /* Debug */ = {
