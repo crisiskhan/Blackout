@@ -212,13 +212,11 @@ enum PTTAudioPacket {
 
     static func decode(_ data: Data) -> (sampleRate: Double, samples: [Int16])? {
         guard data.count >= 6 else { return nil }
-        let rate: UInt32 = data.prefix(4).withUnsafeBytes { raw in
-            var value: UInt32 = 0
-            Swift.withUnsafeMutableBytes(of: &value) { dest in
-                dest.copyBytes(from: raw.prefix(4))
-            }
-            return UInt32(bigEndian: value)
-        }
+        let header = [UInt8](data.prefix(4))
+        let rate = UInt32(header[0]) << 24
+            | UInt32(header[1]) << 16
+            | UInt32(header[2]) << 8
+            | UInt32(header[3])
         let sampleBytes = data.dropFirst(4)
         guard sampleBytes.count % 2 == 0 else { return nil }
         var samples = [Int16](repeating: 0, count: sampleBytes.count / 2)
