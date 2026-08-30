@@ -33,6 +33,11 @@ struct RadarView: View {
                 }
             }
             MeshPill(nearbyCount: roster.peerCount)
+            if let footnote = roster.selfLabel.footnote {
+                Text(footnote)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+            }
             if location.authorization == .denied {
                 PermissionDenied(
                     kind: .location,

@@ -15,6 +15,7 @@ public final class MeshFacade: MeshServing {
     public private(set) var inboundSequence: UInt64 = 0
 
     public var onInbound: ((MeshInbound) -> Void)?
+    public var onNearbyCount: ((Int) -> Void)?
     public var onFileProgress: ((String, Double) -> Void)?
     public var onFileReceiveStarted: ((String) -> Void)?
     public var onSendComplete: ((String, Bool) -> Void)?
@@ -51,7 +52,7 @@ public final class MeshFacade: MeshServing {
         if running { return }
         guard MeshGate.allowsTraffic(partyCode: partyCode), let partyCode else { return }
         running = true
-        let localPeer = MCPeerID(displayName: callsign)
+        let localPeer = MCPeerID(displayName: Callsign.radioName(callsign, id: deviceID))
         let radio = MultipeerPipe(
             localPeer: localPeer,
             partyCode: partyCode,
@@ -59,6 +60,7 @@ public final class MeshFacade: MeshServing {
         )
         radio.onPeerCount = { [weak self] count in
             self?.nearbyPeerCount = count
+            self?.onNearbyCount?(count)
         }
         radio.onInbound = { [weak self] event in
             self?.receive(event)

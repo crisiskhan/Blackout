@@ -13,7 +13,10 @@ final class ExpeditionPauseTests: XCTestCase {
     }
 
     func testPacksPlateIsCatalogNotDownloadWall() {
-        XCTAssertEqual(ExpeditionPauseCopy.packsReady, "Florida, Texas, New York, and New Mexico are Ready on this phone.")
+        XCTAssertEqual(
+            ExpeditionPauseCopy.packsReady,
+            "Florida, Texas, New York, and New Mexico are Ready on this phone. 4 states on disk."
+        )
         XCTAssertFalse(ExpeditionPauseCopy.packsReady.localizedCaseInsensitiveContains("download"))
     }
 
@@ -50,6 +53,9 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(PartyIdentityCopy.join, "Join")
         XCTAssertEqual(PartyIdentityCopy.leave, "Leave")
         XCTAssertEqual(PartyIdentityCopy.end, "End")
+        XCTAssertEqual(PartyIdentityCopy.noParty, "No party")
+        XCTAssertEqual(PartyIdentityCopy.soloValid, "Solo. Mesh is off until you Create or Join.")
+        XCTAssertEqual(PartyIdentityCopy.outingNameHint, "Outing name. Not your callsign.")
         XCTAssertEqual(Callsign.defaultValue, "YOU")
         XCTAssertEqual(Callsign.maxLength, 12)
     }

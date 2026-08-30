@@ -169,15 +169,19 @@ def test_map_chrome_lock() -> None:
         fail("MapsRootView lost the single empty card")
     if "showFieldPacksOverlay" in root:
         fail("Field Packs is still a ZStack overlay")
-    if "fieldPacksSheetBinding" not in root or "FieldPacksView" not in root:
-        fail("Field Packs sheet missing from RootView")
+    if "fieldPacksSheetBinding" in root or "FieldPacksView" in root:
+        fail("first-run Field Packs sheet must stay dead")
+    if "fieldPacksIntroCompleted" in root:
+        fail("RootView still auto-presents the pack intro")
+    if "destination = .expedition" not in root:
+        fail("Packs must open the Expedition plate, not a modal")
     if "Heading-up" in radar or "Sweep audio" in radar or "0 peers · self only" in radar:
         fail("RadarHUDView still floats heading/audio/peer chrome")
     if "MKMapView(" in maps:
         fail("MapsRootView must not construct MKMapView")
     if "URLSession" in maps:
         fail("MapsRootView must not use URLSession")
-    ok("Map chrome is HUD + Recenter/Layers/Packs, Field Packs sheet")
+    ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
 
 
 def test_map_pack_resolver() -> None:

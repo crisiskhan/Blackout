@@ -189,7 +189,7 @@ public struct MapsRootView: View {
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
-                    $0.noteActivity(at: nowOffset)
+                    $0.tick(at: nowOffset)
                 }
             },
             onChromeInputs: {
@@ -867,7 +867,7 @@ struct MapEmptyCard: View {
                     MetalButton("Recenter", height: BlackoutDS.Hit.md, action: onRecenter)
                 }
                 if let onOpenFieldPacks {
-                    GhostButton("Field Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
+                    GhostButton("Packs", height: BlackoutDS.Hit.md, action: onOpenFieldPacks)
                 }
             }
             .padding(20)

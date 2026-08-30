@@ -30,6 +30,53 @@ public enum Callsign {
         if trimmed.isEmpty { return defaultValue }
         return String(trimmed.prefix(maxLength))
     }
+
+    public static func last4(_ id: BlackoutID) -> String {
+        let hex = id.rawValue.uuidString.replacingOccurrences(of: "-", with: "")
+        return String(hex.suffix(4)).uppercased()
+    }
+
+    /// Multipeer display name. Default YOU always carries last-4 so two YOUs can radio.
+    public static func radioName(_ callsign: String, id: BlackoutID) -> String {
+        let name = commit(callsign)
+        if name == defaultValue {
+            return "\(name) · \(last4(id))"
+        }
+        return name
+    }
+
+    public static func collides(
+        _ callsign: String,
+        id: BlackoutID,
+        among: [(BlackoutID, String)]
+    ) -> Bool {
+        let name = commit(callsign)
+        guard name == defaultValue else { return false }
+        return among.contains { $0.0 != id && commit($0.1) == defaultValue }
+    }
+}
+
+/// Roster / Radar / Comms label. Footnote is silver.dim, not a badge, not on SOS.
+public struct CallsignLabel: Equatable, Sendable {
+    public var name: String
+    public var footnote: String?
+
+    public init(name: String, footnote: String? = nil) {
+        self.name = name
+        self.footnote = footnote
+    }
+
+    public static func resolve(
+        callsign: String,
+        id: BlackoutID,
+        among: [(BlackoutID, String)]
+    ) -> CallsignLabel {
+        let name = Callsign.commit(callsign)
+        if Callsign.collides(name, id: id, among: among) {
+            return CallsignLabel(name: name, footnote: "\(name) · \(Callsign.last4(id))")
+        }
+        return CallsignLabel(name: name, footnote: nil)
+    }
 }
 
 public enum PartyCode {
@@ -77,7 +124,9 @@ public enum PartyIdentityCopy {
     public static let leave = "Leave"
     public static let end = "End"
     public static let save = "Save"
-    public static let soloValid = "Solo. Mesh waits for a party code."
+    public static let soloValid = "Solo. Mesh is off until you Create or Join."
+    public static let noParty = "No party"
+    public static let outingNameHint = "Outing name. Not your callsign."
 }
 
 /// Single profile store. Crypto keeps Keychain keys; this is the field name + party.

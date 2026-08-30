@@ -8,4 +8,7 @@ public enum RootChromeLock {
     public static let sosPlacement = "RootView.ZStack.sibling"
     /// Only flag that unmounts Map / Comms / Field / Expedition.
     public static let chromeCollapseFlag = "battery.isCritical"
+    /// DS §10.1 first-run pack sheet is dead. Cold launch is Map.
+    public static let autoPresentsFirstOpenPackSheet = false
+    public static let coldLaunchDestination = "map"
 }

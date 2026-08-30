@@ -170,6 +170,66 @@ final class LocalIdentityTests: XCTestCase {
         XCTAssertEqual(RootChromeLock.tabCount, 4)
         XCTAssertEqual(RootChromeLock.chromeCollapseFlag, "battery.isCritical")
         XCTAssertEqual(RootChromeLock.sosPlacement, "RootView.ZStack.sibling")
+        XCTAssertFalse(RootChromeLock.autoPresentsFirstOpenPackSheet)
+        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "map")
+    }
+
+    func testPersonNameIsCallsignNotUUIDPrefix() {
+        let id = BlackoutID()
+        let unnamed = PartyMemberStatus(id: id)
+        XCTAssertEqual(unnamed.callsign, "YOU")
+        XCTAssertEqual(unnamed.shortName, "YOU")
+        XCTAssertFalse(unnamed.shortName.contains(id.rawValue.uuidString.prefix(8)))
+        var named = PartyMemberStatus(id: id, displayName: "RIDGE")
+        XCTAssertEqual(named.callsign, "RIDGE")
+        named.displayName = nil
+        XCTAssertEqual(named.callsign, "YOU")
+    }
+
+    func testTwoYOUGetLast4SuffixUntilEdit() {
+        let a = BlackoutID(UUID(uuidString: "00000000-0000-4000-8000-00000000A1F3")!)
+        let b = BlackoutID(UUID(uuidString: "00000000-0000-4000-8000-000000009C00")!)
+        let among: [(BlackoutID, String)] = [(a, "YOU"), (b, "YOU")]
+        let labelA = CallsignLabel.resolve(callsign: "YOU", id: a, among: among)
+        XCTAssertEqual(labelA.name, "YOU")
+        XCTAssertEqual(labelA.footnote, "YOU · A1F3")
+        XCTAssertEqual(Callsign.last4(a), "A1F3")
+        let edited = CallsignLabel.resolve(callsign: "WOLF", id: a, among: among)
+        XCTAssertEqual(edited.name, "WOLF")
+        XCTAssertNil(edited.footnote)
+        let solo = CallsignLabel.resolve(callsign: "YOU", id: a, among: [(a, "YOU")])
+        XCTAssertNil(solo.footnote)
+        XCTAssertEqual(Callsign.radioName("YOU", id: a), "YOU · A1F3")
+        XCTAssertEqual(Callsign.radioName("WOLF", id: a), "WOLF")
+    }
+
+    func testCallsignSurvivesKillAcceptance() {
+        let defaults = freshDefaults("night-kill")
+        let device = BlackoutID()
+        let night = LocalIdentityStore(deviceID: device, defaults: defaults)
+        night.commitCallsign("NIGHT")
+        XCTAssertTrue(night.createParty())
+        let code = night.partyCode
+        let relaunched = LocalIdentityStore(deviceID: device, defaults: defaults)
+        XCTAssertEqual(relaunched.callsign, "NIGHT")
+        XCTAssertEqual(relaunched.partyCode, code)
+    }
+
+    @MainActor
+    func testSOSMeshPaintsSameRoster() {
+        let local = BlackoutID()
+        let roster = PartyRoster(localID: local, defaults: freshDefaults("sos-ingest"))
+        let sender = BlackoutID()
+        let envelope = SOSConfirm.meshEnvelope(
+            sender: sender,
+            recipient: local,
+            callsign: "YOU"
+        )
+        XCTAssertEqual(roster.ingest(envelope), .becameRed(sender))
+        XCTAssertEqual(roster.peerCount, 1)
+        XCTAssertEqual(roster.peers.first?.callsign, "YOU")
+        XCTAssertEqual(roster.peers.first?.band, .red)
+        XCTAssertTrue(roster.peers.first?.injury == true)
     }
 
     func testOnePackReadySnapshot() {

@@ -25,7 +25,6 @@ final class AppContainer {
     let bootError: String?
     var sosConfirmRequested = false
     var sosCoverOpen = false
-    var showFieldPacks = false
     let guidePackURL: URL?
     let identity: LocalIdentityStore
     let party: PartyRoster
@@ -77,6 +76,9 @@ final class AppContainer {
         mesh.onInbound = { [weak self] event in
             self?.handleMeshInbound(event)
         }
+        mesh.onNearbyCount = { [weak self] count in
+            self?.broadcastSelfIfRadioUp(count)
+        }
         mesh.onFileProgress = { [weak self] name, value in
             self?.packs.updateRelayProgress(name, value)
         }
@@ -103,6 +105,14 @@ final class AppContainer {
             mesh.stop()
         } else {
             mesh.start()
+            broadcastSelfIfRadioUp(mesh.nearbyPeerCount)
+        }
+    }
+
+    private func broadcastSelfIfRadioUp(_ count: Int) {
+        guard count > 0 else { return }
+        if let envelope = party.broadcastSelf(fix: location.navigationFix) {
+            sendPartyStatus(envelope)
         }
     }
 
@@ -166,11 +176,11 @@ final class AppContainer {
 
     private func ingestEnvelope(_ envelope: Envelope) {
         switch envelope.kind {
-        case .partyStatus:
+        case .partyStatus, .sosAlert:
             ingestPartyStatus(envelope)
         case .message:
             ingestMessage(envelope)
-        case .sosAlert, .pttClip, .locationFix, .breadcrumb:
+        case .pttClip, .locationFix, .breadcrumb:
             return
         }
     }

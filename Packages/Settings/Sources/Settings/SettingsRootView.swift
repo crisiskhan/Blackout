@@ -53,11 +53,11 @@ public struct SettingsRootView: View {
             Text("Field Packs")
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
-            Text("Download Texas and New Mexico on Wi-Fi, then they work airplane. Skip keeps the bundled Denver sample.")
+            Text("Florida, Texas, New York, and New Mexico are Ready on this phone. Catalog lives on the Expedition Packs plate. DefaultPack stays the Denver fallback.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
             if let onFieldPacks {
-                GhostButton("Open Field Packs", height: BlackoutDS.Hit.sm, action: onFieldPacks)
+                GhostButton("Open Packs plate", height: BlackoutDS.Hit.sm, action: onFieldPacks)
             }
         }
     }

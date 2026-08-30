@@ -180,7 +180,7 @@ public struct SOSConfirmCover: View {
                         MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
                             showSystemSOS = true
                         }
-                        MeshPill(nearbyCount: roster.peerCount)
+                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
                         SlideToConfirm("Slide to arm") {
                             controller?.stopSpeech()
                             onArm()
@@ -259,7 +259,7 @@ public struct SOSArmedPanel: View {
                         SOSConfirmActionList(strobeOn: strobeOn) { action in
                             perform(action)
                         }
-                        MeshPill(nearbyCount: roster.peerCount)
+                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
                         MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
                             showSystemSOS = true
                         }

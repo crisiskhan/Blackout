@@ -2,8 +2,8 @@ import BlackoutCore
 import DesignSystem
 import SwiftUI
 
-/// Roster plate: callsign, party create/join/leave, then DRANK / ATE / I AM NOT OK.
-/// I AM NOT OK shares Map chip state.
+/// Roster plate: 56h callsign, party Create/Join, then DRANK / ATE / I AM NOT OK.
+/// I AM NOT OK shares Map chip state. Edit lives here only.
 struct PartyVitalsPlate: View {
     @Bindable var roster: PartyRoster
     var fix: LocationFix?
@@ -43,6 +43,9 @@ struct PartyVitalsPlate: View {
         .onAppear {
             callsignDraft = roster.identity.callsign
         }
+        .onDisappear {
+            commitCallsign()
+        }
         .onChange(of: roster.identity.callsign) { _, value in
             callsignDraft = value
         }
@@ -51,13 +54,10 @@ struct PartyVitalsPlate: View {
     private var identityBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             selfRow
-            Text(PartyIdentityCopy.callsign)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.dim)
             TextField(Callsign.defaultValue, text: $callsignDraft)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
-                .padding(14)
+                .padding(.horizontal, 14)
                 .frame(height: BlackoutDS.Hit.sm)
                 .background(BlackoutDS.Surface.sunken)
                 .onChange(of: callsignDraft) { _, value in
@@ -66,97 +66,116 @@ struct PartyVitalsPlate: View {
                     }
                 }
                 .onSubmit { commitCallsign() }
-            MetalButton(PartyIdentityCopy.save, height: BlackoutDS.Hit.sm, action: commitCallsign)
-            partyControls
+            partyCodePlate
+            if roster.identity.partyCode == nil {
+                Text(PartyIdentityCopy.soloValid)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+                TextField(PartyIdentityCopy.partyCode, text: $joinDraft)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                    .textInputAutocapitalization(.characters)
+                    .disableAutocorrection(true)
+                    .padding(.horizontal, 14)
+                    .frame(height: BlackoutDS.Hit.sm)
+                    .background(BlackoutDS.Surface.sunken)
+                    .onChange(of: joinDraft) { _, value in
+                        joinDraft = PartyCode.normalize(value)
+                        joinFailed = false
+                    }
+                HStack(spacing: 10) {
+                    MetalButton(PartyIdentityCopy.create, height: BlackoutDS.Hit.sm, action: onCreateParty)
+                    MetalButton(PartyIdentityCopy.join, height: BlackoutDS.Hit.sm) {
+                        joinFailed = !onJoinParty(joinDraft)
+                        if !joinFailed { joinDraft = "" }
+                    }
+                }
+                if joinFailed {
+                    Text("Party code is 4–8 A–Z 0–9.")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Semantic.warn)
+                }
+            } else {
+                HStack(spacing: 10) {
+                    GhostButton(PartyIdentityCopy.leave, height: BlackoutDS.Hit.sm, action: onLeaveParty)
+                    GhostButton(PartyIdentityCopy.end, height: BlackoutDS.Hit.sm, action: onLeaveParty)
+                }
+                if roster.isFrozen {
+                    Text("Party ended. Roster frozen.")
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
+                }
+            }
         }
+    }
+
+    private var partyCodePlate: some View {
+        HStack {
+            Text(roster.identity.partyCode ?? PartyIdentityCopy.noParty)
+                .font(BlackoutDS.bodyFont())
+                .fontWeight(.semibold)
+                .foregroundStyle(BlackoutDS.Surface.void)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: BlackoutDS.Hit.sm)
+        .background(BlackoutDS.Btn.metal)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     private var selfRow: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(bandColor(roster.selfVitals.band))
-                .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
-            Text(roster.selfVitals.shortName)
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
-            Spacer()
-            Text(roster.isRed ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(roster.isRed ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
-        }
-        .accessibilityLabel("Self \(roster.selfVitals.shortName)")
-    }
-
-    @ViewBuilder
-    private var partyControls: some View {
-        if let code = roster.identity.partyCode {
-            Text("\(PartyIdentityCopy.partyCode) \(code)")
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
-            if roster.isFrozen {
-                Text("Party ended. Roster frozen.")
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(bandColor(roster.selfVitals.band))
+                    .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
+                Text(roster.selfLabel.name)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                Spacer()
+                Text(roster.isRed ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(roster.isRed ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
+            }
+            if let footnote = roster.selfLabel.footnote {
+                Text(footnote)
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
             }
-            HStack(spacing: 10) {
-                GhostButton(PartyIdentityCopy.leave, height: BlackoutDS.Hit.sm, action: onLeaveParty)
-                GhostButton(PartyIdentityCopy.end, height: BlackoutDS.Hit.sm, action: onLeaveParty)
-            }
-        } else {
-            if roster.isFrozen {
-                Text("Party ended. Roster frozen.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
-            }
-            Text(PartyIdentityCopy.soloValid)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.dim)
-            MetalButton(PartyIdentityCopy.create, height: BlackoutDS.Hit.sm, action: onCreateParty)
-            TextField(PartyIdentityCopy.partyCode, text: $joinDraft)
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
-                .textInputAutocapitalization(.characters)
-                .disableAutocorrection(true)
-                .padding(14)
-                .frame(height: BlackoutDS.Hit.sm)
-                .background(BlackoutDS.Surface.sunken)
-                .onChange(of: joinDraft) { _, value in
-                    joinDraft = PartyCode.normalize(value)
-                    joinFailed = false
-                }
-            GhostButton(PartyIdentityCopy.join, height: BlackoutDS.Hit.sm) {
-                joinFailed = !onJoinParty(joinDraft)
-                if !joinFailed {
-                    joinDraft = ""
-                }
-            }
-            if joinFailed {
-                Text("Party code is 4–8 A–Z 0–9.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Semantic.warn)
-            }
         }
+        .accessibilityLabel("Self \(roster.selfLabel.footnote ?? roster.selfLabel.name)")
     }
 
     @ViewBuilder
     private var memberList: some View {
         if roster.peers.isEmpty {
-            Text(ExpeditionPauseCopy.rosterEmpty)
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.dim)
+            if roster.identity.partyCode != nil {
+                Text(ExpeditionPauseCopy.rosterEmpty)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+            }
         } else {
             ForEach(roster.peers) { peer in
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(bandColor(peer.band))
-                        .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
-                    Text(peer.shortName)
-                        .font(BlackoutDS.bodyFont())
-                        .foregroundStyle(BlackoutDS.Silver.bright)
-                    Spacer()
-                    Text(peer.band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(peer.band == .red ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
+                let shown = roster.label(for: peer)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(bandColor(peer.band))
+                            .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
+                        Text(shown.name)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.bright)
+                        Spacer()
+                        Text(peer.band == .red ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(peer.band == .red ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
+                    }
+                    if let footnote = shown.footnote {
+                        Text(footnote)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                    }
                 }
             }
         }

@@ -74,10 +74,10 @@ public struct PartyMemberStatus: Hashable, Codable, Sendable, Identifiable {
         self.updatedAt = updatedAt
     }
 
-    public var shortName: String {
-        if let displayName, !displayName.isEmpty { return displayName }
-        return String(id.rawValue.uuidString.prefix(8))
-    }
+    /// Person name is the callsign. There is no second display-name field.
+    public var callsign: String { Callsign.commit(displayName ?? "") }
+
+    public var shortName: String { callsign }
 
     public var drankLatched: Bool { drankAt != nil }
     public var ateLatched: Bool { ateAt != nil }
@@ -289,6 +289,21 @@ public final class PartyRoster {
         set { selfStatus = newValue }
     }
     public var peerCount: Int { peers.count }
+    public var liveCallsigns: [(BlackoutID, String)] {
+        [(localID, identity.callsign)] + peers.map { ($0.id, $0.callsign) }
+    }
+
+    public func label(for id: BlackoutID, callsign: String) -> CallsignLabel {
+        CallsignLabel.resolve(callsign: callsign, id: id, among: liveCallsigns)
+    }
+
+    public func label(for member: PartyMemberStatus) -> CallsignLabel {
+        label(for: member.id, callsign: member.callsign)
+    }
+
+    public var selfLabel: CallsignLabel {
+        label(for: localID, callsign: identity.callsign)
+    }
 
     public init(
         localID: BlackoutID,
@@ -410,10 +425,53 @@ public final class PartyRoster {
 
     public func ingest(_ envelope: Envelope) -> PartyInboundSignal {
         guard !isFrozen else { return .ignored }
-        guard envelope.kind == .partyStatus else { return .ignored }
         guard envelope.sender != localID else { return .ignored }
-        guard var member = PartyStatusWire.decode(envelope.ciphertext) else { return .ignored }
-        member.id = envelope.sender
+        switch envelope.kind {
+        case .partyStatus:
+            guard var member = PartyStatusWire.decode(envelope.ciphertext) else { return .ignored }
+            member.id = envelope.sender
+            member.displayName = Callsign.commit(member.displayName ?? "")
+            return upsertPeer(member)
+        case .sosAlert:
+            var member = peers.first(where: { $0.id == envelope.sender })
+                ?? PartyMemberStatus(
+                    id: envelope.sender,
+                    displayName: SOSMeshBody.callsign(in: envelope.ciphertext)
+                )
+            member.displayName = SOSMeshBody.callsign(in: envelope.ciphertext)
+            PartyVitals.apply(.notOK, to: &member)
+            return upsertPeer(member)
+        case .message, .pttClip, .locationFix, .breadcrumb:
+            return .ignored
+        }
+    }
+
+    public func radarBlips(selfFix: LocationFix?, now: Date = Date()) -> [RadarBlip] {
+        guard let selfFix, selfFix.hasCoordinate else { return [] }
+        return peers.compactMap { peer in
+            guard let lat = peer.latitude, let lon = peer.longitude else { return nil }
+            guard let range = PartyRadar.rangeMeters(from: selfFix, toLat: lat, toLon: lon),
+                  let bearing = PartyRadar.bearingDegrees(from: selfFix, toLat: lat, toLon: lon) else {
+                return nil
+            }
+            return RadarBlip(
+                id: peer.id,
+                kind: .member,
+                displayName: peer.callsign,
+                footnote: label(for: peer).footnote,
+                bearingDegrees: bearing,
+                rangeMeters: range,
+                pingAge: now.timeIntervalSince(peer.updatedAt),
+                hops: 1,
+                band: peer.band,
+                latitude: lat,
+                longitude: lon
+            )
+        }
+    }
+
+    @discardableResult
+    private func upsertPeer(_ member: PartyMemberStatus) -> PartyInboundSignal {
         let previous = peers.first(where: { $0.id == member.id })
         if let index = peers.firstIndex(where: { $0.id == member.id }) {
             peers[index] = member
@@ -428,29 +486,6 @@ public final class PartyRoster {
             alertedRed.remove(member.id)
         }
         return .updated
-    }
-
-    public func radarBlips(selfFix: LocationFix?, now: Date = Date()) -> [RadarBlip] {
-        guard let selfFix, selfFix.hasCoordinate else { return [] }
-        return peers.compactMap { peer in
-            guard let lat = peer.latitude, let lon = peer.longitude else { return nil }
-            guard let range = PartyRadar.rangeMeters(from: selfFix, toLat: lat, toLon: lon),
-                  let bearing = PartyRadar.bearingDegrees(from: selfFix, toLat: lat, toLon: lon) else {
-                return nil
-            }
-            return RadarBlip(
-                id: peer.id,
-                kind: .member,
-                displayName: peer.shortName,
-                bearingDegrees: bearing,
-                rangeMeters: range,
-                pingAge: now.timeIntervalSince(peer.updatedAt),
-                hops: 1,
-                band: peer.band,
-                latitude: lat,
-                longitude: lon
-            )
-        }
     }
 
     private func applyFix(_ fix: LocationFix?) {

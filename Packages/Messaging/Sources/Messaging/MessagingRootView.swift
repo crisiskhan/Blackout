@@ -30,7 +30,7 @@ public struct MessagingRootView: View {
             HStack {
                 ScreenHeader("Comms", subtitle: "Local radio. Ciphertext on disk.")
                 Spacer()
-                MeshPill(nearbyCount: roster.peerCount)
+                MeshPill(nearbyCount: mesh.nearbyPeerCount)
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -43,6 +43,11 @@ public struct MessagingRootView: View {
                         Text("from \(row.from)")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.mid)
+                        if let footnote = row.footnote {
+                            Text(footnote)
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
                         HStack {
                             Text(row.status.rawValue)
                                 .font(BlackoutDS.captionFont())
@@ -142,14 +147,16 @@ public struct MessagingRootView: View {
         }
     }
 
-    private func fromLabel(sender: BlackoutID) -> String {
+    private func fromLabel(sender: BlackoutID) -> (String, String?) {
         if sender == roster.localID || sender == crypto.localIdentity {
-            return roster.identity.callsign
+            let shown = roster.selfLabel
+            return (shown.name, shown.footnote)
         }
         if let peer = roster.peers.first(where: { $0.id == sender }) {
-            return peer.shortName
+            let shown = roster.label(for: peer)
+            return (shown.name, shown.footnote)
         }
-        return String(sender.rawValue.uuidString.prefix(8))
+        return (Callsign.defaultValue, nil)
     }
 
     private func reload() {
@@ -163,10 +170,12 @@ public struct MessagingRootView: View {
                 } else {
                     body = "(unable to open)"
                 }
+                let from = fromLabel(sender: record.senderID)
                 return DisplayMessage(
                     id: record.id,
                     body: body,
-                    from: fromLabel(sender: record.senderID),
+                    from: from.0,
+                    footnote: from.1,
                     status: record.status,
                     createdAt: record.createdAt
                 )
@@ -181,6 +190,7 @@ private struct DisplayMessage: Identifiable {
     var id: BlackoutID
     var body: String
     var from: String
+    var footnote: String?
     var status: MessageStatus
     var createdAt: Date
 }

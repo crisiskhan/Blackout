@@ -79,20 +79,9 @@ struct RootView: View {
                 lock: container.lock,
                 onFieldPacks: {
                     showSettings = false
-                    container.showFieldPacks = true
+                    destination = .expedition
                 }
             )
-            .preferredColorScheme(.dark)
-        }
-        .sheet(isPresented: fieldPacksSheetBinding) {
-            FieldPacksView(
-                store: container.packs,
-                nearbyCount: container.mesh.nearbyPeerCount,
-                onSendToPeer: { container.relayPack($0) }
-            ) {
-                skipFieldPacks()
-            }
-            .presentationDetents([.medium, .large])
             .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
@@ -103,42 +92,12 @@ struct RootView: View {
                 syncSensorsToBattery()
             }
         }
-        .onChange(of: container.battery.isCritical) { _, critical in
-            if critical {
-                container.showFieldPacks = false
-            }
+        .onChange(of: container.battery.isCritical) { _, _ in
             syncSensorsToBattery()
         }
         .onAppear {
             syncSensorsToBattery()
-            if !UserDefaults.standard.bool(forKey: BlackoutKeys.fieldPacksIntroCompleted),
-               !container.battery.isCritical {
-                container.showFieldPacks = true
-            }
         }
-    }
-
-    private var fieldPacksSheetBinding: Binding<Bool> {
-        Binding(
-            get: {
-                container.showFieldPacks
-                    && !container.battery.isCritical
-                    && !(container.lock.isEnabled && !container.lock.isUnlocked)
-            },
-            set: { newValue in
-                if newValue {
-                    container.showFieldPacks = true
-                } else {
-                    skipFieldPacks()
-                }
-            }
-        )
-    }
-
-    private func skipFieldPacks() {
-        container.packs.skipIntro()
-        container.showFieldPacks = false
-        destination = .map
     }
 
     /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
@@ -256,8 +215,8 @@ struct RootView: View {
             coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
             installedPackRoots: container.packs.readyRoots,
             packReady: container.packs.readySnapshot,
-            onOpenFieldPacks: { container.showFieldPacks = true },
-            externalSheetOpen: showSettings || container.showFieldPacks,
+            onOpenFieldPacks: { destination = .expedition },
+            externalSheetOpen: showSettings,
             sosCoverOpen: container.sosCoverOpen,
             roster: container.party,
             onMessagePeer: { destination = .comms }
