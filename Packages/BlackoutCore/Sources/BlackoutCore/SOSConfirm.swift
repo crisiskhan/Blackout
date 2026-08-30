@@ -26,11 +26,53 @@ public enum SOSConfirmAction: String, CaseIterable, Sendable, Hashable {
 public enum SOSConfirmCopy {
     public static let speakSOS = "SPEAK SOS"
     public static let speakLocation = "SPEAK LOCATION"
+    public static let speakCoords = "SPEAK COORDS"
     public static let sharePosition = "SHARE"
     public static let copyCoords = "COPY"
     public static let call911 = "CALL 911"
     public static let visualStrobe = "STROBE"
     public static let stop = "STOP"
+    public static let slideToConfirm = "SLIDE TO CONFIRM"
+    public static let cancel = "CANCEL"
+}
+
+/// Crisis-lock confirm cover controls. Not the Map 88pt FAB. CALL 911 is tap-only.
+public enum SOSCrisisLockControl: String, CaseIterable, Sendable, Hashable {
+    case cancel
+    case strobe
+    case speakCoords
+    case share
+    case call911
+
+    public var title: String {
+        switch self {
+        case .cancel: return SOSConfirmCopy.cancel
+        case .strobe: return SOSConfirmCopy.visualStrobe
+        case .speakCoords: return SOSConfirmCopy.speakCoords
+        case .share: return SOSConfirmCopy.sharePosition
+        case .call911: return SOSConfirmCopy.call911
+        }
+    }
+
+    public var symbol: String {
+        switch self {
+        case .cancel: return "xmark"
+        case .strobe: return "sun.max.fill"
+        case .speakCoords: return "plus.viewfinder"
+        case .share: return "square.and.arrow.up"
+        case .call911: return "phone.fill"
+        }
+    }
+
+    public var confirmAction: SOSConfirmAction? {
+        switch self {
+        case .cancel: return nil
+        case .strobe: return .visualStrobe
+        case .speakCoords: return .speakLocation
+        case .share: return .sharePosition
+        case .call911: return .call911
+        }
+    }
 }
 
 /// FAB + I’m-OK chip geometry. SOS never recedes with Map HUD.
@@ -42,6 +84,12 @@ public enum SOSChrome {
     public static let tabBar: Double = 49
     public static let homeIndicator: Double = 34
     public static let holdSeconds: Double = 1.5
+    /// Confirm-cover SOS only. Map FAB stays `fab` (88). Never 88 on the lock cover.
+    public static let confirmHit: Double = 64
+    /// Bottom fraction of the SOS confirm cover. Thumb reaches slide + SOS.
+    public static let confirmThumbZone: Double = 0.34
+    public static let confirmPhrase = SOSConfirmCopy.slideToConfirm
+    public static let confirmKnobIsSOS = true
 
     /// Overlay ignores the bottom safe area. Compact 4-tab: 8pt above the tab bar.
     /// Critical SOS-only and iPad split have no tab bar: 8pt above the home indicator.

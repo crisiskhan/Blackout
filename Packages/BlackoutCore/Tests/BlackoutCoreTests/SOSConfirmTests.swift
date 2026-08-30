@@ -49,7 +49,48 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(SOSChrome.chipDiskClearance - SOSChrome.fab, SOSChrome.gap)
         XCTAssertGreaterThanOrEqual(SOSChrome.horizontalGap, 8)
         XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
-        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 48)
+        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 200)
+        XCTAssertGreaterThan(BrandChromeLock.sosConfirmRedEye, 48)
+    }
+
+    func testCrisisLockCoverUsesFullEyeAndThumbZoneSOSNotTheMapFAB() {
+        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 200)
+        XCTAssertGreaterThan(BrandChromeLock.sosConfirmRedEye, 48)
+        XCTAssertFalse(BrandChromeLock.sosConfirmShowsSOSWordUnderEye)
+        XCTAssertFalse(BrandChromeLock.sosConfirmStacksSOSDiskUnderEye)
+        XCTAssertFalse(BrandChromeLock.sosConfirmUsesLockup)
+        XCTAssertFalse(BrandChromeLock.sosConfirmUsesEmblem)
+        XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
+        XCTAssertEqual(SOSChrome.fab, 88)
+        XCTAssertEqual(SOSChrome.confirmHit, 64)
+        XCTAssertNotEqual(SOSChrome.confirmHit, SOSChrome.fab)
+        XCTAssertTrue(SOSChrome.confirmHit == 56 || SOSChrome.confirmHit == 64)
+        XCTAssertEqual(SOSChrome.confirmThumbZone, 0.34, accuracy: 0.0001)
+        XCTAssertEqual(SOSChrome.confirmPhrase, "SLIDE TO CONFIRM")
+        XCTAssertTrue(SOSChrome.confirmKnobIsSOS)
+        XCTAssertEqual(SOSCrisisLockControl.allCases.map(\.title), [
+            "CANCEL",
+            "STROBE",
+            "SPEAK COORDS",
+            "SHARE",
+            "CALL 911",
+        ])
+        XCTAssertNil(SOSCrisisLockControl.cancel.confirmAction)
+        XCTAssertEqual(SOSCrisisLockControl.strobe.confirmAction, .visualStrobe)
+        XCTAssertEqual(SOSCrisisLockControl.speakCoords.confirmAction, .speakLocation)
+        XCTAssertEqual(SOSCrisisLockControl.share.confirmAction, .sharePosition)
+        XCTAssertEqual(SOSCrisisLockControl.call911.confirmAction, .call911)
+        XCTAssertEqual(SOSCrisisLockControl.allCases.map(\.symbol), [
+            "xmark",
+            "sun.max.fill",
+            "plus.viewfinder",
+            "square.and.arrow.up",
+            "phone.fill",
+        ])
+        XCTAssertFalse(SOSConfirm.autoDials911)
+        XCTAssertFalse(SOSConfirm.autoInvokesSystemEmergencySOS)
+        XCTAssertEqual(SOSConfirm.emergencyTel, "tel:911")
+        XCTAssertEqual(RootChromeLock.tabCount, 4)
     }
 
     func testStrobeOrCallSendsMeshKindSOSWhenPeersExist() {

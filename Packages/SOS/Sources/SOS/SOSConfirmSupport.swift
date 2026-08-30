@@ -102,6 +102,88 @@ struct SOSStrobeWash: View {
     }
 }
 
+struct CrisisLockActionStrip: View {
+    var strobeOn: Bool
+    var onControl: (SOSCrisisLockControl) -> Void
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(SOSCrisisLockControl.allCases, id: \.self) { control in
+                Button {
+                    onControl(control)
+                } label: {
+                    VStack(spacing: 6) {
+                        glyph(for: control)
+                        Text(label(for: control))
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(accessibilityLabel(for: control))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func glyph(for control: SOSCrisisLockControl) -> some View {
+        switch control {
+        case .cancel:
+            Image(systemName: control.symbol)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(glyphColor(control))
+                .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                .background(BlackoutDS.Surface.raised)
+                .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
+                .clipShape(Circle())
+        case .strobe, .speakCoords, .share, .call911:
+            Image(systemName: control.symbol)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(glyphColor(control))
+                .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                .background(BlackoutDS.Surface.raised)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+    }
+
+    private func label(for control: SOSCrisisLockControl) -> String {
+        switch control {
+        case .strobe:
+            return strobeOn ? SOSConfirmAction.visualStrobe.stopTitle : control.title
+        case .cancel, .speakCoords, .share, .call911:
+            return control.title
+        }
+    }
+
+    private func accessibilityLabel(for control: SOSCrisisLockControl) -> String {
+        switch control {
+        case .cancel:
+            return "Cancel. Dismiss unarmed."
+        case .call911:
+            return "Call 911. Opens Phone. Does not auto-dial."
+        case .strobe, .speakCoords, .share:
+            return label(for: control)
+        }
+    }
+
+    private func glyphColor(_ control: SOSCrisisLockControl) -> Color {
+        switch control {
+        case .strobe:
+            return strobeOn ? BlackoutDS.Red.hot : BlackoutDS.Silver.metal
+        case .cancel, .speakCoords, .share, .call911:
+            return BlackoutDS.Silver.metal
+        }
+    }
+}
+
 struct SOSConfirmActionList: View {
     var strobeOn: Bool
     var onAction: (SOSConfirmAction) -> Void

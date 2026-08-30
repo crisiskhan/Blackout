@@ -154,70 +154,69 @@ public struct SOSConfirmCover: View {
     var onArm: () -> Void
     var onDismissUnarmed: () -> Void
     @State private var strobeOn = false
-    @State private var showSystemSOS = false
     @State private var controller: SOSConfirmController?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
-        ZStack(alignment: .topTrailing) {
-            BlackoutDS.Surface.hazard.ignoresSafeArea()
-            if strobeOn {
-                SOSStrobeWash(reduceMotion: reduceMotion)
-            }
-            VStack(alignment: .leading, spacing: 16) {
-                RedEyeOMark(point: CGFloat(BrandChromeLock.sosConfirmRedEye))
-                Text("SOS")
-                    .font(BlackoutDS.titleFont())
-                    .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Unarmed. Holding the button only opened this cover. Slide to arm, log, and alert peers when they exist. Tap never fires.")
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
-                    .lineSpacing(7)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        SOSConfirmActionList(strobeOn: strobeOn) { action in
-                            perform(action)
-                        }
-                        MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
-                            showSystemSOS = true
-                        }
-                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
-                        SlideToConfirm("Slide to arm") {
+        GeometryReader { geo in
+            let thumbHeight = geo.size.height * CGFloat(SOSChrome.confirmThumbZone)
+            ZStack {
+                BlackoutDS.Surface.hazard.ignoresSafeArea()
+                if strobeOn {
+                    SOSStrobeWash(reduceMotion: reduceMotion)
+                }
+                VStack(spacing: 0) {
+                    VStack {
+                        Spacer(minLength: 24)
+                        RedEyeOMark(point: CGFloat(BrandChromeLock.sosConfirmRedEye))
+                            .clipShape(Circle())
+                        Spacer(minLength: 12)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .accessibilityHidden(true)
+
+                    VStack(spacing: 16) {
+                        SlideToConfirm(
+                            SOSChrome.confirmPhrase,
+                            knobStyle: SOSChrome.confirmKnobIsSOS ? .sos : .metal,
+                            knobSize: CGFloat(SOSChrome.confirmHit)
+                        ) {
                             controller?.stopSpeech()
                             onArm()
+                        }
+                        CrisisLockActionStrip(strobeOn: strobeOn) { control in
+                            handle(control)
                         }
                         if let storeError {
                             StoreFailure(storeError)
                         }
-                        Text("CALL 911 opens the Phone app. You still confirm the call. Blackout never auto-dials and never starts OS Emergency SOS by itself.")
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.steel)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 18)
+                    .frame(height: thumbHeight, alignment: .bottom)
                 }
             }
-            .padding(24)
-            Button {
-                controller?.stopSpeech()
-                strobeOn = false
-                onDismissUnarmed()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                    .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-            }
-            .padding(12)
         }
-        .sheet(isPresented: $showSystemSOS) {
-            SystemEmergencySOSView()
-                .preferredColorScheme(.dark)
-                .presentationDetents([.medium, .large])
-        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("SOS confirm. Slide to arm. Tap never fires.")
         .preferredColorScheme(.dark)
         .onAppear { bindController() }
         .onDisappear {
             controller?.stopSpeech()
             strobeOn = false
+        }
+    }
+
+    private func handle(_ control: SOSCrisisLockControl) {
+        switch control {
+        case .cancel:
+            controller?.stopSpeech()
+            strobeOn = false
+            onDismissUnarmed()
+        case .strobe, .speakCoords, .share, .call911:
+            if let action = control.confirmAction {
+                perform(action)
+            }
         }
     }
 

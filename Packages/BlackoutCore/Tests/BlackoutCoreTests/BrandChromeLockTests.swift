@@ -41,7 +41,13 @@ final class BrandChromeLockTests: XCTestCase {
     }
 
     func testRedEyeOLivesOnConfirmCoverAndNoPackOnly() {
-        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 48)
+        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 200)
+        XCTAssertGreaterThan(BrandChromeLock.sosConfirmRedEye, 48)
+        XCTAssertFalse(BrandChromeLock.sosConfirmShowsSOSWordUnderEye)
+        XCTAssertFalse(BrandChromeLock.sosConfirmStacksSOSDiskUnderEye)
+        XCTAssertFalse(BrandChromeLock.sosConfirmUsesLockup)
+        XCTAssertFalse(BrandChromeLock.sosConfirmUsesEmblem)
+        XCTAssertFalse(BrandChromeLock.usesLockupInApp)
         XCTAssertEqual(BrandChromeLock.noPackRedEye, 24)
         XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
         XCTAssertEqual(SOSChrome.fab, 88)

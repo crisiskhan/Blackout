@@ -32,7 +32,12 @@ public enum BrandChromeLock {
         }
     }
 
-    public static let sosConfirmRedEye: Double = 48
+    /// Full red-eye O hero on the Crisis lock confirm cover. Not the old 48pt crop.
+    public static let sosConfirmRedEye: Double = 200
+    public static let sosConfirmShowsSOSWordUnderEye = false
+    public static let sosConfirmStacksSOSDiskUnderEye = false
+    public static let sosConfirmUsesLockup = false
+    public static let sosConfirmUsesEmblem = false
     public static let noPackRedEye: Double = 24
     public static let fabShowsRedEyeO = false
 
