@@ -203,6 +203,44 @@ final class LocalIdentityTests: XCTestCase {
         XCTAssertEqual(Callsign.radioName("WOLF", id: a), "WOLF")
     }
 
+    @MainActor
+    func testTwoYOUFootnoteDropsOnCallsignCommit() {
+        let local = BlackoutID(UUID(uuidString: "00000000-0000-4000-8000-00000000A1F3")!)
+        let peer = BlackoutID(UUID(uuidString: "00000000-0000-4000-8000-000000009C00")!)
+        let roster = PartyRoster(
+            localID: local,
+            defaults: freshDefaults("two-you-commit")
+        )
+        let inbound = PartyStatusWire.envelope(
+            status: PartyMemberStatus(
+                id: peer,
+                displayName: "YOU",
+                latitude: 31.7,
+                longitude: -106.4
+            ),
+            sender: peer,
+            recipient: local
+        )
+        XCTAssertEqual(roster.ingest(inbound), .updated)
+        XCTAssertEqual(roster.selfLabel.footnote, "YOU · A1F3")
+        XCTAssertEqual(roster.label(for: roster.peers[0]).footnote, "YOU · 9C00")
+        let blips = roster.radarBlips(
+            selfFix: LocationFix(latitude: 31.76, longitude: -106.48)
+        )
+        XCTAssertEqual(blips.first?.footnote, "YOU · 9C00")
+        roster.commitCallsign("WOLF")
+        XCTAssertNil(roster.selfLabel.footnote)
+        XCTAssertEqual(roster.selfLabel.name, "WOLF")
+        XCTAssertEqual(roster.label(for: roster.peers[0]).footnote, "YOU · 9C00")
+        let sos = SOSConfirm.meshEnvelope(
+            sender: roster.localID,
+            recipient: roster.recipientID,
+            callsign: roster.identity.callsign
+        )
+        XCTAssertEqual(SOSMeshBody.callsign(in: sos.ciphertext), "WOLF")
+        XCTAssertFalse((SOSMeshBody.callsign(in: sos.ciphertext) ?? "").contains("·"))
+    }
+
     func testCallsignSurvivesKillAcceptance() {
         let defaults = freshDefaults("night-kill")
         let device = BlackoutID()

@@ -40,10 +40,10 @@ public struct MessagingRootView: View {
                         Text(row.body)
                             .font(BlackoutDS.bodyFont())
                             .foregroundStyle(BlackoutDS.Silver.bright)
-                        Text("from \(row.from)")
+                        Text("from \(fromLabel(sender: row.senderID).0)")
                             .font(BlackoutDS.captionFont())
                             .foregroundStyle(BlackoutDS.Silver.mid)
-                        if let footnote = row.footnote {
+                        if let footnote = fromLabel(sender: row.senderID).1 {
                             Text(footnote)
                                 .font(BlackoutDS.captionFont())
                                 .foregroundStyle(BlackoutDS.Silver.dim)
@@ -170,12 +170,10 @@ public struct MessagingRootView: View {
                 } else {
                     body = "(unable to open)"
                 }
-                let from = fromLabel(sender: record.senderID)
                 return DisplayMessage(
                     id: record.id,
                     body: body,
-                    from: from.0,
-                    footnote: from.1,
+                    senderID: record.senderID,
                     status: record.status,
                     createdAt: record.createdAt
                 )
@@ -189,8 +187,7 @@ public struct MessagingRootView: View {
 private struct DisplayMessage: Identifiable {
     var id: BlackoutID
     var body: String
-    var from: String
-    var footnote: String?
+    var senderID: BlackoutID
     var status: MessageStatus
     var createdAt: Date
 }
