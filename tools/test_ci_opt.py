@@ -706,8 +706,17 @@ def test_sos_confirm_panel() -> None:
         fail("strobe / CALL must set local injury/red")
     if "Vitals.sosGap" not in root or "Vitals.tabBar" not in root:
         fail("SOS FAB must inset tabBar+8")
+    if ".padding(.trailing, 16)" not in root:
+        fail("SOS FAB must use 16pt trailing inset")
+    if ".padding(.trailing, 18)" in root:
+        fail("SOS trailing drifted off 16pt")
+    maps_root = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    if ".padding(.trailing, 16)" not in maps_root:
+        fail("vitals chip must share the 16pt trailing inset so the ≥8pt gap is real")
+    if ".padding(.trailing, 18)" in maps_root:
+        fail("vitals chip trailing drifted off 16pt")
     if "return 16 + tab + home" in root:
-        fail("SOS FAB still uses the old 16pt tab inset")
+        fail("SOS FAB still uses the old 16pt-above-tab inset")
     if "sosClearance: CGFloat = 120" in vitals:
         fail("SOS clearance must be the 88pt disk band, not 120 stacked")
     if "sosClearance: CGFloat = 88" not in vitals or "sosGap: CGFloat = 8" not in vitals:

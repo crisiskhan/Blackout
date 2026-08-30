@@ -38,18 +38,22 @@ public enum SOSChrome {
     public static let fab: Double = 88
     public static let chip: Double = 56
     public static let gap: Double = 8
+    public static let trailing: Double = 16
     public static let tabBar: Double = 49
     public static let homeIndicator: Double = 34
     public static let holdSeconds: Double = 1.5
 
-    /// Overlay ignores the bottom safe area. Compact 4-tab: gap above the tab bar.
-    /// Critical SOS-only and iPad split have no tab bar: gap above the home indicator.
+    /// Overlay ignores the bottom safe area. Compact 4-tab: 8pt above the tab bar.
+    /// Critical SOS-only and iPad split have no tab bar: 8pt above the home indicator.
     public static func fabBottomInset(hasTabBar: Bool) -> Double {
         gap + (hasTabBar ? tabBar : 0) + homeIndicator
     }
 
-    /// Trailing spacer so the 56h chip stays 8pt clear of the 88pt disk.
+    /// Trailing spacer so the 56h chip stays ≥8pt clear of the 88pt disk.
     public static var chipDiskClearance: Double { fab + gap }
+
+    /// Chip and SOS share 16pt trailing. Spacer is disk + gap, so the gap is exactly 8.
+    public static var horizontalGap: Double { chipDiskClearance - fab }
 }
 
 /// Unarmed-cover helpers. Never auto-dials 911. Never auto-invokes OS Emergency SOS.

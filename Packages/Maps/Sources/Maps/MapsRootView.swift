@@ -463,7 +463,8 @@ public struct MapsRootView: View {
         }
     }
 
-    /// Bottom-leading 56h chip. 8pt clear of the trailing 88pt SOS disk. Recedes; SOS does not.
+    /// Bottom-leading 56h metal chip. Same 8pt-above-tab-bar baseline as SOS.
+    /// ≥8pt horizontal gap to the 88pt disk. Recedes with HUD. Never a disk.
     private var vitalsRow: some View {
         receding {
             HStack(alignment: .bottom, spacing: 0) {
@@ -478,7 +479,7 @@ public struct MapsRootView: View {
             }
             .frame(minHeight: BlackoutDS.Vitals.sosClearance, alignment: .bottom)
             .padding(.leading, 16)
-            .padding(.trailing, 18)
+            .padding(.trailing, 16)
             .padding(.bottom, BlackoutDS.Vitals.sosGap)
         }
     }

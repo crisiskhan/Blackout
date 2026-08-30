@@ -40,12 +40,14 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertEqual(SOSChrome.chip, 56)
         XCTAssertEqual(SOSChrome.gap, 8)
+        XCTAssertEqual(SOSChrome.trailing, 16)
         XCTAssertEqual(SOSChrome.tabBar, 49)
         XCTAssertEqual(SOSChrome.homeIndicator, 34)
         XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true), 8 + 49 + 34)
         XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: false), 8 + 34)
         XCTAssertEqual(SOSChrome.chipDiskClearance, 88 + 8)
         XCTAssertGreaterThanOrEqual(SOSChrome.chipDiskClearance - SOSChrome.fab, SOSChrome.gap)
+        XCTAssertGreaterThanOrEqual(SOSChrome.horizontalGap, 8)
     }
 
     func testStrobeOrCallSendsMeshKindSOSWhenPeersExist() {
