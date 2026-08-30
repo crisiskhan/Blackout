@@ -120,40 +120,43 @@ public struct MapsRootView: View {
     }
 
     public var body: some View {
-        mapLifecycle
+        mapWithSheets
+            .modifier(packObservers)
+            .modifier(chromeObservers)
     }
 
-    private var mapLifecycle: some View {
-        mapWithSheets
-            .onChange(of: outsidePack) { _, outside in
+    private var packObservers: MapsPackObservers {
+        MapsPackObservers(
+            outsidePack: outsidePack,
+            fixLatitude: location.navigationFix?.latitude,
+            fixLongitude: location.navigationFix?.longitude,
+            lastKnownLatitude: location.lastKnown?.latitude,
+            authorization: location.authorization,
+            profile: navigate.profile,
+            installedPackRoots: installedPackRoots,
+            pinnedToPackCoverage: pinnedToPackCoverage,
+            isCritical: battery.isCritical,
+            onOutsidePack: { outside in
                 if outside { pinnedToPackCoverage = false }
-            }
-            .task { reloadCrumbs() }
-            .onChange(of: location.navigationFix?.latitude) { _, _ in
+            },
+            onReloadCrumbs: reloadCrumbs,
+            onFixLatitude: {
                 resolvePaintPack()
                 if showViewshed { refreshTerrain() }
                 refreshGuidance()
-            }
-            .onChange(of: location.navigationFix?.longitude) { _, _ in
+            },
+            onFixLongitude: {
                 resolvePaintPack()
                 refreshGuidance()
-            }
-            .onChange(of: navigate.profile) { _, _ in
+            },
+            onProfile: {
                 navigate.refreshPreview(origin: originCoordinate, pack: packService.routing)
-            }
-            .onChange(of: location.authorization) { _, _ in
-                refreshGuidance()
-            }
-            .onChange(of: location.lastKnown?.latitude) { _, _ in
-                resolvePaintPack()
-            }
-            .onChange(of: installedPackRoots) { _, _ in
-                resolvePaintPack()
-            }
-            .onChange(of: pinnedToPackCoverage) { _, _ in
-                resolvePaintPack()
-            }
-            .onChange(of: battery.isCritical) { _, critical in
+            },
+            onAuthorization: refreshGuidance,
+            onLastKnown: resolvePaintPack,
+            onInstalledRoots: resolvePaintPack,
+            onPinned: resolvePaintPack,
+            onCritical: { critical in
                 if critical {
                     tool = nil
                     showLiDAR = false
@@ -162,7 +165,14 @@ public struct MapsRootView: View {
                     navigate.end()
                 }
             }
-            .onAppear {
+        )
+    }
+
+    private var chromeObservers: MapsChromeObservers {
+        MapsChromeObservers(
+            reduceMotion: reduceMotion,
+            holdsChrome: holdsChrome,
+            onAppearAction: {
                 if extremeSaver { radarOn = true }
                 resolvePaintPack()
                 refreshTerrain()
@@ -172,38 +182,15 @@ public struct MapsRootView: View {
                     $0.hold = holdsChrome
                     $0.noteActivity(at: nowOffset)
                 }
-            }
-            .onChange(of: reduceMotion) { _, value in
-                applyChrome {
-                    $0.reduceMotion = value
-                    $0.hold = holdsChrome
-                    $0.tick(at: nowOffset)
-                }
-            }
-            .onChange(of: holdsChrome) { _, held in
-                applyChrome {
-                    $0.reduceMotion = reduceMotion
-                    $0.hold = held
-                    $0.tick(at: nowOffset)
-                }
-            }
-            .task(id: reduceMotion) {
+            },
+            onChromeInputs: {
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
                     $0.tick(at: nowOffset)
                 }
-                guard !reduceMotion else { return }
-                while !Task.isCancelled {
-                    try? await Task.sleep(nanoseconds: 250_000_000)
-                    applyChrome {
-                        $0.reduceMotion = reduceMotion
-                        $0.hold = holdsChrome
-                        $0.tick(at: nowOffset)
-                    }
-                    if reduceMotion { break }
-                }
             }
+        )
     }
 
     private var mapRoot: some View {
@@ -689,6 +676,122 @@ enum MapTool: String, Identifiable {
 }
 
 /// Fade chrome in place. Opacity only — VoiceOver keeps the controls in the tree.
+/// Isolates pack/fix `onChange` from the sheet stack so Swift can type-check.
+private struct MapsPackObservers: ViewModifier {
+    var outsidePack: Bool
+    var fixLatitude: Double?
+    var fixLongitude: Double?
+    var lastKnownLatitude: Double?
+    var authorization: LocationAuthorization
+    var profile: NavigateProfile
+    var installedPackRoots: [URL]
+    var pinnedToPackCoverage: Bool
+    var isCritical: Bool
+    var onOutsidePack: (Bool) -> Void
+    var onReloadCrumbs: () -> Void
+    var onFixLatitude: () -> Void
+    var onFixLongitude: () -> Void
+    var onProfile: () -> Void
+    var onAuthorization: () -> Void
+    var onLastKnown: () -> Void
+    var onInstalledRoots: () -> Void
+    var onPinned: () -> Void
+    var onCritical: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .modifier(MapsFixObservers(
+                fixLatitude: fixLatitude,
+                fixLongitude: fixLongitude,
+                lastKnownLatitude: lastKnownLatitude,
+                authorization: authorization,
+                profile: profile,
+                onFixLatitude: onFixLatitude,
+                onFixLongitude: onFixLongitude,
+                onProfile: onProfile,
+                onAuthorization: onAuthorization,
+                onLastKnown: onLastKnown
+            ))
+            .modifier(MapsPackStateObservers(
+                outsidePack: outsidePack,
+                installedPackRoots: installedPackRoots,
+                pinnedToPackCoverage: pinnedToPackCoverage,
+                isCritical: isCritical,
+                onOutsidePack: onOutsidePack,
+                onReloadCrumbs: onReloadCrumbs,
+                onInstalledRoots: onInstalledRoots,
+                onPinned: onPinned,
+                onCritical: onCritical
+            ))
+    }
+}
+
+private struct MapsFixObservers: ViewModifier {
+    var fixLatitude: Double?
+    var fixLongitude: Double?
+    var lastKnownLatitude: Double?
+    var authorization: LocationAuthorization
+    var profile: NavigateProfile
+    var onFixLatitude: () -> Void
+    var onFixLongitude: () -> Void
+    var onProfile: () -> Void
+    var onAuthorization: () -> Void
+    var onLastKnown: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: fixLatitude) { _, _ in onFixLatitude() }
+            .onChange(of: fixLongitude) { _, _ in onFixLongitude() }
+            .onChange(of: lastKnownLatitude) { _, _ in onLastKnown() }
+            .onChange(of: authorization) { _, _ in onAuthorization() }
+            .onChange(of: profile) { _, _ in onProfile() }
+    }
+}
+
+private struct MapsPackStateObservers: ViewModifier {
+    var outsidePack: Bool
+    var installedPackRoots: [URL]
+    var pinnedToPackCoverage: Bool
+    var isCritical: Bool
+    var onOutsidePack: (Bool) -> Void
+    var onReloadCrumbs: () -> Void
+    var onInstalledRoots: () -> Void
+    var onPinned: () -> Void
+    var onCritical: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: outsidePack) { _, outside in onOutsidePack(outside) }
+            .task { onReloadCrumbs() }
+            .onChange(of: installedPackRoots) { _, _ in onInstalledRoots() }
+            .onChange(of: pinnedToPackCoverage) { _, _ in onPinned() }
+            .onChange(of: isCritical) { _, critical in onCritical(critical) }
+    }
+}
+
+private struct MapsChromeObservers: ViewModifier {
+    var reduceMotion: Bool
+    var holdsChrome: Bool
+    var onAppearAction: () -> Void
+    var onChromeInputs: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear(perform: onAppearAction)
+            .onChange(of: reduceMotion) { _, _ in onChromeInputs() }
+            .onChange(of: holdsChrome) { _, _ in onChromeInputs() }
+            .task(id: reduceMotion) {
+                onChromeInputs()
+                guard !reduceMotion else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 250_000_000)
+                    onChromeInputs()
+                    if reduceMotion { break }
+                }
+            }
+    }
+}
+
 private struct RecedingMapChrome: ViewModifier {
     var isReceded: Bool
     var reduceMotion: Bool
