@@ -19,6 +19,7 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
     @State private var crumbs: [BreadcrumbRecordDTO] = []
     @State private var tracking = false
     @State private var showAdmin = false
+    @State private var showAbout = false
     @State private var storeError: String?
 
     public init(
@@ -90,6 +91,9 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
                         MetalButton("New expedition", height: BlackoutDS.Hit.md) {
                             editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
                         }
+                        GhostButton(ExpeditionPauseCopy.about, height: BlackoutDS.Hit.sm) {
+                            showAbout = true
+                        }
                         GhostButton("Admin dashboard", height: BlackoutDS.Hit.sm) {
                             showAdmin = true
                         }
@@ -143,6 +147,9 @@ public struct ExpeditionsRootView<PacksPlate: View>: View {
             }
             .navigationDestination(isPresented: $showAdmin) {
                 AdminDashboardView(persistence: persistence)
+            }
+            .navigationDestination(isPresented: $showAbout) {
+                AboutChromeView(callsign: roster.identity.callsign)
             }
             .task { reload() }
             .task(id: tracking) {

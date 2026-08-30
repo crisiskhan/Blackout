@@ -108,6 +108,14 @@ public enum MapEmptyKind: Equatable, Sendable {
         case .noWater: return MapEmptyCopy.noWater
         }
     }
+
+    /// Red-eye O on the no-pack metal plate only. Other empties stay mark-free.
+    public var showsRedEyeO: Bool {
+        switch self {
+        case .noPack: return true
+        case .noTurns, .noCivilization, .noWater: return false
+        }
+    }
 }
 
 public enum NavigateEmpty: Equatable, Sendable {

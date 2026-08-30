@@ -165,6 +165,7 @@ public struct SOSConfirmCover: View {
                 SOSStrobeWash(reduceMotion: reduceMotion)
             }
             VStack(alignment: .leading, spacing: 16) {
+                RedEyeOMark(point: CGFloat(BrandChromeLock.sosConfirmRedEye))
                 Text("SOS")
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Red.hot)

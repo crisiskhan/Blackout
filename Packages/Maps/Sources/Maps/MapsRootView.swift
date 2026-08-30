@@ -946,7 +946,7 @@ struct MapLockHUD: View {
     }
 }
 
-/// Native metal notice. Eyebrow MAP. One card. No PNG chrome, no logo, no Skip, no shadow.
+/// Native metal notice. Eyebrow MAP. One card. Red-eye O only on no-pack. No Skip, no shadow.
 struct MapEmptyCard: View {
     var kind: MapEmptyKind
     var onPacks: (() -> Void)? = nil
@@ -970,6 +970,9 @@ struct MapEmptyCard: View {
 
     private var plate: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if kind.showsRedEyeO {
+                RedEyeOMark(point: CGFloat(BrandChromeLock.noPackRedEye))
+            }
             Text(MapEmptyCopy.eyebrow)
                 .font(BlackoutDS.captionFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)

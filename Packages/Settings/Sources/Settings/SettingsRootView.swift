@@ -10,22 +10,26 @@ public struct SettingsRootView: View {
     @Bindable var location: LocationService
     @Bindable var mesh: MeshFacade
     @Bindable var lock: AppLockService
+    private let callsign: String
 
     public init(
         battery: BatteryService,
         location: LocationService,
         mesh: MeshFacade,
         lock: AppLockService,
+        callsign: String = Callsign.defaultValue,
         onFieldPacks: (() -> Void)? = nil
     ) {
         self.battery = battery
         self.location = location
         self.mesh = mesh
         self.lock = lock
+        self.callsign = callsign
         self.onFieldPacks = onFieldPacks
     }
 
     private let onFieldPacks: (() -> Void)?
+    @State private var showAbout = false
 
     public var body: some View {
         NavigationStack {
@@ -39,12 +43,24 @@ public struct SettingsRootView: View {
                     meshBlock
                     privacyBlock
                     limitsBlock
+                    aboutBlock
                 }
                 .padding(20)
                 .padding(.bottom, 120)
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Settings")
+            .navigationDestination(isPresented: $showAbout) {
+                AboutChromeView(callsign: callsign)
+            }
+        }
+    }
+
+    private var aboutBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            GhostButton(BrandChromeLock.aboutTitle, height: BlackoutDS.Hit.sm) {
+                showAbout = true
+            }
         }
     }
 

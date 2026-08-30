@@ -48,6 +48,8 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertEqual(SOSChrome.chipDiskClearance, 88 + 8)
         XCTAssertGreaterThanOrEqual(SOSChrome.chipDiskClearance - SOSChrome.fab, SOSChrome.gap)
         XCTAssertGreaterThanOrEqual(SOSChrome.horizontalGap, 8)
+        XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
+        XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 48)
     }
 
     func testStrobeOrCallSendsMeshKindSOSWhenPeersExist() {

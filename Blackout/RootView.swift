@@ -77,6 +77,7 @@ struct RootView: View {
                 location: container.location,
                 mesh: container.mesh,
                 lock: container.lock,
+                callsign: container.party.identity.callsign,
                 onFieldPacks: {
                     showSettings = false
                     destination = .expedition

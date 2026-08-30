@@ -38,6 +38,8 @@ final class ExpeditionPauseTests: XCTestCase {
 
     func testPauseSectionsStayFour() {
         XCTAssertEqual(ExpeditionPauseCopy.sections, ["Roster", "Gear", "Packs", "Settings"])
+        XCTAssertEqual(ExpeditionPauseCopy.about, "About")
+        XCTAssertFalse(ExpeditionPauseCopy.sections.contains("About"))
     }
 
     func testRosterKeepsHonestEmptyAndTwoTapVitals() {

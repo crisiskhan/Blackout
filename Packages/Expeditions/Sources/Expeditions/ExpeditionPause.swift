@@ -9,6 +9,7 @@ public enum ExpeditionPauseCopy {
     public static let packsReady = "Florida, Texas, New York, and New Mexico are Ready on this phone. 4 states on disk."
     public static let mapBannerEmpty = "No open expedition"
     public static let sections = ["Roster", "Gear", "Packs", "Settings"]
+    public static let about = "About"
 }
 
 /// GuidePack tools cards that exist on disk. Not a 17-cell inventory grid.
