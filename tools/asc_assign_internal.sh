@@ -86,6 +86,8 @@ def pick_assign_match(candidates, not_before):
             fresh.append(rec)
     if fresh:
         return "fresh", fresh[0]
+    if candidates:
+        return "stale_only", None
     return "none", None
 
 
@@ -191,7 +193,6 @@ def sync(rec, tok):
 
 
 deadline = time.time() + 20 * 60
-stale_only_since = None
 target = None
 last_tok = None
 last_tok_at = 0
@@ -215,6 +216,10 @@ while time.time() < deadline:
     kind, chosen = pick_assign_match(candidates, not_before)
     if kind == "fallback":
         raise SystemExit("refusing FALLBACK assign of a stale same-number build")
+    if kind == "stale_only":
+        raise SystemExit(
+            f"CFBundleVersion {want} already exists on ASC from before this archive; bump CURRENT_PROJECT_VERSION"
+        )
     if chosen:
         target = chosen
         if target["processingState"] == "VALID":
@@ -228,18 +233,8 @@ while time.time() < deadline:
             raise SystemExit(2)
         else:
             print("WAIT", target["processingState"], target.get("uploadedDate"), flush=True)
-            stale_only_since = None
     else:
         print("WAIT no fresh build", want, flush=True)
-        if not_before and candidates:
-            if stale_only_since is None:
-                stale_only_since = time.time()
-            elif time.time() - stale_only_since >= 8 * 60:
-                raise SystemExit(
-                    f"CFBundleVersion {want} already exists on ASC from before this archive; bump CURRENT_PROJECT_VERSION"
-                )
-        else:
-            stale_only_since = None
     time.sleep(30)
 print("TIMEOUT", json.dumps(target), flush=True)
 raise SystemExit(1)

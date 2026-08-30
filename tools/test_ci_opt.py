@@ -324,6 +324,8 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign_internal.sh must still fail closed on FAILED/INVALID")
     if "already exists on ASC from before this archive" not in src:
         fail("asc_assign_internal.sh must fail fast when CFBundleVersion is already on ASC")
+    if "8 * 60" in src:
+        fail("stale CFBundleVersion must fail on the first poll, not after 8 minutes")
     ok("asc_assign_internal.sh fails closed without secrets")
 
 
@@ -358,15 +360,23 @@ def test_assign_pick_prefers_fresh_then_fallback() -> None:
         "internalBuildState": None,
     }
     kind, rec = pick([stale_valid], not_before)
+    if kind != "stale_only" or rec is not None:
+        fail(f"stale VALID missing-compliance must be stale_only, got {kind} {rec}")
+    kind, rec = pick([], not_before)
     if kind != "none" or rec is not None:
-        fail(f"stale VALID missing-compliance must not be assigned, got {kind} {rec}")
+        fail(f"empty list must keep polling, got {kind} {rec}")
     kind, rec = pick([fresh_processing, stale_valid], not_before)
     if kind != "fresh" or rec is not fresh_processing:
         fail(f"expected fresh preference, got {kind} {rec}")
     failed = dict(stale_valid, processingState="FAILED", id="failed-19")
     kind, rec = pick([failed], not_before)
-    if kind != "none" or rec is not None:
-        fail(f"FAILED must not be assigned, got {kind} {rec}")
+    if kind != "stale_only" or rec is not None:
+        fail(f"stale FAILED must be stale_only, got {kind} {rec}")
+    src = (ROOT / "tools/asc_assign_internal.sh").read_text()
+    if 'kind == "stale_only"' not in src:
+        fail("assign must exit on stale_only, not wait 8 minutes")
+    if "8 * 60" in src or "stale_only_since" in src:
+        fail("stale same-number build must not poll for 8 minutes")
     ok("pick_assign_match assigns only builds uploaded after ASC_NOT_BEFORE")
 
 
