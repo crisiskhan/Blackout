@@ -58,6 +58,8 @@ def test_compile_workflow_drops_feature_branch_push() -> None:
         fail("ios-compile.yml must keep push to main")
     if "cancel-in-progress: true" not in text:
         fail("ios-compile.yml lost cancel-in-progress")
+    if "python3 tools/test_ci_opt.py" not in text:
+        fail("ios-compile.yml must run tools/test_ci_opt.py before xcodebuild")
     ok("ios-compile.yml is pull_request + push main only")
 
 
@@ -71,6 +73,8 @@ def test_testflight_paths_and_assign() -> None:
         fail("ios-testflight.yml must not auto-run on the feature branch")
     if "cancel-in-progress: true" not in text:
         fail("ios-testflight.yml lost cancel-in-progress")
+    if "python3 tools/test_ci_opt.py" not in text:
+        fail("ios-testflight.yml must run tools/test_ci_opt.py before archive")
     if "tools/asc_assign_internal.sh" not in text:
         fail("ios-testflight.yml does not call tools/asc_assign_internal.sh")
     if "tools/asc_prune_development_certs.sh" not in text:
