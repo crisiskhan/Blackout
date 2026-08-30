@@ -36,4 +36,11 @@ final class PackStoreBundledTests: XCTestCase {
         XCTAssertTrue(snapshot.isReady("us-fl"))
         XCTAssertEqual(store.readyRoots.map(\.lastPathComponent).sorted(), roots.map(\.lastPathComponent).sorted())
     }
+
+    func testFourStatesOnDiskNoSkip() {
+        XCTAssertEqual(
+            Set(FieldPackRowState.allCases),
+            [.noWifi, .downloading, .ready, .failed]
+        )
+    }
 }
