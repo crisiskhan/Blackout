@@ -1104,7 +1104,92 @@ def main() -> None:
     test_format_version_insurance()
     test_update_maps_one_tap()
     test_pack_amenity_address_search()
+    test_sos_armed_restore_no_crash()
     print("all ci-opt checks passed")
+
+
+def test_sos_armed_restore_no_crash() -> None:
+    core = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/SOSConfirm.swift").read_text()
+    keys = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/BlackoutKeys.swift").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/SOSConfirmTests.swift").read_text()
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    speech = (ROOT / "Packages/SOS/Sources/SOS/SOSSpeech.swift").read_text()
+    support = (ROOT / "Packages/SOS/Sources/SOS/SOSConfirmSupport.swift").read_text()
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+
+    def should_auto_present(armed: bool, requested: bool, new_binary: bool) -> bool:
+        return armed and requested and not new_binary
+
+    def is_new_binary(current: str, last: str | None) -> bool:
+        return current == "" or current != last
+
+    def should_request_confirm(armed: bool, new_binary: bool) -> bool:
+        return not (armed and new_binary)
+
+    if should_auto_present(True, True, True):
+        fail("new TestFlight binary must not auto-present a persisted armed overlay")
+    if should_auto_present(True, False, False):
+        fail("cold launch must not present armed overlay from the persist flag alone")
+    if not should_auto_present(True, True, False):
+        fail("same-build missed check-in may still present the armed panel")
+    if not is_new_binary("30", None) or not is_new_binary("30", "25") or is_new_binary("30", "30"):
+        fail("new-binary launch detection drifted")
+    if should_request_confirm(True, True) or not should_request_confirm(False, True):
+        fail("missed check-in must not reopen armed overlay on a new binary")
+
+    if "enum SOSArmedRestore" not in core:
+        fail("SOSArmedRestore policy missing")
+    if "dismissDisarms = false" not in core:
+        fail("closing the armed panel must not disarm")
+    if "autoPresentOnColdLaunch = false" not in core:
+        fail("cold launch must not restore the armed overlay")
+    if "appearStartsSpeech = false" not in core or "appearStartsStrobe = false" not in core:
+        fail("armed appear must stay speech/strobe idle")
+    if "appearRequiresPeers = false" not in core or "appearRequiresLocation = false" not in core:
+        fail("armed appear must not require peers or a fix")
+    if "persistedArmed && presentRequested && !newBinaryLaunch" not in core:
+        fail("auto-present policy drifted")
+    if "sosLastSeenBuild" not in keys:
+        fail("missing last-seen build key")
+    if "testNewBinaryLaunchDoesNotAutoPresentPersistedArmedOverlay" not in tests:
+        fail("missing new-binary armed restore regression")
+    if "testDismissArmedPanelDoesNotDisarm" not in tests:
+        fail("missing dismiss-does-not-disarm regression")
+    if "testArmedOverlayAppearIsIdleWithZeroPeersAndNoFix" not in tests:
+        fail("missing idle 0-peer / no-fix appear regression")
+    if "shouldAutoPresentArmedOverlay" not in sos:
+        fail("SOSFab must consult SOSArmedRestore before auto-present")
+    if "suppressPersistedArmedAutoPresent" not in sos or "suppressPersistedArmedAutoPresent" not in app:
+        fail("new-binary suppress flag not wired")
+    if "shouldRequestConfirmAfterMissedCheckIn" not in app:
+        fail("missed check-in must not trap a new-binary armed restore")
+    if "dismissWithoutDisarming" not in sos:
+        fail("armed panel X must dismiss without disarming")
+    if 'accessibilityLabel("Close. Does not disarm.")' not in sos:
+        fail("armed panel X lost its close label")
+    armed_panel = sos.split("public struct SOSArmedPanel", 1)[-1].split("public struct SystemEmergencySOSView", 1)[0]
+    if "onAppear { bindController() }" in armed_panel:
+        fail("armed panel must not create speech on appear")
+    if "private let synthesizer = AVSpeechSynthesizer()" in speech:
+        fail("SOS speech must not construct AVSpeechSynthesizer until speak")
+    if "private var synthesizer: AVSpeechSynthesizer?" not in speech:
+        fail("SOS speech synthesizer must stay lazy")
+    if "private var speech: SOSSpeech?" not in support:
+        fail("confirm controller must not allocate speech on init")
+    if "autoDials911 = false" not in core or "tel:911" not in core:
+        fail("CALL 911 must stay tel:911 and never auto-dial")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    if "BlackoutDS.Hit.sos" not in sos:
+        fail("Map SOS FAB size drifted")
+    if pbx.count("CURRENT_PROJECT_VERSION = 30") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "workflow_dispatch:" not in tf or "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight from this fix")
+    ok("SOS armed restore: no new-binary trap, idle appear, dismiss keeps arm, version 30")
 
 
 def test_pack_amenity_address_search() -> None:

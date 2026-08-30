@@ -150,6 +150,40 @@ public enum SOSConfirm {
     }
 }
 
+/// Persisted-armed restore. Closing the panel does not disarm. A new binary
+/// must not trap the first launch on that overlay.
+public enum SOSArmedRestore {
+    public static let dismissDisarms = false
+    public static let autoPresentOnColdLaunch = false
+    public static let appearStartsSpeech = false
+    public static let appearStartsStrobe = false
+    public static let appearRequiresPeers = false
+    public static let appearRequiresLocation = false
+
+    public static func currentBuild(from bundle: Bundle = .main) -> String {
+        (bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String) ?? ""
+    }
+
+    public static func isNewBinaryLaunch(currentBuild: String, lastSeenBuild: String?) -> Bool {
+        currentBuild.isEmpty || currentBuild != lastSeenBuild
+    }
+
+    public static func shouldAutoPresentArmedOverlay(
+        persistedArmed: Bool,
+        presentRequested: Bool,
+        newBinaryLaunch: Bool
+    ) -> Bool {
+        persistedArmed && presentRequested && !newBinaryLaunch
+    }
+
+    public static func shouldRequestConfirmAfterMissedCheckIn(
+        persistedArmed: Bool,
+        newBinaryLaunch: Bool
+    ) -> Bool {
+        !(persistedArmed && newBinaryLaunch)
+    }
+}
+
 /// SOS mesh body. Sender callsign lives here so the pipe stays opaque.
 public enum SOSMeshBody {
     public static func encode(callsign: String) -> Data {

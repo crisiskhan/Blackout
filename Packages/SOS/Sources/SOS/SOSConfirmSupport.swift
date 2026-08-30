@@ -10,7 +10,7 @@ final class SOSConfirmController {
     var location: LocationService
     var mesh: MeshFacade
     var roster: PartyRoster
-    let speech = SOSSpeech()
+    private var speech: SOSSpeech?
 
     init(location: LocationService, mesh: MeshFacade, roster: PartyRoster) {
         self.location = location
@@ -23,9 +23,9 @@ final class SOSConfirmController {
     func perform(_ action: SOSConfirmAction, strobeOn: inout Bool) {
         switch action {
         case .speakSOS:
-            speech.speak(SOSConfirm.speakSOS)
+            ensureSpeech().speak(SOSConfirm.speakSOS)
         case .speakLocation:
-            speech.speak(SOSConfirm.speakLocation(fix))
+            ensureSpeech().speak(SOSConfirm.speakLocation(fix))
         case .sharePosition:
             SOSShareSheet.present(SOSConfirm.shareMessage(fix: fix))
         case .copyCoords:
@@ -42,7 +42,14 @@ final class SOSConfirmController {
     }
 
     func stopSpeech() {
-        speech.stop()
+        speech?.stop()
+    }
+
+    private func ensureSpeech() -> SOSSpeech {
+        if let speech { return speech }
+        let created = SOSSpeech()
+        speech = created
+        return created
     }
 
     /// Strobe start and CALL send mesh kind sos when a peer exists, and set local injury/red.

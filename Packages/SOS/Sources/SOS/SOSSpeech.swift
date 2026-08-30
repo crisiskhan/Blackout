@@ -4,19 +4,21 @@ import Foundation
 /// On-device `AVSpeechSynthesizer` only. No cloud TTS, no background audio session.
 @MainActor
 final class SOSSpeech {
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer: AVSpeechSynthesizer?
 
     func speak(_ text: String) {
         guard !text.isEmpty else { return }
-        synthesizer.stopSpeaking(at: .immediate)
+        let synth = synthesizer ?? AVSpeechSynthesizer()
+        synthesizer = synth
+        synth.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
-        synthesizer.speak(utterance)
+        synth.speak(utterance)
     }
 
     func stop() {
-        synthesizer.stopSpeaking(at: .immediate)
+        synthesizer?.stopSpeaking(at: .immediate)
     }
 
     private func onDeviceVoice() -> AVSpeechSynthesisVoice? {

@@ -415,7 +415,8 @@ struct RootView: View {
                     battery: container.battery,
                     roster: container.party,
                     presentConfirm: $container.sosConfirmRequested,
-                    coverOpen: $container.sosCoverOpen
+                    coverOpen: $container.sosCoverOpen,
+                    suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent
                 )
                 .padding(.trailing, 16)
                 .padding(.bottom, fabBottomPadding)

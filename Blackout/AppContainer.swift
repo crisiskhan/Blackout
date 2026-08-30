@@ -27,6 +27,7 @@ final class AppContainer {
     let bootError: String?
     var sosConfirmRequested = false
     var sosCoverOpen = false
+    let suppressPersistedArmedAutoPresent: Bool
     let guidePackURL: URL?
     let identity: LocalIdentityStore
     let party: PartyRoster
@@ -48,6 +49,13 @@ final class AppContainer {
     private var lastNearbyCount = 0
 
     init() {
+        let build = SOSArmedRestore.currentBuild()
+        let lastSeen = UserDefaults.standard.string(forKey: BlackoutKeys.sosLastSeenBuild)
+        suppressPersistedArmedAutoPresent = SOSArmedRestore.isNewBinaryLaunch(
+            currentBuild: build,
+            lastSeenBuild: lastSeen
+        )
+        UserDefaults.standard.set(build, forKey: BlackoutKeys.sosLastSeenBuild)
         var errors: [String] = []
         let opened: any PersistenceServing
         do {
@@ -482,7 +490,13 @@ final class AppContainer {
             if overdue {
                 if !signaledMissedCheckIns.contains(key) {
                     signaledMissedCheckIns.insert(key)
-                    sosConfirmRequested = true
+                    let armed = UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed)
+                    if SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+                        persistedArmed: armed,
+                        newBinaryLaunch: suppressPersistedArmedAutoPresent
+                    ) {
+                        sosConfirmRequested = true
+                    }
                 }
             } else {
                 signaledMissedCheckIns.remove(key)

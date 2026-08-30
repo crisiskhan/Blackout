@@ -19,6 +19,7 @@ public struct SOSFab: View {
     @State private var storeError: String?
     var presentConfirm: Binding<Bool>?
     var coverOpen: Binding<Bool>?
+    var suppressPersistedArmedAutoPresent: Bool
 
     private static let armedKey = BlackoutKeys.sosArmed
 
@@ -29,7 +30,8 @@ public struct SOSFab: View {
         battery: BatteryService,
         roster: PartyRoster,
         presentConfirm: Binding<Bool>? = nil,
-        coverOpen: Binding<Bool>? = nil
+        coverOpen: Binding<Bool>? = nil,
+        suppressPersistedArmedAutoPresent: Bool = false
     ) {
         self.location = location
         self.persistence = persistence
@@ -38,6 +40,7 @@ public struct SOSFab: View {
         self.roster = roster
         self.presentConfirm = presentConfirm
         self.coverOpen = coverOpen
+        self.suppressPersistedArmedAutoPresent = suppressPersistedArmedAutoPresent
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
     }
 
@@ -98,7 +101,13 @@ public struct SOSFab: View {
         .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
             if requested {
                 if isArmed {
-                    showArmedPanel = true
+                    if SOSArmedRestore.shouldAutoPresentArmedOverlay(
+                        persistedArmed: true,
+                        presentRequested: true,
+                        newBinaryLaunch: suppressPersistedArmedAutoPresent
+                    ) {
+                        showArmedPanel = true
+                    }
                 } else {
                     showConfirm = true
                 }
@@ -231,7 +240,7 @@ public struct SOSConfirmCover: View {
 }
 
 public struct SOSArmedPanel: View {
-    @Bindable var location: LocationService
+    var location: LocationService
     @Bindable var mesh: MeshFacade
     @Bindable var roster: PartyRoster
     var onDismiss: () -> Void
@@ -271,16 +280,19 @@ public struct SOSArmedPanel: View {
             }
             .padding(24)
             Button {
-                controller?.stopSpeech()
-                strobeOn = false
-                onDismiss()
+                dismissWithoutDisarming()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(BlackoutDS.Silver.bright)
                     .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                    .contentShape(Rectangle())
             }
-            .padding(12)
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close. Does not disarm.")
+            .padding(.trailing, 12)
+            .padding(.top, 12)
+            .safeAreaPadding(.top)
         }
         .sheet(isPresented: $showSystemSOS) {
             SystemEmergencySOSView()
@@ -288,7 +300,6 @@ public struct SOSArmedPanel: View {
                 .presentationDetents([.medium, .large])
         }
         .preferredColorScheme(.dark)
-        .onAppear { bindController() }
         .onDisappear {
             controller?.stopSpeech()
             strobeOn = false
@@ -302,6 +313,13 @@ public struct SOSArmedPanel: View {
     private func perform(_ action: SOSConfirmAction) {
         if controller == nil { bindController() }
         controller?.perform(action, strobeOn: &strobeOn)
+    }
+
+    private func dismissWithoutDisarming() {
+        controller?.stopSpeech()
+        strobeOn = false
+        // Closing does not write BlackoutKeys.sosArmed. Product keeps the arm.
+        onDismiss()
     }
 }
 

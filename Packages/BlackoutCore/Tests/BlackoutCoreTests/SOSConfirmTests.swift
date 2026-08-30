@@ -124,4 +124,61 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertFalse(PartyVitals.redFiresSOS)
         XCTAssertNil(roster.pending)
     }
+
+    func testNewBinaryLaunchDoesNotAutoPresentPersistedArmedOverlay() {
+        XCTAssertTrue(SOSArmedRestore.isNewBinaryLaunch(currentBuild: "30", lastSeenBuild: nil))
+        XCTAssertTrue(SOSArmedRestore.isNewBinaryLaunch(currentBuild: "30", lastSeenBuild: "25"))
+        XCTAssertTrue(SOSArmedRestore.isNewBinaryLaunch(currentBuild: "", lastSeenBuild: "30"))
+        XCTAssertFalse(SOSArmedRestore.isNewBinaryLaunch(currentBuild: "30", lastSeenBuild: "30"))
+        XCTAssertFalse(SOSArmedRestore.shouldAutoPresentArmedOverlay(
+            persistedArmed: true,
+            presentRequested: true,
+            newBinaryLaunch: true
+        ))
+        XCTAssertFalse(SOSArmedRestore.shouldAutoPresentArmedOverlay(
+            persistedArmed: true,
+            presentRequested: false,
+            newBinaryLaunch: false
+        ))
+        XCTAssertFalse(SOSArmedRestore.shouldAutoPresentArmedOverlay(
+            persistedArmed: false,
+            presentRequested: true,
+            newBinaryLaunch: false
+        ))
+        XCTAssertTrue(SOSArmedRestore.shouldAutoPresentArmedOverlay(
+            persistedArmed: true,
+            presentRequested: true,
+            newBinaryLaunch: false
+        ))
+        XCTAssertFalse(SOSArmedRestore.autoPresentOnColdLaunch)
+        XCTAssertFalse(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+            persistedArmed: true,
+            newBinaryLaunch: true
+        ))
+        XCTAssertTrue(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+            persistedArmed: false,
+            newBinaryLaunch: true
+        ))
+        XCTAssertTrue(SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+            persistedArmed: true,
+            newBinaryLaunch: false
+        ))
+    }
+
+    func testDismissArmedPanelDoesNotDisarm() {
+        XCTAssertFalse(SOSArmedRestore.dismissDisarms)
+        XCTAssertEqual(BlackoutKeys.sosArmed, "com.crisiskhan.blackout.sos.armed")
+        XCTAssertEqual(BlackoutKeys.sosLastSeenBuild, "com.crisiskhan.blackout.sos.lastSeenBuild")
+    }
+
+    func testArmedOverlayAppearIsIdleWithZeroPeersAndNoFix() {
+        XCTAssertFalse(SOSConfirm.shouldSendMesh(peerCount: 0))
+        XCTAssertEqual(SOSConfirm.speakLocation(nil), SOSConfirm.noFix)
+        XCTAssertEqual(SOSConfirm.shareMessage(fix: nil), "BLACKOUT NO FIX")
+        XCTAssertEqual(SOSConfirm.coordsLine(nil), SOSConfirm.noFix)
+        XCTAssertFalse(SOSArmedRestore.appearStartsSpeech)
+        XCTAssertFalse(SOSArmedRestore.appearStartsStrobe)
+        XCTAssertFalse(SOSArmedRestore.appearRequiresPeers)
+        XCTAssertFalse(SOSArmedRestore.appearRequiresLocation)
+    }
 }

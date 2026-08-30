@@ -2,6 +2,8 @@ import Foundation
 
 public enum BlackoutKeys {
     public static let sosArmed = "com.crisiskhan.blackout.sos.armed"
+    /// Last CFBundleVersion that stamped an SOS restore decision. Not the armed flag.
+    public static let sosLastSeenBuild = "com.crisiskhan.blackout.sos.lastSeenBuild"
     public static let radarSweepAudio = "com.crisiskhan.blackout.radar.sweepAudio"
     public static let radarHeadingUp = "com.crisiskhan.blackout.radar.headingUp"
     public static let mapViewshed = "com.crisiskhan.blackout.map.viewshed"
