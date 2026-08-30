@@ -179,10 +179,12 @@ struct RootView: View {
         if container.battery.isCritical {
             showSettings = false
             container.setLeaveBehindRelay(false)
+            container.packs.setDownloadsAllowed(false)
             container.location.stopUpdating()
             container.mesh.stop()
             container.ptt.stop()
         } else {
+            container.packs.setDownloadsAllowed(true)
             container.location.startUpdating()
             container.location.applyPolicy(container.battery.policy)
             container.ptt.extremeSaver = container.battery.isExtremeSaver

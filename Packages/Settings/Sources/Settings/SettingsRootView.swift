@@ -69,7 +69,7 @@ public struct SettingsRootView: View {
             Text("Field Packs")
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
-            Text("Florida, Texas, New York, and New Mexico are Ready on this phone. Catalog lives on the Expedition Packs plate. DefaultPack stays the Denver fallback.")
+            Text("Open the Packs plate to Get a city or Update maps on Wi-Fi. Ready is disk-only. DefaultPack stays the Denver fallback.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
             if let onFieldPacks {

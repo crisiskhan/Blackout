@@ -80,6 +80,12 @@ for id in ${IDS}; do
     echo "error: copied ${id} has no PNG tiles" >&2
     exit 1
   fi
+  case "${id}" in
+    us-tx) printf '%s\n' "6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade" > "${DST}/${id}/catalog.sha256" ;;
+    us-nm) printf '%s\n' "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8" > "${DST}/${id}/catalog.sha256" ;;
+    us-fl) printf '%s\n' "49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d" > "${DST}/${id}/catalog.sha256" ;;
+    us-ny) printf '%s\n' "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500" > "${DST}/${id}/catalog.sha256" ;;
+  esac
   echo "Copied FieldPacks/${id} (${count} PNG tiles)"
   copied=$((copied + 1))
 done

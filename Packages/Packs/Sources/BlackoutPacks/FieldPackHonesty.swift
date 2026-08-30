@@ -43,12 +43,12 @@ public enum FieldPackHonesty {
                 return "No network. Airplane uses packs already on disk."
             }
             if !onWiFi {
-                return "Prefers Wi-Fi. Tap Download to try anyway from this screen."
+                return "Prefers Wi-Fi. Tap Use Cellular on this row to Get."
             }
             if !assetReady {
                 return "Not on GitHub Releases yet. Denver stays the fallback."
             }
-            return "Tap Download. Then airplane."
+            return "Tap Get. Then airplane."
         }
         return "Available. Not installed on this device."
     }

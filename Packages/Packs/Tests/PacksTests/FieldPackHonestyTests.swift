@@ -74,7 +74,7 @@ final class FieldPackHonestyTests: XCTestCase {
                 pathSatisfied: true,
                 onWiFi: true
             ),
-            "Tap Download. Then airplane."
+            "Tap Get. Then airplane."
         )
     }
 

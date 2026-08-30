@@ -632,6 +632,10 @@ def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
             fail("copy invented routing/ on a pack that had none")
         if "routing/" not in copied.stdout:
             fail("copy did not report routing/ when present")
+        for pack_id, _filename, _size, digest in STATEWIDE_PACKS:
+            sidecar = app / "FieldPacks" / pack_id / "catalog.sha256"
+            if not sidecar.is_file() or sidecar.read_text().strip() != digest:
+                fail(f"copy did not pin catalog.sha256 for {pack_id}")
         if "BLRG0001" not in probe.read_text():
             fail("probe_fieldpacks_app.sh does not check routing magic when present")
 
@@ -1080,7 +1084,57 @@ def main() -> None:
     test_hits_23()
     test_offline_10()
     test_format_version_insurance()
+    test_update_maps_one_tap()
     print("all ci-opt checks passed")
+
+
+def test_update_maps_one_tap() -> None:
+    catalog_list = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalogList.swift").read_text()
+    store = (ROOT / "Packages/Packs/Sources/BlackoutPacks/PackStore.swift").read_text()
+    policy = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackUpdatePolicy.swift").read_text()
+    honesty = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackHonesty.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    tests = (ROOT / "Packages/Packs/Tests/PacksTests/FieldPackUpdateTests.swift").read_text()
+    if "updateMapsLabel" not in catalog_list or "updateAllMaps" not in catalog_list:
+        fail("Packs sheet lost the one-tap Update maps control")
+    if 'updateMapsLabel = "Update maps"' not in policy:
+        fail("Update maps label drifted")
+    if "func updateAllMaps" not in store:
+        fail("PackStore missing updateAllMaps")
+    if "installVerifiedZip" not in store or ".new" not in store:
+        fail("PackStore must stage a zip before replacing on-disk tiles")
+    if "setDownloadsAllowed" not in store or "setDownloadsAllowed(false)" not in root:
+        fail("last-2% must turn pack downloads off")
+    if "setDownloadsAllowed(false)" not in app:
+        fail("AppContainer must refuse downloads when already critical")
+    if "let session: URLSession" in store:
+        fail("PackStore still constructs URLSession on init")
+    if "onAppear { store.updateAllMaps" in catalog_list or "onAppear { store.download" in catalog_list:
+        fail("Packs sheet must not start a fetch on appear")
+    if 'case .available' in catalog_list:
+        fail("do not restore case .available")
+    if "showsRowGet" not in policy or "isCityExtra" not in policy:
+        fail("per-row Get must stay city-missing only")
+    if "useCellularLabel" not in catalog_list:
+        fail("cellular batch confirm missing")
+    if "Tap Get. Then airplane." not in honesty:
+        fail("city Get copy drifted")
+    if "BlackoutDS.Hit.md" not in catalog_list:
+        fail("Update maps must stay a 64pt glove hit")
+    if root.count("tabItem") != 4:
+        fail("do not add a fifth tab")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if "testSameHashOnTapIsUpToDateAndDoesNotFetch" not in tests:
+        fail("Update maps hash skip test missing")
+    if "testBadHashKeepsOldTilesAndContinues" not in tests:
+        fail("fail-closed keep-old-tiles test missing")
+    ok("one-tap Update maps is user-tapped, Wi-Fi default, fail-closed, version 19")
 
 
 def test_offline_10() -> None:

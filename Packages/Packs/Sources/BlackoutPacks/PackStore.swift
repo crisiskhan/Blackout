@@ -10,6 +10,7 @@ import Observation
 public final class PackStore {
     public private(set) var pathSatisfied = false
     public private(set) var onWiFi = false
+    public private(set) var downloadsAllowed = true
     public private(set) var states: [String: FieldPackRowState] = [:]
     public private(set) var messages: [String: String] = [:]
     public private(set) var progress: [String: Double] = [:]
@@ -22,8 +23,32 @@ public final class PackStore {
     private let monitor = NWPathMonitor()
     private var session: URLSession?
     private var tasks: [String: Task<Void, Never>] = [:]
+    private let sha256ForPack: (String) -> String?
+    private let zipProvider: ((URL, String) async throws -> Data)?
 
-    public init(bundledRoot: URL?, bundledPacksRoot: URL? = nil, diskRoot: URL? = nil) {
+    public convenience init(
+        bundledRoot: URL?,
+        bundledPacksRoot: URL? = nil,
+        diskRoot: URL? = nil
+    ) {
+        self.init(
+            bundledRoot: bundledRoot,
+            bundledPacksRoot: bundledPacksRoot,
+            diskRoot: diskRoot,
+            enablePathMonitor: true,
+            sha256ForPack: nil,
+            zipProvider: nil
+        )
+    }
+
+    init(
+        bundledRoot: URL?,
+        bundledPacksRoot: URL?,
+        diskRoot: URL?,
+        enablePathMonitor: Bool,
+        sha256ForPack: ((String) -> String?)?,
+        zipProvider: ((URL, String) async throws -> Data)?
+    ) {
         self.bundledRoot = bundledRoot
         self.bundledPacksRoot = bundledPacksRoot
         let base = diskRoot ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -31,21 +56,27 @@ public final class PackStore {
         self.diskRoot = base
         self.workRoot = base.appendingPathComponent(".partial", isDirectory: true)
         self.relayRoot = base.appendingPathComponent(".relay", isDirectory: true)
+        self.sha256ForPack = { id in
+            sha256ForPack?(id) ?? FieldPackCatalog.descriptor(id: id)?.sha256
+        }
+        self.zipProvider = zipProvider
         try? FileManager.default.createDirectory(at: self.diskRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.workRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.relayRoot, withIntermediateDirectories: true)
-        monitor.pathUpdateHandler = { [weak self] path in
-            Task { @MainActor in
-                self?.pathSatisfied = path.status == .satisfied
-                self?.onWiFi = path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet)
-                self?.refreshStates()
+        if enablePathMonitor {
+            monitor.pathUpdateHandler = { [weak self] path in
+                Task { @MainActor in
+                    self?.pathSatisfied = path.status == .satisfied
+                    self?.onWiFi = path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet)
+                    self?.refreshStates()
+                }
             }
+            monitor.start(queue: DispatchQueue(label: "com.crisiskhan.blackout.packs.path"))
         }
-        monitor.start(queue: DispatchQueue(label: "com.crisiskhan.blackout.packs.path"))
         refreshStates()
     }
 
-    /// Created only when the user taps Download on an optional extra. Never on boot.
+    /// Created only when the user taps Get / Update maps. Never on boot.
     private func httpSession() -> URLSession {
         if let session { return session }
         let config = URLSessionConfiguration.ephemeral
@@ -102,16 +133,18 @@ public final class PackStore {
     }
 
     /// Files on disk, including a too-new schema we must not call Ready.
+    /// User-updated Application Support wins over the read-only archive copy.
     public func packOnDisk(_ id: String) -> URL? {
         if id == FieldPackCatalog.denver.id {
             return bundledFilesPresent ? bundledRoot : nil
         }
+        let disk = diskRoot.appendingPathComponent(id, isDirectory: true)
+        if packFilesPresent(disk) { return disk }
         if let bundled = bundledPacksRoot?.appendingPathComponent(id, isDirectory: true),
            packFilesPresent(bundled) {
             return bundled
         }
-        let disk = diskRoot.appendingPathComponent(id, isDirectory: true)
-        return packFilesPresent(disk) ? disk : nil
+        return nil
     }
 
     public func isInstalled(_ id: String) -> Bool {
@@ -131,11 +164,51 @@ public final class PackStore {
         )
     }
 
-    public func download(_ id: String) {
-        guard let descriptor = FieldPackCatalog.remotePacks.first(where: { $0.id == id }) else { return }
-        tasks[id]?.cancel()
-        tasks[id] = Task { [weak self] in
-            await self?.runDownload(descriptor)
+    var isBusyForTests: Bool {
+        !tasks.isEmpty
+    }
+
+    public func setDownloadsAllowed(_ allowed: Bool) {
+        downloadsAllowed = allowed
+        if !allowed {
+            for task in tasks.values { task.cancel() }
+            tasks.removeAll()
+            for id in states.keys where states[id] == .downloading {
+                progress[id] = nil
+            }
+            refreshStates()
+        }
+    }
+
+    func applyNetworkPathForTests(satisfied: Bool, onWiFi: Bool) {
+        pathSatisfied = satisfied
+        self.onWiFi = onWiFi
+        refreshStates()
+    }
+
+    /// First install of one missing city. Not an update path.
+    public func download(_ id: String, allowCellular: Bool = false) {
+        guard downloadsAllowed else { return }
+        guard let descriptor = FieldPackCatalog.descriptor(id: id) else { return }
+        guard FieldPackUpdatePolicy.showsRowGet(
+            isInstalled: isInstalled(id),
+            isCityExtra: FieldPackCatalog.remotePacks.contains(where: { $0.id == id }),
+            hasRemoteURL: descriptor.downloadURL != nil
+        ) else { return }
+        startInstall(descriptor, replacing: false, allowCellular: allowCellular || onWiFi)
+    }
+
+    /// One tap. Every catalog pack with a remote URL. Wi-Fi default.
+    public func updateAllMaps(allowCellular: Bool = false) {
+        guard FieldPackUpdatePolicy.updateMapsEnabled(
+            downloadsAllowed: downloadsAllowed,
+            pathSatisfied: pathSatisfied,
+            batchRunning: tasks["*batch*"] != nil
+        ) else { return }
+        if !onWiFi && !allowCellular { return }
+        tasks["*batch*"] = Task { [weak self] in
+            await self?.runBatchUpdate(allowCellular: allowCellular)
+            self?.tasks["*batch*"] = nil
         }
     }
 
@@ -150,12 +223,13 @@ public final class PackStore {
             states[FieldPackCatalog.denver.id] = .failed
             messages[FieldPackCatalog.denver.id] = "Bundled Denver pack is missing from the app."
         }
-        for pack in FieldPackCatalog.bundledStatewide {
-            applyCatalogState(pack, isBundled: true, isRemote: false)
-        }
-        for pack in FieldPackCatalog.remotePacks {
+        for pack in FieldPackCatalog.installablePacks {
             if states[pack.id] == .downloading { continue }
-            applyCatalogState(pack, isBundled: false, isRemote: true)
+            applyCatalogState(
+                pack,
+                isBundled: FieldPackCatalog.bundledStatewide.contains(where: { $0.id == pack.id }),
+                isRemote: FieldPackCatalog.remotePacks.contains(where: { $0.id == pack.id })
+            )
         }
     }
 
@@ -219,11 +293,46 @@ public final class PackStore {
         )
     }
 
-    private func runDownload(_ descriptor: FieldPackDescriptor) async {
+    private func startInstall(
+        _ descriptor: FieldPackDescriptor,
+        replacing: Bool,
+        allowCellular: Bool
+    ) {
         let id = descriptor.id
-        if isInstalled(id) {
-            states[id] = .ready
-            messages[id] = "Ready. Works airplane."
+        tasks[id]?.cancel()
+        tasks[id] = Task { [weak self] in
+            await self?.runInstall(descriptor, replacing: replacing, allowCellular: allowCellular)
+            self?.tasks[id] = nil
+        }
+    }
+
+    private func runBatchUpdate(allowCellular: Bool) async {
+        for pack in FieldPackUpdatePolicy.batchTargets() {
+            if Task.isCancelled || !downloadsAllowed { break }
+            if !pathSatisfied { break }
+            if !onWiFi && !allowCellular { break }
+            await runInstall(pack, replacing: true, allowCellular: allowCellular)
+        }
+    }
+
+    private func runInstall(
+        _ descriptor: FieldPackDescriptor,
+        replacing: Bool,
+        allowCellular: Bool
+    ) async {
+        let id = descriptor.id
+        if !downloadsAllowed { return }
+        if !replacing && isInstalled(id) { return }
+        if replacing,
+           !FieldPackUpdatePolicy.shouldFetch(
+                catalogSHA: sha256ForPack(id),
+                recordedSHA: recordedSHA256(id),
+                isInstalled: isInstalled(id)
+           ) {
+            if isInstalled(id) {
+                states[id] = .ready
+                messages[id] = FieldPackUpdatePolicy.upToDateCopy
+            }
             return
         }
         states[id] = .downloading
@@ -238,25 +347,27 @@ public final class PackStore {
         }
         if !pathSatisfied {
             states[id] = .noWifi
-            messages[id] = "No network. Airplane uses packs already on disk."
+            messages[id] = FieldPackUpdatePolicy.noPathCopy
+            return
+        }
+        if !onWiFi && !allowCellular {
+            states[id] = .noWifi
+            messages[id] = FieldPackHonesty.message(
+                isInstalled: isInstalled(id),
+                isBundled: FieldPackCatalog.bundledStatewide.contains(where: { $0.id == id }),
+                isRemote: FieldPackCatalog.remotePacks.contains(where: { $0.id == id }),
+                assetReady: descriptor.assetReady,
+                pathSatisfied: pathSatisfied,
+                onWiFi: onWiFi
+            )
             return
         }
         do {
-            let zipURL = try await fetchZip(from: url, id: id, expectedSHA: descriptor.sha256)
+            let zipURL = try await fetchZip(from: url, id: id, expectedSHA: sha256ForPack(id))
             if Task.isCancelled { return }
-            let dest = diskRoot.appendingPathComponent(id, isDirectory: true)
-            try? FileManager.default.removeItem(at: dest)
-            try PackZip.extract(zipURL: zipURL, to: dest)
-            let manifest = dest.appendingPathComponent("manifest.json")
-            guard FileManager.default.fileExists(atPath: manifest.path) else {
-                try? FileManager.default.removeItem(at: dest)
-                throw PackStoreError.missingManifest
-            }
-            guard packSchemaOK(dest) else {
-                try? FileManager.default.removeItem(at: dest)
-                throw PackStoreError.tooNew
-            }
+            try installVerifiedZip(zipURL, id: id)
             keepRelayZip(id: id, from: zipURL)
+            writeSHA256(id, sha256ForPack(id))
             try? FileManager.default.removeItem(at: zipURL)
             states[id] = .ready
             messages[id] = "Ready. Works airplane."
@@ -268,20 +379,26 @@ public final class PackStore {
             messages[id] = MapPackLayout.tooNewCopy
         } catch {
             if isInstalled(id) {
-                states[id] = .ready
-                messages[id] = "Ready. Works airplane."
+                states[id] = .failed
+                messages[id] = "Failed. Old tiles stay on this phone."
             } else if !pathSatisfied {
                 states[id] = .noWifi
-                messages[id] = "No network. Airplane uses packs already on disk."
+                messages[id] = FieldPackUpdatePolicy.noPathCopy
             } else {
                 states[id] = .failed
-                messages[id] = "Download failed. Airplane still uses Denver plus any pack already on disk."
+                messages[id] = "Failed. Airplane still uses Denver plus any pack already on disk."
             }
         }
     }
 
     private func fetchZip(from url: URL, id: String, expectedSHA: String?) async throws -> URL {
         let partial = workRoot.appendingPathComponent("\(id).zip.part")
+        if let zipProvider {
+            let data = try await zipProvider(url, id)
+            try verifySHA256(data, expected: expectedSHA)
+            try data.write(to: partial, options: .atomic)
+            return partial
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let existing = (try? FileManager.default.attributesOfItem(atPath: partial.path)[.size] as? NSNumber)?.int64Value ?? 0
@@ -305,15 +422,77 @@ public final class PackStore {
             try FileManager.default.moveItem(at: temp, to: partial)
         }
         let data = try Data(contentsOf: partial, options: [.mappedIfSafe])
-        if let expectedSHA, expectedSHA.count == 64, expectedSHA.contains(where: { $0 != "0" }) {
-            let digest = SHA256.hash(data: data)
-            let hex = digest.map { String(format: "%02x", $0) }.joined()
-            if hex != expectedSHA.lowercased() {
-                try? FileManager.default.removeItem(at: partial)
-                throw PackStoreError.checksum
-            }
+        do {
+            try verifySHA256(data, expected: expectedSHA)
+        } catch {
+            try? FileManager.default.removeItem(at: partial)
+            throw error
         }
         return partial
+    }
+
+    private func verifySHA256(_ data: Data, expected: String?) throws {
+        guard let expected = FieldPackUpdatePolicy.normalizedSHA(expected) else { return }
+        let hex = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        if hex != expected { throw PackStoreError.checksum }
+    }
+
+    /// Extract to staging, verify, then swap. Failure leaves the working pack untouched.
+    private func installVerifiedZip(_ zipURL: URL, id: String) throws {
+        let fm = FileManager.default
+        let staging = workRoot.appendingPathComponent("\(id).new", isDirectory: true)
+        let dest = diskRoot.appendingPathComponent(id, isDirectory: true)
+        let backup = workRoot.appendingPathComponent("\(id).old", isDirectory: true)
+        try? fm.removeItem(at: staging)
+        try? fm.removeItem(at: backup)
+        try PackZip.extract(zipURL: zipURL, to: staging)
+        let manifest = staging.appendingPathComponent("manifest.json")
+        guard fm.fileExists(atPath: manifest.path),
+              MapPackLayout.containsTilePNGs(root: staging) else {
+            try? fm.removeItem(at: staging)
+            throw PackStoreError.missingManifest
+        }
+        guard packSchemaOK(staging) else {
+            try? fm.removeItem(at: staging)
+            throw PackStoreError.tooNew
+        }
+        if fm.fileExists(atPath: dest.path) {
+            try fm.moveItem(at: dest, to: backup)
+            do {
+                try fm.moveItem(at: staging, to: dest)
+                try? fm.removeItem(at: backup)
+            } catch {
+                try? fm.removeItem(at: dest)
+                try? fm.moveItem(at: backup, to: dest)
+                try? fm.removeItem(at: staging)
+                throw error
+            }
+        } else {
+            try fm.moveItem(at: staging, to: dest)
+        }
+    }
+
+    func recordedSHA256(_ id: String) -> String? {
+        let candidates: [URL] = [
+            diskRoot.appendingPathComponent("\(id).sha256"),
+            diskRoot.appendingPathComponent(id, isDirectory: true).appendingPathComponent("catalog.sha256"),
+            bundledPacksRoot?.appendingPathComponent(id, isDirectory: true).appendingPathComponent("catalog.sha256")
+        ].compactMap { $0 }
+        for url in candidates {
+            if let text = try? String(contentsOf: url, encoding: .utf8),
+               let hex = FieldPackUpdatePolicy.normalizedSHA(text) {
+                return hex
+            }
+        }
+        return nil
+    }
+
+    private func writeSHA256(_ id: String, _ hex: String?) {
+        guard let hex = FieldPackUpdatePolicy.normalizedSHA(hex) else { return }
+        let sidecar = diskRoot.appendingPathComponent("\(id).sha256")
+        try? Data(hex.utf8).write(to: sidecar, options: .atomic)
+        let inside = diskRoot.appendingPathComponent(id, isDirectory: true).appendingPathComponent("catalog.sha256")
+        try? Data(hex.utf8).write(to: inside, options: .atomic)
     }
 
     /// Zip bytes for the 1/N radio. Prefers the kept GitHub zip (catalog SHA-256).
@@ -380,23 +559,12 @@ public final class PackStore {
         do {
             let data = try Data(contentsOf: zipURL, options: [.mappedIfSafe])
             let hex = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-            let expected = FieldPackCatalog.descriptor(id: id)?.sha256?.lowercased()
-            let catalogMatch = expected?.count == 64 && hex == expected
+            let expected = FieldPackUpdatePolicy.normalizedSHA(sha256ForPack(id))
+            let catalogMatch = expected != nil && hex == expected
 
-            let dest = diskRoot.appendingPathComponent(id, isDirectory: true)
-            try? FileManager.default.removeItem(at: dest)
-            try PackZip.extract(data: data, to: dest)
-            let manifest = dest.appendingPathComponent("manifest.json")
-            guard FileManager.default.fileExists(atPath: manifest.path),
-                  MapPackLayout.containsTilePNGs(root: dest) else {
-                try? FileManager.default.removeItem(at: dest)
-                throw PackStoreError.missingManifest
-            }
-            guard packSchemaOK(dest) else {
-                try? FileManager.default.removeItem(at: dest)
-                throw PackStoreError.tooNew
-            }
+            try installVerifiedZip(zipURL, id: id)
             keepRelayZip(id: id, from: zipURL)
+            if catalogMatch { writeSHA256(id, hex) }
             try? FileManager.default.removeItem(at: zipURL)
             states[id] = .ready
             progress[id] = 1

@@ -137,6 +137,7 @@ final class AppContainer {
         }
         location.applyPolicy(battery.policy)
         if battery.isCritical {
+            packs.setDownloadsAllowed(false)
             location.stopUpdating()
             mesh.stop()
             ptt.stop()
