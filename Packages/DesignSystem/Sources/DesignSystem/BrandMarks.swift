@@ -77,17 +77,16 @@ public struct AboutChromeView: View {
     }
 
     private var wordmarkPlate: some View {
-        let radius = CGFloat(BrandChromeLock.aboutPlateRadius)
         BrandWordmark(maxWidth: CGFloat(BrandChromeLock.aboutWordmarkMaxWidth))
             .padding(16)
             .background(BlackoutDS.Surface.raised)
             .overlay(
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                RoundedRectangle(cornerRadius: CGFloat(BrandChromeLock.aboutPlateRadius), style: .continuous)
                     .stroke(
                         BlackoutDS.Silver.edge,
                         lineWidth: CGFloat(BrandChromeLock.aboutPlateEdgeWidth(sun: false))
                     )
             )
-            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: CGFloat(BrandChromeLock.aboutPlateRadius), style: .continuous))
     }
 }
