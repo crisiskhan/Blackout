@@ -44,33 +44,32 @@ struct TogglePTTIntent: AppIntent {
 }
 
 struct BlackoutPTTShortcuts: AppShortcutsProvider {
+    @AppShortcutsBuilder
     static var appShortcuts: [AppShortcut] {
-        [
-            AppShortcut(
-                intent: TogglePTTIntent(),
-                phrases: [
-                    "Toggle PTT in \(.applicationName)",
-                    "Talk in \(.applicationName)",
-                ],
-                shortTitle: "Toggle PTT",
-                systemImageName: "mic.fill"
-            ),
-            AppShortcut(
-                intent: StartPTTIntent(),
-                phrases: [
-                    "Start PTT in \(.applicationName)",
-                ],
-                shortTitle: "Start PTT",
-                systemImageName: "mic.fill"
-            ),
-            AppShortcut(
-                intent: StopPTTIntent(),
-                phrases: [
-                    "Stop PTT in \(.applicationName)",
-                ],
-                shortTitle: "Stop PTT",
-                systemImageName: "mic.slash"
-            ),
-        ]
+        AppShortcut(
+            intent: TogglePTTIntent(),
+            phrases: [
+                "Toggle PTT in \(.applicationName)",
+                "Talk in \(.applicationName)",
+            ],
+            shortTitle: "Toggle PTT",
+            systemImageName: "mic.fill"
+        )
+        AppShortcut(
+            intent: StartPTTIntent(),
+            phrases: [
+                "Start PTT in \(.applicationName)",
+            ],
+            shortTitle: "Start PTT",
+            systemImageName: "mic.fill"
+        )
+        AppShortcut(
+            intent: StopPTTIntent(),
+            phrases: [
+                "Stop PTT in \(.applicationName)",
+            ],
+            shortTitle: "Stop PTT",
+            systemImageName: "mic.slash"
+        )
     }
 }
