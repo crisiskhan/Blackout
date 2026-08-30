@@ -463,10 +463,10 @@ public struct MapsRootView: View {
         }
     }
 
-    /// Bottom-leading. 8pt above SOS clearance. Trailing spacer keeps the 88pt disk clear.
+    /// Bottom-leading 56h chip. 8pt clear of the trailing 88pt SOS disk. Recedes; SOS does not.
     private var vitalsRow: some View {
         receding {
-            HStack(spacing: 0) {
+            HStack(alignment: .bottom, spacing: 0) {
                 VitalsChip(
                     isOKLatched: !roster.isRed,
                     isNotLatched: roster.isRed,
@@ -474,11 +474,12 @@ public struct MapsRootView: View {
                     onOK: { commitVitals(.imOK) },
                     onNot: { commitVitals(.notOK) }
                 )
-                Spacer(minLength: BlackoutDS.Hit.sos + 18)
+                Spacer(minLength: BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap)
             }
+            .frame(minHeight: BlackoutDS.Vitals.sosClearance, alignment: .bottom)
             .padding(.leading, 16)
             .padding(.trailing, 18)
-            .padding(.bottom, BlackoutDS.Vitals.sosClearance + BlackoutDS.Vitals.sosGap)
+            .padding(.bottom, BlackoutDS.Vitals.sosGap)
         }
     }
 

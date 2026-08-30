@@ -327,6 +327,7 @@ struct RootView: View {
                     persistence: container.persistence,
                     mesh: container.mesh,
                     battery: container.battery,
+                    roster: container.party,
                     presentConfirm: $container.sosConfirmRequested,
                     coverOpen: $container.sosCoverOpen
                 )
@@ -339,12 +340,13 @@ struct RootView: View {
     }
 
     /// Measured from the physical bottom of the screen (overlay ignores the bottom safe area).
-    /// Compact 4-tab: 16pt above the tab bar (49pt) and home indicator (~34pt).
-    /// Critical SOS-only and regular iPad split have no tab bar: 16pt above the home indicator.
+    /// Compact 4-tab: 8pt above the tab bar. Critical SOS-only and iPad split: 8pt above home indicator.
+    /// SOS never recedes with Map HUD. Last-2% still shows the 88pt FAB.
     private var fabBottomPadding: CGFloat {
-        let home: CGFloat = 34
-        let tab: CGFloat = (sizeClass == .regular || container.battery.isCritical) ? 0 : 49
-        return 16 + tab + home
+        let hasTabBar = sizeClass != .regular && !container.battery.isCritical
+        return BlackoutDS.Vitals.sosGap
+            + (hasTabBar ? BlackoutDS.Vitals.tabBar : 0)
+            + BlackoutDS.Vitals.homeIndicator
     }
 
     private var settingsOverlay: some View {

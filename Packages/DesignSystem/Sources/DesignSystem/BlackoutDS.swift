@@ -69,10 +69,12 @@ public enum BlackoutDS {
     public enum Vitals {
         public static let chip: CGFloat = 56
         public static let pip: CGFloat = 6
-        /// Gap above the reserved SOS clearance. Chip never covers the 88pt disk.
+        /// 8pt: chip-to-disk gap and FAB inset above the tab bar (tabBar+8).
         public static let sosGap: CGFloat = 8
-        /// Map chrome bottom inset that keeps tools off the 88pt SOS FAB.
-        public static let sosClearance: CGFloat = 120
+        /// Reserved height of the 88pt SOS disk band. Chip sits in this band, leading.
+        public static let sosClearance: CGFloat = 88
+        public static let tabBar: CGFloat = 49
+        public static let homeIndicator: CGFloat = 34
     }
 
     /// Commit plates. `primary` is SOS/hazard fill only — vitals stay `metal`.

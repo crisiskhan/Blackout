@@ -50,6 +50,8 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(BlackoutDS.Vitals.chip, 56)
         XCTAssertEqual(BlackoutDS.Vitals.pip, 6)
         XCTAssertEqual(BlackoutDS.Vitals.sosGap, 8)
+        XCTAssertEqual(BlackoutDS.Vitals.sosClearance, 88)
+        XCTAssertEqual(BlackoutDS.Vitals.tabBar, 49)
         XCTAssertEqual(BlackoutDS.Hit.sm, 56)
         XCTAssertEqual(BlackoutDS.Hit.sos, 88)
     }

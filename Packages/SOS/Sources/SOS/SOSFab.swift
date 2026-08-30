@@ -11,6 +11,7 @@ public struct SOSFab: View {
     let persistence: any PersistenceServing
     @Bindable var mesh: MeshFacade
     @Bindable var battery: BatteryService
+    @Bindable var roster: PartyRoster
 
     @State private var showConfirm = false
     @State private var isArmed = false
@@ -26,6 +27,7 @@ public struct SOSFab: View {
         persistence: any PersistenceServing,
         mesh: MeshFacade,
         battery: BatteryService,
+        roster: PartyRoster,
         presentConfirm: Binding<Bool>? = nil,
         coverOpen: Binding<Bool>? = nil
     ) {
@@ -33,6 +35,7 @@ public struct SOSFab: View {
         self.persistence = persistence
         self.mesh = mesh
         self.battery = battery
+        self.roster = roster
         self.presentConfirm = presentConfirm
         self.coverOpen = coverOpen
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
@@ -55,7 +58,7 @@ public struct SOSFab: View {
         .buttonStyle(.plain)
         .accessibilityLabel("SOS. Hold to arm.")
         .simultaneousGesture(
-            LongPressGesture(minimumDuration: 1.5)
+            LongPressGesture(minimumDuration: SOSChrome.holdSeconds)
                 .onEnded { _ in
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     if isArmed {
@@ -67,7 +70,9 @@ public struct SOSFab: View {
         )
         .fullScreenCover(isPresented: $showConfirm) {
             SOSConfirmCover(
-                meshCount: mesh.nearbyPeerCount,
+                location: location,
+                mesh: mesh,
+                roster: roster,
                 storeError: $storeError,
                 onArm: arm,
                 onDismissUnarmed: { showConfirm = false }
@@ -75,7 +80,9 @@ public struct SOSFab: View {
         }
         .fullScreenCover(isPresented: $showArmedPanel) {
             SOSArmedPanel(
-                meshCount: mesh.nearbyPeerCount,
+                location: location,
+                mesh: mesh,
+                roster: roster,
                 onDismiss: { showArmedPanel = false }
             )
         }
@@ -123,14 +130,10 @@ public struct SOSFab: View {
         showConfirm = false
         showArmedPanel = true
         storeError = nil
-        let envelope = Envelope(
-            kind: .sosAlert,
-            ciphertext: Data("sos".utf8),
-            sender: BlackoutID(),
-            recipient: BlackoutID()
-        )
-        if mesh.nearbyPeerCount > 0 {
-            mesh.send(envelope)
+        if SOSConfirm.shouldSendMesh(peerCount: mesh.nearbyPeerCount) {
+            mesh.send(
+                SOSConfirm.meshEnvelope(sender: roster.localID, recipient: roster.recipientID)
+            )
         }
     }
 
@@ -140,60 +143,57 @@ public struct SOSFab: View {
 }
 
 public struct SOSConfirmCover: View {
-    var meshCount: Int
+    @Bindable var location: LocationService
+    @Bindable var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
     @Binding var storeError: String?
     var onArm: () -> Void
     var onDismissUnarmed: () -> Void
-    @State private var sirenOn = false
     @State private var strobeOn = false
-    @State private var flashWhite = false
     @State private var showSystemSOS = false
+    @State private var controller: SOSConfirmController?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         ZStack(alignment: .topTrailing) {
-            (flashWhite ? Color.white : BlackoutDS.Surface.hazard).ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 20) {
+            BlackoutDS.Surface.hazard.ignoresSafeArea()
+            if strobeOn {
+                SOSStrobeWash(reduceMotion: reduceMotion)
+            }
+            VStack(alignment: .leading, spacing: 16) {
                 Text("SOS")
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Unarmed. Holding the button only opened this cover. Slide to arm, log, and alert peers when they exist.")
+                Text("Unarmed. Holding the button only opened this cover. Slide to arm, log, and alert peers when they exist. Tap never fires.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(7)
-                SOSPictogramBar(
-                    onSiren: {
-                        SOSLocalSignals.shared.toggleSiren()
-                        sirenOn = SOSLocalSignals.shared.sirenRunning
-                    },
-                    onStrobe: {
-                        SOSLocalSignals.shared.onStrobeTick = { flashWhite = $0 }
-                        SOSLocalSignals.shared.toggleStrobe()
-                        strobeOn = SOSLocalSignals.shared.strobeRunning
-                    },
-                    onSystemSOS: { showSystemSOS = true },
-                    onCancel: {
-                        SOSLocalSignals.shared.stopAll()
-                        onDismissUnarmed()
-                    },
-                    sirenOn: sirenOn,
-                    strobeOn: strobeOn
-                )
-                MeshPill(nearbyCount: meshCount)
-                SlideToConfirm("Slide to arm") {
-                    SOSLocalSignals.shared.stopAll()
-                    onArm()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        SOSConfirmActionList(strobeOn: strobeOn) { action in
+                            perform(action)
+                        }
+                        MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
+                            showSystemSOS = true
+                        }
+                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        SlideToConfirm("Slide to arm") {
+                            controller?.stopSpeech()
+                            onArm()
+                        }
+                        if let storeError {
+                            StoreFailure(storeError)
+                        }
+                        Text("CALL 911 opens the Phone app. You still confirm the call. Blackout never auto-dials and never starts OS Emergency SOS by itself.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
                 }
-                if let storeError {
-                    StoreFailure(storeError)
-                }
-                Text("Pictograms are local siren, strobe, OS Emergency SOS, cancel. Slide still arms. Blackout never auto-dials 911.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.steel)
-                Spacer()
             }
             .padding(24)
             Button {
-                SOSLocalSignals.shared.stopAll()
+                controller?.stopSpeech()
+                strobeOn = false
                 onDismissUnarmed()
             } label: {
                 Image(systemName: "xmark")
@@ -209,37 +209,68 @@ public struct SOSConfirmCover: View {
                 .presentationDetents([.medium, .large])
         }
         .preferredColorScheme(.dark)
-        .onDisappear { SOSLocalSignals.shared.stopAll() }
+        .onAppear { bindController() }
+        .onDisappear {
+            controller?.stopSpeech()
+            strobeOn = false
+        }
+    }
+
+    private func bindController() {
+        controller = SOSConfirmController(location: location, mesh: mesh, roster: roster)
+    }
+
+    private func perform(_ action: SOSConfirmAction) {
+        if controller == nil { bindController() }
+        controller?.perform(action, strobeOn: &strobeOn)
     }
 }
 
 public struct SOSArmedPanel: View {
-    var meshCount: Int
+    @Bindable var location: LocationService
+    @Bindable var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
     var onDismiss: () -> Void
+    @State private var strobeOn = false
     @State private var showSystemSOS = false
+    @State private var controller: SOSConfirmController?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         ZStack(alignment: .topTrailing) {
             BlackoutDS.Surface.hazard.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 20) {
+            if strobeOn {
+                SOSStrobeWash(reduceMotion: reduceMotion)
+            }
+            VStack(alignment: .leading, spacing: 16) {
                 Text("SOS armed")
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Logged on-device. Mesh peers: \(meshCount). Closing this panel does not disarm. The alert already went out locally.")
+                Text("Logged on-device. Mesh peers: \(mesh.nearbyPeerCount). Closing this panel does not disarm. The alert already went out locally.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(7)
-                MeshPill(nearbyCount: meshCount)
-                MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
-                    showSystemSOS = true
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        SOSConfirmActionList(strobeOn: strobeOn) { action in
+                            perform(action)
+                        }
+                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
+                            showSystemSOS = true
+                        }
+                        Text("Never auto-dials 911. You start the OS Emergency SOS gesture.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
                 }
-                Text("Never auto-dials 911. You start the OS Emergency SOS gesture.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.steel)
-                Spacer()
             }
             .padding(24)
-            Button(action: onDismiss) {
+            Button {
+                controller?.stopSpeech()
+                strobeOn = false
+                onDismiss()
+            } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(BlackoutDS.Silver.bright)
@@ -253,6 +284,20 @@ public struct SOSArmedPanel: View {
                 .presentationDetents([.medium, .large])
         }
         .preferredColorScheme(.dark)
+        .onAppear { bindController() }
+        .onDisappear {
+            controller?.stopSpeech()
+            strobeOn = false
+        }
+    }
+
+    private func bindController() {
+        controller = SOSConfirmController(location: location, mesh: mesh, roster: roster)
+    }
+
+    private func perform(_ action: SOSConfirmAction) {
+        if controller == nil { bindController() }
+        controller?.perform(action, strobeOn: &strobeOn)
     }
 }
 

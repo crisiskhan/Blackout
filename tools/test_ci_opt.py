@@ -614,10 +614,12 @@ def test_party_vitals_red_loop() -> None:
         fail("party red must not auto-dial 911")
     if "VitalsChip" not in maps or "vitalsRow" not in maps:
         fail("Map lost the bottom-leading §10.4 vitals chip")
-    if "sosClearance + BlackoutDS.Vitals.sosGap" not in maps:
-        fail("vitals chip is not 8pt above SOS clearance")
-    if "BlackoutDS.Hit.sos + 18" not in maps:
-        fail("vitals row must leave trailing clearance for the 88pt SOS disk")
+    if "BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap" not in maps:
+        fail("vitals chip must stay 8pt clear of the 88pt SOS disk")
+    if "padding(.bottom, BlackoutDS.Vitals.sosGap)" not in maps:
+        fail("vitals chip must sit in the SOS band, not stacked above 120pt clearance")
+    if "sosClearance + BlackoutDS.Vitals.sosGap" in maps:
+        fail("vitals chip must not sit above the old 120pt SOS stack")
     if "BlackoutDS.Vitals.chip" not in chip:
         fail("I AM NOT chip is not 56h")
     if "BlackoutDS.Btn.metal" not in chip or "Btn.primary" in chip:
@@ -663,6 +665,64 @@ def test_party_vitals_red_loop() -> None:
     if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
         fail("CURRENT_PROJECT_VERSION was bumped off 19")
     ok("party vitals two-tap + red packet, SOS 88, chip 56, no 911")
+
+
+def test_sos_confirm_panel() -> None:
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    support = (ROOT / "Packages/SOS/Sources/SOS/SOSConfirmSupport.swift").read_text()
+    core = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/SOSConfirm.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    vitals = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/BlackoutDS.swift").read_text()
+    chrome = (ROOT / "Packages/Maps/Sources/MapsChrome/MapChromeRecede.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    if "SPEAK SOS" not in core or "SPEAK MY LOCATION" not in core:
+        fail("confirm panel missing SPEAK SOS / SPEAK MY LOCATION")
+    if "SHARE POSITION" not in core or "COPY COORDS" not in core:
+        fail("confirm panel missing SHARE POSITION / COPY COORDS")
+    if "CALL 911" not in core or "VISUAL SOS STROBE" not in core or "STOP" not in core:
+        fail("confirm panel missing CALL 911 / VISUAL SOS STROBE / STOP")
+    if "BLACKOUT" not in core:
+        fail("SHARE POSITION must start with BLACKOUT")
+    if "tel:911" not in core or "autoDials911 = false" not in core:
+        fail("CALL 911 must be tel:911 and must not auto-dial")
+    if "strobePeriodMs = 330" not in core or "reduceMotionOpacity = 0.55" not in core:
+        fail("visual strobe must be 330ms pulse / Reduce Motion 0.55")
+    if "SOSConfirmActionList" not in sos or "SOSStrobeWash" not in sos:
+        fail("confirm cover lost the six actions or visual strobe")
+    if "Button(action: {})" not in sos:
+        fail("SOS tap must never fire")
+    if "SOSChrome.holdSeconds" not in sos:
+        fail("hold 1.5s must present the unarmed cover")
+    if "SlideToConfirm" not in sos:
+        fail("slide still commits")
+    if "Emergency SOS (system)" not in sos:
+        fail("OS Emergency SOS must stay an explicit extra control")
+    if "onAppear { showSystemSOS" in sos or ".onAppear { showSystemSOS = true" in sos:
+        fail("must not auto-invoke OS Emergency SOS")
+    if "openTel911" not in support or "signalDistress" not in support:
+        fail("CALL / strobe must open tel:911 and send mesh sos")
+    if "markInjured" not in support:
+        fail("strobe / CALL must set local injury/red")
+    if "Vitals.sosGap" not in root or "Vitals.tabBar" not in root:
+        fail("SOS FAB must inset tabBar+8")
+    if "return 16 + tab + home" in root:
+        fail("SOS FAB still uses the old 16pt tab inset")
+    if "sosClearance: CGFloat = 120" in vitals:
+        fail("SOS clearance must be the 88pt disk band, not 120 stacked")
+    if "sosClearance: CGFloat = 88" not in vitals or "sosGap: CGFloat = 8" not in vitals:
+        fail("DS SOS tokens drifted")
+    if "SOS FAB is not part of this flag" not in chrome:
+        fail("Map recede must not include the SOS FAB")
+    if root.count("tabItem") != 4:
+        fail("do not make SOS a tab")
+    if "CriticalSOSShell" not in root or "SOSFab" not in root:
+        fail("last-2% must still show the 88pt SOS FAB")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    ok("SOS is bottom-trailing tabBar+8, confirm has six actions, no auto-911")
 
 
 def test_locked_app_icon() -> None:
@@ -724,6 +784,7 @@ def main() -> None:
     test_live_mesh_1n()
     test_pack_relay_1n()
     test_party_vitals_red_loop()
+    test_sos_confirm_panel()
     test_locked_app_icon()
     test_bundled_statewide_archive_only()
     test_copy_fieldpacks_compile_noop_and_archive_required()

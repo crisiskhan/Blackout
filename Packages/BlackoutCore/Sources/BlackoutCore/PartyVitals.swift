@@ -304,6 +304,26 @@ public final class PartyRoster {
 
     public var isRed: Bool { selfStatus.band == .red }
 
+    /// SOS strobe / CALL set injury immediately. Not the two-tap Map chip. Not an SOS arm.
+    @discardableResult
+    public func markInjured(fix: LocationFix?) -> Envelope? {
+        pending = nil
+        let before = selfStatus
+        PartyVitals.apply(.notOK, to: &selfStatus)
+        if let fix, fix.hasCoordinate {
+            selfStatus.latitude = fix.latitude
+            selfStatus.longitude = fix.longitude
+        }
+        selfStatus.id = localID
+        persistSelf()
+        guard PartyVitals.shouldBroadcast(before: before, after: selfStatus) else { return nil }
+        return PartyStatusWire.envelope(
+            status: selfStatus,
+            sender: localID,
+            recipient: recipientID
+        )
+    }
+
     /// First tap arms. Second tap on the same action commits. Returns a packet only on band change.
     public func tap(_ action: PartyVitalAction, fix: LocationFix?) -> Envelope? {
         var taps = PartyTapState(pending: pending)
