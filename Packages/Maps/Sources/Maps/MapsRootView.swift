@@ -120,313 +120,372 @@ public struct MapsRootView: View {
     }
 
     public var body: some View {
-        ZStack {
-            BlackoutDS.Surface.void.ignoresSafeArea()
-            if let pack = packService.pack {
-                OfflineMapView(
-                    pack: pack,
-                    selfFix: location.navigationFix,
-                    manualPin: location.manualPin,
-                    breadcrumbs: crumbs,
-                    viewshed: viewshedRays,
-                    slope: slopeSamples,
-                    showViewshed: showViewshed && extrasOn,
-                    showSlope: showSlope && extrasOn,
-                    centerToken: centerToken,
-                    pinCameraToPack: pinnedToPackCoverage,
-                    routing: packService.routing,
-                    routeLine: navigate.routePolyline,
-                    destination: navigate.destination,
-                    showPackTiles: packService.routing == nil || showTopoTiles,
-                    showTrails: showTrails,
-                    headingDegrees: location.headingDegrees,
-                    accuracyMeters: gpsAccuracyMeters,
-                    packContainsSelf: packContainsSelf,
-                    activeManeuver: liveManeuver,
-                    onDropPin: { lat, lon in
-                        location.dropManualPin(latitude: lat, longitude: lon)
-                    },
-                    onTap: { lat, lon in
-                        noteMapActivity()
-                        guard battery.coarseNavigateEnabled, navigate.phase != .guidance else { return }
-                        navigate.pickMap(
-                            latitude: lat,
-                            longitude: lon,
-                            origin: originCoordinate,
-                            pack: packService.routing
-                        )
-                    },
-                    onUserInteract: noteMapActivity,
-                    onScaleChange: { metersPerPoint = $0 },
-                    onOutsidePack: { outside in
-                        outsidePack = outside
-                    },
-                    resetToken: resetToken
-                )
-                .id(pack.rootURL.standardizedFileURL.path)
-                .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
-                .ignoresSafeArea()
-                if radarVisible {
-                    RadarHUDView(
-                        headingUp: headingUp,
-                        headingDegrees: location.headingDegrees,
-                        peers: peers,
-                        sweepAudio: sweepAudio,
-                        onSelectPeer: {
-                            noteMapActivity()
-                            selectedPeer = $0
-                        },
-                        onSelectSelf: {
-                            noteMapActivity()
-                            selectedPeer = nil
-                        }
-                    )
-                    .padding(.top, 80)
-                    .padding(.bottom, 180)
-                    .allowsHitTesting(true)
-                }
+        mapLifecycle
+    }
+
+    private var mapLifecycle: some View {
+        mapWithSheets
+            .onChange(of: outsidePack) { _, outside in
+                if outside { pinnedToPackCoverage = false }
             }
-            if showEmptyCard {
-                MapEmptyCard(
-                    title: emptyCardTitle,
-                    detail: emptyCardDetail,
-                    showRecenter: packService.pack != nil,
-                    onRecenter: packService.pack == nil ? nil : recenterToPack,
-                    onOpenFieldPacks: onOpenFieldPacks
-                )
-            } else if let empty = navigate.empty, navigate.phase != .guidance {
-                VStack {
-                    Spacer()
-                    NavigateEmptyCard(
-                        empty: empty,
-                        onBearing: { tool = .navigate },
-                        onPacks: onOpenFieldPacks
-                    )
-                    .padding(.horizontal, 24)
-                    Spacer()
-                }
-                .padding(.bottom, 100)
+            .task { reloadCrumbs() }
+            .onChange(of: location.navigationFix?.latitude) { _, _ in
+                resolvePaintPack()
+                if showViewshed { refreshTerrain() }
+                refreshGuidance()
             }
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    MapLockHUD(
-                        accuracyMeters: gpsAccuracyMeters,
-                        headingDegrees: location.headingDegrees,
-                        onNorthUp: {
-                            noteMapActivity()
-                            headingUp = false
-                            UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
-                        }
-                    )
-                    MapExpeditionBanner(title: openOutingName ?? "No open expedition")
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, sizeClass == .regular ? 8 : 64)
-                .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
-                if showChipRow, battery.coarseNavigateEnabled, showsNavigateBanner {
-                    navigateChrome
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                }
-                Spacer()
-                if showChipRow {
-                    HStack(alignment: .bottom, spacing: 8) {
-                        MapScaleBar(metersPerPoint: metersPerPoint)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
-                    .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
-                    HStack(spacing: 8) {
-                        MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
-                        MetalButton("Layers", height: BlackoutDS.Hit.md) {
-                            noteMapActivity()
-                            showLayers = true
-                        }
-                        MetalButton("Packs", height: BlackoutDS.Hit.md) {
-                            noteMapActivity()
-                            onOpenFieldPacks?()
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 120)
-                    .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
-                }
+            .onChange(of: location.navigationFix?.longitude) { _, _ in
+                resolvePaintPack()
+                refreshGuidance()
             }
-        }
-        .sheet(item: $tool) { item in
-            NavigationStack {
-                switch item {
-                case .navigate:
-                    NavigateView(location: location, pack: packService.pack, battery: battery)
-                case .radar:
-                    RadarView(location: location, mesh: mesh, pack: packService.pack)
-                case .topo:
-                    TopographyView(location: location, packService: packService)
-                case .civilization:
-                    FindCivilizationView(location: location, pack: packService.pack)
-                }
+            .onChange(of: navigate.profile) { _, _ in
+                navigate.refreshPreview(origin: originCoordinate, pack: packService.routing)
             }
-            .preferredColorScheme(.dark)
-            .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showLayers) {
-            MapLayersSheet(
-                radarOn: $radarOn,
-                headingUp: $headingUp,
-                sweepAudio: $sweepAudio,
-                showSlope: $showSlope,
-                showViewshed: $showViewshed,
-                extrasOn: extrasOn,
-                showTopoTiles: $showTopoTiles,
-                showTrails: $showTrails,
-                hasRouting: packService.routing != nil,
-                searchQuery: navQueryBinding,
-                searchHits: navigate.hits,
-                navigateEnabled: battery.coarseNavigateEnabled,
-                lidarSupported: LiDARAvailability.isSupported,
-                onToggleSlope: {
-                    UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
-                    refreshTerrain()
-                },
-                onToggleViewshed: {
-                    UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
-                    refreshTerrain()
-                },
-                onToggleHeading: {
-                    UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
-                    if headingUp, !pinnedToPackCoverage {
-                        centerToken += 1
-                    }
-                },
-                onToggleAudio: {
-                    UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
-                },
-                onToggleTopo: {
-                    UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
-                },
-                onToggleTrails: {
-                    UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
-                },
-                onSearch: {
-                    navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
-                },
-                onPickSearch: { hit in
+            .onChange(of: location.authorization) { _, _ in
+                refreshGuidance()
+            }
+            .onChange(of: location.lastKnown?.latitude) { _, _ in
+                resolvePaintPack()
+            }
+            .onChange(of: installedPackRoots) { _, _ in
+                resolvePaintPack()
+            }
+            .onChange(of: pinnedToPackCoverage) { _, _ in
+                resolvePaintPack()
+            }
+            .onChange(of: battery.isCritical) { _, critical in
+                if critical {
+                    tool = nil
+                    showLiDAR = false
                     showLayers = false
-                    navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
-                },
-                onOpenLiDAR: {
-                    showLayers = false
-                    showLiDAR = true
-                },
-                onOpenTool: { item in
-                    showLayers = false
-                    tool = item
-                }
-            )
-            .presentationDetents([.medium])
-            .preferredColorScheme(.dark)
-        }
-        .sheet(item: $selectedPeer) { blip in
-            RadarPeerSheet(
-                blip: blip,
-                onMessage: { selectedPeer = nil },
-                onPTT: { selectedPeer = nil },
-                onNavigate: {
                     selectedPeer = nil
-                    if battery.coarseNavigateEnabled {
-                        tool = .navigate
-                    }
+                    navigate.end()
                 }
-            )
-            .presentationDetents([.medium])
-        }
-        .sheet(isPresented: $showLiDAR) {
-            LiDARRangeView(
-                mapRangeMeters: lidarMapRange,
-                pointName: lidarPointName
-            )
-            .presentationDetents([.large])
-        }
-        .onChange(of: outsidePack) { _, outside in
-            if outside { pinnedToPackCoverage = false }
-        }
-        .task { reloadCrumbs() }
-        .onChange(of: location.navigationFix?.latitude) { _, _ in
-            resolvePaintPack()
-            if showViewshed { refreshTerrain() }
-            refreshGuidance()
-        }
-        .onChange(of: location.navigationFix?.longitude) { _, _ in
-            resolvePaintPack()
-            refreshGuidance()
-        }
-        .onChange(of: navigate.profile) { _, _ in
-            navigate.refreshPreview(origin: originCoordinate, pack: packService.routing)
-        }
-        .onChange(of: location.authorization) { _, _ in
-            refreshGuidance()
-        }
-        .onChange(of: location.lastKnown?.latitude) { _, _ in
-            resolvePaintPack()
-        }
-        .onChange(of: installedPackRoots) { _, _ in
-            resolvePaintPack()
-        }
-        .onChange(of: pinnedToPackCoverage) { _, _ in
-            resolvePaintPack()
-        }
-        .onChange(of: battery.isCritical) { _, critical in
-            if critical {
-                tool = nil
-                showLiDAR = false
-                showLayers = false
-                selectedPeer = nil
-                navigate.end()
             }
-        }
-        .onAppear {
-            if extremeSaver { radarOn = true }
-            resolvePaintPack()
-            refreshTerrain()
-            location.startUpdating()
-            applyChrome {
-                $0.reduceMotion = reduceMotion
-                $0.hold = holdsChrome
-                $0.noteActivity(at: nowOffset)
+            .onAppear {
+                if extremeSaver { radarOn = true }
+                resolvePaintPack()
+                refreshTerrain()
+                location.startUpdating()
+                applyChrome {
+                    $0.reduceMotion = reduceMotion
+                    $0.hold = holdsChrome
+                    $0.noteActivity(at: nowOffset)
+                }
             }
-        }
-        .onChange(of: reduceMotion) { _, value in
-            applyChrome {
-                $0.reduceMotion = value
-                $0.hold = holdsChrome
-                $0.tick(at: nowOffset)
+            .onChange(of: reduceMotion) { _, value in
+                applyChrome {
+                    $0.reduceMotion = value
+                    $0.hold = holdsChrome
+                    $0.tick(at: nowOffset)
+                }
             }
-        }
-        .onChange(of: holdsChrome) { _, held in
-            applyChrome {
-                $0.reduceMotion = reduceMotion
-                $0.hold = held
-                $0.tick(at: nowOffset)
+            .onChange(of: holdsChrome) { _, held in
+                applyChrome {
+                    $0.reduceMotion = reduceMotion
+                    $0.hold = held
+                    $0.tick(at: nowOffset)
+                }
             }
-        }
-        .task(id: reduceMotion) {
-            applyChrome {
-                $0.reduceMotion = reduceMotion
-                $0.hold = holdsChrome
-                $0.tick(at: nowOffset)
-            }
-            guard !reduceMotion else { return }
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 250_000_000)
+            .task(id: reduceMotion) {
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
                     $0.tick(at: nowOffset)
                 }
-                if reduceMotion { break }
+                guard !reduceMotion else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 250_000_000)
+                    applyChrome {
+                        $0.reduceMotion = reduceMotion
+                        $0.hold = holdsChrome
+                        $0.tick(at: nowOffset)
+                    }
+                    if reduceMotion { break }
+                }
+            }
+    }
+
+    private var mapRoot: some View {
+        ZStack {
+            BlackoutDS.Surface.void.ignoresSafeArea()
+            mapCanvas
+            emptyOverlay
+            mapLockChrome
+        }
+    }
+
+    private var mapWithSheets: some View {
+        mapRoot
+            .sheet(item: $tool, content: toolSheet)
+            .sheet(isPresented: $showLayers, content: layersSheet)
+            .sheet(item: $selectedPeer, content: peerSheet)
+            .sheet(isPresented: $showLiDAR, content: lidarSheet)
+    }
+
+    @ViewBuilder
+    private func toolSheet(_ item: MapTool) -> some View {
+        NavigationStack {
+            switch item {
+            case .navigate:
+                NavigateView(location: location, pack: packService.pack, battery: battery)
+            case .radar:
+                RadarView(location: location, mesh: mesh, pack: packService.pack)
+            case .topo:
+                TopographyView(location: location, packService: packService)
+            case .civilization:
+                FindCivilizationView(location: location, pack: packService.pack)
             }
         }
+        .preferredColorScheme(.dark)
+        .presentationDetents([.medium, .large])
+    }
+
+    private func layersSheet() -> some View {
+        MapLayersSheet(
+            radarOn: $radarOn,
+            headingUp: $headingUp,
+            sweepAudio: $sweepAudio,
+            showSlope: $showSlope,
+            showViewshed: $showViewshed,
+            extrasOn: extrasOn,
+            showTopoTiles: $showTopoTiles,
+            showTrails: $showTrails,
+            hasRouting: packService.routing != nil,
+            searchQuery: navQueryBinding,
+            searchHits: navigate.hits,
+            navigateEnabled: battery.coarseNavigateEnabled,
+            lidarSupported: LiDARAvailability.isSupported,
+            onToggleSlope: {
+                UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
+                refreshTerrain()
+            },
+            onToggleViewshed: {
+                UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
+                refreshTerrain()
+            },
+            onToggleHeading: {
+                UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
+                if headingUp, !pinnedToPackCoverage {
+                    centerToken += 1
+                }
+            },
+            onToggleAudio: {
+                UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
+            },
+            onToggleTopo: {
+                UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
+            },
+            onToggleTrails: {
+                UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
+            },
+            onSearch: {
+                navigate.search(pack: packService.routing, pois: packService.pack?.pois ?? [])
+            },
+            onPickSearch: { hit in
+                showLayers = false
+                navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
+            },
+            onOpenLiDAR: {
+                showLayers = false
+                showLiDAR = true
+            },
+            onOpenTool: { item in
+                showLayers = false
+                tool = item
+            }
+        )
+        .presentationDetents([.medium])
+        .preferredColorScheme(.dark)
+    }
+
+    private func peerSheet(_ blip: RadarBlip) -> some View {
+        RadarPeerSheet(
+            blip: blip,
+            onMessage: { selectedPeer = nil },
+            onPTT: { selectedPeer = nil },
+            onNavigate: {
+                selectedPeer = nil
+                if battery.coarseNavigateEnabled {
+                    tool = .navigate
+                }
+            }
+        )
+        .presentationDetents([.medium])
+    }
+
+    private func lidarSheet() -> some View {
+        LiDARRangeView(
+            mapRangeMeters: lidarMapRange,
+            pointName: lidarPointName
+        )
+        .presentationDetents([.large])
+    }
+
+    @ViewBuilder
+    private var mapCanvas: some View {
+        if let pack = packService.pack {
+            offlineMap(pack)
+                .id(pack.rootURL.standardizedFileURL.path)
+                .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
+                .ignoresSafeArea()
+            if radarVisible {
+                RadarHUDView(
+                    headingUp: headingUp,
+                    headingDegrees: location.headingDegrees,
+                    peers: peers,
+                    sweepAudio: sweepAudio,
+                    onSelectPeer: {
+                        noteMapActivity()
+                        selectedPeer = $0
+                    },
+                    onSelectSelf: {
+                        noteMapActivity()
+                        selectedPeer = nil
+                    }
+                )
+                .padding(.top, 80)
+                .padding(.bottom, 180)
+                .allowsHitTesting(true)
+            }
+        }
+    }
+
+    private func offlineMap(_ pack: MapPackSnapshot) -> OfflineMapView {
+        OfflineMapView(
+            pack: pack,
+            selfFix: location.navigationFix,
+            manualPin: location.manualPin,
+            breadcrumbs: crumbs,
+            viewshed: viewshedRays,
+            slope: slopeSamples,
+            showViewshed: showViewshed && extrasOn,
+            showSlope: showSlope && extrasOn,
+            centerToken: centerToken,
+            pinCameraToPack: pinnedToPackCoverage,
+            routing: packService.routing,
+            routeLine: navigate.routePolyline,
+            destination: navigate.destination,
+            showPackTiles: packService.routing == nil || showTopoTiles,
+            showTrails: showTrails,
+            headingDegrees: location.headingDegrees,
+            accuracyMeters: gpsAccuracyMeters,
+            packContainsSelf: packContainsSelf,
+            activeManeuver: liveManeuver,
+            onDropPin: { lat, lon in
+                location.dropManualPin(latitude: lat, longitude: lon)
+            },
+            onTap: { lat, lon in
+                noteMapActivity()
+                guard battery.coarseNavigateEnabled, navigate.phase != .guidance else { return }
+                navigate.pickMap(
+                    latitude: lat,
+                    longitude: lon,
+                    origin: originCoordinate,
+                    pack: packService.routing
+                )
+            },
+            onUserInteract: noteMapActivity,
+            onScaleChange: { metersPerPoint = $0 },
+            onOutsidePack: { outside in
+                outsidePack = outside
+            },
+            resetToken: resetToken
+        )
+    }
+
+    @ViewBuilder
+    private var emptyOverlay: some View {
+        if showEmptyCard {
+            MapEmptyCard(
+                title: emptyCardTitle,
+                detail: emptyCardDetail,
+                showRecenter: packService.pack != nil,
+                onRecenter: packService.pack == nil ? nil : recenterToPack,
+                onOpenFieldPacks: onOpenFieldPacks
+            )
+        } else if let empty = navigate.empty, navigate.phase != .guidance {
+            VStack {
+                Spacer()
+                NavigateEmptyCard(
+                    empty: empty,
+                    onBearing: { tool = .navigate },
+                    onPacks: onOpenFieldPacks
+                )
+                .padding(.horizontal, 24)
+                Spacer()
+            }
+            .padding(.bottom, 100)
+        }
+    }
+
+    private var mapLockChrome: some View {
+        VStack(spacing: 0) {
+            lockHudStack
+            if showChipRow, battery.coarseNavigateEnabled, showsNavigateBanner {
+                navigateChrome
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+            }
+            Spacer()
+            if showChipRow {
+                scaleBarRow
+                chipRow
+            }
+        }
+    }
+
+    private var lockHudStack: some View {
+        receding {
+            VStack(spacing: 8) {
+                MapLockHUD(
+                    accuracyMeters: gpsAccuracyMeters,
+                    headingDegrees: location.headingDegrees,
+                    onNorthUp: {
+                        noteMapActivity()
+                        headingUp = false
+                        UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
+                    }
+                )
+                MapExpeditionBanner(title: openOutingName ?? "No open expedition")
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, sizeClass == .regular ? 8 : 64)
+        }
+    }
+
+    private var scaleBarRow: some View {
+        receding {
+            HStack(alignment: .bottom, spacing: 8) {
+                MapScaleBar(metersPerPoint: metersPerPoint)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
+        }
+    }
+
+    private var chipRow: some View {
+        receding {
+            HStack(spacing: 8) {
+                MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
+                MetalButton("Layers", height: BlackoutDS.Hit.md) {
+                    noteMapActivity()
+                    showLayers = true
+                }
+                MetalButton("Packs", height: BlackoutDS.Hit.md) {
+                    noteMapActivity()
+                    onOpenFieldPacks?()
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 120)
+        }
+    }
+
+    private func receding<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
     }
 
     private var originCoordinate: RoutingCoordinate? {
