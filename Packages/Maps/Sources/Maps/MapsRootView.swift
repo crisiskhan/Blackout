@@ -127,6 +127,7 @@ public struct MapsRootView: View {
             || showEmptyCard
             || navigate.phase == .preview
             || !navigate.hits.isEmpty
+            || navigate.empty != nil
             || liveRec
             || compass.showMarkSheet
     }
@@ -630,6 +631,7 @@ public struct MapsRootView: View {
             profile: navigate.profile
         ) {
         case .route:
+            compass.end()
             navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
         case .lockOn:
             navigate.end()
@@ -954,9 +956,9 @@ struct MapEmptyCard: View {
         Group {
             if fillsSpace {
                 VStack {
-                    Spacer()
+                    Spacer().allowsHitTesting(false)
                     plate
-                    Spacer()
+                    Spacer().allowsHitTesting(false)
                 }
                 .padding(.bottom, BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap + 4)
             } else {

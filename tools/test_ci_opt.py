@@ -1015,6 +1015,10 @@ def test_pack_find_civ_water() -> None:
         fail("Towns must become Find civilization + Find water")
     if "pickFound" not in maps or "PackFind.action" not in maps:
         fail("tapping a pack POI must STEER / Feature 1 route or lock-on")
+    if "navigate.empty != nil" not in maps:
+        fail("Find empty cards must hold chrome")
+    if "compass.end()" not in maps or "case .route:" not in maps:
+        fail("Feature 1 route from a pack POI must end compass lock")
     if "case .poi" not in lock:
         fail("compass lock-on from a pack POI needs kind .poi")
     if "func findPack" not in session:
