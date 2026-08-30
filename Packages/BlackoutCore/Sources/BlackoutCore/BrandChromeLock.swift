@@ -17,6 +17,20 @@ public enum BrandChromeLock {
 
     public static let aboutWordmarkMaxWidth: Double = 240
     public static let aboutTitle = "About"
+    public static let aboutUsesSameWordmarkPNG = true
+    public static let aboutPlateRadius: Double = 12
+    public static let aboutPlateEdge: Double = 1
+    public static let aboutPlateSunEdge: Double = 2
+    public static let aboutPlateHasDropShadow = false
+
+    public static func aboutPlateEdgeWidth(sun: Bool) -> Double {
+        switch sun {
+        case true:
+            return aboutPlateSunEdge
+        case false:
+            return aboutPlateEdge
+        }
+    }
 
     public static let sosConfirmRedEye: Double = 48
     public static let noPackRedEye: Double = 24

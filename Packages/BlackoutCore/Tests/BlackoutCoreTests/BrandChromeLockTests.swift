@@ -30,6 +30,14 @@ final class BrandChromeLockTests: XCTestCase {
         XCTAssertEqual(BrandChromeLock.aboutWordmarkMaxWidth, 240)
         XCTAssertEqual(BrandChromeLock.aboutTitle, "About")
         XCTAssertLessThan(BrandChromeLock.aboutWordmarkMaxWidth, BrandChromeLock.splashWordmarkMaxWidth)
+        XCTAssertEqual(BrandChromeLock.wordmarkAsset, "Wordmark")
+        XCTAssertTrue(BrandChromeLock.aboutUsesSameWordmarkPNG)
+        XCTAssertEqual(BrandChromeLock.aboutPlateRadius, 12)
+        XCTAssertEqual(BrandChromeLock.aboutPlateEdge, 1)
+        XCTAssertEqual(BrandChromeLock.aboutPlateSunEdge, 2)
+        XCTAssertEqual(BrandChromeLock.aboutPlateEdgeWidth(sun: false), 1)
+        XCTAssertEqual(BrandChromeLock.aboutPlateEdgeWidth(sun: true), 2)
+        XCTAssertFalse(BrandChromeLock.aboutPlateHasDropShadow)
     }
 
     func testRedEyeOLivesOnConfirmCoverAndNoPackOnly() {

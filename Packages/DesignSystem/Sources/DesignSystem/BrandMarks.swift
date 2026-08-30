@@ -51,7 +51,7 @@ public struct SplashChromeView: View {
     }
 }
 
-/// Existing wordmark above callsign. Not the lockup.
+/// Existing wordmark on a raised metal plate, above callsign. Same PNG. Not the lockup.
 public struct AboutChromeView: View {
     private let callsign: String
 
@@ -62,7 +62,7 @@ public struct AboutChromeView: View {
     public var body: some View {
         VStack(spacing: 20) {
             Spacer()
-            BrandWordmark(maxWidth: CGFloat(BrandChromeLock.aboutWordmarkMaxWidth))
+            wordmarkPlate
             Text(callsign)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
@@ -74,5 +74,20 @@ public struct AboutChromeView: View {
         .background(BlackoutDS.Surface.void.ignoresSafeArea())
         .navigationTitle(BrandChromeLock.aboutTitle)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var wordmarkPlate: some View {
+        let radius = CGFloat(BrandChromeLock.aboutPlateRadius)
+        BrandWordmark(maxWidth: CGFloat(BrandChromeLock.aboutWordmarkMaxWidth))
+            .padding(16)
+            .background(BlackoutDS.Surface.raised)
+            .overlay(
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .stroke(
+                        BlackoutDS.Silver.edge,
+                        lineWidth: CGFloat(BrandChromeLock.aboutPlateEdgeWidth(sun: false))
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 }
