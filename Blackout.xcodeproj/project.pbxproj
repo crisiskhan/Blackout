@@ -372,7 +372,6 @@
 		CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
 			);
@@ -392,7 +391,6 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 8E8A406124A99A2C1D9A1238 /* Resources */;
 			membershipExceptions = (
-				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
 			);
@@ -475,7 +473,7 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
-					INFOPLIST_FILE = "Blackout/Blackout-Info.plist";
+					INFOPLIST_FILE = "Supporting/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
@@ -536,7 +534,7 @@
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
-					INFOPLIST_FILE = "Blackout/Blackout-Info.plist";
+					INFOPLIST_FILE = "Supporting/Blackout-Info.plist";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
@@ -584,7 +582,7 @@
 					CURRENT_PROJECT_VERSION = 19;
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
-					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_FILE = Supporting/BlackoutWidgets-Info.plist;
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
@@ -611,7 +609,7 @@
 					CURRENT_PROJECT_VERSION = 19;
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
-					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_FILE = Supporting/BlackoutWidgets-Info.plist;
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;

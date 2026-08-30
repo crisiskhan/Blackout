@@ -278,7 +278,7 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                     "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.",
                     "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.",
                 "INFOPLIST_KEY_NSSupportsLiveActivities": "YES",
-                "INFOPLIST_FILE": "Blackout/Blackout-Info.plist",
+                "INFOPLIST_FILE": "Supporting/Blackout-Info.plist",
                 "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
                 "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
                 "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
@@ -621,7 +621,6 @@ exec "${SRCROOT}/tools/copy_fieldpacks.sh"
 		{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */ = {{
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
 			);
@@ -634,7 +633,6 @@ exec "${SRCROOT}/tools/copy_fieldpacks.sh"
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = {ids['resources']} /* Resources */;
 			membershipExceptions = (
-				Blackout-Info.plist,
 				DefaultPack,
 				GuidePack,
 			);
