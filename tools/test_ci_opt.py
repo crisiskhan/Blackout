@@ -659,6 +659,15 @@ def test_party_vitals_red_loop() -> None:
         fail("Expedition roster lost two-tap vitals")
     if "DRANK" not in plate or "ATE" not in plate or "I AM NOT OK" not in plate:
         fail("roster missing DRANK / ATE / I AM NOT OK")
+    comms = (ROOT / "Packages/Messaging/Sources/Messaging/MessagingRootView.swift").read_text()
+    if "selfLabel.footnote" not in plate or "Silver.dim" not in plate:
+        fail("roster lost YOU last-4 silver.dim footnote")
+    if "blip.footnote" not in radar or "Silver.dim" not in radar:
+        fail("Radar lost YOU last-4 silver.dim footnote")
+    if "fromLabel" not in comms or "Silver.dim" not in comms:
+        fail("Comms lost live YOU last-4 silver.dim footnote")
+    if "footnote" in sos:
+        fail("YOU last-4 must not appear on SOS")
     if "Btn.metal" not in plate or "Vitals.chip" not in plate:
         fail("roster buttons must be Btn.metal 56")
     if "drankLatched" not in plate or "ateLatched" not in plate:
