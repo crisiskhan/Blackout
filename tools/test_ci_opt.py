@@ -1103,6 +1103,8 @@ def test_hits_23() -> None:
         fail("NFC missing-hardware hide test missing")
     if "webview" in nfc.lower() or "WKWebView" in nfc:
         fail("NFC must not use a webview")
+    if "if let (text, _)" in nfc:
+        fail("wellKnownTypeTextPayload returns (String?, Locale?), not Optional")
     if "emitsSOS = false" not in core:
         fail("Map torch policy must not emit SOS")
     if "testFlashlightDoesNotEmitSOS" not in tests:
