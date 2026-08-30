@@ -899,6 +899,78 @@ def test_locked_app_icon() -> None:
     ok("AppIcon is the locked emblem PNG; wordmark is catalog-only")
 
 
+def test_compass_lock_on() -> None:
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    session = (ROOT / "Packages/Maps/Sources/Maps/CompassLockSession.swift").read_text()
+    chrome = (ROOT / "Packages/Maps/Sources/Maps/CompassLockChrome.swift").read_text()
+    math = (ROOT / "Packages/Maps/Sources/MapsRouting/CompassLock.swift").read_text()
+    speech = (ROOT / "Packages/Maps/Sources/Maps/OnDeviceSpeech.swift").read_text()
+    tests = (ROOT / "Packages/Maps/Tests/MapsTests/CompassLockTests.swift").read_text()
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    vitals = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
+    for path in (maps, session, chrome, math):
+        if "MKDirections" in path or "URLSession" in path:
+            fail("compass lock path must stay airplane: no MKDirections / URLSession")
+    if "CompassLockBar" not in maps or "CompassLockSession" not in maps:
+        fail("Map lost compass lock chrome")
+    for label in ('SPEAK', 'STEER', 'MARK', 'LOCK'):
+        if f'"{label}"' not in math:
+            fail(f"compass lock lost button {label}")
+    if "Nothing to lock. MARK a point or wait for a peer." not in math:
+        fail("compass lock lost empty copy")
+    if "Hold course" not in math or "Right " not in math or "Left " not in math:
+        fail("compass lock lost turnPhrase")
+    if "relBearing" not in math or "540" not in math:
+        fail("compass lock lost relBearing formula")
+    if "voiceInterval: TimeInterval = 2.2" not in math:
+        fail("voice lock must stay 2.2s")
+    if "speechRateMin: Float = 0.47" not in math or "speechRateMax: Float = 0.52" not in math:
+        fail("voice lock rate must stay 0.47–0.52")
+    if "id: \"th\"" not in math or "31.8924" not in math or "-106.4401" not in math:
+        fail("standards list lost th Trailhead")
+    if "id: \"wc\"" not in math or "Water cache" not in math:
+        fail("standards list lost wc Water cache")
+    if "startLoopIfNeeded" not in session or "guard voiceTask == nil" not in session:
+        fail("2.2s timer must not restart on every render")
+    if "AVSpeechSynthesizer" not in speech:
+        fail("lock voice must stay on-device AVSpeechSynthesizer")
+    if "NavigateSession" not in maps or "routing" not in maps:
+        fail("street TBT must stay default when routing/ exists")
+    if "fieldHeadingUp" not in maps or "-(location.headingDegrees" not in maps:
+        fail("rose must rotate by -heading while heading-up")
+    if "SAVE CURRENT" not in math or "LOCKED" not in math or "DELETE" not in math:
+        fail("MARK sheet lost SAVE CURRENT / STEER / LOCKED / DELETE")
+    if "BlackoutDS.Hit.sos" not in sos:
+        fail("SOS 88 must never recede")
+    if "vitalsRow" not in vitals or "RecedingMapChrome" not in vitals:
+        fail("I AM OK must still recede with HUD")
+    if "FieldPacksView" in (ROOT / "Blackout/RootView.swift").read_text():
+        fail("do not restore the first-open Field Packs sheet")
+    if (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").exists():
+        fail("do not restore FieldPacksView")
+    if "6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade" not in catalog:
+        fail("texas.pack.zip pin drifted")
+    if "220_512_882" not in catalog:
+        fail("texas.pack.zip byte pin drifted")
+    if "tabItem" in (ROOT / "Blackout/RootView.swift").read_text() and (
+        ROOT / "Blackout/RootView.swift"
+    ).read_text().count("tabItem") != 4:
+        fail("do not restore 6 tabs")
+    if "func coveringRoot" not in (ROOT / "Packages/Maps/Sources/MapsRouting/RoutingPack.swift").read_text():
+        fail("do not revert Feature 1 routing loader")
+    if "routing/graph.bin" not in (ROOT / ".gitignore").read_text():
+        fail("do not put graph bins in git")
+    if pbx.count("CURRENT_PROJECT_VERSION = 19") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    if "push:" in (ROOT / ".github/workflows/ios-testflight.yml").read_text():
+        fail("do not dispatch TestFlight")
+    if "31.8924" not in tests or "Hold course" not in tests:
+        fail("compass lock tests lost the standards / turnPhrase locks")
+    ok("compass lock is SPEAK/STEER/MARK/LOCK, 2.2s voice, one standards list")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -919,6 +991,7 @@ def main() -> None:
     test_bundled_statewide_archive_only()
     test_copy_fieldpacks_compile_noop_and_archive_required()
     test_fieldpack_root_flatten_fixture()
+    test_compass_lock_on()
     print("all ci-opt checks passed")
 
 

@@ -6,12 +6,12 @@ import Foundation
 final class OnDeviceSpeech {
     private let synthesizer = AVSpeechSynthesizer()
 
-    func speak(_ text: String) {
+    func speak(_ text: String, rate: Float = AVSpeechUtteranceDefaultSpeechRate) {
         guard !text.isEmpty else { return }
         synthesizer.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        utterance.rate = rate
         synthesizer.speak(utterance)
     }
 

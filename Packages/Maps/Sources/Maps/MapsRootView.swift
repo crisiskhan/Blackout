@@ -39,6 +39,7 @@ public struct MapsRootView: View {
     @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
     @State private var showTrails = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTrails)
     @State private var navigate = NavigateSession()
+    @State private var compass = CompassLockSession()
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
@@ -126,6 +127,7 @@ public struct MapsRootView: View {
             || showEmptyCard
             || navigate.phase == .preview
             || liveRec
+            || compass.showMarkSheet
     }
 
     public var body: some View {
@@ -144,6 +146,7 @@ public struct MapsRootView: View {
             profile: navigate.profile,
             installedPackRoots: installedPackRoots,
             pinnedToPackCoverage: pinnedToPackCoverage,
+            headingDegrees: location.headingDegrees,
             isCritical: battery.isCritical,
             onOutsidePack: { outside in
                 if outside { pinnedToPackCoverage = false }
@@ -158,6 +161,7 @@ public struct MapsRootView: View {
                 resolvePaintPack()
                 refreshGuidance()
             },
+            onHeading: refreshGuidance,
             onProfile: {
                 navigate.refreshPreview(origin: originCoordinate, pack: packService.routing)
             },
@@ -172,6 +176,7 @@ public struct MapsRootView: View {
                     showLayers = false
                     selectedPeer = nil
                     navigate.end()
+                    compass.end()
                 }
             }
         )
@@ -185,6 +190,7 @@ public struct MapsRootView: View {
                 if extremeSaver { radarOn = true }
                 resolvePaintPack()
                 refreshTerrain()
+                refreshGuidance()
                 location.startUpdating()
                 applyChrome {
                     $0.reduceMotion = reduceMotion
@@ -217,6 +223,7 @@ public struct MapsRootView: View {
             .sheet(isPresented: $showLayers, content: layersSheet)
             .sheet(item: $selectedPeer, content: peerSheet)
             .sheet(isPresented: $showLiDAR, content: lidarSheet)
+            .sheet(isPresented: Bindable(compass).showMarkSheet, content: markSheet)
     }
 
     @ViewBuilder
@@ -335,6 +342,16 @@ public struct MapsRootView: View {
         }
     }
 
+    private func markSheet() -> some View {
+        CompassMarkSheet(
+            session: compass,
+            peers: peers,
+            fix: location.navigationFix,
+            onLocked: applyLockHeading
+        )
+        .presentationDetents([.medium, .large])
+    }
+
     private func lidarSheet() -> some View {
         LiDARRangeView(
             mapRangeMeters: lidarMapRange,
@@ -348,11 +365,11 @@ public struct MapsRootView: View {
         if let pack = packService.pack {
             offlineMap(pack)
                 .id(pack.rootURL.standardizedFileURL.path)
-                .rotationEffect(.degrees(radarVisible && headingUp ? -(location.headingDegrees ?? 0) : 0))
+                .rotationEffect(.degrees(radarVisible && fieldHeadingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
             if radarVisible {
                 RadarHUDView(
-                    headingUp: headingUp,
+                    headingUp: fieldHeadingUp,
                     headingDegrees: location.headingDegrees,
                     peers: peers,
                     sweepAudio: sweepAudio,
@@ -386,7 +403,7 @@ public struct MapsRootView: View {
             pinCameraToPack: pinnedToPackCoverage,
             routing: packService.routing,
             routeLine: navigate.routePolyline,
-            destination: navigate.destination,
+            destination: navigate.destination ?? compass.lockCoordinate,
             showPackTiles: packService.routing == nil || showTopoTiles,
             showTrails: showTrails,
             headingDegrees: location.headingDegrees,
@@ -437,6 +454,8 @@ public struct MapsRootView: View {
                 Spacer()
             }
             .padding(.bottom, 100)
+        } else if let copy = compass.emptyCopy {
+            CompassLockEmptyCard(text: copy)
         }
     }
 
@@ -449,6 +468,33 @@ public struct MapsRootView: View {
                     .padding(.top, 8)
             }
             Spacer()
+            if showChipRow, battery.coarseNavigateEnabled {
+                receding {
+                    CompassLockBar(
+                        isLocked: compass.isLocked,
+                        hasTarget: compass.target != nil,
+                        onSpeak: {
+                            noteMapActivity()
+                            compass.speakOnce()
+                        },
+                        onSteer: {
+                            noteMapActivity()
+                            compass.openSteer()
+                        },
+                        onMark: {
+                            noteMapActivity()
+                            compass.openMark()
+                        },
+                        onLock: {
+                            noteMapActivity()
+                            compass.toggleLock()
+                            if compass.isLocked { applyLockHeading() }
+                        }
+                    )
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+                }
+            }
             if showChipRow {
                 scaleBarRow
                 chipRow
@@ -465,6 +511,7 @@ public struct MapsRootView: View {
                     headingDegrees: location.headingDegrees,
                     onNorthUp: {
                         noteMapActivity()
+                        guard !compass.isLocked else { return }
                         headingUp = false
                         UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                     }
@@ -611,12 +658,23 @@ public struct MapsRootView: View {
         )
     }
 
+    private var fieldHeadingUp: Bool { headingUp || compass.isLocked }
+
+    private func applyLockHeading() {
+        headingUp = true
+        UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
+        if !pinnedToPackCoverage {
+            centerToken += 1
+        }
+    }
+
     private func refreshGuidance() {
         navigate.update(
             position: originCoordinate,
             pack: packService.routing,
             canFollow: canFollowGuidance
         )
+        compass.refreshFix(origin: originCoordinate, heading: location.headingDegrees)
         if navigate.phase == .guidance, packContainsSelf, !pinnedToPackCoverage {
             centerToken += 1
         }

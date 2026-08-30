@@ -24,11 +24,13 @@ struct MapsPackObservers: ViewModifier {
     var profile: NavigateProfile
     var installedPackRoots: [URL]
     var pinnedToPackCoverage: Bool
+    var headingDegrees: Double?
     var isCritical: Bool
     var onOutsidePack: (Bool) -> Void
     var onReloadCrumbs: () -> Void
     var onFixLatitude: () -> Void
     var onFixLongitude: () -> Void
+    var onHeading: () -> Void
     var onProfile: () -> Void
     var onAuthorization: () -> Void
     var onLastKnown: () -> Void
@@ -42,10 +44,12 @@ struct MapsPackObservers: ViewModifier {
                 fixLatitude: fixLatitude,
                 fixLongitude: fixLongitude,
                 lastKnownLatitude: lastKnownLatitude,
+                headingDegrees: headingDegrees,
                 authorization: authorization,
                 profile: profile,
                 onFixLatitude: onFixLatitude,
                 onFixLongitude: onFixLongitude,
+                onHeading: onHeading,
                 onProfile: onProfile,
                 onAuthorization: onAuthorization,
                 onLastKnown: onLastKnown
@@ -68,10 +72,12 @@ private struct MapsFixObservers: ViewModifier {
     var fixLatitude: Double?
     var fixLongitude: Double?
     var lastKnownLatitude: Double?
+    var headingDegrees: Double?
     var authorization: LocationAuthorization
     var profile: NavigateProfile
     var onFixLatitude: () -> Void
     var onFixLongitude: () -> Void
+    var onHeading: () -> Void
     var onProfile: () -> Void
     var onAuthorization: () -> Void
     var onLastKnown: () -> Void
@@ -82,8 +88,10 @@ private struct MapsFixObservers: ViewModifier {
                 fixLatitude: fixLatitude,
                 fixLongitude: fixLongitude,
                 lastKnownLatitude: lastKnownLatitude,
+                headingDegrees: headingDegrees,
                 onFixLatitude: onFixLatitude,
                 onFixLongitude: onFixLongitude,
+                onHeading: onHeading,
                 onLastKnown: onLastKnown
             ))
             .modifier(MapsRouteObservers(
@@ -99,8 +107,10 @@ private struct MapsCoordinateObservers: ViewModifier {
     var fixLatitude: Double?
     var fixLongitude: Double?
     var lastKnownLatitude: Double?
+    var headingDegrees: Double?
     var onFixLatitude: () -> Void
     var onFixLongitude: () -> Void
+    var onHeading: () -> Void
     var onLastKnown: () -> Void
 
     func body(content: Content) -> some View {
@@ -108,6 +118,7 @@ private struct MapsCoordinateObservers: ViewModifier {
             .onChange(of: fixLatitude) { _, _ in onFixLatitude() }
             .onChange(of: fixLongitude) { _, _ in onFixLongitude() }
             .onChange(of: lastKnownLatitude) { _, _ in onLastKnown() }
+            .onChange(of: headingDegrees) { _, _ in onHeading() }
     }
 }
 
