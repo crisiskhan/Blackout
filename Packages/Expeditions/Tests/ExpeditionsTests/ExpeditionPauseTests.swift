@@ -70,5 +70,7 @@ final class ExpeditionPauseTests: XCTestCase {
         XCTAssertEqual(BlackoutDS.Vitals.tabBar, 49)
         XCTAssertEqual(BlackoutDS.Hit.sm, 56)
         XCTAssertEqual(BlackoutDS.Hit.sos, 88)
+        XCTAssertEqual(BlackoutDS.Motion.moveDuration, 0.220)
+        XCTAssertEqual(BlackoutDS.Motion.snapDuration, 0.120)
     }
 }

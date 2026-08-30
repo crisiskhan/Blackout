@@ -53,7 +53,6 @@ struct PartyVitalsPlate: View {
 
     private var identityBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
-            selfRow
             TextField(Callsign.defaultValue, text: $callsignDraft)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
@@ -66,11 +65,21 @@ struct PartyVitalsPlate: View {
                     }
                 }
                 .onSubmit { commitCallsign() }
+                .accessibilityLabel(PartyIdentityCopy.callsign)
+            if let footnote = roster.selfLabel.footnote {
+                Text(footnote)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+            }
             partyCodePlate
             if roster.identity.partyCode == nil {
-                Text(PartyIdentityCopy.soloValid)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
+                HStack(spacing: 10) {
+                    MetalButton(PartyIdentityCopy.create, height: BlackoutDS.Hit.sm, action: onCreateParty)
+                    MetalButton(PartyIdentityCopy.join, height: BlackoutDS.Hit.sm) {
+                        joinFailed = !onJoinParty(joinDraft)
+                        if !joinFailed { joinDraft = "" }
+                    }
+                }
                 TextField(PartyIdentityCopy.partyCode, text: $joinDraft)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.bright)
@@ -83,18 +92,14 @@ struct PartyVitalsPlate: View {
                         joinDraft = PartyCode.normalize(value)
                         joinFailed = false
                     }
-                HStack(spacing: 10) {
-                    MetalButton(PartyIdentityCopy.create, height: BlackoutDS.Hit.sm, action: onCreateParty)
-                    MetalButton(PartyIdentityCopy.join, height: BlackoutDS.Hit.sm) {
-                        joinFailed = !onJoinParty(joinDraft)
-                        if !joinFailed { joinDraft = "" }
-                    }
-                }
                 if joinFailed {
                     Text("Party code is 4–8 A–Z 0–9.")
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Semantic.warn)
                 }
+                Text(PartyIdentityCopy.soloValid)
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
             } else {
                 HStack(spacing: 10) {
                     GhostButton(PartyIdentityCopy.leave, height: BlackoutDS.Hit.sm, action: onLeaveParty)
@@ -122,29 +127,6 @@ struct PartyVitalsPlate: View {
         .frame(height: BlackoutDS.Hit.sm)
         .background(BlackoutDS.Btn.metal)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
-    private var selfRow: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(bandColor(roster.selfVitals.band))
-                    .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
-                Text(roster.selfLabel.name)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                Spacer()
-                Text(roster.isRed ? PartyVitalsCopy.imNot : PartyVitalsCopy.imOK)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(roster.isRed ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.dim)
-            }
-            if let footnote = roster.selfLabel.footnote {
-                Text(footnote)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
-            }
-        }
-        .accessibilityLabel("Self \(roster.selfLabel.footnote ?? roster.selfLabel.name)")
     }
 
     @ViewBuilder
