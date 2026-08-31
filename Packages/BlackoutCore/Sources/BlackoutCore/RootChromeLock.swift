@@ -50,7 +50,14 @@ public enum LaunchLock {
     public static let startsPackPathMonitorInInit = false
     public static let startsHardwareSynchronouslyOnUnlock = false
     public static let remountsLockGateOnBackground = false
+    public static let remountsLockGateOnInactive = false
     public static let parksHardwareOnBackground = true
+    /// Never call lock() while backgrounded. MetalRingLockup remount there is the 9:08 class.
+    public static let locksOnBackground = false
+    /// PHPicker / share / fileImporter / photo library is not a true leave.
+    public static let locksOnPickerBackground = false
+    public static let parksLiveActivityOnBackground = true
+    public static let startsHardwareWhenSceneInactive = false
     public static let startsLiveActivityBeforeUnlock = false
     /// 33 lock-frame crash class. Covers stay off the lock tree until the twin asks.
     public static let sosFabMountsOnLockFrame = false
@@ -67,5 +74,53 @@ public enum LaunchLock {
 
     public static func showsLockGate(isUnlocked: Bool, sceneActive: Bool) -> Bool {
         !isUnlocked && sceneActive
+    }
+}
+
+/// Scene-phase lock / park contract. Lock UI never remounts off an active scene.
+public enum SceneLockPolicy {
+    public enum Phase: Equatable, Sendable {
+        case active
+        case inactive
+        case background
+    }
+
+    public static let requiresActiveSceneForHardware = true
+
+    /// Lock Image / Metal / SOS cover paint only on a live, locked scene.
+    public static func showsLockGate(isUnlocked: Bool, phase: Phase) -> Bool {
+        !isUnlocked && phase == .active
+    }
+
+    /// lock() is never applied in the phase handler itself.
+    public static func shouldLockNow(phase: Phase) -> Bool {
+        _ = phase
+        return false
+    }
+
+    public static func shouldPark(phase: Phase) -> Bool {
+        phase != .active
+    }
+
+    /// Home / other-app leave. A presented system picker is not a true leave.
+    public static func pendingTrueLeave(phase: Phase, systemCoverPresented: Bool) -> Bool {
+        phase == .background && !systemCoverPresented
+    }
+
+    /// Relock mounts MetalRingLockup on the next live scene only.
+    public static func shouldRelockOnActive(pendingTrueLeave: Bool, systemCoverPresented: Bool) -> Bool {
+        pendingTrueLeave && !systemCoverPresented
+    }
+
+    public static func isSystemCover(_ name: String) -> Bool {
+        let needles = [
+            "UIImagePickerController",
+            "PHPickerViewController",
+            "UIActivityViewController",
+            "UIDocumentPickerViewController",
+            "UIDocumentBrowserViewController",
+            "PUPhotoPicker"
+        ]
+        return needles.contains { name.contains($0) }
     }
 }

@@ -1555,10 +1555,50 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("unlock gate must not depend on Settings local-lock being on")
     if "showsLockGate(" not in root:
         fail("background must not remount LockGateView under a system picker")
-    if "parkHardwareForBackground" not in root.split("onChange(of: scenePhase)")[1][:400]:
-        fail("scenePhase .background must park location/mesh/radio before lock remount")
-    if "refreshLiveActivity()" in root.split("onChange(of: scenePhase)")[1].split("phase == .background")[1].split("if phase == .active")[0]:
-        fail("background must not touch ActivityKit")
+    scene_change = root.split("onChange(of: scenePhase)")[1]
+    if "container.lock.lock()" in scene_change:
+        fail("RootView must not lock() on scenePhase — remounts MetalRingLockup in background")
+    if "applyScenePhase" not in scene_change:
+        fail("scenePhase must go through SceneLockPolicy applyScenePhase")
+    if "parkHardwareForBackground" not in app and "parkHardwareForBackground" not in scene_change:
+        fail("scenePhase .background must park location/mesh/radio")
+    if "locksOnBackground = false" not in launch:
+        fail("lock contract must not call lock() while backgrounded")
+    if "locksOnPickerBackground = false" not in launch:
+        fail("picker / share / PHPicker must not lock()")
+    if "parksLiveActivityOnBackground = true" not in launch:
+        fail("background must park Live Activity")
+    if "startsHardwareWhenSceneInactive = false" not in launch:
+        fail("hardware must not start unless scene is active")
+    if "testBackgroundParkDoesNotRemountLockGate" not in tests:
+        fail("missing background park / no remount test")
+    if "testPickerBackgroundDoesNotRelock" not in tests:
+        fail("missing picker-background does not lock test")
+    if "testTrueLeaveRelocksOnlyOnNextActive" not in tests:
+        fail("missing true-leave relock-on-active test")
+    if "testHardwareStaysOffUntilMapFrameAndActiveScene" not in tests:
+        fail("missing hardware-after-Map-frame-and-active test")
+    if "enum SceneLockPolicy" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("SceneLockPolicy missing — background lock remount is untested")
+    if "func applyScenePhase" not in app:
+        fail("AppContainer must apply SceneLockPolicy; never lock() in RootView background")
+    if "parkLiveActivity" not in app:
+        fail("background must park Live Activity if one is up")
+    if "shouldRelockOnActive" not in app:
+        fail("true leave may lock() only on next .active")
+    if "isSystemCover" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("system picker / share / PHPicker must be classified as not a true leave")
+    if "sceneIsActive" not in app.split("func scheduleHardwareAfterFirstMapFrame")[1][:400]:
+        fail("hardware after unlock must require an active scene")
+    apply_fn = app.split("func applyScenePhase", 1)[-1].split("\n    func ", 1)[0]
+    if "lock.lock()" in apply_fn.split("shouldRelockOnActive", 1)[0]:
+        fail("applyScenePhase must not lock() on park/background")
+    if "refreshLiveActivity()" in apply_fn.split("shouldRelockOnActive", 1)[0]:
+        fail("background park must not start Live Activity")
     if "scenePhase == .active" not in root.split(".task {", 1)[-1][:500]:
         fail("Live Activity 1s loop must not run while backgrounded")
     if "remountsLockGateOnBackground = false" not in launch:

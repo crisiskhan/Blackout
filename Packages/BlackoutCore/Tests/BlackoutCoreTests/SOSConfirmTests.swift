@@ -195,6 +195,10 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertFalse(LaunchLock.startsHardwareSynchronouslyOnUnlock)
         XCTAssertFalse(LaunchLock.remountsLockGateOnBackground)
         XCTAssertTrue(LaunchLock.parksHardwareOnBackground)
+        XCTAssertFalse(LaunchLock.locksOnBackground)
+        XCTAssertFalse(LaunchLock.remountsLockGateOnInactive)
+        XCTAssertTrue(LaunchLock.parksLiveActivityOnBackground)
+        XCTAssertFalse(LaunchLock.startsHardwareWhenSceneInactive)
         XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
         XCTAssertTrue(RootChromeLock.showsLockGate(isUnlocked: false, sceneActive: true))
         XCTAssertFalse(RootChromeLock.showsLockGate(isUnlocked: false, sceneActive: false))
@@ -213,6 +217,59 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertEqual(RootChromeLock.tabCount, 4)
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertEqual(BrandChromeLock.lockupMaxPoint, 280)
+    }
+
+    func testBackgroundParkDoesNotRemountLockGate() {
+        XCTAssertFalse(SceneLockPolicy.shouldLockNow(phase: .background))
+        XCTAssertFalse(SceneLockPolicy.shouldLockNow(phase: .inactive))
+        XCTAssertFalse(SceneLockPolicy.shouldLockNow(phase: .active))
+        XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .background))
+        XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .inactive))
+        XCTAssertTrue(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .active))
+        XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: true, phase: .active))
+        XCTAssertTrue(SceneLockPolicy.shouldPark(phase: .background))
+        XCTAssertTrue(SceneLockPolicy.shouldPark(phase: .inactive))
+        XCTAssertFalse(SceneLockPolicy.shouldPark(phase: .active))
+        XCTAssertFalse(LaunchLock.locksOnBackground)
+        XCTAssertFalse(LaunchLock.remountsLockGateOnBackground)
+        XCTAssertFalse(LaunchLock.remountsLockGateOnInactive)
+    }
+
+    func testPickerBackgroundDoesNotRelock() {
+        XCTAssertFalse(SceneLockPolicy.pendingTrueLeave(phase: .background, systemCoverPresented: true))
+        XCTAssertFalse(SceneLockPolicy.shouldRelockOnActive(
+            pendingTrueLeave: true,
+            systemCoverPresented: true
+        ))
+        XCTAssertFalse(SceneLockPolicy.shouldRelockOnActive(
+            pendingTrueLeave: false,
+            systemCoverPresented: false
+        ))
+        XCTAssertTrue(SceneLockPolicy.isSystemCover("UIImagePickerController"))
+        XCTAssertTrue(SceneLockPolicy.isSystemCover("PHPickerViewController"))
+        XCTAssertTrue(SceneLockPolicy.isSystemCover("UIActivityViewController"))
+        XCTAssertTrue(SceneLockPolicy.isSystemCover("UIDocumentPickerViewController"))
+        XCTAssertFalse(SceneLockPolicy.isSystemCover("UITabBarController"))
+        XCTAssertFalse(LaunchLock.locksOnPickerBackground)
+    }
+
+    func testTrueLeaveRelocksOnlyOnNextActive() {
+        XCTAssertTrue(SceneLockPolicy.pendingTrueLeave(phase: .background, systemCoverPresented: false))
+        XCTAssertFalse(SceneLockPolicy.pendingTrueLeave(phase: .inactive, systemCoverPresented: false))
+        XCTAssertTrue(SceneLockPolicy.shouldRelockOnActive(
+            pendingTrueLeave: true,
+            systemCoverPresented: false
+        ))
+        XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .background))
+    }
+
+    func testHardwareStaysOffUntilMapFrameAndActiveScene() {
+        XCTAssertFalse(LaunchLock.startsHardwareSynchronouslyOnUnlock)
+        XCTAssertFalse(LaunchLock.startsHardwareWhenSceneInactive)
+        XCTAssertTrue(SceneLockPolicy.requiresActiveSceneForHardware)
+        XCTAssertTrue(LaunchLock.parksLiveActivityOnBackground)
+        XCTAssertFalse(LaunchLock.slideArmsSOS)
+        XCTAssertFalse(LaunchLock.persistedSOSArmedStealsFirstOpen)
     }
 
     func testDismissArmedPanelDoesNotDisarm() {

@@ -47,6 +47,9 @@ final class AppContainer {
     private var missedCheckInTask: Task<Void, Never>?
     private var signaledMissedCheckIns: Set<String> = []
     private var lastNearbyCount = 0
+    /// Cold launch is an active scene. onChange(scenePhase) does not fire for the first value.
+    var sceneIsActive = true
+    private var pendingTrueLeaveRelock = false
 
     init() {
         let build = SOSArmedRestore.currentBuild()
@@ -163,16 +166,48 @@ final class AppContainer {
         packs.stopPathMonitor()
     }
 
+    /// End a live ActivityKit row. Never Activity.request from here.
+    func parkLiveActivity() {
+        LiveActivityHub.end(newBinaryLaunch: suppressPersistedArmedAutoPresent)
+    }
+
+    /// Park on inactive/background. Never lock() off-scene. True leave relocks on next .active.
+    func applyScenePhase(_ phase: SceneLockPolicy.Phase, systemCoverPresented: Bool) {
+        sceneIsActive = phase == .active
+        if SceneLockPolicy.shouldPark(phase) {
+            parkHardwareForBackground()
+            parkLiveActivity()
+            if SceneLockPolicy.pendingTrueLeave(phase: phase, systemCoverPresented: systemCoverPresented) {
+                pendingTrueLeaveRelock = true
+            }
+            return
+        }
+        if SceneLockPolicy.shouldRelockOnActive(
+            pendingTrueLeave: pendingTrueLeaveRelock,
+            systemCoverPresented: systemCoverPresented
+        ) {
+            pendingTrueLeaveRelock = false
+            lock.lock()
+            return
+        }
+        pendingTrueLeaveRelock = false
+        guard lock.isUnlocked else { return }
+        scheduleHardwareAfterFirstMapFrame()
+        refreshRadiosBanner()
+        applyIdleTimer()
+    }
+
     /// Unlock paints Map first. CL / motion / radio / ActivityKit wait one turn.
     func scheduleHardwareAfterFirstMapFrame() {
         Task { @MainActor in
             await Task.yield()
-            guard lock.isUnlocked else { return }
+            guard lock.isUnlocked, sceneIsActive else { return }
             armHardwareAfterUnlock()
         }
     }
 
     func armHardwareAfterUnlock() {
+        guard sceneIsActive, lock.isUnlocked else { return }
         packs.startPathMonitorIfNeeded()
         if battery.isCritical {
             packs.setDownloadsAllowed(false)
@@ -192,6 +227,7 @@ final class AppContainer {
     }
 
     func syncMeshToParty() {
+        guard sceneIsActive else { return }
         radios.start()
         crypto.setPartyCode(identity.partyCode)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
@@ -358,6 +394,7 @@ final class AppContainer {
 
     func refreshLiveActivity() {
         expireInboundIfNeeded()
+        guard sceneIsActive, lock.isUnlocked else { return }
         LiveActivityHub.sync(
             partyCode: identity.partyCode,
             inbound: latestInbound,
@@ -513,7 +550,7 @@ final class AppContainer {
     }
 
     private func pollMissedCheckIns() {
-        guard lock.isUnlocked else { return }
+        guard lock.isUnlocked, sceneIsActive else { return }
         let items: [ExpeditionRecordDTO]
         do {
             items = try persistence.expeditions()
@@ -586,5 +623,36 @@ final class AppContainer {
             return candidate
         }
         return nil
+    }
+}
+
+/// Walks presented controllers. PHPicker / share / fileImporter are not a true leave.
+enum SystemCoverProbe {
+    static func isPresented() -> Bool {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        for scene in scenes {
+            for window in scene.windows where !window.isHidden {
+                if let root = window.rootViewController, walk(root) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private static func walk(_ controller: UIViewController) -> Bool {
+        if SceneLockPolicy.isSystemCover(String(describing: type(of: controller))) {
+            return true
+        }
+        if let presented = controller.presentedViewController, walk(presented) {
+            return true
+        }
+        if let nav = controller as? UINavigationController {
+            return nav.viewControllers.contains { walk($0) }
+        }
+        if let tab = controller as? UITabBarController, let selected = tab.selectedViewController {
+            return walk(selected)
+        }
+        return controller.children.contains { walk($0) }
     }
 }

@@ -77,16 +77,12 @@ struct RootView: View {
                 .preferredColorScheme(.dark)
             }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .background {
-                    container.parkHardwareForBackground()
-                    container.lock.lock()
-                }
-                if phase == .active, container.lock.isUnlocked {
-                    syncSensorsToBattery()
-                    container.refreshRadiosBanner()
-                    container.refreshLiveActivity()
-                    container.applyIdleTimer()
-                }
+                // container.lock.isUnlocked is applied inside applyScenePhase.
+                // Never lock() here — remounting MetalRingLockup off-scene is the 9:08 class.
+                container.applyScenePhase(
+                    Self.lockPolicyPhase(phase),
+                    systemCoverPresented: SystemCoverProbe.isPresented()
+                )
             }
             .onChange(of: container.lock.isUnlocked) { _, unlocked in
                 if unlocked {
@@ -94,7 +90,7 @@ struct RootView: View {
                 }
             }
             .onChange(of: container.battery.isCritical) { _, _ in
-                if container.lock.isUnlocked {
+                if container.lock.isUnlocked, scenePhase == .active {
                     syncSensorsToBattery()
                 }
             }
@@ -122,6 +118,7 @@ struct RootView: View {
             }
             .onAppear {
                 guard container.lock.isUnlocked else { return }
+                guard scenePhase == .active else { return }
                 syncSensorsToBattery()
                 container.refreshRadiosBanner()
                 container.refreshLiveActivity()
@@ -156,8 +153,11 @@ struct RootView: View {
                 LockGateView(lock: container.lock, onHoldSOS: {
                     container.sosConfirmRequested = true
                 })
-            } else {
+            } else if container.lock.isUnlocked {
                 unlockedChrome
+            } else {
+                // Locked but inactive/background: do not remount lock Image or Map Metal.
+                BlackoutDS.Surface.void.ignoresSafeArea()
             }
         }
     }
@@ -239,6 +239,15 @@ struct RootView: View {
         }
     }
 
+    private static func lockPolicyPhase(_ phase: ScenePhase) -> SceneLockPolicy.Phase {
+        switch phase {
+        case .active: return .active
+        case .inactive: return .inactive
+        case .background: return .background
+        @unknown default: return .inactive
+        }
+    }
+
     private func syncSensorsToBattery() {
         if container.battery.isCritical {
             showSettings = false
@@ -247,7 +256,7 @@ struct RootView: View {
             container.location.stopUpdating()
             container.mesh.stop()
             container.ptt.stop()
-        } else {
+        } else if container.sceneIsActive {
             container.packs.setDownloadsAllowed(true)
             container.location.startUpdating()
             container.location.applyPolicy(container.battery.policy)
