@@ -1584,6 +1584,8 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("SceneLockPolicy missing — background lock remount is untested")
     if "func applyScenePhase" not in app:
         fail("AppContainer must apply SceneLockPolicy; never lock() in RootView background")
+    if "shouldPark(phase: phase)" not in app:
+        fail("applyScenePhase must call shouldPark(phase:) — unlabeled call fails xcodebuild")
     if "parkLiveActivity" not in app:
         fail("background must park Live Activity if one is up")
     if "shouldRelockOnActive" not in app:

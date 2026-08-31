@@ -174,7 +174,7 @@ final class AppContainer {
     /// Park on inactive/background. Never lock() off-scene. True leave relocks on next .active.
     func applyScenePhase(_ phase: SceneLockPolicy.Phase, systemCoverPresented: Bool) {
         sceneIsActive = phase == .active
-        if SceneLockPolicy.shouldPark(phase) {
+        if SceneLockPolicy.shouldPark(phase: phase) {
             parkHardwareForBackground()
             parkLiveActivity()
             if SceneLockPolicy.pendingTrueLeave(phase: phase, systemCoverPresented: systemCoverPresented) {
