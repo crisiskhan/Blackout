@@ -51,87 +51,93 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        stackedChrome
+        applyLifecycle(to: stackedChrome)
+    }
+
+    /// Keep `body` a one-line wrapper. Xcode 16 times out type-checking the
+    /// sheet + onChange + task chain when it lives on `body` itself.
+    private func applyLifecycle<Content: View>(to content: Content) -> some View {
+        content
             .preferredColorScheme(.dark)
             .onChange(of: container.nightRed) { _, _ in
-            // Night red is not light mode. Scheme stays dark.
-        }
-        .sheet(isPresented: settingsSheetBinding) {
-            SettingsRootView(
-                battery: container.battery,
-                location: container.location,
-                mesh: container.mesh,
-                lock: container.lock,
-                callsign: container.party.identity.callsign,
-                onFieldPacks: {
-                    showSettings = false
-                    destination = .expedition
+                // Night red is not light mode. Scheme stays dark.
+            }
+            .sheet(isPresented: settingsSheetBinding) {
+                SettingsRootView(
+                    battery: container.battery,
+                    location: container.location,
+                    mesh: container.mesh,
+                    lock: container.lock,
+                    callsign: container.party.identity.callsign,
+                    onFieldPacks: {
+                        showSettings = false
+                        destination = .expedition
+                    }
+                )
+                .preferredColorScheme(.dark)
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background {
+                    container.lock.lock()
                 }
-            )
-            .preferredColorScheme(.dark)
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .background {
-                container.lock.lock()
+                if phase == .active, container.lock.isUnlocked {
+                    syncSensorsToBattery()
+                    container.refreshRadiosBanner()
+                    container.refreshLiveActivity()
+                    container.applyIdleTimer()
+                }
             }
-            if phase == .active, container.lock.isUnlocked {
+            .onChange(of: container.lock.isUnlocked) { _, unlocked in
+                if unlocked {
+                    syncSensorsToBattery()
+                    container.refreshRadiosBanner()
+                    container.refreshLiveActivity()
+                    container.applyIdleTimer()
+                }
+            }
+            .onChange(of: container.battery.isCritical) { _, _ in
+                if container.lock.isUnlocked {
+                    syncSensorsToBattery()
+                }
+            }
+            .onChange(of: container.sosCoverOpen) { _, _ in
+                container.applyIdleTimer()
+            }
+            .onChange(of: container.ptt.isTransmitting) { _, _ in
+                container.applyIdleTimer()
+            }
+            .onChange(of: container.ptt.lastHeardAt) { _, _ in
+                container.applyIdleTimer()
+            }
+            .onChange(of: container.radios.cannotRun) { _, _ in
+                container.refreshRadiosBanner()
+            }
+            .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
+                if container.lock.isUnlocked {
+                    container.refreshLiveActivity()
+                }
+            }
+            .onOpenURL { url in
+                if let next = container.applyDeepLink(url) {
+                    destination = next
+                }
+            }
+            .onAppear {
+                guard container.lock.isUnlocked else { return }
                 syncSensorsToBattery()
                 container.refreshRadiosBanner()
                 container.refreshLiveActivity()
                 container.applyIdleTimer()
             }
-        }
-        .onChange(of: container.lock.isUnlocked) { _, unlocked in
-            if unlocked {
-                syncSensorsToBattery()
-                container.refreshRadiosBanner()
-                container.refreshLiveActivity()
-                container.applyIdleTimer()
+            .task {
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    guard container.lock.isUnlocked else { continue }
+                    container.expireInboundIfNeeded()
+                    container.refreshLiveActivity()
+                    container.applyIdleTimer()
+                }
             }
-        }
-        .onChange(of: container.battery.isCritical) { _, _ in
-            if container.lock.isUnlocked {
-                syncSensorsToBattery()
-            }
-        }
-        .onChange(of: container.sosCoverOpen) { _, _ in
-            container.applyIdleTimer()
-        }
-        .onChange(of: container.ptt.isTransmitting) { _, _ in
-            container.applyIdleTimer()
-        }
-        .onChange(of: container.ptt.lastHeardAt) { _, _ in
-            container.applyIdleTimer()
-        }
-        .onChange(of: container.radios.cannotRun) { _, _ in
-            container.refreshRadiosBanner()
-        }
-        .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
-            if container.lock.isUnlocked {
-                container.refreshLiveActivity()
-            }
-        }
-        .onOpenURL { url in
-            if let next = container.applyDeepLink(url) {
-                destination = next
-            }
-        }
-        .onAppear {
-            guard container.lock.isUnlocked else { return }
-            syncSensorsToBattery()
-            container.refreshRadiosBanner()
-            container.refreshLiveActivity()
-            container.applyIdleTimer()
-        }
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                guard container.lock.isUnlocked else { continue }
-                container.expireInboundIfNeeded()
-                container.refreshLiveActivity()
-                container.applyIdleTimer()
-            }
-        }
     }
 
     private var stackedChrome: some View {

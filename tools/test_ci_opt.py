@@ -1198,6 +1198,7 @@ def main() -> None:
     test_update_maps_one_tap()
     test_pack_amenity_address_search()
     test_sos_armed_restore_no_crash()
+    test_root_view_body_type_checks()
     print("all ci-opt checks passed")
 
 
@@ -1432,6 +1433,29 @@ def test_sos_armed_restore_no_crash() -> None:
     if pbx.count("CURRENT_PROJECT_VERSION = 33") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("SOS armed restore + lockup first-open + launch crash sweep, version 33")
+
+
+def test_root_view_body_type_checks() -> None:
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    root_struct = root.split("struct RootView: View", 1)[-1].split(
+        "private struct CriticalSOSShell", 1
+    )[0]
+    body = root_struct.split("var body: some View {", 1)[-1].split(
+        "private func applyLifecycle", 1
+    )[0]
+    if "applyLifecycle(to: stackedChrome)" not in body:
+        fail("RootView.body must stay a thin applyLifecycle wrapper")
+    if ".sheet(" in body or ".onChange(" in body or ".task {" in body:
+        fail("RootView.body still holds the lifecycle chain Xcode 16 cannot type-check")
+    if "func applyLifecycle<" not in root_struct:
+        fail("RootView lost applyLifecycle")
+    if "sosOverlayMounts(" not in root_struct:
+        fail("SOS overlay must stay gated off the idle lock frame")
+    if "guard container.lock.isUnlocked else { return }" not in root_struct.split(
+        ".onAppear"
+    )[1][:240]:
+        fail("RootView.onAppear must not start sensors while the lock is up")
+    ok("RootView.body is split so Xcode 16 can type-check")
 
 
 def test_pack_amenity_address_search() -> None:
