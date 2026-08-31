@@ -158,14 +158,16 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapPackSearchPolicy.missOpensSheet)
         XCTAssertTrue(MapPackSearchPolicy.missShowsEmptyInList)
         XCTAssertTrue(MapPackSearchPolicy.submitStillRuns)
-        XCTAssertTrue(MapPackSearchPolicy.submitPresentsSheet)
+        XCTAssertFalse(MapPackSearchPolicy.submitPresentsSheet)
+        XCTAssertTrue(MapPackSearchPolicy.submitPicksSingleHit)
+        XCTAssertTrue(MapPackSearchPolicy.dropdownRowsStealMapTaps)
         XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "h", hitCount: 5, empty: false, submitted: false))
-        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false, submitted: false))
-        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false, submitted: true))
-        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "zzzz", hitCount: 0, empty: true, submitted: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "Walmart Pharmacy", hitCount: 1, empty: false, submitted: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "zzzz", hitCount: 0, empty: true, submitted: true))
         XCTAssertTrue(MapPackSearchPolicy.presentsDropdown(query: "h", hitCount: 5, empty: false, submitted: false))
         XCTAssertTrue(MapPackSearchPolicy.presentsDropdown(query: "zzzz", hitCount: 0, empty: true, submitted: false))
-        XCTAssertFalse(MapPackSearchPolicy.presentsDropdown(query: "h", hitCount: 5, empty: false, submitted: true))
+        XCTAssertTrue(MapPackSearchPolicy.presentsDropdown(query: "zzzz", hitCount: 0, empty: true, submitted: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsDropdown(query: "Walmart Pharmacy", hitCount: 1, empty: false, submitted: true))
         XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "", hitCount: 0, empty: false, submitted: true))
         XCTAssertFalse(MapPackSearchPolicy.presentsDropdown(query: "", hitCount: 0, empty: false, submitted: false))
     }
@@ -173,6 +175,30 @@ final class MapChromeLockTests: XCTestCase {
     func testPickStartsNavigateNotCameraOnly() {
         XCTAssertTrue(MapPackSearchPolicy.pickStartsNavigate)
         XCTAssertFalse(MapPackSearchPolicy.pickIsCameraOnly)
+        XCTAssertTrue(MapPackSearchPolicy.dropdownRowsStealMapTaps)
+    }
+
+    func testSubmitSingleHitPicksAndDoesNotPresentSheet() {
+        XCTAssertTrue(MapPackSearchPolicy.shouldPickOnSubmit(hitCount: 1))
+        XCTAssertFalse(MapPackSearchPolicy.shouldPickOnSubmit(hitCount: 0))
+        XCTAssertFalse(MapPackSearchPolicy.shouldPickOnSubmit(hitCount: 5))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "Walmart Pharmacy", hitCount: 1, empty: false, submitted: true))
+    }
+
+    func testPickWithOriginAndGraphStartsPreview() {
+        XCTAssertTrue(MapPackSearchPolicy.startsWalkPreview(hasOrigin: true, hasGraphRoute: true))
+        XCTAssertFalse(MapPackSearchPolicy.locksCompassWhenNoRoute(hasOrigin: true, hasGraphRoute: true))
+    }
+
+    func testPickNilOriginLocksDestAndCompass() {
+        XCTAssertFalse(MapPackSearchPolicy.startsWalkPreview(hasOrigin: false, hasGraphRoute: false))
+        XCTAssertTrue(MapPackSearchPolicy.locksCompassWhenNoRoute(hasOrigin: false, hasGraphRoute: false))
+        XCTAssertTrue(MapPackSearchPolicy.pickLocksDestWhenNoRoute)
+    }
+
+    func testPickOffGraphLocksDestAndCompass() {
+        XCTAssertFalse(MapPackSearchPolicy.startsWalkPreview(hasOrigin: true, hasGraphRoute: false))
+        XCTAssertTrue(MapPackSearchPolicy.locksCompassWhenNoRoute(hasOrigin: true, hasGraphRoute: false))
     }
 
     func testMissEmptyDoesNotHoldChromeForever() {

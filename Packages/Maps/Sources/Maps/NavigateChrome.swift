@@ -276,10 +276,15 @@ struct MapPackSearchDropdown: View {
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.metal)
                     .frame(maxWidth: .infinity, minHeight: 36)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .highPriorityGesture(TapGesture().onEnded(onDismiss))
             .accessibilityLabel("Cancel search")
         }
+        .zIndex(8)
+        .allowsHitTesting(true)
+        .contentShape(Rectangle())
     }
 }
 
@@ -291,31 +296,29 @@ struct MapPackSearchHits: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(hits.prefix(5)) { hit in
-                Button {
-                    onPick(hit)
-                } label: {
-                    HStack(spacing: 8) {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(hit.title)
-                                .font(BlackoutDS.captionFont())
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BlackoutDS.Silver.bright)
-                            Text(hit.kind)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(BlackoutDS.Silver.dim)
-                        }
-                        Spacer(minLength: 0)
-                        if let meters = hit.meters {
-                            Text(Formatters.distance(meters))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.mid)
-                        }
+                HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(hit.title)
+                            .font(BlackoutDS.captionFont())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(BlackoutDS.Silver.bright)
+                        Text(hit.kind)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(BlackoutDS.Silver.dim)
                     }
-                    .padding(.horizontal, 12)
-                    .frame(height: 36)
-                    .contentShape(Rectangle())
+                    Spacer(minLength: 0)
+                    if let meters = hit.meters {
+                        Text(Formatters.distance(meters))
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.mid)
+                    }
                 }
-                .buttonStyle(.plain)
+                .padding(.horizontal, 12)
+                .frame(height: 36)
+                .contentShape(Rectangle())
+                .highPriorityGesture(TapGesture().onEnded { onPick(hit) })
+                .accessibilityAddTraits(.isButton)
+                .accessibilityLabel(hit.title)
             }
         }
         .background(BlackoutDS.Surface.raised.opacity(0.92))
@@ -324,6 +327,8 @@ struct MapPackSearchHits: View {
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .allowsHitTesting(true)
+        .zIndex(8)
     }
 }
 

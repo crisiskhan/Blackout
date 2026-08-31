@@ -142,9 +142,12 @@ public enum MapPackSearchPolicy {
     public static let missOpensSheet = false
     public static let missShowsEmptyInList = true
     public static let submitStillRuns = true
-    public static let submitPresentsSheet = true
+    public static let submitPresentsSheet = false
+    public static let submitPicksSingleHit = true
+    public static let dropdownRowsStealMapTaps = true
     public static let pickStartsNavigate = true
     public static let pickIsCameraOnly = false
+    public static let pickLocksDestWhenNoRoute = true
     public static let searchMissHoldsChrome = false
     public static let focusedHoldsChrome = true
     public static let recedeDisablesFocusedField = false
@@ -155,10 +158,11 @@ public enum MapPackSearchPolicy {
         empty: Bool,
         submitted: Bool = false
     ) -> Bool {
-        guard submitted else { return false }
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return false }
-        return hitCount > 0 || empty
+        _ = query
+        _ = hitCount
+        _ = empty
+        _ = submitted
+        return false
     }
 
     public static func presentsDropdown(
@@ -167,10 +171,22 @@ public enum MapPackSearchPolicy {
         empty: Bool,
         submitted: Bool = false
     ) -> Bool {
-        guard !submitted else { return false }
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
+        if submitted, hitCount == 1 { return false }
         return hitCount > 0 || empty
+    }
+
+    public static func shouldPickOnSubmit(hitCount: Int) -> Bool {
+        hitCount == 1
+    }
+
+    public static func startsWalkPreview(hasOrigin: Bool, hasGraphRoute: Bool) -> Bool {
+        hasOrigin && hasGraphRoute
+    }
+
+    public static func locksCompassWhenNoRoute(hasOrigin: Bool, hasGraphRoute: Bool) -> Bool {
+        !startsWalkPreview(hasOrigin: hasOrigin, hasGraphRoute: hasGraphRoute)
     }
 
     public static func recedeAllowsHitTesting(

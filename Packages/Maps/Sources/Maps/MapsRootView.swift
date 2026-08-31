@@ -628,14 +628,18 @@ public struct MapsRootView: View {
         let hitCount = navigate.hits.count
         let empty = navigate.empty != nil
         if present {
-            showSearchHits = MapChromeLock.showsSearchHitsInSheet
-                && MapPackSearchPolicy.presentsSheet(
-                    query: navigate.query,
-                    hitCount: hitCount,
-                    empty: empty,
-                    submitted: true
-                )
-            showSearchDropdown = false
+            if MapPackSearchPolicy.shouldPickOnSubmit(hitCount: hitCount),
+               let hit = navigate.hits.first {
+                pickFound(hit)
+                return
+            }
+            showSearchHits = false
+            showSearchDropdown = MapPackSearchPolicy.presentsDropdown(
+                query: navigate.query,
+                hitCount: hitCount,
+                empty: empty,
+                submitted: true
+            )
         } else {
             showSearchHits = false
             showSearchDropdown = MapPackSearchPolicy.presentsDropdown(
@@ -870,7 +874,23 @@ public struct MapsRootView: View {
         showLayers = false
         dismissSearchResults()
         pinnedToPackCoverage = false
-        navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
+        let origin = originCoordinate
+        navigate.pick(hit, origin: origin, pack: packService.routing)
+        let routed = navigate.phase == .preview
+        if MapPackSearchPolicy.locksCompassWhenNoRoute(
+            hasOrigin: origin != nil,
+            hasGraphRoute: routed
+        ) {
+            let point = CompassLockWaypoint(
+                id: hit.id,
+                name: hit.title,
+                latitude: hit.coordinate.latitude,
+                longitude: hit.coordinate.longitude,
+                kind: .poi
+            )
+            _ = compass.lockOn(point)
+            applyLockHeading()
+        }
         jumpCoordinate = hit.coordinate
         jumpToken += 1
         userMovedCamera = true

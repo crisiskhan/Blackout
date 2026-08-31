@@ -473,11 +473,29 @@ def test_map_google_feel() -> None:
         fail("typing must fill a dropdown under the 56h bar, not a covering sheet")
     if "runPackSearch(present: true)" in maps.split("onQueryChange", 1)[-1][:400]:
         fail("onChange must not present a sheet on each letter — 4:13 unstable trap")
-    pick_fn = maps.split("func pickFound", 1)[-1][:500]
+    pick_fn = maps.split("func pickFound", 1)[-1][:900]
     if "navigate.pick(" not in pick_fn:
         fail("pickFound must call navigate.pick so Walk/preview starts")
     if "lockOrRoute(" in pick_fn:
         fail("pickFound must not call lockOrRoute — that can end() the Walk preview")
+    if "compass.lockOn(" not in pick_fn:
+        fail("pickFound must compass.lockOn when there is no Walk graph route")
+    if "highPriorityGesture" not in nav_chrome.split("struct MapPackSearchHits", 1)[-1][:1200]:
+        fail("dropdown rows must highPriorityGesture so the map does not eat the pick tap")
+    if "shouldPickOnSubmit" not in maps:
+        fail("keyboard Search with one hit must pickFound, not present a covering sheet")
+    if "submitPresentsSheet = false" not in lock:
+        fail("submit must not cover the map with MapPackSearchSheet")
+    if "submitPicksSingleHit = true" not in lock:
+        fail("one-hit submit must start going")
+    if "testSubmitSingleHitPicksAndDoesNotPresentSheet" not in tests:
+        fail("missing submit-single-hit-picks test")
+    if "testPickNilOriginLocksDestAndCompass" not in tests:
+        fail("missing NO FIX pick → dest+compass test")
+    if "testPickOffGraphLocksDestAndCompass" not in tests:
+        fail("missing off-graph pick → dest+lock test")
+    if "testPickWithOriginAndGraphStartsPreview" not in tests:
+        fail("missing origin+graph → preview test")
     if "typingPresentsSheet = false" not in lock:
         fail("typing a letter must not auto-present the search sheet")
     if "pickStartsNavigate = true" not in lock or "pickIsCameraOnly = false" not in lock:
