@@ -82,6 +82,13 @@ final class CompassLockTests: XCTestCase {
         XCTAssertFalse(spoken.contains("Mesa Street"))
     }
 
+    func testLockOnLineIsMockHeaderNotACapsule() {
+        XCTAssertEqual(CompassLockMath.lockOnLine(headingDegrees: 302), "LOCK ON • 302° NW")
+        XCTAssertEqual(CompassLockMath.lockOnLine(headingDegrees: 0), "LOCK ON • 0° N")
+        XCTAssertEqual(CompassLockMath.lockOnLine(headingDegrees: nil), "LOCK ON")
+        XCTAssertEqual(CompassLockMath.cardinal(302), "NW")
+    }
+
     func testVoiceLockConstants() {
         XCTAssertEqual(CompassLockMath.voiceInterval, 2.2, accuracy: 0.001)
         XCTAssertGreaterThanOrEqual(CompassLockMath.speechRate, CompassLockMath.speechRateMin)

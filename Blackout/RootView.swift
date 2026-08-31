@@ -287,7 +287,9 @@ struct RootView: View {
                 .tabItem { monochromeTab(AppDestination.expedition) }
                 .tag(AppDestination.expedition)
         }
-        .toolbarBackground(BlackoutDS.Surface.base, for: .tabBar)
+        .toolbarBackground(BlackoutDS.Surface.raised, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
+        .toolbarColorScheme(.dark, for: .tabBar)
         .tint(BlackoutDS.Silver.metal)
     }
 

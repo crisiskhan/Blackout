@@ -30,18 +30,36 @@ struct CompassLockBar: View {
                 .padding(.horizontal, 10)
                 .frame(minWidth: CGFloat(MapChromeLock.chipPaintedHeight))
                 .frame(height: CGFloat(MapChromeLock.chipPaintedHeight))
-                .background(lit ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised.opacity(0.92))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .metalPlate(lit ? .bright : .rail, cornerRadius: MetalPlate.railCorner)
         }
         .buttonStyle(.plain)
         .padding(CGFloat(MapChromeLock.chipHitSlopInset))
         .contentShape(Rectangle())
         .padding(-CGFloat(MapChromeLock.chipHitSlopInset))
         .accessibilityLabel(title)
+    }
+}
+
+/// Mock brushed header. Nav-in-play only. Not the idle 28pt GPS chip.
+struct CompassLockOnHeader: View {
+    var headingDegrees: Double?
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 16, weight: .bold))
+            Text(CompassLockMath.lockOnLine(headingDegrees: headingDegrees))
+                .font(.system(size: 15, weight: .bold, design: .default))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 0)
+        }
+        .foregroundStyle(BlackoutDS.Surface.void)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 40)
+        .metalPlate(.bright, cornerRadius: MetalPlate.headerCorner)
+        .accessibilityLabel(CompassLockMath.lockOnLine(headingDegrees: headingDegrees))
     }
 }
 

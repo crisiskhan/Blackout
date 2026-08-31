@@ -123,4 +123,29 @@ public enum CompassLockMath {
         let name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         return name.isEmpty ? nil : name
     }
+
+    public static func lockHeading(
+        origin: RoutingCoordinate?,
+        dest: RoutingCoordinate?,
+        fallback: Double?
+    ) -> Double? {
+        if let origin, let dest {
+            return Geo.bearing(origin, dest)
+        }
+        return fallback
+    }
+
+    public static func lockOnLine(headingDegrees: Double?) -> String {
+        guard let headingDegrees, headingDegrees.isFinite else { return "LOCK ON" }
+        var deg = headingDegrees.truncatingRemainder(dividingBy: 360)
+        if deg < 0 { deg += 360 }
+        let rounded = Int(deg.rounded()) % 360
+        return "LOCK ON • \(rounded)° \(cardinal(rounded))"
+    }
+
+    public static func cardinal(_ degrees: Int) -> String {
+        let dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let idx = Int((Double((degrees % 360 + 360) % 360) / 45.0).rounded()) % 8
+        return dirs[idx]
+    }
 }

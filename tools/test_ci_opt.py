@@ -1501,6 +1501,7 @@ def main() -> None:
     test_sos_armed_restore_no_crash()
     test_root_view_body_type_checks()
     test_map_fill_bleed_and_paint_budget()
+    test_map_metal_plates()
     print("all ci-opt checks passed")
 
 
@@ -2253,6 +2254,67 @@ def test_map_fill_bleed_and_paint_budget() -> None:
     if pbx.count("CURRENT_PROJECT_VERSION = 38") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map canvas fills, streets/topo session-off, paint budget cut, version 38")
+
+
+def test_map_metal_plates() -> None:
+    plate = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MetalPlate.swift").read_text()
+    hud_chip = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MapHUDChip.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    nav = (ROOT / "Packages/Maps/Sources/Maps/NavigateChrome.swift").read_text()
+    compass = (ROOT / "Packages/Maps/Sources/Maps/CompassLockChrome.swift").read_text()
+    vitals = (ROOT / "Packages/Maps/Sources/Maps/VitalsChip.swift").read_text()
+    sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    core = (ROOT / "Packages/Maps/Sources/MapsRouting/CompassLock.swift").read_text()
+    tests = (ROOT / "Packages/Maps/Tests/MapsTests/CompassLockTests.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+
+    if "struct MetalPlate" not in plate or "case rail" not in plate or "case bright" not in plate:
+        fail("MetalPlate must be the mock plate, not another Capsule")
+    if "clipShape(Capsule" in plate:
+        fail("MetalPlate must not clip to Capsule")
+    if "metalPlate(.rail" not in hud_chip:
+        fail("Recenter/Layers/Packs must sit on MetalPlate rails")
+    if "Capsule" in hud_chip:
+        fail("MapHUDChip must not be a Capsule")
+    lock_hud = maps.split("struct MapLockHUD", 1)[-1].split("struct MapEmptyCard", 1)[0]
+    if "Capsule" in lock_hud:
+        fail("3 m HUD must be a metal plate, not a Capsule")
+    if "metalPlate(.inset" not in lock_hud:
+        fail("3 m HUD lost its metal plate")
+    if ".frame(maxWidth: .infinity)" in lock_hud:
+        fail("MapLockHUD must stay the tiny chip")
+    if "metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)" not in nav:
+        fail("Search this pack must be a metal plate")
+    if "struct CompassLockOnHeader" not in compass:
+        fail("nav-in-play must paint the mock LOCK ON header")
+    if "LOCK ON" not in core or "func lockOnLine" not in core:
+        fail("LOCK ON • 302° NW copy must be testable")
+    if "testLockOnLineIsMockHeaderNotACapsule" not in tests:
+        fail("missing LOCK ON header test")
+    if "CompassLockOnHeader" not in maps.split("private var lockHudStack", 1)[-1]:
+        fail("LOCK ON header must sit in lockHudStack when nav is in play")
+    if "metalPlate(lit ? .bright : .rail" not in compass:
+        fail("SPEAK/STEER/MARK/LOCK must be metal rails")
+    if "metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)" not in vitals:
+        fail("I AM OK dual must be a metal plate")
+    if "clipShape(Capsule" in vitals:
+        fail("I AM OK must not become a Capsule")
+    if "Silver.steel, lineWidth: 7" not in sos:
+        fail("SOS 88 must keep a metal ring")
+    if "setBlendMode(.multiply)" not in offline:
+        fail("dusk grade must multiply so USGS county labels do not sit on the default layer")
+    pick_fn = maps.split("func pickFound", 1)[-1][:900]
+    if "navigate.pick(" not in pick_fn or "compass.lockOn(" not in pick_fn:
+        fail("pickFound Walk/bearing must stay")
+    if "coverZoomScale" not in offline or "searchDebounce" not in maps:
+        fail("do not revert cover-zoom or 180ms search debounce")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if pbx.count("CURRENT_PROJECT_VERSION = 38") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    ok("Map chrome is metal plates, LOCK ON header, dusk multiply, version 38")
 
 
 if __name__ == "__main__":

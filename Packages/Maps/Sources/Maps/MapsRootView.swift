@@ -546,6 +546,14 @@ public struct MapsRootView: View {
             || navigate.phase == .guidance
     }
 
+    private var lockOnHeading: Double? {
+        CompassLockMath.lockHeading(
+            origin: originCoordinate,
+            dest: navigate.destination ?? compass.lockCoordinate,
+            fallback: compass.headingDegrees ?? location.headingDegrees
+        )
+    }
+
     private var mapLockChrome: some View {
         VStack(spacing: 0) {
             lockHudStack
@@ -580,16 +588,21 @@ public struct MapsRootView: View {
         VStack(spacing: 8) {
             receding(keepInteractive: searchFocused) {
                 VStack(alignment: .leading, spacing: 8) {
-                    MapLockHUD(
-                        accuracyMeters: gpsAccuracyMeters,
-                        headingDegrees: location.headingDegrees,
-                        onNorthUp: {
-                            noteMapActivity()
-                            guard !compass.isLocked else { return }
-                            headingUp = false
-                            UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
-                        }
-                    )
+                    if routeInPlay {
+                        CompassLockOnHeader(headingDegrees: lockOnHeading)
+                            .padding(.horizontal, -16)
+                    } else {
+                        MapLockHUD(
+                            accuracyMeters: gpsAccuracyMeters,
+                            headingDegrees: location.headingDegrees,
+                            onNorthUp: {
+                                noteMapActivity()
+                                guard !compass.isLocked else { return }
+                                headingUp = false
+                                UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
+                            }
+                        )
+                    }
                     if showChipRow {
                         mapPackSearch
                         if showSearchDropdown {
@@ -1261,11 +1274,7 @@ struct MapLockHUD: View {
         }
         .padding(.horizontal, 8)
         .frame(height: CGFloat(MapChromeLock.lockHUDPaintedHeight))
-        .background(BlackoutDS.Surface.raised.opacity(0.82))
-        .overlay(
-            Capsule().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-        )
-        .clipShape(Capsule())
+        .metalPlate(.inset, cornerRadius: MetalPlate.railCorner)
     }
 
     private var accuracyLabel: String {

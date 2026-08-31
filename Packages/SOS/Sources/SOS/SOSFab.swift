@@ -94,9 +94,18 @@ public struct SOSFab: View {
         Button(action: {}) {
             ZStack {
                 Circle()
-                    .fill(BlackoutDS.Red.core)
+                    .fill(
+                        RadialGradient(
+                            colors: [BlackoutDS.Red.hot, BlackoutDS.Red.core, BlackoutDS.Red.blood],
+                            center: .center,
+                            startRadius: 4,
+                            endRadius: 44
+                        )
+                    )
                 Circle()
-                    .stroke(isArmed ? BlackoutDS.Silver.metal : BlackoutDS.Red.hot, lineWidth: 3)
+                    .stroke(BlackoutDS.Silver.steel, lineWidth: 7)
+                Circle()
+                    .stroke(isArmed ? BlackoutDS.Silver.metal : BlackoutDS.Silver.edge, lineWidth: 2)
                 Text("SOS")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(BlackoutDS.Silver.metal)

@@ -1,7 +1,7 @@
 import BlackoutCore
 import SwiftUI
 
-/// Recenter / Layers / Packs. 56h painted chip, 22pt glyph. 64 slop is invisible inset, not the face.
+/// Recenter / Layers / Packs. 56h metal rail, 22pt glyph. 64 slop is invisible inset, not the face.
 public struct MapHUDChip: View {
     private let title: String
     private let systemName: String
@@ -25,12 +25,7 @@ public struct MapHUDChip: View {
             .foregroundStyle(BlackoutDS.Silver.metal)
             .padding(.horizontal, 10)
             .frame(height: CGFloat(MapChromeLock.chipPaintedHeight))
-            .background(BlackoutDS.Surface.raised.opacity(0.92))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .metalPlate(.rail, cornerRadius: MetalPlate.railCorner)
         }
         .buttonStyle(.plain)
         .padding(CGFloat(MapChromeLock.chipHitSlopInset))

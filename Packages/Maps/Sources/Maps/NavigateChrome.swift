@@ -49,12 +49,7 @@ struct NavigatePreviewCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(BlackoutDS.Surface.raised.opacity(0.92))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
     }
 
     private func profileChip(_ value: NavigateProfile) -> some View {
@@ -121,12 +116,7 @@ struct NavigateGuidanceBar: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(BlackoutDS.Surface.raised.opacity(0.92))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
     }
 
     private var street: String {
@@ -205,12 +195,7 @@ struct MapPackSearchField: View {
         .foregroundStyle(BlackoutDS.Silver.metal)
         .padding(.horizontal, 12)
         .frame(height: CGFloat(MapChromeLock.chipPaintedHeight))
-        .background(BlackoutDS.Surface.raised.opacity(0.92))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
         .contentShape(Rectangle())
         .onTapGesture { isFocused.wrappedValue = true }
         .allowsHitTesting(true)
@@ -262,12 +247,7 @@ struct MapPackSearchDropdown: View {
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
-                    .background(BlackoutDS.Surface.raised.opacity(0.92))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
             } else {
                 MapPackSearchHits(hits: hits, onPick: onPick)
             }
@@ -321,12 +301,7 @@ struct MapPackSearchHits: View {
                 .accessibilityLabel(hit.title)
             }
         }
-        .background(BlackoutDS.Surface.raised.opacity(0.92))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
         .allowsHitTesting(true)
         .zIndex(8)
     }
