@@ -89,10 +89,7 @@ struct RootView: View {
             }
             .onChange(of: container.lock.isUnlocked) { _, unlocked in
                 if unlocked {
-                    syncSensorsToBattery()
-                    container.refreshRadiosBanner()
-                    container.refreshLiveActivity()
-                    container.applyIdleTimer()
+                    container.scheduleHardwareAfterFirstMapFrame()
                 }
             }
             .onChange(of: container.battery.isCritical) { _, _ in

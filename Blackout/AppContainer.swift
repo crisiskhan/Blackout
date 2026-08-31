@@ -153,6 +153,34 @@ final class AppContainer {
         startMissedCheckInWatch()
     }
 
+    /// Unlock paints Map first. CL / motion / radio / ActivityKit wait one turn.
+    func scheduleHardwareAfterFirstMapFrame() {
+        Task { @MainActor in
+            await Task.yield()
+            guard lock.isUnlocked else { return }
+            armHardwareAfterUnlock()
+        }
+    }
+
+    func armHardwareAfterUnlock() {
+        packs.startPathMonitorIfNeeded()
+        if battery.isCritical {
+            packs.setDownloadsAllowed(false)
+            location.stopUpdating()
+            mesh.stop()
+            ptt.stop()
+            applyIdleTimer()
+            return
+        }
+        packs.setDownloadsAllowed(true)
+        location.startUpdating()
+        location.applyPolicy(battery.policy)
+        ptt.extremeSaver = battery.isExtremeSaver
+        syncMeshToParty()
+        refreshRadiosBanner()
+        applyIdleTimer()
+    }
+
     func syncMeshToParty() {
         radios.start()
         crypto.setPartyCode(identity.partyCode)

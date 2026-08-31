@@ -1454,7 +1454,41 @@ def test_sos_armed_restore_no_crash() -> None:
     if "container.lock.isUnlocked" not in root.split("onChange(of: scenePhase)")[1][:500]:
         fail("foreground restore must not start sensors while locked")
     if "onChange(of: container.lock.isUnlocked)" not in root:
-        fail("unlock must start Map sensors only after the slide")
+        fail("unlock must schedule hardware only after the slide")
+    unlock_tick = root.split("onChange(of: container.lock.isUnlocked)", 1)[-1].split("onChange(", 1)[0]
+    if "syncSensorsToBattery()" in unlock_tick:
+        fail("unlock tick must not start CLLocation/mesh in the same turn as unlockSession")
+    if "startUpdating()" in unlock_tick or "syncMeshToParty()" in unlock_tick:
+        fail("unlockSession path must not call startUpdating/syncMesh synchronously")
+    if "radios.start()" in unlock_tick:
+        fail("unlock tick must not start mesh radio in the same turn")
+    if "refreshLiveActivity()" in unlock_tick:
+        fail("unlock tick must not touch Live Activity in the same turn")
+    if "scheduleHardwareAfterFirstMapFrame" not in unlock_tick:
+        fail("unlock must paint Map first, then defer hardware")
+    lock_svc = (ROOT / "Packages/Settings/Sources/Settings/AppLockService.swift").read_text()
+    unlock_fn = lock_svc.split("func unlockSession()", 1)[-1].split("func ", 1)[0]
+    if "startUpdating" in unlock_fn or "radios.start" in unlock_fn or "syncMesh" in unlock_fn:
+        fail("unlockSession must not start hardware")
+    if "Activity.request" in unlock_fn or "refreshLiveActivity" in unlock_fn:
+        fail("unlockSession must not request a Live Activity")
+    if "isUnlocked = true" not in unlock_fn:
+        fail("unlockSession must only flip the lock")
+    if "let monitor = NWPathMonitor()" in store:
+        fail("PackStore must not construct NWPathMonitor at init")
+    if "enablePathMonitor: true" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
+        fail("AppContainer.init must not enable the PackStore path monitor")
+    if "startPathMonitor" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
+        fail("AppContainer.init must not start the PackStore path monitor")
+    if "func startPathMonitorIfNeeded" not in store:
+        fail("PackStore path monitor must arm after unlock, like MeshRadioProbe")
+    if "startsPackPathMonitorInInit = false" not in launch:
+        fail("lock contract must forbid PackStore path monitor on AppContainer.init")
+    if "startsHardwareSynchronouslyOnUnlock = false" not in launch:
+        fail("lock contract must forbid hardware in the unlock tick")
+    maps_root = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    if "location.startUpdating()" in maps_root:
+        fail("Map onAppear must not start CLLocation in the unlock tick")
     task = root.split(".task {", 1)[-1][:400]
     if "guard container.lock.isUnlocked else { continue }" not in task:
         fail("RootView.task must not refresh Live Activity on the lock gate")
@@ -1542,6 +1576,11 @@ def test_root_view_body_type_checks() -> None:
         ".onAppear"
     )[1][:240]:
         fail("RootView.onAppear must not start sensors while the lock is up")
+    unlock_tick = root_struct.split("onChange(of: container.lock.isUnlocked)", 1)[-1].split(
+        "onChange(", 1
+    )[0]
+    if "syncSensorsToBattery()" in unlock_tick or "refreshLiveActivity()" in unlock_tick:
+        fail("unlock onChange must not start hardware before the first Map frame")
     ok("RootView.body is split so Xcode 16 can type-check")
 
 

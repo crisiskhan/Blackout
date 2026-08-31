@@ -20,7 +20,7 @@ public final class PackStore {
     private let diskRoot: URL
     private let workRoot: URL
     private let relayRoot: URL
-    private let monitor = NWPathMonitor()
+    private var monitor: NWPathMonitor?
     private var session: URLSession?
     private var tasks: [String: Task<Void, Never>] = [:]
     private let sha256ForPack: (String) -> String?
@@ -35,7 +35,7 @@ public final class PackStore {
             bundledRoot: bundledRoot,
             bundledPacksRoot: bundledPacksRoot,
             diskRoot: diskRoot,
-            enablePathMonitor: true,
+            enablePathMonitor: false,
             sha256ForPack: nil,
             zipProvider: nil
         )
@@ -65,16 +65,24 @@ public final class PackStore {
         try? FileManager.default.createDirectory(at: self.workRoot, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: self.relayRoot, withIntermediateDirectories: true)
         if enablePathMonitor {
-            monitor.pathUpdateHandler = { [weak self] path in
-                Task { @MainActor in
-                    self?.pathSatisfied = path.status == .satisfied
-                    self?.onWiFi = path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet)
-                    self?.refreshStates()
-                }
-            }
-            monitor.start(queue: DispatchQueue(label: "com.crisiskhan.blackout.packs.path"))
+            startPathMonitorIfNeeded()
         }
         refreshStates()
+    }
+
+    /// After unlock. AppContainer.init must not construct or start this.
+    public func startPathMonitorIfNeeded() {
+        guard monitor == nil else { return }
+        let pathMonitor = NWPathMonitor()
+        pathMonitor.pathUpdateHandler = { [weak self] path in
+            Task { @MainActor in
+                self?.pathSatisfied = path.status == .satisfied
+                self?.onWiFi = path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet)
+                self?.refreshStates()
+            }
+        }
+        pathMonitor.start(queue: DispatchQueue(label: "com.crisiskhan.blackout.packs.path"))
+        monitor = pathMonitor
     }
 
     /// Created only when the user taps Get / Update maps. Never on boot.

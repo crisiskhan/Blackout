@@ -191,6 +191,8 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertFalse(LaunchLock.persistedSOSArmedStealsFirstOpen)
         XCTAssertFalse(LaunchLock.startsSensorsBeforeUnlock)
         XCTAssertFalse(LaunchLock.constructsLocationHardwareInInit)
+        XCTAssertFalse(LaunchLock.startsPackPathMonitorInInit)
+        XCTAssertFalse(LaunchLock.startsHardwareSynchronouslyOnUnlock)
         XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
         XCTAssertFalse(LaunchLock.sosFabMountsOnLockFrame)
         XCTAssertFalse(LaunchLock.startsRadioProbeBeforeUnlock)

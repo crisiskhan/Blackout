@@ -229,7 +229,6 @@ public struct MapsRootView: View {
                 resolvePaintPack()
                 refreshTerrain()
                 refreshGuidance()
-                location.startUpdating()
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
