@@ -92,26 +92,11 @@ public struct SOSFab: View {
 
     private var disk: some View {
         Button(action: {}) {
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [BlackoutDS.Red.hot, BlackoutDS.Red.core, BlackoutDS.Red.blood],
-                            center: .center,
-                            startRadius: 4,
-                            endRadius: 44
-                        )
-                    )
-                Circle()
-                    .stroke(BlackoutDS.Silver.steel, lineWidth: 7)
-                Circle()
-                    .stroke(isArmed ? BlackoutDS.Silver.metal : BlackoutDS.Silver.edge, lineWidth: 2)
-                Text("SOS")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(BlackoutDS.Silver.metal)
-            }
-            .frame(width: BlackoutDS.Hit.sos, height: BlackoutDS.Hit.sos)
-            .shadow(color: BlackoutDS.Red.blood.opacity(0.55), radius: 12, y: 4)
+            Text("SOS")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(BlackoutDS.Silver.metal)
+                .frame(width: BlackoutDS.Hit.sos, height: BlackoutDS.Hit.sos)
+                .metalDisk(isArmed ? .bright : .hazard, diameter: BlackoutDS.Hit.sos)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("SOS. Hold to arm.")

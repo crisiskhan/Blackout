@@ -2301,8 +2301,14 @@ def test_map_metal_plates() -> None:
         fail("I AM OK dual must be a metal plate")
     if "clipShape(Capsule" in vitals:
         fail("I AM OK must not become a Capsule")
-    if "Silver.steel, lineWidth: 7" not in sos:
-        fail("SOS 88 must keep a metal ring")
+    if "RadialGradient" in sos:
+        fail("SOSFab must not use Circle+RadialGradient — QA fail-closed on the type")
+    if "metalPlate(" not in sos and "MetalPlate(" not in sos and "metalDisk(" not in sos:
+        fail("SOS 88 must use MetalPlate gradient rails, clipped to a disk")
+    if "BlackoutDS.Hit.sos" not in sos:
+        fail("SOS hit target remains 88pt")
+    if "case hazard" not in plate:
+        fail("MetalPlate needs a hazard rail for the SOS disk")
     if "setBlendMode(.multiply)" not in offline:
         fail("dusk grade must multiply so USGS county labels do not sit on the default layer")
     pick_fn = maps.split("func pickFound", 1)[-1][:900]

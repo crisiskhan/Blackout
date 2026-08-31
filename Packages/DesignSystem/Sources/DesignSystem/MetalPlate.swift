@@ -6,6 +6,7 @@ public struct MetalPlate: View {
         case rail
         case bright
         case inset
+        case hazard
     }
 
     public static let railCorner: CGFloat = 6
@@ -71,6 +72,16 @@ public struct MetalPlate: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
+        case .hazard:
+            return LinearGradient(
+                colors: [
+                    BlackoutDS.Red.hot,
+                    BlackoutDS.Red.core,
+                    BlackoutDS.Red.blood
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
     }
 
@@ -94,6 +105,8 @@ public struct MetalPlate: View {
             return BlackoutDS.Silver.steel
         case .rail, .inset:
             return BlackoutDS.Silver.edge
+        case .hazard:
+            return BlackoutDS.Silver.metal
         }
     }
 
@@ -102,6 +115,7 @@ public struct MetalPlate: View {
         case .bright: return 0.55
         case .rail: return 0.22
         case .inset: return 0.12
+        case .hazard: return 0.35
         }
     }
 }
@@ -111,5 +125,10 @@ public extension View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         return background { MetalPlate(kind, cornerRadius: cornerRadius) }
             .clipShape(shape)
+    }
+
+    func metalDisk(_ kind: MetalPlate.Kind, diameter: CGFloat) -> some View {
+        background { MetalPlate(kind, cornerRadius: diameter / 2) }
+            .clipShape(Circle())
     }
 }
