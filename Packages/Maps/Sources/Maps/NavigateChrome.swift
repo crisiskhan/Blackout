@@ -247,6 +247,42 @@ struct MapPackSearchSheet: View {
     }
 }
 
+/// Compact hits under the 56h bar. Not a covering sheet. Not slabs on the tiles.
+struct MapPackSearchDropdown: View {
+    var hits: [PackSearchHit]
+    var empty: NavigateEmpty?
+    var onPick: (PackSearchHit) -> Void
+    var onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if hits.isEmpty {
+                Text(empty?.title ?? NavigateCopy.searchMiss)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.mid)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                    .background(BlackoutDS.Surface.raised.opacity(0.92))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            } else {
+                MapPackSearchHits(hits: hits, onPick: onPick)
+            }
+            Button(action: onDismiss) {
+                Text("Cancel")
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.metal)
+                    .frame(maxWidth: .infinity, minHeight: 36)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Cancel search")
+        }
+    }
+}
+
 /// Compact hit rows in the search sheet. Not Hit.md white slabs on the map.
 struct MapPackSearchHits: View {
     var hits: [PackSearchHit]

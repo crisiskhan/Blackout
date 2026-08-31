@@ -48,6 +48,7 @@ public struct MapsRootView: View {
     @State private var showLiDAR = false
     @State private var showLayers = false
     @State private var showSearchHits = false
+    @State private var showSearchDropdown = false
     @FocusState private var searchFocused: Bool
     @State private var selectedPOI: RoutingPOI?
     @State private var jumpToken = 0
@@ -169,10 +170,15 @@ public struct MapsRootView: View {
             || selectedPeer != nil
             || showEmptyCard
             || navigate.phase == .preview
-            || navigate.empty != nil
+            || (navigate.empty != nil && navigate.empty != .searchMiss)
             || liveRec
             || compass.showMarkSheet
-            || MapPackSearchPolicy.holdChrome(existingHold: false, fieldFocused: searchFocused)
+            || showSearchDropdown
+            || MapPackSearchPolicy.holdChrome(
+                existingHold: false,
+                fieldFocused: searchFocused,
+                searchMiss: navigate.empty == .searchMiss
+            )
     }
 
     public var body: some View {
@@ -584,6 +590,14 @@ public struct MapsRootView: View {
                     )
                     if showChipRow {
                         mapPackSearch
+                        if showSearchDropdown {
+                            MapPackSearchDropdown(
+                                hits: navigate.hits,
+                                empty: navigate.empty,
+                                onPick: { pickFound($0) },
+                                onDismiss: dismissSearchResults
+                            )
+                        }
                     }
                 }
             }
@@ -598,7 +612,7 @@ public struct MapsRootView: View {
             onSubmit: { runPackSearch(present: true) },
             onQueryChange: {
                 guard searchFocused else { return }
-                runPackSearch(present: true)
+                runPackSearch(present: false)
             },
             isFocused: $searchFocused
         )
@@ -611,23 +625,37 @@ public struct MapsRootView: View {
             pois: packService.pack?.pois ?? [],
             addresses: packService.pack?.addresses ?? []
         )
-        let ready = MapChromeLock.showsSearchHitsInSheet
-            && MapPackSearchPolicy.presentsSheet(
-                query: navigate.query,
-                hitCount: navigate.hits.count,
-                empty: navigate.empty != nil
-            )
+        let hitCount = navigate.hits.count
+        let empty = navigate.empty != nil
         if present {
-            showSearchHits = ready
-        } else if !ready {
+            showSearchHits = MapChromeLock.showsSearchHitsInSheet
+                && MapPackSearchPolicy.presentsSheet(
+                    query: navigate.query,
+                    hitCount: hitCount,
+                    empty: empty,
+                    submitted: true
+                )
+            showSearchDropdown = false
+        } else {
             showSearchHits = false
+            showSearchDropdown = MapPackSearchPolicy.presentsDropdown(
+                query: navigate.query,
+                hitCount: hitCount,
+                empty: empty,
+                submitted: false
+            )
         }
+    }
+
+    private func dismissSearchResults() {
+        showSearchHits = false
+        showSearchDropdown = false
+        searchFocused = false
     }
 
     private func packSearchHitsSheet() -> some View {
         MapPackSearchSheet(hits: navigate.hits, empty: navigate.empty, onPick: { hit in
-            showSearchHits = false
-            searchFocused = false
+            dismissSearchResults()
             pickFound(hit)
         })
         .presentationDetents([.medium, .large])
@@ -840,18 +868,13 @@ public struct MapsRootView: View {
     private func pickFound(_ hit: PackSearchHit) {
         tool = nil
         showLayers = false
-        showSearchHits = false
-        searchFocused = false
+        dismissSearchResults()
         pinnedToPackCoverage = false
-        selectedPOI = RoutingPOI(
-            id: hit.id,
-            name: hit.title,
-            kind: hit.kind,
-            coordinate: hit.coordinate
-        )
+        navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
         jumpCoordinate = hit.coordinate
         jumpToken += 1
         userMovedCamera = true
+        reportNavLock()
     }
 
     private var amenityPinModels: [RoutingPOI] {

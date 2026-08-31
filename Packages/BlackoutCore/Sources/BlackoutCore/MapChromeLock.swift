@@ -132,17 +132,42 @@ public enum MapChromeLock {
     }
 }
 
-/// 3:20 pack search. Tap focuses; type searches the pack; a miss still opens the sheet.
+/// Pack search. Type stays on the field; submit may sheet; pick starts Walk.
 public enum MapPackSearchPolicy {
     public static let usesFocusState = true
     public static let contentShapesWholeBar = true
     public static let runsOnQueryChange = true
-    public static let missOpensSheet = true
+    public static let typingPresentsSheet = false
+    public static let typingShowsDropdown = true
+    public static let missOpensSheet = false
+    public static let missShowsEmptyInList = true
     public static let submitStillRuns = true
+    public static let submitPresentsSheet = true
+    public static let pickStartsNavigate = true
+    public static let pickIsCameraOnly = false
+    public static let searchMissHoldsChrome = false
     public static let focusedHoldsChrome = true
     public static let recedeDisablesFocusedField = false
 
-    public static func presentsSheet(query: String, hitCount: Int, empty: Bool) -> Bool {
+    public static func presentsSheet(
+        query: String,
+        hitCount: Int,
+        empty: Bool,
+        submitted: Bool = false
+    ) -> Bool {
+        guard submitted else { return false }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        return hitCount > 0 || empty
+    }
+
+    public static func presentsDropdown(
+        query: String,
+        hitCount: Int,
+        empty: Bool,
+        submitted: Bool = false
+    ) -> Bool {
+        guard !submitted else { return false }
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
         return hitCount > 0 || empty
@@ -157,7 +182,12 @@ public enum MapPackSearchPolicy {
         return !isReceded
     }
 
-    public static func holdChrome(existingHold: Bool, fieldFocused: Bool) -> Bool {
-        existingHold || fieldFocused
+    public static func holdChrome(
+        existingHold: Bool,
+        fieldFocused: Bool,
+        searchMiss: Bool = false
+    ) -> Bool {
+        if searchMiss, !fieldFocused { return existingHold }
+        return existingHold || fieldFocused
     }
 }

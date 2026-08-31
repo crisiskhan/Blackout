@@ -469,12 +469,27 @@ def test_map_google_feel() -> None:
         fail("pack search must run on query change, not only keyboard submit")
     if "onSubmit" not in nav_chrome.split("struct MapPackSearchField", 1)[-1]:
         fail("keyboard Search submit must still run pack search")
-    if "presentsSheet" not in maps:
-        fail("runPackSearch must present the sheet for hits and miss")
-    if "!navigate.hits.isEmpty" in maps.split("func runPackSearch", 1)[-1][:400] and "empty" not in maps.split("func runPackSearch", 1)[-1][:400]:
-        fail("a search miss must still open the sheet")
-    if "NavigateCopy.searchMiss" not in nav_chrome and "searchMiss" not in nav_chrome.split("struct MapPackSearchSheet", 1)[-1]:
-        fail("search-miss sheet must paint the existing empty state")
+    if "presentsDropdown" not in maps:
+        fail("typing must fill a dropdown under the 56h bar, not a covering sheet")
+    if "runPackSearch(present: true)" in maps.split("onQueryChange", 1)[-1][:400]:
+        fail("onChange must not present a sheet on each letter — 4:13 unstable trap")
+    pick_fn = maps.split("func pickFound", 1)[-1][:500]
+    if "navigate.pick(" not in pick_fn:
+        fail("pickFound must call navigate.pick so Walk/preview starts")
+    if "lockOrRoute(" in pick_fn:
+        fail("pickFound must not call lockOrRoute — that can end() the Walk preview")
+    if "typingPresentsSheet = false" not in lock:
+        fail("typing a letter must not auto-present the search sheet")
+    if "pickStartsNavigate = true" not in lock or "pickIsCameraOnly = false" not in lock:
+        fail("search pick must start dest/preview, not camera-only jump")
+    if "searchMissHoldsChrome = false" not in lock:
+        fail("a search miss must not hold Map chrome forever")
+    if "testPickStartsNavigateNotCameraOnly" not in tests:
+        fail("missing pick-starts-Walk test")
+    if "testMissEmptyDoesNotHoldChromeForever" not in tests:
+        fail("missing miss-does-not-trap-chrome test")
+    if "NavigateCopy.searchMiss" not in nav_chrome and "searchMiss" not in nav_chrome:
+        fail("search-miss must still paint the existing empty state")
     if "searchFocused" not in maps.split("private var holdsChrome", 1)[-1][:800]:
         fail("focused search must hold chrome so recede does not disable the field")
     if "recedeAllowsHitTesting" not in maps and "keepInteractive" not in maps:

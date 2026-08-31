@@ -153,12 +153,44 @@ final class MapChromeLockTests: XCTestCase {
 
     func testPackSearchQueryMatchAndMissPresentSheet() {
         XCTAssertTrue(MapPackSearchPolicy.runsOnQueryChange)
-        XCTAssertTrue(MapPackSearchPolicy.missOpensSheet)
+        XCTAssertFalse(MapPackSearchPolicy.typingPresentsSheet)
+        XCTAssertTrue(MapPackSearchPolicy.typingShowsDropdown)
+        XCTAssertFalse(MapPackSearchPolicy.missOpensSheet)
+        XCTAssertTrue(MapPackSearchPolicy.missShowsEmptyInList)
         XCTAssertTrue(MapPackSearchPolicy.submitStillRuns)
-        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false))
-        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "zzzz", hitCount: 0, empty: true))
-        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "", hitCount: 0, empty: false))
-        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "   ", hitCount: 0, empty: false))
+        XCTAssertTrue(MapPackSearchPolicy.submitPresentsSheet)
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "h", hitCount: 5, empty: false, submitted: false))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false, submitted: false))
+        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false, submitted: true))
+        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "zzzz", hitCount: 0, empty: true, submitted: true))
+        XCTAssertTrue(MapPackSearchPolicy.presentsDropdown(query: "h", hitCount: 5, empty: false, submitted: false))
+        XCTAssertTrue(MapPackSearchPolicy.presentsDropdown(query: "zzzz", hitCount: 0, empty: true, submitted: false))
+        XCTAssertFalse(MapPackSearchPolicy.presentsDropdown(query: "h", hitCount: 5, empty: false, submitted: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "", hitCount: 0, empty: false, submitted: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsDropdown(query: "", hitCount: 0, empty: false, submitted: false))
+    }
+
+    func testPickStartsNavigateNotCameraOnly() {
+        XCTAssertTrue(MapPackSearchPolicy.pickStartsNavigate)
+        XCTAssertFalse(MapPackSearchPolicy.pickIsCameraOnly)
+    }
+
+    func testMissEmptyDoesNotHoldChromeForever() {
+        XCTAssertFalse(MapPackSearchPolicy.searchMissHoldsChrome)
+        XCTAssertFalse(
+            MapPackSearchPolicy.holdChrome(
+                existingHold: false,
+                fieldFocused: false,
+                searchMiss: true
+            )
+        )
+        XCTAssertTrue(
+            MapPackSearchPolicy.holdChrome(
+                existingHold: false,
+                fieldFocused: true,
+                searchMiss: true
+            )
+        )
     }
 
     func testRecedeDoesNotDisableFocusedSearchField() {
