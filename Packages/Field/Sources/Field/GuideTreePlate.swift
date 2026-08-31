@@ -60,6 +60,7 @@ struct GuideTreePlate: View {
             MetalButton("Party-split", height: BlackoutDS.Hit.lg) {
                 applyTriage(.partySplit)
             }
+            stopControl
         }
     }
 
@@ -76,6 +77,8 @@ struct GuideTreePlate: View {
         if !steps.isEmpty {
             pictogramFirst(steps: steps)
             speakControls(steps: steps)
+        } else {
+            stopControl
         }
         if OutingGearStore.load().isEmpty, medical {
             Text("Gear list empty. Showing improvise steps.")
@@ -179,11 +182,15 @@ struct GuideTreePlate: View {
                         speech.speakNext(spoken)
                     }
                 }
-                MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
-                    speech.stop()
-                    onStop()
-                }
+                stopControl
             }
+        }
+    }
+
+    private var stopControl: some View {
+        MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
+            speech.stop()
+            onStop()
         }
     }
 

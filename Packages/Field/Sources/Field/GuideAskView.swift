@@ -167,6 +167,7 @@ struct GuideAskView: View {
     }
 
     private func openArticle(_ article: GuideArticle) {
+        stopMic()
         activeArticle = article
         browsing = false
         asked = true
@@ -227,12 +228,6 @@ struct GuideAskView: View {
             error = "Retrieve lagged. Showing pack hits anyway."
         }
         applyHits()
-        let snapshotQuery = query
-        let grounded = hits.prefix(5).map { $0.article.title + ". " + $0.article.body }.joined(separator: "\n")
-        guard GuideLanguageModel.isAvailable, !snapshotQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        Task {
-            _ = await GuideLanguageModel.complete(query: snapshotQuery, grounded: grounded)
-        }
     }
 
     private func applyHits() {

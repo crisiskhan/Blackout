@@ -2452,6 +2452,11 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
         fail("taxonomy must sit behind Browse, not the home wall")
     if "onStop" not in tree:
         fail("Stop must return to Ask")
+    triage = tree.split("Adult / Kid / Party-split", 1)[-1][:900]
+    if "stopControl" not in triage and "GuideSpeak.controlStop" not in triage:
+        fail("Injury/Lost triage must have Stop back to Ask")
+    if "GuideLanguageModel.complete" in ask:
+        fail("Ask must not run the leftover on-device model after retrieve")
     if "GuideCardWire.sendLabel" not in tree and "Send to party" not in tree:
         fail("Send to party stays on the step card")
     if "GuidePackSchema.tooNewCopy" not in ask:
