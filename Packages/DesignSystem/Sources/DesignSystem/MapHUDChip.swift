@@ -1,7 +1,7 @@
 import BlackoutCore
 import SwiftUI
 
-/// Recenter / Layers / Packs. 56h painted chip, 22pt glyph, 64 slop is not a fill.
+/// Recenter / Layers / Packs. 56h painted chip, 22pt glyph. 64 slop is invisible inset, not the face.
 public struct MapHUDChip: View {
     private let title: String
     private let systemName: String
@@ -33,8 +33,9 @@ public struct MapHUDChip: View {
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
-        .frame(minWidth: CGFloat(MapChromeLock.chipHitSlop), minHeight: CGFloat(MapChromeLock.chipHitSlop))
+        .padding(CGFloat(MapChromeLock.chipHitSlopInset))
         .contentShape(Rectangle())
+        .padding(-CGFloat(MapChromeLock.chipHitSlopInset))
         .accessibilityLabel(title)
     }
 }

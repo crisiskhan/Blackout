@@ -172,7 +172,6 @@ public struct MapsRootView: View {
             || selectedPeer != nil
             || showEmptyCard
             || navigate.phase == .preview
-            || !navigate.hits.isEmpty
             || navigate.empty != nil
             || liveRec
             || compass.showMarkSheet
@@ -564,7 +563,10 @@ public struct MapsRootView: View {
                     pack: packService.routing
                 )
             },
-            onUserInteract: noteMapActivity,
+            onUserInteract: {
+                pinnedToPackCoverage = false
+                noteMapActivity()
+            },
             onScaleChange: { metersPerPoint = $0 },
             onOutsidePack: { outside in
                 outsidePack = outside
@@ -716,8 +718,10 @@ public struct MapsRootView: View {
     }
 
     private var chipColumn: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: CGFloat(MapChromeLock.chipGap)) {
             MapHUDChip("Recenter", systemName: "location.north.line", action: recenterToPack)
+                .opacity(MapChromeLock.recenterOpacity(onCenter: pinnedToPackCoverage))
+                .allowsHitTesting(MapChromeLock.recenterOpacity(onCenter: pinnedToPackCoverage) > 0)
             MapHUDChip("Layers", systemName: "square.3.layers.3d") {
                 noteMapActivity()
                 showLayers = true
@@ -901,7 +905,7 @@ public struct MapsRootView: View {
     }
 
     private var showsNavigateBanner: Bool {
-        navigate.phase == .preview || navigate.phase == .guidance || navigate.empty != nil || !navigate.hits.isEmpty
+        navigate.phase == .preview || navigate.phase == .guidance || navigate.empty != nil
     }
 
     @ViewBuilder
@@ -935,8 +939,6 @@ public struct MapsRootView: View {
                     },
                     onCancel: { navigate.end() }
                 )
-            } else if !navigate.hits.isEmpty {
-                NavigateHitsList(hits: navigate.hits, onPick: pickFound)
             }
         }
     }

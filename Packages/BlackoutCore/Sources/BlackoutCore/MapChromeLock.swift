@@ -8,10 +8,14 @@ public enum MapChromeLock {
 
     public static let chipPaintedHeight: Double = 56
     public static let chipGlyphPoint: Double = 22
+    public static let chipGap: Double = 8
     public static let chipHitSlop: Double = 64
+    public static let chipHitSlopInset: Double = 4
     public static let chipHitIsPainted = false
+    public static let chipHitIsLayoutMinHeight = false
     public static let chipTitles = ["Recenter", "Layers", "Packs"]
     public static let chipRowIncludesLight = false
+    public static let showsSearchHitsOnMap = false
 
     public static let showsShareReturnLastMarkOnMap = false
     public static let showsSearchPatternsOnMap = false
@@ -47,5 +51,10 @@ public enum MapChromeLock {
 
     public static func rightEdgeShowsChips(routeInPlay: Bool) -> Bool {
         !routeInPlay
+    }
+
+    /// Recenter is not painted when the camera is already on-center.
+    public static func recenterOpacity(onCenter: Bool) -> Double {
+        onCenter ? 0 : 1
     }
 }

@@ -12,12 +12,29 @@ final class MapChromeLockTests: XCTestCase {
     func testChipsAre56PaintedWithInvisible64SlopNoLight() {
         XCTAssertEqual(MapChromeLock.chipPaintedHeight, 56)
         XCTAssertEqual(MapChromeLock.chipGlyphPoint, 22)
+        XCTAssertEqual(MapChromeLock.chipGap, 8)
         XCTAssertEqual(MapChromeLock.chipHitSlop, 64)
+        XCTAssertEqual(MapChromeLock.chipHitSlopInset, 4)
         XCTAssertFalse(MapChromeLock.chipHitIsPainted)
+        XCTAssertFalse(MapChromeLock.chipHitIsLayoutMinHeight)
         XCTAssertEqual(MapChromeLock.chipTitles, ["Recenter", "Layers", "Packs"])
         XCTAssertFalse(MapChromeLock.chipRowIncludesLight)
         XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.chipHitSlop)
         XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.sosDiameter)
+        XCTAssertEqual(MapChromeLock.chipPaintedHeight + MapChromeLock.chipGap, 64)
+        XCTAssertEqual(
+            MapChromeLock.chipPaintedHeight + MapChromeLock.chipHitSlopInset * 2,
+            MapChromeLock.chipHitSlop
+        )
+    }
+
+    func testRecenterOpacityZeroWhenOnCenter() {
+        XCTAssertEqual(MapChromeLock.recenterOpacity(onCenter: true), 0)
+        XCTAssertEqual(MapChromeLock.recenterOpacity(onCenter: false), 1)
+    }
+
+    func testSearchHitsDoNotLandOnMap() {
+        XCTAssertFalse(MapChromeLock.showsSearchHitsOnMap)
     }
 
     func testKillsDevice32PermanentSlabStack() {

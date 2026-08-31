@@ -235,6 +235,31 @@ def test_map_chrome_lock() -> None:
         fail("MapsRootView must not construct MKMapView")
     if "URLSession" in maps:
         fail("MapsRootView must not use URLSession")
+    import re
+
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text()
+    hud = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MapHUDChip.swift").read_text()
+    compass = (ROOT / "Packages/Maps/Sources/Maps/CompassLockChrome.swift").read_text()
+    if "chipGap: Double = 8" not in lock:
+        fail("chip stack gap must stay 8 (56h + 8, not 64h slop)")
+    if "chipHitIsLayoutMinHeight = false" not in lock:
+        fail("64 slop must not be the chip layout minHeight")
+    if "func recenterOpacity" not in lock:
+        fail("MapChromeLock lost recenterOpacity")
+    if "showsSearchHitsOnMap = false" not in lock:
+        fail("Layers search hits must not land on Map")
+    if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", hud):
+        fail("MapHUDChip still lays out 64 as the chip face")
+    if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", compass):
+        fail("CompassLockBar still lays out 64 as the chip face")
+    if "recenterOpacity(onCenter:" not in maps:
+        fail("Recenter must go opacity 0 when already on-center")
+    if "NavigateHitsList(hits: navigate.hits" in maps:
+        fail("NavigateHitsList must not land on Map")
+    if "NavigateHitsList(hits: searchHits" not in maps:
+        fail("Layers search hits must stay in the Layers sheet")
+    if maps.count("NavigateHitsList") != 1:
+        fail("NavigateHitsList must live only in the Layers sheet")
     ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
 
 

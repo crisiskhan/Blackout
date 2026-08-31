@@ -12,7 +12,7 @@ struct CompassLockBar: View {
     var onLock: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: CGFloat(MapChromeLock.chipGap)) {
             lockChip(CompassLockCopy.speak, lit: false, action: onSpeak)
             lockChip(CompassLockCopy.steer, lit: hasTarget && !isLocked, action: onSteer)
             lockChip(CompassLockCopy.mark, lit: false, action: onMark)
@@ -38,8 +38,9 @@ struct CompassLockBar: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
-        .frame(minWidth: CGFloat(MapChromeLock.chipHitSlop), minHeight: CGFloat(MapChromeLock.chipHitSlop))
+        .padding(CGFloat(MapChromeLock.chipHitSlopInset))
         .contentShape(Rectangle())
+        .padding(-CGFloat(MapChromeLock.chipHitSlopInset))
         .accessibilityLabel(title)
     }
 }
