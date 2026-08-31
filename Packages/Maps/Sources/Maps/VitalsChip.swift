@@ -2,7 +2,7 @@ import BlackoutCore
 import DesignSystem
 import SwiftUI
 
-/// DS §10.4 segmented metal chip. 56h. Metal plate, not a disk. Does not arm SOS.
+/// DS §10.4 segmented dual chip. 56h. Raised plate, silver type. Not a white pill. Does not arm SOS.
 public struct VitalsChip: View {
     var isOKLatched: Bool
     var isNotLatched: Bool
@@ -45,7 +45,7 @@ public struct VitalsChip: View {
             )
         }
         .frame(height: BlackoutDS.Vitals.chip)
-        .background(BlackoutDS.Btn.metal)
+        .background(BlackoutDS.Surface.raised)
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
@@ -83,7 +83,7 @@ public struct VitalsChip: View {
                     }
                 }
             }
-            .foregroundStyle(warnLabel ? BlackoutDS.Semantic.warn : BlackoutDS.Surface.void)
+            .foregroundStyle(warnLabel ? BlackoutDS.Semantic.warn : BlackoutDS.Silver.bright)
             .padding(.horizontal, 12)
             .frame(height: BlackoutDS.Vitals.chip)
             .contentShape(Rectangle())

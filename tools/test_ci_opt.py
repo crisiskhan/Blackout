@@ -856,14 +856,24 @@ def test_party_vitals_red_loop() -> None:
         fail("public VitalsChip must declare public var body")
     if "BlackoutDS.Vitals.chip" not in chip:
         fail("I AM NOT chip is not 56h")
-    if "BlackoutDS.Btn.metal" not in chip or "Btn.primary" in chip:
-        fail("vitals chip must be Btn.metal, not Btn.primary")
+    if "BlackoutDS.Surface.raised" not in chip or "Btn.primary" in chip:
+        fail("I AM OK dual chip plate must be Surface.raised, not Btn.primary")
+    if "BlackoutDS.Btn.metal" in chip:
+        fail("I AM OK dual chip must not paint the white Btn.metal pill")
+    if "vitalsPlateIsRaised = true" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift"
+    ).read_text():
+        fail("MapChromeLock must keep the dual chip on Surface.raised")
     if "clipShape(Circle" in chip or "clipShape(Capsule" in chip:
         fail("vitals chip must not be a disk")
     if "SOSFab" in chip or "sosAlert" in chip or "sosConfirm" in chip:
         fail("vitals chip must not present or arm SOS")
     if "BlackoutDS.Vitals.pip" not in chip or "BlackoutDS.Semantic.warn" not in chip:
-        fail("I AM NOT must use 6pt red.core pip + warn label on metal")
+        fail("I AM NOT must use 6pt red.core pip + warn label")
+    if "BlackoutDS.Silver.bright" not in chip:
+        fail("I AM OK dual chip type must be silver on the raised plate")
+    if "Surface.void" in chip:
+        fail("I AM OK type must not stay void-on-white")
     if "§10.4" not in ds or "public static let pip: CGFloat = 6" not in ds:
         fail("DS §10.4 vitals metrics missing")
     if "Color(red: 1, green: 43 / 255, blue: 43 / 255)" not in ds:

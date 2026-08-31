@@ -47,6 +47,8 @@ public enum MapChromeLock {
     public static let vitalsIsFatBottomToggle = false
     public static let vitalsIs56LeadingOverlay = true
     public static let vitalsPaintedHeight: Double = 56
+    public static let vitalsPlateIsRaised = true
+    public static let vitalsPlateIsBtnMetal = false
 
     public static let sosIsTabViewSibling = true
     public static let sosStackedInMapPanel = false

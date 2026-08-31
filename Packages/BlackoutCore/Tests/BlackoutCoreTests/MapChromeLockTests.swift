@@ -60,6 +60,8 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.vitalsIsFatBottomToggle)
         XCTAssertTrue(MapChromeLock.vitalsIs56LeadingOverlay)
         XCTAssertEqual(MapChromeLock.vitalsPaintedHeight, 56)
+        XCTAssertTrue(MapChromeLock.vitalsPlateIsRaised)
+        XCTAssertFalse(MapChromeLock.vitalsPlateIsBtnMetal)
         XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
     }
 
