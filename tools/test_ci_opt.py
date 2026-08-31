@@ -338,8 +338,18 @@ def test_map_google_feel() -> None:
         fail("GPS / compass HUD must not be a full-width bar")
     if "lockHUDPaintedHeight: Double = 28" not in lock:
         fail("compass / accuracy HUD must stay tiny (28pt)")
-    if 'layersTitles = ["Pack tiles", "Trail"]' not in lock:
-        fail("Layers must be pack imagery only")
+    if 'layersTitles = ["Pack tiles", "Streets", "Topo"]' not in lock:
+        fail("Layers must be pack tiles + streets/topo")
+    if "streetsLayerDefaultOn = false" not in lock or "topoLayerDefaultOn = false" not in lock:
+        fail("streets/topo layers must default off")
+    if "duskGradesPackTiles = true" not in lock:
+        fail("pack satellite/aerial must be dusk-graded")
+    if "usesGoogleLogo = false" not in lock:
+        fail("never a Google logo")
+    if "searchFieldSitsUnderHUD = true" not in lock:
+        fail("56h search must sit under the HUD")
+    if "pinsDestMarkSearch = true" not in lock:
+        fail("pins are dest / MARK / search")
     for flag in (
         "layersIncludeRadar = false",
         "layersIncludeSlope = false",
@@ -394,7 +404,6 @@ def test_map_google_feel() -> None:
         'layerToggle("Slope"',
         'layerToggle("Viewshed"',
         'layerToggle("Night red"',
-        'layerToggle("Topo"',
         'TextField("Search this pack"',
         'GhostButton("LiDAR"',
         'GhostButton("Navigate"',
@@ -407,9 +416,24 @@ def test_map_google_feel() -> None:
             fail(f"Layers is not pack/imagery-only: still has {banned}")
     if 'layerToggle("Pack tiles"' not in layers:
         fail("Layers lost Pack tiles")
-    if 'layerToggle("Trail"' not in layers:
-        fail("Layers lost Trail")
+    if 'layerToggle("Streets"' not in layers:
+        fail("Layers lost Streets")
+    if 'layerToggle("Topo"' not in layers:
+        fail("Layers lost Topo")
+    if 'layerToggle("Trail"' in layers:
+        fail("Trail is not a Crisis 34 layer; streets/topo are")
 
+    hud_order = maps.split("private var lockHudStack", 1)[-1].split("private var mapPackSearch", 1)[0]
+    if hud_order.find("MapLockHUD") < 0 or hud_order.find("mapPackSearch") < 0:
+        fail("HUD + 56h search must both live in lockHudStack")
+    if hud_order.find("MapLockHUD") > hud_order.find("mapPackSearch"):
+        fail("56h search must sit under the HUD, not above it")
+    if "Google" in maps or "google logo" in maps.lower():
+        fail("never a Google logo")
+    if "showStreets:" not in maps or "showTopoTiles:" not in maps:
+        fail("streets/topo must be Layers, default off")
+    if "markPins:" not in maps:
+        fail("Map must pin dest / MARK / search")
     if "MapPOINameSheet" not in maps:
         fail("tap pin must open a name sheet")
     poi_sheet = maps.split("struct MapPOINameSheet", 1)[-1][:900] if "struct MapPOINameSheet" in maps else ""
@@ -432,10 +456,12 @@ def test_map_google_feel() -> None:
     if "MKLocalSearch" in maps or "satelliteFlyover" in maps or "MKTileOverlay" in maps:
         fail("Map must not call live Apple / Google satellite")
     if "showsVitalsOverlay" not in root:
-        fail("I AM OK must consult the tab so it does not cover Field cards")
+        fail("I AM OK must stay a Root sibling on every tab")
     vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:500]
     if "showsVitalsOverlay" not in vitals_slot:
-        fail("I AM OK overlay must hide on Field")
+        fail("I AM OK overlay must stay in the SOS band on every tab")
+    if "tab != \"field\"" in lock or 'tab != "field"' in lock:
+        fail("I AM OK must paint on Field; cards inset the SOS band")
     if "vitalsIsRootSibling = true" not in lock:
         fail("I AM OK dual must stay a Root sibling")
     if "vitalsSitsInSOSBand = true" not in lock:

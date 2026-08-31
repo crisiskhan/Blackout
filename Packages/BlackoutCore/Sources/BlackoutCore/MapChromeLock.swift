@@ -89,7 +89,13 @@ public enum MapChromeLock {
     public static let lockHUDIsFullWidthBar = false
     public static let lockHUDPaintedHeight: Double = 28
 
-    public static let layersTitles = ["Pack tiles", "Trail"]
+    public static let layersTitles = ["Pack tiles", "Streets", "Topo"]
+    public static let streetsLayerDefaultOn = false
+    public static let topoLayerDefaultOn = false
+    public static let duskGradesPackTiles = true
+    public static let usesGoogleLogo = false
+    public static let searchFieldSitsUnderHUD = true
+    public static let pinsDestMarkSearch = true
     public static let layersIncludeRadar = false
     public static let layersIncludeSlope = false
     public static let layersIncludeViewshed = false
@@ -116,7 +122,8 @@ public enum MapChromeLock {
     public static let vitalsCoversFieldCards = false
 
     public static func showsVitalsOverlay(tab: String) -> Bool {
-        tab != "field"
+        _ = tab
+        return true
     }
 
     /// Field Injury / Guide cards sit above the dual chip + SOS band.

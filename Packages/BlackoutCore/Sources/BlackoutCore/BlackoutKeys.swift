@@ -11,6 +11,7 @@ public enum BlackoutKeys {
     public static let mapTopoTiles = "com.crisiskhan.blackout.map.topoTiles"
     public static let mapTrails = "com.crisiskhan.blackout.map.trails"
     public static let mapPackTiles = "com.crisiskhan.blackout.map.packTiles"
+    public static let mapStreets = "com.crisiskhan.blackout.map.streets"
     public static let navigateProfile = "com.crisiskhan.blackout.navigate.profile"
     public static let navigateMute = "com.crisiskhan.blackout.navigate.mute"
     public static let crumbsTracking = "com.crisiskhan.blackout.crumbs.tracking"

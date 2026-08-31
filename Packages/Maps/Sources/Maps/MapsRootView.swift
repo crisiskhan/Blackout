@@ -52,7 +52,8 @@ public struct MapsRootView: View {
     @State private var jumpToken = 0
     @State private var jumpCoordinate: RoutingCoordinate?
     @State private var showPackTiles = UserDefaults.standard.object(forKey: BlackoutKeys.mapPackTiles) as? Bool ?? true
-    @State private var showTrails = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTrails)
+    @State private var showStreets = UserDefaults.standard.bool(forKey: BlackoutKeys.mapStreets)
+    @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
     @State private var navigate = NavigateSession()
     @State private var compass = CompassLockSession()
     @State private var viewshedRays: [ViewshedRay] = []
@@ -361,14 +362,18 @@ public struct MapsRootView: View {
     private func layersSheet() -> some View {
         MapLayersSheet(
             showPackTiles: $showPackTiles,
-            showTrails: $showTrails,
+            showStreets: $showStreets,
+            showTopoTiles: $showTopoTiles,
             extrasOn: extrasOn,
             hasRouting: packService.routing != nil,
             onTogglePackTiles: {
                 UserDefaults.standard.set(showPackTiles, forKey: BlackoutKeys.mapPackTiles)
             },
-            onToggleTrails: {
-                UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
+            onToggleStreets: {
+                UserDefaults.standard.set(showStreets, forKey: BlackoutKeys.mapStreets)
+            },
+            onToggleTopo: {
+                UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
             }
         )
         .presentationDetents([.medium])
@@ -456,7 +461,9 @@ public struct MapsRootView: View {
             routeLine: navigate.routePolyline,
             destination: navigate.destination ?? compass.lockCoordinate,
             showPackTiles: showPackTiles,
-            showTrails: showTrails,
+            showStreets: showStreets,
+            showTopoTiles: showTopoTiles,
+            showTrails: showStreets,
             jumpToken: jumpToken,
             jumpCoordinate: jumpCoordinate,
             headingDegrees: location.headingDegrees,
@@ -468,6 +475,7 @@ public struct MapsRootView: View {
             searchPattern: [],
             sharedTrack: sharedTrack,
             amenityPins: amenityPinModels,
+            markPins: destMarkSearchPins,
             onDropPin: { lat, lon in
                 location.dropManualPin(latitude: lat, longitude: lon)
             },
@@ -562,9 +570,6 @@ public struct MapsRootView: View {
         VStack(spacing: 8) {
             receding {
                 VStack(alignment: .leading, spacing: 8) {
-                    if showChipRow {
-                        mapPackSearch
-                    }
                     MapLockHUD(
                         accuracyMeters: gpsAccuracyMeters,
                         headingDegrees: location.headingDegrees,
@@ -575,6 +580,9 @@ public struct MapsRootView: View {
                             UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                         }
                     )
+                    if showChipRow {
+                        mapPackSearch
+                    }
                 }
             }
         }
@@ -824,6 +832,21 @@ public struct MapsRootView: View {
                 coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
             )
         }
+    }
+
+    /// Dest, MARK, and the last search pick. Pack pins only.
+    private var destMarkSearchPins: [RoutingCoordinate] {
+        var pins: [RoutingCoordinate] = []
+        if let dest = navigate.destination ?? compass.lockCoordinate {
+            pins.append(dest)
+        }
+        for mark in compass.marks {
+            pins.append(mark.coordinate)
+        }
+        if let poi = selectedPOI {
+            pins.append(poi.coordinate)
+        }
+        return pins
     }
 
     private var canFollowGuidance: Bool {
@@ -1241,11 +1264,13 @@ struct MapPOINameSheet: View {
 
 struct MapLayersSheet: View {
     @Binding var showPackTiles: Bool
-    @Binding var showTrails: Bool
+    @Binding var showStreets: Bool
+    @Binding var showTopoTiles: Bool
     var extrasOn: Bool
     var hasRouting: Bool
     var onTogglePackTiles: () -> Void
-    var onToggleTrails: () -> Void
+    var onToggleStreets: () -> Void
+    var onToggleTopo: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -1253,7 +1278,8 @@ struct MapLayersSheet: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
                     layerToggle("Pack tiles", on: $showPackTiles, enabled: extrasOn, persist: onTogglePackTiles)
-                    layerToggle("Trail", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
+                    layerToggle("Streets", on: $showStreets, enabled: extrasOn && hasRouting, persist: onToggleStreets)
+                    layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
                 }
                 .padding(20)
             }

@@ -34,6 +34,8 @@ struct OfflineMapView: UIViewRepresentable {
     var routeLine: [RoutingCoordinate]
     var destination: RoutingCoordinate?
     var showPackTiles: Bool
+    var showStreets: Bool = false
+    var showTopoTiles: Bool = false
     var showTrails: Bool
     var jumpToken: Int = 0
     var jumpCoordinate: RoutingCoordinate? = nil
@@ -46,6 +48,7 @@ struct OfflineMapView: UIViewRepresentable {
     var searchPattern: [(Double, Double)] = []
     var sharedTrack: [FollowTrackWire.Point] = []
     var amenityPins: [RoutingPOI] = []
+    var markPins: [RoutingCoordinate] = []
     var onDropPin: (Double, Double) -> Void
     var onTap: ((Double, Double) -> Void)?
     var onUserInteract: (() -> Void)?
@@ -79,6 +82,8 @@ struct OfflineMapView: UIViewRepresentable {
             routeLine: routeLine,
             destination: destination,
             showPackTiles: showPackTiles,
+            showStreets: showStreets,
+            showTopoTiles: showTopoTiles,
             showTrails: showTrails,
             headingDegrees: headingDegrees,
             accuracyMeters: accuracyMeters,
@@ -88,7 +93,8 @@ struct OfflineMapView: UIViewRepresentable {
             inboundPingHue: inboundPingHue,
             searchPattern: searchPattern,
             sharedTrack: sharedTrack,
-            amenityPins: amenityPins
+            amenityPins: amenityPins,
+            markPins: markPins
         )
         return view
     }
@@ -113,6 +119,8 @@ struct OfflineMapView: UIViewRepresentable {
             routeLine: routeLine,
             destination: destination,
             showPackTiles: showPackTiles,
+            showStreets: showStreets,
+            showTopoTiles: showTopoTiles,
             showTrails: showTrails,
             headingDegrees: headingDegrees,
             accuracyMeters: accuracyMeters,
@@ -122,7 +130,8 @@ struct OfflineMapView: UIViewRepresentable {
             inboundPingHue: inboundPingHue,
             searchPattern: searchPattern,
             sharedTrack: sharedTrack,
-            amenityPins: amenityPins
+            amenityPins: amenityPins,
+            markPins: markPins
         )
         if context.coordinator.lastResetToken != resetToken {
             context.coordinator.lastResetToken = resetToken
@@ -278,6 +287,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         routeLine: [RoutingCoordinate],
         destination: RoutingCoordinate?,
         showPackTiles: Bool,
+        showStreets: Bool,
+        showTopoTiles: Bool,
         showTrails: Bool,
         headingDegrees: Double?,
         accuracyMeters: Double?,
@@ -287,7 +298,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         inboundPingHue: FieldPingHue?,
         searchPattern: [(Double, Double)],
         sharedTrack: [FollowTrackWire.Point],
-        amenityPins: [RoutingPOI]
+        amenityPins: [RoutingPOI],
+        markPins: [RoutingCoordinate]
     ) {
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
@@ -301,6 +313,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.routeLine = routeLine
         canvas.destination = destination
         canvas.showPackTiles = showPackTiles
+        canvas.showStreets = showStreets
+        canvas.showTopoTiles = showTopoTiles
         canvas.showTrails = showTrails
         canvas.headingDegrees = headingDegrees
         canvas.accuracyMeters = accuracyMeters
@@ -311,6 +325,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.searchPattern = searchPattern
         canvas.sharedTrack = sharedTrack
         canvas.amenityPins = amenityPins
+        canvas.markPins = markPins
         canvas.setNeedsDisplay()
     }
 
@@ -440,6 +455,8 @@ final class TileCanvasLayer: UIView {
     var routeLine: [RoutingCoordinate] = []
     var destination: RoutingCoordinate?
     var showPackTiles = true
+    var showStreets = false
+    var showTopoTiles = false
     var showTrails = false
     var headingDegrees: Double?
     var accuracyMeters: Double?
@@ -450,6 +467,7 @@ final class TileCanvasLayer: UIView {
     var searchPattern: [(Double, Double)] = []
     var sharedTrack: [FollowTrackWire.Point] = []
     var amenityPins: [RoutingPOI] = []
+    var markPins: [RoutingCoordinate] = []
     private let cache = NSCache<NSString, UIImage>()
 
     override func draw(_ rect: CGRect) {
@@ -479,16 +497,32 @@ final class TileCanvasLayer: UIView {
                     }
                 }
             }
+            if MapChromeLock.duskGradesPackTiles {
+                ctx.setFillColor(UIColor(BlackoutDS.Surface.void).withAlphaComponent(0.22).cgColor)
+                ctx.fill(rect)
+            }
         }
-        drawStreets(in: ctx)
+        if showStreets {
+            drawStreets(in: ctx)
+        }
         drawRoute(in: ctx)
-        drawStreetNames(in: ctx)
+        if showTopoTiles {
+            drawStreetNames(in: ctx)
+        }
         drawTurnChevrons(in: ctx)
         if let destination {
             drawMark(
                 LocationFix(latitude: destination.latitude, longitude: destination.longitude),
                 color: UIColor(BlackoutDS.Semantic.warn),
                 in: ctx
+            )
+        }
+        for pin in markPins {
+            drawMark(
+                LocationFix(latitude: pin.latitude, longitude: pin.longitude),
+                color: UIColor(BlackoutDS.Semantic.warn),
+                in: ctx,
+                radius: 5
             )
         }
         drawFollowPuck(in: ctx)
