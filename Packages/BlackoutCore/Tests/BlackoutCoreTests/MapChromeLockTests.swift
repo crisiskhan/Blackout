@@ -271,7 +271,36 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.topoLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.streetsTopoReadPersistedOnLaunch)
         XCTAssertFalse(MapChromeLock.paintsPackLabelOverlayWhenTopoOff)
-        XCTAssertEqual(MapChromeLock.duskGradeAlpha, 0.42, accuracy: 0.001)
+        XCTAssertFalse(MapChromeLock.duskUsesMultiply)
+        XCTAssertEqual(MapChromeLock.duskGradeAlpha, 0.22, accuracy: 0.001)
+    }
+
+    func testDuskGradeDoesNotZeroTileLuminance() {
+        XCTAssertFalse(MapChromeLock.duskUsesMultiply)
+        let washed = MapChromeLock.duskResultLuminance(tileLuminance: 0.70)
+        XCTAssertGreaterThan(washed, 0.45)
+        XCTAssertLessThan(washed, 0.70)
+        XCTAssertGreaterThan(MapChromeLock.duskResultLuminance(tileLuminance: 0.35), 0.20)
+    }
+
+    func testPickDismissesHitsAndDropdown() {
+        XCTAssertTrue(MapPackSearchPolicy.pickDismissesHits)
+        XCTAssertFalse(
+            MapPackSearchPolicy.presentsDropdown(
+                query: "El Paso Children's Hospital",
+                hitCount: 1,
+                empty: false,
+                picked: true
+            )
+        )
+        XCTAssertTrue(
+            MapPackSearchPolicy.presentsDropdown(
+                query: "El Paso Children's Hospital",
+                hitCount: 1,
+                empty: false,
+                picked: false
+            )
+        )
     }
 
     func testPackSearchQueryChangeDebounces() {

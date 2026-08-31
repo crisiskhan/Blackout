@@ -547,11 +547,7 @@ final class TileCanvasLayer: UIView {
                 }
             }
             if MapChromeLock.duskGradesPackTiles {
-                ctx.saveGState()
-                ctx.setBlendMode(.multiply)
-                ctx.setFillColor(UIColor(BlackoutDS.Surface.overlay).cgColor)
-                ctx.fill(rect)
-                ctx.restoreGState()
+                // Overlay-only. Multiply + 0.42 void (device 39) crushed rasters to black.
                 ctx.setFillColor(
                     UIColor(BlackoutDS.Surface.void)
                         .withAlphaComponent(CGFloat(MapChromeLock.duskGradeAlpha))

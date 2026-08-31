@@ -97,7 +97,19 @@ public enum MapChromeLock {
     /// Pack rasters already print county/street names. Do not add a second label pass.
     public static let paintsPackLabelOverlayWhenTopoOff = false
     public static let duskGradesPackTiles = true
-    public static let duskGradeAlpha: Double = 0.42
+    /// Device 39 FAIL: multiply + 0.42 void crushed pack rasters to a black well.
+    /// Overlay-only wash (38 path) keeps USGS/terrain visible under dusk.
+    public static let duskUsesMultiply = false
+    /// Overlay-only wash. 0.42 × multiply was the killer; 0.22 grades dusk without zeroing luminance.
+    public static let duskGradeAlpha: Double = 0.22
+    public static let duskGradeColorName = "Surface.void"
+
+    /// Overlay blend: `tile * (1 - alpha) + void * alpha`. Mid-gray pack tiles must stay terrain, not void.
+    public static func duskResultLuminance(tileLuminance: Double) -> Double {
+        let voidLuminance = 7.0 / 255.0
+        let a = duskGradeAlpha
+        return tileLuminance * (1.0 - a) + voidLuminance * a
+    }
     public static let usesGoogleLogo = false
 
     /// OfflineMapView fills the ZStack. Letterbox fit is the device-38 black well.
@@ -231,6 +243,7 @@ public enum MapPackSearchPolicy {
     public static let pickStartsNavigate = true
     public static let pickIsCameraOnly = false
     public static let pickLocksDestWhenNoRoute = true
+    public static let pickDismissesHits = true
     public static let searchMissHoldsChrome = false
     public static let focusedHoldsChrome = true
     public static let recedeDisablesFocusedField = false
@@ -252,8 +265,10 @@ public enum MapPackSearchPolicy {
         query: String,
         hitCount: Int,
         empty: Bool,
-        submitted: Bool = false
+        submitted: Bool = false,
+        picked: Bool = false
     ) -> Bool {
+        if pickDismissesHits, picked { return false }
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
         if submitted, hitCount == 1 { return false }

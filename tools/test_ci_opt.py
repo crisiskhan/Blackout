@@ -2187,7 +2187,9 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "paintsPackLabelOverlayWhenTopoOff = false",
         "redrawCanvasOnPan = false",
         "reportsScaleOnEveryScroll = false",
-        "duskGradeAlpha: Double = 0.42",
+        "duskGradeAlpha: Double = 0.22",
+        "duskUsesMultiply = false",
+        "pickDismissesHits = true",
         "headingRedrawStepDegrees: Double = 8",
     ):
         if flag not in lock:
@@ -2206,6 +2208,8 @@ def test_map_fill_bleed_and_paint_budget() -> None:
     for name in (
         "testCanvasFillsZStackCoverNotLetterboxStrip",
         "testStreetsTopoStayOffUnlessToggledThisSession",
+        "testDuskGradeDoesNotZeroTileLuminance",
+        "testPickDismissesHitsAndDropdown",
         "testPackSearchQueryChangeDebounces",
         "testMapPaintDoesNotRedrawEveryScrollFrame",
         "testPickWithOriginAndGraphStartsPreview",
@@ -2229,6 +2233,12 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("topo launch value must be the lock default")
     if "searchDebounce" not in maps or "shouldRunQuerySearch" not in maps:
         fail("query-change search must debounce")
+    if "searchPickConsumed" not in maps:
+        fail("pickFound must consume the search so FocusState lag cannot reopen the dropdown")
+    if "picked: searchPickConsumed" not in maps:
+        fail("presentsDropdown must stay off after pickFound")
+    if "func duskResultLuminance" not in lock:
+        fail("dusk grade luminance must be testable so tiles do not wash to void")
     pick_fn = maps.split("func pickFound", 1)[-1][:900]
     if "navigate.pick(" not in pick_fn:
         fail("pickFound must still call navigate.pick")
@@ -2309,8 +2319,12 @@ def test_map_metal_plates() -> None:
         fail("SOS hit target remains 88pt")
     if "case hazard" not in plate:
         fail("MetalPlate needs a hazard rail for the SOS disk")
-    if "setBlendMode(.multiply)" not in offline:
-        fail("dusk grade must multiply so USGS county labels do not sit on the default layer")
+    if "setBlendMode(.multiply)" in offline:
+        fail("dusk grade must not multiply pack rasters to a black well")
+    if "duskUsesMultiply = false" not in (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text():
+        fail("duskUsesMultiply must stay false")
+    if "searchPickConsumed" not in maps:
+        fail("pickFound must dismiss hits; searchPickConsumed is the latch")
     pick_fn = maps.split("func pickFound", 1)[-1][:900]
     if "navigate.pick(" not in pick_fn or "compass.lockOn(" not in pick_fn:
         fail("pickFound Walk/bearing must stay")
@@ -2320,7 +2334,7 @@ def test_map_metal_plates() -> None:
         fail("do not dispatch TestFlight")
     if pbx.count("CURRENT_PROJECT_VERSION = 39") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Map chrome is metal plates, LOCK ON header, dusk multiply, version 39")
+    ok("Map chrome is metal plates, LOCK ON header, overlay dusk, version 39")
 
 
 if __name__ == "__main__":

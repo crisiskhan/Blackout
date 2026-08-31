@@ -49,6 +49,7 @@ public struct MapsRootView: View {
     @State private var showLayers = false
     @State private var showSearchHits = false
     @State private var showSearchDropdown = false
+    @State private var searchPickConsumed = false
     @FocusState private var searchFocused: Bool
     @State private var selectedPOI: RoutingPOI?
     @State private var jumpToken = 0
@@ -290,6 +291,11 @@ public struct MapsRootView: View {
             .onAppear {
                 consumePingNav(pendingPingNav.wrappedValue)
                 consumeGuideJob(pendingGuideJob)
+            }
+            .onChange(of: searchFocused) { _, focused in
+                if focused {
+                    searchPickConsumed = false
+                }
             }
     }
 
@@ -629,6 +635,7 @@ public struct MapsRootView: View {
                 runPackSearch(present: true)
             },
             onQueryChange: {
+                if searchPickConsumed { return }
                 guard searchFocused else { return }
                 searchDebounceTask?.cancel()
                 searchDebounceTask = Task { @MainActor in
@@ -665,7 +672,8 @@ public struct MapsRootView: View {
                 query: navigate.query,
                 hitCount: hitCount,
                 empty: empty,
-                submitted: true
+                submitted: true,
+                picked: searchPickConsumed
             )
         } else {
             showSearchHits = false
@@ -673,7 +681,8 @@ public struct MapsRootView: View {
                 query: navigate.query,
                 hitCount: hitCount,
                 empty: empty,
-                submitted: false
+                submitted: false,
+                picked: searchPickConsumed
             )
         }
     }
@@ -898,6 +907,7 @@ public struct MapsRootView: View {
     }
 
     private func pickFound(_ hit: PackSearchHit) {
+        searchPickConsumed = true
         tool = nil
         showLayers = false
         dismissSearchResults()
