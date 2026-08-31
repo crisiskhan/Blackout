@@ -24,7 +24,7 @@ public struct VitalsChip: View {
         self.onNot = onNot
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 0) {
             segment(
                 title: PartyVitalsCopy.imOK,

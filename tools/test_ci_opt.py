@@ -773,6 +773,8 @@ def test_party_vitals_red_loop() -> None:
         fail("right-edge stack must clear the 88pt SOS disk")
     if "sosClearance + BlackoutDS.Vitals.sosGap" in maps:
         fail("vitals chip must not sit above the old 120pt SOS stack")
+    if "public var body" not in chip:
+        fail("public VitalsChip must declare public var body")
     if "BlackoutDS.Vitals.chip" not in chip:
         fail("I AM NOT chip is not 56h")
     if "BlackoutDS.Btn.metal" not in chip or "Btn.primary" in chip:
