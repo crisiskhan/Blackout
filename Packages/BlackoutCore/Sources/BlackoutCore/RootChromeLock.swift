@@ -16,6 +16,12 @@ public enum RootChromeLock {
     public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
         LaunchLock.sosOverlayMounts(isUnlocked: isUnlocked, coverRequested: coverRequested)
     }
+
+    /// Lock gate stays off while backgrounded so Field camera / photo leave
+    /// does not tear down UIImagePickerController under the lock remount.
+    public static func showsLockGate(isUnlocked: Bool, sceneActive: Bool) -> Bool {
+        LaunchLock.showsLockGate(isUnlocked: isUnlocked, sceneActive: sceneActive)
+    }
 }
 
 /// First-open lock chrome. SwiftUI slider + lockup Image emblem. Not a full-screen still.
@@ -43,6 +49,8 @@ public enum LaunchLock {
     public static let constructsLocationHardwareInInit = false
     public static let startsPackPathMonitorInInit = false
     public static let startsHardwareSynchronouslyOnUnlock = false
+    public static let remountsLockGateOnBackground = false
+    public static let parksHardwareOnBackground = true
     public static let startsLiveActivityBeforeUnlock = false
     /// 33 lock-frame crash class. Covers stay off the lock tree until the twin asks.
     public static let sosFabMountsOnLockFrame = false
@@ -55,5 +63,9 @@ public enum LaunchLock {
     /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
     public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
         isUnlocked || coverRequested
+    }
+
+    public static func showsLockGate(isUnlocked: Bool, sceneActive: Bool) -> Bool {
+        !isUnlocked && sceneActive
     }
 }

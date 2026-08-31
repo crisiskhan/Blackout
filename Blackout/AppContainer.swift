@@ -153,6 +153,16 @@ final class AppContainer {
         startMissedCheckInWatch()
     }
 
+    /// Leave / photo picker. Stop CL, motion, mesh, radio, path monitor.
+    /// Do not remount the lock tree here. Do not call Activity.request.
+    func parkHardwareForBackground() {
+        location.stopUpdating()
+        mesh.stop()
+        ptt.stop()
+        radios.stop()
+        packs.stopPathMonitor()
+    }
+
     /// Unlock paints Map first. CL / motion / radio / ActivityKit wait one turn.
     func scheduleHardwareAfterFirstMapFrame() {
         Task { @MainActor in

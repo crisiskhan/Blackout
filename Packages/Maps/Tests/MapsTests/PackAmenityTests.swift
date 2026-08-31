@@ -96,6 +96,40 @@ final class PackAmenityTests: XCTestCase {
         XCTAssertNil(PackPOIFile.addresses(from: addrV2))
     }
 
+    func testPinHitSelectsNearbyPackPOIAndMissesEmptyTap() {
+        let cafe = RoutingPOI(
+            id: "cafe-1",
+            name: "H&H Car Wash",
+            kind: "restaurant",
+            coordinate: RoutingCoordinate(latitude: 31.758, longitude: -106.487)
+        )
+        XCTAssertEqual(
+            PackAmenityPolicy.pinHit(
+                latitude: 31.75805,
+                longitude: -106.487,
+                pins: [cafe],
+                zoom: 12
+            )?.name,
+            "H&H Car Wash"
+        )
+        XCTAssertNil(
+            PackAmenityPolicy.pinHit(
+                latitude: 31.80,
+                longitude: -106.40,
+                pins: [cafe],
+                zoom: 12
+            )
+        )
+        XCTAssertNil(
+            PackAmenityPolicy.pinHit(
+                latitude: 31.75805,
+                longitude: -106.487,
+                pins: [cafe],
+                zoom: 10
+            )
+        )
+    }
+
     func testFindCivilizationIncludesStores() {
         XCTAssertTrue(PackFind.matches(kind: "restaurant", mode: .civilization))
         XCTAssertTrue(PackFind.matches(kind: "grocery", mode: .civilization))

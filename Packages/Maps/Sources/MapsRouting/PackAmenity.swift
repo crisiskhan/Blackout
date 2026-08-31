@@ -44,6 +44,25 @@ public enum PackAmenityPolicy {
         return cap(pois.filter { paintsOnMap($0.kind) }, limit: limit)
     }
 
+    public static let tapRadiusMeters: Double = 48
+
+    /// Nearest painted pin within `radiusMeters`. Empty tap / far zoom is a miss.
+    public static func pinHit(
+        latitude: Double,
+        longitude: Double,
+        pins: [RoutingPOI],
+        zoom: Int,
+        radiusMeters: Double = tapRadiusMeters
+    ) -> RoutingPOI? {
+        let visible = visiblePins(pois: pins, zoom: zoom)
+        let tap = RoutingCoordinate(latitude: latitude, longitude: longitude)
+        return visible.min(by: {
+            Geo.haversine(tap, $0.coordinate) < Geo.haversine(tap, $1.coordinate)
+        }).flatMap { pin in
+            Geo.haversine(tap, pin.coordinate) <= radiusMeters ? pin : nil
+        }
+    }
+
     private static func normalize(_ kind: String) -> String {
         kind.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }

@@ -35,6 +35,8 @@ struct OfflineMapView: UIViewRepresentable {
     var destination: RoutingCoordinate?
     var showPackTiles: Bool
     var showTrails: Bool
+    var jumpToken: Int = 0
+    var jumpCoordinate: RoutingCoordinate? = nil
     var headingDegrees: Double?
     var accuracyMeters: Double?
     var packContainsSelf: Bool
@@ -135,6 +137,12 @@ struct OfflineMapView: UIViewRepresentable {
                 view.centerOn(latitude: selfFix.latitude!, longitude: selfFix.longitude!)
             }
         }
+        if context.coordinator.lastJumpToken != jumpToken {
+            context.coordinator.lastJumpToken = jumpToken
+            if let jump = jumpCoordinate {
+                view.centerOn(latitude: jump.latitude, longitude: jump.longitude)
+            }
+        }
     }
 
     final class Coordinator {
@@ -145,6 +153,7 @@ struct OfflineMapView: UIViewRepresentable {
         var onOutsidePack: (Bool) -> Void
         var lastResetToken = 0
         var lastCenterToken = 0
+        var lastJumpToken = 0
 
         init(
             onDropPin: @escaping (Double, Double) -> Void,

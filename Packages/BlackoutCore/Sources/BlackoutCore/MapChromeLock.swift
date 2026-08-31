@@ -75,4 +75,34 @@ public enum MapChromeLock {
     public static func recenterOpacity(onCenter: Bool) -> Double {
         onCenter ? 0 : 1
     }
+
+    /// Compass / GPS accuracy. Tiny pill, not a 56h full-width bar.
+    public static let lockHUDIsFullWidthBar = false
+    public static let lockHUDPaintedHeight: Double = 28
+
+    public static let layersTitles = ["Pack tiles", "Trail"]
+    public static let layersIncludeRadar = false
+    public static let layersIncludeSlope = false
+    public static let layersIncludeViewshed = false
+    public static let layersIncludeNightRed = false
+    public static let layersIncludeSearch = false
+    public static let layersIncludeLiDAR = false
+    public static let layersIncludeNavigate = false
+    public static let layersIncludeFind = false
+    public static let layersIncludeHeadingUp = false
+    public static let layersIncludeSweepAudio = false
+
+    public static let tapPinShowsNameSheet = true
+    public static let tapPinStartsRoute = false
+    public static let prefersPackImagery = true
+    public static let usesNetworkSatellite = false
+    public static let paintsFieldModePlateOnIdleMap = false
+    public static let paintsDeadReckoningChipOnMap = false
+    public static let paintsScaleBarOnMap = false
+    public static let pinSheetIsMetalSlab = false
+
+    /// I AM OK sits in the SOS band. Field cards must stay clear.
+    public static func showsVitalsOverlay(tab: String) -> Bool {
+        tab != "field"
+    }
 }

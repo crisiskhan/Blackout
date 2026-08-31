@@ -48,7 +48,10 @@ public struct MapsRootView: View {
     @State private var showLiDAR = false
     @State private var showLayers = false
     @State private var showSearchHits = false
-    @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
+    @State private var selectedPOI: RoutingPOI?
+    @State private var jumpToken = 0
+    @State private var jumpCoordinate: RoutingCoordinate?
+    @State private var showPackTiles = UserDefaults.standard.object(forKey: BlackoutKeys.mapPackTiles) as? Bool ?? true
     @State private var showTrails = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTrails)
     @State private var navigate = NavigateSession()
     @State private var compass = CompassLockSession()
@@ -158,6 +161,7 @@ public struct MapsRootView: View {
             || tool != nil
             || showLayers
             || showSearchHits
+            || selectedPOI != nil
             || showLiDAR
             || selectedPeer != nil
             || showEmptyCard
@@ -262,6 +266,7 @@ public struct MapsRootView: View {
             .sheet(item: $tool, content: toolSheet)
             .sheet(isPresented: $showLayers, content: layersSheet)
             .sheet(isPresented: $showSearchHits, content: packSearchHitsSheet)
+            .sheet(item: $selectedPOI, content: poiNameSheet)
             .sheet(item: $selectedPeer, content: peerSheet)
             .sheet(isPresented: $showLiDAR, content: lidarSheet)
             .sheet(isPresented: Bindable(compass).showMarkSheet, content: markSheet)
@@ -354,80 +359,26 @@ public struct MapsRootView: View {
 
     private func layersSheet() -> some View {
         MapLayersSheet(
-            headingUp: $headingUp,
-            sweepAudio: $sweepAudio,
-            showSlope: $showSlope,
-            showViewshed: $showViewshed,
-            extrasOn: extrasOn,
-            hasDEM: packService.hasDEM,
-            nightRed: $nightRed,
-            nearbyPeerCount: mesh.nearbyPeerCount,
-            relayableReadyIDs: packReady.readyIDs.filter { PackRelayPolicy.isRelayable($0) },
-            onToggleNightRed: {
-                onNightRedChange?(nightRed)
-            },
-            onSendPack: onSendPack,
-            showTopoTiles: $showTopoTiles,
+            showPackTiles: $showPackTiles,
             showTrails: $showTrails,
+            extrasOn: extrasOn,
             hasRouting: packService.routing != nil,
-            searchQuery: navQueryBinding,
-            searchHits: navigate.hits,
-            navigateEnabled: battery.coarseNavigateEnabled,
-            lidarSupported: LiDARAvailability.isSupported,
-            onToggleSlope: {
-                UserDefaults.standard.set(showSlope, forKey: BlackoutKeys.mapSlope)
-                refreshTerrain()
-            },
-            onToggleViewshed: {
-                UserDefaults.standard.set(showViewshed, forKey: BlackoutKeys.mapViewshed)
-                refreshTerrain()
-            },
-            onToggleHeading: {
-                UserDefaults.standard.set(headingUp, forKey: BlackoutKeys.radarHeadingUp)
-                if headingUp, !pinnedToPackCoverage {
-                    centerToken += 1
-                }
-            },
-            onToggleAudio: {
-                UserDefaults.standard.set(sweepAudio, forKey: BlackoutKeys.radarSweepAudio)
-            },
-            onToggleTopo: {
-                UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
+            onTogglePackTiles: {
+                UserDefaults.standard.set(showPackTiles, forKey: BlackoutKeys.mapPackTiles)
             },
             onToggleTrails: {
                 UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
-            },
-            onSearch: {
-                navigate.search(
-                    pack: packService.routing,
-                    pois: packService.pack?.pois ?? [],
-                    addresses: packService.pack?.addresses ?? []
-                )
-            },
-            onPickSearch: { hit in
-                showLayers = false
-                pickFound(hit)
-            },
-            onOpenLiDAR: {
-                showLayers = false
-                showLiDAR = true
-            },
-            onOpenTool: { item in
-                showLayers = false
-                tool = item
-            },
-            onFind: { mode in
-                showLayers = false
-                navigate.findPack(
-                    mode: mode,
-                    origin: originCoordinate,
-                    bounds: packBounds,
-                    pois: packService.pack?.pois ?? []
-                )
             }
         )
         .presentationDetents([.medium])
         .preferredColorScheme(.dark)
+    }
+
+    private func poiNameSheet(_ poi: RoutingPOI) -> some View {
+        MapPOINameSheet(name: poi.name, kind: poi.kind)
+            .presentationDetents([.height(120)])
+            .presentationDragIndicator(.visible)
+            .preferredColorScheme(.dark)
     }
 
     private func peerSheet(_ blip: RadarBlip) -> some View {
@@ -495,16 +446,18 @@ public struct MapsRootView: View {
             breadcrumbs: crumbs,
             viewshed: viewshedRays,
             slope: slopeSamples,
-            showViewshed: showViewshed && extrasOn && packService.hasDEM,
+            showViewshed: false,
             viewshedOrigin: viewshedOrigin,
-            showSlope: showSlope && extrasOn,
+            showSlope: false,
             centerToken: centerToken,
             pinCameraToPack: pinnedToPackCoverage,
             routing: packService.routing,
             routeLine: navigate.routePolyline,
             destination: navigate.destination ?? compass.lockCoordinate,
-            showPackTiles: packService.routing == nil || showTopoTiles,
+            showPackTiles: showPackTiles,
             showTrails: showTrails,
+            jumpToken: jumpToken,
+            jumpCoordinate: jumpCoordinate,
             headingDegrees: location.headingDegrees,
             accuracyMeters: gpsAccuracyMeters,
             packContainsSelf: packContainsSelf,
@@ -513,26 +466,21 @@ public struct MapsRootView: View {
             inboundPingHue: openInbound?.hue,
             searchPattern: [],
             sharedTrack: sharedTrack,
-            amenityPins: (packService.pack?.pois ?? []).map {
-                RoutingPOI(
-                    id: $0.id,
-                    name: $0.name,
-                    kind: $0.kind,
-                    coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
-                )
-            },
+            amenityPins: amenityPinModels,
             onDropPin: { lat, lon in
                 location.dropManualPin(latitude: lat, longitude: lon)
             },
             onTap: { lat, lon in
                 noteMapActivity()
-                guard battery.coarseNavigateEnabled, navigate.phase != .guidance else { return }
-                navigate.pickMap(
+                guard MapChromeLock.tapPinShowsNameSheet else { return }
+                if let poi = PackAmenityPolicy.pinHit(
                     latitude: lat,
                     longitude: lon,
-                    origin: originCoordinate,
-                    pack: packService.routing
-                )
+                    pins: amenityPinModels,
+                    zoom: 12
+                ) {
+                    selectedPOI = poi
+                }
             },
             onUserInteract: {
                 pinnedToPackCoverage = false
@@ -588,7 +536,6 @@ public struct MapsRootView: View {
             }
             Spacer()
             if showChipRow {
-                scaleBarRow
                 HStack(alignment: .bottom, spacing: 0) {
                     Spacer(minLength: 0)
                     rightEdgeStack
@@ -612,7 +559,10 @@ public struct MapsRootView: View {
     private var lockHudStack: some View {
         VStack(spacing: 8) {
             receding {
-                VStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if showChipRow {
+                        mapPackSearch
+                    }
                     MapLockHUD(
                         accuracyMeters: gpsAccuracyMeters,
                         headingDegrees: location.headingDegrees,
@@ -623,26 +573,6 @@ public struct MapsRootView: View {
                             UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
                         }
                     )
-                    if DeadReckoningHonesty.chipVisible(gpsLive: gpsLive, isDeadReckoning: location.isDeadReckoning) {
-                        Text(DeadReckoningHonesty.chip)
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Semantic.warn)
-                    } else if location.motionDenied, !gpsLive {
-                        Text(DeadReckoningHonesty.motionDeniedCopy)
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Semantic.warn)
-                    }
-                    if showViewshed, !packService.hasDEM {
-                        Text(ViewshedPolicy.noDEM)
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.steel)
-                    }
-                    if let fieldMode {
-                        fieldModePlate(fieldMode)
-                    }
-                    if showChipRow {
-                        mapPackSearch
-                    }
                 }
             }
         }
@@ -856,29 +786,26 @@ public struct MapsRootView: View {
     private func pickFound(_ hit: PackSearchHit) {
         tool = nil
         showLayers = false
-        compass.markSearchHit(hit)
-        switch PackFind.action(
-            destination: hit.coordinate,
-            origin: originCoordinate,
-            pack: packService.routing,
-            profile: navigate.profile
-        ) {
-        case .route:
-            compass.end()
-            navigate.pick(hit, origin: originCoordinate, pack: packService.routing)
-        case .lockOn:
-            navigate.end()
-            let point = CompassLockWaypoint(
-                id: hit.id,
-                name: hit.title,
-                latitude: hit.coordinate.latitude,
-                longitude: hit.coordinate.longitude,
-                kind: .poi
+        showSearchHits = false
+        pinnedToPackCoverage = false
+        selectedPOI = RoutingPOI(
+            id: hit.id,
+            name: hit.title,
+            kind: hit.kind,
+            coordinate: hit.coordinate
+        )
+        jumpCoordinate = hit.coordinate
+        jumpToken += 1
+    }
+
+    private var amenityPinModels: [RoutingPOI] {
+        (packService.pack?.pois ?? []).map {
+            RoutingPOI(
+                id: $0.id,
+                name: $0.name,
+                kind: $0.kind,
+                coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
             )
-            UserDefaults.standard.set(false, forKey: BlackoutKeys.lastUsedTBT)
-            _ = compass.lockOn(point)
-            applyLockHeading()
-            reportNavLock()
         }
     }
 
@@ -1169,46 +1096,37 @@ struct MapScaleBar: View {
     }
 }
 
-/// 56h GPS lock + accuracy, and a compass that taps to north-up. No grid-ref.
+/// Tiny GPS accuracy + north-up. Not a full-width 56h bar.
 struct MapLockHUD: View {
     var accuracyMeters: Double?
     var headingDegrees: Double?
     var onNorthUp: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: accuracyMeters == nil ? "lock.open" : "lock.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(accuracyMeters == nil ? BlackoutDS.Silver.steel : BlackoutDS.Semantic.ok)
-                Text(accuracyLabel)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                    .accessibilityLabel(accuracyMeters == nil ? "NO FIX" : accuracyLabel)
-            }
-            Spacer(minLength: 8)
+        HStack(spacing: 6) {
+            Image(systemName: accuracyMeters == nil ? "location.slash" : "location.fill")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(accuracyMeters == nil ? BlackoutDS.Silver.steel : BlackoutDS.Semantic.ok)
+            Text(accuracyLabel)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+                .accessibilityLabel(accuracyMeters == nil ? "NO FIX" : accuracyLabel)
             Button(action: onNorthUp) {
-                HStack(spacing: 6) {
-                    Image(systemName: "location.north.line")
-                        .font(.system(size: 18, weight: .semibold))
-                        .rotationEffect(.degrees(-(headingDegrees ?? 0)))
-                    Text(headingDegrees.map { "\(Int($0.rounded()))°" } ?? "—")
-                        .font(BlackoutDS.captionFont())
-                }
-                .foregroundStyle(BlackoutDS.Silver.metal)
+                Image(systemName: "location.north.line")
+                    .font(.system(size: 13, weight: .semibold))
+                    .rotationEffect(.degrees(-(headingDegrees ?? 0)))
+                    .foregroundStyle(BlackoutDS.Silver.metal)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("North-up")
         }
-        .padding(.horizontal, 16)
-        .frame(maxWidth: .infinity)
-        .frame(height: BlackoutDS.Hit.sm)
+        .padding(.horizontal, 8)
+        .frame(height: CGFloat(MapChromeLock.lockHUDPaintedHeight))
         .background(BlackoutDS.Surface.raised.opacity(0.82))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+            Capsule().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(Capsule())
     }
 
     private var accuracyLabel: String {
@@ -1281,99 +1199,43 @@ struct MapEmptyCard: View {
     }
 }
 
+/// Compact pin name. Not a MetalButton slab.
+struct MapPOINameSheet: View {
+    var name: String
+    var kind: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(name)
+                .font(BlackoutDS.titleFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+            if !kind.isEmpty {
+                Text(kind)
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.dim)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(BlackoutDS.Surface.raised)
+    }
+}
+
 struct MapLayersSheet: View {
-    @Binding var headingUp: Bool
-    @Binding var sweepAudio: Bool
-    @Binding var showSlope: Bool
-    @Binding var showViewshed: Bool
-    var extrasOn: Bool
-    var hasDEM: Bool
-    @Binding var nightRed: Bool
-    var nearbyPeerCount: Int
-    var relayableReadyIDs: [String]
-    var onToggleNightRed: () -> Void
-    var onSendPack: ((String) -> Void)?
-    @Binding var showTopoTiles: Bool
+    @Binding var showPackTiles: Bool
     @Binding var showTrails: Bool
+    var extrasOn: Bool
     var hasRouting: Bool
-    @Binding var searchQuery: String
-    var searchHits: [PackSearchHit]
-    var navigateEnabled: Bool
-    var lidarSupported: Bool
-    var onToggleSlope: () -> Void
-    var onToggleViewshed: () -> Void
-    var onToggleHeading: () -> Void
-    var onToggleAudio: () -> Void
-    var onToggleTopo: () -> Void
+    var onTogglePackTiles: () -> Void
     var onToggleTrails: () -> Void
-    var onSearch: () -> Void
-    var onPickSearch: (PackSearchHit) -> Void
-    var onOpenLiDAR: () -> Void
-    var onOpenTool: (MapTool) -> Void
-    var onFind: (PackFindMode) -> Void
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
-                    if extrasOn {
-                        GhostButton("Radar", height: BlackoutDS.Hit.md) { onOpenTool(.radar) }
-                    }
-                    layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
+                    layerToggle("Pack tiles", on: $showPackTiles, enabled: extrasOn, persist: onTogglePackTiles)
                     layerToggle("Trail", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
-                    layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
-                    layerToggle("Viewshed", on: $showViewshed, enabled: extrasOn && hasDEM, persist: onToggleViewshed)
-                    if extrasOn, !hasDEM {
-                        Text(ViewshedPolicy.noDEM)
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.steel)
-                    }
-                    layerToggle("Night red", on: $nightRed, enabled: true, persist: onToggleNightRed)
-                    if extrasOn, PackRelayPolicy.sendEnabled(nearbyPeerCount: nearbyPeerCount) {
-                        ForEach(relayableReadyIDs, id: \.self) { id in
-                            MetalButton("\(PackRelayPolicy.sendLabel) \(id)", height: BlackoutDS.Hit.sm) {
-                                onSendPack?(id)
-                            }
-                        }
-                    }
-                    if extrasOn {
-                        TextField("Search this pack", text: $searchQuery)
-                            .textInputAutocapitalization(.never)
-                            .disableAutocorrection(true)
-                            .font(BlackoutDS.bodyFont())
-                            .foregroundStyle(BlackoutDS.Silver.bright)
-                            .submitLabel(.search)
-                            .onSubmit(onSearch)
-                            .padding(.horizontal, 16)
-                            .frame(height: BlackoutDS.Hit.md)
-                            .background(BlackoutDS.Surface.raised.opacity(0.82))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        if !searchHits.isEmpty {
-                            NavigateHitsList(hits: searchHits, onPick: onPickSearch)
-                        }
-                    }
-                    if lidarSupported, extrasOn {
-                        GhostButton("LiDAR", height: BlackoutDS.Hit.md, action: onOpenLiDAR)
-                    }
-                    if navigateEnabled {
-                        GhostButton("Navigate", height: BlackoutDS.Hit.md) { onOpenTool(.navigate) }
-                    }
-                    if extrasOn {
-                        GhostButton("Topo", height: BlackoutDS.Hit.md) { onOpenTool(.topo) }
-                        GhostButton(PackFindCopy.civilization, height: BlackoutDS.Hit.md) {
-                            onFind(.civilization)
-                        }
-                        GhostButton(PackFindCopy.water, height: BlackoutDS.Hit.md) {
-                            onFind(.water)
-                        }
-                    }
-                    layerToggle("Heading-up", on: $headingUp, enabled: true, persist: onToggleHeading)
-                    layerToggle("Sweep audio", on: $sweepAudio, enabled: extrasOn, persist: onToggleAudio)
                 }
                 .padding(20)
             }

@@ -195,7 +195,7 @@ def test_map_chrome_lock() -> None:
         if banned in maps:
             fail(f"MapsRootView still paints {banned}")
     if "MapLockHUD" not in maps or "NO FIX" not in maps:
-        fail("MapsRootView lost the 56h GPS lock HUD")
+        fail("MapsRootView lost the tiny GPS / compass HUD")
     if 'MapHUDChip("Recenter"' not in maps or 'MapHUDChip("Layers"' not in maps:
         fail("MapsRootView lost Recenter / Layers 56h chips")
     if 'MapHUDChip("Packs"' not in maps:
@@ -303,8 +303,8 @@ def test_map_chrome_lock() -> None:
         fail("search must not be a giant MetalButton slab")
     if "NavigateHitsList(hits: navigate.hits" in maps:
         fail("NavigateHitsList must not land as a Map overlay slab")
-    if "NavigateHitsList(hits: searchHits" not in maps:
-        fail("Layers search hits must stay in the Layers sheet")
+    if "NavigateHitsList(hits: searchHits" in maps:
+        fail("Layers must not host a second search field")
     tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
     if "RadarHUDView(" not in tools:
         fail("Layers → Radar must reuse RadarView / RadarHUDView")
@@ -315,6 +315,124 @@ def test_map_chrome_lock() -> None:
     if pbx_version_off_32():
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
+
+
+def test_map_google_feel() -> None:
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text()
+    amenity = (ROOT / "Packages/Maps/Sources/MapsRouting/PackAmenity.swift").read_text()
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    keys = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/BlackoutKeys.swift").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/MapChromeLockTests.swift").read_text()
+    amenity_tests = (ROOT / "Packages/Maps/Tests/MapsTests/PackAmenityTests.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+
+    if "lockHUDIsFullWidthBar = false" not in lock:
+        fail("GPS / compass HUD must not be a full-width bar")
+    if "lockHUDPaintedHeight: Double = 28" not in lock:
+        fail("compass / accuracy HUD must stay tiny (28pt)")
+    if 'layersTitles = ["Pack tiles", "Trail"]' not in lock:
+        fail("Layers must be pack imagery only")
+    for flag in (
+        "layersIncludeRadar = false",
+        "layersIncludeSlope = false",
+        "layersIncludeViewshed = false",
+        "layersIncludeNightRed = false",
+        "layersIncludeSearch = false",
+        "layersIncludeLiDAR = false",
+        "layersIncludeNavigate = false",
+        "layersIncludeFind = false",
+        "layersIncludeHeadingUp = false",
+        "layersIncludeSweepAudio = false",
+        "tapPinShowsNameSheet = true",
+        "tapPinStartsRoute = false",
+        "prefersPackImagery = true",
+        "usesNetworkSatellite = false",
+        "paintsFieldModePlateOnIdleMap = false",
+        "paintsDeadReckoningChipOnMap = false",
+        "paintsScaleBarOnMap = false",
+        "pinSheetIsMetalSlab = false",
+    ):
+        if flag not in lock:
+            fail(f"MapChromeLock missing {flag}")
+    if "func showsVitalsOverlay" not in lock:
+        fail("I AM OK must hide on Field")
+    if "testIdleMapIsPackTilesPinsSearchNotARadarHUD" not in tests:
+        fail("missing Crisis 21:13 Map lock test")
+    if "testPinHitSelectsNearbyPackPOIAndMissesEmptyTap" not in amenity_tests:
+        fail("missing pack POI tap-hit test")
+    if "func pinHit" not in amenity:
+        fail("PackAmenityPolicy must hit-test a tap to a pack pin")
+
+    hud = maps.split("struct MapLockHUD", 1)[-1].split("struct MapEmptyCard", 1)[0]
+    if ".frame(maxWidth: .infinity)" in hud:
+        fail("MapLockHUD must not be a full-width bar that eats the map")
+    if "BlackoutDS.Hit.sm" in hud:
+        fail("MapLockHUD must not be the 56h lock bar")
+    if "MapChromeLock.lockHUDPaintedHeight" not in maps:
+        fail("tiny HUD must use lockHUDPaintedHeight")
+
+    hud_stack = maps.split("private var lockHudStack", 1)[-1].split("private var mapPackSearch", 1)[0]
+    if "fieldModePlate" in hud_stack:
+        fail("field mode plate must not cover idle Map tiles")
+    if "DeadReckoningHonesty" in hud_stack:
+        fail("DR chip must not cover idle Map tiles")
+    chrome = maps.split("private var mapLockChrome", 1)[-1].split("private var lockHudStack", 1)[0]
+    if "scaleBarRow" in chrome:
+        fail("scale bar must not cover tiles")
+
+    layers = maps.split("struct MapLayersSheet", 1)[-1]
+    for banned in (
+        'GhostButton("Radar"',
+        'layerToggle("Slope"',
+        'layerToggle("Viewshed"',
+        'layerToggle("Night red"',
+        'layerToggle("Topo"',
+        'TextField("Search this pack"',
+        'GhostButton("LiDAR"',
+        'GhostButton("Navigate"',
+        "PackFindCopy.civilization",
+        "PackFindCopy.water",
+        'layerToggle("Heading-up"',
+        'layerToggle("Sweep audio"',
+    ):
+        if banned in layers:
+            fail(f"Layers is not pack/imagery-only: still has {banned}")
+    if 'layerToggle("Pack tiles"' not in layers:
+        fail("Layers lost Pack tiles")
+    if 'layerToggle("Trail"' not in layers:
+        fail("Layers lost Trail")
+
+    if "MapPOINameSheet" not in maps:
+        fail("tap pin must open a name sheet")
+    poi_sheet = maps.split("struct MapPOINameSheet", 1)[-1][:900] if "struct MapPOINameSheet" in maps else ""
+    if "MetalButton" in poi_sheet or "GhostButton" in poi_sheet:
+        fail("POI sheet must be the name, not a MetalButton slab")
+    if "navigate.pickMap(" in maps:
+        fail("idle Map tap must not start a dest/route")
+    if "PackAmenityPolicy.pinHit" not in maps:
+        fail("tap must hit-test pack POI pins")
+    if "jumpToken" not in maps or "jumpCoordinate" not in maps:
+        fail("search pick must jump the camera to the pin")
+    if "jumpToken" not in offline:
+        fail("OfflineMapView must accept a jump-to-pin token")
+    if "showPackTiles: packService.routing == nil || showTopoTiles" in maps:
+        fail("pack imagery must stay on when routing exists")
+    if "showPackTiles: showPackTiles" not in maps:
+        fail("pack tiles must be the Layers imagery toggle")
+    if "mapPackTiles" not in keys:
+        fail("pack-tiles preference needs a BlackoutKey")
+    if "MKLocalSearch" in maps or "satelliteFlyover" in maps or "MKTileOverlay" in maps:
+        fail("Map must not call live Apple / Google satellite")
+    if "showsVitalsOverlay" not in root:
+        fail("I AM OK must consult the tab so it does not cover Field cards")
+    vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:500]
+    if "showsVitalsOverlay" not in vitals_slot:
+        fail("I AM OK overlay must hide on Field")
+    if pbx.count("CURRENT_PROJECT_VERSION = 34") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    ok("Map is pack tiles + pins + search; Layers imagery-only; tiny HUD")
 
 
 def test_map_pack_resolver() -> None:
@@ -1206,16 +1324,18 @@ def test_pack_find_civ_water() -> None:
         fail("Map empty / chrome must not drop-shadow in sun mode")
     if "Skip" in (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text() and 'GhostButton("Skip"' in maps:
         fail("Map empty must not grow a Skip control")
-    if "PackFindCopy.civilization" not in maps or "PackFindCopy.water" not in maps:
-        fail("Layers lost Find civilization / Find water")
+    if "PackFindCopy.civilization" not in tools or "PackFindCopy.water" not in tools:
+        fail("PackFindSheet lost Find civilization / Find water")
+    if "PackFindCopy.civilization" in maps.split("struct MapLayersSheet", 1)[-1]:
+        fail("Find civ/water must not live on Layers")
     if 'GhostButton("Towns"' in maps:
         fail("Towns must become Find civilization + Find water")
-    if "pickFound" not in maps or "PackFind.action" not in maps:
-        fail("tapping a pack POI must STEER / Feature 1 route or lock-on")
+    if "pickFound" not in maps or "MapPOINameSheet" not in maps:
+        fail("tapping a pack POI must open the name sheet")
     if "navigate.empty != nil" not in maps:
         fail("Find empty cards must hold chrome")
-    if "compass.end()" not in maps or "case .route:" not in maps:
-        fail("Feature 1 route from a pack POI must end compass lock")
+    if "compass.end()" not in maps:
+        fail("Map lost compass.end")
     if "case .poi" not in lock:
         fail("compass lock-on from a pack POI needs kind .poi")
     if "func findPack" not in session:
@@ -1245,6 +1365,7 @@ def main() -> None:
     test_assign_existing_workflow()
     test_prune_script_requires_secrets()
     test_map_chrome_lock()
+    test_map_google_feel()
     test_map_pack_resolver()
     test_usgs_defaultpack()
     test_live_mesh_1n()
@@ -1383,10 +1504,22 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("slider must unlock the session without Face ID as the first frame")
     if "sosArmed" in lock_view.split("SlideToUnlock", 1)[-1][:200]:
         fail("LockGateView slider must not write sosArmed")
-    if "if !container.lock.isUnlocked" not in root:
+    if "if !container.lock.isUnlocked" not in root and "showsLockGate(" not in root:
         fail("RootView must show the unlock gate on every cold launch")
     if "isEnabled && !container.lock.isUnlocked" in root:
         fail("unlock gate must not depend on Settings local-lock being on")
+    if "showsLockGate(" not in root:
+        fail("background must not remount LockGateView under a system picker")
+    if "parkHardwareForBackground" not in root.split("onChange(of: scenePhase)")[1][:400]:
+        fail("scenePhase .background must park location/mesh/radio before lock remount")
+    if "refreshLiveActivity()" in root.split("onChange(of: scenePhase)")[1].split("phase == .background")[1].split("if phase == .active")[0]:
+        fail("background must not touch ActivityKit")
+    if "scenePhase == .active" not in root.split(".task {", 1)[-1][:500]:
+        fail("Live Activity 1s loop must not run while backgrounded")
+    if "remountsLockGateOnBackground = false" not in launch:
+        fail("lock contract must not remount the lock gate on leave")
+    if "parksHardwareOnBackground = true" not in launch:
+        fail("lock contract must park hardware on leave")
     if "testColdLaunchLandsOnUnlockNotArmedOrBitmap" not in tests:
         fail("missing first-open unlock regression")
     if "sosLastSeenBuild" not in keys:
@@ -1482,6 +1615,8 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("AppContainer.init must not start the PackStore path monitor")
     if "func startPathMonitorIfNeeded" not in store:
         fail("PackStore path monitor must arm after unlock, like MeshRadioProbe")
+    if "func stopPathMonitor" not in store:
+        fail("PackStore path monitor must stop on background park")
     if "startsPackPathMonitorInInit = false" not in launch:
         fail("lock contract must forbid PackStore path monitor on AppContainer.init")
     if "startsHardwareSynchronouslyOnUnlock = false" not in launch:
@@ -1490,8 +1625,10 @@ def test_sos_armed_restore_no_crash() -> None:
     if "location.startUpdating()" in maps_root:
         fail("Map onAppear must not start CLLocation in the unlock tick")
     task = root.split(".task {", 1)[-1][:400]
-    if "guard container.lock.isUnlocked else { continue }" not in task:
+    if "guard container.lock.isUnlocked" not in task or "continue" not in task:
         fail("RootView.task must not refresh Live Activity on the lock gate")
+    if "scenePhase == .active" not in task:
+        fail("Live Activity 1s loop must not run while backgrounded")
     if "return true" not in layout.split("public static func containsTilePNGs")[1][:800]:
         fail("containsTilePNGs must return on the first PNG")
     if "tilePNGCount(root: root) > 0" in layout:
@@ -1543,6 +1680,8 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("MeshRadioProbe.init must not start NWPathMonitor")
     if "let monitor = NWPathMonitor()" in probe:
         fail("NWPathMonitor must not construct during MeshRadioProbe / AppContainer.init")
+    if "started = false" not in probe.split("public func stop()")[1][:400]:
+        fail("MeshRadioProbe.stop must allow start after background park")
     if "kind: .selfDot" not in (
         ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/PartyVitals.swift"
     ).read_text().split("func radarBlips", 1)[-1][:800]:
@@ -1605,8 +1744,10 @@ def test_pack_amenity_address_search() -> None:
         fail("amenity pins must be close-zoom only")
     if "paintsOnMap" not in amenity or 'address' not in amenity:
         fail("addresses must stay searchable and not paint a statewide dot field")
-    if "amenityPins" not in maps or "markSearchHit" not in maps:
-        fail("Map must pin amenities and MARK a search result")
+    if "amenityPins" not in maps or "PackAmenityPolicy.pinHit" not in maps:
+        fail("Map must pin amenities and hit-test a tap to the name sheet")
+    if "MapPOINameSheet" not in maps:
+        fail("tap pin / search pick must open a name sheet, not MARK a route")
     if "func updateAllMaps" not in store or "updateMapsLabel" not in catalog_list:
         fail("do not add a second pack updater")
     if poi.get("schema") != 1:
@@ -1742,8 +1883,8 @@ def test_offline_10() -> None:
         fail("Guide lost Send to party")
     if "Stay as relay" not in expedition and "LeaveBehindRelayPolicy.control" not in expedition:
         fail("Expedition lost Stay as relay")
-    if "Night red" not in maps:
-        fail("Map lost Night red")
+    if "nightRed ?" not in maps:
+        fail("Map lost night-red multiply")
     if ".preferredColorScheme(.light)" in maps or ".preferredColorScheme(.light)" in root:
         fail("night red must not enable light mode")
     if "Dead reckoning, GPS lost." not in chips and "DeadReckoningHonesty.chip" not in maps:

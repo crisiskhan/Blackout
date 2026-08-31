@@ -85,6 +85,11 @@ public final class PackStore {
         monitor = pathMonitor
     }
 
+    public func stopPathMonitor() {
+        monitor?.cancel()
+        monitor = nil
+    }
+
     /// Created only when the user taps Get / Update maps. Never on boot.
     private func httpSession() -> URLSession {
         if let session { return session }

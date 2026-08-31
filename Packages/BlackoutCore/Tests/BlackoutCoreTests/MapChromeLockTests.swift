@@ -91,4 +91,33 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.rightEdgeShowsNav(routeInPlay: false))
         XCTAssertTrue(MapChromeLock.rightEdgeShowsChips(routeInPlay: false))
     }
+
+    func testIdleMapIsPackTilesPinsSearchNotARadarHUD() {
+        XCTAssertFalse(MapChromeLock.lockHUDIsFullWidthBar)
+        XCTAssertEqual(MapChromeLock.lockHUDPaintedHeight, 28)
+        XCTAssertLessThan(MapChromeLock.lockHUDPaintedHeight, MapChromeLock.chipPaintedHeight)
+        XCTAssertEqual(MapChromeLock.layersTitles, ["Pack tiles", "Trail"])
+        XCTAssertFalse(MapChromeLock.layersIncludeRadar)
+        XCTAssertFalse(MapChromeLock.layersIncludeSlope)
+        XCTAssertFalse(MapChromeLock.layersIncludeViewshed)
+        XCTAssertFalse(MapChromeLock.layersIncludeNightRed)
+        XCTAssertFalse(MapChromeLock.layersIncludeSearch)
+        XCTAssertFalse(MapChromeLock.layersIncludeLiDAR)
+        XCTAssertFalse(MapChromeLock.layersIncludeNavigate)
+        XCTAssertFalse(MapChromeLock.layersIncludeFind)
+        XCTAssertFalse(MapChromeLock.layersIncludeHeadingUp)
+        XCTAssertFalse(MapChromeLock.layersIncludeSweepAudio)
+        XCTAssertTrue(MapChromeLock.tapPinShowsNameSheet)
+        XCTAssertFalse(MapChromeLock.tapPinStartsRoute)
+        XCTAssertTrue(MapChromeLock.prefersPackImagery)
+        XCTAssertFalse(MapChromeLock.usesNetworkSatellite)
+        XCTAssertFalse(MapChromeLock.paintsFieldModePlateOnIdleMap)
+        XCTAssertFalse(MapChromeLock.paintsDeadReckoningChipOnMap)
+        XCTAssertFalse(MapChromeLock.paintsScaleBarOnMap)
+        XCTAssertFalse(MapChromeLock.pinSheetIsMetalSlab)
+        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "map"))
+        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "comms"))
+        XCTAssertFalse(MapChromeLock.showsVitalsOverlay(tab: "field"))
+        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "expedition"))
+    }
 }

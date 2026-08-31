@@ -78,6 +78,7 @@ struct RootView: View {
             }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .background {
+                    container.parkHardwareForBackground()
                     container.lock.lock()
                 }
                 if phase == .active, container.lock.isUnlocked {
@@ -129,7 +130,7 @@ struct RootView: View {
             .task {
                 while !Task.isCancelled {
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
-                    guard container.lock.isUnlocked else { continue }
+                    guard container.lock.isUnlocked, scenePhase == .active else { continue }
                     container.expireInboundIfNeeded()
                     container.refreshLiveActivity()
                     container.applyIdleTimer()
@@ -148,7 +149,10 @@ struct RootView: View {
     private var rootStack: some View {
         ZStack {
             BlackoutDS.Surface.void.ignoresSafeArea()
-            if !container.lock.isUnlocked {
+            if RootChromeLock.showsLockGate(
+                isUnlocked: container.lock.isUnlocked,
+                sceneActive: scenePhase == .active
+            ) {
                 LockGateView(lock: container.lock, onHoldSOS: {
                     container.sosConfirmRequested = true
                 })
@@ -190,7 +194,9 @@ struct RootView: View {
 
     @ViewBuilder
     private var vitalsOverlaySlot: some View {
-        if container.lock.isUnlocked, !container.battery.isCritical {
+        if container.lock.isUnlocked,
+           !container.battery.isCritical,
+           MapChromeLock.showsVitalsOverlay(tab: destination.rawValue) {
             vitalsOverlay
         }
     }

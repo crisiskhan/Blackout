@@ -48,6 +48,9 @@ public final class MeshRadioProbe: NSObject {
 
     public func stop() {
         monitor?.cancel()
+        monitor = nil
+        central = nil
+        started = false
     }
 
     private func apply(_ path: NWPath) {
