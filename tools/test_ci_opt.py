@@ -1565,6 +1565,7 @@ def main() -> None:
     test_root_view_body_type_checks()
     test_map_fill_bleed_and_paint_budget()
     test_map_metal_plates()
+    test_field_ask_home_is_not_encyclopedia()
     print("all ci-opt checks passed")
 
 
@@ -2410,6 +2411,69 @@ def test_map_metal_plates() -> None:
     if pbx.count("CURRENT_PROJECT_VERSION = 43") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map chrome is metal plates, LOCK ON header, overlay dusk, version 43")
+
+
+def test_field_ask_home_is_not_encyclopedia() -> None:
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/GuideContext.swift").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/GuideOfflineTests.swift").read_text()
+    field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
+    ask = (ROOT / "Packages/Field/Sources/Field/GuideAskView.swift").read_text()
+    tree = (ROOT / "Packages/Field/Sources/Field/GuideTreePlate.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    chrome = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text()
+
+    if "enum FieldAskHomeLock" not in lock:
+        fail("FieldAskHomeLock missing")
+    if 'askPlaceholder = "What do you need?"' not in lock:
+        fail("Ask placeholder must be What do you need?")
+    if "testFieldAskHomeIsAskPlusChipsNotEncyclopedia" not in tests:
+        fail("missing Field Ask home lock test")
+    if "Situation cards" in field or "FieldManual.guide" in field:
+        fail("Field Guide home must not paint the encyclopedia wall")
+    if '"Field guide"' in field:
+        fail("Field Guide home must not paint a pack-count essay header")
+    if "Medical / lost" in ask:
+        fail("Field Ask home must not paint the Medical/lost wall")
+    if "Ask the field guide" in ask:
+        fail("old buried Ask placeholder must be gone")
+    if "FieldAskHomeLock.askPlaceholder" not in ask and "What do you need?" not in ask:
+        fail("Ask field must use What do you need?")
+    if "GuideTreePlate" in ask.split("ForEach(hits)", 1)[-1][:500] if "ForEach(hits)" in ask else False:
+        fail("do not stack answer cards from retrieve hits")
+    if "ForEach(GuideTopic.allCases)" in ask:
+        fail("category pills must not sit on the Ask home plate")
+    if "onChange(of: pack?.articles.count)" in ask:
+        fail("do not auto-retrieve on appear")
+    if "FieldAskHomeLock.homeChipTitles" not in ask:
+        fail("kid chips must come from FieldAskHomeLock")
+    if "FieldAskHomeLock.browseLabel" not in ask and "Browse" not in ask:
+        fail("taxonomy must sit behind Browse, not the home wall")
+    if "onStop" not in tree:
+        fail("Stop must return to Ask")
+    if "GuideCardWire.sendLabel" not in tree and "Send to party" not in tree:
+        fail("Send to party stays on the step card")
+    if "GuidePackSchema.tooNewCopy" not in ask:
+        fail("guide schema fail-closed line missing")
+    skills = tree.split("struct GuideSkillsView", 1)[-1].split("struct GuideDoAlongPlate", 1)[0]
+    if "ForEach(doAlongArticles)" in skills and "GuideDoAlongPlate" in skills.split("ForEach(doAlongArticles)", 1)[-1][:500]:
+        fail("Skills must be a curriculum list, not a dump of plates")
+    if "FieldSafePlate" not in field or "fieldContentHorizontalInset" not in field:
+        fail("Field plate must keep the safe-area inset")
+    if "onOpenSettings" not in field:
+        fail("Field gear must stay in the Guide/Skills/Vision row")
+    if "I AM OK" in field or "I AM OK" in ask or "I AM OK" in root:
+        fail("I AM OK dual must stay unmounted")
+    if "duskCrushesCountyLabels = true" not in chrome:
+        fail("duskCrushesCountyLabels must stay")
+    if root.count("tabItem") != 4:
+        fail("four tabs stay")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if pbx.count("CURRENT_PROJECT_VERSION = 43") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    ok("Field home is Ask+chips, one step card, I AM OK gone, version 43")
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ struct GuideTreePlate: View {
     var onStartMode: (FieldJobMode) -> Void
     var onOpenMapJob: (GuideMapJob) -> Void
     var openExpeditionID: String? = nil
+    var onStop: () -> Void = {}
 
     @State private var triage: GuideTriageChoice?
     @State private var showText = false
@@ -180,6 +181,7 @@ struct GuideTreePlate: View {
                 }
                 MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
                     speech.stop()
+                    onStop()
                 }
             }
         }
@@ -226,20 +228,37 @@ struct GuideSkillsView: View {
     var pack: GuidePackSnapshot?
     var onOpenMapJob: (GuideMapJob) -> Void
 
+    @State private var selectedArticle: GuideArticle?
+
     var body: some View {
         FieldSafePlate {
             VStack(alignment: .leading, spacing: 20) {
-                ScreenHeader("Primitive skills", subtitle: "Timed do-along. Fire, shelter, water. Not a game.")
-                ForEach(doAlongArticles) { article in
-                    if let kind = GuideDoAlong.classify(id: article.id, tags: article.tags, topic: article.topic) {
-                        HUDPanel {
-                            GuideDoAlongPlate(article: article, kind: kind, onOpenMapJob: onOpenMapJob)
+                if let selectedArticle,
+                   let kind = GuideDoAlong.classify(
+                    id: selectedArticle.id,
+                    tags: selectedArticle.tags,
+                    topic: selectedArticle.topic
+                   ) {
+                    HUDPanel {
+                        GuideDoAlongPlate(
+                            article: selectedArticle,
+                            kind: kind,
+                            onOpenMapJob: onOpenMapJob,
+                            onStop: { self.selectedArticle = nil }
+                        )
+                        .id(selectedArticle.id)
+                    }
+                } else {
+                    ScreenHeader("Primitive skills", subtitle: "Timed do-along. Fire, shelter, water. Not a game.")
+                    ForEach(doAlongArticles) { article in
+                        MetalButton(article.title, height: BlackoutDS.Hit.sm) {
+                            selectedArticle = article
                         }
                     }
+                    Text(GuideDoAlong.hardStopCopy)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
                 }
-                Text(GuideDoAlong.hardStopCopy)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.dim)
             }
         }
     }
@@ -249,7 +268,7 @@ struct GuideSkillsView: View {
             GuideDoAlong.classify(id: $0.id, tags: $0.tags, topic: $0.topic) != nil
                 && $0.id.hasPrefix("skill-")
         } ?? []
-        if !fromPack.isEmpty { return Array(fromPack.prefix(6)) }
+        if !fromPack.isEmpty { return Array(fromPack.prefix(3)) }
         return [
             GuideArticle(
                 id: "skill-ferro-fire",
@@ -280,6 +299,7 @@ struct GuideDoAlongPlate: View {
     var article: GuideArticle
     var kind: GuideDoAlongKind
     var onOpenMapJob: (GuideMapJob) -> Void
+    var onStop: () -> Void = {}
 
     @State private var stepIndex = 0
     @State private var started: Date?
@@ -306,6 +326,10 @@ struct GuideDoAlongPlate: View {
                 Text("Not a game. Walk.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
+                MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
+                    speech.stop()
+                    onStop()
+                }
             } else {
                 if let current = GuideSpeak.nextStepOnly(steps: steps, index: stepIndex) {
                     Text(current)
@@ -333,6 +357,7 @@ struct GuideDoAlongPlate: View {
                     MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
                         stopped = true
                         speech.stop()
+                        onStop()
                     }
                 }
             }

@@ -116,6 +116,54 @@ public struct GuideQueryContext: Sendable {
     }
 }
 
+/// Field Guide home is Ask + kid chips + one step card. Not an encyclopedia wall.
+public enum FieldAskHomeLock {
+    public static let homeIsAskPlusChips = true
+    public static let paintsEncyclopediaOnHome = false
+    public static let paintsMedicalLostWallOnHome = false
+    public static let paintsPackCountEssayOnHome = false
+    public static let stacksAnswerCards = false
+    public static let oneCardAtATime = true
+    public static let stopReturnsToAsk = true
+    public static let askPlaceholder = "What do you need?"
+    public static let browseLabel = "Browse"
+    public static let unknownCopy = "Unknown is valid. Try a chip or ask again."
+    public static let homeChipTitles = [
+        "Fire", "Water", "Shelter", "First aid", "Injury", "Lost", "Signaling"
+    ]
+    public static let skillsIsCurriculumList = true
+    public static let skillsDumpsAllPlates = false
+
+    public static func homeChipArticleID(_ title: String) -> String? {
+        switch title {
+        case "Fire": return "fire-when"
+        case "Water": return "situation-water"
+        case "Shelter": return "shelter-emergency"
+        case "First aid": return "aid-scene"
+        case "Injury": return "situation-injury"
+        case "Lost": return "situation-lost"
+        case "Signaling": return "signal-whistle"
+        default: return nil
+        }
+    }
+
+    public static func showsHome(hasActiveArticle: Bool, browsing: Bool) -> Bool {
+        !hasActiveArticle && !browsing
+    }
+
+    public static func presentsStepPager(hitCount: Int) -> Bool {
+        hitCount == 1
+    }
+
+    public static func presentsBrowse(hitCount: Int) -> Bool {
+        hitCount > 1
+    }
+
+    public static func presentsUnknown(hitCount: Int) -> Bool {
+        hitCount == 0
+    }
+}
+
 public struct ViewshedRay: Hashable, Sendable {
     public var bearingDegrees: Double
     public var visibleMeters: Double

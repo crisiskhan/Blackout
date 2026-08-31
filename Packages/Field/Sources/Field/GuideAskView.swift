@@ -16,9 +16,10 @@ struct GuideAskView: View {
     var openExpeditionID: String? = nil
 
     @State private var query = ""
-    @State private var topic: GuideTopic?
     @State private var hits: [GuideHit] = []
-    @State private var modelNote: String?
+    @State private var activeArticle: GuideArticle?
+    @State private var browsing = false
+    @State private var asked = false
     @State private var listening = false
     @State private var micDenied = false
     @State private var micUnavailable = false
@@ -30,30 +31,36 @@ struct GuideAskView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            medicalLostEntry
-            HStack(spacing: 8) {
-                TextField("Ask the field guide", text: $query)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                    .padding(14)
-                    .frame(minHeight: BlackoutDS.Hit.sm)
-                    .background(BlackoutDS.Surface.sunken)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+            if let activeArticle {
+                HUDPanel {
+                    GuideTreePlate(
+                        article: activeArticle,
+                        onSendArticle: onSendArticle,
+                        onStartMode: onStartMode,
+                        onOpenMapJob: onOpenMapJob,
+                        openExpeditionID: openExpeditionID,
+                        onStop: returnToAsk
                     )
-                if !micUnavailable {
-                    Button(action: toggleMic) {
-                        Image(systemName: listening ? "mic.fill" : "mic")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(listening ? BlackoutDS.Red.hot : BlackoutDS.Silver.metal)
-                            .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-                            .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(listening ? "Stop mic" : "Speak")
+                    .id(activeArticle.id)
                 }
+            } else if browsing {
+                browsePlate
+            } else {
+                askHome
             }
+        }
+        .onAppear {
+            micUnavailable = !onDeviceSpeechAvailable
+            if let pack { focusInbound(in: pack) }
+        }
+        .onChange(of: focusArticleID) { _, _ in
+            if let pack { focusInbound(in: pack) }
+        }
+    }
+
+    private var askHome: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            askFieldRow
             MetalButton("Ask", height: BlackoutDS.Hit.md, action: runAsk)
             Text(GuideAskRanker.honestyLine(context))
                 .font(BlackoutDS.captionFont())
@@ -61,94 +68,117 @@ struct GuideAskView: View {
             if micDenied {
                 PermissionDenied(kind: .microphone, reason: "Mic denied. Type the ask. Guide still works.")
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    topicChip(nil, title: "All")
-                    ForEach(GuideTopic.allCases) { item in
-                        topicChip(item, title: item.title)
-                    }
-                }
-            }
+            chipRow
+            GhostButton(FieldAskHomeLock.browseLabel, height: BlackoutDS.Hit.sm, action: runBrowse)
             if let error {
                 StoreFailure(error)
             }
-            if let modelNote {
-                Text(modelNote)
+            if asked, FieldAskHomeLock.presentsUnknown(hitCount: hits.count) {
+                Text(FieldAskHomeLock.unknownCopy)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(6)
-            } else if GuideLanguageModel.isAvailable {
-                Text("On-device model available. Pack snippets first; model is never first paint.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.steel)
             }
-            ForEach(hits) { hit in
-                HUDPanel {
-                    GuideTreePlate(
-                        article: hit.article,
-                        onSendArticle: onSendArticle,
-                        onStartMode: onStartMode,
-                        onOpenMapJob: onOpenMapJob,
-                        openExpeditionID: openExpeditionID
-                    )
-                }
-            }
-            if packTooNew {
-                Text(GuidePackSchema.tooNewCopy)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Semantic.warn)
-            } else if pack == nil {
-                Text("GuidePack missing from the app bundle. Ask cannot retrieve.")
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Semantic.warn)
-            }
-        }
-        .onAppear {
-            micUnavailable = !onDeviceSpeechAvailable
-        }
-        .onChange(of: pack?.articles.count) { _, _ in
-            if hits.isEmpty, let pack {
-                hits = GuideSearch.retrieve(query: query, topic: topic, pack: pack, context: context)
-                focusInbound(in: pack)
-            }
-        }
-        .onChange(of: focusArticleID) { _, _ in
-            if let pack { focusInbound(in: pack) }
-        }
-        .onChange(of: topic) { _, _ in
-            runAsk()
+            packStatus
         }
     }
 
-    private var medicalLostEntry: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Medical / lost")
-                .font(BlackoutDS.titleFont())
-            Text("Adult / Kid / Party-split first. Then the tree.")
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.mid)
-            HStack(spacing: 8) {
-                MetalButton("Injury", height: BlackoutDS.Hit.sm) {
-                    openTree(id: "situation-injury")
+    private var browsePlate: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            askFieldRow
+            MetalButton("Ask", height: BlackoutDS.Hit.md, action: runAsk)
+            ForEach(hits) { hit in
+                GhostButton(hit.article.title, height: BlackoutDS.Hit.sm) {
+                    openArticle(hit.article)
                 }
-                MetalButton("Lost", height: BlackoutDS.Hit.sm) {
-                    openTree(id: "situation-lost")
+            }
+            MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg, action: returnToAsk)
+            if let error {
+                StoreFailure(error)
+            }
+            packStatus
+        }
+    }
+
+    private var askFieldRow: some View {
+        HStack(spacing: 8) {
+            TextField(FieldAskHomeLock.askPlaceholder, text: $query)
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+                .padding(14)
+                .frame(minHeight: BlackoutDS.Hit.sm)
+                .background(BlackoutDS.Surface.sunken)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+                )
+            if !micUnavailable {
+                Button(action: toggleMic) {
+                    Image(systemName: listening ? "mic.fill" : "mic")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(listening ? BlackoutDS.Red.hot : BlackoutDS.Silver.metal)
+                        .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                        .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
                 }
-                MetalButton("Split", height: BlackoutDS.Hit.sm) {
-                    openTree(id: "party-split")
+                .buttonStyle(.plain)
+                .accessibilityLabel(listening ? "Stop mic" : "Speak")
+            }
+        }
+    }
+
+    private var chipRow: some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+            spacing: 8
+        ) {
+            ForEach(FieldAskHomeLock.homeChipTitles, id: \.self) { title in
+                MetalButton(title, height: BlackoutDS.Hit.sm) {
+                    openChip(title)
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var packStatus: some View {
+        if packTooNew {
+            Text(GuidePackSchema.tooNewCopy)
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Semantic.warn)
+        } else if pack == nil {
+            Text("GuidePack missing from the app bundle. Ask cannot retrieve.")
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Semantic.warn)
+        }
+    }
+
+    private func openChip(_ title: String) {
+        guard let id = FieldAskHomeLock.homeChipArticleID(title) else { return }
+        openTree(id: id)
     }
 
     private func openTree(id: String) {
         guard let pack, let article = pack.articles.first(where: { $0.id == id }) else {
-            topic = .firstAid
-            query = id == "situation-lost" ? "lost" : "injury"
+            query = id.replacingOccurrences(of: "-", with: " ")
             runAsk()
             return
         }
+        openArticle(article)
+    }
+
+    private func openArticle(_ article: GuideArticle) {
+        activeArticle = article
+        browsing = false
+        asked = true
         hits = [GuideHit(article: article, score: 1, snippet: article.body)]
+        error = nil
+    }
+
+    private func returnToAsk() {
+        activeArticle = nil
+        browsing = false
+        hits = []
+        asked = false
         error = nil
     }
 
@@ -157,52 +187,64 @@ struct GuideAskView: View {
         return speech?.supportsOnDeviceRecognition == true
     }
 
-    private func topicChip(_ value: GuideTopic?, title: String) -> some View {
-        let on = topic == value
-        return Button {
-            topic = value
-        } label: {
-            Text(title)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(on ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
-                .padding(.horizontal, 12)
-                .frame(height: 36)
-                .background(on ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised)
-                .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-    }
-
     private func focusInbound(in pack: GuidePackSnapshot) {
         guard let focusArticleID,
               let article = pack.articles.first(where: { $0.id == focusArticleID }) else { return }
-        hits = [GuideHit(article: article, score: 1, snippet: article.body)]
+        openArticle(article)
+    }
+
+    private func runBrowse() {
+        retrieveHits()
     }
 
     private func runAsk() {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            hits = []
+            asked = true
+            error = nil
+            applyHits()
+            return
+        }
+        retrieveHits()
+    }
+
+    private func retrieveHits() {
         guard let pack else {
             error = packTooNew ? GuidePackSchema.tooNewCopy : "GuidePack missing."
             hits = []
+            asked = true
+            activeArticle = nil
+            browsing = false
             return
         }
         let started = Date()
-        hits = GuideSearch.retrieve(query: query, topic: topic, pack: pack, context: context)
+        hits = GuideSearch.retrieve(query: query, topic: nil, pack: pack, context: context)
         error = nil
-        modelNote = nil
-        let grounded = hits.prefix(5).map { $0.article.title + ". " + $0.article.body }.joined(separator: "\n")
+        asked = true
         let elapsed = Date().timeIntervalSince(started)
         if elapsed > 2 {
             error = "Retrieve lagged. Showing pack hits anyway."
         }
+        applyHits()
         let snapshotQuery = query
+        let grounded = hits.prefix(5).map { $0.article.title + ". " + $0.article.body }.joined(separator: "\n")
         guard GuideLanguageModel.isAvailable, !snapshotQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         Task {
-            let text = await GuideLanguageModel.complete(query: snapshotQuery, grounded: grounded)
-            await MainActor.run {
-                if let text, !text.isEmpty {
-                    modelNote = text
-                }
-            }
+            _ = await GuideLanguageModel.complete(query: snapshotQuery, grounded: grounded)
+        }
+    }
+
+    private func applyHits() {
+        if FieldAskHomeLock.presentsStepPager(hitCount: hits.count), let first = hits.first {
+            activeArticle = first.article
+            browsing = false
+        } else if FieldAskHomeLock.presentsBrowse(hitCount: hits.count) {
+            activeArticle = nil
+            browsing = true
+        } else {
+            activeArticle = nil
+            browsing = false
         }
     }
 

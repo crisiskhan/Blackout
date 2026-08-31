@@ -294,4 +294,46 @@ final class GuideOfflineTests: XCTestCase {
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertFalse(FieldJobMode.replacesSOS)
     }
+
+    func testFieldAskHomeIsAskPlusChipsNotEncyclopedia() {
+        XCTAssertTrue(FieldAskHomeLock.homeIsAskPlusChips)
+        XCTAssertFalse(FieldAskHomeLock.paintsEncyclopediaOnHome)
+        XCTAssertFalse(FieldAskHomeLock.paintsMedicalLostWallOnHome)
+        XCTAssertFalse(FieldAskHomeLock.paintsPackCountEssayOnHome)
+        XCTAssertFalse(FieldAskHomeLock.stacksAnswerCards)
+        XCTAssertTrue(FieldAskHomeLock.oneCardAtATime)
+        XCTAssertTrue(FieldAskHomeLock.stopReturnsToAsk)
+        XCTAssertEqual(FieldAskHomeLock.askPlaceholder, "What do you need?")
+        XCTAssertEqual(FieldAskHomeLock.browseLabel, "Browse")
+        XCTAssertEqual(FieldAskHomeLock.unknownCopy, "Unknown is valid. Try a chip or ask again.")
+        XCTAssertEqual(
+            FieldAskHomeLock.homeChipTitles,
+            ["Fire", "Water", "Shelter", "First aid", "Injury", "Lost", "Signaling"]
+        )
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Fire"), "fire-when")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Water"), "situation-water")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Shelter"), "shelter-emergency")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("First aid"), "aid-scene")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Injury"), "situation-injury")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Lost"), "situation-lost")
+        XCTAssertEqual(FieldAskHomeLock.homeChipArticleID("Signaling"), "signal-whistle")
+        XCTAssertNil(FieldAskHomeLock.homeChipArticleID("Split"))
+        XCTAssertTrue(FieldAskHomeLock.showsHome(hasActiveArticle: false, browsing: false))
+        XCTAssertFalse(FieldAskHomeLock.showsHome(hasActiveArticle: true, browsing: false))
+        XCTAssertFalse(FieldAskHomeLock.showsHome(hasActiveArticle: false, browsing: true))
+        XCTAssertTrue(FieldAskHomeLock.presentsStepPager(hitCount: 1))
+        XCTAssertFalse(FieldAskHomeLock.presentsStepPager(hitCount: 2))
+        XCTAssertTrue(FieldAskHomeLock.presentsBrowse(hitCount: 3))
+        XCTAssertFalse(FieldAskHomeLock.presentsBrowse(hitCount: 1))
+        XCTAssertTrue(FieldAskHomeLock.presentsUnknown(hitCount: 0))
+        XCTAssertFalse(FieldAskHomeLock.presentsUnknown(hitCount: 1))
+        XCTAssertTrue(FieldAskHomeLock.skillsIsCurriculumList)
+        XCTAssertFalse(FieldAskHomeLock.skillsDumpsAllPlates)
+        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(SOSChrome.fab, 88)
+        XCTAssertTrue(MapChromeLock.fieldPlateUsesSafeArea)
+        XCTAssertEqual(MapChromeLock.fieldContentHorizontalInset, 20)
+        XCTAssertTrue(MapChromeLock.duskCrushesCountyLabels)
+        XCTAssertFalse(MapChromeLock.paintsVitalsChrome)
+    }
 }

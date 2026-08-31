@@ -96,12 +96,6 @@ public struct FieldRootView: View {
             case .guide:
                 FieldSafePlate {
                     VStack(alignment: .leading, spacing: 20) {
-                        ScreenHeader(
-                            "Field guide",
-                            subtitle: packReady.readyIDs.isEmpty
-                                ? "Ask first. Pack only. Not a website."
-                                : "Ask first. Pack only. \(packReady.readyIDs.count) field packs Ready."
-                        )
                         if inboundMissing, let inboundArticleID {
                             HUDPanel {
                                 VStack(alignment: .leading, spacing: 8) {
@@ -129,20 +123,6 @@ public struct FieldRootView: View {
                             onOpenMapJob: onOpenMapJob,
                             openExpeditionID: openExpeditionID
                         )
-                        Text("Situation cards")
-                            .font(BlackoutDS.titleFont())
-                            .foregroundStyle(BlackoutDS.Silver.bright)
-                        ForEach(FieldManual.guide) { section in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(section.title)
-                                    .font(BlackoutDS.titleFont())
-                                    .foregroundStyle(BlackoutDS.Silver.bright)
-                                Text(section.body)
-                                    .font(BlackoutDS.bodyFont())
-                                    .foregroundStyle(BlackoutDS.Silver.mid)
-                                    .lineSpacing(7)
-                            }
-                        }
                     }
                 }
             case .skills:
