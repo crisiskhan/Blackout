@@ -183,6 +183,8 @@ struct NavigateEmptyCard: View {
 struct MapPackSearchField: View {
     @Binding var query: String
     var onSubmit: () -> Void
+    var onQueryChange: (() -> Void)? = nil
+    var isFocused: FocusState<Bool>.Binding
 
     var body: some View {
         HStack(spacing: 8) {
@@ -194,7 +196,11 @@ struct MapPackSearchField: View {
                 .font(BlackoutDS.captionFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
                 .submitLabel(.search)
+                .focused(isFocused)
                 .onSubmit(onSubmit)
+                .onChange(of: query) { _, _ in
+                    onQueryChange?()
+                }
         }
         .foregroundStyle(BlackoutDS.Silver.metal)
         .padding(.horizontal, 12)
@@ -205,6 +211,9 @@ struct MapPackSearchField: View {
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .contentShape(Rectangle())
+        .onTapGesture { isFocused.wrappedValue = true }
+        .allowsHitTesting(true)
         .accessibilityLabel("Search this pack")
     }
 }
@@ -212,13 +221,23 @@ struct MapPackSearchField: View {
 /// Hits live in a sheet, not on the tiles.
 struct MapPackSearchSheet: View {
     var hits: [PackSearchHit]
+    var empty: NavigateEmpty?
     var onPick: (PackSearchHit) -> Void
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                MapPackSearchHits(hits: hits, onPick: onPick)
+                if hits.isEmpty {
+                    NavigateEmptyCard(
+                        empty: empty ?? .searchMiss,
+                        onBearing: {},
+                        onPacks: nil
+                    )
                     .padding(16)
+                } else {
+                    MapPackSearchHits(hits: hits, onPick: onPick)
+                        .padding(16)
+                }
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Search this pack")

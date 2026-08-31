@@ -455,6 +455,42 @@ def test_map_google_feel() -> None:
         fail("pack-tiles preference needs a BlackoutKey")
     if "MKLocalSearch" in maps or "satelliteFlyover" in maps or "MKTileOverlay" in maps:
         fail("Map must not call live Apple / Google satellite")
+    nav_chrome = (ROOT / "Packages/Maps/Sources/Maps/NavigateChrome.swift").read_text()
+    if "@FocusState" not in nav_chrome and "@FocusState" not in maps:
+        fail("56h search must use FocusState so tap shows the keyboard")
+    if ".focused(" not in nav_chrome:
+        fail("MapPackSearchField must bind FocusState onto the TextField")
+    search_field = nav_chrome.split("struct MapPackSearchField", 1)[-1][:1600]
+    if ".contentShape(" not in search_field:
+        fail("56h search bar must contentShape the whole chip so the map does not steal the tap")
+    if ".onTapGesture" not in search_field:
+        fail("tap on the 56h bar must focus the field")
+    if ".onChange(of: query)" not in nav_chrome and "onChange(of: navigate.query)" not in maps:
+        fail("pack search must run on query change, not only keyboard submit")
+    if "onSubmit" not in nav_chrome.split("struct MapPackSearchField", 1)[-1]:
+        fail("keyboard Search submit must still run pack search")
+    if "presentsSheet" not in maps:
+        fail("runPackSearch must present the sheet for hits and miss")
+    if "!navigate.hits.isEmpty" in maps.split("func runPackSearch", 1)[-1][:400] and "empty" not in maps.split("func runPackSearch", 1)[-1][:400]:
+        fail("a search miss must still open the sheet")
+    if "NavigateCopy.searchMiss" not in nav_chrome and "searchMiss" not in nav_chrome.split("struct MapPackSearchSheet", 1)[-1]:
+        fail("search-miss sheet must paint the existing empty state")
+    if "searchFocused" not in maps.split("private var holdsChrome", 1)[-1][:800]:
+        fail("focused search must hold chrome so recede does not disable the field")
+    if "recedeAllowsHitTesting" not in maps and "keepInteractive" not in maps:
+        fail("recede must not allowsHitTesting(false) on a focused search field")
+    if "enum MapPackSearchPolicy" not in lock:
+        fail("MapPackSearchPolicy missing — 3:20 search tap/miss contract untested")
+    if "testPackSearchTapFocusesFieldAndMapDoesNotSteal" not in tests:
+        fail("missing tap/focus search contract test")
+    if "testPackSearchQueryMatchAndMissPresentSheet" not in tests:
+        fail("missing pack search hit/miss sheet test")
+    if "testRecedeDoesNotDisableFocusedSearchField" not in tests:
+        fail("missing recede-does-not-disable-focused-field test")
+    if "testPackSearchMissIsEmptyStateNotSilent" not in amenity_tests:
+        fail("missing search-miss empty-state test")
+    if "MKLocalSearch" in nav_chrome:
+        fail("pack search must stay offline — no MKLocalSearch")
     if "showsVitalsOverlay" not in root:
         fail("I AM OK must stay a Root sibling on every tab")
     vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:500]

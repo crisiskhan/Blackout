@@ -142,4 +142,47 @@ final class MapChromeLockTests: XCTestCase {
             MapChromeLock.vitalsPaintedHeight
         )
     }
+
+    func testPackSearchTapFocusesFieldAndMapDoesNotSteal() {
+        XCTAssertTrue(MapPackSearchPolicy.usesFocusState)
+        XCTAssertTrue(MapPackSearchPolicy.contentShapesWholeBar)
+        XCTAssertTrue(MapPackSearchPolicy.focusedHoldsChrome)
+        XCTAssertTrue(MapPackSearchPolicy.holdChrome(existingHold: false, fieldFocused: true))
+        XCTAssertFalse(MapPackSearchPolicy.holdChrome(existingHold: false, fieldFocused: false))
+    }
+
+    func testPackSearchQueryMatchAndMissPresentSheet() {
+        XCTAssertTrue(MapPackSearchPolicy.runsOnQueryChange)
+        XCTAssertTrue(MapPackSearchPolicy.missOpensSheet)
+        XCTAssertTrue(MapPackSearchPolicy.submitStillRuns)
+        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "mesa pharmacy", hitCount: 1, empty: false))
+        XCTAssertTrue(MapPackSearchPolicy.presentsSheet(query: "zzzz", hitCount: 0, empty: true))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "", hitCount: 0, empty: false))
+        XCTAssertFalse(MapPackSearchPolicy.presentsSheet(query: "   ", hitCount: 0, empty: false))
+    }
+
+    func testRecedeDoesNotDisableFocusedSearchField() {
+        XCTAssertFalse(MapPackSearchPolicy.recedeDisablesFocusedField)
+        XCTAssertTrue(
+            MapPackSearchPolicy.recedeAllowsHitTesting(
+                isReceded: true,
+                fieldFocused: true,
+                reduceMotion: false
+            )
+        )
+        XCTAssertFalse(
+            MapPackSearchPolicy.recedeAllowsHitTesting(
+                isReceded: true,
+                fieldFocused: false,
+                reduceMotion: false
+            )
+        )
+        XCTAssertTrue(
+            MapPackSearchPolicy.recedeAllowsHitTesting(
+                isReceded: true,
+                fieldFocused: false,
+                reduceMotion: true
+            )
+        )
+    }
 }

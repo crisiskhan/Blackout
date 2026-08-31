@@ -131,3 +131,33 @@ public enum MapChromeLock {
         vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: hasTabBar)
     }
 }
+
+/// 3:20 pack search. Tap focuses; type searches the pack; a miss still opens the sheet.
+public enum MapPackSearchPolicy {
+    public static let usesFocusState = true
+    public static let contentShapesWholeBar = true
+    public static let runsOnQueryChange = true
+    public static let missOpensSheet = true
+    public static let submitStillRuns = true
+    public static let focusedHoldsChrome = true
+    public static let recedeDisablesFocusedField = false
+
+    public static func presentsSheet(query: String, hitCount: Int, empty: Bool) -> Bool {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        return hitCount > 0 || empty
+    }
+
+    public static func recedeAllowsHitTesting(
+        isReceded: Bool,
+        fieldFocused: Bool,
+        reduceMotion: Bool
+    ) -> Bool {
+        if fieldFocused || reduceMotion { return true }
+        return !isReceded
+    }
+
+    public static func holdChrome(existingHold: Bool, fieldFocused: Bool) -> Bool {
+        existingHold || fieldFocused
+    }
+}

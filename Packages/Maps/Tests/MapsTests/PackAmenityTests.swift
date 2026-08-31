@@ -84,6 +84,24 @@ final class PackAmenityTests: XCTestCase {
 
         let miss = PackSearch.query("zzzz", pack: nil, pois: [cafe], addresses: addresses)
         XCTAssertEqual(miss.empty, .searchMiss)
+        XCTAssertTrue(byName.hits.isEmpty == false)
+        XCTAssertEqual(miss.hits.count, 0)
+    }
+
+    func testPackSearchMissIsEmptyStateNotSilent() {
+        let cafe = RoutingPOI(
+            id: "cafe-1",
+            name: "H&H Car Wash",
+            kind: "restaurant",
+            coordinate: RoutingCoordinate(latitude: 31.758, longitude: -106.487)
+        )
+        let hit = PackSearch.query("h&h", pack: nil, pois: [cafe], addresses: [])
+        XCTAssertEqual(hit.hits.first?.title, "H&H Car Wash")
+        XCTAssertNil(hit.empty)
+        let miss = PackSearch.query("zzzz", pack: nil, pois: [cafe], addresses: [])
+        XCTAssertTrue(miss.hits.isEmpty)
+        XCTAssertEqual(miss.empty, .searchMiss)
+        XCTAssertEqual(miss.empty?.title, NavigateCopy.searchMiss)
     }
 
     func testNewerPOISchemaFailsClosed() {

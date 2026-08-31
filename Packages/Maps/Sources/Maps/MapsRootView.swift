@@ -48,6 +48,7 @@ public struct MapsRootView: View {
     @State private var showLiDAR = false
     @State private var showLayers = false
     @State private var showSearchHits = false
+    @FocusState private var searchFocused: Bool
     @State private var selectedPOI: RoutingPOI?
     @State private var jumpToken = 0
     @State private var jumpCoordinate: RoutingCoordinate?
@@ -171,6 +172,7 @@ public struct MapsRootView: View {
             || navigate.empty != nil
             || liveRec
             || compass.showMarkSheet
+            || MapPackSearchPolicy.holdChrome(existingHold: false, fieldFocused: searchFocused)
     }
 
     public var body: some View {
@@ -512,7 +514,7 @@ public struct MapsRootView: View {
             MapEmptyCard(kind: .noPack, onPacks: onOpenFieldPacks, onRecenter: recenterToPack)
         } else if let kind = navigate.empty?.mapKind, navigate.phase != .guidance {
             MapEmptyCard(kind: kind)
-        } else if let empty = navigate.empty, navigate.phase != .guidance {
+        } else if let empty = navigate.empty, navigate.phase != .guidance, empty != .searchMiss {
             VStack {
                 Spacer()
                 NavigateEmptyCard(
@@ -568,7 +570,7 @@ public struct MapsRootView: View {
 
     private var lockHudStack: some View {
         VStack(spacing: 8) {
-            receding {
+            receding(keepInteractive: searchFocused) {
                 VStack(alignment: .leading, spacing: 8) {
                     MapLockHUD(
                         accuracyMeters: gpsAccuracyMeters,
@@ -591,22 +593,41 @@ public struct MapsRootView: View {
     }
 
     private var mapPackSearch: some View {
-        MapPackSearchField(query: navQueryBinding, onSubmit: runPackSearch)
+        MapPackSearchField(
+            query: navQueryBinding,
+            onSubmit: { runPackSearch(present: true) },
+            onQueryChange: {
+                guard searchFocused else { return }
+                runPackSearch(present: true)
+            },
+            isFocused: $searchFocused
+        )
     }
 
-    private func runPackSearch() {
+    private func runPackSearch(present: Bool) {
         noteMapActivity()
         navigate.search(
             pack: packService.routing,
             pois: packService.pack?.pois ?? [],
             addresses: packService.pack?.addresses ?? []
         )
-        showSearchHits = MapChromeLock.showsSearchHitsInSheet && !navigate.hits.isEmpty
+        let ready = MapChromeLock.showsSearchHitsInSheet
+            && MapPackSearchPolicy.presentsSheet(
+                query: navigate.query,
+                hitCount: navigate.hits.count,
+                empty: navigate.empty != nil
+            )
+        if present {
+            showSearchHits = ready
+        } else if !ready {
+            showSearchHits = false
+        }
     }
 
     private func packSearchHitsSheet() -> some View {
-        MapPackSearchSheet(hits: navigate.hits, onPick: { hit in
+        MapPackSearchSheet(hits: navigate.hits, empty: navigate.empty, onPick: { hit in
             showSearchHits = false
+            searchFocused = false
             pickFound(hit)
         })
         .presentationDetents([.medium, .large])
@@ -787,9 +808,18 @@ public struct MapsRootView: View {
         onNavLockChange?(on)
     }
 
-    private func receding<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+    private func receding<Content: View>(
+        keepInteractive: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
         content()
-            .modifier(RecedingMapChrome(isReceded: chrome.isReceded, reduceMotion: reduceMotion))
+            .modifier(
+                RecedingMapChrome(
+                    isReceded: chrome.isReceded,
+                    reduceMotion: reduceMotion,
+                    keepInteractive: keepInteractive
+                )
+            )
     }
 
     private var originCoordinate: RoutingCoordinate? {
@@ -811,6 +841,7 @@ public struct MapsRootView: View {
         tool = nil
         showLayers = false
         showSearchHits = false
+        searchFocused = false
         pinnedToPackCoverage = false
         selectedPOI = RoutingPOI(
             id: hit.id,
@@ -1099,11 +1130,18 @@ enum MapTool: String, Identifiable {
 private struct RecedingMapChrome: ViewModifier {
     var isReceded: Bool
     var reduceMotion: Bool
+    var keepInteractive: Bool = false
 
     func body(content: Content) -> some View {
+        let hittable = MapPackSearchPolicy.recedeAllowsHitTesting(
+            isReceded: isReceded,
+            fieldFocused: keepInteractive,
+            reduceMotion: reduceMotion
+        )
+        let hide = isReceded && !reduceMotion && !keepInteractive
         content
-            .opacity(isReceded && !reduceMotion ? 0 : 1)
-            .allowsHitTesting(!(isReceded && !reduceMotion))
+            .opacity(hide ? 0 : 1)
+            .allowsHitTesting(hittable)
             .animation(
                 reduceMotion ? nil : (isReceded ? BlackoutDS.Motion.move : BlackoutDS.Motion.snap),
                 value: isReceded
