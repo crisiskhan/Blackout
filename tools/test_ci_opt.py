@@ -39,12 +39,6 @@ STATEWIDE_PACKS = (
         "79093063",
         "49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d",
     ),
-    (
-        "us-ny",
-        "new-york.pack.zip",
-        "130327390",
-        "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500",
-    ),
 )
 
 
@@ -338,10 +332,18 @@ def test_map_google_feel() -> None:
         fail("GPS / compass HUD must not be a full-width bar")
     if "lockHUDPaintedHeight: Double = 28" not in lock:
         fail("compass / accuracy HUD must stay tiny (28pt)")
-    if 'layersTitles = ["Pack tiles", "Streets", "Topo"]' not in lock:
-        fail("Layers must be pack tiles + streets/topo")
+    if 'layersTitles = ["Streets", "Contours", "Trails"]' not in lock:
+        fail("Layers must be streets/contours/trails")
+    if "defaultPaintIsDuskAerial = true" not in lock:
+        fail("default paint must be dusk aerial, not labeled USGS")
+    if "defaultPaintsLabeledUSGS = false" not in lock:
+        fail("labeled USGS must not be the default layer")
+    if "defaultPaintsCountyNames = false" not in lock or "defaultPaintsHighwayShields = false" not in lock:
+        fail("default paint must not print county names or highway shields")
     if "streetsLayerDefaultOn = false" not in lock or "topoLayerDefaultOn = false" not in lock:
         fail("streets/topo layers must default off")
+    if "contoursLayerDefaultOn = false" not in lock or "trailsLayerDefaultOn = false" not in lock:
+        fail("contours/trails layers must default off")
     if "duskGradesPackTiles = true" not in lock:
         fail("pack satellite/aerial must be dusk-graded")
     if "usesGoogleLogo = false" not in lock:
@@ -414,14 +416,16 @@ def test_map_google_feel() -> None:
     ):
         if banned in layers:
             fail(f"Layers is not pack/imagery-only: still has {banned}")
-    if 'layerToggle("Pack tiles"' not in layers:
-        fail("Layers lost Pack tiles")
+    if 'layerToggle("Pack tiles"' in layers:
+        fail("labeled USGS pack tiles are not a default Layers toggle")
     if 'layerToggle("Streets"' not in layers:
         fail("Layers lost Streets")
-    if 'layerToggle("Topo"' not in layers:
-        fail("Layers lost Topo")
-    if 'layerToggle("Trail"' in layers:
-        fail("Trail is not a Crisis 34 layer; streets/topo are")
+    if 'layerToggle("Contours"' not in layers:
+        fail("Layers lost Contours")
+    if 'layerToggle("Trails"' not in layers:
+        fail("Layers lost Trails")
+    if 'layerToggle("Topo"' in layers:
+        fail("Topo is Contours now; do not keep a Topo toggle")
 
     hud_order = maps.split("private var lockHudStack", 1)[-1].split("private var mapPackSearch", 1)[0]
     if hud_order.find("MapLockHUD") < 0 or hud_order.find("mapPackSearch") < 0:
@@ -431,7 +435,9 @@ def test_map_google_feel() -> None:
     if "Google" in maps or "google logo" in maps.lower():
         fail("never a Google logo")
     if "showStreets:" not in maps or "showTopoTiles:" not in maps:
-        fail("streets/topo must be Layers, default off")
+        fail("streets/contours must be Layers, default off")
+    if "showTrails:" not in maps:
+        fail("trails must be a Layer, default off")
     if "markPins:" not in maps:
         fail("Map must pin dest / MARK / search")
     if "MapPOINameSheet" not in maps:
@@ -449,8 +455,13 @@ def test_map_google_feel() -> None:
         fail("OfflineMapView must accept a jump-to-pin token")
     if "showPackTiles: packService.routing == nil || showTopoTiles" in maps:
         fail("pack imagery must stay on when routing exists")
-    if "showPackTiles: showPackTiles" not in maps:
-        fail("pack tiles must be the Layers imagery toggle")
+    if "showPackTiles: MapChromeLock.defaultPaintIsDuskAerial" not in maps:
+        fail("default canvas must paint dusk aerial from the installed pack")
+    layers_sheet = maps.split("struct MapLayersSheet", 1)[-1]
+    if "Pack tiles" in layers_sheet:
+        fail("Pack tiles must not be a Layers toggle — labeled USGS is Contours")
+    if 'layerToggle("Streets"' not in layers_sheet or 'layerToggle("Contours"' not in layers_sheet or 'layerToggle("Trails"' not in layers_sheet:
+        fail("Layers must be Streets, Contours, Trails")
     if "mapPackTiles" not in keys:
         fail("pack-tiles preference needs a BlackoutKey")
     if "MKLocalSearch" in maps or "satelliteFlyover" in maps or "MKTileOverlay" in maps:
@@ -905,9 +916,17 @@ def test_bundled_statewide_archive_only() -> None:
         fail(".gitignore must exclude pack zips and BundledFieldPacks")
     if "routing/graph.bin" not in gitignore:
         fail(".gitignore must exclude routing binaries")
+    if "us-ny" in fetch or "new-york.pack.zip" in fetch or "new-york.pack.zip" in catalog:
+        fail("New York pack must be cut from fetch and catalog")
+    if 'id: "us-ny"' in catalog or "us-ny" in copy.split("IDS=", 1)[-1][:80]:
+        fail("New York must not remain in catalog or copy IDS")
+    if "us-ny" in probe.split("for id in", 1)[-1][:80]:
+        fail("probe must not require us-ny")
+    if "FL TX NY" in flight or "us-ny" in flight:
+        fail("TestFlight must not fetch NY")
     if pbx.count("CURRENT_PROJECT_VERSION = 40") < 2:
         fail("CURRENT_PROJECT_VERSION was bumped off 40")
-    ok("archive fetches FL/TX/NY/NM; compile does not; catalog is bundled Ready")
+    ok("archive fetches FL/TX/NM; compile does not; catalog is bundled Ready")
 
 
 def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
@@ -937,7 +956,7 @@ def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
             fail("archive copy must fail when staging is missing")
 
         staging = srcroot / "BundledFieldPacks"
-        for pack_id in ("us-tx", "us-nm", "us-fl", "us-ny"):
+        for pack_id in ("us-tx", "us-nm", "us-fl"):
             tiles = staging / pack_id / "tiles" / "8" / "1"
             tiles.mkdir(parents=True)
             manifest = {
@@ -966,7 +985,7 @@ def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
         app = resources
         subprocess.check_call(["bash", str(probe), str(app)])
         if (app / "FieldPacks" / "tiles").exists():
-            fail("copy flattened four states into FieldPacks/tiles")
+            fail("copy flattened three states into FieldPacks/tiles")
         if (app / "FieldPacks" / "el-paso").exists():
             fail("copy staged a city pack")
         tx_routing = app / "FieldPacks" / "us-tx" / "routing"
@@ -992,7 +1011,7 @@ def test_copy_fieldpacks_compile_noop_and_archive_required() -> None:
         bad = subprocess.run(["bash", str(copy)], env=env, capture_output=True, text=True)
         if bad.returncode == 0:
             fail("copy must fail when routing/ magic mismatches")
-    ok("copy no-ops on compile and requires four separate statewide folders on archive")
+    ok("copy no-ops on compile and requires three separate statewide folders on archive")
 
 
 def test_fieldpack_root_flatten_fixture() -> None:
@@ -1919,6 +1938,8 @@ def test_pack_amenity_address_search() -> None:
         fail("DefaultPack address fixture missing")
     if "testSearchHitsRestaurantAndHouseNumberWithoutLiveGeocoder" not in tests:
         fail("amenity/address search tests missing")
+    if "testDefaultPinsAreHospitalWaterCivOnly" not in tests:
+        fail("default map pins must stay hospital/water/civ")
     if "testNewerPOISchemaFailsClosed" not in tests:
         fail("poi schema fail-closed test missing")
     if pbx.count("CURRENT_PROJECT_VERSION = 40") < 2:
@@ -2189,6 +2210,8 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "reportsScaleOnEveryScroll = false",
         "duskGradeAlpha: Double = 0.22",
         "duskUsesMultiply = false",
+        "defaultPaintIsDuskAerial = true",
+        "defaultPaintsLabeledUSGS = false",
         "pickDismissesHits = true",
         "headingRedrawStepDegrees: Double = 8",
     ):
@@ -2209,6 +2232,9 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "testCanvasFillsZStackCoverNotLetterboxStrip",
         "testStreetsTopoStayOffUnlessToggledThisSession",
         "testDuskGradeDoesNotZeroTileLuminance",
+        "testDefaultPaintIsDuskAerialWithoutLabeledUSGS",
+        "testDuskAerialRemapHidesPaperWhiteLabels",
+        "testFieldLayersStartOffExceptPins",
         "testPickDismissesHitsAndDropdown",
         "testPackSearchQueryChangeDebounces",
         "testMapPaintDoesNotRedrawEveryScrollFrame",
@@ -2229,8 +2255,10 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("topo must default off this session, not last launch")
     if "MapChromeLock.streetsLayerDefaultOn" not in maps:
         fail("streets launch value must be the lock default")
-    if "MapChromeLock.topoLayerDefaultOn" not in maps:
-        fail("topo launch value must be the lock default")
+    if "MapChromeLock.contoursLayerDefaultOn" not in maps:
+        fail("contours launch value must be the lock default")
+    if "MapChromeLock.trailsLayerDefaultOn" not in maps:
+        fail("trails launch value must be the lock default")
     if "searchDebounce" not in maps or "shouldRunQuerySearch" not in maps:
         fail("query-change search must debounce")
     if "searchPickConsumed" not in maps:
@@ -2255,6 +2283,8 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("updateUIView must not repaint tiles on every heading/GPS tick")
     if "duskGradeAlpha" not in offline:
         fail("dusk grade must use MapChromeLock.duskGradeAlpha")
+    if "duskAerial" not in offline or "remapsLabeledPackTilesToDuskAerial" not in offline:
+        fail("labeled USGS rasters must remap to dusk aerial on the default paint")
     if "paintsPackLabelOverlayWhenTopoOff" not in offline:
         fail("default pack paint must not add a street-name overlay")
     if "showViewshed: false" not in maps or "showSlope: false" not in maps:

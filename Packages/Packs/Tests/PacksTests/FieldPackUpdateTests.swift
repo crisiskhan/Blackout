@@ -7,7 +7,7 @@ final class FieldPackUpdatePolicyTests: XCTestCase {
         let ids = FieldPackUpdatePolicy.batchTargets().map(\.id)
         XCTAssertEqual(
             Set(ids),
-            ["us-tx", "us-nm", "us-fl", "us-ny", "el-paso", "las-cruces", "albuquerque"]
+            ["us-tx", "us-nm", "us-fl", "el-paso", "las-cruces", "albuquerque"]
         )
         XCTAssertFalse(ids.contains(FieldPackCatalog.denver.id))
         XCTAssertNil(FieldPackCatalog.denver.downloadURL)

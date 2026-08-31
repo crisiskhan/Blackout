@@ -54,9 +54,9 @@ public struct MapsRootView: View {
     @State private var selectedPOI: RoutingPOI?
     @State private var jumpToken = 0
     @State private var jumpCoordinate: RoutingCoordinate?
-    @State private var showPackTiles = UserDefaults.standard.object(forKey: BlackoutKeys.mapPackTiles) as? Bool ?? true
     @State private var showStreets = MapChromeLock.streetsLayerDefaultOn
-    @State private var showTopoTiles = MapChromeLock.topoLayerDefaultOn
+    @State private var showTopoTiles = MapChromeLock.contoursLayerDefaultOn
+    @State private var showTrails = MapChromeLock.trailsLayerDefaultOn
     @State private var searchDebounceTask: Task<Void, Never>?
     @State private var navigate = NavigateSession()
     @State private var compass = CompassLockSession()
@@ -376,19 +376,19 @@ public struct MapsRootView: View {
 
     private func layersSheet() -> some View {
         MapLayersSheet(
-            showPackTiles: $showPackTiles,
             showStreets: $showStreets,
-            showTopoTiles: $showTopoTiles,
+            showContours: $showTopoTiles,
+            showTrails: $showTrails,
             extrasOn: extrasOn,
             hasRouting: packService.routing != nil,
-            onTogglePackTiles: {
-                UserDefaults.standard.set(showPackTiles, forKey: BlackoutKeys.mapPackTiles)
-            },
             onToggleStreets: {
                 UserDefaults.standard.set(showStreets, forKey: BlackoutKeys.mapStreets)
             },
-            onToggleTopo: {
+            onToggleContours: {
                 UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
+            },
+            onToggleTrails: {
+                UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
             }
         )
         .presentationDetents([.medium])
@@ -476,10 +476,10 @@ public struct MapsRootView: View {
             routing: packService.routing,
             routeLine: navigate.routePolyline,
             destination: navigate.destination ?? compass.lockCoordinate,
-            showPackTiles: showPackTiles,
+            showPackTiles: MapChromeLock.defaultPaintIsDuskAerial,
             showStreets: showStreets,
             showTopoTiles: showTopoTiles,
-            showTrails: showStreets,
+            showTrails: showTrails,
             jumpToken: jumpToken,
             jumpCoordinate: jumpCoordinate,
             headingDegrees: location.headingDegrees,
@@ -1380,23 +1380,23 @@ struct MapPOINameSheet: View {
 }
 
 struct MapLayersSheet: View {
-    @Binding var showPackTiles: Bool
     @Binding var showStreets: Bool
-    @Binding var showTopoTiles: Bool
+    @Binding var showContours: Bool
+    @Binding var showTrails: Bool
     var extrasOn: Bool
     var hasRouting: Bool
-    var onTogglePackTiles: () -> Void
     var onToggleStreets: () -> Void
-    var onToggleTopo: () -> Void
+    var onToggleContours: () -> Void
+    var onToggleTrails: () -> Void
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
-                    layerToggle("Pack tiles", on: $showPackTiles, enabled: extrasOn, persist: onTogglePackTiles)
                     layerToggle("Streets", on: $showStreets, enabled: extrasOn && hasRouting, persist: onToggleStreets)
-                    layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
+                    layerToggle("Contours", on: $showContours, enabled: extrasOn, persist: onToggleContours)
+                    layerToggle("Trails", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
                 }
                 .padding(20)
             }

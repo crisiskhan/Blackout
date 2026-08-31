@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Archive-time only. Download the four statewide packs from packs-v1, verify
-# sha256, ROOT-flatten into BundledFieldPacks/<us-xx>/. Never city packs.
+# Archive-time only. Download the three statewide packs (FL TX NM) from packs-v1, verify
+# sha256, ROOT-flatten into BundledFieldPacks/<us-xx>/. Never city packs. No NY.
 # Do not commit the zips or the staging folder.
 set -euo pipefail
 
@@ -14,7 +14,6 @@ PACKS=(
   "us-tx|texas.pack.zip|220512882|6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade"
   "us-nm|new-mexico.pack.zip|77478829|2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8"
   "us-fl|florida.pack.zip|79093063|49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d"
-  "us-ny|new-york.pack.zip|130327390|928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500"
 )
 
 verify_sha() {
@@ -130,8 +129,8 @@ done
 
 # Refuse a merged tiles/ directory at the FieldPacks root.
 if [ -d "${DEST}/tiles" ]; then
-  echo "error: do not flatten four states into one tiles/ directory" >&2
+  echo "error: do not flatten three states into one tiles/ directory" >&2
   exit 1
 fi
 
-echo "Statewide Field Packs staged: us-tx us-nm us-fl us-ny under ${DEST}"
+echo "Statewide Field Packs staged: us-tx us-nm us-fl under ${DEST}"

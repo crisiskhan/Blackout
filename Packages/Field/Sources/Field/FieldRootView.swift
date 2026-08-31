@@ -241,7 +241,7 @@ struct FieldVisionView: View {
                                 .foregroundStyle(BlackoutDS.Silver.steel)
                         }
                         if biome == .unknown {
-                            Text("Biome unknown. Four-state plant/tree ID needs FL/TX/NY/NM.")
+                            Text("Biome unknown. Three-state plant/tree ID needs FL/TX/NM.")
                                 .font(BlackoutDS.captionFont())
                                 .foregroundStyle(BlackoutDS.Silver.dim)
                         }

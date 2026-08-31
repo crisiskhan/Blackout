@@ -89,26 +89,6 @@ public enum FieldPackCatalog {
         )
     )
 
-    public static let newYork = FieldPackDescriptor(
-        id: "us-ny",
-        title: "New York",
-        summary: "Bundled. Ready. Statewide New York. Works airplane.",
-        downloadURL: releaseBase.appendingPathComponent("new-york.pack.zip"),
-        sha256: "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500",
-        byteCount: 130_327_390,
-        assetReady: true,
-        isBundled: true,
-        region: MapRegion(
-            name: "New York",
-            centerLatitude: 42.7466,
-            centerLongitude: -75.7569,
-            spanLatitude: 4.5385,
-            spanLongitude: 8.0114,
-            minZoom: 8,
-            maxZoom: 12
-        )
-    )
-
     public static let elPaso = FieldPackDescriptor(
         id: "el-paso",
         title: "El Paso",
@@ -172,7 +152,7 @@ public enum FieldPackCatalog {
     /// Designated statewide packs. Archive fetches these; compile does not.
     /// UI Ready is disk-only — see FieldPackHonesty.
     public static let bundledStatewide: [FieldPackDescriptor] = [
-        florida, texas, newYork, newMexico
+        florida, texas, newMexico
     ]
 
     /// Optional extras. User-initiated download or 1/N radio only.
@@ -211,7 +191,7 @@ public struct FieldPackDescriptor: Identifiable, Hashable, Sendable {
     public var region: MapRegion
 }
 
-/// Four states on disk. Skip and first-run available are gone.
+/// Three states on disk (FL / TX / NM). Skip and first-run available are gone.
 public enum FieldPackRowState: String, Sendable, CaseIterable {
     case noWifi
     case downloading

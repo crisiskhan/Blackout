@@ -13,25 +13,19 @@ final class PackAmenityTests: XCTestCase {
         XCTAssertFalse(PackAmenityPolicy.isAmenity("address"))
         XCTAssertFalse(PackAmenityPolicy.isAmenity("house"))
         XCTAssertFalse(PackAmenityPolicy.paintsOnMap("address"))
-        XCTAssertTrue(PackAmenityPolicy.paintsOnMap("restaurant"))
+        XCTAssertFalse(PackAmenityPolicy.paintsOnMap("restaurant"))
+        XCTAssertTrue(PackAmenityPolicy.paintsOnMap("hospital"))
         XCTAssertTrue(PackAmenityPolicy.paintsOnMap("water"))
         XCTAssertTrue(PackAmenityPolicy.paintsOnMap("town"))
     }
 
-    func testFullCivicShopAndFieldKindsPaintAtCloseZoom() {
-        let kinds = [
-            "shop", "grocery", "supermarket", "convenience", "mall", "hardware", "clothes",
-            "fuel", "pharmacy", "hospital", "clinic", "dentist", "dentists",
-            "police", "fire_station", "post_office", "school", "bank", "atm",
-            "cafe", "fast_food", "restaurant", "bar", "pub",
-            "toilets", "parking", "charging_station",
-            "hotel", "motel", "lodging", "camp_site", "information",
-            "office", "craft",
-            "water", "spring", "town", "ranger", "mill", "road", "rail"
-        ]
-        for kind in kinds {
+    func testDefaultPinsAreHospitalWaterCivOnly() {
+        for kind in ["hospital", "clinic", "water", "spring", "town", "city", "ranger"] {
             XCTAssertTrue(PackAmenityPolicy.paintsOnMap(kind), kind)
             XCTAssertTrue(PackAmenityPolicy.showsPins(zoom: 11))
+        }
+        for kind in ["shop", "cafe", "restaurant", "pharmacy", "fuel", "address"] {
+            XCTAssertFalse(PackAmenityPolicy.paintsOnMap(kind), kind)
         }
         XCTAssertFalse(PackAmenityPolicy.paintsOnMap("address"))
         let pharmacy = RoutingPOI(

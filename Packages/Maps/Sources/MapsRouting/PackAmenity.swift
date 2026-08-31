@@ -24,11 +24,18 @@ public enum PackAmenityPolicy {
         amenityKinds.contains(normalize(kind))
     }
 
+    /// Default pins: hospital / water / civ. Shops stay searchable, not a white-dot field.
+    public static let mapPinKinds: Set<String> = [
+        "hospital", "clinic",
+        "spring", "tank", "water", "reservoir", "lake", "creek", "river", "pond",
+        "city", "town", "ranger"
+    ]
+
     /// Addresses stay searchable. They do not paint a statewide dot field.
     public static func paintsOnMap(_ kind: String) -> Bool {
         let key = normalize(kind)
         if key == "address" || key == "house" { return false }
-        return isAmenity(key) || fieldKinds.contains(key)
+        return mapPinKinds.contains(key)
     }
 
     public static func showsPins(zoom: Int) -> Bool {

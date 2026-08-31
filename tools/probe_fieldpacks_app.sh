@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fail if Blackout.app is missing the four statewide Field Packs as Ready roots.
+# Fail if Blackout.app is missing the three statewide Field Packs (FL TX NM) as Ready roots.
 set -euo pipefail
 
 APP="${1:-}"
@@ -14,11 +14,11 @@ if [ ! -d "${ROOT}" ]; then
   exit 1
 fi
 if [ -d "${ROOT}/tiles" ]; then
-  echo "error: ${APP} flattened four states into FieldPacks/tiles/" >&2
+  echo "error: ${APP} flattened three states into FieldPacks/tiles/" >&2
   exit 1
 fi
 
-for id in us-tx us-nm us-fl us-ny; do
+for id in us-tx us-nm us-fl; do
   if [ ! -f "${ROOT}/${id}/manifest.json" ]; then
     echo "error: ${APP} missing FieldPacks/${id}/manifest.json" >&2
     exit 1
@@ -51,6 +51,11 @@ for id in us-tx us-nm us-fl us-ny; do
   fi
 done
 
+if [ -d "${ROOT}/us-ny" ]; then
+  echo "error: New York pack must not be in the IPA" >&2
+  exit 1
+fi
+
 for city in el-paso las-cruces albuquerque; do
   if [ -d "${ROOT}/${city}" ]; then
     echo "error: city pack ${city} must not be in the IPA" >&2
@@ -58,4 +63,4 @@ for city in el-paso las-cruces albuquerque; do
   fi
 done
 
-echo "FieldPacks in .app ok: us-tx us-nm us-fl us-ny Ready, no city packs, no merged tiles/"
+echo "FieldPacks in .app ok: us-tx us-nm us-fl Ready, no city packs, no merged tiles/"

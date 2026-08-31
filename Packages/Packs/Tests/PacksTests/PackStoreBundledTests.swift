@@ -8,7 +8,7 @@ final class PackStoreBundledTests: XCTestCase {
         let bundle = fm.temporaryDirectory.appendingPathComponent("fp-bundle-\(UUID().uuidString)", isDirectory: true)
         let disk = fm.temporaryDirectory.appendingPathComponent("fp-disk-\(UUID().uuidString)", isDirectory: true)
         try fm.createDirectory(at: disk, withIntermediateDirectories: true)
-        for id in ["us-tx", "us-nm", "us-fl", "us-ny"] {
+        for id in ["us-tx", "us-nm", "us-fl"] {
             let tiles = bundle.appendingPathComponent("\(id)/tiles/8/1", isDirectory: true)
             try fm.createDirectory(at: tiles, withIntermediateDirectories: true)
             try Data("{\"id\":\"\(id)\"}".utf8).write(
@@ -20,13 +20,13 @@ final class PackStoreBundledTests: XCTestCase {
         let store = PackStore(bundledRoot: nil, bundledPacksRoot: bundle, diskRoot: disk)
         store.refreshStates()
 
-        for id in ["us-tx", "us-nm", "us-fl", "us-ny"] {
+        for id in ["us-tx", "us-nm", "us-fl"] {
             XCTAssertEqual(store.states[id], .ready)
             XCTAssertTrue(store.isInstalled(id))
             XCTAssertNotNil(store.packRoot(for: id))
         }
         let roots = store.installedPackRoots
-        XCTAssertEqual(Set(roots.map(\.lastPathComponent)), ["us-tx", "us-nm", "us-fl", "us-ny"])
+        XCTAssertEqual(Set(roots.map(\.lastPathComponent)), ["us-tx", "us-nm", "us-fl"])
         XCTAssertFalse(roots.contains(where: { $0.lastPathComponent == "tiles" }))
         XCTAssertFalse(store.isInstalled("el-paso"))
         XCTAssertNotEqual(store.states["el-paso"], .ready)
@@ -43,7 +43,7 @@ final class PackStoreBundledTests: XCTestCase {
         try? fm.createDirectory(at: disk, withIntermediateDirectories: true)
         let store = PackStore(bundledRoot: nil, bundledPacksRoot: nil, diskRoot: disk)
         store.refreshStates()
-        for id in ["us-tx", "us-nm", "us-fl", "us-ny"] {
+        for id in ["us-tx", "us-nm", "us-fl"] {
             XCTAssertNotEqual(store.states[id], .ready)
             XCTAssertNotEqual(store.states[id], .failed)
             XCTAssertFalse(store.isInstalled(id))
@@ -51,7 +51,7 @@ final class PackStoreBundledTests: XCTestCase {
         }
     }
 
-    func testFourStatesOnDiskNoSkip() {
+    func testThreeStatesOnDiskNoSkip() {
         XCTAssertEqual(
             Set(FieldPackRowState.allCases),
             [.noWifi, .downloading, .ready, .failed]

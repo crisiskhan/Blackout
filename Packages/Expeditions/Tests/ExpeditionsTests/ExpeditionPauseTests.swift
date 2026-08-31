@@ -15,7 +15,7 @@ final class ExpeditionPauseTests: XCTestCase {
     func testPacksPlateIsCatalogNotDownloadWall() {
         XCTAssertEqual(
             ExpeditionPauseCopy.packsReady,
-            "Florida, Texas, New York, New Mexico, and city extras. Ready is on this phone only. Tap Update maps on Wi-Fi."
+            "Florida, Texas, New Mexico, and city extras. Ready is on this phone only. Tap Update maps on Wi-Fi."
         )
         XCTAssertFalse(ExpeditionPauseCopy.packsReady.localizedCaseInsensitiveContains("download"))
     }

@@ -353,7 +353,7 @@ public enum PackRelayPolicy {
 
     public static func isRelayable(_ id: String) -> Bool {
         switch id {
-        case "el-paso", "las-cruces", "albuquerque", "us-tx", "us-nm", "us-fl", "us-ny":
+        case "el-paso", "las-cruces", "albuquerque", "us-tx", "us-nm", "us-fl":
             return true
         default:
             return false

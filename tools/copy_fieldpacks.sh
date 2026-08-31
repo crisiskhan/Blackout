@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Copy staged statewide Field Packs into Blackout.app/FieldPacks/<id>/.
 # Compile/unsigned: staging is absent — no-op.
-# Archive: FIELD_PACKS_REQUIRED=1 fails the build if any of the four is missing.
+# Archive: FIELD_PACKS_REQUIRED=1 fails the build if any of FL/TX/NM is missing.
 # Each state stays in its own folder so tile z/x/y.png names cannot collide.
 set -euo pipefail
 
 SRC="${FIELD_PACKS_SRC:-${SRCROOT}/BundledFieldPacks}"
 DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FieldPacks"
-IDS="us-tx us-nm us-fl us-ny"
+IDS="us-tx us-nm us-fl"
 REQUIRED="${FIELD_PACKS_REQUIRED:-0}"
 
 copy_tree() {
@@ -84,19 +84,18 @@ for id in ${IDS}; do
     us-tx) printf '%s\n' "6ff6c9a191fe5df8d3bf48abb360ad361990bc672c1c59bd0cf2e3a3d5d55ade" > "${DST}/${id}/catalog.sha256" ;;
     us-nm) printf '%s\n' "2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8" > "${DST}/${id}/catalog.sha256" ;;
     us-fl) printf '%s\n' "49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d" > "${DST}/${id}/catalog.sha256" ;;
-    us-ny) printf '%s\n' "928034851277ab8628521f5bfd7f2f06e6bfed5b588d58f9b46033bae5e64500" > "${DST}/${id}/catalog.sha256" ;;
   esac
   echo "Copied FieldPacks/${id} (${count} PNG tiles)"
   copied=$((copied + 1))
 done
 
 if [ -d "${DST}/tiles" ]; then
-  echo "error: FieldPacks/tiles would collide across states — keep us-tx/us-nm/us-fl/us-ny" >&2
+  echo "error: FieldPacks/tiles would collide across states — keep us-tx/us-nm/us-fl" >&2
   exit 1
 fi
 
-if [ "${REQUIRED}" = "1" ] && [ "${copied}" -ne 4 ]; then
-  echo "error: archive needs all four statewide packs, copied ${copied}" >&2
+if [ "${REQUIRED}" = "1" ] && [ "${copied}" -ne 3 ]; then
+  echo "error: archive needs all three statewide packs, copied ${copied}" >&2
   exit 1
 fi
 

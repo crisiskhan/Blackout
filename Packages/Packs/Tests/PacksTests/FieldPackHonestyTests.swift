@@ -103,11 +103,12 @@ final class FieldPackHonestyTests: XCTestCase {
         )
     }
 
-    func testCatalogFactsStayFLTXNYNM() {
+    func testCatalogFactsStayFLTXNM() {
         XCTAssertEqual(
             Set(FieldPackCatalog.bundledStatewide.map(\.id)),
-            ["us-tx", "us-nm", "us-fl", "us-ny"]
+            ["us-tx", "us-nm", "us-fl"]
         )
+        XCTAssertFalse(FieldPackCatalog.bundledStatewide.contains(where: { $0.id == "us-ny" }))
         for pack in FieldPackCatalog.bundledStatewide {
             XCTAssertTrue(pack.isBundled)
             XCTAssertTrue(pack.assetReady)

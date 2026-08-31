@@ -89,9 +89,19 @@ public enum MapChromeLock {
     public static let lockHUDIsFullWidthBar = false
     public static let lockHUDPaintedHeight: Double = 28
 
-    public static let layersTitles = ["Pack tiles", "Streets", "Topo"]
+    /// Crisis 2026-08-31: one dusk aerial. USGS/streets/topo are Layers, default off.
+    public static let layersTitles = ["Streets", "Contours", "Trails"]
+    public static let defaultPaintIsDuskAerial = true
+    public static let defaultPaintsLabeledUSGS = false
+    public static let defaultPaintsCountyNames = false
+    public static let defaultPaintsHighwayShields = false
+    public static let remapsLabeledPackTilesToDuskAerial = true
+    public static let packTilesLayerDefaultOn = false
     public static let streetsLayerDefaultOn = false
+    public static let contoursLayerDefaultOn = false
+    public static let trailsLayerDefaultOn = false
     public static let topoLayerDefaultOn = false
+    public static let pinsDefaultOn = true
     /// Last-launch UserDefaults must not turn streets/topo on. Session toggle only.
     public static let streetsTopoReadPersistedOnLaunch = false
     /// Pack rasters already print county/street names. Do not add a second label pass.
@@ -109,6 +119,22 @@ public enum MapChromeLock {
         let voidLuminance = 7.0 / 255.0
         let a = duskGradeAlpha
         return tileLuminance * (1.0 - a) + voidLuminance * a
+    }
+
+    /// USGS paper is near-white with black type. Invert into dusk so county/I-10 ink is not a label.
+    public static func duskAerialRGB(tileLuminance: Double) -> (Double, Double, Double) {
+        let t = min(1, max(0, tileLuminance))
+        let dusk = 0.16 + (1.0 - t) * 0.38
+        return (
+            12.0 / 255.0 + dusk * 0.55,
+            16.0 / 255.0 + dusk * 0.50,
+            22.0 / 255.0 + dusk * 0.58
+        )
+    }
+
+    public static func duskAerialLuminance(tileLuminance: Double) -> Double {
+        let rgb = duskAerialRGB(tileLuminance: tileLuminance)
+        return 0.2126 * rgb.0 + 0.7152 * rgb.1 + 0.0722 * rgb.2
     }
     public static let usesGoogleLogo = false
 

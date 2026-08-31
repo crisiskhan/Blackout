@@ -535,14 +535,20 @@ final class TileCanvasLayer: UIView {
         let shift = zMax - z
         let worldX0 = x0 >> shift
         let worldY0 = y0 >> shift
-        if showPackTiles {
+        if showPackTiles || MapChromeLock.defaultPaintIsDuskAerial {
             for ty in minY...max(minY, maxY) {
                 for tx in minX...max(minX, maxX) {
                     let tileX = worldX0 + tx
                     let tileY = worldY0 + ty
                     let dest = CGRect(x: CGFloat(tx) * tileSize, y: CGFloat(ty) * tileSize, width: tileSize, height: tileSize)
-                    if let image = image(z: z, x: tileX, y: tileY) {
-                        image.draw(in: dest)
+                    if let raw = image(z: z, x: tileX, y: tileY) {
+                        let painted: UIImage
+                        if showTopoTiles || MapChromeLock.defaultPaintsLabeledUSGS {
+                            painted = raw
+                        } else {
+                            painted = duskAerial(raw, z: z, x: tileX, y: tileY)
+                        }
+                        painted.draw(in: dest)
                     }
                 }
             }
@@ -560,7 +566,7 @@ final class TileCanvasLayer: UIView {
             drawStreets(in: ctx)
         }
         drawRoute(in: ctx)
-        if showTopoTiles || MapChromeLock.paintsPackLabelOverlayWhenTopoOff {
+        if showStreets || MapChromeLock.paintsPackLabelOverlayWhenTopoOff {
             drawStreetNames(in: ctx)
         }
         drawTurnChevrons(in: ctx)
@@ -1055,5 +1061,58 @@ final class TileCanvasLayer: UIView {
         }
         cache.setObject(image, forKey: key)
         return image
+    }
+
+    private func duskAerial(_ source: UIImage, z: Int, x: Int, y: Int) -> UIImage {
+        guard MapChromeLock.remapsLabeledPackTilesToDuskAerial else { return source }
+        let key = "dusk/\(z)/\(x)/\(y)" as NSString
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let painted = remappedDuskAerial(source) else { return source }
+        cache.setObject(painted, forKey: key)
+        return painted
+    }
+
+    private func remappedDuskAerial(_ source: UIImage) -> UIImage? {
+        guard let cg = source.cgImage else { return nil }
+        let width = cg.width
+        let height = cg.height
+        let bytesPerRow = width * 4
+        var pixels = [UInt8](repeating: 0, count: height * bytesPerRow)
+        return pixels.withUnsafeMutableBytes { buffer in
+            guard let base = buffer.baseAddress else { return nil }
+            guard let ctx = CGContext(
+                data: base,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { return nil }
+            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+            let ptr = base.assumingMemoryBound(to: UInt8.self)
+            let count = height * bytesPerRow
+            var index = 0
+            while index + 3 < count {
+                let lum = (
+                    0.2126 * Double(ptr[index])
+                        + 0.7152 * Double(ptr[index + 1])
+                        + 0.0722 * Double(ptr[index + 2])
+                ) / 255.0
+                let rgb = MapChromeLock.duskAerialRGB(tileLuminance: lum)
+                ptr[index] = UInt8((rgb.0 * 255).clamped(to: 0...255))
+                ptr[index + 1] = UInt8((rgb.1 * 255).clamped(to: 0...255))
+                ptr[index + 2] = UInt8((rgb.2 * 255).clamped(to: 0...255))
+                index += 4
+            }
+            guard let out = ctx.makeImage() else { return nil }
+            return UIImage(cgImage: out)
+        }
+    }
+}
+
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        min(range.upperBound, max(range.lowerBound, self))
     }
 }

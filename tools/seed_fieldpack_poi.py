@@ -32,7 +32,6 @@ PACKS = {
 STATEWIDE = {
     "us-fl": (27.6986 - 6.6047 / 2, -83.8046 - 7.6606 / 2, 27.6986 + 6.6047 / 2, -83.8046 + 7.6606 / 2),
     "us-nm": (34.17 - 5.6681 / 2, -106.03 - 6.0483 / 2, 34.17 + 5.6681 / 2, -106.03 + 6.0483 / 2),
-    "us-ny": (42.7466 - 4.5385 / 2, -75.7569 - 8.0114 / 2, 42.7466 + 4.5385 / 2, -75.7569 + 8.0114 / 2),
     "us-tx": (31.17 - 10.6636 / 2, -100.08 - 13.1378 / 2, 31.17 + 10.6636 / 2, -100.08 + 13.1378 / 2),
 }
 
@@ -345,7 +344,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--statewide", action="store_true", help="Also seed FL/TX/NY/NM amenity-only")
+    parser.add_argument("--statewide", action="store_true", help="Also seed FL/TX/NM amenity-only")
     parser.add_argument("packs", nargs="*", help="Pack ids to seed (default: the three cities)")
     args = parser.parse_args()
     if args.statewide and not args.packs:
