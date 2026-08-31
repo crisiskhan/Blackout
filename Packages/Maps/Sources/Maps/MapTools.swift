@@ -10,30 +10,20 @@ struct RadarView: View {
     @Bindable var roster: PartyRoster
     var nearbyPeerCount: Int
 
+    var sweepAudio: Bool = false
+
     var body: some View {
         VStack(spacing: 20) {
             ScreenHeader("Radar", subtitle: "Self-dot plus nearby mesh. Zero peers is success.")
-            ZStack {
-                Circle()
-                    .stroke(BlackoutDS.Silver.edge.opacity(0.35), lineWidth: 0.5)
-                    .frame(width: 260, height: 260)
-                Circle()
-                    .stroke(BlackoutDS.Silver.edge.opacity(0.2), lineWidth: 0.5)
-                    .frame(width: 160, height: 160)
-                Circle()
-                    .fill(BlackoutDS.Semantic.info)
-                    .frame(width: 14, height: 14)
-                if roster.peerCount == 0 {
-                    VStack {
-                        Spacer()
-                        Text("0 peers")
-                            .font(BlackoutDS.captionFont())
-                            .foregroundStyle(BlackoutDS.Silver.dim)
-                            .padding(.bottom, 28)
-                    }
-                    .frame(width: 260, height: 260)
-                }
-            }
+            RadarHUDView(
+                headingUp: true,
+                headingDegrees: location.headingDegrees,
+                peers: roster.radarBlips(selfFix: location.navigationFix),
+                sweepAudio: sweepAudio,
+                onSelectPeer: { _ in },
+                onSelectSelf: {}
+            )
+            .frame(height: 280)
             MeshPill(nearbyCount: nearbyPeerCount)
             if let footnote = roster.selfLabel.footnote {
                 Text(footnote)

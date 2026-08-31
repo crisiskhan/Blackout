@@ -246,20 +246,40 @@ def test_map_chrome_lock() -> None:
         fail("64 slop must not be the chip layout minHeight")
     if "func recenterOpacity" not in lock:
         fail("MapChromeLock lost recenterOpacity")
-    if "showsSearchHitsOnMap = false" not in lock:
-        fail("Layers search hits must not land on Map")
+    if "showsAddressSearchOnMap = true" not in lock:
+        fail("pack address search must be visible on Map")
+    if "showsSearchHitsAsSlabsOnMap = false" not in lock:
+        fail("Map search hits must not be giant white slabs")
+    if "showsRadarOnMap = false" not in lock:
+        fail("RadarHUD must not sit on the big map")
+    if "radarDefaultOn = false" not in lock:
+        fail("Radar must default OFF")
     if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", hud):
         fail("MapHUDChip still lays out 64 as the chip face")
     if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", compass):
         fail("CompassLockBar still lays out 64 as the chip face")
     if "recenterOpacity(onCenter:" not in maps:
         fail("Recenter must go opacity 0 when already on-center")
+    if "RadarHUDView(" in maps:
+        fail("RadarHUDView must not sit on OfflineMapView")
+    if "rotationEffect(.degrees(radarVisible" in maps:
+        fail("do not rotate the tile map under a radar sweep")
+    if 'radarOn = true' in maps:
+        fail("Radar must default OFF")
+    if "MapPackSearchField" not in maps:
+        fail("Map lost the visible pack address search field")
+    if "MapPackSearchHits" not in maps:
+        fail("Map search hits must be compact rows, not MetalButton slabs")
+    if 'MetalButton("Search' in maps:
+        fail("search must not be a giant MetalButton slab")
     if "NavigateHitsList(hits: navigate.hits" in maps:
-        fail("NavigateHitsList must not land on Map")
+        fail("NavigateHitsList must not land as a Map overlay slab")
     if "NavigateHitsList(hits: searchHits" not in maps:
         fail("Layers search hits must stay in the Layers sheet")
-    if maps.count("NavigateHitsList") != 1:
-        fail("NavigateHitsList must live only in the Layers sheet")
+    if "sosOverlayMounts(" not in root:
+        fail("SOSFab must not live in the idle lock overlay tree")
+    if pbx_version_off_32():
+        fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
 
 
@@ -1067,8 +1087,10 @@ def test_compass_lock_on() -> None:
         fail("lock voice must stay on-device AVSpeechSynthesizer")
     if "NavigateSession" not in maps or "routing" not in maps:
         fail("street TBT must stay default when routing/ exists")
-    if "fieldHeadingUp" not in maps or "-(location.headingDegrees" not in maps:
-        fail("rose must rotate by -heading while heading-up")
+    if "-(location.headingDegrees" in maps:
+        fail("do not rotate OfflineMapView under heading-up; radar owns that sweep")
+    if "RadarHUDView(" not in (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text():
+        fail("Radar sweep must live on the Radar sheet, not the big map")
     if "SAVE CURRENT" not in math or "LOCKED" not in math or "DELETE" not in math:
         fail("MARK sheet lost SAVE CURRENT / STEER / LOCKED / DELETE")
     if "BlackoutDS.Hit.sos" not in sos:

@@ -20,9 +20,11 @@ public enum MapEmptyPolicy {
         radarOn: Bool,
         extremeSaver: Bool
     ) -> Bool {
-        if sosOnly || !packMounted { return false }
-        if extremeSaver { return true }
-        return radarOn
+        _ = packMounted
+        _ = sosOnly
+        _ = radarOn
+        _ = extremeSaver
+        return false
     }
 
     /// Follow-puck stays on the covering pack. Recenter pins coverage, never a GPS void.

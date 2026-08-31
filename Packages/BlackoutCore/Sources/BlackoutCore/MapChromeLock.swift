@@ -15,7 +15,11 @@ public enum MapChromeLock {
     public static let chipHitIsLayoutMinHeight = false
     public static let chipTitles = ["Recenter", "Layers", "Packs"]
     public static let chipRowIncludesLight = false
-    public static let showsSearchHitsOnMap = false
+    public static let showsAddressSearchOnMap = true
+    public static let showsSearchHitsOnMap = true
+    public static let showsSearchHitsAsSlabsOnMap = false
+    public static let showsRadarOnMap = false
+    public static let radarDefaultOn = false
 
     public static let showsShareReturnLastMarkOnMap = false
     public static let showsSearchPatternsOnMap = false

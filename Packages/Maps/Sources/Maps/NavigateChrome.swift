@@ -1,3 +1,4 @@
+import BlackoutCore
 import DesignSystem
 import MapsRouting
 import SwiftUI
@@ -175,6 +176,80 @@ struct NavigateEmptyCard: View {
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+}
+
+/// 56h pack search on the map. Dark chip face, not a MetalButton slab.
+struct MapPackSearchField: View {
+    @Binding var query: String
+    var onSubmit: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: CGFloat(MapChromeLock.chipGlyphPoint), weight: .semibold))
+            TextField("Search this pack", text: $query)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+                .submitLabel(.search)
+                .onSubmit(onSubmit)
+        }
+        .foregroundStyle(BlackoutDS.Silver.metal)
+        .padding(.horizontal, 12)
+        .frame(height: CGFloat(MapChromeLock.chipPaintedHeight))
+        .background(BlackoutDS.Surface.raised.opacity(0.92))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityLabel("Search this pack")
+    }
+}
+
+/// Compact hit rows under the map search field. Not Hit.md white slabs.
+struct MapPackSearchHits: View {
+    var hits: [PackSearchHit]
+    var onPick: (PackSearchHit) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(hits.prefix(5)) { hit in
+                Button {
+                    onPick(hit)
+                } label: {
+                    HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(hit.title)
+                                .font(BlackoutDS.captionFont())
+                                .fontWeight(.semibold)
+                                .foregroundStyle(BlackoutDS.Silver.bright)
+                            Text(hit.kind)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
+                        Spacer(minLength: 0)
+                        if let meters = hit.meters {
+                            Text(Formatters.distance(meters))
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.mid)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 36)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .background(BlackoutDS.Surface.raised.opacity(0.92))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

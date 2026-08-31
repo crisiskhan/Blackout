@@ -40,7 +40,6 @@ public struct MapsRootView: View {
     @State private var outsidePack = false
     @State private var resetToken = 0
     @State private var centerToken = 0
-    @State private var radarOn = true
     @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
     @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
     @State private var showViewshed = UserDefaults.standard.bool(forKey: BlackoutKeys.mapViewshed)
@@ -62,9 +61,6 @@ public struct MapsRootView: View {
     @State private var outingStartLongitude: Double?
     @State private var toolHint: String?
     @State private var torch = MapTorchController()
-    @State private var searchKind: SearchPatternKind = .expandingSquare
-    @State private var searchActive = false
-    @State private var searchLine: [(Double, Double)] = []
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(
@@ -148,14 +144,6 @@ public struct MapsRootView: View {
     private var showEmptyCard: Bool {
         MapEmptyPolicy.showsEmptyCard(packMounted: packService.pack != nil)
     }
-    private var radarVisible: Bool {
-        MapEmptyPolicy.showsRadar(
-            packMounted: packService.pack != nil,
-            sosOnly: sosOnly,
-            radarOn: radarOn,
-            extremeSaver: extremeSaver
-        )
-    }
     private var showChipRow: Bool {
         MapEmptyPolicy.showsChips(packMounted: packService.pack != nil, sosOnly: sosOnly)
     }
@@ -236,7 +224,6 @@ public struct MapsRootView: View {
             reduceMotion: reduceMotion,
             holdsChrome: holdsChrome,
             onAppearAction: {
-                if extremeSaver { radarOn = true }
                 resolvePaintPack()
                 refreshTerrain()
                 refreshGuidance()
@@ -336,7 +323,8 @@ public struct MapsRootView: View {
                     location: location,
                     pack: packService.pack,
                     roster: roster,
-                    nearbyPeerCount: mesh.nearbyPeerCount
+                    nearbyPeerCount: mesh.nearbyPeerCount,
+                    sweepAudio: sweepAudio
                 )
             case .topo:
                 TopographyView(location: location, packService: packService)
@@ -364,7 +352,6 @@ public struct MapsRootView: View {
 
     private func layersSheet() -> some View {
         MapLayersSheet(
-            radarOn: $radarOn,
             headingUp: $headingUp,
             sweepAudio: $sweepAudio,
             showSlope: $showSlope,
@@ -494,25 +481,7 @@ public struct MapsRootView: View {
         if MapEmptyPolicy.paintsCanvas(packMounted: packService.pack != nil), let pack = packService.pack {
             offlineMap(pack)
                 .id(pack.rootURL.standardizedFileURL.path)
-                .rotationEffect(.degrees(radarVisible && fieldHeadingUp ? -(location.headingDegrees ?? 0) : 0))
                 .ignoresSafeArea()
-            if radarVisible {
-                RadarHUDView(
-                    headingUp: fieldHeadingUp,
-                    headingDegrees: location.headingDegrees,
-                    peers: peers,
-                    sweepAudio: sweepAudio,
-                    onSelectPeer: {
-                        noteMapActivity()
-                        selectedPeer = $0
-                    },
-                    onSelectSelf: {
-                        noteMapActivity()
-                        selectedPeer = nil
-                    }
-                )
-                .allowsHitTesting(true)
-            }
         }
     }
 
@@ -540,7 +509,7 @@ public struct MapsRootView: View {
             activeManeuver: liveManeuver,
             inboundPing: openInboundPingFix,
             inboundPingHue: openInbound?.hue,
-            searchPattern: searchActive ? searchLine : [],
+            searchPattern: [],
             sharedTrack: sharedTrack,
             amenityPins: (packService.pack?.pois ?? []).map {
                 RoutingPOI(
@@ -639,39 +608,63 @@ public struct MapsRootView: View {
     }
 
     private var lockHudStack: some View {
-        receding {
-            VStack(spacing: 8) {
-                MapLockHUD(
-                    accuracyMeters: gpsAccuracyMeters,
-                    headingDegrees: location.headingDegrees,
-                    onNorthUp: {
-                        noteMapActivity()
-                        guard !compass.isLocked else { return }
-                        headingUp = false
-                        UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
+        VStack(spacing: 8) {
+            receding {
+                VStack(spacing: 8) {
+                    MapLockHUD(
+                        accuracyMeters: gpsAccuracyMeters,
+                        headingDegrees: location.headingDegrees,
+                        onNorthUp: {
+                            noteMapActivity()
+                            guard !compass.isLocked else { return }
+                            headingUp = false
+                            UserDefaults.standard.set(false, forKey: BlackoutKeys.radarHeadingUp)
+                        }
+                    )
+                    if DeadReckoningHonesty.chipVisible(gpsLive: gpsLive, isDeadReckoning: location.isDeadReckoning) {
+                        Text(DeadReckoningHonesty.chip)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Semantic.warn)
+                    } else if location.motionDenied, !gpsLive {
+                        Text(DeadReckoningHonesty.motionDeniedCopy)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Semantic.warn)
                     }
-                )
-                if DeadReckoningHonesty.chipVisible(gpsLive: gpsLive, isDeadReckoning: location.isDeadReckoning) {
-                    Text(DeadReckoningHonesty.chip)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                } else if location.motionDenied, !gpsLive {
-                    Text(DeadReckoningHonesty.motionDeniedCopy)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                }
-                if showViewshed, !packService.hasDEM {
-                    Text(ViewshedPolicy.noDEM)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.steel)
-                }
-                if let fieldMode {
-                    fieldModePlate(fieldMode)
+                    if showViewshed, !packService.hasDEM {
+                        Text(ViewshedPolicy.noDEM)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
+                    if let fieldMode {
+                        fieldModePlate(fieldMode)
+                    }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            if showChipRow {
+                mapPackSearch
+            }
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    private var mapPackSearch: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            MapPackSearchField(query: navQueryBinding, onSubmit: runPackSearch)
+            if MapChromeLock.showsSearchHitsOnMap, !MapChromeLock.showsSearchHitsAsSlabsOnMap,
+               !navigate.hits.isEmpty {
+                MapPackSearchHits(hits: navigate.hits, onPick: pickFound)
+            }
+        }
+    }
+
+    private func runPackSearch() {
+        noteMapActivity()
+        navigate.search(
+            pack: packService.routing,
+            pois: packService.pack?.pois ?? [],
+            addresses: packService.pack?.addresses ?? []
+        )
     }
 
     @ViewBuilder
@@ -950,8 +943,6 @@ public struct MapsRootView: View {
         )
     }
 
-    private var fieldHeadingUp: Bool { headingUp || compass.isLocked }
-
     private func applyLockHeading() {
         headingUp = true
         UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
@@ -1120,35 +1111,6 @@ public struct MapsRootView: View {
         return nil
     }
 
-    private func toggleSearch() {
-        if searchActive {
-            searchActive = false
-            searchLine = []
-            return
-        }
-        guard let region = packService.pack?.region else { return }
-        guard let origin = searchOrigin, origin.hasCoordinate else { return }
-        searchLine = SearchPattern.polyline(
-            kind: searchKind,
-            originLatitude: origin.latitude!,
-            originLongitude: origin.longitude!,
-            region: region
-        )
-        searchActive = true
-    }
-
-    private var searchOrigin: LocationFix? {
-        if let inbound = latestInbound, inbound.hasCoordinate {
-            return LocationFix(latitude: inbound.latitude, longitude: inbound.longitude)
-        }
-        if let stale = roster.peers.first(where: { PartyThread.isStale(lastHeard: $0.updatedAt) }),
-           let lat = stale.latitude, let lon = stale.longitude {
-            return LocationFix(latitude: lat, longitude: lon)
-        }
-        if let pin = location.manualPin, pin.hasCoordinate { return pin }
-        return location.navigationFix
-    }
-
     private func applySharedTrackIfNeeded() {
         guard sharedTrack.count >= 2, let last = sharedTrack.last else { return }
         lockOrRoute(latitude: last.latitude, longitude: last.longitude, label: "Shared track")
@@ -1315,7 +1277,6 @@ struct MapEmptyCard: View {
 }
 
 struct MapLayersSheet: View {
-    @Binding var radarOn: Bool
     @Binding var headingUp: Bool
     @Binding var sweepAudio: Bool
     @Binding var showSlope: Bool
@@ -1351,7 +1312,9 @@ struct MapLayersSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     ScreenHeader("Layers")
-                    layerToggle("Radar", on: $radarOn, enabled: extrasOn, persist: {})
+                    if extrasOn {
+                        GhostButton("Radar", height: BlackoutDS.Hit.md) { onOpenTool(.radar) }
+                    }
                     layerToggle("Topo", on: $showTopoTiles, enabled: extrasOn && hasRouting, persist: onToggleTopo)
                     layerToggle("Trail", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
                     layerToggle("Slope", on: $showSlope, enabled: extrasOn, persist: onToggleSlope)
