@@ -5,6 +5,7 @@ import Network
 import Observation
 
 /// Bluetooth / Wi-Fi / Local Network radios. GPS is out of scope.
+/// Must not construct CBCentralManager or start NWPathMonitor until unlock.
 @MainActor
 @Observable
 public final class MeshRadioProbe: NSObject {
@@ -23,9 +24,15 @@ public final class MeshRadioProbe: NSObject {
     private var central: CBCentralManager?
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "blackout.mesh.radios")
+    private var started = false
 
     public override init() {
         super.init()
+    }
+
+    public func start() {
+        guard !started else { return }
+        started = true
         central = CBCentralManager(delegate: self, queue: .main, options: [
             CBCentralManagerOptionShowPowerAlertKey: false
         ])

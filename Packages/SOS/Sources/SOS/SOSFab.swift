@@ -82,25 +82,9 @@ public struct SOSFab: View {
                     .offset(y: -120)
             }
         }
+        .onAppear { consumePresentConfirm() }
         .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
-            if requested {
-                if showsDisk {
-                    if isArmed {
-                        if SOSArmedRestore.shouldAutoPresentArmedOverlay(
-                            persistedArmed: true,
-                            presentRequested: true,
-                            newBinaryLaunch: suppressPersistedArmedAutoPresent
-                        ) {
-                            showArmedPanel = true
-                        }
-                    } else {
-                        showConfirm = true
-                    }
-                } else {
-                    showConfirm = true
-                }
-                presentConfirm?.wrappedValue = false
-            }
+            if requested { consumePresentConfirm() }
         }
         .onChange(of: showConfirm) { _, _ in publishCover() }
         .onChange(of: showArmedPanel) { _, _ in publishCover() }
@@ -165,6 +149,26 @@ public struct SOSFab: View {
                 )
             )
         }
+    }
+
+    private func consumePresentConfirm() {
+        guard presentConfirm?.wrappedValue == true else { return }
+        if showsDisk {
+            if isArmed {
+                if SOSArmedRestore.shouldAutoPresentArmedOverlay(
+                    persistedArmed: true,
+                    presentRequested: true,
+                    newBinaryLaunch: suppressPersistedArmedAutoPresent
+                ) {
+                    showArmedPanel = true
+                }
+            } else {
+                showConfirm = true
+            }
+        } else {
+            showConfirm = true
+        }
+        presentConfirm?.wrappedValue = false
     }
 
     private func publishCover() {

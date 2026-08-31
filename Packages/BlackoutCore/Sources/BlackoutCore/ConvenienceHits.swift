@@ -295,6 +295,11 @@ public enum LiveActivityPolicy {
         guard let inboundPing else { return false }
         return inboundPing.isOpen(at: now) && FieldPing.holdsMapChrome(inboundPing.ping)
     }
+
+    /// New-binary first process must not read `Activity.activities` or `request`.
+    public static func shouldTouchActivityKit(newBinaryLaunch: Bool) -> Bool {
+        !newBinaryLaunch
+    }
 }
 
 public enum ConvenienceCopy {

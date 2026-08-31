@@ -1406,6 +1406,27 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("do not restore NDEF")
     if "startUpdatingLocation()" not in loc.split("if authorization == .authorized")[1][:200]:
         fail("denied/not-determined GPS must not force startUpdatingLocation")
+    probe = (ROOT / "Packages/Mesh/Sources/BlackoutMesh/MeshRadioProbe.swift").read_text()
+    hub = (ROOT / "Blackout/LiveActivityHub.swift").read_text()
+    launch = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift").read_text()
+    if "sosFabMountsOnLockFrame = false" not in launch:
+        fail("lock frame must not mount SOSFab")
+    if "startsRadioProbeBeforeUnlock = false" not in launch:
+        fail("radio probe must not start on the lock frame")
+    if "touchesLiveActivityOnNewBinary = false" not in launch:
+        fail("new-binary first process must not touch ActivityKit")
+    if "sosOverlayMounts(" not in root:
+        fail("SOS overlay must stay off the idle lock frame")
+    if "CBCentralManager(" in probe.split("public override init()")[1].split("public func start")[0]:
+        fail("MeshRadioProbe.init must not construct CBCentralManager")
+    if "monitor.start(" in probe.split("public override init()")[1].split("public func start")[0]:
+        fail("MeshRadioProbe.init must not start NWPathMonitor")
+    if "shouldTouchActivityKit" not in hub:
+        fail("LiveActivityHub must consult shouldTouchActivityKit")
+    if "newBinaryLaunch: suppressPersistedArmedAutoPresent" not in app:
+        fail("Live Activity sync must pass the new-binary suppress flag")
+    if pbx.count("CURRENT_PROJECT_VERSION = 33") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
     ok("SOS armed restore + lockup first-open + launch crash sweep, version 33")
 
 

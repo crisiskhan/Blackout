@@ -11,9 +11,11 @@ enum LiveActivityHub {
         partyCode: String?,
         inbound: LatestInboundPing?,
         peerCount: Int,
-        callsign: String
+        callsign: String,
+        newBinaryLaunch: Bool = false
     ) {
 #if canImport(ActivityKit)
+        guard LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: newBinaryLaunch) else { return }
         let open = inbound.flatMap { $0.isOpen() ? $0 : nil }
         let should = LiveActivityPolicy.shouldBeActive(partyCode: partyCode, inboundPing: open)
         let state = BlackoutLiveAttributes.ContentState(
@@ -25,13 +27,14 @@ enum LiveActivityHub {
         if should {
             startOrUpdate(state: state)
         } else {
-            end()
+            end(newBinaryLaunch: newBinaryLaunch)
         }
 #endif
     }
 
-    static func end() {
+    static func end(newBinaryLaunch: Bool = false) {
 #if canImport(ActivityKit)
+        guard LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: newBinaryLaunch) else { return }
         for activity in Activity<BlackoutLiveAttributes>.activities {
             Task { await activity.end(nil, dismissalPolicy: .immediate) }
         }

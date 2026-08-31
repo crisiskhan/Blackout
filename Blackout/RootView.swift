@@ -90,7 +90,12 @@ struct RootView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            sosOverlay
+            if RootChromeLock.sosOverlayMounts(
+                isUnlocked: container.lock.isUnlocked,
+                coverRequested: container.sosCoverOpen || container.sosConfirmRequested
+            ) {
+                sosOverlay
+            }
         }
         .preferredColorScheme(.dark)
         .onChange(of: container.nightRed) { _, _ in

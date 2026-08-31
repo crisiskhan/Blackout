@@ -35,5 +35,16 @@ public enum LaunchLock {
     public static let coldLaunchShowsSplash = false
     public static let startsSensorsBeforeUnlock = false
     public static let startsLiveActivityBeforeUnlock = false
+    /// 33 lock-frame crash class. Covers stay off the lock tree until the twin asks.
+    public static let sosFabMountsOnLockFrame = false
+    /// CBCentralManager + NWPathMonitor must not start during AppContainer.init.
+    public static let startsRadioProbeBeforeUnlock = false
+    /// Leftover 32 ActivityKit rows must not be read on the first 33 process.
+    public static let touchesLiveActivityOnNewBinary = false
     public static let walksAllTilesOnBoot = false
+
+    /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
+    public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
+        isUnlocked || coverRequested
+    }
 }

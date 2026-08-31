@@ -154,6 +154,7 @@ final class AppContainer {
     }
 
     func syncMeshToParty() {
+        radios.start()
         crypto.setPartyCode(identity.partyCode)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
         ptt.extremeSaver = battery.isExtremeSaver
@@ -200,7 +201,7 @@ final class AppContainer {
         party.leaveParty()
         setLeaveBehindRelay(false)
         mesh.stop()
-        LiveActivityHub.end()
+        LiveActivityHub.end(newBinaryLaunch: suppressPersistedArmedAutoPresent)
         latestInbound = nil
         applyIdleTimer()
     }
@@ -323,7 +324,8 @@ final class AppContainer {
             partyCode: identity.partyCode,
             inbound: latestInbound,
             peerCount: mesh.nearbyPeerCount,
-            callsign: identity.callsign
+            callsign: identity.callsign,
+            newBinaryLaunch: suppressPersistedArmedAutoPresent
         )
     }
 

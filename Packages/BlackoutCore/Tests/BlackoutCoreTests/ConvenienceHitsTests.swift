@@ -172,6 +172,8 @@ final class ConvenienceHitsTests: XCTestCase {
         XCTAssertTrue(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: inbound))
         XCTAssertFalse(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: nil))
         XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
+        XCTAssertFalse(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: true))
+        XCTAssertTrue(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: false))
     }
 
     func testBLACKOUTCoordStringMatchesSOSFormat() {
