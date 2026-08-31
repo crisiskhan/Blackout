@@ -23,7 +23,7 @@ struct RadarView: View {
                 onSelectPeer: { _ in },
                 onSelectSelf: {}
             )
-            .frame(height: 280)
+            .frame(height: CGFloat(MapChromeLock.radarSelfPoint))
             MeshPill(nearbyCount: nearbyPeerCount)
             if let footnote = roster.selfLabel.footnote {
                 Text(footnote)

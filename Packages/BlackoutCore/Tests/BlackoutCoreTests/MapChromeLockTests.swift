@@ -35,10 +35,13 @@ final class MapChromeLockTests: XCTestCase {
 
     func testSearchHitsDoNotLandOnMap() {
         XCTAssertTrue(MapChromeLock.showsAddressSearchOnMap)
-        XCTAssertTrue(MapChromeLock.showsSearchHitsOnMap)
+        XCTAssertFalse(MapChromeLock.showsSearchHitsOnMap)
+        XCTAssertTrue(MapChromeLock.showsSearchHitsInSheet)
+        XCTAssertTrue(MapChromeLock.searchRecedesWithChrome)
         XCTAssertFalse(MapChromeLock.showsSearchHitsAsSlabsOnMap)
         XCTAssertFalse(MapChromeLock.showsRadarOnMap)
         XCTAssertFalse(MapChromeLock.radarDefaultOn)
+        XCTAssertEqual(MapChromeLock.radarSelfPoint, 260)
     }
 
     func testKillsDevice32PermanentSlabStack() {

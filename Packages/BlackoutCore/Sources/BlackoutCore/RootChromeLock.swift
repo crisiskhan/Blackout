@@ -39,6 +39,8 @@ public enum LaunchLock {
     public static let persistedSOSArmedStealsFirstOpen = false
     public static let coldLaunchShowsSplash = false
     public static let startsSensorsBeforeUnlock = false
+    /// CLLocationManager / CMPedometer / CMMotionManager stay off AppContainer.init.
+    public static let constructsLocationHardwareInInit = false
     public static let startsLiveActivityBeforeUnlock = false
     /// 33 lock-frame crash class. Covers stay off the lock tree until the twin asks.
     public static let sosFabMountsOnLockFrame = false

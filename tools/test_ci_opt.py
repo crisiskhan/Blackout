@@ -248,12 +248,20 @@ def test_map_chrome_lock() -> None:
         fail("MapChromeLock lost recenterOpacity")
     if "showsAddressSearchOnMap = true" not in lock:
         fail("pack address search must be visible on Map")
+    if "showsSearchHitsOnMap = false" not in lock:
+        fail("search hits must not paint on the tiles")
+    if "showsSearchHitsInSheet = true" not in lock:
+        fail("search hits must open a sheet")
+    if "searchRecedesWithChrome = true" not in lock:
+        fail("56h pack search must recede with Map chrome")
     if "showsSearchHitsAsSlabsOnMap = false" not in lock:
         fail("Map search hits must not be giant white slabs")
     if "showsRadarOnMap = false" not in lock:
         fail("RadarHUD must not sit on the big map")
     if "radarDefaultOn = false" not in lock:
         fail("Radar must default OFF")
+    if "radarSelfPoint: Double = 260" not in lock:
+        fail("dedicated Radar screen must be 260pt on-self")
     if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", hud):
         fail("MapHUDChip still lays out 64 as the chip face")
     if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", compass):
@@ -268,14 +276,24 @@ def test_map_chrome_lock() -> None:
         fail("Radar must default OFF")
     if "MapPackSearchField" not in maps:
         fail("Map lost the visible pack address search field")
-    if "MapPackSearchHits" not in maps:
-        fail("Map search hits must be compact rows, not MetalButton slabs")
+    if "MapPackSearchHits(hits:" in maps:
+        fail("search hits must not be a list on the tiles")
+    if ".sheet(isPresented: $showSearchHits" not in maps:
+        fail("pack search hits must open a sheet")
+    hud_stack = maps.split("private var lockHudStack", 1)[-1].split("private var mapPackSearch", 1)[0]
+    if "mapPackSearch" not in hud_stack.split("receding", 1)[-1]:
+        fail("56h pack search must recede with chrome")
     if 'MetalButton("Search' in maps:
         fail("search must not be a giant MetalButton slab")
     if "NavigateHitsList(hits: navigate.hits" in maps:
         fail("NavigateHitsList must not land as a Map overlay slab")
     if "NavigateHitsList(hits: searchHits" not in maps:
         fail("Layers search hits must stay in the Layers sheet")
+    tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
+    if "RadarHUDView(" not in tools:
+        fail("Layers → Radar must reuse RadarView / RadarHUDView")
+    if ".frame(height: 260)" not in tools and "radarSelfPoint" not in tools:
+        fail("RadarView must stay 260pt on-self, not an overlay on OfflineMapView")
     if "sosOverlayMounts(" not in root:
         fail("SOSFab must not live in the idle lock overlay tree")
     if pbx_version_off_32():
@@ -1293,6 +1311,8 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("lock SOS twin hold must stay 1.5s")
     if "startsSensorsBeforeUnlock = false" not in launch:
         fail("cold launch must not start GPS/motion before unlock")
+    if "constructsLocationHardwareInInit = false" not in launch:
+        fail("LocationService must not construct CoreLocation/CoreMotion in AppContainer.init")
     if "startsLiveActivityBeforeUnlock = false" not in launch:
         fail("cold launch must not start Live Activity before unlock")
     if "walksAllTilesOnBoot = false" not in launch:
@@ -1388,6 +1408,19 @@ def test_sos_armed_restore_no_crash() -> None:
     loc = (ROOT / "Packages/Location/Sources/BlackoutLocation/LocationService.swift").read_text()
     if "location.startUpdating()" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
         fail("AppContainer.init must not start GPS/motion before the unlock gate")
+    loc_init = loc.split("public init() {", 1)[1].split("\n    }", 1)[0]
+    if "CLLocationManager(" in loc_init or "CMPedometer(" in loc_init or "CMMotionManager(" in loc_init:
+        fail("LocationService.init must not construct CLLocationManager/CMPedometer/CMMotionManager")
+    if "armHardwareIfNeeded()" not in loc.split("public func startUpdating()")[1][:400]:
+        fail("location hardware must arm on startUpdating after unlock")
+    if "let manager = CLLocationManager()" in loc:
+        fail("CLLocationManager must not be a stored eager property")
+    if "let pedometer = CMPedometer()" in loc:
+        fail("CMPedometer must not be a stored eager property")
+    if "let motion = CMMotionManager()" in loc:
+        fail("CMMotionManager must not be a stored eager property")
+    if "constructsLocationHardwareInInit = false" not in launch:
+        fail("lock contract must forbid location hardware on AppContainer.init")
     if "syncMeshToParty()" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
         fail("AppContainer.init must not start mesh/Live Activity before unlock")
     if "guard container.lock.isUnlocked else { return }" not in root.split(".onAppear")[1][:240]:

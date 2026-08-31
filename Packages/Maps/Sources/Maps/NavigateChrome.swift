@@ -209,7 +209,26 @@ struct MapPackSearchField: View {
     }
 }
 
-/// Compact hit rows under the map search field. Not Hit.md white slabs.
+/// Hits live in a sheet, not on the tiles.
+struct MapPackSearchSheet: View {
+    var hits: [PackSearchHit]
+    var onPick: (PackSearchHit) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                MapPackSearchHits(hits: hits, onPick: onPick)
+                    .padding(16)
+            }
+            .background(BlackoutDS.Surface.base.ignoresSafeArea())
+            .navigationTitle("Search this pack")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .preferredColorScheme(.dark)
+    }
+}
+
+/// Compact hit rows in the search sheet. Not Hit.md white slabs on the map.
 struct MapPackSearchHits: View {
     var hits: [PackSearchHit]
     var onPick: (PackSearchHit) -> Void

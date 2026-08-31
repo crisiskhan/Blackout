@@ -47,6 +47,7 @@ public struct MapsRootView: View {
     @State private var selectedPeer: RadarBlip?
     @State private var showLiDAR = false
     @State private var showLayers = false
+    @State private var showSearchHits = false
     @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
     @State private var showTrails = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTrails)
     @State private var navigate = NavigateSession()
@@ -156,6 +157,7 @@ public struct MapsRootView: View {
             || sosCoverOpen
             || tool != nil
             || showLayers
+            || showSearchHits
             || showLiDAR
             || selectedPeer != nil
             || showEmptyCard
@@ -260,6 +262,7 @@ public struct MapsRootView: View {
         mapRoot
             .sheet(item: $tool, content: toolSheet)
             .sheet(isPresented: $showLayers, content: layersSheet)
+            .sheet(isPresented: $showSearchHits, content: packSearchHitsSheet)
             .sheet(item: $selectedPeer, content: peerSheet)
             .sheet(isPresented: $showLiDAR, content: lidarSheet)
             .sheet(isPresented: Bindable(compass).showMarkSheet, content: markSheet)
@@ -638,10 +641,10 @@ public struct MapsRootView: View {
                     if let fieldMode {
                         fieldModePlate(fieldMode)
                     }
+                    if showChipRow {
+                        mapPackSearch
+                    }
                 }
-            }
-            if showChipRow {
-                mapPackSearch
             }
         }
         .padding(.horizontal, 16)
@@ -649,13 +652,7 @@ public struct MapsRootView: View {
     }
 
     private var mapPackSearch: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            MapPackSearchField(query: navQueryBinding, onSubmit: runPackSearch)
-            if MapChromeLock.showsSearchHitsOnMap, !MapChromeLock.showsSearchHitsAsSlabsOnMap,
-               !navigate.hits.isEmpty {
-                MapPackSearchHits(hits: navigate.hits, onPick: pickFound)
-            }
-        }
+        MapPackSearchField(query: navQueryBinding, onSubmit: runPackSearch)
     }
 
     private func runPackSearch() {
@@ -665,6 +662,15 @@ public struct MapsRootView: View {
             pois: packService.pack?.pois ?? [],
             addresses: packService.pack?.addresses ?? []
         )
+        showSearchHits = MapChromeLock.showsSearchHitsInSheet && !navigate.hits.isEmpty
+    }
+
+    private func packSearchHitsSheet() -> some View {
+        MapPackSearchSheet(hits: navigate.hits, onPick: { hit in
+            showSearchHits = false
+            pickFound(hit)
+        })
+        .presentationDetents([.medium, .large])
     }
 
     @ViewBuilder

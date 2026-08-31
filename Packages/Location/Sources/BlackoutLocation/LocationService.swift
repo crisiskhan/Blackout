@@ -28,10 +28,11 @@ public final class LocationService: LocationServing {
         return lastKnown
     }
 
-    fileprivate let manager = CLLocationManager()
+    fileprivate var manager: CLLocationManager?
     private let engine = LocationEngine()
-    private let pedometer = CMPedometer()
-    private let motion = CMMotionManager()
+    private var pedometer: CMPedometer?
+    private var motion: CMMotionManager?
+    private var pendingPolicy: BatteryPolicy?
     private var origin: LocationFix?
     private var stepsSinceOrigin: Double = 0
     private var lastStepAt: Date?
@@ -44,26 +45,40 @@ public final class LocationService: LocationServing {
 
     public init() {
         engine.owner = self
-        manager.delegate = engine
-        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        manager.headingFilter = 2
-        authorization = Self.map(manager.authorizationStatus)
         lastKnown = Self.load(Self.lastKnownKey)
         manualPin = Self.load(Self.manualPinKey)
         origin = lastKnown ?? manualPin
     }
 
+    /// CoreLocation / CoreMotion objects stay off the lock frame.
+    private func armHardwareIfNeeded() {
+        guard manager == nil else { return }
+        let mgr = CLLocationManager()
+        mgr.delegate = engine
+        mgr.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        mgr.headingFilter = 2
+        manager = mgr
+        pedometer = CMPedometer()
+        motion = CMMotionManager()
+        authorization = Self.map(mgr.authorizationStatus)
+        if let pendingPolicy {
+            applyPolicy(pendingPolicy)
+        }
+    }
+
     public func requestWhenInUse() {
-        manager.requestWhenInUseAuthorization()
+        armHardwareIfNeeded()
+        manager?.requestWhenInUseAuthorization()
     }
 
     public func startUpdating() {
+        armHardwareIfNeeded()
         isUpdating = true
         if authorization == .authorized {
-            manager.startUpdatingLocation()
+            manager?.startUpdatingLocation()
         }
         if CLLocationManager.headingAvailable() {
-            manager.startUpdatingHeading()
+            manager?.startUpdatingHeading()
         }
         startDeadReckoningSensors()
         refreshDeadReckoningFlag()
@@ -71,13 +86,15 @@ public final class LocationService: LocationServing {
 
     public func stopUpdating() {
         isUpdating = false
-        manager.stopUpdatingLocation()
-        manager.stopUpdatingHeading()
+        manager?.stopUpdatingLocation()
+        manager?.stopUpdatingHeading()
         stopDeadReckoningSensors()
         isDeadReckoning = false
     }
 
     public func applyPolicy(_ policy: BatteryPolicy) {
+        pendingPolicy = policy
+        guard let manager else { return }
         switch policy {
         case .balanced:
             manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
@@ -94,7 +111,7 @@ public final class LocationService: LocationServing {
     fileprivate func applyAuthorization(_ status: CLAuthorizationStatus) {
         authorization = Self.map(status)
         if authorization == .authorized, isUpdating {
-            manager.startUpdatingLocation()
+            manager?.startUpdatingLocation()
         }
         refreshDeadReckoningFlag()
     }
@@ -147,7 +164,7 @@ public final class LocationService: LocationServing {
     private func startDeadReckoningSensors() {
         refreshMotionAuthorization()
         guard DeadReckoningHonesty.canDeadReckon(motionDenied: motionDenied) else { return }
-        if CMPedometer.isStepCountingAvailable() {
+        if CMPedometer.isStepCountingAvailable(), let pedometer {
             let from = Date().addingTimeInterval(-1)
             pedometer.startUpdates(from: from) { [weak self] data, _ in
                 guard let data else { return }
@@ -156,7 +173,7 @@ public final class LocationService: LocationServing {
                 }
             }
         }
-        if motion.isAccelerometerAvailable {
+        if let motion, motion.isAccelerometerAvailable {
             motion.accelerometerUpdateInterval = 0.05
             motion.startAccelerometerUpdates(to: .main) { [weak self] sample, _ in
                 guard let sample else { return }
@@ -168,8 +185,8 @@ public final class LocationService: LocationServing {
     }
 
     private func stopDeadReckoningSensors() {
-        pedometer.stopUpdates()
-        motion.stopAccelerometerUpdates()
+        pedometer?.stopUpdates()
+        motion?.stopAccelerometerUpdates()
     }
 
     private func applyPedometer(_ data: CMPedometerData) {
