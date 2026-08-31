@@ -1417,6 +1417,10 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("new-binary first process must not touch ActivityKit")
     if "sosOverlayMounts(" not in root:
         fail("SOS overlay must stay off the idle lock frame")
+    if "func sosOverlayMounts" not in launch or "enum RootChromeLock" not in launch:
+        fail("RootChromeLock must own sosOverlayMounts (RootView and tests call it)")
+    if "stackedChrome" not in root or "sosOverlaySlot" not in root:
+        fail("RootView.body must stay split or Xcode 16 cannot type-check it")
     if "CBCentralManager(" in probe.split("public override init()")[1].split("public func start")[0]:
         fail("MeshRadioProbe.init must not construct CBCentralManager")
     if "monitor.start(" in probe.split("public override init()")[1].split("public func start")[0]:

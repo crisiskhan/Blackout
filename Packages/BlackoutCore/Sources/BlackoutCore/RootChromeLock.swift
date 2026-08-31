@@ -11,6 +11,11 @@ public enum RootChromeLock {
     /// DS §10.1 first-run pack sheet is dead. Cold launch is the in-app unlock gate.
     public static let autoPresentsFirstOpenPackSheet = false
     public static let coldLaunchDestination = LaunchLock.destination
+
+    /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
+    public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
+        LaunchLock.sosOverlayMounts(isUnlocked: isUnlocked, coverRequested: coverRequested)
+    }
 }
 
 /// First-open lock chrome. SwiftUI slider + lockup Image emblem. Not a full-screen still.

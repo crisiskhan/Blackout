@@ -51,54 +51,9 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        ZStack {
-            BlackoutDS.Surface.void.ignoresSafeArea()
-            if !container.lock.isUnlocked {
-                LockGateView(lock: container.lock, onHoldSOS: {
-                    container.sosConfirmRequested = true
-                })
-            } else {
-                chrome
-                if let bootError = container.bootError {
-                    VStack {
-                        StoreFailure(bootError)
-                            .padding(.horizontal, 16)
-                            .padding(.top, sizeClass == .regular ? 12 : 72)
-                        Spacer()
-                    }
-                    .allowsHitTesting(false)
-                }
-                CameraControlPTTCatcher()
-                    .frame(width: 0, height: 0)
-                    .allowsHitTesting(false)
-                if container.showRadioBanner {
-                    radioBannerOverlay
-                }
-            }
-        }
-        .overlay(alignment: .topLeading) {
-            if container.lock.isUnlocked,
-               sizeClass != .regular,
-               !container.battery.isCritical,
-               destination != .map {
-                settingsButton
-            }
-        }
-        .overlay(alignment: .bottomLeading) {
-            if container.lock.isUnlocked, !container.battery.isCritical {
-                vitalsOverlay
-            }
-        }
-        .overlay(alignment: .bottomTrailing) {
-            if RootChromeLock.sosOverlayMounts(
-                isUnlocked: container.lock.isUnlocked,
-                coverRequested: container.sosCoverOpen || container.sosConfirmRequested
-            ) {
-                sosOverlay
-            }
-        }
-        .preferredColorScheme(.dark)
-        .onChange(of: container.nightRed) { _, _ in
+        stackedChrome
+            .preferredColorScheme(.dark)
+            .onChange(of: container.nightRed) { _, _ in
             // Night red is not light mode. Scheme stays dark.
         }
         .sheet(isPresented: settingsSheetBinding) {
@@ -176,6 +131,74 @@ struct RootView: View {
                 container.refreshLiveActivity()
                 container.applyIdleTimer()
             }
+        }
+    }
+
+    private var stackedChrome: some View {
+        rootStack
+            .overlay(alignment: .topLeading) { settingsOverlaySlot }
+            .overlay(alignment: .bottomLeading) { vitalsOverlaySlot }
+            .overlay(alignment: .bottomTrailing) { sosOverlaySlot }
+    }
+
+    @ViewBuilder
+    private var rootStack: some View {
+        ZStack {
+            BlackoutDS.Surface.void.ignoresSafeArea()
+            if !container.lock.isUnlocked {
+                LockGateView(lock: container.lock, onHoldSOS: {
+                    container.sosConfirmRequested = true
+                })
+            } else {
+                unlockedChrome
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var unlockedChrome: some View {
+        chrome
+        if let bootError = container.bootError {
+            VStack {
+                StoreFailure(bootError)
+                    .padding(.horizontal, 16)
+                    .padding(.top, sizeClass == .regular ? 12 : 72)
+                Spacer()
+            }
+            .allowsHitTesting(false)
+        }
+        CameraControlPTTCatcher()
+            .frame(width: 0, height: 0)
+            .allowsHitTesting(false)
+        if container.showRadioBanner {
+            radioBannerOverlay
+        }
+    }
+
+    @ViewBuilder
+    private var settingsOverlaySlot: some View {
+        if container.lock.isUnlocked,
+           sizeClass != .regular,
+           !container.battery.isCritical,
+           destination != .map {
+            settingsButton
+        }
+    }
+
+    @ViewBuilder
+    private var vitalsOverlaySlot: some View {
+        if container.lock.isUnlocked, !container.battery.isCritical {
+            vitalsOverlay
+        }
+    }
+
+    @ViewBuilder
+    private var sosOverlaySlot: some View {
+        if RootChromeLock.sosOverlayMounts(
+            isUnlocked: container.lock.isUnlocked,
+            coverRequested: container.sosCoverOpen || container.sosConfirmRequested
+        ) {
+            sosOverlay
         }
     }
 
