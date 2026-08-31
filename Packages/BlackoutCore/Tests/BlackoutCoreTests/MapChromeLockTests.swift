@@ -133,16 +133,18 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.paintsDeadReckoningChipOnMap)
         XCTAssertFalse(MapChromeLock.paintsScaleBarOnMap)
         XCTAssertFalse(MapChromeLock.pinSheetIsMetalSlab)
-        XCTAssertTrue(MapChromeLock.vitalsIsRootSibling)
-        XCTAssertTrue(MapChromeLock.vitalsSitsInSOSBand)
+        XCTAssertFalse(MapChromeLock.paintsVitalsChrome)
+        XCTAssertFalse(MapChromeLock.vitalsIsRootSibling)
         XCTAssertFalse(MapChromeLock.vitalsCoversFieldCards)
-        XCTAssertTrue(MapChromeLock.vitalsNeverOnField)
         XCTAssertFalse(MapChromeLock.sosHidesForKeyboard)
         XCTAssertTrue(MapChromeLock.sosLiftsAboveKeyboard)
+        XCTAssertTrue(RootChromeLock.settingsSitsInSegmentRow)
+        XCTAssertFalse(RootChromeLock.settingsIsTopLeadingOverlay)
+        XCTAssertFalse(RootChromeLock.pttIgnoresBottomSafeArea)
     }
 
-    func testSoloHidesIAmOKOnEveryTab() {
-        XCTAssertFalse(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: false))
+    func testVitalsChromeIsGoneOnEveryTabSoloOrParty() {
+        XCTAssertFalse(MapChromeLock.paintsVitalsChrome)
         for tab in ["map", "comms", "field", "expedition"] {
             XCTAssertFalse(
                 MapChromeLock.showsVitalsOverlay(
@@ -151,28 +153,24 @@ final class MapChromeLockTests: XCTestCase {
                     partyPeerCount: 0,
                     expeditionOpen: false
                 ),
-                "solo must hide I AM OK on \(tab)"
+                "dual must be gone on \(tab) when solo"
+            )
+            XCTAssertFalse(
+                MapChromeLock.showsVitalsOverlay(
+                    tab: tab,
+                    nearbyPeerCount: 3,
+                    partyPeerCount: 3,
+                    expeditionOpen: true
+                ),
+                "dual must be gone on \(tab) when a party is present"
             )
         }
     }
 
-    func testPartyShowsIAmOKOnMapCommsExpeditionNeverField() {
-        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 1, partyPeerCount: 0, expeditionOpen: false))
-        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 2, expeditionOpen: false))
-        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: true))
-        XCTAssertTrue(
-            MapChromeLock.showsVitalsOverlay(tab: "map", nearbyPeerCount: 1, partyPeerCount: 0, expeditionOpen: false)
-        )
-        XCTAssertTrue(
-            MapChromeLock.showsVitalsOverlay(tab: "comms", nearbyPeerCount: 0, partyPeerCount: 1, expeditionOpen: false)
-        )
-        XCTAssertTrue(
-            MapChromeLock.showsVitalsOverlay(tab: "expedition", nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: true)
-        )
-        XCTAssertFalse(
-            MapChromeLock.showsVitalsOverlay(tab: "field", nearbyPeerCount: 3, partyPeerCount: 3, expeditionOpen: true)
-        )
-        XCTAssertTrue(MapChromeLock.vitalsNeverOnField)
+    func testFieldPlateFitsSafeWidthAndClearsSOS() {
+        XCTAssertTrue(MapChromeLock.fieldPlateUsesSafeArea)
+        XCTAssertTrue(MapChromeLock.fieldContentFitsSafeWidth)
+        XCTAssertEqual(MapChromeLock.fieldContentHorizontalInset, 20)
     }
 
     func testFieldClearanceClearsThe88SOSDisk() {
@@ -339,10 +337,12 @@ final class MapChromeLockTests: XCTestCase {
     }
 
     func testDuskAerialRemapHidesPaperWhiteLabels() {
+        XCTAssertTrue(MapChromeLock.duskCrushesCountyLabels)
         let paper = MapChromeLock.duskAerialLuminance(tileLuminance: 0.95)
-        XCTAssertLessThan(paper, 0.45)
         let ink = MapChromeLock.duskAerialLuminance(tileLuminance: 0.10)
-        XCTAssertGreaterThan(ink, 0.20)
+        XCTAssertLessThan(paper, 0.35)
+        XCTAssertLessThan(ink, 0.35)
+        XCTAssertLessThan(abs(paper - ink), 0.12)
         let washed = MapChromeLock.duskResultLuminance(
             tileLuminance: MapChromeLock.duskAerialLuminance(tileLuminance: 0.50)
         )

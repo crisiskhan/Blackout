@@ -227,7 +227,7 @@ struct GuideSkillsView: View {
     var onOpenMapJob: (GuideMapJob) -> Void
 
     var body: some View {
-        ScrollView {
+        FieldSafePlate {
             VStack(alignment: .leading, spacing: 20) {
                 ScreenHeader("Primitive skills", subtitle: "Timed do-along. Fire, shelter, water. Not a game.")
                 ForEach(doAlongArticles) { article in
@@ -241,11 +241,6 @@ struct GuideSkillsView: View {
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
             }
-            .padding(20)
-            .padding(
-                .bottom,
-                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
-            )
         }
     }
 

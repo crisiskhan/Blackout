@@ -6,6 +6,11 @@ public enum RootChromeLock {
     public static let sosOverlayIsInsideTabView = false
     public static let sosIsRootViewSibling = true
     public static let sosPlacement = "RootView.ZStack.sibling"
+    /// Device 42: gear on Guide/Threads was a Root overlay at top-leading.
+    public static let settingsIsTopLeadingOverlay = false
+    public static let settingsSitsInSegmentRow = true
+    /// PTT disc must sit in the bottom safe area, not under the tab bar.
+    public static let pttIgnoresBottomSafeArea = false
     /// Only flag that unmounts Map / Comms / Field / Expedition.
     public static let chromeCollapseFlag = "battery.isCritical"
     /// DS §10.1 first-run pack sheet is dead. Cold launch is the in-app unlock gate.

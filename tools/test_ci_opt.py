@@ -375,9 +375,9 @@ def test_map_google_feel() -> None:
         if flag not in lock:
             fail(f"MapChromeLock missing {flag}")
     if "func showsVitalsOverlay" not in lock:
-        fail("I AM OK must hide on Field")
-    if "vitalsNeverOnField = true" not in lock:
-        fail("I AM OK must never paint on Field")
+        fail("showsVitalsOverlay must stay testable and return false")
+    if "paintsVitalsChrome = false" not in lock:
+        fail("I AM OK dual chrome must be deleted")
     if "sosHidesForKeyboard = false" not in lock:
         fail("never hide SOS to clear the keyboard")
     if "sosLiftsAboveKeyboard = true" not in lock:
@@ -386,10 +386,10 @@ def test_map_google_feel() -> None:
         fail("Recenter/Layers must hide when Map search is focused")
     if "testIdleMapIsPackTilesPinsSearchNotARadarHUD" not in tests:
         fail("missing Crisis 21:13 Map lock test")
-    if "testSoloHidesIAmOKOnEveryTab" not in tests:
-        fail("missing solo-hides-I-AM-OK test")
-    if "testPartyShowsIAmOKOnMapCommsExpeditionNeverField" not in tests:
-        fail("missing party-I-AM-OK-not-on-Field test")
+    if "testVitalsChromeIsGoneOnEveryTabSoloOrParty" not in tests:
+        fail("missing dual-gone-everywhere test")
+    if "testFieldPlateFitsSafeWidthAndClearsSOS" not in tests:
+        fail("missing Field safe-width test")
     if "testFieldClearanceClearsThe88SOSDisk" not in tests:
         fail("missing Field clearance-above-88-SOS test")
     if "testRightEdgeChipsHideWhenSearchFocused" not in tests:
@@ -551,32 +551,36 @@ def test_map_google_feel() -> None:
         fail("missing search-miss empty-state test")
     if "MKLocalSearch" in nav_chrome:
         fail("pack search must stay offline — no MKLocalSearch")
-    if "showsVitalsOverlay" not in root:
-        fail("I AM OK must stay a Root sibling on every tab")
-    vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:900]
-    if "showsVitalsOverlay" not in vitals_slot:
-        fail("I AM OK overlay must stay in the SOS band on every tab")
-    if "nearbyPeerCount" not in vitals_slot:
-        fail("I AM OK must gate on nearby peers")
-    if "partyPeerCount" not in vitals_slot:
-        fail("I AM OK must gate on party roster peers")
-    if "expeditionOpen" not in vitals_slot:
-        fail("I AM OK must gate on open expedition")
-    if "vitalsNeverOnField = true" not in lock:
-        fail("I AM OK must never paint on Field")
-    if "vitalsIsRootSibling = true" not in lock:
-        fail("I AM OK dual must stay a Root sibling")
-    if "vitalsSitsInSOSBand = true" not in lock:
-        fail("I AM OK must sit in the SOS band, 8pt above the tab bar")
+    if "VitalsChip" in root or "vitalsOverlay" in root or "I AM OK" in root:
+        fail("I AM OK dual must not be a Root overlay")
+    if ".overlay(alignment: .bottomLeading)" in root:
+        fail("do not leave a bottom-leading dual placeholder")
+    if "settingsOverlaySlot" in root or "settingsIsTopLeadingOverlay = false" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("Settings gear must not be a top-leading Root overlay")
+    if "paintsVitalsChrome = false" not in lock:
+        fail("I AM OK dual chrome must stay deleted")
+    if "vitalsIsRootSibling = false" not in lock:
+        fail("I AM OK dual must not be a Root sibling")
     if "vitalsCoversFieldCards = false" not in lock:
         fail("I AM OK must not cover Field Injury cards")
-    if ".overlay(alignment: .bottomLeading) { vitalsOverlaySlot }" not in root:
-        fail("I AM OK must stay a Root sibling overlay")
     if "VitalsChip" in (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text():
         fail("do not move I AM OK into Field")
     field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
     if "fieldContentBottomClearance" not in field and "MapChromeLock.fieldContentBottomClearance" not in field:
         fail("Field cards must inset above the 88pt SOS disk so Guide/Ask/Next stay readable")
+    if "FieldSafePlate" not in field:
+        fail("Field plate must pin content to the safe-area width")
+    if "fieldContentHorizontalInset" not in field:
+        fail("Field plate must use the locked horizontal inset")
+    if "onOpenSettings" not in field:
+        fail("Field gear must sit in the Guide/Skills/Vision row")
+    comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
+    if "onOpenSettings" not in comms:
+        fail("Comms gear must sit in the Threads/Radar/Roster row")
+    if "ignoresSafeArea(edges: .bottom)" in comms:
+        fail("PTT disc must not ignore the bottom safe area")
     if pbx.count("CURRENT_PROJECT_VERSION = 42") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map is pack tiles + pins + search; Layers imagery-only; tiny HUD")
@@ -1117,8 +1121,8 @@ def test_party_vitals_red_loop() -> None:
         fail("manual vitals must not import HealthKit")
     if "tel:911" in core or "tel:911" in plate or "tel:911" in app:
         fail("party red must not auto-dial 911")
-    if "VitalsChip" not in root or "vitalsOverlay" not in root:
-        fail("RootView lost the 56 leading I AM OK overlay")
+    if "VitalsChip" in root or "vitalsOverlay" in root:
+        fail("RootView must not mount the I AM OK dual")
     if "vitalsRow" in maps:
         fail("I AM OK must not live in the Map slab stack")
     if "MapChromeLock.sosDiameter" not in maps:
@@ -1301,8 +1305,8 @@ def test_sos_confirm_panel() -> None:
         fail("SOS trailing drifted off 16pt")
     if "ignoresSafeArea(edges: .bottom)" in root:
         fail("SOS overlay must not ignore the bottom safe area")
-    if ".padding(.leading, 16)" not in root:
-        fail("I AM OK must be 16pt leading")
+    if "VitalsChip" in root:
+        fail("I AM OK dual must stay off RootView")
     maps_root = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
     if "showsRightEdgeChips" not in maps_root:
         fail("Recenter/Layers must hide when Map search is focused")
@@ -1329,7 +1333,7 @@ def test_sos_confirm_panel() -> None:
     if "SOSFab" in maps or "SOSFab" in comms or "SOSFab" in field or "SOSFab" in expedition:
         fail("SOS must not be a per-tab or nav-bar control")
     if "isReceded && !reduceMotion" not in maps:
-        fail("I AM OK chip must stay when Reduce Motion is on")
+        fail("HUD recede must keep chrome when Reduce Motion is on")
     if "CriticalSOSShell" not in root or "SOSFab" not in root:
         fail("last-2% must still show the 88pt SOS FAB")
     if "push:" in tf or "pull_request:" in tf:
@@ -1432,8 +1436,8 @@ def test_compass_lock_on() -> None:
         fail("SOS 88 must never recede")
     if "RecedingMapChrome" not in vitals:
         fail("HUD chips must still recede")
-    if "vitalsOverlay" not in (ROOT / "Blackout/RootView.swift").read_text():
-        fail("I AM OK must stay a 56 leading overlay")
+    if "vitalsOverlay" in (ROOT / "Blackout/RootView.swift").read_text():
+        fail("I AM OK dual must stay off RootView")
     if "FieldPacksView" in (ROOT / "Blackout/RootView.swift").read_text():
         fail("do not restore the first-open Field Packs sheet")
     if (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").exists():
@@ -2250,6 +2254,7 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "reportsScaleOnEveryScroll = false",
         "duskGradeAlpha: Double = 0.22",
         "duskUsesMultiply = false",
+        "duskCrushesCountyLabels = true",
         "defaultPaintIsDuskAerial = true",
         "defaultPaintsLabeledUSGS = false",
         "pickDismissesHits = true",

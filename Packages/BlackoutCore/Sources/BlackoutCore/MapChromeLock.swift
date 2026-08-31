@@ -112,6 +112,8 @@ public enum MapChromeLock {
     /// Device 39 FAIL: multiply + 0.42 void crushed pack rasters to a black well.
     /// Overlay-only wash (38 path) keeps USGS/terrain visible under dusk.
     public static let duskUsesMultiply = false
+    /// Paper + ink both flatten so county / I-10 type does not survive the invert.
+    public static let duskCrushesCountyLabels = true
     /// Overlay-only wash. 0.42 × multiply was the killer; 0.22 grades dusk without zeroing luminance.
     public static let duskGradeAlpha: Double = 0.22
     public static let duskGradeColorName = "Surface.void"
@@ -123,10 +125,16 @@ public enum MapChromeLock {
         return tileLuminance * (1.0 - a) + voidLuminance * a
     }
 
-    /// USGS paper is near-white with black type. Invert into dusk so county/I-10 ink is not a label.
+    /// USGS paper is near-white with black type. Paper and ink both flatten to dusk
+    /// ground so county / highway words do not survive as glowing labels.
     public static func duskAerialRGB(tileLuminance: Double) -> (Double, Double, Double) {
         let t = min(1, max(0, tileLuminance))
-        let dusk = 0.16 + (1.0 - t) * 0.38
+        let dusk: Double
+        if duskCrushesCountyLabels, t > 0.82 || t < 0.28 {
+            dusk = 0.18
+        } else {
+            dusk = 0.16 + (1.0 - t) * 0.38
+        }
         return (
             12.0 / 255.0 + dusk * 0.55,
             16.0 / 255.0 + dusk * 0.50,
@@ -234,11 +242,15 @@ public enum MapChromeLock {
     public static let paintsScaleBarOnMap = false
     public static let pinSheetIsMetalSlab = false
 
-    /// I AM OK sits in the SOS band. Field cards must stay clear of the 88 disk.
-    public static let vitalsIsRootSibling = true
-    public static let vitalsSitsInSOSBand = true
+    /// Crisis 2026-08-31 15:57: dual I AM OK chrome is deleted. Roster two-tap stays.
+    public static let paintsVitalsChrome = false
+    public static let vitalsIsRootSibling = false
+    public static let vitalsSitsInSOSBand = false
     public static let vitalsCoversFieldCards = false
     public static let vitalsNeverOnField = true
+    public static let fieldPlateUsesSafeArea = true
+    public static let fieldContentFitsSafeWidth = true
+    public static let fieldContentHorizontalInset: Double = 20
 
     public static func hasParty(
         nearbyPeerCount: Int,
@@ -248,29 +260,18 @@ public enum MapChromeLock {
         nearbyPeerCount > 0 || partyPeerCount > 0 || expeditionOpen
     }
 
-    /// Solo: hidden on every tab. Party: Map / Comms / Expedition only. Never Field.
+    /// Dead. Dual is not chrome. Expedition roster two-tap is PartyVitalsPlate.
     public static func showsVitalsOverlay(
         tab: String,
         nearbyPeerCount: Int = 0,
         partyPeerCount: Int = 0,
         expeditionOpen: Bool = false
     ) -> Bool {
-        if vitalsNeverOnField, tab == "field" {
-            return false
-        }
-        guard hasParty(
-            nearbyPeerCount: nearbyPeerCount,
-            partyPeerCount: partyPeerCount,
-            expeditionOpen: expeditionOpen
-        ) else {
-            return false
-        }
-        switch tab {
-        case "map", "comms", "expedition":
-            return true
-        default:
-            return false
-        }
+        _ = tab
+        _ = nearbyPeerCount
+        _ = partyPeerCount
+        _ = expeditionOpen
+        return paintsVitalsChrome
     }
 
     /// Recenter / Layers / Packs recede when Map search is focused so they do not sit on the keyboard.

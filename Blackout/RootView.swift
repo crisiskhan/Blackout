@@ -139,8 +139,6 @@ struct RootView: View {
 
     private var stackedChrome: some View {
         rootStack
-            .overlay(alignment: .topLeading) { settingsOverlaySlot }
-            .overlay(alignment: .bottomLeading) { vitalsOverlaySlot }
             .overlay(alignment: .bottomTrailing) { sosOverlaySlot }
             .onReceive(
                 NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)
@@ -191,30 +189,6 @@ struct RootView: View {
             .allowsHitTesting(false)
         if container.showRadioBanner {
             radioBannerOverlay
-        }
-    }
-
-    @ViewBuilder
-    private var settingsOverlaySlot: some View {
-        if container.lock.isUnlocked,
-           sizeClass != .regular,
-           !container.battery.isCritical,
-           destination != .map {
-            settingsButton
-        }
-    }
-
-    @ViewBuilder
-    private var vitalsOverlaySlot: some View {
-        if container.lock.isUnlocked,
-           !container.battery.isCritical,
-           MapChromeLock.showsVitalsOverlay(
-               tab: destination.rawValue,
-               nearbyPeerCount: container.mesh.nearbyPeerCount,
-               partyPeerCount: container.party.peerCount,
-               expeditionOpen: container.hasOpenExpedition
-           ) {
-            vitalsOverlay
         }
     }
 
@@ -418,19 +392,9 @@ struct RootView: View {
                 destination = .map
             },
             onPingReplied: { container.acknowledgeLatestPing() },
-            pendingDM: $pendingDM
+            pendingDM: $pendingDM,
+            onOpenSettings: { showSettings = true }
         )
-        .swiftUIToolbar {
-            if sizeClass != .regular {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                }
-            }
-        }
     }
 
     private var fieldDestination: some View {
@@ -454,7 +418,8 @@ struct RootView: View {
             onOpenMapJob: { job in
                 pendingGuideJob = job
                 destination = .map
-            }
+            },
+            onOpenSettings: { showSettings = true }
         )
     }
 
@@ -482,6 +447,18 @@ struct RootView: View {
                 nearbyCount: container.mesh.nearbyPeerCount,
                 onSendToPeer: { container.relayPack($0) }
             )
+        }
+        .swiftUIToolbar {
+            if sizeClass != .regular {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Settings")
+                }
+            }
         }
     }
 
@@ -523,42 +500,6 @@ struct RootView: View {
                 screenHeight: Double(UIScreen.main.bounds.height)
             )
         )
-    }
-
-    private var vitalsOverlay: some View {
-        VitalsChip(
-            isOKLatched: !container.party.isRed,
-            isNotLatched: container.party.isRed,
-            pending: container.party.pending,
-            onOK: { commitVitals(.imOK) },
-            onNot: { commitVitals(.notOK) }
-        )
-        .padding(.leading, 16)
-        .padding(.bottom, fabBottomPadding)
-    }
-
-    private func commitVitals(_ action: PartyVitalAction) {
-        if let envelope = container.party.tap(action, fix: container.location.navigationFix) {
-            container.mesh.send(envelope)
-        }
-    }
-
-    private var settingsButton: some View {
-        Button {
-            showSettings = true
-        } label: {
-            Image(systemName: "gearshape")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(BlackoutDS.Silver.metal)
-                .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-                .background(BlackoutDS.Surface.raised.opacity(0.82))
-                .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .padding(.leading, 16)
-        .padding(.top, 8)
-        .accessibilityLabel("Settings")
     }
 
     private var mapFoldTab: some View {

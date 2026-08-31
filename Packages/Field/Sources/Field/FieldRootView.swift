@@ -28,6 +28,7 @@ public struct FieldRootView: View {
     var onStartMode: (FieldJobMode) -> Void
     var onRelayPack: (String) -> Void
     var onOpenMapJob: (GuideMapJob) -> Void
+    var onOpenSettings: () -> Void
 
     @State private var segment: Segment = .guide
     @State private var pack: GuidePackSnapshot?
@@ -47,7 +48,8 @@ public struct FieldRootView: View {
         onSendArticle: @escaping (String) -> Void = { _ in },
         onStartMode: @escaping (FieldJobMode) -> Void = { _ in },
         onRelayPack: @escaping (String) -> Void = { _ in },
-        onOpenMapJob: @escaping (GuideMapJob) -> Void = { _ in }
+        onOpenMapJob: @escaping (GuideMapJob) -> Void = { _ in },
+        onOpenSettings: @escaping () -> Void = {}
     ) {
         self.location = location
         self.battery = battery
@@ -63,20 +65,36 @@ public struct FieldRootView: View {
         self.onStartMode = onStartMode
         self.onRelayPack = onRelayPack
         self.onOpenMapJob = onOpenMapJob
+        self.onOpenSettings = onOpenSettings
     }
 
     public var body: some View {
         VStack(spacing: 0) {
-            Picker("Field", selection: $segment) {
-                ForEach(Segment.allCases) { item in
-                    Text(item.rawValue).tag(item)
+            HStack(spacing: 8) {
+                Picker("Field", selection: $segment) {
+                    ForEach(Segment.allCases) { item in
+                        Text(item.rawValue).tag(item)
+                    }
                 }
+                .pickerStyle(.segmented)
+                Button(action: onOpenSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(BlackoutDS.Silver.metal)
+                        .frame(width: 36, height: 36)
+                        .background(BlackoutDS.Surface.raised.opacity(0.82))
+                        .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
             }
-            .pickerStyle(.segmented)
-            .padding(16)
+            .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
+            .padding(.top, 8)
+            .padding(.bottom, 8)
             switch segment {
             case .guide:
-                ScrollView {
+                FieldSafePlate {
                     VStack(alignment: .leading, spacing: 20) {
                         ScreenHeader(
                             "Field guide",
@@ -126,11 +144,6 @@ public struct FieldRootView: View {
                             }
                         }
                     }
-                    .padding(20)
-                    .padding(
-                        .bottom,
-                        CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
-                    )
                 }
             case .skills:
                 GuideSkillsView(pack: pack, onOpenMapJob: onOpenMapJob)
@@ -152,13 +165,13 @@ public struct FieldRootView: View {
                             .foregroundStyle(BlackoutDS.Silver.mid)
                         Spacer()
                     }
-                    .padding(20)
+                    .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
                 } else {
                     FieldVisionView(biome: guideContext.biome, pack: pack)
                 }
             }
         }
-        .background(BlackoutDS.Surface.base.ignoresSafeArea())
+        .background(BlackoutDS.Surface.base)
         .onAppear {
             packTooNew = GuidePackLoader.status(rootURL: packURL) == .tooNew
             pack = GuidePackLoader.load(rootURL: packURL)
@@ -184,12 +197,29 @@ public struct FieldRootView: View {
     }
 }
 
+/// Pins Field scroll content to the safe-area width so a chip row cannot shift the plate left.
+struct FieldSafePlate<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ScrollView {
+            content()
+                .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
+                .padding(
+                    .bottom,
+                    CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
+                )
+                .containerRelativeFrame(.horizontal, alignment: .leading)
+        }
+    }
+}
+
 struct FieldCopyView: View {
     var title: String
     var paragraphs: [FieldManual.Section]
 
     var body: some View {
-        ScrollView {
+        FieldSafePlate {
             VStack(alignment: .leading, spacing: 20) {
                 ScreenHeader(title, subtitle: "Bundled on-device. Not a website.")
                 ForEach(paragraphs) { section in
@@ -204,11 +234,6 @@ struct FieldCopyView: View {
                     }
                 }
             }
-            .padding(20)
-            .padding(
-                .bottom,
-                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
-            )
         }
     }
 }
@@ -223,7 +248,7 @@ struct FieldVisionView: View {
     @State private var reading: GuideVisionReading = GuideVisionID.unknownReading(biome: .unknown)
 
     var body: some View {
-        ScrollView {
+        FieldSafePlate {
             VStack(alignment: .leading, spacing: 16) {
                 ScreenHeader("Field Vision", subtitle: "Two percents. Lookalike. Unknown is valid. No eat verdict.")
                 HUDPanel {
@@ -265,11 +290,6 @@ struct FieldVisionView: View {
                     requestAndOpen()
                 }
             }
-            .padding(20)
-            .padding(
-                .bottom,
-                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
-            )
         }
         .sheet(isPresented: $showCamera) {
             CameraPicker(

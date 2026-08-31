@@ -25,25 +25,39 @@ struct CommsRootView: View {
     var onNavigatePing: (FieldPingNav) -> Void
     var onPingReplied: (() -> Void)?
     @Binding var pendingDM: BlackoutID?
+    var onOpenSettings: () -> Void
 
     @State private var segment: Segment = .threads
     @State private var radarPeer: RadarBlip?
     @State private var actionHint = ActionButtonHintPolicy(
         dismissed: UserDefaults.standard.bool(forKey: BlackoutKeys.actionButtonHintDismissed)
     )
-    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                Picker("Comms", selection: $segment) {
-                    ForEach(Segment.allCases) { item in
-                        Text(item.rawValue).tag(item)
+                HStack(spacing: 8) {
+                    Picker("Comms", selection: $segment) {
+                        ForEach(Segment.allCases) { item in
+                            Text(item.rawValue).tag(item)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    Button(action: onOpenSettings) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(BlackoutDS.Silver.metal)
+                            .frame(width: 36, height: 36)
+                            .background(BlackoutDS.Surface.raised.opacity(0.82))
+                            .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                 }
-                .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
+                .padding(.bottom, 8)
                 switch segment {
                 case .threads:
                     MessagingRootView(
@@ -150,15 +164,11 @@ struct CommsRootView: View {
             .padding(.trailing, 16)
             .padding(.bottom, pttBottomPadding)
         }
-        .ignoresSafeArea(edges: .bottom)
         .allowsHitTesting(true)
     }
 
     private var pttBottomPadding: CGFloat {
-        let hasTabBar = sizeClass != .regular
-        return BlackoutDS.Vitals.sosGap
-            + (hasTabBar ? BlackoutDS.Vitals.tabBar : 0)
-            + BlackoutDS.Vitals.homeIndicator
+        CGFloat(SOSChrome.gap)
     }
 
     private func openSettings() {
