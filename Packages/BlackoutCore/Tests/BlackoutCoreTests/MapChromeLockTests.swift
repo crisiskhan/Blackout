@@ -1,0 +1,64 @@
+import XCTest
+@testable import BlackoutCore
+
+final class MapChromeLockTests: XCTestCase {
+    func testMapIsFullBleedZStackNotACroppedPage() {
+        XCTAssertEqual(MapChromeLock.surface, "ZStack.fullBleed")
+        XCTAssertFalse(MapChromeLock.mapIsCroppedPage)
+        XCTAssertEqual(MapChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 4)
+    }
+
+    func testChipsAre56PaintedWithInvisible64SlopNoLight() {
+        XCTAssertEqual(MapChromeLock.chipPaintedHeight, 56)
+        XCTAssertEqual(MapChromeLock.chipGlyphPoint, 22)
+        XCTAssertEqual(MapChromeLock.chipHitSlop, 64)
+        XCTAssertFalse(MapChromeLock.chipHitIsPainted)
+        XCTAssertEqual(MapChromeLock.chipTitles, ["Recenter", "Layers", "Packs"])
+        XCTAssertFalse(MapChromeLock.chipRowIncludesLight)
+        XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.chipHitSlop)
+        XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.sosDiameter)
+    }
+
+    func testKillsDevice32PermanentSlabStack() {
+        XCTAssertFalse(MapChromeLock.showsShareReturnLastMarkOnMap)
+        XCTAssertFalse(MapChromeLock.showsSearchPatternsOnMap)
+        XCTAssertFalse(MapChromeLock.showsExpeditionBannerOnMap)
+        XCTAssertFalse(MapChromeLock.showsGearOnMap)
+        XCTAssertFalse(MapChromeLock.showsFieldVisionOnMap)
+        XCTAssertFalse(MapChromeLock.showsExpeditionPanelsOnMap)
+        XCTAssertFalse(MapChromeLock.compassLockIsMidMapSlabs)
+        XCTAssertTrue(MapChromeLock.compassLockIsRightEdgeStack)
+        XCTAssertFalse(MapChromeLock.vitalsIsFatBottomToggle)
+        XCTAssertTrue(MapChromeLock.vitalsIs56LeadingOverlay)
+        XCTAssertEqual(MapChromeLock.vitalsPaintedHeight, 56)
+        XCTAssertEqual(PartyVitalsCopy.chipHeight, 56)
+    }
+
+    func testSOSIs88SiblingAndDoesNotRecede() {
+        XCTAssertTrue(MapChromeLock.sosIsTabViewSibling)
+        XCTAssertTrue(RootChromeLock.sosIsRootViewSibling)
+        XCTAssertFalse(MapChromeLock.sosStackedInMapPanel)
+        XCTAssertFalse(MapChromeLock.sosRecedesWithHUD)
+        XCTAssertEqual(MapChromeLock.sosDiameter, 88)
+        XCTAssertEqual(SOSChrome.fab, 88)
+        XCTAssertFalse(MapChromeLock.overlayIgnoresBottomSafeArea)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true), 8 + 49)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: false), 8)
+    }
+
+    func testFollowPuckIs36RedNotMapKitBlue() {
+        XCTAssertEqual(MapChromeLock.puckDiameter, 36)
+        XCTAssertFalse(MapChromeLock.puckIsMapKitBlue)
+        XCTAssertEqual(MapChromeLock.mapTabSymbol, "map")
+        XCTAssertEqual(MapChromeLock.mapTabSymbolRendering, "monochrome")
+    }
+
+    func testRightEdgeNeverDrawsBothStacks() {
+        XCTAssertFalse(MapChromeLock.drawsBothRightEdgeStacks)
+        XCTAssertTrue(MapChromeLock.rightEdgeShowsNav(routeInPlay: true))
+        XCTAssertFalse(MapChromeLock.rightEdgeShowsChips(routeInPlay: true))
+        XCTAssertFalse(MapChromeLock.rightEdgeShowsNav(routeInPlay: false))
+        XCTAssertTrue(MapChromeLock.rightEdgeShowsChips(routeInPlay: false))
+    }
+}

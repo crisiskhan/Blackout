@@ -34,7 +34,6 @@ public struct MapsRootView: View {
     var onOpenGuide: ((String) -> Void)?
     var onNightRedChange: ((Bool) -> Void)?
     @Binding var pendingGuideJob: GuideMapJob?
-    @Environment(\.horizontalSizeClass) private var sizeClass
 
     @State private var tool: MapTool?
     @State private var crumbs: [BreadcrumbRecordDTO] = []
@@ -513,8 +512,6 @@ public struct MapsRootView: View {
                         selectedPeer = nil
                     }
                 )
-                .padding(.top, 80)
-                .padding(.bottom, 180)
                 .allowsHitTesting(true)
             }
         }
@@ -601,6 +598,13 @@ public struct MapsRootView: View {
         }
     }
 
+    private var routeInPlay: Bool {
+        compass.isLocked
+            || compass.target != nil
+            || navigate.phase == .preview
+            || navigate.phase == .guidance
+    }
+
     private var mapLockChrome: some View {
         VStack(spacing: 0) {
             lockHudStack
@@ -610,40 +614,16 @@ public struct MapsRootView: View {
                     .padding(.top, 8)
             }
             Spacer()
-            if showChipRow, battery.coarseNavigateEnabled {
-                receding {
-                    CompassLockBar(
-                        isLocked: compass.isLocked,
-                        hasTarget: compass.target != nil,
-                        onSpeak: {
-                            noteMapActivity()
-                            compass.speakOnce()
-                        },
-                        onSteer: {
-                            noteMapActivity()
-                            compass.openSteer()
-                        },
-                        onMark: {
-                            noteMapActivity()
-                            compass.openMark()
-                        },
-                        onLock: {
-                            noteMapActivity()
-                            compass.toggleLock()
-                            if compass.isLocked { applyLockHeading() }
-                        }
-                    )
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 8)
-                }
-            }
             if showChipRow {
                 scaleBarRow
-                quickNavRow
-                chipRow
+                HStack(alignment: .bottom, spacing: 0) {
+                    Spacer(minLength: 0)
+                    rightEdgeStack
+                }
+                .padding(.trailing, 12)
+                .padding(.bottom, CGFloat(MapChromeLock.sosDiameter) + BlackoutDS.Vitals.sosGap)
             }
             pingStrip
-            vitalsRow
         }
         .onChange(of: compass.isLocked) { _, _ in reportNavLock() }
         .onChange(of: navigate.phase) { _, _ in reportNavLock() }
@@ -683,42 +663,44 @@ public struct MapsRootView: View {
                         .font(BlackoutDS.captionFont())
                         .foregroundStyle(BlackoutDS.Silver.steel)
                 }
-                MapExpeditionBanner(title: openOutingName ?? "No open expedition")
                 if let fieldMode {
                     fieldModePlate(fieldMode)
                 }
-                fieldToolsRow
             }
             .padding(.horizontal, 16)
-            .padding(.top, sizeClass == .regular ? 8 : 64)
+            .padding(.top, 8)
         }
     }
 
-    /// Bottom-leading 56h metal chip. Same 8pt-above-tab-bar baseline as SOS.
-    /// ≥8pt horizontal gap to the 88pt disk. Recedes with HUD. Reduce Motion: stays. Never a disk.
-    private var vitalsRow: some View {
+    @ViewBuilder
+    private var rightEdgeStack: some View {
         receding {
-            HStack(alignment: .bottom, spacing: 0) {
-                VitalsChip(
-                    isOKLatched: !roster.isRed,
-                    isNotLatched: roster.isRed,
-                    pending: roster.pending,
-                    onOK: { commitVitals(.imOK) },
-                    onNot: { commitVitals(.notOK) }
+            switch MapRightEdge.stack(routeInPlay: routeInPlay) {
+            case .nav:
+                CompassLockBar(
+                    isLocked: compass.isLocked,
+                    hasTarget: compass.target != nil,
+                    onSpeak: {
+                        noteMapActivity()
+                        compass.speakOnce()
+                    },
+                    onSteer: {
+                        noteMapActivity()
+                        compass.openSteer()
+                    },
+                    onMark: {
+                        noteMapActivity()
+                        compass.openMark()
+                    },
+                    onLock: {
+                        noteMapActivity()
+                        compass.toggleLock()
+                        if compass.isLocked { applyLockHeading() }
+                    }
                 )
-                Spacer(minLength: BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap)
+            case .chips:
+                chipColumn
             }
-            .frame(minHeight: BlackoutDS.Vitals.sosClearance, alignment: .bottom)
-            .padding(.leading, 16)
-            .padding(.trailing, 16)
-            .padding(.bottom, BlackoutDS.Vitals.sosGap)
-        }
-    }
-
-    private func commitVitals(_ action: PartyVitalAction) {
-        noteMapActivity()
-        if let envelope = roster.tap(action, fix: location.navigationFix) {
-            mesh.send(envelope)
         }
     }
 
@@ -733,52 +715,18 @@ public struct MapsRootView: View {
         }
     }
 
-    private var chipRow: some View {
-        receding {
-            HStack(spacing: 8) {
-                MetalButton("Recenter", height: BlackoutDS.Hit.md, action: recenterToPack)
-                MetalButton("Layers", height: BlackoutDS.Hit.md) {
-                    noteMapActivity()
-                    showLayers = true
-                }
-                MetalButton("Packs", height: BlackoutDS.Hit.md) {
-                    noteMapActivity()
-                    onOpenFieldPacks?()
-                }
-                if MapTorchPolicy.showsControl(hasTorch: torch.hasHardware) {
-                    flashlightButton
-                }
+    private var chipColumn: some View {
+        VStack(spacing: 8) {
+            MapHUDChip("Recenter", systemName: "location.north.line", action: recenterToPack)
+            MapHUDChip("Layers", systemName: "square.3.layers.3d") {
+                noteMapActivity()
+                showLayers = true
             }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 8)
-        }
-    }
-
-    private var flashlightButton: some View {
-        Button {
-            noteMapActivity()
-            torch.toggle()
-        } label: {
-            HStack(spacing: 8) {
-                if torch.isOn {
-                    Circle()
-                        .fill(BlackoutDS.Silver.bright)
-                        .frame(width: BlackoutDS.Vitals.pip, height: BlackoutDS.Vitals.pip)
-                }
-                Text(ConvenienceCopy.flashlight)
-                    .font(BlackoutDS.bodyFont())
-                    .fontWeight(.semibold)
+            MapHUDChip("Packs", systemName: "shippingbox") {
+                noteMapActivity()
+                onOpenFieldPacks?()
             }
-            .foregroundStyle(BlackoutDS.Surface.void)
-            .frame(maxWidth: .infinity)
-            .frame(height: BlackoutDS.Hit.md)
-            .background(BlackoutDS.Silver.metal)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(ConvenienceCopy.flashlight)
-        .accessibilityAddTraits(torch.isOn ? .isSelected : [])
-        .accessibilityValue(torch.isOn ? "On" : "Off")
     }
 
     private var outingStart: (latitude: Double, longitude: Double)? {
@@ -803,57 +751,6 @@ public struct MapsRootView: View {
             return nil
         }
         return LocationFix(latitude: lat, longitude: lon)
-    }
-
-    private var quickNavRow: some View {
-        receding {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    mapToolButton(ConvenienceCopy.shareCoords, enabled: true) {
-                        shareCoords()
-                    }
-                    mapToolButton(
-                        ConvenienceCopy.returnToStart,
-                        enabled: MapQuickNav.returnEnabled(hasStart: outingStart != nil)
-                    ) {
-                        guard let start = outingStart else {
-                            toolHint = MapQuickNav.returnDisabledReason(hasStart: false)
-                            return
-                        }
-                        toolHint = nil
-                        lockOrRoute(latitude: start.latitude, longitude: start.longitude, label: "Return")
-                    }
-                    mapToolButton(
-                        ConvenienceCopy.lastMark,
-                        enabled: MapQuickNav.lastMarkEnabled(hasMark: lastMark != nil)
-                    ) {
-                        guard let mark = lastMark else {
-                            toolHint = MapQuickNav.lastMarkDisabledReason(hasMark: false)
-                            return
-                        }
-                        toolHint = nil
-                        lockOrRoute(latitude: mark.latitude, longitude: mark.longitude, label: mark.name)
-                    }
-                }
-                if let toolHint {
-                    Text(toolHint)
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 8)
-        }
-    }
-
-    private func mapToolButton(_ title: String, enabled: Bool, action: @escaping () -> Void) -> some View {
-        MetalButton(title, height: BlackoutDS.Hit.sm) {
-            noteMapActivity()
-            action()
-        }
-        .opacity(enabled ? 1 : MapQuickNav.disabledOpacity)
-        .disabled(false)
-        .accessibilityLabel(title)
     }
 
     @ViewBuilder
@@ -1174,30 +1071,6 @@ public struct MapsRootView: View {
         }
     }
 
-    private var fieldToolsRow: some View {
-        HStack(spacing: 8) {
-            let canShare = FollowTrackWire.canShare(crumbs: crumbs)
-            MetalButton(FollowTrackWire.shareLabel, height: BlackoutDS.Hit.sm) {
-                onShareTrack?(crumbs)
-            }
-            .disabled(!canShare)
-            .opacity(canShare ? 1 : FollowTrackWire.disabledOpacity)
-            MetalButton(searchKind.title, height: BlackoutDS.Hit.sm) {
-                let all = SearchPatternKind.allCases
-                if let idx = all.firstIndex(of: searchKind) {
-                    searchKind = all[(idx + 1) % all.count]
-                }
-            }
-            MetalButton(searchActive ? "Stop search" : "Start search", height: BlackoutDS.Hit.sm) {
-                toggleSearch()
-            }
-            MetalButton(nightRed ? "Night on" : "Night red", height: BlackoutDS.Hit.sm) {
-                nightRed.toggle()
-                onNightRedChange?(nightRed)
-            }
-        }
-    }
-
     private func fieldModePlate(_ mode: FieldJobMode) -> some View {
         HUDPanel {
             VStack(alignment: .leading, spacing: 8) {
@@ -1298,27 +1171,6 @@ private struct RecedingMapChrome: ViewModifier {
                 reduceMotion ? nil : (isReceded ? BlackoutDS.Motion.move : BlackoutDS.Motion.snap),
                 value: isReceded
             )
-    }
-}
-
-/// Thin outing strip. Recedes with the GPS HUD. Members stay on Map radar.
-struct MapExpeditionBanner: View {
-    var title: String
-
-    var body: some View {
-        Text(title)
-            .font(BlackoutDS.captionFont())
-            .foregroundStyle(BlackoutDS.Silver.bright)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .frame(height: 28)
-            .background(BlackoutDS.Surface.raised.opacity(0.82))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .accessibilityLabel(title)
     }
 }
 

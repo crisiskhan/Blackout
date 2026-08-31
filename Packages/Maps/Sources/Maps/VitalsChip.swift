@@ -3,12 +3,26 @@ import DesignSystem
 import SwiftUI
 
 /// DS §10.4 segmented metal chip. 56h. Metal plate, not a disk. Does not arm SOS.
-struct VitalsChip: View {
+public struct VitalsChip: View {
     var isOKLatched: Bool
     var isNotLatched: Bool
     var pending: PartyVitalAction?
     var onOK: () -> Void
     var onNot: () -> Void
+
+    public init(
+        isOKLatched: Bool,
+        isNotLatched: Bool,
+        pending: PartyVitalAction?,
+        onOK: @escaping () -> Void,
+        onNot: @escaping () -> Void
+    ) {
+        self.isOKLatched = isOKLatched
+        self.isNotLatched = isNotLatched
+        self.pending = pending
+        self.onOK = onOK
+        self.onNot = onNot
+    }
 
     var body: some View {
         HStack(spacing: 0) {

@@ -91,10 +91,10 @@ public enum SOSChrome {
     public static let confirmPhrase = SOSConfirmCopy.slideToConfirm
     public static let confirmKnobIsSOS = true
 
-    /// Overlay ignores the bottom safe area. Compact 4-tab: 8pt above the tab bar.
-    /// Critical SOS-only and iPad split have no tab bar: 8pt above the home indicator.
+    /// Overlay stays in the bottom safe area so the tab bar is not padded off-screen.
+    /// Compact 4-tab: 8pt above the tab bar. Critical / iPad: 8pt above the home indicator.
     public static func fabBottomInset(hasTabBar: Bool) -> Double {
-        gap + (hasTabBar ? tabBar : 0) + homeIndicator
+        gap + (hasTabBar ? tabBar : 0)
     }
 
     /// Trailing spacer so the 56h chip stays ≥8pt clear of the 88pt disk.

@@ -12,7 +12,7 @@ struct CompassLockBar: View {
     var onLock: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
+        VStack(spacing: 8) {
             lockChip(CompassLockCopy.speak, lit: false, action: onSpeak)
             lockChip(CompassLockCopy.steer, lit: hasTarget && !isLocked, action: onSteer)
             lockChip(CompassLockCopy.mark, lit: false, action: onMark)
@@ -27,8 +27,9 @@ struct CompassLockBar: View {
                 .font(BlackoutDS.captionFont())
                 .fontWeight(.semibold)
                 .foregroundStyle(lit ? BlackoutDS.Surface.void : BlackoutDS.Silver.bright)
-                .frame(maxWidth: .infinity)
-                .frame(height: BlackoutDS.Hit.sm)
+                .padding(.horizontal, 10)
+                .frame(minWidth: CGFloat(MapChromeLock.chipPaintedHeight))
+                .frame(height: CGFloat(MapChromeLock.chipPaintedHeight))
                 .background(lit ? BlackoutDS.Silver.metal : BlackoutDS.Surface.raised.opacity(0.92))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -37,6 +38,8 @@ struct CompassLockBar: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
+        .frame(minWidth: CGFloat(MapChromeLock.chipHitSlop), minHeight: CGFloat(MapChromeLock.chipHitSlop))
+        .contentShape(Rectangle())
         .accessibilityLabel(title)
     }
 }

@@ -42,15 +42,6 @@ public struct RadarHUDView: View {
                     headingDegrees: headingUp ? 0 : (headingDegrees ?? 0)
                 )
                 .allowsHitTesting(false)
-                Button(action: onSelectSelf) {
-                    Circle()
-                        .fill(BlackoutDS.Silver.metal)
-                        .frame(width: 14, height: 14)
-                        .overlay(Circle().stroke(BlackoutDS.Semantic.info, lineWidth: 2))
-                        .shadow(color: BlackoutDS.Red.core.opacity(0.35), radius: 6)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Self. Not a peer.")
                 ForEach(peers) { blip in
                     peerMark(blip)
                 }

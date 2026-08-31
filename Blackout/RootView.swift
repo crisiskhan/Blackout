@@ -1,6 +1,7 @@
 import BlackoutBattery
 import BlackoutCore
 import BlackoutLocation
+import BlackoutMesh
 import BlackoutPacks
 import DesignSystem
 import Expeditions
@@ -31,7 +32,7 @@ enum AppDestination: String, Hashable, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .map: return "map"
+        case .map: return MapChromeLock.mapTabSymbol
         case .comms: return "antenna.radiowaves.left.and.right"
         case .field: return "leaf"
         case .expedition: return "flag"
@@ -73,12 +74,22 @@ struct RootView: View {
                 if container.showRadioBanner {
                     radioBannerOverlay
                 }
-                if sizeClass != .regular, !container.battery.isCritical {
-                    settingsOverlay
-                }
             }
-            // SOS stays a ZStack sibling of TabView (`RootChromeLock.sosPlacement`).
-            // Tab switches must not remount the 88pt disk. Lock hides the disk.
+        }
+        .overlay(alignment: .topLeading) {
+            if container.lock.isUnlocked,
+               sizeClass != .regular,
+               !container.battery.isCritical,
+               destination != .map {
+                settingsButton
+            }
+        }
+        .overlay(alignment: .bottomLeading) {
+            if container.lock.isUnlocked, !container.battery.isCritical {
+                vitalsOverlay
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
             sosOverlay
         }
         .preferredColorScheme(.dark)
@@ -173,7 +184,7 @@ struct RootView: View {
             )
             .padding(.horizontal, 16)
             .padding(.top, sizeClass == .regular ? 12 : 72)
-            Spacer()
+            Spacer().allowsHitTesting(false)
         }
         .allowsHitTesting(true)
     }
@@ -218,16 +229,16 @@ struct RootView: View {
     private var iPhoneTabs: some View {
         TabView(selection: $destination) {
             mapDestination
-                .tabItem { Label(AppDestination.map.title, systemImage: AppDestination.map.symbol) }
+                .tabItem { mapFoldTab }
                 .tag(AppDestination.map)
             commsDestination
-                .tabItem { Label(AppDestination.comms.title, systemImage: AppDestination.comms.symbol) }
+                .tabItem { monochromeTab(AppDestination.comms) }
                 .tag(AppDestination.comms)
             fieldDestination
-                .tabItem { Label(AppDestination.field.title, systemImage: AppDestination.field.symbol) }
+                .tabItem { monochromeTab(AppDestination.field) }
                 .tag(AppDestination.field)
             expeditionDestination
-                .tabItem { Label(AppDestination.expedition.title, systemImage: AppDestination.expedition.symbol) }
+                .tabItem { monochromeTab(AppDestination.expedition) }
                 .tag(AppDestination.expedition)
         }
         .toolbarBackground(BlackoutDS.Surface.base, for: .tabBar)
@@ -266,11 +277,13 @@ struct RootView: View {
         } detail: {
             detail
                 .swiftUIToolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Image(systemName: "gearshape")
+                    if destination != .map {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                showSettings = true
+                            } label: {
+                                Image(systemName: "gearshape")
+                            }
                         }
                     }
                 }
@@ -325,18 +338,6 @@ struct RootView: View {
             onNightRedChange: { container.setNightRed($0) },
             pendingGuideJob: $pendingGuideJob
         )
-        .swiftUIToolbar {
-            if sizeClass != .regular {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                    .foregroundStyle(BlackoutDS.Silver.metal)
-                }
-            }
-        }
     }
 
     private var commsDestination: some View {
@@ -420,66 +421,75 @@ struct RootView: View {
     }
 
     private var sosOverlay: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer()
-                SOSFab(
-                    location: container.location,
-                    persistence: container.persistence,
-                    mesh: container.mesh,
-                    battery: container.battery,
-                    roster: container.party,
-                    presentConfirm: $container.sosConfirmRequested,
-                    coverOpen: $container.sosCoverOpen,
-                    suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent,
-                    showsDisk: container.lock.isUnlocked
-                )
-                .padding(.trailing, 16)
-                .padding(.bottom, fabBottomPadding)
-            }
-        }
-        .ignoresSafeArea(edges: .bottom)
-        // Locked: pass hits through to the slider. Cover-open: the unarmed twin-hold
-        // sheet must stay tappable. Unlocked: the 88pt FAB as usual.
+        SOSFab(
+            location: container.location,
+            persistence: container.persistence,
+            mesh: container.mesh,
+            battery: container.battery,
+            roster: container.party,
+            presentConfirm: $container.sosConfirmRequested,
+            coverOpen: $container.sosCoverOpen,
+            suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent,
+            showsDisk: container.lock.isUnlocked
+        )
+        .padding(.trailing, CGFloat(SOSChrome.trailing))
+        .padding(.bottom, fabBottomPadding)
         .allowsHitTesting(
             container.lock.isUnlocked || container.sosCoverOpen || container.sosConfirmRequested
         )
     }
 
-    /// Same 88pt SOS on Map / Comms / Field / Expedition — RootView sibling, not inside TabView.
-    /// Not Map-only, not a nav-bar chip, not a tab. `RootChromeLock.sosIsRootViewSibling`.
-    /// Compact 4-tab: 8pt above the tab bar, 16pt trailing. Critical / iPad: 8pt above home indicator.
-    /// Never recedes with Map HUD. Last-2% CriticalSOSShell still shows the FAB.
+    /// 88pt SOS is a TabView sibling overlay. Stays in the bottom safe area so the
+    /// tab bar is not padded off-screen. Never recedes with Map HUD.
     private var fabBottomPadding: CGFloat {
         let hasTabBar = sizeClass != .regular && !container.battery.isCritical
-        return BlackoutDS.Vitals.sosGap
-            + (hasTabBar ? BlackoutDS.Vitals.tabBar : 0)
-            + BlackoutDS.Vitals.homeIndicator
+        return CGFloat(SOSChrome.fabBottomInset(hasTabBar: hasTabBar))
     }
 
-    private var settingsOverlay: some View {
-        VStack {
-            HStack {
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(BlackoutDS.Silver.metal)
-                        .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-                        .background(BlackoutDS.Surface.raised.opacity(0.82))
-                        .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .padding(.leading, 16)
-                .padding(.top, 8)
-                Spacer()
-            }
-            Spacer()
+    private var vitalsOverlay: some View {
+        VitalsChip(
+            isOKLatched: !container.party.isRed,
+            isNotLatched: container.party.isRed,
+            pending: container.party.pending,
+            onOK: { commitVitals(.imOK) },
+            onNot: { commitVitals(.notOK) }
+        )
+        .padding(.leading, 16)
+        .padding(.bottom, fabBottomPadding)
+    }
+
+    private func commitVitals(_ action: PartyVitalAction) {
+        if let envelope = container.party.tap(action, fix: container.location.navigationFix) {
+            container.mesh.send(envelope)
         }
-        .allowsHitTesting(true)
+    }
+
+    private var settingsButton: some View {
+        Button {
+            showSettings = true
+        } label: {
+            Image(systemName: "gearshape")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(BlackoutDS.Silver.metal)
+                .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                .background(BlackoutDS.Surface.raised.opacity(0.82))
+                .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(.leading, 16)
+        .padding(.top, 8)
+        .accessibilityLabel("Settings")
+    }
+
+    private var mapFoldTab: some View {
+        Label(AppDestination.map.title, systemImage: MapChromeLock.mapTabSymbol)
+            .symbolRenderingMode(.monochrome)
+    }
+
+    private func monochromeTab(_ item: AppDestination) -> some View {
+        Label(item.title, systemImage: item.symbol)
+            .symbolRenderingMode(.monochrome)
     }
 }
 

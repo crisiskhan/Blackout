@@ -196,10 +196,18 @@ def test_map_chrome_lock() -> None:
             fail(f"MapsRootView still paints {banned}")
     if "MapLockHUD" not in maps or "NO FIX" not in maps:
         fail("MapsRootView lost the 56h GPS lock HUD")
-    if 'MetalButton("Recenter"' not in maps or 'MetalButton("Layers"' not in maps:
-        fail("MapsRootView lost Recenter / Layers metal chips")
-    if 'MetalButton("Packs"' not in maps:
-        fail("MapsRootView lost Packs metal chip")
+    if 'MapHUDChip("Recenter"' not in maps or 'MapHUDChip("Layers"' not in maps:
+        fail("MapsRootView lost Recenter / Layers 56h chips")
+    if 'MapHUDChip("Packs"' not in maps:
+        fail("MapsRootView lost Packs 56h chip")
+    if "MapRightEdge.stack" not in maps:
+        fail("Map must show only one right-edge stack")
+    if "ConvenienceCopy.flashlight" in maps or 'MapHUDChip("Light"' in maps:
+        fail("Light must not be a fourth Map tile")
+    if "MapExpeditionBanner" in maps or "No open expedition" in maps:
+        fail("No open expedition banner must stay off Map")
+    if 'MetalButton("Recenter"' in maps and 'MapHUDChip("Recenter"' not in maps:
+        fail("Recenter must be a 56h chip, not a MetalButton slab")
     if "MapEmptyCard" not in maps:
         fail("MapsRootView lost the single empty card")
     if "showFieldPacksOverlay" in root:
@@ -757,12 +765,12 @@ def test_party_vitals_red_loop() -> None:
         fail("manual vitals must not import HealthKit")
     if "tel:911" in core or "tel:911" in plate or "tel:911" in app:
         fail("party red must not auto-dial 911")
-    if "VitalsChip" not in maps or "vitalsRow" not in maps:
-        fail("Map lost the bottom-leading §10.4 vitals chip")
-    if "BlackoutDS.Hit.sos + BlackoutDS.Vitals.sosGap" not in maps:
-        fail("vitals chip must stay 8pt clear of the 88pt SOS disk")
-    if "padding(.bottom, BlackoutDS.Vitals.sosGap)" not in maps:
-        fail("vitals chip must sit in the SOS band, not stacked above 120pt clearance")
+    if "VitalsChip" not in root or "vitalsOverlay" not in root:
+        fail("RootView lost the 56 leading I AM OK overlay")
+    if "vitalsRow" in maps:
+        fail("I AM OK must not live in the Map slab stack")
+    if "MapChromeLock.sosDiameter" not in maps:
+        fail("right-edge stack must clear the 88pt SOS disk")
     if "sosClearance + BlackoutDS.Vitals.sosGap" in maps:
         fail("vitals chip must not sit above the old 120pt SOS stack")
     if "BlackoutDS.Vitals.chip" not in chip:
@@ -866,17 +874,19 @@ def test_sos_confirm_panel() -> None:
         fail("CALL / strobe must open tel:911 and send mesh sos")
     if "markInjured" not in support:
         fail("strobe / CALL must set local injury/red")
-    if "Vitals.sosGap" not in root or "Vitals.tabBar" not in root:
-        fail("SOS FAB must inset tabBar+8")
-    if ".padding(.trailing, 16)" not in root:
+    if "SOSChrome.fabBottomInset" not in root:
+        fail("SOS FAB must inset tabBar+8 via SOSChrome")
+    if "SOSChrome.trailing" not in root:
         fail("SOS FAB must use 16pt trailing inset")
     if ".padding(.trailing, 18)" in root:
         fail("SOS trailing drifted off 16pt")
+    if "ignoresSafeArea(edges: .bottom)" in root:
+        fail("SOS overlay must not ignore the bottom safe area")
+    if ".padding(.leading, 16)" not in root:
+        fail("I AM OK must be 16pt leading")
     maps_root = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
-    if ".padding(.trailing, 16)" not in maps_root:
-        fail("vitals chip must share the 16pt trailing inset so the ≥8pt gap is real")
     if ".padding(.trailing, 18)" in maps_root:
-        fail("vitals chip trailing drifted off 16pt")
+        fail("Map chrome trailing drifted off SoT")
     if "return 16 + tab + home" in root:
         fail("SOS FAB still uses the old 16pt-above-tab inset")
     if "sosClearance: CGFloat = 120" in vitals:
@@ -995,8 +1005,10 @@ def test_compass_lock_on() -> None:
         fail("MARK sheet lost SAVE CURRENT / STEER / LOCKED / DELETE")
     if "BlackoutDS.Hit.sos" not in sos:
         fail("SOS 88 must never recede")
-    if "vitalsRow" not in vitals or "RecedingMapChrome" not in vitals:
-        fail("I AM OK must still recede with HUD")
+    if "RecedingMapChrome" not in vitals:
+        fail("HUD chips must still recede")
+    if "vitalsOverlay" not in (ROOT / "Blackout/RootView.swift").read_text():
+        fail("I AM OK must stay a 56 leading overlay")
     if "FieldPacksView" in (ROOT / "Blackout/RootView.swift").read_text():
         fail("do not restore the first-open Field Packs sheet")
     if (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPacksView.swift").exists():
@@ -1492,8 +1504,8 @@ def test_offline_10() -> None:
         fail("night red must not enable light mode")
     if "Dead reckoning, GPS lost." not in chips and "DeadReckoningHonesty.chip" not in maps:
         fail("honest dead-reckon chip missing")
-    if "Start search" not in maps:
-        fail("search pattern start/stop missing")
+    if "Start search" in maps or "Expanding square" in maps:
+        fail("search patterns must not be permanent Map chrome")
     if "PackRelayPolicy.sendLabel" not in catalog_list:
         fail("Send pack row missing")
     if "setLeaveBehindRelay(false)" not in app and "setLeaveBehindRelay(false)" not in root:
@@ -1592,8 +1604,8 @@ def test_hits_23() -> None:
         fail("Map torch policy must not emit SOS")
     if "testFlashlightDoesNotEmitSOS" not in tests:
         fail("flashlight SOS test missing")
-    if "ConvenienceCopy.flashlight" not in maps or "BlackoutDS.Hit.md" not in maps:
-        fail("Map flashlight 64 metal tool missing")
+    if "ConvenienceCopy.flashlight" in maps or 'MapHUDChip("Light"' in maps:
+        fail("Light must not be a fourth Map tile")
     if "torchMode" not in torch or "sosAlert" in torch:
         fail("Map torch must set AVCaptureDevice.torch and not emit sos")
     if "MapTorch" in shell.split("CriticalSOSShell", 1)[-1] or "flashlight" in shell.split("CriticalSOSShell", 1)[-1].lower():
