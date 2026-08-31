@@ -11,6 +11,7 @@ import Messaging
 import Settings
 import SOS
 import SwiftUI
+import UIKit
 import VoicePTT
 
 enum AppDestination: String, Hashable, CaseIterable, Identifiable {
@@ -49,6 +50,7 @@ struct RootView: View {
     @State private var pendingPingNav: FieldPingNav?
     @State private var pendingGuideJob: GuideMapJob?
     @Environment(\.scenePhase) private var scenePhase
+    @State private var keyboardHeight: CGFloat = 0
 
     var body: some View {
         applyLifecycle(to: stackedChrome)
@@ -140,6 +142,16 @@ struct RootView: View {
             .overlay(alignment: .topLeading) { settingsOverlaySlot }
             .overlay(alignment: .bottomLeading) { vitalsOverlaySlot }
             .overlay(alignment: .bottomTrailing) { sosOverlaySlot }
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)
+            ) { note in
+                applyKeyboardFrame(note)
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            ) { _ in
+                keyboardHeight = 0
+            }
     }
 
     @ViewBuilder
@@ -196,7 +208,12 @@ struct RootView: View {
     private var vitalsOverlaySlot: some View {
         if container.lock.isUnlocked,
            !container.battery.isCritical,
-           MapChromeLock.showsVitalsOverlay(tab: destination.rawValue) {
+           MapChromeLock.showsVitalsOverlay(
+               tab: destination.rawValue,
+               nearbyPeerCount: container.mesh.nearbyPeerCount,
+               partyPeerCount: container.party.peerCount,
+               expeditionOpen: container.hasOpenExpedition
+           ) {
             vitalsOverlay
         }
     }
@@ -488,10 +505,24 @@ struct RootView: View {
     }
 
     /// 88pt SOS is a TabView sibling overlay. Stays in the bottom safe area so the
-    /// tab bar is not padded off-screen. Never recedes with Map HUD.
+    /// tab bar is not padded off-screen. Keyboard up: lift above the keys. Never hide.
     private var fabBottomPadding: CGFloat {
         let hasTabBar = sizeClass != .regular && !container.battery.isCritical
-        return CGFloat(SOSChrome.fabBottomInset(hasTabBar: hasTabBar))
+        return CGFloat(
+            SOSChrome.fabBottomInset(hasTabBar: hasTabBar, keyboardHeight: Double(keyboardHeight))
+        )
+    }
+
+    private func applyKeyboardFrame(_ note: Notification) {
+        guard let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            return
+        }
+        keyboardHeight = CGFloat(
+            SOSChrome.keyboardOverlap(
+                keyboardMinY: frame.minY,
+                screenHeight: Double(UIScreen.main.bounds.height)
+            )
+        )
     }
 
     private var vitalsOverlay: some View {

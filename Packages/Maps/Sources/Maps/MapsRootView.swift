@@ -569,7 +569,7 @@ public struct MapsRootView: View {
                     .padding(.top, 8)
             }
             Spacer()
-            if showChipRow {
+            if showChipRow, MapChromeLock.showsRightEdgeChips(searchFocused: searchFocused) {
                 HStack(alignment: .bottom, spacing: 0) {
                     Spacer(minLength: 0)
                     rightEdgeStack

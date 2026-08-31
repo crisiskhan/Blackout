@@ -91,10 +91,23 @@ public enum SOSChrome {
     public static let confirmPhrase = SOSConfirmCopy.slideToConfirm
     public static let confirmKnobIsSOS = true
 
+    /// Never hide the 88pt disk to clear Field or the keyboard. Lift it instead.
+    public static let hidesForKeyboard = false
+    public static let liftsAboveKeyboard = true
+
     /// Overlay stays in the bottom safe area so the tab bar is not padded off-screen.
     /// Compact 4-tab: 8pt above the tab bar. Critical / iPad: 8pt above the home indicator.
-    public static func fabBottomInset(hasTabBar: Bool) -> Double {
-        gap + (hasTabBar ? tabBar : 0)
+    /// Keyboard up: 8pt above the keys. Tab bar is covered, so it is not added again.
+    public static func fabBottomInset(hasTabBar: Bool, keyboardHeight: Double = 0) -> Double {
+        if keyboardHeight > 0 {
+            return gap + keyboardHeight
+        }
+        return gap + (hasTabBar ? tabBar : 0)
+    }
+
+    /// Keyboard frame overlap with the screen. Hidden / off-screen frames are 0.
+    public static func keyboardOverlap(keyboardMinY: Double, screenHeight: Double) -> Double {
+        max(0, screenHeight - keyboardMinY)
     }
 
     /// Trailing spacer so the 56h chip stays ≥8pt clear of the 88pt disk.

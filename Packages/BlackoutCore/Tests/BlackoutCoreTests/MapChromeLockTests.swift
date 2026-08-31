@@ -133,21 +133,64 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.paintsDeadReckoningChipOnMap)
         XCTAssertFalse(MapChromeLock.paintsScaleBarOnMap)
         XCTAssertFalse(MapChromeLock.pinSheetIsMetalSlab)
-        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "map"))
-        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "comms"))
-        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "field"))
-        XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "expedition"))
         XCTAssertTrue(MapChromeLock.vitalsIsRootSibling)
         XCTAssertTrue(MapChromeLock.vitalsSitsInSOSBand)
         XCTAssertFalse(MapChromeLock.vitalsCoversFieldCards)
-        XCTAssertEqual(
+        XCTAssertTrue(MapChromeLock.vitalsNeverOnField)
+        XCTAssertFalse(MapChromeLock.sosHidesForKeyboard)
+        XCTAssertTrue(MapChromeLock.sosLiftsAboveKeyboard)
+    }
+
+    func testSoloHidesIAmOKOnEveryTab() {
+        XCTAssertFalse(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: false))
+        for tab in ["map", "comms", "field", "expedition"] {
+            XCTAssertFalse(
+                MapChromeLock.showsVitalsOverlay(
+                    tab: tab,
+                    nearbyPeerCount: 0,
+                    partyPeerCount: 0,
+                    expeditionOpen: false
+                ),
+                "solo must hide I AM OK on \(tab)"
+            )
+        }
+    }
+
+    func testPartyShowsIAmOKOnMapCommsExpeditionNeverField() {
+        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 1, partyPeerCount: 0, expeditionOpen: false))
+        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 2, expeditionOpen: false))
+        XCTAssertTrue(MapChromeLock.hasParty(nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: true))
+        XCTAssertTrue(
+            MapChromeLock.showsVitalsOverlay(tab: "map", nearbyPeerCount: 1, partyPeerCount: 0, expeditionOpen: false)
+        )
+        XCTAssertTrue(
+            MapChromeLock.showsVitalsOverlay(tab: "comms", nearbyPeerCount: 0, partyPeerCount: 1, expeditionOpen: false)
+        )
+        XCTAssertTrue(
+            MapChromeLock.showsVitalsOverlay(tab: "expedition", nearbyPeerCount: 0, partyPeerCount: 0, expeditionOpen: true)
+        )
+        XCTAssertFalse(
+            MapChromeLock.showsVitalsOverlay(tab: "field", nearbyPeerCount: 3, partyPeerCount: 3, expeditionOpen: true)
+        )
+        XCTAssertTrue(MapChromeLock.vitalsNeverOnField)
+    }
+
+    func testFieldClearanceClearsThe88SOSDisk() {
+        let expected = SOSChrome.fab + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: true)
+        XCTAssertEqual(MapChromeLock.fieldContentBottomClearance(hasTabBar: true), expected)
+        XCTAssertGreaterThan(
             MapChromeLock.fieldContentBottomClearance(hasTabBar: true),
-            MapChromeLock.vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: true)
+            SOSChrome.fab + SOSChrome.fabBottomInset(hasTabBar: true)
         )
         XCTAssertGreaterThan(
             MapChromeLock.fieldContentBottomClearance(hasTabBar: true),
-            MapChromeLock.vitalsPaintedHeight
+            MapChromeLock.vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: true)
         )
+    }
+
+    func testRightEdgeChipsHideWhenSearchFocused() {
+        XCTAssertTrue(MapChromeLock.showsRightEdgeChips(searchFocused: false))
+        XCTAssertFalse(MapChromeLock.showsRightEdgeChips(searchFocused: true))
     }
 
     func testPackSearchTapFocusesFieldAndMapDoesNotSteal() {

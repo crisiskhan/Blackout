@@ -45,12 +45,31 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertEqual(SOSChrome.homeIndicator, 34)
         XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true), 8 + 49)
         XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: false), 8)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true, keyboardHeight: 0), 8 + 49)
         XCTAssertEqual(SOSChrome.chipDiskClearance, 88 + 8)
         XCTAssertGreaterThanOrEqual(SOSChrome.chipDiskClearance - SOSChrome.fab, SOSChrome.gap)
         XCTAssertGreaterThanOrEqual(SOSChrome.horizontalGap, 8)
+        XCTAssertFalse(SOSChrome.hidesForKeyboard)
+        XCTAssertTrue(SOSChrome.liftsAboveKeyboard)
         XCTAssertFalse(BrandChromeLock.fabShowsRedEyeO)
         XCTAssertEqual(BrandChromeLock.sosConfirmRedEye, 200)
         XCTAssertGreaterThan(BrandChromeLock.sosConfirmRedEye, 48)
+    }
+
+    func testSOSLiftsAboveKeyboardAndNeverHides() {
+        XCTAssertFalse(SOSChrome.hidesForKeyboard)
+        XCTAssertTrue(SOSChrome.liftsAboveKeyboard)
+        XCTAssertEqual(SOSChrome.fab, 88)
+        XCTAssertEqual(SOSChrome.keyboardOverlap(keyboardMinY: 500, screenHeight: 844), 344)
+        XCTAssertEqual(SOSChrome.keyboardOverlap(keyboardMinY: 844, screenHeight: 844), 0)
+        XCTAssertEqual(SOSChrome.keyboardOverlap(keyboardMinY: 900, screenHeight: 844), 0)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true, keyboardHeight: 336), 8 + 336)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: false, keyboardHeight: 336), 8 + 336)
+        XCTAssertEqual(SOSChrome.fabBottomInset(hasTabBar: true, keyboardHeight: 0), 8 + 49)
+        XCTAssertGreaterThan(
+            SOSChrome.fabBottomInset(hasTabBar: true, keyboardHeight: 336),
+            SOSChrome.fabBottomInset(hasTabBar: true)
+        )
     }
 
     func testCrisisLockCoverUsesFullEyeAndThumbZoneSOSNotTheMapFAB() {

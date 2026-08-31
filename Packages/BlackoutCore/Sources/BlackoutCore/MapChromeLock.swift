@@ -53,6 +53,8 @@ public enum MapChromeLock {
     public static let sosIsTabViewSibling = true
     public static let sosStackedInMapPanel = false
     public static let sosRecedesWithHUD = false
+    public static let sosHidesForKeyboard = false
+    public static let sosLiftsAboveKeyboard = true
     public static let sosDiameter: Double = 88
 
     public static let puckDiameter: Double = 36
@@ -232,19 +234,53 @@ public enum MapChromeLock {
     public static let paintsScaleBarOnMap = false
     public static let pinSheetIsMetalSlab = false
 
-    /// I AM OK sits in the SOS band. Field cards must stay clear.
+    /// I AM OK sits in the SOS band. Field cards must stay clear of the 88 disk.
     public static let vitalsIsRootSibling = true
     public static let vitalsSitsInSOSBand = true
     public static let vitalsCoversFieldCards = false
+    public static let vitalsNeverOnField = true
 
-    public static func showsVitalsOverlay(tab: String) -> Bool {
-        _ = tab
-        return true
+    public static func hasParty(
+        nearbyPeerCount: Int,
+        partyPeerCount: Int = 0,
+        expeditionOpen: Bool
+    ) -> Bool {
+        nearbyPeerCount > 0 || partyPeerCount > 0 || expeditionOpen
     }
 
-    /// Field Injury / Guide cards sit above the dual chip + SOS band.
+    /// Solo: hidden on every tab. Party: Map / Comms / Expedition only. Never Field.
+    public static func showsVitalsOverlay(
+        tab: String,
+        nearbyPeerCount: Int = 0,
+        partyPeerCount: Int = 0,
+        expeditionOpen: Bool = false
+    ) -> Bool {
+        if vitalsNeverOnField, tab == "field" {
+            return false
+        }
+        guard hasParty(
+            nearbyPeerCount: nearbyPeerCount,
+            partyPeerCount: partyPeerCount,
+            expeditionOpen: expeditionOpen
+        ) else {
+            return false
+        }
+        switch tab {
+        case "map", "comms", "expedition":
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Recenter / Layers / Packs recede when Map search is focused so they do not sit on the keyboard.
+    public static func showsRightEdgeChips(searchFocused: Bool) -> Bool {
+        !searchFocused
+    }
+
+    /// Field Guide / Ask / Next sit above the 88pt SOS disk, not the 56pt chip.
     public static func fieldContentBottomClearance(hasTabBar: Bool) -> Double {
-        vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: hasTabBar)
+        max(vitalsPaintedHeight, SOSChrome.fab) + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: hasTabBar)
     }
 }
 

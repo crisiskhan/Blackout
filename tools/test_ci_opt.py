@@ -376,8 +376,24 @@ def test_map_google_feel() -> None:
             fail(f"MapChromeLock missing {flag}")
     if "func showsVitalsOverlay" not in lock:
         fail("I AM OK must hide on Field")
+    if "vitalsNeverOnField = true" not in lock:
+        fail("I AM OK must never paint on Field")
+    if "sosHidesForKeyboard = false" not in lock:
+        fail("never hide SOS to clear the keyboard")
+    if "sosLiftsAboveKeyboard = true" not in lock:
+        fail("SOS must lift above the keyboard")
+    if "func showsRightEdgeChips" not in lock:
+        fail("Recenter/Layers must hide when Map search is focused")
     if "testIdleMapIsPackTilesPinsSearchNotARadarHUD" not in tests:
         fail("missing Crisis 21:13 Map lock test")
+    if "testSoloHidesIAmOKOnEveryTab" not in tests:
+        fail("missing solo-hides-I-AM-OK test")
+    if "testPartyShowsIAmOKOnMapCommsExpeditionNeverField" not in tests:
+        fail("missing party-I-AM-OK-not-on-Field test")
+    if "testFieldClearanceClearsThe88SOSDisk" not in tests:
+        fail("missing Field clearance-above-88-SOS test")
+    if "testRightEdgeChipsHideWhenSearchFocused" not in tests:
+        fail("missing Recenter/Layers hide-on-search-focus test")
     if "testPinHitSelectsNearbyPackPOIAndMissesEmptyTap" not in amenity_tests:
         fail("missing pack POI tap-hit test")
     if "func pinHit" not in amenity:
@@ -537,11 +553,17 @@ def test_map_google_feel() -> None:
         fail("pack search must stay offline — no MKLocalSearch")
     if "showsVitalsOverlay" not in root:
         fail("I AM OK must stay a Root sibling on every tab")
-    vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:500]
+    vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:900]
     if "showsVitalsOverlay" not in vitals_slot:
         fail("I AM OK overlay must stay in the SOS band on every tab")
-    if "tab != \"field\"" in lock or 'tab != "field"' in lock:
-        fail("I AM OK must paint on Field; cards inset the SOS band")
+    if "nearbyPeerCount" not in vitals_slot:
+        fail("I AM OK must gate on nearby peers")
+    if "partyPeerCount" not in vitals_slot:
+        fail("I AM OK must gate on party roster peers")
+    if "expeditionOpen" not in vitals_slot:
+        fail("I AM OK must gate on open expedition")
+    if "vitalsNeverOnField = true" not in lock:
+        fail("I AM OK must never paint on Field")
     if "vitalsIsRootSibling = true" not in lock:
         fail("I AM OK dual must stay a Root sibling")
     if "vitalsSitsInSOSBand = true" not in lock:
@@ -554,7 +576,7 @@ def test_map_google_feel() -> None:
         fail("do not move I AM OK into Field")
     field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
     if "fieldContentBottomClearance" not in field and "MapChromeLock.fieldContentBottomClearance" not in field:
-        fail("Field cards must inset above the SOS band so Injury is not under I AM OK")
+        fail("Field cards must inset above the 88pt SOS disk so Guide/Ask/Next stay readable")
     if pbx.count("CURRENT_PROJECT_VERSION = 41") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map is pack tiles + pins + search; Layers imagery-only; tiny HUD")
@@ -1259,6 +1281,20 @@ def test_sos_confirm_panel() -> None:
         fail("strobe / CALL must set local injury/red")
     if "SOSChrome.fabBottomInset" not in root:
         fail("SOS FAB must inset tabBar+8 via SOSChrome")
+    if "keyboardHeight" not in root:
+        fail("SOS must track keyboard height and lift above the keys")
+    if "keyboardOverlap" not in root:
+        fail("SOS lift must use SOSChrome.keyboardOverlap")
+    if "keyboardHeight" not in root.split("private var fabBottomPadding", 1)[-1][:400]:
+        fail("fabBottomPadding must include keyboard height")
+    if "hidesForKeyboard = false" not in core:
+        fail("never hide SOS for the keyboard")
+    if "liftsAboveKeyboard = true" not in core:
+        fail("SOS must lift above the keyboard")
+    if "testSOSLiftsAboveKeyboardAndNeverHides" not in (
+        (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/SOSConfirmTests.swift").read_text()
+    ):
+        fail("missing SOS keyboard-lift test")
     if "SOSChrome.trailing" not in root:
         fail("SOS FAB must use 16pt trailing inset")
     if ".padding(.trailing, 18)" in root:
@@ -1268,6 +1304,10 @@ def test_sos_confirm_panel() -> None:
     if ".padding(.leading, 16)" not in root:
         fail("I AM OK must be 16pt leading")
     maps_root = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    if "showsRightEdgeChips" not in maps_root:
+        fail("Recenter/Layers must hide when Map search is focused")
+    if "searchFocused" not in maps_root.split("showsRightEdgeChips", 1)[-1][:240]:
+        fail("Recenter/Layers hide must key off search focus")
     if ".padding(.trailing, 18)" in maps_root:
         fail("Map chrome trailing drifted off SoT")
     if "return 16 + tab + home" in root:
