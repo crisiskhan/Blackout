@@ -831,6 +831,47 @@ def test_party_vitals_red_loop() -> None:
     ok("party vitals two-tap + red packet, SOS 88, chip 56, no 911")
 
 
+def test_chrome_public_view_access() -> None:
+    import re
+
+    paths = [
+        ROOT / "Packages/Maps/Sources/Maps/VitalsChip.swift",
+        ROOT / "Packages/DesignSystem/Sources/DesignSystem/MapHUDChip.swift",
+        ROOT / "Packages/Maps/Sources/Maps/RadarHUDView.swift",
+        ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift",
+        ROOT / "Packages/Maps/Sources/Maps/CompassLockChrome.swift",
+    ]
+    for path in paths:
+        src = path.read_text()
+        for match in re.finditer(r"public struct (\w+): View", src):
+            name = match.group(1)
+            rest = src[match.end() :]
+            body = re.search(r"^    (public )?var body:", rest, re.M)
+            if body is None:
+                fail(f"{path.name} {name} has no View body")
+            if body.group(1) is None:
+                fail(f"{path.name} {name} body must be public")
+            head = rest[: body.start()]
+            if "public init" not in head and "init(" in head:
+                fail(f"{path.name} {name} init must be public")
+    chip = (ROOT / "Packages/Maps/Sources/Maps/VitalsChip.swift").read_text()
+    if "public struct VitalsChip" not in chip or "public var body" not in chip:
+        fail("VitalsChip must stay public View with public body")
+    if "public init(" not in chip:
+        fail("VitalsChip init must stay public")
+    hud = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MapHUDChip.swift").read_text()
+    if "public struct MapHUDChip" not in hud or "public var body" not in hud:
+        fail("MapHUDChip must stay public View with public body")
+    if pbx_version_off_32():
+        fail("CURRENT_PROJECT_VERSION was bumped off 32")
+    ok("chrome public Views expose public body/init")
+
+
+def pbx_version_off_32() -> bool:
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    return pbx.count("CURRENT_PROJECT_VERSION = 32") < 2
+
+
 def test_sos_confirm_panel() -> None:
     sos = (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text()
     support = (ROOT / "Packages/SOS/Sources/SOS/SOSConfirmSupport.swift").read_text()
@@ -1118,6 +1159,7 @@ def main() -> None:
     test_live_mesh_1n()
     test_pack_relay_1n()
     test_party_vitals_red_loop()
+    test_chrome_public_view_access()
     test_sos_confirm_panel()
     test_locked_app_icon()
     test_bundled_statewide_archive_only()
