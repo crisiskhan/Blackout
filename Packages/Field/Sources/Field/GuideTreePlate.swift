@@ -242,7 +242,10 @@ struct GuideSkillsView: View {
                     .foregroundStyle(BlackoutDS.Silver.dim)
             }
             .padding(20)
-            .padding(.bottom, 120)
+            .padding(
+                .bottom,
+                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
+            )
         }
     }
 

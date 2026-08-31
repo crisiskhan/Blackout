@@ -127,7 +127,10 @@ public struct FieldRootView: View {
                         }
                     }
                     .padding(20)
-                    .padding(.bottom, 120)
+                    .padding(
+                        .bottom,
+                        CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
+                    )
                 }
             case .skills:
                 GuideSkillsView(pack: pack, onOpenMapJob: onOpenMapJob)
@@ -202,7 +205,10 @@ struct FieldCopyView: View {
                 }
             }
             .padding(20)
-            .padding(.bottom, 120)
+            .padding(
+                .bottom,
+                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
+            )
         }
     }
 }
@@ -260,7 +266,10 @@ struct FieldVisionView: View {
                 }
             }
             .padding(20)
-            .padding(.bottom, 120)
+            .padding(
+                .bottom,
+                CGFloat(MapChromeLock.fieldContentBottomClearance(hasTabBar: true))
+            )
         }
         .sheet(isPresented: $showCamera) {
             CameraPicker(

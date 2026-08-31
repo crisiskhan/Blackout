@@ -76,6 +76,15 @@ public enum MapChromeLock {
         onCenter ? 0 : 1
     }
 
+    /// Opacity 0 keeps the 56h slot so Layers / Packs do not jump.
+    public static let recenterSlotReserved = true
+
+    /// GPS lock (12 m) is on-center until the user pans. Pack-pin is not the signal.
+    public static func cameraIsOnCenter(userMovedCamera: Bool, gpsLocked: Bool = false) -> Bool {
+        _ = gpsLocked
+        return !userMovedCamera
+    }
+
     /// Compass / GPS accuracy. Tiny pill, not a 56h full-width bar.
     public static let lockHUDIsFullWidthBar = false
     public static let lockHUDPaintedHeight: Double = 28
@@ -102,7 +111,16 @@ public enum MapChromeLock {
     public static let pinSheetIsMetalSlab = false
 
     /// I AM OK sits in the SOS band. Field cards must stay clear.
+    public static let vitalsIsRootSibling = true
+    public static let vitalsSitsInSOSBand = true
+    public static let vitalsCoversFieldCards = false
+
     public static func showsVitalsOverlay(tab: String) -> Bool {
         tab != "field"
+    }
+
+    /// Field Injury / Guide cards sit above the dual chip + SOS band.
+    public static func fieldContentBottomClearance(hasTabBar: Bool) -> Double {
+        vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: hasTabBar)
     }
 }

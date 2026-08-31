@@ -31,6 +31,11 @@ final class MapChromeLockTests: XCTestCase {
     func testRecenterOpacityZeroWhenOnCenter() {
         XCTAssertEqual(MapChromeLock.recenterOpacity(onCenter: true), 0)
         XCTAssertEqual(MapChromeLock.recenterOpacity(onCenter: false), 1)
+        XCTAssertTrue(MapChromeLock.recenterSlotReserved)
+        XCTAssertTrue(MapChromeLock.cameraIsOnCenter(userMovedCamera: false))
+        XCTAssertFalse(MapChromeLock.cameraIsOnCenter(userMovedCamera: true))
+        XCTAssertTrue(MapChromeLock.cameraIsOnCenter(userMovedCamera: false, gpsLocked: true))
+        XCTAssertFalse(MapChromeLock.cameraIsOnCenter(userMovedCamera: true, gpsLocked: true))
     }
 
     func testSearchHitsDoNotLandOnMap() {
@@ -119,5 +124,16 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "comms"))
         XCTAssertFalse(MapChromeLock.showsVitalsOverlay(tab: "field"))
         XCTAssertTrue(MapChromeLock.showsVitalsOverlay(tab: "expedition"))
+        XCTAssertTrue(MapChromeLock.vitalsIsRootSibling)
+        XCTAssertTrue(MapChromeLock.vitalsSitsInSOSBand)
+        XCTAssertFalse(MapChromeLock.vitalsCoversFieldCards)
+        XCTAssertEqual(
+            MapChromeLock.fieldContentBottomClearance(hasTabBar: true),
+            MapChromeLock.vitalsPaintedHeight + SOSChrome.gap + SOSChrome.fabBottomInset(hasTabBar: true)
+        )
+        XCTAssertGreaterThan(
+            MapChromeLock.fieldContentBottomClearance(hasTabBar: true),
+            MapChromeLock.vitalsPaintedHeight
+        )
     }
 }

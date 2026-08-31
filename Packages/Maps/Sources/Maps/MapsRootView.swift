@@ -58,6 +58,7 @@ public struct MapsRootView: View {
     @State private var viewshedRays: [ViewshedRay] = []
     @State private var slopeSamples: [SlopeSample] = []
     @State private var pinnedToPackCoverage = false
+    @State private var userMovedCamera = false
     @State private var chrome = MapChromeRecede()
     @State private var metersPerPoint = 10.0
     @State private var openOutingName: String?
@@ -483,6 +484,7 @@ public struct MapsRootView: View {
                 }
             },
             onUserInteract: {
+                userMovedCamera = true
                 pinnedToPackCoverage = false
                 noteMapActivity()
             },
@@ -648,8 +650,22 @@ public struct MapsRootView: View {
     private var chipColumn: some View {
         VStack(spacing: CGFloat(MapChromeLock.chipGap)) {
             MapHUDChip("Recenter", systemName: "location.north.line", action: recenterToPack)
-                .opacity(MapChromeLock.recenterOpacity(onCenter: pinnedToPackCoverage))
-                .allowsHitTesting(MapChromeLock.recenterOpacity(onCenter: pinnedToPackCoverage) > 0)
+                .opacity(
+                    MapChromeLock.recenterOpacity(
+                        onCenter: MapChromeLock.cameraIsOnCenter(
+                            userMovedCamera: userMovedCamera,
+                            gpsLocked: gpsAccuracyMeters != nil
+                        )
+                    )
+                )
+                .allowsHitTesting(
+                    MapChromeLock.recenterOpacity(
+                        onCenter: MapChromeLock.cameraIsOnCenter(
+                            userMovedCamera: userMovedCamera,
+                            gpsLocked: gpsAccuracyMeters != nil
+                        )
+                    ) > 0
+                )
             MapHUDChip("Layers", systemName: "square.3.layers.3d") {
                 noteMapActivity()
                 showLayers = true
@@ -796,6 +812,7 @@ public struct MapsRootView: View {
         )
         jumpCoordinate = hit.coordinate
         jumpToken += 1
+        userMovedCamera = true
     }
 
     private var amenityPinModels: [RoutingPOI] {
@@ -920,6 +937,7 @@ public struct MapsRootView: View {
 
     private func recenterToPack() {
         noteMapActivity()
+        userMovedCamera = false
         pinnedToPackCoverage = true
         resolvePaintPack()
         resetToken += 1

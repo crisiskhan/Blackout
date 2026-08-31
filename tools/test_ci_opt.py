@@ -272,8 +272,14 @@ def test_map_chrome_lock() -> None:
         fail("MapHUDChip still lays out 64 as the chip face")
     if re.search(r"minHeight:\s*CGFloat\(MapChromeLock\.chipHitSlop\)", compass):
         fail("CompassLockBar still lays out 64 as the chip face")
-    if "recenterOpacity(onCenter:" not in maps:
+    if "recenterOpacity(" not in maps:
         fail("Recenter must go opacity 0 when already on-center")
+    if "recenterOpacity(onCenter: pinnedToPackCoverage)" in maps:
+        fail("Recenter on-center is camera-on-center, not pack-pin. 12 m lock stays opacity 0")
+    if "cameraIsOnCenter(" not in maps or "userMovedCamera:" not in maps:
+        fail("Recenter must hide when the camera is already on-center")
+    if "recenterSlotReserved" not in lock:
+        fail("Recenter slot stays reserved at opacity 0")
     if "RadarHUDView(" in maps:
         fail("RadarHUDView must not sit on OfflineMapView")
     if "RadarPolarCanvas(" in maps:
@@ -430,6 +436,19 @@ def test_map_google_feel() -> None:
     vitals_slot = root.split("private var vitalsOverlaySlot", 1)[-1][:500]
     if "showsVitalsOverlay" not in vitals_slot:
         fail("I AM OK overlay must hide on Field")
+    if "vitalsIsRootSibling = true" not in lock:
+        fail("I AM OK dual must stay a Root sibling")
+    if "vitalsSitsInSOSBand = true" not in lock:
+        fail("I AM OK must sit in the SOS band, 8pt above the tab bar")
+    if "vitalsCoversFieldCards = false" not in lock:
+        fail("I AM OK must not cover Field Injury cards")
+    if ".overlay(alignment: .bottomLeading) { vitalsOverlaySlot }" not in root:
+        fail("I AM OK must stay a Root sibling overlay")
+    if "VitalsChip" in (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text():
+        fail("do not move I AM OK into Field")
+    field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
+    if "fieldContentBottomClearance" not in field and "MapChromeLock.fieldContentBottomClearance" not in field:
+        fail("Field cards must inset above the SOS band so Injury is not under I AM OK")
     if pbx.count("CURRENT_PROJECT_VERSION = 34") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map is pack tiles + pins + search; Layers imagery-only; tiny HUD")
