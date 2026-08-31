@@ -1500,6 +1500,7 @@ def main() -> None:
     test_pack_amenity_address_search()
     test_sos_armed_restore_no_crash()
     test_root_view_body_type_checks()
+    test_map_fill_bleed_and_paint_budget()
     print("all ci-opt checks passed")
 
 
@@ -2166,6 +2167,92 @@ def test_hits_23() -> None:
     if pbx.count("CURRENT_PROJECT_VERSION = 38") < 2:
         fail("version bumped off 38")
     ok("hits 23: NFC + Map torch + PTT intent, widget id locked, version 19")
+
+
+def test_map_fill_bleed_and_paint_budget() -> None:
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/MapChromeLockTests.swift").read_text()
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+
+    for flag in (
+        "canvasIgnoresSafeArea = true",
+        "canvasMaxFrameInfinity = true",
+        "canvasUIViewAutoresizes = true",
+        "canvasCoverNotLetterbox = true",
+        "streetsTopoReadPersistedOnLaunch = false",
+        "paintsPackLabelOverlayWhenTopoOff = false",
+        "redrawCanvasOnPan = false",
+        "reportsScaleOnEveryScroll = false",
+        "duskGradeAlpha: Double = 0.42",
+        "headingRedrawStepDegrees: Double = 8",
+    ):
+        if flag not in lock:
+            fail(f"MapChromeLock missing {flag}")
+    if "func coverZoomScale" not in lock or "func letterboxZoomScale" not in lock:
+        fail("cover vs letterbox scale must be testable")
+    if "func shouldRedrawAfterScroll" not in lock:
+        fail("pan must not force a canvas redraw")
+    if "func shouldRedrawForHeading" not in lock or "func shouldRedrawForFix" not in lock:
+        fail("heading / GPS must not rebuild the map every tick")
+    if "searchDebounceMilliseconds: Double = 180" not in lock:
+        fail("pack search on each keystroke must debounce")
+    if "func shouldRunQuerySearch" not in lock:
+        fail("search debounce gate missing")
+
+    for name in (
+        "testCanvasFillsZStackCoverNotLetterboxStrip",
+        "testStreetsTopoStayOffUnlessToggledThisSession",
+        "testPackSearchQueryChangeDebounces",
+        "testMapPaintDoesNotRedrawEveryScrollFrame",
+        "testPickWithOriginAndGraphStartsPreview",
+        "testPickNilOriginLocksDestAndCompass",
+    ):
+        if name not in tests:
+            fail(f"missing {name}")
+
+    canvas = maps.split("private var mapCanvas", 1)[-1].split("private func offlineMap", 1)[0]
+    if ".frame(maxWidth: .infinity, maxHeight: .infinity)" not in canvas:
+        fail("OfflineMapView must frame max infinity so the ZStack is full-bleed")
+    if ".ignoresSafeArea()" not in canvas:
+        fail("map canvas must ignoreSafeArea")
+    if "UserDefaults.standard.bool(forKey: BlackoutKeys.mapStreets)" in maps:
+        fail("streets must default off this session, not last launch")
+    if "UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)" in maps:
+        fail("topo must default off this session, not last launch")
+    if "MapChromeLock.streetsLayerDefaultOn" not in maps:
+        fail("streets launch value must be the lock default")
+    if "MapChromeLock.topoLayerDefaultOn" not in maps:
+        fail("topo launch value must be the lock default")
+    if "searchDebounce" not in maps or "shouldRunQuerySearch" not in maps:
+        fail("query-change search must debounce")
+    pick_fn = maps.split("func pickFound", 1)[-1][:900]
+    if "navigate.pick(" not in pick_fn:
+        fail("pickFound must still call navigate.pick")
+    if "compass.lockOn(" not in pick_fn:
+        fail("pickFound must still compass.lockOn when there is no Walk route")
+
+    if "coverZoomScale" not in offline:
+        fail("recenterToPackCoverage must cover-fill, not letterbox a strip over void")
+    if "flexibleWidth" not in offline or "flexibleHeight" not in offline:
+        fail("OfflineTileScrollView must UIView-autoresize")
+    if "shouldRedrawAfterScroll" not in offline:
+        fail("scroll must not setNeedsDisplay every frame")
+    if "shouldRedrawForHeading" not in offline or "shouldRedrawForFix" not in offline:
+        fail("updateUIView must not repaint tiles on every heading/GPS tick")
+    if "duskGradeAlpha" not in offline:
+        fail("dusk grade must use MapChromeLock.duskGradeAlpha")
+    if "paintsPackLabelOverlayWhenTopoOff" not in offline:
+        fail("default pack paint must not add a street-name overlay")
+    if "showViewshed: false" not in maps or "showSlope: false" not in maps:
+        fail("viewshed/slope must stay off the idle Map")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if pbx.count("CURRENT_PROJECT_VERSION = 38") < 2:
+        fail("do not bump CURRENT_PROJECT_VERSION")
+    ok("Map canvas fills, streets/topo session-off, paint budget cut, version 38")
 
 
 if __name__ == "__main__":

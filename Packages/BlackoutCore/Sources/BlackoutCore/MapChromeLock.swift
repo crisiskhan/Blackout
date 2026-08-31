@@ -92,8 +92,86 @@ public enum MapChromeLock {
     public static let layersTitles = ["Pack tiles", "Streets", "Topo"]
     public static let streetsLayerDefaultOn = false
     public static let topoLayerDefaultOn = false
+    /// Last-launch UserDefaults must not turn streets/topo on. Session toggle only.
+    public static let streetsTopoReadPersistedOnLaunch = false
+    /// Pack rasters already print county/street names. Do not add a second label pass.
+    public static let paintsPackLabelOverlayWhenTopoOff = false
     public static let duskGradesPackTiles = true
+    public static let duskGradeAlpha: Double = 0.42
     public static let usesGoogleLogo = false
+
+    /// OfflineMapView fills the ZStack. Letterbox fit is the device-38 black well.
+    public static let canvasIgnoresSafeArea = true
+    public static let canvasMaxFrameInfinity = true
+    public static let canvasUIViewAutoresizes = true
+    public static let canvasCoverNotLetterbox = true
+
+    public static func coverZoomScale(
+        viewWidth: Double,
+        viewHeight: Double,
+        canvasWidth: Double,
+        canvasHeight: Double
+    ) -> Double {
+        let width = max(viewWidth, 1)
+        let height = max(viewHeight, 1)
+        let canvasW = max(canvasWidth, 1)
+        let canvasH = max(canvasHeight, 1)
+        return max(width / canvasW, height / canvasH)
+    }
+
+    public static func letterboxZoomScale(
+        viewWidth: Double,
+        viewHeight: Double,
+        canvasWidth: Double,
+        canvasHeight: Double
+    ) -> Double {
+        let width = max(viewWidth, 1)
+        let height = max(viewHeight, 1)
+        let canvasW = max(canvasWidth, 1)
+        let canvasH = max(canvasHeight, 1)
+        return min(width / canvasW, height / canvasH)
+    }
+
+    /// Per-frame `setNeedsDisplay` on pan is why the map feels unusable.
+    public static let redrawCanvasOnPan = false
+    public static let reportsScaleOnEveryScroll = false
+    public static let headingRedrawStepDegrees: Double = 8
+
+    public static func shouldRedrawAfterScroll(zoomIntegerChanged: Bool) -> Bool {
+        zoomIntegerChanged
+    }
+
+    public static func shouldRedrawForHeading(previous: Double?, next: Double?) -> Bool {
+        switch (previous, next) {
+        case (nil, nil):
+            return false
+        case (nil, _?), (_?, nil):
+            return true
+        case let (last?, incoming?):
+            let delta = abs(incoming - last)
+            let wrapped = min(delta, 360 - delta)
+            return wrapped >= headingRedrawStepDegrees
+        }
+    }
+
+    public static func shouldRedrawForFix(
+        previousLat: Double?,
+        previousLon: Double?,
+        nextLat: Double?,
+        nextLon: Double?
+    ) -> Bool {
+        switch (previousLat, previousLon, nextLat, nextLon) {
+        case (nil, nil, nil, nil):
+            return false
+        case (nil, _, _?, _), (_, nil, _, _?), (_?, _, nil, _), (_, _?, _, nil):
+            return true
+        case let (plat?, plon?, nlat?, nlon?):
+            return abs(nlat - plat) >= 0.0004 || abs(nlon - plon) >= 0.0004
+        default:
+            return previousLat != nextLat || previousLon != nextLon
+        }
+    }
+
     public static let searchFieldSitsUnderHUD = true
     public static let pinsDestMarkSearch = true
     public static let layersIncludeRadar = false
@@ -137,6 +215,11 @@ public enum MapPackSearchPolicy {
     public static let usesFocusState = true
     public static let contentShapesWholeBar = true
     public static let runsOnQueryChange = true
+    public static let searchDebounceMilliseconds: Double = 180
+
+    public static func shouldRunQuerySearch(elapsedMs: Double) -> Bool {
+        elapsedMs >= searchDebounceMilliseconds
+    }
     public static let typingPresentsSheet = false
     public static let typingShowsDropdown = true
     public static let missOpensSheet = false

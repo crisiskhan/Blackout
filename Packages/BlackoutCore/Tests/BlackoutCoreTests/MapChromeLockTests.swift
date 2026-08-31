@@ -243,4 +243,64 @@ final class MapChromeLockTests: XCTestCase {
             )
         )
     }
+
+    func testCanvasFillsZStackCoverNotLetterboxStrip() {
+        XCTAssertTrue(MapChromeLock.canvasIgnoresSafeArea)
+        XCTAssertTrue(MapChromeLock.canvasMaxFrameInfinity)
+        XCTAssertTrue(MapChromeLock.canvasUIViewAutoresizes)
+        XCTAssertTrue(MapChromeLock.canvasCoverNotLetterbox)
+        let cover = MapChromeLock.coverZoomScale(
+            viewWidth: 390,
+            viewHeight: 844,
+            canvasWidth: 8000,
+            canvasHeight: 3000
+        )
+        let letterbox = MapChromeLock.letterboxZoomScale(
+            viewWidth: 390,
+            viewHeight: 844,
+            canvasWidth: 8000,
+            canvasHeight: 3000
+        )
+        XCTAssertGreaterThan(cover, letterbox)
+        XCTAssertEqual(cover, 844 / 3000, accuracy: 1e-9)
+        XCTAssertEqual(letterbox, 390 / 8000, accuracy: 1e-9)
+    }
+
+    func testStreetsTopoStayOffUnlessToggledThisSession() {
+        XCTAssertFalse(MapChromeLock.streetsLayerDefaultOn)
+        XCTAssertFalse(MapChromeLock.topoLayerDefaultOn)
+        XCTAssertFalse(MapChromeLock.streetsTopoReadPersistedOnLaunch)
+        XCTAssertFalse(MapChromeLock.paintsPackLabelOverlayWhenTopoOff)
+        XCTAssertEqual(MapChromeLock.duskGradeAlpha, 0.42, accuracy: 0.001)
+    }
+
+    func testPackSearchQueryChangeDebounces() {
+        XCTAssertTrue(MapPackSearchPolicy.runsOnQueryChange)
+        XCTAssertEqual(MapPackSearchPolicy.searchDebounceMilliseconds, 180)
+        XCTAssertFalse(MapPackSearchPolicy.shouldRunQuerySearch(elapsedMs: 0))
+        XCTAssertFalse(MapPackSearchPolicy.shouldRunQuerySearch(elapsedMs: 179))
+        XCTAssertTrue(MapPackSearchPolicy.shouldRunQuerySearch(elapsedMs: 180))
+    }
+
+    func testMapPaintDoesNotRedrawEveryScrollFrame() {
+        XCTAssertFalse(MapChromeLock.redrawCanvasOnPan)
+        XCTAssertFalse(MapChromeLock.reportsScaleOnEveryScroll)
+        XCTAssertFalse(MapChromeLock.shouldRedrawAfterScroll(zoomIntegerChanged: false))
+        XCTAssertTrue(MapChromeLock.shouldRedrawAfterScroll(zoomIntegerChanged: true))
+        XCTAssertFalse(MapChromeLock.shouldRedrawForHeading(previous: 10, next: 12))
+        XCTAssertTrue(MapChromeLock.shouldRedrawForHeading(previous: 10, next: 20))
+        XCTAssertTrue(MapChromeLock.shouldRedrawForHeading(previous: nil, next: 0))
+        XCTAssertFalse(MapChromeLock.shouldRedrawForFix(
+            previousLat: 31.76,
+            previousLon: -106.48,
+            nextLat: 31.76001,
+            nextLon: -106.48
+        ))
+        XCTAssertTrue(MapChromeLock.shouldRedrawForFix(
+            previousLat: 31.76,
+            previousLon: -106.48,
+            nextLat: 31.77,
+            nextLon: -106.48
+        ))
+    }
 }

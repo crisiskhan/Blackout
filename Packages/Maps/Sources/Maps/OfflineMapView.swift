@@ -68,6 +68,9 @@ struct OfflineMapView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> OfflineTileScrollView {
         let view = OfflineTileScrollView(pack: pack)
+        if MapChromeLock.canvasUIViewAutoresizes {
+            view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
         view.coordinator = context.coordinator
         view.applyOverlays(
             selfFix: selfFix,
@@ -192,6 +195,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     private let zMin: Int
     private var lastOutside = false
     private var didFit = false
+    private var didPaint = false
+    private var lastDrawnZoom: Int?
 
     init(pack: MapPackSnapshot) {
         self.pack = pack
@@ -211,6 +216,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         y0 = Int(floor(WebMercator.tileY(latitude: north, zoom: zMax)))
         let y1 = Int(floor(WebMercator.tileY(latitude: south, zoom: zMax)))
         super.init(frame: .zero)
+        if MapChromeLock.canvasUIViewAutoresizes {
+            autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
         backgroundColor = UIColor(red: 7 / 255, green: 8 / 255, blue: 10 / 255, alpha: 1)
         scroll.delegate = self
         scroll.backgroundColor = backgroundColor
@@ -218,6 +226,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         scroll.showsHorizontalScrollIndicator = false
         scroll.bounces = true
         scroll.bouncesZoom = true
+        if MapChromeLock.canvasUIViewAutoresizes {
+            scroll.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
         addSubview(scroll)
         canvas.overlay = overlay
         canvas.x0 = x0
@@ -260,12 +271,17 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     }
 
     func recenterToPackCoverage() {
-        let fit = min(
-            bounds.width / max(canvas.bounds.width, 1),
-            bounds.height / max(canvas.bounds.height, 1)
+        let cover = MapChromeLock.coverZoomScale(
+            viewWidth: Double(bounds.width),
+            viewHeight: Double(bounds.height),
+            canvasWidth: Double(canvas.bounds.width),
+            canvasHeight: Double(canvas.bounds.height)
         )
-        scroll.minimumZoomScale = min(0.2, max(fit * 0.5, 0.05))
-        scroll.setZoomScale(max(fit, scroll.minimumZoomScale), animated: false)
+        let scale = CGFloat(cover)
+        scroll.minimumZoomScale = max(scale, 0.01)
+        scroll.maximumZoomScale = max(4, scale * 4)
+        scroll.setZoomScale(scale, animated: false)
+        lastDrawnZoom = canvas.currentZoom()
         centerPack()
         // Manifest center (Denver / Front Range). Never GPS / last-known.
         centerOn(latitude: pack.region.centerLatitude, longitude: pack.region.centerLongitude)
@@ -301,6 +317,26 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         amenityPins: [RoutingPOI],
         markPins: [RoutingCoordinate]
     ) {
+        let headingDirty = MapChromeLock.shouldRedrawForHeading(
+            previous: canvas.headingDegrees,
+            next: headingDegrees
+        )
+        let fixDirty = MapChromeLock.shouldRedrawForFix(
+            previousLat: canvas.selfFix?.latitude,
+            previousLon: canvas.selfFix?.longitude,
+            nextLat: selfFix?.latitude,
+            nextLon: selfFix?.longitude
+        )
+        let layersDirty = canvas.showPackTiles != showPackTiles
+            || canvas.showStreets != showStreets
+            || canvas.showTopoTiles != showTopoTiles
+            || canvas.showTrails != showTrails
+        let routeDirty = canvas.routeLine.count != routeLine.count
+            || canvas.destination?.latitude != destination?.latitude
+            || canvas.destination?.longitude != destination?.longitude
+        let pinsDirty = canvas.amenityPins.count != amenityPins.count
+            || canvas.markPins.count != markPins.count
+            || canvas.packContainsSelf != packContainsSelf
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
         canvas.breadcrumbs = breadcrumbs
@@ -326,7 +362,10 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.sharedTrack = sharedTrack
         canvas.amenityPins = amenityPins
         canvas.markPins = markPins
-        canvas.setNeedsDisplay()
+        if !didPaint || headingDirty || fixDirty || layersDirty || routeDirty || pinsDirty {
+            didPaint = true
+            canvas.setNeedsDisplay()
+        }
     }
 
     func centerOn(latitude: Double, longitude: Double) {
@@ -350,7 +389,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         canvas.zoomScale = scrollView.zoomScale
-        canvas.setNeedsDisplay()
+        redrawCanvasIfZoomIntegerChanged()
         clampCamera()
         reportOutside()
         reportScale()
@@ -358,10 +397,19 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         canvas.zoomScale = scrollView.zoomScale
-        canvas.setNeedsDisplay()
+        redrawCanvasIfZoomIntegerChanged()
         clampCamera()
         reportOutside()
         reportScale()
+    }
+
+    private func redrawCanvasIfZoomIntegerChanged() {
+        let zoom = canvas.currentZoom()
+        let changed = lastDrawnZoom != zoom
+        lastDrawnZoom = zoom
+        if MapChromeLock.shouldRedrawAfterScroll(zoomIntegerChanged: changed) {
+            canvas.setNeedsDisplay()
+        }
     }
 
     @objc private func handlePress(_ gesture: UILongPressGestureRecognizer) {
@@ -381,6 +429,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     }
 
     private func reportScale() {
+        guard MapChromeLock.paintsScaleBarOnMap || MapChromeLock.reportsScaleOnEveryScroll else { return }
         let zoom = Double(zMax) + Darwin.log2(Double(max(scroll.zoomScale, 0.01)))
         let meters = MapScaleBarMath.metersPerPoint(
             latitude: pack.region.centerLatitude,
@@ -498,7 +547,11 @@ final class TileCanvasLayer: UIView {
                 }
             }
             if MapChromeLock.duskGradesPackTiles {
-                ctx.setFillColor(UIColor(BlackoutDS.Surface.void).withAlphaComponent(0.22).cgColor)
+                ctx.setFillColor(
+                    UIColor(BlackoutDS.Surface.void)
+                        .withAlphaComponent(CGFloat(MapChromeLock.duskGradeAlpha))
+                        .cgColor
+                )
                 ctx.fill(rect)
             }
         }
@@ -506,7 +559,7 @@ final class TileCanvasLayer: UIView {
             drawStreets(in: ctx)
         }
         drawRoute(in: ctx)
-        if showTopoTiles {
+        if showTopoTiles || MapChromeLock.paintsPackLabelOverlayWhenTopoOff {
             drawStreetNames(in: ctx)
         }
         drawTurnChevrons(in: ctx)
@@ -988,7 +1041,7 @@ final class TileCanvasLayer: UIView {
         ctx.fillEllipse(in: CGRect(x: point.x - 4, y: point.y - 4, width: 8, height: 8))
     }
 
-    private func currentZoom() -> Int {
+    func currentZoom() -> Int {
         let z = zMax + Int(floor(log2(Double(max(zoomScale, 0.01)))))
         return min(zMax, max(zMin, z))
     }

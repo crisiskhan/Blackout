@@ -54,8 +54,9 @@ public struct MapsRootView: View {
     @State private var jumpToken = 0
     @State private var jumpCoordinate: RoutingCoordinate?
     @State private var showPackTiles = UserDefaults.standard.object(forKey: BlackoutKeys.mapPackTiles) as? Bool ?? true
-    @State private var showStreets = UserDefaults.standard.bool(forKey: BlackoutKeys.mapStreets)
-    @State private var showTopoTiles = UserDefaults.standard.bool(forKey: BlackoutKeys.mapTopoTiles)
+    @State private var showStreets = MapChromeLock.streetsLayerDefaultOn
+    @State private var showTopoTiles = MapChromeLock.topoLayerDefaultOn
+    @State private var searchDebounceTask: Task<Void, Never>?
     @State private var navigate = NavigateSession()
     @State private var compass = CompassLockSession()
     @State private var viewshedRays: [ViewshedRay] = []
@@ -448,6 +449,7 @@ public struct MapsRootView: View {
         if MapEmptyPolicy.paintsCanvas(packMounted: packService.pack != nil), let pack = packService.pack {
             offlineMap(pack)
                 .id(pack.rootURL.standardizedFileURL.path)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
         }
     }
@@ -609,10 +611,22 @@ public struct MapsRootView: View {
     private var mapPackSearch: some View {
         MapPackSearchField(
             query: navQueryBinding,
-            onSubmit: { runPackSearch(present: true) },
+            onSubmit: {
+                searchDebounceTask?.cancel()
+                runPackSearch(present: true)
+            },
             onQueryChange: {
                 guard searchFocused else { return }
-                runPackSearch(present: false)
+                searchDebounceTask?.cancel()
+                searchDebounceTask = Task { @MainActor in
+                    let started = Date()
+                    let nanos = UInt64(MapPackSearchPolicy.searchDebounceMilliseconds * 1_000_000)
+                    try? await Task.sleep(nanoseconds: nanos)
+                    guard !Task.isCancelled else { return }
+                    let elapsedMs = Date().timeIntervalSince(started) * 1000
+                    guard MapPackSearchPolicy.shouldRunQuerySearch(elapsedMs: elapsedMs) else { return }
+                    runPackSearch(present: false)
+                }
             },
             isFocused: $searchFocused
         )
@@ -652,6 +666,7 @@ public struct MapsRootView: View {
     }
 
     private func dismissSearchResults() {
+        searchDebounceTask?.cancel()
         showSearchHits = false
         showSearchDropdown = false
         searchFocused = false
@@ -898,14 +913,16 @@ public struct MapsRootView: View {
     }
 
     private var amenityPinModels: [RoutingPOI] {
-        (packService.pack?.pois ?? []).map {
-            RoutingPOI(
-                id: $0.id,
-                name: $0.name,
-                kind: $0.kind,
-                coordinate: RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+        let mapped = (packService.pack?.pois ?? []).compactMap { poi -> RoutingPOI? in
+            guard PackAmenityPolicy.paintsOnMap(poi.kind) else { return nil }
+            return RoutingPOI(
+                id: poi.id,
+                name: poi.name,
+                kind: poi.kind,
+                coordinate: RoutingCoordinate(latitude: poi.latitude, longitude: poi.longitude)
             )
         }
+        return PackAmenityPolicy.cap(mapped)
     }
 
     /// Dest, MARK, and the last search pick. Pack pins only.
