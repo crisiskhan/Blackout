@@ -148,7 +148,10 @@ final class PartyVitalsTests: XCTestCase {
             defaults: UserDefaults(suiteName: "party-empty-\(UUID().uuidString)")!
         )
         XCTAssertTrue(roster.radarBlips(selfFix: nil).isEmpty)
-        XCTAssertTrue(roster.radarBlips(selfFix: LocationFix(latitude: 31.76, longitude: -106.48)).isEmpty)
+        let selfOnly = roster.radarBlips(selfFix: LocationFix(latitude: 31.76, longitude: -106.48))
+        XCTAssertEqual(selfOnly.count, 1)
+        XCTAssertEqual(selfOnly[0].kind, .selfDot)
+        XCTAssertEqual(selfOnly[0].rangeMeters, 0)
         XCTAssertTrue(roster.peers.isEmpty)
     }
 
@@ -171,11 +174,13 @@ final class PartyVitalsTests: XCTestCase {
         XCTAssertEqual(roster.ingest(envelope), .becameRed(peer))
         XCTAssertEqual(roster.ingest(envelope), .updated)
         let blips = roster.radarBlips(selfFix: LocationFix(latitude: 31.76, longitude: -106.48))
-        XCTAssertEqual(blips.count, 1)
-        XCTAssertEqual(blips[0].band, .red)
-        XCTAssertTrue(PartyRadar.pipIsRed(blips[0]))
-        XCTAssertEqual(blips[0].kind, .member)
-        XCTAssertNotNil(blips[0].latitude)
+        XCTAssertEqual(blips.count, 2)
+        XCTAssertEqual(blips[0].kind, .selfDot)
+        let member = blips.first { $0.kind == .member }
+        XCTAssertEqual(member?.band, .red)
+        XCTAssertTrue(PartyRadar.pipIsRed(member!))
+        XCTAssertEqual(member?.kind, .member)
+        XCTAssertNotNil(member?.latitude)
     }
 
     func testCopyLocksManualButtonsAndSheet() {

@@ -454,7 +454,18 @@ public final class PartyRoster {
 
     public func radarBlips(selfFix: LocationFix?, now: Date = Date()) -> [RadarBlip] {
         guard let selfFix, selfFix.hasCoordinate else { return [] }
-        return peers.compactMap { peer in
+        let selfDot = RadarBlip(
+            id: localID,
+            kind: .selfDot,
+            displayName: selfLabel.name,
+            footnote: selfLabel.footnote,
+            bearingDegrees: 0,
+            rangeMeters: 0,
+            band: selfStatus.band,
+            latitude: selfFix.latitude,
+            longitude: selfFix.longitude
+        )
+        let members = peers.compactMap { peer -> RadarBlip? in
             guard let lat = peer.latitude, let lon = peer.longitude else { return nil }
             guard let range = PartyRadar.rangeMeters(from: selfFix, toLat: lat, toLon: lon),
                   let bearing = PartyRadar.bearingDegrees(from: selfFix, toLat: lat, toLon: lon) else {
@@ -474,6 +485,7 @@ public final class PartyRoster {
                 longitude: lon
             )
         }
+        return [selfDot] + members
     }
 
     @discardableResult

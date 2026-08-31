@@ -4,7 +4,7 @@ import DesignSystem
 import SwiftUI
 import UIKit
 
-/// Polar HUD on top of the file-tile map. Transparent — never a black disc.
+/// Polar HUD for the dedicated Radar screen (Layers → Radar, Comms Radar). Not a Map overlay.
 /// Wave 1.5: 0 peers. Members would be filled silver disks; strangers hollow rings.
 public struct RadarHUDView: View {
     var headingUp: Bool
@@ -63,7 +63,11 @@ public struct RadarHUDView: View {
             let x = geo.size.width / 2 + cos(rad) * r
             let y = geo.size.height / 2 + sin(rad) * r
             Button {
-                onSelectPeer(blip)
+                if blip.kind == .selfDot {
+                    onSelectSelf()
+                } else {
+                    onSelectPeer(blip)
+                }
             } label: {
                 Circle()
                     .fill(pipFill(blip))

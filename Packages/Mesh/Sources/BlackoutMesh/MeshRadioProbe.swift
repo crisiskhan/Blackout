@@ -22,7 +22,7 @@ public final class MeshRadioProbe: NSObject {
     }
 
     private var central: CBCentralManager?
-    private let monitor = NWPathMonitor()
+    private var monitor: NWPathMonitor?
     private let queue = DispatchQueue(label: "blackout.mesh.radios")
     private var started = false
 
@@ -36,16 +36,18 @@ public final class MeshRadioProbe: NSObject {
         central = CBCentralManager(delegate: self, queue: .main, options: [
             CBCentralManagerOptionShowPowerAlertKey: false
         ])
-        monitor.pathUpdateHandler = { [weak self] path in
+        let pathMonitor = NWPathMonitor()
+        pathMonitor.pathUpdateHandler = { [weak self] path in
             Task { @MainActor in
                 self?.apply(path)
             }
         }
-        monitor.start(queue: queue)
+        pathMonitor.start(queue: queue)
+        monitor = pathMonitor
     }
 
     public func stop() {
-        monitor.cancel()
+        monitor?.cancel()
     }
 
     private func apply(_ path: NWPath) {

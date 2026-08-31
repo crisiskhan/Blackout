@@ -1497,6 +1497,12 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("MeshRadioProbe.init must not construct CBCentralManager")
     if "monitor.start(" in probe.split("public override init()")[1].split("public func start")[0]:
         fail("MeshRadioProbe.init must not start NWPathMonitor")
+    if "let monitor = NWPathMonitor()" in probe:
+        fail("NWPathMonitor must not construct during MeshRadioProbe / AppContainer.init")
+    if "kind: .selfDot" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/PartyVitals.swift"
+    ).read_text().split("func radarBlips", 1)[-1][:800]:
+        fail("radarBlips must emit .selfDot for the dedicated Radar screen")
     if "shouldTouchActivityKit" not in hub:
         fail("LiveActivityHub must consult shouldTouchActivityKit")
     if "newBinaryLaunch: suppressPersistedArmedAutoPresent" not in app:

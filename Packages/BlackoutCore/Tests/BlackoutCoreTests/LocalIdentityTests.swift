@@ -227,7 +227,7 @@ final class LocalIdentityTests: XCTestCase {
         let blips = roster.radarBlips(
             selfFix: LocationFix(latitude: 31.76, longitude: -106.48)
         )
-        XCTAssertEqual(blips.first?.footnote, "YOU · 9C00")
+        XCTAssertEqual(blips.first { $0.kind == .member }?.footnote, "YOU · 9C00")
         roster.commitCallsign("WOLF")
         XCTAssertNil(roster.selfLabel.footnote)
         XCTAssertEqual(roster.selfLabel.name, "WOLF")
