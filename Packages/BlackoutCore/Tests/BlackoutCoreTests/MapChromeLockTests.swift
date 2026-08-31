@@ -40,6 +40,10 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertTrue(MapChromeLock.searchRecedesWithChrome)
         XCTAssertFalse(MapChromeLock.showsSearchHitsAsSlabsOnMap)
         XCTAssertFalse(MapChromeLock.showsRadarOnMap)
+        XCTAssertFalse(MapChromeLock.showsRadarOverlayWhenRadarOn)
+        XCTAssertFalse(MapChromeLock.radarIsFifthTab)
+        XCTAssertFalse(MapChromeLock.paintsRadarOnMap(radarOn: false))
+        XCTAssertFalse(MapChromeLock.paintsRadarOnMap(radarOn: true))
         XCTAssertFalse(MapChromeLock.radarDefaultOn)
         XCTAssertEqual(MapChromeLock.radarSelfPoint, 260)
     }

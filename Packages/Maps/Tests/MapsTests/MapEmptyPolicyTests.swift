@@ -9,6 +9,7 @@ final class MapEmptyPolicyTests: XCTestCase {
         XCTAssertFalse(MapEmptyPolicy.showsRadar(packMounted: false, sosOnly: false, radarOn: true, extremeSaver: true))
         XCTAssertFalse(MapEmptyPolicy.showsRadar(packMounted: true, sosOnly: false, radarOn: true, extremeSaver: false))
         XCTAssertFalse(MapEmptyPolicy.showsRadar(packMounted: true, sosOnly: false, radarOn: true, extremeSaver: true))
+        XCTAssertFalse(MapEmptyPolicy.showsRadar(packMounted: true, sosOnly: false, radarOn: false, extremeSaver: false))
     }
 
     func testMountedPackPaintsFileTiles() {

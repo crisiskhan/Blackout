@@ -21,8 +21,17 @@ public enum MapChromeLock {
     public static let searchRecedesWithChrome = true
     public static let showsSearchHitsAsSlabsOnMap = false
     public static let showsRadarOnMap = false
+    /// Product wanted DBZ polar HUD on Map when Radar is on. Crisis override: never.
+    public static let showsRadarOverlayWhenRadarOn = false
+    public static let radarIsFifthTab = false
     public static let radarDefaultOn = false
     public static let radarSelfPoint: Double = 260
+
+    /// Layers → Radar is its own screen. The Map tab never paints sweep/rings/wedge.
+    public static func paintsRadarOnMap(radarOn: Bool) -> Bool {
+        _ = radarOn
+        return false
+    }
 
     public static let showsShareReturnLastMarkOnMap = false
     public static let showsSearchPatternsOnMap = false

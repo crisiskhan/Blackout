@@ -258,6 +258,12 @@ def test_map_chrome_lock() -> None:
         fail("Map search hits must not be giant white slabs")
     if "showsRadarOnMap = false" not in lock:
         fail("RadarHUD must not sit on the big map")
+    if "showsRadarOverlayWhenRadarOn = false" not in lock:
+        fail("Crisis override: no DBZ/radar overlay on Map even when Radar is on")
+    if "radarIsFifthTab = false" not in lock:
+        fail("Radar is Layers → Radar, not a fifth tab")
+    if "func paintsRadarOnMap" not in lock:
+        fail("paintsRadarOnMap must stay false when radarOn is true")
     if "radarDefaultOn = false" not in lock:
         fail("Radar must default OFF")
     if "radarSelfPoint: Double = 260" not in lock:
@@ -270,10 +276,20 @@ def test_map_chrome_lock() -> None:
         fail("Recenter must go opacity 0 when already on-center")
     if "RadarHUDView(" in maps:
         fail("RadarHUDView must not sit on OfflineMapView")
+    if "RadarPolarCanvas(" in maps:
+        fail("polar sweep/rings/wedge must not paint on the Map tab")
     if "rotationEffect(.degrees(radarVisible" in maps:
         fail("do not rotate the tile map under a radar sweep")
+    if "if radarOn" in maps or "radarVisible" in maps:
+        fail("do not restore a radar overlay on Map when Radar is on")
     if 'radarOn = true' in maps:
         fail("Radar must default OFF")
+    if "showsRadar(" in maps:
+        fail("Map tab must not consult showsRadar to overlay tiles")
+    dest = (ROOT / "Blackout/RootView.swift").read_text()
+    dest_enum = dest.split("enum AppDestination", 1)[-1].split("struct RootView", 1)[0]
+    if "case radar" in dest_enum or 'case .radar' in dest_enum:
+        fail("Radar must not become a fifth tab")
     if "MapPackSearchField" not in maps:
         fail("Map lost the visible pack address search field")
     if "MapPackSearchHits(hits:" in maps:

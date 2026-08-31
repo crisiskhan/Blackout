@@ -14,6 +14,7 @@ public enum MapEmptyPolicy {
         packMounted && !sosOnly
     }
 
+    /// Crisis override. `radarOn` never paints polar HUD / DBZ overlay on the Map tab.
     public static func showsRadar(
         packMounted: Bool,
         sosOnly: Bool,
