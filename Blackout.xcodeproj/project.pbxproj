@@ -434,7 +434,7 @@
 					CODE_SIGN_ENTITLEMENTS = Supporting/Blackout.entitlements;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 41;
+					CURRENT_PROJECT_VERSION = 42;
 					DEBUG_INFORMATION_FORMAT = dwarf;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_PREVIEWS = YES;
@@ -499,7 +499,7 @@
 					CODE_SIGN_ENTITLEMENTS = Supporting/Blackout.entitlements;
 					CODE_SIGN_STYLE = Automatic;
 					COPY_PHASE_STRIP = NO;
-					CURRENT_PROJECT_VERSION = 41;
+					CURRENT_PROJECT_VERSION = 42;
 					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
 					DEVELOPMENT_TEAM = "";
 					ENABLE_NS_ASSERTIONS = NO;
@@ -553,7 +553,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 					CODE_SIGN_STYLE = Automatic;
-					CURRENT_PROJECT_VERSION = 41;
+					CURRENT_PROJECT_VERSION = 42;
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
 					INFOPLIST_FILE = Supporting/BlackoutWidgets-Info.plist;
@@ -580,7 +580,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 					CODE_SIGN_STYLE = Automatic;
-					CURRENT_PROJECT_VERSION = 41;
+					CURRENT_PROJECT_VERSION = 42;
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
 					INFOPLIST_FILE = Supporting/BlackoutWidgets-Info.plist;
