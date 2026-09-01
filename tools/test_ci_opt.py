@@ -728,6 +728,10 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign_internal.sh must fail fast when CFBundleVersion is already on ASC")
     if "8 * 60" in src:
         fail("stale CFBundleVersion must fail on the first poll, not after 8 minutes")
+    if "URLError" not in src or "TimeoutError" not in src:
+        fail("asc_assign must retry ASC urlopen timeouts; TF 51 died on urllib timeout")
+    if "WAIT asc net" not in src or "WAIT asc timeout" not in src:
+        fail("ASC network timeout must log and keep polling until the deadline")
     ok("asc_assign_internal.sh fails closed without secrets")
 
 

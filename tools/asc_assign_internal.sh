@@ -109,27 +109,34 @@ def token():
 
 def req(method, url, body=None, tok=None):
     data = None if body is None else json.dumps(body).encode()
-    r = urllib.request.Request(
-        url,
-        data=data,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {tok or token()}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-    )
-    try:
-        with urllib.request.urlopen(r, timeout=45) as resp:
-            raw = resp.read()
-            return resp.status, json.loads(raw) if raw else {}
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode()
+    last_err = None
+    for attempt in range(4):
+        r = urllib.request.Request(
+            url,
+            data=data,
+            method=method,
+            headers={
+                "Authorization": f"Bearer {tok or token()}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+        )
         try:
-            parsed = json.loads(raw)
-        except Exception:
-            parsed = {"raw": raw[:800]}
-        return e.code, parsed
+            with urllib.request.urlopen(r, timeout=45) as resp:
+                raw = resp.read()
+                return resp.status, json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as e:
+            raw = e.read().decode()
+            try:
+                parsed = json.loads(raw)
+            except Exception:
+                parsed = {"raw": raw[:800]}
+            return e.code, parsed
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_err = e
+            print("WAIT asc net", attempt + 1, e, flush=True)
+            time.sleep(5 * (attempt + 1))
+    raise last_err
 
 
 def list_builds(tok):
@@ -200,7 +207,12 @@ while time.time() < deadline:
     if last_tok is None or time.time() - last_tok_at > 10 * 60:
         last_tok = token()
         last_tok_at = time.time()
-    builds = list_builds(last_tok)
+    try:
+        builds = list_builds(last_tok)
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        print("WAIT asc timeout", e, flush=True)
+        time.sleep(30)
+        continue
     candidates = [b for b in builds if b["version"] == want] if want else builds[:1]
     if not_before:
         for rec in candidates:
