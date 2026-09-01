@@ -1,4 +1,5 @@
 import AVFoundation
+import BlackoutCore
 import Foundation
 
 /// On-device `AVSpeechSynthesizer` only. No cloud TTS, no background audio session.
@@ -8,7 +9,9 @@ final class OnDeviceSpeech {
 
     func speak(_ text: String, rate: Float = AVSpeechUtteranceDefaultSpeechRate) {
         guard !text.isEmpty else { return }
-        synthesizer.stopSpeaking(at: .immediate)
+        if AudioChromeLock.interruptible {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
         utterance.rate = rate

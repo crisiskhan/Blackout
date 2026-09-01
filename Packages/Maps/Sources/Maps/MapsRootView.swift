@@ -697,7 +697,12 @@ public struct MapsRootView: View {
                     hasTarget: compass.target != nil,
                     onSpeak: {
                         noteMapActivity()
-                        if navigate.phase == .guidance {
+                        if AudioChromeLock.speakUsesLockPhrase(
+                            isLocked: compass.isLocked,
+                            hasTarget: compass.target != nil
+                        ) {
+                            compass.speakOnce()
+                        } else if navigate.phase == .guidance {
                             navigate.speakNow()
                         } else {
                             compass.speakOnce()

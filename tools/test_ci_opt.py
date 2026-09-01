@@ -1669,6 +1669,91 @@ def test_walk_map_10() -> None:
     ok("Walk Map 10/10: heading-up, haptic, return breadcrumb, Find chips; CPV 50; pack-gap reported")
 
 
+def test_audio_10() -> None:
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    session = (ROOT / "Packages/Maps/Sources/Maps/CompassLockSession.swift").read_text()
+    math = (ROOT / "Packages/Maps/Sources/MapsRouting/CompassLock.swift").read_text()
+    speech = (ROOT / "Packages/Maps/Sources/Maps/OnDeviceSpeech.swift").read_text()
+    guide_speech = (ROOT / "Packages/Field/Sources/Field/GuideSpeech.swift").read_text()
+    ask = (ROOT / "Packages/Field/Sources/Field/GuideAskView.swift").read_text()
+    plate = (ROOT / "Packages/Field/Sources/Field/GuideTreePlate.swift").read_text()
+    comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/AudioChromeLock.swift").read_text()
+    ask_lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/GuideContext.swift").read_text()
+    ptt = (ROOT / "Packages/VoicePTT/Sources/VoicePTT/LivePTTHub.swift").read_text()
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    gen = (ROOT / "tools/generate_project.py").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/AudioChromeLockTests.swift").read_text()
+
+    if "enum AudioChromeLock" not in lock:
+        fail("AudioChromeLock missing")
+    if "interruptible = true" not in lock:
+        fail("lock voice must be interruptible")
+    if "restartsTimerOnRender = false" not in lock:
+        fail("2.2s timer must not restart on render")
+    if "speakPrefersLockWhenLocked = true" not in lock:
+        fail("SPEAK while LOCK on must use the lock phrase")
+    if "speakUsesLockPhrase(" not in maps:
+        fail("MapsRootView SPEAK must prefer lock phrase while LOCK on")
+    if "func speakOnce" not in session:
+        fail("Walk lost SPEAK")
+    if "startLoopIfNeeded" not in session or "guard voiceTask == nil" not in session:
+        fail("2.2s lock voice must not restart on every render")
+    if '"\\(name). \\(fmtDist(meters)). \\(turnPhrase(rel: rel))."' not in math:
+        fail("lock phrase must stay {name}. {fmtDist}. {turnPhrase}.")
+    if "voiceInterval: TimeInterval = 2.2" not in math:
+        fail("lock voice interval must stay 2.2s")
+    if "speechRateMin: Float = 0.47" not in math or "speechRateMax: Float = 0.52" not in math:
+        fail("lock speech rate must stay 0.47–0.52")
+    if "clampedLockRate" not in session:
+        fail("lock voice must clamp speech rate")
+    if "stopSpeaking(at: .immediate)" not in speech:
+        fail("new SPEAK / tick must cut the current utterance")
+    if "AVSpeechSynthesizer" not in speech or "AVSpeechSynthesizer" not in guide_speech:
+        fail("Walk + Field speak must stay on-device AVSpeechSynthesizer")
+    for banned in ("URLSession", "MKLocalSearch", "Mapbox"):
+        if banned in speech or banned in session or banned in guide_speech or banned in ask:
+            fail(f"speak path must stay airplane: no {banned}")
+    if "requiresOnDeviceRecognition = true" not in ask:
+        fail("Field Ask mic must stay on-device")
+    if "Mic denied. Type the ask" not in ask:
+        fail("mic deny must fall back to type")
+    if "micDenyFallsBackToType = true" not in ask_lock:
+        fail("Field Ask mic-deny lock missing")
+    if "GuideSpeak.nextStepOnly" not in plate:
+        fail("Field Ask lost spoken step plates")
+    if "VoicePTTRootView(" not in comms:
+        fail("PTT must stay on Comms")
+    if "VoicePTTRootView(" in maps:
+        fail("PTT must not sit on Map")
+    if "URLSession" in ptt:
+        fail("PTT must stay mesh-only: no URLSession")
+    if "SOSFab" in root or "CriticalSOSShell" in root or "SOSSpeech" in root:
+        fail("do not restore SOS speak / FAB / confirm")
+    if "liveActivitySOSEnabled = false" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("Live Activity SOS must stay off")
+    if root.count("tabItem") != 3:
+        fail("KEEP 3 tabs")
+    if "func applyHeadingUpRotation" not in offline:
+        fail("heading-up must stay")
+    if pbx.count("CURRENT_PROJECT_VERSION = 50") < 4:
+        fail("CPV must still be 50")
+    if "CURRENT_PROJECT_VERSION = 51" in pbx:
+        fail("do not bump CPV to 51")
+    if '"CURRENT_PROJECT_VERSION": "50"' not in gen:
+        fail("generate_project.py CPV must stay 50")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if "testWalkLockVoiceIsInterruptibleAndDoesNotRestartOnRender" not in tests:
+        fail("audio 10 lock tests missing")
+    ok("audio 10/10: Walk SPEAK + 2.2s lock voice, Field Ask mic, PTT on Comms; CPV 50")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -1694,6 +1779,7 @@ def main() -> None:
     test_compass_lock_on()
     test_pack_find_civ_water()
     test_walk_map_10()
+    test_audio_10()
     test_hits_23()
     test_offline_10()
     test_format_version_insurance()

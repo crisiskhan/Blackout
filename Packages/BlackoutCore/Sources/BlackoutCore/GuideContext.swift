@@ -145,6 +145,9 @@ public enum FieldAskHomeLock {
     public static let speakIsSmallIcon = true
     public static let loadsGuidePackOnFieldAppear = false
     public static let loadsGuidePackOnAsk = true
+    public static let micDenyFallsBackToType = true
+    public static let requiresOnDeviceRecognition = true
+    public static let usesURLSession = false
 
     public static func homeChipArticleID(_ title: String) -> String? {
         switch title {

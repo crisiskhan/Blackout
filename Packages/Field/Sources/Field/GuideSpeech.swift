@@ -1,4 +1,5 @@
 import AVFoundation
+import BlackoutCore
 import Foundation
 
 /// Speak the next step only. On-device `AVSpeechSynthesizer`. Not the essay.
@@ -8,7 +9,9 @@ final class GuideSpeech {
 
     func speakNext(_ text: String) {
         guard !text.isEmpty else { return }
-        synthesizer.stopSpeaking(at: .immediate)
+        if AudioChromeLock.interruptible {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate

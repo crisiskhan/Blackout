@@ -128,7 +128,7 @@ final class CompassLockSession {
         }
         emptyCopy = nil
         if let text = currentPhrase() {
-            speech.speak(text, rate: CompassLockMath.speechRate)
+            speech.speak(text, rate: AudioChromeLock.clampedLockRate(CompassLockMath.speechRate))
         }
     }
 
@@ -171,7 +171,7 @@ final class CompassLockSession {
 
     private func utterLockPhrase() {
         guard isLocked, target != nil, let text = currentPhrase() else { return }
-        speech.speak(text, rate: CompassLockMath.speechRate)
+        speech.speak(text, rate: AudioChromeLock.clampedLockRate(CompassLockMath.speechRate))
     }
 
     private func currentPhrase() -> String? {
