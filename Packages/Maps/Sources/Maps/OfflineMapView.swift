@@ -40,6 +40,9 @@ struct OfflineMapView: UIViewRepresentable {
     var jumpToken: Int = 0
     var jumpCoordinate: RoutingCoordinate? = nil
     var headingDegrees: Double?
+    /// Walk heading-up rotates this canvas. Do not apply in MapsRootView (HUD stays north).
+    var headingUp: Bool = false
+    var outingStart: RoutingCoordinate? = nil
     var accuracyMeters: Double?
     var packContainsSelf: Bool
     var activeManeuver: Maneuver?
@@ -89,6 +92,8 @@ struct OfflineMapView: UIViewRepresentable {
             showTopoTiles: showTopoTiles,
             showTrails: showTrails,
             headingDegrees: headingDegrees,
+            headingUp: headingUp,
+            outingStart: outingStart,
             accuracyMeters: accuracyMeters,
             packContainsSelf: packContainsSelf,
             activeManeuver: activeManeuver,
@@ -126,6 +131,8 @@ struct OfflineMapView: UIViewRepresentable {
             showTopoTiles: showTopoTiles,
             showTrails: showTrails,
             headingDegrees: headingDegrees,
+            headingUp: headingUp,
+            outingStart: outingStart,
             accuracyMeters: accuracyMeters,
             packContainsSelf: packContainsSelf,
             activeManeuver: activeManeuver,
@@ -307,6 +314,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         showTopoTiles: Bool,
         showTrails: Bool,
         headingDegrees: Double?,
+        headingUp: Bool,
+        outingStart: RoutingCoordinate?,
         accuracyMeters: Double?,
         packContainsSelf: Bool,
         activeManeuver: Maneuver?,
@@ -337,6 +346,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let pinsDirty = canvas.amenityPins.count != amenityPins.count
             || canvas.markPins.count != markPins.count
             || canvas.packContainsSelf != packContainsSelf
+        let crumbsDirty = canvas.breadcrumbs.count != breadcrumbs.count
+            || canvas.outingStart?.latitude != outingStart?.latitude
+            || canvas.outingStart?.longitude != outingStart?.longitude
         canvas.selfFix = selfFix
         canvas.manualPin = manualPin
         canvas.breadcrumbs = breadcrumbs
@@ -353,6 +365,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.showTopoTiles = showTopoTiles
         canvas.showTrails = showTrails
         canvas.headingDegrees = headingDegrees
+        canvas.outingStart = outingStart
         canvas.accuracyMeters = accuracyMeters
         canvas.packContainsSelf = packContainsSelf
         canvas.activeManeuver = activeManeuver
@@ -362,10 +375,22 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.sharedTrack = sharedTrack
         canvas.amenityPins = amenityPins
         canvas.markPins = markPins
-        if !didPaint || headingDirty || fixDirty || layersDirty || routeDirty || pinsDirty {
+        if !didPaint || headingDirty || fixDirty || layersDirty || routeDirty || pinsDirty || crumbsDirty {
             didPaint = true
             invalidateVisibleCanvas()
         }
+        applyHeadingUpRotation(enabled: headingUp, headingDegrees: headingDegrees)
+    }
+
+    /// Heading-up while Walk: rotate the tile scroll around the follow-puck center.
+    /// HUD chips stay in MapsRootView and are not rotated.
+    func applyHeadingUpRotation(enabled: Bool, headingDegrees: Double?) {
+        guard MapChromeLock.headingUpWhileWalk, enabled, let heading = headingDegrees else {
+            scroll.transform = .identity
+            return
+        }
+        let radians = -heading * .pi / 180
+        scroll.transform = CGAffineTransform(rotationAngle: CGFloat(radians))
     }
 
     func centerOn(latitude: Double, longitude: Double) {
@@ -545,6 +570,7 @@ final class TileCanvasLayer: UIView {
     var showTopoTiles = false
     var showTrails = false
     var headingDegrees: Double?
+    var outingStart: RoutingCoordinate?
     var accuracyMeters: Double?
     var packContainsSelf = false
     var activeManeuver: Maneuver?
@@ -661,6 +687,7 @@ final class TileCanvasLayer: UIView {
                 drawMark(fix, color: UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.9), in: ctx, radius: 4)
             }
         }
+        drawReturnBreadcrumb(in: ctx)
         drawAmenityPins(in: ctx)
         drawPolyline(searchPattern, color: UIColor(BlackoutDS.Semantic.info), dashed: false, in: ctx)
         drawPolyline(sharedTrack.map { ($0.latitude, $0.longitude) }, color: UIColor(BlackoutDS.Red.sun), dashed: true, in: ctx)
@@ -1084,6 +1111,50 @@ final class TileCanvasLayer: UIView {
         ctx.setLineDash(phase: 0, lengths: [pt(3), pt(3)])
         ctx.strokeEllipse(in: CGRect(x: point.x - 5, y: point.y - 5, width: 10, height: 10))
         ctx.setLineDash(phase: 0, lengths: [])
+    }
+
+    private func drawReturnBreadcrumb(in ctx: CGContext) {
+        guard MapChromeLock.paintsReturnBreadcrumbOnMap else { return }
+        let startNode = outingStart.map {
+            WalkReturnBreadcrumb.Node(latitude: $0.latitude, longitude: $0.longitude, estimated: false)
+        }
+        let crumbNodes = breadcrumbs.compactMap { crumb -> WalkReturnBreadcrumb.Node? in
+            guard crumb.hasCoordinate, let lat = crumb.latitude, let lon = crumb.longitude else {
+                return nil
+            }
+            return WalkReturnBreadcrumb.Node(
+                latitude: lat,
+                longitude: lon,
+                estimated: crumb.estimated
+            )
+        }
+        let endNode: WalkReturnBreadcrumb.Node?
+        if let selfFix, selfFix.hasCoordinate, let lat = selfFix.latitude, let lon = selfFix.longitude {
+            endNode = WalkReturnBreadcrumb.Node(latitude: lat, longitude: lon, estimated: false)
+        } else {
+            endNode = nil
+        }
+        let gps = UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.95)
+        let estimated = UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.7)
+        for segment in WalkReturnBreadcrumb.segments(start: startNode, crumbs: crumbNodes, end: endNode) {
+            drawPolyline(
+                [
+                    (segment.from.latitude, segment.from.longitude),
+                    (segment.to.latitude, segment.to.longitude)
+                ],
+                color: segment.dashed ? estimated : gps,
+                dashed: segment.dashed,
+                in: ctx
+            )
+        }
+        if let outingStart {
+            drawMark(
+                LocationFix(latitude: outingStart.latitude, longitude: outingStart.longitude),
+                color: UIColor(BlackoutDS.Semantic.ok),
+                in: ctx,
+                radius: 5
+            )
+        }
     }
 
     private func drawPolyline(_ coords: [(Double, Double)], color: UIColor, dashed: Bool, in ctx: CGContext) {

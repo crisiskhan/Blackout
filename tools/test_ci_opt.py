@@ -205,6 +205,10 @@ def test_map_chrome_lock() -> None:
         fail("MapsRootView lost Recenter 56h chip")
     if 'MapHUDChip("Layers"' in maps:
         fail("Layers control must stay off Map")
+    if 'MapHUDChip("Find civ"' not in maps:
+        fail("MapsRootView lost Find civ 56h chip")
+    if 'MapHUDChip("Water"' not in maps:
+        fail("MapsRootView lost Water 56h chip")
     if 'MapHUDChip("Packs"' not in maps:
         fail("MapsRootView lost Packs 56h chip")
     if "MapRightEdge.stack" not in maps:
@@ -333,7 +337,7 @@ def test_map_chrome_lock() -> None:
         fail("SOS FAB must stay off Map chrome")
     if pbx_version_off_32():
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Map chrome is HUD + Recenter/Packs/Satellite, catalog sheet, no Expedition tab")
+    ok("Map chrome is HUD + Recenter/Find civ/Water/Packs/Satellite, catalog sheet, no Expedition tab")
 
 
 def test_map_google_feel() -> None:
@@ -1456,6 +1460,21 @@ def test_compass_lock_on() -> None:
         fail("street TBT must stay default when routing/ exists")
     if "-(location.headingDegrees" in maps:
         fail("do not rotate OfflineMapView under heading-up; radar owns that sweep")
+    offline_map = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    if "func applyHeadingUpRotation" not in offline_map:
+        fail("heading-up must rotate the tile canvas inside OfflineMapView")
+    if "headingUp:" not in maps.split("OfflineMapView(", 1)[-1][:1200]:
+        fail("MapsRootView must pass headingUp into OfflineMapView")
+    if "outingStart:" not in maps.split("OfflineMapView(", 1)[-1][:1200]:
+        fail("MapsRootView must pass outingStart into OfflineMapView")
+    if "drawReturnBreadcrumb" not in offline_map:
+        fail("return breadcrumb must paint on the file-tile canvas")
+    if "UINotificationFeedbackGenerator" not in maps:
+        fail("Walk off-course must fire a haptic on MapsRootView")
+    if "walkOffCourseHaptic = true" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift"
+    ).read_text():
+        fail("walkOffCourseHaptic lock missing")
     if "RadarHUDView(" not in (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text():
         fail("Radar sweep must live on the Radar sheet, not the big map")
     if "SAVE CURRENT" not in math or "LOCKED" not in math or "DELETE" not in math:
@@ -1533,6 +1552,8 @@ def test_pack_find_civ_water() -> None:
         fail("PackFindSheet lost Find civilization / Find water")
     if "struct MapLayersSheet" in maps:
         fail("Find civ/water must not live on a Layers pile")
+    if 'MapHUDChip("Find civ"' not in maps or 'MapHUDChip("Water"' not in maps:
+        fail("Find civ + Water must be Map HUD chips, not a Layers pile")
     if 'GhostButton("Towns"' in maps:
         fail("Towns must become Find civilization + Find water")
     if "pickFound" not in maps or "MapPOINameSheet" not in maps:
@@ -1560,6 +1581,84 @@ def test_pack_find_civ_water() -> None:
     ok("Map Find civilization / Find water scores pack POIs only")
 
 
+def test_walk_map_10() -> None:
+    maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    lock = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/MapChromeLock.swift").read_text()
+    guidance = (ROOT / "Packages/Maps/Sources/MapsRouting/Guidance.swift").read_text()
+    catalog = (ROOT / "Packages/Packs/Sources/BlackoutPacks/FieldPackCatalog.swift").read_text()
+    root = (ROOT / "Blackout/RootView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
+    gen = (ROOT / "tools/generate_project.py").read_text()
+    tf = (ROOT / ".github/workflows/ios-testflight.yml").read_text()
+    tests = (ROOT / "Packages/Maps/Tests/MapsTests/WalkChromeTests.swift").read_text()
+    lock_tests = (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/MapChromeLockTests.swift").read_text()
+
+    if "-(location.headingDegrees" in maps:
+        fail("do not rotate OfflineMapView from MapsRootView")
+    if "func applyHeadingUpRotation" not in offline:
+        fail("heading-up must live in OfflineMapView")
+    if "CGAffineTransform(rotationAngle" not in offline:
+        fail("heading-up must rotate the file-tile scroll")
+    if "headingUpWhileWalk = true" not in lock:
+        fail("headingUpWhileWalk lock missing")
+    if "appliesHeadingUp(" not in maps:
+        fail("Walk heading-up must be gated to guidance")
+    if "outingStart:" not in maps or "drawReturnBreadcrumb" not in offline:
+        fail("return breadcrumb must reach the canvas")
+    if "paintsReturnBreadcrumbOnMap = true" not in lock:
+        fail("return breadcrumb lock missing")
+    if "showsShareReturnLastMarkOnMap = false" not in lock:
+        fail("do not remount Share/Return/Last MARK slabs")
+    if "WalkReturnBreadcrumb" not in guidance or "dashed" not in guidance:
+        fail("dashed estimated vs GPS return breadcrumb must be in source")
+    if "walkOffCourseHaptic = true" not in lock:
+        fail("off-course haptic lock missing")
+    if "UINotificationFeedbackGenerator" not in maps:
+        fail("off-course haptic must fire from MapsRootView")
+    if "notificationOccurred(.warning)" not in maps:
+        fail("off-course haptic must be a warning pulse, not radar's light impact")
+    if 'MapHUDChip("Find civ"' not in maps or 'MapHUDChip("Water"' not in maps:
+        fail("Find civ + Water chips missing")
+    if 'chipTitles = ["Recenter", "Find civ", "Water", "Packs", "Satellite"]' not in lock:
+        fail("chipTitles must include Find civ + Water")
+    if "layersIncludeFind = false" not in lock or "layersIncludeHeadingUp = false" not in lock:
+        fail("Find / heading-up must not return as a Layers pile")
+    if "PackSearch" not in maps and "navigate.pick" not in maps:
+        fail("offline geocoder / pick path must stay")
+    if "MKLocalSearch" in maps or "MKLocalSearch" in offline:
+        fail("no MKLocalSearch on Map")
+    if "MKMapView(" in maps or "MKMapView(" in offline:
+        fail("do not construct MKMapView on Map")
+    if "Mapbox" in maps or "Mapbox" in offline:
+        fail("no Mapbox SDK")
+    if "SOSFab" in root or "CriticalSOSShell" in root:
+        fail("SOS chrome must stay gone")
+    if root.count("tabItem") != 3:
+        fail("KEEP 3 tabs Map/Comms/Field")
+    if "packGapZ16TownInsetsInTree = false" not in lock:
+        fail("pack-gap z16 must be reported")
+    if "packGapStatewideGraphsInTree = false" not in lock:
+        fail("pack-gap statewide graphs must be reported")
+    if "Pack-gap" not in catalog:
+        fail("FieldPackCatalog must leave a pack-gap comment")
+    if pbx.count("CURRENT_PROJECT_VERSION = 49") < 4:
+        fail("CPV must still be 49")
+    if "CURRENT_PROJECT_VERSION = 50" in pbx:
+        fail("do not bump CPV to 50")
+    if '"CURRENT_PROJECT_VERSION": "49"' not in gen:
+        fail("generate_project.py CPV must stay 49")
+    if "push:" in tf or "pull_request:" in tf:
+        fail("do not dispatch TestFlight")
+    if "testReturnBreadcrumbDashesEstimatedAndSolidsGPS" not in tests:
+        fail("return breadcrumb tests missing")
+    if "testOffCourseHapticFiresOnRisingEdgeOnly" not in tests:
+        fail("off-course haptic tests missing")
+    if "headingUpWhileWalk" not in lock_tests:
+        fail("MapChromeLockTests lost heading-up / Walk 10 locks")
+    ok("Walk Map 10/10: heading-up, haptic, return breadcrumb, Find chips; CPV 49; pack-gap reported")
+
+
 def main() -> None:
     test_compile_workflow_drops_feature_branch_push()
     test_testflight_paths_and_assign()
@@ -1584,6 +1683,7 @@ def main() -> None:
     test_fieldpack_root_flatten_fixture()
     test_compass_lock_on()
     test_pack_find_civ_water()
+    test_walk_map_10()
     test_hits_23()
     test_offline_10()
     test_format_version_insurance()

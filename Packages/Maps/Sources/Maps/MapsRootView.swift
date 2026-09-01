@@ -41,6 +41,7 @@ public struct MapsRootView: View {
     @State private var resetToken = 0
     @State private var centerToken = 0
     @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
+    @State private var wasOffRoute = false
     @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
     @State private var showViewshed = MapChromeLock.initsViewshedOnLaunch
     @State private var showSlope = MapChromeLock.initsSlopeOnLaunch
@@ -456,6 +457,13 @@ public struct MapsRootView: View {
             jumpToken: jumpToken,
             jumpCoordinate: jumpCoordinate,
             headingDegrees: location.headingDegrees,
+            headingUp: MapChromeLock.appliesHeadingUp(
+                walkActive: navigate.phase == .guidance,
+                headingUp: headingUp
+            ),
+            outingStart: outingStart.map {
+                RoutingCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+            },
             accuracyMeters: gpsAccuracyMeters,
             packContainsSelf: packContainsSelf,
             activeManeuver: liveManeuver,
@@ -765,6 +773,14 @@ public struct MapsRootView: View {
                         )
                     ) > 0
                 )
+            MapHUDChip("Find civ", systemName: "building.2") {
+                noteMapActivity()
+                tool = .civilization
+            }
+            MapHUDChip("Water", systemName: "drop") {
+                noteMapActivity()
+                tool = .water
+            }
             MapHUDChip("Packs", systemName: "shippingbox") {
                 noteMapActivity()
                 onOpenFieldPacks?()
@@ -1053,6 +1069,11 @@ public struct MapsRootView: View {
             canFollow: canFollowGuidance
         )
         compass.refreshFix(origin: originCoordinate, heading: location.headingDegrees)
+        let nowOffRoute = navigate.phase == .guidance && navigate.tick?.offRoute == true
+        if MapChromeLock.shouldFireOffCourseHaptic(wasOffRoute: wasOffRoute, nowOffRoute: nowOffRoute) {
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        }
+        wasOffRoute = nowOffRoute
         if navigate.phase == .guidance, packContainsSelf, !pinnedToPackCoverage {
             centerToken += 1
         }

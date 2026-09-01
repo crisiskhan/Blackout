@@ -3,6 +3,11 @@ import Foundation
 
 /// GitHub Releases host for optional region packs. Bundle ID stays
 /// `com.crisiskhan.blackout`. No Blackout cloud.
+///
+/// Pack-gap (50 recode, CPV stays 49): z16 town insets (TX/NM/FL) and statewide
+/// `routing/graph.bin` are not in this tree. Catalog `maxZoom` stays 12. Chrome +
+/// on-device routing must not stall generating those packs. Systems may add them
+/// separately. Honest empty if `packService.routing` is nil.
 public enum FieldPackCatalog {
     public static let releaseTag = "packs-v1"
     public static let releaseBase = URL(

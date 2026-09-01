@@ -13,7 +13,25 @@ public enum MapChromeLock {
     public static let chipHitSlopInset: Double = 4
     public static let chipHitIsPainted = false
     public static let chipHitIsLayoutMinHeight = false
-    public static let chipTitles = ["Recenter", "Packs", "Satellite"]
+    public static let chipTitles = ["Recenter", "Find civ", "Water", "Packs", "Satellite"]
+    public static let showsFindCivWaterChips = true
+    /// Walk heading-up lives on the tile canvas, not a Layers pile and not MapsRootView.
+    public static let headingUpWhileWalk = true
+    public static let walkOffCourseHaptic = true
+    /// Return-to-start polyline on the canvas. Not Share/Return/Last MARK slabs.
+    public static let paintsReturnBreadcrumbOnMap = true
+    /// Pack-gap (50 recode, CPV stays 49): z16 town insets (TX/NM/FL) and statewide
+    /// `routing/graph.bin` are not in this tree. Do not stall chrome+routing generating them.
+    public static let packGapZ16TownInsetsInTree = false
+    public static let packGapStatewideGraphsInTree = false
+
+    public static func appliesHeadingUp(walkActive: Bool, headingUp: Bool) -> Bool {
+        headingUpWhileWalk && walkActive && headingUp
+    }
+
+    public static func shouldFireOffCourseHaptic(wasOffRoute: Bool, nowOffRoute: Bool) -> Bool {
+        walkOffCourseHaptic && nowOffRoute && !wasOffRoute
+    }
     public static let layersChipOnMap = false
     public static let satelliteChipOnMap = true
     public static let hideStrangerBlips = true

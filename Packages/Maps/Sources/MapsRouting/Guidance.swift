@@ -146,4 +146,56 @@ public enum WalkChrome {
         let eta = Formatters.eta(etaSeconds).replacingOccurrences(of: "min", with: "MIN")
         return "\(distance(meters)) / \(eta)"
     }
+
+    public static func shouldFireOffCourseHaptic(wasOffRoute: Bool, nowOffRoute: Bool) -> Bool {
+        nowOffRoute && !wasOffRoute
+    }
+}
+
+/// Return breadcrumb: GPS segments solid, estimated segments dashed.
+/// A start→self line with no walked crumbs is estimated (straight-line, not GPS).
+public enum WalkReturnBreadcrumb {
+    public struct Node: Equatable {
+        public var latitude: Double
+        public var longitude: Double
+        public var estimated: Bool
+
+        public init(latitude: Double, longitude: Double, estimated: Bool) {
+            self.latitude = latitude
+            self.longitude = longitude
+            self.estimated = estimated
+        }
+    }
+
+    public struct Segment: Equatable {
+        public var from: Node
+        public var to: Node
+        public var dashed: Bool
+
+        public init(from: Node, to: Node, dashed: Bool) {
+            self.from = from
+            self.to = to
+            self.dashed = dashed
+        }
+    }
+
+    public static func segments(
+        start: Node?,
+        crumbs: [Node],
+        end: Node?
+    ) -> [Segment] {
+        var nodes: [Node] = []
+        if let start { nodes.append(start) }
+        nodes.append(contentsOf: crumbs)
+        if let end { nodes.append(end) }
+        guard nodes.count >= 2 else { return [] }
+        let onlyEstimatedReturn = crumbs.isEmpty && start != nil && end != nil
+        var out: [Segment] = []
+        for index in 0..<(nodes.count - 1) {
+            let a = nodes[index]
+            let b = nodes[index + 1]
+            out.append(Segment(from: a, to: b, dashed: onlyEstimatedReturn || a.estimated || b.estimated))
+        }
+        return out
+    }
 }
