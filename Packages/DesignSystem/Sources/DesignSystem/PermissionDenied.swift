@@ -48,7 +48,7 @@ public struct PermissionDenied: View {
         case .location:
             return "GPS is off for Blackout. Last-known and compass-only still work when the OS has them. Bundled map, Guide, Skills, messaging, and SOS stay available."
         case .camera:
-            return "Field Vision needs the camera. Deny is a valid field state. Guide and Skills remain on-device."
+            return "Field Vision needs the camera. Deny is a valid field state. Guide remains on-device."
         case .microphone:
             return "Voice PTT stays local when allowed. Deny leaves text comms and SOS intact."
         case .bluetooth:

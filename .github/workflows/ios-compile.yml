@@ -1,0 +1,62 @@
+name: iOS compile
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'Blackout/GuidePack/**'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ios-compile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    name: xcodebuild Blackout
+    runs-on: macos-14
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail closed on TestFlight archive killers
+        run: python3 tools/test_ci_opt.py
+
+      - name: Select Xcode 16
+        run: |
+          set -euo pipefail
+          ls /Applications | grep -i xcode || true
+          app="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -z "${app}" ]; then
+            app="/Applications/Xcode.app"
+          fi
+          sudo xcode-select -s "${app}/Contents/Developer"
+          xcodebuild -version
+
+      - name: Compile Blackout (unsigned)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Blackout.xcodeproj \
+            -scheme Blackout \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Probe DefaultPack tiles inside Blackout.app
+        run: |
+          set -euo pipefail
+          APP="$(find "$RUNNER_TEMP/DerivedData/Build/Products" -name 'Blackout.app' -type d | head -1)"
+          if [ -z "${APP}" ]; then
+            echo "error: Blackout.app not found under DerivedData" >&2
+            find "$RUNNER_TEMP/DerivedData/Build/Products" | head -80 >&2
+            exit 1
+          fi
+          bash tools/probe_defaultpack_app.sh "${APP}"

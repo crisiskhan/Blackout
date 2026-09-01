@@ -11,3 +11,10 @@ __pycache__/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.pack.zip
+BundledFieldPacks/
+Blackout/FieldPacks/
+# Field Pack routing binaries live in packs-v1 zips, never git / DefaultPack.
+**/routing/graph.bin
+**/routing/names.bin
+**/routing/geometry.bin

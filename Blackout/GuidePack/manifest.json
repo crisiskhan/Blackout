@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "id": "core-rockies-denver-v1",
+  "locale": "en",
+  "region": "rockies-denver",
+  "name": "Blackout Field Guide — Rockies / Denver core",
+  "articleCount": 284,
+  "sections": [
+    "guide",
+    "skills",
+    "vision"
+  ],
+  "taxonomy": [
+    {
+      "id": "situation",
+      "title": "Situation",
+      "section": "guide"
+    },
+    {
+      "id": "water",
+      "title": "Water",
+      "section": "guide"
+    },
+    {
+      "id": "fire",
+      "title": "Fire",
+      "section": "guide"
+    },
+    {
+      "id": "shelter",
+      "title": "Shelter",
+      "section": "guide"
+    },
+    {
+      "id": "first-aid",
+      "title": "First Aid",
+      "section": "guide"
+    },
+    {
+      "id": "signaling",
+      "title": "Signaling",
+      "section": "guide"
+    },
+    {
+      "id": "navigation",
+      "title": "Navigation",
+      "section": "guide"
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "section": "guide"
+    },
+    {
+      "id": "food",
+      "title": "Food",
+      "section": "guide"
+    },
+    {
+      "id": "plants",
+      "title": "Plants",
+      "section": "guide"
+    },
+    {
+      "id": "animals",
+      "title": "Animals",
+      "section": "guide"
+    },
+    {
+      "id": "tools",
+      "title": "Tools",
+      "section": "guide"
+    },
+    {
+      "id": "bushcraft",
+      "title": "Bushcraft",
+      "section": "guide"
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "section": "guide"
+    },
+    {
+      "id": "hazards",
+      "title": "Hazards",
+      "section": "guide"
+    },
+    {
+      "id": "vision",
+      "title": "Vision",
+      "section": "vision"
+    },
+    {
+      "id": "skills-path",
+      "title": "Rookie paths",
+      "section": "guide"
+    }
+  ],
+  "version": "1.0.0",
+  "offline": true,
+  "notes": "Offline pack. Core 132 preserved. Vision cards carry two typical-visual percents (ID and runner-up). Specimen verdict stays Unknown. No food verdicts."
+}

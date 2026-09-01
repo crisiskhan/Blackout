@@ -11,6 +11,9 @@ final class ExpeditionRecord {
     var closedAt: Date?
     var startLatitude: Double?
     var startLongitude: Double?
+    var checkInEnabled: Bool = false
+    var checkInIntervalSeconds: Int = 1800
+    var lastCheckInAt: Date?
 
     init(_ dto: ExpeditionRecordDTO) {
         id = dto.id.rawValue
@@ -20,6 +23,9 @@ final class ExpeditionRecord {
         closedAt = dto.closedAt
         startLatitude = dto.startLatitude
         startLongitude = dto.startLongitude
+        checkInEnabled = dto.checkInEnabled
+        checkInIntervalSeconds = dto.checkInIntervalSeconds
+        lastCheckInAt = dto.lastCheckInAt
     }
 
     func apply(_ dto: ExpeditionRecordDTO) {
@@ -29,6 +35,9 @@ final class ExpeditionRecord {
         closedAt = dto.closedAt
         startLatitude = dto.startLatitude
         startLongitude = dto.startLongitude
+        checkInEnabled = dto.checkInEnabled
+        checkInIntervalSeconds = dto.checkInIntervalSeconds
+        lastCheckInAt = dto.lastCheckInAt
     }
 
     func dto() -> ExpeditionRecordDTO {
@@ -39,7 +48,10 @@ final class ExpeditionRecord {
             createdAt: createdAt,
             closedAt: closedAt,
             startLatitude: startLatitude,
-            startLongitude: startLongitude
+            startLongitude: startLongitude,
+            checkInEnabled: checkInEnabled,
+            checkInIntervalSeconds: checkInIntervalSeconds,
+            lastCheckInAt: lastCheckInAt
         )
     }
 }
@@ -51,6 +63,7 @@ final class BreadcrumbRecord {
     var recordedAt: Date
     var latitude: Double?
     var longitude: Double?
+    var estimated: Bool = false
 
     init(_ dto: BreadcrumbRecordDTO) {
         id = dto.id.rawValue
@@ -58,6 +71,7 @@ final class BreadcrumbRecord {
         recordedAt = dto.recordedAt
         latitude = dto.latitude
         longitude = dto.longitude
+        estimated = dto.estimated
     }
 
     func dto() -> BreadcrumbRecordDTO {
@@ -66,7 +80,8 @@ final class BreadcrumbRecord {
             expeditionID: BlackoutID(expeditionID),
             recordedAt: recordedAt,
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            estimated: estimated
         )
     }
 }
@@ -106,6 +121,7 @@ final class MessageRecord {
     var statusRaw: String
     var senderID: UUID
     var recipientID: UUID
+    var wireCiphertext: Data?
 
     init(_ dto: MessageRecordDTO) {
         id = dto.id.rawValue
@@ -114,6 +130,16 @@ final class MessageRecord {
         statusRaw = dto.status.rawValue
         senderID = dto.senderID.rawValue
         recipientID = dto.recipientID.rawValue
+        wireCiphertext = dto.wireCiphertext
+    }
+
+    func apply(_ dto: MessageRecordDTO) {
+        createdAt = dto.createdAt
+        ciphertext = dto.ciphertext
+        statusRaw = dto.status.rawValue
+        senderID = dto.senderID.rawValue
+        recipientID = dto.recipientID.rawValue
+        wireCiphertext = dto.wireCiphertext
     }
 
     func dto() -> MessageRecordDTO {
@@ -123,7 +149,8 @@ final class MessageRecord {
             ciphertext: ciphertext,
             status: MessageStatus(rawValue: statusRaw) ?? .sealed,
             senderID: BlackoutID(senderID),
-            recipientID: BlackoutID(recipientID)
+            recipientID: BlackoutID(recipientID),
+            wireCiphertext: wireCiphertext
         )
     }
 }

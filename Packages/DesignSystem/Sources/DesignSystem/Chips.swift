@@ -35,6 +35,7 @@ public struct GPSChip: View {
         case compass = "Compass only"
         case denied = "GPS denied"
         case none = "No fix"
+        case deadReckoning = "Dead reckoning, GPS lost."
     }
 
     private let mode: Mode
@@ -65,6 +66,7 @@ public struct GPSChip: View {
         switch mode {
         case .live: return BlackoutDS.Semantic.ok
         case .lastKnown, .compass, .manual: return BlackoutDS.Semantic.warn
+        case .deadReckoning: return BlackoutDS.Semantic.warn
         case .denied, .none: return BlackoutDS.Silver.steel
         }
     }

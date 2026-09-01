@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 public enum BlackoutDS {
@@ -16,6 +17,21 @@ public enum BlackoutDS {
         public static let sun = Color(red: 1, green: 74 / 255, blue: 74 / 255)
         public static let ember = Color(red: 196 / 255, green: 30 / 255, blue: 30 / 255)
         public static let blood = Color(red: 139 / 255, green: 20 / 255, blue: 20 / 255)
+        public static let wash = Color(red: 1, green: 43 / 255, blue: 43 / 255).opacity(0.28)
+    }
+
+    public enum Comms {
+        public static let bubbleWidth: CGFloat = 0.78
+        public static let lockShield: CGFloat = 10
+        public static let pttSOSGap: CGFloat = 16
+        public static let composeClearance: CGFloat = Hit.sos + Vitals.sosGap + 4
+        public static let dimmed: Double = 0.38
+        public static let pttPressScale: CGFloat = 0.96
+        public static let pttPressSeconds: Double = 0.080
+        public static let liveTracking: CGFloat = 1.6
+        public static let waveform: CGFloat = 28
+        public static let rosterRow: CGFloat = 64
+        public static let staleSeconds: TimeInterval = 90
     }
 
     public enum Silver {
@@ -33,11 +49,53 @@ public enum BlackoutDS {
         public static let info = Color(red: 110 / 255, green: 200 / 255, blue: 1)
     }
 
+    /// DS v1 §10.2 navigator LOOK. Aliases only — hexes unchanged.
+    public enum Map {
+        public static let land = Surface.base
+        public static let water = Surface.sunken
+        public static let trail = Silver.dim
+        public static let grid = Silver.steel
+        public static let selfDot = Red.core
+        public static let label: CGFloat = 12
+        public static let callout: CGFloat = 16
+        public static let shield: CGFloat = 24
+        public static let puck: CGFloat = 36
+        public static let chevron: CGFloat = 16
+        public static let chevronGap: CGFloat = 12
+        public static let blade: CGFloat = 10
+    }
+
     public enum Hit {
         public static let sm: CGFloat = 56
         public static let md: CGFloat = 64
         public static let lg: CGFloat = 72
         public static let sos: CGFloat = 88
+    }
+
+    /// DS v1 §10.3 motion. Durations only — hexes unchanged.
+    public enum Motion {
+        public static let moveDuration: TimeInterval = 0.220
+        public static let snapDuration: TimeInterval = 0.120
+        public static var move: Animation { .easeInOut(duration: moveDuration) }
+        public static var snap: Animation { .easeOut(duration: snapDuration) }
+    }
+
+    /// DS v1 §10.4 party vitals. Metrics and aliases only — hexes unchanged.
+    public enum Vitals {
+        public static let chip: CGFloat = 56
+        public static let pip: CGFloat = 6
+        /// 8pt: chip-to-disk gap and FAB inset above the tab bar (tabBar+8).
+        public static let sosGap: CGFloat = 8
+        /// Reserved height of the 88pt SOS disk band. Chip sits in this band, leading.
+        public static let sosClearance: CGFloat = 88
+        public static let tabBar: CGFloat = 49
+        public static let homeIndicator: CGFloat = 34
+    }
+
+    /// Commit plates. `primary` is SOS/hazard fill only — vitals stay `metal`.
+    public enum Btn {
+        public static let metal = Silver.metal
+        public static let primary = Red.core
     }
 
     public enum TypeMetrics {

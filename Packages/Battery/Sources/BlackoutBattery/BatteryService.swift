@@ -14,10 +14,20 @@ public final class BatteryService: BatteryServing {
 
     public var hidesSOS: Bool { false }
 
-    public var coarseNavigateEnabled: Bool { true }
+    /// Coarse Navigate stays on in Extreme Saver (above 2%). Last-2% unmounts Map, so this is false.
+    public var coarseNavigateEnabled: Bool { !isCritical }
+
+    /// Last-2% lock. Does not write `policy = .extremeSaver`. Plug-in (`isCharging`) clears this.
+    public var isCritical: Bool {
+        level >= 0 && level <= 0.02 && !isCharging
+    }
+
+    public var isExtremeSaver: Bool {
+        policy == .extremeSaver && !isCritical
+    }
 
     public var pausesCameraAndPTT: Bool {
-        policy == .extremeSaver
+        isCritical || policy == .extremeSaver
     }
 
     private static let policyKey = "com.crisiskhan.blackout.battery.policy"

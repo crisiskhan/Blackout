@@ -17,5 +17,9 @@ let package = Package(
                 "BlackoutCore",
             ]
         ),
+        .testTarget(
+            name: "CryptoTests",
+            dependencies: ["BlackoutCrypto"]
+        ),
     ]
 )

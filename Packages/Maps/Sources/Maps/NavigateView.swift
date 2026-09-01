@@ -8,53 +8,70 @@ struct NavigateView: View {
     @Bindable var location: LocationService
     var pack: MapPackSnapshot?
     @Bindable var battery: BatteryService
+    var packReady: PackReadySnapshot = .empty
     @State private var selected: MapPOI?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ScreenHeader("Navigate", subtitle: "Coarse bearing. Extreme Saver does not disable this.")
-                if battery.policy == .extremeSaver {
-                    Text("Extreme Saver · coarse only")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Semantic.warn)
-                }
-                if location.authorization == .denied || location.authorization == .restricted {
-                    PermissionDenied(
-                        kind: .location,
-                        reason: "No live GPS. Bearing uses last-known or a manual pin. Compass-only still paints a heading. The app does not wait on a fix."
-                    )
-                }
-                HUDPanel {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(bearingCopy)
-                            .font(BlackoutDS.bodyFont())
-                        if let heading = location.headingDegrees {
-                            Text("Compass \(Int(heading))°")
-                                .foregroundStyle(BlackoutDS.Silver.mid)
-                        }
+                ScreenHeader(
+                    "Navigate",
+                    subtitle: battery.isCritical
+                        ? "Coarse Navigate is off at ~2% battery. SOS stays."
+                        : "Bearing only. Walk / Drive turns live on the Map tab when the pack has routing/."
+                )
+                if battery.isCritical {
+                    Text("Last-2% is SOS-only. Radar HUD and coarse nav are hidden. The SOS FAB stays.")
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Red.hot)
+                } else {
+                    if pack == nil, !packReady.readyIDs.isEmpty {
+                        Text("Field pack Ready on this phone. Open Packs to paint coverage.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
                     }
-                }
-                ForEach(pack?.pois ?? []) { poi in
-                    Button {
-                        selected = poi
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(poi.name)
-                                    .foregroundStyle(BlackoutDS.Silver.bright)
-                                Text(poi.kind)
-                                    .font(BlackoutDS.captionFont())
-                                    .foregroundStyle(BlackoutDS.Silver.dim)
+                    if battery.isExtremeSaver {
+                        Text("Extreme Saver · coarse only")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Semantic.warn)
+                    }
+                    if location.authorization == .denied || location.authorization == .restricted {
+                        PermissionDenied(
+                            kind: .location,
+                            reason: "No live GPS. Bearing uses last-known or a manual pin. Compass-only still paints a heading. The app does not wait on a fix."
+                        )
+                    }
+                    HUDPanel {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(bearingCopy)
+                                .font(BlackoutDS.bodyFont())
+                            if let heading = location.headingDegrees {
+                                Text("Compass \(Int(heading))°")
+                                    .foregroundStyle(BlackoutDS.Silver.mid)
                             }
-                            Spacer()
-                            Text(rangeCopy(to: poi))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.mid)
                         }
-                        .padding(.vertical, 8)
                     }
-                    .buttonStyle(.plain)
+                    ForEach(pack?.pois ?? []) { poi in
+                        Button {
+                            selected = poi
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(poi.name)
+                                        .foregroundStyle(BlackoutDS.Silver.bright)
+                                    Text(poi.kind)
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.dim)
+                                }
+                                Spacer()
+                                Text(rangeCopy(to: poi))
+                                    .font(BlackoutDS.captionFont())
+                                    .foregroundStyle(BlackoutDS.Silver.mid)
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
             .padding(20)
@@ -66,21 +83,21 @@ struct NavigateView: View {
     }
 
     private var bearingCopy: String {
-        guard let selected, let from = location.navigationFix, from.hasCoordinate else {
+        guard let selected, let from = location.navigationFix, let (lat, lon) = from.latLon else {
             if selected == nil { return "Pick a pack point. No network routing." }
             return "No coordinate to compute a bearing. Drop a manual pin on the map."
         }
         let brg = bearing(
-            fromLat: from.latitude!, fromLon: from.longitude!,
+            fromLat: lat, fromLon: lon,
             toLat: selected.latitude, toLon: selected.longitude
         )
         return "Bearing to \(selected.name): \(Int(brg))°"
     }
 
     private func rangeCopy(to poi: MapPOI) -> String {
-        guard let from = location.navigationFix, from.hasCoordinate else { return "—" }
+        guard let from = location.navigationFix, let (lat, lon) = from.latLon else { return "—" }
         let meters = haversine(
-            from.latitude!, from.longitude!,
+            lat, lon,
             poi.latitude, poi.longitude
         )
         if meters > 1000 { return String(format: "%.1f km", meters / 1000) }
