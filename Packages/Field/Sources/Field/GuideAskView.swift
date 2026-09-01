@@ -31,19 +31,18 @@ struct GuideAskView: View {
     @State private var engine = AVAudioEngine()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(FieldAskHomeLock.homeStackSpacing)) {
             if let activeArticle {
-                HUDPanel {
-                    GuideTreePlate(
-                        article: activeArticle,
-                        onSendArticle: onSendArticle,
-                        onStartMode: onStartMode,
-                        onOpenMapJob: onOpenMapJob,
-                        openExpeditionID: openExpeditionID,
-                        onStop: returnToAsk
-                    )
-                    .id(activeArticle.id)
-                }
+                GuideTreePlate(
+                    article: activeArticle,
+                    onSendArticle: onSendArticle,
+                    onStartMode: onStartMode,
+                    onOpenMapJob: onOpenMapJob,
+                    openExpeditionID: openExpeditionID,
+                    onStop: returnToAsk
+                )
+                .id(activeArticle.id)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else if browsing {
                 browsePlate
             } else {
@@ -60,45 +59,59 @@ struct GuideAskView: View {
     }
 
     private var askHome: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(FieldAskHomeLock.homeStackSpacing)) {
             askFieldRow
-            MetalButton("Ask", height: BlackoutDS.Hit.md, action: runAsk)
-            Text(GuideAskRanker.honestyLine(context))
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.steel)
+            MetalButton("Ask", height: BlackoutDS.Hit.sm, action: runAsk)
             if micDenied {
                 PermissionDenied(kind: .microphone, reason: "Mic denied. Type the ask. Guide still works.")
             }
             chipRow
-            GhostButton(FieldAskHomeLock.browseLabel, height: BlackoutDS.Hit.sm, action: runBrowse)
+            browseAffordance
             if let error {
                 StoreFailure(error)
             }
             if asked, FieldAskHomeLock.presentsUnknown(hitCount: hits.count) {
                 Text(FieldAskHomeLock.unknownCopy)
-                    .font(BlackoutDS.bodyFont())
+                    .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
-                    .lineSpacing(6)
             }
             packStatus
         }
     }
 
     private var browsePlate: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(FieldAskHomeLock.homeStackSpacing)) {
             askFieldRow
-            MetalButton("Ask", height: BlackoutDS.Hit.md, action: runAsk)
+            MetalButton("Ask", height: BlackoutDS.Hit.sm, action: runAsk)
             ForEach(hits) { hit in
-                GhostButton(hit.article.title, height: BlackoutDS.Hit.sm) {
+                Button {
                     openArticle(hit.article)
+                } label: {
+                    Text(hit.article.title)
+                        .font(BlackoutDS.bodyFont())
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(minHeight: BlackoutDS.Hit.sm)
                 }
+                .buttonStyle(.plain)
             }
-            MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg, action: returnToAsk)
+            MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.sm, action: returnToAsk)
             if let error {
                 StoreFailure(error)
             }
             packStatus
         }
+    }
+
+    private var browseAffordance: some View {
+        Button(action: runBrowse) {
+            Text(FieldAskHomeLock.browseLabel)
+                .font(BlackoutDS.captionFont())
+                .foregroundStyle(BlackoutDS.Silver.steel)
+                .underline()
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(FieldAskHomeLock.browseLabel)
     }
 
     private var askFieldRow: some View {
@@ -129,8 +142,11 @@ struct GuideAskView: View {
 
     private var chipRow: some View {
         LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
-            spacing: 8
+            columns: Array(
+                repeating: GridItem(.flexible(), spacing: 6),
+                count: FieldAskHomeLock.chipColumns
+            ),
+            spacing: 6
         ) {
             ForEach(FieldAskHomeLock.homeChipTitles, id: \.self) { title in
                 MetalButton(title, height: BlackoutDS.Hit.sm) {

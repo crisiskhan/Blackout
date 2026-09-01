@@ -22,12 +22,9 @@ struct GuideTreePlate: View {
 
     var body: some View {
         let medical = GuideTriage.isMedicalOrLost(id: article.id, topic: article.topic, tags: article.tags)
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(article.title)
                 .font(BlackoutDS.titleFont())
-            Text(article.topic)
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.steel)
             if medical, triage == nil {
                 triagePlate
             } else {
@@ -45,19 +42,17 @@ struct GuideTreePlate: View {
     }
 
     private var triagePlate: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Adult / Kid / Party-split")
-                .font(BlackoutDS.titleFont())
-            Text("First question. Then the tree. Not a search box.")
                 .font(BlackoutDS.captionFont())
                 .foregroundStyle(BlackoutDS.Silver.mid)
-            MetalButton("Adult", height: BlackoutDS.Hit.lg) {
+            MetalButton("Adult", height: BlackoutDS.Hit.sm) {
                 applyTriage(.adult)
             }
-            MetalButton("Kid", height: BlackoutDS.Hit.lg) {
+            MetalButton("Kid", height: BlackoutDS.Hit.sm) {
                 applyTriage(.kid)
             }
-            MetalButton("Party-split", height: BlackoutDS.Hit.lg) {
+            MetalButton("Party-split", height: BlackoutDS.Hit.sm) {
                 applyTriage(.partySplit)
             }
             stopControl
@@ -69,36 +64,34 @@ struct GuideTreePlate: View {
         let steps = resolvedSteps
         if medical, let pin = GuideCarePinParser.parse(article.body).firstLine {
             Text(pin)
-                .font(BlackoutDS.titleFont())
+                .font(BlackoutDS.captionFont())
                 .foregroundStyle(BlackoutDS.Semantic.warn)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        outingPrompts
         if !steps.isEmpty {
             pictogramFirst(steps: steps)
             speakControls(steps: steps)
         } else {
             stopControl
         }
-        if OutingGearStore.load().isEmpty, medical {
-            Text("Gear list empty. Showing improvise steps.")
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.dim)
-        }
-        mapJobRow
-        MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
-            onSendArticle(article.id)
-        }
-        if let mode = FieldJobMode.from(articleID: article.id) {
-            MetalButton(mode.title, height: BlackoutDS.Hit.sm) {
-                onStartMode(mode)
+        HStack(spacing: 8) {
+            MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
+                onSendArticle(article.id)
+            }
+            if !showText {
+                GhostButton("Show text", height: BlackoutDS.Hit.sm) {
+                    showText = true
+                }
             }
         }
-        if showText || steps.isEmpty {
+        if showText {
+            outingPrompts
             GuideMarkdownView(source: article.body)
-        } else {
-            GhostButton("Show text", height: BlackoutDS.Hit.sm) {
-                showText = true
+            mapJobRow
+            if let mode = FieldJobMode.from(articleID: article.id) {
+                MetalButton(mode.title, height: BlackoutDS.Hit.sm) {
+                    onStartMode(mode)
+                }
             }
         }
     }
@@ -143,9 +136,6 @@ struct GuideTreePlate: View {
     private func pictogramFirst(steps: [String]) -> some View {
         let pictos = GuidePictogramSteps.symbols(for: steps)
         return VStack(alignment: .leading, spacing: 8) {
-            Text("Steps")
-                .font(BlackoutDS.captionFont())
-                .foregroundStyle(BlackoutDS.Silver.steel)
             PictogramBar(
                 items: pictos.enumerated().map { index, picto in
                     PictogramBar.Item(
@@ -174,7 +164,7 @@ struct GuideTreePlate: View {
                     .lineSpacing(6)
             }
             HStack(spacing: 8) {
-                MetalButton(GuideSpeak.controlNext, height: BlackoutDS.Hit.lg) {
+                MetalButton(GuideSpeak.controlNext, height: BlackoutDS.Hit.sm) {
                     if stepIndex + 1 < steps.count {
                         stepIndex += 1
                     }
@@ -188,7 +178,7 @@ struct GuideTreePlate: View {
     }
 
     private var stopControl: some View {
-        MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
+        MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.sm) {
             speech.stop()
             onStop()
         }
@@ -239,7 +229,7 @@ struct GuideSkillsView: View {
 
     var body: some View {
         FieldSafePlate {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: CGFloat(FieldAskHomeLock.homeStackSpacing)) {
                 if let selectedArticle,
                    let kind = GuideDoAlong.classify(
                     id: selectedArticle.id,
@@ -256,7 +246,7 @@ struct GuideSkillsView: View {
                         .id(selectedArticle.id)
                     }
                 } else {
-                    ScreenHeader("Primitive skills", subtitle: "Timed do-along. Fire, shelter, water. Not a game.")
+                    ScreenHeader("Skills", subtitle: "Fire, shelter, water.")
                     ForEach(doAlongArticles) { article in
                         MetalButton(article.title, height: BlackoutDS.Hit.sm) {
                             selectedArticle = article
@@ -320,7 +310,7 @@ struct GuideDoAlongPlate: View {
         let steps = GuideTreeText.doSteps(in: article.body)
         let elapsed = started.map { now.timeIntervalSince($0) } ?? 0
         let hard = GuideDoAlong.shouldHardStop(elapsed: elapsed, kind: kind)
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(article.title)
                 .font(BlackoutDS.titleFont())
             Text(kind.rawValue.capitalized)
@@ -333,7 +323,7 @@ struct GuideDoAlongPlate: View {
                 Text("Not a game. Walk.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
-                MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
+                MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.sm) {
                     speech.stop()
                     onStop()
                 }
@@ -345,7 +335,7 @@ struct GuideDoAlongPlate: View {
                         .lineSpacing(6)
                 }
                 HStack(spacing: 8) {
-                    MetalButton(started == nil ? "Do along" : GuideSpeak.controlNext, height: BlackoutDS.Hit.lg) {
+                    MetalButton(started == nil ? "Do along" : GuideSpeak.controlNext, height: BlackoutDS.Hit.sm) {
                         if started == nil {
                             started = Date()
                             if let spoken = GuideSpeak.nextStepOnly(steps: steps, index: 0) {
@@ -361,7 +351,7 @@ struct GuideDoAlongPlate: View {
                             speech.stop()
                         }
                     }
-                    MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.lg) {
+                    MetalButton(GuideSpeak.controlStop, height: BlackoutDS.Hit.sm) {
                         stopped = true
                         speech.stop()
                         onStop()

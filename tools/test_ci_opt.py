@@ -2457,6 +2457,16 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
         fail("kid chips must come from FieldAskHomeLock")
     if "FieldAskHomeLock.browseLabel" not in ask and "Browse" not in ask:
         fail("taxonomy must sit behind Browse, not the home wall")
+    if "GuideAskRanker.honestyLine" in ask:
+        fail("Ask home must not paint the honesty paragraph")
+    if "GhostButton(FieldAskHomeLock.browseLabel" in ask:
+        fail("Browse must be a text affordance, not a metal slab")
+    if "paintsHonestyOnHome = false" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/GuideContext.swift"
+    ).read_text():
+        fail("honesty paragraph must stay off Field home")
+    if 'MetalButton("Ask", height: BlackoutDS.Hit.md' in ask:
+        fail("Ask hit must stay 56pt")
     if "onStop" not in tree:
         fail("Stop must return to Ask")
     triage = tree.split("Adult / Kid / Party-split", 1)[-1][:900]

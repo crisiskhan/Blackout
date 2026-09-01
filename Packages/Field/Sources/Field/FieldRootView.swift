@@ -90,12 +90,12 @@ public struct FieldRootView: View {
                 .accessibilityLabel("Settings")
             }
             .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
-            .padding(.top, 8)
-            .padding(.bottom, 8)
+            .padding(.top, 6)
+            .padding(.bottom, 4)
             switch segment {
             case .guide:
                 FieldSafePlate {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: CGFloat(FieldAskHomeLock.homeStackSpacing)) {
                         if inboundMissing, let inboundArticleID {
                             HUDPanel {
                                 VStack(alignment: .leading, spacing: 8) {

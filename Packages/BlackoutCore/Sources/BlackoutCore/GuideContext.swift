@@ -122,6 +122,10 @@ public enum FieldAskHomeLock {
     public static let paintsEncyclopediaOnHome = false
     public static let paintsMedicalLostWallOnHome = false
     public static let paintsPackCountEssayOnHome = false
+    public static let paintsHonestyOnHome = false
+    public static let browseIsMetalSlab = false
+    public static let homeStackSpacing: Double = 8
+    public static let chipColumns = 3
     public static let stacksAnswerCards = false
     public static let oneCardAtATime = true
     public static let stopReturnsToAsk = true
