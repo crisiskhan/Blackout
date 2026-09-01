@@ -394,6 +394,7 @@ final class AppContainer {
 
     func refreshLiveActivity() {
         expireInboundIfNeeded()
+        guard RootChromeLock.liveActivitySOSEnabled else { return }
         guard sceneIsActive, lock.isUnlocked else { return }
         LiveActivityHub.sync(
             partyCode: identity.partyCode,
@@ -568,12 +569,10 @@ final class AppContainer {
                 if !signaledMissedCheckIns.contains(key) {
                     signaledMissedCheckIns.insert(key)
                     let armed = UserDefaults.standard.bool(forKey: BlackoutKeys.sosArmed)
-                    if SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
+                    _ = SOSArmedRestore.shouldRequestConfirmAfterMissedCheckIn(
                         persistedArmed: armed,
                         newBinaryLaunch: suppressPersistedArmedAutoPresent
-                    ) {
-                        sosConfirmRequested = true
-                    }
+                    )
                 }
             } else {
                 signaledMissedCheckIns.remove(key)

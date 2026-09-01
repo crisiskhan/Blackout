@@ -329,8 +329,8 @@ def test_map_chrome_lock() -> None:
         fail("Layers → Radar must reuse RadarView / RadarHUDView")
     if ".frame(height: 260)" not in tools and "radarSelfPoint" not in tools:
         fail("RadarView must stay 260pt on-self, not an overlay on OfflineMapView")
-    if "sosOverlayMounts(" not in root:
-        fail("SOSFab must not live in the idle lock overlay tree")
+    if "SOSFab" in root:
+        fail("SOS FAB must stay off Map chrome")
     if pbx_version_off_32():
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map chrome is HUD + Recenter/Packs/Satellite, catalog sheet, no Expedition tab")
@@ -403,8 +403,10 @@ def test_map_google_feel() -> None:
         fail("I AM OK dual chrome must be deleted")
     if "sosHidesForKeyboard = false" not in lock:
         fail("never hide SOS to clear the keyboard")
-    if "sosLiftsAboveKeyboard = true" not in lock:
-        fail("SOS must lift above the keyboard")
+    if "sosLiftsAboveKeyboard = false" not in lock:
+        fail("SOS FAB lift is deleted with chrome")
+    if "sosPaintsFAB = false" not in lock:
+        fail("SOS FAB must stay unpainted")
     if "func showsRightEdgeChips" not in lock:
         fail("Recenter/Layers must hide when Map search is focused")
     if "testIdleMapIsPackTilesPinsSearchNotARadarHUD" not in tests:
@@ -1311,26 +1313,20 @@ def test_sos_confirm_panel() -> None:
         fail("CALL / strobe must open tel:911 and send mesh sos")
     if "markInjured" not in support:
         fail("strobe / CALL must set local injury/red")
-    if "SOSChrome.fabBottomInset" not in root:
-        fail("SOS FAB must inset tabBar+8 via SOSChrome")
-    if "keyboardHeight" not in root:
-        fail("SOS must track keyboard height and lift above the keys")
-    if "keyboardOverlap" not in root:
-        fail("SOS lift must use SOSChrome.keyboardOverlap")
-    if "keyboardHeight" not in root.split("private var fabBottomPadding", 1)[-1][:400]:
-        fail("fabBottomPadding must include keyboard height")
+    if "SOSFab" in root or "sosOverlay" in root or "CriticalSOSShell" in root:
+        fail("SOS FAB / confirm / 2% shell must stay off chrome")
+    if "keyboardHeight" in root or "fabBottomPadding" in root:
+        fail("SOS keyboard lift is deleted with the FAB")
     if "hidesForKeyboard = false" not in core:
         fail("never hide SOS for the keyboard")
     if "liftsAboveKeyboard = true" not in core:
-        fail("SOS must lift above the keyboard")
+        fail("SOSChrome token liftsAboveKeyboard drifted")
     if "testSOSLiftsAboveKeyboardAndNeverHides" not in (
         (ROOT / "Packages/BlackoutCore/Tests/BlackoutCoreTests/SOSConfirmTests.swift").read_text()
     ):
         fail("missing SOS keyboard-lift test")
-    if "SOSChrome.trailing" not in root:
-        fail("SOS FAB must use 16pt trailing inset")
     if ".padding(.trailing, 18)" in root:
-        fail("SOS trailing drifted off 16pt")
+        fail("RootView trailing drifted")
     if "ignoresSafeArea(edges: .bottom)" in root:
         fail("SOS overlay must not ignore the bottom safe area")
     if "VitalsChip" in root:
@@ -1352,8 +1348,8 @@ def test_sos_confirm_panel() -> None:
         fail("Map recede must not include the SOS FAB")
     if root.count("tabItem") != 3:
         fail("do not make SOS a tab")
-    if "sosOverlay" not in root or root.count("SOSFab") != 1:
-        fail("SOS must be one RootView overlay on all four tabs")
+    if "SOSFab" in root or "CriticalSOSShell" in root:
+        fail("SOS must not remount on RootView")
     maps = (ROOT / "Packages/Maps/Sources/Maps/MapsRootView.swift").read_text()
     comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
     field = (ROOT / "Packages/Field/Sources/Field/FieldRootView.swift").read_text()
@@ -1362,13 +1358,17 @@ def test_sos_confirm_panel() -> None:
         fail("SOS must not be a per-tab or nav-bar control")
     if "isReceded && !reduceMotion" not in maps:
         fail("HUD recede must keep chrome when Reduce Motion is on")
-    if "CriticalSOSShell" not in root or "SOSFab" not in root:
-        fail("last-2% must still show the 88pt SOS FAB")
+    if "CriticalSOSShell" in root or "SOSFab" in root:
+        fail("2% SOS-only path and FAB are deleted from chrome")
+    if "sosChromeDeleted = true" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("sosChromeDeleted lock missing")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
     if pbx.count("CURRENT_PROJECT_VERSION = 48") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("SOS is bottom-trailing tabBar+8, confirm has six actions, no auto-911")
+    ok("SOS FAB/confirm/2% deleted from chrome; package tokens stay; no auto-911")
 
 
 def test_locked_app_icon() -> None:
@@ -1700,10 +1700,8 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("lock SOS twin must be red.core")
     if "onHoldSOS" not in lock_view:
         fail("LockGateView must wire hold-on-twin to the unarmed cover")
-    if "showsDisk: container.lock.isUnlocked" not in root:
-        fail("lock gate must hide the 88pt Map FAB until after unlock")
-    if "container.sosCoverOpen || container.sosConfirmRequested" not in root:
-        fail("lock SOS twin hold cover must stay hittable while the gate is up")
+    if "SOSFab" in root or "CriticalSOSShell" in root:
+        fail("SOS FAB / 2% shell must stay off RootView")
     if "BlackoutDS.Hit.sos" not in sos:
         fail("Map SOS FAB size drifted off 88pt")
     if "SplashChromeView" in shell_app:
@@ -1918,12 +1916,14 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("radio probe must not start on the lock frame")
     if "touchesLiveActivityOnNewBinary = false" not in launch:
         fail("new-binary first process must not touch ActivityKit")
-    if "sosOverlayMounts(" not in root:
-        fail("SOS overlay must stay off the idle lock frame")
     if "func sosOverlayMounts" not in launch or "enum RootChromeLock" not in launch:
-        fail("RootChromeLock must own sosOverlayMounts (RootView and tests call it)")
-    if "stackedChrome" not in root or "sosOverlaySlot" not in root:
+        fail("RootChromeLock must own sosOverlayMounts")
+    if "sosChromeDeleted = true" not in launch:
+        fail("SOS chrome delete lock missing")
+    if "stackedChrome" not in root:
         fail("RootView.body must stay split or Xcode 16 cannot type-check it")
+    if "SOSFab" in root or "sosOverlaySlot" in root:
+        fail("SOS overlay slot must stay deleted")
     if "CBCentralManager(" in probe.split("public override init()")[1].split("public func start")[0]:
         fail("MeshRadioProbe.init must not construct CBCentralManager")
     if "monitor.start(" in probe.split("public override init()")[1].split("public func start")[0]:
@@ -1959,8 +1959,8 @@ def test_root_view_body_type_checks() -> None:
         fail("RootView.body still holds the lifecycle chain Xcode 16 cannot type-check")
     if "func applyLifecycle<" not in root_struct:
         fail("RootView lost applyLifecycle")
-    if "sosOverlayMounts(" not in root_struct:
-        fail("SOS overlay must stay gated off the idle lock frame")
+    if "SOSFab" in root_struct or "CriticalSOSShell" in root_struct:
+        fail("SOS FAB / 2% shell must stay off RootView")
     if "guard container.lock.isUnlocked else { return }" not in root_struct.split(
         ".onAppear"
     )[1][:240]:
@@ -2245,8 +2245,8 @@ def test_hits_23() -> None:
         fail("Light must not be a fourth Map tile")
     if "torchMode" not in torch or "sosAlert" in torch:
         fail("Map torch must set AVCaptureDevice.torch and not emit sos")
-    if "MapTorch" in shell.split("CriticalSOSShell", 1)[-1] or "flashlight" in shell.split("CriticalSOSShell", 1)[-1].lower():
-        fail("do not add torch to CriticalSOSShell")
+    if "CriticalSOSShell" in shell:
+        fail("2% SOS-only shell is deleted from chrome")
     if "Start PTT" not in intents or "Stop PTT" not in intents:
         fail("PTT App Intents missing")
     if "static var appShortcuts: [AppShortcut] {\n        [" in intents:

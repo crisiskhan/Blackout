@@ -75,8 +75,12 @@ final class MapChromeLockTests: XCTestCase {
     }
 
     func testSOSIs88SiblingAndDoesNotRecede() {
-        XCTAssertTrue(MapChromeLock.sosIsTabViewSibling)
-        XCTAssertTrue(RootChromeLock.sosIsRootViewSibling)
+        XCTAssertFalse(MapChromeLock.sosIsTabViewSibling)
+        XCTAssertFalse(RootChromeLock.sosIsRootViewSibling)
+        XCTAssertTrue(RootChromeLock.sosChromeDeleted)
+        XCTAssertFalse(RootChromeLock.sosFabOnChrome)
+        XCTAssertFalse(RootChromeLock.sosConfirmOnChrome)
+        XCTAssertFalse(MapChromeLock.sosPaintsFAB)
         XCTAssertFalse(MapChromeLock.sosStackedInMapPanel)
         XCTAssertFalse(MapChromeLock.sosRecedesWithHUD)
         XCTAssertEqual(MapChromeLock.sosDiameter, 88)
@@ -153,7 +157,7 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.vitalsIsRootSibling)
         XCTAssertFalse(MapChromeLock.vitalsCoversFieldCards)
         XCTAssertFalse(MapChromeLock.sosHidesForKeyboard)
-        XCTAssertTrue(MapChromeLock.sosLiftsAboveKeyboard)
+        XCTAssertFalse(MapChromeLock.sosLiftsAboveKeyboard)
         XCTAssertTrue(RootChromeLock.settingsSitsInSegmentRow)
         XCTAssertFalse(RootChromeLock.settingsIsTopLeadingOverlay)
         XCTAssertFalse(RootChromeLock.pttIgnoresBottomSafeArea)

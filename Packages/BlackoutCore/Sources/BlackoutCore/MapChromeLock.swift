@@ -63,11 +63,12 @@ public enum MapChromeLock {
     public static let vitalsPlateIsRaised = true
     public static let vitalsPlateIsBtnMetal = false
 
-    public static let sosIsTabViewSibling = true
+    public static let sosIsTabViewSibling = false
+    public static let sosPaintsFAB = false
     public static let sosStackedInMapPanel = false
     public static let sosRecedesWithHUD = false
     public static let sosHidesForKeyboard = false
-    public static let sosLiftsAboveKeyboard = true
+    public static let sosLiftsAboveKeyboard = false
     public static let sosDiameter: Double = 88
 
     public static let puckDiameter: Double = 36

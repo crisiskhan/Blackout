@@ -8,9 +8,7 @@ import Field
 import Maps
 import Messaging
 import Settings
-import SOS
 import SwiftUI
-import UIKit
 import VoicePTT
 
 enum AppDestination: String, Hashable, CaseIterable, Identifiable {
@@ -56,7 +54,6 @@ struct RootView: View {
     @State private var pendingPingNav: FieldPingNav?
     @State private var pendingGuideJob: GuideMapJob?
     @Environment(\.scenePhase) private var scenePhase
-    @State private var keyboardHeight: CGFloat = 0
 
     var body: some View {
         applyLifecycle(to: stackedChrome)
@@ -102,9 +99,6 @@ struct RootView: View {
                     syncSensorsToBattery()
                 }
             }
-            .onChange(of: container.sosCoverOpen) { _, _ in
-                container.applyIdleTimer()
-            }
             .onChange(of: container.ptt.isTransmitting) { _, _ in
                 container.applyIdleTimer()
             }
@@ -113,11 +107,6 @@ struct RootView: View {
             }
             .onChange(of: container.radios.cannotRun) { _, _ in
                 container.refreshRadiosBanner()
-            }
-            .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
-                if container.lock.isUnlocked {
-                    container.refreshLiveActivity()
-                }
             }
             .onOpenURL { url in
                 if let next = container.applyDeepLink(url) {
@@ -146,7 +135,6 @@ struct RootView: View {
                 guard scenePhase == .active else { return }
                 syncSensorsToBattery()
                 container.refreshRadiosBanner()
-                container.refreshLiveActivity()
                 container.applyIdleTimer()
             }
             .task {
@@ -154,7 +142,6 @@ struct RootView: View {
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
                     guard container.lock.isUnlocked, scenePhase == .active else { continue }
                     container.expireInboundIfNeeded()
-                    container.refreshLiveActivity()
                     container.applyIdleTimer()
                 }
             }
@@ -162,17 +149,6 @@ struct RootView: View {
 
     private var stackedChrome: some View {
         rootStack
-            .overlay(alignment: .bottomTrailing) { sosOverlaySlot }
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)
-            ) { note in
-                applyKeyboardFrame(note)
-            }
-            .onReceive(
-                NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-            ) { _ in
-                keyboardHeight = 0
-            }
     }
 
     @ViewBuilder
@@ -203,16 +179,6 @@ struct RootView: View {
         }
     }
 
-    @ViewBuilder
-    private var sosOverlaySlot: some View {
-        if RootChromeLock.sosOverlayMounts(
-            isUnlocked: container.lock.isUnlocked,
-            coverRequested: container.sosCoverOpen || container.sosConfirmRequested
-        ) {
-            sosOverlay
-        }
-    }
-
     private var radioBannerOverlay: some View {
         VStack {
             MeshRadioBannerView(
@@ -228,13 +194,9 @@ struct RootView: View {
         .allowsHitTesting(true)
     }
 
-    /// QA Residual A: RootView reads `battery.isCritical` and unmounts Map / Comms / Field / Expedition.
-    /// No TabView tabs, no iPad sidebar destinations, no gear overlay, no Settings sheet from this shell.
     @ViewBuilder
     private var chrome: some View {
-        if container.battery.isCritical, RootChromeLock.sosOnlyCollapseOnColdLaunch {
-            CriticalSOSShell(container: container)
-        } else if sizeClass == .regular {
+        if sizeClass == .regular {
             iPadSplit
         } else {
             iPhoneTabs
@@ -439,46 +401,6 @@ struct RootView: View {
         )
     }
 
-    private var sosOverlay: some View {
-        SOSFab(
-            location: container.location,
-            persistence: container.persistence,
-            mesh: container.mesh,
-            battery: container.battery,
-            roster: container.party,
-            presentConfirm: $container.sosConfirmRequested,
-            coverOpen: $container.sosCoverOpen,
-            suppressPersistedArmedAutoPresent: container.suppressPersistedArmedAutoPresent,
-            showsDisk: container.lock.isUnlocked
-        )
-        .padding(.trailing, CGFloat(SOSChrome.trailing))
-        .padding(.bottom, fabBottomPadding)
-        .allowsHitTesting(
-            container.lock.isUnlocked || container.sosCoverOpen || container.sosConfirmRequested
-        )
-    }
-
-    /// 88pt SOS is a TabView sibling overlay. Stays in the bottom safe area so the
-    /// tab bar is not padded off-screen. Keyboard up: lift above the keys. Never hide.
-    private var fabBottomPadding: CGFloat {
-        let hasTabBar = sizeClass != .regular && !container.battery.isCritical
-        return CGFloat(
-            SOSChrome.fabBottomInset(hasTabBar: hasTabBar, keyboardHeight: Double(keyboardHeight))
-        )
-    }
-
-    private func applyKeyboardFrame(_ note: Notification) {
-        guard let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
-            return
-        }
-        keyboardHeight = CGFloat(
-            SOSChrome.keyboardOverlap(
-                keyboardMinY: frame.minY,
-                screenHeight: Double(UIScreen.main.bounds.height)
-            )
-        )
-    }
-
     private var mapFoldTab: some View {
         Label(AppDestination.map.title, systemImage: MapChromeLock.mapTabSymbol)
             .symbolRenderingMode(.monochrome)
@@ -487,66 +409,5 @@ struct RootView: View {
     private func monochromeTab(_ item: AppDestination) -> some View {
         Label(item.title, systemImage: item.symbol)
             .symbolRenderingMode(.monochrome)
-    }
-}
-
-/// Last-2% shell. Does not construct OfflineMapView, tiles, radar, DR HUD, GPS chip,
-/// Guide ask, Messages, PTT, breadcrumbs, tracking, or missed-check-in UI.
-private struct CriticalSOSShell: View {
-    @Bindable var container: AppContainer
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("CRITICAL · SOS only")
-                .font(BlackoutDS.titleFont())
-                .foregroundStyle(BlackoutDS.Red.hot)
-            Text("Charge to restore Map, Comms, Field, Expedition.")
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.mid)
-            lastKnownOrDropPin
-            Spacer()
-        }
-        .padding(24)
-        .padding(.bottom, 120)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(BlackoutDS.Surface.void.ignoresSafeArea())
-    }
-
-    @ViewBuilder
-    private var lastKnownOrDropPin: some View {
-        if let line = lastKnownLine {
-            Text(line)
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Silver.mid)
-        } else {
-            Button("Drop pin") {
-                dropPinWithoutMap()
-            }
-            .font(BlackoutDS.bodyFont())
-            .foregroundStyle(BlackoutDS.Silver.metal)
-            .buttonStyle(.plain)
-        }
-    }
-
-    private var lastKnownLine: String? {
-        let fix: LocationFix?
-        if let last = container.location.lastKnown, last.hasCoordinate {
-            fix = last
-        } else if let pin = container.location.manualPin, pin.hasCoordinate {
-            fix = pin
-        } else {
-            fix = nil
-        }
-        guard let fix, let lat = fix.latitude, let lon = fix.longitude else { return nil }
-        let coord = String(format: "%.5f, %.5f", lat, lon)
-        let age = fix.timestamp.formatted(.relative(presentation: .named))
-        return "Last-known \(coord) · \(age)"
-    }
-
-    /// Writes the existing manual-pin store. Does not paint OfflineMapView / tiles.
-    private func dropPinWithoutMap() {
-        let lat = container.pack.pack?.region.centerLatitude ?? 39.74
-        let lon = container.pack.pack?.region.centerLongitude ?? -105.25
-        container.location.dropManualPin(latitude: lat, longitude: lon)
     }
 }

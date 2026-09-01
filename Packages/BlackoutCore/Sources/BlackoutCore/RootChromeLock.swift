@@ -1,11 +1,14 @@
 import Foundation
 
-/// Chrome contract. SOS is a RootView sibling so tab switches do not remount the 88pt disk.
+/// Chrome contract. SOS FAB / confirm / 2% shell are deleted from chrome.
 public enum RootChromeLock {
     public static let tabCount = 3
+    public static let sosChromeDeleted = true
+    public static let sosFabOnChrome = false
+    public static let sosConfirmOnChrome = false
     public static let sosOverlayIsInsideTabView = false
-    public static let sosIsRootViewSibling = true
-    public static let sosPlacement = "RootView.ZStack.sibling"
+    public static let sosIsRootViewSibling = false
+    public static let sosPlacement = "none"
     /// Device 42: gear on Guide/Threads was a Root overlay at top-leading.
     public static let settingsIsTopLeadingOverlay = false
     public static let settingsSitsInSegmentRow = true
@@ -17,13 +20,16 @@ public enum RootChromeLock {
     public static let autoPresentsFirstOpenPackSheet = false
     public static let coldLaunchDestination = LaunchLock.destination
     public static let expeditionIsTab = false
-    /// 2% SOS-only shell stays in the tree for later. Do not collapse on cold launch.
+    /// 2% SOS-only shell is deleted from chrome.
     public static let sosOnlyCollapseOnColdLaunch = false
+    public static let sosOnlyCollapseEnabled = false
     public static let liveActivitySOSEnabled = false
 
-    /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
+    /// SOS FAB / confirm never mount on chrome.
     public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
-        LaunchLock.sosOverlayMounts(isUnlocked: isUnlocked, coverRequested: coverRequested)
+        _ = isUnlocked
+        _ = coverRequested
+        return false
     }
 
     /// Lock gate stays off while backgrounded so Field camera / photo leave
@@ -76,9 +82,11 @@ public enum LaunchLock {
     public static let touchesLiveActivityOnNewBinary = false
     public static let walksAllTilesOnBoot = false
 
-    /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
+    /// SOS FAB is deleted from chrome. Twin cover does not mount it.
     public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
-        isUnlocked || coverRequested
+        _ = isUnlocked
+        _ = coverRequested
+        return false
     }
 
     public static func showsLockGate(isUnlocked: Bool, sceneActive: Bool) -> Bool {
