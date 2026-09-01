@@ -129,10 +129,10 @@ def test_pbx_single_copy() -> None:
         fail("widget Info.plist must expand PRODUCT_BUNDLE_IDENTIFIER (parent prefix check)")
     if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
         fail("widget bundle id must stay com.crisiskhan.blackout.widget on Debug and Release")
-    if "CURRENT_PROJECT_VERSION = 44" not in pbx:
-        fail("CURRENT_PROJECT_VERSION is no longer 44")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
-        fail("expected CURRENT_PROJECT_VERSION = 44 on Debug and Release")
+    if "CURRENT_PROJECT_VERSION = 45" not in pbx:
+        fail("CURRENT_PROJECT_VERSION is no longer 45")
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
+        fail("expected CURRENT_PROJECT_VERSION = 45 on Debug and Release")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION is no longer 0.1.0")
     if "Apple Distribution" in pbx:
@@ -160,7 +160,7 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py lost FieldPacks ditto phase")
     if "copy_fieldpacks.sh" not in src:
         fail("generate_project.py lost copy_fieldpacks.sh")
-    if '"CURRENT_PROJECT_VERSION": "44",' not in src:
+    if '"CURRENT_PROJECT_VERSION": "45",' not in src:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
     if "Apple Distribution" in src:
         fail("generate_project.py must not set Apple Distribution")
@@ -581,7 +581,7 @@ def test_map_google_feel() -> None:
         fail("Comms gear must sit in the Threads/Radar/Roster row")
     if "ignoresSafeArea(edges: .bottom)" in comms:
         fail("PTT disc must not ignore the bottom safe area")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("Map is pack tiles + pins + search; Layers imagery-only; tiny HUD")
 
@@ -845,8 +845,8 @@ def test_live_mesh_1n() -> None:
             fail(f"{label} missing Local Network usage string")
         if "NSBonjourServices" not in src or "blckout-mesh" not in src:
             fail(f"{label} missing Bonjour mesh service")
-    if "CURRENT_PROJECT_VERSION = 44" not in pbx:
-        fail("version was bumped off 44")
+    if "CURRENT_PROJECT_VERSION = 45" not in pbx:
+        fail("version was bumped off 45")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
     tools = (ROOT / "Packages/Maps/Sources/Maps/MapTools.swift").read_text()
@@ -887,8 +887,8 @@ def test_pack_relay_1n() -> None:
         fail("AppContainer does not glue pack relay")
     if "session.download" in store.split("installRelayedZip")[-1][:2000]:
         fail("installRelayedZip must not download")
-    if "CURRENT_PROJECT_VERSION = 44" not in pbx:
-        fail("version was bumped off 44")
+    if "CURRENT_PROJECT_VERSION = 45" not in pbx:
+        fail("version was bumped off 45")
     if "MARKETING_VERSION = 0.1.0" not in pbx:
         fail("MARKETING_VERSION changed")
     ok("city pack relay uses sendResource, Packs owns zip/hash, version 19")
@@ -950,8 +950,8 @@ def test_bundled_statewide_archive_only() -> None:
         fail("probe must not require us-ny")
     if "FL TX NY" in flight or "us-ny" in flight:
         fail("TestFlight must not fetch NY")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
-        fail("CURRENT_PROJECT_VERSION was bumped off 44")
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
+        fail("CURRENT_PROJECT_VERSION was bumped off 45")
     ok("archive fetches FL/TX/NM; compile does not; catalog is bundled Ready")
 
 
@@ -1192,8 +1192,8 @@ def test_party_vitals_red_loop() -> None:
         fail("4-tab chrome missing")
     if root.count("tabItem") != 4:
         fail("do not add a fifth tab")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
-        fail("CURRENT_PROJECT_VERSION was bumped off 44")
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
+        fail("CURRENT_PROJECT_VERSION was bumped off 45")
     ok("party vitals two-tap + red packet, SOS 88, chip 56, no 911")
 
 
@@ -1229,13 +1229,13 @@ def test_chrome_public_view_access() -> None:
     if "public struct MapHUDChip" not in hud or "public var body" not in hud:
         fail("MapHUDChip must stay public View with public body")
     if pbx_version_off_32():
-        fail("CURRENT_PROJECT_VERSION was bumped off 44")
+        fail("CURRENT_PROJECT_VERSION was bumped off 45")
     ok("chrome public Views expose public body/init")
 
 
 def pbx_version_off_32() -> bool:
     pbx = (ROOT / "Blackout.xcodeproj/project.pbxproj").read_text()
-    return pbx.count("CURRENT_PROJECT_VERSION = 44") < 2
+    return pbx.count("CURRENT_PROJECT_VERSION = 45") < 2
 
 
 def test_sos_confirm_panel() -> None:
@@ -1338,7 +1338,7 @@ def test_sos_confirm_panel() -> None:
         fail("last-2% must still show the 88pt SOS FAB")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     ok("SOS is bottom-trailing tabBar+8, confirm has six actions, no auto-911")
 
@@ -1382,8 +1382,8 @@ def test_locked_app_icon() -> None:
         fail("lockup must not be wired into the app icon")
     if "CURRENT_PROJECT_VERSION" in (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text():
         pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
-        if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
-            fail("version was bumped off 44 while landing the emblem")
+        if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
+            fail("version was bumped off 45 while landing the emblem")
     ok("AppIcon is the locked emblem PNG; wordmark is catalog-only")
 
 
@@ -1454,7 +1454,7 @@ def test_compass_lock_on() -> None:
         fail("do not revert Feature 1 routing loader")
     if "routing/graph.bin" not in (ROOT / ".gitignore").read_text():
         fail("do not put graph bins in git")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in (ROOT / ".github/workflows/ios-testflight.yml").read_text():
         fail("do not dispatch TestFlight")
@@ -1521,7 +1521,7 @@ def test_pack_find_civ_water() -> None:
         fail("MapPOI lost isWater")
     if "logo" in maps.lower() and "watermark" in maps.lower():
         fail("do not put a logo on Map")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
@@ -1777,7 +1777,7 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("do not add a fifth tab")
     if "BlackoutDS.Hit.sos" not in sos:
         fail("Map SOS FAB size drifted")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "workflow_dispatch:" not in tf or "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight from this fix")
@@ -1912,9 +1912,9 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("LiveActivityHub must consult shouldTouchActivityKit")
     if "newBinaryLaunch: suppressPersistedArmedAutoPresent" not in app:
         fail("Live Activity sync must pass the new-binary suppress flag")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("SOS armed restore + lockup first-open + launch crash sweep, version 44")
+    ok("SOS armed restore + lockup first-open + launch crash sweep, version 45")
 
 
 def test_root_view_body_type_checks() -> None:
@@ -1987,7 +1987,7 @@ def test_pack_amenity_address_search() -> None:
         fail("default map pins must stay hospital/water/civ")
     if "testNewerPOISchemaFailsClosed" not in tests:
         fail("poi schema fail-closed test missing")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
@@ -2057,7 +2057,7 @@ def test_update_maps_one_tap() -> None:
         fail("Update maps must stay a 64pt glove hit")
     if root.count("tabItem") != 4:
         fail("do not add a fifth tab")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
@@ -2129,7 +2129,7 @@ def test_offline_10() -> None:
         fail("do not dispatch TestFlight")
     if "cursor/blackout-ios-foundation-7e54" in compile:
         fail("compile must not push on the feature branch")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if (ROOT / "Blackout/GuidePack/manifest.json").read_text().count('"articleCount": 284') < 1:
         fail("GuidePack articleCount drifted off 284")
@@ -2171,7 +2171,7 @@ def test_format_version_insurance() -> None:
         fail("GuidePack articles drifted")
     if "_ingest" in articles:
         fail("GuidePack gained _ingest")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
@@ -2231,8 +2231,8 @@ def test_hits_23() -> None:
         fail("widget CFBundleIdentifier must stay PRODUCT_BUNDLE_IDENTIFIER")
     if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
         fail("widget bundle id drifted")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
-        fail("version bumped off 44")
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
+        fail("version bumped off 45")
     ok("hits 23: NFC + Map torch + PTT intent, widget id locked, version 19")
 
 
@@ -2344,9 +2344,9 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("viewshed/slope must stay off the idle Map")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Map canvas fills, streets/topo session-off, paint budget cut, version 44")
+    ok("Map canvas fills, streets/topo session-off, paint budget cut, version 45")
 
 
 def test_map_metal_plates() -> None:
@@ -2415,9 +2415,9 @@ def test_map_metal_plates() -> None:
         fail("do not revert cover-zoom or 180ms search debounce")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Map chrome is metal plates, LOCK ON header, overlay dusk, version 44")
+    ok("Map chrome is metal plates, LOCK ON header, overlay dusk, version 45")
 
 
 def test_field_ask_home_is_not_encyclopedia() -> None:
@@ -2504,9 +2504,9 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
         fail("four tabs stay")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if pbx.count("CURRENT_PROJECT_VERSION = 44") < 2:
+    if pbx.count("CURRENT_PROJECT_VERSION = 45") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Field home is Ask+chips, one step card, I AM OK gone, version 44")
+    ok("Field home is Ask+chips, one step card, I AM OK gone, version 45")
 
 
 if __name__ == "__main__":
