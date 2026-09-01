@@ -338,6 +338,9 @@ final class MapChromeLockTests: XCTestCase {
 
     func testDuskAerialRemapHidesPaperWhiteLabels() {
         XCTAssertTrue(MapChromeLock.duskCrushesCountyLabels)
+        XCTAssertFalse(MapChromeLock.duskRemapBlocksDraw)
+        XCTAssertTrue(MapChromeLock.duskRemapCachesTiles)
+        XCTAssertTrue(MapChromeLock.canvasRedrawsVisibleRectOnly)
         let paper = MapChromeLock.duskAerialLuminance(tileLuminance: 0.95)
         let ink = MapChromeLock.duskAerialLuminance(tileLuminance: 0.10)
         XCTAssertLessThan(paper, 0.35)

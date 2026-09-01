@@ -114,6 +114,7 @@ public struct FieldRootView: View {
                         }
                         GuideAskView(
                             pack: pack,
+                            packURL: packURL,
                             packTooNew: packTooNew,
                             context: guideContext,
                             extremeSaver: battery.isExtremeSaver,
@@ -127,35 +128,47 @@ public struct FieldRootView: View {
                 }
             case .skills:
                 GuideSkillsView(pack: pack, onOpenMapJob: onOpenMapJob)
+                    .onAppear { ensurePack() }
             case .vision:
-                if battery.pausesCameraAndPTT {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ScreenHeader(
-                            "Field Vision",
-                            subtitle: battery.isCritical
-                                ? "Paused at ~2% battery. SOS stays up. Radar and coarse nav are off."
-                                : "Paused in Extreme Saver. SOS, coarse nav, and radar stay up."
-                        )
-                        Text(
-                            battery.isCritical
-                                ? "Last-2% is SOS-only. The FAB stays. Camera stills wait until you charge."
-                                : "Camera stills pause so Extreme Saver can keep SOS, coarse Navigate, and the radar HUD."
-                        )
-                            .font(BlackoutDS.bodyFont())
-                            .foregroundStyle(BlackoutDS.Silver.mid)
-                        Spacer()
+                Group {
+                    if battery.pausesCameraAndPTT {
+                        VStack(alignment: .leading, spacing: 16) {
+                            ScreenHeader(
+                                "Field Vision",
+                                subtitle: battery.isCritical
+                                    ? "Paused at ~2% battery. SOS stays up. Radar and coarse nav are off."
+                                    : "Paused in Extreme Saver. SOS, coarse nav, and radar stay up."
+                            )
+                            Text(
+                                battery.isCritical
+                                    ? "Last-2% is SOS-only. The FAB stays. Camera stills wait until you charge."
+                                    : "Camera stills pause so Extreme Saver can keep SOS, coarse Navigate, and the radar HUD."
+                            )
+                                .font(BlackoutDS.bodyFont())
+                                .foregroundStyle(BlackoutDS.Silver.mid)
+                            Spacer()
+                        }
+                        .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
+                    } else {
+                        FieldVisionView(biome: guideContext.biome, pack: pack)
                     }
-                    .padding(.horizontal, CGFloat(MapChromeLock.fieldContentHorizontalInset))
-                } else {
-                    FieldVisionView(biome: guideContext.biome, pack: pack)
                 }
+                .onAppear { ensurePack() }
             }
         }
         .background(BlackoutDS.Surface.base)
         .onAppear {
-            packTooNew = GuidePackLoader.status(rootURL: packURL) == .tooNew
-            pack = GuidePackLoader.load(rootURL: packURL)
+            if !FieldAskHomeLock.loadsGuidePackOnFieldAppear {
+                return
+            }
+            ensurePack()
         }
+    }
+
+    private func ensurePack() {
+        guard pack == nil else { return }
+        packTooNew = GuidePackLoader.status(rootURL: packURL) == .tooNew
+        pack = GuidePackLoader.load(rootURL: packURL)
     }
 
     private var guideContext: GuideQueryContext {

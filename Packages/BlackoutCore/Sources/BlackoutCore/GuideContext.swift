@@ -133,6 +133,8 @@ public enum FieldAskHomeLock {
     ]
     public static let skillsIsCurriculumList = true
     public static let skillsDumpsAllPlates = false
+    public static let loadsGuidePackOnFieldAppear = false
+    public static let loadsGuidePackOnAsk = true
 
     public static func homeChipArticleID(_ title: String) -> String? {
         switch title {

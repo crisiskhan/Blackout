@@ -6,6 +6,7 @@ import SwiftUI
 
 struct GuideAskView: View {
     var pack: GuidePackSnapshot?
+    var packURL: URL? = nil
     var packTooNew = false
     var context: GuideQueryContext
     var extremeSaver: Bool
@@ -51,10 +52,10 @@ struct GuideAskView: View {
         }
         .onAppear {
             micUnavailable = !onDeviceSpeechAvailable
-            if let pack { focusInbound(in: pack) }
+            if focusArticleID != nil, let inbound = resolvedPack() { focusInbound(in: inbound) }
         }
-        .onChange(of: focusArticleID) { _, _ in
-            if let pack { focusInbound(in: pack) }
+        .onChange(of: focusArticleID) { _, next in
+            if next != nil, let inbound = resolvedPack() { focusInbound(in: inbound) }
         }
     }
 
@@ -145,11 +146,11 @@ struct GuideAskView: View {
             Text(GuidePackSchema.tooNewCopy)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Semantic.warn)
-        } else if pack == nil {
-            Text("GuidePack missing from the app bundle. Ask cannot retrieve.")
-                .font(BlackoutDS.bodyFont())
-                .foregroundStyle(BlackoutDS.Semantic.warn)
-        }
+            } else if asked, resolvedPack() == nil {
+                Text("GuidePack missing from the app bundle. Ask cannot retrieve.")
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Semantic.warn)
+            }
     }
 
     private func openChip(_ title: String) {
@@ -157,8 +158,16 @@ struct GuideAskView: View {
         openTree(id: id)
     }
 
+    private func resolvedPack() -> GuidePackSnapshot? {
+        if let pack { return pack }
+        if FieldAskHomeLock.loadsGuidePackOnAsk {
+            return GuidePackLoader.load(rootURL: packURL)
+        }
+        return nil
+    }
+
     private func openTree(id: String) {
-        guard let pack, let article = pack.articles.first(where: { $0.id == id }) else {
+        guard let pack = resolvedPack(), let article = pack.articles.first(where: { $0.id == id }) else {
             query = id.replacingOccurrences(of: "-", with: " ")
             runAsk()
             return
@@ -211,8 +220,9 @@ struct GuideAskView: View {
     }
 
     private func retrieveHits() {
-        guard let pack else {
-            error = packTooNew ? GuidePackSchema.tooNewCopy : "GuidePack missing."
+        guard let pack = resolvedPack() else {
+            let tooNew = packTooNew || GuidePackLoader.status(rootURL: packURL) == .tooNew
+            error = tooNew ? GuidePackSchema.tooNewCopy : "GuidePack missing."
             hits = []
             asked = true
             activeArticle = nil

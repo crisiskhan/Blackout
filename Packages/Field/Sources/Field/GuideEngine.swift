@@ -29,6 +29,9 @@ enum GuidePackLoad: Equatable {
 }
 
 enum GuidePackLoader {
+    private static var memoKey: String?
+    private static var memoInspect: Inspect?
+
     static func load(rootURL: URL?) -> GuidePackSnapshot? {
         switch inspect(rootURL: rootURL) {
         case .ready(let snap):
@@ -56,6 +59,10 @@ enum GuidePackLoader {
     }
 
     private static func inspect(rootURL: URL?) -> Inspect {
+        let key = rootURL?.standardizedFileURL.path ?? "bundle"
+        if memoKey == key, let memoInspect {
+            return memoInspect
+        }
         let candidates: [URL?] = [
             rootURL,
             Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "GuidePack")?.deletingLastPathComponent(),
@@ -63,18 +70,25 @@ enum GuidePackLoader {
             Bundle.main.bundleURL.appendingPathComponent("GuidePack", isDirectory: true)
         ]
         var sawTooNew = false
+        var result: Inspect = .missing
         for candidate in candidates {
             guard let candidate else { continue }
             switch inspect(from: candidate) {
             case .ready(let snap):
-                return .ready(snap)
+                result = .ready(snap)
+                memoKey = key
+                memoInspect = result
+                return result
             case .tooNew:
                 sawTooNew = true
             case .missing:
                 continue
             }
         }
-        return sawTooNew ? .tooNew : .missing
+        result = sawTooNew ? .tooNew : .missing
+        memoKey = key
+        memoInspect = result
+        return result
     }
 
     private static func inspect(from root: URL) -> Inspect {

@@ -364,7 +364,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         canvas.markPins = markPins
         if !didPaint || headingDirty || fixDirty || layersDirty || routeDirty || pinsDirty {
             didPaint = true
-            canvas.setNeedsDisplay()
+            invalidateVisibleCanvas()
         }
     }
 
@@ -408,6 +408,30 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let changed = lastDrawnZoom != zoom
         lastDrawnZoom = zoom
         if MapChromeLock.shouldRedrawAfterScroll(zoomIntegerChanged: changed) {
+            invalidateVisibleCanvas()
+        }
+    }
+
+    private func visibleCanvasRect() -> CGRect {
+        let scale = max(scroll.zoomScale, CGFloat(0.01))
+        let pad = CGFloat(256)
+        let raw = CGRect(
+            x: scroll.contentOffset.x / scale - pad,
+            y: scroll.contentOffset.y / scale - pad,
+            width: scroll.bounds.width / scale + pad * 2,
+            height: scroll.bounds.height / scale + pad * 2
+        )
+        if scroll.bounds.isEmpty || canvas.bounds.isEmpty {
+            return canvas.bounds
+        }
+        let hit = raw.intersection(canvas.bounds.insetBy(dx: -pad, dy: -pad))
+        return hit.isNull || hit.isEmpty ? canvas.bounds : hit
+    }
+
+    private func invalidateVisibleCanvas() {
+        if MapChromeLock.canvasRedrawsVisibleRectOnly {
+            canvas.setNeedsDisplay(visibleCanvasRect())
+        } else {
             canvas.setNeedsDisplay()
         }
     }
@@ -518,6 +542,18 @@ final class TileCanvasLayer: UIView {
     var amenityPins: [RoutingPOI] = []
     var markPins: [RoutingCoordinate] = []
     private let cache = NSCache<NSString, UIImage>()
+    private let duskQueue = DispatchQueue(label: "blackout.map.dusk-remap", qos: .userInitiated)
+    private var duskInflight = Set<String>()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        if MapChromeLock.duskRemapCachesTiles {
+            cache.countLimit = 256
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
@@ -546,7 +582,7 @@ final class TileCanvasLayer: UIView {
                         if showTopoTiles || MapChromeLock.defaultPaintsLabeledUSGS {
                             painted = raw
                         } else {
-                            painted = duskAerial(raw, z: z, x: tileX, y: tileY)
+                            painted = duskAerial(raw, z: z, x: tileX, y: tileY, dest: dest)
                         }
                         painted.draw(in: dest)
                     }
@@ -1063,16 +1099,42 @@ final class TileCanvasLayer: UIView {
         return image
     }
 
-    private func duskAerial(_ source: UIImage, z: Int, x: Int, y: Int) -> UIImage {
+    private func duskAerial(_ source: UIImage, z: Int, x: Int, y: Int, dest: CGRect) -> UIImage {
         guard MapChromeLock.remapsLabeledPackTilesToDuskAerial else { return source }
         let key = "dusk/\(z)/\(x)/\(y)" as NSString
-        if let cached = cache.object(forKey: key) { return cached }
-        guard let painted = remappedDuskAerial(source) else { return source }
-        cache.setObject(painted, forKey: key)
-        return painted
+        if MapChromeLock.duskRemapCachesTiles, let cached = cache.object(forKey: key) {
+            return cached
+        }
+        if MapChromeLock.duskRemapBlocksDraw {
+            guard let painted = Self.remappedDuskAerial(source) else { return source }
+            if MapChromeLock.duskRemapCachesTiles {
+                cache.setObject(painted, forKey: key)
+            }
+            return painted
+        }
+        enqueueDuskRemap(source, key: key, dest: dest)
+        return source
     }
 
-    private func remappedDuskAerial(_ source: UIImage) -> UIImage? {
+    private func enqueueDuskRemap(_ source: UIImage, key: NSString, dest: CGRect) {
+        let token = key as String
+        guard duskInflight.insert(token).inserted else { return }
+        duskQueue.async { [weak self] in
+            let painted = Self.remappedDuskAerial(source)
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.duskInflight.remove(token)
+                if let painted {
+                    if MapChromeLock.duskRemapCachesTiles {
+                        self.cache.setObject(painted, forKey: key)
+                    }
+                    self.setNeedsDisplay(dest)
+                }
+            }
+        }
+    }
+
+    private static func remappedDuskAerial(_ source: UIImage) -> UIImage? {
         guard let cg = source.cgImage else { return nil }
         let width = cg.width
         let height = cg.height

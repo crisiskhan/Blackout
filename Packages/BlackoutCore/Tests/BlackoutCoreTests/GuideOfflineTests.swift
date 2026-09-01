@@ -329,6 +329,8 @@ final class GuideOfflineTests: XCTestCase {
         XCTAssertFalse(FieldAskHomeLock.presentsUnknown(hitCount: 1))
         XCTAssertTrue(FieldAskHomeLock.skillsIsCurriculumList)
         XCTAssertFalse(FieldAskHomeLock.skillsDumpsAllPlates)
+        XCTAssertFalse(FieldAskHomeLock.loadsGuidePackOnFieldAppear)
+        XCTAssertTrue(FieldAskHomeLock.loadsGuidePackOnAsk)
         XCTAssertEqual(RootChromeLock.tabCount, 4)
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertTrue(MapChromeLock.fieldPlateUsesSafeArea)

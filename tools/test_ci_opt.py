@@ -2256,6 +2256,9 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "duskGradeAlpha: Double = 0.22",
         "duskUsesMultiply = false",
         "duskCrushesCountyLabels = true",
+        "duskRemapBlocksDraw = false",
+        "duskRemapCachesTiles = true",
+        "canvasRedrawsVisibleRectOnly = true",
         "defaultPaintIsDuskAerial = true",
         "defaultPaintsLabeledUSGS = false",
         "pickDismissesHits = true",
@@ -2267,6 +2270,10 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("cover vs letterbox scale must be testable")
     if "func shouldRedrawAfterScroll" not in lock:
         fail("pan must not force a canvas redraw")
+    if "invalidateVisibleCanvas" not in maps and "invalidateVisibleCanvas" not in (
+        ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift"
+    ).read_text():
+        fail("Map must dirty the visible canvas, not the whole pack")
     if "func shouldRedrawForHeading" not in lock or "func shouldRedrawForFix" not in lock:
         fail("heading / GPS must not rebuild the map every tick")
     if "searchDebounceMilliseconds: Double = 180" not in lock:
@@ -2472,6 +2479,17 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
         fail("I AM OK dual must stay unmounted")
     if "duskCrushesCountyLabels = true" not in chrome:
         fail("duskCrushesCountyLabels must stay")
+    if "duskRemapBlocksDraw = false" not in chrome:
+        fail("dusk remap must not block Map draw")
+    if "canvasRedrawsVisibleRectOnly = true" not in chrome:
+        fail("Map must dirty the visible rect, not the whole pack canvas")
+    if "loadsGuidePackOnFieldAppear = false" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/GuideContext.swift"
+    ).read_text():
+        fail("GuidePack must not load on Field appear")
+    offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
+    if "invalidateVisibleCanvas" not in offline or "enqueueDuskRemap" not in offline:
+        fail("dusk remap must leave draw and fill in off-main")
     if root.count("tabItem") != 4:
         fail("four tabs stay")
     if "push:" in tf or "pull_request:" in tf:

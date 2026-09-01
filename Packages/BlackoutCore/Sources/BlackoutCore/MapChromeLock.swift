@@ -114,6 +114,10 @@ public enum MapChromeLock {
     public static let duskUsesMultiply = false
     /// Paper + ink both flatten so county / I-10 type does not survive the invert.
     public static let duskCrushesCountyLabels = true
+    /// Per-pixel dusk remap in `draw` is the Map crawl. Cache + off-main fill-in.
+    public static let duskRemapBlocksDraw = false
+    public static let duskRemapCachesTiles = true
+    public static let canvasRedrawsVisibleRectOnly = true
     /// Overlay-only wash. 0.42 × multiply was the killer; 0.22 grades dusk without zeroing luminance.
     public static let duskGradeAlpha: Double = 0.22
     public static let duskGradeColorName = "Surface.void"
