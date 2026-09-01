@@ -209,44 +209,44 @@ while time.time() < deadline:
         last_tok_at = time.time()
     try:
         builds = list_builds(last_tok)
+        candidates = [b for b in builds if b["version"] == want] if want else builds[:1]
+        if not_before:
+            for rec in candidates:
+                uploaded = parse_iso(rec.get("uploadedDate") or "")
+                if uploaded is None or uploaded < not_before:
+                    print(
+                        "SKIP stale",
+                        rec.get("version"),
+                        rec.get("id"),
+                        rec.get("uploadedDate"),
+                        flush=True,
+                    )
+        kind, chosen = pick_assign_match(candidates, not_before)
+        if kind == "fallback":
+            raise SystemExit("refusing FALLBACK assign of a stale same-number build")
+        if kind == "stale_only":
+            raise SystemExit(
+                f"CFBundleVersion {want} already exists on ASC from before this archive; bump CURRENT_PROJECT_VERSION"
+            )
+        if chosen:
+            target = chosen
+            if target["processingState"] == "VALID":
+                det = sync(target, last_tok)
+                state = (det or {}).get("internalBuildState")
+                print("RESULT", target["version"], target["id"], state, flush=True)
+                if state in ("IN_BETA_TESTING", "READY_FOR_BETA_TESTING"):
+                    raise SystemExit(0)
+            elif target["processingState"] in ("FAILED", "INVALID"):
+                print("FAILED_STATE", target, flush=True)
+                raise SystemExit(2)
+            else:
+                print("WAIT", target["processingState"], target.get("uploadedDate"), flush=True)
+        else:
+            print("WAIT no fresh build", want, flush=True)
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         print("WAIT asc timeout", e, flush=True)
         time.sleep(30)
         continue
-    candidates = [b for b in builds if b["version"] == want] if want else builds[:1]
-    if not_before:
-        for rec in candidates:
-            uploaded = parse_iso(rec.get("uploadedDate") or "")
-            if uploaded is None or uploaded < not_before:
-                print(
-                    "SKIP stale",
-                    rec.get("version"),
-                    rec.get("id"),
-                    rec.get("uploadedDate"),
-                    flush=True,
-                )
-    kind, chosen = pick_assign_match(candidates, not_before)
-    if kind == "fallback":
-        raise SystemExit("refusing FALLBACK assign of a stale same-number build")
-    if kind == "stale_only":
-        raise SystemExit(
-            f"CFBundleVersion {want} already exists on ASC from before this archive; bump CURRENT_PROJECT_VERSION"
-        )
-    if chosen:
-        target = chosen
-        if target["processingState"] == "VALID":
-            det = sync(target, last_tok)
-            state = (det or {}).get("internalBuildState")
-            print("RESULT", target["version"], target["id"], state, flush=True)
-            if state in ("IN_BETA_TESTING", "READY_FOR_BETA_TESTING"):
-                raise SystemExit(0)
-        elif target["processingState"] in ("FAILED", "INVALID"):
-            print("FAILED_STATE", target, flush=True)
-            raise SystemExit(2)
-        else:
-            print("WAIT", target["processingState"], target.get("uploadedDate"), flush=True)
-    else:
-        print("WAIT no fresh build", want, flush=True)
     time.sleep(30)
 print("TIMEOUT", json.dumps(target), flush=True)
 raise SystemExit(1)

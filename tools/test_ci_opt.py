@@ -732,6 +732,10 @@ def test_assign_script_requires_secrets() -> None:
         fail("asc_assign must retry ASC urlopen timeouts; TF 51 died on urllib timeout")
     if "WAIT asc net" not in src or "WAIT asc timeout" not in src:
         fail("ASC network timeout must log and keep polling until the deadline")
+    sync_at = src.find("det = sync(target, last_tok)")
+    except_at = src.rfind('print("WAIT asc timeout"')
+    if sync_at < 0 or except_at < 0 or sync_at > except_at:
+        fail("sync() must stay inside the ASC timeout retry")
     ok("asc_assign_internal.sh fails closed without secrets")
 
 
