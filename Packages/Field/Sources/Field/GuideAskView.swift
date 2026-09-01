@@ -52,6 +52,7 @@ struct GuideAskView: View {
         .onAppear {
             if focusArticleID != nil, let inbound = resolvedPack() { focusInbound(in: inbound) }
         }
+        .onDisappear { stopMic() }
         .onChange(of: focusArticleID) { _, next in
             if next != nil, let inbound = resolvedPack() { focusInbound(in: inbound) }
         }

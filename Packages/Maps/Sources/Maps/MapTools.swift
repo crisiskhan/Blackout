@@ -53,11 +53,11 @@ struct TopographyView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ScreenHeader("Topography", subtitle: "GPS altitude plus bundled DEM. Generated sample, not USGS.")
-                if let fix = location.navigationFix, fix.hasCoordinate {
+                if let fix = location.navigationFix, let (lat, lon) = fix.latLon {
                     HUDPanel {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("GPS altitude: \(fix.altitudeMeters.map { "\(Int($0)) m" } ?? "unavailable")")
-                            if let dem = packService.elevationMeters(latitude: fix.latitude!, longitude: fix.longitude!) {
+                            if let dem = packService.elevationMeters(latitude: lat, longitude: lon) {
                                 Text("Pack DEM: \(Int(dem)) m")
                             } else {
                                 Text("Pack DEM: outside sample window")

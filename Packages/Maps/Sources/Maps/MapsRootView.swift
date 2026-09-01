@@ -187,7 +187,11 @@ public struct MapsRootView: View {
             .modifier(
                 MapPackLifecycleModifier(pack: packObservers, chrome: chromeObservers)
             )
-            .onDisappear { torch.turnOff() }
+            .onDisappear {
+                torch.turnOff()
+                compass.park()
+                navigate.park()
+            }
     }
 
     private var packObservers: MapsPackObservers {
@@ -242,6 +246,7 @@ public struct MapsRootView: View {
             onAppearAction: {
                 resolvePaintPack()
                 refreshGuidance()
+                compass.syncVoiceLoop()
                 applyChrome {
                     $0.reduceMotion = reduceMotion
                     $0.hold = holdsChrome
@@ -915,8 +920,8 @@ public struct MapsRootView: View {
     }
 
     private var originCoordinate: RoutingCoordinate? {
-        guard let fix = location.navigationFix, fix.hasCoordinate else { return nil }
-        return RoutingCoordinate(latitude: fix.latitude!, longitude: fix.longitude!)
+        guard let fix = location.navigationFix, let (lat, lon) = fix.latLon else { return nil }
+        return RoutingCoordinate(latitude: lat, longitude: lon)
     }
 
     private var packBounds: RoutingBBox? {
@@ -996,10 +1001,10 @@ public struct MapsRootView: View {
     }
 
     private var packContainsSelf: Bool {
-        guard let pack = packService.pack, let fix = location.navigationFix, fix.hasCoordinate else {
+        guard let pack = packService.pack, let fix = location.navigationFix, let (lat, lon) = fix.latLon else {
             return false
         }
-        return pack.region.contains(latitude: fix.latitude!, longitude: fix.longitude!)
+        return pack.region.contains(latitude: lat, longitude: lon)
     }
 
     private var liveManeuver: Maneuver? {
@@ -1139,12 +1144,12 @@ public struct MapsRootView: View {
     }
 
     private var lidarMapRange: Double? {
-        guard let from = location.navigationFix, from.hasCoordinate,
+        guard let from = location.navigationFix, let (alat, alon) = from.latLon,
               let to = location.manualPin ?? packService.pack?.pois.first(where: { $0.kind == "summit" }).map({
                   LocationFix(latitude: $0.latitude, longitude: $0.longitude)
               }),
-              to.hasCoordinate else { return nil }
-        return haversine(from.latitude!, from.longitude!, to.latitude!, to.longitude!)
+              let (blat, blon) = to.latLon else { return nil }
+        return haversine(alat, alon, blat, blon)
     }
 
     private var lidarPointName: String {
@@ -1157,10 +1162,10 @@ public struct MapsRootView: View {
 
     private func refreshTerrain() {
         slopeSamples = showSlope ? packService.slopeSamples() : []
-        if showViewshed, packService.hasDEM, let fix = viewshedOrigin, fix.hasCoordinate {
+        if showViewshed, packService.hasDEM, let fix = viewshedOrigin, let (lat, lon) = fix.latLon {
             viewshedRays = packService.viewshed(
-                fromLatitude: fix.latitude!,
-                fromLongitude: fix.longitude!,
+                fromLatitude: lat,
+                fromLongitude: lon,
                 observerHeightMeters: 2
             )
         } else {
@@ -1212,8 +1217,8 @@ public struct MapsRootView: View {
                     }
                 }
                 MetalButton("Navigate to last pin", height: BlackoutDS.Hit.sm) {
-                    if let pin = location.manualPin ?? lastPeerPin, pin.hasCoordinate {
-                        lockOrRoute(latitude: pin.latitude!, longitude: pin.longitude!, label: mode.title)
+                    if let pin = location.manualPin ?? lastPeerPin, let (lat, lon) = pin.latLon {
+                        lockOrRoute(latitude: lat, longitude: lon, label: mode.title)
                     }
                 }
                 MetalButton("Field Guide", height: BlackoutDS.Hit.sm) {

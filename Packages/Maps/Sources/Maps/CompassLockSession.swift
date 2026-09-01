@@ -3,6 +3,20 @@ import Foundation
 import MapsRouting
 import Observation
 
+/// Cancels the 2.2s lock loop if the session is released while LOCK is on.
+final class VoiceLoopHandle: @unchecked Sendable {
+    var task: Task<Void, Never>?
+
+    func cancel() {
+        task?.cancel()
+        task = nil
+    }
+
+    deinit {
+        cancel()
+    }
+}
+
 /// Field steer on the Map tab. Street TBT stays on `NavigateSession` when routing/ exists.
 @MainActor
 @Observable
@@ -17,7 +31,11 @@ final class CompassLockSession {
     var headingDegrees: Double?
 
     private let speech = OnDeviceSpeech()
-    private var voiceTask: Task<Void, Never>?
+    private let voiceLoop = VoiceLoopHandle()
+    private var voiceTask: Task<Void, Never>? {
+        get { voiceLoop.task }
+        set { voiceLoop.task = newValue }
+    }
     private let defaults: UserDefaults
     private let marksKey: String
 
@@ -140,6 +158,12 @@ final class CompassLockSession {
         stopLoop()
     }
 
+    /// Tab leave / view teardown. Keeps LOCK state; cancels the loop and synthesizer.
+    func park() {
+        stopLoop()
+        speech.teardown()
+    }
+
     func pickerRows(peers: [RadarBlip]) -> [CompassLockWaypoint] {
         CompassLockStandards.waypoints + marks + peers.compactMap(Self.waypoint(from:))
     }
@@ -164,8 +188,7 @@ final class CompassLockSession {
     }
 
     private func stopLoop() {
-        voiceTask?.cancel()
-        voiceTask = nil
+        voiceLoop.cancel()
         speech.stop()
     }
 

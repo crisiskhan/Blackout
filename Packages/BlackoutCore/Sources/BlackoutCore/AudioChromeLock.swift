@@ -24,6 +24,10 @@ public enum AudioChromeLock {
     public static let constructsSynthesizerOnInit = false
     public static let constructsAudioEngineOnViewInit = false
     public static let installsPTTRemoteOnAppInit = false
+    /// First Map frame still constructs sessions. Remotes wait for Comms select.
+    public static let installsPTTRemoteOnFirstMapFrame = false
+    public static let cancelsVoiceTaskOnDeinit = true
+    public static let nilsSynthesizerOnDeinit = true
 
     public static func speakUsesLockPhrase(isLocked: Bool, hasTarget: Bool) -> Bool {
         speakPrefersLockWhenLocked && isLocked && hasTarget

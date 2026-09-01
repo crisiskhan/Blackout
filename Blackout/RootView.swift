@@ -116,6 +116,10 @@ struct RootView: View {
             .onChange(of: destination) { _, next in
                 let resolved = AppDestination.resolved(next)
                 if resolved != next { destination = resolved }
+                container.syncPTTAudioLifetime(onComms: resolved == .comms)
+            }
+            .onChange(of: container.mesh.nearbyPeerCount) { _, _ in
+                container.syncPTTAudioLifetime(onComms: AppDestination.resolved(destination) == .comms)
             }
             .sheet(isPresented: $showPacksSheet) {
                 NavigationStack {

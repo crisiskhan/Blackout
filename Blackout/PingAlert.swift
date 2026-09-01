@@ -36,17 +36,40 @@ enum PingAlert {
     }
 }
 
+final class PingSynthBox {
+    private var synthesizer: AVSpeechSynthesizer?
+
+    func ensure() -> AVSpeechSynthesizer {
+        if let synthesizer { return synthesizer }
+        let created = AVSpeechSynthesizer()
+        synthesizer = created
+        return created
+    }
+
+    func stopAndNil() {
+        synthesizer?.stopSpeaking(at: .immediate)
+        synthesizer = nil
+    }
+
+    deinit {
+        stopAndNil()
+    }
+}
+
 @MainActor
 final class PingSpeech {
-    private var synthesizer: AVSpeechSynthesizer?
+    private let box = PingSynthBox()
 
     func speak(_ text: String, rate: Float) {
         guard !text.isEmpty else { return }
-        let synth = synthesizer ?? AVSpeechSynthesizer()
-        synthesizer = synth
+        let synth = box.ensure()
         synth.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = rate
         synth.speak(utterance)
+    }
+
+    func stop() {
+        box.stopAndNil()
     }
 }

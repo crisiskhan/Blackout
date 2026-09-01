@@ -4,13 +4,34 @@ import Foundation
 
 /// Speak the next step only. On-device `AVSpeechSynthesizer`. Not the essay.
 /// Synthesizer is created on first speak — never during Field/view init.
+/// Stops speech in `deinit` so a released Field plate cannot dealloc a live synthesizer.
+final class GuideSynthBox {
+    private var synthesizer: AVSpeechSynthesizer?
+
+    func ensure() -> AVSpeechSynthesizer {
+        if let synthesizer { return synthesizer }
+        let created = AVSpeechSynthesizer()
+        synthesizer = created
+        return created
+    }
+
+    func stopAndNil() {
+        synthesizer?.stopSpeaking(at: .immediate)
+        synthesizer = nil
+    }
+
+    deinit {
+        stopAndNil()
+    }
+}
+
 @MainActor
 final class GuideSpeech {
-    private var synthesizer: AVSpeechSynthesizer?
+    private let box = GuideSynthBox()
 
     func speakNext(_ text: String) {
         guard !text.isEmpty else { return }
-        let synth = ensureSynthesizer()
+        let synth = box.ensure()
         if AudioChromeLock.interruptible {
             synth.stopSpeaking(at: .immediate)
         }
@@ -21,14 +42,7 @@ final class GuideSpeech {
     }
 
     func stop() {
-        synthesizer?.stopSpeaking(at: .immediate)
-    }
-
-    private func ensureSynthesizer() -> AVSpeechSynthesizer {
-        if let synthesizer { return synthesizer }
-        let created = AVSpeechSynthesizer()
-        synthesizer = created
-        return created
+        box.stopAndNil()
     }
 
     private func onDeviceVoice() -> AVSpeechSynthesisVoice? {

@@ -83,21 +83,21 @@ struct NavigateView: View {
     }
 
     private var bearingCopy: String {
-        guard let selected, let from = location.navigationFix, from.hasCoordinate else {
+        guard let selected, let from = location.navigationFix, let (lat, lon) = from.latLon else {
             if selected == nil { return "Pick a pack point. No network routing." }
             return "No coordinate to compute a bearing. Drop a manual pin on the map."
         }
         let brg = bearing(
-            fromLat: from.latitude!, fromLon: from.longitude!,
+            fromLat: lat, fromLon: lon,
             toLat: selected.latitude, toLon: selected.longitude
         )
         return "Bearing to \(selected.name): \(Int(brg))°"
     }
 
     private func rangeCopy(to poi: MapPOI) -> String {
-        guard let from = location.navigationFix, from.hasCoordinate else { return "—" }
+        guard let from = location.navigationFix, let (lat, lon) = from.latLon else { return "—" }
         let meters = haversine(
-            from.latitude!, from.longitude!,
+            lat, lon,
             poi.latitude, poi.longitude
         )
         if meters > 1000 { return String(format: "%.1f km", meters / 1000) }

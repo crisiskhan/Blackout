@@ -43,8 +43,9 @@ public struct VoicePTTRootView: View {
                 }
             }
         )
-        .task {
-            await hub.refreshMicrophone()
+        .onDisappear {
+            hub.pressEnded()
+            hub.stop()
         }
     }
 }

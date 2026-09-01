@@ -39,6 +39,7 @@ struct GuideTreePlate: View {
             }
             gear = OutingGearStore.load()
         }
+        .onDisappear { speech.stop() }
     }
 
     private var triagePlate: some View {
@@ -392,5 +393,6 @@ struct GuideDoAlongPlate: View {
                 speech.stop()
             }
         }
+        .onDisappear { speech.stop() }
     }
 }

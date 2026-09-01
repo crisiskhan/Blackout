@@ -152,8 +152,8 @@ struct OfflineMapView: UIViewRepresentable {
             // Heading-up / follow-puck only while GPS is on this pack.
             // Recenter pins coverage. GPS outside the pack never yanks the camera.
             if MapEmptyPolicy.followGPS(pinToPack: pinCameraToPack, packContainsSelf: packContainsSelf),
-               let selfFix, selfFix.hasCoordinate {
-                view.centerOn(latitude: selfFix.latitude!, longitude: selfFix.longitude!)
+               let selfFix, let (lat, lon) = selfFix.latLon {
+                view.centerOn(latitude: lat, longitude: lon)
             }
         }
         if context.coordinator.lastJumpToken != jumpToken {
@@ -1048,12 +1048,12 @@ final class TileCanvasLayer: UIView {
     }
 
     private func drawViewshed(from origin: LocationFix, in ctx: CGContext) {
-        guard let start = point(for: origin), origin.hasCoordinate else { return }
+        guard let start = point(for: origin), let (olat, olon) = origin.latLon else { return }
         ctx.setFillColor(UIColor(red: 197 / 255, green: 205 / 255, blue: 214 / 255, alpha: 0.12).cgColor)
         ctx.beginPath()
         ctx.move(to: start)
         for ray in viewshed {
-            let dest = offset(latitude: origin.latitude!, longitude: origin.longitude!, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
+            let dest = offset(latitude: olat, longitude: olon, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
             let fix = LocationFix(latitude: dest.0, longitude: dest.1)
             if let p = point(for: fix) {
                 ctx.addLine(to: p)
@@ -1066,7 +1066,7 @@ final class TileCanvasLayer: UIView {
         ctx.beginPath()
         ctx.move(to: start)
         for ray in viewshed {
-            let dest = offset(latitude: origin.latitude!, longitude: origin.longitude!, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
+            let dest = offset(latitude: olat, longitude: olon, meters: ray.visibleMeters, bearing: ray.bearingDegrees)
             let fix = LocationFix(latitude: dest.0, longitude: dest.1)
             if let p = point(for: fix) {
                 ctx.addLine(to: p)

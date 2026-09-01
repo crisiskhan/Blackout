@@ -214,14 +214,21 @@ final class AppContainer {
         location.startUpdating()
         location.applyPolicy(battery.policy)
         ptt.extremeSaver = battery.isExtremeSaver
-        bindPTTRemote()
         syncMeshToParty()
         refreshRadiosBanner()
         applyIdleTimer()
     }
 
-    /// Now Playing / remote commands wait for the first Map frame.
-    /// AppContainer.init must not arm them — that is a launch-audio crash class.
+    /// Now Playing / remotes wait for Comms select with peers. First Map frame must not arm them.
+    func syncPTTAudioLifetime(onComms: Bool) {
+        if onComms, mesh.nearbyPeerCount > 0, !battery.isCritical {
+            bindPTTRemote()
+        } else {
+            ptt.stop()
+        }
+    }
+
+    /// AppContainer.init and first Map frame must not arm remotes — launch-audio crash class.
     private func bindPTTRemote() {
         ptt.installRemoteCommands { [ptt, mesh, identity] in
             ptt.decision(

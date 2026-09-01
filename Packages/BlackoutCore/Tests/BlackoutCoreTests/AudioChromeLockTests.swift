@@ -33,6 +33,9 @@ final class AudioChromeLockTests: XCTestCase {
         XCTAssertFalse(AudioChromeLock.constructsSynthesizerOnInit)
         XCTAssertFalse(AudioChromeLock.constructsAudioEngineOnViewInit)
         XCTAssertFalse(AudioChromeLock.installsPTTRemoteOnAppInit)
+        XCTAssertFalse(AudioChromeLock.installsPTTRemoteOnFirstMapFrame)
+        XCTAssertTrue(AudioChromeLock.cancelsVoiceTaskOnDeinit)
+        XCTAssertTrue(AudioChromeLock.nilsSynthesizerOnDeinit)
         XCTAssertTrue(RootChromeLock.sosChromeDeleted)
         XCTAssertFalse(RootChromeLock.liveActivitySOSEnabled)
     }

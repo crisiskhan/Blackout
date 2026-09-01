@@ -1710,6 +1710,27 @@ def test_audio_10() -> None:
         fail("Walk lost SPEAK")
     if "startLoopIfNeeded" not in session or "guard voiceTask == nil" not in session:
         fail("2.2s lock voice must not restart on every render")
+    if "deinit" not in session or "cancel()" not in session:
+        fail("CompassLockSession voiceTask must cancel on deinit")
+    if "func park(" not in session:
+        fail("CompassLockSession must park the 2.2s loop on tab leave")
+    if "compass.park(" not in maps:
+        fail("Map tab leave must park lock voice")
+    if "navigate.park(" not in maps:
+        fail("Map tab leave must park Walk speak")
+    if "deinit" not in speech or "synthesizer = nil" not in speech:
+        fail("OnDeviceSpeech must stopSpeaking + nil synthesizer on deinit")
+    if "deinit" not in guide_speech or "synthesizer = nil" not in guide_speech:
+        fail("GuideSpeech must stopSpeaking + nil synthesizer on deinit")
+    if ".onDisappear { stopMic() }" not in ask and "onDisappear { stopMic() }" not in ask:
+        fail("Field Ask must stop + removeTap on disappear / deny")
+    ptt_view = (ROOT / "Packages/VoicePTT/Sources/VoicePTT/VoicePTTRootView.swift").read_text()
+    if "refreshMicrophone()" in ptt_view:
+        fail("PTT must not request mic on TabView appear")
+    if "latitude!" in maps:
+        fail("MapsRootView must not force-unwrap latitude")
+    if "longitude!" in maps:
+        fail("MapsRootView must not force-unwrap longitude")
     if '"\\(name). \\(fmtDist(meters)). \\(turnPhrase(rel: rel))."' not in math:
         fail("lock phrase must stay {name}. {fmtDist}. {turnPhrase}.")
     if "voiceInterval: TimeInterval = 2.2" not in math:
@@ -1731,6 +1752,8 @@ def test_audio_10() -> None:
     ping = (ROOT / "Blackout/PingAlert.swift").read_text()
     if "private let synthesizer = AVSpeechSynthesizer()" in ping:
         fail("PingSpeech must not construct AVSpeechSynthesizer until announce")
+    if "deinit" not in ping or "synthesizer = nil" not in ping:
+        fail("PingSpeech must stopSpeaking + nil synthesizer on deinit")
     if "engine = AVAudioEngine()" in ask or "@State private var engine = AVAudioEngine()" in ask:
         fail("Field Ask must not construct AVAudioEngine on first-open TabView")
     if "micUnavailable = !onDeviceSpeechAvailable" in ask:
@@ -1742,8 +1765,13 @@ def test_audio_10() -> None:
     init_fn = app.split("init() {", 1)[-1].split("func parkHardwareForBackground", 1)[0]
     if "installRemoteCommands" in init_fn:
         fail("PTT Now Playing must not arm on AppContainer init")
-    if "bindPTTRemote()" not in app.split("func armHardwareAfterUnlock", 1)[-1][:800]:
-        fail("PTT remote must wait for the first Map frame")
+    arm_fn = app.split("func armHardwareAfterUnlock", 1)[-1].split("\n    func ", 1)[0]
+    if "bindPTTRemote()" in arm_fn or "installRemoteCommands" in arm_fn:
+        fail("PTT remote must not arm on first Map frame")
+    if "func syncPTTAudioLifetime" not in app:
+        fail("PTT lifetime must follow Comms select / 0 peers")
+    if "syncPTTAudioLifetime(onComms:" not in root:
+        fail("RootView must park PTT off Map first-open and on tab leave")
     if "installRemoteCommands" not in app.split("func bindPTTRemote", 1)[-1][:400]:
         fail("bindPTTRemote must install remote commands")
     if "constructsSynthesizerOnInit = false" not in lock:
@@ -1752,6 +1780,12 @@ def test_audio_10() -> None:
         fail("eager audio-engine-on-view-init lock missing")
     if "installsPTTRemoteOnAppInit = false" not in lock:
         fail("PTT-remote-on-app-init lock missing")
+    if "installsPTTRemoteOnFirstMapFrame = false" not in lock:
+        fail("PTT-remote-on-first-Map-frame lock missing")
+    if "cancelsVoiceTaskOnDeinit = true" not in lock:
+        fail("voiceTask deinit lock missing")
+    if "nilsSynthesizerOnDeinit = true" not in lock:
+        fail("synthesizer deinit lock missing")
     for banned in ("URLSession", "MKLocalSearch", "Mapbox"):
         if banned in speech or banned in session or banned in guide_speech or banned in ask:
             fail(f"speak path must stay airplane: no {banned}")

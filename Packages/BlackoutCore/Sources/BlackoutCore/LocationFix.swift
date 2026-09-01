@@ -42,6 +42,12 @@ public struct LocationFix: Hashable, Codable, Sendable {
         latitude != nil && longitude != nil
     }
 
+    /// Prefer this over `latitude!` after `hasCoordinate`.
+    public var latLon: (Double, Double)? {
+        guard let latitude, let longitude else { return nil }
+        return (latitude, longitude)
+    }
+
     enum CodingKeys: String, CodingKey {
         case latitude, longitude, altitudeMeters, horizontalAccuracyMeters
         case courseDegrees, headingDegrees, timestamp, source

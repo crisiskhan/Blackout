@@ -183,6 +183,10 @@ final class NavigateSession {
         speech.stop()
     }
 
+    func park() {
+        speech.teardown()
+    }
+
     func update(
         position: RoutingCoordinate?,
         pack: RoutingPack?,
