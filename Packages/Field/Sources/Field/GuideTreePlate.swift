@@ -69,18 +69,24 @@ struct GuideTreePlate: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         if !steps.isEmpty {
-            pictogramFirst(steps: steps)
-            speakControls(steps: steps)
+            if FieldAskHomeLock.stepShowsPictogramBar {
+                pictogramFirst(steps: steps)
+            }
+            firstPlate(steps: steps)
         } else {
             stopControl
         }
-        HStack(spacing: 8) {
-            MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
-                onSendArticle(article.id)
-            }
-            if !showText {
-                GhostButton("Show text", height: BlackoutDS.Hit.sm) {
-                    showText = true
+        if FieldAskHomeLock.stepShowsSendOnFirstPlate || FieldAskHomeLock.stepShowsShowTextOnFirstPlate {
+            HStack(spacing: 8) {
+                if FieldAskHomeLock.stepShowsSendOnFirstPlate {
+                    MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
+                        onSendArticle(article.id)
+                    }
+                }
+                if FieldAskHomeLock.stepShowsShowTextOnFirstPlate, !showText {
+                    GhostButton("Show text", height: BlackoutDS.Hit.sm) {
+                        showText = true
+                    }
                 }
             }
         }
@@ -88,6 +94,9 @@ struct GuideTreePlate: View {
             outingPrompts
             GuideMarkdownView(source: article.body)
             mapJobRow
+            MetalButton(GuideCardWire.sendLabel, height: BlackoutDS.Hit.sm) {
+                onSendArticle(article.id)
+            }
             if let mode = FieldJobMode.from(articleID: article.id) {
                 MetalButton(mode.title, height: BlackoutDS.Hit.sm) {
                     onStartMode(mode)
@@ -155,25 +164,38 @@ struct GuideTreePlate: View {
         }
     }
 
-    private func speakControls(steps: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let current = GuideSpeak.nextStepOnly(steps: steps, index: stepIndex) {
-                Text(current)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
-                    .lineSpacing(6)
-            }
-            HStack(spacing: 8) {
-                MetalButton(GuideSpeak.controlNext, height: BlackoutDS.Hit.sm) {
-                    if stepIndex + 1 < steps.count {
-                        stepIndex += 1
-                    }
+    @ViewBuilder
+    private func firstPlate(steps: [String]) -> some View {
+        if let current = GuideSpeak.nextStepOnly(steps: steps, index: stepIndex) {
+            Text(current)
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.mid)
+                .lineSpacing(6)
+        }
+        HStack(spacing: 8) {
+            if FieldAskHomeLock.speakIsSmallIcon {
+                Button {
                     if let spoken = GuideSpeak.nextStepOnly(steps: steps, index: stepIndex) {
                         speech.speakNext(spoken)
                     }
+                } label: {
+                    Image(systemName: "speaker.wave.2")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        .frame(width: 40, height: BlackoutDS.Hit.sm)
                 }
-                stopControl
+                .buttonStyle(.plain)
+                .accessibilityLabel("Speak")
             }
+            MetalButton(GuideSpeak.controlNext, height: BlackoutDS.Hit.sm) {
+                if stepIndex + 1 < steps.count {
+                    stepIndex += 1
+                }
+                if let spoken = GuideSpeak.nextStepOnly(steps: steps, index: stepIndex) {
+                    speech.speakNext(spoken)
+                }
+            }
+            stopControl
         }
     }
 

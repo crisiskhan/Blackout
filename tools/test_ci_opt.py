@@ -500,13 +500,17 @@ def test_map_google_feel() -> None:
         fail("typing must fill a dropdown under the 56h bar, not a covering sheet")
     if "runPackSearch(present: true)" in maps.split("onQueryChange", 1)[-1][:400]:
         fail("onChange must not present a sheet on each letter — 4:13 unstable trap")
-    pick_fn = maps.split("func pickFound", 1)[-1][:900]
+    pick_fn = maps.split("func pickFound", 1)[-1][:1400]
     if "navigate.pick(" not in pick_fn:
         fail("pickFound must call navigate.pick so Walk/preview starts")
+    if "navigate.start(" not in pick_fn:
+        fail("pickFound must call navigate.start so a search pick STARTS Walk, not camera-only")
     if "lockOrRoute(" in pick_fn:
         fail("pickFound must not call lockOrRoute — that can end() the Walk preview")
     if "compass.lockOn(" not in pick_fn:
         fail("pickFound must compass.lockOn when there is no Walk graph route")
+    if "pickAutoStartsGuidance = true" not in lock:
+        fail("search pick must auto-start Walk guidance when a graph route exists")
     if "highPriorityGesture" not in nav_chrome.split("struct MapPackSearchHits", 1)[-1][:1200]:
         fail("dropdown rows must highPriorityGesture so the map does not eat the pick tap")
     if "shouldPickOnSubmit" not in maps:
@@ -575,7 +579,7 @@ def test_map_google_feel() -> None:
     if "fieldContentHorizontalInset" not in field:
         fail("Field plate must use the locked horizontal inset")
     if "onOpenSettings" not in field:
-        fail("Field gear must sit in the Guide/Skills/Vision row")
+        fail("Field gear must sit in the Guide/Vision row")
     comms = (ROOT / "Blackout/CommsRootView.swift").read_text()
     if "onOpenSettings" not in comms:
         fail("Comms gear must sit in the Threads/Radar/Roster row")
@@ -2320,9 +2324,11 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("presentsDropdown must stay off after pickFound")
     if "func duskResultLuminance" not in lock:
         fail("dusk grade luminance must be testable so tiles do not wash to void")
-    pick_fn = maps.split("func pickFound", 1)[-1][:900]
+    pick_fn = maps.split("func pickFound", 1)[-1][:1400]
     if "navigate.pick(" not in pick_fn:
         fail("pickFound must still call navigate.pick")
+    if "navigate.start(" not in pick_fn:
+        fail("pickFound must still navigate.start so Walk is not camera-only")
     if "compass.lockOn(" not in pick_fn:
         fail("pickFound must still compass.lockOn when there is no Walk route")
 
@@ -2408,8 +2414,8 @@ def test_map_metal_plates() -> None:
         fail("duskUsesMultiply must stay false")
     if "searchPickConsumed" not in maps:
         fail("pickFound must dismiss hits; searchPickConsumed is the latch")
-    pick_fn = maps.split("func pickFound", 1)[-1][:900]
-    if "navigate.pick(" not in pick_fn or "compass.lockOn(" not in pick_fn:
+    pick_fn = maps.split("func pickFound", 1)[-1][:1400]
+    if "navigate.pick(" not in pick_fn or "navigate.start(" not in pick_fn or "compass.lockOn(" not in pick_fn:
         fail("pickFound Walk/bearing must stay")
     if "coverZoomScale" not in offline or "searchDebounce" not in maps:
         fail("do not revert cover-zoom or 180ms search debounce")
@@ -2475,16 +2481,36 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
     if "GuideLanguageModel.complete" in ask:
         fail("Ask must not run the leftover on-device model after retrieve")
     if "GuideCardWire.sendLabel" not in tree and "Send to party" not in tree:
-        fail("Send to party stays on the step card")
+        fail("Send to party stays in GuideTreePlate for show-text, not the first plate")
+    first = tree.split("func treeBody", 1)[-1].split("if showText {", 1)[0]
+    if "pictogramFirst" in first and "stepShowsPictogramBar" not in first:
+        fail("pictogram row must not paint on the first step plate")
+    if "GuideCardWire.sendLabel" in first and "stepShowsSendOnFirstPlate" not in first:
+        fail("Send to party must not be on the first step plate")
+    if "Show text" in first and "stepShowsShowTextOnFirstPlate" not in first:
+        fail("Show text must not be on the first step plate")
+    plate = tree.split("func firstPlate", 1)[-1].split("private var stopControl", 1)[0]
+    if "GuideSpeak.controlNext" not in plate or "stopControl" not in plate:
+        fail("first step plate must be title + instruction + Next/Stop")
+    if "speaker.wave" not in plate:
+        fail("Speak on the step plate must be a small icon")
+    if "skillsIsFieldSegment = false" not in lock:
+        fail("Skills is not a Field segment")
+    if 'fieldSegmentTitles = ["Guide", "Vision"]' not in lock:
+        fail("Field segments are Guide and Vision")
+    if "Skills" in field or "case skills" in field or "GuideSkillsView(" in field:
+        fail("Field nav must be Guide|Vision only — Skills is not a third page")
+    if 'case guide = "Guide"' not in field or 'case vision = "Vision"' not in field:
+        fail("Field segments must be Guide and Vision")
     if "GuidePackSchema.tooNewCopy" not in ask:
         fail("guide schema fail-closed line missing")
     skills = tree.split("struct GuideSkillsView", 1)[-1].split("struct GuideDoAlongPlate", 1)[0]
     if "ForEach(doAlongArticles)" in skills and "GuideDoAlongPlate" in skills.split("ForEach(doAlongArticles)", 1)[-1][:500]:
-        fail("Skills must be a curriculum list, not a dump of plates")
+        fail("Skills curriculum must stay a list reachable from Guide Ask, not a dump of plates")
     if "FieldSafePlate" not in field or "fieldContentHorizontalInset" not in field:
         fail("Field plate must keep the safe-area inset")
     if "onOpenSettings" not in field:
-        fail("Field gear must stay in the Guide/Skills/Vision row")
+        fail("Field gear must stay in the Guide/Vision row")
     if "I AM OK" in field or "I AM OK" in ask or "I AM OK" in root:
         fail("I AM OK dual must stay unmounted")
     if "duskCrushesCountyLabels = true" not in chrome:

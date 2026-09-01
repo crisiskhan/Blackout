@@ -915,7 +915,13 @@ public struct MapsRootView: View {
         let origin = originCoordinate
         navigate.pick(hit, origin: origin, pack: packService.routing)
         let routed = navigate.phase == .preview
-        if MapPackSearchPolicy.locksCompassWhenNoRoute(
+        if MapPackSearchPolicy.pickAutoStartsGuidance, navigate.preview != nil {
+            headingUp = true
+            UserDefaults.standard.set(true, forKey: BlackoutKeys.radarHeadingUp)
+            UserDefaults.standard.set(true, forKey: BlackoutKeys.lastUsedTBT)
+            navigate.start(canFollow: canFollowGuidance)
+            refreshGuidance()
+        } else if MapPackSearchPolicy.locksCompassWhenNoRoute(
             hasOrigin: origin != nil,
             hasGraphRoute: routed
         ) {

@@ -9,7 +9,6 @@ import UIKit
 public struct FieldRootView: View {
     public enum Segment: String, CaseIterable, Identifiable {
         case guide = "Guide"
-        case skills = "Skills"
         case vision = "Vision"
         public var id: String { rawValue }
     }
@@ -126,9 +125,6 @@ public struct FieldRootView: View {
                         )
                     }
                 }
-            case .skills:
-                GuideSkillsView(pack: pack, onOpenMapJob: onOpenMapJob)
-                    .onAppear { ensurePack() }
             case .vision:
                 Group {
                     if battery.pausesCameraAndPTT {
@@ -268,7 +264,7 @@ struct FieldVisionView: View {
                 if denied {
                     PermissionDenied(
                         kind: .camera,
-                        reason: "Camera denied. Guide and Skills stay available. Vision will not guess from the network."
+                        reason: "Camera denied. Guide stays available. Vision will not guess from the network."
                     )
                 }
                 if unavailable {

@@ -223,6 +223,7 @@ final class MapChromeLockTests: XCTestCase {
     func testPickStartsNavigateNotCameraOnly() {
         XCTAssertTrue(MapPackSearchPolicy.pickStartsNavigate)
         XCTAssertFalse(MapPackSearchPolicy.pickIsCameraOnly)
+        XCTAssertTrue(MapPackSearchPolicy.pickAutoStartsGuidance)
         XCTAssertTrue(MapPackSearchPolicy.dropdownRowsStealMapTaps)
     }
 

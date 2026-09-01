@@ -137,6 +137,12 @@ public enum FieldAskHomeLock {
     ]
     public static let skillsIsCurriculumList = true
     public static let skillsDumpsAllPlates = false
+    public static let skillsIsFieldSegment = false
+    public static let fieldSegmentTitles = ["Guide", "Vision"]
+    public static let stepShowsPictogramBar = false
+    public static let stepShowsSendOnFirstPlate = false
+    public static let stepShowsShowTextOnFirstPlate = false
+    public static let speakIsSmallIcon = true
     public static let loadsGuidePackOnFieldAppear = false
     public static let loadsGuidePackOnAsk = true
 

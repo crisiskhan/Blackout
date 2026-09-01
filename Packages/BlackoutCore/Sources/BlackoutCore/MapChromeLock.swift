@@ -309,6 +309,7 @@ public enum MapPackSearchPolicy {
     public static let dropdownRowsStealMapTaps = true
     public static let pickStartsNavigate = true
     public static let pickIsCameraOnly = false
+    public static let pickAutoStartsGuidance = true
     public static let pickLocksDestWhenNoRoute = true
     public static let pickDismissesHits = true
     public static let searchMissHoldsChrome = false
