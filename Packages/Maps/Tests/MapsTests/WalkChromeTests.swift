@@ -26,13 +26,6 @@ final class WalkChromeTests: XCTestCase {
         XCTAssertEqual(WalkChrome.scaleLine(meters: 804.7, etaSeconds: 60), "0.5 mi / 1 MIN")
     }
 
-    func testOffCourseHapticFiresOnRisingEdgeOnly() {
-        XCTAssertTrue(WalkChrome.shouldFireOffCourseHaptic(wasOffRoute: false, nowOffRoute: true))
-        XCTAssertFalse(WalkChrome.shouldFireOffCourseHaptic(wasOffRoute: true, nowOffRoute: true))
-        XCTAssertFalse(WalkChrome.shouldFireOffCourseHaptic(wasOffRoute: false, nowOffRoute: false))
-        XCTAssertFalse(WalkChrome.shouldFireOffCourseHaptic(wasOffRoute: true, nowOffRoute: false))
-    }
-
     func testReturnBreadcrumbDashesEstimatedAndSolidsGPS() {
         let start = WalkReturnBreadcrumb.Node(latitude: 31.76, longitude: -106.48, estimated: false)
         let gps = WalkReturnBreadcrumb.Node(latitude: 31.761, longitude: -106.481, estimated: false)

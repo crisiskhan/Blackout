@@ -146,10 +146,6 @@ public enum WalkChrome {
         let eta = Formatters.eta(etaSeconds).replacingOccurrences(of: "min", with: "MIN")
         return "\(distance(meters)) / \(eta)"
     }
-
-    public static func shouldFireOffCourseHaptic(wasOffRoute: Bool, nowOffRoute: Bool) -> Bool {
-        nowOffRoute && !wasOffRoute
-    }
 }
 
 /// Return breadcrumb: GPS segments solid, estimated segments dashed.

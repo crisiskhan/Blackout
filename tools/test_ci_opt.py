@@ -1600,6 +1600,12 @@ def test_walk_map_10() -> None:
         fail("heading-up must live in OfflineMapView")
     if "CGAffineTransform(rotationAngle" not in offline:
         fail("heading-up must rotate the file-tile scroll")
+    if "headingUpEnabled" not in offline or "headingUpDegrees" not in offline:
+        fail("heading-up must stash heading so layoutSubviews can re-apply")
+    if "scroll.center" not in offline or "scroll.bounds" not in offline:
+        fail("heading-up must size the scroll with bounds/center, not frame")
+    if "scroll.frame = bounds" in offline:
+        fail("do not assign scroll.frame while heading-up can be transformed")
     if "headingUpWhileWalk = true" not in lock:
         fail("headingUpWhileWalk lock missing")
     if "appliesHeadingUp(" not in maps:
@@ -1616,8 +1622,12 @@ def test_walk_map_10() -> None:
         fail("off-course haptic lock missing")
     if "UINotificationFeedbackGenerator" not in maps:
         fail("off-course haptic must fire from MapsRootView")
+    if "class WalkOffCourseHaptic" not in maps or "generator.prepare()" not in maps:
+        fail("off-course haptic must retain a generator and prepare()")
     if "notificationOccurred(.warning)" not in maps:
         fail("off-course haptic must be a warning pulse, not radar's light impact")
+    if "lastOld?.estimated != lastNew?.estimated" not in offline:
+        fail("return breadcrumb redraw must see in-place estimated crumb updates")
     if 'MapHUDChip("Find civ"' not in maps or 'MapHUDChip("Water"' not in maps:
         fail("Find civ + Water chips missing")
     if 'chipTitles = ["Recenter", "Find civ", "Water", "Packs", "Satellite"]' not in lock:
@@ -1652,7 +1662,7 @@ def test_walk_map_10() -> None:
         fail("do not dispatch TestFlight")
     if "testReturnBreadcrumbDashesEstimatedAndSolidsGPS" not in tests:
         fail("return breadcrumb tests missing")
-    if "testOffCourseHapticFiresOnRisingEdgeOnly" not in tests:
+    if "shouldFireOffCourseHaptic" not in lock_tests:
         fail("off-course haptic tests missing")
     if "headingUpWhileWalk" not in lock_tests:
         fail("MapChromeLockTests lost heading-up / Walk 10 locks")

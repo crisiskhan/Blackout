@@ -42,6 +42,7 @@ public struct MapsRootView: View {
     @State private var centerToken = 0
     @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
     @State private var wasOffRoute = false
+    @State private var offCourseHaptic = WalkOffCourseHaptic()
     @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
     @State private var showViewshed = MapChromeLock.initsViewshedOnLaunch
     @State private var showSlope = MapChromeLock.initsSlopeOnLaunch
@@ -1070,8 +1071,11 @@ public struct MapsRootView: View {
         )
         compass.refreshFix(origin: originCoordinate, heading: location.headingDegrees)
         let nowOffRoute = navigate.phase == .guidance && navigate.tick?.offRoute == true
+        if navigate.phase == .guidance {
+            offCourseHaptic.prepare()
+        }
         if MapChromeLock.shouldFireOffCourseHaptic(wasOffRoute: wasOffRoute, nowOffRoute: nowOffRoute) {
-            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            offCourseHaptic.fire()
         }
         wasOffRoute = nowOffRoute
         if navigate.phase == .guidance, packContainsSelf, !pinnedToPackCoverage {
@@ -1231,6 +1235,20 @@ public struct MapsRootView: View {
     private func applySharedTrackIfNeeded() {
         guard sharedTrack.count >= 2, let last = sharedTrack.last else { return }
         lockOrRoute(latitude: last.latitude, longitude: last.longitude, label: "Shared track")
+    }
+}
+
+@MainActor
+final class WalkOffCourseHaptic {
+    private let generator = UINotificationFeedbackGenerator()
+
+    func prepare() {
+        generator.prepare()
+    }
+
+    func fire() {
+        generator.notificationOccurred(.warning)
+        generator.prepare()
     }
 }
 

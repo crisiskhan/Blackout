@@ -204,6 +204,8 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     private var didFit = false
     private var didPaint = false
     private var lastDrawnZoom: Int?
+    private var headingUpEnabled = false
+    private var headingUpDegrees: Double?
 
     init(pack: MapPackSnapshot) {
         self.pack = pack
@@ -233,9 +235,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         scroll.showsHorizontalScrollIndicator = false
         scroll.bounces = true
         scroll.bouncesZoom = true
-        if MapChromeLock.canvasUIViewAutoresizes {
-            scroll.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        }
+        // Parent autoresizes. Scroll is sized with bounds/center so heading-up
+        // transform does not fight UIView autoresizing's frame writes.
+        scroll.autoresizingMask = []
         addSubview(scroll)
         canvas.overlay = overlay
         canvas.x0 = x0
@@ -268,11 +270,15 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        scroll.frame = bounds
+        // Identity first so bounds/center are not warped by a live heading transform.
+        scroll.transform = .identity
+        scroll.bounds = CGRect(origin: .zero, size: bounds.size)
+        scroll.center = CGPoint(x: bounds.midX, y: bounds.midY)
         if !didFit, bounds.width > 0, canvas.bounds.width > 0 {
             didFit = true
             recenterToPackCoverage()
         }
+        applyHeadingUpRotation(enabled: headingUpEnabled, headingDegrees: headingUpDegrees)
         reportOutside()
         reportScale()
     }
@@ -346,7 +352,12 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         let pinsDirty = canvas.amenityPins.count != amenityPins.count
             || canvas.markPins.count != markPins.count
             || canvas.packContainsSelf != packContainsSelf
+        let lastOld = canvas.breadcrumbs.last
+        let lastNew = breadcrumbs.last
         let crumbsDirty = canvas.breadcrumbs.count != breadcrumbs.count
+            || lastOld?.latitude != lastNew?.latitude
+            || lastOld?.longitude != lastNew?.longitude
+            || lastOld?.estimated != lastNew?.estimated
             || canvas.outingStart?.latitude != outingStart?.latitude
             || canvas.outingStart?.longitude != outingStart?.longitude
         canvas.selfFix = selfFix
@@ -383,8 +394,11 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     }
 
     /// Heading-up while Walk: rotate the tile scroll around the follow-puck center.
-    /// HUD chips stay in MapsRootView and are not rotated.
+    /// HUD chips stay in MapsRootView and are not rotated. Stash heading so
+    /// `layoutSubviews` can re-apply after sizing with bounds/center, not frame.
     func applyHeadingUpRotation(enabled: Bool, headingDegrees: Double?) {
+        headingUpEnabled = enabled
+        headingUpDegrees = headingDegrees
         guard MapChromeLock.headingUpWhileWalk, enabled, let heading = headingDegrees else {
             scroll.transform = .identity
             return
