@@ -109,3 +109,41 @@ public enum Formatters {
         return "<1 min"
     }
 }
+
+/// Walk TBT copy. Mock SoT: 0.4 mi / RAVEN ROCK RD. Not the idle metric scale bar.
+public enum WalkChrome {
+    public static func distance(_ meters: Double) -> String {
+        let miles = meters / 1609.344
+        if miles >= 10 { return String(format: "%.0f mi", miles.rounded()) }
+        if miles >= 0.1 { return String(format: "%.1f mi", miles) }
+        let feet = meters * 3.28084
+        let rounded = max(10, (feet / 10).rounded() * 10)
+        return "\(Int(rounded)) ft"
+    }
+
+    public static func roadName(_ raw: String?) -> String {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmed.isEmpty { return "CONTINUE" }
+        return trimmed.uppercased()
+    }
+
+    public static func arrowSystemName(_ kind: ManeuverKind) -> String {
+        switch kind {
+        case .right, .slightRight:
+            return "arrow.turn.up.right"
+        case .left, .slightLeft:
+            return "arrow.turn.up.left"
+        case .uTurn:
+            return "arrow.uturn.left"
+        case .straight, .depart:
+            return "arrow.up"
+        case .arrive:
+            return "flag.checkered"
+        }
+    }
+
+    public static func scaleLine(meters: Double, etaSeconds: Double) -> String {
+        let eta = Formatters.eta(etaSeconds).replacingOccurrences(of: "min", with: "MIN")
+        return "\(distance(meters)) / \(eta)"
+    }
+}

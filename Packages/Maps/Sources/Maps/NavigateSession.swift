@@ -222,6 +222,15 @@ final class NavigateSession {
         if muted { speech.stop() }
     }
 
+    func speakNow() {
+        if muted { muted = false }
+        if let maneuver = tick?.nextManeuver {
+            speak(VoicePrompt.phrase(for: maneuver, distanceMeters: tick?.distanceToTurnMeters ?? maneuver.distanceMeters))
+        } else if let first = preview?.maneuvers.first {
+            speak(VoicePrompt.phrase(for: first, distanceMeters: first.distanceMeters))
+        }
+    }
+
     private func setDestination(
         _ coordinate: RoutingCoordinate,
         label: String,

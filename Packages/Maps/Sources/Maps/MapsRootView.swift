@@ -568,6 +568,9 @@ public struct MapsRootView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
             }
+            if MapChromeLock.paintsWalkScaleAndCompass, navigate.phase == .guidance {
+                walkCompassScale
+            }
             Spacer()
             if showChipRow, MapChromeLock.showsRightEdgeChips(searchFocused: searchFocused) {
                 HStack(alignment: .bottom, spacing: 0) {
@@ -609,7 +612,7 @@ public struct MapsRootView: View {
                             }
                         )
                     }
-                    if showChipRow {
+                    if showChipRow, !(MapChromeLock.hidesSearchDuringWalk && navigate.phase == .guidance) {
                         mapPackSearch
                         if showSearchDropdown {
                             MapPackSearchDropdown(
@@ -712,7 +715,11 @@ public struct MapsRootView: View {
                     hasTarget: compass.target != nil,
                     onSpeak: {
                         noteMapActivity()
-                        compass.speakOnce()
+                        if navigate.phase == .guidance {
+                            navigate.speakNow()
+                        } else {
+                            compass.speakOnce()
+                        }
                     },
                     onSteer: {
                         noteMapActivity()
@@ -731,6 +738,27 @@ public struct MapsRootView: View {
             case .chips:
                 chipColumn
             }
+        }
+    }
+
+    private var walkCompassScale: some View {
+        receding {
+            HStack(alignment: .top, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
+                    MapWalkCompass(headingDegrees: location.headingDegrees)
+                    Text(
+                        WalkChrome.scaleLine(
+                            meters: MapScaleBarMath.niceMeters(metersPerPoint: metersPerPoint),
+                            etaSeconds: navigate.tick?.etaSeconds ?? navigate.activeRoute?.etaSeconds ?? 0
+                        )
+                    )
+                    .font(BlackoutDS.captionFont())
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
     }
 
@@ -1006,6 +1034,9 @@ public struct MapsRootView: View {
                     onMute: { navigate.toggleMute() },
                     onEnd: { navigate.end() }
                 )
+                if MapChromeLock.walkShowsEndUnderTurnPlate {
+                    GhostButton("End", height: 36, action: { navigate.end() })
+                }
             } else if navigate.phase == .preview, let route = navigate.preview {
                 NavigatePreviewCard(
                     profile: nav.profile,
@@ -1261,6 +1292,29 @@ struct MapScaleBar: View {
             return "\(Int((meters / 1_000).rounded())) km"
         }
         return "\(Int(meters.rounded())) m"
+    }
+}
+
+/// Walk-only compass. Idle Map keeps the tiny GPS chip.
+struct MapWalkCompass: View {
+    var headingDegrees: Double?
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(BlackoutDS.Surface.raised.opacity(0.82))
+                .overlay(Circle().stroke(BlackoutDS.Silver.edge, lineWidth: 0.5))
+            VStack(spacing: 0) {
+                Image(systemName: "chevron.up")
+                    .font(.system(size: 8, weight: .bold))
+                Text("N")
+                    .font(.system(size: 11, weight: .bold, design: .default))
+            }
+            .foregroundStyle(BlackoutDS.Silver.bright)
+            .rotationEffect(.degrees(-(headingDegrees ?? 0)))
+        }
+        .frame(width: 36, height: 36)
+        .accessibilityLabel("Compass")
     }
 }
 

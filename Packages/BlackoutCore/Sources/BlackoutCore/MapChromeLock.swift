@@ -244,6 +244,14 @@ public enum MapChromeLock {
     public static let paintsFieldModePlateOnIdleMap = false
     public static let paintsDeadReckoningChipOnMap = false
     public static let paintsScaleBarOnMap = false
+    /// Walk chrome (Crisis 2026-08-31 20:30). Idle map stays clean.
+    public static let paintsWalkTurnPlate = true
+    public static let walkTurnPlateShowsMuteEnd = false
+    public static let paintsWalkLockOnBanner = true
+    public static let walkLockOnBannerHeight: Double = 56
+    public static let paintsWalkScaleAndCompass = true
+    public static let hidesSearchDuringWalk = true
+    public static let walkShowsEndUnderTurnPlate = true
     public static let pinSheetIsMetalSlab = false
 
     /// Crisis 2026-08-31 15:57: dual I AM OK chrome is deleted. Roster two-tap stays.

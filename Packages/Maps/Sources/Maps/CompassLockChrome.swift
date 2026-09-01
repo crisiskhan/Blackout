@@ -49,7 +49,7 @@ struct CompassLockOnHeader: View {
             Image(systemName: "lock.fill")
                 .font(.system(size: 16, weight: .bold))
             Text(CompassLockMath.lockOnLine(headingDegrees: headingDegrees))
-                .font(.system(size: 15, weight: .bold, design: .default))
+                .font(.system(size: 18, weight: .bold, design: .default))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Spacer(minLength: 0)
@@ -57,7 +57,7 @@ struct CompassLockOnHeader: View {
         .foregroundStyle(BlackoutDS.Surface.void)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 40)
+        .frame(height: CGFloat(MapChromeLock.walkLockOnBannerHeight))
         .metalPlate(.bright, cornerRadius: MetalPlate.headerCorner)
         .accessibilityLabel(CompassLockMath.lockOnLine(headingDegrees: headingDegrees))
     }

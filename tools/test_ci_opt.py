@@ -386,6 +386,18 @@ def test_map_google_feel() -> None:
         fail("Recenter/Layers must hide when Map search is focused")
     if "testIdleMapIsPackTilesPinsSearchNotARadarHUD" not in tests:
         fail("missing Crisis 21:13 Map lock test")
+    if "paintsWalkTurnPlate = true" not in lock:
+        fail("Walk must paint the mock TBT plate")
+    if "walkTurnPlateShowsMuteEnd = false" not in lock:
+        fail("Mute/End must not sit on the Walk TBT plate")
+    if "paintsWalkLockOnBanner = true" not in lock:
+        fail("Walk must paint LOCK ON • bearing")
+    if "paintsWalkScaleAndCompass = true" not in lock:
+        fail("Walk must paint compass + scale")
+    if "hidesSearchDuringWalk = true" not in lock:
+        fail("Search this pack must recede during Walk")
+    if "testWalkChromeMatchesMockExceptSOS" not in tests:
+        fail("missing Walk chrome mock lock test")
     if "testVitalsChromeIsGoneOnEveryTabSoloOrParty" not in tests:
         fail("missing dual-gone-everywhere test")
     if "testFieldPlateFitsSafeWidthAndClearsSOS" not in tests:
@@ -2394,6 +2406,23 @@ def test_map_metal_plates() -> None:
         fail("missing LOCK ON header test")
     if "CompassLockOnHeader" not in maps.split("private var lockHudStack", 1)[-1]:
         fail("LOCK ON header must sit in lockHudStack when nav is in play")
+    guidance = nav.split("struct NavigateGuidanceBar", 1)[-1].split("struct NavigateEmptyCard", 1)[0]
+    if "WalkChrome.arrowSystemName" not in guidance:
+        fail("Walk TBT plate must paint the mock silver turn arrow")
+    if "WalkChrome.distance" not in guidance or "WalkChrome.roadName" not in guidance:
+        fail("Walk TBT plate must be distance + road name")
+    first_plate = guidance.split("walkTurnPlateShowsMuteEnd", 1)[0]
+    if 'GhostButton(muted ? "Unmute" : "Mute"' in first_plate:
+        fail("Mute/End must not sit on the first Walk TBT plate")
+    if "hidesSearchDuringWalk" not in maps:
+        fail("Walk must hide Search this pack")
+    if "MapWalkCompass" not in maps:
+        fail("Walk must paint the mock compass")
+    if "walkLockOnBannerHeight" not in compass:
+        fail("LOCK ON banner must be the 56pt metal header")
+    walk = (ROOT / "Packages/Maps/Tests/MapsTests/WalkChromeTests.swift").read_text()
+    if "testDistanceIsMockMiles" not in walk or "RAVEN ROCK RD" not in walk:
+        fail("Walk chrome miles/road tests missing")
     if "metalPlate(lit ? .bright : .rail" not in compass:
         fail("SPEAK/STEER/MARK/LOCK must be metal rails")
     if "metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)" not in vitals:

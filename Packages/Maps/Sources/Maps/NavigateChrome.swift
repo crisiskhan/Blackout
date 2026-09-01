@@ -90,46 +90,60 @@ struct NavigateGuidanceBar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 8) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(street)
+            HStack(alignment: .center, spacing: 16) {
+                Image(systemName: WalkChrome.arrowSystemName(kind))
+                    .font(.system(size: 44, weight: .bold, design: .default))
+                    .foregroundStyle(BlackoutDS.Silver.metal)
+                    .frame(width: 64, height: 64)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(WalkChrome.distance(metersToTurn))
                         .font(BlackoutDS.titleFont())
                         .foregroundStyle(BlackoutDS.Silver.bright)
-                    Text(turnDistance)
+                    Text(WalkChrome.roadName(streetRaw))
                         .font(BlackoutDS.bodyFont())
-                        .foregroundStyle(BlackoutDS.Silver.mid)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
                 }
-                Spacer(minLength: 8)
-                Text(eta)
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.bright)
+                Spacer(minLength: 0)
             }
             if noGPS {
                 Text(NavigateCopy.noGPS)
                     .font(BlackoutDS.captionFont())
                     .foregroundStyle(BlackoutDS.Semantic.warn)
             }
-            HStack(spacing: 8) {
-                GhostButton(muted ? "Unmute" : "Mute", height: BlackoutDS.Hit.sm, action: onMute)
-                GhostButton("End", height: BlackoutDS.Hit.sm, action: onEnd)
+            if MapChromeLock.walkTurnPlateShowsMuteEnd {
+                HStack(spacing: 8) {
+                    GhostButton(muted ? "Unmute" : "Mute", height: BlackoutDS.Hit.sm, action: onMute)
+                    GhostButton("End", height: BlackoutDS.Hit.sm, action: onEnd)
+                }
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .metalPlate(.rail, cornerRadius: MetalPlate.searchCorner)
+        .accessibilityLabel("\(WalkChrome.distance(metersToTurn)), \(WalkChrome.roadName(streetRaw))")
+        .accessibilityAction(named: "End", onEnd)
+        .accessibilityAction(named: muted ? "Unmute" : "Mute", onMute)
     }
 
-    private var street: String {
-        tick?.nextManeuver?.streetName ?? "Continue"
+    private var kind: ManeuverKind {
+        tick?.nextManeuver?.kind
+            ?? route?.maneuvers.first(where: { $0.kind != .arrive })?.kind
+            ?? .straight
     }
 
-    private var turnDistance: String {
-        guard let tick else { return "—" }
-        return Formatters.distance(tick.distanceToTurnMeters)
+    private var streetRaw: String? {
+        tick?.nextManeuver?.streetName
+            ?? route?.maneuvers.first(where: { $0.kind != .arrive })?.streetName
     }
 
-    private var eta: String {
-        Formatters.eta(tick?.etaSeconds ?? route?.etaSeconds ?? 0)
+    private var metersToTurn: Double {
+        tick?.distanceToTurnMeters
+            ?? route?.maneuvers.first?.distanceMeters
+            ?? 0
     }
 }
 

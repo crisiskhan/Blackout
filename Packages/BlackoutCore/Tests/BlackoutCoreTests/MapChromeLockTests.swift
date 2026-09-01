@@ -143,6 +143,23 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(RootChromeLock.pttIgnoresBottomSafeArea)
     }
 
+    func testWalkChromeMatchesMockExceptSOS() {
+        XCTAssertTrue(MapChromeLock.paintsWalkTurnPlate)
+        XCTAssertFalse(MapChromeLock.walkTurnPlateShowsMuteEnd)
+        XCTAssertTrue(MapChromeLock.paintsWalkLockOnBanner)
+        XCTAssertEqual(MapChromeLock.walkLockOnBannerHeight, 56)
+        XCTAssertTrue(MapChromeLock.paintsWalkScaleAndCompass)
+        XCTAssertTrue(MapChromeLock.hidesSearchDuringWalk)
+        XCTAssertTrue(MapChromeLock.walkShowsEndUnderTurnPlate)
+        XCTAssertFalse(MapChromeLock.paintsScaleBarOnMap)
+        XCTAssertFalse(MapChromeLock.paintsVitalsChrome)
+        XCTAssertFalse(MapChromeLock.paintsRadarOnMap(radarOn: true))
+        XCTAssertEqual(MapChromeLock.sosDiameter, 88)
+        XCTAssertEqual(SOSChrome.trailing, 16)
+        XCTAssertEqual(SOSChrome.gap, 8)
+        XCTAssertTrue(MapPackSearchPolicy.pickAutoStartsGuidance)
+    }
+
     func testVitalsChromeIsGoneOnEveryTabSoloOrParty() {
         XCTAssertFalse(MapChromeLock.paintsVitalsChrome)
         for tab in ["map", "comms", "field", "expedition"] {

@@ -392,7 +392,6 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         redrawCanvasIfZoomIntegerChanged()
         clampCamera()
         reportOutside()
-        reportScale()
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -400,7 +399,18 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         redrawCanvasIfZoomIntegerChanged()
         clampCamera()
         reportOutside()
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         reportScale()
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        reportScale()
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate { reportScale() }
     }
 
     private func redrawCanvasIfZoomIntegerChanged() {
@@ -409,6 +419,7 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
         lastDrawnZoom = zoom
         if MapChromeLock.shouldRedrawAfterScroll(zoomIntegerChanged: changed) {
             invalidateVisibleCanvas()
+            reportScale()
         }
     }
 
@@ -453,7 +464,9 @@ final class OfflineTileScrollView: UIView, UIScrollViewDelegate, UIGestureRecogn
     }
 
     private func reportScale() {
-        guard MapChromeLock.paintsScaleBarOnMap || MapChromeLock.reportsScaleOnEveryScroll else { return }
+        guard MapChromeLock.paintsScaleBarOnMap
+            || MapChromeLock.paintsWalkScaleAndCompass
+            || MapChromeLock.reportsScaleOnEveryScroll else { return }
         let zoom = Double(zMax) + Darwin.log2(Double(max(scroll.zoomScale, 0.01)))
         let meters = MapScaleBarMath.metersPerPoint(
             latitude: pack.region.centerLatitude,
