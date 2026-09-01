@@ -3,23 +3,32 @@ import BlackoutCore
 import Foundation
 
 /// Speak the next step only. On-device `AVSpeechSynthesizer`. Not the essay.
+/// Synthesizer is created on first speak — never during Field/view init.
 @MainActor
 final class GuideSpeech {
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer: AVSpeechSynthesizer?
 
     func speakNext(_ text: String) {
         guard !text.isEmpty else { return }
+        let synth = ensureSynthesizer()
         if AudioChromeLock.interruptible {
-            synthesizer.stopSpeaking(at: .immediate)
+            synth.stopSpeaking(at: .immediate)
         }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
-        synthesizer.speak(utterance)
+        synth.speak(utterance)
     }
 
     func stop() {
-        synthesizer.stopSpeaking(at: .immediate)
+        synthesizer?.stopSpeaking(at: .immediate)
+    }
+
+    private func ensureSynthesizer() -> AVSpeechSynthesizer {
+        if let synthesizer { return synthesizer }
+        let created = AVSpeechSynthesizer()
+        synthesizer = created
+        return created
     }
 
     private func onDeviceVoice() -> AVSpeechSynthesisVoice? {

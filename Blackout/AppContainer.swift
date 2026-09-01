@@ -120,13 +120,6 @@ final class AppContainer {
         ptt.bindSender { meshRef.sendPTTFrame($0) }
         ptt.extremeSaver = battery.isExtremeSaver
         radioBanner.dismissed = UserDefaults.standard.bool(forKey: BlackoutKeys.meshRadioBannerDismissed)
-        ptt.installRemoteCommands { [ptt, mesh, identity] in
-            ptt.decision(
-                nearbyPeerCount: mesh.nearbyPeerCount,
-                partyCode: identity.partyCode,
-                meshRunning: mesh.isRunning
-            )
-        }
         PTTIntentBridge.bind(hub: ptt)
         mesh.setLocalAdvertisement(crypto.localAdvertisement)
         mesh.setParty(code: identity.partyCode, callsign: identity.callsign, deviceID: identity.deviceID)
@@ -221,9 +214,22 @@ final class AppContainer {
         location.startUpdating()
         location.applyPolicy(battery.policy)
         ptt.extremeSaver = battery.isExtremeSaver
+        bindPTTRemote()
         syncMeshToParty()
         refreshRadiosBanner()
         applyIdleTimer()
+    }
+
+    /// Now Playing / remote commands wait for the first Map frame.
+    /// AppContainer.init must not arm them — that is a launch-audio crash class.
+    private func bindPTTRemote() {
+        ptt.installRemoteCommands { [ptt, mesh, identity] in
+            ptt.decision(
+                nearbyPeerCount: mesh.nearbyPeerCount,
+                partyCode: identity.partyCode,
+                meshRunning: mesh.isRunning
+            )
+        }
     }
 
     func syncMeshToParty() {

@@ -1722,6 +1722,36 @@ def test_audio_10() -> None:
         fail("new SPEAK / tick must cut the current utterance")
     if "AVSpeechSynthesizer" not in speech or "AVSpeechSynthesizer" not in guide_speech:
         fail("Walk + Field speak must stay on-device AVSpeechSynthesizer")
+    if "private let synthesizer = AVSpeechSynthesizer()" in speech:
+        fail("OnDeviceSpeech must not construct AVSpeechSynthesizer on session init")
+    if "private var synthesizer: AVSpeechSynthesizer?" not in speech:
+        fail("OnDeviceSpeech synthesizer must stay lazy until speak")
+    if "private let synthesizer = AVSpeechSynthesizer()" in guide_speech:
+        fail("GuideSpeech must not construct AVSpeechSynthesizer on Field init")
+    ping = (ROOT / "Blackout/PingAlert.swift").read_text()
+    if "private let synthesizer = AVSpeechSynthesizer()" in ping:
+        fail("PingSpeech must not construct AVSpeechSynthesizer until announce")
+    if "engine = AVAudioEngine()" in ask or "@State private var engine = AVAudioEngine()" in ask:
+        fail("Field Ask must not construct AVAudioEngine on first-open TabView")
+    if "micUnavailable = !onDeviceSpeechAvailable" in ask:
+        fail("Field Ask must not probe SFSpeechRecognizer on first-open TabView appear")
+    dictation = (ROOT / "Packages/Messaging/Sources/Messaging/ComposeDictation.swift").read_text()
+    if "@State private var engine = AVAudioEngine()" in dictation:
+        fail("Comms dictation must not construct AVAudioEngine on first-open TabView")
+    app = (ROOT / "Blackout/AppContainer.swift").read_text()
+    init_fn = app.split("init() {", 1)[-1].split("func parkHardwareForBackground", 1)[0]
+    if "installRemoteCommands" in init_fn:
+        fail("PTT Now Playing must not arm on AppContainer init")
+    if "bindPTTRemote()" not in app.split("func armHardwareAfterUnlock", 1)[-1][:800]:
+        fail("PTT remote must wait for the first Map frame")
+    if "installRemoteCommands" not in app.split("func bindPTTRemote", 1)[-1][:400]:
+        fail("bindPTTRemote must install remote commands")
+    if "constructsSynthesizerOnInit = false" not in lock:
+        fail("eager speech-on-init lock missing")
+    if "constructsAudioEngineOnViewInit = false" not in lock:
+        fail("eager audio-engine-on-view-init lock missing")
+    if "installsPTTRemoteOnAppInit = false" not in lock:
+        fail("PTT-remote-on-app-init lock missing")
     for banned in ("URLSession", "MKLocalSearch", "Mapbox"):
         if banned in speech or banned in session or banned in guide_speech or banned in ask:
             fail(f"speak path must stay airplane: no {banned}")
@@ -1739,6 +1769,8 @@ def test_audio_10() -> None:
         fail("PTT must not sit on Map")
     if "URLSession" in ptt:
         fail("PTT must stay mesh-only: no URLSession")
+    if "format.sampleRate > 0" not in ptt or "format.channelCount > 0" not in ptt:
+        fail("PTT installTap must refuse 0 Hz / 0 channel input")
     if "SOSFab" in root or "CriticalSOSShell" in root or "SOSSpeech" in root:
         fail("do not restore SOS speak / FAB / confirm")
     if "liveActivitySOSEnabled = false" not in (

@@ -15,7 +15,7 @@ struct ComposeDictationButton: View {
     @State private var recognizer: SFSpeechRecognizer?
     @State private var request: SFSpeechAudioBufferRecognitionRequest?
     @State private var task: SFSpeechRecognitionTask?
-    @State private var engine = AVAudioEngine()
+    @State private var engine: AVAudioEngine?
     @State private var prefix = ""
 
     var body: some View {
@@ -65,8 +65,15 @@ struct ComposeDictationButton: View {
         req.requiresOnDeviceRecognition = true
         req.shouldReportPartialResults = true
         request = req
-        let input = engine.inputNode
+        let next = AVAudioEngine()
+        let input = next.inputNode
         let format = input.outputFormat(forBus: 0)
+        guard format.sampleRate > 0, format.channelCount > 0 else {
+            denied = true
+            stop()
+            onDenied()
+            return
+        }
         input.removeTap(onBus: 0)
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
             req.append(buffer)
@@ -74,8 +81,9 @@ struct ComposeDictationButton: View {
         do {
             try AVAudioSession.sharedInstance().setCategory(.record, mode: .measurement, options: .duckOthers)
             try AVAudioSession.sharedInstance().setActive(true)
-            engine.prepare()
-            try engine.start()
+            next.prepare()
+            try next.start()
+            engine = next
         } catch {
             denied = true
             stop()
@@ -106,8 +114,11 @@ struct ComposeDictationButton: View {
         task?.cancel()
         task = nil
         request = nil
-        engine.stop()
-        engine.inputNode.removeTap(onBus: 0)
+        if let engine {
+            engine.stop()
+            engine.inputNode.removeTap(onBus: 0)
+        }
+        engine = nil
         try? AVAudioSession.sharedInstance().setActive(false)
     }
 }

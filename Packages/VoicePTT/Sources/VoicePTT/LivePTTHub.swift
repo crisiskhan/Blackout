@@ -95,9 +95,8 @@ public final class LivePTTHub {
             else { return }
             buffer.frameLength = AVAudioFrameCount(packet.samples.count)
             packet.samples.withUnsafeBufferPointer { src in
-                if let dest = buffer.int16ChannelData?[0] {
-                    dest.update(from: src.baseAddress!, count: packet.samples.count)
-                }
+                guard let dest = buffer.int16ChannelData?[0], let base = src.baseAddress else { return }
+                dest.update(from: base, count: packet.samples.count)
             }
             player?.scheduleBuffer(buffer) { [weak self] in
                 Task { @MainActor in
@@ -247,6 +246,9 @@ public final class LivePTTHub {
             engine.inputNode.removeTap(onBus: 0)
             let input = engine.inputNode
             let format = input.outputFormat(forBus: 0)
+            guard format.sampleRate > 0, format.channelCount > 0 else {
+                throw LivePTTError.engine
+            }
             input.installTap(onBus: 0, bufferSize: 1_024, format: format) { [weak self] buffer, _ in
                 self?.emit(buffer)
             }

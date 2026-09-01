@@ -3,23 +3,32 @@ import BlackoutCore
 import Foundation
 
 /// On-device `AVSpeechSynthesizer` only. No cloud TTS, no background audio session.
+/// Synthesizer is created on first speak — never during Map/session init.
 @MainActor
 final class OnDeviceSpeech {
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer: AVSpeechSynthesizer?
 
     func speak(_ text: String, rate: Float = AVSpeechUtteranceDefaultSpeechRate) {
         guard !text.isEmpty else { return }
+        let synth = ensureSynthesizer()
         if AudioChromeLock.interruptible {
-            synthesizer.stopSpeaking(at: .immediate)
+            synth.stopSpeaking(at: .immediate)
         }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = onDeviceVoice()
         utterance.rate = rate
-        synthesizer.speak(utterance)
+        synth.speak(utterance)
     }
 
     func stop() {
-        synthesizer.stopSpeaking(at: .immediate)
+        synthesizer?.stopSpeaking(at: .immediate)
+    }
+
+    private func ensureSynthesizer() -> AVSpeechSynthesizer {
+        if let synthesizer { return synthesizer }
+        let created = AVSpeechSynthesizer()
+        synthesizer = created
+        return created
     }
 
     private func onDeviceVoice() -> AVSpeechSynthesisVoice? {

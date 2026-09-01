@@ -38,13 +38,15 @@ enum PingAlert {
 
 @MainActor
 final class PingSpeech {
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer: AVSpeechSynthesizer?
 
     func speak(_ text: String, rate: Float) {
         guard !text.isEmpty else { return }
-        synthesizer.stopSpeaking(at: .immediate)
+        let synth = synthesizer ?? AVSpeechSynthesizer()
+        synthesizer = synth
+        synth.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = rate
-        synthesizer.speak(utterance)
+        synth.speak(utterance)
     }
 }

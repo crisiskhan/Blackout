@@ -19,6 +19,11 @@ public enum AudioChromeLock {
     public static let pttOnMap = false
     public static let sosSpeakOnChrome = false
     public static let cloudTTS = false
+    /// First-open Map constructs NavigateSession + CompassLockSession.
+    /// AVSpeechSynthesizer / AVAudioEngine stay off that init. SOS already lazy.
+    public static let constructsSynthesizerOnInit = false
+    public static let constructsAudioEngineOnViewInit = false
+    public static let installsPTTRemoteOnAppInit = false
 
     public static func speakUsesLockPhrase(isLocked: Bool, hasTarget: Bool) -> Bool {
         speakPrefersLockWhenLocked && isLocked && hasTarget
