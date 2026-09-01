@@ -129,6 +129,13 @@ def test_pbx_single_copy() -> None:
         fail("widget Info.plist must expand PRODUCT_BUNDLE_IDENTIFIER (parent prefix check)")
     if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
         fail("widget bundle id must stay com.crisiskhan.blackout.widget on Debug and Release")
+    if "BlackoutWidgets.appex in Embed Foundation Extensions" in pbx:
+        fail("widget appex must stay out of the app archive until Map is green")
+    app_target = pbx.split("8796EC6A87564C187A908CD6 /* Blackout */", 1)[-1].split(
+        "4A33CE8067C626636E3DE224 /* BlackoutWidgets */", 1
+    )[0]
+    if "PBXTargetDependency" in app_target or "BlackoutWidgets" in app_target.split("buildPhases", 1)[0][-200:]:
+        fail("app target must not depend on BlackoutWidgets")
     if "CURRENT_PROJECT_VERSION = 47" not in pbx:
         fail("CURRENT_PROJECT_VERSION is no longer 47")
     if pbx.count("CURRENT_PROJECT_VERSION = 47") < 2:
@@ -164,6 +171,10 @@ def test_generator_does_not_restore_double_copy() -> None:
         fail("generate_project.py would bump CURRENT_PROJECT_VERSION")
     if "Apple Distribution" in src:
         fail("generate_project.py must not set Apple Distribution")
+    if "BlackoutWidgets.appex in Embed" in src:
+        fail("generate_project.py must not embed the widget appex")
+    if '"INFOPLIST_KEY_NSSupportsLiveActivities": "YES"' in src:
+        fail("generate_project.py must not enable Live Activities on the app")
     if "generated-sample" in src:
         fail("generate_project.py would restore synthetic DefaultPack stubs")
     if "SOS red core" in src or "if r < 280" in src:
@@ -190,8 +201,10 @@ def test_map_chrome_lock() -> None:
             fail(f"MapsRootView still paints {banned}")
     if "MapLockHUD" not in maps or "NO FIX" not in maps:
         fail("MapsRootView lost the tiny GPS / compass HUD")
-    if 'MapHUDChip("Recenter"' not in maps or 'MapHUDChip("Layers"' not in maps:
-        fail("MapsRootView lost Recenter / Layers 56h chips")
+    if 'MapHUDChip("Recenter"' not in maps:
+        fail("MapsRootView lost Recenter 56h chip")
+    if 'MapHUDChip("Layers"' in maps:
+        fail("Layers control must stay off Map")
     if 'MapHUDChip("Packs"' not in maps:
         fail("MapsRootView lost Packs 56h chip")
     if "MapRightEdge.stack" not in maps:
@@ -221,8 +234,14 @@ def test_map_chrome_lock() -> None:
             fail(f"Expedition catalog lost state {label}")
     if 'case .available' in catalog_list or 'case .skip' in catalog_list:
         fail("catalog still paints available/skip")
-    if "destination = .expedition" not in root:
-        fail("Packs must open the Expedition plate, not a modal")
+    if "showPacksSheet" not in root or "FieldPackCatalogList" not in root:
+        fail("Packs must open a catalog sheet, not Expedition")
+    if "destination = .expedition" in root.split("onOpenFieldPacks", 1)[-1][:400]:
+        fail("Packs must not route to the Expedition tab")
+    if 'MapHUDChip("Satellite"' not in maps:
+        fail("one satellite toggle must sit on Map, default off")
+    if "struct MapLayersSheet" in maps or 'layerToggle("Streets"' in maps:
+        fail("Layers pile is cut — no streets/contours/trails sheet")
     if "Heading-up" in radar or "Sweep audio" in radar or "0 peers · self only" in radar:
         fail("RadarHUDView still floats heading/audio/peer chrome")
     if "MKMapView(" in maps:
@@ -314,7 +333,7 @@ def test_map_chrome_lock() -> None:
         fail("SOSFab must not live in the idle lock overlay tree")
     if pbx_version_off_32():
         fail("do not bump CURRENT_PROJECT_VERSION")
-    ok("Map chrome is HUD + Recenter/Layers/Packs, catalog on Expedition")
+    ok("Map chrome is HUD + Recenter/Packs/Satellite, catalog sheet, no Expedition tab")
 
 
 def test_map_google_feel() -> None:
@@ -332,19 +351,23 @@ def test_map_google_feel() -> None:
         fail("GPS / compass HUD must not be a full-width bar")
     if "lockHUDPaintedHeight: Double = 28" not in lock:
         fail("compass / accuracy HUD must stay tiny (28pt)")
-    if 'layersTitles = ["Streets", "Contours", "Trails"]' not in lock:
-        fail("Layers must be streets/contours/trails")
-    if "defaultPaintIsDuskAerial = true" not in lock:
-        fail("default paint must be dusk aerial, not labeled USGS")
+    if "layersTitles: [String] = []" not in lock and "layersTitles = []" not in lock:
+        fail("Layers pile is cut — no streets/contours/trails control")
+    if "defaultPaintIsDuskAerial = false" not in lock:
+        fail("default paint must be daylight streets, not dusk aerial")
+    if "daylightStreetsAreBase = true" not in lock:
+        fail("vector streets are the base look")
+    if "aerialOverlayDefaultOn = false" not in lock:
+        fail("dusk/satellite overlay must default off")
     if "defaultPaintsLabeledUSGS = false" not in lock:
         fail("labeled USGS must not be the default layer")
     if "defaultPaintsCountyNames = false" not in lock or "defaultPaintsHighwayShields = false" not in lock:
         fail("default paint must not print county names or highway shields")
-    if "streetsLayerDefaultOn = false" not in lock or "topoLayerDefaultOn = false" not in lock:
-        fail("streets/topo layers must default off")
+    if "streetsLayerDefaultOn = true" not in lock or "topoLayerDefaultOn = false" not in lock:
+        fail("streets are the daylight base; topo stays off")
     if "contoursLayerDefaultOn = false" not in lock or "trailsLayerDefaultOn = false" not in lock:
         fail("contours/trails layers must default off")
-    if "duskGradesPackTiles = true" not in lock:
+    if "duskGradesPackTiles = false" not in lock:
         fail("pack satellite/aerial must be dusk-graded")
     if "usesGoogleLogo = false" not in lock:
         fail("never a Google logo")
@@ -428,32 +451,26 @@ def test_map_google_feel() -> None:
     if "scaleBarRow" in chrome:
         fail("scale bar must not cover tiles")
 
-    layers = maps.split("struct MapLayersSheet", 1)[-1]
-    for banned in (
-        'GhostButton("Radar"',
-        'layerToggle("Slope"',
-        'layerToggle("Viewshed"',
-        'layerToggle("Night red"',
-        'TextField("Search this pack"',
-        'GhostButton("LiDAR"',
-        'GhostButton("Navigate"',
-        "PackFindCopy.civilization",
-        "PackFindCopy.water",
-        'layerToggle("Heading-up"',
-        'layerToggle("Sweep audio"',
-    ):
-        if banned in layers:
-            fail(f"Layers is not pack/imagery-only: still has {banned}")
-    if 'layerToggle("Pack tiles"' in layers:
-        fail("labeled USGS pack tiles are not a default Layers toggle")
-    if 'layerToggle("Streets"' not in layers:
-        fail("Layers lost Streets")
-    if 'layerToggle("Contours"' not in layers:
-        fail("Layers lost Contours")
-    if 'layerToggle("Trails"' not in layers:
-        fail("Layers lost Trails")
-    if 'layerToggle("Topo"' in layers:
-        fail("Topo is Contours now; do not keep a Topo toggle")
+    if "struct MapLayersSheet" in maps:
+        fail("Layers pile is cut")
+    if 'layerToggle("Streets"' in maps or 'layerToggle("Contours"' in maps or 'layerToggle("Trails"' in maps:
+        fail("streets/contours/trails must not be a Layers pile")
+    if 'MapHUDChip("Satellite"' not in maps:
+        fail("one satellite toggle must stay on Map")
+    if "hideStrangerBlips = true" not in lock or "strangerRadarDefaultOn = false" not in lock:
+        fail("Stranger Radar must default OFF")
+    if "initsViewshedOnLaunch = false" not in lock or "initsLiDAROnLaunch = false" not in lock:
+        fail("viewshed/LiDAR must not init on first paint")
+    if "killsDuskGradePipeline = true" not in lock:
+        fail("dusk-grade pipeline must stay killed")
+    if "refreshTerrain()" in maps.split("onAppearAction:", 1)[-1][:240]:
+        fail("viewshed/terrain must not refresh on first Map appear")
+    if pbx.count("INFOPLIST_KEY_NSSupportsLiveActivities = NO") < 2:
+        fail("app target must not advertise Live Activities")
+    if "sosOnlyCollapseOnColdLaunch = false" not in (
+        ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/RootChromeLock.swift"
+    ).read_text():
+        fail("2% SOS-only collapse must stay off cold launch")
 
     hud_order = maps.split("private var lockHudStack", 1)[-1].split("private var mapPackSearch", 1)[0]
     if hud_order.find("MapLockHUD") < 0 or hud_order.find("mapPackSearch") < 0:
@@ -462,10 +479,10 @@ def test_map_google_feel() -> None:
         fail("56h search must sit under the HUD, not above it")
     if "Google" in maps or "google logo" in maps.lower():
         fail("never a Google logo")
-    if "showStreets:" not in maps or "showTopoTiles:" not in maps:
-        fail("streets/contours must be Layers, default off")
-    if "showTrails:" not in maps:
-        fail("trails must be a Layer, default off")
+    if "showStreets:" not in maps:
+        fail("vector streets must still reach OfflineMapView")
+    if "showSatellite" not in maps:
+        fail("satellite overlay must be a session toggle, default off")
     if "markPins:" not in maps:
         fail("Map must pin dest / MARK / search")
     if "MapPOINameSheet" not in maps:
@@ -483,13 +500,8 @@ def test_map_google_feel() -> None:
         fail("OfflineMapView must accept a jump-to-pin token")
     if "showPackTiles: packService.routing == nil || showTopoTiles" in maps:
         fail("pack imagery must stay on when routing exists")
-    if "showPackTiles: MapChromeLock.defaultPaintIsDuskAerial" not in maps:
-        fail("default canvas must paint dusk aerial from the installed pack")
-    layers_sheet = maps.split("struct MapLayersSheet", 1)[-1]
-    if "Pack tiles" in layers_sheet:
-        fail("Pack tiles must not be a Layers toggle — labeled USGS is Contours")
-    if 'layerToggle("Streets"' not in layers_sheet or 'layerToggle("Contours"' not in layers_sheet or 'layerToggle("Trails"' not in layers_sheet:
-        fail("Layers must be Streets, Contours, Trails")
+    if "showPackTiles: showSatellite" not in maps:
+        fail("pack rasters are the optional satellite overlay, default off")
     if "mapPackTiles" not in keys:
         fail("pack-tiles preference needs a BlackoutKey")
     if "MKLocalSearch" in maps or "satelliteFlyover" in maps or "MKTileOverlay" in maps:
@@ -1206,7 +1218,7 @@ def test_party_vitals_red_loop() -> None:
         fail("MeshFacade must stay a dumb pipe")
     if "case expedition" not in root or "case field" not in root:
         fail("4-tab chrome missing")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     if pbx.count("CURRENT_PROJECT_VERSION = 47") < 2:
         fail("CURRENT_PROJECT_VERSION was bumped off 47")
@@ -1338,7 +1350,7 @@ def test_sos_confirm_panel() -> None:
         fail("DS SOS tokens drifted")
     if "SOS FAB is not part of this flag" not in chrome:
         fail("Map recede must not include the SOS FAB")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not make SOS a tab")
     if "sosOverlay" not in root or root.count("SOSFab") != 1:
         fail("SOS must be one RootView overlay on all four tabs")
@@ -1464,8 +1476,8 @@ def test_compass_lock_on() -> None:
         fail("texas.pack.zip byte pin drifted")
     if "tabItem" in (ROOT / "Blackout/RootView.swift").read_text() and (
         ROOT / "Blackout/RootView.swift"
-    ).read_text().count("tabItem") != 4:
-        fail("do not restore 6 tabs")
+    ).read_text().count("tabItem") != 3:
+        fail("tab bar is Map / Comms / Field only")
     if "func coveringRoot" not in (ROOT / "Packages/Maps/Sources/MapsRouting/RoutingPack.swift").read_text():
         fail("do not revert Feature 1 routing loader")
     if "routing/graph.bin" not in (ROOT / ".gitignore").read_text():
@@ -1519,8 +1531,8 @@ def test_pack_find_civ_water() -> None:
         fail("Map empty must not grow a Skip control")
     if "PackFindCopy.civilization" not in tools or "PackFindCopy.water" not in tools:
         fail("PackFindSheet lost Find civilization / Find water")
-    if "PackFindCopy.civilization" in maps.split("struct MapLayersSheet", 1)[-1]:
-        fail("Find civ/water must not live on Layers")
+    if "struct MapLayersSheet" in maps:
+        fail("Find civ/water must not live on a Layers pile")
     if 'GhostButton("Towns"' in maps:
         fail("Towns must become Find civilization + Find water")
     if "pickFound" not in maps or "MapPOINameSheet" not in maps:
@@ -1541,7 +1553,7 @@ def test_pack_find_civ_water() -> None:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if (ROOT / "Blackout/RootView.swift").read_text().count("tabItem") != 4:
+    if (ROOT / "Blackout/RootView.swift").read_text().count("tabItem") != 3:
         fail("do not restore 6 tabs")
     if "BlackoutDS.Hit.sos" not in (ROOT / "Packages/SOS/Sources/SOS/SOSFab.swift").read_text():
         fail("do not move SOS")
@@ -1634,12 +1646,12 @@ def test_sos_armed_restore_no_crash() -> None:
     lock_view = (ROOT / "Packages/Settings/Sources/Settings/SettingsRootView.swift").read_text()
     ring = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/MetalRingLockup.swift").read_text()
     slide = (ROOT / "Packages/DesignSystem/Sources/DesignSystem/SlideToUnlock.swift").read_text()
-    if 'destination = "unlock"' not in launch:
-        fail("cold launch must land on unlock")
+    if 'destination = "map"' not in launch:
+        fail("cold launch must land on Map")
     if "usesBitmapLockUI = false" not in launch or "usesFullScreenLockImage = false" not in launch:
         fail("unlock chrome must not be a painted lock/SOS bitmap")
-    if "usesLockupImage = true" not in launch or "metalRingIsSwiftUI = false" not in launch:
-        fail("unlock emblem must be the lockup Image, not empty SwiftUI rings")
+    if "usesLockupImage = false" not in launch:
+        fail("MetalRingLockup is not first-open")
     if "sosTwinHit: Double = 56" not in launch:
         fail("unlock handle/SOS twins must be 56pt")
     if "trackHit: Double = 56" not in launch or "handleHit: Double = 56" not in launch:
@@ -1700,12 +1712,10 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("slider must unlock the session without Face ID as the first frame")
     if "sosArmed" in lock_view.split("SlideToUnlock", 1)[-1][:200]:
         fail("LockGateView slider must not write sosArmed")
-    if "if !container.lock.isUnlocked" not in root and "showsLockGate(" not in root:
-        fail("RootView must show the unlock gate on every cold launch")
-    if "isEnabled && !container.lock.isUnlocked" in root:
-        fail("unlock gate must not depend on Settings local-lock being on")
-    if "showsLockGate(" not in root:
-        fail("background must not remount LockGateView under a system picker")
+    if "LockGateView" in root:
+        fail("LockGateView must not wrap first paint — cold launch is Map")
+    if "MetalRingLockup" in root:
+        fail("MetalRingLockup is not first-open")
     scene_change = root.split("onChange(of: scenePhase)")[1]
     if "container.lock.lock()" in scene_change:
         fail("RootView must not lock() on scenePhase — remounts MetalRingLockup in background")
@@ -1789,7 +1799,7 @@ def test_sos_armed_restore_no_crash() -> None:
         fail("confirm controller must not allocate speech on init")
     if "autoDials911 = false" not in core or "tel:911" not in core:
         fail("CALL 911 must stay tel:911 and never auto-dial")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     if "BlackoutDS.Hit.sos" not in sos:
         fail("Map SOS FAB size drifted")
@@ -1805,6 +1815,8 @@ def test_sos_armed_restore_no_crash() -> None:
     loc = (ROOT / "Packages/Location/Sources/BlackoutLocation/LocationService.swift").read_text()
     if "location.startUpdating()" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
         fail("AppContainer.init must not start GPS/motion before the unlock gate")
+    if "articles.jsonl" in app.split("init()")[1].split("startMissedCheckInWatch")[0]:
+        fail("do not parse GuidePack articles on first paint")
     loc_init = loc.split("public init() {", 1)[1].split("\n    }", 1)[0]
     if "CLLocationManager(" in loc_init or "CMPedometer(" in loc_init or "CMMotionManager(" in loc_init:
         fail("LocationService.init must not construct CLLocationManager/CMPedometer/CMMotionManager")
@@ -2007,7 +2019,7 @@ def test_pack_amenity_address_search() -> None:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     copy = (ROOT / "tools/copy_fieldpacks.sh").read_text()
     compile_yml = (ROOT / ".github/workflows/ios-compile.yml").read_text()
@@ -2071,7 +2083,7 @@ def test_update_maps_one_tap() -> None:
         fail("city Get copy drifted")
     if "BlackoutDS.Hit.md" not in catalog_list:
         fail("Update maps must stay a 64pt glove hit")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     if pbx.count("CURRENT_PROJECT_VERSION = 47") < 2:
         fail("do not bump CURRENT_PROJECT_VERSION")
@@ -2139,7 +2151,7 @@ def test_offline_10() -> None:
         fail("store-and-forward must not use WAN")
     if "ciphertext" in queue and "open(" in queue:
         fail("queue must not inspect ciphertext")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
@@ -2191,7 +2203,7 @@ def test_format_version_insurance() -> None:
         fail("do not bump CURRENT_PROJECT_VERSION")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
-    if root.count("tabItem") != 4:
+    if root.count("tabItem") != 3:
         fail("do not add a fifth tab")
     ok("format-version insurance: pack/mesh/guide v1, fail closed, version 19")
 
@@ -2247,9 +2259,14 @@ def test_hits_23() -> None:
         fail("widget CFBundleIdentifier must stay PRODUCT_BUNDLE_IDENTIFIER")
     if pbx.count("PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widget") < 2:
         fail("widget bundle id drifted")
+    if "BlackoutWidgets.appex in Embed Foundation Extensions" in pbx:
+        fail("widget appex must stay out of the app archive")
+    live_policy = (ROOT / "Packages/BlackoutCore/Sources/BlackoutCore/ConvenienceHits.swift").read_text()
+    if "enum LiveActivityPolicy" not in live_policy or "static let enabled = false" not in live_policy.split("enum LiveActivityPolicy", 1)[-1]:
+        fail("Live Activity / Dynamic Island SOS must stay off")
     if pbx.count("CURRENT_PROJECT_VERSION = 47") < 2:
         fail("version bumped off 47")
-    ok("hits 23: NFC + Map torch + PTT intent, widget id locked, version 19")
+    ok("hits 23: NFC + Map torch + PTT intent, widget unembedded, version 47")
 
 
 def test_map_fill_bleed_and_paint_budget() -> None:
@@ -2275,7 +2292,9 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         "duskRemapBlocksDraw = false",
         "duskRemapCachesTiles = true",
         "canvasRedrawsVisibleRectOnly = true",
-        "defaultPaintIsDuskAerial = true",
+        "defaultPaintIsDuskAerial = false",
+        "daylightStreetsAreBase = true",
+        "aerialOverlayDefaultOn = false",
         "defaultPaintsLabeledUSGS = false",
         "pickDismissesHits = true",
         "headingRedrawStepDegrees: Double = 8",
@@ -2354,8 +2373,10 @@ def test_map_fill_bleed_and_paint_budget() -> None:
         fail("updateUIView must not repaint tiles on every heading/GPS tick")
     if "duskGradeAlpha" not in offline:
         fail("dusk grade must use MapChromeLock.duskGradeAlpha")
-    if "duskAerial" not in offline or "remapsLabeledPackTilesToDuskAerial" not in offline:
-        fail("labeled USGS rasters must remap to dusk aerial on the default paint")
+    if "remapsLabeledPackTilesToDuskAerial" not in offline:
+        fail("dusk remap must stay gated off the default streets paint")
+    if "remapsLabeledPackTilesToDuskAerial = false" not in lock:
+        fail("do not remap pack tiles to dusk on the default canvas")
     if "paintsPackLabelOverlayWhenTopoOff" not in offline:
         fail("default pack paint must not add a street-name overlay")
     if "showViewshed: false" not in maps or "showSlope: false" not in maps:
@@ -2555,8 +2576,8 @@ def test_field_ask_home_is_not_encyclopedia() -> None:
     offline = (ROOT / "Packages/Maps/Sources/Maps/OfflineMapView.swift").read_text()
     if "invalidateVisibleCanvas" not in offline or "enqueueDuskRemap" not in offline:
         fail("dusk remap must leave draw and fill in off-main")
-    if root.count("tabItem") != 4:
-        fail("four tabs stay")
+    if root.count("tabItem") != 3:
+        fail("three tabs stay")
     if "push:" in tf or "pull_request:" in tf:
         fail("do not dispatch TestFlight")
     if pbx.count("CURRENT_PROJECT_VERSION = 47") < 2:

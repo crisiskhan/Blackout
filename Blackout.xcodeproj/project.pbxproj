@@ -23,7 +23,6 @@
 		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
 		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
 		F93D9F3002F2E7BA8A1E0DB5 /* BlackoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0EF801150577B69F1E6C2DC2 /* BlackoutCore */; };
-		F12F6D0E48F8AD3FE4382694 /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -120,12 +119,10 @@
 				2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */,
 				4820F4A3B3A71138B5126D3B /* Copy GuidePack into app bundle */,
 				B8719EE0E94A635E5A7667A7 /* Copy FieldPacks into app bundle */,
-				BC55DAC5CB72489762A721EE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				443C676FB48EC5BF3B5BED25 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				466304068CF247FDBD3B915E /* Blackout */,
@@ -330,39 +327,6 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		BC55DAC5CB72489762A721EE /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				F12F6D0E48F8AD3FE4382694 /* BlackoutWidgets.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
-/* Begin PBXContainerItemProxy section */
-		3F19E977FE6399992DCB2876 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 59601E391B529B07AE11313D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4A33CE8067C626636E3DE224;
-			remoteInfo = BlackoutWidgets;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXTargetDependency section */
-		443C676FB48EC5BF3B5BED25 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4A33CE8067C626636E3DE224 /* BlackoutWidgets */;
-			targetProxy = 3F19E977FE6399992DCB2876 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
-
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -458,7 +422,7 @@
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
 					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.";
-					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					INFOPLIST_KEY_NSSupportsLiveActivities = NO;
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -521,7 +485,7 @@
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.";
 					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.";
-					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					INFOPLIST_KEY_NSSupportsLiveActivities = NO;
 					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;

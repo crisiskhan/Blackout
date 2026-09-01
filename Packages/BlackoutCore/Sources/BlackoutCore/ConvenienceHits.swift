@@ -242,8 +242,11 @@ public enum MapTorchPolicy {
     public static let showsOnCriticalShell = false
     public static let envelopeKind: PayloadKind? = nil
 
+    public static let defaultOn = false
+
     public static func showsControl(hasTorch: Bool) -> Bool {
-        hasTorch
+        _ = hasTorch
+        return defaultOn
     }
 }
 
@@ -286,19 +289,24 @@ public struct ActionButtonHintPolicy: Equatable, Sendable {
 }
 
 public enum LiveActivityPolicy {
+    public static let enabled = false
+    public static let dynamicIslandSOS = false
+
     public static func shouldBeActive(
         partyCode: String?,
         inboundPing: LatestInboundPing?,
         now: Date = Date()
     ) -> Bool {
-        if PartyCode.isValid(partyCode) { return true }
-        guard let inboundPing else { return false }
-        return inboundPing.isOpen(at: now) && FieldPing.holdsMapChrome(inboundPing.ping)
+        _ = partyCode
+        _ = inboundPing
+        _ = now
+        return enabled
     }
 
-    /// New-binary first process must not read `Activity.activities` or `request`.
+    /// Crisis 21:41: no Live Activity / Dynamic Island SOS.
     public static func shouldTouchActivityKit(newBinaryLaunch: Bool) -> Bool {
-        !newBinaryLaunch
+        _ = newBinaryLaunch
+        return enabled
     }
 }
 

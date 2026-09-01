@@ -2,7 +2,7 @@ import Foundation
 
 /// Chrome contract. SOS is a RootView sibling so tab switches do not remount the 88pt disk.
 public enum RootChromeLock {
-    public static let tabCount = 4
+    public static let tabCount = 3
     public static let sosOverlayIsInsideTabView = false
     public static let sosIsRootViewSibling = true
     public static let sosPlacement = "RootView.ZStack.sibling"
@@ -13,9 +13,13 @@ public enum RootChromeLock {
     public static let pttIgnoresBottomSafeArea = false
     /// Only flag that unmounts Map / Comms / Field / Expedition.
     public static let chromeCollapseFlag = "battery.isCritical"
-    /// DS §10.1 first-run pack sheet is dead. Cold launch is the in-app unlock gate.
+    /// DS §10.1 first-run pack sheet is dead. Cold launch is live Map.
     public static let autoPresentsFirstOpenPackSheet = false
     public static let coldLaunchDestination = LaunchLock.destination
+    public static let expeditionIsTab = false
+    /// 2% SOS-only shell stays in the tree for later. Do not collapse on cold launch.
+    public static let sosOnlyCollapseOnColdLaunch = false
+    public static let liveActivitySOSEnabled = false
 
     /// Hold-twin cover may mount SOSFab. The idle lock frame must not.
     public static func sosOverlayMounts(isUnlocked: Bool, coverRequested: Bool) -> Bool {
@@ -31,10 +35,10 @@ public enum RootChromeLock {
 
 /// First-open lock chrome. SwiftUI slider + lockup Image emblem. Not a full-screen still.
 public enum LaunchLock {
-    public static let destination = "unlock"
+    public static let destination = "map"
     public static let usesBitmapLockUI = false
     public static let usesFullScreenLockImage = false
-    public static let usesLockupImage = true
+    public static let usesLockupImage = false
     public static let metalRingIsSwiftUI = false
     public static let sliderHasSOSTwin = true
     public static let sosTwinIsMapFAB = false
@@ -78,7 +82,9 @@ public enum LaunchLock {
     }
 
     public static func showsLockGate(isUnlocked: Bool, sceneActive: Bool) -> Bool {
-        !isUnlocked && sceneActive
+        _ = isUnlocked
+        _ = sceneActive
+        return false
     }
 }
 
@@ -94,7 +100,9 @@ public enum SceneLockPolicy {
 
     /// Lock Image / Metal / SOS cover paint only on a live, locked scene.
     public static func showsLockGate(isUnlocked: Bool, phase: Phase) -> Bool {
-        !isUnlocked && phase == .active
+        _ = isUnlocked
+        _ = phase
+        return false
     }
 
     /// lock() is never applied in the phase handler itself.
@@ -114,7 +122,9 @@ public enum SceneLockPolicy {
 
     /// Relock mounts MetalRingLockup on the next live scene only.
     public static func shouldRelockOnActive(pendingTrueLeave: Bool, systemCoverPresented: Bool) -> Bool {
-        pendingTrueLeave && !systemCoverPresented
+        _ = pendingTrueLeave
+        _ = systemCoverPresented
+        return false
     }
 
     public static func isSystemCover(_ name: String) -> Bool {

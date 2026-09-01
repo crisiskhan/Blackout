@@ -109,7 +109,7 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertFalse(SOSConfirm.autoDials911)
         XCTAssertFalse(SOSConfirm.autoInvokesSystemEmergencySOS)
         XCTAssertEqual(SOSConfirm.emergencyTel, "tel:911")
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
     }
 
     func testStrobeOrCallSendsMeshKindSOSWhenPeersExist() {
@@ -186,11 +186,11 @@ final class SOSConfirmTests: XCTestCase {
     }
 
     func testColdLaunchLandsOnUnlockNotArmedOrBitmap() {
-        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "unlock")
-        XCTAssertEqual(LaunchLock.destination, "unlock")
+        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "map")
+        XCTAssertEqual(LaunchLock.destination, "map")
         XCTAssertFalse(LaunchLock.usesBitmapLockUI)
         XCTAssertFalse(LaunchLock.usesFullScreenLockImage)
-        XCTAssertTrue(LaunchLock.usesLockupImage)
+        XCTAssertFalse(LaunchLock.usesLockupImage)
         XCTAssertFalse(LaunchLock.metalRingIsSwiftUI)
         XCTAssertTrue(LaunchLock.sliderHasSOSTwin)
         XCTAssertTrue(LaunchLock.handleIsMetal)
@@ -219,7 +219,7 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertTrue(LaunchLock.parksLiveActivityOnBackground)
         XCTAssertFalse(LaunchLock.startsHardwareWhenSceneInactive)
         XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
-        XCTAssertTrue(RootChromeLock.showsLockGate(isUnlocked: false, sceneActive: true))
+        XCTAssertFalse(RootChromeLock.showsLockGate(isUnlocked: false, sceneActive: true))
         XCTAssertFalse(RootChromeLock.showsLockGate(isUnlocked: false, sceneActive: false))
         XCTAssertFalse(RootChromeLock.showsLockGate(isUnlocked: true, sceneActive: true))
         XCTAssertFalse(RootChromeLock.showsLockGate(isUnlocked: true, sceneActive: false))
@@ -231,9 +231,9 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertTrue(RootChromeLock.sosOverlayMounts(isUnlocked: false, coverRequested: true))
         XCTAssertTrue(RootChromeLock.sosOverlayMounts(isUnlocked: true, coverRequested: false))
         XCTAssertFalse(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: true))
-        XCTAssertTrue(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: false))
+        XCTAssertFalse(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: false))
         XCTAssertFalse(SOSConfirm.autoDials911)
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertEqual(BrandChromeLock.lockupMaxPoint, 280)
     }
@@ -244,7 +244,7 @@ final class SOSConfirmTests: XCTestCase {
         XCTAssertFalse(SceneLockPolicy.shouldLockNow(phase: .active))
         XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .background))
         XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .inactive))
-        XCTAssertTrue(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .active))
+        XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: false, phase: .active))
         XCTAssertFalse(SceneLockPolicy.showsLockGate(isUnlocked: true, phase: .active))
         XCTAssertTrue(SceneLockPolicy.shouldPark(phase: .background))
         XCTAssertTrue(SceneLockPolicy.shouldPark(phase: .inactive))
@@ -275,7 +275,7 @@ final class SOSConfirmTests: XCTestCase {
     func testTrueLeaveRelocksOnlyOnNextActive() {
         XCTAssertTrue(SceneLockPolicy.pendingTrueLeave(phase: .background, systemCoverPresented: false))
         XCTAssertFalse(SceneLockPolicy.pendingTrueLeave(phase: .inactive, systemCoverPresented: false))
-        XCTAssertTrue(SceneLockPolicy.shouldRelockOnActive(
+        XCTAssertFalse(SceneLockPolicy.shouldRelockOnActive(
             pendingTrueLeave: true,
             systemCoverPresented: false
         ))

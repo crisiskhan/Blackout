@@ -167,7 +167,7 @@ final class LocalIdentityTests: XCTestCase {
     func testSOSOverlayIsNotInsideTabView() {
         XCTAssertFalse(RootChromeLock.sosOverlayIsInsideTabView)
         XCTAssertTrue(RootChromeLock.sosIsRootViewSibling)
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
         XCTAssertEqual(RootChromeLock.chromeCollapseFlag, "battery.isCritical")
         XCTAssertEqual(RootChromeLock.sosPlacement, "RootView.ZStack.sibling")
         XCTAssertFalse(RootChromeLock.autoPresentsFirstOpenPackSheet)

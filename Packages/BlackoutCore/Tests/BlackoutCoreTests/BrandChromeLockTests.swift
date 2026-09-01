@@ -9,7 +9,7 @@ final class BrandChromeLockTests: XCTestCase {
         XCTAssertEqual(BrandChromeLock.lockupMaxPoint, 280)
         XCTAssertFalse(BrandChromeLock.redEyeOIsTemplate)
         XCTAssertTrue(BrandChromeLock.usesLockupInApp)
-        XCTAssertTrue(LaunchLock.usesLockupImage)
+        XCTAssertFalse(LaunchLock.usesLockupImage)
         XCTAssertFalse(BrandChromeLock.typesetsBlackoutInSFPro)
         XCTAssertFalse(BrandChromeLock.substitutesSFSymbolForO)
     }
@@ -21,7 +21,7 @@ final class BrandChromeLockTests: XCTestCase {
         XCTAssertFalse(BrandChromeLock.splashHasEmblem)
         XCTAssertFalse(BrandChromeLock.splashHasLockup)
         XCTAssertFalse(BrandChromeLock.splashUsesStandaloneRedEyeO)
-        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "unlock")
+        XCTAssertEqual(RootChromeLock.coldLaunchDestination, "map")
         XCTAssertFalse(LaunchLock.coldLaunchShowsSplash)
         XCTAssertFalse(LaunchLock.usesBitmapLockUI)
     }

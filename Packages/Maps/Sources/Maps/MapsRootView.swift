@@ -42,11 +42,11 @@ public struct MapsRootView: View {
     @State private var centerToken = 0
     @State private var headingUp = UserDefaults.standard.bool(forKey: BlackoutKeys.radarHeadingUp)
     @State private var sweepAudio = UserDefaults.standard.bool(forKey: BlackoutKeys.radarSweepAudio)
-    @State private var showViewshed = UserDefaults.standard.bool(forKey: BlackoutKeys.mapViewshed)
-    @State private var showSlope = UserDefaults.standard.bool(forKey: BlackoutKeys.mapSlope)
+    @State private var showViewshed = MapChromeLock.initsViewshedOnLaunch
+    @State private var showSlope = MapChromeLock.initsSlopeOnLaunch
     @State private var selectedPeer: RadarBlip?
-    @State private var showLiDAR = false
-    @State private var showLayers = false
+    @State private var showLiDAR = MapChromeLock.initsLiDAROnLaunch
+    @State private var showSatellite = MapChromeLock.aerialOverlayDefaultOn
     @State private var showSearchHits = false
     @State private var showSearchDropdown = false
     @State private var searchPickConsumed = false
@@ -128,8 +128,6 @@ public struct MapsRootView: View {
     }
 
     private var sosOnly: Bool { battery.isCritical }
-    private var extremeSaver: Bool { battery.isExtremeSaver }
-    private var extrasOn: Bool { !sosOnly && !extremeSaver }
     private var peers: [RadarBlip] { roster.radarBlips(selfFix: location.navigationFix) }
     private var locationDenied: Bool {
         location.authorization == .denied || location.authorization == .restricted
@@ -165,7 +163,6 @@ public struct MapsRootView: View {
         externalSheetOpen
             || sosCoverOpen
             || tool != nil
-            || showLayers
             || showSearchHits
             || selectedPOI != nil
             || showLiDAR
@@ -228,7 +225,6 @@ public struct MapsRootView: View {
                 if critical {
                     tool = nil
                     showLiDAR = false
-                    showLayers = false
                     selectedPeer = nil
                     navigate.end()
                     compass.end()
@@ -243,7 +239,6 @@ public struct MapsRootView: View {
             holdsChrome: holdsChrome,
             onAppearAction: {
                 resolvePaintPack()
-                refreshTerrain()
                 refreshGuidance()
                 applyChrome {
                     $0.reduceMotion = reduceMotion
@@ -276,7 +271,6 @@ public struct MapsRootView: View {
     private var mapWithSheets: some View {
         mapRoot
             .sheet(item: $tool, content: toolSheet)
-            .sheet(isPresented: $showLayers, content: layersSheet)
             .sheet(isPresented: $showSearchHits, content: packSearchHitsSheet)
             .sheet(item: $selectedPOI, content: poiNameSheet)
             .sheet(item: $selectedPeer, content: peerSheet)
@@ -374,27 +368,6 @@ public struct MapsRootView: View {
         .presentationDetents([.medium, .large])
     }
 
-    private func layersSheet() -> some View {
-        MapLayersSheet(
-            showStreets: $showStreets,
-            showContours: $showTopoTiles,
-            showTrails: $showTrails,
-            extrasOn: extrasOn,
-            hasRouting: packService.routing != nil,
-            onToggleStreets: {
-                UserDefaults.standard.set(showStreets, forKey: BlackoutKeys.mapStreets)
-            },
-            onToggleContours: {
-                UserDefaults.standard.set(showTopoTiles, forKey: BlackoutKeys.mapTopoTiles)
-            },
-            onToggleTrails: {
-                UserDefaults.standard.set(showTrails, forKey: BlackoutKeys.mapTrails)
-            }
-        )
-        .presentationDetents([.medium])
-        .preferredColorScheme(.dark)
-    }
-
     private func poiNameSheet(_ poi: RoutingPOI) -> some View {
         MapPOINameSheet(name: poi.name, kind: poi.kind)
             .presentationDetents([.height(120)])
@@ -476,7 +449,7 @@ public struct MapsRootView: View {
             routing: packService.routing,
             routeLine: navigate.routePolyline,
             destination: navigate.destination ?? compass.lockCoordinate,
-            showPackTiles: MapChromeLock.defaultPaintIsDuskAerial,
+            showPackTiles: showSatellite,
             showStreets: showStreets,
             showTopoTiles: showTopoTiles,
             showTrails: showTrails,
@@ -792,13 +765,13 @@ public struct MapsRootView: View {
                         )
                     ) > 0
                 )
-            MapHUDChip("Layers", systemName: "square.3.layers.3d") {
-                noteMapActivity()
-                showLayers = true
-            }
             MapHUDChip("Packs", systemName: "shippingbox") {
                 noteMapActivity()
                 onOpenFieldPacks?()
+            }
+            MapHUDChip("Satellite", systemName: "globe") {
+                noteMapActivity()
+                showSatellite.toggle()
             }
         }
     }
@@ -937,7 +910,6 @@ public struct MapsRootView: View {
     private func pickFound(_ hit: PackSearchHit) {
         searchPickConsumed = true
         tool = nil
-        showLayers = false
         dismissSearchResults()
         pinnedToPackCoverage = false
         let origin = originCoordinate
@@ -1436,69 +1408,6 @@ struct MapPOINameSheet: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(BlackoutDS.Surface.raised)
-    }
-}
-
-struct MapLayersSheet: View {
-    @Binding var showStreets: Bool
-    @Binding var showContours: Bool
-    @Binding var showTrails: Bool
-    var extrasOn: Bool
-    var hasRouting: Bool
-    var onToggleStreets: () -> Void
-    var onToggleContours: () -> Void
-    var onToggleTrails: () -> Void
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ScreenHeader("Layers")
-                    layerToggle("Streets", on: $showStreets, enabled: extrasOn && hasRouting, persist: onToggleStreets)
-                    layerToggle("Contours", on: $showContours, enabled: extrasOn, persist: onToggleContours)
-                    layerToggle("Trails", on: $showTrails, enabled: extrasOn && hasRouting, persist: onToggleTrails)
-                }
-                .padding(20)
-            }
-            .background(BlackoutDS.Surface.base.ignoresSafeArea())
-            .navigationTitle("Layers")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-
-    private func layerToggle(
-        _ title: String,
-        on: Binding<Bool>,
-        enabled: Bool,
-        persist: @escaping () -> Void
-    ) -> some View {
-        Button {
-            guard enabled else { return }
-            on.wrappedValue.toggle()
-            persist()
-        } label: {
-            HStack {
-                Text(title)
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(enabled ? BlackoutDS.Silver.bright : BlackoutDS.Silver.steel)
-                Spacer()
-                Text(on.wrappedValue ? "On" : "Off")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(on.wrappedValue && enabled ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.mid)
-            }
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity)
-            .frame(height: BlackoutDS.Hit.md)
-            .background(BlackoutDS.Surface.raised.opacity(0.82))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.55)
     }
 }
 

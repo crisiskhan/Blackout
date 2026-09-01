@@ -3,7 +3,7 @@ import Foundation
 /// Signed-off Map chrome. Mocks are SoT. Device-32 slab stack is the fail.
 public enum MapChromeLock {
     public static let surface = "ZStack.fullBleed"
-    public static let tabCount = 4
+    public static let tabCount = 3
     public static let mapIsCroppedPage = false
 
     public static let chipPaintedHeight: Double = 56
@@ -13,7 +13,20 @@ public enum MapChromeLock {
     public static let chipHitSlopInset: Double = 4
     public static let chipHitIsPainted = false
     public static let chipHitIsLayoutMinHeight = false
-    public static let chipTitles = ["Recenter", "Layers", "Packs"]
+    public static let chipTitles = ["Recenter", "Packs", "Satellite"]
+    public static let layersChipOnMap = false
+    public static let satelliteChipOnMap = true
+    public static let hideStrangerBlips = true
+    public static let strangerRadarDefaultOn = false
+    public static let initsViewshedOnLaunch = false
+    public static let initsLiDAROnLaunch = false
+    public static let initsManDownOnLaunch = false
+    public static let initsSlopeOnLaunch = false
+    public static let killsDuskGradePipeline = true
+    public static let actionButtonDefaultOn = false
+    public static let backTapDefaultOn = false
+    public static let controlCenterDefaultOn = false
+    public static let flashlightDefaultOn = false
     public static let chipRowIncludesLight = false
     public static let showsAddressSearchOnMap = true
     public static let showsSearchHitsOnMap = false
@@ -91,24 +104,36 @@ public enum MapChromeLock {
     public static let lockHUDIsFullWidthBar = false
     public static let lockHUDPaintedHeight: Double = 28
 
-    /// Crisis 2026-08-31: one dusk aerial. USGS/streets/topo are Layers, default off.
-    public static let layersTitles = ["Streets", "Contours", "Trails"]
-    public static let defaultPaintIsDuskAerial = true
+    /// Crisis 2026-08-31 21:30: Mapbox Standard LOOK on pack vectors. No Mapbox SDK.
+    public static let daylightStreetsAreBase = true
+    public static let layersTitles: [String] = []
+    public static let defaultPaintIsDuskAerial = false
+    public static let aerialOverlayDefaultOn = false
     public static let defaultPaintsLabeledUSGS = false
     public static let defaultPaintsCountyNames = false
     public static let defaultPaintsHighwayShields = false
-    public static let remapsLabeledPackTilesToDuskAerial = true
+    public static let remapsLabeledPackTilesToDuskAerial = false
     public static let packTilesLayerDefaultOn = false
-    public static let streetsLayerDefaultOn = false
+    public static let streetsLayerDefaultOn = true
     public static let contoursLayerDefaultOn = false
     public static let trailsLayerDefaultOn = false
     public static let topoLayerDefaultOn = false
+    public static let recedesBasemapWhenRouteInPlay = true
+    /// Paper fill under daylight streets. Not Surface.void dusk.
+    public static let daylightLandRed: Double = 0.93
+    public static let daylightLandGreen: Double = 0.94
+    public static let daylightLandBlue: Double = 0.91
+
+    public static func basemapAlpha(routeInPlay: Bool) -> Double {
+        if recedesBasemapWhenRouteInPlay, routeInPlay { return 0.42 }
+        return 1
+    }
     public static let pinsDefaultOn = true
     /// Last-launch UserDefaults must not turn streets/topo on. Session toggle only.
     public static let streetsTopoReadPersistedOnLaunch = false
     /// Pack rasters already print county/street names. Do not add a second label pass.
     public static let paintsPackLabelOverlayWhenTopoOff = false
-    public static let duskGradesPackTiles = true
+    public static let duskGradesPackTiles = false
     /// Device 39 FAIL: multiply + 0.42 void crushed pack rasters to a black well.
     /// Overlay-only wash (38 path) keeps USGS/terrain visible under dusk.
     public static let duskUsesMultiply = false

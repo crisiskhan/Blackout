@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Roster plate: 56h callsign, party Create/Join, then DRANK / ATE / I AM NOT OK.
 /// I AM NOT OK shares Map chip state. Edit lives here only.
-struct PartyVitalsPlate: View {
+public struct PartyVitalsPlate: View {
     @Bindable var roster: PartyRoster
     var fix: LocationFix?
     var onBroadcast: (Envelope) -> Void
@@ -12,7 +12,7 @@ struct PartyVitalsPlate: View {
     var onCreateParty: () -> Void
     var onJoinParty: (String) -> Bool
     var onLeaveParty: () -> Void
-    var onStartFieldMode: (FieldJobMode) -> Void = { _ in }
+    var onStartFieldMode: (FieldJobMode) -> Void
 
     @State private var callsignDraft = ""
     @State private var joinDraft = ""
@@ -23,27 +23,49 @@ struct PartyVitalsPlate: View {
     @State private var nfc = PartyNFCCoordinator()
     @State private var nfcCopy: String?
 
-    var body: some View {
+    public init(
+        roster: PartyRoster,
+        fix: LocationFix?,
+        onBroadcast: @escaping (Envelope) -> Void,
+        onCommitCallsign: @escaping (String) -> Void,
+        onCreateParty: @escaping () -> Void,
+        onJoinParty: @escaping (String) -> Bool,
+        onLeaveParty: @escaping () -> Void,
+        onStartFieldMode: @escaping (FieldJobMode) -> Void = { _ in }
+    ) {
+        self.roster = roster
+        self.fix = fix
+        self.onBroadcast = onBroadcast
+        self.onCommitCallsign = onCommitCallsign
+        self.onCreateParty = onCreateParty
+        self.onJoinParty = onJoinParty
+        self.onLeaveParty = onLeaveParty
+        self.onStartFieldMode = onStartFieldMode
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             identityBlock
-            metalButton(
-                title: PartyVitalsCopy.drank,
-                action: .drank,
-                pip: roster.selfVitals.drankLatched ? .ok : nil,
-                warnLabel: false
-            )
-            metalButton(
-                title: PartyVitalsCopy.ate,
-                action: .ate,
-                pip: roster.selfVitals.ateLatched ? .ok : nil,
-                warnLabel: false
-            )
-            metalButton(
-                title: PartyVitalsCopy.notOK,
-                action: .notOK,
-                pip: roster.isRed ? .red : nil,
-                warnLabel: roster.isRed
-            )
+            if roster.identity.partyCode != nil {
+                metalButton(
+                    title: PartyVitalsCopy.drank,
+                    action: .drank,
+                    pip: roster.selfVitals.drankLatched ? .ok : nil,
+                    warnLabel: false
+                )
+                metalButton(
+                    title: PartyVitalsCopy.ate,
+                    action: .ate,
+                    pip: roster.selfVitals.ateLatched ? .ok : nil,
+                    warnLabel: false
+                )
+                metalButton(
+                    title: PartyVitalsCopy.notOK,
+                    action: .notOK,
+                    pip: roster.isRed ? .red : nil,
+                    warnLabel: roster.isRed
+                )
+            }
             memberList
         }
         .onAppear {

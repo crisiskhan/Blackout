@@ -485,7 +485,11 @@ public final class PartyRoster {
                 longitude: lon
             )
         }
-        return [selfDot] + members
+        let dots = [selfDot] + members
+        if MapChromeLock.hideStrangerBlips {
+            return dots.filter { $0.kind != .stranger }
+        }
+        return dots
     }
 
     @discardableResult

@@ -290,7 +290,7 @@ final class GuideOfflineTests: XCTestCase {
     }
 
     func testChromeAndTabsStayLocked() {
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertFalse(FieldJobMode.replacesSOS)
     }
@@ -341,7 +341,7 @@ final class GuideOfflineTests: XCTestCase {
         XCTAssertTrue(FieldAskHomeLock.speakIsSmallIcon)
         XCTAssertFalse(FieldAskHomeLock.loadsGuidePackOnFieldAppear)
         XCTAssertTrue(FieldAskHomeLock.loadsGuidePackOnAsk)
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
         XCTAssertEqual(SOSChrome.fab, 88)
         XCTAssertTrue(MapChromeLock.fieldPlateUsesSafeArea)
         XCTAssertEqual(MapChromeLock.fieldContentHorizontalInset, 20)

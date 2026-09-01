@@ -2,6 +2,7 @@ import BlackoutCore
 import BlackoutLocation
 import BlackoutMesh
 import DesignSystem
+import Expeditions
 import Maps
 import Messaging
 import SwiftUI
@@ -20,8 +21,13 @@ struct CommsRootView: View {
     var mesh: MeshFacade
     @Bindable var roster: PartyRoster
     @Bindable var location: LocationService
-    @Bindable var ptt: LivePTTHub
-    var onOpenExpedition: () -> Void
+    @Bindable     var ptt: LivePTTHub
+    var onBroadcast: (Envelope) -> Void
+    var onCommitCallsign: (String) -> Void
+    var onCreateParty: () -> Void
+    var onJoinParty: (String) -> Bool
+    var onLeaveParty: () -> Void
+    var onStartFieldMode: (FieldJobMode) -> Void
     var onNavigatePing: (FieldPingNav) -> Void
     var onPingReplied: (() -> Void)?
     @Binding var pendingDM: BlackoutID?
@@ -65,7 +71,7 @@ struct CommsRootView: View {
                         mesh: mesh,
                         roster: roster,
                         locationFix: location.navigationFix ?? location.lastKnown,
-                        onOpenExpedition: onOpenExpedition,
+                        onOpenExpedition: { segment = .roster },
                         onNavigatePing: onNavigatePing,
                         onPingReplied: onPingReplied,
                         pendingDM: $pendingDM
@@ -73,14 +79,20 @@ struct CommsRootView: View {
                 case .radar:
                     commsRadar
                 case .roster:
-                    CommsRosterView(
-                        roster: roster,
-                        meshRunning: mesh.isRunning,
-                        onMessage: { id in
-                            pendingDM = id
-                            segment = .threads
-                        }
-                    )
+                    ScrollView {
+                        PartyVitalsPlate(
+                            roster: roster,
+                            fix: location.navigationFix ?? location.lastKnown,
+                            onBroadcast: onBroadcast,
+                            onCommitCallsign: onCommitCallsign,
+                            onCreateParty: onCreateParty,
+                            onJoinParty: onJoinParty,
+                            onLeaveParty: onLeaveParty,
+                            onStartFieldMode: onStartFieldMode
+                        )
+                        .padding(16)
+                    }
+                    .background(BlackoutDS.Surface.base)
                 }
             }
             pttOverlay

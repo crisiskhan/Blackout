@@ -169,11 +169,13 @@ final class ConvenienceHitsTests: XCTestCase {
         )
         XCTAssertTrue(inbound.keepsScreenAwake())
         XCTAssertTrue(inbound.holdsMapChrome())
-        XCTAssertTrue(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: inbound))
+        XCTAssertFalse(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: inbound))
         XCTAssertFalse(LiveActivityPolicy.shouldBeActive(partyCode: nil, inboundPing: nil))
         XCTAssertFalse(LaunchLock.startsLiveActivityBeforeUnlock)
+        XCTAssertFalse(LiveActivityPolicy.enabled)
+        XCTAssertFalse(LiveActivityPolicy.dynamicIslandSOS)
         XCTAssertFalse(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: true))
-        XCTAssertTrue(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: false))
+        XCTAssertFalse(LiveActivityPolicy.shouldTouchActivityKit(newBinaryLaunch: false))
     }
 
     func testBLACKOUTCoordStringMatchesSOSFormat() {
@@ -215,7 +217,8 @@ final class ConvenienceHitsTests: XCTestCase {
         XCTAssertNil(MapTorchPolicy.envelopeKind)
         XCTAssertNotEqual(MapTorchPolicy.envelopeKind, .sosAlert)
         XCTAssertNotEqual(MapTorchPolicy.envelopeKind, SOSConfirm.meshKind)
-        XCTAssertTrue(MapTorchPolicy.showsControl(hasTorch: true))
+        XCTAssertFalse(MapTorchPolicy.defaultOn)
+        XCTAssertFalse(MapTorchPolicy.showsControl(hasTorch: true))
         XCTAssertFalse(MapTorchPolicy.showsControl(hasTorch: false))
     }
 

@@ -5,8 +5,8 @@ final class MapChromeLockTests: XCTestCase {
     func testMapIsFullBleedZStackNotACroppedPage() {
         XCTAssertEqual(MapChromeLock.surface, "ZStack.fullBleed")
         XCTAssertFalse(MapChromeLock.mapIsCroppedPage)
-        XCTAssertEqual(MapChromeLock.tabCount, 4)
-        XCTAssertEqual(RootChromeLock.tabCount, 4)
+        XCTAssertEqual(MapChromeLock.tabCount, 3)
+        XCTAssertEqual(RootChromeLock.tabCount, 3)
     }
 
     func testChipsAre56PaintedWithInvisible64SlopNoLight() {
@@ -17,7 +17,11 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertEqual(MapChromeLock.chipHitSlopInset, 4)
         XCTAssertFalse(MapChromeLock.chipHitIsPainted)
         XCTAssertFalse(MapChromeLock.chipHitIsLayoutMinHeight)
-        XCTAssertEqual(MapChromeLock.chipTitles, ["Recenter", "Layers", "Packs"])
+        XCTAssertEqual(MapChromeLock.chipTitles, ["Recenter", "Packs", "Satellite"])
+        XCTAssertFalse(MapChromeLock.layersChipOnMap)
+        XCTAssertTrue(MapChromeLock.satelliteChipOnMap)
+        XCTAssertTrue(MapChromeLock.hideStrangerBlips)
+        XCTAssertFalse(MapChromeLock.strangerRadarDefaultOn)
         XCTAssertFalse(MapChromeLock.chipRowIncludesLight)
         XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.chipHitSlop)
         XCTAssertLessThan(MapChromeLock.chipPaintedHeight, MapChromeLock.sosDiameter)
@@ -101,13 +105,25 @@ final class MapChromeLockTests: XCTestCase {
         XCTAssertFalse(MapChromeLock.lockHUDIsFullWidthBar)
         XCTAssertEqual(MapChromeLock.lockHUDPaintedHeight, 28)
         XCTAssertLessThan(MapChromeLock.lockHUDPaintedHeight, MapChromeLock.chipPaintedHeight)
-        XCTAssertEqual(MapChromeLock.layersTitles, ["Streets", "Contours", "Trails"])
-        XCTAssertFalse(MapChromeLock.streetsLayerDefaultOn)
+        XCTAssertEqual(MapChromeLock.layersTitles, [])
+        XCTAssertTrue(MapChromeLock.streetsLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.contoursLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.trailsLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.topoLayerDefaultOn)
-        XCTAssertTrue(MapChromeLock.duskGradesPackTiles)
-        XCTAssertTrue(MapChromeLock.defaultPaintIsDuskAerial)
+        XCTAssertFalse(MapChromeLock.duskGradesPackTiles)
+        XCTAssertFalse(MapChromeLock.defaultPaintIsDuskAerial)
+        XCTAssertTrue(MapChromeLock.daylightStreetsAreBase)
+        XCTAssertTrue(MapChromeLock.killsDuskGradePipeline)
+        XCTAssertFalse(MapChromeLock.aerialOverlayDefaultOn)
+        XCTAssertFalse(MapChromeLock.initsViewshedOnLaunch)
+        XCTAssertFalse(MapChromeLock.initsLiDAROnLaunch)
+        XCTAssertFalse(MapChromeLock.initsManDownOnLaunch)
+        XCTAssertFalse(MapChromeLock.initsSlopeOnLaunch)
+        XCTAssertFalse(RootChromeLock.sosOnlyCollapseOnColdLaunch)
+        XCTAssertFalse(RootChromeLock.liveActivitySOSEnabled)
+        XCTAssertFalse(RootChromeLock.expeditionIsTab)
+        XCTAssertEqual(MapChromeLock.basemapAlpha(routeInPlay: false), 1)
+        XCTAssertEqual(MapChromeLock.basemapAlpha(routeInPlay: true), 0.42)
         XCTAssertFalse(MapChromeLock.defaultPaintsLabeledUSGS)
         XCTAssertFalse(MapChromeLock.defaultPaintsCountyNames)
         XCTAssertFalse(MapChromeLock.defaultPaintsHighwayShields)
@@ -333,7 +349,7 @@ final class MapChromeLockTests: XCTestCase {
     }
 
     func testStreetsTopoStayOffUnlessToggledThisSession() {
-        XCTAssertFalse(MapChromeLock.streetsLayerDefaultOn)
+        XCTAssertTrue(MapChromeLock.streetsLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.topoLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.contoursLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.trailsLayerDefaultOn)
@@ -345,12 +361,14 @@ final class MapChromeLockTests: XCTestCase {
     }
 
     func testDefaultPaintIsDuskAerialWithoutLabeledUSGS() {
-        XCTAssertTrue(MapChromeLock.defaultPaintIsDuskAerial)
+        XCTAssertFalse(MapChromeLock.defaultPaintIsDuskAerial)
+        XCTAssertTrue(MapChromeLock.daylightStreetsAreBase)
+        XCTAssertFalse(MapChromeLock.aerialOverlayDefaultOn)
         XCTAssertFalse(MapChromeLock.defaultPaintsLabeledUSGS)
         XCTAssertFalse(MapChromeLock.defaultPaintsCountyNames)
         XCTAssertFalse(MapChromeLock.defaultPaintsHighwayShields)
-        XCTAssertTrue(MapChromeLock.remapsLabeledPackTilesToDuskAerial)
-        XCTAssertEqual(MapChromeLock.layersTitles, ["Streets", "Contours", "Trails"])
+        XCTAssertFalse(MapChromeLock.remapsLabeledPackTilesToDuskAerial)
+        XCTAssertEqual(MapChromeLock.layersTitles, [])
         XCTAssertFalse(MapChromeLock.layersTitles.contains("Pack tiles"))
     }
 
@@ -372,10 +390,16 @@ final class MapChromeLockTests: XCTestCase {
     }
 
     func testFieldLayersStartOffExceptPins() {
-        XCTAssertFalse(MapChromeLock.streetsLayerDefaultOn)
+        XCTAssertTrue(MapChromeLock.streetsLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.contoursLayerDefaultOn)
         XCTAssertFalse(MapChromeLock.trailsLayerDefaultOn)
         XCTAssertTrue(MapChromeLock.pinsDefaultOn)
+        XCTAssertFalse(MapChromeLock.layersChipOnMap)
+        XCTAssertTrue(MapChromeLock.satelliteChipOnMap)
+        XCTAssertFalse(MapChromeLock.actionButtonDefaultOn)
+        XCTAssertFalse(MapChromeLock.backTapDefaultOn)
+        XCTAssertFalse(MapChromeLock.controlCenterDefaultOn)
+        XCTAssertFalse(MapChromeLock.flashlightDefaultOn)
     }
 
     func testDuskGradeDoesNotZeroTileLuminance() {

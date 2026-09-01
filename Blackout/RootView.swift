@@ -4,7 +4,6 @@ import BlackoutLocation
 import BlackoutMesh
 import BlackoutPacks
 import DesignSystem
-import Expeditions
 import Field
 import Maps
 import Messaging
@@ -22,12 +21,18 @@ enum AppDestination: String, Hashable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    static let tabs: [AppDestination] = [.map, .comms, .field]
+
+    static func resolved(_ dest: AppDestination) -> AppDestination {
+        dest == .expedition ? .map : dest
+    }
+
     var title: String {
         switch self {
         case .map: return "Map"
         case .comms: return "Comms"
         case .field: return "Field"
-        case .expedition: return "Expedition"
+        case .expedition: return "Map"
         }
     }
 
@@ -36,7 +41,7 @@ enum AppDestination: String, Hashable, CaseIterable, Identifiable {
         case .map: return MapChromeLock.mapTabSymbol
         case .comms: return "antenna.radiowaves.left.and.right"
         case .field: return "leaf"
-        case .expedition: return "flag"
+        case .expedition: return MapChromeLock.mapTabSymbol
         }
     }
 }
@@ -46,6 +51,7 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var destination: AppDestination = .map
     @State private var showSettings = false
+    @State private var showPacksSheet = false
     @State private var pendingDM: BlackoutID?
     @State private var pendingPingNav: FieldPingNav?
     @State private var pendingGuideJob: GuideMapJob?
@@ -73,14 +79,14 @@ struct RootView: View {
                     callsign: container.party.identity.callsign,
                     onFieldPacks: {
                         showSettings = false
-                        destination = .expedition
+                        showPacksSheet = true
                     }
                 )
                 .preferredColorScheme(.dark)
             }
             .onChange(of: scenePhase) { _, phase in
                 // container.lock.isUnlocked is applied inside applyScenePhase.
-                // Never lock() here — remounting MetalRingLockup off-scene is the 9:08 class.
+                // Never lock() here — remounting the lock gate off-scene is the 9:08 class.
                 container.applyScenePhase(
                     Self.lockPolicyPhase(phase),
                     systemCoverPresented: SystemCoverProbe.isPresented()
@@ -115,8 +121,25 @@ struct RootView: View {
             }
             .onOpenURL { url in
                 if let next = container.applyDeepLink(url) {
-                    destination = next
+                    destination = AppDestination.resolved(next)
                 }
+            }
+            .onChange(of: destination) { _, next in
+                let resolved = AppDestination.resolved(next)
+                if resolved != next { destination = resolved }
+            }
+            .sheet(isPresented: $showPacksSheet) {
+                NavigationStack {
+                    FieldPackCatalogList(
+                        store: container.packs,
+                        nearbyCount: container.mesh.nearbyPeerCount,
+                        onSendToPeer: { container.relayPack($0) }
+                    )
+                    .navigationTitle("Packs")
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+                .preferredColorScheme(.dark)
+                .presentationDetents([.medium, .large])
             }
             .onAppear {
                 guard container.lock.isUnlocked else { return }
@@ -156,19 +179,7 @@ struct RootView: View {
     private var rootStack: some View {
         ZStack {
             BlackoutDS.Surface.void.ignoresSafeArea()
-            if RootChromeLock.showsLockGate(
-                isUnlocked: container.lock.isUnlocked,
-                sceneActive: scenePhase == .active
-            ) {
-                LockGateView(lock: container.lock, onHoldSOS: {
-                    container.sosConfirmRequested = true
-                })
-            } else if container.lock.isUnlocked {
-                unlockedChrome
-            } else {
-                // Locked but inactive/background: do not remount lock Image or Map Metal.
-                BlackoutDS.Surface.void.ignoresSafeArea()
-            }
+            unlockedChrome
         }
     }
 
@@ -221,7 +232,7 @@ struct RootView: View {
     /// No TabView tabs, no iPad sidebar destinations, no gear overlay, no Settings sheet from this shell.
     @ViewBuilder
     private var chrome: some View {
-        if container.battery.isCritical {
+        if container.battery.isCritical, RootChromeLock.sosOnlyCollapseOnColdLaunch {
             CriticalSOSShell(container: container)
         } else if sizeClass == .regular {
             iPadSplit
@@ -274,9 +285,6 @@ struct RootView: View {
             fieldDestination
                 .tabItem { monochromeTab(AppDestination.field) }
                 .tag(AppDestination.field)
-            expeditionDestination
-                .tabItem { monochromeTab(AppDestination.expedition) }
-                .tag(AppDestination.expedition)
         }
         .toolbarBackground(BlackoutDS.Surface.raised, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
@@ -295,7 +303,7 @@ struct RootView: View {
     private var iPadSplit: some View {
         NavigationSplitView {
             List(selection: sidebarSelection) {
-                ForEach(AppDestination.allCases) { item in
+                ForEach(AppDestination.tabs) { item in
                     Label(item.title, systemImage: item.symbol)
                         .tag(item)
                 }
@@ -336,7 +344,7 @@ struct RootView: View {
         case .map: mapDestination
         case .comms: commsDestination
         case .field: fieldDestination
-        case .expedition: expeditionDestination
+        case .expedition: mapDestination
         }
     }
 
@@ -350,7 +358,7 @@ struct RootView: View {
             coverageRegions: container.packs.coverageRegions(bundled: container.pack.bundledRegion),
             installedPackRoots: container.packs.diskPackRoots,
             packReady: container.packs.readySnapshot,
-            onOpenFieldPacks: { destination = .expedition },
+            onOpenFieldPacks: { showPacksSheet = true },
             externalSheetOpen: showSettings,
             sosCoverOpen: container.sosCoverOpen,
             roster: container.party,
@@ -386,7 +394,15 @@ struct RootView: View {
             roster: container.party,
             location: container.location,
             ptt: container.ptt,
-            onOpenExpedition: { destination = .expedition },
+            onBroadcast: { container.sendPartyStatus($0) },
+            onCommitCallsign: { container.commitCallsign($0) },
+            onCreateParty: { container.createParty() },
+            onJoinParty: { container.joinParty($0) },
+            onLeaveParty: { container.leaveParty() },
+            onStartFieldMode: { mode in
+                container.startFieldMode(mode)
+                destination = .map
+            },
             onNavigatePing: { nav in
                 pendingPingNav = nav
                 destination = .map
@@ -421,45 +437,6 @@ struct RootView: View {
             },
             onOpenSettings: { showSettings = true }
         )
-    }
-
-    private var expeditionDestination: some View {
-        ExpeditionsRootView(
-            persistence: container.persistence,
-            location: container.location,
-            roster: container.party,
-            onBroadcast: { container.sendPartyStatus($0) },
-            onCommitCallsign: { container.commitCallsign($0) },
-            onCreateParty: { container.createParty() },
-            onJoinParty: { container.joinParty($0) },
-            onLeaveParty: { container.leaveParty() },
-            leaveBehindOn: container.leaveBehindRelay,
-            nightRed: container.nightRed,
-            onLeaveBehind: { container.setLeaveBehindRelay($0) },
-            onNightRed: { container.setNightRed($0) },
-            onStartFieldMode: { mode in
-                container.startFieldMode(mode)
-                destination = .map
-            }
-        ) {
-            FieldPackCatalogList(
-                store: container.packs,
-                nearbyCount: container.mesh.nearbyPeerCount,
-                onSendToPeer: { container.relayPack($0) }
-            )
-        }
-        .swiftUIToolbar {
-            if sizeClass != .regular {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                    .accessibilityLabel("Settings")
-                }
-            }
-        }
     }
 
     private var sosOverlay: some View {

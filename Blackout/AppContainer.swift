@@ -414,7 +414,9 @@ final class AppContainer {
         switch url.host {
         case "map": return .map
         case "comms": return .comms
-        default: return nil
+        case "field": return .field
+        case "expedition", "expeditions": return .map
+        default: return .map
         }
     }
 

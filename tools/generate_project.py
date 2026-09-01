@@ -279,7 +279,7 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                     "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.",
                     "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.",
                 "INFOPLIST_KEY_NFCReaderUsageDescription": "Blackout shares a local party code over NFC. No account. Deny still lets you type or scan the 4–8 code.",
-                "INFOPLIST_KEY_NSSupportsLiveActivities": "YES",
+                "INFOPLIST_KEY_NSSupportsLiveActivities": "NO",
                 "INFOPLIST_FILE": "Supporting/Blackout-Info.plist",
                 "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
                 "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
@@ -316,12 +316,9 @@ def xc_settings(is_target: bool, debug: bool) -> str:
 
 
 def generate_xcodeproj() -> None:
-    # BlackoutWidgets (Live Activity) is maintained in Blackout.xcodeproj/project.pbxproj.
-    # Re-add that target after a full regen. Keep Info.plist out of the
-    # BlackoutWidgets sync root and out of sync exceptions — Xcode 26 archive
-    # copies those onto the appex while ProcessInfoPlistFile writes
-    # Supporting/BlackoutWidgets-Info.plist. GENERATE_INFOPLIST_FILE = NO
-    # requires CFBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER) in Supporting/.
+    # Crisis 21:41: do not embed BlackoutWidgets.appex until Map is green.
+    # The leftover widget target may stay in pbxproj; the app target must not
+    # depend on it or copy it in Embed Foundation Extensions.
     ids = {
         "app_ref": oid("app_ref"),
         "sync": oid("sync_blackout"),

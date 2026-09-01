@@ -15,7 +15,7 @@ public final class AppLockService: AppLockServing {
 
     public init() {
         isEnabled = UserDefaults.standard.bool(forKey: Self.enabledKey)
-        isUnlocked = false
+        isUnlocked = true
     }
 
     public func unlockSession() {

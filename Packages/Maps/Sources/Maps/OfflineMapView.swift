@@ -570,8 +570,21 @@ final class TileCanvasLayer: UIView {
 
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
-        ctx.setFillColor(UIColor(BlackoutDS.Map.land).cgColor)
+        if MapChromeLock.daylightStreetsAreBase {
+            ctx.setFillColor(
+                UIColor(
+                    red: MapChromeLock.daylightLandRed,
+                    green: MapChromeLock.daylightLandGreen,
+                    blue: MapChromeLock.daylightLandBlue,
+                    alpha: 1
+                ).cgColor
+            )
+        } else {
+            ctx.setFillColor(UIColor(BlackoutDS.Map.land).cgColor)
+        }
         ctx.fill(rect)
+        let routeInPlay = routeLine.count >= 2 || destination != nil || !markPins.isEmpty
+        ctx.setAlpha(CGFloat(MapChromeLock.basemapAlpha(routeInPlay: routeInPlay)))
         let z = currentZoom()
         let factor = pow(2.0, Double(zMax - z))
         let tileSize = CGFloat(256.0 * factor)
@@ -584,7 +597,7 @@ final class TileCanvasLayer: UIView {
         let shift = zMax - z
         let worldX0 = x0 >> shift
         let worldY0 = y0 >> shift
-        if showPackTiles || MapChromeLock.defaultPaintIsDuskAerial {
+        if showPackTiles {
             for ty in minY...max(minY, maxY) {
                 for tx in minX...max(minX, maxX) {
                     let tileX = worldX0 + tx
@@ -614,6 +627,7 @@ final class TileCanvasLayer: UIView {
         if showStreets {
             drawStreets(in: ctx)
         }
+        ctx.setAlpha(1)
         drawRoute(in: ctx)
         if showStreets || MapChromeLock.paintsPackLabelOverlayWhenTopoOff {
             drawStreetNames(in: ctx)
@@ -718,10 +732,18 @@ final class TileCanvasLayer: UIView {
                 in: ctx
             )
         }
-        stroke(locals, color: UIColor(BlackoutDS.Silver.steel), width: pt(1), in: ctx)
-        stroke(arterials, color: UIColor(BlackoutDS.Silver.dim), width: pt(2), in: ctx)
-        stroke(highways, color: UIColor(BlackoutDS.Silver.steel), width: pt(5), in: ctx)
-        stroke(highways, color: UIColor(BlackoutDS.Silver.edge), width: pt(3), in: ctx)
+        if MapChromeLock.daylightStreetsAreBase {
+            stroke(locals, color: UIColor(white: 0.78, alpha: 1), width: pt(1.2), in: ctx)
+            stroke(arterials, color: UIColor(white: 1, alpha: 1), width: pt(3.2), in: ctx)
+            stroke(arterials, color: UIColor(white: 0.72, alpha: 1), width: pt(2), in: ctx)
+            stroke(highways, color: UIColor(white: 0.22, alpha: 1), width: pt(6), in: ctx)
+            stroke(highways, color: UIColor(red: 0.98, green: 0.84, blue: 0.42, alpha: 1), width: pt(3.5), in: ctx)
+        } else {
+            stroke(locals, color: UIColor(BlackoutDS.Silver.steel), width: pt(1), in: ctx)
+            stroke(arterials, color: UIColor(BlackoutDS.Silver.dim), width: pt(2), in: ctx)
+            stroke(highways, color: UIColor(BlackoutDS.Silver.steel), width: pt(5), in: ctx)
+            stroke(highways, color: UIColor(BlackoutDS.Silver.edge), width: pt(3), in: ctx)
+        }
     }
 
     private func drawRoute(in ctx: CGContext) {
