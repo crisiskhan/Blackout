@@ -565,17 +565,20 @@ jobs:
           path.write_text(out)
           print("CI-only pbxproj signing patch (not committed)")
           PY
-          # Write cleanup script + wire one-liner phase (quoted heredoc: no bash $ expand).
+          # Write cleanup script + wire one-liner phase (quoted heredoc).
           "$PYBIN" << 'PY'
           from pathlib import Path
           script = Path("ci_strip_appicon.sh")
           script.write_text(
               "#!/bin/sh\n"
               "set -e\n"
-              "APP=\"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\"\n"
-              "if [ -d \"$APP\" ]; then\n"
-              "  find \"$APP\" -maxdepth 1 -name \"AppIcon*.png\" -print -delete || true\n"
-              "  /usr/bin/xattr -cr \"$APP\" || true\n"
+              'APP="$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
+              'echo "CI AppIcon strip app=$APP"\n'
+              'if [ -d "$APP" ]; then\n'
+              '  find "$APP" -maxdepth 1 -name "AppIcon*.png" -print -delete || true\n'
+              '  /usr/bin/xattr -cr "$APP" || true\n'
+              '  /bin/chmod -R a-x "$APP" 2>/dev/null || true\n'
+              '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} +\n'
               "fi\n"
           )
           script.chmod(0o755)
@@ -584,42 +587,48 @@ jobs:
           text = path.read_text()
           phase_id = "C1A00001B007000000000001"
           note = "CI strip loose AppIcon before CodeSign"
-          if phase_id not in text:
-              # shellScript calls the file; SRCROOT with braces built without putting dollar-brace-brace in the workflow YAML
-              src = "$" + "{SRCROOT}/ci_strip_appicon.sh"
-              shell = '\\"' + src + '\\"\\n'
-              # Actually pbxproj wants: shellScript = dollar-SRCROOT/ci_strip_appicon.sh
-              shell_script_value = '"$SRCROOT/ci_strip_appicon.sh"\n'
+          if phase_id in text:
+              print("phase already present")
+          else:
               phase = (
-                  "\t\t" + phase_id + " /* " + note + " */ = {\n"
+                  f"\t\t{phase_id} /* {note} */ = {{\n"
                   "\t\t\tisa = PBXShellScriptBuildPhase;\n"
+                  "\t\t\talwaysOutOfDate = 1;\n"
                   "\t\t\tbuildActionMask = 2147483647;\n"
                   "\t\t\tfiles = (\n\t\t\t);\n"
                   "\t\t\tinputFileListPaths = (\n\t\t\t);\n"
                   "\t\t\tinputPaths = (\n\t\t\t);\n"
-                  "\t\t\tname = \"" + note + "\";\n"
+                  f'\t\t\tname = "{note}";\n'
                   "\t\t\toutputFileListPaths = (\n\t\t\t);\n"
                   "\t\t\toutputPaths = (\n\t\t\t);\n"
                   "\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
                   "\t\t\tshellPath = /bin/sh;\n"
-                  "\t\t\tshellScript = \"" + shell_script_value + "\";\n"
+                  # pbxproj: shellScript = "\"$SRCROOT/ci_strip_appicon.sh\"\n";
+                  '\t\t\tshellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";\n'
                   "\t\t\tshowEnvVarsInLog = 0;\n"
                   "\t\t};\n"
               )
-              text = text.replace(
-                  "/* Begin PBXShellScriptBuildPhase section */\n",
-                  "/* Begin PBXShellScriptBuildPhase section */\n" + phase,
-                  1,
-              )
+              marker = "/* Begin PBXShellScriptBuildPhase section */\n"
+              if marker not in text:
+                  raise SystemExit("PBXShellScriptBuildPhase section missing")
+              text = text.replace(marker, marker + phase, 1)
               needle = "\t\t\t\t22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,\n"
-              if needle in text:
-                  text = text.replace(needle, needle + "\t\t\t\t" + phase_id + " /* " + note + " */,\n", 1)
-                  print("injected AppIcon cleanup phase after Embed Foundation Extensions")
-              else:
-                  print("Embed Foundation Extensions not found")
+              if needle not in text:
+                  raise SystemExit("Embed Foundation Extensions missing")
+              text = text.replace(needle, needle + f"\t\t\t\t{phase_id} /* {note} */,\n", 1)
               path.write_text(text)
+              print("injected AppIcon cleanup phase")
+          # sanity: shellScript line must contain escaped quotes
+          check = path.read_text()
+          if 'shellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";' not in check and 'shellScript = "\\"$SRCROOT/ci_strip_appicon.sh"\\n";' not in check:
+              # print nearby for debug
+              i = check.find("ci_strip_appicon")
+              print("SANITY FAIL nearby:", repr(check[i-40:i+80]))
+              raise SystemExit("pbxproj shellScript line malformed")
+          print("pbxproj shellScript line OK")
           PY
           /usr/bin/xattr -cr . || true
+          find . -name '*.png' -exec chmod a-x {} + || true
           echo "codesign identities:"
           security find-identity -v -p codesigning || true
           IDLINE=$(security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
