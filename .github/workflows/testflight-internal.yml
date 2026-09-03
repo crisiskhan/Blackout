@@ -572,13 +572,21 @@ jobs:
           script.write_text(
               "#!/bin/sh\n"
               "set -e\n"
-              'APP="$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
-              'echo "CI AppIcon strip app=$APP"\n'
-              'if [ -d "$APP" ]; then\n'
+              "strip_app() {\n"
+              '  APP="$1"\n'
+              '  [ -d "$APP" ] || return 0\n'
+              '  echo "CI AppIcon strip app=$APP"\n'
               '  find "$APP" -maxdepth 1 -name "AppIcon*.png" -print -delete || true\n'
               '  /usr/bin/xattr -cr "$APP" || true\n'
-              '  /bin/chmod -R a-x "$APP" 2>/dev/null || true\n'
-              '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} +\n'
+              '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} + 2>/dev/null || true\n'
+              "}\n"
+              'strip_app "$CODESIGNING_FOLDER_PATH"\n'
+              'strip_app "$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
+              'strip_app "$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME"\n'
+              'if [ -n "$BUILD_DIR" ]; then\n'
+              '  find "$BUILD_DIR" -type d -path "*/InstallationBuildProductsLocation/Applications/*.app" 2>/dev/null | while read -r APP; do\n'
+              "    strip_app \"$APP\"\n"
+              "  done\n"
               "fi\n"
           )
           script.chmod(0o755)
