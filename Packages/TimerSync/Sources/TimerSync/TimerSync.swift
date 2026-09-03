@@ -36,5 +36,11 @@ public final class TimerBoard: @unchecked Sendable {
         box.log("timer", "DONE \(id)")
     }
 
+    public func markDoneTask(_ task: String) {
+        if let t = timers.first(where: { $0.task == task }) {
+            markDone(t.id)
+        }
+    }
+
     public func isSOS(_ t: PartyTimer) -> Bool { false }
 }

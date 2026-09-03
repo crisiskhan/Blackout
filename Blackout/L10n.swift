@@ -16,6 +16,10 @@ enum L10n {
         "net.none": ["en": "NET · NONE", "es": "RED · NINGUNA"],
         "net.physics": ["en": "Airplane: no sockets. Mesh is Bluetooth tens of meters (MPC+BLE). LoRa never required. NET · NONE is local writes only.", "es": "Avión: sin sockets. Mesh es Bluetooth a decenas de metros (MPC+BLE). LoRa nunca es obligatorio. RED · NINGUNA es solo escritura local."],
         "vision.none": ["en": "NO VISION MODEL", "es": "SIN MODELO DE VISIÓN"],
+        "chip.rally": ["en": "RALLY", "es": "REUNIR"],
+        "chip.down": ["en": "DOWN", "es": "CAÍDO"],
+        "scan.qr": ["en": "SCAN QR", "es": "ESCANEAR QR"],
+        "net.nolog": ["en": "NO PEERS · LOGGED", "es": "SIN PARES · REGISTRADO"],
     ]
 
     static func t(_ key: String, _ locale: String) -> String {

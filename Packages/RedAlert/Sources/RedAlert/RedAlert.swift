@@ -21,4 +21,10 @@ public final class RedPlate: @unchecked Sendable {
         cancelled = true
         box.log("red", "cancelled")
     }
+
+    public func force(_ on: Bool) {
+        isRed = on
+        cancelled = !on
+        box.log("red", on ? "plate on remote" : "cancelled remote")
+    }
 }

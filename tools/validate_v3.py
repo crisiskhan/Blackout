@@ -258,19 +258,40 @@ def l10n() -> None:
 def mesh() -> None:
     src = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "MeshDTN.swift").read_text()
     live = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "LiveMeshRadio.swift").read_text()
+    comms = (ROOT / "Blackout" / "CommsTab.swift").read_text()
+    exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
+    join = (ROOT / "Blackout" / "PartyJoin.swift").read_text() if (ROOT / "Blackout" / "PartyJoin.swift").is_file() else ""
     if "deny-all sockets" in src and "Bluetooth only" not in src:
         bad("mesh still treats airplane as no radio")
     if "NET · NONE" not in src:
         bad("mesh missing NET · NONE chrome")
+    if "NO PEERS · LOGGED" not in src:
+        bad("mesh missing NO PEERS · LOGGED local-write chrome")
     if "import MultipeerConnectivity" not in live or "import CoreBluetooth" not in live:
         bad("LiveMeshRadio missing MPC or BLE")
+    if "session.send" not in live:
+        bad("MPC session.send missing")
+    if "CBMutableCharacteristic" not in live or "writeValue" not in live or "updateValue" not in live:
+        bad("BLE GATT write+notify exchange missing")
+    if "isNotifying" not in live:
+        bad("BLE marks peer before GATT notify")
     else:
-        ok("MeshDTN MPC+BLE paths exist; NET · NONE is local writes")
+        ok("MeshDTN live MPC+BLE GATT exchange; NET · NONE / NO PEERS · LOGGED")
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
     if "mesh.meet(" in app:
         bad("join still uses store-and-meet-only")
     else:
         ok("joinNet starts LiveMeshRadio, not meet-only")
+    if "PartyQR" not in join or "scan.qr" not in comms:
+        bad("party join missing QR encode/scan")
+    else:
+        ok("join is QR plus typed party code")
+    if "chip.rally" not in comms or "chip.down" not in comms:
+        bad("comms missing RALLY/DOWN chips")
+    if "sendRED" not in exp or "sendTimer" not in exp:
+        bad("RED/timer not wired to mesh")
+    else:
+        ok("RALLY/DOWN chips and RED/timer mesh wiring")
 
 
 def main() -> None:

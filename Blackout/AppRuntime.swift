@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import CoreLocation
 import BlackBox
 import PackIO
 import MeshDTN
@@ -45,6 +46,8 @@ final class AppRuntime {
     var lockOn = false
     var showInstruments = false
     var locale = "en"
+    var lastKnownFix: (lat: Double, lon: Double)?
+    private let fix = MeshFix()
 
     init() {
         mesh = MeshNet(box: box)
@@ -59,7 +62,14 @@ final class AppRuntime {
             roster = roster.setting(code: saved)
         }
         mesh.partyCode = roster.code
+        mesh.onInbound = { [weak self] env in
+            Task { @MainActor in self?.applyInbound(env) }
+        }
+        mesh.onPeersChanged = { [weak self] in
+            Task { @MainActor in self?.sendPOSIfPossible() }
+        }
         mesh.startLocal()
+        fix.arm()
         if let root = Self.resourceRoot() {
             packs = try? PackStore(root: root.appendingPathComponent("Packs"), box: box)
         }
@@ -82,15 +92,38 @@ final class AppRuntime {
         mesh.airplane = true
         mesh.partyCode = roster.code
         UserDefaults.standard.set(roster.code, forKey: "party.code")
-        #if canImport(MultipeerConnectivity)
         if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
-        #endif
         mesh.startLocal()
     }
 
     func sendPOSIfPossible() {
-        if let c = packs?.active?.center {
-            mesh.sendPOS(from: roster.code, lat: c.lat, lon: c.lon)
+        fix.arm()
+        let pack = packs?.active?.center
+        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? pack?.lat
+        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
+        guard let lat, let lon else { return }
+        lastKnownFix = (lat, lon)
+        mesh.sendPOS(from: mesh.localID, lat: lat, lon: lon)
+    }
+
+    func applyInbound(_ env: MeshEnvelope) {
+        switch env.kind {
+        case "red":
+            red.force(String(data: env.body, encoding: .utf8) == "on")
+        case "timer.set":
+            if let task = String(data: env.body, encoding: .utf8) {
+                _ = timers.add(who: env.from, task: task, duration: 7200, subjectAll: true)
+            }
+        case "timer.done":
+            if let task = String(data: env.body, encoding: .utf8) {
+                timers.markDoneTask(task)
+            }
+        case "chip":
+            if let raw = String(data: env.body, encoding: .utf8), let chip = Chip(rawValue: raw) {
+                comms.chips.append(chip)
+            }
+        default:
+            break
         }
     }
 
@@ -100,6 +133,36 @@ final class AppRuntime {
 
     static func resourceRoot() -> URL? {
         Bundle.main.resourceURL?.appendingPathComponent("Resources")
+    }
+}
+
+final class MeshFix: NSObject, CLLocationManagerDelegate {
+    var last: CLLocationCoordinate2D?
+    private let mgr = CLLocationManager()
+
+    func arm() {
+        mgr.delegate = self
+        switch mgr.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            mgr.startUpdatingLocation()
+        case .notDetermined:
+            mgr.requestWhenInUseAuthorization()
+        default:
+            break
+        }
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        default:
+            break
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        last = locations.last?.coordinate
     }
 }
 
