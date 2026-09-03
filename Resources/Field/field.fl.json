@@ -1,0 +1,260 @@
+{
+  "schema": "1.4",
+  "id": "field.fl",
+  "state": "FL",
+  "cards": [
+    {
+      "schema": "1.4",
+      "id": "tx-heat-island",
+      "category": "environment",
+      "states": [
+        "TX",
+        "FL"
+      ],
+      "title": {
+        "en": "City heat island",
+        "es": "Isla de calor urbana"
+      },
+      "situation": {
+        "en": "Pavement, no shade, and a party still moving in El Paso, Austin, Miami, or Jacksonville afternoon.",
+        "es": "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin, Miami o Jacksonville."
+      },
+      "stop_if": [
+        {
+          "en": "You have a cooled interior and water.",
+          "es": "Tienes un interior fresco y agua."
+        }
+      ],
+      "get_to_care": {
+        "en": "Same as heat collapse if they stop making sense.",
+        "es": "Igual que el colapso por calor si dejan de tener sentido."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Cut the pace. Shade every 15 minutes. Water in, not just on. Watch the person in black kit.",
+            "es": "Baja el ritmo. Sombra cada 15 minutos. Agua adentro, no solo encima."
+          },
+          "why": {
+            "en": "Asphalt reradiates after the sun 'feels' done.",
+            "es": "El asfalto sigue radiando cuando el sol 'ya no pica'."
+          },
+          "child": {
+            "en": "Stroller and kids get the shade first.",
+            "es": "Coche y niños a la sombra primero."
+          },
+          "stop": {
+            "en": "Stop the march if urine is dark and they are dizzy.",
+            "es": "Para si la orina está oscura y hay mareo."
+          },
+          "image": "heat-island.png",
+          "tickSeconds": 900
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-rip",
+      "category": "water",
+      "states": [
+        "FL"
+      ],
+      "title": {
+        "en": "Rip current",
+        "es": "Corriente de resaca"
+      },
+      "situation": {
+        "en": "Florida beach. The party is being pulled off the sand. No live NWS — you have eyes and a procedure.",
+        "es": "Playa de Florida. El grupo se va mar adentro. Sin NWS en vivo: ojos y procedimiento."
+      },
+      "stop_if": [
+        {
+          "en": "You are already back in thigh-deep water that is not pulling.",
+          "es": "Ya estás en agua a los muslos que no jala."
+        }
+      ],
+      "get_to_care": {
+        "en": "Drowning is care you cannot do past CPR on the sand. Offer Emergency SOS from the beach, not from the rip.",
+        "es": "El ahogo es cuidado que no das más allá de RCP en la arena. Emergency SOS desde la playa, no desde la resaca."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not fight straight in. Swim parallel to the beach until the pull eases, then angle in. If you cannot swim, float and raise an arm. Shore party does not make a second victim.",
+            "es": "No pelees derecho a la orilla. Nada paralelo hasta que afloje, luego en ángulo. Si no nadas, flota y alza un brazo."
+          },
+          "why": {
+            "en": "The rip is a narrow river. Sideways exits it.",
+            "es": "La resaca es un río angosto. De lado se sale."
+          },
+          "child": {
+            "en": "A child in a rip: throw a board or line if you have it. Do not send another child.",
+            "es": "Niño en la resaca: lanza tabla o cuerda. No mandes a otro niño."
+          },
+          "stop": {
+            "en": "Stop the hero swim if you are already tired on the sand.",
+            "es": "No hagas el nado héroe si ya estás cansado en la arena."
+          },
+          "image": "rip.png",
+          "party": {
+            "1": "Float, signal, parallel.",
+            "2": "One swims parallel; one stays on sand with eyes and SOS offer.",
+            "4": "Two on sand (spot + SOS), one throw bag, one swimmer max."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-gator-dusk",
+      "category": "animals",
+      "states": [
+        "FL"
+      ],
+      "title": {
+        "en": "Gator at dusk",
+        "es": "Caimán al anochecer"
+      },
+      "situation": {
+        "en": "Fresh water in Florida. Dusk, a dog, or a kid at the edge. This card does not exist in NY packs.",
+        "es": "Agua dulce en Florida. Anochecer, un perro o un niño en la orilla. Esta tarjeta no existe en packs de NY."
+      },
+      "stop_if": [
+        {
+          "en": "You are already well back from the waterline and the animal is gone.",
+          "es": "Ya estás lejos de la orilla y el animal se fue."
+        }
+      ],
+      "get_to_care": {
+        "en": "A bite is a bleed and a trauma hospital. Do not 'move the gator'.",
+        "es": "Una mordida es hemorragia y hospital de trauma. No 'muevas al caimán'."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Leash the dog. Child in hand, not at the bloom of water. Do not feed. If you see eyes, back up on the same path. Night: torch 3× at the bank before you fill bottles.",
+            "es": "Perro con correa. Niño de la mano. No alimentes. Si ves ojos, retrocede por el mismo camino. Noche: linterna 3× antes de llenar botellas."
+          },
+          "why": {
+            "en": "They hunt the edge. You do not need to win a stare.",
+            "es": "Cazan la orilla. No tienes que ganar la mirada."
+          },
+          "child": {
+            "en": "No wading 'just to the knees' at dusk.",
+            "es": "Sin meterse 'hasta las rodillas' al anochecer."
+          },
+          "stop": {
+            "en": "Stop fishing that hole if a slide mark is fresh.",
+            "es": "No pesques ese hueco si la marca de arrastre está fresca."
+          },
+          "image": "gator-dusk.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-keys-mm",
+      "category": "nav",
+      "states": [
+        "FL"
+      ],
+      "title": {
+        "en": "Keys mile marker",
+        "es": "Milla de los Keys"
+      },
+      "situation": {
+        "en": "Overseas Highway. Mile markers are the handrail. Hospitals and exits are sparse.",
+        "es": "Carretera Overseas. Las millas son la baranda. Hospitales y salidas son pocos."
+      },
+      "stop_if": [
+        {
+          "en": "You know the last MM and the next town.",
+          "es": "Sabes la última MM y el próximo pueblo."
+        }
+      ],
+      "get_to_care": {
+        "en": "A wreck on a two-lane causeway is care that has to come from a marked MM.",
+        "es": "Un choque en un puente de dos carriles necesita una MM marcada."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Write the mile marker on the trip brief and the paper sheet. If you stop, stand off the pavement. Hurricane: this card is a road, not a shelter.",
+            "es": "Anota la milla en el brief y en el papel. Si paras, fuera del pavimento."
+          },
+          "why": {
+            "en": "Without an MM, help cannot find a dot in the water.",
+            "es": "Sin MM, no encuentran un punto en el agua."
+          },
+          "child": {
+            "en": "Kids stay in the vehicle if you are on a narrow shoulder.",
+            "es": "Los niños en el vehículo si el acotamiento es estrecho."
+          },
+          "stop": {
+            "en": "Stop walking the bridge in a storm — there is no honest high ground.",
+            "es": "No camines el puente en tormenta."
+          },
+          "image": "keys-mm.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-hurricane-paper",
+      "category": "environment",
+      "states": [
+        "FL",
+        "TX"
+      ],
+      "title": {
+        "en": "Hurricane — procedure and paper",
+        "es": "Huracán — procedimiento y papel"
+      },
+      "situation": {
+        "en": "A named storm is in the story you already know. No live NWS in this app. You have a list and a paper map.",
+        "es": "Hay un huracán en la historia que ya conoces. Esta app no trae NWS en vivo. Tienes una lista y un mapa de papel."
+      },
+      "stop_if": [
+        {
+          "en": "You are already inland on a known floor above surge, with water and a radio you already own.",
+          "es": "Ya estás tierra adentro, sobre el oleaje, con agua y un radio que ya tienes."
+        }
+      ],
+      "get_to_care": {
+        "en": "This card is not a forecast. It is a leave / water / shutters / paper sequence.",
+        "es": "Esta tarjeta no es un pronóstico. Es una secuencia de salir / agua / persianas / papel."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "If you are still in a surge or flood polygon in the pack, leave on the printed route. Fill water. Paper copies of roster and MM / county roads. Tape does not beat a surge.",
+            "es": "Si sigues en un polígono de oleaje, sal por la ruta impresa. Llena agua. Papel del roster y las millas."
+          },
+          "why": {
+            "en": "The app will not update the cone.",
+            "es": "La app no actualizará el cono."
+          },
+          "child": {
+            "en": "Child carries their own small bottle and shoes, not a toy.",
+            "es": "El niño lleva su botella y zapatos, no un juguete."
+          },
+          "stop": {
+            "en": "Stop 'riding it out' on a barrier island because the map still looks pretty.",
+            "es": "No 'aguantes' en una isla de barrera porque el mapa se ve bonito."
+          },
+          "image": "hurricane-paper.png"
+        }
+      ]
+    }
+  ]
+}

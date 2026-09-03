@@ -1,0 +1,74 @@
+{
+  "id": "tx-west",
+  "name": "TX WEST",
+  "state": "TX",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 31.7,
+    "west": -106.62,
+    "north": 32.0,
+    "east": -106.35
+  },
+  "slices": {
+    "metro": {
+      "name": "El Paso metro",
+      "bbox": {
+        "name": "El Paso metro",
+        "south": 31.74,
+        "west": -106.52,
+        "north": 31.82,
+        "east": -106.4
+      },
+      "featureCount": 23698
+    },
+    "wild": {
+      "name": "Franklin Mountains wild",
+      "bbox": {
+        "name": "Franklin Mountains wild",
+        "south": 31.88,
+        "west": -106.52,
+        "north": 32.0,
+        "east": -106.4
+      },
+      "featureCount": 3744
+    },
+    "border": {
+      "name": "El Paso TX+NM border union",
+      "bbox": {
+        "name": "El Paso TX+NM border union",
+        "south": 31.7,
+        "west": -106.62,
+        "north": 31.9,
+        "east": -106.35
+      },
+      "featureCount": 65648
+    }
+  },
+  "banners": [
+    "heat-island",
+    "cattle-guard",
+    "border-hospitals"
+  ],
+  "bytes": 2289897,
+  "files": [
+    "border.geojson",
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 31.85,
+    "lon": -106.485
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

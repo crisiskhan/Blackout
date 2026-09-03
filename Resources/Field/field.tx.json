@@ -1,0 +1,208 @@
+{
+  "schema": "1.4",
+  "id": "field.tx",
+  "state": "TX",
+  "cards": [
+    {
+      "schema": "1.4",
+      "id": "tx-cattle-guard",
+      "category": "nav",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Cattle guard",
+        "es": "Paso canadiense"
+      },
+      "situation": {
+        "en": "A steel grate across a ranch road. Ankle, bike, and dog hazard. Texas and New Mexico ranch edges.",
+        "es": "Rejilla de acero en un camino de rancho. Riesgo de tobillo, bici y perro."
+      },
+      "stop_if": [
+        {
+          "en": "You can walk around on firm ground.",
+          "es": "Puedes rodearlo por suelo firme."
+        }
+      ],
+      "get_to_care": {
+        "en": "Twisted ankle is still an evacuation if they cannot bear weight.",
+        "es": "Un tobillo torcido sigue siendo evacuación si no carga peso."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not diagonal the grate. Step on the rails or walk the dirt bypass. Carry small dogs and small children.",
+            "es": "No cruces en diagonal. Pisa los rieles o el bypass de tierra. Carga perros y niños chicos."
+          },
+          "why": {
+            "en": "A foot slides in and stays.",
+            "es": "El pie se mete y se queda."
+          },
+          "child": {
+            "en": "Hold the child's hand. They do not 'balance' across.",
+            "es": "Toma la mano del niño. No 'equilibra'."
+          },
+          "stop": {
+            "en": "Stop if a cow panel is swinging — wait, do not climb it.",
+            "es": "Si un panel de ganado se mueve, espera."
+          },
+          "image": "cattle-guard.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "tx-heat-island",
+      "category": "environment",
+      "states": [
+        "TX",
+        "FL"
+      ],
+      "title": {
+        "en": "City heat island",
+        "es": "Isla de calor urbana"
+      },
+      "situation": {
+        "en": "Pavement, no shade, and a party still moving in El Paso, Austin, Miami, or Jacksonville afternoon.",
+        "es": "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin, Miami o Jacksonville."
+      },
+      "stop_if": [
+        {
+          "en": "You have a cooled interior and water.",
+          "es": "Tienes un interior fresco y agua."
+        }
+      ],
+      "get_to_care": {
+        "en": "Same as heat collapse if they stop making sense.",
+        "es": "Igual que el colapso por calor si dejan de tener sentido."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Cut the pace. Shade every 15 minutes. Water in, not just on. Watch the person in black kit.",
+            "es": "Baja el ritmo. Sombra cada 15 minutos. Agua adentro, no solo encima."
+          },
+          "why": {
+            "en": "Asphalt reradiates after the sun 'feels' done.",
+            "es": "El asfalto sigue radiando cuando el sol 'ya no pica'."
+          },
+          "child": {
+            "en": "Stroller and kids get the shade first.",
+            "es": "Coche y niños a la sombra primero."
+          },
+          "stop": {
+            "en": "Stop the march if urine is dark and they are dizzy.",
+            "es": "Para si la orina está oscura y hay mareo."
+          },
+          "image": "heat-island.png",
+          "tickSeconds": 900
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-hurricane-paper",
+      "category": "environment",
+      "states": [
+        "FL",
+        "TX"
+      ],
+      "title": {
+        "en": "Hurricane — procedure and paper",
+        "es": "Huracán — procedimiento y papel"
+      },
+      "situation": {
+        "en": "A named storm is in the story you already know. No live NWS in this app. You have a list and a paper map.",
+        "es": "Hay un huracán en la historia que ya conoces. Esta app no trae NWS en vivo. Tienes una lista y un mapa de papel."
+      },
+      "stop_if": [
+        {
+          "en": "You are already inland on a known floor above surge, with water and a radio you already own.",
+          "es": "Ya estás tierra adentro, sobre el oleaje, con agua y un radio que ya tienes."
+        }
+      ],
+      "get_to_care": {
+        "en": "This card is not a forecast. It is a leave / water / shutters / paper sequence.",
+        "es": "Esta tarjeta no es un pronóstico. Es una secuencia de salir / agua / persianas / papel."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "If you are still in a surge or flood polygon in the pack, leave on the printed route. Fill water. Paper copies of roster and MM / county roads. Tape does not beat a surge.",
+            "es": "Si sigues en un polígono de oleaje, sal por la ruta impresa. Llena agua. Papel del roster y las millas."
+          },
+          "why": {
+            "en": "The app will not update the cone.",
+            "es": "La app no actualizará el cono."
+          },
+          "child": {
+            "en": "Child carries their own small bottle and shoes, not a toy.",
+            "es": "El niño lleva su botella y zapatos, no un juguete."
+          },
+          "stop": {
+            "en": "Stop 'riding it out' on a barrier island because the map still looks pretty.",
+            "es": "No 'aguantes' en una isla de barrera porque el mapa se ve bonito."
+          },
+          "image": "hurricane-paper.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "tx-nm-border-hospital",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Border hospitals",
+        "es": "Hospitales de la frontera"
+      },
+      "situation": {
+        "en": "El Paso / southern NM. Trauma may be on one side of a line you cannot see on a dirt road.",
+        "es": "El Paso / sur de NM. El trauma puede estar de un lado de una línea que no ves en un camino de tierra."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a named hospital from the pack POI list.",
+          "es": "Ya tienes un hospital con nombre de la lista POI del pack."
+        }
+      ],
+      "get_to_care": {
+        "en": "This card lists how to use the pack POIs. It does not replace 911 or a Border Patrol roadblock decision.",
+        "es": "Esta tarjeta dice cómo usar los POI del pack. No reemplaza al 911."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Search the pack for hospital / clinic. Note the name on paper. Do not assume the closest pin is the trauma center. If a net exists, Emergency SOS; if not, drive the marked road, not the wash.",
+            "es": "Busca hospital/clínica en el pack. Anota el nombre. No asumas que el pin más cercano es trauma."
+          },
+          "why": {
+            "en": "A clinic pin is not a level-I trauma bay.",
+            "es": "Una clínica no es un trauma nivel I."
+          },
+          "child": {
+            "en": "Child in the vehicle, not walking a fence.",
+            "es": "Niño en el vehículo, no caminando la cerca."
+          },
+          "stop": {
+            "en": "Stop at a marked crossing. Do not cut a fence for a 'shortcut'.",
+            "es": "Para en un cruce marcado. No cortes una cerca."
+          },
+          "image": "border-hospital.png"
+        }
+      ]
+    }
+  ]
+}

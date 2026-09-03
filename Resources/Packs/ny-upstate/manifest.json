@@ -1,0 +1,61 @@
+{
+  "id": "ny-upstate",
+  "name": "NY UPSTATE",
+  "state": "NY",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 42.64,
+    "west": -73.98,
+    "north": 44.16,
+    "east": -73.74
+  },
+  "slices": {
+    "metro": {
+      "name": "Albany metro",
+      "bbox": {
+        "name": "Albany metro",
+        "south": 42.64,
+        "west": -73.8,
+        "north": 42.7,
+        "east": -73.74
+      },
+      "featureCount": 9158
+    },
+    "wild": {
+      "name": "Adirondack High Peaks wild",
+      "bbox": {
+        "name": "Adirondack High Peaks wild",
+        "south": 44.1,
+        "west": -73.98,
+        "north": 44.16,
+        "east": -73.9
+      },
+      "featureCount": 252
+    }
+  },
+  "banners": [
+    "ice-rock",
+    "subway-north"
+  ],
+  "bytes": 2696549,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 43.4,
+    "lon": -73.86
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

@@ -1,0 +1,101 @@
+{
+  "version": 8,
+  "name": "Blackout fl-north",
+  "sources": {
+    "osm": {
+      "type": "geojson",
+      "data": "osm.geojson"
+    },
+    "contours": {
+      "type": "geojson",
+      "data": "contours.geojson"
+    },
+    "public-land": {
+      "type": "geojson",
+      "data": "layers/public_land.geojson"
+    },
+    "flood": {
+      "type": "geojson",
+      "data": "layers/flood.geojson"
+    },
+    "hazards": {
+      "type": "geojson",
+      "data": "layers/hazards.geojson"
+    }
+  },
+  "layers": [
+    {
+      "id": "void",
+      "type": "background",
+      "paint": {
+        "background-color": "#0c0e10"
+      }
+    },
+    {
+      "id": "public-land-fill",
+      "type": "fill",
+      "source": "public-land",
+      "paint": {
+        "fill-color": "#1a2a1a",
+        "fill-opacity": 0.45
+      }
+    },
+    {
+      "id": "flood-fill",
+      "type": "fill",
+      "source": "flood",
+      "paint": {
+        "fill-color": "#143044",
+        "fill-opacity": 0.35
+      }
+    },
+    {
+      "id": "water",
+      "type": "line",
+      "source": "osm",
+      "filter": [
+        "has",
+        "waterway"
+      ],
+      "paint": {
+        "line-color": "#3a6a88",
+        "line-width": 1.4
+      }
+    },
+    {
+      "id": "roads",
+      "type": "line",
+      "source": "osm",
+      "filter": [
+        "has",
+        "highway"
+      ],
+      "paint": {
+        "line-color": "#c5cdd6",
+        "line-width": 1.1
+      }
+    },
+    {
+      "id": "contours",
+      "type": "line",
+      "source": "contours",
+      "paint": {
+        "line-color": "#6a7060",
+        "line-width": 0.6
+      }
+    },
+    {
+      "id": "hazards",
+      "type": "line",
+      "source": "hazards",
+      "paint": {
+        "line-color": "#c43b3b",
+        "line-width": 1.2
+      }
+    }
+  ],
+  "metadata": {
+    "engine": "maplibre-metal-offline",
+    "network": "deny-all"
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "state": "NY",
+  "neverEdibleUnlock": true,
+  "fungiDefault": "LEAVE_IT",
+  "labels": [
+    {
+      "id": "ny-sugar-maple",
+      "name": {
+        "en": "Sugar maple",
+        "es": "Arce azucarero"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "norway-maple-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Northeast hardwood.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Madera dura del noreste."
+      }
+    },
+    {
+      "id": "ny-white-oak",
+      "name": {
+        "en": "White oak",
+        "es": "Roble blanco"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "chestnut-oak-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Lobed leaves.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Hojas lobuladas."
+      }
+    },
+    {
+      "id": "ny-hemlock",
+      "name": {
+        "en": "Eastern hemlock",
+        "es": "Tsuga del este"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "balsam-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Shade evergreen.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Siempreverde de sombra."
+      }
+    },
+    {
+      "id": "ny-white-pine",
+      "name": {
+        "en": "Eastern white pine",
+        "es": "Pino blanco"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "red-pine-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Five needles.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cinco agujas."
+      }
+    },
+    {
+      "id": "ny-timber-rattler",
+      "name": {
+        "en": "Timber rattlesnake",
+        "es": "Cascabel de bosque"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "milksnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Upstate / ledges.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Norte del estado."
+      }
+    },
+    {
+      "id": "ny-copperhead",
+      "name": {
+        "en": "Copperhead",
+        "es": "Cabeza de cobre"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "watersnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Hudson / ledges.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Hudson / cornisas."
+      }
+    },
+    {
+      "id": "ny-black-bear",
+      "name": {
+        "en": "Black bear",
+        "es": "Oso negro"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "dark-dog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Adirondack and Catskill.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Adirondacks y Catskills."
+      }
+    },
+    {
+      "id": "ny-whitetail",
+      "name": {
+        "en": "White-tailed deer",
+        "es": "Venado cola blanca"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "dog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Tick host. Dusk roads.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Hospedero de garrapatas."
+      }
+    },
+    {
+      "id": "ny-moose",
+      "name": {
+        "en": "Moose",
+        "es": "Alce"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "elk-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Adirondack. Do not approach calves.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Adirondacks. No te acerques a las crías."
+      }
+    },
+    {
+      "id": "ny-amanita",
+      "name": {
+        "en": "Amanita-like cap",
+        "es": "Sombrero tipo Amanita"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "destroying-angel-lookalike",
+        "puffball-young"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Default LEAVE IT.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Por defecto DÉJALO."
+      }
+    },
+    {
+      "id": "ny-galerina",
+      "name": {
+        "en": "Little brown mushroom",
+        "es": "Hongo marrón chico"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "galerina-lookalike",
+        "honey-mushroom-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. LBMs are a leave-it set.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los marrones chicos se dejan."
+      }
+    },
+    {
+      "id": "ny-false-morel",
+      "name": {
+        "en": "Brain / false morel shape",
+        "es": "Forma de falsa colmenilla"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "true-morel-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Do not eat. Late liver toxins exist.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No comas. Hay toxinas tardías de hígado."
+      }
+    },
+    {
+      "id": "ny-jack",
+      "name": {
+        "en": "Jack-o-lantern / orange shelf",
+        "es": "Naranja en estante"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "chanterelle-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Leave it. GI wreck is common in lookalikes.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Déjalo. Los parecidos destrozan el estómago."
+      }
+    }
+  ]
+}

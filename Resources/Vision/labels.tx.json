@@ -1,0 +1,299 @@
+{
+  "state": "TX",
+  "neverEdibleUnlock": true,
+  "fungiDefault": "LEAVE_IT",
+  "labels": [
+    {
+      "id": "tx-live-oak",
+      "name": {
+        "en": "Live oak",
+        "es": "Encino siempreverde"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "white-oak-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Common Texas shade tree.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol de sombra común en Texas."
+      }
+    },
+    {
+      "id": "tx-mesquite",
+      "name": {
+        "en": "Mesquite",
+        "es": "Mezquite"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "acacia-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Thorns. Not a meal ticket.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Espinas. No es un ticket de comida."
+      }
+    },
+    {
+      "id": "tx-cedar-elm",
+      "name": {
+        "en": "Cedar elm",
+        "es": "Olmo cedro"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "american-elm-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Street and bosque tree.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol de calle y bosque."
+      }
+    },
+    {
+      "id": "tx-pecan",
+      "name": {
+        "en": "Pecan",
+        "es": "Nogal pecanero"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "hickory-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Cultivated and wild along rivers.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cultivado y silvestre junto a ríos."
+      }
+    },
+    {
+      "id": "tx-prickly-pear",
+      "name": {
+        "en": "Prickly pear",
+        "es": "Nopal"
+      },
+      "kind": "cactus",
+      "lookalikes": [
+        "glochid-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Spines and glochids. Vision does not unlock edible pads.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Espinas. Vision no desbloquea nopales comestibles."
+      }
+    },
+    {
+      "id": "tx-yucca",
+      "name": {
+        "en": "Yucca",
+        "es": "Yuca"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "sotol-lookalike",
+        "agave-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Sharp tips. Not a salad.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Puntas afiladas. No es ensalada."
+      }
+    },
+    {
+      "id": "tx-western-diamondback",
+      "name": {
+        "en": "Western diamondback",
+        "es": "Cascabel diamante occidental"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "bullsnake-lookalike",
+        "gophersnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Give space.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Da espacio."
+      }
+    },
+    {
+      "id": "tx-copperhead",
+      "name": {
+        "en": "Copperhead",
+        "es": "Cabeza de cobre"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "cornsnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. East and Hill Country.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Este y Hill Country."
+      }
+    },
+    {
+      "id": "tx-cottonmouth",
+      "name": {
+        "en": "Cottonmouth",
+        "es": "Boca de algodón"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "watersnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Water edges in east TX.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Orillas en el este de TX."
+      }
+    },
+    {
+      "id": "tx-coyote",
+      "name": {
+        "en": "Coyote",
+        "es": "Coyote"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "dog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Wild canid. Do not feed.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Cánido silvestre. No alimentes."
+      }
+    },
+    {
+      "id": "tx-javelina",
+      "name": {
+        "en": "Javelina",
+        "es": "Pecari"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "feral-hog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Charges when cornered.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Embiste si se siente acorralado."
+      }
+    },
+    {
+      "id": "tx-whitetail",
+      "name": {
+        "en": "White-tailed deer",
+        "es": "Venado cola blanca"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "mule-deer-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Road and dusk hazard.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Peligro en carretera y al anochecer."
+      }
+    },
+    {
+      "id": "tx-amanita",
+      "name": {
+        "en": "Amanita-like cap",
+        "es": "Sombrero tipo Amanita"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "destroying-angel-lookalike",
+        "puffball-young"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Default LEAVE IT.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Por defecto DÉJALO."
+      }
+    },
+    {
+      "id": "tx-galerina",
+      "name": {
+        "en": "Little brown mushroom",
+        "es": "Hongo marrón chico"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "galerina-lookalike",
+        "honey-mushroom-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. LBMs are a leave-it set.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los marrones chicos se dejan."
+      }
+    },
+    {
+      "id": "tx-false-morel",
+      "name": {
+        "en": "Brain / false morel shape",
+        "es": "Forma de falsa colmenilla"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "true-morel-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Do not eat. Late liver toxins exist.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No comas. Hay toxinas tardías de hígado."
+      }
+    },
+    {
+      "id": "tx-jack",
+      "name": {
+        "en": "Jack-o-lantern / orange shelf",
+        "es": "Naranja en estante"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "chanterelle-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Leave it. GI wreck is common in lookalikes.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Déjalo. Los parecidos destrozan el estómago."
+      }
+    }
+  ]
+}

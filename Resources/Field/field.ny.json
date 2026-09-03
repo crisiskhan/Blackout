@@ -1,0 +1,155 @@
+{
+  "schema": "1.4",
+  "id": "field.ny",
+  "state": "NY",
+  "cards": [
+    {
+      "schema": "1.4",
+      "id": "nm-ice-rock",
+      "category": "environment",
+      "states": [
+        "NM",
+        "NY"
+      ],
+      "title": {
+        "en": "Ice on rock",
+        "es": "Hielo en la roca"
+      },
+      "situation": {
+        "en": "Sandia or high NM rock with a film of ice. Same problem as Adirondack ledge ice — not a Florida card.",
+        "es": "Roca alta de Sandia con una película de hielo. El mismo problema que el hielo de cornisa en Adirondacks."
+      },
+      "stop_if": [
+        {
+          "en": "You can walk a dry dirt bypass.",
+          "es": "Puedes ir por un bypass de tierra seca."
+        }
+      ],
+      "get_to_care": {
+        "en": "A sliding fall is trauma. Do not 'just try the slab'.",
+        "es": "Una caída al resbalar es trauma. No 'pruebes la losa'."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Off the varnish. Microspikes if you have them. One at a time. Belay a child on a short leash of webbing, not a hand hold.",
+            "es": "Fuera del barniz. Microspikes si hay. Uno por uno. El niño con cintas, no de la mano en el hielo."
+          },
+          "why": {
+            "en": "Thin ice on granite has no honest friction.",
+            "es": "El hielo fino en granito no tiene fricción honesta."
+          },
+          "child": {
+            "en": "Child last, on the dry line, or turn around.",
+            "es": "El niño al último, por lo seco, o den la vuelta."
+          },
+          "stop": {
+            "en": "Stop the summit bid if the wind is loading more rime.",
+            "es": "Corten la cumbre si el viento carga más escarcha."
+          },
+          "image": "ice-rock.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "ny-subway-north",
+      "category": "nav",
+      "states": [
+        "NY"
+      ],
+      "title": {
+        "en": "Subway — walk north to air",
+        "es": "Metro — camina al norte al aire"
+      },
+      "situation": {
+        "en": "NYC underground. You need out. Station names and north are the handrail. Not a gator card.",
+        "es": "Bajo tierra en NYC. Necesitas salir. Los nombres de estación y el norte son la baranda."
+      },
+      "stop_if": [
+        {
+          "en": "You can see sky and a street plate.",
+          "es": "Ves cielo y una placa de calle."
+        }
+      ],
+      "get_to_care": {
+        "en": "Smoke or a crush is care on the platform. Do not go deeper 'to find a better train'.",
+        "es": "Humo o una estampida es cuidado en el andén. No bajes más 'a buscar un tren mejor'."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Follow the walkway toward the numbered street increase if you already know you entered south — or follow EXIT signs to the street, then check the map pack. Stay off the track bed unless the platform is on fire.",
+            "es": "Sigue la pasarela a la salida, luego el pack. No bajes a las vías salvo que el andén arda."
+          },
+          "why": {
+            "en": "The tunnel is not a trail. Trains still move.",
+            "es": "El túnel no es un sendero. Los trenes siguen."
+          },
+          "child": {
+            "en": "Child's hand. No scavenger hunt down the tube.",
+            "es": "Mano del niño. Sin explorar el tubo."
+          },
+          "stop": {
+            "en": "Stop if you hear a train — wall, face in, wait.",
+            "es": "Si oyes tren: pared, cara adentro, espera."
+          },
+          "image": "subway-north.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "ny-ice-adk",
+      "category": "environment",
+      "states": [
+        "NY"
+      ],
+      "title": {
+        "en": "Adirondack ice",
+        "es": "Hielo de Adirondacks"
+      },
+      "situation": {
+        "en": "Upstate ledge, spring crust, or a waterfall path. Florida packs must not show this card.",
+        "es": "Cornisa del norte del estado, costra de primavera o una ruta de cascada. Los packs de Florida no deben mostrar esta tarjeta."
+      },
+      "stop_if": [
+        {
+          "en": "You turned around to dirt.",
+          "es": "Ya diste la vuelta a la tierra."
+        }
+      ],
+      "get_to_care": {
+        "en": "A sliding fall into a drainage is a trauma evac.",
+        "es": "Una caída a un desagüe es evacuación de trauma."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Turn around early. If you continue, one at a time, spots below, no glissade on unknown runouts. Paper the turnaround time on the party timer.",
+            "es": "Da la vuelta temprano. Si sigues, uno por uno, nadie trineo en una salida desconocida."
+          },
+          "why": {
+            "en": "Ice under leaves is how Adirondack afternoons go bad.",
+            "es": "El hielo bajo las hojas es cómo se pone mala la tarde."
+          },
+          "child": {
+            "en": "Kids do not 'ski' the slab on their shoes.",
+            "es": "Los niños no 'esquían' la losa."
+          },
+          "stop": {
+            "en": "Stop if the last pip shows you still above the ice line at dusk.",
+            "es": "Para si el último pip te deja sobre la línea de hielo al oscurecer."
+          },
+          "image": "adk-ice.png"
+        }
+      ]
+    }
+  ]
+}

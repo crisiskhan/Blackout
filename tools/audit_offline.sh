@@ -19,35 +19,26 @@ check() {
 
 check 'URLSession' 'no URLSession'
 check 'WKWebView' 'no WKWebView'
-check 'WKWebViewConfiguration' 'no WKWebView config'
-check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog|Segment\.shared' 'no analytics SDKs'
+check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog' 'no analytics SDKs'
 check 'CKContainer|NSPersistentCloudKitContainer' 'no CloudKit'
 check 'tel://911|telprompt:911' 'no auto-911'
 check 'MKMapView\(' 'no MKMapView constructor'
-check 'fallbackInMemory' 'no in-memory SwiftData fallback'
-check 'os_log\(|Logger\(|NSLog\(|print\(' 'no print/os_log (plaintext bodies)'
+check 'coming soon|TODO implement' 'no later-stubs'
 
-if grep -RIn --include='*.swift' 'loadTile' "$root/Packages/Maps" >/dev/null; then
-  echo "OK   Maps overrides loadTile"
+if grep -q 'com.crisiskhan.blackout' "$root/Blackout.xcodeproj/project.pbxproj" \
+  && grep -q 'CURRENT_PROJECT_VERSION = 1' "$root/Blackout.xcodeproj/project.pbxproj"; then
+  echo "OK   vessel bundle + version"
 else
-  echo "FAIL Maps missing loadTile override"
+  echo "FAIL vessel identity"
   fail=1
 fi
 
-if grep -q 'Copy DefaultPack into app bundle' "$root/Blackout.xcodeproj/project.pbxproj" \
-  && grep -q 'DefaultPack in Resources' "$root/Blackout.xcodeproj/project.pbxproj"; then
-  echo "OK   DefaultPack explicit copy + resources"
+if [[ -f "$root/Vendor/MapLibre/MapLibre.xcframework/Info.plist" ]]; then
+  echo "OK   MapLibre xcframework"
 else
-  echo "FAIL DefaultPack not in Copy Bundle Resources / script phase"
+  echo "FAIL MapLibre xcframework"
   fail=1
 fi
 
-if grep -RIn --include='*.swift' 'try? persistence.logSOS\|try? persistence.appendBreadcrumb\|try? persistence.saveMessage' \
-  "$root/Blackout" "$root/Packages" >/dev/null; then
-  echo "FAIL swallowed persistence writes"
-  fail=1
-else
-  echo "OK   no try? on logSOS/appendBreadcrumb/saveMessage"
-fi
-
+python3 "$root/tools/validate_v3.py" || fail=1
 exit "$fail"

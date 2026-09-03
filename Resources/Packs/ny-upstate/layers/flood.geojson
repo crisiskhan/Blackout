@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "layer": "flood",
+        "name": "Low-ground flood / surge overlay"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -73.8,
+              42.64
+            ],
+            [
+              -73.74,
+              42.64
+            ],
+            [
+              -73.74,
+              42.655
+            ],
+            [
+              -73.8,
+              42.655
+            ],
+            [
+              -73.8,
+              42.64
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

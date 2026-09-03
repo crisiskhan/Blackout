@@ -1,0 +1,297 @@
+{
+  "state": "NM",
+  "neverEdibleUnlock": true,
+  "fungiDefault": "LEAVE_IT",
+  "labels": [
+    {
+      "id": "nm-pinon",
+      "name": {
+        "en": "Piñon",
+        "es": "Piñón"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "juniper-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. High desert tree.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol de desierto alto."
+      }
+    },
+    {
+      "id": "nm-juniper",
+      "name": {
+        "en": "Juniper",
+        "es": "Enebro"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "pinon-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Scale leaves, berry-like cones.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Hojas en escama."
+      }
+    },
+    {
+      "id": "nm-aspen",
+      "name": {
+        "en": "Aspen",
+        "es": "Álamo temblón"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "cottonwood-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. High country.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Alta montaña."
+      }
+    },
+    {
+      "id": "nm-cottonwood",
+      "name": {
+        "en": "Rio Grande cottonwood",
+        "es": "Álamo del Río Grande"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "aspen-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Bosque tree.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol de bosque ribereño."
+      }
+    },
+    {
+      "id": "nm-cholla",
+      "name": {
+        "en": "Cholla",
+        "es": "Cholla"
+      },
+      "kind": "cactus",
+      "lookalikes": [
+        "prickly-pear-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Joints hitchhike on skin.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los segmentos se pegan a la piel."
+      }
+    },
+    {
+      "id": "nm-yucca",
+      "name": {
+        "en": "Yucca",
+        "es": "Yuca"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "sotol-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Sharp tips.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Puntas afiladas."
+      }
+    },
+    {
+      "id": "nm-sotol",
+      "name": {
+        "en": "Sotol",
+        "es": "Sotol"
+      },
+      "kind": "cacti_yucca",
+      "lookalikes": [
+        "yucca-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Desert rosette.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Roseta del desierto."
+      }
+    },
+    {
+      "id": "nm-prairie-rattler",
+      "name": {
+        "en": "Prairie rattlesnake",
+        "es": "Cascabel de pradera"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "bullsnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Give space.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Da espacio."
+      }
+    },
+    {
+      "id": "nm-western-diamondback",
+      "name": {
+        "en": "Western diamondback",
+        "es": "Cascabel diamante occidental"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "gophersnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Southern NM.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Sur de NM."
+      }
+    },
+    {
+      "id": "nm-elk",
+      "name": {
+        "en": "Elk",
+        "es": "Wapití"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "mule-deer-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Rut is a hazard.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. El celo es un peligro."
+      }
+    },
+    {
+      "id": "nm-mule-deer",
+      "name": {
+        "en": "Mule deer",
+        "es": "Venado bura"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "whitetail-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Dusk roads.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Carreteras al anochecer."
+      }
+    },
+    {
+      "id": "nm-black-bear",
+      "name": {
+        "en": "Black bear",
+        "es": "Oso negro"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "dark-dog-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Food storage, not photos.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Guarda comida, no fotos."
+      }
+    },
+    {
+      "id": "nm-amanita",
+      "name": {
+        "en": "Amanita-like cap",
+        "es": "Sombrero tipo Amanita"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "destroying-angel-lookalike",
+        "puffball-young"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Default LEAVE IT.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Por defecto DÉJALO."
+      }
+    },
+    {
+      "id": "nm-galerina",
+      "name": {
+        "en": "Little brown mushroom",
+        "es": "Hongo marrón chico"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "galerina-lookalike",
+        "honey-mushroom-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. LBMs are a leave-it set.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los marrones chicos se dejan."
+      }
+    },
+    {
+      "id": "nm-false-morel",
+      "name": {
+        "en": "Brain / false morel shape",
+        "es": "Forma de falsa colmenilla"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "true-morel-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Do not eat. Late liver toxins exist.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No comas. Hay toxinas tardías de hígado."
+      }
+    },
+    {
+      "id": "nm-jack",
+      "name": {
+        "en": "Jack-o-lantern / orange shelf",
+        "es": "Naranja en estante"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "chanterelle-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Leave it. GI wreck is common in lookalikes.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Déjalo. Los parecidos destrozan el estómago."
+      }
+    }
+  ]
+}
