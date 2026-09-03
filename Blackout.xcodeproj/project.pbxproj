@@ -52,6 +52,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3BFADFFD5F6800C1D655599B /* Blackout */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */,
+			);
 			path = Blackout;
 			sourceTree = "<group>";
 		};
@@ -409,6 +412,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 26357C8EB97FA055344683EE /* Blackout */;
+		};
 		301F26F93D27BA798689F280 /* Exceptions for "BlackoutWatch" */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
