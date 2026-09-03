@@ -564,7 +564,38 @@ jobs:
               print(f"patched {bundle} blocks={n}")
           path.write_text(out)
           print("CI-only pbxproj signing patch (not committed)")
+          # Inject last-run script: drop loose AppIcon PNGs + xattrs that break CodeSign.
+          text = path.read_text()
+          phase_id = "C1A00001B007000000000001"
+          build_file_note = "CI strip loose AppIcon before CodeSign"
+          if phase_id not in text:
+              phase = (
+                  f"\t\t{phase_id} /* {build_file_note} */ = {{\n"
+                  f"\t\t\tisa = PBXShellScriptBuildPhase;\n"
+                  f"\t\t\tbuildActionMask = 2147483647;\n"
+                  f"\t\t\tfiles = (\n\t\t\t);\n"
+                  f"\t\t\tinputFileListPaths = (\n\t\t\t);\n"
+                  f"\t\t\tinputPaths = (\n\t\t\t);\n"
+                  f"\t\t\tname = \"{build_file_note}\";\n"
+                  f"\t\t\toutputFileListPaths = (\n\t\t\t);\n"
+                  f"\t\t\toutputPaths = (\n\t\t\t);\n"
+                  f"\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
+                  f"\t\t\tshellPath = /bin/sh;\n"
+                  f"\t\t\tshellScript = \"set -e\\nAPP=\\\"${{BUILT_PRODUCTS_DIR}}/${{FULL_PRODUCT_NAME}}\\\"\\nif [ -d \\\"$APP\\\" ]; then\\n  find \\\"$APP\\\" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true\\n  /usr/bin/xattr -cr \\\"$APP\\\" || true\\nfi\\n\";\n"
+                  f"\t\t\tshowEnvVarsInLog = 0;\n"
+                  f"\t\t}};\n"
+              )
+              text = text.replace("/* Begin PBXShellScriptBuildPhase section */\n", "/* Begin PBXShellScriptBuildPhase section */\n" + phase, 1)
+              # append to Blackout target buildPhases (the app target with productName Blackout and Embed Watch)
+              needle = "\t\t\t\t22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,\n"
+              if needle in text:
+                  text = text.replace(needle, needle + f"\t\t\t\t{phase_id} /* {build_file_note} */,\n", 1)
+                  print("injected AppIcon cleanup phase after Embed Foundation Extensions")
+              else:
+                  print("Embed Foundation Extensions phase id not found; cleanup phase not wired")
+              path.write_text(text)
           PY
+          /usr/bin/xattr -cr . || true
           echo "codesign identities:"
           security find-identity -v -p codesigning || true
           IDLINE=$(security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
@@ -632,7 +663,7 @@ jobs:
           }
           archive_once
           ARC="$(cat "$RUNNER_TEMP/archive.exit")"
-          if [ "$ARC" -ne 0 ] && grep -q "BlackoutWatch" "$RUNNER_TEMP/archive.log" && grep -qi "mobileprovision" "$RUNNER_TEMP/archive.log"; then
+          if [ "$ARC" -ne 0 ] && grep -q "Build input file cannot be found:.*BlackoutWatch.*mobileprovision" "$RUNNER_TEMP/archive.log"; then
             strip_watch
             rm -rf "$ARCHIVE"
             archive_once
