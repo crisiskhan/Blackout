@@ -322,6 +322,9 @@ jobs:
                   fh.write("HAS_LOCAL_DIST_KEY=1\n")
                   fh.write(f"DIST_CERT_ID={cert_id}\n")
                   fh.write(f"SIGNING_KEYCHAIN={kc}\n")
+                  fh.write(f"SIGNING_KC_PASS={kc_pass}\n")
+              print("identities in signing keychain:")
+              subprocess.call(["security", "find-identity", "-v", "-p", "codesigning", str(kc)])
 
               def ensure_bundle(ident, platform):
                   q = urllib.parse.urlencode({"filter[identifier]": ident, "limit": "5"})
@@ -478,6 +481,17 @@ jobs:
             exit 1
           fi
           echo "CURRENT_PROJECT_VERSION on the command line only: $NEXT (not committed)"
+          if [ -n "${SIGNING_KEYCHAIN:-}" ] && [ -f "$SIGNING_KEYCHAIN" ]; then
+            security unlock-keychain -p "$SIGNING_KC_PASS" "$SIGNING_KEYCHAIN"
+            security set-keychain-settings -lut 21600 "$SIGNING_KEYCHAIN"
+            security default-keychain -s "$SIGNING_KEYCHAIN"
+            EXISTING=$(security list-keychains -d user | sed 's/"//g')
+            security list-keychains -d user -s "$SIGNING_KEYCHAIN" $EXISTING
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$SIGNING_KC_PASS" "$SIGNING_KEYCHAIN" || true
+            echo "identities after unlock:"
+            security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" || true
+            security find-identity -v -p codesigning || true
+          fi
           ARCHIVE="$RUNNER_TEMP/Blackout.xcarchive"
           EXPORT="$RUNNER_TEMP/export"
           STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
@@ -555,6 +569,21 @@ jobs:
           PY
           echo "codesign identities:"
           security find-identity -v -p codesigning || true
+          IDLINE=$(security find-identity -v -p codesigning 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
+          if [ -n "$IDLINE" ]; then
+            IDNAME=$(printf '%s' "$IDLINE" | sed -n 's/.*"\(.*\)"/\1/p')
+            echo "Using CODE_SIGN_IDENTITY=$IDNAME"
+            "$PYBIN" - "$IDNAME" << 'PY'
+          import sys
+          from pathlib import Path
+          name = sys.argv[1]
+          p = Path("Blackout.xcodeproj/project.pbxproj")
+          t = p.read_text()
+          t = t.replace('CODE_SIGN_IDENTITY = "iOS Distribution";', f'CODE_SIGN_IDENTITY = "{name}";')
+          p.write_text(t)
+          print("rewrote CODE_SIGN_IDENTITY to exact keychain name")
+          PY
+          fi
           strip_watch() {
             echo "CI-only: strip Embed Watch Content from checkout (not committed) after Watch profile packaging fail"
             "$PYBIN" - << 'PY'
