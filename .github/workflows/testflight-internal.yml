@@ -564,35 +564,58 @@ jobs:
               print(f"patched {bundle} blocks={n}")
           path.write_text(out)
           print("CI-only pbxproj signing patch (not committed)")
-          # Inject last-run script: drop loose AppIcon PNGs + xattrs that break CodeSign.
+          # Write cleanup script + wire one-liner phase (quoted heredoc: no bash $ expand).
+          "$PYBIN" << 'PY'
+          from pathlib import Path
+          script = Path("ci_strip_appicon.sh")
+          script.write_text(
+              "#!/bin/sh\n"
+              "set -e\n"
+              "APP=\"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\"\n"
+              "if [ -d \"$APP\" ]; then\n"
+              "  find \"$APP\" -maxdepth 1 -name \"AppIcon*.png\" -print -delete || true\n"
+              "  /usr/bin/xattr -cr \"$APP\" || true\n"
+              "fi\n"
+          )
+          script.chmod(0o755)
+          print("wrote", script.resolve())
+          path = Path("Blackout.xcodeproj/project.pbxproj")
           text = path.read_text()
           phase_id = "C1A00001B007000000000001"
-          build_file_note = "CI strip loose AppIcon before CodeSign"
+          note = "CI strip loose AppIcon before CodeSign"
           if phase_id not in text:
+              # shellScript calls the file; SRCROOT with braces built without putting ${{ in the workflow YAML
+              src = "$" + "{SRCROOT}/ci_strip_appicon.sh"
+              shell = '\\"' + src + '\\"\\n'
+              # Actually pbxproj wants: shellScript = "${SRCROOT}/ci_strip_appicon.sh\n";
+              shell_script_value = '"$SRCROOT/ci_strip_appicon.sh"\n'
               phase = (
-                  f"\t\t{phase_id} /* {build_file_note} */ = {{\n"
-                  f"\t\t\tisa = PBXShellScriptBuildPhase;\n"
-                  f"\t\t\tbuildActionMask = 2147483647;\n"
-                  f"\t\t\tfiles = (\n\t\t\t);\n"
-                  f"\t\t\tinputFileListPaths = (\n\t\t\t);\n"
-                  f"\t\t\tinputPaths = (\n\t\t\t);\n"
-                  f"\t\t\tname = \"{build_file_note}\";\n"
-                  f"\t\t\toutputFileListPaths = (\n\t\t\t);\n"
-                  f"\t\t\toutputPaths = (\n\t\t\t);\n"
-                  f"\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
-                  f"\t\t\tshellPath = /bin/sh;\n"
-                  f"\t\t\tshellScript = \"set -e\\nAPP=\\\"\$BUILT_PRODUCTS_DIR/\$FULL_PRODUCT_NAME\\\"\\nif [ -d \\\"$APP\\\" ]; then\\n  find \\\"$APP\\\" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true\\n  /usr/bin/xattr -cr \\\"$APP\\\" || true\\nfi\\n\";\n"
-                  f"\t\t\tshowEnvVarsInLog = 0;\n"
-                  f"\t\t}};\n"
+                  "\t\t" + phase_id + " /* " + note + " */ = {\n"
+                  "\t\t\tisa = PBXShellScriptBuildPhase;\n"
+                  "\t\t\tbuildActionMask = 2147483647;\n"
+                  "\t\t\tfiles = (\n\t\t\t);\n"
+                  "\t\t\tinputFileListPaths = (\n\t\t\t);\n"
+                  "\t\t\tinputPaths = (\n\t\t\t);\n"
+                  "\t\t\tname = \"" + note + "\";\n"
+                  "\t\t\toutputFileListPaths = (\n\t\t\t);\n"
+                  "\t\t\toutputPaths = (\n\t\t\t);\n"
+                  "\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
+                  "\t\t\tshellPath = /bin/sh;\n"
+                  "\t\t\tshellScript = \"" + shell_script_value + "\";\n"
+                  "\t\t\tshowEnvVarsInLog = 0;\n"
+                  "\t\t};\n"
               )
-              text = text.replace("/* Begin PBXShellScriptBuildPhase section */\n", "/* Begin PBXShellScriptBuildPhase section */\n" + phase, 1)
-              # append to Blackout target buildPhases (the app target with productName Blackout and Embed Watch)
+              text = text.replace(
+                  "/* Begin PBXShellScriptBuildPhase section */\n",
+                  "/* Begin PBXShellScriptBuildPhase section */\n" + phase,
+                  1,
+              )
               needle = "\t\t\t\t22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,\n"
               if needle in text:
-                  text = text.replace(needle, needle + f"\t\t\t\t{phase_id} /* {build_file_note} */,\n", 1)
+                  text = text.replace(needle, needle + "\t\t\t\t" + phase_id + " /* " + note + " */,\n", 1)
                   print("injected AppIcon cleanup phase after Embed Foundation Extensions")
               else:
-                  print("Embed Foundation Extensions phase id not found; cleanup phase not wired")
+                  print("Embed Foundation Extensions not found")
               path.write_text(text)
           PY
           /usr/bin/xattr -cr . || true
