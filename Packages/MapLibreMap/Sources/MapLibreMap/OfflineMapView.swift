@@ -21,7 +21,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.logoView.isHidden = false
         view.prefetchesTiles = false
         view.allowsRotating = true
-        view.setCenterCoordinate(
+        view.setCenter(
             CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
             zoomLevel: 13,
             animated: false
