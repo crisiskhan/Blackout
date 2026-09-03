@@ -129,7 +129,7 @@ public final class MeshNet: @unchecked Sendable {
     }
 
     public func sendRED(from: String, on: Bool) {
-        enqueue(make(from: from, kind: "red", body: Data(on ? "on" : "off", using: .utf8)!))
+        enqueue(make(from: from, kind: "red", body: Data((on ? "on" : "off").utf8)))
     }
 
     public func sendTimer(from: String, task: String, done: Bool) {
