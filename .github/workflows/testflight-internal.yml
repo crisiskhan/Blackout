@@ -499,7 +499,7 @@ jobs:
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
           )
-          "$PYBIN" - << PY
+          "$PYBIN" << 'PY'
           import json, os, plistlib
           from pathlib import Path
           path = os.environ["RUNNER_TEMP"] + "/ExportOptions.plist"
@@ -523,7 +523,7 @@ jobs:
           plistlib.dump(body, open(path, "wb"))
           print("wrote", path, "signingStyle", body["signingStyle"])
           PY
-          "$PYBIN" - << PY
+          "$PYBIN" << 'PY'
           import json, os, re
           from pathlib import Path
           team = os.environ["APPLE_TEAM_ID"]
@@ -564,6 +564,7 @@ jobs:
               print(f"patched {bundle} blocks={n}")
           path.write_text(out)
           print("CI-only pbxproj signing patch (not committed)")
+          PY
           # Write cleanup script + wire one-liner phase (quoted heredoc: no bash $ expand).
           "$PYBIN" << 'PY'
           from pathlib import Path
