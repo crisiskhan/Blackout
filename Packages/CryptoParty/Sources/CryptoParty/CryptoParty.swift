@@ -7,11 +7,11 @@ public struct SealedBlob: Equatable, Sendable {
 }
 
 public enum CryptoParty {
-    public static func seal(plain: Data, key: SymmetricKey) throws -> SealedBox {
+    public static func seal(plain: Data, key: SymmetricKey) throws -> AES.GCM.SealedBox {
         try AES.GCM.seal(plain, using: key)
     }
 
-    public static func open(_ box: SealedBox, key: SymmetricKey) throws -> Data {
+    public static func open(_ box: AES.GCM.SealedBox, key: SymmetricKey) throws -> Data {
         try AES.GCM.open(box, using: key)
     }
 
