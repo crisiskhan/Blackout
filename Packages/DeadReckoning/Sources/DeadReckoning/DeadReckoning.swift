@@ -6,6 +6,14 @@ public struct DRFix: Equatable, Sendable {
     public var headingDeg: Double
     public var strideMeters: Double
     public var steps: Int
+
+    public init(lat: Double, lon: Double, headingDeg: Double, strideMeters: Double, steps: Int) {
+        self.lat = lat
+        self.lon = lon
+        self.headingDeg = headingDeg
+        self.strideMeters = strideMeters
+        self.steps = steps
+    }
 }
 
 public enum DeadReckoning {

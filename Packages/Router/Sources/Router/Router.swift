@@ -16,6 +16,13 @@ public struct RouteResult: Equatable, Sendable {
     public var meters: Double
     public var mode: TravelMode
     public var fallback: RouteFallback
+
+    public init(nodeIds: [Int], meters: Double, mode: TravelMode, fallback: RouteFallback) {
+        self.nodeIds = nodeIds
+        self.meters = meters
+        self.mode = mode
+        self.fallback = fallback
+    }
 }
 
 public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOffGraph }

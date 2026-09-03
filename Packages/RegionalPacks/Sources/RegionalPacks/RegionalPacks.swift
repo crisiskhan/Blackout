@@ -4,6 +4,12 @@ public struct Banner: Equatable, Sendable, Identifiable {
     public var id: String
     public var states: [String]
     public var title: [String: String]
+
+    public init(id: String, states: [String], title: [String: String]) {
+        self.id = id
+        self.states = states
+        self.title = title
+    }
 }
 
 public enum RegionalPacks {

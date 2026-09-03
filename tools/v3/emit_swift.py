@@ -246,6 +246,14 @@ public struct SearchHit: Equatable, Sendable {
     public var lat: Double
     public var lon: Double
     public var score: Double
+
+    public init(name: String, kind: String, lat: Double, lon: Double, score: Double) {
+        self.name = name
+        self.kind = kind
+        self.lat = lat
+        self.lon = lon
+        self.score = score
+    }
 }
 
 public struct SearchIndex: Sendable {
@@ -327,6 +335,13 @@ public struct RouteResult: Equatable, Sendable {
     public var meters: Double
     public var mode: TravelMode
     public var fallback: RouteFallback
+
+    public init(nodeIds: [Int], meters: Double, mode: TravelMode, fallback: RouteFallback) {
+        self.nodeIds = nodeIds
+        self.meters = meters
+        self.mode = mode
+        self.fallback = fallback
+    }
 }
 
 public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOffGraph }
@@ -418,6 +433,14 @@ public struct DRFix: Equatable, Sendable {
     public var headingDeg: Double
     public var strideMeters: Double
     public var steps: Int
+
+    public init(lat: Double, lon: Double, headingDeg: Double, strideMeters: Double, steps: Int) {
+        self.lat = lat
+        self.lon = lon
+        self.headingDeg = headingDeg
+        self.strideMeters = strideMeters
+        self.steps = steps
+    }
 }
 
 public enum DeadReckoning {
@@ -900,6 +923,12 @@ public struct Banner: Equatable, Sendable, Identifiable {
     public var id: String
     public var states: [String]
     public var title: [String: String]
+
+    public init(id: String, states: [String], title: [String: String]) {
+        self.id = id
+        self.states = states
+        self.title = title
+    }
 }
 
 public enum RegionalPacks {
@@ -1035,6 +1064,14 @@ public struct StepperState: Equatable, Sendable {
     public var index: Int
     public var speaking: Bool
     public var sentToParty: Bool
+
+    public init(card: FieldCard, index: Int, speaking: Bool, sentToParty: Bool) {
+        self.card = card
+        self.index = index
+        self.speaking = speaking
+        self.sentToParty = sentToParty
+    }
+
     public var step: FieldStep { card.steps[index] }
     public var isLast: Bool { index == card.steps.count - 1 }
     public mutating func next() { if !isLast { index += 1 } }
@@ -1218,10 +1255,16 @@ import VisionCoreML
 public struct CaptureFrame: Equatable, Sendable {
     public var features: [Double]
     public var added: Bool
+
+    public init(features: [Double], added: Bool) {
+        self.features = features
+        self.added = added
+    }
 }
 
 public struct GuidedCapture: Equatable, Sendable {
     public var frames: [CaptureFrame] = []
+    public init(frames: [CaptureFrame] = []) { self.frames = frames }
     public mutating func addFrame(_ features: [Double]) {
         frames.append(CaptureFrame(features: features, added: true))
     }
@@ -1267,10 +1310,18 @@ public struct GearItem: Equatable, Sendable, Identifiable {
     public var name: String
     public var working: Bool
     public var failureHazard: String?
+
+    public init(id: String, name: String, working: Bool, failureHazard: String? = nil) {
+        self.id = id
+        self.name = name
+        self.working = working
+        self.failureHazard = failureHazard
+    }
 }
 
 public struct KitBag: Equatable, Sendable {
     public var items: [GearItem]
+    public init(items: [GearItem]) { self.items = items }
     public var hazards: [String] { items.compactMap { $0.working ? nil : $0.failureHazard } }
     public mutating func markFailed(_ id: String, hazard: String) {
         if let i = items.firstIndex(where: { $0.id == id }) {

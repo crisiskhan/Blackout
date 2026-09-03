@@ -6,6 +6,14 @@ public struct SearchHit: Equatable, Sendable {
     public var lat: Double
     public var lon: Double
     public var score: Double
+
+    public init(name: String, kind: String, lat: Double, lon: Double, score: Double) {
+        self.name = name
+        self.kind = kind
+        self.lat = lat
+        self.lon = lon
+        self.score = score
+    }
 }
 
 public struct SearchIndex: Sendable {
