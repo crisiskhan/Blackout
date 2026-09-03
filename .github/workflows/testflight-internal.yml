@@ -584,10 +584,10 @@ jobs:
           phase_id = "C1A00001B007000000000001"
           note = "CI strip loose AppIcon before CodeSign"
           if phase_id not in text:
-              # shellScript calls the file; SRCROOT with braces built without putting ${{ in the workflow YAML
+              # shellScript calls the file; SRCROOT with braces built without putting dollar-brace-brace in the workflow YAML
               src = "$" + "{SRCROOT}/ci_strip_appicon.sh"
               shell = '\\"' + src + '\\"\\n'
-              # Actually pbxproj wants: shellScript = "${SRCROOT}/ci_strip_appicon.sh\n";
+              # Actually pbxproj wants: shellScript = dollar-SRCROOT/ci_strip_appicon.sh
               shell_script_value = '"$SRCROOT/ci_strip_appicon.sh"\n'
               phase = (
                   "\t\t" + phase_id + " /* " + note + " */ = {\n"
