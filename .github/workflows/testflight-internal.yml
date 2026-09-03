@@ -504,13 +504,57 @@ jobs:
           }
           if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
               body["signingStyle"] = "manual"
-              body["signingCertificate"] = "Apple Distribution"
+              body["signingCertificate"] = "iOS Distribution"
               body["provisioningProfiles"] = profiles
           else:
               body["signingStyle"] = "automatic"
           plistlib.dump(body, open(path, "wb"))
           print("wrote", path, "signingStyle", body["signingStyle"])
           PY
+          "$PYBIN" - << PY
+          import json, os, re
+          from pathlib import Path
+          team = os.environ["APPLE_TEAM_ID"]
+          pmap = {}
+          mp = Path(os.environ["RUNNER_TEMP"]) / "profile_map.json"
+          if mp.exists():
+              pmap = json.loads(mp.read_text())
+          path = Path("Blackout.xcodeproj/project.pbxproj")
+          text = path.read_text()
+          # Per-target Release/Debug: only the 3 native app targets, never SPM packages.
+          spec = {
+              "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA"),
+              "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA"),
+              "com.crisiskhan.blackout.watchkitapp": pmap.get("com.crisiskhan.blackout.watchkitapp", "Blackout Watch App Store GHA"),
+          }
+          def patch_block(block, bundle):
+              name = spec[bundle]
+              def sub(key, val):
+                  nonlocal block
+                  if re.search(rf"{key} = ", block):
+                      block = re.sub(rf"{key} = [^;]*;", f"{key} = {val};", block, count=1)
+                  else:
+                      block = block.replace("buildSettings = {", "buildSettings = {\n\t\t\t\t" + f"{key} = {val};")
+                  return block
+              block = sub("CODE_SIGN_STYLE", "Manual")
+              block = sub("CODE_SIGN_IDENTITY", '"iOS Distribution"')
+              block = sub("DEVELOPMENT_TEAM", team)
+              block = sub("PROVISIONING_PROFILE_SPECIFIER", f'"{name}"')
+              return block
+          out = text
+          for bundle in spec:
+              # patch every buildSettings block that contains this PRODUCT_BUNDLE_IDENTIFIER
+              pattern = re.compile(
+                  r"(buildSettings = \{[^{}]*PRODUCT_BUNDLE_IDENTIFIER = " + re.escape(bundle) + r";[^{}]*\})",
+                  re.S,
+              )
+              out, n = pattern.subn(lambda m: patch_block(m.group(1), bundle), out)
+              print(f"patched {bundle} blocks={n}")
+          path.write_text(out)
+          print("CI-only pbxproj signing patch (not committed)")
+          PY
+          echo "codesign identities:"
+          security find-identity -v -p codesigning || true
           strip_watch() {
             echo "CI-only: strip Embed Watch Content from checkout (not committed) after Watch profile packaging fail"
             "$PYBIN" - << 'PY'
@@ -552,10 +596,7 @@ jobs:
               -archivePath "$ARCHIVE" \
               CURRENT_PROJECT_VERSION="$NEXT" \
               DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-              CODE_SIGN_STYLE=Automatic \
-              CODE_SIGN_IDENTITY="Apple Distribution" \
               CODE_SIGNING_ALLOWED=YES \
-              CODE_SIGNING_REQUIRED=YES \
               "${AUTH[@]}" \
               archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
             echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
