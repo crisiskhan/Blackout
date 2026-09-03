@@ -1,37 +1,55 @@
-# TESTFLIGHT — Xcode Cloud → Internal
+# TESTFLIGHT — iPhone Safari + Xcode Cloud
 
-Primary path: Xcode Cloud. iPhone + any browser (ASUS laptop is fine). No Mac. No Xcode. No p12.
+Crisis is on iPhone 12 Pro Max only. No Xcode. No Mac. No p12.
+
+Start from the app page menu: Distribution / Analytics / TestFlight / Xcode Cloud.
 
 ## Facts
 
-- App: Blackout  
-- Bundle id: `com.crisiskhan.blackout`  
-- ASC app id: `6806388963`  
-- GitHub repo: `crisiskhan/Blackout`  
-- Exact branch Xcode Cloud must build: `cursor/blackout-bible-v3-64d0`  
-- Destination: TestFlight Internal group only (`28035586-fce6-474f-9bc2-ef0f1f65306e`). No App Review. No External Testing.
+- Bundle `com.crisiskhan.blackout`
+- Repo `crisiskhan/Blackout`
+- Branch Xcode Cloud MUST use: `cursor/blackout-bible-v3-64d0` (never `main`)
+- Destination: TestFlight Internal only. No App Review. No External Testing.
+- Repo CPV is 1 and collides; turn ON Apple managing the build number.
+- A 50-series TestFlight build is the old vessel.
+- `ci_scripts` are in the repo; they do not start a build by themselves.
 
-This PR tree is not on TestFlight until an Xcode Cloud archive of that branch is VALID and assigned Internal. A 50-series build in TestFlight is the old vessel.
+## Safari first
 
-`pbxproj` `CURRENT_PROJECT_VERSION` is `1` and WILL collide with old ASC builds. In the Xcode Cloud workflow, turn ON Apple managing the build number (unique `CFBundleVersion`, next unused after existing internals). Do not require Crisis to export a cert.
+1. Open appstoreconnect.apple.com in Safari. Sign in with the Apple Developer account that owns this app (human tap 1 — I cannot do this).
+2. Safari: tap Aa / Page Settings → Request Desktop Website. Stay on desktop site.
+3. Open the Blackout app. Tap **Xcode Cloud** on that row (Distribution / Analytics / TestFlight / Xcode Cloud).
 
-## A — start the cloud build (browser, not Xcode)
+## GitHub not connected yet — exact taps
 
-1. App Store Connect → Apps → Blackout (`com.crisiskhan.blackout`) → Xcode Cloud.
-2. Product is this GitHub repo `crisiskhan/Blackout`, scheme Blackout, project `Blackout.xcodeproj`. If a product already exists from the old tree, point the workflow at branch `cursor/blackout-bible-v3-64d0` (do not use `main` for this pass).
-3. Workflow settings: Archive, TestFlight Internal, not App Store Review, not External Testing. Manage version and build number ON.
-4. Start Build on `cursor/blackout-bible-v3-64d0`. Wait until the build is Processed / Ready to Test.
+Use Apple's Grant Access language. Do not invent extra menus.
 
-## B — iPhone taps after the build appears in TestFlight
+4. If Xcode Cloud shows Get Started / Grant Access / Connect Repository / GitHub not connected: tap **Grant Access** (or Get Started then Grant Access).
+5. Choose **GitHub** (github.com, not Enterprise).
+6. Sign into GitHub as the owner of `crisiskhan/Blackout`. Authorize Apple's Xcode Cloud GitHub app. Install it on **only** `crisiskhan/Blackout`, not every repo. Return to App Store Connect (human tap 2 — I cannot do this).
+7. If GitHub is already connected, skip 4–6.
 
-1. Open TestFlight (install from the App Store if needed).
-2. If Blackout is missing, redeem the Internal tester email invite.
-3. Open Blackout. Confirm the build number is the new Xcode Cloud build, not a leftover 50-series.
-4. Tap Install (or Update).
-5. Open Blackout.
-6. Airplane On, then Bluetooth On. Wi-Fi off. Cell off.
-7. Score `docs/SOLO_QA.md`.
+## Workflow (still Safari, Xcode Cloud tab → Manage Workflows)
 
-## C — Mac-optional GHA (do not use)
+8. Add or edit a workflow named Internal TF (or edit the existing product for this bundle).
+9. Start condition: Branch Changes on `cursor/blackout-bible-v3-64d0` only. Do not use `main`.
+10. Action: Archive, platform iOS, scheme **Blackout**, project `Blackout.xcodeproj`. Distribution preparation: TestFlight Internal Only. Manage version and build number ON.
+11. Post-Actions: TestFlight Internal Test, artifact Archive - iOS, existing Internal group. Do not add App Store Review. Do not add External Testing.
+12. Save. Tap **Start Build**. Branch picker: `cursor/blackout-bible-v3-64d0`. Start Build (human tap 3 — I cannot do this).
+13. Wait until Processed / Ready to Test.
 
-`.github/workflows/testflight-internal.yml` remains `workflow_dispatch` only. It needs a Mac-exported Apple Distribution p12 + three App Store profiles. Crisis cannot produce those. Default CI (`.github/workflows/xcodebuild.yml`) does not read those secrets and must not fail when they are missing. Do not run the p12 workflow.
+## Then iPhone TestFlight app
+
+14. Open TestFlight. Redeem Internal invite if Blackout is missing.
+15. Confirm the build number is the new Xcode Cloud build, not 50-series. Install or Update. Open Blackout.
+16. Airplane On, then Bluetooth On. Wi-Fi off. Cell off. Score `docs/SOLO_QA.md`.
+
+## Three taps I cannot do
+
+1. Apple login (Safari → App Store Connect)
+2. Grant GitHub to Xcode Cloud (Grant Access → GitHub → install app on `crisiskhan/Blackout`)
+3. Start Build on `cursor/blackout-bible-v3-64d0`
+
+## Mac-optional GHA — do not use
+
+`.github/workflows/testflight-internal.yml` stays `workflow_dispatch` only. Default CI does not need p12. Do not run the p12 workflow.
