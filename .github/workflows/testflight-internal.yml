@@ -78,11 +78,17 @@ jobs:
           echo "AUTH_KEY_PATH=$TEMP_KEY" >> "$GITHUB_ENV"
           echo "AuthKey written (path only, not contents)."
 
+      - name: Python JWT venv
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install -q PyJWT cryptography
+          echo "PYBIN=$RUNNER_TEMP/py/bin/python" >> "$GITHUB_ENV"
+
       - name: Probe ASC DISTRIBUTION certificates
         run: |
           set -euo pipefail
-          python3 -m pip install -q PyJWT cryptography
-          python3 << 'PY'
+          "$PYBIN" << 'PY'
           import json, os, time, urllib.error, urllib.parse, urllib.request
           import jwt
 
@@ -136,8 +142,7 @@ jobs:
         id: ver
         run: |
           set -euo pipefail
-          python3 -m pip install -q PyJWT cryptography
-          python3 << 'PY'
+          "$PYBIN" << 'PY'
           import json, os, time, urllib.parse, urllib.request
           import jwt
 
@@ -285,8 +290,7 @@ jobs:
       - name: Assign existing Internal group after VALID
         run: |
           set -euo pipefail
-          python3 -m pip install -q PyJWT cryptography
-          WANT_BUILD="${NEXT_BUILD}" python3 << 'PY'
+          WANT_BUILD="${NEXT_BUILD}" "$PYBIN" << 'PY'
           import json, os, time, urllib.error, urllib.parse, urllib.request
           import jwt
 
