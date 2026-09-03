@@ -1,3 +1,7 @@
+# Mac-optional. Crisis has no Mac.
+# Default path is Xcode Cloud (docs/TESTFLIGHT.md).
+# This file is workflow_dispatch only.
+# Must never run on pull_request or push.
 name: TestFlight Internal
 
 on:
