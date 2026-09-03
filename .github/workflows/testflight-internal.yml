@@ -581,7 +581,7 @@ jobs:
                   f"\t\t\toutputPaths = (\n\t\t\t);\n"
                   f"\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
                   f"\t\t\tshellPath = /bin/sh;\n"
-                  f"\t\t\tshellScript = \"set -e\\nAPP=\\\"${{BUILT_PRODUCTS_DIR}}/${{FULL_PRODUCT_NAME}}\\\"\\nif [ -d \\\"$APP\\\" ]; then\\n  find \\\"$APP\\\" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true\\n  /usr/bin/xattr -cr \\\"$APP\\\" || true\\nfi\\n\";\n"
+                  f"\t\t\tshellScript = \"set -e\\nAPP=\\\"\$BUILT_PRODUCTS_DIR/\$FULL_PRODUCT_NAME\\\"\\nif [ -d \\\"$APP\\\" ]; then\\n  find \\\"$APP\\\" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true\\n  /usr/bin/xattr -cr \\\"$APP\\\" || true\\nfi\\n\";\n"
                   f"\t\t\tshowEnvVarsInLog = 0;\n"
                   f"\t\t}};\n"
               )
