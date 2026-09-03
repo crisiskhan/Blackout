@@ -1,56 +1,34 @@
-# Mac-optional. Crisis has no Mac.
-# Default path is Xcode Cloud (docs/TESTFLIGHT.md).
-# This file is workflow_dispatch only.
-# Must never run on pull_request or push.
+# No human p12. ASC AuthKey automatic signing.
+# workflow_dispatch only. Never pull_request or push.
+# Default unsigned compile is xcodebuild.yml and must stay green without these secrets.
 name: TestFlight Internal
 
 on:
   workflow_dispatch:
+    inputs:
+      git_ref:
+        description: "App tree to archive (not main)"
+        required: true
+        default: cursor/blackout-bible-v3-64d0
 
 jobs:
   upload:
-    name: Signed archive + Internal upload
-    runs-on: macos-14
+    name: AuthKey archive + Internal upload
+    runs-on: macos-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
     env:
       APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
       APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-      P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-      BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-      WATCH_PROVISION_PROFILE_BASE64: ${{ secrets.WATCH_PROVISION_PROFILE_BASE64 }}
-      WIDGETS_PROVISION_PROFILE_BASE64: ${{ secrets.WIDGETS_PROVISION_PROFILE_BASE64 }}
       ASC_APP_ID: "6806388963"
       ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
     steps:
-      - name: Require signing secrets
+      - name: Require ASC AuthKey secrets
         run: |
           set -euo pipefail
-          missing=0
-          for name in \
-            BUILD_CERTIFICATE_BASE64 \
-            P12_PASSWORD \
-            BUILD_PROVISION_PROFILE_BASE64 \
-            WATCH_PROVISION_PROFILE_BASE64 \
-            WIDGETS_PROVISION_PROFILE_BASE64
-          do
-            eval "val=\${$name:-}"
-            if [ -z "$val" ]; then
-              missing=1
-            fi
-          done
-          if [ "$missing" -ne 0 ]; then
-            echo "MISSING and must exist as repo Actions secrets:"
-            echo "- BUILD_CERTIFICATE_BASE64 — Apple Distribution certificate exported as .p12, base64"
-            echo "- P12_PASSWORD — password for that p12"
-            echo "- BUILD_PROVISION_PROFILE_BASE64 — App Store profile for com.crisiskhan.blackout"
-            echo "- WATCH_PROVISION_PROFILE_BASE64 — App Store profile for com.crisiskhan.blackout.watchkitapp (embedded Watch)"
-            echo "- WIDGETS_PROVISION_PROFILE_BASE64 — App Store profile for com.crisiskhan.blackout.widgets (embedded widgets)"
-            echo "No archive. No upload. CURRENT_PROJECT_VERSION not bumped."
-            exit 1
-          fi
           for name in APP_STORE_CONNECT_API_KEY APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_ID APPLE_TEAM_ID
           do
             eval "val=\${$name:-}"
@@ -59,9 +37,11 @@ jobs:
               exit 1
             fi
           done
-          echo "Signing and ASC secrets are present (values not printed)."
+          echo "ASC AuthKey secrets are present (values not printed)."
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
 
       - name: Select Xcode 16
         run: |
@@ -85,25 +65,72 @@ jobs:
           xcodebuild -version
           xcode-select -p
 
-      - name: Import Distribution cert and App Store profiles
+      - name: Write AuthKey
         run: |
           set -euo pipefail
-          CERT="$RUNNER_TEMP/dist.p12"
-          KEYCHAIN="$RUNNER_TEMP/blackout-signing.keychain-db"
-          KEYCHAIN_PW="$(openssl rand -base64 24)"
-          printf '%s' "$BUILD_CERTIFICATE_BASE64" | base64 --decode > "$CERT"
-          security create-keychain -p "$KEYCHAIN_PW" "$KEYCHAIN"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN"
-          security unlock-keychain -p "$KEYCHAIN_PW" "$KEYCHAIN"
-          security import "$CERT" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PW" "$KEYCHAIN"
-          security list-keychain -d user -s "$KEYCHAIN" login.keychain
-          PROFILES="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES"
-          printf '%s' "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > "$PROFILES/blackout-app.mobileprovision"
-          printf '%s' "$WATCH_PROVISION_PROFILE_BASE64" | base64 --decode > "$PROFILES/blackout-watch.mobileprovision"
-          printf '%s' "$WIDGETS_PROVISION_PROFILE_BASE64" | base64 --decode > "$PROFILES/blackout-widgets.mobileprovision"
-          echo "Imported certificate and three App Store profiles (names not assumed)."
+          KEYDIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEYDIR"
+          HOME_KEY="$KEYDIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          TEMP_KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$(printf '%s' "$APP_STORE_CONNECT_API_KEY" | tr -d '\r')" > "$HOME_KEY"
+          cp "$HOME_KEY" "$TEMP_KEY"
+          chmod 600 "$HOME_KEY" "$TEMP_KEY"
+          echo "AUTH_KEY_PATH=$TEMP_KEY" >> "$GITHUB_ENV"
+          echo "AuthKey written (path only, not contents)."
+
+      - name: Probe ASC DISTRIBUTION certificates
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q PyJWT cryptography
+          python3 << 'PY'
+          import json, os, time, urllib.error, urllib.parse, urllib.request
+          import jwt
+
+          STOP = (
+              "ASC API key cannot create or reuse signing certificates. "
+              "In App Store Connect → Users and Access → Integrations → App Store Connect API, "
+              "the key’s role must be Admin or Account Holder (not Developer, not App Manager). "
+              "Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key."
+          )
+
+          key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
+          kid = os.environ["APP_STORE_CONNECT_KEY_ID"].strip()
+          iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
+          now = int(time.time())
+          tok = jwt.encode(
+              {"iss": iss, "iat": now, "exp": now + 15 * 60, "aud": "appstoreconnect-v1"},
+              key,
+              algorithm="ES256",
+              headers={"kid": kid, "typ": "JWT"},
+          )
+          if isinstance(tok, bytes):
+              tok = tok.decode()
+          q = urllib.parse.urlencode({"filter[certificateType]": "DISTRIBUTION", "limit": "5"})
+          url = "https://api.appstoreconnect.apple.com/v1/certificates?" + q
+          req = urllib.request.Request(
+              url,
+              headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"},
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=45) as resp:
+                  st = resp.status
+                  raw = resp.read()
+          except urllib.error.HTTPError as e:
+              st = e.code
+              raw = e.read()
+          if st in (401, 403):
+              print(STOP)
+              raise SystemExit(1)
+          if st != 200:
+              print(f"ASC certificates probe HTTP {st}")
+              print(raw[:400].decode("utf-8", "replace"))
+              if st in (401, 403):
+                  print(STOP)
+              raise SystemExit(1)
+          data = json.loads(raw) if raw else {}
+          n = len(data.get("data") or [])
+          print(f"ASC DISTRIBUTION certificates reachable n={n} (reuse; no human cert export)")
+          PY
 
       - name: Next CFBundleVersion from ASC
         id: ver
@@ -156,44 +183,34 @@ jobs:
           echo "CURRENT_PROJECT_VERSION on the command line only: $NEXT (not committed)"
           ARCHIVE="$RUNNER_TEMP/Blackout.xcarchive"
           EXPORT="$RUNNER_TEMP/export"
-          PROFILES="$HOME/Library/MobileDevice/Provisioning Profiles"
-          name_of() {
-            security cms -D -i "$1" | plutil -extract Name raw -
+          STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
+          AUTH=(
+            -allowProvisioningUpdates
+            -authenticationKeyPath "$AUTH_KEY_PATH"
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+          )
+          python3 - << PY
+          import os, plistlib
+          path = os.environ["RUNNER_TEMP"] + "/ExportOptions.plist"
+          plistlib.dump(
+              {
+                  "method": "app-store-connect",
+                  "destination": "export",
+                  "signingStyle": "automatic",
+                  "teamID": os.environ["APPLE_TEAM_ID"],
+                  "uploadSymbols": True,
+                  "manageAppVersionAndBuildNumber": False,
+              },
+              open(path, "wb"),
+          )
+          print("wrote", path)
+          PY
+          fail_admin() {
+            echo "$STOP"
+            exit 1
           }
-          APP_PN="$(name_of "$PROFILES/blackout-app.mobileprovision")"
-          WATCH_PN="$(name_of "$PROFILES/blackout-watch.mobileprovision")"
-          WIDGET_PN="$(name_of "$PROFILES/blackout-widgets.mobileprovision")"
-          cat > "$RUNNER_TEMP/ExportOptions.plist" << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>destination</key>
-            <string>export</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>signingCertificate</key>
-            <string>Apple Distribution</string>
-            <key>teamID</key>
-            <string>${APPLE_TEAM_ID}</string>
-            <key>manageAppVersionAndBuildNumber</key>
-            <false/>
-            <key>uploadSymbols</key>
-            <true/>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.crisiskhan.blackout</key>
-              <string>${APP_PN}</string>
-              <key>com.crisiskhan.blackout.watchkitapp</key>
-              <string>${WATCH_PN}</string>
-              <key>com.crisiskhan.blackout.widgets</key>
-              <string>${WIDGET_PN}</string>
-            </dict>
-          </dict>
-          </plist>
-          EOF
+          set +e
           xcodebuild \
             -project Blackout.xcodeproj \
             -scheme Blackout \
@@ -202,17 +219,38 @@ jobs:
             -archivePath "$ARCHIVE" \
             CURRENT_PROJECT_VERSION="$NEXT" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
             CODE_SIGNING_ALLOWED=YES \
             CODE_SIGNING_REQUIRED=YES \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            archive
+            "${AUTH[@]}" \
+            archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
+          ARC=${PIPESTATUS[0]}
+          set -e
+          if [ "$ARC" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/archive.log"; then
+              fail_admin
+            fi
+            echo "Archive failed. No upload."
+            exit 1
+          fi
           mkdir -p "$EXPORT"
+          set +e
           xcodebuild \
             -exportArchive \
             -archivePath "$ARCHIVE" \
             -exportPath "$EXPORT" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            "${AUTH[@]}" \
+            2>&1 | tee "$RUNNER_TEMP/export.log"
+          EXP=${PIPESTATUS[0]}
+          set -e
+          if [ "$EXP" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/export.log"; then
+              fail_admin
+            fi
+            echo "Export failed. No upload."
+            exit 1
+          fi
           ls -la "$EXPORT"
           IPA="$(ls "$EXPORT"/*.ipa | head -n 1)"
           echo "IPA=$IPA" >> "$GITHUB_ENV"
@@ -225,16 +263,23 @@ jobs:
             echo "No IPA. No upload."
             exit 1
           fi
-          KEYDIR="$HOME/.appstoreconnect/private_keys"
-          mkdir -p "$KEYDIR"
-          KEYFILE="$KEYDIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
-          printf '%s\n' "$(printf '%s' "$APP_STORE_CONNECT_API_KEY" | tr -d '\r')" > "$KEYFILE"
-          chmod 600 "$KEYFILE"
+          STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
+          set +e
           xcrun altool --upload-app \
             --type ios \
             --file "$IPA" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            2>&1 | tee "$RUNNER_TEMP/altool.log"
+          UP=${PIPESTATUS[0]}
+          set -e
+          if [ "$UP" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/altool.log"; then
+              echo "$STOP"
+            fi
+            echo "Upload failed. Not faked."
+            exit 1
+          fi
           echo "Uploaded CFBundleVersion ${NEXT_BUILD}. Not submitted for App Review. No External Testing group."
 
       - name: Assign existing Internal group after VALID
