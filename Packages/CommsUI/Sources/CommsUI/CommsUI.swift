@@ -4,7 +4,7 @@ import CryptoParty
 import PTTAudio
 import RosterRoles
 
-public enum Chip: String, CaseIterable, Sendable {
+public enum Chip: String, CaseIterable, Sendable, Hashable {
     case ok, formUp, wait, water, lostKid, overdue
 }
 

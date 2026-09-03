@@ -10,8 +10,8 @@ public struct PTTClip: Equatable, Sendable {
 public final class PTTDeck: @unchecked Sendable {
     public private(set) var live = false
     public private(set) var last: PTTClip?
-    private let box: BlackBox
-    public init(box: BlackBox) { self.box = box }
+    private let box: EventLog
+    public init(box: EventLog) { self.box = box }
 
     public func beginLive() { live = true; box.log("ptt", "live") }
     public func endLive() { live = false }

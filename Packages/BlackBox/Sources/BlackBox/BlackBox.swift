@@ -9,7 +9,7 @@ public struct BlackBoxEvent: Codable, Equatable, Sendable {
     }
 }
 
-public final class BlackBox: @unchecked Sendable {
+public final class EventLog: @unchecked Sendable {
     private let lock = NSLock()
     private var events: [BlackBoxEvent] = []
     public init() {}

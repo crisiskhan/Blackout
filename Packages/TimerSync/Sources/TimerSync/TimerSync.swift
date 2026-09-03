@@ -13,9 +13,9 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
 
 public final class TimerBoard: @unchecked Sendable {
     public private(set) var timers: [PartyTimer] = []
-    private let box: BlackBox
+    private let box: EventLog
     public static let maxActive = 4
-    public init(box: BlackBox) { self.box = box }
+    public init(box: EventLog) { self.box = box }
 
     @discardableResult
     public func add(who: String, task: String, duration: TimeInterval, subjectAll: Bool, now: Date = Date()) -> PartyTimer? {

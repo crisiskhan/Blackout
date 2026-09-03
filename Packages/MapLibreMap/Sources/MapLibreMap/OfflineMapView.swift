@@ -1,6 +1,5 @@
+import CoreLocation
 import Foundation
-
-#if canImport(SwiftUI) && canImport(UIKit) && canImport(MapLibre)
 import MapLibre
 import SwiftUI
 import UIKit
@@ -22,7 +21,11 @@ public struct OfflineMapView: UIViewRepresentable {
         view.logoView.isHidden = false
         view.prefetchesTiles = false
         view.allowsRotating = true
-        view.setCenter(CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon), zoomLevel: 13, animated: false)
+        view.setCenterCoordinate(
+            CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
+            zoomLevel: 13,
+            animated: false
+        )
         return view
     }
 
@@ -32,4 +35,3 @@ public struct OfflineMapView: UIViewRepresentable {
         }
     }
 }
-#endif

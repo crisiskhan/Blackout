@@ -32,9 +32,9 @@ public struct MapSession: Sendable {
     public mutating func mark(lat: Double, lon: Double) { lastPip = (lat, lon); lockOn = true }
 
     public func navigate(graph: RouteGraph, from: Int, to: Int, mode: TravelMode) -> RouteResult {
-        if let r = Router.route(graph: graph, from: from, to: to, mode: mode) { return r }
+        if let r = GraphRouter.route(graph: graph, from: from, to: to, mode: mode) { return r }
         let a = lastPip ?? (pack.center.lat, pack.center.lon)
-        return Router.bearingFallback(fromLat: a.0, fromLon: a.1, toLat: pack.center.lat, toLon: pack.center.lon)
+        return GraphRouter.bearingFallback(fromLat: a.0, fromLon: a.1, toLat: pack.center.lat, toLon: pack.center.lon)
     }
 
     public func deadReckon(heading: Double, steps: Int, stride: Double) -> (Double, Double) {

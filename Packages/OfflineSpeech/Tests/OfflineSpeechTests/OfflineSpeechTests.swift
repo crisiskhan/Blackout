@@ -2,9 +2,9 @@ import XCTest
 import BlackBox
 @testable import OfflineSpeech
 
-final class OfflineSpeechTests: XCTestCase {
+final class SpeechEngineTests: XCTestCase {
     func testSpeak() {
-        let s = OfflineSpeech(box: BlackBox())
+        let s = SpeechEngine(box: EventLog())
         s.speak("STOP", locale: "es")
         XCTAssertTrue(s.lastUtterance.contains("STOP"))
     }

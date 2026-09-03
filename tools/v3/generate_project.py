@@ -115,6 +115,7 @@ def ios_target_settings(debug: bool) -> dict:
             "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator",
             "SUPPORTS_MACCATALYST": "NO",
             "TARGETED_DEVICE_FAMILY": "1,2",
+            "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         }
     )
     return s
@@ -137,6 +138,11 @@ def watch_settings(debug: bool) -> dict:
             "SKIP_INSTALL": "YES",
             "TARGETED_DEVICE_FAMILY": "4",
             "WATCHOS_DEPLOYMENT_TARGET": "11.0",
+            "SUPPORTED_PLATFORMS": "watchos watchsimulator",
+            "INFOPLIST_FILE": "BlackoutWatch/Info.plist",
+            "INFOPLIST_KEY_WKWatchOnly": "YES",
+            "INFOPLIST_KEY_WKCompanionAppBundleIdentifier": "com.crisiskhan.blackout",
+            "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         }
     )
     return s
@@ -157,12 +163,19 @@ def widget_settings(debug: bool) -> dict:
             "PRODUCT_NAME": "$(TARGET_NAME)",
             "SKIP_INSTALL": "YES",
             "TARGETED_DEVICE_FAMILY": "1,2",
+            "APPLICATION_EXTENSION_API_ONLY": "YES",
+            "INFOPLIST_FILE": "BlackoutWidgets/Info.plist",
+            "IPHONEOS_DEPLOYMENT_TARGET": "18.0",
+            "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator",
+            "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         }
     )
     return s
 
 
 def generate() -> None:
+    pkg_paths = [(f"Packages/{folder}", product) for folder, product in PACKAGES]
+    pkg_paths.append(("Vendor/MapLibre", "MapLibre"))
     ids = {k: oid(k) for k in [
         "app_ref", "watch_ref", "widget_ref", "sync_app", "sync_watch", "sync_widget",
         "fw_app", "fw_watch", "fw_widget", "root", "products", "tgt_app", "tgt_watch", "tgt_widget",
@@ -170,21 +183,21 @@ def generate() -> None:
         "res_app", "res_watch", "res_widget", "project", "proj_conf",
         "proj_debug", "proj_release", "app_debug", "app_release", "watch_debug", "watch_release",
         "widget_debug", "widget_release", "pack_ref", "pack_build", "copy_script",
-        "sync_ex", "embed_watch", "embed_widget", "dep_watch", "dep_widget",
+        "sync_ex", "sync_watch_ex", "sync_widget_ex", "embed_watch", "embed_widget", "dep_watch", "dep_widget",
         "proxy_watch", "proxy_widget",
     ]}
-    pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
-    pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in PACKAGES}
-    pkg_link = {product: oid(f"pkglink-{product}") for _, product in PACKAGES}
+    pkg_ref = {path: oid(f"pkgref-{path}") for path, _ in pkg_paths}
+    pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in pkg_paths}
+    pkg_link = {product: oid(f"pkglink-{product}") for _, product in pkg_paths}
 
-    dep_lines = ",\n".join(f"\t\t\t\t{pkg_dep[p]} /* {p} */" for _, p in PACKAGES)
+    dep_lines = ",\n".join(f"\t\t\t\t{pkg_dep[p]} /* {p} */" for _, p in pkg_paths)
     ref_lines = ",\n".join(
-        f'\t\t\t\t{pkg_ref[f]} /* XCLocalSwiftPackageReference "Packages/{f}" */' for f, _ in PACKAGES
+        f'\t\t\t\t{pkg_ref[path]} /* XCLocalSwiftPackageReference "{path}" */' for path, _ in pkg_paths
     )
-    fw_files = ",\n".join(f"\t\t\t\t{pkg_link[p]} /* {p} in Frameworks */" for _, p in PACKAGES)
+    fw_files = ",\n".join(f"\t\t\t\t{pkg_link[p]} /* {p} in Frameworks */" for _, p in pkg_paths)
     build_files = [
         f"\t\t{pkg_link[p]} /* {p} in Frameworks */ = {{isa = PBXBuildFile; productRef = {pkg_dep[p]} /* {p} */; }};"
-        for _, p in PACKAGES
+        for _, p in pkg_paths
     ]
     build_files.append(
         f"\t\t{ids['pack_build']} /* Resources in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* Resources */; }};"
@@ -211,19 +224,19 @@ test -f "${DST}/Field/field.core.json"
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     local_refs = "\n".join(
-        f'''\t\t{pkg_ref[f]} /* XCLocalSwiftPackageReference "Packages/{f}" */ = {{
+        f'''\t\t{pkg_ref[path]} /* XCLocalSwiftPackageReference "{path}" */ = {{
 \t\t\tisa = XCLocalSwiftPackageReference;
-\t\t\trelativePath = Packages/{f};
+\t\t\trelativePath = {path};
 \t\t}};'''
-        for f, _ in PACKAGES
+        for path, _ in pkg_paths
     )
     product_deps = "\n".join(
         f'''\t\t{pkg_dep[p]} /* {p} */ = {{
 \t\t\tisa = XCSwiftPackageProductDependency;
-\t\t\tpackage = {pkg_ref[f]} /* XCLocalSwiftPackageReference "Packages/{f}" */;
+\t\t\tpackage = {pkg_ref[path]} /* XCLocalSwiftPackageReference "{path}" */;
 \t\t\tproductName = {p};
 \t\t}};'''
-        for f, p in PACKAGES
+        for path, p in pkg_paths
     )
 
     def cfg(name: str, settings: dict, debug: bool) -> str:
@@ -257,11 +270,17 @@ test -f "${DST}/Field/field.core.json"
 		}};
 		{ids['sync_watch']} /* BlackoutWatch */ = {{
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				{ids['sync_watch_ex']} /* Exceptions for "BlackoutWatch" */,
+			);
 			path = BlackoutWatch;
 			sourceTree = "<group>";
 		}};
 		{ids['sync_widget']} /* BlackoutWidgets */ = {{
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				{ids['sync_widget_ex']} /* Exceptions for "BlackoutWidgets" */,
+			);
 			path = BlackoutWidgets;
 			sourceTree = "<group>";
 		}};
@@ -514,6 +533,23 @@ test -f "${DST}/Field/field.core.json"
 			shellScript = "{copy_script}";
 		}};
 /* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		{ids['sync_watch_ex']} /* Exceptions for "BlackoutWatch" */ = {{
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = {ids['tgt_watch']} /* BlackoutWatch */;
+		}};
+		{ids['sync_widget_ex']} /* Exceptions for "BlackoutWidgets" */ = {{
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = {ids['tgt_widget']} /* BlackoutWidgets */;
+		}};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXTargetDependency section */
 		{ids['dep_watch']} /* PBXTargetDependency */ = {{

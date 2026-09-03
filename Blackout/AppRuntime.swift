@@ -20,24 +20,24 @@ import RegionalPacks
 @MainActor
 @Observable
 final class AppRuntime {
-    let box = BlackBox()
+    let box = EventLog()
     var packs: PackStore?
     var mesh: MeshNet
     var vitals = PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2)
     var red: RedPlate
     var timers: TimerBoard
     var roster = PartyRoster.create(lead: "Lead")
-    var trip = TripBrief.make(brief: "", hours: 2)
+    var trip = TripFactory.make(brief: "", hours: 2)
     var kit = KitBag(items: [
         GearItem(id: "water", name: "Water filter", working: true, failureHazard: "no drinkable water"),
         GearItem(id: "headlamp", name: "Headlamp", working: true, failureHazard: "no night march"),
     ])
-    var power: BatteryAuction
+    var power: AuctionBoard
     var night = NightRedState(enabled: false)
-    var instruments: Instruments
+    var instruments: InstrumentBoard
     var comms = CommsState()
     var ptt: PTTDeck
-    var speech: OfflineSpeech
+    var speech: SpeechEngine
     var armed = false
     var sawCannotDo = false
     var leftHand = false
@@ -50,10 +50,10 @@ final class AppRuntime {
         mesh = MeshNet(box: box)
         red = RedPlate(box: box)
         timers = TimerBoard(box: box)
-        power = BatteryAuction(box: box)
-        instruments = Instruments(box: box)
+        power = AuctionBoard(box: box)
+        instruments = InstrumentBoard(box: box)
         ptt = PTTDeck(box: box)
-        speech = OfflineSpeech(box: box)
+        speech = SpeechEngine(box: box)
         mesh.airplane = true
         mesh.startLocal()
         if let root = Self.resourceRoot() {

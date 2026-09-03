@@ -4,7 +4,7 @@ import BlackBox
 
 final class MeshDTNTests: XCTestCase {
     func testAirplaneNoJoin() {
-        let net = MeshNet(box: BlackBox())
+        let net = MeshNet(box: EventLog())
         net.startLocal()
         XCTAssertFalse(net.joined)
         net.meet("peer")

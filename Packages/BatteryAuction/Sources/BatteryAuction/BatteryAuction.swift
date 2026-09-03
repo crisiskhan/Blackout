@@ -10,10 +10,10 @@ public struct PowerState: Equatable, Sendable {
     public var screenBuffer: Bool
 }
 
-public final class BatteryAuction: @unchecked Sendable {
+public final class AuctionBoard: @unchecked Sendable {
     public private(set) var state: PowerState
-    private let box: BlackBox
-    public init(box: BlackBox) {
+    private let box: EventLog
+    public init(box: EventLog) {
         self.box = box
         self.state = PowerState(mode: .normal, pocket: false, powerBankWh: 0, screenBuffer: false)
     }

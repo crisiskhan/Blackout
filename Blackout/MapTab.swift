@@ -24,10 +24,8 @@ struct MapTab: View {
                     .foregroundStyle(Color(white: 0.6))
                 if let root = runtime.packs?.packURL("style.json")?.deletingLastPathComponent(),
                    let style = try? PackStyle.resolved(styleAt: root.appendingPathComponent("style.json"), packRoot: root) {
-                    #if canImport(MapLibre)
                     OfflineMapView(styleURL: style, centerLat: pack.center.lat, centerLon: pack.center.lon)
                         .frame(minHeight: 220)
-                    #endif
                 }
                 ForEach(RegionalPacks.visible(state: pack.state)) { b in
                     Text(b.title[runtime.locale] ?? b.id).font(.caption).foregroundStyle(Color(white: 0.7))

@@ -45,7 +45,7 @@ public enum FieldCorpus {
             guard card.schema == "1.4" else { throw FieldError.schema }
             guard !card.steps.isEmpty else { throw FieldError.emptySteps }
             for st in card.steps {
-                if st.do.en.isEmpty || st.image.isEmpty { throw FieldError.incompleteStep }
+                if st.`do`.en.isEmpty || st.image.isEmpty { throw FieldError.incompleteStep }
             }
         }
         return all

@@ -20,7 +20,7 @@ public struct RouteResult: Equatable, Sendable {
 
 public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOffGraph }
 
-public enum Router {
+public enum GraphRouter {
     public static func route(graph: RouteGraph, from: Int, to: Int, mode: TravelMode, avoid: Set<Int> = []) -> RouteResult? {
         var adj: [Int: [(Int, Double)]] = [:]
         for e in graph.edges {

@@ -2,9 +2,9 @@ import XCTest
 import BlackBox
 @testable import BatteryAuction
 
-final class BatteryAuctionTests: XCTestCase {
+final class AuctionBoardTests: XCTestCase {
     func testModes() {
-        let a = BatteryAuction(box: BlackBox())
+        let a = AuctionBoard(box: EventLog())
         XCTAssertFalse(a.state.screenBuffer)
         a.set(.search)
         XCTAssertEqual(a.state.mode, .search)

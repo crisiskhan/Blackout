@@ -18,8 +18,8 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var store: [MeshEnvelope] = []
     public var airplane = true
     public var loRaBrickPresent = false
-    private let box: BlackBox
-    public init(box: BlackBox) { self.box = box }
+    private let box: EventLog
+    public init(box: EventLog) { self.box = box }
 
     public func startLocal() {
         if airplane {

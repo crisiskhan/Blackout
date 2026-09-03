@@ -9,7 +9,7 @@ public struct TripSheet: Equatable, Sendable {
     public func overdue(now: Date = Date()) -> Bool { now > dueBack }
 }
 
-public enum TripBrief {
+public enum TripFactory {
     public static func make(brief: String, hours: Double, now: Date = Date()) -> TripSheet {
         TripSheet(brief: brief, debrief: "", outTime: now, dueBack: now.addingTimeInterval(hours * 3600))
     }

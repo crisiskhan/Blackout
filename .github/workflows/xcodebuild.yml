@@ -1,0 +1,54 @@
+name: xcodebuild
+
+on:
+  push:
+    branches:
+      - cursor/blackout-bible-v3-64d0
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Blackout generic iOS device
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          set -euo pipefail
+          ls /Applications | grep -i xcode || true
+          xcodebuild -version || true
+          for app in \
+            /Applications/Xcode_16.4.app \
+            /Applications/Xcode_16.3.app \
+            /Applications/Xcode_16.2.app \
+            /Applications/Xcode_16.1.app \
+            /Applications/Xcode_16.0.app \
+            /Applications/Xcode_16.app \
+            /Applications/Xcode.app
+          do
+            if [ -d "$app" ]; then
+              sudo xcode-select -s "$app"
+              break
+            fi
+          done
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Build Blackout (unsigned compile of all scheme targets)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Blackout.xcodeproj \
+            -scheme Blackout \
+            -destination 'generic/platform=iOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY= \
+            DEVELOPMENT_TEAM= \
+            build

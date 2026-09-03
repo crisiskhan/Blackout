@@ -22,10 +22,10 @@ public struct PackCatalog: Codable, Equatable, Sendable {
 public final class PackStore: @unchecked Sendable {
     public private(set) var active: PackManifest?
     public private(set) var catalog: PackCatalog
-    private let box: BlackBox
+    private let box: EventLog
     private let root: URL
 
-    public init(root: URL, box: BlackBox) throws {
+    public init(root: URL, box: EventLog) throws {
         self.root = root
         self.box = box
         let data = try Data(contentsOf: root.appendingPathComponent("catalog.json"))

@@ -9,10 +9,10 @@ public struct InstrumentState: Equatable, Sendable {
     public var magNorth: Bool
 }
 
-public final class Instruments: @unchecked Sendable {
+public final class InstrumentBoard: @unchecked Sendable {
     public private(set) var state = InstrumentState(torchClicks: 0, compassCalibrated: false, usbCPTT: false, externalGNSS: false, magNorth: true)
-    private let box: BlackBox
-    public init(box: BlackBox) { self.box = box }
+    private let box: EventLog
+    public init(box: EventLog) { self.box = box }
     public func torchTap() {
         state.torchClicks = (state.torchClicks + 1) % 4
         box.log("torch", "\(state.torchClicks)")

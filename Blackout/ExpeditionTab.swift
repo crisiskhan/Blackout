@@ -11,9 +11,9 @@ struct ExpeditionTab: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("EXPEDITION").foregroundStyle(Color(white: 0.85))
                 Text("CONDITION \(runtime.vitals.band.rawValue.uppercased())")
-                slider("Water", $runtime.vitals.water)
-                slider("Fatigue", $runtime.vitals.fatigue)
-                slider("Exposure", $runtime.vitals.weatherExposure)
+                slider("Water", Binding(get: { runtime.vitals.water }, set: { runtime.vitals.water = $0 }))
+                slider("Fatigue", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
+                slider("Exposure", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
                 Button("APPLY RED BAND") { runtime.red.apply(runtime.vitals) }
                 if runtime.red.isRed {
                     Text(L10n.t("red.plate", runtime.locale)).font(.title.weight(.bold)).foregroundStyle(.red)
