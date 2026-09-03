@@ -15,9 +15,21 @@ struct MapTab: View {
                 Spacer()
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
-                    runtime.lockOn.toggle()
-                    if runtime.lockOn { runtime.sendPOSIfPossible() }
+                    runtime.toggleLockOn()
                 }
+            }
+            HStack {
+                Button("MARK") { runtime.dropMark() }
+                Button("SPEAK") { runtime.speakMap() }
+            }
+            if !runtime.lockChrome.isEmpty {
+                Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+            }
+            if let h = runtime.headingDeg {
+                Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Color(white: 0.7))
+            }
+            if !runtime.speechChrome.isEmpty {
+                Text(runtime.speechChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
             }
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
@@ -37,6 +49,10 @@ struct MapTab: View {
                     .font(.caption2).foregroundStyle(Color(white: 0.45))
             }
             Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
+            ForEach(runtime.marks) { m in
+                Text("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))")
+                    .font(.caption).foregroundStyle(Color(white: 0.75))
+            }
             ForEach(runtime.mesh.pips, id: \.from) { p in
                 Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
                     .font(.caption).foregroundStyle(Color(white: 0.7))

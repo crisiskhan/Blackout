@@ -26,10 +26,17 @@ struct ExpeditionTab: View {
                     }
                 }
                 Text("ROSTER \(runtime.roster.code)")
+                PartyQRImage(code: runtime.roster.code)
+                Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
                 ForEach(runtime.roster.members) { m in
                     Text("\(m.role.rawValue) \(m.name)")
                 }
                 Button("JOIN NAV") { runtime.roster = runtime.roster.joining("Nav", role: .nav) }
+                Button("1 MIN TIMER SET") {
+                    if runtime.timers.add(who: "ALL", task: "1min", duration: 60, subjectAll: true) != nil {
+                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "1min", done: false)
+                    }
+                }
                 Button("2H WATER TIMER SET") {
                     if runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true) != nil {
                         runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "water", done: false)

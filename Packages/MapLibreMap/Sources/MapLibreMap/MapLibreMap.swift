@@ -6,6 +6,39 @@ import DeadReckoning
 import Almanac
 import BlackBox
 
+public struct MapMark: Codable, Equatable, Sendable, Identifiable {
+    public var id: String
+    public var lat: Double
+    public var lon: Double
+    public var label: String
+    public init(id: String, lat: Double, lon: Double, label: String) {
+        self.id = id
+        self.lat = lat
+        self.lon = lon
+        self.label = label
+    }
+}
+
+public enum MarkStore {
+    public static let key = "map.marks"
+
+    public static func save(_ marks: [MapMark], defaults: UserDefaults = .standard) {
+        defaults.set(try? JSONEncoder().encode(marks), forKey: key)
+    }
+
+    public static func load(defaults: UserDefaults = .standard) -> [MapMark] {
+        guard let data = defaults.data(forKey: key) else { return [] }
+        return (try? JSONDecoder().decode([MapMark].self, from: data)) ?? []
+    }
+}
+
+public enum LockOnChrome {
+    public static func banner(hasGPS: Bool, hasGraph: Bool) -> String {
+        if hasGPS || hasGraph { return "" }
+        return "OFF GRAPH"
+    }
+}
+
 public enum MapTool: String, CaseIterable, Sendable {
     case mark, walk, drive, ruler, usng, magTrue, almanac, elevProfile
     case avoidPolygon, shadePrefer, highLow, crossing, truckPin

@@ -16,7 +16,11 @@ struct CommsTab: View {
                 VStack(alignment: .leading, spacing: 8) {
                     TextField("PARTY CODE", text: Binding(
                         get: { runtime.roster.code },
-                        set: { runtime.roster = runtime.roster.setting(code: $0); runtime.mesh.partyCode = runtime.roster.code }
+                        set: {
+                            runtime.roster = runtime.roster.setting(code: $0)
+                            runtime.mesh.partyCode = runtime.roster.code
+                            runtime.persistPartyCode()
+                        }
                     ))
                     .textFieldStyle(.roundedBorder)
                     .textInputAutocapitalization(.characters)
@@ -37,16 +41,18 @@ struct CommsTab: View {
                     runtime.comms.down()
                     runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.down.rawValue)
                 }
-                Button(L10n.t("ok.chip", runtime.locale)) {
-                    runtime.comms.chips.append(.ok)
-                    runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.ok.rawValue)
+                if runtime.mesh.joined {
+                    Button(L10n.t("ok.chip", runtime.locale)) {
+                        runtime.comms.chips.append(.ok)
+                        runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.ok.rawValue)
+                    }
                 }
             }
             Text("Whisper <10 m: \(runtime.comms.whisperOK ? "yes" : "no")")
             Text(L10n.t("net.physics", runtime.locale))
                 .font(.caption).foregroundStyle(Color(white: 0.55))
             Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
-                if runtime.ptt.live { runtime.ptt.endLive() } else { runtime.ptt.beginLive() }
+                if runtime.ptt.live { runtime.ptt.endLive() } else { runtime.beginPTTSolo() }
             }
             Button("15s CLIP") {
                 _ = runtime.ptt.recordClip(pcm: Data(repeating: 0, count: 32000), sampleRate: 16000)

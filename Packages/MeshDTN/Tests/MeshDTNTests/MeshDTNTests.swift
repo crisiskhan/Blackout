@@ -21,6 +21,10 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.store.count, 4)
         XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
         XCTAssertTrue(box.all().contains { $0.detail.contains("NO PEERS") })
+        net.sendChip(from: net.localID, chip: "field:med-bleed-pack")
+        net.sendChip(from: net.localID, chip: "ptt")
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
     }
 
     func testConnectedRadioSendsChipRedTimerPOS() {

@@ -25,11 +25,26 @@ struct FieldTab: View {
                     Button("NEXT") { var x = s; x.next(); stepper = x }
                     Button("SPEAK") {
                         var x = s; x.speak(); stepper = x
-                        FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech)
+                        if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech) {
+                            runtime.speechChrome = "SPEECH FAILED"
+                        } else {
+                            runtime.speechChrome = ""
+                        }
                     }
-                    Button("SEND TO PARTY") { var x = s; x.send(); stepper = x }
+                    Button("SEND TO PARTY") {
+                        var x = s
+                        x.send()
+                        stepper = x
+                        runtime.sendFieldToParty(cardID: s.card.id)
+                    }
+                }
+                Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
+                if !runtime.speechChrome.isEmpty {
+                    Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)
                 }
             }
+            Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
+            Text(L10n.t("sos.offer", runtime.locale)).font(.caption2).foregroundStyle(Color(white: 0.55))
             Text(L10n.t("vision.none", runtime.locale))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.orange)

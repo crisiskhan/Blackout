@@ -3,6 +3,7 @@ import Observation
 import CoreLocation
 import BlackBox
 import PackIO
+import MapLibreMap
 import MeshDTN
 import Vitals
 import RedAlert
@@ -47,6 +48,10 @@ final class AppRuntime {
     var showInstruments = false
     var locale = "en"
     var lastKnownFix: (lat: Double, lon: Double)?
+    var marks: [MapMark] = []
+    var headingDeg: Double?
+    var lockChrome = ""
+    var speechChrome = ""
     private let fix = MeshFix()
 
     init() {
@@ -69,10 +74,17 @@ final class AppRuntime {
             Task { @MainActor in self?.sendPOSIfPossible() }
         }
         mesh.startLocal()
+        fix.onChange = { [weak self] in
+            Task { @MainActor in self?.pullFix() }
+        }
         fix.arm()
         if let root = Self.resourceRoot() {
             packs = try? PackStore(root: root.appendingPathComponent("Packs"), box: box)
+            if let id = UserDefaults.standard.string(forKey: "pack.id") {
+                try? packs?.switchTo(id)
+            }
         }
+        marks = MarkStore.load()
         if UserDefaults.standard.bool(forKey: "cannotDo.seen") {
             sawCannotDo = true
         }
@@ -91,9 +103,54 @@ final class AppRuntime {
     func joinNet() {
         mesh.airplane = true
         mesh.partyCode = roster.code
-        UserDefaults.standard.set(roster.code, forKey: "party.code")
+        persistPartyCode()
         if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
         mesh.startLocal()
+    }
+
+    func persistPartyCode() {
+        UserDefaults.standard.set(roster.code, forKey: "party.code")
+    }
+
+    func dropMark() {
+        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
+        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
+        guard let lat, let lon else { return }
+        marks.append(MapMark(id: UUID().uuidString, lat: lat, lon: lon, label: packs?.active?.name ?? "mark"))
+        MarkStore.save(marks)
+    }
+
+    func toggleLockOn() {
+        lockOn.toggle()
+        if !lockOn {
+            lockChrome = ""
+            return
+        }
+        fix.arm()
+        pullFix()
+        let hasGPS = fix.last != nil || lastKnownFix != nil
+        let hasGraph = packs?.packURL("graph.json") != nil
+        lockChrome = LockOnChrome.banner(hasGPS: hasGPS, hasGraph: hasGraph)
+        sendPOSIfPossible()
+    }
+
+    func speakMap() {
+        let pack = packs?.active?.name ?? "no pack"
+        let bearing = headingDeg.map { String(format: "%.0f degrees", $0) } ?? "no heading"
+        if speech.speak("\(pack) \(bearing)", locale: locale) {
+            speechChrome = ""
+        } else {
+            speechChrome = "SPEECH FAILED"
+        }
+    }
+
+    func beginPTTSolo() {
+        ptt.beginLive()
+        mesh.sendChip(from: mesh.localID, chip: "ptt")
+    }
+
+    func sendFieldToParty(cardID: String) {
+        mesh.sendChip(from: mesh.localID, chip: "field:\(cardID)")
     }
 
     func sendPOSIfPossible() {
@@ -129,6 +186,14 @@ final class AppRuntime {
 
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
+        UserDefaults.standard.set(id, forKey: "pack.id")
+    }
+
+    private func pullFix() {
+        headingDeg = fix.heading
+        if let c = fix.last {
+            lastKnownFix = (c.latitude, c.longitude)
+        }
     }
 
     static func resourceRoot() -> URL? {
@@ -138,6 +203,8 @@ final class AppRuntime {
 
 final class MeshFix: NSObject, CLLocationManagerDelegate {
     var last: CLLocationCoordinate2D?
+    var heading: Double?
+    var onChange: (() -> Void)?
     private let mgr = CLLocationManager()
 
     func arm() {
@@ -145,17 +212,24 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
         switch mgr.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             mgr.startUpdatingLocation()
+            startHeading()
         case .notDetermined:
             mgr.requestWhenInUseAuthorization()
         default:
-            break
+            startHeading()
         }
+    }
+
+    private func startHeading() {
+        guard CLLocationManager.headingAvailable() else { return }
+        mgr.startUpdatingHeading()
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             manager.startUpdatingLocation()
+            startHeading()
         default:
             break
         }
@@ -163,6 +237,13 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         last = locations.last?.coordinate
+        onChange?()
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        let trueH = newHeading.trueHeading
+        heading = trueH >= 0 ? trueH : newHeading.magneticHeading
+        onChange?()
     }
 }
 
