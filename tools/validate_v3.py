@@ -8,6 +8,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from v3.generate_project import assert_openstep_plist
+
 fail = 0
 
 
@@ -195,8 +198,15 @@ def vessel() -> None:
         bad("iOS 18")
     else:
         ok("iOS 18 Universal vessel")
-    if "TARGETED_DEVICE_FAMILY = 1,2;" not in pbx:
-        bad("not universal")
+    if 'TARGETED_DEVICE_FAMILY = "1,2";' not in pbx:
+        bad("not universal (TARGETED_DEVICE_FAMILY must be quoted OpenStep \"1,2\")")
+    else:
+        ok("universal TARGETED_DEVICE_FAMILY = \"1,2\"")
+    try:
+        assert_openstep_plist(pbx)
+        ok("project.pbxproj is valid OpenStep plist")
+    except Exception as exc:
+        bad(f"project.pbxproj OpenStep parse: {exc}")
     if not (ROOT / "Vendor" / "MapLibre" / "MapLibre.xcframework").is_dir():
         bad("MapLibre xcframework missing")
     else:

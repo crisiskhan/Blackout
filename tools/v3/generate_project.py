@@ -1,7 +1,12 @@
 """Xcode 16 project: iOS app + Watch + widgets. CURRENT_PROJECT_VERSION stays 1."""
 from __future__ import annotations
 
+import re
+
 from .common import ROOT, oid
+
+# OpenStep unquoted token. Comma is a list separator — `1,2` must be quoted.
+_UNQUOTED_VALUE = re.compile(r"^[A-Za-z0-9_./+-]+$")
 
 PACKAGES = [
     ("Tokens", "Tokens"),
@@ -72,16 +77,168 @@ def xc_common(debug: bool) -> dict:
     return common
 
 
+def pbx_assign(value: object) -> str:
+    s = str(value)
+    if _UNQUOTED_VALUE.fullmatch(s):
+        return s
+    escaped = s.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def settings_block(d: dict) -> str:
     lines = ["\t\t\t\tisa = XCBuildConfiguration;", "\t\t\t\tbuildSettings = {"]
     for k in sorted(d):
-        v = d[k]
-        if v == "" or " " in str(v) or "$" in str(v):
-            lines.append(f'\t\t\t\t\t{k} = "{v}";')
-        else:
-            lines.append(f"\t\t\t\t\t{k} = {v};")
+        lines.append(f"\t\t\t\t\t{k} = {pbx_assign(d[k])};")
     lines.append("\t\t\t\t};")
     return "\n".join(lines)
+
+
+def assert_openstep_plist(text: str) -> None:
+    """Raise ValueError if text is not a well-formed OpenStep plist.
+
+    Matches the CFPropertyList old-style rule that failed GHA:
+    `TARGETED_DEVICE_FAMILY = 1,2` is two tokens, so the dictionary
+    is missing a semicolon.
+    """
+    parser = _OpenStepParser(text)
+    parser.parse()
+
+
+class _OpenStepParser:
+    def __init__(self, text: str) -> None:
+        self.s = text
+        self.i = 0
+        self.n = len(text)
+
+    def parse(self) -> object:
+        obj = self._object()
+        self._ws()
+        if self.i < self.n:
+            raise ValueError(f"OpenStep trailing junk at {self._where()}")
+        return obj
+
+    def _where(self) -> str:
+        line = self.s.count("\n", 0, self.i) + 1
+        return f"line {line} col {self.i - self.s.rfind(chr(10), 0, self.i)}"
+
+    def _ws(self) -> None:
+        while self.i < self.n:
+            c = self.s[self.i]
+            if c in " \t\r\n":
+                self.i += 1
+                continue
+            if c == "/" and self.i + 1 < self.n and self.s[self.i + 1] == "/":
+                self.i = self.s.find("\n", self.i)
+                if self.i < 0:
+                    self.i = self.n
+                continue
+            if c == "/" and self.i + 1 < self.n and self.s[self.i + 1] == "*":
+                end = self.s.find("*/", self.i + 2)
+                if end < 0:
+                    raise ValueError(f"OpenStep unclosed comment at {self._where()}")
+                self.i = end + 2
+                continue
+            return
+
+    def _peek(self) -> str:
+        self._ws()
+        return self.s[self.i] if self.i < self.n else ""
+
+    def _eat(self, ch: str) -> None:
+        self._ws()
+        if self.i >= self.n or self.s[self.i] != ch:
+            raise ValueError(f"OpenStep expected {ch!r} at {self._where()}")
+        self.i += 1
+
+    def _object(self) -> object:
+        c = self._peek()
+        if c == "{":
+            return self._dict()
+        if c == "(":
+            return self._array()
+        if c == '"':
+            return self._quoted()
+        if c == "":
+            raise ValueError(f"OpenStep unexpected EOF at {self._where()}")
+        return self._bare()
+
+    def _dict(self) -> dict:
+        self._eat("{")
+        out: dict = {}
+        while True:
+            c = self._peek()
+            if c == "}":
+                self.i += 1
+                return out
+            if c == "":
+                raise ValueError(f"OpenStep unclosed dictionary at {self._where()}")
+            key = self._object()
+            self._eat("=")
+            value = self._object()
+            self._ws()
+            if self._peek() != ";":
+                raise ValueError(
+                    f"OpenStep missing semicolon in dictionary at {self._where()} "
+                    f"(after {key}={value!r})"
+                )
+            self._eat(";")
+            out[key] = value
+
+    def _array(self) -> list:
+        self._eat("(")
+        out: list = []
+        while True:
+            c = self._peek()
+            if c == ")":
+                self.i += 1
+                return out
+            if c == "":
+                raise ValueError(f"OpenStep unclosed array at {self._where()}")
+            out.append(self._object())
+            c = self._peek()
+            if c == ",":
+                self.i += 1
+                continue
+            if c == ")":
+                self.i += 1
+                return out
+            raise ValueError(f"OpenStep expected comma or ) in array at {self._where()}")
+
+    def _quoted(self) -> str:
+        self._eat('"')
+        buf: list[str] = []
+        while self.i < self.n:
+            c = self.s[self.i]
+            self.i += 1
+            if c == '"':
+                return "".join(buf)
+            if c == "\\":
+                if self.i >= self.n:
+                    raise ValueError(f"OpenStep truncated escape at {self._where()}")
+                esc = self.s[self.i]
+                self.i += 1
+                if esc == "n":
+                    buf.append("\n")
+                elif esc == "t":
+                    buf.append("\t")
+                elif esc == "r":
+                    buf.append("\r")
+                else:
+                    buf.append(esc)
+                continue
+            buf.append(c)
+        raise ValueError(f"OpenStep unclosed string at {self._where()}")
+
+    def _bare(self) -> str:
+        start = self.i
+        while self.i < self.n:
+            c = self.s[self.i]
+            if c in "{ }()=;,\t\r\n" or (c == "/" and self.i + 1 < self.n and self.s[self.i + 1] in "/*"):
+                break
+            self.i += 1
+        if self.i == start:
+            raise ValueError(f"OpenStep empty token at {self._where()}")
+        return self.s[start : self.i]
 
 
 def ios_target_settings(debug: bool) -> dict:
@@ -644,6 +801,7 @@ test -f "${DST}/Field/field.core.json"
 """
     proj = ROOT / "Blackout.xcodeproj"
     proj.mkdir(parents=True, exist_ok=True)
+    assert_openstep_plist(pbx)
     (proj / "project.pbxproj").write_text(pbx)
     scheme_dir = proj / "xcshareddata" / "xcschemes"
     scheme_dir.mkdir(parents=True, exist_ok=True)
