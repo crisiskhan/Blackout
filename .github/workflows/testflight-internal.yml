@@ -577,6 +577,10 @@ jobs:
               '  [ -d "$APP" ] || return 0\n'
               '  echo "CI AppIcon strip app=$APP"\n'
               '  find "$APP" -maxdepth 1 -name "AppIcon*.png" -print -delete || true\n'
+              '  if [ -d "$APP/Metadata.appintents" ]; then\n'
+              '    echo "CI remove unsigned Metadata.appintents"\n'
+              '    rm -rf "$APP/Metadata.appintents"\n'
+              '  fi\n'
               '  /usr/bin/xattr -cr "$APP" || true\n'
               '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} + 2>/dev/null || true\n'
               "}\n"
