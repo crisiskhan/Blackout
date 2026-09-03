@@ -1,0 +1,386 @@
+# No human p12. ASC AuthKey automatic signing.
+# workflow_dispatch only. Never pull_request or push.
+# Default unsigned compile is xcodebuild.yml and must stay green without these secrets.
+name: TestFlight Internal
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: "App tree to archive (not main)"
+        required: true
+        default: cursor/blackout-bible-v3-64d0
+
+jobs:
+  upload:
+    name: AuthKey archive + Internal upload
+    runs-on: macos-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_APP_ID: "6806388963"
+      ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
+    steps:
+      - name: Require ASC AuthKey secrets
+        run: |
+          set -euo pipefail
+          for name in APP_STORE_CONNECT_API_KEY APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_ID APPLE_TEAM_ID
+          do
+            eval "val=\${$name:-}"
+            if [ -z "$val" ]; then
+              echo "Required secret $name is empty. No archive. No upload."
+              exit 1
+            fi
+          done
+          echo "ASC AuthKey secrets are present (values not printed)."
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref }}
+
+      - name: Select Xcode 16
+        run: |
+          set -euo pipefail
+          ls /Applications | grep -i xcode || true
+          xcodebuild -version || true
+          for app in \
+            /Applications/Xcode_16.4.app \
+            /Applications/Xcode_16.3.app \
+            /Applications/Xcode_16.2.app \
+            /Applications/Xcode_16.1.app \
+            /Applications/Xcode_16.0.app \
+            /Applications/Xcode_16.app \
+            /Applications/Xcode.app
+          do
+            if [ -d "$app" ]; then
+              sudo xcode-select -s "$app"
+              break
+            fi
+          done
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Write AuthKey
+        run: |
+          set -euo pipefail
+          KEYDIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEYDIR"
+          HOME_KEY="$KEYDIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          TEMP_KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$(printf '%s' "$APP_STORE_CONNECT_API_KEY" | tr -d '\r')" > "$HOME_KEY"
+          cp "$HOME_KEY" "$TEMP_KEY"
+          chmod 600 "$HOME_KEY" "$TEMP_KEY"
+          echo "AUTH_KEY_PATH=$TEMP_KEY" >> "$GITHUB_ENV"
+          echo "AuthKey written (path only, not contents)."
+
+      - name: Probe ASC DISTRIBUTION certificates
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q PyJWT cryptography
+          python3 << 'PY'
+          import json, os, time, urllib.error, urllib.parse, urllib.request
+          import jwt
+
+          STOP = (
+              "ASC API key cannot create or reuse signing certificates. "
+              "In App Store Connect → Users and Access → Integrations → App Store Connect API, "
+              "the key’s role must be Admin or Account Holder (not Developer, not App Manager). "
+              "Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key."
+          )
+
+          key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
+          kid = os.environ["APP_STORE_CONNECT_KEY_ID"].strip()
+          iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
+          now = int(time.time())
+          tok = jwt.encode(
+              {"iss": iss, "iat": now, "exp": now + 15 * 60, "aud": "appstoreconnect-v1"},
+              key,
+              algorithm="ES256",
+              headers={"kid": kid, "typ": "JWT"},
+          )
+          if isinstance(tok, bytes):
+              tok = tok.decode()
+          q = urllib.parse.urlencode({"filter[certificateType]": "DISTRIBUTION", "limit": "5"})
+          url = "https://api.appstoreconnect.apple.com/v1/certificates?" + q
+          req = urllib.request.Request(
+              url,
+              headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"},
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=45) as resp:
+                  st = resp.status
+                  raw = resp.read()
+          except urllib.error.HTTPError as e:
+              st = e.code
+              raw = e.read()
+          if st in (401, 403):
+              print(STOP)
+              raise SystemExit(1)
+          if st != 200:
+              print(f"ASC certificates probe HTTP {st}")
+              print(raw[:400].decode("utf-8", "replace"))
+              if st in (401, 403):
+                  print(STOP)
+              raise SystemExit(1)
+          data = json.loads(raw) if raw else {}
+          n = len(data.get("data") or [])
+          print(f"ASC DISTRIBUTION certificates reachable n={n} (reuse; no human cert export)")
+          PY
+
+      - name: Next CFBundleVersion from ASC
+        id: ver
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q PyJWT cryptography
+          python3 << 'PY'
+          import json, os, time, urllib.parse, urllib.request
+          import jwt
+
+          key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
+          kid = os.environ["APP_STORE_CONNECT_KEY_ID"].strip()
+          iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
+          app = os.environ["ASC_APP_ID"]
+          now = int(time.time())
+          tok = jwt.encode(
+              {"iss": iss, "iat": now, "exp": now + 15 * 60, "aud": "appstoreconnect-v1"},
+              key,
+              algorithm="ES256",
+              headers={"kid": kid, "typ": "JWT"},
+          )
+          if isinstance(tok, bytes):
+              tok = tok.decode()
+          q = urllib.parse.urlencode({"filter[app]": app, "limit": "50", "sort": "-version"})
+          req = urllib.request.Request(
+              "https://api.appstoreconnect.apple.com/v1/builds?" + q,
+              headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"},
+          )
+          with urllib.request.urlopen(req, timeout=45) as resp:
+              data = json.loads(resp.read())
+          nums = []
+          for b in data.get("data") or []:
+              v = str((b.get("attributes") or {}).get("version") or "")
+              if v.isdigit():
+                  nums.append(int(v))
+          nxt = (max(nums) + 1) if nums else 1
+          print(f"ASC existing CFBundleVersion max={max(nums) if nums else 'none'} next={nxt}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"next={nxt}\n")
+          PY
+
+      - name: Archive and export App Store IPA
+        run: |
+          set -euo pipefail
+          NEXT="${{ steps.ver.outputs.next }}"
+          if [ -z "$NEXT" ]; then
+            echo "No next CFBundleVersion. No archive."
+            exit 1
+          fi
+          echo "CURRENT_PROJECT_VERSION on the command line only: $NEXT (not committed)"
+          ARCHIVE="$RUNNER_TEMP/Blackout.xcarchive"
+          EXPORT="$RUNNER_TEMP/export"
+          STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
+          AUTH=(
+            -allowProvisioningUpdates
+            -authenticationKeyPath "$AUTH_KEY_PATH"
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+          )
+          python3 - << PY
+          import os, plistlib
+          path = os.environ["RUNNER_TEMP"] + "/ExportOptions.plist"
+          plistlib.dump(
+              {
+                  "method": "app-store-connect",
+                  "destination": "export",
+                  "signingStyle": "automatic",
+                  "teamID": os.environ["APPLE_TEAM_ID"],
+                  "uploadSymbols": True,
+                  "manageAppVersionAndBuildNumber": False,
+              },
+              open(path, "wb"),
+          )
+          print("wrote", path)
+          PY
+          fail_admin() {
+            echo "$STOP"
+            exit 1
+          }
+          set +e
+          xcodebuild \
+            -project Blackout.xcodeproj \
+            -scheme Blackout \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE" \
+            CURRENT_PROJECT_VERSION="$NEXT" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_REQUIRED=YES \
+            "${AUTH[@]}" \
+            archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
+          ARC=${PIPESTATUS[0]}
+          set -e
+          if [ "$ARC" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/archive.log"; then
+              fail_admin
+            fi
+            echo "Archive failed. No upload."
+            exit 1
+          fi
+          mkdir -p "$EXPORT"
+          set +e
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$ARCHIVE" \
+            -exportPath "$EXPORT" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            "${AUTH[@]}" \
+            2>&1 | tee "$RUNNER_TEMP/export.log"
+          EXP=${PIPESTATUS[0]}
+          set -e
+          if [ "$EXP" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/export.log"; then
+              fail_admin
+            fi
+            echo "Export failed. No upload."
+            exit 1
+          fi
+          ls -la "$EXPORT"
+          IPA="$(ls "$EXPORT"/*.ipa | head -n 1)"
+          echo "IPA=$IPA" >> "$GITHUB_ENV"
+          echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"
+
+      - name: Upload IPA with AuthKey (no App Review)
+        run: |
+          set -euo pipefail
+          if [ -z "${IPA:-}" ] || [ ! -f "$IPA" ]; then
+            echo "No IPA. No upload."
+            exit 1
+          fi
+          STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
+          set +e
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            2>&1 | tee "$RUNNER_TEMP/altool.log"
+          UP=${PIPESTATUS[0]}
+          set -e
+          if [ "$UP" -ne 0 ]; then
+            if grep -qiE 'certificate|provision|403|permission|not have permission|unable to log in' "$RUNNER_TEMP/altool.log"; then
+              echo "$STOP"
+            fi
+            echo "Upload failed. Not faked."
+            exit 1
+          fi
+          echo "Uploaded CFBundleVersion ${NEXT_BUILD}. Not submitted for App Review. No External Testing group."
+
+      - name: Assign existing Internal group after VALID
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q PyJWT cryptography
+          WANT_BUILD="${NEXT_BUILD}" python3 << 'PY'
+          import json, os, time, urllib.error, urllib.parse, urllib.request
+          import jwt
+
+          key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
+          kid = os.environ["APP_STORE_CONNECT_KEY_ID"].strip()
+          iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
+          app = os.environ["ASC_APP_ID"]
+          group = os.environ["ASC_INTERNAL_GROUP_ID"]
+          want = (os.environ.get("WANT_BUILD") or "").strip()
+
+          def token():
+              now = int(time.time())
+              t = jwt.encode(
+                  {"iss": iss, "iat": now, "exp": now + 15 * 60, "aud": "appstoreconnect-v1"},
+                  key,
+                  algorithm="ES256",
+                  headers={"kid": kid, "typ": "JWT"},
+              )
+              return t.decode() if isinstance(t, bytes) else t
+
+          def req(method, url, body=None, tok=None):
+              data = None if body is None else json.dumps(body).encode()
+              r = urllib.request.Request(
+                  url,
+                  data=data,
+                  method=method,
+                  headers={
+                      "Authorization": f"Bearer {tok or token()}",
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(r, timeout=45) as resp:
+                      raw = resp.read()
+                      return resp.status, json.loads(raw) if raw else {}
+              except urllib.error.HTTPError as e:
+                  raw = e.read().decode()
+                  try:
+                      parsed = json.loads(raw)
+                  except Exception:
+                      parsed = {"raw": raw[:800]}
+                  return e.code, parsed
+
+          deadline = time.time() + 25 * 60
+          last_tok = None
+          last_tok_at = 0
+          target = None
+          while time.time() < deadline:
+              if last_tok is None or time.time() - last_tok_at > 10 * 60:
+                  last_tok = token()
+                  last_tok_at = time.time()
+              q = urllib.parse.urlencode({"filter[app]": app, "limit": "20", "sort": "-uploadedDate"})
+              st, data = req("GET", "https://api.appstoreconnect.apple.com/v1/builds?" + q, tok=last_tok)
+              if st != 200:
+                  raise SystemExit(f"list {st} {data}")
+              match = None
+              for b in data.get("data") or []:
+                  a = b.get("attributes") or {}
+                  if str(a.get("version")) == want:
+                      match = {"id": b["id"], "version": str(a.get("version")), "processingState": a.get("processingState"), "usesNonExemptEncryption": a.get("usesNonExemptEncryption")}
+                      break
+              if not match:
+                  print("WAIT no build", want)
+                  time.sleep(30)
+                  continue
+              target = match
+              print("BUILD", json.dumps(target))
+              if target["processingState"] in ("FAILED", "INVALID"):
+                  raise SystemExit(2)
+              if target["processingState"] != "VALID":
+                  print("WAIT", target["processingState"])
+                  time.sleep(30)
+                  continue
+              bid = target["id"]
+              if target.get("usesNonExemptEncryption") is None:
+                  st, data = req(
+                      "PATCH",
+                      f"https://api.appstoreconnect.apple.com/v1/builds/{bid}",
+                      {"data": {"type": "builds", "id": bid, "attributes": {"usesNonExemptEncryption": False}}},
+                      tok=last_tok,
+                  )
+                  print("PATCH", target["version"], st)
+              st, data = req(
+                  "POST",
+                  f"https://api.appstoreconnect.apple.com/v1/betaGroups/{group}/relationships/builds",
+                  {"data": [{"type": "builds", "id": bid}]},
+                  tok=last_tok,
+              )
+              print("ASSIGN Internal", target["version"], st)
+              if st >= 400 and st != 409:
+                  print(json.dumps(data)[:500])
+                  raise SystemExit(1)
+              raise SystemExit(0)
+          print("TIMEOUT", json.dumps(target))
+          raise SystemExit(1)
+          PY
