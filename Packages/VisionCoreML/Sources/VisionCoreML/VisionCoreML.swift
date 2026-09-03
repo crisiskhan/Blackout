@@ -7,6 +7,25 @@ public struct VisionGuess: Equatable, Sendable {
     public var lookalikes: [String]
     public var leaveIt: Bool
     public var edible: Bool
+    public var noModel: Bool
+
+    public init(
+        labelId: String,
+        name: String,
+        percent: Int,
+        lookalikes: [String],
+        leaveIt: Bool,
+        edible: Bool,
+        noModel: Bool
+    ) {
+        self.labelId = labelId
+        self.name = name
+        self.percent = percent
+        self.lookalikes = lookalikes
+        self.leaveIt = leaveIt
+        self.edible = edible
+        self.noModel = noModel
+    }
 }
 
 public struct VisionLabel: Codable, Equatable, Sendable {
@@ -27,21 +46,24 @@ public struct VisionBook: Codable, Equatable, Sendable {
 }
 
 public enum VisionCoreML {
+    /// No compiled .mlmodel ships in this tree. Hash-to-label is not an ID.
+    public static let onDeviceModelPresent = false
+
     public static func load(_ data: Data) throws -> VisionBook {
         try JSONDecoder().decode(VisionBook.self, from: data)
     }
 
     public static func classify(features: [Double], book: VisionBook) -> VisionGuess {
-        let idx = abs(features.hashValue) % max(1, book.labels.count)
-        let lab = book.labels[idx]
-        let pct = 40 + (abs(features.hashValue) % 45)
+        _ = features
+        _ = book
         return VisionGuess(
-            labelId: lab.id,
-            name: lab.name["en"] ?? lab.id,
-            percent: pct,
-            lookalikes: lab.lookalikes,
-            leaveIt: lab.kind == "fungi" ? true : lab.leaveIt,
-            edible: false
+            labelId: "no-model",
+            name: "NO VISION MODEL",
+            percent: 0,
+            lookalikes: [],
+            leaveIt: true,
+            edible: false,
+            noModel: true
         )
     }
 }

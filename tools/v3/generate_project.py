@@ -255,6 +255,8 @@ def ios_target_settings(debug: bool) -> dict:
             "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.navigation",
             "INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription": "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.",
             "INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription": "Mesh uses Bluetooth only when you opt in. Deny is supported.",
+            "INFOPLIST_KEY_NSLocalNetworkUsageDescription": "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.",
+            "INFOPLIST_KEY_NSBonjourServices": "_blackoutmesh._tcp",
             "INFOPLIST_KEY_NSCameraUsageDescription": "Vision classifies a still on this device. It is a guess. Deny is supported.",
             "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.",
             "INFOPLIST_KEY_NSMicrophoneUsageDescription": "PTT live and 15s clip stay on this device. Deny is supported.",

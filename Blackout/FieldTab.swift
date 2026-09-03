@@ -2,14 +2,11 @@ import SwiftUI
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
-import VisionCapture
-import VisionCoreML
 
 struct FieldTab: View {
     @Bindable var runtime: AppRuntime
     @State private var cards: [FieldCard] = []
     @State private var stepper: StepperState?
-    @State private var guess: VisionGuess?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -33,21 +30,12 @@ struct FieldTab: View {
                     Button("SEND TO PARTY") { var x = s; x.send(); stepper = x }
                 }
             }
-            Button("VISION ADD FRAME") {
-                var cap = GuidedCapture()
-                cap.addFrame([0.2, 0.7, 0.1])
-                let st = runtime.packs?.active?.state.lowercased() ?? "tx"
-                let url = Bundle.main.resourceURL?
-                    .appendingPathComponent("Resources/Vision/labels.\(st).json")
-                if let url, let data = try? Data(contentsOf: url),
-                   let book = try? VisionCoreML.load(data) {
-                    guess = cap.guess(book: book)
-                }
-            }
-            if let g = guess {
-                Text("\(g.name) \(g.percent)% lookalikes \(g.lookalikes.joined(separator: ", ")) edible=\(g.edible)")
-                    .font(.caption)
-            }
+            Text(L10n.t("vision.none", runtime.locale))
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.orange)
+            Text("No on-device CoreML model ships in this build. Hash-to-label is not an ID. Fungi default LEAVE IT. Edible unlock is off.")
+                .font(.caption2)
+                .foregroundStyle(Color(white: 0.5))
         }
         .onAppear(perform: load)
         .padding(8)

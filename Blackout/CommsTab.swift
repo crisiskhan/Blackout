@@ -7,18 +7,36 @@ struct CommsTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("COMMS").foregroundStyle(Color(white: 0.85))
+            Text(runtime.mesh.chromeNet)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(runtime.mesh.joined ? Color(white: 0.85) : Color.orange)
+            TextField("PARTY CODE", text: Binding(
+                get: { runtime.roster.code },
+                set: { runtime.roster = runtime.roster.setting(code: $0); runtime.mesh.partyCode = runtime.roster.code }
+            ))
+            .textFieldStyle(.roundedBorder)
+            .textInputAutocapitalization(.characters)
             HStack {
                 Button("ALL") { runtime.comms.setChannel("ALL") }
                 Button("1:1") { runtime.comms.setChannel("1:1") }
                 Button("RADIO CHECK") { runtime.comms.radioCheck() }
             }
             HStack {
-                Button(L10n.t("form.up", runtime.locale)) { runtime.comms.formUp() }
-                Button(L10n.t("lost.kid", runtime.locale)) { runtime.comms.lostKid() }
-                Button(L10n.t("ok.chip", runtime.locale)) { runtime.comms.chips.append(.ok) }
+                Button(L10n.t("form.up", runtime.locale)) {
+                    runtime.comms.formUp()
+                    runtime.mesh.sendChip(from: runtime.roster.code, chip: Chip.formUp.rawValue)
+                }
+                Button(L10n.t("lost.kid", runtime.locale)) {
+                    runtime.comms.lostKid()
+                    runtime.mesh.sendChip(from: runtime.roster.code, chip: Chip.lostKid.rawValue)
+                }
+                Button(L10n.t("ok.chip", runtime.locale)) {
+                    runtime.comms.chips.append(.ok)
+                    runtime.mesh.sendChip(from: runtime.roster.code, chip: Chip.ok.rawValue)
+                }
             }
             Text("Whisper <10 m: \(runtime.comms.whisperOK ? "yes" : "no")")
-            Text("PTT live + 15 s clip. Mesh tens of meters + DTN. LoRa never required.")
+            Text(L10n.t("net.physics", runtime.locale))
                 .font(.caption).foregroundStyle(Color(white: 0.55))
             Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
                 if runtime.ptt.live { runtime.ptt.endLive() } else { runtime.ptt.beginLive() }

@@ -1,5 +1,6 @@
 import SwiftUI
 import Tokens
+import CommsUI
 
 struct SOSHold: View {
     @Bindable var runtime: AppRuntime
@@ -42,6 +43,7 @@ struct IAMOKBar: View {
             HStack {
                 Button(L10n.t("ok.chip", runtime.locale)) {
                     runtime.comms.chips.append(.ok)
+                    runtime.mesh.sendChip(from: runtime.roster.code, chip: Chip.ok.rawValue)
                     runtime.box.log("ok", "I AM OK")
                 }
                 .padding(8)

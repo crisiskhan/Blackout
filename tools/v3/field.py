@@ -841,6 +841,223 @@ def state_cards() -> list[dict]:
     ]
 
 
+def thickness_core() -> list[dict]:
+    """Bleed/heat/water/lost/shelter/signal already live in core. Add fracture + cold."""
+    return [
+        card(
+            "trauma-fracture",
+            "trauma",
+            "Closed fracture / bad angulation",
+            "Fractura cerrada / mala angulación",
+            "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed. No eat-from-photo. No 911 auto-dial.",
+            "Una extremidad está doblada donde no debe, o no carga peso después de una caída. La piel está cerrada.",
+            [
+                ("They can take weight and the limb looks like the other one.", "Puede cargar peso y la extremidad se ve como la otra."),
+                ("Bone is out or the foot/hand is white and numb — this card is not enough.", "Hay hueso afuera o el pie/mano está blanco y entumecido: esta tarjeta no alcanza."),
+            ],
+            "Splint and carry to care. Emergency SOS if a net exists. Do not 'set' a bone because a video said so.",
+            "Inmoviliza y lleva a cuidado. Emergency SOS si hay red. No 'aocomodes' un hueso por un video.",
+            [
+                step(
+                    "Do not test the break. Pad and splint the joint above and the joint below. Tie loose enough that a fingertip fits. Check color of fingers or toes after.",
+                    "Motion at the break makes bleeding and nerve damage worse.",
+                    "A child holds the unused tape. They do not pull the limb straight.",
+                    "Stop pulling if they scream through a pulse you can still feel — stabilize as-is and move.",
+                    "fracture-splint.png",
+                    "No pruebes la rotura. Almohadilla y férula la articulación de arriba y la de abajo. Que quepa un dedo. Revisa color de dedos.",
+                    "Mover el quiebre empeora sangrado y nervios.",
+                    "El niño sostiene la cinta. No estira la extremidad.",
+                    "Para de tirar si grita con pulso que aún sientes: inmoviliza como está y mueve.",
+                    party={"1": "Splint and walk them if they can.", "2": "One splints, one carries kit.", "4": "Splint / carry / trail / watch shock."},
+                )
+            ],
+        ),
+        card(
+            "env-cold",
+            "environment",
+            "Cold and wet — stop the slide",
+            "Frío y mojado — para la caída",
+            "Shivering that will not quit, wet cotton, wind, or a party member who stopped complaining and just sits. No live NWS.",
+            "Temblor que no para, algodón mojado, viento, o alguien que ya no se queja y se sienta. Sin NWS en vivo.",
+            [
+                ("They are dry, fed, and talking sense in a wind break.", "Están secos, comidos y hablan con sentido en un abrigo."),
+                ("They are unconscious or not shivering in obvious cold — this is evacuation, not a snack.", "Están inconscientes o no tiemblan con frío obvio: es evacuación, no un snack."),
+            ],
+            "Rewarm trunk first. Get to care for confusion that does not clear. This card does not replace Emergency SOS.",
+            "Recalienta el tronco primero. Busca cuidado si la confusión no pasa. No reemplaza Emergency SOS.",
+            [
+                step(
+                    "Stop walking into wind. Change out of wet next-to-skin layers. Put the cold person in a bag or tarp with a warm body. Warm sweet drink only if they can swallow sitting up.",
+                    "Wet cotton dumps heat. Walking harder in a cotton shirt makes it worse.",
+                    "Child gets the dry layer first. No 'tough it out' races.",
+                    "Stop oral fluids if they cannot sit or are vomiting. Do not put them in a cold creek to 'wake up'.",
+                    "cold-rewarm.png",
+                    "Para de caminar al viento. Cambia lo mojado pegado a la piel. Mételos en bolsa o lona con un cuerpo caliente. Bebida tibia solo si tragan sentados.",
+                    "El algodón mojado tira el calor. Caminar más recio lo empeora.",
+                    "El niño recibe la capa seca primero. Sin carreras de aguante.",
+                    "Nada por boca si no se sientan o vomitan. No los metas a un arroyo frío para 'despertarlos'.",
+                    tick_s=600,
+                    party={"1": "Shelter and change.", "2": "One shelters, one fetches dry/kit.", "4": "Shelter / dry / stove / watch the rest."},
+                )
+            ],
+        ),
+    ]
+
+
+def thickness_state() -> list[dict]:
+    """Snake and plant-danger of that state. No cross-coast leak. No edible unlock."""
+    snakes = [
+        (
+            "tx-snake",
+            ["TX"],
+            "Texas pit viper",
+            "Víbora de Texas",
+            "West Texas or East Texas brush. Western diamondback or copperhead country. Do not catch it for a photo ID.",
+            "Matorral de Texas. Cascabel del oeste o cabeza de cobre. No la atrapes para identificarla.",
+            "Western diamondback / copperhead: keep the bitten limb still at heart level. No ice, no cut, no suck, no tourniquet.",
+            "Cascabel / cabeza de cobre: extremidad quieta a la altura del corazón. Sin hielo, sin cortar, sin chupar, sin torniquete.",
+        ),
+        (
+            "nm-snake",
+            ["NM"],
+            "New Mexico rattlesnake",
+            "Cascabel de Nuevo México",
+            "Prairie or western diamondback on rock or arroyo shade. Do not pin it with a stick.",
+            "Cascabel de pradera o del oeste en roca o sombra de arroyo. No la claves con un palo.",
+            "Same US pit-viper rule: still limb, walk out if you can, Emergency SOS if a net exists.",
+            "Misma regla de víbora de foseta: extremidad quieta, camina si puedes, Emergency SOS si hay red.",
+        ),
+        (
+            "fl-snake",
+            ["FL"],
+            "Florida cottonmouth / diamondback",
+            "Boca de algodón / cascabel de Florida",
+            "Water edge or palmetto. Cottonmouth or eastern diamondback. This card does not exist in NY packs.",
+            "Orilla o palmito. Boca de algodón o cascabel del este. Esta tarjeta no existe en packs de NY.",
+            "Do not 'move the snake off the trail' with your hands. Pit-viper first aid, then care.",
+            "No 'quites la culebra del sendero' con las manos. Primeros auxilios de foseta y luego cuidado.",
+        ),
+        (
+            "ny-snake",
+            ["NY"],
+            "Timber rattlesnake / copperhead",
+            "Cascabel de bosque / cabeza de cobre",
+            "Hudson ledge or Adirondack talus. Timber rattlesnake or copperhead. No cottonmouth card here.",
+            "Cornisa del Hudson o talud de Adirondacks. Cascabel de bosque o cabeza de cobre. Aquí no hay boca de algodón.",
+            "Still limb at heart level. No ice. Walk to a road if you can. Florida packs must not show this card.",
+            "Extremidad quieta al corazón. Sin hielo. Camina a un camino si puedes. Los packs de Florida no deben ver esta tarjeta.",
+        ),
+    ]
+    plants = [
+        (
+            "tx-plant-danger",
+            ["TX"],
+            "Texas plant danger — do not chew",
+            "Planta peligrosa de Texas — no mastiques",
+            "Oleander hedge or Texas mountain laurel seed. Pretty is not food. No eat-from-photo. Edible unlock is off.",
+            "Seto de adelfa o semilla de Texas mountain laurel. Lo bonito no es comida. Sin comer-de-foto.",
+            "Oleander and mountain laurel seeds can stop a heart. Do not make tea. Wash sap off skin and eyes with water.",
+            "Adelfa y las semillas pueden parar un corazón. No hagas té. Lava savia de piel y ojos con agua.",
+        ),
+        (
+            "nm-plant-danger",
+            ["NM"],
+            "Datura and jumping cholla",
+            "Datura y cholla saltarina",
+            "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower. No edible unlock.",
+            "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible.",
+            "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
+            "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda.",
+        ),
+        (
+            "fl-plant-danger",
+            ["FL"],
+            "Manchineel — do not stand under it in rain",
+            "Manzanillo — no te pares debajo si llueve",
+            "Beach apple on the Florida coast. Sap burns skin and eyes. Fruit is not a snack. This card is FL only.",
+            "Manzana de playa en la costa de Florida. La savia quema piel y ojos. El fruto no es tentempié. Solo FL.",
+            "Do not take cover under manchineel in rain. Do not burn the wood. Rinse sap with water, then care.",
+            "No te refugies bajo el manzanillo si llueve. No quemes la madera. Enjuaga savia con agua y busca cuidado.",
+        ),
+        (
+            "ny-plant-danger",
+            ["NY"],
+            "Giant hogweed / poison ivy",
+            "Hogweed gigante / hiedra venenosa",
+            "Road-edge hogweed or a shiny ivy that already itched. Do not eat either. NY only — not a manchineel card.",
+            "Hogweed al borde del camino o hiedra brillante que ya pica. No comas ninguna. Solo NY.",
+            "Hogweed sap plus sun burns like a chemical. Cover skin, wash with soap, do not scratch open.",
+            "La savia de hogweed más sol quema como químico. Cubre piel, lava con jabón, no te rasques hasta abrir.",
+        ),
+    ]
+    out = []
+    for cid, states, title, title_es, sit, sit_es, care, care_es in snakes:
+        out.append(
+            card(
+                cid,
+                "animals",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("The snake is gone and no one was bitten.", "La culebra se fue y nadie fue mordido."),
+                    ("They are bitten and already not breathing — go to airway / CPR, then this card is secondary.", "Hay mordida y ya no respiran: vía aérea / RCP, esta tarjeta es secundaria."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
+                        "US pit vipers are not treated with jungle-movie first aid. Time to a hospital is the treatment.",
+                        "Child stays behind the adult. No stick-poking.",
+                        "Stop chasing the snake for 'ID'. A phone photo from far is enough if it is safe.",
+                        f"{cid}.png",
+                        "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora.",
+                        "Las víboras de foseta de EE. UU. no se tratan como en las películas. El tiempo al hospital es el tratamiento.",
+                        "El niño detrás del adulto. Sin pinchar con palo.",
+                        "No persigas la culebra para 'identificarla'. Una foto de lejos basta si es seguro.",
+                        party={"1": "Sit, still limb, walk out.", "2": "One stays with the bitten, one finds the road.", "4": "Patient / still limb / navigation / SOS offer if a net exists."},
+                    )
+                ],
+                states=states,
+            )
+        )
+    for cid, states, title, title_es, sit, sit_es, care, care_es in plants:
+        out.append(
+            card(
+                cid,
+                "plants",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("Nobody put it in a mouth and sap is off skin.", "Nadie se lo metió a la boca y la savia está fuera de la piel."),
+                    ("They swallowed a seed or sap is in both eyes and they cannot see — this is care now.", "Tragó una semilla o hay savia en los dos ojos y no ve: esto es cuidado ahora."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
+                        "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
+                        "Child does not carry the pretty seed as a toy.",
+                        "Stop if they start vomiting or see halos — sit, watch airway, offer Emergency SOS if a net exists.",
+                        f"{cid}.png",
+                        "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto.",
+                        "Comer-de-foto está apagado. El desbloqueo comestible está apagado.",
+                        "El niño no lleva la semilla bonita de juguete.",
+                        "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",
+                    )
+                ],
+                states=states,
+                speak=True,
+            )
+        )
+    return out
+
+
 def write_images(cards: list[dict]) -> None:
     img_root = ROOT / "Resources" / "Field" / "images"
     seen = set()
@@ -855,8 +1072,8 @@ def write_images(cards: list[dict]) -> None:
 
 
 def write_all() -> None:
-    core = core_cards()
-    extra = state_cards()
+    core = core_cards() + thickness_core()
+    extra = state_cards() + thickness_state()
     all_cards = core + extra
     write_images(all_cards)
     field_root = ROOT / "Resources" / "Field"

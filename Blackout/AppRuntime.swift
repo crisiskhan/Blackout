@@ -55,6 +55,10 @@ final class AppRuntime {
         ptt = PTTDeck(box: box)
         speech = SpeechEngine(box: box)
         mesh.airplane = true
+        if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
+            roster = roster.setting(code: saved)
+        }
+        mesh.partyCode = roster.code
         mesh.startLocal()
         if let root = Self.resourceRoot() {
             packs = try? PackStore(root: root.appendingPathComponent("Packs"), box: box)
@@ -75,8 +79,19 @@ final class AppRuntime {
     }
 
     func joinNet() {
-        mesh.airplane = false
-        mesh.meet("local-peer")
+        mesh.airplane = true
+        mesh.partyCode = roster.code
+        UserDefaults.standard.set(roster.code, forKey: "party.code")
+        #if canImport(MultipeerConnectivity)
+        if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
+        #endif
+        mesh.startLocal()
+    }
+
+    func sendPOSIfPossible() {
+        if let c = packs?.active?.center {
+            mesh.sendPOS(from: roster.code, lat: c.lat, lon: c.lon)
+        }
     }
 
     func switchPack(_ id: String) {

@@ -14,18 +14,35 @@ struct ExpeditionTab: View {
                 slider("Water", Binding(get: { runtime.vitals.water }, set: { runtime.vitals.water = $0 }))
                 slider("Fatigue", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
                 slider("Exposure", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
-                Button("APPLY RED BAND") { runtime.red.apply(runtime.vitals) }
+                Button("APPLY RED BAND") {
+                    runtime.red.apply(runtime.vitals)
+                    runtime.mesh.sendRED(from: runtime.roster.code, on: runtime.red.isRed)
+                }
                 if runtime.red.isRed {
                     Text(L10n.t("red.plate", runtime.locale)).font(.title.weight(.bold)).foregroundStyle(.red)
-                    Button(L10n.t("red.cancel", runtime.locale)) { runtime.red.cancelRED() }
+                    Button(L10n.t("red.cancel", runtime.locale)) {
+                        runtime.red.cancelRED()
+                        runtime.mesh.sendRED(from: runtime.roster.code, on: false)
+                    }
                 }
                 Text("ROSTER \(runtime.roster.code)")
                 ForEach(runtime.roster.members) { m in
                     Text("\(m.role.rawValue) \(m.name)")
                 }
                 Button("JOIN NAV") { runtime.roster = runtime.roster.joining("Nav", role: .nav) }
-                Button("2H WATER TIMER") {
-                    _ = runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true)
+                Button("2H WATER TIMER SET") {
+                    if runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true) != nil {
+                        runtime.mesh.sendTimer(from: runtime.roster.code, task: "water", done: false)
+                    }
+                }
+                ForEach(runtime.timers.timers, id: \.id) { t in
+                    HStack {
+                        Text("\(t.task) \(t.who)")
+                        Button("DONE") {
+                            runtime.timers.markDone(t.id)
+                            runtime.mesh.sendTimer(from: runtime.roster.code, task: t.task, done: true)
+                        }
+                    }
                 }
                 ForEach(runtime.timers.overduePlate(), id: \.id) { t in
                     Text("\(L10n.t("overdue", runtime.locale)) \(t.task) — not SOS")

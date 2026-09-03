@@ -31,5 +31,10 @@ public final class TimerBoard: @unchecked Sendable {
         timers.filter { now.timeIntervalSince($0.started) > $0.duration }
     }
 
+    public func markDone(_ id: String) {
+        timers.removeAll { $0.id == id }
+        box.log("timer", "DONE \(id)")
+    }
+
     public func isSOS(_ t: PartyTimer) -> Bool { false }
 }

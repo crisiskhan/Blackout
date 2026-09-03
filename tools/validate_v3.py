@@ -120,12 +120,25 @@ def field_schema() -> None:
         bad(f"missing categories {need - cats}")
     else:
         ok(f"field.core {len(core['cards'])} cards categories={sorted(cats)}")
+    core_ids = {c["id"] for c in core["cards"]}
+    for need_id in ("med-bleed-pack", "trauma-fracture", "env-heat-collapse", "env-cold", "water-disinfect", "nav-lost", "shelter-tarp", "sig-mirror"):
+        if need_id not in core_ids:
+            bad(f"core missing thickness {need_id}")
+        else:
+            ok(f"core has {need_id}")
     for st in ("tx", "nm", "fl", "ny"):
         book = json.loads((root / f"field.{st}.json").read_text())
         if not book["cards"]:
             bad(f"empty field.{st}")
         else:
             ok(f"field.{st} {len(book['cards'])} cards")
+        ids = {c["id"] for c in book["cards"]}
+        if f"{st}-snake" not in ids:
+            bad(f"field.{st} missing snake-of-that-state")
+        if f"{st}-plant-danger" not in ids:
+            bad(f"field.{st} missing plant-danger")
+        else:
+            ok(f"field.{st} snake+plant-danger")
     fl_ids = {c["id"] for c in json.loads((root / "field.fl.json").read_text())["cards"]}
     ny_ids = {c["id"] for c in json.loads((root / "field.ny.json").read_text())["cards"]}
     if "ny-ice-adk" in fl_ids:
@@ -182,6 +195,18 @@ def vision() -> None:
         if st != "fl" and any(l.get("marineOrGatorFL") for l in book["labels"]):
             bad(f"{st} leaked FL marine")
         ok(f"vision {st} n={len(book['labels'])} kinds={sorted(kinds)}")
+    vis = (ROOT / "Packages" / "VisionCoreML" / "Sources" / "VisionCoreML" / "VisionCoreML.swift").read_text()
+    if "hashValue" in vis or "features.hashValue" in vis:
+        bad("Vision classify still uses hash-to-label as ID")
+    if "NO VISION MODEL" not in vis or "onDeviceModelPresent = false" not in vis:
+        bad("Vision must be honest NO VISION MODEL")
+    else:
+        ok("Vision = NO VISION MODEL (no hash-to-label ID)")
+    field_tab = (ROOT / "Blackout" / "FieldTab.swift").read_text()
+    if "VISION ADD FRAME" in field_tab or "g.percent" in field_tab:
+        bad("Field tab still presents a fake Vision ID")
+    else:
+        ok("Field tab does not present a fake Vision percent")
 
 
 def vessel() -> None:
@@ -223,11 +248,29 @@ def vessel() -> None:
 
 def l10n() -> None:
     text = (ROOT / "Blackout" / "L10n.swift").read_text()
-    for key in ("CALL SOS", "LLAMAR SOS", "ROJO", "PARA-SI", "VENCIDO", "ESTOY BIEN"):
+    for key in ("CALL SOS", "LLAMAR SOS", "ROJO", "PARA-SI", "VENCIDO", "ESTOY BIEN", "NET · NONE", "NO VISION MODEL"):
         if key not in text:
             bad(f"missing l10n {key}")
             return
-    ok("Español SOS/RED/STOP-IF/OVERDUE/chips")
+    ok("Español SOS/RED/STOP-IF/OVERDUE/chips + NET NONE + NO VISION MODEL")
+
+
+def mesh() -> None:
+    src = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "MeshDTN.swift").read_text()
+    live = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "LiveMeshRadio.swift").read_text()
+    if "deny-all sockets" in src and "Bluetooth only" not in src:
+        bad("mesh still treats airplane as no radio")
+    if "NET · NONE" not in src:
+        bad("mesh missing NET · NONE chrome")
+    if "import MultipeerConnectivity" not in live or "import CoreBluetooth" not in live:
+        bad("LiveMeshRadio missing MPC or BLE")
+    else:
+        ok("MeshDTN MPC+BLE paths exist; NET · NONE is local writes")
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    if "mesh.meet(" in app:
+        bad("join still uses store-and-meet-only")
+    else:
+        ok("joinNet starts LiveMeshRadio, not meet-only")
 
 
 def main() -> None:
@@ -237,6 +280,7 @@ def main() -> None:
     field_schema()
     packs()
     vision()
+    mesh()
     vessel()
     l10n()
     sys.exit(fail)

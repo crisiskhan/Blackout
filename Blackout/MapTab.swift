@@ -14,7 +14,10 @@ struct MapTab: View {
                 Text("MAP").foregroundStyle(Color(white: 0.85))
                 Spacer()
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
-                Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") { runtime.lockOn.toggle() }
+                Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
+                    runtime.lockOn.toggle()
+                    if runtime.lockOn { runtime.sendPOSIfPossible() }
+                }
             }
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
@@ -32,6 +35,11 @@ struct MapTab: View {
                 }
                 Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
                     .font(.caption2).foregroundStyle(Color(white: 0.45))
+            }
+            Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
+            ForEach(runtime.mesh.pips, id: \.from) { p in
+                Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
+                    .font(.caption).foregroundStyle(Color(white: 0.7))
             }
             ForEach(hits, id: \.name) { h in
                 Text("\(h.name) · \(h.kind)").foregroundStyle(Color(white: 0.8))

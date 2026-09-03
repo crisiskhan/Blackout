@@ -255,6 +255,117 @@
           "image": "hurricane-paper.png"
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-snake",
+      "category": "animals",
+      "states": [
+        "FL"
+      ],
+      "title": {
+        "en": "Florida cottonmouth / diamondback",
+        "es": "Boca de algodón / cascabel de Florida"
+      },
+      "situation": {
+        "en": "Water edge or palmetto. Cottonmouth or eastern diamondback. This card does not exist in NY packs.",
+        "es": "Orilla o palmito. Boca de algodón o cascabel del este. Esta tarjeta no existe en packs de NY."
+      },
+      "stop_if": [
+        {
+          "en": "The snake is gone and no one was bitten.",
+          "es": "La culebra se fue y nadie fue mordido."
+        },
+        {
+          "en": "They are bitten and already not breathing — go to airway / CPR, then this card is secondary.",
+          "es": "Hay mordida y ya no respiran: vía aérea / RCP, esta tarjeta es secundaria."
+        }
+      ],
+      "get_to_care": {
+        "en": "Do not 'move the snake off the trail' with your hands. Pit-viper first aid, then care.",
+        "es": "No 'quites la culebra del sendero' con las manos. Primeros auxilios de foseta y luego cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
+            "es": "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora."
+          },
+          "why": {
+            "en": "US pit vipers are not treated with jungle-movie first aid. Time to a hospital is the treatment.",
+            "es": "Las víboras de foseta de EE. UU. no se tratan como en las películas. El tiempo al hospital es el tratamiento."
+          },
+          "child": {
+            "en": "Child stays behind the adult. No stick-poking.",
+            "es": "El niño detrás del adulto. Sin pinchar con palo."
+          },
+          "stop": {
+            "en": "Stop chasing the snake for 'ID'. A phone photo from far is enough if it is safe.",
+            "es": "No persigas la culebra para 'identificarla'. Una foto de lejos basta si es seguro."
+          },
+          "image": "fl-snake.png",
+          "party": {
+            "1": "Sit, still limb, walk out.",
+            "2": "One stays with the bitten, one finds the road.",
+            "4": "Patient / still limb / navigation / SOS offer if a net exists."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fl-plant-danger",
+      "category": "plants",
+      "states": [
+        "FL"
+      ],
+      "title": {
+        "en": "Manchineel — do not stand under it in rain",
+        "es": "Manzanillo — no te pares debajo si llueve"
+      },
+      "situation": {
+        "en": "Beach apple on the Florida coast. Sap burns skin and eyes. Fruit is not a snack. This card is FL only.",
+        "es": "Manzana de playa en la costa de Florida. La savia quema piel y ojos. El fruto no es tentempié. Solo FL."
+      },
+      "stop_if": [
+        {
+          "en": "Nobody put it in a mouth and sap is off skin.",
+          "es": "Nadie se lo metió a la boca y la savia está fuera de la piel."
+        },
+        {
+          "en": "They swallowed a seed or sap is in both eyes and they cannot see — this is care now.",
+          "es": "Tragó una semilla o hay savia en los dos ojos y no ve: esto es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Do not take cover under manchineel in rain. Do not burn the wood. Rinse sap with water, then care.",
+        "es": "No te refugies bajo el manzanillo si llueve. No quemes la madera. Enjuaga savia con agua y busca cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
+            "es": "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
+          },
+          "why": {
+            "en": "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
+            "es": "Comer-de-foto está apagado. El desbloqueo comestible está apagado."
+          },
+          "child": {
+            "en": "Child does not carry the pretty seed as a toy.",
+            "es": "El niño no lleva la semilla bonita de juguete."
+          },
+          "stop": {
+            "en": "Stop if they start vomiting or see halos — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "fl-plant-danger.png"
+        }
+      ]
     }
   ]
 }

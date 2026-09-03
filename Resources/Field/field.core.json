@@ -952,6 +952,129 @@
           "image": "spine.png"
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "trauma-fracture",
+      "category": "trauma",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Closed fracture / bad angulation",
+        "es": "Fractura cerrada / mala angulación"
+      },
+      "situation": {
+        "en": "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed. No eat-from-photo. No 911 auto-dial.",
+        "es": "Una extremidad está doblada donde no debe, o no carga peso después de una caída. La piel está cerrada."
+      },
+      "stop_if": [
+        {
+          "en": "They can take weight and the limb looks like the other one.",
+          "es": "Puede cargar peso y la extremidad se ve como la otra."
+        },
+        {
+          "en": "Bone is out or the foot/hand is white and numb — this card is not enough.",
+          "es": "Hay hueso afuera o el pie/mano está blanco y entumecido: esta tarjeta no alcanza."
+        }
+      ],
+      "get_to_care": {
+        "en": "Splint and carry to care. Emergency SOS if a net exists. Do not 'set' a bone because a video said so.",
+        "es": "Inmoviliza y lleva a cuidado. Emergency SOS si hay red. No 'aocomodes' un hueso por un video."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not test the break. Pad and splint the joint above and the joint below. Tie loose enough that a fingertip fits. Check color of fingers or toes after.",
+            "es": "No pruebes la rotura. Almohadilla y férula la articulación de arriba y la de abajo. Que quepa un dedo. Revisa color de dedos."
+          },
+          "why": {
+            "en": "Motion at the break makes bleeding and nerve damage worse.",
+            "es": "Mover el quiebre empeora sangrado y nervios."
+          },
+          "child": {
+            "en": "A child holds the unused tape. They do not pull the limb straight.",
+            "es": "El niño sostiene la cinta. No estira la extremidad."
+          },
+          "stop": {
+            "en": "Stop pulling if they scream through a pulse you can still feel — stabilize as-is and move.",
+            "es": "Para de tirar si grita con pulso que aún sientes: inmoviliza como está y mueve."
+          },
+          "image": "fracture-splint.png",
+          "party": {
+            "1": "Splint and walk them if they can.",
+            "2": "One splints, one carries kit.",
+            "4": "Splint / carry / trail / watch shock."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-cold",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Cold and wet — stop the slide",
+        "es": "Frío y mojado — para la caída"
+      },
+      "situation": {
+        "en": "Shivering that will not quit, wet cotton, wind, or a party member who stopped complaining and just sits. No live NWS.",
+        "es": "Temblor que no para, algodón mojado, viento, o alguien que ya no se queja y se sienta. Sin NWS en vivo."
+      },
+      "stop_if": [
+        {
+          "en": "They are dry, fed, and talking sense in a wind break.",
+          "es": "Están secos, comidos y hablan con sentido en un abrigo."
+        },
+        {
+          "en": "They are unconscious or not shivering in obvious cold — this is evacuation, not a snack.",
+          "es": "Están inconscientes o no tiemblan con frío obvio: es evacuación, no un snack."
+        }
+      ],
+      "get_to_care": {
+        "en": "Rewarm trunk first. Get to care for confusion that does not clear. This card does not replace Emergency SOS.",
+        "es": "Recalienta el tronco primero. Busca cuidado si la confusión no pasa. No reemplaza Emergency SOS."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Stop walking into wind. Change out of wet next-to-skin layers. Put the cold person in a bag or tarp with a warm body. Warm sweet drink only if they can swallow sitting up.",
+            "es": "Para de caminar al viento. Cambia lo mojado pegado a la piel. Mételos en bolsa o lona con un cuerpo caliente. Bebida tibia solo si tragan sentados."
+          },
+          "why": {
+            "en": "Wet cotton dumps heat. Walking harder in a cotton shirt makes it worse.",
+            "es": "El algodón mojado tira el calor. Caminar más recio lo empeora."
+          },
+          "child": {
+            "en": "Child gets the dry layer first. No 'tough it out' races.",
+            "es": "El niño recibe la capa seca primero. Sin carreras de aguante."
+          },
+          "stop": {
+            "en": "Stop oral fluids if they cannot sit or are vomiting. Do not put them in a cold creek to 'wake up'.",
+            "es": "Nada por boca si no se sientan o vomitan. No los metas a un arroyo frío para 'despertarlos'."
+          },
+          "image": "cold-rewarm.png",
+          "tickSeconds": 600,
+          "party": {
+            "1": "Shelter and change.",
+            "2": "One shelters, one fetches dry/kit.",
+            "4": "Shelter / dry / stove / watch the rest."
+          }
+        }
+      ]
     }
   ]
 }

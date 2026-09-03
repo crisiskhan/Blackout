@@ -201,6 +201,117 @@
           "image": "border-hospital.png"
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-snake",
+      "category": "animals",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico rattlesnake",
+        "es": "Cascabel de Nuevo México"
+      },
+      "situation": {
+        "en": "Prairie or western diamondback on rock or arroyo shade. Do not pin it with a stick.",
+        "es": "Cascabel de pradera o del oeste en roca o sombra de arroyo. No la claves con un palo."
+      },
+      "stop_if": [
+        {
+          "en": "The snake is gone and no one was bitten.",
+          "es": "La culebra se fue y nadie fue mordido."
+        },
+        {
+          "en": "They are bitten and already not breathing — go to airway / CPR, then this card is secondary.",
+          "es": "Hay mordida y ya no respiran: vía aérea / RCP, esta tarjeta es secundaria."
+        }
+      ],
+      "get_to_care": {
+        "en": "Same US pit-viper rule: still limb, walk out if you can, Emergency SOS if a net exists.",
+        "es": "Misma regla de víbora de foseta: extremidad quieta, camina si puedes, Emergency SOS si hay red."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
+            "es": "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora."
+          },
+          "why": {
+            "en": "US pit vipers are not treated with jungle-movie first aid. Time to a hospital is the treatment.",
+            "es": "Las víboras de foseta de EE. UU. no se tratan como en las películas. El tiempo al hospital es el tratamiento."
+          },
+          "child": {
+            "en": "Child stays behind the adult. No stick-poking.",
+            "es": "El niño detrás del adulto. Sin pinchar con palo."
+          },
+          "stop": {
+            "en": "Stop chasing the snake for 'ID'. A phone photo from far is enough if it is safe.",
+            "es": "No persigas la culebra para 'identificarla'. Una foto de lejos basta si es seguro."
+          },
+          "image": "nm-snake.png",
+          "party": {
+            "1": "Sit, still limb, walk out.",
+            "2": "One stays with the bitten, one finds the road.",
+            "4": "Patient / still limb / navigation / SOS offer if a net exists."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-plant-danger",
+      "category": "plants",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "Datura and jumping cholla",
+        "es": "Datura y cholla saltarina"
+      },
+      "situation": {
+        "en": "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower. No edible unlock.",
+        "es": "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible."
+      },
+      "stop_if": [
+        {
+          "en": "Nobody put it in a mouth and sap is off skin.",
+          "es": "Nadie se lo metió a la boca y la savia está fuera de la piel."
+        },
+        {
+          "en": "They swallowed a seed or sap is in both eyes and they cannot see — this is care now.",
+          "es": "Tragó una semilla o hay savia en los dos ojos y no ve: esto es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
+        "es": "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
+            "es": "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
+          },
+          "why": {
+            "en": "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
+            "es": "Comer-de-foto está apagado. El desbloqueo comestible está apagado."
+          },
+          "child": {
+            "en": "Child does not carry the pretty seed as a toy.",
+            "es": "El niño no lleva la semilla bonita de juguete."
+          },
+          "stop": {
+            "en": "Stop if they start vomiting or see halos — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "nm-plant-danger.png"
+        }
+      ]
     }
   ]
 }

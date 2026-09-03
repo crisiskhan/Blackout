@@ -505,13 +505,9 @@ public final class MeshNet: @unchecked Sendable {
 
     public func startLocal() {
         if airplane {
-            box.log("mesh", "airplane deny-all sockets; local store only")
-            joined = false
-            nearby = []
-            return
+            box.log("mesh", "airplane: no sockets; radio is Bluetooth only")
         }
-        joined = true
-        box.log("mesh", "local radio tens-of-meters")
+        box.log("mesh", "NET NONE unless LiveMeshRadio attaches")
     }
 
     public func meet(_ peer: String) {
@@ -1187,6 +1183,7 @@ public struct VisionGuess: Equatable, Sendable {
     public var lookalikes: [String]
     public var leaveIt: Bool
     public var edible: Bool
+    public var noModel: Bool
 }
 
 public struct VisionLabel: Codable, Equatable, Sendable {
@@ -1207,22 +1204,16 @@ public struct VisionBook: Codable, Equatable, Sendable {
 }
 
 public enum VisionCoreML {
+    public static let onDeviceModelPresent = false
+
     public static func load(_ data: Data) throws -> VisionBook {
         try JSONDecoder().decode(VisionBook.self, from: data)
     }
 
     public static func classify(features: [Double], book: VisionBook) -> VisionGuess {
-        let idx = abs(features.hashValue) % max(1, book.labels.count)
-        let lab = book.labels[idx]
-        let pct = 40 + (abs(features.hashValue) % 45)
-        return VisionGuess(
-            labelId: lab.id,
-            name: lab.name["en"] ?? lab.id,
-            percent: pct,
-            lookalikes: lab.lookalikes,
-            leaveIt: lab.kind == "fungi" ? true : lab.leaveIt,
-            edible: false
-        )
+        _ = features
+        _ = book
+        return VisionGuess(labelId: "no-model", name: "NO VISION MODEL", percent: 0, lookalikes: [], leaveIt: true, edible: false, noModel: true)
     }
 }
 ''',

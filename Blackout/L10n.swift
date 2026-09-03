@@ -13,6 +13,9 @@ enum L10n {
         "lost.kid": ["en": "LOST KID", "es": "NIÑO PERDIDO"],
         "chip.wait": ["en": "WAIT", "es": "ESPERA"],
         "chip.water": ["en": "WATER", "es": "AGUA"],
+        "net.none": ["en": "NET · NONE", "es": "RED · NINGUNA"],
+        "net.physics": ["en": "Airplane: no sockets. Mesh is Bluetooth tens of meters (MPC+BLE). LoRa never required. NET · NONE is local writes only.", "es": "Avión: sin sockets. Mesh es Bluetooth a decenas de metros (MPC+BLE). LoRa nunca es obligatorio. RED · NINGUNA es solo escritura local."],
+        "vision.none": ["en": "NO VISION MODEL", "es": "SIN MODELO DE VISIÓN"],
     ]
 
     static func t(_ key: String, _ locale: String) -> String {
