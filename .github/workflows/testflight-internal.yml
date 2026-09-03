@@ -382,11 +382,9 @@ jobs:
                   match = None
                   for p in payload.get("data") or []:
                       a = p.get("attributes") or {}
-                      if a.get("name") == pname or a.get("profileState") == "ACTIVE":
-                          # confirm bundle via related? skip name match first
-                          if a.get("name") == pname:
-                              match = p
-                              break
+                      if a.get("name") == pname:
+                          st_d, _ = api("DELETE", f"https://api.appstoreconnect.apple.com/v1/profiles/{p.get('id')}")
+                          print(f"PROFILE delete stale {pname} id={p.get('id')} HTTP {st_d}")
                   if match is None:
                       st, payload = api(
                           "POST",
@@ -518,7 +516,7 @@ jobs:
           }
           if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
               body["signingStyle"] = "manual"
-              body["signingCertificate"] = "iOS Distribution"
+              body["signingCertificate"] = "iPhone Distribution"
               body["provisioningProfiles"] = profiles
           else:
               body["signingStyle"] = "automatic"
@@ -569,11 +567,12 @@ jobs:
           PY
           echo "codesign identities:"
           security find-identity -v -p codesigning || true
-          IDLINE=$(security find-identity -v -p codesigning 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
+          IDLINE=$(security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
           if [ -n "$IDLINE" ]; then
+            IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
             IDNAME=$(printf '%s' "$IDLINE" | sed -n 's/.*"\(.*\)"/\1/p')
-            echo "Using CODE_SIGN_IDENTITY=$IDNAME"
-            "$PYBIN" - "$IDNAME" << 'PY'
+            echo "Using CODE_SIGN_IDENTITY hash=$IDHASH name=$IDNAME"
+            "$PYBIN" - "$IDHASH" << 'PY'
           import sys
           from pathlib import Path
           name = sys.argv[1]
