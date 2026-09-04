@@ -763,6 +763,8 @@ jobs:
             archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
           echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
           set -e
+          stop_janitor
+          trap - EXIT
           ARC="$(cat "$RUNNER_TEMP/archive.exit")"
           echo "archive exit=$ARC"
 
@@ -807,10 +809,10 @@ jobs:
               exit 1
             fi
             echo "Recovered app at $APP (archive exit=$ARC) — fallback re-seal"
-            find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
+            # Do not xattr -cr: that made Assets.car / PrivacyInfo.xcprivacy look like
+            # unsigned nested code (3a9dd38 / 148a34a). Only strip Metadata + old seal.
             find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
             rm -rf "$APP/_CodeSignature" 2>/dev/null || true
-            /usr/bin/xattr -cr "$APP" || true
             IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
             if [ -z "$IDLINE" ]; then
               IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
