@@ -1,6 +1,6 @@
-# No human p12. ASC AuthKey reuses KEEP Dist cert 45YLWHL6UP + ACTIVE App Store
-# profiles by name (tools/tf_asc_signing.py). Create only if missing. Never
-# revoke KEEP. Never delete+create GHA profiles on the happy path.
+# No human p12. KEEP Dist 45YLWHL6UP is reference-only. tools/tf_asc_signing.py
+# always mints a runner-local Dist cert and binds Local-named App Store
+# profiles to it. Never revoke KEEP. Never delete KEEP-named GHA profiles.
 # workflow_dispatch only. Never pull_request or push.
 # Default unsigned compile is xcodebuild.yml and must stay green without these secrets.
 name: TestFlight Internal

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Create or reuse ASC Dist cert + App Store profiles for TestFlight GHA.
+"""Create a runner-local ASC Dist cert + Local App Store profiles for TF GHA.
 
-Reuse KEEP Dist cert 45YLWHL6UP when present. Reuse ACTIVE profiles by name.
-Create a Dist cert only if KEEP is missing. Create a profile only if missing.
-Never revoke KEEP. Never delete+create profiles on the happy path.
+KEEP Dist 45YLWHL6UP is reference-only and is never revoked. Always mint a
+runner-local Dist cert (CSR/openssl/p12 → keychain) and bind Local-named
+App Store profiles to that cert. Leave KEEP-named ACTIVE profiles alone.
 """
 from __future__ import annotations
 
@@ -97,14 +97,14 @@ def list_certificates() -> list[dict]:
             dist.append(cert)
     print(f"ASC certificate type counts {json.dumps(counts, sort_keys=True)}")
     print(f"ASC distribution-class certificates n={len(dist)}")
-    return dist
+    return certs
 
 
 def append_env(text: str) -> None:
     Path(os.environ["GITHUB_ENV"]).open("a").write(text)
 
 
-def create_and_import_dist_cert(tmp: Path) -> str:
+def create_and_import_dist_cert(tmp: Path, keep_id: str | None = None) -> str:
     openssl = ["/usr/bin/openssl"]
     key_path = tmp / "dist.key"
     csr_path = tmp / "dist.csr"
@@ -124,6 +124,8 @@ def create_and_import_dist_cert(tmp: Path) -> str:
     )
     csr = csr_path.read_text()
     created = None
+    last_st = 0
+    last_payload: dict = {}
     for ctype in ("IOS_DISTRIBUTION", "DISTRIBUTION"):
         st, payload = api(
             "POST",
@@ -135,15 +137,16 @@ def create_and_import_dist_cert(tmp: Path) -> str:
                 }
             },
         )
+        last_st, last_payload = st, payload
         if st in (401, 403):
             die_admin(st, payload)
         if st in (200, 201):
             created = payload.get("data") or {}
-            print(f"CREATED certificate type={ctype} id={created.get('id')}")
+            print(f"CREATED local Dist certificate type={ctype} id={created.get('id')}")
             break
         print(f"CREATE {ctype} HTTP {st} {json.dumps(payload)[:500]}")
     if created is None:
-        print("KEEP Dist cert missing and no new distribution certificate could be created.")
+        print(reuse.dist_create_failure_message(last_st, last_payload, keep_id))
         raise SystemExit(1)
     der_b64 = (created.get("attributes") or {}).get("certificateContent") or ""
     if not der_b64:
@@ -374,6 +377,7 @@ def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
                 bundle_id=bid,
                 cert_id=cert_id,
                 ident=ident,
+                require_cert=True,
             )
         except reuse.ProfileCreateError as exc:
             print(str(exc))
@@ -399,18 +403,26 @@ def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
 def main() -> None:
     tmp = Path(os.environ["RUNNER_TEMP"])
     home = Path.home()
-    dist = list_certificates()
-    keep = reuse.pick_keep_dist_cert(dist)
+    certs = list_certificates()
+    try:
+        revoked = reuse.revoke_development_orphans(api, certs)
+    except reuse.RevokeDeniedError as exc:
+        print(str(exc))
+        raise SystemExit(1) from exc
+    for cid in revoked:
+        print(f"REVOKED development orphan id={cid} (Created via API; not KEEP Dist)")
+    keep = reuse.pick_keep_dist_cert(certs)
+    keep_id = str(keep.get("id") or "") if keep is not None else ""
     if keep is not None:
-        cert_id = str(keep.get("id") or "")
         name = str((keep.get("attributes") or {}).get("name") or "")
-        print(f"KEEP reuse distribution cert id={cert_id} name={name}")
-        print("Not creating a new Dist cert. Not revoking KEEP or other Dist certs.")
-        append_env("HAS_LOCAL_DIST_KEY=0\n")
-        append_env(f"DIST_CERT_ID={cert_id}\n")
+        print(f"KEEP Dist cert present id={keep_id} name={name} (reference only)")
+        print("Creating a runner-local Dist cert for this flight. Not revoking KEEP.")
     else:
-        print("KEEP Dist cert missing — creating one Dist cert for this runner only.")
-        cert_id = create_and_import_dist_cert(tmp)
+        print("KEEP Dist cert missing — creating a runner-local Dist cert.")
+    cert_id = create_and_import_dist_cert(tmp, keep_id or None)
+    print(f"KEEP Dist id={keep_id or 'none'} (reference)")
+    print(f"LOCAL Dist id={cert_id} (signing)")
+    append_env(f"KEEP_DIST_CERT_ID={keep_id}\n")
     write_profiles(home, tmp, cert_id)
 
 

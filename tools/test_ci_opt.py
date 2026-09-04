@@ -358,18 +358,26 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("testflight-internal.yml must run tools/tf_asc_signing.py (reuse helper)")
     if "PROFILE delete stale" in yml or "PROFILE delete stale" in sign:
         fail("TF must not delete GHA App Store profiles on the happy path")
-    if "REVOKE orphan" in yml or "REVOKE orphan" in sign:
+    if "REVOKE orphan Dist" in yml or "REVOKE orphan Dist" in sign:
         fail("TF must not revoke Dist certs on the happy path")
     if KEEP_DIST_ID not in reuse:
         fail(f"tf_asc_reuse.py must pin KEEP Dist cert {KEEP_DIST_ID}")
     if "resolve_profile" not in reuse or "Not deleting" not in reuse:
         fail("tf_asc_reuse.py must get-or-create / reuse ACTIVE profiles by name")
-    if "HAS_LOCAL_DIST_KEY" not in archive or "KEEP cert reuse" not in archive:
-        fail("tf-archive.sh must leave Automatic signing when KEEP is reused (no local key)")
+    if "GHA Local" not in reuse:
+        fail("tf_asc_reuse.py must sign with Local-named App Store profiles")
+    if "should_revoke_development_orphan" not in reuse:
+        fail("tf_asc_reuse.py must offer a Development orphan revoke helper")
+    if "HAS_LOCAL_DIST_KEY" not in archive:
+        fail("tf-archive.sh must switch on HAS_LOCAL_DIST_KEY")
+    if 'signingStyle"] = "manual"' not in archive and "signingStyle'] = 'manual'" not in archive:
+        fail("tf-archive.sh must use Manual signing when HAS_LOCAL_DIST_KEY=1")
+    if "GHA Local" not in archive:
+        fail("tf-archive.sh Manual path must default to Local profile names")
     if "watchkitapp" in reuse:
         fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")
     test_tf_asc_reuse.main()
-    ok("ASC Dist cert + profiles reuse KEEP / ACTIVE by name; no delete+create")
+    ok("ASC local Dist + Local profiles; KEEP Dist is reference-only")
 
 
 def test_crisis_opt_locks() -> None:

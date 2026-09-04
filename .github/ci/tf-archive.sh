@@ -69,15 +69,14 @@ if mp.exists():
 path = Path("Blackout.xcodeproj/project.pbxproj")
 text = path.read_text()
 spec = {
-    "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA"),
-    "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA"),
+    "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA Local"),
+    "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA Local"),
 }
 # 33926435868: HAS_LOCAL_DIST_KEY=0 skipped this patch and left stock
 # Automatic. xcodebuild archive then demanded Apple Development certs
 # ("Revoke certificate" / iOS App Development profiles) and exited 65.
-# Keep Automatic + AuthKey, but pin iPhone Distribution so archive does
-# not touch Development certs. Manual + specifier only when the Dist
-# private key is in the runner keychain.
+# Happy path now always mints a runner-local Dist cert so this Manual
+# branch runs. The != 1 pin is a last-ditch fallback only.
 if os.environ.get("HAS_LOCAL_DIST_KEY") != "1":
     def pin_dist(block):
         def sub(key, val):
