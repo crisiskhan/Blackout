@@ -252,6 +252,104 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
         self.assertEqual(api.calls, [])
 
+    def test_invalid_local_named_after_dist_revoke_replaces(self) -> None:
+        """Dist prune invalidates Local; same-name CREATE 409s unless we delete first."""
+        api = FakeAPI()
+        stale = _profile(
+            "OLDLOC",
+            LOCAL_IOS_NAME,
+            state="INVALID",
+            cert_ids=["DR46Y6TTC3"],
+        )
+        keep_named = _profile("KEEPPROF", KEEP_IOS_NAME, cert_ids=[KEEP])
+        action, match = reuse.resolve_profile(
+            api,
+            [stale, keep_named],
+            name=LOCAL_IOS_NAME,
+            bundle_id="bid1",
+            cert_id="YVK8HM9GT2",
+            require_cert=True,
+        )
+        self.assertEqual(action, "replace")
+        self.assertEqual(match["id"], "NEW")
+        self.assertEqual([m for m, _ in api.calls], ["DELETE", "POST"])
+        self.assertIn("profiles/OLDLOC", api.calls[0][1])
+        self.assertFalse(any("KEEPPROF" in url for _m, url in api.calls))
+        posted = api.bodies[1]["data"]
+        self.assertEqual(posted["attributes"]["name"], LOCAL_IOS_NAME)
+        self.assertEqual(
+            [c["id"] for c in posted["relationships"]["certificates"]["data"]],
+            ["YVK8HM9GT2"],
+        )
+
+    def test_widget_local_wrong_cert_replaces(self) -> None:
+        api = FakeAPI()
+        existing = _profile("OLDWID", LOCAL_WIDGET_NAME, cert_ids=["DR46Y6TTC3"])
+        action, match = reuse.resolve_profile(
+            api,
+            [existing],
+            name=LOCAL_WIDGET_NAME,
+            bundle_id="bid2",
+            cert_id=LOCAL_DIST,
+            require_cert=True,
+        )
+        self.assertEqual(action, "replace")
+        self.assertEqual(match["id"], "NEW")
+        self.assertEqual([m for m, _ in api.calls], ["DELETE", "POST"])
+        self.assertIn("profiles/OLDWID", api.calls[0][1])
+        posted = api.bodies[1]["data"]
+        self.assertEqual(posted["attributes"]["name"], LOCAL_WIDGET_NAME)
+        self.assertEqual(
+            [c["id"] for c in posted["relationships"]["certificates"]["data"]],
+            [LOCAL_DIST],
+        )
+
+    def test_local_delete_denied_fails_closed(self) -> None:
+        api = FakeAPI()
+        api.delete_status = 403
+        api.delete_payload = {
+            "errors": [{"status": "403", "code": "FORBIDDEN.REQUIRED", "title": "Forbidden"}]
+        }
+        existing = _profile("OLDLOC", LOCAL_IOS_NAME, cert_ids=[KEEP])
+        with self.assertRaises(reuse.ProfileCreateError) as ctx:
+            reuse.resolve_profile(
+                api,
+                [existing],
+                name=LOCAL_IOS_NAME,
+                bundle_id="bid1",
+                cert_id=LOCAL_DIST,
+                require_cert=True,
+            )
+        msg = str(ctx.exception)
+        self.assertIn(LOCAL_IOS_NAME, msg)
+        self.assertIn("OLDLOC", msg)
+        self.assertIn("403", msg)
+        self.assertIn("Fail closed", msg)
+        self.assertEqual([m for m, _ in api.calls], ["DELETE"])
+        self.assertFalse(any(m == "POST" for m, _ in api.calls))
+
+    def test_local_recreate_denied_fails_closed(self) -> None:
+        api = FakeAPI()
+        api.post_status = 409
+        api.post_payload = {
+            "errors": [{"status": "409", "code": "ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE"}]
+        }
+        existing = _profile("OLDLOC", LOCAL_IOS_NAME, cert_ids=["DR46Y6TTC3"])
+        with self.assertRaises(reuse.ProfileCreateError) as ctx:
+            reuse.resolve_profile(
+                api,
+                [existing],
+                name=LOCAL_IOS_NAME,
+                bundle_id="bid1",
+                cert_id=LOCAL_DIST,
+                require_cert=True,
+            )
+        msg = str(ctx.exception)
+        self.assertIn(LOCAL_IOS_NAME, msg)
+        self.assertIn("409", msg)
+        self.assertEqual([m for m, _ in api.calls], ["DELETE", "POST"])
+        self.assertFalse(any("KEEP" in url for _m, url in api.calls))
+
     def test_reuse_fetches_certs_when_list_omits_relationships(self) -> None:
         api = FakeAPI()
         api.get_payload = {

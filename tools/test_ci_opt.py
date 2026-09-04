@@ -373,6 +373,8 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("TF must revoke stale non-KEEP Dist leftovers before the next mint")
     if "LOCAL_PROFILE_NAMES" not in reuse:
         fail("tf_asc_reuse.py must replace only Local-named profiles")
+    if "select_profile_any_state" not in reuse:
+        fail("tf_asc_reuse.py must replace INVALID Local leftovers after Dist prune")
     if "HAS_LOCAL_DIST_KEY" not in archive:
         fail("tf-archive.sh must switch on HAS_LOCAL_DIST_KEY")
     if 'signingStyle"] = "manual"' not in archive and "signingStyle'] = 'manual'" not in archive:

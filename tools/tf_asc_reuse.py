@@ -7,7 +7,8 @@ Never revoke KEEP. Never delete KEEP-named profiles.
 33928044175: each GHA runner is ephemeral, so the previous local Dist
 has no private key here. Revoke stale non-KEEP Dist leftovers (they
 fill Apple's cap) and replace Local-named profiles bound to a previous
-mint. KEEP-named profiles stay.
+mint — including INVALID leftovers after that Dist revoke. KEEP-named
+profiles stay.
 """
 from __future__ import annotations
 
@@ -191,6 +192,18 @@ def select_reusable_profile(
     return None
 
 
+def select_profile_any_state(
+    profiles: list[dict[str, Any]],
+    name: str,
+) -> Optional[dict[str, Any]]:
+    """Exact name, any state. Dist revoke leaves Local profiles INVALID."""
+    for profile in profiles:
+        attrs = profile.get("attributes") or {}
+        if attrs.get("name") == name:
+            return profile
+    return None
+
+
 def profile_certificate_ids(profile: dict[str, Any]) -> list[str]:
     rel = ((profile.get("relationships") or {}).get("certificates") or {}).get("data") or []
     return [str(item.get("id") or "") for item in rel if item.get("id")]
@@ -258,6 +271,8 @@ def resolve_profile(
     require_cert: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     match = select_reusable_profile(profiles, name)
+    if match is None and require_cert and name in LOCAL_PROFILE_NAMES:
+        match = select_profile_any_state(profiles, name)
     replaced = False
     if match is not None:
         if not require_cert:
