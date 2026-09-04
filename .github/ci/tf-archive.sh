@@ -55,7 +55,6 @@ plistlib.dump(body, open(path, "wb"))
 print("wrote", path, "signingStyle", body["signingStyle"])
 PY
 
-# CI-only pbxproj signing settings (not committed). No strip phases. No AppIntents hacks.
 "$PYBIN" << 'PY'
 import json, os, re
 from pathlib import Path
