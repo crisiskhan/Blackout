@@ -72,8 +72,35 @@ spec = {
     "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA"),
     "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA"),
 }
+# 33926435868: HAS_LOCAL_DIST_KEY=0 skipped this patch and left stock
+# Automatic. xcodebuild archive then demanded Apple Development certs
+# ("Revoke certificate" / iOS App Development profiles) and exited 65.
+# Keep Automatic + AuthKey, but pin iPhone Distribution so archive does
+# not touch Development certs. Manual + specifier only when the Dist
+# private key is in the runner keychain.
 if os.environ.get("HAS_LOCAL_DIST_KEY") != "1":
-    print("no local Dist key — leave Automatic signing for AuthKey (KEEP cert reuse)")
+    def pin_dist(block):
+        def sub(key, val):
+            nonlocal block
+            if re.search(rf"{key} = ", block):
+                block = re.sub(rf"{key} = [^;]*;", f"{key} = {val};", block, count=1)
+            else:
+                block = block.replace("buildSettings = {", "buildSettings = {\n\t\t\t\t" + f"{key} = {val};")
+            return block
+        block = sub("CODE_SIGN_STYLE", "Automatic")
+        block = sub("CODE_SIGN_IDENTITY", '"iPhone Distribution"')
+        block = sub("DEVELOPMENT_TEAM", team)
+        return block
+    out = text
+    for bundle in spec:
+        pattern = re.compile(
+            r"(buildSettings = \{[^{}]*PRODUCT_BUNDLE_IDENTIFIER = " + re.escape(bundle) + r";[^{}]*\})",
+            re.S,
+        )
+        out, n = pattern.subn(lambda m: pin_dist(m.group(1)), out)
+        print(f"pinned Distribution Automatic {bundle} blocks={n}")
+    path.write_text(out)
+    print("CI-only pbxproj Dist Automatic pin (KEEP cert reuse, not committed)")
     raise SystemExit(0)
 def patch_block(block, bundle):
     name = spec[bundle]
@@ -246,6 +273,7 @@ xcodebuild \
   -archivePath "$ARCHIVE" \
   CURRENT_PROJECT_VERSION="$NEXT" \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+  CODE_SIGN_IDENTITY="iPhone Distribution" \
   CODE_SIGNING_ALLOWED=YES \
   ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
   "${AUTH[@]}" \
