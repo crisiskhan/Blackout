@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "layer": "hazards",
+        "name": "High-contrast hazard overlay"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -106.46000000000001,
+              31.74
+            ],
+            [
+              -106.4,
+              31.78
+            ],
+            [
+              -106.46000000000001,
+              31.82
+            ],
+            [
+              -106.52,
+              31.78
+            ],
+            [
+              -106.46000000000001,
+              31.74
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

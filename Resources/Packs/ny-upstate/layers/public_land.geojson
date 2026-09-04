@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "layer": "public_land",
+        "name": "Public land overlay from pack extract"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -73.98,
+              44.129999999999995
+            ],
+            [
+              -73.94,
+              44.16
+            ],
+            [
+              -73.9,
+              44.129999999999995
+            ],
+            [
+              -73.94,
+              44.1
+            ],
+            [
+              -73.98,
+              44.129999999999995
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

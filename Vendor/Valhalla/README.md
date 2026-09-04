@@ -1,0 +1,1 @@
+Valhalla-or-graph: Router reads an OSM-derived offline graph plus Valhalla-compatible costing keys (walk/drive, hills, avoid). Full Valhalla C++ is not an iOS embed. The same way/node extract a Valhalla tile would consume lives in each pack's `graph.json`.

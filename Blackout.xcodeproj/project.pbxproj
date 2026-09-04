@@ -7,185 +7,382 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		726A841CF59B435A99C219CB /* BlackoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 94BE6BC726994C1BE6FDB1ED /* BlackoutCore */; };
-		D15DD3B44FEFA270909AA628 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 2C69B7EE0E687CB38564BBC3 /* DesignSystem */; };
-		F2B5CDAF356B9654500FC62C /* BlackoutCrypto in Frameworks */ = {isa = PBXBuildFile; productRef = E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */; };
-		FA71575A92DB3DA4582AEEC1 /* BlackoutBattery in Frameworks */ = {isa = PBXBuildFile; productRef = 9F99C72352301779F4A58527 /* BlackoutBattery */; };
-		CE537E1757AA50257828966C /* BlackoutPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 4727D8B200A97A548F694FBC /* BlackoutPersistence */; };
-		165BFA3CCBE595A5E46744CD /* BlackoutLocation in Frameworks */ = {isa = PBXBuildFile; productRef = C4830C6DFCC1B531A7117B65 /* BlackoutLocation */; };
-		E7FDC2DAC814F64AE6874E1A /* BlackoutMesh in Frameworks */ = {isa = PBXBuildFile; productRef = 75017D353F218FF9B4B088BE /* BlackoutMesh */; };
-		F4DDBB966264344337F1328D /* Messaging in Frameworks */ = {isa = PBXBuildFile; productRef = FBC432B44ADB3FEFE4545993 /* Messaging */; };
-		FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */ = {isa = PBXBuildFile; productRef = 03B8622003259D7DCD3BB9BD /* VoicePTT */; };
-		3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */ = {isa = PBXBuildFile; productRef = 22D618336C0CB913039FE327 /* Maps */; };
-		96AA929602CB8D0BEE73B632 /* SOS in Frameworks */ = {isa = PBXBuildFile; productRef = 244B139EBFA8CAEC15CBBC8D /* SOS */; };
-		F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8646A3CDCE8F5E86C75F3A /* Expeditions */; };
-		BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */ = {isa = PBXBuildFile; productRef = 9F9EA0AE7E7BA084D594A1C5 /* Field */; };
-		D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 945B11D319B9F346AA576637 /* Settings */; };
-		5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */ = {isa = PBXBuildFile; fileRef = E8CF23C84AF6AD06DA1E4784 /* DefaultPack */; };
+		4718FE35FC3D9807AED87236 /* Tokens in Frameworks */ = {isa = PBXBuildFile; productRef = 3967DFB3EBD6DE29488DB49F /* Tokens */; };
+		0EA57CD1C5566D3E40EF7EA2 /* BlackBox in Frameworks */ = {isa = PBXBuildFile; productRef = D0786CE451717C8726544FBF /* BlackBox */; };
+		28D8BFDA827B68E22B2AFBA8 /* PackIO in Frameworks */ = {isa = PBXBuildFile; productRef = EABA63E1353A3EC5661E242F /* PackIO */; };
+		CD806A94D8E1015756402F96 /* Search in Frameworks */ = {isa = PBXBuildFile; productRef = B6845CF51F29554E0454B26E /* Search */; };
+		8244807D2560D8CBA83CE7B0 /* Router in Frameworks */ = {isa = PBXBuildFile; productRef = 3DC79516B9CCDE68A8546F7E /* Router */; };
+		67EA543102B08267C81BFFBC /* DeadReckoning in Frameworks */ = {isa = PBXBuildFile; productRef = 169CB191E8532AB2AB3A3B07 /* DeadReckoning */; };
+		F869714589F85C0802CA0366 /* MeshDTN in Frameworks */ = {isa = PBXBuildFile; productRef = F21C88F8ACD697A19E223866 /* MeshDTN */; };
+		7BC2809D91BDE514CC3C4530 /* CryptoParty in Frameworks */ = {isa = PBXBuildFile; productRef = 06591D4E67CB5079629D79BA /* CryptoParty */; };
+		B5E9C281200E372A9707A4E5 /* PTTAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 0D91C7BB6B7B7AFA630D391F /* PTTAudio */; };
+		6CF0436BED6A8D60BF3F1110 /* CommsUI in Frameworks */ = {isa = PBXBuildFile; productRef = 836FEB75AAD17DE1995EC103 /* CommsUI */; };
+		E21F937CC6078C7D1BA8EF9B /* FieldCorpus in Frameworks */ = {isa = PBXBuildFile; productRef = 0099751D650B3FB88A62D7B9 /* FieldCorpus */; };
+		DAD876D26694166B9F35594C /* FieldStepper in Frameworks */ = {isa = PBXBuildFile; productRef = CB866CF29E640022662FB5FA /* FieldStepper */; };
+		32610B0D47F20572CBD6FDE0 /* OfflineSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = A443294E97E5F795B4446975 /* OfflineSpeech */; };
+		9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = 8C1039025E2D17CE92E79C01 /* FieldSpeech */; };
+		ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */ = {isa = PBXBuildFile; productRef = 23D30BFE8411990E2FC45A88 /* VisionCoreML */; };
+		34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */ = {isa = PBXBuildFile; productRef = CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */; };
+		B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA5F25B4520F0497169C09A /* KitStore */; };
+		D353BBFF8674B6F0B60EFC51 /* Vitals in Frameworks */ = {isa = PBXBuildFile; productRef = CB29C7043F09D7DF11FEEACC /* Vitals */; };
+		DB4540FACD5366945D215732 /* RedAlert in Frameworks */ = {isa = PBXBuildFile; productRef = CCBB82BF482F7E55E8AAE363 /* RedAlert */; };
+		9DF70F4121E4E6E680B739CA /* TimerSync in Frameworks */ = {isa = PBXBuildFile; productRef = F0F01B5AD66A37308713FF58 /* TimerSync */; };
+		C8F4354DBAFB1E4686BEE331 /* RosterRoles in Frameworks */ = {isa = PBXBuildFile; productRef = BB0A73C40F1251AB2CBBA317 /* RosterRoles */; };
+		3664B3EB0CD00ECCAAB0D1DB /* TripBrief in Frameworks */ = {isa = PBXBuildFile; productRef = 5AC4E2AB3321B9C7AFE60B65 /* TripBrief */; };
+		86C630E30C053793FFD3918B /* PaperGen in Frameworks */ = {isa = PBXBuildFile; productRef = 4058A145F0541E15FE88E8FD /* PaperGen */; };
+		7CB94E660D9C9983B9CEEA94 /* Almanac in Frameworks */ = {isa = PBXBuildFile; productRef = 373AC51C66DE579F20535CCA /* Almanac */; };
+		0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */ = {isa = PBXBuildFile; productRef = 2EEC2750DDE6DD942664AD31 /* NightRed */; };
+		E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */ = {isa = PBXBuildFile; productRef = FC847D28FFD57BF7EE7E498C /* BatteryAuction */; };
+		A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */ = {isa = PBXBuildFile; productRef = 77F4E4985DB1424CF0DB1857 /* Instruments */; };
+		DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */ = {isa = PBXBuildFile; productRef = 04EC158D5DD9027CF710A3A4 /* RegionalPacks */; };
+		B0393E48081BE19742625903 /* MapLibreMap in Frameworks */ = {isa = PBXBuildFile; productRef = E648C806A9EA32B613781C40 /* MapLibreMap */; };
+		65A85523F935D622BA89CB01 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 3E3D4914CDE33667A03D92C1 /* MapLibre */; };
+		48DC310F0F68C6FA33F515C5 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = B6EAF066226A93016BECDF9F /* Resources */; };
+		61FBFF9043DC2352CAEDC813 /* BlackoutWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 0D15B19A30A73B511F9F8245 /* BlackoutWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A51B0C23E183211AB08F242E /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3ECE9A2F0678B209E4A706C9 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E8CF23C84AF6AD06DA1E4784 /* DefaultPack */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; };
+		0D15B19A30A73B511F9F8245 /* BlackoutWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackoutWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BlackoutWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B6EAF066226A93016BECDF9F /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Resources; path = Resources; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		466304068CF247FDBD3B915E /* Blackout */ = {
+		3BFADFFD5F6800C1D655599B /* Blackout */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */,
+				E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */,
 			);
 			path = Blackout;
+			sourceTree = "<group>";
+		};
+		77A141E33052E9AD914D725D /* BlackoutWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				301F26F93D27BA798689F280 /* Exceptions for "BlackoutWatch" */,
+			);
+			path = BlackoutWatch;
+			sourceTree = "<group>";
+		};
+		C40A7FCEB18ABD12026DB9D4 /* BlackoutWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				25DBC456100F11D1734438C4 /* Exceptions for "BlackoutWidgets" */,
+			);
+			path = BlackoutWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3323629B96A3F2337CE24535 /* Frameworks */ = {
+		C92AE8AAAC90B5A5825C0B1E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				726A841CF59B435A99C219CB /* BlackoutCore in Frameworks */,
-				D15DD3B44FEFA270909AA628 /* DesignSystem in Frameworks */,
-				F2B5CDAF356B9654500FC62C /* BlackoutCrypto in Frameworks */,
-				FA71575A92DB3DA4582AEEC1 /* BlackoutBattery in Frameworks */,
-				CE537E1757AA50257828966C /* BlackoutPersistence in Frameworks */,
-				165BFA3CCBE595A5E46744CD /* BlackoutLocation in Frameworks */,
-				E7FDC2DAC814F64AE6874E1A /* BlackoutMesh in Frameworks */,
-				F4DDBB966264344337F1328D /* Messaging in Frameworks */,
-				FFDF84223388D1BFE2FA6E2D /* VoicePTT in Frameworks */,
-				3ADD47F30AEC9D31AB4AE058 /* Maps in Frameworks */,
-				96AA929602CB8D0BEE73B632 /* SOS in Frameworks */,
-				F42E7333BA408C6B08228E42 /* Expeditions in Frameworks */,
-				BA7B4BEC5588B7C1526B0749 /* Field in Frameworks */,
-				D83C6D5BF92FCF04514B6FEC /* Settings in Frameworks */,
+				4718FE35FC3D9807AED87236 /* Tokens in Frameworks */,
+				0EA57CD1C5566D3E40EF7EA2 /* BlackBox in Frameworks */,
+				28D8BFDA827B68E22B2AFBA8 /* PackIO in Frameworks */,
+				CD806A94D8E1015756402F96 /* Search in Frameworks */,
+				8244807D2560D8CBA83CE7B0 /* Router in Frameworks */,
+				67EA543102B08267C81BFFBC /* DeadReckoning in Frameworks */,
+				F869714589F85C0802CA0366 /* MeshDTN in Frameworks */,
+				7BC2809D91BDE514CC3C4530 /* CryptoParty in Frameworks */,
+				B5E9C281200E372A9707A4E5 /* PTTAudio in Frameworks */,
+				6CF0436BED6A8D60BF3F1110 /* CommsUI in Frameworks */,
+				E21F937CC6078C7D1BA8EF9B /* FieldCorpus in Frameworks */,
+				DAD876D26694166B9F35594C /* FieldStepper in Frameworks */,
+				32610B0D47F20572CBD6FDE0 /* OfflineSpeech in Frameworks */,
+				9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */,
+				ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */,
+				34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */,
+				B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */,
+				D353BBFF8674B6F0B60EFC51 /* Vitals in Frameworks */,
+				DB4540FACD5366945D215732 /* RedAlert in Frameworks */,
+				9DF70F4121E4E6E680B739CA /* TimerSync in Frameworks */,
+				C8F4354DBAFB1E4686BEE331 /* RosterRoles in Frameworks */,
+				3664B3EB0CD00ECCAAB0D1DB /* TripBrief in Frameworks */,
+				86C630E30C053793FFD3918B /* PaperGen in Frameworks */,
+				7CB94E660D9C9983B9CEEA94 /* Almanac in Frameworks */,
+				0F5C7C23FE54CBF3C90B872B /* NightRed in Frameworks */,
+				E457536BEB1CFFFC7FE9E688 /* BatteryAuction in Frameworks */,
+				A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */,
+				DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */,
+				B0393E48081BE19742625903 /* MapLibreMap in Frameworks */,
+				65A85523F935D622BA89CB01 /* MapLibre in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DCE07A47D2B7D551CBCE603 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E9FD067F60B8245DE808340 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8CB695B89F15D64CF154F9CA = {
+		4813494D137E1631BBA301D5 = {
 			isa = PBXGroup;
 			children = (
-				466304068CF247FDBD3B915E /* Blackout */,
-				E8CF23C84AF6AD06DA1E4784 /* DefaultPack */,
-				942A9A1A63793D61082FFAA8 /* Products */,
+				3BFADFFD5F6800C1D655599B /* Blackout */,
+				77A141E33052E9AD914D725D /* BlackoutWatch */,
+				C40A7FCEB18ABD12026DB9D4 /* BlackoutWidgets */,
+				B6EAF066226A93016BECDF9F /* Resources */,
+				0A3E27B8CA818264D75C8D81 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		942A9A1A63793D61082FFAA8 /* Products */ = {
+		0A3E27B8CA818264D75C8D81 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				3ECE9A2F0678B209E4A706C9 /* Blackout.app */,
+				0D15B19A30A73B511F9F8245 /* BlackoutWatch.app */,
+				1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		DD3B27DAD2460464B6896A8B /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				61FBFF9043DC2352CAEDC813 /* BlackoutWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A51B0C23E183211AB08F242E /* BlackoutWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		8796EC6A87564C187A908CD6 /* Blackout */ = {
+		26357C8EB97FA055344683EE /* Blackout */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9217D4CDF52D089EFBCEAA17 /* Build configuration list for PBXNativeTarget "Blackout" */;
+			buildConfigurationList = DFBB87791AF9D8287D4429A7 /* Build configuration list for PBXNativeTarget "Blackout" */;
 			buildPhases = (
-				A8845CE5F531D368403AFF88 /* Sources */,
-				3323629B96A3F2337CE24535 /* Frameworks */,
-				8E8A406124A99A2C1D9A1238 /* Resources */,
-				2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */,
+				A1E8A1A34FFBAB38B2C8B3AC /* Sources */,
+				C92AE8AAAC90B5A5825C0B1E /* Frameworks */,
+				02245E091A78364E4F4C8AC3 /* Resources */,
+				BF2845EB39BCB354A61873D3 /* Copy Resources into app bundle */,
+				DD3B27DAD2460464B6896A8B /* Embed Watch Content */,
+				22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3194704E78350E7A30EA15E2 /* PBXTargetDependency */,
+				E9A4CDA30F5D0AEF002B42AA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3BFADFFD5F6800C1D655599B /* Blackout */,
+			);
+			name = Blackout;
+			packageProductDependencies = (
+				3967DFB3EBD6DE29488DB49F /* Tokens */,
+				D0786CE451717C8726544FBF /* BlackBox */,
+				EABA63E1353A3EC5661E242F /* PackIO */,
+				B6845CF51F29554E0454B26E /* Search */,
+				3DC79516B9CCDE68A8546F7E /* Router */,
+				169CB191E8532AB2AB3A3B07 /* DeadReckoning */,
+				F21C88F8ACD697A19E223866 /* MeshDTN */,
+				06591D4E67CB5079629D79BA /* CryptoParty */,
+				0D91C7BB6B7B7AFA630D391F /* PTTAudio */,
+				836FEB75AAD17DE1995EC103 /* CommsUI */,
+				0099751D650B3FB88A62D7B9 /* FieldCorpus */,
+				CB866CF29E640022662FB5FA /* FieldStepper */,
+				A443294E97E5F795B4446975 /* OfflineSpeech */,
+				8C1039025E2D17CE92E79C01 /* FieldSpeech */,
+				23D30BFE8411990E2FC45A88 /* VisionCoreML */,
+				CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */,
+				2AA5F25B4520F0497169C09A /* KitStore */,
+				CB29C7043F09D7DF11FEEACC /* Vitals */,
+				CCBB82BF482F7E55E8AAE363 /* RedAlert */,
+				F0F01B5AD66A37308713FF58 /* TimerSync */,
+				BB0A73C40F1251AB2CBBA317 /* RosterRoles */,
+				5AC4E2AB3321B9C7AFE60B65 /* TripBrief */,
+				4058A145F0541E15FE88E8FD /* PaperGen */,
+				373AC51C66DE579F20535CCA /* Almanac */,
+				2EEC2750DDE6DD942664AD31 /* NightRed */,
+				FC847D28FFD57BF7EE7E498C /* BatteryAuction */,
+				77F4E4985DB1424CF0DB1857 /* Instruments */,
+				04EC158D5DD9027CF710A3A4 /* RegionalPacks */,
+				E648C806A9EA32B613781C40 /* MapLibreMap */,
+				3E3D4914CDE33667A03D92C1 /* MapLibre */,
+			);
+			productName = Blackout;
+			productReference = 3ECE9A2F0678B209E4A706C9 /* Blackout.app */;
+			productType = "com.apple.product-type.application";
+		};
+		24C410C82FA6297068B2EBDD /* BlackoutWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56A0206E639F214537EF418D /* Build configuration list for PBXNativeTarget "BlackoutWatch" */;
+			buildPhases = (
+				4000008D2DBDD3B0AFFF9ABE /* Sources */,
+				5DCE07A47D2B7D551CBCE603 /* Frameworks */,
+				6F41125B787E8824C2ACF62E /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				466304068CF247FDBD3B915E /* Blackout */,
+				77A141E33052E9AD914D725D /* BlackoutWatch */,
 			);
-			name = Blackout;
-			packageProductDependencies = (
-				94BE6BC726994C1BE6FDB1ED /* BlackoutCore */,
-				2C69B7EE0E687CB38564BBC3 /* DesignSystem */,
-				E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */,
-				9F99C72352301779F4A58527 /* BlackoutBattery */,
-				4727D8B200A97A548F694FBC /* BlackoutPersistence */,
-				C4830C6DFCC1B531A7117B65 /* BlackoutLocation */,
-				75017D353F218FF9B4B088BE /* BlackoutMesh */,
-				FBC432B44ADB3FEFE4545993 /* Messaging */,
-				03B8622003259D7DCD3BB9BD /* VoicePTT */,
-				22D618336C0CB913039FE327 /* Maps */,
-				244B139EBFA8CAEC15CBBC8D /* SOS */,
-				2E8646A3CDCE8F5E86C75F3A /* Expeditions */,
-				9F9EA0AE7E7BA084D594A1C5 /* Field */,
-				945B11D319B9F346AA576637 /* Settings */,
-			);
-			productName = Blackout;
-			productReference = 3ECE9A2F0678B209E4A706C9 /* Blackout.app */;
+			name = BlackoutWatch;
+			productName = BlackoutWatch;
+			productReference = 0D15B19A30A73B511F9F8245 /* BlackoutWatch.app */;
 			productType = "com.apple.product-type.application";
+		};
+		CCF3A5B986A45588384EF61E /* BlackoutWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 29C417B94D2D4A50259B6114 /* Build configuration list for PBXNativeTarget "BlackoutWidgets" */;
+			buildPhases = (
+				B8A50D03F8FA7528B86AF776 /* Sources */,
+				6E9FD067F60B8245DE808340 /* Frameworks */,
+				8B753843DB2071F3D589F96C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C40A7FCEB18ABD12026DB9D4 /* BlackoutWidgets */,
+			);
+			name = BlackoutWidgets;
+			productName = BlackoutWidgets;
+			productReference = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		59601E391B529B07AE11313D /* Project object */ = {
+		244210E48437B6556980A702 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					8796EC6A87564C187A908CD6 = {
-						CreatedOnToolsVersion = 16.0;
-					};
-				};
 			};
-			buildConfigurationList = 0781223A035E65BFD19ECE32 /* Build configuration list for PBXProject "Blackout" */;
+			buildConfigurationList = 1934B3F13FC9BCD90BADF308 /* Build configuration list for PBXProject "Blackout" */;
+			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				es,
 				Base,
 			);
-			mainGroup = 8CB695B89F15D64CF154F9CA;
+			mainGroup = 4813494D137E1631BBA301D5;
 			minimizedProjectReferenceProxies = 1;
-			compatibilityVersion = "Xcode 16.0";
 			packageReferences = (
-				E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */,
-				5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
-				69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */,
-				036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */,
-				8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */,
-				6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */,
-				26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */,
-				EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */,
-				2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */,
-				51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */,
-				FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */,
-				6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */,
-				3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */,
-				86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */,
+				4F353D4FCA233CBE8A2EACCC /* XCLocalSwiftPackageReference "Packages/Tokens" */,
+				2EB2E0D40553FA7C93AA21D9 /* XCLocalSwiftPackageReference "Packages/BlackBox" */,
+				A14B20F8488398C4680733CD /* XCLocalSwiftPackageReference "Packages/PackIO" */,
+				CD3CEC4ED701318D58EDD7E6 /* XCLocalSwiftPackageReference "Packages/Search" */,
+				F0EF88738804327FF1A08EB7 /* XCLocalSwiftPackageReference "Packages/Router" */,
+				FD20E6DF3CF881025D679227 /* XCLocalSwiftPackageReference "Packages/DeadReckoning" */,
+				001F66B016F73E8F70451B15 /* XCLocalSwiftPackageReference "Packages/MeshDTN" */,
+				165179C7FC47063A716F1549 /* XCLocalSwiftPackageReference "Packages/CryptoParty" */,
+				0C9B40F0EF70954B909AB392 /* XCLocalSwiftPackageReference "Packages/PTTAudio" */,
+				A47D800C02CB5E4393ABDA88 /* XCLocalSwiftPackageReference "Packages/CommsUI" */,
+				D593219EE50A646A7E1C0537 /* XCLocalSwiftPackageReference "Packages/FieldCorpus" */,
+				A6A74F93A4A27EFFE7C210D5 /* XCLocalSwiftPackageReference "Packages/FieldStepper" */,
+				3545128B03B16CAE2151F1D4 /* XCLocalSwiftPackageReference "Packages/OfflineSpeech" */,
+				1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */,
+				9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */,
+				6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */,
+				6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */,
+				B69ADB5DA75C1213D70ADF4A /* XCLocalSwiftPackageReference "Packages/Vitals" */,
+				963F34A583FE7701116215B1 /* XCLocalSwiftPackageReference "Packages/RedAlert" */,
+				56241AEF72F7BA930A9CAC73 /* XCLocalSwiftPackageReference "Packages/TimerSync" */,
+				5872FC58D04D3B49F0D14278 /* XCLocalSwiftPackageReference "Packages/RosterRoles" */,
+				F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */,
+				328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */,
+				4AED5443EA4254FCFB264540 /* XCLocalSwiftPackageReference "Packages/Almanac" */,
+				1BADFB1C30942929E8CB0088 /* XCLocalSwiftPackageReference "Packages/NightRed" */,
+				491A6E57190CB58B9CC8B69A /* XCLocalSwiftPackageReference "Packages/BatteryAuction" */,
+				F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */,
+				B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */,
+				E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */,
+				EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 942A9A1A63793D61082FFAA8 /* Products */;
+			productRefGroup = 0A3E27B8CA818264D75C8D81 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8796EC6A87564C187A908CD6 /* Blackout */,
+				26357C8EB97FA055344683EE /* Blackout */,
+				24C410C82FA6297068B2EBDD /* BlackoutWatch */,
+				CCF3A5B986A45588384EF61E /* BlackoutWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8E8A406124A99A2C1D9A1238 /* Resources */ = {
+		02245E091A78364E4F4C8AC3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C7BD30F9EAEFD7C665F12BA /* DefaultPack in Resources */,
+				48DC310F0F68C6FA33F515C5 /* Resources in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F41125B787E8824C2ACF62E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B753843DB2071F3D589F96C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A8845CE5F531D368403AFF88 /* Sources */ = {
+		A1E8A1A34FFBAB38B2C8B3AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4000008D2DBDD3B0AFFF9ABE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8A50D03F8FA7528B86AF776 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -195,38 +392,78 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2DCBB3A50AD653F3646EBA2F /* Copy DefaultPack into app bundle */ = {
+		BF2845EB39BCB354A61873D3 /* Copy Resources into app bundle */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
-				"$(SRCROOT)/Blackout/DefaultPack/manifest.json",
+				"$(SRCROOT)/Resources/Packs/catalog.json",
 			);
-			name = "Copy DefaultPack into app bundle";
-			outputFileListPaths = (
-			);
+			name = "Copy Resources into app bundle";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/manifest.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Resources/Packs/catalog.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Blackout/DefaultPack\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack\"\nif [ ! -f \"${SRC}/manifest.json\" ]; then\n  echo \"error: DefaultPack missing at ${SRC}\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\necho \"Copied DefaultPack -> ${DST}\"\ntest -f \"${DST}/manifest.json\"\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Resources\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CE25193FD49F6067CCD984C9 /* Exceptions for "Blackout" folder in "Blackout" target */ = {
+		E7C1A94B2F6D8014B3A55E21 /* Exceptions for "Blackout" */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				DefaultPack,
+				Info.plist,
 			);
-			target = 8796EC6A87564C187A908CD6 /* Blackout */;
+			target = 26357C8EB97FA055344683EE /* Blackout */;
+		};
+		301F26F93D27BA798689F280 /* Exceptions for "BlackoutWatch" */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 24C410C82FA6297068B2EBDD /* BlackoutWatch */;
+		};
+		25DBC456100F11D1734438C4 /* Exceptions for "BlackoutWidgets" */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CCF3A5B986A45588384EF61E /* BlackoutWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXTargetDependency section */
+		3194704E78350E7A30EA15E2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 24C410C82FA6297068B2EBDD /* BlackoutWatch */;
+			targetProxy = 89FFE7937BC36CA13DAF7849 /* PBXContainerItemProxy */;
+		};
+		E9A4CDA30F5D0AEF002B42AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CCF3A5B986A45588384EF61E /* BlackoutWidgets */;
+			targetProxy = BE9187A1743CFFCE976E7F64 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		89FFE7937BC36CA13DAF7849 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 244210E48437B6556980A702 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 24C410C82FA6297068B2EBDD;
+			remoteInfo = BlackoutWatch;
+		};
+		BE9187A1743CFFCE976E7F64 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 244210E48437B6556980A702 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CCF3A5B986A45588384EF61E;
+			remoteInfo = BlackoutWidgets;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin XCBuildConfiguration section */
 		3D45766170DCCA05AF05902A /* Debug */ = {
@@ -240,11 +477,9 @@
 					DEBUG_INFORMATION_FORMAT = dwarf;
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
 					ENABLE_TESTABILITY = YES;
-					GCC_DYNAMIC_NO_PIC = NO;
 					GCC_NO_COMMON_BLOCKS = YES;
 					GCC_OPTIMIZATION_LEVEL = 0;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-					MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 					ONLY_ACTIVE_ARCH = YES;
 					SDKROOT = iphoneos;
 					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -262,11 +497,9 @@
 					CLANG_ENABLE_OBJC_ARC = YES;
 					COPY_PHASE_STRIP = NO;
 					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
-					ENABLE_NS_ASSERTIONS = NO;
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
 					GCC_NO_COMMON_BLOCKS = YES;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-					MTL_ENABLE_DEBUG_INFO = NO;
 					SDKROOT = iphoneos;
 					SWIFT_COMPILATION_MODE = wholemodule;
 					SWIFT_OPTIMIZATION_LEVEL = -O;
@@ -275,13 +508,12 @@
 				};
 				name = Release;
 		};
-		368B24278E57628104DC2C43 /* Debug */ = {
+		F0B6C82E1E400020046E0F38 /* Debug */ = {
 				isa = XCBuildConfiguration;
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-					ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -293,53 +525,48 @@
 					ENABLE_PREVIEWS = YES;
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
 					ENABLE_TESTABILITY = YES;
-					GCC_DYNAMIC_NO_PIC = NO;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
 					GCC_NO_COMMON_BLOCKS = YES;
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = Blackout/Info.plist;
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
-					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
-					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
-					INFOPLIST_KEY_NSCameraUsageDescription = "Field Vision classifies a still on this device. Deny is supported — Guide and Skills still work.";
-					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
-					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
-					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
-					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
-					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
+					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Deny is supported.";
+					INFOPLIST_KEY_NSCameraUsageDescription = "Vision classifies a still on this device. It is a guess. Deny is supported.";
+					INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.";
+					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
+					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-					INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 					INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 					INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 					MARKETING_VERSION = 0.1.0;
-					MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 					ONLY_ACTIVE_ARCH = YES;
 					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout;
 					PRODUCT_NAME = "$(TARGET_NAME)";
 					SDKROOT = iphoneos;
 					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 					SUPPORTS_MACCATALYST = NO;
-					SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-					SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-					SWIFT_EMIT_LOC_STRINGS = YES;
 					SWIFT_OPTIMIZATION_LEVEL = -Onone;
 					SWIFT_VERSION = 5.0;
-					TARGETED_DEVICE_FAMILY = 1,2;
+					TARGETED_DEVICE_FAMILY = "1,2";
 				};
 				name = Debug;
 		};
-		028CF4E55748EB8D13684699 /* Release */ = {
+		889039B614F0C8069EEF6723 /* Release */ = {
 				isa = XCBuildConfiguration;
 				buildSettings = {
 					ALWAYS_SEARCH_USER_PATHS = NO;
 					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-					ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
 					CLANG_ANALYZER_NONNULL = YES;
 					CLANG_ENABLE_MODULES = YES;
 					CLANG_ENABLE_OBJC_ARC = YES;
@@ -348,43 +575,189 @@
 					CURRENT_PROJECT_VERSION = 1;
 					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
 					DEVELOPMENT_TEAM = "";
-					ENABLE_NS_ASSERTIONS = NO;
 					ENABLE_PREVIEWS = YES;
 					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = Blackout/Info.plist;
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
-					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
-					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.";
-					INFOPLIST_KEY_NSCameraUsageDescription = "Field Vision classifies a still on this device. Deny is supported — Guide and Skills still work.";
-					INFOPLIST_KEY_NSFaceIDUsageDescription = "Optional on-device lock. Nothing is sent anywhere.";
-					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.";
-					INFOPLIST_KEY_NSMicrophoneUsageDescription = "Voice PTT records locally on this device. Deny is supported.";
-					INFOPLIST_KEY_NSMotionUsageDescription = "Compass heading when GPS is denied or coarse. Deny is supported.";
-					INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
+					INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Mesh uses Bluetooth only when you opt in. Deny is supported.";
+					INFOPLIST_KEY_NSCameraUsageDescription = "Vision classifies a still on this device. It is a guess. Deny is supported.";
+					INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.";
+					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
+					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
+					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-					INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 					INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 					INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 					MARKETING_VERSION = 0.1.0;
-					MTL_ENABLE_DEBUG_INFO = NO;
 					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout;
 					PRODUCT_NAME = "$(TARGET_NAME)";
 					SDKROOT = iphoneos;
 					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 					SUPPORTS_MACCATALYST = NO;
-					SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-					SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 					SWIFT_COMPILATION_MODE = wholemodule;
-					SWIFT_EMIT_LOC_STRINGS = YES;
 					SWIFT_OPTIMIZATION_LEVEL = -O;
 					SWIFT_VERSION = 5.0;
-					TARGETED_DEVICE_FAMILY = 1,2;
+					TARGETED_DEVICE_FAMILY = "1,2";
+					VALIDATE_PRODUCT = YES;
+				};
+				name = Release;
+		};
+		8BAD37C00F1462017DBABA0E /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_TESTABILITY = YES;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GCC_OPTIMIZATION_LEVEL = 0;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWatch/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
+					INFOPLIST_KEY_WKWatchOnly = YES;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					MARKETING_VERSION = 0.1.0;
+					ONLY_ACTIVE_ARCH = YES;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.watchkitapp;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = watchos;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "watchos watchsimulator";
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_OPTIMIZATION_LEVEL = -Onone;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = 4;
+					WATCHOS_DEPLOYMENT_TARGET = 11.0;
+				};
+				name = Debug;
+		};
+		81B4296E14BCBF4216D6B9AD /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR = none;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWatch/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
+					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
+					INFOPLIST_KEY_WKWatchOnly = YES;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.watchkitapp;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = watchos;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "watchos watchsimulator";
+					SWIFT_COMPILATION_MODE = wholemodule;
+					SWIFT_OPTIMIZATION_LEVEL = -O;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = 4;
+					VALIDATE_PRODUCT = YES;
+					WATCHOS_DEPLOYMENT_TARGET = 11.0;
+				};
+				name = Release;
+		};
+		38F7EB72A03913A012A47B55 /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					APPLICATION_EXTENSION_API_ONLY = YES;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_TESTABILITY = YES;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GCC_OPTIMIZATION_LEVEL = 0;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					ONLY_ACTIVE_ARCH = YES;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widgets;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_OPTIMIZATION_LEVEL = -Onone;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Debug;
+		};
+		D2F7974108FF61BBD177A14A /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ALWAYS_SEARCH_USER_PATHS = NO;
+					APPLICATION_EXTENSION_API_ONLY = YES;
+					CLANG_ANALYZER_NONNULL = YES;
+					CLANG_ENABLE_MODULES = YES;
+					CLANG_ENABLE_OBJC_ARC = YES;
+					CODE_SIGN_STYLE = Automatic;
+					COPY_PHASE_STRIP = NO;
+					CURRENT_PROJECT_VERSION = 1;
+					DEBUG_INFORMATION_FORMAT = dwarf-with-dsym;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
+					ENABLE_USER_SCRIPT_SANDBOXING = NO;
+					GCC_NO_COMMON_BLOCKS = YES;
+					GENERATE_INFOPLIST_FILE = YES;
+					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
+					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.widgets;
+					PRODUCT_NAME = "$(TARGET_NAME)";
+					SDKROOT = iphoneos;
+					SKIP_INSTALL = YES;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SWIFT_COMPILATION_MODE = wholemodule;
+					SWIFT_OPTIMIZATION_LEVEL = -O;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
 					VALIDATE_PRODUCT = YES;
 				};
 				name = Release;
@@ -392,7 +765,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0781223A035E65BFD19ECE32 /* Build configuration list for PBXProject "Blackout" */ = {
+		1934B3F13FC9BCD90BADF308 /* Build configuration list for PBXProject "Blackout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3D45766170DCCA05AF05902A /* Debug */,
@@ -401,11 +774,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9217D4CDF52D089EFBCEAA17 /* Build configuration list for PBXNativeTarget "Blackout" */ = {
+		DFBB87791AF9D8287D4429A7 /* Build configuration list for PBXNativeTarget "Blackout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				368B24278E57628104DC2C43 /* Debug */,
-				028CF4E55748EB8D13684699 /* Release */,
+				F0B6C82E1E400020046E0F38 /* Debug */,
+				889039B614F0C8069EEF6723 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56A0206E639F214537EF418D /* Build configuration list for PBXNativeTarget "BlackoutWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8BAD37C00F1462017DBABA0E /* Debug */,
+				81B4296E14BCBF4216D6B9AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		29C417B94D2D4A50259B6114 /* Build configuration list for PBXNativeTarget "BlackoutWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				38F7EB72A03913A012A47B55 /* Debug */,
+				D2F7974108FF61BBD177A14A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -413,136 +804,280 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */ = {
+		4F353D4FCA233CBE8A2EACCC /* XCLocalSwiftPackageReference "Packages/Tokens" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/BlackoutCore;
+			relativePath = Packages/Tokens;
 		};
-		5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
+		2EB2E0D40553FA7C93AA21D9 /* XCLocalSwiftPackageReference "Packages/BlackBox" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/DesignSystem;
+			relativePath = Packages/BlackBox;
 		};
-		69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */ = {
+		A14B20F8488398C4680733CD /* XCLocalSwiftPackageReference "Packages/PackIO" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Crypto;
+			relativePath = Packages/PackIO;
 		};
-		036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */ = {
+		CD3CEC4ED701318D58EDD7E6 /* XCLocalSwiftPackageReference "Packages/Search" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Battery;
+			relativePath = Packages/Search;
 		};
-		8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */ = {
+		F0EF88738804327FF1A08EB7 /* XCLocalSwiftPackageReference "Packages/Router" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Persistence;
+			relativePath = Packages/Router;
 		};
-		6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */ = {
+		FD20E6DF3CF881025D679227 /* XCLocalSwiftPackageReference "Packages/DeadReckoning" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Location;
+			relativePath = Packages/DeadReckoning;
 		};
-		26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */ = {
+		001F66B016F73E8F70451B15 /* XCLocalSwiftPackageReference "Packages/MeshDTN" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Mesh;
+			relativePath = Packages/MeshDTN;
 		};
-		EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */ = {
+		165179C7FC47063A716F1549 /* XCLocalSwiftPackageReference "Packages/CryptoParty" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Messaging;
+			relativePath = Packages/CryptoParty;
 		};
-		2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */ = {
+		0C9B40F0EF70954B909AB392 /* XCLocalSwiftPackageReference "Packages/PTTAudio" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/VoicePTT;
+			relativePath = Packages/PTTAudio;
 		};
-		51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */ = {
+		A47D800C02CB5E4393ABDA88 /* XCLocalSwiftPackageReference "Packages/CommsUI" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Maps;
+			relativePath = Packages/CommsUI;
 		};
-		FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */ = {
+		D593219EE50A646A7E1C0537 /* XCLocalSwiftPackageReference "Packages/FieldCorpus" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/SOS;
+			relativePath = Packages/FieldCorpus;
 		};
-		6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */ = {
+		A6A74F93A4A27EFFE7C210D5 /* XCLocalSwiftPackageReference "Packages/FieldStepper" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Expeditions;
+			relativePath = Packages/FieldStepper;
 		};
-		3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */ = {
+		3545128B03B16CAE2151F1D4 /* XCLocalSwiftPackageReference "Packages/OfflineSpeech" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Field;
+			relativePath = Packages/OfflineSpeech;
 		};
-		86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */ = {
+		1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Settings;
+			relativePath = Packages/FieldSpeech;
+		};
+		9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/VisionCoreML;
+		};
+		6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/VisionCapture;
+		};
+		6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/KitStore;
+		};
+		B69ADB5DA75C1213D70ADF4A /* XCLocalSwiftPackageReference "Packages/Vitals" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Vitals;
+		};
+		963F34A583FE7701116215B1 /* XCLocalSwiftPackageReference "Packages/RedAlert" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RedAlert;
+		};
+		56241AEF72F7BA930A9CAC73 /* XCLocalSwiftPackageReference "Packages/TimerSync" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/TimerSync;
+		};
+		5872FC58D04D3B49F0D14278 /* XCLocalSwiftPackageReference "Packages/RosterRoles" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RosterRoles;
+		};
+		F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/TripBrief;
+		};
+		328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PaperGen;
+		};
+		4AED5443EA4254FCFB264540 /* XCLocalSwiftPackageReference "Packages/Almanac" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Almanac;
+		};
+		1BADFB1C30942929E8CB0088 /* XCLocalSwiftPackageReference "Packages/NightRed" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/NightRed;
+		};
+		491A6E57190CB58B9CC8B69A /* XCLocalSwiftPackageReference "Packages/BatteryAuction" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/BatteryAuction;
+		};
+		F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Instruments;
+		};
+		B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RegionalPacks;
+		};
+		E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MapLibreMap;
+		};
+		EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Vendor/MapLibre;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		94BE6BC726994C1BE6FDB1ED /* BlackoutCore */ = {
+		3967DFB3EBD6DE29488DB49F /* Tokens */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E37D951500592BC112626794 /* XCLocalSwiftPackageReference "Packages/BlackoutCore" */;
-			productName = BlackoutCore;
+			package = 4F353D4FCA233CBE8A2EACCC /* XCLocalSwiftPackageReference "Packages/Tokens" */;
+			productName = Tokens;
 		};
-		2C69B7EE0E687CB38564BBC3 /* DesignSystem */ = {
+		D0786CE451717C8726544FBF /* BlackBox */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5B9CEE61AF48BB8F7D7B2078 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
-			productName = DesignSystem;
+			package = 2EB2E0D40553FA7C93AA21D9 /* XCLocalSwiftPackageReference "Packages/BlackBox" */;
+			productName = BlackBox;
 		};
-		E06011E59AC3C0FBF4E58117 /* BlackoutCrypto */ = {
+		EABA63E1353A3EC5661E242F /* PackIO */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69CBB714858BB5EF0BF1A27A /* XCLocalSwiftPackageReference "Packages/Crypto" */;
-			productName = BlackoutCrypto;
+			package = A14B20F8488398C4680733CD /* XCLocalSwiftPackageReference "Packages/PackIO" */;
+			productName = PackIO;
 		};
-		9F99C72352301779F4A58527 /* BlackoutBattery */ = {
+		B6845CF51F29554E0454B26E /* Search */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 036773C22535F1EB204101C1 /* XCLocalSwiftPackageReference "Packages/Battery" */;
-			productName = BlackoutBattery;
+			package = CD3CEC4ED701318D58EDD7E6 /* XCLocalSwiftPackageReference "Packages/Search" */;
+			productName = Search;
 		};
-		4727D8B200A97A548F694FBC /* BlackoutPersistence */ = {
+		3DC79516B9CCDE68A8546F7E /* Router */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8046A0A6A96207CD2E9B833F /* XCLocalSwiftPackageReference "Packages/Persistence" */;
-			productName = BlackoutPersistence;
+			package = F0EF88738804327FF1A08EB7 /* XCLocalSwiftPackageReference "Packages/Router" */;
+			productName = Router;
 		};
-		C4830C6DFCC1B531A7117B65 /* BlackoutLocation */ = {
+		169CB191E8532AB2AB3A3B07 /* DeadReckoning */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6DC59D125525699EAFBA7EC6 /* XCLocalSwiftPackageReference "Packages/Location" */;
-			productName = BlackoutLocation;
+			package = FD20E6DF3CF881025D679227 /* XCLocalSwiftPackageReference "Packages/DeadReckoning" */;
+			productName = DeadReckoning;
 		};
-		75017D353F218FF9B4B088BE /* BlackoutMesh */ = {
+		F21C88F8ACD697A19E223866 /* MeshDTN */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 26AD86705DED4DF272F08CEB /* XCLocalSwiftPackageReference "Packages/Mesh" */;
-			productName = BlackoutMesh;
+			package = 001F66B016F73E8F70451B15 /* XCLocalSwiftPackageReference "Packages/MeshDTN" */;
+			productName = MeshDTN;
 		};
-		FBC432B44ADB3FEFE4545993 /* Messaging */ = {
+		06591D4E67CB5079629D79BA /* CryptoParty */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = EF45D3773E96D982DAF19896 /* XCLocalSwiftPackageReference "Packages/Messaging" */;
-			productName = Messaging;
+			package = 165179C7FC47063A716F1549 /* XCLocalSwiftPackageReference "Packages/CryptoParty" */;
+			productName = CryptoParty;
 		};
-		03B8622003259D7DCD3BB9BD /* VoicePTT */ = {
+		0D91C7BB6B7B7AFA630D391F /* PTTAudio */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2F7F2521B6D3E91222CD275F /* XCLocalSwiftPackageReference "Packages/VoicePTT" */;
-			productName = VoicePTT;
+			package = 0C9B40F0EF70954B909AB392 /* XCLocalSwiftPackageReference "Packages/PTTAudio" */;
+			productName = PTTAudio;
 		};
-		22D618336C0CB913039FE327 /* Maps */ = {
+		836FEB75AAD17DE1995EC103 /* CommsUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 51DA7E859CB3308427BA8680 /* XCLocalSwiftPackageReference "Packages/Maps" */;
-			productName = Maps;
+			package = A47D800C02CB5E4393ABDA88 /* XCLocalSwiftPackageReference "Packages/CommsUI" */;
+			productName = CommsUI;
 		};
-		244B139EBFA8CAEC15CBBC8D /* SOS */ = {
+		0099751D650B3FB88A62D7B9 /* FieldCorpus */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FFDF8E08EFC0353BEF8E8190 /* XCLocalSwiftPackageReference "Packages/SOS" */;
-			productName = SOS;
+			package = D593219EE50A646A7E1C0537 /* XCLocalSwiftPackageReference "Packages/FieldCorpus" */;
+			productName = FieldCorpus;
 		};
-		2E8646A3CDCE8F5E86C75F3A /* Expeditions */ = {
+		CB866CF29E640022662FB5FA /* FieldStepper */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6859FAF16AA9E6D3A55A9BA7 /* XCLocalSwiftPackageReference "Packages/Expeditions" */;
-			productName = Expeditions;
+			package = A6A74F93A4A27EFFE7C210D5 /* XCLocalSwiftPackageReference "Packages/FieldStepper" */;
+			productName = FieldStepper;
 		};
-		9F9EA0AE7E7BA084D594A1C5 /* Field */ = {
+		A443294E97E5F795B4446975 /* OfflineSpeech */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3A26158739467486F0270FDE /* XCLocalSwiftPackageReference "Packages/Field" */;
-			productName = Field;
+			package = 3545128B03B16CAE2151F1D4 /* XCLocalSwiftPackageReference "Packages/OfflineSpeech" */;
+			productName = OfflineSpeech;
 		};
-		945B11D319B9F346AA576637 /* Settings */ = {
+		8C1039025E2D17CE92E79C01 /* FieldSpeech */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 86FE358CCCF797B84398BF05 /* XCLocalSwiftPackageReference "Packages/Settings" */;
-			productName = Settings;
+			package = 1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */;
+			productName = FieldSpeech;
+		};
+		23D30BFE8411990E2FC45A88 /* VisionCoreML */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */;
+			productName = VisionCoreML;
+		};
+		CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */;
+			productName = VisionCapture;
+		};
+		2AA5F25B4520F0497169C09A /* KitStore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */;
+			productName = KitStore;
+		};
+		CB29C7043F09D7DF11FEEACC /* Vitals */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B69ADB5DA75C1213D70ADF4A /* XCLocalSwiftPackageReference "Packages/Vitals" */;
+			productName = Vitals;
+		};
+		CCBB82BF482F7E55E8AAE363 /* RedAlert */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 963F34A583FE7701116215B1 /* XCLocalSwiftPackageReference "Packages/RedAlert" */;
+			productName = RedAlert;
+		};
+		F0F01B5AD66A37308713FF58 /* TimerSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56241AEF72F7BA930A9CAC73 /* XCLocalSwiftPackageReference "Packages/TimerSync" */;
+			productName = TimerSync;
+		};
+		BB0A73C40F1251AB2CBBA317 /* RosterRoles */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5872FC58D04D3B49F0D14278 /* XCLocalSwiftPackageReference "Packages/RosterRoles" */;
+			productName = RosterRoles;
+		};
+		5AC4E2AB3321B9C7AFE60B65 /* TripBrief */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F01CFB8B7C225C06E4C079EA /* XCLocalSwiftPackageReference "Packages/TripBrief" */;
+			productName = TripBrief;
+		};
+		4058A145F0541E15FE88E8FD /* PaperGen */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 328875F5428CC1DA8809671C /* XCLocalSwiftPackageReference "Packages/PaperGen" */;
+			productName = PaperGen;
+		};
+		373AC51C66DE579F20535CCA /* Almanac */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4AED5443EA4254FCFB264540 /* XCLocalSwiftPackageReference "Packages/Almanac" */;
+			productName = Almanac;
+		};
+		2EEC2750DDE6DD942664AD31 /* NightRed */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1BADFB1C30942929E8CB0088 /* XCLocalSwiftPackageReference "Packages/NightRed" */;
+			productName = NightRed;
+		};
+		FC847D28FFD57BF7EE7E498C /* BatteryAuction */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 491A6E57190CB58B9CC8B69A /* XCLocalSwiftPackageReference "Packages/BatteryAuction" */;
+			productName = BatteryAuction;
+		};
+		77F4E4985DB1424CF0DB1857 /* Instruments */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */;
+			productName = Instruments;
+		};
+		04EC158D5DD9027CF710A3A4 /* RegionalPacks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */;
+			productName = RegionalPacks;
+		};
+		E648C806A9EA32B613781C40 /* MapLibreMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */;
+			productName = MapLibreMap;
+		};
+		3E3D4914CDE33667A03D92C1 /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */;
+			productName = MapLibre;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 59601E391B529B07AE11313D /* Project object */;
+	rootObject = 244210E48437B6556980A702 /* Project object */;
 }

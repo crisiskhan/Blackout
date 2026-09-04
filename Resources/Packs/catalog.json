@@ -1,0 +1,460 @@
+{
+  "schema": "blackout-packs-v3",
+  "states": [
+    "TX",
+    "NM",
+    "FL",
+    "NY"
+  ],
+  "packs": [
+    {
+      "id": "fl-north",
+      "name": "FL NORTH",
+      "state": "FL",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 30.3,
+        "west": -81.7,
+        "north": 30.52,
+        "east": -81.38
+      },
+      "slices": {
+        "metro": {
+          "name": "Jacksonville metro",
+          "bbox": {
+            "name": "Jacksonville metro",
+            "south": 30.3,
+            "west": -81.7,
+            "north": 30.38,
+            "east": -81.6
+          },
+          "featureCount": 34407
+        },
+        "wild": {
+          "name": "Timucuan / Big Talbot wild",
+          "bbox": {
+            "name": "Timucuan / Big Talbot wild",
+            "south": 30.45,
+            "west": -81.48,
+            "north": 30.52,
+            "east": -81.38
+          },
+          "featureCount": 298
+        }
+      },
+      "banners": [
+        "hurricane",
+        "rip",
+        "gator-dusk",
+        "heat-island"
+      ],
+      "bytes": 1864081,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 30.41,
+        "lon": -81.53999999999999
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "fl-south",
+      "name": "FL SOUTH",
+      "state": "FL",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 25.72,
+        "west": -80.8,
+        "north": 25.82,
+        "east": -80.18
+      },
+      "slices": {
+        "metro": {
+          "name": "Miami metro",
+          "bbox": {
+            "name": "Miami metro",
+            "south": 25.74,
+            "west": -80.28,
+            "north": 25.82,
+            "east": -80.18
+          },
+          "featureCount": 58389
+        },
+        "wild": {
+          "name": "Shark Valley / Everglades wild",
+          "bbox": {
+            "name": "Shark Valley / Everglades wild",
+            "south": 25.72,
+            "west": -80.8,
+            "north": 25.8,
+            "east": -80.7
+          },
+          "featureCount": 249
+        }
+      },
+      "banners": [
+        "hurricane",
+        "rip",
+        "gator-dusk",
+        "keys-mm",
+        "heat-island"
+      ],
+      "bytes": 1893390,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 25.77,
+        "lon": -80.49000000000001
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "nm",
+      "name": "NM",
+      "state": "NM",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 35.06,
+        "west": -106.68,
+        "north": 35.25,
+        "east": -106.38
+      },
+      "slices": {
+        "metro": {
+          "name": "Albuquerque metro",
+          "bbox": {
+            "name": "Albuquerque metro",
+            "south": 35.06,
+            "west": -106.68,
+            "north": 35.14,
+            "east": -106.55
+          },
+          "featureCount": 47888
+        },
+        "wild": {
+          "name": "Sandia foothills wild",
+          "bbox": {
+            "name": "Sandia foothills wild",
+            "south": 35.15,
+            "west": -106.5,
+            "north": 35.25,
+            "east": -106.38
+          },
+          "featureCount": 2483
+        }
+      },
+      "banners": [
+        "monsoon",
+        "ice-rock",
+        "cattle-guard",
+        "border-hospitals"
+      ],
+      "bytes": 2125208,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 35.155,
+        "lon": -106.53
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "ny-metro",
+      "name": "NY METRO",
+      "state": "NY",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 40.58,
+        "west": -74.02,
+        "north": 40.76,
+        "east": -73.82
+      },
+      "slices": {
+        "metro": {
+          "name": "Lower Manhattan metro",
+          "bbox": {
+            "name": "Lower Manhattan metro",
+            "south": 40.7,
+            "west": -74.02,
+            "north": 40.76,
+            "east": -73.97
+          },
+          "featureCount": 33155
+        },
+        "wild": {
+          "name": "Jamaica Bay wild",
+          "bbox": {
+            "name": "Jamaica Bay wild",
+            "south": 40.58,
+            "west": -73.9,
+            "north": 40.64,
+            "east": -73.82
+          },
+          "featureCount": 3621
+        }
+      },
+      "banners": [
+        "subway-north",
+        "hurricane",
+        "heat-island"
+      ],
+      "bytes": 2266935,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 40.67,
+        "lon": -73.91999999999999
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "ny-upstate",
+      "name": "NY UPSTATE",
+      "state": "NY",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 42.64,
+        "west": -73.98,
+        "north": 44.16,
+        "east": -73.74
+      },
+      "slices": {
+        "metro": {
+          "name": "Albany metro",
+          "bbox": {
+            "name": "Albany metro",
+            "south": 42.64,
+            "west": -73.8,
+            "north": 42.7,
+            "east": -73.74
+          },
+          "featureCount": 9158
+        },
+        "wild": {
+          "name": "Adirondack High Peaks wild",
+          "bbox": {
+            "name": "Adirondack High Peaks wild",
+            "south": 44.1,
+            "west": -73.98,
+            "north": 44.16,
+            "east": -73.9
+          },
+          "featureCount": 252
+        }
+      },
+      "banners": [
+        "ice-rock",
+        "subway-north"
+      ],
+      "bytes": 2696549,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 43.4,
+        "lon": -73.86
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "tx-east",
+      "name": "TX EAST",
+      "state": "TX",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 30.08,
+        "west": -97.78,
+        "north": 30.32,
+        "east": -97.2
+      },
+      "slices": {
+        "metro": {
+          "name": "Austin metro",
+          "bbox": {
+            "name": "Austin metro",
+            "south": 30.24,
+            "west": -97.78,
+            "north": 30.32,
+            "east": -97.68
+          },
+          "featureCount": 50273
+        },
+        "wild": {
+          "name": "Lost Pines / Bastrop wild",
+          "bbox": {
+            "name": "Lost Pines / Bastrop wild",
+            "south": 30.08,
+            "west": -97.32,
+            "north": 30.18,
+            "east": -97.2
+          },
+          "featureCount": 3820
+        }
+      },
+      "banners": [
+        "heat-island",
+        "cattle-guard",
+        "hurricane"
+      ],
+      "bytes": 2063444,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 30.2,
+        "lon": -97.49000000000001
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "tx-west",
+      "name": "TX WEST",
+      "state": "TX",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 31.7,
+        "west": -106.62,
+        "north": 32.0,
+        "east": -106.35
+      },
+      "slices": {
+        "metro": {
+          "name": "El Paso metro",
+          "bbox": {
+            "name": "El Paso metro",
+            "south": 31.74,
+            "west": -106.52,
+            "north": 31.82,
+            "east": -106.4
+          },
+          "featureCount": 23698
+        },
+        "wild": {
+          "name": "Franklin Mountains wild",
+          "bbox": {
+            "name": "Franklin Mountains wild",
+            "south": 31.88,
+            "west": -106.52,
+            "north": 32.0,
+            "east": -106.4
+          },
+          "featureCount": 3744
+        },
+        "border": {
+          "name": "El Paso TX+NM border union",
+          "bbox": {
+            "name": "El Paso TX+NM border union",
+            "south": 31.7,
+            "west": -106.62,
+            "north": 31.9,
+            "east": -106.35
+          },
+          "featureCount": 65648
+        }
+      },
+      "banners": [
+        "heat-island",
+        "cattle-guard",
+        "border-hospitals"
+      ],
+      "bytes": 2289897,
+      "files": [
+        "border.geojson",
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 31.85,
+        "lon": -106.485
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    }
+  ]
+}

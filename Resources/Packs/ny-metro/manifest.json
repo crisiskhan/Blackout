@@ -1,0 +1,62 @@
+{
+  "id": "ny-metro",
+  "name": "NY METRO",
+  "state": "NY",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 40.58,
+    "west": -74.02,
+    "north": 40.76,
+    "east": -73.82
+  },
+  "slices": {
+    "metro": {
+      "name": "Lower Manhattan metro",
+      "bbox": {
+        "name": "Lower Manhattan metro",
+        "south": 40.7,
+        "west": -74.02,
+        "north": 40.76,
+        "east": -73.97
+      },
+      "featureCount": 33155
+    },
+    "wild": {
+      "name": "Jamaica Bay wild",
+      "bbox": {
+        "name": "Jamaica Bay wild",
+        "south": 40.58,
+        "west": -73.9,
+        "north": 40.64,
+        "east": -73.82
+      },
+      "featureCount": 3621
+    }
+  },
+  "banners": [
+    "subway-north",
+    "hurricane",
+    "heat-island"
+  ],
+  "bytes": 2266935,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 40.67,
+    "lon": -73.91999999999999
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

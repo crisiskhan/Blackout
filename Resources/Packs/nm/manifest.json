@@ -1,0 +1,63 @@
+{
+  "id": "nm",
+  "name": "NM",
+  "state": "NM",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 35.06,
+    "west": -106.68,
+    "north": 35.25,
+    "east": -106.38
+  },
+  "slices": {
+    "metro": {
+      "name": "Albuquerque metro",
+      "bbox": {
+        "name": "Albuquerque metro",
+        "south": 35.06,
+        "west": -106.68,
+        "north": 35.14,
+        "east": -106.55
+      },
+      "featureCount": 47888
+    },
+    "wild": {
+      "name": "Sandia foothills wild",
+      "bbox": {
+        "name": "Sandia foothills wild",
+        "south": 35.15,
+        "west": -106.5,
+        "north": 35.25,
+        "east": -106.38
+      },
+      "featureCount": 2483
+    }
+  },
+  "banners": [
+    "monsoon",
+    "ice-rock",
+    "cattle-guard",
+    "border-hospitals"
+  ],
+  "bytes": 2125208,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 35.155,
+    "lon": -106.53
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

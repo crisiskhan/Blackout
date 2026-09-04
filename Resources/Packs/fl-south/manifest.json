@@ -1,0 +1,64 @@
+{
+  "id": "fl-south",
+  "name": "FL SOUTH",
+  "state": "FL",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 25.72,
+    "west": -80.8,
+    "north": 25.82,
+    "east": -80.18
+  },
+  "slices": {
+    "metro": {
+      "name": "Miami metro",
+      "bbox": {
+        "name": "Miami metro",
+        "south": 25.74,
+        "west": -80.28,
+        "north": 25.82,
+        "east": -80.18
+      },
+      "featureCount": 58389
+    },
+    "wild": {
+      "name": "Shark Valley / Everglades wild",
+      "bbox": {
+        "name": "Shark Valley / Everglades wild",
+        "south": 25.72,
+        "west": -80.8,
+        "north": 25.8,
+        "east": -80.7
+      },
+      "featureCount": 249
+    }
+  },
+  "banners": [
+    "hurricane",
+    "rip",
+    "gator-dusk",
+    "keys-mm",
+    "heat-island"
+  ],
+  "bytes": 1893390,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 25.77,
+    "lon": -80.49000000000001
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

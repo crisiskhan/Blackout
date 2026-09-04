@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8796EC6A87564C187A908CD6"
+               BlueprintIdentifier = "26357C8EB97FA055344683EE"
                BuildableName = "Blackout.app"
                BlueprintName = "Blackout"
                ReferencedContainer = "container:Blackout.xcodeproj">
@@ -43,7 +43,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8796EC6A87564C187A908CD6"
+            BlueprintIdentifier = "26357C8EB97FA055344683EE"
             BuildableName = "Blackout.app"
             BlueprintName = "Blackout"
             ReferencedContainer = "container:Blackout.xcodeproj">
@@ -60,7 +60,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8796EC6A87564C187A908CD6"
+            BlueprintIdentifier = "26357C8EB97FA055344683EE"
             BuildableName = "Blackout.app"
             BlueprintName = "Blackout"
             ReferencedContainer = "container:Blackout.xcodeproj">

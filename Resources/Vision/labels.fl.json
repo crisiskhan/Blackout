@@ -1,0 +1,297 @@
+{
+  "state": "FL",
+  "neverEdibleUnlock": true,
+  "fungiDefault": "LEAVE_IT",
+  "labels": [
+    {
+      "id": "fl-live-oak",
+      "name": {
+        "en": "Live oak",
+        "es": "Encino siempreverde"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "laurel-oak-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Coastal plain oak.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Encino de la planicie costera."
+      }
+    },
+    {
+      "id": "fl-slash-pine",
+      "name": {
+        "en": "Slash pine",
+        "es": "Pino elliotti"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "longleaf-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Flatwoods.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Pinares húmedos."
+      }
+    },
+    {
+      "id": "fl-sabal",
+      "name": {
+        "en": "Sabal palm",
+        "es": "Palma sabal"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "coconut-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. State tree. Not a coconut unlock.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Árbol del estado. No desbloquea coco."
+      }
+    },
+    {
+      "id": "fl-cypress",
+      "name": {
+        "en": "Bald cypress",
+        "es": "Ciprés calvo"
+      },
+      "kind": "tree",
+      "lookalikes": [
+        "dawn-redwood-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Knees in water.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Rodillas en el agua."
+      }
+    },
+    {
+      "id": "fl-eastern-diamondback",
+      "name": {
+        "en": "Eastern diamondback",
+        "es": "Cascabel diamante oriental"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "pinesnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa."
+      }
+    },
+    {
+      "id": "fl-cottonmouth",
+      "name": {
+        "en": "Cottonmouth",
+        "es": "Boca de algodón"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "banded-watersnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Water edges.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. Orillas."
+      }
+    },
+    {
+      "id": "fl-coral",
+      "name": {
+        "en": "Coral snake",
+        "es": "Coralillo"
+      },
+      "kind": "snake",
+      "lookalikes": [
+        "scarlet-kingsnake-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Venomous. Do not use rhyme as ID.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Venenosa. No uses rimas como ID."
+      }
+    },
+    {
+      "id": "fl-gator",
+      "name": {
+        "en": "American alligator",
+        "es": "Caimán americano"
+      },
+      "kind": "marine_gator",
+      "lookalikes": [
+        "crocodile-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": true,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. FL only. Dusk edge hunter.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Solo FL. Caza la orilla al anochecer."
+      }
+    },
+    {
+      "id": "fl-manatee",
+      "name": {
+        "en": "Manatee",
+        "es": "Manatí"
+      },
+      "kind": "marine_gator",
+      "lookalikes": [
+        "dolphin-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": true,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Marine mammal. Do not chase.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Mamífero marino. No persigas."
+      }
+    },
+    {
+      "id": "fl-dolphin",
+      "name": {
+        "en": "Bottlenose dolphin",
+        "es": "Delfín nariz de botella"
+      },
+      "kind": "marine_gator",
+      "lookalikes": [
+        "manatee-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": true,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Marine. Do not feed.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Marino. No alimentes."
+      }
+    },
+    {
+      "id": "fl-raccoon",
+      "name": {
+        "en": "Raccoon",
+        "es": "Mapache"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "cat-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Rabies vector. Do not handle.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Vector de rabia. No lo tomes."
+      }
+    },
+    {
+      "id": "fl-armadillo",
+      "name": {
+        "en": "Nine-banded armadillo",
+        "es": "Armadillo"
+      },
+      "kind": "mammal",
+      "lookalikes": [
+        "possum-lookalike"
+      ],
+      "leaveIt": false,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Night digger.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Excava de noche."
+      }
+    },
+    {
+      "id": "fl-amanita",
+      "name": {
+        "en": "Amanita-like cap",
+        "es": "Sombrero tipo Amanita"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "destroying-angel-lookalike",
+        "puffball-young"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Default LEAVE IT.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Por defecto DÉJALO."
+      }
+    },
+    {
+      "id": "fl-galerina",
+      "name": {
+        "en": "Little brown mushroom",
+        "es": "Hongo marrón chico"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "galerina-lookalike",
+        "honey-mushroom-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. LBMs are a leave-it set.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Los marrones chicos se dejan."
+      }
+    },
+    {
+      "id": "fl-false-morel",
+      "name": {
+        "en": "Brain / false morel shape",
+        "es": "Forma de falsa colmenilla"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "true-morel-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Do not eat. Late liver toxins exist.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. No comas. Hay toxinas tardías de hígado."
+      }
+    },
+    {
+      "id": "fl-jack",
+      "name": {
+        "en": "Jack-o-lantern / orange shelf",
+        "es": "Naranja en estante"
+      },
+      "kind": "fungi",
+      "lookalikes": [
+        "chanterelle-lookalike"
+      ],
+      "leaveIt": true,
+      "edibleUnlock": false,
+      "marineOrGatorFL": false,
+      "honesty": {
+        "en": "Vision is a guess. Percent is not ID. Leave it. GI wreck is common in lookalikes.",
+        "es": "Vision es una conjetura. El porcentaje no es identificación. Déjalo. Los parecidos destrozan el estómago."
+      }
+    }
+  ]
+}

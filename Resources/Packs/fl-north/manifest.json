@@ -1,0 +1,63 @@
+{
+  "id": "fl-north",
+  "name": "FL NORTH",
+  "state": "FL",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 30.3,
+    "west": -81.7,
+    "north": 30.52,
+    "east": -81.38
+  },
+  "slices": {
+    "metro": {
+      "name": "Jacksonville metro",
+      "bbox": {
+        "name": "Jacksonville metro",
+        "south": 30.3,
+        "west": -81.7,
+        "north": 30.38,
+        "east": -81.6
+      },
+      "featureCount": 34407
+    },
+    "wild": {
+      "name": "Timucuan / Big Talbot wild",
+      "bbox": {
+        "name": "Timucuan / Big Talbot wild",
+        "south": 30.45,
+        "west": -81.48,
+        "north": 30.52,
+        "east": -81.38
+      },
+      "featureCount": 298
+    }
+  },
+  "banners": [
+    "hurricane",
+    "rip",
+    "gator-dusk",
+    "heat-island"
+  ],
+  "bytes": 1864081,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 30.41,
+    "lon": -81.53999999999999
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

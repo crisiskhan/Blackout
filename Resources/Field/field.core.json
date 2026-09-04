@@ -1,0 +1,1080 @@
+{
+  "schema": "1.4",
+  "id": "field.core",
+  "cards": [
+    {
+      "schema": "1.4",
+      "id": "med-cpr-adult",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Adult CPR",
+        "es": "RCP adulto"
+      },
+      "situation": {
+        "en": "Unresponsive adult, not breathing normally. You are with the party and a phone may or may not reach 911.",
+        "es": "Adulto sin respuesta, no respira con normalidad. Estás con el grupo y el teléfono puede o no alcanzar al 911."
+      },
+      "stop_if": [
+        {
+          "en": "The person starts breathing normally and has a pulse you can feel.",
+          "es": "La persona respira con normalidad y tiene pulso."
+        },
+        {
+          "en": "Scene becomes unsafe (fire, collapse, traffic).",
+          "es": "La escena se vuelve insegura."
+        },
+        {
+          "en": "You are too exhausted to continue and no one can take over.",
+          "es": "Estás agotado y nadie puede relevarte."
+        }
+      ],
+      "get_to_care": {
+        "en": "Get trained help and an AED. This card does not replace Emergency SOS or 911.",
+        "es": "Consigue ayuda entrenada y un DEA. Esta tarjeta no reemplaza Emergency SOS ni el 911."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Check response and look at the chest for 10 seconds. If no normal breathing, start compressions.",
+            "es": "Comprueba respuesta y mira el pecho 10 segundos. Si no hay respiración normal, empieza compresiones."
+          },
+          "why": {
+            "en": "Delay kills. Gasping is not normal breathing.",
+            "es": "La demora mata. El jadeo no es respiración normal."
+          },
+          "child": {
+            "en": "Keep children back. One adult does compressions; another watches the child.",
+            "es": "Aleja a los niños. Un adulto comprime; otro vigila al niño."
+          },
+          "stop": {
+            "en": "If they cough, move, or breathe normally, stop compressions and watch the airway.",
+            "es": "Si tose, se mueve o respira normal, detén y vigila la vía aérea."
+          },
+          "image": "cpr-check.png",
+          "tickSeconds": 10
+        },
+        {
+          "do": {
+            "en": "Hard, fast compressions in the center of the chest. 100–120 per minute. Let the chest recoil.",
+            "es": "Compresiones fuertes y rápidas al centro del pecho. 100–120 por minuto. Deja que el pecho recoja."
+          },
+          "why": {
+            "en": "Blood has to reach the brain. Shallow pumps do nothing.",
+            "es": "La sangre tiene que llegar al cerebro. Las palmaditas no sirven."
+          },
+          "child": {
+            "en": "Do not let a child stand on the chest or 'help' compressions.",
+            "es": "No dejes que un niño se suba al pecho ni 'ayude' a comprimir."
+          },
+          "stop": {
+            "en": "Stop if an AED is attached and tells you to stay clear, or if they start breathing.",
+            "es": "Para si el DEA dice apartarse o si empieza a respirar."
+          },
+          "image": "cpr-compress.png",
+          "metronomeBpm": 110,
+          "party": {
+            "1": "You do continuous compressions.",
+            "2": "Swap every 2 minutes.",
+            "4": "Compress / air / AED / crowd control."
+          }
+        },
+        {
+          "do": {
+            "en": "If trained and willing, 30:2 breaths. If not, hands-only until help or exhaustion.",
+            "es": "Si estás entrenado, 30:2. Si no, solo manos hasta relevo o agotamiento."
+          },
+          "why": {
+            "en": "Oxygen helps, but bad breaths delay pumps. Hands-only is valid.",
+            "es": "El oxígeno ayuda, pero una mala insuflación retrasa las bombas."
+          },
+          "child": {
+            "en": "Do not put a child's mouth on a stranger. Adult-only breaths.",
+            "es": "No pongas la boca de un niño en un extraño. Solo adultos."
+          },
+          "stop": {
+            "en": "Stop breaths if vomit fills the mouth — roll and clear, then resume pumps.",
+            "es": "Si hay vómito, gira, limpia y reanuda bombas."
+          },
+          "image": "cpr-breath.png",
+          "tickSeconds": 120
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-bleed-pack",
+      "category": "trauma",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Pack a bad bleed",
+        "es": "Taponar una hemorragia grave"
+      },
+      "situation": {
+        "en": "Blood is pulsing or soaking through cloth faster than you can wipe it. Limb or junction (groin, armpit, neck).",
+        "es": "La sangre pulsa o empapa la tela más rápido de lo que puedes limpiar. Extremidad o unión (ingle, axila, cuello)."
+      },
+      "stop_if": [
+        {
+          "en": "Bleeding stops and the person is alert.",
+          "es": "El sangrado para y la persona está alerta."
+        },
+        {
+          "en": "You cannot see the wound and they are in a moving vehicle wreck — stabilize first.",
+          "es": "No ves la herida y hay un choque inestable: primero estabiliza."
+        }
+      ],
+      "get_to_care": {
+        "en": "This is a race to a hospital. Use Emergency SOS when a net exists. Do not sit on this card.",
+        "es": "Es una carrera al hospital. Usa Emergency SOS si hay red. No te quedes en esta tarjeta."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Expose the wound. Feed gauze or clean cloth straight into the hole. Press hard with both hands.",
+            "es": "Expón la herida. Mete gasa o tela limpia en el hueco. Presiona con las dos manos."
+          },
+          "why": {
+            "en": "Surface wipes do not close a vessel. Pressure has to be on the bleeder.",
+            "es": "Limpiar la superficie no cierra un vaso. La presión va sobre el sangrado."
+          },
+          "child": {
+            "en": "A child can hold unused gauze. They do not push into the wound.",
+            "es": "Un niño puede sostener gasa. No empuja dentro de la herida."
+          },
+          "stop": {
+            "en": "If you see bone end or a chest suck, this is not a simple pack — go to chest/open-fracture cards.",
+            "es": "Si ves hueso o el pecho chupa aire, no es un taponado simple."
+          },
+          "image": "bleed-pack.png",
+          "party": {
+            "1": "You pack and hold.",
+            "2": "One packs, one lifts/holds limb.",
+            "4": "Pack / hold / kit / watch the trail."
+          }
+        },
+        {
+          "do": {
+            "en": "If a limb and blood still pours, place a windlass tourniquet 5–7 cm above the wound, not on a joint. Twist until bleeding slows, note the time.",
+            "es": "Si es extremidad y sigue saliendo, torniquete 5–7 cm arriba, no en articulación. Anota la hora."
+          },
+          "why": {
+            "en": "A loose strap is jewelry. Tight enough that a finger cannot slip under.",
+            "es": "Una correa floja es adorno. Tan apretada que no quepa un dedo."
+          },
+          "child": {
+            "en": "Tell the child the strap will hurt and that hurting means it is working.",
+            "es": "Dile al niño que dolerá y que el dolor significa que funciona."
+          },
+          "stop": {
+            "en": "Do not put a tourniquet on the neck. Do not loosen it to 'check'.",
+            "es": "Nunca en el cuello. No lo aflojes para 'mirar'."
+          },
+          "image": "bleed-tq.png",
+          "tickSeconds": 60
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-heat-collapse",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Heat collapse",
+        "es": "Colapso por calor"
+      },
+      "situation": {
+        "en": "Party member stopped sweating or is confused, hot, and not making sense after work in heat.",
+        "es": "Alguien del grupo dejó de sudar o está confuso, caliente y sin sentido después de trabajar con calor."
+      },
+      "stop_if": [
+        {
+          "en": "They cool, talk sense, and can drink.",
+          "es": "Se enfría, habla con sentido y puede beber."
+        },
+        {
+          "en": "Seizure starts — protect the head, do not pour water into the mouth.",
+          "es": "Empieza una convulsión: protege la cabeza, no eches agua en la boca."
+        }
+      ],
+      "get_to_care": {
+        "en": "Heat stroke is an emergency. Cool first, then move to care. Do not wait for 'feeling better' in the sun.",
+        "es": "El golpe de calor es una emergencia. Enfría primero, luego mueve a cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Get them to shade. Strip extra layers. Pour water on skin and fan. Ice packs at neck, armpits, groin if you have them.",
+            "es": "A la sombra. Quita capas. Agua en la piel y abanica. Hielo en cuello, axilas e ingle si hay."
+          },
+          "why": {
+            "en": "The brain is cooking. Evaporative cooling is the field tool.",
+            "es": "El cerebro se está cociendo. El enfriamiento evaporativo es la herramienta."
+          },
+          "child": {
+            "en": "Keep a child in shade with the same cooling. Do not make them 'walk it off'.",
+            "es": "El niño también a la sombra. No lo hagas 'caminar'."
+          },
+          "stop": {
+            "en": "Stop oral fluids if they cannot swallow or are vomiting continuously.",
+            "es": "Nada por boca si no traga o vomita sin parar."
+          },
+          "image": "heat-cool.png",
+          "tickSeconds": 600,
+          "party": {
+            "1": "Cool and watch airway.",
+            "2": "One cools, one fetches water/shade.",
+            "4": "Cool / water / shade tarp / watch others."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "water-disinfect",
+      "category": "water",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Make water less bad",
+        "es": "Hacer el agua menos mala"
+      },
+      "situation": {
+        "en": "You need drinking water from a creek, tank, or unknown tap. No lab, no live test.",
+        "es": "Necesitas beber de un arroyo, tanque o grifo desconocido. Sin laboratorio."
+      },
+      "stop_if": [
+        {
+          "en": "You have sealed commercial water.",
+          "es": "Tienes agua comercial sellada."
+        },
+        {
+          "en": "The source is downstream of a carcass, sewage outfall, or chemical sheen — walk farther.",
+          "es": "La fuente está abajo de un cadáver, alcantarilla o brillo químico: camina más."
+        }
+      ],
+      "get_to_care": {
+        "en": "Disinfection is not sterile. GI illness still happens. Get to care for bloody stool, no urine, or confusion.",
+        "es": "Desinfectar no es estéril. Aún puedes enfermar. Busca cuidado si hay sangre en heces, no orinas o hay confusión."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Clear first: settle, then filter cloth. Boil a rolling boil for 1 minute (3 minutes above ~2000 m).",
+            "es": "Aclara: deja asentar, filtra con tela. Hierve 1 minuto (3 minutos sobre ~2000 m)."
+          },
+          "why": {
+            "en": "Cloud hides bugs. Heat is the honest field kill for most pathogens.",
+            "es": "El agua turbia esconde bichos. El calor es la muerte honesta de campo."
+          },
+          "child": {
+            "en": "Do not let a child sip the untreated scoop 'to try'.",
+            "es": "El niño no prueba el scoop sin tratar."
+          },
+          "stop": {
+            "en": "Stop if the water smells like fuel or has a rainbow sheen — boiling will not fix chemicals.",
+            "es": "Para si huele a combustible o hay irisado: el hervor no quita químicos."
+          },
+          "image": "water-boil.png",
+          "tickSeconds": 60,
+          "party": {
+            "1": "1 L per person per hour of work as a starting guess.",
+            "2": "2 L pot, take turns watching the boil.",
+            "4": "4 L rotation; one person never leaves the stove."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fire-stove",
+      "category": "fire",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Stove and small fire",
+        "es": "Estufa y fuego pequeño"
+      },
+      "situation": {
+        "en": "You need heat for water or warmth. Wind, dry grass, or a canyon can turn a cook fire into a problem.",
+        "es": "Necesitas calor para agua o abrigo. Viento, pasto seco o un cañón pueden convertir la cocina en un problema."
+      },
+      "stop_if": [
+        {
+          "en": "You have a working canister stove on mineral soil.",
+          "es": "Tienes estufa de cartucho sobre suelo mineral."
+        },
+        {
+          "en": "Red-flag wind or a fire ban you already know — do not start a new fire.",
+          "es": "Viento extremo o veda que ya conoces: no inicies fuego."
+        }
+      ],
+      "get_to_care": {
+        "en": "Burns go to care. This card is for starting and killing a small fire, not fighting a wildfire.",
+        "es": "Las quemaduras van a cuidado. Esta tarjeta es para prender y matar un fuego chico, no un incendio."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Mineral soil, rock ring or stove. Downwind of tents. Water or dirt in hand before the match.",
+            "es": "Suelo mineral, aro de piedra o estufa. Aguas abajo de las tiendas. Agua o tierra en la mano antes del fósforo."
+          },
+          "why": {
+            "en": "Escape paths and a kill method come first.",
+            "es": "Primero la salida y cómo matarlo."
+          },
+          "child": {
+            "en": "Child stays outside the ring. They can fetch dead twigs, not tend the flame.",
+            "es": "El niño fuera del aro. Puede traer ramitas, no cuida la llama."
+          },
+          "stop": {
+            "en": "Stop if embers run into grass you cannot stamp.",
+            "es": "Para si las brasas se van al pasto y no puedes pisarlas."
+          },
+          "image": "fire-ring.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "shelter-tarp",
+      "category": "shelter",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Tarp or debris lean-to",
+        "es": "Lona o refugio de restos"
+      },
+      "situation": {
+        "en": "Night, wind, or rain is coming and you need a roof for the party.",
+        "es": "Viene noche, viento o lluvia y el grupo necesita techo."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a closed tent on high ground.",
+          "es": "Ya tienes tienda cerrada en alto."
+        },
+        {
+          "en": "Lightning is on top of you — get off ridges, do not hold poles.",
+          "es": "El rayo está encima: baja de filos, no sostengas postes."
+        }
+      ],
+      "get_to_care": {
+        "en": "Hypothermia care if shivering stops and speech slurs. Shelter is not treatment.",
+        "es": "Cuidado por hipotermia si deja de temblar y habla raro. El refugio no es tratamiento."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Pick high, drained ground. Ridgepole or taut ridgeline. Low side into the wind. Insulate the floor with pack, sit pad, or debris.",
+            "es": "Suelo alto y drenado. Cumbrera tensa. Lado bajo contra el viento. Aísla el piso."
+          },
+          "why": {
+            "en": "Wind and ground suck heat faster than air.",
+            "es": "El viento y el suelo quitan calor más que el aire."
+          },
+          "child": {
+            "en": "Put the child in the middle, off the dirt, not at the dripping edge.",
+            "es": "El niño al centro, no en el borde que gotea."
+          },
+          "stop": {
+            "en": "Stop and move if water is already running under the floor.",
+            "es": "Muévete si ya corre agua bajo el piso."
+          },
+          "image": "shelter-tarp.png",
+          "party": {
+            "1": "One-person lean-to, 2 m ridge.",
+            "2": "A-frame, two walls.",
+            "4": "Tarp wall + debris bunk; one person on watch."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nav-lost",
+      "category": "nav",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Stop and locate",
+        "es": "Parar y localizar"
+      },
+      "situation": {
+        "en": "The trail is gone, the party disagrees, or the last pip is older than your comfort.",
+        "es": "Se acabó el sendero, el grupo no está de acuerdo o el último pip es viejo."
+      },
+      "stop_if": [
+        {
+          "en": "You can see a known handrail (road, river, ridge) and the party is together.",
+          "es": "Ves una baranda conocida y el grupo está junto."
+        },
+        {
+          "en": "Someone is injured — treat that first, then navigate.",
+          "es": "Alguien está herido: trata primero, luego navega."
+        }
+      ],
+      "get_to_care": {
+        "en": "Walking farther while lost is how parties split. Care is the last known road or town, not a guess bearing.",
+        "es": "Caminar más estando perdido es cómo se parte el grupo. El cuidado está en el último camino conocido."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "STOP. Sit. Water. Mark the spot. Compare map pack, last pip, and what everyone remembers. Do not send scouts farther than voice.",
+            "es": "PARA. Siéntate. Agua. Marca el sitio. Compara el pack, el último pip y lo que recuerdan. Sin exploradores más allá de la voz."
+          },
+          "why": {
+            "en": "Motion feels like progress and usually is not.",
+            "es": "Moverse parece progreso y casi nunca lo es."
+          },
+          "child": {
+            "en": "Give the child a job: count party, hold the whistle, sit on the pack.",
+            "es": "El niño cuenta al grupo, sostiene el silbato, se sienta en la mochila."
+          },
+          "stop": {
+            "en": "Stop walking if two people have two different 'I'm sure' directions.",
+            "es": "No caminen si dos personas tienen dos 'estoy seguro' distintos."
+          },
+          "image": "nav-stop.png",
+          "tickSeconds": 300
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "plant-unknown",
+      "category": "plants",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Unknown plant",
+        "es": "Planta desconocida"
+      },
+      "situation": {
+        "en": "Someone wants to eat, rub, or brew a plant you cannot name with certainty.",
+        "es": "Alguien quiere comer, frotar o hervir una planta que no puedes nombrar con certeza."
+      },
+      "stop_if": [
+        {
+          "en": "You already have known food in the kit.",
+          "es": "Ya tienes comida conocida en el kit."
+        },
+        {
+          "en": "Lips, tongue, or skin are already burning — that is a medical card, not ID.",
+          "es": "Labios, lengua o piel ya arden: eso es médico, no identificación."
+        }
+      ],
+      "get_to_care": {
+        "en": "Vision is a guess. Nothing in this app unlocks edible. If they ate it, get to care for vomiting blood, trouble breathing, or collapse.",
+        "es": "Vision es una conjetura. Nada en esta app desbloquea 'comestible'. Si ya lo comieron, busca cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not eat it. Photo with Vision if you want a guess and lookalikes. Wash hands. Watch for rash.",
+            "es": "No lo comas. Foto con Vision si quieres un porcentaje y parecidos. Lávate las manos."
+          },
+          "why": {
+            "en": "Lookalikes kill. A percent is not a meal.",
+            "es": "Los parecidos matan. Un porcentaje no es una comida."
+          },
+          "child": {
+            "en": "Take the leaf out of a child's hand. No 'tiny taste'.",
+            "es": "Saca la hoja de la mano del niño. Sin 'probadita'."
+          },
+          "stop": {
+            "en": "Stop the experiment if anyone's mouth tingles.",
+            "es": "Para si a alguien le hormiguea la boca."
+          },
+          "image": "plant-leave.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "animal-bite",
+      "category": "animals",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Bite or envenomation",
+        "es": "Mordedura o veneno"
+      },
+      "situation": {
+        "en": "Teeth, fangs, or a sting. You may or may not have seen the animal.",
+        "es": "Dientes, colmillos o aguijón. Puede que no hayas visto al animal."
+      },
+      "stop_if": [
+        {
+          "en": "Tiny scratch, animal gone, person calm — wash and watch.",
+          "es": "Rasguño mínimo, animal lejos, persona calmada: lava y observa."
+        },
+        {
+          "en": "They cannot breathe or the face is swelling — this is airway, not a nature lesson.",
+          "es": "No puede respirar o la cara hincha: es vía aérea, no una lección de naturaleza."
+        }
+      ],
+      "get_to_care": {
+        "en": "Antivenom and rabies decisions are hospital work. Offer Emergency SOS. Do not cut, suck, or ice a snake bite.",
+        "es": "El antiveneno y la rabia son del hospital. Ofrece Emergency SOS. No cortes, chupes ni hieles una mordedura de serpiente."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Get space from the animal. Keep the person still. Remove rings. Wash with water if you can. Mark the swelling edge and time.",
+            "es": "Aléjate del animal. Quédate quieto. Quita anillos. Lava si puedes. Marca la hinchazón y la hora."
+          },
+          "why": {
+            "en": "Motion spreads venom and panic makes hearts race.",
+            "es": "El movimiento reparte veneno y el pánico acelera el corazón."
+          },
+          "child": {
+            "en": "A child stays behind an adult, not 'to see the snake'.",
+            "es": "El niño detrás de un adulto, no 'para ver la víbora'."
+          },
+          "stop": {
+            "en": "Stop walking them out if they are vomiting or fading — carry or wait for help.",
+            "es": "No los hagas caminar si vomitan o se apagan: carga o espera."
+          },
+          "image": "animal-bite.png",
+          "tickSeconds": 900
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fungi-leave",
+      "category": "fungi",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Fungi — leave it",
+        "es": "Hongos — déjalo"
+      },
+      "situation": {
+        "en": "A mushroom, bracket, or puffball is in the hand or in the pot.",
+        "es": "Hay un hongo, yesquero o pedo de lobo en la mano o en la olla."
+      },
+      "stop_if": [
+        {
+          "en": "It is already in a sealed bag and nobody ate it — leave the bag, wash hands.",
+          "es": "Ya está en una bolsa y nadie lo comió: deja la bolsa, lávate."
+        },
+        {
+          "en": "They ate it — this is poison timing, not ID. Get to care.",
+          "es": "Ya lo comieron: es tiempo de veneno, no ID. Busca cuidado."
+        }
+      ],
+      "get_to_care": {
+        "en": "Default is LEAVE IT. Vision will not unlock edible. Care for vomiting, diarrhea, or late liver pain (hours to days).",
+        "es": "Por defecto DÉJALO. Vision no desbloquea comestible. Cuidado si hay vómito, diarrea o dolor de hígado tardío."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Put it down. Do not cook 'just a little'. If already eaten, save a piece in a bag for the hospital and start walking to care.",
+            "es": "Suéltalo. No lo cocines 'un poquito'. Si ya se comió, guarda un trozo para el hospital."
+          },
+          "why": {
+            "en": "Cooking does not make a deadly mushroom safe. Some toxins show up late.",
+            "es": "Cocinar no vuelve seguro un hongo mortal. Hay toxinas tardías."
+          },
+          "child": {
+            "en": "Take it out of the child's collection bucket.",
+            "es": "Sácalo del cubo del niño."
+          },
+          "stop": {
+            "en": "Stop tasting 'to compare'. There is no field test that is honest.",
+            "es": "Nada de probar 'para comparar'. No hay test de campo honesto."
+          },
+          "image": "fungi-leave.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "food-cook",
+      "category": "food",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Cook what you already trust",
+        "es": "Cocina lo que ya confías"
+      },
+      "situation": {
+        "en": "You have rice, beans, a can, or a known fish you caught — not a mystery plant.",
+        "es": "Tienes arroz, frijoles, una lata o un pescado conocido que pescaste — no una planta misteriosa."
+      },
+      "stop_if": [
+        {
+          "en": "Food is commercially sealed and undamaged.",
+          "es": "La comida es comercial, sellada e intacta."
+        },
+        {
+          "en": "The can is bulging or the meat smells like death — bury it, do not taste.",
+          "es": "La lata está abombada o la carne huele a muerte: entiérrela, no pruebes."
+        }
+      ],
+      "get_to_care": {
+        "en": "Food poisoning is care if they cannot keep fluids down. This card does not ID wild plants.",
+        "es": "La intoxicación va a cuidado si no retienen líquidos. Esta tarjeta no identifica plantas silvestres."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Boil. Keep raw meat off the ready-to-eat pile. Cool leftovers fast or eat them now. Party of 4 needs a bigger pot, not a shared half-cooked center.",
+            "es": "Hierve. Separa crudo de listo. Enfría sobras o cómelas ya. Un grupo de 4 necesita olla grande."
+          },
+          "why": {
+            "en": "Heat and separation prevent the usual field gut-punch.",
+            "es": "El calor y la separación evitan el golpe de estómago."
+          },
+          "child": {
+            "en": "Child gets fully cooked food, not the 'almost done' middle.",
+            "es": "El niño come lo bien cocido, no el centro 'casi'."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water.",
+            "es": "Si prende la grasa: tapa, no agua."
+          },
+          "image": "food-boil.png",
+          "party": {
+            "1": "1 pot, 1 meal.",
+            "2": "Stagger boil so someone watches.",
+            "4": "Two pots or two shifts; no shared half-raw meat."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "sig-mirror",
+      "category": "signaling",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Be found",
+        "es": "Que te encuentren"
+      },
+      "situation": {
+        "en": "You need a passing aircraft, a ridge party, or a road to notice you. No sat modem.",
+        "es": "Necesitas que un avión, un grupo en el filo o una carretera te vean. Sin módem satelital."
+      },
+      "stop_if": [
+        {
+          "en": "You already have voice contact with your party.",
+          "es": "Ya tienes voz con tu grupo."
+        },
+        {
+          "en": "You are under a fire that signaling would spread — move first.",
+          "es": "Hay un fuego que la señal puede extender: muévete primero."
+        }
+      ],
+      "get_to_care": {
+        "en": "Signaling is not a rescue guarantee. Still offer Emergency SOS if a cell net exists.",
+        "es": "Señalar no garantiza rescate. Aún así ofrece Emergency SOS si hay red."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Three of anything: whistle, flash, ground X in contrasting cloth. Mirror toward sun and the target. Night: controlled torch, 3×, not a dead battery show.",
+            "es": "Tres de algo: silbato, destello, X en el suelo. Espejo al sol y al blanco. Noche: linterna 3×."
+          },
+          "why": {
+            "en": "Pattern beats random waving.",
+            "es": "El patrón gana al meneo."
+          },
+          "child": {
+            "en": "Child can blow the whistle on command, not play.",
+            "es": "El niño sopla el silbato a la orden, no juega."
+          },
+          "stop": {
+            "en": "Stop wasting the battery if no one can possibly see you tonight — save SEARCH mode for a window.",
+            "es": "No gastes pila si nadie puede verte esta noche."
+          },
+          "image": "signal-three.png",
+          "party": {
+            "1": "You signal, you also stay put.",
+            "2": "One signals, one watches the backtrail.",
+            "4": "Signal / fire-tender / child-watch / runner only if the road is known."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "tact-formup",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Form up",
+        "es": "Formar"
+      },
+      "situation": {
+        "en": "The party is strung out, a kid is not in sight, or the lead cannot see the tail.",
+        "es": "El grupo está estirado, un niño no se ve o el líder no ve la cola."
+      },
+      "stop_if": [
+        {
+          "en": "Everyone is on the same rock and answered by name.",
+          "es": "Todos están en la misma roca y respondieron por nombre."
+        },
+        {
+          "en": "You are mid-crossing on a road or water — finish the crossing, then form.",
+          "es": "Estás a medio cruce: termínalo y luego forma."
+        }
+      ],
+      "get_to_care": {
+        "en": "Lost-kid is not a Field browse problem. Comms lost-kid haptic + FORM UP. Then care if they are hurt.",
+        "es": "Niño perdido no es un browse de Field. Háptico lost-kid + FORMAR. Luego cuidado si está herido."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Lead stops. Tail stops. Names out loud. Last pip + time. Do not have four people search four directions.",
+            "es": "El líder para. La cola para. Nombres en voz alta. Último pip y hora. No mandes a cuatro por cuatro rumbos."
+          },
+          "why": {
+            "en": "A moving search makes a second lost party.",
+            "es": "Una búsqueda en movimiento crea un segundo grupo perdido."
+          },
+          "child": {
+            "en": "The remaining children sit on packs with one adult, not in the search line.",
+            "es": "Los demás niños se sientan con un adulto, no en la línea de búsqueda."
+          },
+          "stop": {
+            "en": "Stop the fan-out if it is getting dark — stay, signal, wait.",
+            "es": "Si oscurece, quédense, señalen, esperen."
+          },
+          "image": "form-up.png",
+          "tickSeconds": 180,
+          "party": {
+            "1": "You are the whole party — mark and stay.",
+            "2": "One stays with kit, one walks back the last 100 m only.",
+            "4": "Lead + tail freeze; one pair walks the last handrail only."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-airway",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Airway — they cannot breathe",
+        "es": "Vía aérea — no puede respirar"
+      },
+      "situation": {
+        "en": "Wheeze, swell, or silence after a sting, food, or smoke. They are still awake or just fading.",
+        "es": "Silibancia, hinchazón o silencio después de picadura, comida o humo."
+      },
+      "stop_if": [
+        {
+          "en": "They are talking full sentences and the swelling is not growing.",
+          "es": "Habla frases completas y la hinchazón no crece."
+        },
+        {
+          "en": "They are unresponsive and not breathing — that is CPR, not this card.",
+          "es": "Sin respuesta y sin respirar: eso es RCP, no esta tarjeta."
+        }
+      ],
+      "get_to_care": {
+        "en": "This is Emergency SOS territory. An auto-injector they already own is theirs to use; this app does not prescribe.",
+        "es": "Esto es territorio de Emergency SOS. Un autoinyector que ya sea suyo es de ellos; esta app no receta."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Sit them up. Nothing in the mouth. If they have their own auto-injector and know it, they use it. Watch breathing.",
+            "es": "Siéntalos. Nada en la boca. Si tienen su autoinyector y lo conocen, lo usan. Vigila la respiración."
+          },
+          "why": {
+            "en": "Lying flat can worsen some swell. You are buying time.",
+            "es": "Tumbados puede empeorar. Estás comprando tiempo."
+          },
+          "child": {
+            "en": "Keep the child from offering water or candy.",
+            "es": "Que el niño no ofrezca agua ni dulce."
+          },
+          "stop": {
+            "en": "If they stop breathing, leave this card for CPR.",
+            "es": "Si dejan de respirar, esta tarjeta se acaba: RCP."
+          },
+          "image": "airway.png",
+          "tickSeconds": 60
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "trauma-spine",
+      "category": "trauma",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "They fell — do not twist",
+        "es": "Se cayó — no gires"
+      },
+      "situation": {
+        "en": "A fall, a roof, a cliff, or a car. Neck or back pain, numbness, or 'I heard a crack'.",
+        "es": "Una caída, un techo, un risco o un auto. Dolor de cuello o espalda, hormigueo o 'oí un crujido'."
+      },
+      "stop_if": [
+        {
+          "en": "They already walked to you laughing with no pain — still watch, but this card is lighter.",
+          "es": "Ya caminó riendo sin dolor: vigila, la tarjeta pesa menos."
+        },
+        {
+          "en": "They are in a burning wreck — move them anyway, then this card is over.",
+          "es": "Están en un choque que arde: muévelos igual."
+        }
+      ],
+      "get_to_care": {
+        "en": "Spine care is a hospital. You are preventing a second injury.",
+        "es": "La columna es del hospital. Tú evitas una segunda lesión."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Hands on both sides of the head. Neutral. Log-roll only if vomit or water. Pad, do not sit them up for a photo.",
+            "es": "Manos a ambos lados de la cabeza. Neutro. Solo gira en bloque si hay vómito o agua."
+          },
+          "why": {
+            "en": "Twisting a broken neck is how walking becomes not walking.",
+            "es": "Girar un cuello roto es cómo se deja de caminar."
+          },
+          "child": {
+            "en": "A child can hold the hand, not the head.",
+            "es": "El niño sostiene la mano, no la cabeza."
+          },
+          "stop": {
+            "en": "Stop pulling on a helmet unless the airway is dead.",
+            "es": "No quites el casco salvo que la vía esté muerta."
+          },
+          "image": "spine.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "trauma-fracture",
+      "category": "trauma",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Closed fracture / bad angulation",
+        "es": "Fractura cerrada / mala angulación"
+      },
+      "situation": {
+        "en": "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed. No eat-from-photo. No 911 auto-dial.",
+        "es": "Una extremidad está doblada donde no debe, o no carga peso después de una caída. La piel está cerrada."
+      },
+      "stop_if": [
+        {
+          "en": "They can take weight and the limb looks like the other one.",
+          "es": "Puede cargar peso y la extremidad se ve como la otra."
+        },
+        {
+          "en": "Bone is out or the foot/hand is white and numb — this card is not enough.",
+          "es": "Hay hueso afuera o el pie/mano está blanco y entumecido: esta tarjeta no alcanza."
+        }
+      ],
+      "get_to_care": {
+        "en": "Splint and carry to care. Emergency SOS if a net exists. Do not 'set' a bone because a video said so.",
+        "es": "Inmoviliza y lleva a cuidado. Emergency SOS si hay red. No 'aocomodes' un hueso por un video."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not test the break. Pad and splint the joint above and the joint below. Tie loose enough that a fingertip fits. Check color of fingers or toes after.",
+            "es": "No pruebes la rotura. Almohadilla y férula la articulación de arriba y la de abajo. Que quepa un dedo. Revisa color de dedos."
+          },
+          "why": {
+            "en": "Motion at the break makes bleeding and nerve damage worse.",
+            "es": "Mover el quiebre empeora sangrado y nervios."
+          },
+          "child": {
+            "en": "A child holds the unused tape. They do not pull the limb straight.",
+            "es": "El niño sostiene la cinta. No estira la extremidad."
+          },
+          "stop": {
+            "en": "Stop pulling if they scream through a pulse you can still feel — stabilize as-is and move.",
+            "es": "Para de tirar si grita con pulso que aún sientes: inmoviliza como está y mueve."
+          },
+          "image": "fracture-splint.png",
+          "party": {
+            "1": "Splint and walk them if they can.",
+            "2": "One splints, one carries kit.",
+            "4": "Splint / carry / trail / watch shock."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-cold",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM",
+        "FL",
+        "NY"
+      ],
+      "title": {
+        "en": "Cold and wet — stop the slide",
+        "es": "Frío y mojado — para la caída"
+      },
+      "situation": {
+        "en": "Shivering that will not quit, wet cotton, wind, or a party member who stopped complaining and just sits. No live NWS.",
+        "es": "Temblor que no para, algodón mojado, viento, o alguien que ya no se queja y se sienta. Sin NWS en vivo."
+      },
+      "stop_if": [
+        {
+          "en": "They are dry, fed, and talking sense in a wind break.",
+          "es": "Están secos, comidos y hablan con sentido en un abrigo."
+        },
+        {
+          "en": "They are unconscious or not shivering in obvious cold — this is evacuation, not a snack.",
+          "es": "Están inconscientes o no tiemblan con frío obvio: es evacuación, no un snack."
+        }
+      ],
+      "get_to_care": {
+        "en": "Rewarm trunk first. Get to care for confusion that does not clear. This card does not replace Emergency SOS.",
+        "es": "Recalienta el tronco primero. Busca cuidado si la confusión no pasa. No reemplaza Emergency SOS."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Stop walking into wind. Change out of wet next-to-skin layers. Put the cold person in a bag or tarp with a warm body. Warm sweet drink only if they can swallow sitting up.",
+            "es": "Para de caminar al viento. Cambia lo mojado pegado a la piel. Mételos en bolsa o lona con un cuerpo caliente. Bebida tibia solo si tragan sentados."
+          },
+          "why": {
+            "en": "Wet cotton dumps heat. Walking harder in a cotton shirt makes it worse.",
+            "es": "El algodón mojado tira el calor. Caminar más recio lo empeora."
+          },
+          "child": {
+            "en": "Child gets the dry layer first. No 'tough it out' races.",
+            "es": "El niño recibe la capa seca primero. Sin carreras de aguante."
+          },
+          "stop": {
+            "en": "Stop oral fluids if they cannot sit or are vomiting. Do not put them in a cold creek to 'wake up'.",
+            "es": "Nada por boca si no se sientan o vomitan. No los metas a un arroyo frío para 'despertarlos'."
+          },
+          "image": "cold-rewarm.png",
+          "tickSeconds": 600,
+          "party": {
+            "1": "Shelter and change.",
+            "2": "One shelters, one fetches dry/kit.",
+            "4": "Shelter / dry / stove / watch the rest."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "tx-east",
+  "name": "TX EAST",
+  "state": "TX",
+  "kind": "osm-contour-extract",
+  "engine": "maplibre",
+  "bbox": {
+    "south": 30.08,
+    "west": -97.78,
+    "north": 30.32,
+    "east": -97.2
+  },
+  "slices": {
+    "metro": {
+      "name": "Austin metro",
+      "bbox": {
+        "name": "Austin metro",
+        "south": 30.24,
+        "west": -97.78,
+        "north": 30.32,
+        "east": -97.68
+      },
+      "featureCount": 50273
+    },
+    "wild": {
+      "name": "Lost Pines / Bastrop wild",
+      "bbox": {
+        "name": "Lost Pines / Bastrop wild",
+        "south": 30.08,
+        "west": -97.32,
+        "north": 30.18,
+        "east": -97.2
+      },
+      "featureCount": 3820
+    }
+  },
+  "banners": [
+    "heat-island",
+    "cattle-guard",
+    "hurricane"
+  ],
+  "bytes": 2063444,
+  "files": [
+    "contours.geojson",
+    "dem.json",
+    "graph.json",
+    "layers/flood.geojson",
+    "layers/hazards.geojson",
+    "layers/public_land.geojson",
+    "manifest.json",
+    "metro.geojson",
+    "osm.geojson",
+    "pois.geojson",
+    "style.json",
+    "wild.geojson"
+  ],
+  "center": {
+    "lat": 30.2,
+    "lon": -97.49000000000001
+  },
+  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+}

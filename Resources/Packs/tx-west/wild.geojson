@@ -1,0 +1,8228 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 179487339,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4123092,
+          31.8988303
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 179514453,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "lines",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4127918,
+          31.8988322
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 356698794,
+        "kind": "poi",
+        "ele": "2081",
+        "gnis:feature_id": "1329588",
+        "name": "Anthonys Nose",
+        "natural": "peak"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4986003,
+          31.9595469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 356713261,
+        "kind": "poi",
+        "ele": "2186",
+        "gnis:feature_id": "1342745",
+        "name": "North Franklin Mountain",
+        "natural": "peak",
+        "wikidata": "Q7055443"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4936356,
+          31.9028762
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 356751470,
+        "kind": "poi",
+        "ele": "1985",
+        "gnis:feature_id": "1377711",
+        "name": "Indian Peak",
+        "natural": "peak"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4849882,
+          31.9064931
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1227618567,
+        "kind": "poi",
+        "amenity": "fire_station",
+        "source": "NAIP"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4165896,
+          31.8848568
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3534610741,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4407809,
+          31.9238257
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3998454158,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4082199,
+          31.938917
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3999837501,
+        "kind": "poi",
+        "amenity": "shelter",
+        "shelter_type": "picnic_shelter"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4210077,
+          31.9220411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5819492853,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4094341,
+          31.8985557
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5819675061,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4349637,
+          31.8824561
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6219582826,
+        "kind": "poi",
+        "amenity": "doctors",
+        "healthcare": "doctor",
+        "healthcare:speciality": "general",
+        "name": "Well Med"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4339577,
+          31.8972312
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6616977149,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069397,
+          31.8987235
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8193838826,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4381224,
+          31.9213124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8213908662,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4093296,
+          31.8994832
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8451720893,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066309,
+          31.8976719
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8831438844,
+        "kind": "poi",
+        "crossing": "marked",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4396315,
+          31.8837222
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8831438865,
+        "kind": "poi",
+        "crossing": "marked",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4392163,
+          31.8840773
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9150529087,
+        "kind": "poi",
+        "amenity": "pharmacy",
+        "brand": "Walgreens",
+        "brand:wikidata": "Q1591889",
+        "dispensing": "yes",
+        "healthcare": "pharmacy",
+        "name": "Walgreens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4382113,
+          31.922433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9378134274,
+        "kind": "poi",
+        "amenity": "pharmacy",
+        "brand": "Walmart",
+        "brand:wikidata": "Q483551",
+        "dispensing": "yes",
+        "healthcare": "pharmacy",
+        "name": "Walmart Pharmacy",
+        "website": "https://www.walmart.com/store/500-el-paso-tx/pharmacy"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4373779,
+          31.8963436
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10755214331,
+        "kind": "poi",
+        "amenity": "police",
+        "name": "El Paso Police Department Northeast Regional Command Center"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.41548,
+          31.8873777
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10916989048,
+        "kind": "poi",
+        "addr:city": "El Paso",
+        "addr:housenumber": "11274",
+        "addr:postcode": "79934",
+        "addr:state": "TX",
+        "addr:street": "McCombs Street",
+        "amenity": "hospital",
+        "beds": "8",
+        "healthcare": "hospital",
+        "name": "The Hospitals Of Providence Northeast Campus",
+        "operator": "The Hospitals of Providence",
+        "operator:wikidata": "Q140358009",
+        "phone": "+1-281-292-2450",
+        "website": "https://www.thehospitalsofprovidence.com/locations/detail/northeast-campus"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067987,
+          31.9378228
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 11369435909,
+        "kind": "poi",
+        "gnis:feature_id": "1332305",
+        "name": "Castner Range",
+        "natural": "peak"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4677655,
+          31.9012156
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 12660062910,
+        "kind": "poi",
+        "access": "yes",
+        "amenity": "drinking_water",
+        "wheelchair": "yes"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.449247,
+          31.9325051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13115408950,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4184669,
+          31.9205876
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13115408954,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "ladder:skewed",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4192257,
+          31.9181159
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13115408960,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "ladder:skewed",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.420742,
+          31.9184729
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13115408961,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4210811,
+          31.9186734
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051736,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4401488,
+          31.8832097
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051737,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4403007,
+          31.8828358
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051738,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4403072,
+          31.8829865
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051790,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4333061,
+          31.8929032
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051798,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "lines",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4406169,
+          31.8977879
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051836,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4375341,
+          31.8830623
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051849,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4350661,
+          31.882221
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051850,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4351439,
+          31.8823684
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13188051851,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4349114,
+          31.8823024
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597209,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066379,
+          31.8981317
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597212,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066318,
+          31.8977276
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597220,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4065715,
+          31.8955597
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597223,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066595,
+          31.8947887
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597226,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067942,
+          31.8952714
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597230,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4068152,
+          31.8961003
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597235,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4068393,
+          31.8969346
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597239,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4068738,
+          31.8983957
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597247,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067097,
+          31.8987624
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13633597248,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4068243,
+          31.8987586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840461,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4340892,
+          31.8983065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840462,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4349106,
+          31.8982932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840463,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4354957,
+          31.8982844
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840464,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.436138,
+          31.8982718
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840465,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4363531,
+          31.8982665
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840466,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4375174,
+          31.8982498
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840467,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.43954,
+          31.8982181
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840468,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4401148,
+          31.8982036
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840481,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4406454,
+          31.8981877
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840482,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4407065,
+          31.8982845
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840484,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4408198,
+          31.8989075
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840485,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4407257,
+          31.8988162
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840489,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4419334,
+          31.8988932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840499,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4331895,
+          31.8934543
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636840500,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4331932,
+          31.8935505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855001,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332001,
+          31.8937266
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855002,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332226,
+          31.8943763
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855003,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332384,
+          31.8949847
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855004,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332411,
+          31.8951264
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855005,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332586,
+          31.8960308
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855006,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332737,
+          31.8967426
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855007,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.433277,
+          31.8968567
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855008,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332976,
+          31.8975548
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855009,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332999,
+          31.8977345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636855010,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4332918,
+          31.8982111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636969997,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4403737,
+          31.9229038
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636969998,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4403538,
+          31.9227902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978401,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4402795,
+          31.9230011
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978406,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4402362,
+          31.9231171
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978408,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4401502,
+          31.9230016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978421,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.439855,
+          31.9234954
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978447,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4346833,
+          31.9264221
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978448,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4378043,
+          31.9248764
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13636978449,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4388931,
+          31.9242541
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045351,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4395053,
+          31.9222015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045358,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4393674,
+          31.9222101
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045359,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4392855,
+          31.9222943
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045361,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4393086,
+          31.9224303
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045365,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4391848,
+          31.9223791
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045367,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4393791,
+          31.9220939
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045378,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4367945,
+          31.9204555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045379,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.437636,
+          31.9210147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045380,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4389836,
+          31.9218551
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045381,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4391069,
+          31.9219345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045383,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4363567,
+          31.9199467
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045399,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4385215,
+          31.9219519
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637045400,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.43835,
+          31.9218465
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637046401,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.437888,
+          31.9215572
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637046402,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4363623,
+          31.9205077
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049757,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4349325,
+          31.9166426
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049758,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4352438,
+          31.9173469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049759,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4355329,
+          31.9180274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049760,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4358093,
+          31.9187085
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049771,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4346744,
+          31.9169284
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049772,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4348959,
+          31.9174537
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049773,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4351819,
+          31.9181433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049774,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4354583,
+          31.9188173
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049775,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4343504,
+          31.9162876
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049776,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.434466,
+          31.9161853
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049784,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4381737,
+          31.9232241
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049785,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4384025,
+          31.9230124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637049786,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4385793,
+          31.9228575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053836,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4411053,
+          31.9133602
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053837,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4411396,
+          31.914676
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053840,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.441156,
+          31.9154218
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053841,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4411566,
+          31.9155233
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053842,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4411808,
+          31.9162263
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053845,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4412131,
+          31.9170342
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053846,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4412009,
+          31.916925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053847,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4408839,
+          31.9193053
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053848,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4404465,
+          31.920395
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053849,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4401003,
+          31.9210583
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637053850,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4395847,
+          31.9218004
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637447653,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4294944,
+          31.8806622
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637447657,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4297501,
+          31.8807361
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637447658,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.430519,
+          31.8809586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637476679,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.420626,
+          31.8986834
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637476686,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.420763,
+          31.8982696
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637476690,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207283,
+          31.8974698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637476693,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207224,
+          31.8967577
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637476697,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205827,
+          31.896686
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487707,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4204759,
+          31.8974742
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487718,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205065,
+          31.898274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487724,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4204965,
+          31.8987831
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487729,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207814,
+          31.8987795
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487732,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4208055,
+          31.899161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487734,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.42064,
+          31.8992417
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637487735,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205072,
+          31.8991622
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637493578,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207653,
+          31.8996557
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637493583,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207665,
+          31.8997642
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637493587,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4208225,
+          31.900074
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508701,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.42102,
+          31.9007046
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508703,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4215441,
+          31.9023317
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508708,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4215788,
+          31.9026227
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508710,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4214533,
+          31.9028024
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508724,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4211831,
+          31.9018963
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508735,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4208843,
+          31.901018
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508743,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4206912,
+          31.9004709
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508754,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205315,
+          31.89953
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637508755,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205743,
+          31.899996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523040,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4212899,
+          31.8992105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523041,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4215634,
+          31.8992044
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523054,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4243406,
+          31.899166
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523059,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4264445,
+          31.8991382
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523062,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4272767,
+          31.8991227
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523065,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4281149,
+          31.8991053
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523068,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4289487,
+          31.8990924
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523071,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4297919,
+          31.8990752
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523074,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4306251,
+          31.899065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523077,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4314661,
+          31.8990464
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523080,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4322951,
+          31.8990373
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523084,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4330339,
+          31.8989639
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523087,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4330436,
+          31.898402
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637523099,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4319469,
+          31.8983505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637528606,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4307942,
+          31.8983745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637528610,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4298152,
+          31.8983812
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637535751,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4277861,
+          31.8984119
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637535758,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4272716,
+          31.8984412
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637535767,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4248529,
+          31.8985916
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637535770,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4244827,
+          31.8986112
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637535800,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4162062,
+          31.8987586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545203,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4153603,
+          31.8987809
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545206,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4145246,
+          31.8987977
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545209,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4136979,
+          31.8988134
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545217,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4121022,
+          31.898899
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545220,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4121291,
+          31.8992989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637545224,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4122403,
+          31.8994086
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553254,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4133864,
+          31.899389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553256,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4140408,
+          31.8993808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553259,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4153689,
+          31.8993515
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553264,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4168041,
+          31.8993284
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553267,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4169649,
+          31.899323
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553272,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4160182,
+          31.899345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553274,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4184882,
+          31.8993031
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553276,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4189534,
+          31.8992966
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553277,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4191947,
+          31.8992938
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637553280,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4197006,
+          31.8992792
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571250,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4204503,
+          31.896047
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571252,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4207023,
+          31.8960427
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571257,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205507,
+          31.8954138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571258,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4204395,
+          31.8953318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571259,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4206805,
+          31.8953275
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637571260,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4205471,
+          31.8952469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637646281,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.410402,
+          31.8987311
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637646293,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4091947,
+          31.8988252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637646296,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4088875,
+          31.8992772
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637646300,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4088988,
+          31.8994122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637656506,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4107021,
+          31.8994426
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637656510,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4114403,
+          31.8994037
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637656511,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4116929,
+          31.8993801
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664356,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4121473,
+          31.9007513
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664357,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4122699,
+          31.9008307
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664358,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4122638,
+          31.9005475
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664359,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.412405,
+          31.9006147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664360,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4124087,
+          31.9007501
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13637664361,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4121494,
+          31.9006081
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638094088,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4331706,
+          31.8983184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638094091,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4333304,
+          31.898399
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638094099,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4331897,
+          31.8990246
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638094100,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4333419,
+          31.8989568
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100503,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4341075,
+          31.8990027
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100506,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4349506,
+          31.8989909
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100509,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4357789,
+          31.8989744
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100515,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4369685,
+          31.898965
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100516,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4371398,
+          31.8989576
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100519,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4375443,
+          31.8989454
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100522,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4378118,
+          31.8989387
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100525,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4381138,
+          31.8989338
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100530,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4384126,
+          31.8989265
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100535,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4394799,
+          31.8989107
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100538,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4397097,
+          31.8989049
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100541,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4399233,
+          31.8989026
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100544,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4401338,
+          31.8988972
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13638100547,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4404102,
+          31.8988923
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613845,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4081679,
+          31.8998304
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613852,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4082982,
+          31.9001663
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613853,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4085796,
+          31.8997465
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613868,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4060983,
+          31.9029589
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613869,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4062155,
+          31.9027836
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613870,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4065854,
+          31.9022233
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613882,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4060449,
+          31.9035727
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613883,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4061853,
+          31.9033616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613885,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4064473,
+          31.9029655
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613887,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4070463,
+          31.9016657
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613888,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4070762,
+          31.9019184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613889,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069744,
+          31.9022436
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613890,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067905,
+          31.9024741
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613891,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.406681,
+          31.9022254
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639613892,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066976,
+          31.9024853
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639627100,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4068724,
+          31.899355
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640901,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067229,
+          31.8993493
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640921,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069854,
+          31.8995887
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640922,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4065063,
+          31.9006098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640923,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.406471,
+          31.9005105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640924,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066623,
+          31.9016084
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640928,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069524,
+          31.901645
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640929,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4067971,
+          31.9018624
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640930,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069879,
+          31.8999651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640931,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069939,
+          31.9001094
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640962,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "lines",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4042096,
+          31.8988772
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640963,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4052162,
+          31.8988214
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640964,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4056674,
+          31.8987741
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639640984,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4041358,
+          31.8994346
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641003,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4083899,
+          31.9008152
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641004,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4085489,
+          31.9008488
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641008,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4096947,
+          31.9008638
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641017,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066227,
+          31.8999602
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641018,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069998,
+          31.9005743
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641019,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4072271,
+          31.899306
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641020,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4073832,
+          31.8993066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641021,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4077805,
+          31.8993146
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641022,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4073226,
+          31.901663
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641023,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4075665,
+          31.9012996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641024,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4077328,
+          31.9010242
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639641025,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4076714,
+          31.9011259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678401,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4089848,
+          31.8987287
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678402,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4091773,
+          31.8987386
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678409,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4088141,
+          31.8988269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678410,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4087714,
+          31.899352
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678411,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4085781,
+          31.8993413
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678412,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4085288,
+          31.8992697
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678420,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4080708,
+          31.9006383
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678421,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4081493,
+          31.900502
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678422,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.408096,
+          31.9003935
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678423,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4079283,
+          31.9003207
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678424,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4077829,
+          31.9003529
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678425,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4077197,
+          31.9004658
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678427,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4073723,
+          31.9000839
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678428,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4077528,
+          31.9002582
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678433,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069481,
+          31.8992538
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678434,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4069181,
+          31.8988285
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678437,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066139,
+          31.8988323
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678438,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4066125,
+          31.8992441
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678439,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4072409,
+          31.9003041
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678440,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4074475,
+          31.9004009
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13639678441,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4076322,
+          31.9006252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13726996881,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4367318,
+          31.8840643
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13726996882,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4357783,
+          31.88555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13900849361,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.441175,
+          31.9248091
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13900849365,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4415309,
+          31.9257919
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13900849366,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4413728,
+          31.9257931
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17298090,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Blackhawk Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Blackhawk",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4074074,
+            31.9196768
+          ],
+          [
+            -106.40375,
+            31.919555
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17299829,
+        "kind": "wild",
+        "highway": "service",
+        "service": "parking_aisle",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189334762",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -106.5093584,
+              31.9168197
+            ],
+            [
+              -106.5092847,
+              31.9166589
+            ],
+            [
+              -106.5093584,
+              31.9168197
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17302232,
+        "kind": "wild",
+        "highway": "service",
+        "service": "driveway",
+        "surface": "asphalt",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.5098734,
+            31.9167346
+          ],
+          [
+            -106.5127178,
+            31.9161379
+          ],
+          [
+            -106.5141044,
+            31.9154199
+          ],
+          [
+            -106.5153956,
+            31.9152553
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17305111,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189338611",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.40448,
+            31.917501
+          ],
+          [
+            -106.404939,
+            31.917664
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17306061,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189369316",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4427848,
+            31.9356372
+          ],
+          [
+            -106.4425308,
+            31.9355924
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17306567,
+        "kind": "wild",
+        "highway": "service",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4192229,
+            31.91804
+          ],
+          [
+            -106.4194682,
+            31.9185875
+          ],
+          [
+            -106.4197259,
+            31.9190931
+          ],
+          [
+            -106.419756,
+            31.9206396
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17307357,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Dyer Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189339475:189339476",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4156048,
+            31.8894814
+          ],
+          [
+            -106.4152082,
+            31.8901086
+          ],
+          [
+            -106.4150064,
+            31.8904077
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17308664,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Cross Bow",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4123474,
+            31.8876324
+          ],
+          [
+            -106.4123593,
+            31.8880939
+          ],
+          [
+            -106.412368,
+            31.8885312
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17309008,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Maid Marian",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Will Scarlet;Sherwood Forest",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4150158,
+            31.8875934
+          ],
+          [
+            -106.4139648,
+            31.8894784
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17309768,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4143302,
+            31.9166789
+          ],
+          [
+            -106.4138748,
+            31.9166608
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17310056,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189365684",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4004568,
+            31.9066074
+          ],
+          [
+            -106.400376,
+            31.907782
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17310060,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Cross Bow",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4123773,
+            31.8890822
+          ],
+          [
+            -106.4123768,
+            31.8895144
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17310632,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189338294",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.405909,
+            31.930478
+          ],
+          [
+            -106.4055849,
+            31.9304845
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17310920,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Cross Bow",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4122566,
+            31.8890316
+          ],
+          [
+            -106.4122546,
+            31.8884919
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17311986,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4205261,
+            31.9095798
+          ],
+          [
+            -106.4206334,
+            31.9097848
+          ],
+          [
+            -106.4206173,
+            31.9098485
+          ],
+          [
+            -106.4205368,
+            31.9099077
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17312037,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189338701",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.403089,
+            31.903659
+          ],
+          [
+            -106.403484,
+            31.903657
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17312196,
+        "kind": "wild",
+        "highway": "service",
+        "service": "driveway",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.5132242,
+            31.9277496
+          ],
+          [
+            -106.5100603,
+            31.9283142
+          ],
+          [
+            -106.5094739,
+            31.9282913
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313225,
+        "kind": "wild",
+        "highway": "service",
+        "service": "parking_aisle",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.5150242,
+            31.9158124
+          ],
+          [
+            -106.5144298,
+            31.9161758
+          ],
+          [
+            -106.5148799,
+            31.9163068
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313633,
+        "kind": "wild",
+        "highway": "residential",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189338969",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4209246,
+            31.8832138
+          ],
+          [
+            -106.4212838,
+            31.8833824
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313876,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Garland Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Garland",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.424135,
+            31.917709
+          ],
+          [
+            -106.421762,
+            31.919001
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313882,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Juliandra Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Juliandra",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4234268,
+            31.8953154
+          ],
+          [
+            -106.4174218,
+            31.8953924
+          ],
+          [
+            -106.4154088,
+            31.8944374
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313893,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Bonita Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Bonita",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.439668,
+            31.937948
+          ],
+          [
+            -106.435265,
+            31.937457
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313970,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Suave Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Suave",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4450432,
+            31.941864
+          ],
+          [
+            -106.4441012,
+            31.9413737
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313972,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "William McCool Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "William McCool",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4083606,
+            31.9373101
+          ],
+          [
+            -106.4082603,
+            31.9340234
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17313983,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Redwood Street",
+        "name_1": "Redwood Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Redwood",
+        "tiger:name_base_1": "Redwood",
+        "tiger:name_type": "St",
+        "tiger:name_type_1": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.409602,
+            31.910228
+          ],
+          [
+            -106.408706,
+            31.91373
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314215,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Ketchikan Street",
+        "sidewalk": "both",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Ketchikan",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.417751,
+            31.906258
+          ],
+          [
+            -106.41607,
+            31.903583
+          ],
+          [
+            -106.413207,
+            31.902208
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314236,
+        "kind": "wild",
+        "highway": "tertiary",
+        "name": "Prince Edward Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Prince Edward",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.422852,
+            31.90559
+          ],
+          [
+            -106.416901,
+            31.906273
+          ],
+          [
+            -106.409782,
+            31.906393
+          ],
+          [
+            -106.4070954,
+            31.9064781
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314322,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Mackinaw Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Mackinaw",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.418,
+            31.907025
+          ],
+          [
+            -106.418086,
+            31.910633
+          ],
+          [
+            -106.4174649,
+            31.9138933
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314340,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Matador Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Matador",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4021158,
+            31.9029834
+          ],
+          [
+            -106.4021324,
+            31.905826
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314380,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Salisbury Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Salisbury",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4172602,
+            31.8805584
+          ],
+          [
+            -106.417353,
+            31.8845855
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314426,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma del Sol Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma del Sol",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.444019,
+            31.928213
+          ],
+          [
+            -106.443406,
+            31.9308575
+          ],
+          [
+            -106.442919,
+            31.934748
+          ],
+          [
+            -106.4424707,
+            31.939181
+          ],
+          [
+            -106.4425086,
+            31.9406301
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314444,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Whyburn Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Whyburn",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.418935,
+            31.911372
+          ],
+          [
+            -106.418418,
+            31.913563
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314486,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Agnes Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Agnes",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4204908,
+            31.8852834
+          ],
+          [
+            -106.4205055,
+            31.8859714
+          ],
+          [
+            -106.4205208,
+            31.8866864
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314713,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Kirwood Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Kirwood",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.431269,
+            31.903002
+          ],
+          [
+            -106.433055,
+            31.903733
+          ],
+          [
+            -106.433075,
+            31.904445
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314716,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Kirwood Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Kirwood",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4306229,
+            31.899005
+          ],
+          [
+            -106.431259,
+            31.902818
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17314979,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Alta Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Alta",
+        "tiger:name_type": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.436567,
+            31.930027
+          ],
+          [
+            -106.437102,
+            31.930101
+          ],
+          [
+            -106.437188,
+            31.930155
+          ],
+          [
+            -106.437261,
+            31.930765
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315173,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "England Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "England",
+        "tiger:name_type": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.438255,
+            31.929863
+          ],
+          [
+            -106.438242,
+            31.930337
+          ],
+          [
+            -106.438223,
+            31.930753
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315177,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Academy Avenue",
+        "name_1": "Academy Circle",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Academy",
+        "tiger:name_base_1": "Academy",
+        "tiger:name_type": "Ave",
+        "tiger:name_type_1": "Cir",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.436441,
+            31.904381
+          ],
+          [
+            -106.4340923,
+            31.9036688
+          ],
+          [
+            -106.433762,
+            31.903593
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315238,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Galaxie Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Galaxie",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.406152,
+            31.896269
+          ],
+          [
+            -106.40382,
+            31.896218
+          ],
+          [
+            -106.402596,
+            31.895813
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315298,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma de Indios Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma de Indios",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189380211"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.437678,
+            31.934892
+          ],
+          [
+            -106.439009,
+            31.934513
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315507,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Kalpana Chawla Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Kalpana Chawla",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4104638,
+            31.9346896
+          ],
+          [
+            -106.4091772,
+            31.9346993
+          ],
+          [
+            -106.4082942,
+            31.9347059
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315522,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Flounder Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Flounder",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4066988,
+            31.8891154
+          ],
+          [
+            -106.4008738,
+            31.8891144
+          ],
+          [
+            -106.4004378,
+            31.8889614
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315536,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Dearborne Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Dearborne",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.424076,
+            31.915394
+          ],
+          [
+            -106.418599,
+            31.915063
+          ],
+          [
+            -106.415234,
+            31.915237
+          ],
+          [
+            -106.410014,
+            31.915277
+          ],
+          [
+            -106.407481,
+            31.916075
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315540,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Dearborne Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Dearborne",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4073224,
+            31.9160768
+          ],
+          [
+            -106.4070634,
+            31.916081
+          ],
+          [
+            -106.405589,
+            31.916108
+          ],
+          [
+            -106.405,
+            31.916116
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315567,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Pearl Sands Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Pearl Sands",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4248732,
+            31.9237165
+          ],
+          [
+            -106.426944,
+            31.926453
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17315809,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Yogi Berra Circle",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Yogi Berra",
+        "tiger:name_type": "Cir",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4142299,
+            31.9288262
+          ],
+          [
+            -106.4126538,
+            31.9288515
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316052,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Prince George Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Prince George",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.423593,
+            31.920027
+          ],
+          [
+            -106.42299,
+            31.922404
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316154,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Pickerel Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Pickerel",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4066538,
+            31.8876754
+          ],
+          [
+            -106.4038848,
+            31.8880324
+          ],
+          [
+            -106.4038328,
+            31.8893614
+          ],
+          [
+            -106.4041008,
+            31.8908194
+          ],
+          [
+            -106.4041218,
+            31.8929024
+          ],
+          [
+            -106.4038588,
+            31.8940954
+          ],
+          [
+            -106.4035418,
+            31.8945954
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316254,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Putter Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Putter",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.400939,
+            31.931143
+          ],
+          [
+            -106.400273,
+            31.930965
+          ],
+          [
+            -106.39971,
+            31.931021
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316274,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Nathan Bay Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Nathan Bay",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.403319,
+            31.932998
+          ],
+          [
+            -106.40108,
+            31.930305
+          ],
+          [
+            -106.4007317,
+            31.9283739
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316455,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Sugarland Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Sugarland",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4275566,
+            31.9234778
+          ],
+          [
+            -106.431138,
+            31.925447
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316509,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Kodiak Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Kodiak",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.421886,
+            31.904311
+          ],
+          [
+            -106.4176632,
+            31.9048537
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316534,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Grapeland Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Grapeland",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.428274,
+            31.924439
+          ],
+          [
+            -106.430239,
+            31.924429
+          ],
+          [
+            -106.432159,
+            31.924796
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316564,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Equinox Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Equinox",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4005113,
+            31.9091257
+          ],
+          [
+            -106.400271,
+            31.909022
+          ],
+          [
+            -106.398878,
+            31.909029
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316651,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Panther Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Panther",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.412286,
+            31.901508
+          ],
+          [
+            -106.408893,
+            31.901699
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316663,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Rosada Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Rosada",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.449692,
+            31.936506
+          ],
+          [
+            -106.449135,
+            31.93852
+          ],
+          [
+            -106.446931,
+            31.937855
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316736,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Annette Avenue",
+        "surface": "asphalt",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Annette",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189425927"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4121512,
+            31.8945005
+          ],
+          [
+            -106.4119992,
+            31.8944293
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316753,
+        "kind": "wild",
+        "hgv": "designated",
+        "hgv:national_network": "yes",
+        "highway": "motorway",
+        "lanes": "2",
+        "maxheight": "16'5\"",
+        "maxspeed": "60 mph",
+        "oneway": "yes",
+        "ref": "TX 375 Loop",
+        "source:hgv:national_network": "https://www.ecfr.gov/current/title-23/chapter-I/subchapter-G/part-658;https://hepgis-usdot.hub.arcgis.com/apps/usdot::national-network-conventional-combination-trucks-map"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.442132,
+            31.8985055
+          ],
+          [
+            -106.4418236,
+            31.8984884
+          ],
+          [
+            -106.4415978,
+            31.898487
+          ],
+          [
+            -106.4338483,
+            31.8986136
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316755,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Silver Strand Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Silver Strand",
+        "tiger:name_type": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4008378,
+            31.9066074
+          ],
+          [
+            -106.400714,
+            31.907784
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316912,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Chick A Dee Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Chick A Dee",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.404134,
+            31.899358
+          ],
+          [
+            -106.4041358,
+            31.8994346
+          ],
+          [
+            -106.4043628,
+            31.9029774
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17316918,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Nell Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Nell",
+        "tiger:name_type": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.414781,
+            31.9213742
+          ],
+          [
+            -106.414801,
+            31.922387
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317034,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Regulus Drive",
+        "name_1": "Regulus Road",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Regulus",
+        "tiger:name_base_1": "Regulus",
+        "tiger:name_type": "Dr",
+        "tiger:name_type_1": "Rd",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4062808,
+            31.8955934
+          ],
+          [
+            -106.4041078,
+            31.8955484
+          ],
+          [
+            -106.4027978,
+            31.8950614
+          ],
+          [
+            -106.4002662,
+            31.8938945
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317117,
+        "kind": "wild",
+        "highway": "unclassified",
+        "name": "Whispering Springs Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Whispering Springs",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4406948,
+            31.8888884
+          ],
+          [
+            -106.4393858,
+            31.8887794
+          ],
+          [
+            -106.4355428,
+            31.8884304
+          ],
+          [
+            -106.4335907,
+            31.8880645
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317172,
+        "kind": "wild",
+        "bridge": "yes",
+        "highway": "tertiary",
+        "layer": "1",
+        "name": "Sean Haggerty Drive",
+        "oneway": "yes",
+        "tiger:cfcc": "A45",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Sean Haggerty",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4242575,
+            31.9319599
+          ],
+          [
+            -106.4242025,
+            31.9317799
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317179,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Desert Sands",
+        "name_1": "Desert Sands Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Desert Sands",
+        "tiger:name_base_1": "Desert Sands",
+        "tiger:name_type_1": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4258618,
+            31.9277475
+          ],
+          [
+            -106.42592,
+            31.9280254
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317354,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Aphrodite Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Aphrodite",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.429141,
+            31.914567
+          ],
+          [
+            -106.430568,
+            31.917846
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317356,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Capricorn Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Capricorn",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.441278,
+            31.916226
+          ],
+          [
+            -106.438947,
+            31.915936
+          ],
+          [
+            -106.437368,
+            31.915294
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317370,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Vanguard Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Vanguard",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4064418,
+            31.8927314
+          ],
+          [
+            -106.4056958,
+            31.8927324
+          ],
+          [
+            -106.4050708,
+            31.8927374
+          ],
+          [
+            -106.4041268,
+            31.8927374
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317379,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Blythe Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Blythe",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.430005,
+            31.910332
+          ],
+          [
+            -106.425546,
+            31.912759
+          ],
+          [
+            -106.425552,
+            31.913546
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317390,
+        "kind": "wild",
+        "highway": "secondary",
+        "name": "Kenworthy Street",
+        "oneway": "yes",
+        "sidewalk:left": "no",
+        "sidewalk:right": "separate",
+        "tiger:cfcc": "A45",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Kenworthy",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.434289,
+            31.916199
+          ],
+          [
+            -106.435556,
+            31.918785
+          ],
+          [
+            -106.4379453,
+            31.9214887
+          ],
+          [
+            -106.4393699,
+            31.9223524
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317430,
+        "kind": "wild",
+        "highway": "residential",
+        "lit": "yes",
+        "name": "Loma de Cobre Drive",
+        "oneway": "no",
+        "sidewalk": "both",
+        "surface": "asphalt",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma de Cobre",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.440726,
+            31.932965
+          ],
+          [
+            -106.433869,
+            31.932953
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317449,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "George Patton Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "George Patton",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4340518,
+            31.8788154
+          ],
+          [
+            -106.4341178,
+            31.8796164
+          ],
+          [
+            -106.4351548,
+            31.8803964
+          ],
+          [
+            -106.4356518,
+            31.8805634
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317496,
+        "kind": "wild",
+        "highway": "tertiary",
+        "name": "Deer Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Deer",
+        "tiger:name_type": "Ave"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.3943751,
+            31.9066015
+          ],
+          [
+            -106.3990438,
+            31.9066084
+          ],
+          [
+            -106.4026411,
+            31.9066104
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317518,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Rayito Place",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Rayito",
+        "tiger:name_type": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4109699,
+            31.9214347
+          ],
+          [
+            -106.410996,
+            31.922383
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317531,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Bellaire Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Bellaire",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.410253,
+            31.907871
+          ],
+          [
+            -106.4102826,
+            31.9083715
+          ],
+          [
+            -106.4102627,
+            31.9085298
+          ],
+          [
+            -106.4101521,
+            31.9087993
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317536,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Venus Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Venus",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.40332,
+            31.896855
+          ],
+          [
+            -106.40309,
+            31.897579
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317608,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Clydesdale Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Clydesdale",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.406151,
+            31.922443
+          ],
+          [
+            -106.402994,
+            31.92166
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317618,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Wahoo Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Wahoo",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4033958,
+            31.8869654
+          ],
+          [
+            -106.4028958,
+            31.8881114
+          ],
+          [
+            -106.4028738,
+            31.8883994
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317737,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Menzies Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Menzies",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.427304,
+            31.911727
+          ],
+          [
+            -106.426615,
+            31.912574
+          ],
+          [
+            -106.426538,
+            31.912801
+          ],
+          [
+            -106.426545,
+            31.913139
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317946,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "McCormick Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "McCormick",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.424095,
+            31.916166
+          ],
+          [
+            -106.421007,
+            31.916792
+          ],
+          [
+            -106.419784,
+            31.917315
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317953,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Jamaica Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Jamaica",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4314637,
+            31.898991
+          ],
+          [
+            -106.432095,
+            31.902798
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17317974,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Shenandoah Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Shenandoah",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.424418,
+            31.902813
+          ],
+          [
+            -106.42443,
+            31.908341
+          ],
+          [
+            -106.424885,
+            31.912146
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318099,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Yukon Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Yukon",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.41139,
+            31.90152
+          ],
+          [
+            -106.411445,
+            31.903975
+          ],
+          [
+            -106.411387,
+            31.904113
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318108,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Warren Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Warren",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.412978,
+            31.914445
+          ],
+          [
+            -106.412754,
+            31.917954
+          ],
+          [
+            -106.4127541,
+            31.9206933
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318172,
+        "kind": "wild",
+        "highway": "residential",
+        "lit": "yes",
+        "name": "Loma Feliz Court",
+        "sidewalk": "both",
+        "surface": "asphalt",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Feliz",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.434981,
+            31.934875
+          ],
+          [
+            -106.43392,
+            31.934897
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318178,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Robin Hood Road",
+        "name_1": "Robin Hood Place",
+        "surface": "paved",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Robin Hood",
+        "tiger:name_base_1": "Robin Hood",
+        "tiger:name_type": "Rd;Dr",
+        "tiger:name_type_1": "Pl",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4104922,
+            31.8861797
+          ],
+          [
+            -106.4105434,
+            31.88847
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318282,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Antonio Santos Way",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Antonio Santos",
+        "tiger:name_type": "Way",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4461488,
+            31.9384825
+          ],
+          [
+            -106.446287,
+            31.937965
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318312,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Rica Way",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Rica",
+        "tiger:name_type": "Way"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4424446,
+            31.9382453
+          ],
+          [
+            -106.4429254,
+            31.9382437
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318459,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Coral Sands Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Coral Sands",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4257702,
+            31.9236868
+          ],
+          [
+            -106.428428,
+            31.926447
+          ],
+          [
+            -106.428972,
+            31.926568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318479,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Keystone Creek",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Keystone Creek",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189425910",
+        "tiger:upload_uuid": "bulk_upload.pl-f2423618-bf49-43f4-8c87-df83f57c7236"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.427077,
+            31.902898
+          ],
+          [
+            -106.427084,
+            31.903068
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318598,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Nato Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Nato",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4118768,
+            31.8903134
+          ],
+          [
+            -106.4109448,
+            31.8903294
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318620,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Esparza Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Esparza",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.438242,
+            31.930337
+          ],
+          [
+            -106.439072,
+            31.930455
+          ],
+          [
+            -106.439151,
+            31.930506
+          ],
+          [
+            -106.439196,
+            31.930741
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318663,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Larkspur Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Larkspur",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.436564,
+            31.908791
+          ],
+          [
+            -106.433739,
+            31.90883
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318747,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Saluki Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Saluki",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.41255,
+            31.8939068
+          ],
+          [
+            -106.4104718,
+            31.8928764
+          ],
+          [
+            -106.4085578,
+            31.8928144
+          ],
+          [
+            -106.4067628,
+            31.8928394
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318855,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Vicksburg Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Vicksburg",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4120138,
+            31.8806524
+          ],
+          [
+            -106.4124048,
+            31.8821454
+          ],
+          [
+            -106.4132838,
+            31.8837954
+          ],
+          [
+            -106.4133068,
+            31.8846584
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17318904,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma Canada Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma Canada",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.440851,
+            31.940271
+          ],
+          [
+            -106.437727,
+            31.94031
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319051,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Yellowstone Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Yellowstone",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.429925,
+            31.906553
+          ],
+          [
+            -106.42999,
+            31.911051
+          ],
+          [
+            -106.427153,
+            31.910699
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319087,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Eisenhower Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Eisenhower",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4118758,
+            31.8911314
+          ],
+          [
+            -106.4105598,
+            31.8911374
+          ],
+          [
+            -106.4083718,
+            31.8911844
+          ],
+          [
+            -106.4083118,
+            31.8911544
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319242,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Chateau Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Chateau",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4233888,
+            31.8937844
+          ],
+          [
+            -106.4162958,
+            31.8930974
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319323,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Byzantium Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Byzantium",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.435041,
+            31.913845
+          ],
+          [
+            -106.433786,
+            31.915594
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319384,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma de Azteca Court",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma de Azteca",
+        "tiger:name_type": "Ct",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.448737,
+            31.930772
+          ],
+          [
+            -106.44932,
+            31.930968
+          ],
+          [
+            -106.449478,
+            31.930977
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319389,
+        "kind": "wild",
+        "highway": "residential",
+        "lanes": "2",
+        "maxspeed": "30 mph",
+        "name": "Tarpon Drive",
+        "surface": "asphalt",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Tarpon",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4066068,
+            31.8862344
+          ],
+          [
+            -106.4025588,
+            31.8861564
+          ],
+          [
+            -106.4022898,
+            31.8860424
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319452,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Loma de Luna Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Loma de Luna",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.447411,
+            31.935382
+          ],
+          [
+            -106.442424,
+            31.933868
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319467,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Sherbrooke Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Sherbrooke",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no",
+        "tiger:separated": "no",
+        "tiger:source": "tiger_import_dch_v0.6_20070829",
+        "tiger:tlid": "189434042:189429836"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.411387,
+            31.904113
+          ],
+          [
+            -106.4070529,
+            31.9042452
+          ],
+          [
+            -106.4067884,
+            31.904251
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319496,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Saxon Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Saxon",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.423383,
+            31.909067
+          ],
+          [
+            -106.418068,
+            31.909874
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319767,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Naples Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Naples",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.401166,
+            31.90441
+          ],
+          [
+            -106.397679,
+            31.904413
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319810,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Pompeii Street",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Pompeii",
+        "tiger:name_type": "St",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.40115,
+            31.903679
+          ],
+          [
+            -106.397663,
+            31.90369
+          ],
+          [
+            -106.396779,
+            31.903717
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319870,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Marcillus Avenue",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Marcillus",
+        "tiger:name_type": "Ave",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4233538,
+            31.8923544
+          ],
+          [
+            -106.4158208,
+            31.8912284
+          ],
+          [
+            -106.414679,
+            31.8906674
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17319962,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Longview Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Longview",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.414496,
+            31.923742
+          ],
+          [
+            -106.414593,
+            31.927663
+          ],
+          [
+            -106.4081186,
+            31.9264515
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17320266,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "El Campo Drive",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "El Campo",
+        "tiger:name_type": "Dr",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.436534,
+            31.906637
+          ],
+          [
+            -106.4359216,
+            31.9073666
+          ],
+          [
+            -106.430775,
+            31.907311
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17320320,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Teal Lane",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Teal",
+        "tiger:name_type": "Ln",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.4065788,
+            31.8840834
+          ],
+          [
+            -106.4031558,
+            31.8841024
+          ],
+          [
+            -106.4028288,
+            31.8841784
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17320407,
+        "kind": "wild",
+        "highway": "residential",
+        "name": "Nova Way",
+        "tiger:cfcc": "A41",
+        "tiger:county": "El Paso, TX",
+        "tiger:name_base": "Nova",
+        "tiger:name_type": "Way",
+        "tiger:reviewed": "no"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -106.40138,
+            31.897736
+          ],
+          [
+            -106.3990296,
+            31.896649
+          ],
+          [
+            -106.3978448,
+            31.8960714
+          ]
+        ]
+      }
+    }
+  ],
+  "attribution": "© OpenStreetMap contributors"
+}

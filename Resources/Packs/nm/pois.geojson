@@ -1,0 +1,4288 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140742301,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.587661,
+          35.1055253
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140748763,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5689852,
+          35.0971093
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140798030,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing",
+        "kerb": "flush",
+        "tactile_paving": "yes"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.588184,
+          35.1046978
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140798888,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6466856,
+          35.0663587
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140837875,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5952358,
+          35.1284003
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140845703,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6000565,
+          35.070843
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140863870,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5862222,
+          35.1127955
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140879500,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.626309,
+          35.0841349
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140907895,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5674241,
+          35.0983887
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140907951,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5685408,
+          35.0998331
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140909638,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6278005,
+          35.0759505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140912695,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6064356,
+          35.1268734
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140936082,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6000162,
+          35.1207212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140937988,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6451883,
+          35.0816961
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140940627,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5995731,
+          35.102136
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140946343,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5520246,
+          35.1068274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140948614,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6454169,
+          35.1166704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140970874,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5864118,
+          35.0806685
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140971071,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.564163,
+          35.0800943
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140973427,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5775343,
+          35.094839
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140975011,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6034679,
+          35.0719869
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140977800,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6746527,
+          35.1315913
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 140993965,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5522707,
+          35.1054189
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141005440,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6263868,
+          35.0772765
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141046386,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6043025,
+          35.1237147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141046421,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.582188,
+          35.1243367
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141087512,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6218638,
+          35.0624245
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141090189,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "lines",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6705743,
+          35.0982774
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141100165,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6626267,
+          35.0886959
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141107758,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6605133,
+          35.0877304
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141115881,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "highway": "crossing",
+        "traffic_calming": "table"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6757492,
+          35.1255776
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141118347,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5537598,
+          35.1082463
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141118350,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5534927,
+          35.1081364
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 141120623,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5632421,
+          35.072658
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 151364049,
+        "kind": "poi",
+        "alt_name:el": "Άλμπουκερκι",
+        "capital": "6",
+        "ele": "1511",
+        "gnis:feature_id": "928679",
+        "name": "Albuquerque",
+        "name:af": "Albuquerque",
+        "name:am": "አልበከርኪ",
+        "name:an": "Albuquerque",
+        "name:ar": "ألباكركي",
+        "name:az": "Albukerke",
+        "name:be": "Альбукерке",
+        "name:bg": "Албакърки",
+        "name:bn": "অ্যালবাকের্কে",
+        "name:ce": "Альбукерке",
+        "name:cy": "Albuquerque",
+        "name:el": "Αλμπουκέρκη",
+        "name:en": "Albuquerque",
+        "name:es": "Albuquerque",
+        "name:fa": "آلبوکرکی",
+        "name:fy": "Albuquerque",
+        "name:ga": "Albuquerque",
+        "name:gd": "Albuquerque",
+        "name:he": "אלבקרקי",
+        "name:hr": "Albuquerque",
+        "name:hy": "Ալբուկերկե",
+        "name:ia": "Albuquerque",
+        "name:id": "Albuquerque",
+        "name:ja": "アルバカーキ",
+        "name:ka": "ალბუკერკე",
+        "name:kk": "Альбукерке",
+        "name:kn": "ಆಲ್ಬುಕರ್ಕ್",
+        "name:ko": "앨버커키",
+        "name:kw": "Albuquerque",
+        "name:ky": "Альбукерке",
+        "name:la": "Alba Quercus",
+        "name:lt": "Albukerkė",
+        "name:lv": "Albukerke",
+        "name:mi": "Arapakēreki",
+        "name:mk": "Албакерки",
+        "name:mn": "Альбукерке",
+        "name:mr": "आल्बुकर्की",
+        "name:ms": "Albuquerque",
+        "name:nl": "Albuquerque",
+        "name:nv": "Bee'eldííldahsinil",
+        "name:os": "Альбукерке",
+        "name:pa": "ਅਲਬੂਕਰਕੀ, ਨਿਊ ਮੈਕਸੀਕੋ",
+        "name:ro": "Albuquerque",
+        "name:ru": "Альбукерке",
+        "name:sd": "ايلبقرقي",
+        "name:sl": "Albuquerque",
+        "name:sq": "Albuquerque",
+        "name:sr": "Албукерки",
+        "name:sw": "Albuquerque",
+        "name:ta": "ஆல்புகெர்க்கி",
+        "name:th": "อัลบูเคอร์คี",
+        "name:tl": "Albuquerque",
+        "name:tt": "Әлбукерке",
+        "name:tw": "Albukɛɛki",
+        "name:ug": "Albukwér kwé",
+        "name:uk": "Альбукерке",
+        "name:ur": "البیکرکی",
+        "name:uz": "Albukerke",
+        "name:vi": "Albuquerque",
+        "name:yue": "阿爾伯克基",
+        "name:zh": "阿尔伯克基;阿布奎基;阿爾伯克基",
+        "name:zh-Hans": "阿尔伯克基",
+        "name:zh-Hant": "阿布奎基;阿爾伯克基",
+        "name:zh-Hant-CN": "阿爾伯克基",
+        "name:zh-Hant-HK": "阿爾伯克基",
+        "name:zh-Hant-TW": "阿布奎基",
+        "place": "city",
+        "population": "560326",
+        "population:date": "2024-07-01",
+        "short_name": "ABQ",
+        "source:population": "census",
+        "website": "https://www.cabq.gov/",
+        "wikidata": "Q34804",
+        "wikipedia": "en:Albuquerque, New Mexico"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.650985,
+          35.0841034
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 357573312,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "717",
+        "addr:postcode": "87102",
+        "addr:state": "NM",
+        "addr:street": "Encino Place Northeast",
+        "amenity": "clinic",
+        "ele": "1562",
+        "gnis:feature_id": "888879",
+        "healthcare": "clinic",
+        "name": "Encino Medical Plaza",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.63284,
+          35.0883226
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 357588677,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "505",
+        "addr:postcode": "87102",
+        "addr:street": "Elm Street Northeast",
+        "amenity": "hospital",
+        "emergency": "no",
+        "gnis:feature_id": "901300",
+        "healthcare": "hospital",
+        "name": "Lovelace Rehabilitation Hospital",
+        "old_name": "Saint Joseph Rehabilitation Hospital",
+        "operator": "Lovelace Health System",
+        "operator:wikidata": "Q30280774",
+        "phone": "+1 505 727 4725",
+        "website": "https://lovelace.com/lovelace-rehabilitation-hospital"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6380728,
+          35.087744
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 357613858,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "700",
+        "addr:postcode": "87102",
+        "addr:state": "NM",
+        "addr:street": "High Street Northeast",
+        "amenity": "hospital",
+        "emergency": "no",
+        "gnis:feature_id": "934091",
+        "healthcare": "hospital",
+        "healthcare:speciality": "rehabilitation;LTACH",
+        "name": "Kindred Hospital - Albuquerque",
+        "old_name": "Care Unit Hospital of Albuquerque",
+        "operator": "Kindred Healthcare",
+        "operator:type": "private",
+        "operator:wikidata": "Q921363",
+        "phone": "+1 505 242 4444",
+        "website": "http://www.kindredalbuquerque.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6379011,
+          35.088902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 366376389,
+        "kind": "poi",
+        "alt_name": "University of New Mexico Police",
+        "amenity": "police",
+        "ele": "1577",
+        "gnis:feature_id": "933267",
+        "name": "Police Administration Building",
+        "operator": "UNM Police",
+        "ref": "58",
+        "short_name": "UNMPD"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.618611,
+          35.086473
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 445796886,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6350222,
+          35.0943269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 614269622,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.604544,
+          35.1058779
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 614269675,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.604041,
+          35.1057679
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 614269871,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.604335,
+          35.1043329
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1730120923,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5873855,
+          35.1033023
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1730120975,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing",
+        "kerb": "flush",
+        "source": "survey",
+        "tactile_paving": "yes"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.586793,
+          35.1031793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1736428333,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.569826,
+          35.107331
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1736428354,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5685312,
+          35.0976183
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1736930813,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5596887,
+          35.0978549
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1759344046,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.624041,
+          35.0857233
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1760400474,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6210374,
+          35.0857401
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1761842611,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.625521,
+          35.0848735
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1761842822,
+        "kind": "poi",
+        "crossing:island": "no",
+        "crossing:markings": "yes",
+        "crossing:signals": "no",
+        "highway": "crossing",
+        "tactile_paving": "no"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6221911,
+          35.0816035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1764746647,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6070138,
+          35.0812803
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1765125872,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5876513,
+          35.0603651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1765196938,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5953212,
+          35.0651973
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1765196946,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5881069,
+          35.0674362
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1768520900,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.58799,
+          35.1056708
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1768520902,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.586479,
+          35.1076928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1770916538,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5952588,
+          35.0875771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1770942543,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6023143,
+          35.0722759
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1789178035,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "8201",
+        "addr:postcode": "87109",
+        "addr:street": "Osuna Road Northeast",
+        "alt_name": "Albuquerque Police (Northeast Command)",
+        "amenity": "police",
+        "name": "John Carrillo Memorial Substation",
+        "phone": "+1-505-823-4455",
+        "source": "www.cabq.gov/police",
+        "website": "https://www.cabq.gov/police/area-commands/northeast-area-command"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5529135,
+          35.1379393
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1791513656,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6565501,
+          35.1179273
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1791513691,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6679735,
+          35.1183702
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1791513770,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6657715,
+          35.118128
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1791569768,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6706245,
+          35.104606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1797705404,
+        "kind": "poi",
+        "name": "La Mesa",
+        "place": "hamlet",
+        "source": "cabq.gov"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5597419,
+          35.080794
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1799759006,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.611351,
+          35.1335015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1803009575,
+        "kind": "poi",
+        "amenity": "drinking_water",
+        "check_date": "2024-04-15",
+        "fountain": "bubbler"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6740122,
+          35.0855193
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1803067175,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6702123,
+          35.0961054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1805490248,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.577584,
+          35.1035853
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1834863897,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5869182,
+          35.1033239
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1834890315,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing_ref": "zebra",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6308074,
+          35.067458
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1838904393,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5575982,
+          35.1072812
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842143356,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5932992,
+          35.0733284
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842171064,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613016,
+          35.0875377
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842171066,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613297,
+          35.0873798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842171078,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613021,
+          35.0874055
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842171084,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613281,
+          35.0875298
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1842175342,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.595164,
+          35.0874382
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1849349610,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6189531,
+          35.1350818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1850100669,
+        "kind": "poi",
+        "amenity": "drinking_water",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5611467,
+          35.1283088
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1850100677,
+        "kind": "poi",
+        "amenity": "drinking_water",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5532852,
+          35.1386753
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1850208316,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5518933,
+          35.137741
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1850821693,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6234138,
+          35.1142184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1850821715,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.615187,
+          35.115858
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1852152763,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6333742,
+          35.0766244
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1857987146,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.555896,
+          35.1256575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1858003569,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "8400",
+        "addr:postcode": "87111",
+        "addr:state": "NM",
+        "addr:street": "Montgomery Boulevard Northeast",
+        "amenity": "pharmacy",
+        "brand": "Walgreens",
+        "brand:wikidata": "Q1591889",
+        "dispensing": "yes",
+        "healthcare": "pharmacy",
+        "name": "Walgreens",
+        "ref": "6121"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5500569,
+          35.130173
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1875074357,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6652153,
+          35.0902765
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1876247578,
+        "kind": "poi",
+        "amenity": "drinking_water",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5826455,
+          35.1244863
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1880191374,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5944162,
+          35.073885
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1880270076,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6443522,
+          35.0861984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1881630276,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "2950",
+        "addr:postcode": "87106",
+        "addr:state": "NM",
+        "addr:street": "Central Avenue Southeast",
+        "amenity": "pharmacy",
+        "brand": "Walgreens",
+        "brand:wikidata": "Q1591889",
+        "dispensing": "yes",
+        "drive_through": "no",
+        "healthcare": "pharmacy",
+        "name": "Walgreens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.612475,
+          35.0801544
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1882848237,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5674062,
+          35.1020258
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1884592338,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.644341,
+          35.0863299
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1903218522,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6043162,
+          35.1236191
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1922078183,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6455738,
+          35.0856473
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1924671654,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "2901",
+        "addr:postcode": "87106",
+        "addr:state": "NM",
+        "addr:street": "Central Avenue Northeast",
+        "amenity": "police",
+        "building:architecture": "art_deco",
+        "name": "Triangle Park Police Substation",
+        "operator": "Albuquerque Police Department"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6122304,
+          35.0810755
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1938185863,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5775601,
+          35.0999823
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1940966938,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "ladder",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.61815,
+          35.0873003
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1940966943,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "ladder",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.618268,
+          35.0873032
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1994089117,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing_ref": "hawk",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.60403,
+          35.1275634
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1994089182,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6040361,
+          35.1237544
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1994089221,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing_ref": "hawk",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6042141,
+          35.1275629
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2014685526,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6470773,
+          35.0744958
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2017452382,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6598544,
+          35.07965
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2039255034,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6376667,
+          35.0872374
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2039255082,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6383037,
+          35.0873857
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2042971291,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6318972,
+          35.079891
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2042971294,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6318616,
+          35.0800848
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2045661531,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6364626,
+          35.0930493
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2047303473,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6335647,
+          35.0766236
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2078083126,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6695658,
+          35.0950314
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2078083151,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6707528,
+          35.0949709
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2079977105,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.58445,
+          35.1127122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2142009880,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6172806,
+          35.0607082
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2146065431,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5550197,
+          35.1047554
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2146065463,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5564528,
+          35.107629
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2155393946,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.595144,
+          35.0771679
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2164022255,
+        "kind": "poi",
+        "amenity": "doctors",
+        "healthcare": "doctor",
+        "name": "Medicine@Downtown"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6593368,
+          35.0817122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2167964803,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5968884,
+          35.0759076
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2167964839,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5964483,
+          35.0756745
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2183549143,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6221775,
+          35.0775675
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2187230649,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.591702,
+          35.075627
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2214631502,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5952814,
+          35.0865236
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2232450229,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.59752,
+          35.1147464
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2247426138,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5671316,
+          35.0602565
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2247426145,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5596698,
+          35.0694342
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2247441226,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5594728,
+          35.0689407
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2247443060,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6209274,
+          35.0638817
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2247443061,
+        "kind": "poi",
+        "amenity": "drinking_water"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5995731,
+          35.1193241
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2248997004,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5676892,
+          35.0603942
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2249643745,
+        "kind": "poi",
+        "amenity": "drinking_water",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5923171,
+          35.0757775
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2260909927,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6438302,
+          35.1051015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2260909933,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6473426,
+          35.1055186
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2260909947,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6437826,
+          35.1052051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2270067891,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5852596,
+          35.1092942
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2281243477,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6387942,
+          35.0819477
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2281243546,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6401816,
+          35.0811286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2318389671,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5509562,
+          35.1383805
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2318389676,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.568662,
+          35.138487
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2318389703,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.568791,
+          35.1384841
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2370743532,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6214249,
+          35.101903
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2370867115,
+        "kind": "poi",
+        "addr:housenumber": "1001",
+        "addr:street": "Doctor Martin Luther King Junior Avenue Northeast",
+        "amenity": "clinic",
+        "healthcare": "clinic",
+        "name": "UNM Center For Digestive Disease"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.634677,
+          35.085369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2385443080,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.559783,
+          35.1384541
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2567989922,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6773267,
+          35.0947605
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2625434730,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6269613,
+          35.0749548
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2632457879,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6201645,
+          35.0657757
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2635919254,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6064873,
+          35.1075292
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2635934694,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "2501",
+        "addr:postcode": "87110",
+        "addr:state": "NM",
+        "addr:street": "Carlisle Boulevard Northeast",
+        "amenity": "police",
+        "check_date": "2025-06-13",
+        "name": "New Mexico State Police",
+        "operator": "New Mexico State Police",
+        "operator:short": "NMSP",
+        "operator:wikidata": "Q7010251",
+        "operator:wikipedia": "en:New Mexico State Police"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.604701,
+          35.1082747
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2652048047,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5668773,
+          35.1035825
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2652048066,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5685711,
+          35.1037456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2652048093,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5673048,
+          35.1036343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2652048147,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5668855,
+          35.1035494
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2652048344,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5673082,
+          35.1036105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2657869344,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6312916,
+          35.0644644
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2711476794,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6389577,
+          35.080894
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2760088345,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "5000",
+        "addr:postcode": "87110",
+        "addr:street": "Cutler Avenue Northeast",
+        "addr:unit": "A",
+        "amenity": "clinic",
+        "healthcare": "alternative",
+        "name": "Yi Lin Medical Center",
+        "phone": "+1 505 8886700",
+        "website": "http://yilinmedical.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5893965,
+          35.1047754
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2824734227,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.61771,
+          35.0772487
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2840018906,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.62544,
+          35.0849117
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2857377407,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6319376,
+          35.0712591
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2880918319,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6694832,
+          35.096248
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2904469274,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5551066,
+          35.0959555
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2921952746,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6257524,
+          35.0771538
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2932078190,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5686436,
+          35.0725655
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2934334252,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5978405,
+          35.0677388
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2957276725,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5916566,
+          35.0632223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3035004749,
+        "kind": "poi",
+        "amenity": "pharmacy",
+        "dispensing": "yes",
+        "healthcare": "pharmacy",
+        "name": "Veterans Administration Cooperative Studies Program Clinical Research Pharmacy"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6193595,
+          35.0602488
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3055624667,
+        "kind": "poi",
+        "bicycle": "yes",
+        "crossing:island": "yes",
+        "crossing:markings": "no",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6220497,
+          35.0790826
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3057591722,
+        "kind": "poi",
+        "addr:city": "Albuquerque",
+        "addr:housenumber": "724",
+        "addr:postcode": "87102",
+        "addr:state": "NM",
+        "addr:street": "Silver Avenue Southwest",
+        "amenity": "fire_station",
+        "capacity": "3",
+        "name": "Albuquerque Fire Station 1",
+        "note": "Downtown",
+        "operator": "Albuquerque Fire Rescue",
+        "operator:wikidata": "Q106997936",
+        "source": "survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.656467,
+          35.0829383
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3071333015,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6090396,
+          35.1320616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3071392123,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6351822,
+          35.0946651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3077739219,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5903508,
+          35.0724525
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3077739249,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5902679,
+          35.07249
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3077739251,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5902424,
+          35.0725209
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3077739355,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5924284,
+          35.0727673
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3081911878,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6630911,
+          35.0931403
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3096031116,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6041298,
+          35.094637
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3098036859,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5908688,
+          35.0836705
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3098036866,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5931096,
+          35.0836696
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3112071448,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder:skewed",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5685339,
+          35.1008124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3119279830,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "highway": "crossing",
+        "traffic_calming": "choker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6108282,
+          35.1010627
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3136179330,
+        "kind": "poi",
+        "addr:housenumber": "1021",
+        "addr:street": "Medical Arts Avenue Northeast",
+        "amenity": "clinic",
+        "healthcare": "clinic",
+        "healthcare:speciality": "dermatology",
+        "name": "University of New Mexico Dermatology Clinic"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.63101,
+          35.0905795
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3155412653,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.609634,
+          35.0884604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3236664057,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6273385,
+          35.0688129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3250376702,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.578562,
+          35.1026005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3250376742,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5787222,
+          35.1054226
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3250377124,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5862157,
+          35.110989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3259984772,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5614881,
+          35.135629
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3261745841,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder:skewed",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6642529,
+          35.1016921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3261745852,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "zebra",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6644636,
+          35.1008671
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3264569601,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5919379,
+          35.0771665
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3264569637,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5914099,
+          35.0781644
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3264578885,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5915461,
+          35.0771651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3264578993,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5922679,
+          35.078259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3275656236,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5855547,
+          35.0600981
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3276784488,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6174452,
+          35.0875772
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3276784496,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "lines",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.618217,
+          35.0875912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3276820085,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "ladder",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6180894,
+          35.0869634
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3276941450,
+        "kind": "poi",
+        "button_operated": "yes",
+        "crossing": "traffic_signals",
+        "crossing:markings": "zebra",
+        "crossing:signals": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5660344,
+          35.1020282
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3290059139,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5863831,
+          35.0798878
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3292760962,
+        "kind": "poi",
+        "crossing": "marked",
+        "crossing:markings": "yes",
+        "highway": "crossing",
+        "tactile_paving": "yes"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6629901,
+          35.0757133
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3344028705,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6429207,
+          35.0930561
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3344028746,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6428506,
+          35.0934133
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3351880471,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6360329,
+          35.0777183
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3381251862,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.584704,
+          35.0637273
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3382283329,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5850668,
+          35.0655401
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3382283363,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.584705,
+          35.065538
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149006,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.585106,
+          35.0619185
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149023,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.583925,
+          35.0619043
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149029,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.584567,
+          35.063726
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149042,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5831939,
+          35.0603021
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149052,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5846637,
+          35.0619138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149059,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.583805,
+          35.0619034
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149945,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.584452,
+          35.0619651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149956,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.583652,
+          35.0619023
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149975,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5844299,
+          35.0637246
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149980,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5831738,
+          35.0615981
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149985,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5831839,
+          35.0609475
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3386149994,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5835721,
+          35.0620017
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388092700,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.579848,
+          35.0627819
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388092736,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5798501,
+          35.0626479
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388092748,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5798521,
+          35.0625272
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111713,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.579839,
+          35.0633483
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111715,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5802459,
+          35.0636797
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111721,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5809474,
+          35.0628872
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111728,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5798442,
+          35.0630234
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111732,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5799458,
+          35.063677
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111741,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5803989,
+          35.0636811
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111749,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5806829,
+          35.0636838
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3388111755,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5809451,
+          35.06303
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3392507073,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5820205,
+          35.0649256
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3392508099,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5820173,
+          35.0651808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3392545818,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5820246,
+          35.0645903
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3392545820,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5820229,
+          35.0647242
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3409835701,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5831222,
+          35.0654067
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3416881106,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5823047,
+          35.072744
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3416881119,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5642531,
+          35.07264
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3416881125,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5622038,
+          35.0726672
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3418903444,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5709257,
+          35.0775339
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3419018216,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.5908347,
+          35.08024
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3452973833,
+        "kind": "poi",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.569396,
+          35.1288453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3480454133,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.584591,
+          35.1200928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3512779896,
+        "kind": "poi",
+        "crossing": "uncontrolled",
+        "crossing:markings": "lines",
+        "crossing:signals": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6613762,
+          35.1107469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622202,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing",
+        "traffic_calming": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613295,
+          35.080838
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622241,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613336,
+          35.0811652
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622250,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613429,
+          35.0809274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622261,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613431,
+          35.0810569
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622262,
+        "kind": "poi",
+        "crossing": "unmarked",
+        "crossing:markings": "no",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.631155,
+          35.076639
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3513622292,
+        "kind": "poi",
+        "crossing": "traffic_signals",
+        "crossing:markings": "yes",
+        "highway": "crossing"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.613005,
+          35.0811642
+        ]
+      }
+    }
+  ],
+  "attribution": null
+}
