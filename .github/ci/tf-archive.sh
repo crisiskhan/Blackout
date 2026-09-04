@@ -100,41 +100,15 @@ for bundle in spec:
 path.write_text(out)
 print("CI-only pbxproj signing patch (not committed)")
 PY
-# Write cleanup script + wire one-liner phase (quoted heredoc).
+# Working-copy strip script. Canonical copy is .github/ci/strip-app-before-codesign.sh.
+# Do not generate a version that xattr -cr / chmod 644 / rm Assets.car.
+# 33823846800 xattr → Assets.car; 33824248310 rm+xattr → provision;
+# 33824455260 xattr+chmod janitor → PrivacyInfo.xcprivacy.
+cp .github/ci/strip-app-before-codesign.sh ci_strip_appicon.sh
+chmod 755 ci_strip_appicon.sh
 "$PYBIN" << 'PY'
 from pathlib import Path
-script = Path("ci_strip_appicon.sh")
-script.write_text(
-    "#!/bin/sh\n"
-    "set -e\n"
-    "strip_app() {\n"
-    '  APP="$1"\n'
-    '  [ -d "$APP" ] || return 0\n'
-    '  echo "CI AppIcon strip app=$APP"\n'
-    '  find "$APP" -maxdepth 1 -name "AppIcon*.png" -print -delete || true\n'
-    '  if [ -d "$APP/Metadata.appintents" ]; then\n'
-    '    echo "CI remove unsigned Metadata.appintents"\n'
-    '    rm -rf "$APP/Metadata.appintents"\n'
-    '  fi\n'
-    # Force resources non-executable. SetMode (chmod a+rX) can leave +x on
-    # Assets.car / PrivacyInfo / provision; codesign then treats them as nested code.
-    '  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
-    '    [ -f "$f" ] && /bin/chmod 644 "$f" || true\n'
-    '  done\n'
-    '  find "$APP" -type f \\( -name "*.car" -o -name "*.xcprivacy" -o -name "*.mobileprovision" -o -name "*.png" -o -name "*.plist" \\) -exec /bin/chmod 644 {} + 2>/dev/null || true\n'
-    '  /usr/bin/xattr -cr "$APP" || true\n'
-    "}\n"
-    'strip_app "$CODESIGNING_FOLDER_PATH"\n'
-    'strip_app "$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
-    'strip_app "$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME"\n'
-    'if [ -n "$BUILD_DIR" ]; then\n'
-    '  find "$BUILD_DIR" -type d -path "*/InstallationBuildProductsLocation/Applications/*.app" 2>/dev/null | while read -r APP; do\n'
-    "    strip_app \"$APP\"\n"
-    "  done\n"
-    "fi\n"
-)
-script.chmod(0o755)
-print("wrote", script.resolve())
+print("wrote", Path("ci_strip_appicon.sh").resolve())
 path = Path("Blackout.xcodeproj/project.pbxproj")
 text = path.read_text()
 phase_id = "C1A00001B007000000000001"
@@ -179,8 +153,6 @@ if 'shellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";' not in check and 'sh
     raise SystemExit("pbxproj shellScript line malformed")
 print("pbxproj shellScript line OK")
 PY
-/usr/bin/xattr -cr . || true
-find . -name '*.png' -exec chmod a-x {} + || true
 echo "codesign identities:"
 security find-identity -v -p codesigning || true
 IDLINE=$(security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
@@ -260,34 +232,6 @@ restore_intent_tools() {
 }
 trap restore_intent_tools EXIT
 
-# Busy-poll chmod after SetMode a+rX until CodeSign finishes.
-ARCH_ROOT="$DD/Build/Intermediates.noindex/ArchiveIntermediates/Blackout"
-JANITOR_LOG="$RUNNER_TEMP/chmod-janitor.log"
-: > "$JANITOR_LOG"
-(
-  while true; do
-    APP="$ARCH_ROOT/InstallationBuildProductsLocation/Applications/Blackout.app"
-    if [ -d "$APP" ]; then
-      for f in Assets.car PrivacyInfo.xcprivacy embedded.mobileprovision; do
-        if [ -f "$APP/$f" ] && [ -x "$APP/$f" ]; then
-          echo "$(date -u +%H:%M:%S) chmod644 $f" >> "$JANITOR_LOG"
-          /bin/chmod 644 "$APP/$f" || true
-        fi
-      done
-      find "$APP" -type f \( -name '*.car' -o -name '*.xcprivacy' -o -name '*.mobileprovision' -o -name '*.png' \) -perm +111 -exec chmod 644 {} + 2>/dev/null || true
-    fi
-  done
-) &
-JANITOR_PID=$!
-stop_janitor() {
-  kill "$JANITOR_PID" 2>/dev/null || true
-  wait "$JANITOR_PID" 2>/dev/null || true
-  echo "chmod janitor log:"
-  tail -40 "$JANITOR_LOG" || true
-  restore_intent_tools
-}
-trap stop_janitor EXIT
-
 set +e
 rm -rf "$DD" "$ARCHIVE"
 xcodebuild \
@@ -310,32 +254,7 @@ echo "archive exit=$ARC"
 
 IPA=""
 if [ "$ARC" -eq 0 ] && [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-  echo "Archive OK — exportArchive"
-  APP="$ARCHIVE/Products/Applications/Blackout.app"
-  ASSETS_SRC="$(find . -type d -name Assets.xcassets | head -n 1 || true)"
-  if [ -n "$ASSETS_SRC" ] && [ -d "$ASSETS_SRC" ]; then
-    echo "actool compile from $ASSETS_SRC"
-    xcrun actool "$ASSETS_SRC" \
-      --compile "$APP" \
-      --platform iphoneos \
-      --minimum-deployment-target 18.0 \
-      --app-icon AppIcon \
-      --output-partial-info-plist "$RUNNER_TEMP/actool-partial.plist" \
-      --compress-pngs \
-      2>&1 | tee "$RUNNER_TEMP/actool.log" || true
-    chmod 644 "$APP/Assets.car" 2>/dev/null || true
-    /usr/bin/xattr -cr "$APP/Assets.car" 2>/dev/null || true
-    # Re-seal main after adding Assets.car
-    IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-    IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
-    XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
-    if [ -n "$IDHASH" ] && [ -n "$XCENT" ] && [ -f "$APP/Assets.car" ]; then
-      echo "re-seal after actool with $IDHASH"
-      /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$XCENT" --generate-entitlement-der "$APP"
-    fi
-  else
-    echo "WARNING: no Assets.xcassets found; IPA may lack App Icon"
-  fi
+  echo "Archive OK under Xcode 16 — exportArchive (leave Assets.car as Xcode wrote it)"
   rm -rf "$EXPORT"
   mkdir -p "$EXPORT"
   set +e
@@ -383,183 +302,37 @@ else
     echo "No Distribution identity"
     exit 1
   fi
-  echo "Re-seal nested + main with $IDHASH"
-  IDHASH="$IDHASH" DD="$DD" APP="$APP" "$PYBIN" << 'PY'
-import os, subprocess, plistlib, sys
+  echo "Re-seal main only with $IDHASH (leave Xcode nested seals + Assets.car contents alone)"
+  find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
+  find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
+  if [ -f "$APP/Assets.car" ]; then
+    echo "fallback Assets.car:"
+    ls -lO@ "$APP/Assets.car" || ls -la "$APP/Assets.car" || true
+    /bin/chmod a-x "$APP/Assets.car" || true
+  fi
+  rm -rf "$APP/_CodeSignature"
+  ENT=""
+  XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
+  if [ -n "$XCENT" ] && [ -f "$XCENT" ]; then
+    ENT="$XCENT"
+    echo "using xcent $ENT"
+  elif [ -f "$APP/embedded.mobileprovision" ]; then
+    ENT="$RUNNER_TEMP/ent-main.plist"
+    "$PYBIN" - "$APP/embedded.mobileprovision" "$ENT" << 'PY'
+import plistlib, subprocess, sys
 from pathlib import Path
-
-app = Path(os.environ["APP"])
-dd = Path(os.environ["DD"])
-idhash = os.environ["IDHASH"]
-tmp = Path(os.environ["RUNNER_TEMP"])
-
-def run(cmd):
-    print("+", " ".join(cmd))
-    subprocess.check_call(cmd)
-
-# Strip killers
-for p in app.rglob("Metadata.appintents"):
-    if p.is_dir():
-        print("rm", p)
-        subprocess.call(["rm", "-rf", str(p)])
-for p in app.glob("AppIcon*.png"):
-    print("rm", p)
-    p.unlink(missing_ok=True)
-
-# Non-code resources must not be executable (codesign treats +x as nested code)
-for pat in ("*.xcprivacy", "*.car", "*.png", "*.plist", "*.json", "*.strings", "*.nib", "*.storyboardc"):
-    for p in app.rglob(pat):
-        if p.is_file():
-            p.chmod(0o644)
-subprocess.call(["/usr/bin/xattr", "-cr", str(app)])
-
-# Ensure main + nested binaries stay executable
-for rel in ("Blackout",):
-    b = app / rel
-    if b.is_file():
-        b.chmod(0o755)
-for appex in app.rglob("*.appex"):
-    for cand in appex.iterdir():
-        if cand.is_file() and cand.suffix == "" and cand.name != "embedded.mobileprovision":
-            # heuristic: Mach-O next to Info.plist
-            pass
-    # named executable usually matches appex stem
-    exe = appex / appex.stem
-    if exe.is_file():
-        exe.chmod(0o755)
-for fw in app.rglob("*.framework"):
-    exe = fw / fw.stem
-    if exe.is_file():
-        exe.chmod(0o755)
-
-def ents_from_provision(prov: Path, out: Path):
-    raw = subprocess.check_output(["security", "cms", "-D", "-i", str(prov)], stderr=subprocess.DEVNULL)
-    pl = plistlib.loads(raw)
-    out.write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
-    return out
-
-def ensure_provision(bundle: Path, bundle_id: str):
-    prov = bundle / "embedded.mobileprovision"
-    if prov.exists():
-        return prov
-    home = Path.home()
-    for d in (
-        home / "Library/Developer/Xcode/UserData/Provisioning Profiles",
-        home / "Library/MobileDevice/Provisioning Profiles",
-    ):
-        if not d.exists():
-            continue
-        for p in d.glob("*.mobileprovision"):
-            try:
-                raw = subprocess.check_output(["security", "cms", "-D", "-i", str(p)], stderr=subprocess.DEVNULL)
-                pl = plistlib.loads(raw)
-            except Exception:
-                continue
-            ents = pl.get("Entitlements") or {}
-            appid = ents.get("application-identifier") or ""
-            bid = appid.split(".", 1)[-1] if "." in appid else ""
-            if bid == bundle_id:
-                prov.write_bytes(p.read_bytes())
-                print(f"embedded {bundle_id} from {p.name}")
-                return prov
-    return prov
-
-# Prefer Xcode-generated xcent for main when present
-xcent = None
-for cand in dd.rglob("Blackout.app.xcent"):
-    xcent = cand
-    break
-
-# Re-sign nested deepest-first (Metadata strip invalidated their seals)
-nested = sorted(
-    list(app.rglob("*.appex")) + list(app.rglob("*.framework")) + list(app.rglob("*.app")),
-    key=lambda p: len(p.parts),
-    reverse=True,
-)
-# exclude the main app itself from nested list
-nested = [p for p in nested if p.resolve() != app.resolve()]
-for bundle in nested:
-    # strip nest metadata again
-    md = bundle / "Metadata.appintents"
-    if md.exists():
-        subprocess.call(["rm", "-rf", str(md)])
-    if bundle.suffix == ".framework":
-        run([
-            "/usr/bin/codesign", "--force", "--sign", idhash,
-            "--preserve-metadata=identifier,entitlements,flags",
-            "--generate-entitlement-der", str(bundle),
-        ])
-    else:
-        # appex / watch app
-        bid = {
-            ".appex": "com.crisiskhan.blackout.widgets",
-            ".app": "com.crisiskhan.blackout.watchkitapp",
-        }.get(bundle.suffix, "")
-        if bundle.suffix == ".app" and "watch" not in bundle.name.lower() and bundle.name != "BlackoutWatch.app":
-            continue
-        prov = ensure_provision(bundle, bid) if bid else None
-        cmd = ["/usr/bin/codesign", "--force", "--sign", idhash, "--generate-entitlement-der", str(bundle)]
-        if prov and prov.exists():
-            ent = tmp / f"ent-{bundle.name}.plist"
-            ents_from_provision(prov, ent)
-            cmd = ["/usr/bin/codesign", "--force", "--sign", idhash, "--entitlements", str(ent), "--generate-entitlement-der", str(bundle)]
-        run(cmd)
-
-ensure_provision(app, "com.crisiskhan.blackout")
-if xcent and xcent.exists():
-    ent = xcent
-    print("using xcent", xcent)
-else:
-    ent = tmp / "ent-main.plist"
-    ents_from_provision(app / "embedded.mobileprovision", ent)
-    print("wrote", ent)
-
-rm_sig = app / "_CodeSignature"
-if rm_sig.exists():
-    subprocess.call(["rm", "-rf", str(rm_sig)])
-
-def sign_main():
-    run([
-        "/usr/bin/codesign", "--force", "--sign", idhash,
-        "--entitlements", str(ent),
-        "--generate-entitlement-der",
-        str(app),
-    ])
-
-try:
-    sign_main()
-except subprocess.CalledProcessError:
-    car = app / "Assets.car"
-    if car.exists():
-        print("main sign failed; moving Assets.car aside and retrying")
-        bak = Path(os.environ["RUNNER_TEMP"]) / "Assets.car.bak"
-        car.replace(bak)
-        sign_main()
-        # restore via actool if possible
-        assets = None
-        for cand in Path(".").rglob("Assets.xcassets"):
-            assets = cand
-            break
-        if assets and assets.is_dir():
-            subprocess.call([
-                "xcrun", "actool", str(assets),
-                "--compile", str(app),
-                "--platform", "iphoneos",
-                "--minimum-deployment-target", "18.0",
-                "--app-icon", "AppIcon",
-                "--output-partial-info-plist", str(Path(os.environ["RUNNER_TEMP"]) / "actool-partial.plist"),
-                "--compress-pngs",
-            ])
-            if (app / "Assets.car").exists():
-                (app / "Assets.car").chmod(0o644)
-                subprocess.call(["/usr/bin/xattr", "-cr", str(app / "Assets.car")])
-                sign_main()
-        elif bak.exists():
-            print("WARNING: shipping without Assets.car")
-    else:
-        raise
-print("main app re-sealed")
+raw = subprocess.check_output(["security", "cms", "-D", "-i", sys.argv[1]], stderr=subprocess.DEVNULL)
+pl = plistlib.loads(raw)
+Path(sys.argv[2]).write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
+print("wrote", sys.argv[2])
 PY
+  fi
+  if [ -n "$ENT" ] && [ -f "$ENT" ]; then
+    /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --generate-entitlement-der "$APP"
+  else
+    /usr/bin/codesign --force --sign "$IDHASH" --generate-entitlement-der "$APP"
+  fi
+  echo "main app re-sealed"
   rm -rf "$EXPORT"
   mkdir -p "$EXPORT/Payload"
   cp -a "$APP" "$EXPORT/Payload/Blackout.app"
