@@ -604,6 +604,16 @@ jobs:
               '    echo "CI remove unsigned Metadata.appintents"\n'
               '    rm -rf "$APP/Metadata.appintents"\n'
               '  fi\n'
+              # Assets.car: Xcode SetMode (chmod a+rX) then CodeSign fails with
+              # "code object is not signed at all In subcomponent: Assets.car".
+              # Remove here (runs before CodeSign); regenerate after archive succeeds.
+              '  if [ -f "$APP/Assets.car" ]; then\n'
+              '    echo "CI remove Assets.car before CodeSign (will regenerate after archive)"\n'
+              '    rm -f "$APP/Assets.car"\n'
+              '  fi\n'
+              '  if [ -f "$APP/PrivacyInfo.xcprivacy" ]; then\n'
+              '    /bin/chmod 644 "$APP/PrivacyInfo.xcprivacy" || true\n'
+              '  fi\n'
               '  /usr/bin/xattr -cr "$APP" || true\n'
               '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} + 2>/dev/null || true\n'
               "}\n"
@@ -765,7 +775,32 @@ jobs:
 
           IPA=""
           if [ "$ARC" -eq 0 ] && [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-            echo "Archive OK under wrapper — exportArchive"
+            echo "Archive OK — regenerate Assets.car then exportArchive"
+            APP="$ARCHIVE/Products/Applications/Blackout.app"
+            ASSETS_SRC="$(find . -type d -name Assets.xcassets | head -n 1 || true)"
+            if [ -n "$ASSETS_SRC" ] && [ -d "$ASSETS_SRC" ]; then
+              echo "actool compile from $ASSETS_SRC"
+              xcrun actool "$ASSETS_SRC" \
+                --compile "$APP" \
+                --platform iphoneos \
+                --minimum-deployment-target 18.0 \
+                --app-icon AppIcon \
+                --output-partial-info-plist "$RUNNER_TEMP/actool-partial.plist" \
+                --compress-pngs \
+                2>&1 | tee "$RUNNER_TEMP/actool.log" || true
+              chmod 644 "$APP/Assets.car" 2>/dev/null || true
+              /usr/bin/xattr -cr "$APP/Assets.car" 2>/dev/null || true
+              # Re-seal main after adding Assets.car
+              IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+              IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
+              XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
+              if [ -n "$IDHASH" ] && [ -n "$XCENT" ] && [ -f "$APP/Assets.car" ]; then
+                echo "re-seal after actool with $IDHASH"
+                /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$XCENT" --generate-entitlement-der "$APP"
+              fi
+            else
+              echo "WARNING: no Assets.xcassets found; IPA may lack App Icon"
+            fi
             rm -rf "$EXPORT"
             mkdir -p "$EXPORT"
             set +e
@@ -948,12 +983,46 @@ jobs:
           if rm_sig.exists():
               subprocess.call(["rm", "-rf", str(rm_sig)])
 
-          run([
-              "/usr/bin/codesign", "--force", "--sign", idhash,
-              "--entitlements", str(ent),
-              "--generate-entitlement-der",
-              str(app),
-          ])
+          def sign_main():
+              run([
+                  "/usr/bin/codesign", "--force", "--sign", idhash,
+                  "--entitlements", str(ent),
+                  "--generate-entitlement-der",
+                  str(app),
+              ])
+
+          try:
+              sign_main()
+          except subprocess.CalledProcessError:
+              car = app / "Assets.car"
+              if car.exists():
+                  print("main sign failed; moving Assets.car aside and retrying")
+                  bak = Path(os.environ["RUNNER_TEMP"]) / "Assets.car.bak"
+                  car.replace(bak)
+                  sign_main()
+                  # restore via actool if possible
+                  assets = None
+                  for cand in Path(".").rglob("Assets.xcassets"):
+                      assets = cand
+                      break
+                  if assets and assets.is_dir():
+                      subprocess.call([
+                          "xcrun", "actool", str(assets),
+                          "--compile", str(app),
+                          "--platform", "iphoneos",
+                          "--minimum-deployment-target", "18.0",
+                          "--app-icon", "AppIcon",
+                          "--output-partial-info-plist", str(Path(os.environ["RUNNER_TEMP"]) / "actool-partial.plist"),
+                          "--compress-pngs",
+                      ])
+                      if (app / "Assets.car").exists():
+                          (app / "Assets.car").chmod(0o644)
+                          subprocess.call(["/usr/bin/xattr", "-cr", str(app / "Assets.car")])
+                          sign_main()
+                  elif bak.exists():
+                      print("WARNING: shipping without Assets.car")
+              else:
+                  raise
           print("main app re-sealed")
           PY
             rm -rf "$EXPORT"
