@@ -122,7 +122,6 @@ jobs:
           BUNDLES = [
               ("com.crisiskhan.blackout", "Blackout iOS App Store GHA", "IOS"),
               ("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA", "IOS"),
-              ("com.crisiskhan.blackout.watchkitapp", "Blackout Watch App Store GHA", "IOS"),
           ]
           DIST_TYPES = {"IOS_DISTRIBUTION", "DISTRIBUTION"}
 

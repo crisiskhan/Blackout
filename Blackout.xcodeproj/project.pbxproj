@@ -38,7 +38,6 @@
 		B0393E48081BE19742625903 /* MapLibreMap in Frameworks */ = {isa = PBXBuildFile; productRef = E648C806A9EA32B613781C40 /* MapLibreMap */; };
 		65A85523F935D622BA89CB01 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 3E3D4914CDE33667A03D92C1 /* MapLibre */; };
 		48DC310F0F68C6FA33F515C5 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = B6EAF066226A93016BECDF9F /* Resources */; };
-		61FBFF9043DC2352CAEDC813 /* BlackoutWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 0D15B19A30A73B511F9F8245 /* BlackoutWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A51B0C23E183211AB08F242E /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -155,17 +154,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		DD3B27DAD2460464B6896A8B /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				61FBFF9043DC2352CAEDC813 /* BlackoutWatch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -188,13 +176,11 @@
 				C92AE8AAAC90B5A5825C0B1E /* Frameworks */,
 				02245E091A78364E4F4C8AC3 /* Resources */,
 				BF2845EB39BCB354A61873D3 /* Copy Resources into app bundle */,
-				DD3B27DAD2460464B6896A8B /* Embed Watch Content */,
 				22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				3194704E78350E7A30EA15E2 /* PBXTargetDependency */,
 				E9A4CDA30F5D0AEF002B42AA /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -436,11 +422,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXTargetDependency section */
-		3194704E78350E7A30EA15E2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 24C410C82FA6297068B2EBDD /* BlackoutWatch */;
-			targetProxy = 89FFE7937BC36CA13DAF7849 /* PBXContainerItemProxy */;
-		};
 		E9A4CDA30F5D0AEF002B42AA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CCF3A5B986A45588384EF61E /* BlackoutWidgets */;
@@ -449,13 +430,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXContainerItemProxy section */
-		89FFE7937BC36CA13DAF7849 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 244210E48437B6556980A702 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 24C410C82FA6297068B2EBDD;
-			remoteInfo = BlackoutWatch;
-		};
 		BE9187A1743CFFCE976E7F64 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 244210E48437B6556980A702 /* Project object */;

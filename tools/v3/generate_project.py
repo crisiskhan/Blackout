@@ -1,4 +1,11 @@
-"""Xcode 16 project: iOS app + Watch + widgets. CURRENT_PROJECT_VERSION stays 1."""
+"""Xcode 16 project: iOS app + widgets. Watch target kept, not embedded.
+
+App Store / TestFlight archive of scheme Blackout must not copy
+BlackoutWatch.app into Blackout.app/Watch/. ASC has no companion
+record for com.crisiskhan.blackout.watchkitapp. Re-enable later by
+restoring Embed Watch Content + the Blackout → BlackoutWatch
+dependency (see docs/TESTFLIGHT.md). CURRENT_PROJECT_VERSION stays 1.
+"""
 from __future__ import annotations
 
 import re
@@ -342,8 +349,8 @@ def generate() -> None:
         "res_app", "res_watch", "res_widget", "project", "proj_conf",
         "proj_debug", "proj_release", "app_debug", "app_release", "watch_debug", "watch_release",
         "widget_debug", "widget_release", "pack_ref", "pack_build", "copy_script",
-        "sync_ex", "sync_watch_ex", "sync_widget_ex", "embed_watch", "embed_widget", "dep_watch", "dep_widget",
-        "proxy_watch", "proxy_widget",
+        "sync_ex", "sync_watch_ex", "sync_widget_ex", "embed_widget", "dep_widget",
+        "proxy_widget",
     ]}
     pkg_ref = {path: oid(f"pkgref-{path}") for path, _ in pkg_paths}
     pkg_dep = {product: oid(f"pkgdep-{product}") for _, product in pkg_paths}
@@ -360,9 +367,6 @@ def generate() -> None:
     ]
     build_files.append(
         f"\t\t{ids['pack_build']} /* Resources in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* Resources */; }};"
-    )
-    build_files.append(
-        f"\t\t{ids['embed_watch']} /* BlackoutWatch.app in Embed Watch Content */ = {{isa = PBXBuildFile; fileRef = {ids['watch_ref']} /* BlackoutWatch.app */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};"
     )
     build_files.append(
         f"\t\t{ids['embed_widget']} /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {ids['widget_ref']} /* BlackoutWidgets.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};"
@@ -495,17 +499,6 @@ test -f "${DST}/Field/field.core.json"
 /* End PBXGroup section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		{ids['proxy_watch']} /* Embed Watch Content */ = {{
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				{ids['embed_watch']} /* BlackoutWatch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		}};
 		{ids['proxy_widget']} /* Embed Foundation Extensions */ = {{
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -528,13 +521,11 @@ test -f "${DST}/Field/field.core.json"
 				{ids['fw_app']} /* Frameworks */,
 				{ids['res_app']} /* Resources */,
 				{ids['copy_script']} /* Copy Resources into app bundle */,
-				{ids['proxy_watch']} /* Embed Watch Content */,
 				{ids['proxy_widget']} /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				{ids['dep_watch']} /* PBXTargetDependency */,
 				{ids['dep_widget']} /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -711,11 +702,6 @@ test -f "${DST}/Field/field.core.json"
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXTargetDependency section */
-		{ids['dep_watch']} /* PBXTargetDependency */ = {{
-			isa = PBXTargetDependency;
-			target = {ids['tgt_watch']} /* BlackoutWatch */;
-			targetProxy = {oid('proxytwatch')} /* PBXContainerItemProxy */;
-		}};
 		{ids['dep_widget']} /* PBXTargetDependency */ = {{
 			isa = PBXTargetDependency;
 			target = {ids['tgt_widget']} /* BlackoutWidgets */;
@@ -724,13 +710,6 @@ test -f "${DST}/Field/field.core.json"
 /* End PBXTargetDependency section */
 
 /* Begin PBXContainerItemProxy section */
-		{oid('proxytwatch')} /* PBXContainerItemProxy */ = {{
-			isa = PBXContainerItemProxy;
-			containerPortal = {ids['project']} /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = {ids['tgt_watch']};
-			remoteInfo = BlackoutWatch;
-		}};
 		{oid('proxytwidget')} /* PBXContainerItemProxy */ = {{
 			isa = PBXContainerItemProxy;
 			containerPortal = {ids['project']} /* Project object */;
@@ -807,6 +786,86 @@ test -f "${DST}/Field/field.core.json"
     (proj / "project.pbxproj").write_text(pbx)
     scheme_dir = proj / "xcshareddata" / "xcschemes"
     scheme_dir.mkdir(parents=True, exist_ok=True)
+    (scheme_dir / "BlackoutWatch.xcscheme").write_text(
+        f"""<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1600"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "{ids['tgt_watch']}"
+               BuildableName = "BlackoutWatch.app"
+               BlueprintName = "BlackoutWatch"
+               ReferencedContainer = "container:Blackout.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldAutocreateTestPlan = "YES">
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "{ids['tgt_watch']}"
+            BuildableName = "BlackoutWatch.app"
+            BlueprintName = "BlackoutWatch"
+            ReferencedContainer = "container:Blackout.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "{ids['tgt_watch']}"
+            BuildableName = "BlackoutWatch.app"
+            BlueprintName = "BlackoutWatch"
+            ReferencedContainer = "container:Blackout.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+"""
+    )
     (scheme_dir / "Blackout.xcscheme").write_text(
         f"""<?xml version="1.0" encoding="UTF-8"?>
 <Scheme

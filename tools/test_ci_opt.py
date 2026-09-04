@@ -196,6 +196,81 @@ def test_no_duplicate_widget_info_plist() -> None:
     ok("one widget Info.plist, excluded from sync copy, identifier present")
 
 
+def _blackout_native_target(pbx: str) -> str:
+    marker = "/* Blackout */ = {\n\t\t\tisa = PBXNativeTarget;"
+    start = pbx.find(marker)
+    if start < 0:
+        fail("Blackout PBXNativeTarget missing")
+    nxt = pbx.find("isa = PBXNativeTarget;", start + len(marker))
+    end = pbx.find("/* End PBXNativeTarget section */", start)
+    if nxt >= 0:
+        end = nxt if end < 0 else min(end, nxt)
+    if end < 0:
+        fail("Blackout PBXNativeTarget section truncated")
+    return pbx[start:end]
+
+
+def test_watch_omitted_from_app_store_archive() -> None:
+    """Phone Internal IPA must not embed Watch — no ASC watchkitapp record."""
+    pbx = PBX.read_text()
+    gen = GENERATOR.read_text()
+    archive = TF_ARCHIVE.read_text()
+    tf_yml = TF_YML.read_text()
+    scheme = (ROOT / "Blackout.xcodeproj/xcshareddata/xcschemes/Blackout.xcscheme").read_text()
+
+    if "Embed Watch Content" in pbx:
+        fail("Blackout still has Embed Watch Content — App Store IPA would carry Watch/")
+    if "BlackoutWatch.app in Embed Watch Content" in pbx:
+        fail("Blackout still copies BlackoutWatch.app into the iOS product")
+    if "$(CONTENTS_FOLDER_PATH)/Watch" in pbx:
+        fail("Blackout still has a Watch/ copy-files destination")
+
+    app_tgt = _blackout_native_target(pbx)
+    phases = app_tgt.split("buildPhases = (", 1)
+    if len(phases) < 2:
+        fail("Blackout target missing buildPhases")
+    phase_body = phases[1].split(");", 1)[0]
+    deps = app_tgt.split("dependencies = (", 1)
+    if len(deps) < 2:
+        fail("Blackout target missing dependencies")
+    dep_body = deps[1].split(");", 1)[0]
+    if "Watch" in phase_body or "Watch" in dep_body:
+        fail("Blackout target still depends on or embeds BlackoutWatch")
+    if "Embed Foundation Extensions" not in phase_body:
+        fail("Widget Embed Foundation Extensions must stay on Blackout")
+    if "BlackoutWidgets.appex in Embed Foundation Extensions" not in pbx:
+        fail("Widget must stay embedded in the iOS archive")
+
+    if 'name = BlackoutWatch;' not in pbx:
+        fail("Keep the BlackoutWatch target — omit embed only, do not delete the target")
+    if "PRODUCT_BUNDLE_IDENTIFIER = com.crisiskhan.blackout.watchkitapp;" not in pbx:
+        fail("Watch bundle id must stay on the Watch target for later re-enable")
+
+    if 'name = "Embed Watch Content"' in gen or "BlackoutWatch.app in Embed Watch Content" in gen:
+        fail("generate_project.py would re-embed Watch on regen")
+    if 'dstPath = "$(CONTENTS_FOLDER_PATH)/Watch"' in gen:
+        fail("generate_project.py would restore a Watch/ copy-files destination")
+    if "{ids['dep_watch']}" in gen or "{ids['proxy_watch']}" in gen:
+        fail("generate_project.py would restore Blackout → Watch embed or dependency")
+    if 'name = BlackoutWatch;' not in gen:
+        fail("generate_project.py must keep the BlackoutWatch target")
+    if "Embed Foundation Extensions" not in gen:
+        fail("generate_project.py must keep Widget embed")
+
+    if "BlackoutWatch" in scheme or "watchkitapp" in scheme:
+        fail("Blackout.xcscheme must archive Blackout.app only — no Watch blueprint")
+
+    if "com.crisiskhan.blackout.watchkitapp" in tf_yml:
+        fail("testflight-internal.yml must not create a Watch App Store profile")
+    if "com.crisiskhan.blackout.watchkitapp" in archive:
+        fail("tf-archive.sh must not patch Watch signing — Watch is not in the IPA")
+    if "com.crisiskhan.blackout.widgets" not in archive:
+        fail("tf-archive.sh must still sign the Widget appex")
+    if not re.search(r"Watch/|watchkitapp|BlackoutWatch\.app", archive):
+        fail("tf-archive.sh must fail closed if the IPA still embeds Watch")
+    ok("Watch omitted from App Store archive; Widget stays; target kept for later")
+
+
 def test_crisis_opt_locks() -> None:
     if (ROOT / "tools/strip-app-before-codesign.sh").is_file():
         fail("strip-app-before-codesign.sh must stay deleted")
@@ -217,6 +292,7 @@ def main() -> None:
     test_cpv_inject_model()
     test_nfc_tag_only()
     test_no_duplicate_widget_info_plist()
+    test_watch_omitted_from_app_store_archive()
     test_crisis_opt_locks()
 
 

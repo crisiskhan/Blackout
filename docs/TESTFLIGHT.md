@@ -24,6 +24,23 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - FACT (`33829001016` `ProcessInfoPlistFile`): `GENERATE_INFOPLIST_FILE=YES` did **not** pass a generated Info.plist into `builtin-infoPlistUtility`. Watch (`product-type.application`) and Widgets were processed from their source plists only. Watch source had `WKWatchOnly` + companion id — **no `CFBundleIdentifier`**. Widget source had NSExtension only — **no `CFBundleIdentifier`**. Main app `PRODUCT_BUNDLE_IDENTIFIER=com.crisiskhan.blackout` / `SKIP_INSTALL=NO` were already in the env.
 - Project fix: every archived product Info.plist now carries `CFBundleIdentifier=$(PRODUCT_BUNDLE_IDENTIFIER)` plus the packaging keys ProcessInfoPlistFile actually copies (executable / package type / versions). Main target sets `SKIP_INSTALL=NO` and `INSTALL_PATH=$(LOCAL_APPS_DIR)` explicitly. Prefer stock `xcodebuild archive` + `exportArchive`. Do not delete `PrivacyInfo` / `Assets.car` / AppIcons.
 - `33829001016` (`43f13b9`): processed iOS `CFBundleIdentifier=com.crisiskhan.blackout` / version 54. Snapshot ran. Archive packaging still exited 70, but left `Blackout.xcarchive/Products/Applications/Blackout.app` + dSYMs + Signatures and **no** xcarchive `Info.plist`. Recover overwrote the snapshot with that already-signed product, `rm -rf _CodeSignature`, then `codesign` reported `bundle format unrecognized`. Do not re-seal a signed archive product. CI may still write a missing xcarchive `Info.plist` and `exportArchive` or hand-zip if packaging fails; the project fix is Watch/Widget identifiers so stock archive can write ApplicationProperties.
+- `33907781589`: archive + IPA succeeded (inject CFBundleVersion 54). `altool` upload failed −19000 — no ASC application record for `com.crisiskhan.blackout.watchkitapp`. Crisis cut: **Watch is omitted from the App Store / TestFlight archive** so phone Internal can land. Widget stays embedded. The `BlackoutWatch` target and `BlackoutWatch.xcscheme` remain in the project for later.
+
+## Watch omitted from App Store archive (re-enable later)
+
+Scheme **Blackout** (what GHA archives) does **not** embed `BlackoutWatch.app`. There is no Embed Watch Content phase and no Blackout → BlackoutWatch target dependency. The exported IPA must not contain `Payload/Blackout.app/Watch/` or a `.watchkitapp`. `tf-archive.sh` fails closed if it does.
+
+Do **not** create an ASC Watch companion app just to unblock phone Internal.
+
+To put Watch back in the uploaded iOS IPA (only after ASC has a companion record for `com.crisiskhan.blackout.watchkitapp`):
+
+1. In `Blackout.xcodeproj/project.pbxproj` (and `tools/v3/generate_project.py` so regen matches): restore **Embed Watch Content** (`dstPath = $(CONTENTS_FOLDER_PATH)/Watch`, copy `BlackoutWatch.app`) on the Blackout target, and restore the Blackout → BlackoutWatch `PBXTargetDependency`.
+2. Add `com.crisiskhan.blackout.watchkitapp` back to the TF profile `BUNDLES` list in `.github/workflows/testflight-internal.yml` (platform `WATCHOS`, not `IOS`) and to the signing `spec` in `.github/ci/tf-archive.sh`.
+3. Keep Watch `CFBundleIdentifier=$(PRODUCT_BUNDLE_IDENTIFIER)` in `BlackoutWatch/Info.plist`.
+4. Confirm the IPA listing includes `Payload/Blackout.app/Watch/BlackoutWatch.app` before upload. Then remove the “no Watch/ companion” fail-closed check in `tf-archive.sh`, or invert it to require Watch.
+5. Do not bump tree `CURRENT_PROJECT_VERSION`. Do not add a strip script.
+
+Local Watch compile: scheme **BlackoutWatch**, destination `generic/platform=watchOS`. Unsigned `xcodebuild.yml` still builds scheme **Blackout** for iOS only (Widget embedded; Watch not).
 
 GitHub requires the workflow file on the default branch for the Run workflow button. CoS will place ONLY this yml on `main`; PR #4 app code stays unmerged.
 

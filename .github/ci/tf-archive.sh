@@ -71,7 +71,6 @@ text = path.read_text()
 spec = {
     "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA"),
     "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA"),
-    "com.crisiskhan.blackout.watchkitapp": pmap.get("com.crisiskhan.blackout.watchkitapp", "Blackout Watch App Store GHA"),
 }
 def patch_block(block, bundle):
     name = spec[bundle]
@@ -184,7 +183,7 @@ script.write_text(
     '  done\n'
     'fi\n'
     # After identifier + blob-sign, copy off the install tree. 33827851150
-    # tore it down after CodeSign. Watch + widgets are already embedded.
+    # tore it down after CodeSign. Widget is already embedded. Watch is not.
     'SNAP="${RUNNER_TEMP:-/Users/runner/work/_temp}/recovered-Blackout.app"\n'
     'rm -rf "$SNAP"\n'
     'cp -a "$APP" "$SNAP"\n'
@@ -444,6 +443,12 @@ if [ -z "${IPA:-}" ] || [ ! -f "$IPA" ]; then
   exit 1
 fi
 ls -la "$IPA"
+if unzip -l "$IPA" | grep -qiE 'Payload/Blackout\.app/Watch/|\.watchkitapp|BlackoutWatch\.app'; then
+  echo "IPA still embeds Watch. altool would require ASC watchkitapp. No upload."
+  unzip -l "$IPA" | grep -iE 'Watch/|watchkitapp|BlackoutWatch' || true
+  exit 1
+fi
+echo "IPA has no Watch/ companion (phone Internal only)."
 echo "IPA ready: $IPA"
 echo "IPA=$IPA" >> "$GITHUB_ENV"
 echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"

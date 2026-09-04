@@ -12,7 +12,7 @@ Destination: a physical iPhone (generic iOS device compile is CI only; this doc 
 
 1. On a Mac with Xcode 16.2: clone the repo, `git fetch origin cursor/blackout-bible-v3-64d0 && git checkout cursor/blackout-bible-v3-64d0` (or checkout the PR #4 head). Confirm `git rev-parse --abbrev-ref HEAD` is that branch.
 2. Open `Blackout.xcodeproj` (not a workspace). Select scheme **Blackout**.
-3. Signing & Capabilities for targets Blackout, BlackoutWatch, BlackoutWidgets: Automatically manage signing. Set Team to the Apple Developer team that owns `com.crisiskhan.blackout`. The pbxproj has `DEVELOPMENT_TEAM = ""` on purpose — pick Team in the Xcode UI for the local run; do not commit a team id.
+3. Signing & Capabilities for targets Blackout and BlackoutWidgets (and BlackoutWatch only if you run that scheme): Automatically manage signing. Set Team to the Apple Developer team that owns `com.crisiskhan.blackout`. The pbxproj has `DEVELOPMENT_TEAM = ""` on purpose — pick Team in the Xcode UI for the local run; do not commit a team id. Scheme **Blackout** does not embed Watch; use scheme **BlackoutWatch** if you need the companion on a watch.
 4. Connect the iPhone with a cable, unlock it, Trust This Computer if asked. Destination = that iPhone, not a simulator.
 5. Confirm bundle id `com.crisiskhan.blackout` on the app target.
 6. Required capabilities (must match Info.plist after this commit):
