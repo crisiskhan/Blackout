@@ -555,6 +555,7 @@ jobs:
               # ExtractAppIntentsMetadata runs AFTER user Run Scripts and recreates
               # Metadata.appintents; codesign then fails (bundle format unrecognized).
               block = sub("ENABLE_APP_INTENTS_METADATA_GENERATION", "NO")
+              block = sub("OTHER_SWIFT_FLAGS", '"$(inherited) -Xfrontend -disable-autolink-framework -Xfrontend AppIntents"')
               return block
           out = text
           for bundle in spec:
@@ -616,7 +617,7 @@ jobs:
                   f'\t\t\tname = "{note}";\n'
                   "\t\t\toutputFileListPaths = (\n\t\t\t);\n"
                   "\t\t\toutputPaths = (\n\t\t\t);\n"
-                  "\t\t\trunOnlyForDeploymentPostprocessing = 0;\n"
+                  "\t\t\trunOnlyForDeploymentPostprocessing = 1;\n"
                   "\t\t\tshellPath = /bin/sh;\n"
                   # pbxproj: shellScript = "\"$SRCROOT/ci_strip_appicon.sh\"\n";
                   '\t\t\tshellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";\n'
@@ -693,7 +694,39 @@ jobs:
               print("Removed Embed Watch Content build file from iOS target (working copy only)")
           PY
           }
+          # Xcode 26 ExtractAppIntentsMetadata runs AFTER user Run Scripts and
+          # recreates Metadata.appintents; ENABLE_APP_INTENTS_METADATA_GENERATION=NO
+          # is ignored. Wrap absolute /usr/bin/codesign so we strip right before sign.
+          if [ ! -x /usr/bin/codesign.real ]; then
+            sudo mv /usr/bin/codesign /usr/bin/codesign.real
+          fi
+          sudo tee /usr/bin/codesign > /dev/null << 'WRAP'
+#!/bin/bash
+TARGET=""
+for arg in "$@"; do
+  case "$arg" in
+    -*) ;;
+    *) TARGET="$arg" ;;
+  esac
+done
+if [ -n "$TARGET" ] && [ -d "$TARGET" ]; then
+  case "$TARGET" in
+    *.app|*.appex)
+      find "$TARGET" -maxdepth 1 -name 'AppIcon*.png' -print -delete 2>/dev/null || true
+      if [ -d "$TARGET/Metadata.appintents" ]; then
+        echo "codesign-wrap: rm Metadata.appintents under $TARGET"
+        rm -rf "$TARGET/Metadata.appintents"
+      fi
+      /usr/bin/xattr -cr "$TARGET" 2>/dev/null || true
+      ;;
+  esac
+fi
+exec /usr/bin/codesign.real "$@"
+WRAP
+          sudo chmod 755 /usr/bin/codesign
+          echo "installed codesign wrapper -> /usr/bin/codesign.real"
           archive_once() {
+
             set +e
             xcodebuild \
               -project Blackout.xcodeproj \
