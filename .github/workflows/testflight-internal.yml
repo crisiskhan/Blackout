@@ -709,54 +709,103 @@ jobs:
               print("Removed Embed Watch Content build file from iOS target (working copy only)")
           PY
           }
-          archive_once() {
+          DD="$RUNNER_TEMP/DerivedData"
+          build_once() {
             set +e
-            # Unsigned archive: Metadata.appintents is recreated AFTER strip scripts
-            # on Xcode 16.2 and 26; CodeSign rejects it. Strip then export re-signs.
+            # Use build (not archive): archive + CodeSign dies on Metadata.appintents
+            # recreated after user scripts. We strip, hand-pack .xcarchive, export signs.
+            rm -rf "$DD"
             xcodebuild \
               -project Blackout.xcodeproj \
               -scheme Blackout \
               -configuration Release \
               -destination 'generic/platform=iOS' \
-              -archivePath "$ARCHIVE" \
+              -derivedDataPath "$DD" \
               CURRENT_PROJECT_VERSION="$NEXT" \
               DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
               CODE_SIGNING_ALLOWED=NO \
               CODE_SIGNING_REQUIRED=NO \
-                            ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
-              "${AUTH[@]}" \
-              archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
+              SKIP_INSTALL=NO \
+              ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
+              build 2>&1 | tee "$RUNNER_TEMP/archive.log"
             echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
             set -e
           }
-          strip_before_export() {
-            APP="$ARCHIVE/Products/Applications/Blackout.app"
+          pack_archive() {
+            APP="$DD/Build/Products/Release-iphoneos/Blackout.app"
             if [ ! -d "$APP" ]; then
-              echo "No Blackout.app in archive at $APP"
+              # Fallback: InstallationBuildProductsLocation from an archive-like layout
+              APP="$(find "$DD" -type d -path '*/Release-iphoneos/Blackout.app' | head -n 1 || true)"
+            fi
+            if [ -z "$APP" ] || [ ! -d "$APP" ]; then
+              echo "No Blackout.app under $DD"
               return 1
             fi
-            echo "Pre-export strip under $APP"
+            echo "Using app at $APP"
+            echo "Strip Metadata.appintents + loose AppIcons before packing archive"
             find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
             find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
+            # Nested watch / appex copies
+            find "$APP" -type d \( -name '*.appex' -o -name '*.app' \) | while read -r B; do
+              find "$B" -maxdepth 1 -name 'AppIcon*.png' -delete 2>/dev/null || true
+              rm -rf "$B/Metadata.appintents" 2>/dev/null || true
+            done
             /usr/bin/xattr -cr "$APP" || true
-            echo "Pre-export strip done"
+            rm -rf "$ARCHIVE"
+            mkdir -p "$ARCHIVE/Products/Applications"
+            mkdir -p "$ARCHIVE/dSYMs"
+            cp -a "$APP" "$ARCHIVE/Products/Applications/Blackout.app"
+            if [ -d "$DD/Build/Products/Release-iphoneos/Blackout.app.dSYM" ]; then
+              cp -a "$DD/Build/Products/Release-iphoneos/Blackout.app.dSYM" "$ARCHIVE/dSYMs/" || true
+            fi
+            # Minimal xcarchive Info.plist — exportArchive needs ApplicationProperties.CFBundleIdentifier
+            "$PYBIN" << 'PY'
+          import os, plistlib
+          from pathlib import Path
+          from datetime import datetime, timezone
+          app = Path(os.environ["RUNNER_TEMP"]) / "Blackout.xcarchive/Products/Applications/Blackout.app"
+          info = plistlib.loads((app / "Info.plist").read_bytes())
+          bid = info.get("CFBundleIdentifier") or "com.crisiskhan.blackout"
+          name = info.get("CFBundleName") or "Blackout"
+          ver = info.get("CFBundleShortVersionString") or "1.0"
+          build = str(info.get("CFBundleVersion") or os.environ.get("NEXT", "1"))
+          archive_info = {
+              "ApplicationProperties": {
+                  "ApplicationPath": "Applications/Blackout.app",
+                  "CFBundleIdentifier": bid,
+                  "CFBundleName": name,
+                  "CFBundleShortVersionString": ver,
+                  "CFBundleVersion": build,
+                  "SigningStatus": "apple-id",
+              },
+              "ArchiveVersion": 2,
+              "CreationDate": datetime.now(timezone.utc),
+              "Name": "Blackout",
+              "SchemeName": "Blackout",
           }
-          archive_once
+          out = Path(os.environ["RUNNER_TEMP"]) / "Blackout.xcarchive/Info.plist"
+          plistlib.dump(archive_info, out.open("wb"))
+          print("wrote archive Info.plist", bid, build)
+          PY
+            echo "Packed $ARCHIVE"
+            ls -la "$ARCHIVE/Products/Applications/Blackout.app" | head
+          }
+          build_once
           ARC="$(cat "$RUNNER_TEMP/archive.exit")"
           if [ "$ARC" -ne 0 ] && grep -q "Build input file cannot be found:.*BlackoutWatch.*mobileprovision" "$RUNNER_TEMP/archive.log"; then
             strip_watch
-            rm -rf "$ARCHIVE"
-            archive_once
+            build_once
             ARC="$(cat "$RUNNER_TEMP/archive.exit")"
           fi
           if [ "$ARC" -ne 0 ]; then
             if grep -qiE 'HTTP 401|HTTP 403|not have permission|Unable to log in|403 Forbidden|401 Unauthorized' "$RUNNER_TEMP/archive.log"; then
               echo "$STOP"
             fi
-            echo "Archive failed. No upload."
+            echo "Build failed. No upload."
             exit 1
           fi
-          strip_before_export
+          export NEXT
+          pack_archive
           mkdir -p "$EXPORT"
           set +e
           xcodebuild \
