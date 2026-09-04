@@ -36,7 +36,6 @@
 		A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */ = {isa = PBXBuildFile; productRef = 77F4E4985DB1424CF0DB1857 /* Instruments */; };
 		DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */ = {isa = PBXBuildFile; productRef = 04EC158D5DD9027CF710A3A4 /* RegionalPacks */; };
 		B0393E48081BE19742625903 /* MapLibreMap in Frameworks */ = {isa = PBXBuildFile; productRef = E648C806A9EA32B613781C40 /* MapLibreMap */; };
-		65A85523F935D622BA89CB01 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 3E3D4914CDE33667A03D92C1 /* MapLibre */; };
 		48DC310F0F68C6FA33F515C5 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = B6EAF066226A93016BECDF9F /* Resources */; };
 		A51B0C23E183211AB08F242E /* BlackoutWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1BDDF660CB1709C6EF8D2FD2 /* BlackoutWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -109,7 +108,6 @@
 				A075AC83D2281E4D86F5EA60 /* Instruments in Frameworks */,
 				DE6DB16FBDD3D05AD74A1A63 /* RegionalPacks in Frameworks */,
 				B0393E48081BE19742625903 /* MapLibreMap in Frameworks */,
-				65A85523F935D622BA89CB01 /* MapLibre in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,7 +215,6 @@
 				77F4E4985DB1424CF0DB1857 /* Instruments */,
 				04EC158D5DD9027CF710A3A4 /* RegionalPacks */,
 				E648C806A9EA32B613781C40 /* MapLibreMap */,
-				3E3D4914CDE33667A03D92C1 /* MapLibre */,
 			);
 			productName = Blackout;
 			productReference = 3ECE9A2F0678B209E4A706C9 /* Blackout.app */;
@@ -314,7 +311,6 @@
 				F2A0BF08642A60376E9F533F /* XCLocalSwiftPackageReference "Packages/Instruments" */,
 				B63BA5796311D2FEB2E7F801 /* XCLocalSwiftPackageReference "Packages/RegionalPacks" */,
 				E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */,
-				EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0A3E27B8CA818264D75C8D81 /* Products */;
@@ -504,6 +500,7 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = Blackout/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
@@ -558,6 +555,7 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = Blackout/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.navigation;
 					INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.";
@@ -612,6 +610,7 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWatch/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
@@ -651,6 +650,7 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWatch/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = Blackout;
 					INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 					INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.crisiskhan.blackout;
@@ -691,6 +691,7 @@
 					GCC_OPTIMIZATION_LEVEL = 0;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -727,6 +728,7 @@
 					GCC_NO_COMMON_BLOCKS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
 					INFOPLIST_FILE = BlackoutWidgets/Info.plist;
+					INFOPLIST_KEY_CFBundleIdentifier = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 					INFOPLIST_KEY_CFBundleDisplayName = "Blackout Widgets";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -904,10 +906,6 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/MapLibreMap;
 		};
-		EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Vendor/MapLibre;
-		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1055,11 +1053,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E1D0136A857DC3FF56F03E48 /* XCLocalSwiftPackageReference "Packages/MapLibreMap" */;
 			productName = MapLibreMap;
-		};
-		3E3D4914CDE33667A03D92C1 /* MapLibre */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EF9A5CD890680CC298492070 /* XCLocalSwiftPackageReference "Vendor/MapLibre" */;
-			productName = MapLibre;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

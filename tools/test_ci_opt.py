@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import test_tf_asc_reuse
+import test_tf_ipa_inspect
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +25,7 @@ GENERATOR = ROOT / "tools/v3/generate_project.py"
 TF_ARCHIVE = ROOT / ".github/ci/tf-archive.sh"
 TF_SIGN = ROOT / "tools/tf_asc_signing.py"
 TF_REUSE = ROOT / "tools/tf_asc_reuse.py"
+TF_IPA_INSPECT = ROOT / "tools/tf_ipa_inspect.py"
 WIDGET_PLIST = ROOT / "BlackoutWidgets/Info.plist"
 WATCH_PLIST = ROOT / "BlackoutWatch/Info.plist"
 GATE_INVOKE = "python3 tools/test_ci_opt.py"
@@ -192,6 +194,11 @@ def test_no_duplicate_widget_info_plist() -> None:
             "widget Info.plist missing CFBundleIdentifier — "
             "ValidateEmbeddedBinary / archive packaging sees (null)"
         )
+    if pbx.count("INFOPLIST_KEY_CFBundleIdentifier") < 6:
+        fail(
+            "INFOPLIST_KEY_CFBundleIdentifier must stay on app/watch/widget "
+            "Debug+Release so GENERATE_INFOPLIST emits a BID"
+        )
     try:
         watch = plistlib.loads(WATCH_PLIST.read_bytes())
     except Exception as exc:
@@ -300,9 +307,45 @@ def test_maplibre_framework_not_mapbox_bundle_id() -> None:
         if pkg != "FMWK":
             fail(f"{path.relative_to(ROOT)} must stay FMWK, got {pkg}")
     archive = TF_ARCHIVE.read_text()
+    helper = TF_IPA_INSPECT.read_text() if TF_IPA_INSPECT.is_file() else ""
+    if not TF_IPA_INSPECT.is_file():
+        fail("tools/tf_ipa_inspect.py missing — IPA MapLibre rewrite has no helper")
+    if "com.maplibre.mapbox" not in helper:
+        fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the rewrite stays documented")
+    if "owned_framework_identifier" not in helper or "rewrite_framework_plist" not in helper:
+        fail("tf_ipa_inspect.py must expose the MapLibre BID rewrite helper")
+    if "tf_ipa_inspect.py" not in archive:
+        fail("tf-archive.sh must run tools/tf_ipa_inspect.py after the IPA exists")
+    inspect_at = archive.find('tf_ipa_inspect.py --ipa')
+    ready_at = archive.find('echo "IPA ready:')
+    if inspect_at < 0 or ready_at < 0 or inspect_at > ready_at:
+        fail("tf-archive.sh must inspect/rewrite the IPA before declaring IPA ready")
     if "com.maplibre.mapbox" not in archive:
-        fail("tf-archive.sh must fail closed if the IPA still has com.maplibre.mapbox")
-    ok("MapLibre.framework id is com.crisiskhan.blackout.maplibre; IPA check stays")
+        fail("tf-archive.sh must keep the com.maplibre.mapbox −19000 note")
+    test_tf_ipa_inspect.main()
+    ok("MapLibre.framework id is com.crisiskhan.blackout.maplibre; IPA rewrite helper stays")
+
+
+def test_maplibre_single_embed_via_maplibremap() -> None:
+    """App must not also link Vendor/MapLibre — that XFWK has no CFBundleIdentifier."""
+    pbx = PBX.read_text()
+    gen = GENERATOR.read_text()
+    app_tgt = _blackout_native_target(pbx)
+    if "MapLibre in Frameworks" in pbx:
+        fail("Blackout still links MapLibre as a direct product — archive XFWK has no BID")
+    if "productName = MapLibre;" in pbx:
+        fail("Blackout still has an XCSwiftPackageProductDependency named MapLibre")
+    if 'XCLocalSwiftPackageReference "Vendor/MapLibre"' in pbx:
+        fail("project must not also reference Vendor/MapLibre — MapLibreMap already depends on it")
+    if "MapLibreMap in Frameworks" not in app_tgt and "MapLibreMap" not in app_tgt:
+        fail("Blackout must keep the MapLibreMap product (one embed path)")
+    if "productName = MapLibreMap;" not in pbx:
+        fail("MapLibreMap package product missing")
+    if 'pkg_paths.append(("Vendor/MapLibre"' in gen or "Vendor/MapLibre" in gen:
+        fail("generate_project.py would re-add a direct Vendor/MapLibre app product")
+    if '"MapLibreMap", "MapLibreMap"' not in gen and '("MapLibreMap", "MapLibreMap")' not in gen:
+        fail("generate_project.py must keep MapLibreMap as an app package")
+    ok("MapLibre embeds once via MapLibreMap; Vendor/MapLibre is not an app product")
 
 
 def test_asc_reuse_not_delete_create() -> None:
@@ -352,6 +395,7 @@ def main() -> None:
     test_no_duplicate_widget_info_plist()
     test_watch_omitted_from_app_store_archive()
     test_maplibre_framework_not_mapbox_bundle_id()
+    test_maplibre_single_embed_via_maplibremap()
     test_asc_reuse_not_delete_create()
     test_crisis_opt_locks()
 

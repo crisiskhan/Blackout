@@ -258,6 +258,8 @@ def ios_target_settings(debug: bool) -> dict:
             "DEVELOPMENT_TEAM": "",
             "ENABLE_PREVIEWS": "YES",
             "GENERATE_INFOPLIST_FILE": "YES",
+            "INFOPLIST_FILE": "Blackout/Info.plist",
+            "INFOPLIST_KEY_CFBundleIdentifier": "$(PRODUCT_BUNDLE_IDENTIFIER)",
             "INFOPLIST_KEY_CFBundleDisplayName": "Blackout",
             "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.navigation",
             "INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription": "Mesh uses Bluetooth only when you opt in. Tens of meters without LoRa. Deny is supported.",
@@ -278,6 +280,8 @@ def ios_target_settings(debug: bool) -> dict:
             "MARKETING_VERSION": "0.1.0",
             "PRODUCT_BUNDLE_IDENTIFIER": "com.crisiskhan.blackout",
             "PRODUCT_NAME": "$(TARGET_NAME)",
+            "INSTALL_PATH": "$(LOCAL_APPS_DIR)",
+            "SKIP_INSTALL": "NO",
             "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator",
             "SUPPORTS_MACCATALYST": "NO",
             "TARGETED_DEVICE_FAMILY": "1,2",
@@ -295,6 +299,8 @@ def watch_settings(debug: bool) -> dict:
             "CODE_SIGN_STYLE": "Automatic",
             "CURRENT_PROJECT_VERSION": "1",
             "GENERATE_INFOPLIST_FILE": "YES",
+            "INFOPLIST_FILE": "BlackoutWatch/Info.plist",
+            "INFOPLIST_KEY_CFBundleIdentifier": "$(PRODUCT_BUNDLE_IDENTIFIER)",
             "INFOPLIST_KEY_CFBundleDisplayName": "Blackout",
             "INFOPLIST_KEY_UIUserInterfaceStyle": "Dark",
             "MARKETING_VERSION": "0.1.0",
@@ -305,7 +311,6 @@ def watch_settings(debug: bool) -> dict:
             "TARGETED_DEVICE_FAMILY": "4",
             "WATCHOS_DEPLOYMENT_TARGET": "11.0",
             "SUPPORTED_PLATFORMS": "watchos watchsimulator",
-            "INFOPLIST_FILE": "BlackoutWatch/Info.plist",
             "INFOPLIST_KEY_WKWatchOnly": "YES",
             "INFOPLIST_KEY_WKCompanionAppBundleIdentifier": "com.crisiskhan.blackout",
             "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
@@ -321,6 +326,8 @@ def widget_settings(debug: bool) -> dict:
             "CODE_SIGN_STYLE": "Automatic",
             "CURRENT_PROJECT_VERSION": "1",
             "GENERATE_INFOPLIST_FILE": "YES",
+            "INFOPLIST_FILE": "BlackoutWidgets/Info.plist",
+            "INFOPLIST_KEY_CFBundleIdentifier": "$(PRODUCT_BUNDLE_IDENTIFIER)",
             "INFOPLIST_KEY_CFBundleDisplayName": "Blackout Widgets",
             "INFOPLIST_KEY_NSSupportsLiveActivities": "YES",
             "LD_RUNPATH_SEARCH_PATHS": "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks",
@@ -330,7 +337,6 @@ def widget_settings(debug: bool) -> dict:
             "SKIP_INSTALL": "YES",
             "TARGETED_DEVICE_FAMILY": "1,2",
             "APPLICATION_EXTENSION_API_ONLY": "YES",
-            "INFOPLIST_FILE": "BlackoutWidgets/Info.plist",
             "IPHONEOS_DEPLOYMENT_TARGET": "18.0",
             "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator",
             "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
@@ -341,7 +347,6 @@ def widget_settings(debug: bool) -> dict:
 
 def generate() -> None:
     pkg_paths = [(f"Packages/{folder}", product) for folder, product in PACKAGES]
-    pkg_paths.append(("Vendor/MapLibre", "MapLibre"))
     ids = {k: oid(k) for k in [
         "app_ref", "watch_ref", "widget_ref", "sync_app", "sync_watch", "sync_widget",
         "fw_app", "fw_watch", "fw_widget", "root", "products", "tgt_app", "tgt_watch", "tgt_widget",
@@ -428,6 +433,9 @@ test -f "${DST}/Field/field.core.json"
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		{ids['sync_app']} /* Blackout */ = {{
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				{ids['sync_ex']} /* Exceptions for "Blackout" */,
+			);
 			path = Blackout;
 			sourceTree = "<group>";
 		}};
@@ -685,6 +693,13 @@ test -f "${DST}/Field/field.core.json"
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		{ids['sync_ex']} /* Exceptions for "Blackout" */ = {{
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = {ids['tgt_app']} /* Blackout */;
+		}};
 		{ids['sync_watch_ex']} /* Exceptions for "BlackoutWatch" */ = {{
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
