@@ -13,6 +13,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - Repo CPV is 1 and collides; the job sets `CURRENT_PROJECT_VERSION` on the xcodebuild command line (max ASC + 1). It does not commit a bump.
 - A 50-series TestFlight build is the old vessel.
 - Signing: existing ASC AuthKey + automatic signing. No human certificate export.
+- Archive runner is **macos-14 + Xcode 16** (same toolchain as unsigned `.github/workflows/xcodebuild.yml`). Do not use `macos-latest` / Xcode 26: that toolchain recreates `Metadata.appintents` after the CI strip script and CodeSign fails.
 
 GitHub requires the workflow file on the default branch for the Run workflow button. CoS will place ONLY this yml on `main`; PR #4 app code stays unmerged.
 
