@@ -14,7 +14,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - A 50-series TestFlight build is the old vessel.
 - Signing: existing ASC AuthKey + automatic signing. No human certificate export.
 - Archive runner is **macos-14 + Xcode 16** (same toolchain as unsigned `.github/workflows/xcodebuild.yml`). Do not use `macos-latest` / Xcode 26: that toolchain recreates `Metadata.appintents` after the CI strip script and CodeSign fails.
-- Do not `xattr -cr` the `.app`. Do not `rm`/`ditto`/`chmod 644` `Assets.car`, `PrivacyInfo.xcprivacy`, or `embedded.mobileprovision`. Do not run a chmod janitor during archive. Codesign then reports `code object is not signed at all` on whichever data file it hits first: `Assets.car` (`33823846800`), `embedded.mobileprovision` (`33824248310`), `PrivacyInfo.xcprivacy` (`33824455260`). Clear execute only (`chmod a-x`).
+- Do not `xattr -cr` the `.app` or the repo. Do not `rm`/`ditto`/`chmod 644` `Assets.car`, `PrivacyInfo.xcprivacy`, or `embedded.mobileprovision`. Do not run a chmod janitor during archive. Codesign then reports `code object is not signed at all` on the next data file: `Assets.car` (`33823846800`), `embedded.mobileprovision` (`33824248310`), `PrivacyInfo.xcprivacy` (`33824455260`). `33824948720` deleted `PrivacyInfo` and skipped `chmod a-x`; CodeSign died on `Assets.car`. Clear execute only (`chmod a-x`) on those top-level files.
 
 GitHub requires the workflow file on the default branch for the Run workflow button. CoS will place ONLY this yml on `main`; PR #4 app code stays unmerged.
 
