@@ -531,11 +531,12 @@ jobs:
               "uploadSymbols": True,
               "manageAppVersionAndBuildNumber": False,
               "stripSwiftSymbols": True,
+              "platform": "ios",
           }
           if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
               body["signingStyle"] = "manual"
-              # Prefer modern Apple Distribution; iPhone Distribution also accepted.
-              body["signingCertificate"] = "Apple Distribution"
+              # Keychain identity is iPhone Distribution (GHA IOS_DISTRIBUTION cert).
+              body["signingCertificate"] = "iPhone Distribution"
               body["provisioningProfiles"] = profiles
           else:
               body["signingStyle"] = "automatic"
