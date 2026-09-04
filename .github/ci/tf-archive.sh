@@ -411,11 +411,9 @@ if unzip -l "$IPA" | grep -qiE 'Payload/Blackout\.app/Watch/|\.watchkitapp|Black
   exit 1
 fi
 echo "IPA has no Watch/ companion (phone Internal only)."
-# 33925258357: after Watch was gone, altool -19000 on com.maplibre.mapbox
-# (MapLibre.framework Info.plist). Inspect Payload before declaring IPA ready:
-# assert app/widget BIDs, rewrite foreign FMWK ids (plutil/PlistBuddy via
-# tools/tf_ipa_inspect.py), fail closed, re-zip if rewritten.
-# Do not create an ASC app for com.maplibre.mapbox.
+# 33925258357 / 33929367958: altool -19000 on com.maplibre.mapbox, then on
+# com.crisiskhan.blackout.maplibre. Nested FMWK must use the parent app id.
+# Inspect Payload before declaring IPA ready. No ASC app for MapLibre.
 "$PYBIN" tools/tf_ipa_inspect.py --ipa "$IPA"
 echo "IPA ready: $IPA"
 echo "IPA=$IPA" >> "$GITHUB_ENV"

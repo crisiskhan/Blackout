@@ -303,7 +303,12 @@ def test_maplibre_framework_not_mapbox_bundle_id() -> None:
         pkg = pl.get("CFBundlePackageType")
         if bid == "com.maplibre.mapbox":
             fail(f"{path.relative_to(ROOT)} still com.maplibre.mapbox — altool -19000")
-        if bid != "com.crisiskhan.blackout.maplibre":
+        if bid == "com.crisiskhan.blackout.maplibre":
+            fail(
+                f"{path.relative_to(ROOT)} still com.crisiskhan.blackout.maplibre — "
+                "altool -19000 (33929367958); nested FMWK must use the parent app id"
+            )
+        if bid != "com.crisiskhan.blackout":
             fail(f"{path.relative_to(ROOT)} CFBundleIdentifier={bid}")
         if pkg != "FMWK":
             fail(f"{path.relative_to(ROOT)} must stay FMWK, got {pkg}")
@@ -324,7 +329,7 @@ def test_maplibre_framework_not_mapbox_bundle_id() -> None:
     if "com.maplibre.mapbox" not in archive:
         fail("tf-archive.sh must keep the com.maplibre.mapbox −19000 note")
     test_tf_ipa_inspect.main()
-    ok("MapLibre.framework id is com.crisiskhan.blackout.maplibre; IPA rewrite helper stays")
+    ok("MapLibre.framework id is the parent app; IPA rewrite helper stays")
 
 
 def test_maplibre_single_embed_via_maplibremap() -> None:

@@ -2,8 +2,9 @@
 """Inspect a TestFlight IPA and rewrite vendor FMWK bundle ids.
 
 33925258357: altool −19000 on com.maplibre.mapbox inside MapLibre.framework.
-Rewrite any nested FMWK whose CFBundleIdentifier is not under
-com.crisiskhan.blackout to com.crisiskhan.blackout.<frameworkname>.
+33929367958: renaming that to com.crisiskhan.blackout.maplibre still −19000 —
+altool wants an ASC application record for every unique CFBundleIdentifier.
+Nested FMWK must use the parent app id com.crisiskhan.blackout.
 Fail closed if Payload/*.app or PlugIns/*.appex is outside
 {com.crisiskhan.blackout, com.crisiskhan.blackout.widgets}.
 No ASC app for MapLibre. No network.
@@ -23,8 +24,8 @@ from typing import Any
 APP_BID = "com.crisiskhan.blackout"
 WIDGET_BID = "com.crisiskhan.blackout.widgets"
 ALLOWED_EXECUTABLE_BIDS = frozenset({APP_BID, WIDGET_BID})
-OWNER_PREFIX = "com.crisiskhan.blackout"
 MAPBOX = "com.maplibre.mapbox"
+CHILD_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
 
 
 class InspectError(RuntimeError):
@@ -32,13 +33,9 @@ class InspectError(RuntimeError):
 
 
 def owned_framework_identifier(framework_dirname: str) -> str:
-    stem = framework_dirname
-    if stem.endswith(".framework"):
-        stem = stem[: -len(".framework")]
-    cleaned = "".join(ch for ch in stem.lower() if ch.isalnum())
-    if not cleaned:
-        cleaned = "framework"
-    return f"{OWNER_PREFIX}.{cleaned}"
+    """Nested FMWK must share the parent app id. altool looks up every BID."""
+    del framework_dirname
+    return APP_BID
 
 
 def _load_plist(path: Path) -> dict[str, Any]:
@@ -84,10 +81,6 @@ def _bid(path: Path) -> str:
     return str(value or "")
 
 
-def _is_owned_bid(bid: str) -> bool:
-    return bid == OWNER_PREFIX or bid.startswith(OWNER_PREFIX + ".")
-
-
 def rewrite_framework_plist(path: Path) -> bool:
     """Rewrite a FMWK Info.plist off a foreign BID. Keep CFBundlePackageType."""
     body = _load_plist(path)
@@ -95,7 +88,7 @@ def rewrite_framework_plist(path: Path) -> bool:
     if pkg and pkg != "FMWK":
         return False
     bid = str(body.get("CFBundleIdentifier") or "")
-    if bid and _is_owned_bid(bid):
+    if bid == APP_BID:
         return False
     new_bid = owned_framework_identifier(path.parent.name)
     _set_plist_string(path, "CFBundleIdentifier", new_bid)
@@ -149,16 +142,16 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
                     f"rewrote {plist.as_posix()} "
                     f"CFBundleIdentifier -> {owned_framework_identifier(plist.parent.name)}"
                 )
-    leftover_mapbox = [
+    leftover_foreign = [
         p
         for app in apps
         for p in app.rglob("Info.plist")
-        if MAPBOX.encode() in p.read_bytes()
+        if MAPBOX.encode() in p.read_bytes() or CHILD_MAPLIBRE.encode() in p.read_bytes()
     ]
-    if leftover_mapbox:
+    if leftover_foreign:
         raise InspectError(
-            "IPA still contains com.maplibre.mapbox after rewrite: "
-            + ", ".join(p.as_posix() for p in leftover_mapbox)
+            "IPA still contains a MapLibre-only bundle id after rewrite: "
+            + ", ".join(p.as_posix() for p in leftover_foreign)
         )
     return rewritten
 

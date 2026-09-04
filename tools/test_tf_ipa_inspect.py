@@ -15,7 +15,7 @@ import tf_ipa_inspect as inspect
 APP_BID = "com.crisiskhan.blackout"
 WIDGET_BID = "com.crisiskhan.blackout.widgets"
 MAPBOX = "com.maplibre.mapbox"
-OWNED_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
+CHILD_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
 
 
 def _write_plist(path: Path, body: dict) -> None:
@@ -59,16 +59,15 @@ def _fake_payload(root: Path, *, maplibre_bid: str = MAPBOX, widget: bool = True
 
 
 class TestOwnedFrameworkIdentifier(unittest.TestCase):
-    def test_maplibre_framework_name(self) -> None:
+    def test_nested_fmwk_uses_parent_app_bid(self) -> None:
+        """33929367958: altool −19000 on com.crisiskhan.blackout.maplibre."""
         self.assertEqual(
             inspect.owned_framework_identifier("MapLibre.framework"),
-            OWNED_MAPLIBRE,
+            APP_BID,
         )
-
-    def test_other_framework_name(self) -> None:
         self.assertEqual(
             inspect.owned_framework_identifier("FooBar.framework"),
-            "com.crisiskhan.blackout.foobar",
+            APP_BID,
         )
 
 
@@ -87,22 +86,35 @@ class TestRewriteFrameworkPlist(unittest.TestCase):
             changed = inspect.rewrite_framework_plist(path)
             self.assertTrue(changed)
             pl = _read_plist(path)
-            self.assertEqual(pl["CFBundleIdentifier"], OWNED_MAPLIBRE)
+            self.assertEqual(pl["CFBundleIdentifier"], APP_BID)
             self.assertEqual(pl["CFBundlePackageType"], "FMWK")
             self.assertEqual(pl["CFBundleName"], "MapLibre")
 
-    def test_owned_framework_is_left_alone(self) -> None:
+    def test_child_maplibre_bid_is_rewritten_to_app(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "MapLibre.framework" / "Info.plist"
             _write_plist(
                 path,
                 {
-                    "CFBundleIdentifier": OWNED_MAPLIBRE,
+                    "CFBundleIdentifier": CHILD_MAPLIBRE,
+                    "CFBundlePackageType": "FMWK",
+                },
+            )
+            self.assertTrue(inspect.rewrite_framework_plist(path))
+            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], APP_BID)
+
+    def test_parent_app_bid_on_fmwk_is_left_alone(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "MapLibre.framework" / "Info.plist"
+            _write_plist(
+                path,
+                {
+                    "CFBundleIdentifier": APP_BID,
                     "CFBundlePackageType": "FMWK",
                 },
             )
             self.assertFalse(inspect.rewrite_framework_plist(path))
-            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], OWNED_MAPLIBRE)
+            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], APP_BID)
 
 
 class TestInspectPayload(unittest.TestCase):
@@ -122,17 +134,17 @@ class TestInspectPayload(unittest.TestCase):
                 WIDGET_BID,
             )
             ml = _read_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist")
-            self.assertEqual(ml["CFBundleIdentifier"], OWNED_MAPLIBRE)
+            self.assertEqual(ml["CFBundleIdentifier"], APP_BID)
             self.assertEqual(ml["CFBundlePackageType"], "FMWK")
 
     def test_widget_optional_when_absent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), widget=False, maplibre_bid=OWNED_MAPLIBRE)
+            payload = _fake_payload(Path(tmp), widget=False, maplibre_bid=APP_BID)
             self.assertFalse(inspect.inspect_and_rewrite_payload(payload))
 
     def test_fail_closed_on_foreign_app_bid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), maplibre_bid=OWNED_MAPLIBRE)
+            payload = _fake_payload(Path(tmp), maplibre_bid=APP_BID)
             _write_plist(
                 payload / "Other.app" / "Info.plist",
                 {"CFBundleIdentifier": "com.example.other", "CFBundlePackageType": "APPL"},
@@ -143,7 +155,7 @@ class TestInspectPayload(unittest.TestCase):
 
     def test_fail_closed_on_watchkit_appex_bid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), maplibre_bid=OWNED_MAPLIBRE)
+            payload = _fake_payload(Path(tmp), maplibre_bid=APP_BID)
             _write_plist(
                 payload / "Blackout.app" / "PlugIns" / "Watch.appex" / "Info.plist",
                 {
@@ -173,7 +185,7 @@ class TestInspectIpa(unittest.TestCase):
                     zf.read("Payload/Blackout.app/Frameworks/MapLibre.framework/Info.plist")
                 )
                 app_pl = plistlib.loads(zf.read("Payload/Blackout.app/Info.plist"))
-            self.assertEqual(pl["CFBundleIdentifier"], OWNED_MAPLIBRE)
+            self.assertEqual(pl["CFBundleIdentifier"], APP_BID)
             self.assertEqual(pl["CFBundlePackageType"], "FMWK")
             self.assertEqual(app_pl["CFBundleIdentifier"], APP_BID)
 
