@@ -7,6 +7,7 @@
 #   33824248310  rm Assets.car + xattr     → embedded.mobileprovision
 #   33824455260  xattr + chmod 644 janitor → PrivacyInfo.xcprivacy
 #   33824948720  rm PrivacyInfo, no a-x    → Assets.car
+#   33825215841  stock archive, no strip   → AppIcon60x60@2x.png
 set -e
 strip_app() {
   APP="$1"
