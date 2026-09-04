@@ -3,6 +3,11 @@
 Happy path: KEEP Dist 45YLWHL6UP is reference-only. Always mint a
 runner-local Dist cert and bind Local-named App Store profiles to it.
 Never revoke KEEP. Never delete KEEP-named profiles.
+
+33928044175: each GHA runner is ephemeral, so the previous local Dist
+has no private key here. Revoke stale non-KEEP Dist leftovers (they
+fill Apple's cap) and replace Local-named profiles bound to a previous
+mint. KEEP-named profiles stay.
 """
 from __future__ import annotations
 
@@ -23,6 +28,7 @@ BUNDLES = [
     ("com.crisiskhan.blackout", "Blackout iOS App Store GHA Local", "IOS"),
     ("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA Local", "IOS"),
 ]
+LOCAL_PROFILE_NAMES = frozenset(name for _ident, name, _plat in BUNDLES)
 
 ApiFn = Callable[..., tuple[int, dict[str, Any]]]
 
@@ -57,9 +63,56 @@ def should_revoke_cert(
     cert: dict[str, Any],
     keep_ids: frozenset[str] = KEEP_DIST_IDS,
 ) -> bool:
-    """Happy path never revokes Dist certs. KEEP is pinned."""
+    """Generic Dist revoke stays off. Use should_revoke_stale_local_dist."""
     del cert, keep_ids
     return False
+
+
+def should_revoke_stale_local_dist(
+    cert: dict[str, Any],
+    keep_ids: frozenset[str] = KEEP_DIST_IDS,
+) -> bool:
+    """Previous runner-local Dist leftovers. Never KEEP. Never Development."""
+    cid = str(cert.get("id") or "")
+    if cid in keep_ids:
+        return False
+    attrs = cert.get("attributes") or {}
+    ctype = str(attrs.get("certificateType") or "")
+    return ctype in DIST_TYPES
+
+
+def stale_local_dist_revoke_denied_message(
+    cert_id: str, status: int, payload: dict[str, Any]
+) -> str:
+    errors = payload.get("errors") or []
+    codes = [str(err.get("code") or "") for err in errors if isinstance(err, dict)]
+    code_note = codes[0] if codes else "FORBIDDEN"
+    return (
+        f"ASC revoke stale local Dist id={cert_id} HTTP {status} {code_note}. "
+        "Fail closed. Not revoking KEEP Dist. Not continuing archive."
+    )
+
+
+def revoke_stale_local_dist(
+    api: ApiFn,
+    certs: list[dict[str, Any]],
+    keep_ids: frozenset[str] = KEEP_DIST_IDS,
+) -> list[str]:
+    revoked: list[str] = []
+    for cert in certs:
+        if not should_revoke_stale_local_dist(cert, keep_ids=keep_ids):
+            continue
+        cid = str(cert.get("id") or "")
+        status, payload = api(
+            "DELETE",
+            f"https://api.appstoreconnect.apple.com/v1/certificates/{cid}",
+        )
+        if status not in (200, 204):
+            raise RevokeDeniedError(
+                stale_local_dist_revoke_denied_message(cid, status, payload)
+            )
+        revoked.append(cid)
+    return revoked
 
 
 def should_revoke_development_orphan(
@@ -176,9 +229,21 @@ def profile_create_failure_message(
 def local_profile_cert_mismatch_message(name: str, cert_id: str) -> str:
     keep_names = ", ".join(sorted(KEEP_PROFILE_NAMES))
     return (
-        f"ACTIVE local profile {name} is not bound to local Dist {cert_id}. "
+        f"ACTIVE KEEP-named profile {name} is not bound to local Dist {cert_id}. "
         f"Not deleting KEEP-named profiles ({keep_names}). "
-        "Not auto-replacing. Fail closed."
+        "Not auto-replacing KEEP-named profiles. Fail closed."
+    )
+
+
+def local_profile_replace_failure_message(
+    name: str, profile_id: str, status: int, payload: dict[str, Any]
+) -> str:
+    errors = payload.get("errors") or []
+    codes = [str(err.get("code") or "") for err in errors if isinstance(err, dict)]
+    code_note = codes[0] if codes else "UNEXPECTED_ERROR"
+    return (
+        f"ASC Local profile replace {name} id={profile_id} HTTP {status} {code_note}. "
+        "Not deleting KEEP-named profiles. Fail closed."
     )
 
 
@@ -193,6 +258,7 @@ def resolve_profile(
     require_cert: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     match = select_reusable_profile(profiles, name)
+    replaced = False
     if match is not None:
         if not require_cert:
             return "reuse", match
@@ -201,7 +267,18 @@ def resolve_profile(
             cert_ids = fetch_profile_certificate_ids(api, str(match.get("id") or ""))
         if cert_id in cert_ids:
             return "reuse", match
-        raise ProfileCreateError(local_profile_cert_mismatch_message(name, cert_id))
+        if name in KEEP_PROFILE_NAMES or name not in LOCAL_PROFILE_NAMES:
+            raise ProfileCreateError(local_profile_cert_mismatch_message(name, cert_id))
+        old_id = str(match.get("id") or "")
+        del_status, del_payload = api(
+            "DELETE",
+            f"https://api.appstoreconnect.apple.com/v1/profiles/{old_id}",
+        )
+        if del_status not in (200, 204):
+            raise ProfileCreateError(
+                local_profile_replace_failure_message(name, old_id, del_status, del_payload)
+            )
+        replaced = True
     status, payload = api(
         "POST",
         "https://api.appstoreconnect.apple.com/v1/profiles",
@@ -225,4 +302,4 @@ def resolve_profile(
         raise ProfileCreateError(
             profile_create_failure_message(ident or name, name, status, payload)
         )
-    return "create", created
+    return ("replace" if replaced else "create"), created

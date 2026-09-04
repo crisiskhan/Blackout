@@ -63,9 +63,22 @@ class TestPickKeepDistCert(unittest.TestCase):
         self.assertFalse(reuse.should_revoke_cert(_cert(KEEP)))
         self.assertFalse(reuse.should_revoke_development_orphan(_cert(KEEP)))
 
-    def test_happy_path_does_not_revoke_dist_orphans(self) -> None:
+    def test_happy_path_does_not_revoke_dist_orphans_via_generic_helper(self) -> None:
         self.assertFalse(reuse.should_revoke_cert(_cert("ORPHAN1")))
         self.assertFalse(reuse.should_revoke_development_orphan(_cert("ORPHAN1")))
+
+    def test_revokes_stale_non_keep_dist_before_next_mint(self) -> None:
+        """33928044175: previous local Dist leftovers fill Apple's cap."""
+        self.assertTrue(reuse.should_revoke_stale_local_dist(_cert("ORPHAN1")))
+        self.assertTrue(
+            reuse.should_revoke_stale_local_dist(_cert("YVK8HM9GT2", "DISTRIBUTION"))
+        )
+        self.assertFalse(reuse.should_revoke_stale_local_dist(_cert(KEEP)))
+        self.assertFalse(
+            reuse.should_revoke_stale_local_dist(
+                _cert("DEVAPI", "IOS_DEVELOPMENT", "Created via API")
+            )
+        )
 
     def test_dist_create_hard_cap_fails_closed_without_revoking_keep(self) -> None:
         msg = reuse.dist_create_failure_message(
@@ -196,22 +209,44 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
         self.assertEqual(match["id"], "LOCHIT")
         self.assertEqual(api.calls, [])
 
-    def test_local_named_wrong_cert_fails_closed_without_deleting_keep(self) -> None:
+    def test_local_named_wrong_cert_replaces_local_only(self) -> None:
+        """33928044175: Local profile bound to previous mint must be replaced."""
         api = FakeAPI()
         existing = _profile("OLDLOC", LOCAL_IOS_NAME, cert_ids=[KEEP])
+        keep_named = _profile("KEEPPROF", KEEP_IOS_NAME, cert_ids=[KEEP])
+        action, match = reuse.resolve_profile(
+            api,
+            [existing, keep_named],
+            name=LOCAL_IOS_NAME,
+            bundle_id="bid1",
+            cert_id=LOCAL_DIST,
+            require_cert=True,
+        )
+        self.assertEqual(action, "replace")
+        self.assertEqual(match["id"], "NEW")
+        self.assertEqual([m for m, _ in api.calls], ["DELETE", "POST"])
+        self.assertIn("profiles/OLDLOC", api.calls[0][1])
+        self.assertFalse(any("KEEPPROF" in url for _m, url in api.calls))
+        posted = api.bodies[1]["data"]
+        self.assertEqual(posted["attributes"]["name"], LOCAL_IOS_NAME)
+        self.assertEqual(
+            [c["id"] for c in posted["relationships"]["certificates"]["data"]],
+            [LOCAL_DIST],
+        )
+
+    def test_keep_named_wrong_cert_never_deletes(self) -> None:
+        api = FakeAPI()
         keep_named = _profile("KEEPPROF", KEEP_IOS_NAME, cert_ids=[KEEP])
         with self.assertRaises(reuse.ProfileCreateError) as ctx:
             reuse.resolve_profile(
                 api,
-                [existing, keep_named],
-                name=LOCAL_IOS_NAME,
+                [keep_named],
+                name=KEEP_IOS_NAME,
                 bundle_id="bid1",
                 cert_id=LOCAL_DIST,
                 require_cert=True,
             )
         msg = str(ctx.exception)
-        self.assertIn(LOCAL_IOS_NAME, msg)
-        self.assertIn(LOCAL_DIST, msg)
         self.assertIn(KEEP_IOS_NAME, msg)
         self.assertIn("Not deleting", msg)
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
@@ -282,6 +317,38 @@ class TestDevelopmentOrphanRevoke(unittest.TestCase):
         self.assertEqual([m for m, _ in api.calls], ["DELETE"])
         self.assertIn("certificates/DEVAPI", api.calls[0][1])
         self.assertFalse(any(KEEP in url for _m, url in api.calls))
+
+    def test_revoke_stale_local_dist_deletes_non_keep_only(self) -> None:
+        api = FakeAPI()
+        certs = [
+            _cert(KEEP, name="iOS Distribution: Stephan OConnor"),
+            _cert("2LWNR93SGQ"),
+            _cert("DR46Y6TTC3", "DISTRIBUTION"),
+            _cert("DEVAPI", "IOS_DEVELOPMENT", "Apple Development: Created via API"),
+        ]
+        revoked = reuse.revoke_stale_local_dist(api, certs)
+        self.assertEqual(set(revoked), {"2LWNR93SGQ", "DR46Y6TTC3"})
+        self.assertEqual([m for m, _ in api.calls], ["DELETE", "DELETE"])
+        urls = " ".join(url for _m, url in api.calls)
+        self.assertIn("certificates/2LWNR93SGQ", urls)
+        self.assertIn("certificates/DR46Y6TTC3", urls)
+        self.assertNotIn(KEEP, urls)
+        self.assertNotIn("DEVAPI", urls)
+
+    def test_revoke_stale_local_dist_denied_fails_closed(self) -> None:
+        api = FakeAPI()
+        api.delete_status = 403
+        api.delete_payload = {
+            "errors": [{"status": "403", "code": "FORBIDDEN.REQUIRED", "title": "Forbidden"}]
+        }
+        orphan = _cert("2LWNR93SGQ")
+        with self.assertRaises(reuse.RevokeDeniedError) as ctx:
+            reuse.revoke_stale_local_dist(api, [orphan])
+        msg = str(ctx.exception)
+        self.assertIn("403", msg)
+        self.assertIn("2LWNR93SGQ", msg)
+        self.assertIn("Fail closed", msg)
+        self.assertIn("KEEP", msg)
 
     def test_revoke_denied_fails_closed(self) -> None:
         api = FakeAPI()

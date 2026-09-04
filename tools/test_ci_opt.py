@@ -369,6 +369,10 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("tf_asc_reuse.py must sign with Local-named App Store profiles")
     if "should_revoke_development_orphan" not in reuse:
         fail("tf_asc_reuse.py must offer a Development orphan revoke helper")
+    if "revoke_stale_local_dist" not in reuse or "revoke_stale_local_dist" not in sign:
+        fail("TF must revoke stale non-KEEP Dist leftovers before the next mint")
+    if "LOCAL_PROFILE_NAMES" not in reuse:
+        fail("tf_asc_reuse.py must replace only Local-named profiles")
     if "HAS_LOCAL_DIST_KEY" not in archive:
         fail("tf-archive.sh must switch on HAS_LOCAL_DIST_KEY")
     if 'signingStyle"] = "manual"' not in archive and "signingStyle'] = 'manual'" not in archive:

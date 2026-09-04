@@ -384,9 +384,14 @@ def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
             raise SystemExit(1) from exc
         if action == "reuse":
             print(f"PROFILE reuse {pname} id={match.get('id')}")
-        else:
+        elif action == "replace":
+            print(f"PROFILE replaced {pname} id={match.get('id')} bound to local Dist {cert_id}")
+            profiles.append(match)
+        elif action == "create":
             print(f"PROFILE created {pname} id={match.get('id')}")
             profiles.append(match)
+        else:
+            raise SystemExit(f"unknown profile action {action!r}")
         match = hydrate_profile(match, pname)
         attrs = match.get("attributes") or {}
         uuid = attrs.get("uuid") or match.get("id")
@@ -411,6 +416,13 @@ def main() -> None:
         raise SystemExit(1) from exc
     for cid in revoked:
         print(f"REVOKED development orphan id={cid} (Created via API; not KEEP Dist)")
+    try:
+        stale = reuse.revoke_stale_local_dist(api, certs)
+    except reuse.RevokeDeniedError as exc:
+        print(str(exc))
+        raise SystemExit(1) from exc
+    for cid in stale:
+        print(f"REVOKED stale local Dist id={cid} (previous runner mint; not KEEP)")
     keep = reuse.pick_keep_dist_cert(certs)
     keep_id = str(keep.get("id") or "") if keep is not None else ""
     if keep is not None:
