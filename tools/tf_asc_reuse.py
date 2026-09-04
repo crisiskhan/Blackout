@@ -33,8 +33,11 @@ BUNDLES = [
 ]
 LOCAL_PROFILE_NAMES = frozenset(name for _ident, name, _plat in BUNDLES)
 PROFILE_LIST_STATES = ("ACTIVE", "INVALID")
-PROFILE_CREATE_RETRIES = 4
+PROFILE_CREATE_ATTEMPTS = 5
+PROFILE_CREATE_RETRY_SLEEPS = (15.0, 30.0, 60.0, 90.0, 120.0)
 RETRYABLE_PROFILE_CREATE_STATUS = frozenset({500, 502, 503})
+LOCAL_PROFILE_COOLDOWN_S = 25.0
+PROFILE_CREATE_RETRIES = PROFILE_CREATE_ATTEMPTS
 
 
 def profile_list_query() -> str:
@@ -51,7 +54,7 @@ ApiFn = Callable[..., tuple[int, dict[str, Any]]]
 
 
 class ProfileCreateError(RuntimeError):
-    """ASC profile POST failed. Do not delete existing profiles or retry."""
+    """ASC profile POST failed after retries. Do not delete KEEP-named profiles."""
 
 
 class RevokeDeniedError(RuntimeError):
@@ -239,6 +242,66 @@ def fetch_profile_certificate_ids(api: ApiFn, profile_id: str) -> list[str]:
     return [str(item.get("id") or "") for item in (payload.get("data") or []) if item.get("id")]
 
 
+def profile_error_codes(payload: dict[str, Any]) -> list[str]:
+    errors = payload.get("errors") or []
+    return [str(err.get("code") or "") for err in errors if isinstance(err, dict)]
+
+
+def is_retryable_profile_create(status: int, payload: dict[str, Any]) -> bool:
+    if status in RETRYABLE_PROFILE_CREATE_STATUS:
+        return True
+    return "UNEXPECTED_ERROR" in profile_error_codes(payload)
+
+
+def list_profiles_via_api(api: ApiFn) -> list[dict[str, Any]]:
+    status, payload = api(
+        "GET",
+        "https://api.appstoreconnect.apple.com/v1/profiles?" + profile_list_query(),
+    )
+    if status != 200:
+        return []
+    data = payload.get("data") or []
+    return list(data) if isinstance(data, list) else []
+
+
+def usable_listed_profile(
+    api: ApiFn,
+    profiles: list[dict[str, Any]],
+    *,
+    name: str,
+    cert_id: str,
+    require_cert: bool,
+) -> Optional[dict[str, Any]]:
+    match = select_reusable_profile(profiles, name)
+    if match is None and require_cert and name in LOCAL_PROFILE_NAMES:
+        match = select_profile_any_state(profiles, name)
+    if match is None:
+        return None
+    if not require_cert:
+        return match
+    cert_ids = profile_certificate_ids(match)
+    if not cert_ids:
+        cert_ids = fetch_profile_certificate_ids(api, str(match.get("id") or ""))
+    if cert_id in cert_ids:
+        return match
+    return None
+
+
+def local_profile_inter_create_delay(
+    previous_name: str | None,
+    previous_action: str | None,
+    next_name: str,
+) -> float:
+    """Pause after an iOS Local write before Widgets Local create/replace."""
+    if previous_action not in {"create", "replace"}:
+        return 0.0
+    if previous_name not in LOCAL_PROFILE_NAMES:
+        return 0.0
+    if next_name not in LOCAL_PROFILE_NAMES:
+        return 0.0
+    return LOCAL_PROFILE_COOLDOWN_S
+
+
 def profile_create_failure_message(
     ident: str,
     name: str,
@@ -276,6 +339,19 @@ def local_profile_replace_failure_message(
     )
 
 
+def _delete_local_named_profile(api: ApiFn, name: str, profile_id: str) -> None:
+    if name in KEEP_PROFILE_NAMES or name not in LOCAL_PROFILE_NAMES:
+        raise ProfileCreateError(local_profile_cert_mismatch_message(name, profile_id))
+    del_status, del_payload = api(
+        "DELETE",
+        f"https://api.appstoreconnect.apple.com/v1/profiles/{profile_id}",
+    )
+    if del_status not in (200, 204):
+        raise ProfileCreateError(
+            local_profile_replace_failure_message(name, profile_id, del_status, del_payload)
+        )
+
+
 def resolve_profile(
     api: ApiFn,
     profiles: list[dict[str, Any]],
@@ -286,6 +362,7 @@ def resolve_profile(
     ident: str = "",
     require_cert: bool = False,
     sleeper: Callable[[float], None] | None = None,
+    logger: Callable[[str], None] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     match = select_reusable_profile(profiles, name)
     if match is None and require_cert and name in LOCAL_PROFILE_NAMES:
@@ -301,17 +378,10 @@ def resolve_profile(
             return "reuse", match
         if name in KEEP_PROFILE_NAMES or name not in LOCAL_PROFILE_NAMES:
             raise ProfileCreateError(local_profile_cert_mismatch_message(name, cert_id))
-        old_id = str(match.get("id") or "")
-        del_status, del_payload = api(
-            "DELETE",
-            f"https://api.appstoreconnect.apple.com/v1/profiles/{old_id}",
-        )
-        if del_status not in (200, 204):
-            raise ProfileCreateError(
-                local_profile_replace_failure_message(name, old_id, del_status, del_payload)
-            )
+        _delete_local_named_profile(api, name, str(match.get("id") or ""))
         replaced = True
     sleep = sleeper if sleeper is not None else time.sleep
+    log = logger if logger is not None else (lambda _msg: None)
     body = {
         "data": {
             "type": "profiles",
@@ -323,8 +393,10 @@ def resolve_profile(
         }
     }
     status, payload = 0, {}
-    created: dict[str, Any] = {}
-    for attempt in range(PROFILE_CREATE_RETRIES):
+    for attempt in range(PROFILE_CREATE_ATTEMPTS):
+        log(
+            f"ASC profile CREATE {name} attempt {attempt + 1}/{PROFILE_CREATE_ATTEMPTS}"
+        )
         status, payload = api(
             "POST",
             "https://api.appstoreconnect.apple.com/v1/profiles",
@@ -332,10 +404,35 @@ def resolve_profile(
         )
         created = payload.get("data") or {}
         if status in (200, 201) and created.get("id"):
+            log(f"ASC profile CREATE {name} HTTP {status} id={created.get('id')}")
             return ("replace" if replaced else "create"), created
-        if status not in RETRYABLE_PROFILE_CREATE_STATUS or attempt + 1 >= PROFILE_CREATE_RETRIES:
+        codes = profile_error_codes(payload)
+        code_note = codes[0] if codes else "UNEXPECTED_ERROR"
+        log(
+            f"ASC profile CREATE {name} HTTP {status} {code_note} "
+            f"(attempt {attempt + 1}/{PROFILE_CREATE_ATTEMPTS}); re-listing"
+        )
+        listed = list_profiles_via_api(api)
+        found = usable_listed_profile(
+            api, listed, name=name, cert_id=cert_id, require_cert=require_cert
+        )
+        if found is not None:
+            log(f"ASC profile CREATE {name} appeared on re-list id={found.get('id')}")
+            return ("replace" if replaced else "create"), found
+        leftover = select_profile_any_state(listed, name)
+        if leftover is not None and name in LOCAL_PROFILE_NAMES and name not in KEEP_PROFILE_NAMES:
+            leftover_id = str(leftover.get("id") or "")
+            if leftover_id:
+                log(f"ASC Local profile leftover {name} id={leftover_id}; deleting Local-named only")
+                _delete_local_named_profile(api, name, leftover_id)
+                replaced = True
+        if not is_retryable_profile_create(status, payload):
             break
-        sleep(1.0)
+        if attempt + 1 >= PROFILE_CREATE_ATTEMPTS:
+            break
+        delay = PROFILE_CREATE_RETRY_SLEEPS[min(attempt, len(PROFILE_CREATE_RETRY_SLEEPS) - 1)]
+        log(f"ASC profile CREATE {name} retry backoff {delay:.0f}s")
+        sleep(delay)
     raise ProfileCreateError(
         profile_create_failure_message(ident or name, name, status, payload)
     )

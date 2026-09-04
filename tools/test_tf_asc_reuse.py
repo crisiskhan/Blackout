@@ -128,6 +128,9 @@ class FakeAPI:
         self.delete_payload: dict[str, Any] = {}
         self.get_status = 200
         self.get_payload: dict[str, Any] = {}
+        self.list_status = 200
+        self.list_payload: dict[str, Any] = {"data": []}
+        self.list_queue: list[tuple[int, dict[str, Any]]] | None = None
 
     def __call__(self, method: str, url: str, body: Any = None) -> tuple[int, dict]:
         self.calls.append((method, url))
@@ -139,8 +142,19 @@ class FakeAPI:
         if method == "DELETE":
             return self.delete_status, self.delete_payload
         if method == "GET":
-            return self.get_status, self.get_payload
+            if "/certificates" in url:
+                return self.get_status, self.get_payload
+            if self.list_queue:
+                return self.list_queue.pop(0)
+            return self.list_status, self.list_payload
         return 200, {}
+
+
+ASC_500 = {
+    "errors": [
+        {"status": "500", "code": "UNEXPECTED_ERROR", "title": "An unexpected error occurred."}
+    ]
+}
 
 
 class TestResolveProfileGetOrCreate(unittest.TestCase):
@@ -176,12 +190,13 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
         certs = posted["relationships"]["certificates"]["data"]
         self.assertEqual([c["id"] for c in certs], [LOCAL_DIST])
 
-    def test_create_500_fails_clearly_without_delete(self) -> None:
+    def test_create_500_exhausts_retries_fails_closed(self) -> None:
+        """33930228429: widget Local CREATE 500 must retry, then fail closed."""
         api = FakeAPI()
         api.post_status = 500
-        api.post_payload = {
-            "errors": [{"status": "500", "code": "UNEXPECTED_ERROR", "title": "An unexpected error occurred."}]
-        }
+        api.post_payload = ASC_500
+        logs: list[str] = []
+        sleeps: list[float] = []
         with self.assertRaises(reuse.ProfileCreateError) as ctx:
             reuse.resolve_profile(
                 api,
@@ -189,28 +204,29 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
                 name=LOCAL_WIDGET_NAME,
                 bundle_id="bid2",
                 cert_id=LOCAL_DIST,
-                sleeper=lambda _s: None,
+                sleeper=sleeps.append,
+                logger=logs.append,
             )
         msg = str(ctx.exception)
         self.assertIn("500", msg)
         self.assertIn("UNEXPECTED_ERROR", msg)
         self.assertIn("Not deleting", msg)
+        methods = [m for m, _ in api.calls]
+        self.assertEqual(methods.count("POST"), reuse.PROFILE_CREATE_ATTEMPTS)
+        self.assertEqual(sleeps, list(reuse.PROFILE_CREATE_RETRY_SLEEPS[:-1]))
+        self.assertGreaterEqual(methods.count("GET"), reuse.PROFILE_CREATE_ATTEMPTS)
+        self.assertTrue(any("profiles?" in url or "profiles&" in url or "filter" in url for m, url in api.calls if m == "GET"))
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
-        self.assertGreaterEqual([m for m, _ in api.calls].count("POST"), 1)
-        self.assertTrue(all(m == "POST" for m, _ in api.calls))
+        self.assertTrue(any("attempt" in line.lower() for line in logs))
 
     def test_create_500_retries_then_succeeds(self) -> None:
         """33930228429: widget Local CREATE hit ASC 500 after Dist prune."""
         api = FakeAPI()
-        err = {
-            "errors": [
-                {"status": "500", "code": "UNEXPECTED_ERROR", "title": "An unexpected error occurred."}
-            ]
-        }
         api.post_queue = [
-            (500, err),
+            (500, ASC_500),
             (201, {"data": _profile("NEW", LOCAL_WIDGET_NAME, cert_ids=[LOCAL_DIST])}),
         ]
+        logs: list[str] = []
         sleeps: list[float] = []
         action, match = reuse.resolve_profile(
             api,
@@ -219,11 +235,39 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
             bundle_id="bid2",
             cert_id=LOCAL_DIST,
             sleeper=sleeps.append,
+            logger=logs.append,
         )
         self.assertEqual(action, "create")
         self.assertEqual(match["id"], "NEW")
-        self.assertEqual([m for m, _ in api.calls], ["POST", "POST"])
-        self.assertEqual(sleeps, [1.0])
+        methods = [m for m, _ in api.calls]
+        self.assertEqual(methods.count("POST"), 2)
+        self.assertGreaterEqual(methods.count("GET"), 1)
+        self.assertEqual(sleeps, [reuse.PROFILE_CREATE_RETRY_SLEEPS[0]])
+        self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
+        self.assertTrue(any("1/" in line or "attempt" in line.lower() for line in logs))
+
+    def test_create_500_relists_and_uses_profile_if_it_appears(self) -> None:
+        """ASC 500 may still persist the profile; re-list before the next POST."""
+        api = FakeAPI()
+        api.post_status = 500
+        api.post_payload = ASC_500
+        appeared = _profile("APPEARED", LOCAL_WIDGET_NAME, cert_ids=[LOCAL_DIST])
+        api.list_payload = {"data": [appeared]}
+        sleeps: list[float] = []
+        action, match = reuse.resolve_profile(
+            api,
+            [],
+            name=LOCAL_WIDGET_NAME,
+            bundle_id="bid2",
+            cert_id=LOCAL_DIST,
+            sleeper=sleeps.append,
+            logger=lambda _m: None,
+        )
+        self.assertEqual(action, "create")
+        self.assertEqual(match["id"], "APPEARED")
+        self.assertEqual([m for m, _ in api.calls].count("POST"), 1)
+        self.assertTrue(any(m == "GET" for m, _ in api.calls))
+        self.assertEqual(sleeps, [])
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
 
     def test_reuse_local_named_profile_bound_to_local_cert(self) -> None:
@@ -265,6 +309,26 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
             [c["id"] for c in posted["relationships"]["certificates"]["data"]],
             [LOCAL_DIST],
         )
+
+    def test_local_create_500_relist_never_deletes_keep_named(self) -> None:
+        api = FakeAPI()
+        api.post_status = 500
+        api.post_payload = ASC_500
+        api.list_payload = {
+            "data": [_profile("KEEPPROF", KEEP_WIDGET_NAME, cert_ids=[KEEP])]
+        }
+        with self.assertRaises(reuse.ProfileCreateError):
+            reuse.resolve_profile(
+                api,
+                [],
+                name=LOCAL_WIDGET_NAME,
+                bundle_id="bid2",
+                cert_id=LOCAL_DIST,
+                sleeper=lambda _s: None,
+                logger=lambda _m: None,
+            )
+        self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
+        self.assertFalse(any("KEEPPROF" in url for _m, url in api.calls))
 
     def test_keep_named_wrong_cert_never_deletes(self) -> None:
         api = FakeAPI()
@@ -379,8 +443,38 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
         msg = str(ctx.exception)
         self.assertIn(LOCAL_IOS_NAME, msg)
         self.assertIn("409", msg)
-        self.assertEqual([m for m, _ in api.calls], ["DELETE", "POST"])
+        methods = [m for m, _ in api.calls]
+        self.assertEqual(methods[0], "DELETE")
+        self.assertEqual(methods.count("POST"), 1)
         self.assertFalse(any("KEEP" in url for _m, url in api.calls))
+
+    def test_local_replace_recreate_500_retries_then_succeeds(self) -> None:
+        api = FakeAPI()
+        api.post_queue = [
+            (500, ASC_500),
+            (201, {"data": _profile("NEW", LOCAL_WIDGET_NAME, cert_ids=[LOCAL_DIST])}),
+        ]
+        existing = _profile("OLDWID", LOCAL_WIDGET_NAME, cert_ids=["DR46Y6TTC3"])
+        keep_named = _profile("KEEPPROF", KEEP_WIDGET_NAME, cert_ids=[KEEP])
+        sleeps: list[float] = []
+        action, match = reuse.resolve_profile(
+            api,
+            [existing, keep_named],
+            name=LOCAL_WIDGET_NAME,
+            bundle_id="bid2",
+            cert_id=LOCAL_DIST,
+            require_cert=True,
+            sleeper=sleeps.append,
+            logger=lambda _m: None,
+        )
+        self.assertEqual(action, "replace")
+        self.assertEqual(match["id"], "NEW")
+        methods = [m for m, _ in api.calls]
+        self.assertEqual(methods[0], "DELETE")
+        self.assertIn("profiles/OLDWID", api.calls[0][1])
+        self.assertEqual(methods.count("POST"), 2)
+        self.assertEqual(sleeps, [reuse.PROFILE_CREATE_RETRY_SLEEPS[0]])
+        self.assertFalse(any("KEEPPROF" in url for _m, url in api.calls))
 
     def test_reuse_fetches_certs_when_list_omits_relationships(self) -> None:
         api = FakeAPI()
@@ -401,6 +495,27 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
         self.assertEqual([m for m, _ in api.calls], ["GET"])
         self.assertIn("profiles/LOCHIT/certificates", api.calls[0][1])
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
+
+
+class TestLocalProfileCooldown(unittest.TestCase):
+    def test_cooldown_after_ios_local_write_before_widgets(self) -> None:
+        delay = reuse.local_profile_inter_create_delay(
+            LOCAL_IOS_NAME, "replace", LOCAL_WIDGET_NAME
+        )
+        self.assertGreaterEqual(delay, 20.0)
+        self.assertLessEqual(delay, 30.0)
+
+    def test_no_cooldown_when_ios_was_reused(self) -> None:
+        self.assertEqual(
+            reuse.local_profile_inter_create_delay(LOCAL_IOS_NAME, "reuse", LOCAL_WIDGET_NAME),
+            0.0,
+        )
+
+    def test_no_cooldown_before_first_profile(self) -> None:
+        self.assertEqual(
+            reuse.local_profile_inter_create_delay(None, None, LOCAL_IOS_NAME),
+            0.0,
+        )
 
 
 class TestBundlesPhoneAndWidgetOnly(unittest.TestCase):

@@ -364,10 +364,27 @@ def hydrate_profile(match: dict, pname: str) -> dict:
     return payload.get("data") or {}
 
 
-def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
+def write_profiles(
+    home: Path,
+    tmp: Path,
+    cert_id: str,
+    sleeper=None,
+) -> None:
+    sleep = sleeper if sleeper is not None else time.sleep
     profiles = list_app_store_profiles()
     profile_names: dict[str, str] = {}
+    prev_name: str | None = None
+    prev_action: str | None = None
     for ident, pname, platform in reuse.BUNDLES:
+        delay = reuse.local_profile_inter_create_delay(prev_name, prev_action, pname)
+        if prev_name is not None:
+            if delay:
+                print(
+                    f"ASC cooldown {delay:.0f}s after {prev_name} {prev_action} "
+                    f"before {pname}"
+                )
+                sleep(delay)
+            profiles = list_app_store_profiles()
         bid = ensure_bundle(ident, platform)
         try:
             action, match = reuse.resolve_profile(
@@ -378,6 +395,8 @@ def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
                 cert_id=cert_id,
                 ident=ident,
                 require_cert=True,
+                sleeper=sleep,
+                logger=print,
             )
         except reuse.ProfileCreateError as exc:
             print(str(exc))
@@ -401,6 +420,7 @@ def write_profiles(home: Path, tmp: Path, cert_id: str) -> None:
             raise SystemExit(1)
         write_profile(home, str(uuid), content)
         profile_names[ident] = pname
+        prev_name, prev_action = pname, action
     (tmp / "profile_map.json").write_text(json.dumps(profile_names))
     print("wrote profile_map.json", profile_names)
 
