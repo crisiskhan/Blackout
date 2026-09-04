@@ -523,15 +523,19 @@ jobs:
           if pmap.exists():
               profiles = json.loads(pmap.read_text())
           body = {
-              "method": "app-store-connect",
+              # app-store (IPA). app-store-connect on a hand-packed archive
+              # can mis-detect platform and demand Mac installer certs.
+              "method": "app-store",
               "destination": "export",
               "teamID": os.environ["APPLE_TEAM_ID"],
               "uploadSymbols": True,
               "manageAppVersionAndBuildNumber": False,
+              "stripSwiftSymbols": True,
           }
           if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
               body["signingStyle"] = "manual"
-              body["signingCertificate"] = "iPhone Distribution"
+              # Prefer modern Apple Distribution; iPhone Distribution also accepted.
+              body["signingCertificate"] = "Apple Distribution"
               body["provisioningProfiles"] = profiles
           else:
               body["signingStyle"] = "automatic"
@@ -764,11 +768,18 @@ jobs:
           from pathlib import Path
           from datetime import datetime, timezone
           app = Path(os.environ["RUNNER_TEMP"]) / "Blackout.xcarchive/Products/Applications/Blackout.app"
-          info = plistlib.loads((app / "Info.plist").read_bytes())
+          info_path = app / "Info.plist"
+          info = plistlib.loads(info_path.read_bytes())
+          # Force iOS platform markers so exportArchive does not hunt Mac installer certs
+          info["LSRequiresIPhoneOS"] = True
+          info["CFBundleSupportedPlatforms"] = ["iPhoneOS"]
+          info["DTPlatformName"] = "iphoneos"
+          info_path.write_bytes(plistlib.dumps(info))
           bid = info.get("CFBundleIdentifier") or "com.crisiskhan.blackout"
           name = info.get("CFBundleName") or "Blackout"
           ver = info.get("CFBundleShortVersionString") or "1.0"
           build = str(info.get("CFBundleVersion") or os.environ.get("NEXT", "1"))
+          team = os.environ.get("APPLE_TEAM_ID", "")
           archive_info = {
               "ApplicationProperties": {
                   "ApplicationPath": "Applications/Blackout.app",
@@ -776,7 +787,8 @@ jobs:
                   "CFBundleName": name,
                   "CFBundleShortVersionString": ver,
                   "CFBundleVersion": build,
-                  "SigningStatus": "apple-id",
+                  "Team": team,
+                  "SigningStatus": "unsigned",
               },
               "ArchiveVersion": 2,
               "CreationDate": datetime.now(timezone.utc),
@@ -785,7 +797,7 @@ jobs:
           }
           out = Path(os.environ["RUNNER_TEMP"]) / "Blackout.xcarchive/Info.plist"
           plistlib.dump(archive_info, out.open("wb"))
-          print("wrote archive Info.plist", bid, build)
+          print("wrote archive Info.plist", bid, build, "team", team)
           PY
             echo "Packed $ARCHIVE"
             ls -la "$ARCHIVE/Products/Applications/Blackout.app" | head
