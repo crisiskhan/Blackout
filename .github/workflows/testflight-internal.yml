@@ -762,6 +762,8 @@ jobs:
             archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
           echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
           set -e
+          stop_janitor
+          trap - EXIT
           ARC="$(cat "$RUNNER_TEMP/archive.exit")"
           echo "archive exit=$ARC"
 
@@ -815,149 +817,31 @@ jobs:
               echo "No Distribution identity"
               exit 1
             fi
-            echo "Re-seal nested + main with $IDHASH"
-            IDHASH="$IDHASH" DD="$DD" APP="$APP" "$PYBIN" << 'PY'
-          import os, subprocess, plistlib, sys
+            echo "Re-seal main only with $IDHASH (leave Xcode nested seals + Assets.car alone)"
+            find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
+            rm -rf "$APP/_CodeSignature"
+            ENT=""
+            XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
+            if [ -n "$XCENT" ] && [ -f "$XCENT" ]; then
+              ENT="$XCENT"
+              echo "using xcent $ENT"
+            elif [ -f "$APP/embedded.mobileprovision" ]; then
+              ENT="$RUNNER_TEMP/ent-main.plist"
+              "$PYBIN" - "$APP/embedded.mobileprovision" "$ENT" << 'PY'
+          import plistlib, subprocess, sys
           from pathlib import Path
-
-          app = Path(os.environ["APP"])
-          dd = Path(os.environ["DD"])
-          idhash = os.environ["IDHASH"]
-          tmp = Path(os.environ["RUNNER_TEMP"])
-
-          def run(cmd):
-              print("+", " ".join(cmd))
-              subprocess.check_call(cmd)
-
-          # Strip killers
-          for p in app.rglob("Metadata.appintents"):
-              if p.is_dir():
-                  print("rm", p)
-                  subprocess.call(["rm", "-rf", str(p)])
-          for p in app.glob("AppIcon*.png"):
-              print("rm", p)
-              p.unlink(missing_ok=True)
-
-          # Non-code resources must not be executable (codesign treats +x as nested code)
-          for pat in ("*.xcprivacy", "*.car", "*.png", "*.plist", "*.json", "*.strings", "*.nib", "*.storyboardc"):
-              for p in app.rglob(pat):
-                  if p.is_file():
-                      p.chmod(0o644)
-          subprocess.call(["/usr/bin/xattr", "-cr", str(app)])
-
-          # Ensure main + nested binaries stay executable
-          for rel in ("Blackout",):
-              b = app / rel
-              if b.is_file():
-                  b.chmod(0o755)
-          for appex in app.rglob("*.appex"):
-              for cand in appex.iterdir():
-                  if cand.is_file() and cand.suffix == "" and cand.name != "embedded.mobileprovision":
-                      # heuristic: Mach-O next to Info.plist
-                      pass
-              # named executable usually matches appex stem
-              exe = appex / appex.stem
-              if exe.is_file():
-                  exe.chmod(0o755)
-          for fw in app.rglob("*.framework"):
-              exe = fw / fw.stem
-              if exe.is_file():
-                  exe.chmod(0o755)
-
-          def ents_from_provision(prov: Path, out: Path):
-              raw = subprocess.check_output(["security", "cms", "-D", "-i", str(prov)], stderr=subprocess.DEVNULL)
-              pl = plistlib.loads(raw)
-              out.write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
-              return out
-
-          def ensure_provision(bundle: Path, bundle_id: str):
-              prov = bundle / "embedded.mobileprovision"
-              if prov.exists():
-                  return prov
-              home = Path.home()
-              for d in (
-                  home / "Library/Developer/Xcode/UserData/Provisioning Profiles",
-                  home / "Library/MobileDevice/Provisioning Profiles",
-              ):
-                  if not d.exists():
-                      continue
-                  for p in d.glob("*.mobileprovision"):
-                      try:
-                          raw = subprocess.check_output(["security", "cms", "-D", "-i", str(p)], stderr=subprocess.DEVNULL)
-                          pl = plistlib.loads(raw)
-                      except Exception:
-                          continue
-                      ents = pl.get("Entitlements") or {}
-                      appid = ents.get("application-identifier") or ""
-                      bid = appid.split(".", 1)[-1] if "." in appid else ""
-                      if bid == bundle_id:
-                          prov.write_bytes(p.read_bytes())
-                          print(f"embedded {bundle_id} from {p.name}")
-                          return prov
-              return prov
-
-          # Prefer Xcode-generated xcent for main when present
-          xcent = None
-          for cand in dd.rglob("Blackout.app.xcent"):
-              xcent = cand
-              break
-
-          # Re-sign nested deepest-first (Metadata strip invalidated their seals)
-          nested = sorted(
-              list(app.rglob("*.appex")) + list(app.rglob("*.framework")) + list(app.rglob("*.app")),
-              key=lambda p: len(p.parts),
-              reverse=True,
-          )
-          # exclude the main app itself from nested list
-          nested = [p for p in nested if p.resolve() != app.resolve()]
-          for bundle in nested:
-              # strip nest metadata again
-              md = bundle / "Metadata.appintents"
-              if md.exists():
-                  subprocess.call(["rm", "-rf", str(md)])
-              if bundle.suffix == ".framework":
-                  run([
-                      "/usr/bin/codesign", "--force", "--sign", idhash,
-                      "--preserve-metadata=identifier,entitlements,flags",
-                      "--generate-entitlement-der", str(bundle),
-                  ])
-              else:
-                  # appex / watch app
-                  bid = {
-                      ".appex": "com.crisiskhan.blackout.widgets",
-                      ".app": "com.crisiskhan.blackout.watchkitapp",
-                  }.get(bundle.suffix, "")
-                  if bundle.suffix == ".app" and "watch" not in bundle.name.lower() and bundle.name != "BlackoutWatch.app":
-                      continue
-                  prov = ensure_provision(bundle, bid) if bid else None
-                  cmd = ["/usr/bin/codesign", "--force", "--sign", idhash, "--generate-entitlement-der", str(bundle)]
-                  if prov and prov.exists():
-                      ent = tmp / f"ent-{bundle.name}.plist"
-                      ents_from_provision(prov, ent)
-                      cmd = ["/usr/bin/codesign", "--force", "--sign", idhash, "--entitlements", str(ent), "--generate-entitlement-der", str(bundle)]
-                  run(cmd)
-
-          ensure_provision(app, "com.crisiskhan.blackout")
-          if xcent and xcent.exists():
-              ent = xcent
-              print("using xcent", xcent)
-          else:
-              ent = tmp / "ent-main.plist"
-              ents_from_provision(app / "embedded.mobileprovision", ent)
-              print("wrote", ent)
-
-          rm_sig = app / "_CodeSignature"
-          if rm_sig.exists():
-              subprocess.call(["rm", "-rf", str(rm_sig)])
-
-          run([
-              "/usr/bin/codesign", "--force", "--sign", idhash,
-              "--entitlements", str(ent),
-              "--generate-entitlement-der",
-              str(app),
-          ])
-          print("main app re-sealed")
+          raw = subprocess.check_output(["security", "cms", "-D", "-i", sys.argv[1]], stderr=subprocess.DEVNULL)
+          pl = plistlib.loads(raw)
+          Path(sys.argv[2]).write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
+          print("wrote", sys.argv[2])
           PY
+            fi
+            if [ -n "$ENT" ] && [ -f "$ENT" ]; then
+              /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --generate-entitlement-der "$APP"
+            else
+              /usr/bin/codesign --force --sign "$IDHASH" --generate-entitlement-der "$APP"
+            fi
+            echo "main app re-sealed"
             rm -rf "$EXPORT"
             mkdir -p "$EXPORT/Payload"
             cp -a "$APP" "$EXPORT/Payload/Blackout.app"
