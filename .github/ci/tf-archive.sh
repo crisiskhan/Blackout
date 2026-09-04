@@ -1,6 +1,5 @@
 #!/bin/bash
-# Stock xcodebuild archive+export, plus the smallest pre-CodeSign fixes
-# proven by GHA (no xattr, no chmod 644, no PrivacyInfo/Assets.car delete).
+# Stock archive + export only. No strip, xattr, actool, or post-archive bundle rewrite.
 set -euo pipefail
 NEXT="${NEXT_CPV:?NEXT_CPV not set}"
 if [ -z "$NEXT" ]; then
@@ -56,7 +55,6 @@ plistlib.dump(body, open(path, "wb"))
 print("wrote", path, "signingStyle", body["signingStyle"])
 PY
 
-# CI-only pbxproj signing settings (not committed). No strip phases. No AppIntents hacks.
 "$PYBIN" << 'PY'
 import json, os, re
 from pathlib import Path
@@ -117,88 +115,11 @@ print("rewrote CODE_SIGN_IDENTITY to exact keychain hash")
 PY
 fi
 
-# Stock archive (33825215841) CodeSign-failed on AppIcon60x60@2x.png.
-# Loose AppIcon pngs are unsigned nested code. Delete those; do not xattr.
-cp .github/ci/strip-app-before-codesign.sh ci_strip_appicon.sh
-chmod 755 ci_strip_appicon.sh
-"$PYBIN" << 'PY'
-from pathlib import Path
-print("wrote", Path("ci_strip_appicon.sh").resolve())
-path = Path("Blackout.xcodeproj/project.pbxproj")
-text = path.read_text()
-phase_id = "C1A00001B007000000000001"
-note = "CI strip loose AppIcon before CodeSign"
-if phase_id in text:
-    print("phase already present")
-else:
-    phase = (
-        f"\t\t{phase_id} /* {note} */ = {{\n"
-        "\t\t\tisa = PBXShellScriptBuildPhase;\n"
-        "\t\t\talwaysOutOfDate = 1;\n"
-        "\t\t\tbuildActionMask = 2147483647;\n"
-        "\t\t\tfiles = (\n\t\t\t);\n"
-        "\t\t\tinputFileListPaths = (\n\t\t\t);\n"
-        "\t\t\tinputPaths = (\n\t\t\t);\n"
-        f'\t\t\tname = "{note}";\n'
-        "\t\t\toutputFileListPaths = (\n\t\t\t);\n"
-        "\t\t\toutputPaths = (\n\t\t\t);\n"
-        "\t\t\trunOnlyForDeploymentPostprocessing = 1;\n"
-        "\t\t\tshellPath = /bin/sh;\n"
-        '\t\t\tshellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";\n'
-        "\t\t\tshowEnvVarsInLog = 0;\n"
-        "\t\t};\n"
-    )
-    marker = "/* Begin PBXShellScriptBuildPhase section */\n"
-    if marker not in text:
-        raise SystemExit("PBXShellScriptBuildPhase section missing")
-    text = text.replace(marker, marker + phase, 1)
-    needle = "\t\t\t\t22B4790C46112DC12EE4F2A3 /* Embed Foundation Extensions */,\n"
-    if needle not in text:
-        raise SystemExit("Embed Foundation Extensions missing")
-    text = text.replace(needle, needle + f"\t\t\t\t{phase_id} /* {note} */,\n", 1)
-    path.write_text(text)
-    print("injected AppIcon cleanup phase")
-check = path.read_text()
-if 'shellScript = "\\"$SRCROOT/ci_strip_appicon.sh\\"\\n";' not in check and 'shellScript = "\\"$SRCROOT/ci_strip_appicon.sh"\\n";' not in check:
-    i = check.find("ci_strip_appicon")
-    print("SANITY FAIL nearby:", repr(check[i-40:i+80]))
-    raise SystemExit("pbxproj shellScript line malformed")
-print("pbxproj shellScript line OK")
-PY
-
-# No-op App Intents processors so Metadata.appintents is never written.
-# Stock 33825215841 wrote Metadata on Widgets + main after the real processors ran.
-XCTool="/Applications/Xcode_16.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
-  SRC="$XCTool/$tool"
-  if [ -x "$SRC" ] && [ ! -e "$SRC.blackout-real" ]; then
-    sudo mv "$SRC" "$SRC.blackout-real"
-    echo 'IyEvYmluL2Jhc2gKIyBCbGFja291dCBHSGEgbm8tb3A6IHNraXAgQXBwIEludGVudHMgbWV0YWRhdGEgZ2VuZXJhdGlvbiAocnVubmVyLU9OTFkpCmV4aXQgMAo=' | base64 -d | sudo tee "$SRC" >/dev/null
-    sudo chmod 755 "$SRC"
-    echo "no-op installed: $tool"
-  elif [ -x "$SRC" ]; then
-    echo "no-op already present: $tool"
-  else
-    echo "WARNING: missing $SRC"
-  fi
-done
-restore_intent_tools() {
-  for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
-    SRC="$XCTool/$tool"
-    if [ -e "$SRC.blackout-real" ]; then
-      sudo mv -f "$SRC.blackout-real" "$SRC" 2>/dev/null || true
-      echo "restored $tool"
-    fi
-  done
-}
-trap restore_intent_tools EXIT
-
 DD="$RUNNER_TEMP/DerivedData"
 rm -rf "$DD" "$ARCHIVE" "$EXPORT"
 mkdir -p "$EXPORT"
 
-set +e
-echo "xcodebuild archive..."
+echo "Stock xcodebuild archive..."
 xcodebuild \
   -project Blackout.xcodeproj \
   -scheme Blackout \
@@ -208,94 +129,21 @@ xcodebuild \
   -archivePath "$ARCHIVE" \
   CURRENT_PROJECT_VERSION="$NEXT" \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-  CODE_SIGNING_ALLOWED=YES \
-  ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
   "${AUTH[@]}" \
   archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
-echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
-set -e
-ARC="$(cat "$RUNNER_TEMP/archive.exit")"
-echo "archive exit=$ARC"
 
-if [ "$ARC" -ne 0 ] || [ ! -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-  APP="$(find "$DD" -type d -path '*/InstallationBuildProductsLocation/Applications/Blackout.app' 2>/dev/null | head -n 1 || true)"
-  if [ -z "$APP" ] || [ ! -d "$APP" ]; then
-    echo "Archive failed and no recoverable Blackout.app. No upload."
-    exit 1
-  fi
-  echo "Recovered app at $APP (archive exit=$ARC) — re-seal main only"
-  IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-  if [ -z "$IDLINE" ]; then
-    IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-  fi
-  IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
-  if [ -z "$IDHASH" ]; then
-    echo "No Distribution identity"
-    exit 1
-  fi
-  find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
-  find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
-  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do
-    if [ -f "$f" ]; then
-      echo "fallback a-x $f"
-      ls -lO@ "$f" || ls -la "$f" || true
-      /bin/chmod a-x "$f" || true
-    fi
-  done
-  rm -rf "$APP/_CodeSignature"
-  ENT=""
-  XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
-  if [ -n "$XCENT" ] && [ -f "$XCENT" ]; then
-    ENT="$XCENT"
-    echo "using xcent $ENT"
-  elif [ -f "$APP/embedded.mobileprovision" ]; then
-    ENT="$RUNNER_TEMP/ent-main.plist"
-    "$PYBIN" - "$APP/embedded.mobileprovision" "$ENT" << 'PY'
-import plistlib, subprocess, sys
-from pathlib import Path
-raw = subprocess.check_output(["security", "cms", "-D", "-i", sys.argv[1]], stderr=subprocess.DEVNULL)
-pl = plistlib.loads(raw)
-Path(sys.argv[2]).write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
-print("wrote", sys.argv[2])
-PY
-  fi
-  if [ -n "$ENT" ] && [ -f "$ENT" ]; then
-    /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --generate-entitlement-der "$APP"
-  else
-    /usr/bin/codesign --force --sign "$IDHASH" --generate-entitlement-der "$APP"
-  fi
-  echo "main app re-sealed"
-  rm -rf "$EXPORT"
-  mkdir -p "$EXPORT/Payload"
-  cp -a "$APP" "$EXPORT/Payload/Blackout.app"
-  ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
-  IPA="$EXPORT/Blackout.ipa"
-else
-  echo "Archive OK — exportArchive"
-  set +e
-  xcodebuild \
-    -exportArchive \
-    -archivePath "$ARCHIVE" \
-    -exportPath "$EXPORT" \
-    -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-    "${AUTH[@]}" \
-    2>&1 | tee "$RUNNER_TEMP/export.log"
-  EX="${PIPESTATUS[0]}"
-  set -e
-  IPA="$(ls "$EXPORT"/*.ipa 2>/dev/null | head -n 1 || true)"
-  if [ "$EX" -ne 0 ] || [ -z "$IPA" ] || [ ! -f "$IPA" ]; then
-    echo "exportArchive exit=${EX:-?} — hand-zip from archive Products"
-    APP="$ARCHIVE/Products/Applications/Blackout.app"
-    rm -rf "$EXPORT"
-    mkdir -p "$EXPORT/Payload"
-    cp -a "$APP" "$EXPORT/Payload/Blackout.app"
-    ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
-    IPA="$EXPORT/Blackout.ipa"
-  fi
-fi
+echo "Stock xcodebuild -exportArchive..."
+xcodebuild \
+  -exportArchive \
+  -archivePath "$ARCHIVE" \
+  -exportPath "$EXPORT" \
+  -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+  "${AUTH[@]}" \
+  2>&1 | tee "$RUNNER_TEMP/export.log"
 
-if [ -z "${IPA:-}" ] || [ ! -f "$IPA" ]; then
-  echo "No IPA. No upload."
+IPA="$(ls "$EXPORT"/*.ipa 2>/dev/null | head -n 1 || true)"
+if [ -z "$IPA" ] || [ ! -f "$IPA" ]; then
+  echo "No IPA from exportArchive. No upload."
   exit 1
 fi
 ls -la "$IPA"
