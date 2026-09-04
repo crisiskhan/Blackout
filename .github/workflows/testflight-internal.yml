@@ -714,23 +714,37 @@ jobs:
           PY
           }
           DD="$RUNNER_TEMP/DerivedData"
-          # Ephemeral GHA codesign wrapper (Crisis approved 2026-09-03 MT).
-          # Xcode calls /usr/bin/codesign by absolute path AFTER ExtractAppIntentsMetadata
-          # recreates Metadata.appintents; strip that (and loose AppIcons) then call real codesign.
-          # Lives only on this runner VM for this job.
-          if [ ! -f /usr/bin/codesign.real ]; then
-            sudo mv /usr/bin/codesign /usr/bin/codesign.real
-          fi
-          # Decode ephemeral codesign wrapper (YAML-safe; no column-1 body).
-          echo 'IyEvYmluL2Jhc2gKUkVBTD0vdXNyL2Jpbi9jb2Rlc2lnbi5yZWFsCmZvciBhIGluICIkQCI7IGRvCiAgaWYgWyAtZCAiJGEiIF07IHRoZW4KICAgIGZpbmQgIiRhIiAtdHlwZSBkIC1uYW1lICdNZXRhZGF0YS5hcHBpbnRlbnRzJyAtcHJpbnQgMj4vZGV2L251bGwgfCB3aGlsZSBJRlM9IHJlYWQgLXIgZDsgZG8KICAgICAgZWNobyAiY29kZXNpZ24td3JhcDogcm0gJGQiID4mMgogICAgICBybSAtcmYgIiRkIgogICAgZG9uZQogICAgZmluZCAiJGEiIC1tYXhkZXB0aCAxIC1uYW1lICdBcHBJY29uKi5wbmcnIC1wcmludCAtZGVsZXRlIDI+L2Rldi9udWxsIHx8IHRydWUKICBmaQpkb25lCmV4ZWMgIiRSRUFMIiAiJEAiCg==' | base64 -d | sudo tee /usr/bin/codesign >/dev/null
-          sudo chmod 755 /usr/bin/codesign /usr/bin/codesign.real
-          restore_codesign() {
-            if [ -f /usr/bin/codesign.real ]; then
-              sudo mv -f /usr/bin/codesign.real /usr/bin/codesign 2>/dev/null || true
-            fi
+          # /usr/bin is read-only on GHA macOS (sealed system volume) — cannot replace codesign.
+          # Race janitor: delete Metadata.appintents + loose AppIcons as soon as Xcode writes them,
+          # so CodeSign never sees the bad subcomponent. (Crisis approved ephemeral runner-only fix.)
+          JANITOR_LOG="$RUNNER_TEMP/metadata-janitor.log"
+          : > "$JANITOR_LOG"
+          (
+            while true; do
+              find "$DD" -type d -name 'Metadata.appintents' 2>/dev/null | while IFS= read -r d; do
+                echo "$(date -u +%H:%M:%S) rm $d" >> "$JANITOR_LOG"
+                rm -rf "$d"
+              done
+              find "$DD" -type f -name 'AppIcon*.png' 2>/dev/null | while IFS= read -r f; do
+                case "$f" in
+                  */Blackout.app/AppIcon*.png|*/BlackoutWidgets.appex/AppIcon*.png|*/BlackoutWatch.app/AppIcon*.png)
+                    echo "$(date -u +%H:%M:%S) rm $f" >> "$JANITOR_LOG"
+                    rm -f "$f"
+                    ;;
+                esac
+              done
+              sleep 0.05
+            done
+          ) &
+          JANITOR_PID=$!
+          stop_janitor() {
+            kill "$JANITOR_PID" 2>/dev/null || true
+            wait "$JANITOR_PID" 2>/dev/null || true
+            echo "janitor log (last 40):"
+            tail -40 "$JANITOR_LOG" || true
           }
-          trap restore_codesign EXIT
-          echo "codesign wrapper installed (real=$(ls -la /usr/bin/codesign.real | awk '{print $1,$3,$4,$NF}'))"
+          trap stop_janitor EXIT
+          echo "Metadata janitor pid=$JANITOR_PID"
 
           set +e
           rm -rf "$DD" "$ARCHIVE"
