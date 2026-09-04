@@ -118,7 +118,8 @@ fi
 # 33825793771 stock+STANDALONE_ICON_BEHAVIOR=none: no AppIcon pngs; CodeSign
 # died on Metadata.appintents. No-op the App Intents processors.
 # 33825608089: after Metadata was gone, 644 PrivacyInfo / Assets.car were
-# still "unsigned nested code". Blob-sign those two files before CodeSign.
+# still "unsigned nested code". 33826265768: blob-sign of those two moved
+# CodeSign to embedded.mobileprovision. Blob-sign all three.
 XCTool="/Applications/Xcode_16.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin"
 for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
   SRC="$XCTool/$tool"
@@ -158,7 +159,7 @@ script.write_text(
     'ID="${EXPANDED_CODE_SIGN_IDENTITY:-}"\n'
     'if [ -z "$ID" ] || [ "$ID" = "-" ]; then ID="${CODE_SIGN_IDENTITY:-}"; fi\n'
     'if [ -z "$ID" ] || [ "$ID" = "-" ]; then echo "CI blob-sign skip: no identity"; exit 0; fi\n'
-    'for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy"; do\n'
+    'for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
     '  [ -f "$f" ] || continue\n'
     '  echo "CI blob-sign $f"\n'
     '  /usr/bin/codesign --force --sign "$ID" --timestamp=none --identifier "com.crisiskhan.blackout.$(basename "$f")" "$f"\n'
@@ -244,7 +245,7 @@ if [ "$ARC" -ne 0 ] || [ ! -d "$ARCHIVE/Products/Applications/Blackout.app" ]; t
   fi
   find "$APP" -type d -name 'Metadata.appintents' -exec rm -rf {} + 2>/dev/null || true
   find "$APP" -maxdepth 1 -name 'AppIcon*.png' -delete 2>/dev/null || true
-  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy"; do
+  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do
     if [ -f "$f" ]; then
       echo "fallback blob-sign $f"
       /usr/bin/codesign --force --sign "$IDHASH" --timestamp=none \
