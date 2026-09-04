@@ -261,6 +261,9 @@ SNAP="$RUNNER_TEMP/recovered-Blackout.app"
 rm -rf "$DD" "$ARCHIVE" "$EXPORT" "$SNAP"
 mkdir -p "$EXPORT"
 
+# 33927056130: do not pass CODE_SIGN_IDENTITY on this CLI. It applies to
+# every target including SPM packages (VisionCoreML, Tokens, MapLibreMap).
+# Those stay Automatic. App/widget identity is the CI pbx patch only.
 set +e
 echo "xcodebuild archive..."
 xcodebuild \
@@ -272,7 +275,6 @@ xcodebuild \
   -archivePath "$ARCHIVE" \
   CURRENT_PROJECT_VERSION="$NEXT" \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-  CODE_SIGN_IDENTITY="iPhone Distribution" \
   CODE_SIGNING_ALLOWED=YES \
   ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
   "${AUTH[@]}" \

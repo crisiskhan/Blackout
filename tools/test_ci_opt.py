@@ -374,6 +374,13 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("tf-archive.sh must use Manual signing when HAS_LOCAL_DIST_KEY=1")
     if "GHA Local" not in archive:
         fail("tf-archive.sh Manual path must default to Local profile names")
+    # 33927056130: CLI CODE_SIGN_IDENTITY hits SPM packages and exits 65.
+    start = archive.find('echo "xcodebuild archive..."')
+    end = archive.find("archive 2>&1", start)
+    if start < 0 or end < 0:
+        fail("tf-archive.sh must invoke xcodebuild archive")
+    if "CODE_SIGN_IDENTITY=" in archive[start:end]:
+        fail("do not pass CODE_SIGN_IDENTITY on the xcodebuild archive CLI")
     if "watchkitapp" in reuse:
         fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")
     test_tf_asc_reuse.main()
