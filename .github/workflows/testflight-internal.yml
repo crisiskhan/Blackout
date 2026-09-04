@@ -531,12 +531,11 @@ jobs:
               "uploadSymbols": True,
               "manageAppVersionAndBuildNumber": False,
               "stripSwiftSymbols": True,
-              "platform": "ios",
           }
           if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
               body["signingStyle"] = "manual"
-              # Keychain identity is iPhone Distribution (GHA IOS_DISTRIBUTION cert).
-              body["signingCertificate"] = "iPhone Distribution"
+              # Prefer modern Apple Distribution; iPhone Distribution also accepted.
+              body["signingCertificate"] = "Apple Distribution"
               body["provisioningProfiles"] = profiles
           else:
               body["signingStyle"] = "automatic"
@@ -819,26 +818,148 @@ jobs:
           fi
           export NEXT
           pack_archive
-          mkdir -p "$EXPORT"
-          set +e
-          xcodebuild \
-            -exportArchive \
-            -archivePath "$ARCHIVE" \
-            -exportPath "$EXPORT" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-            "${AUTH[@]}" \
-            2>&1 | tee "$RUNNER_TEMP/export.log"
-          EXP=${PIPESTATUS[0]}
-          set -e
-          if [ "$EXP" -ne 0 ]; then
-            if grep -qiE 'HTTP 401|HTTP 403|not have permission|Unable to log in|403 Forbidden|401 Unauthorized' "$RUNNER_TEMP/export.log"; then
-              echo "$STOP"
+          # exportArchive mis-detects hand-packed archives (Mac installer cert).
+          # Sign with stock codesign and zip an IPA ourselves.
+          make_ipa() {
+            set -e
+            APP="$ARCHIVE/Products/Applications/Blackout.app"
+            IDLINE=$(security find-identity -v -p codesigning "$SIGNING_KEYCHAIN" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+            if [ -z "$IDLINE" ]; then
+              IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
             fi
-            echo "Export failed. No upload."
+            IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
+            if [ -z "$IDHASH" ]; then
+              echo "No Distribution identity for IPA sign"
+              return 1
+            fi
+            echo "IPA sign identity $IDHASH"
+            # Map bundle id -> mobileprovision via security cms
+            "$PYBIN" - "$APP" << 'PY'
+          import os, subprocess, plistlib, sys
+          from pathlib import Path
+          app = Path(sys.argv[1])
+          home = Path.home()
+          dirs = [
+              home / "Library/Developer/Xcode/UserData/Provisioning Profiles",
+              home / "Library/MobileDevice/Provisioning Profiles",
+          ]
+          wanted = {
+              "com.crisiskhan.blackout": app / "embedded.mobileprovision",
+              "com.crisiskhan.blackout.widgets": None,  # filled if appex exists
+              "com.crisiskhan.blackout.watchkitapp": None,
+          }
+          appex = next(iter((app / "PlugIns").glob("*.appex")), None) if (app / "PlugIns").exists() else None
+          watch = None
+          for cand in app.rglob("BlackoutWatch.app"):
+              watch = cand
+              break
+          if appex:
+              wanted["com.crisiskhan.blackout.widgets"] = appex / "embedded.mobileprovision"
+          if watch:
+              wanted["com.crisiskhan.blackout.watchkitapp"] = watch / "embedded.mobileprovision"
+          found = {}
+          for d in dirs:
+              if not d.exists():
+                  continue
+              for p in d.glob("*.mobileprovision"):
+                  try:
+                      raw = subprocess.check_output(["security", "cms", "-D", "-i", str(p)], stderr=subprocess.DEVNULL)
+                      pl = plistlib.loads(raw)
+                  except Exception:
+                      continue
+                  ents = pl.get("Entitlements") or {}
+                  appid = ents.get("application-identifier") or ents.get("com.apple.application-identifier") or ""
+                  # TEAMID.bundle
+                  bid = appid.split(".", 1)[-1] if "." in appid else ""
+                  if bid in wanted and bid not in found:
+                      found[bid] = p
+                      print(f"provision for {bid}: {p.name}")
+          for bid, dest in wanted.items():
+              if dest is None:
+                  continue
+              src = found.get(bid)
+              if not src:
+                  print(f"WARNING: no profile for {bid}")
+                  continue
+              dest.write_bytes(src.read_bytes())
+              print(f"embedded {bid} -> {dest}")
+              # Entitlements for codesign when DerivedData .xcent is absent (unsigned build)
+              try:
+                  raw = subprocess.check_output(["security", "cms", "-D", "-i", str(src)], stderr=subprocess.DEVNULL)
+                  pl = plistlib.loads(raw)
+                  ents = pl.get("Entitlements") or {}
+                  ent_path = Path(os.environ["RUNNER_TEMP"]) / f"ent-{bid.replace('.','_')}.plist"
+                  ent_path.write_bytes(plistlib.dumps(ents))
+                  print(f"entitlements {bid} -> {ent_path}")
+              except Exception as e:
+                  print(f"entitlements extract failed {bid}: {e}")
+          PY
+            # Entitlements from DerivedData xcent if present
+            ENT_APP="$RUNNER_TEMP/ent-com_crisiskhan_blackout.plist"
+            ENT_WIDGET="$RUNNER_TEMP/ent-com_crisiskhan_blackout_widgets.plist"
+            ENT_WATCH="$RUNNER_TEMP/ent-com_crisiskhan_blackout_watchkitapp.plist"
+            [ -f "$ENT_APP" ] || ENT_APP=$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)
+            [ -f "$ENT_WIDGET" ] || ENT_WIDGET=$(find "$DD" -name 'BlackoutWidgets.appex.xcent' 2>/dev/null | head -n 1 || true)
+            [ -f "$ENT_WATCH" ] || ENT_WATCH=$(find "$DD" -name 'BlackoutWatch.app.xcent' 2>/dev/null | head -n 1 || true)
+            sign() {
+              local path="$1"
+              local ent="$2"
+              if [ ! -e "$path" ]; then
+                return 0
+              fi
+              # Always strip Metadata again immediately before sign
+              if [ -d "$path" ]; then
+                rm -rf "$path/Metadata.appintents" 2>/dev/null || true
+                find "$path" -maxdepth 1 -name 'AppIcon*.png' -delete 2>/dev/null || true
+              fi
+              if [ -n "$ent" ] && [ -f "$ent" ]; then
+                /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ent" --generate-entitlement-der --timestamp=none "$path"
+              else
+                /usr/bin/codesign --force --sign "$IDHASH" --timestamp=none "$path"
+              fi
+              echo "signed $path"
+            }
+            # Inside-out
+            if [ -d "$APP/Frameworks" ]; then
+              for f in "$APP"/Frameworks/*; do
+                sign "$f" ""
+              done
+            fi
+            if [ -d "$APP/PlugIns" ]; then
+              for p in "$APP"/PlugIns/*; do
+                sign "$p" "$ENT_WIDGET"
+              done
+            fi
+            if [ -d "$APP/Watch" ]; then
+              for w in "$APP"/Watch/*.app; do
+                sign "$w" "$ENT_WATCH"
+              done
+            fi
+            # Nested Watch might be under Watch/BlackoutWatch.app only
+            while IFS= read -r w; do
+              sign "$w" "$ENT_WATCH"
+            done < <(find "$APP" -name 'BlackoutWatch.app' -type d)
+            sign "$APP" "$ENT_APP"
+            /usr/bin/codesign --verify --deep --strict "$APP" 2>&1 | tee "$RUNNER_TEMP/codesign-verify.log" || {
+              echo "codesign verify failed (continuing to zip; altool is truth)"
+              cat "$RUNNER_TEMP/codesign-verify.log" || true
+            }
+            rm -rf "$EXPORT"
+            mkdir -p "$EXPORT/Payload"
+            cp -a "$APP" "$EXPORT/Payload/Blackout.app"
+            (
+              cd "$EXPORT"
+              zip -r -y -q Blackout.ipa Payload
+            )
+            ls -la "$EXPORT/Blackout.ipa"
+            echo "IPA ready: $EXPORT/Blackout.ipa"
+          }
+          make_ipa
+          IPA="$EXPORT/Blackout.ipa"
+          if [ ! -f "$IPA" ]; then
+            echo "No IPA. No upload."
             exit 1
           fi
-          ls -la "$EXPORT"
-          IPA="$(ls "$EXPORT"/*.ipa | head -n 1)"
           echo "IPA=$IPA" >> "$GITHUB_ENV"
           echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"
 
