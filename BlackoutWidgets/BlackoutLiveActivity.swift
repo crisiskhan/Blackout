@@ -31,6 +31,6 @@ struct BlackoutLiveActivity: Widget {
 struct BlackoutWidgetsBundle: WidgetBundle {
     var body: some Widget {
         BlackoutLiveActivity()
-        SOSControl()
+        // TestFlight slice: SOSControl (AppIntents) omitted — no Metadata.appintents.
     }
 }
