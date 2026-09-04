@@ -116,18 +116,13 @@ script.write_text(
     '    echo "CI remove unsigned Metadata.appintents"\n'
     '    rm -rf "$APP/Metadata.appintents"\n'
     '  fi\n'
-    # Assets.car: Xcode SetMode (chmod a+rX) then CodeSign fails with
-    # "code object is not signed at all In subcomponent: Assets.car".
-    # Remove here (runs before CodeSign); regenerate after archive succeeds.
-    '  if [ -f "$APP/Assets.car" ]; then\n'
-    '    echo "CI remove Assets.car before CodeSign (will regenerate after archive)"\n'
-    '    rm -f "$APP/Assets.car"\n'
-    '  fi\n'
-    '  if [ -f "$APP/PrivacyInfo.xcprivacy" ]; then\n'
-    '    /bin/chmod 644 "$APP/PrivacyInfo.xcprivacy" || true\n'
-    '  fi\n'
+    # Force resources non-executable. SetMode (chmod a+rX) can leave +x on
+    # Assets.car / PrivacyInfo / provision; codesign then treats them as nested code.
+    '  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
+    '    [ -f "$f" ] && /bin/chmod 644 "$f" || true\n'
+    '  done\n'
+    '  find "$APP" -type f \\( -name "*.car" -o -name "*.xcprivacy" -o -name "*.mobileprovision" -o -name "*.png" -o -name "*.plist" \\) -exec /bin/chmod 644 {} + 2>/dev/null || true\n'
     '  /usr/bin/xattr -cr "$APP" || true\n'
-    '  find "$APP" -type f -name "*.png" -exec /bin/chmod a-x {} + 2>/dev/null || true\n'
     "}\n"
     'strip_app "$CODESIGNING_FOLDER_PATH"\n'
     'strip_app "$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
@@ -265,6 +260,34 @@ restore_intent_tools() {
 }
 trap restore_intent_tools EXIT
 
+# Busy-poll chmod after SetMode a+rX until CodeSign finishes.
+ARCH_ROOT="$DD/Build/Intermediates.noindex/ArchiveIntermediates/Blackout"
+JANITOR_LOG="$RUNNER_TEMP/chmod-janitor.log"
+: > "$JANITOR_LOG"
+(
+  while true; do
+    APP="$ARCH_ROOT/InstallationBuildProductsLocation/Applications/Blackout.app"
+    if [ -d "$APP" ]; then
+      for f in Assets.car PrivacyInfo.xcprivacy embedded.mobileprovision; do
+        if [ -f "$APP/$f" ] && [ -x "$APP/$f" ]; then
+          echo "$(date -u +%H:%M:%S) chmod644 $f" >> "$JANITOR_LOG"
+          /bin/chmod 644 "$APP/$f" || true
+        fi
+      done
+      find "$APP" -type f \( -name '*.car' -o -name '*.xcprivacy' -o -name '*.mobileprovision' -o -name '*.png' \) -perm +111 -exec chmod 644 {} + 2>/dev/null || true
+    fi
+  done
+) &
+JANITOR_PID=$!
+stop_janitor() {
+  kill "$JANITOR_PID" 2>/dev/null || true
+  wait "$JANITOR_PID" 2>/dev/null || true
+  echo "chmod janitor log:"
+  tail -40 "$JANITOR_LOG" || true
+  restore_intent_tools
+}
+trap stop_janitor EXIT
+
 set +e
 rm -rf "$DD" "$ARCHIVE"
 xcodebuild \
@@ -287,7 +310,7 @@ echo "archive exit=$ARC"
 
 IPA=""
 if [ "$ARC" -eq 0 ] && [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-  echo "Archive OK — regenerate Assets.car then exportArchive"
+  echo "Archive OK — exportArchive"
   APP="$ARCHIVE/Products/Applications/Blackout.app"
   ASSETS_SRC="$(find . -type d -name Assets.xcassets | head -n 1 || true)"
   if [ -n "$ASSETS_SRC" ] && [ -d "$ASSETS_SRC" ]; then
