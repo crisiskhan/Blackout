@@ -721,27 +721,8 @@ jobs:
           if [ ! -f /usr/bin/codesign.real ]; then
             sudo mv /usr/bin/codesign /usr/bin/codesign.real
           fi
-          # Column-0 WRAP heredoc breaks the workflow YAML. Write via Python.
-          "$PYBIN" - "$RUNNER_TEMP/codesign-wrap" << 'PY'
-          import sys
-          from pathlib import Path
-          Path(sys.argv[1]).write_text(
-              "#!/bin/bash\n"
-              "REAL=/usr/bin/codesign.real\n"
-              "for a in \"$@\"; do\n"
-              "  if [ -d \"$a\" ]; then\n"
-              "    find \"$a\" -type d -name 'Metadata.appintents' -print 2>/dev/null | while IFS= read -r d; do\n"
-              "      echo \"codesign-wrap: rm $d\" >&2\n"
-              "      rm -rf \"$d\"\n"
-              "    done\n"
-              "    find \"$a\" -maxdepth 1 -name 'AppIcon*.png' -print -delete 2>/dev/null || true\n"
-              "  fi\n"
-              "done\n"
-              "exec \"$REAL\" \"$@\"\n"
-          )
-          print("wrote", sys.argv[1])
-          PY
-          sudo cp "$RUNNER_TEMP/codesign-wrap" /usr/bin/codesign
+          # Decode ephemeral codesign wrapper (YAML-safe; no column-1 body).
+          echo 'IyEvYmluL2Jhc2gKUkVBTD0vdXNyL2Jpbi9jb2Rlc2lnbi5yZWFsCmZvciBhIGluICIkQCI7IGRvCiAgaWYgWyAtZCAiJGEiIF07IHRoZW4KICAgIGZpbmQgIiRhIiAtdHlwZSBkIC1uYW1lICdNZXRhZGF0YS5hcHBpbnRlbnRzJyAtcHJpbnQgMj4vZGV2L251bGwgfCB3aGlsZSBJRlM9IHJlYWQgLXIgZDsgZG8KICAgICAgZWNobyAiY29kZXNpZ24td3JhcDogcm0gJGQiID4mMgogICAgICBybSAtcmYgIiRkIgogICAgZG9uZQogICAgZmluZCAiJGEiIC1tYXhkZXB0aCAxIC1uYW1lICdBcHBJY29uKi5wbmcnIC1wcmludCAtZGVsZXRlIDI+L2Rldi9udWxsIHx8IHRydWUKICBmaQpkb25lCmV4ZWMgIiRSRUFMIiAiJEAiCg==' | base64 -d | sudo tee /usr/bin/codesign >/dev/null
           sudo chmod 755 /usr/bin/codesign /usr/bin/codesign.real
           restore_codesign() {
             if [ -f /usr/bin/codesign.real ]; then
@@ -812,8 +793,10 @@ jobs:
               exit 1
             fi
             echo "Recovered app at $APP (archive exit=$ARC) — fallback re-seal"
+            find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
             find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
             rm -rf "$APP/_CodeSignature" 2>/dev/null || true
+            /usr/bin/xattr -cr "$APP" || true
             IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
             if [ -z "$IDLINE" ]; then
               IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
