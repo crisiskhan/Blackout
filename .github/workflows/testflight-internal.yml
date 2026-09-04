@@ -912,21 +912,22 @@ jobs:
                 find "$path" -maxdepth 1 -name 'AppIcon*.png' -delete 2>/dev/null || true
                 rm -rf "$path/_CodeSignature" 2>/dev/null || true
                 /usr/bin/xattr -cr "$path" 2>/dev/null || true
-                # Assets.car must not look like nested code / executable
                 if [ -f "$path/Assets.car" ]; then
-                  /bin/chmod a-x "$path/Assets.car" 2>/dev/null || true
+                  # ditto strip + rewrite avoids bogus code-seal on Assets.car
+                  /usr/bin/ditto "$path/Assets.car" "$path/Assets.car.clean"
+                  /bin/mv -f "$path/Assets.car.clean" "$path/Assets.car"
+                  /bin/chmod 644 "$path/Assets.car"
                   /usr/bin/xattr -c "$path/Assets.car" 2>/dev/null || true
-                fi
-                # Sign the main Mach-O inside .app/.appex first when present
-                base="$(basename "$path" .app)"
-                base="$(basename "$base" .appex)"
-                if [ -f "$path/$base" ]; then
-                  /usr/bin/codesign --force --sign "$IDHASH" --timestamp=none "$path/$base"
-                  echo "signed binary $path/$base"
                 fi
               fi
               if [ -n "$ent" ] && [ -f "$ent" ]; then
-                /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ent" --generate-entitlement-der --timestamp=none "$path"
+                /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ent" --generate-entitlement-der --timestamp=none "$path" || {
+                  echo "codesign failed for $path — file dump:"
+                  ls -la "$path" | head -30
+                  /usr/bin/file "$path/Assets.car" 2>/dev/null || true
+                  /usr/bin/xattr -l "$path/Assets.car" 2>/dev/null || true
+                  return 1
+                }
               else
                 /usr/bin/codesign --force --sign "$IDHASH" --timestamp=none "$path"
               fi
@@ -952,6 +953,12 @@ jobs:
             while IFS= read -r w; do
               sign "$w" "$ENT_WATCH"
             done < <(find "$APP" -name 'BlackoutWatch.app' -type d)
+            # Fresh tree for main app seal (resource-fork-safe)
+            CLEAN="$RUNNER_TEMP/Blackout.app.clean"
+            rm -rf "$CLEAN"
+            /usr/bin/ditto "$APP" "$CLEAN"
+            rm -rf "$APP"
+            /usr/bin/ditto "$CLEAN" "$APP"
             sign "$APP" "$ENT_APP"
             /usr/bin/codesign --verify --deep --strict "$APP" 2>&1 | tee "$RUNNER_TEMP/codesign-verify.log" || {
               echo "codesign verify failed (continuing to zip; altool is truth)"
