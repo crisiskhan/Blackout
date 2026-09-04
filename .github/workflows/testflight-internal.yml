@@ -14,7 +14,11 @@ on:
 jobs:
   upload:
     name: AuthKey archive + Internal upload
-    runs-on: macos-latest
+    # macos-14 + Xcode 16 matches unsigned xcodebuild.yml.
+    # macos-latest has only Xcode 26; ExtractAppIntentsMetadata then recreates
+    # Metadata.appintents after the strip script and CodeSign fails
+    # (bundle format unrecognized).
+    runs-on: macos-14
     timeout-minutes: 90
     permissions:
       contents: read
@@ -43,11 +47,12 @@ jobs:
         with:
           ref: ${{ inputs.git_ref }}
 
-      - name: Select Xcode
+      - name: Select Xcode 16
         run: |
           set -euo pipefail
           ls /Applications | grep -i xcode || true
           xcodebuild -version || true
+          selected=""
           for app in \
             /Applications/Xcode_16.4.app \
             /Applications/Xcode_16.3.app \
@@ -55,17 +60,27 @@ jobs:
             /Applications/Xcode_16.1.app \
             /Applications/Xcode_16.0.app \
             /Applications/Xcode_16.app \
-            /Applications/Xcode_26.6.app \
-            /Applications/Xcode_26.5.app \
             /Applications/Xcode.app
           do
             if [ -d "$app" ]; then
               sudo xcode-select -s "$app"
+              selected="$app"
               break
             fi
           done
           xcodebuild -version
           xcode-select -p
+          ver="$(xcodebuild -version | awk 'NR==1 {print $2}')"
+          case "$ver" in
+            16.*)
+              echo "Using Xcode $ver at ${selected:-$(xcode-select -p)}"
+              ;;
+            *)
+              echo "Need Xcode 16 on macos-14 (got ${ver:-unknown} at ${selected:-none})."
+              echo "Xcode 26 regenerates Metadata.appintents after strip; CodeSign fails."
+              exit 1
+              ;;
+          esac
 
       - name: Write AuthKey
         run: |
