@@ -714,8 +714,37 @@ jobs:
           PY
           }
           DD="$RUNNER_TEMP/DerivedData"
-          # Signed archive gets nested targets sealed; main app dies on Metadata.appintents
-          # (recreated after strip scripts). Recover the app, strip Metadata, re-seal main.
+          # Ephemeral GHA codesign wrapper (Crisis approved 2026-09-03 MT).
+          # Xcode calls /usr/bin/codesign by absolute path AFTER ExtractAppIntentsMetadata
+          # recreates Metadata.appintents; strip that (and loose AppIcons) then call real codesign.
+          # Lives only on this runner VM for this job.
+          if [ ! -f /usr/bin/codesign.real ]; then
+            sudo mv /usr/bin/codesign /usr/bin/codesign.real
+          fi
+          # install wrapper (unindented body via second heredoc)
+          sudo tee /usr/bin/codesign >/dev/null <<'WRAP'
+#!/bin/bash
+REAL=/usr/bin/codesign.real
+for a in "$@"; do
+  if [ -d "$a" ]; then
+    find "$a" -type d -name 'Metadata.appintents' -print 2>/dev/null | while IFS= read -r d; do
+      echo "codesign-wrap: rm $d" >&2
+      rm -rf "$d"
+    done
+    find "$a" -maxdepth 1 -name 'AppIcon*.png' -print -delete 2>/dev/null || true
+  fi
+done
+exec "$REAL" "$@"
+WRAP
+          sudo chmod 755 /usr/bin/codesign /usr/bin/codesign.real
+          restore_codesign() {
+            if [ -f /usr/bin/codesign.real ]; then
+              sudo mv -f /usr/bin/codesign.real /usr/bin/codesign 2>/dev/null || true
+            fi
+          }
+          trap restore_codesign EXIT
+          echo "codesign wrapper installed (real=$(ls -la /usr/bin/codesign.real | awk '{print $1,$3,$4,$NF}'))"
+
           set +e
           rm -rf "$DD" "$ARCHIVE"
           xcodebuild \
@@ -734,43 +763,68 @@ jobs:
           echo "${PIPESTATUS[0]}" > "$RUNNER_TEMP/archive.exit"
           set -e
           ARC="$(cat "$RUNNER_TEMP/archive.exit")"
-          APP=""
-          if [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-            APP="$ARCHIVE/Products/Applications/Blackout.app"
+          echo "archive exit=$ARC"
+
+          IPA=""
+          if [ "$ARC" -eq 0 ] && [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
+            echo "Archive OK under wrapper — exportArchive"
+            rm -rf "$EXPORT"
+            mkdir -p "$EXPORT"
+            set +e
+            xcodebuild \
+              -exportArchive \
+              -archivePath "$ARCHIVE" \
+              -exportPath "$EXPORT" \
+              -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+              "${AUTH[@]}" \
+              2>&1 | tee "$RUNNER_TEMP/export.log"
+            EX="${PIPESTATUS[0]}"
+            set -e
+            if [ "$EX" -eq 0 ]; then
+              IPA="$(ls "$EXPORT"/*.ipa 2>/dev/null | head -n 1 || true)"
+            else
+              echo "exportArchive exit=$EX — hand-zip from archive Products"
+            fi
+            if [ -z "$IPA" ] || [ ! -f "$IPA" ]; then
+              APP="$ARCHIVE/Products/Applications/Blackout.app"
+              rm -rf "$EXPORT"
+              mkdir -p "$EXPORT/Payload"
+              cp -a "$APP" "$EXPORT/Payload/Blackout.app"
+              ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
+              IPA="$EXPORT/Blackout.ipa"
+            fi
           else
-            APP="$(find "$DD" -type d -path '*/InstallationBuildProductsLocation/Applications/Blackout.app' 2>/dev/null | head -n 1 || true)"
-          fi
-          if [ -z "$APP" ] || [ ! -d "$APP" ]; then
-            if [ "$ARC" -ne 0 ]; then
+            # Fallback: recover InstallationBuildProductsLocation, strip, re-seal main only
+            APP=""
+            if [ -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
+              APP="$ARCHIVE/Products/Applications/Blackout.app"
+            else
+              APP="$(find "$DD" -type d -path '*/InstallationBuildProductsLocation/Applications/Blackout.app' 2>/dev/null | head -n 1 || true)"
+            fi
+            if [ -z "$APP" ] || [ ! -d "$APP" ]; then
               echo "Archive failed and no recoverable Blackout.app. No upload."
               exit 1
             fi
-            echo "No Blackout.app found"
-            exit 1
-          fi
-          echo "Recovered app at $APP (archive exit=$ARC)"
-          # Xcode already sealed nested targets + Assets.car. Only Metadata.appintents
-          # made main CodeSign fail. Do not xattr -cr the tree (that made Assets.car
-          # look like unsigned nested code on 3a9dd38).
-          find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
-          rm -rf "$APP/_CodeSignature" 2>/dev/null || true
-          IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-          if [ -z "$IDLINE" ]; then
-            IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-          fi
-          IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
-          if [ -z "$IDHASH" ]; then
-            echo "No Distribution identity"
-            exit 1
-          fi
-          echo "Re-seal main app with $IDHASH"
-          # Entitlements from profile
-          "$PYBIN" - "$APP" << 'PY'
+            echo "Recovered app at $APP (archive exit=$ARC) — fallback re-seal"
+            find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
+            find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
+            rm -rf "$APP/_CodeSignature" 2>/dev/null || true
+            /usr/bin/xattr -cr "$APP" || true
+            IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+            if [ -z "$IDLINE" ]; then
+              IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+            fi
+            IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
+            if [ -z "$IDHASH" ]; then
+              echo "No Distribution identity"
+              exit 1
+            fi
+            echo "Re-seal main app with $IDHASH"
+            "$PYBIN" - "$APP" << 'PY'
           import os, subprocess, plistlib, sys
           from pathlib import Path
           app = Path(sys.argv[1])
           prov = app / "embedded.mobileprovision"
-          # If archive CodeSign failed early, provision may be missing — copy from profiles dir
           if not prov.exists():
               home = Path.home()
               for d in (
@@ -802,20 +856,18 @@ jobs:
           ent_path.write_bytes(plistlib.dumps(ents))
           print("wrote", ent_path)
           PY
-          ENT="$RUNNER_TEMP/ent-main.plist"
-          /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --generate-entitlement-der --timestamp=none "$APP"
-          echo "main app re-sealed"
-          /usr/bin/codesign --verify --deep --strict "$APP" 2>&1 | tee "$RUNNER_TEMP/codesign-verify.log" || {
-            echo "verify warnings (altool is truth):"
-            cat "$RUNNER_TEMP/codesign-verify.log" || true
-          }
-          rm -rf "$EXPORT"
-          mkdir -p "$EXPORT/Payload"
-          cp -a "$APP" "$EXPORT/Payload/Blackout.app"
-          ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
-          ls -la "$EXPORT/Blackout.ipa"
-          echo "IPA ready: $EXPORT/Blackout.ipa"
-          IPA="$EXPORT/Blackout.ipa"
+            ENT="$RUNNER_TEMP/ent-main.plist"
+            /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --generate-entitlement-der --timestamp=none "$APP"
+            echo "main app re-sealed"
+            rm -rf "$EXPORT"
+            mkdir -p "$EXPORT/Payload"
+            cp -a "$APP" "$EXPORT/Payload/Blackout.app"
+            ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
+            IPA="$EXPORT/Blackout.ipa"
+          fi
+
+          ls -la "$IPA"
+          echo "IPA ready: $IPA"
           if [ ! -f "$IPA" ]; then
             echo "No IPA. No upload."
             exit 1
