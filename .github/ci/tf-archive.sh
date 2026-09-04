@@ -452,6 +452,15 @@ if unzip -l "$IPA" | grep -qiE 'Payload/Blackout\.app/Watch/|\.watchkitapp|Black
   exit 1
 fi
 echo "IPA has no Watch/ companion (phone Internal only)."
+# 33925258357: after Watch was gone, altool -19000 on com.maplibre.mapbox
+# (MapLibre.framework Info.plist). Vendor plist is now
+# com.crisiskhan.blackout.maplibre. Fail closed if the old id is still in the IPA.
+if unzip -p "$IPA" 'Payload/Blackout.app/Frameworks/MapLibre.framework/Info.plist' 2>/dev/null \
+  | strings | grep -Fqx 'com.maplibre.mapbox'; then
+  echo "IPA MapLibre.framework still uses com.maplibre.mapbox. altool -19000. No upload."
+  exit 1
+fi
+echo "IPA MapLibre.framework is not com.maplibre.mapbox."
 echo "IPA ready: $IPA"
 echo "IPA=$IPA" >> "$GITHUB_ENV"
 echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"

@@ -280,6 +280,31 @@ def test_watch_omitted_from_app_store_archive() -> None:
     ok("Watch omitted from App Store archive; Widget stays; target kept for later")
 
 
+def test_maplibre_framework_not_mapbox_bundle_id() -> None:
+    """33925258357: altool -19000 on com.maplibre.mapbox inside MapLibre.framework."""
+    slices = [
+        ROOT / "Vendor/MapLibre/MapLibre.xcframework/ios-arm64/MapLibre.framework/Info.plist",
+        ROOT
+        / "Vendor/MapLibre/MapLibre.xcframework/ios-arm64_x86_64-simulator/MapLibre.framework/Info.plist",
+    ]
+    for path in slices:
+        if not path.is_file():
+            fail(f"missing {path.relative_to(ROOT)}")
+        pl = plistlib.loads(path.read_bytes())
+        bid = pl.get("CFBundleIdentifier")
+        pkg = pl.get("CFBundlePackageType")
+        if bid == "com.maplibre.mapbox":
+            fail(f"{path.relative_to(ROOT)} still com.maplibre.mapbox — altool -19000")
+        if bid != "com.crisiskhan.blackout.maplibre":
+            fail(f"{path.relative_to(ROOT)} CFBundleIdentifier={bid}")
+        if pkg != "FMWK":
+            fail(f"{path.relative_to(ROOT)} must stay FMWK, got {pkg}")
+    archive = TF_ARCHIVE.read_text()
+    if "com.maplibre.mapbox" not in archive:
+        fail("tf-archive.sh must fail closed if the IPA still has com.maplibre.mapbox")
+    ok("MapLibre.framework id is com.crisiskhan.blackout.maplibre; IPA check stays")
+
+
 def test_asc_reuse_not_delete_create() -> None:
     """GHA 33924134240 / 33924251037: delete+create hit ASC 500; archive never ran."""
     yml = TF_YML.read_text()
@@ -326,6 +351,7 @@ def main() -> None:
     test_nfc_tag_only()
     test_no_duplicate_widget_info_plist()
     test_watch_omitted_from_app_store_archive()
+    test_maplibre_framework_not_mapbox_bundle_id()
     test_asc_reuse_not_delete_create()
     test_crisis_opt_locks()
 
