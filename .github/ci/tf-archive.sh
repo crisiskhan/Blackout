@@ -1,7 +1,9 @@
 #!/bin/bash
 # Archive, then recover a signed Blackout.app if xcarchive assembly fails.
-# Snapshot during blob-sign: xcodebuild may delete InstallationBuildProductsLocation
-# after "Archive Missing Bundle Identifier" (33827851150). No xattr / chmod janitor.
+# 33827851150: CodeSign succeeded, then "Archive Missing Bundle Identifier".
+# Source Info.plist now carries CFBundleIdentifier=$(PRODUCT_BUNDLE_IDENTIFIER).
+# Blob-sign logs/injects the processed key and snapshots the .app before
+# xcodebuild tears down InstallationBuildProductsLocation. No xattr / chmod janitor.
 set -euo pipefail
 NEXT="${NEXT_CPV:?NEXT_CPV not set}"
 if [ -z "$NEXT" ]; then
@@ -156,22 +158,34 @@ script.write_text(
     'APP="${CODESIGNING_FOLDER_PATH:-}"\n'
     '[ -d "$APP" ] || exit 0\n'
     'echo "CI blob-sign resources app=$APP"\n'
+    # 33827851150: archive packaging reads the built .app Info.plist.
+    # Source plist used to be NSBonjourServices-only; log + inject if
+    # ProcessInfoPlistFile still omitted CFBundleIdentifier.
+    'BID="$(/usr/bin/plutil -extract CFBundleIdentifier raw "$APP/Info.plist" 2>/dev/null || true)"\n'
+    'echo "processed CFBundleIdentifier=${BID:-MISSING}"\n'
+    'echo "processed CFBundleVersion=$(/usr/bin/plutil -extract CFBundleVersion raw "$APP/Info.plist" 2>/dev/null || echo MISSING)"\n'
+    'echo "processed CFBundleShortVersionString=$(/usr/bin/plutil -extract CFBundleShortVersionString raw "$APP/Info.plist" 2>/dev/null || echo MISSING)"\n'
+    'if [ -z "$BID" ]; then\n'
+    '  WANT="${PRODUCT_BUNDLE_IDENTIFIER:-com.crisiskhan.blackout}"\n'
+    '  /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string $WANT" "$APP/Info.plist" 2>/dev/null \\\n'
+    '    || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $WANT" "$APP/Info.plist"\n'
+    '  echo "injected CFBundleIdentifier=$WANT"\n'
+    'fi\n'
     'rm -rf "$APP/Metadata.appintents" 2>/dev/null || true\n'
     'find "$APP" -maxdepth 1 -name "AppIcon*.png" -delete 2>/dev/null || true\n'
     'ID="${EXPANDED_CODE_SIGN_IDENTITY:-}"\n'
     'if [ -z "$ID" ] || [ "$ID" = "-" ]; then ID="${CODE_SIGN_IDENTITY:-}"; fi\n'
-    'if [ -z "$ID" ] || [ "$ID" = "-" ]; then echo "CI blob-sign skip: no identity"; exit 0; fi\n'
-    'for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
-    '  [ -f "$f" ] || continue\n'
-    '  echo "CI blob-sign $f"\n'
-    '  /usr/bin/codesign --force --sign "$ID" --timestamp=none --identifier "com.crisiskhan.blackout.$(basename "$f")" "$f"\n'
-    'done\n'
-    # 33827851150: CodeSign of the .app succeeded, then xcodebuild archive
-    # failed "Archive Missing Bundle Identifier" and tore down
-    # InstallationBuildProductsLocation. BuildProductsPath/Blackout.app is
-    # only a symlink to that same path, so post-archive find found nothing.
-    # Copy off the install tree while it still exists (Watch + widgets are
-    # already embedded). Recover re-seals after archive returns.
+    'if [ -z "$ID" ] || [ "$ID" = "-" ]; then\n'
+    '  echo "CI blob-sign skip: no identity"\n'
+    'else\n'
+    '  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
+    '    [ -f "$f" ] || continue\n'
+    '    echo "CI blob-sign $f"\n'
+    '    /usr/bin/codesign --force --sign "$ID" --timestamp=none --identifier "com.crisiskhan.blackout.$(basename "$f")" "$f"\n'
+    '  done\n'
+    'fi\n'
+    # After identifier + blob-sign, copy off the install tree. 33827851150
+    # tore it down after CodeSign. Watch + widgets are already embedded.
     'SNAP="${RUNNER_TEMP:-/Users/runner/work/_temp}/recovered-Blackout.app"\n'
     'rm -rf "$SNAP"\n'
     'cp -a "$APP" "$SNAP"\n'

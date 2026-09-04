@@ -209,6 +209,79 @@ def vision() -> None:
         ok("Field tab does not present a fake Vision percent")
 
 
+def archive_bundle_id() -> None:
+    """xcodebuild archive 33827851150: IDEArchivedApplicationError after CodeSign.
+
+    FACT: Blackout/Info.plist is INFOPLIST_FILE and currently (or previously)
+    only carried NSBonjourServices. FACT: ProcessInfoPlistFile invoked
+    builtin-infoPlistUtility on that file + assetcatalog_generated_info.plist
+    only. FACT: CodeSign + Validate succeeded; then
+    'Archive Missing Bundle Identifier' (exit 70). INFERENCE: the .app
+    Info.plist that archive packaging copied into the xcarchive lacked
+    CFBundleIdentifier, so ApplicationProperties could not be written.
+    """
+    import plistlib
+
+    src = ROOT / "Blackout" / "Info.plist"
+    try:
+        info = plistlib.loads(src.read_bytes())
+    except Exception as exc:
+        bad(f"Blackout/Info.plist parse: {exc}")
+        return
+    if info.get("CFBundleIdentifier") != "$(PRODUCT_BUNDLE_IDENTIFIER)":
+        bad(
+            "Blackout/Info.plist must set CFBundleIdentifier = "
+            "$(PRODUCT_BUNDLE_IDENTIFIER) so ProcessInfoPlistFile expands it "
+            "into the .app that archive packaging reads"
+        )
+    else:
+        ok("source Info.plist CFBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)")
+    if info.get("CFBundleShortVersionString") != "$(MARKETING_VERSION)":
+        bad("Blackout/Info.plist must set CFBundleShortVersionString = $(MARKETING_VERSION)")
+    else:
+        ok("source Info.plist CFBundleShortVersionString = $(MARKETING_VERSION)")
+    if info.get("CFBundleVersion") != "$(CURRENT_PROJECT_VERSION)":
+        bad("Blackout/Info.plist must set CFBundleVersion = $(CURRENT_PROJECT_VERSION)")
+    else:
+        ok("source Info.plist CFBundleVersion = $(CURRENT_PROJECT_VERSION)")
+    bonjour = info.get("NSBonjourServices")
+    if bonjour != ["_blackoutmesh._tcp"]:
+        bad("NSBonjourServices must stay ['_blackoutmesh._tcp']")
+    else:
+        ok("NSBonjourServices preserved")
+
+    expanded = str(info.get("CFBundleIdentifier") or "").replace(
+        "$(PRODUCT_BUNDLE_IDENTIFIER)", "com.crisiskhan.blackout"
+    )
+    if expanded != "com.crisiskhan.blackout":
+        bad("archive ApplicationProperties.CFBundleIdentifier would be empty")
+    else:
+        ok("expanded CFBundleIdentifier is com.crisiskhan.blackout")
+
+    script = (ROOT / ".github" / "ci" / "tf-archive.sh").read_text()
+    if "recovered-Blackout.app" not in script or "CI snapshot" not in script:
+        bad("tf-archive.sh must snapshot Blackout.app before archive teardown")
+    else:
+        ok("tf-archive.sh snapshots Blackout.app for hand-zip")
+    if "rm " in script and "PrivacyInfo.xcprivacy" in script:
+        # allow mention in comments; forbid a delete of the privacy/asset files
+        for line in script.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if re.search(r"\brm\b.*PrivacyInfo\.xcprivacy|\brm\b.*Assets\.car", stripped):
+                bad(f"tf-archive.sh deletes a Crisis-banned file: {stripped}")
+                break
+        else:
+            ok("tf-archive.sh does not delete PrivacyInfo/Assets.car")
+    else:
+        ok("tf-archive.sh does not delete PrivacyInfo/Assets.car")
+    if "processed CFBundleIdentifier" not in script:
+        bad("tf-archive.sh must log the processed .app CFBundleIdentifier")
+    else:
+        ok("tf-archive.sh logs processed CFBundleIdentifier")
+
+
 def vessel() -> None:
     pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
     if "CURRENT_PROJECT_VERSION = 1;" not in pbx:
@@ -303,6 +376,7 @@ def main() -> None:
     vision()
     mesh()
     vessel()
+    archive_bundle_id()
     l10n()
     sys.exit(fail)
 
