@@ -210,15 +210,14 @@ def vision() -> None:
 
 
 def archive_bundle_id() -> None:
-    """xcodebuild archive 33827851150: IDEArchivedApplicationError after CodeSign.
+    """xcodebuild archive 33827851150 / 33829001016.
 
-    FACT: Blackout/Info.plist is INFOPLIST_FILE and currently (or previously)
-    only carried NSBonjourServices. FACT: ProcessInfoPlistFile invoked
-    builtin-infoPlistUtility on that file + assetcatalog_generated_info.plist
-    only. FACT: CodeSign + Validate succeeded; then
-    'Archive Missing Bundle Identifier' (exit 70). INFERENCE: the .app
-    Info.plist that archive packaging copied into the xcarchive lacked
-    CFBundleIdentifier, so ApplicationProperties could not be written.
+    33829001016 FACT: processed Blackout.app already had
+    CFBundleIdentifier=com.crisiskhan.blackout. xcarchive had Products
+    app + dSYMs but no archive-root Info.plist. Recover overwrote the
+    snapshot, rm'd _CodeSignature, reseal failed (bundle format
+    unrecognized). Keep CFBundleIdentifier in the source plist; hand-zip
+    the already-signed archive product; do not re-seal it.
     """
     import plistlib
 
@@ -280,6 +279,25 @@ def archive_bundle_id() -> None:
         bad("tf-archive.sh must log the processed .app CFBundleIdentifier")
     else:
         ok("tf-archive.sh logs processed CFBundleIdentifier")
+    if "handzip_ipa" not in script or "write_xcarchive_plist" not in script:
+        bad("tf-archive.sh must hand-zip / write xcarchive Info.plist after exit 70")
+    else:
+        ok("tf-archive.sh hand-zips or writes xcarchive Info.plist")
+    if 'rm -rf "$APP/_CodeSignature"' in script:
+        bad("tf-archive.sh must not strip _CodeSignature from a signed archive product")
+    else:
+        ok("tf-archive.sh does not strip _CodeSignature")
+    if "no re-seal" not in script:
+        bad("tf-archive.sh must not re-seal a signed archive product")
+    else:
+        ok("tf-archive.sh does not re-seal signed archive product")
+    if re.search(
+        r'if \[ -n "\$APP" \] && \[ "\$APP" != "\$SNAP" \]; then\n  rm -rf "\$SNAP"',
+        script,
+    ):
+        bad("tf-archive.sh must not overwrite snapshot before hand-zip on failed archive")
+    else:
+        ok("tf-archive.sh does not overwrite snapshot on failed archive")
 
 
 def vessel() -> None:

@@ -296,7 +296,7 @@ if [ -z "$APP" ]; then
   done < <(find "$DD" -name 'Blackout.app' 2>/dev/null || true)
 fi
 
-if [ -n "$APP" ] && [ "$APP" != "$SNAP" ]; then
+if [ "$ARC" -eq 0 ] && [ -n "$APP" ] && [ "$APP" != "$SNAP" ]; then
   rm -rf "$SNAP"
   cp -a "$APP" "$SNAP"
   APP="$SNAP"
