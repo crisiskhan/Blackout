@@ -77,7 +77,7 @@ jobs:
               ;;
             *)
               echo "Need Xcode 16 on macos-14 (got ${ver:-unknown} at ${selected:-none})."
-              echo "Xcode 26 regenerates Metadata.appintents after strip; CodeSign fails."
+              echo "Need Xcode 16 on macos-14 for this workflow."
               exit 1
               ;;
           esac
