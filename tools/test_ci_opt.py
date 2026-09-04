@@ -13,6 +13,7 @@ import re
 import sys
 from pathlib import Path
 
+import test_tf_archive_signing
 import test_tf_asc_reuse
 import test_tf_ipa_inspect
 
@@ -381,6 +382,9 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("tf-archive.sh must invoke xcodebuild archive")
     if "CODE_SIGN_IDENTITY=" in archive[start:end]:
         fail("do not pass CODE_SIGN_IDENTITY on the xcodebuild archive CLI")
+    if "tf_archive_signing.py" not in archive:
+        fail("tf-archive.sh must apply Manual Dist via tools/tf_archive_signing.py")
+    test_tf_archive_signing.main()
     if "watchkitapp" in reuse:
         fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")
     test_tf_asc_reuse.main()

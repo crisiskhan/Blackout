@@ -58,74 +58,13 @@ plistlib.dump(body, open(path, "wb"))
 print("wrote", path, "signingStyle", body["signingStyle"])
 PY
 
-"$PYBIN" << 'PY'
-import json, os, re
-from pathlib import Path
-team = os.environ["APPLE_TEAM_ID"]
-pmap = {}
-mp = Path(os.environ["RUNNER_TEMP"]) / "profile_map.json"
-if mp.exists():
-    pmap = json.loads(mp.read_text())
-path = Path("Blackout.xcodeproj/project.pbxproj")
-text = path.read_text()
-spec = {
-    "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA Local"),
-    "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA Local"),
-}
-# 33926435868: HAS_LOCAL_DIST_KEY=0 skipped this patch and left stock
-# Automatic. xcodebuild archive then demanded Apple Development certs
-# ("Revoke certificate" / iOS App Development profiles) and exited 65.
-# Happy path now always mints a runner-local Dist cert so this Manual
-# branch runs. The != 1 pin is a last-ditch fallback only.
-if os.environ.get("HAS_LOCAL_DIST_KEY") != "1":
-    def pin_dist(block):
-        def sub(key, val):
-            nonlocal block
-            if re.search(rf"{key} = ", block):
-                block = re.sub(rf"{key} = [^;]*;", f"{key} = {val};", block, count=1)
-            else:
-                block = block.replace("buildSettings = {", "buildSettings = {\n\t\t\t\t" + f"{key} = {val};")
-            return block
-        block = sub("CODE_SIGN_STYLE", "Automatic")
-        block = sub("CODE_SIGN_IDENTITY", '"iPhone Distribution"')
-        block = sub("DEVELOPMENT_TEAM", team)
-        return block
-    out = text
-    for bundle in spec:
-        pattern = re.compile(
-            r"(buildSettings = \{[^{}]*PRODUCT_BUNDLE_IDENTIFIER = " + re.escape(bundle) + r";[^{}]*\})",
-            re.S,
-        )
-        out, n = pattern.subn(lambda m: pin_dist(m.group(1)), out)
-        print(f"pinned Distribution Automatic {bundle} blocks={n}")
-    path.write_text(out)
-    print("CI-only pbxproj Dist Automatic pin (KEEP cert reuse, not committed)")
-    raise SystemExit(0)
-def patch_block(block, bundle):
-    name = spec[bundle]
-    def sub(key, val):
-        nonlocal block
-        if re.search(rf"{key} = ", block):
-            block = re.sub(rf"{key} = [^;]*;", f"{key} = {val};", block, count=1)
-        else:
-            block = block.replace("buildSettings = {", "buildSettings = {\n\t\t\t\t" + f"{key} = {val};")
-        return block
-    block = sub("CODE_SIGN_STYLE", "Manual")
-    block = sub("CODE_SIGN_IDENTITY", '"iOS Distribution"')
-    block = sub("DEVELOPMENT_TEAM", team)
-    block = sub("PROVISIONING_PROFILE_SPECIFIER", f'"{name}"')
-    return block
-out = text
-for bundle in spec:
-    pattern = re.compile(
-        r"(buildSettings = \{[^{}]*PRODUCT_BUNDLE_IDENTIFIER = " + re.escape(bundle) + r";[^{}]*\})",
-        re.S,
-    )
-    out, n = pattern.subn(lambda m: patch_block(m.group(1), bundle), out)
-    print(f"patched {bundle} blocks={n}")
-path.write_text(out)
-print("CI-only pbxproj signing patch (not committed)")
-PY
+# 33926435868 / 33927056130: HAS_LOCAL_DIST_KEY=1 Manual Dist on
+# com.crisiskhan.blackout + com.crisiskhan.blackout.widgets only
+# (Blackout iOS App Store GHA Local / Blackout Widgets App Store GHA Local).
+# Do not write CODE_SIGN_IDENTITY on the xcodebuild CLI — that hits SPM
+# packages. Identity placeholder and hash rewrite share one string in
+# tools/tf_archive_signing.py (iPhone Distribution).
+"$PYBIN" tools/tf_archive_signing.py patch
 
 IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
 if [ -z "$IDLINE" ]; then
@@ -134,16 +73,7 @@ fi
 if [ -n "$IDLINE" ]; then
   IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
   echo "Using CODE_SIGN_IDENTITY hash=$IDHASH"
-  "$PYBIN" - "$IDHASH" << 'PY'
-import sys
-from pathlib import Path
-name = sys.argv[1]
-p = Path("Blackout.xcodeproj/project.pbxproj")
-t = p.read_text()
-t = t.replace('CODE_SIGN_IDENTITY = "iOS Distribution";', f'CODE_SIGN_IDENTITY = "{name}";')
-p.write_text(t)
-print("rewrote CODE_SIGN_IDENTITY to exact keychain hash")
-PY
+  "$PYBIN" tools/tf_archive_signing.py rewrite-hash "$IDHASH"
 fi
 
 # 33825793771 stock+STANDALONE_ICON_BEHAVIOR=none: no AppIcon pngs; CodeSign
