@@ -1,5 +1,7 @@
 #!/bin/bash
-# Stock archive + export only. No strip, xattr, actool, or post-archive bundle rewrite.
+# Archive, then recover a signed Blackout.app if xcarchive assembly fails.
+# Snapshot during blob-sign: xcodebuild may delete InstallationBuildProductsLocation
+# after "Archive Missing Bundle Identifier" (33827851150). No xattr / chmod janitor.
 set -euo pipefail
 NEXT="${NEXT_CPV:?NEXT_CPV not set}"
 if [ -z "$NEXT" ]; then
@@ -164,6 +166,16 @@ script.write_text(
     '  echo "CI blob-sign $f"\n'
     '  /usr/bin/codesign --force --sign "$ID" --timestamp=none --identifier "com.crisiskhan.blackout.$(basename "$f")" "$f"\n'
     'done\n'
+    # 33827851150: CodeSign of the .app succeeded, then xcodebuild archive
+    # failed "Archive Missing Bundle Identifier" and tore down
+    # InstallationBuildProductsLocation. BuildProductsPath/Blackout.app is
+    # only a symlink to that same path, so post-archive find found nothing.
+    # Copy off the install tree while it still exists (Watch + widgets are
+    # already embedded). Recover re-seals after archive returns.
+    'SNAP="${RUNNER_TEMP:-/Users/runner/work/_temp}/recovered-Blackout.app"\n'
+    'rm -rf "$SNAP"\n'
+    'cp -a "$APP" "$SNAP"\n'
+    'echo "CI snapshot $SNAP"\n'
 )
 script.chmod(0o755)
 path = Path("Blackout.xcodeproj/project.pbxproj")
@@ -204,7 +216,8 @@ print("blob-sign script ready")
 PY
 
 DD="$RUNNER_TEMP/DerivedData"
-rm -rf "$DD" "$ARCHIVE" "$EXPORT"
+SNAP="$RUNNER_TEMP/recovered-Blackout.app"
+rm -rf "$DD" "$ARCHIVE" "$EXPORT" "$SNAP"
 mkdir -p "$EXPORT"
 
 set +e
@@ -227,8 +240,62 @@ set -e
 ARC="$(cat "$RUNNER_TEMP/archive.exit")"
 echo "archive exit=$ARC"
 
+echo "---- Blackout.app locations ----"
+find "$DD" -name 'Blackout.app' 2>/dev/null || true
+if [ -e "$ARCHIVE" ]; then
+  echo "---- archive tree ----"
+  ls -la "$ARCHIVE" || true
+  find "$ARCHIVE" -name 'Blackout.app' 2>/dev/null || true
+  if [ -f "$ARCHIVE/Info.plist" ]; then
+    echo "---- archive Info.plist ----"
+    plutil -p "$ARCHIVE/Info.plist" || true
+  fi
+else
+  echo "no xcarchive at $ARCHIVE"
+fi
+if [ -d "$SNAP" ]; then
+  echo "---- blob-sign snapshot present $SNAP ----"
+  ls -ld "$SNAP" || true
+fi
+
+# Prefer a still-living post-CodeSign product. Fall back to the snapshot
+# taken during blob-sign (33827851150: archive assembly deleted the install
+# tree; BuildProductsPath/Blackout.app was only a symlink to it).
+APP=""
+for cand in \
+  "$ARCHIVE/Products/Applications/Blackout.app" \
+  "$DD/Build/Intermediates.noindex/ArchiveIntermediates/Blackout/InstallationBuildProductsLocation/Applications/Blackout.app" \
+  "$SNAP"
+do
+  if [ -d "$cand" ] && [ -f "$cand/Blackout" ] && [ -f "$cand/Info.plist" ]; then
+    APP="$cand"
+    echo "picked $APP"
+    break
+  fi
+done
+if [ -z "$APP" ]; then
+  while IFS= read -r cand; do
+    if [ -f "$cand/Blackout" ] && [ -f "$cand/Info.plist" ]; then
+      APP="$cand"
+      echo "picked find $APP"
+      break
+    fi
+  done < <(find "$DD" -name 'Blackout.app' 2>/dev/null || true)
+fi
+
+if [ -n "$APP" ] && [ "$APP" != "$SNAP" ]; then
+  rm -rf "$SNAP"
+  cp -a "$APP" "$SNAP"
+  APP="$SNAP"
+  echo "copied live product to $SNAP"
+fi
+
+if [ -n "$APP" ] && [ -f "$APP/Info.plist" ]; then
+  echo "CFBundleIdentifier=$(plutil -extract CFBundleIdentifier raw "$APP/Info.plist" 2>/dev/null || echo missing)"
+  echo "CFBundleVersion=$(plutil -extract CFBundleVersion raw "$APP/Info.plist" 2>/dev/null || echo missing)"
+fi
+
 if [ "$ARC" -ne 0 ] || [ ! -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-  APP="$(find "$DD" -type d -path '*/InstallationBuildProductsLocation/Applications/Blackout.app' 2>/dev/null | head -n 1 || true)"
   if [ -z "$APP" ] || [ ! -d "$APP" ]; then
     echo "Archive failed and no recoverable Blackout.app. No upload."
     exit 1
