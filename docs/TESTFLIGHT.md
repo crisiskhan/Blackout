@@ -14,6 +14,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - A 50-series TestFlight build is the old vessel.
 - Signing: existing ASC AuthKey + automatic signing. No human certificate export.
 - Archive runner is **macos-14 + Xcode 16** (same toolchain as unsigned `.github/workflows/xcodebuild.yml`). Do not use `macos-latest` / Xcode 26: that toolchain recreates `Metadata.appintents` after the CI strip script and CodeSign fails.
+- Do not `xattr -cr` the `.app`, and do not `rm`/`ditto`/`chmod 644` `Assets.car`. Run `33823846800` showed CodeSign then dying on `Assets.car` (`code object is not signed at all`). Clear execute only (`chmod a-x`) if codesign treats the catalog as nested code.
 
 GitHub requires the workflow file on the default branch for the Run workflow button. CoS will place ONLY this yml on `main`; PR #4 app code stays unmerged.
 
