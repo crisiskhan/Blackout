@@ -110,28 +110,21 @@ script.write_text(
     "strip_app() {\n"
     '  APP="$1"\n'
     '  [ -d "$APP" ] || return 0\n'
-    '  echo "CI AppIcon strip app=$APP"\n'
+    '  echo "CI strip before CodeSign app=$APP"\n'
+    '  # TOP-LEVEL ONLY — do not touch Frameworks/PlugIns (nested seals).\n'
     '  find "$APP" -maxdepth 1 -name "AppIcon*.png" -print -delete || true\n'
-    '  if [ -d "$APP/Metadata.appintents" ]; then\n'
-    '    echo "CI remove unsigned Metadata.appintents"\n'
-    '    rm -rf "$APP/Metadata.appintents"\n'
+    '  rm -rf "$APP/Metadata.appintents" 2>/dev/null || true\n'
+    '  # Unsigned PrivacyInfo.xcprivacy makes CodeSign report\n'
+    '  # "code object is not signed at all" on that path. Remove it from the\n'
+    '  # product before CodeSign (MapLibre keeps its own inside the framework).\n'
+    '  if [ -f "$APP/PrivacyInfo.xcprivacy" ]; then\n'
+    '    echo "CI remove unsigned PrivacyInfo.xcprivacy"\n'
+    '    rm -f "$APP/PrivacyInfo.xcprivacy"\n'
     '  fi\n'
-    # Force resources non-executable. SetMode (chmod a+rX) can leave +x on
-    # Assets.car / PrivacyInfo / provision; codesign then treats them as nested code.
-    '  for f in "$APP/Assets.car" "$APP/PrivacyInfo.xcprivacy" "$APP/embedded.mobileprovision"; do\n'
-    '    [ -f "$f" ] && /bin/chmod 644 "$f" || true\n'
-    '  done\n'
-    '  find "$APP" -type f \\( -name "*.car" -o -name "*.xcprivacy" -o -name "*.mobileprovision" -o -name "*.png" -o -name "*.plist" \\) -exec /bin/chmod 644 {} + 2>/dev/null || true\n'
-    '  /usr/bin/xattr -cr "$APP" || true\n'
     "}\n"
     'strip_app "$CODESIGNING_FOLDER_PATH"\n'
     'strip_app "$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME"\n'
     'strip_app "$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME"\n'
-    'if [ -n "$BUILD_DIR" ]; then\n'
-    '  find "$BUILD_DIR" -type d -path "*/InstallationBuildProductsLocation/Applications/*.app" 2>/dev/null | while read -r APP; do\n'
-    "    strip_app \"$APP\"\n"
-    "  done\n"
-    "fi\n"
 )
 script.chmod(0o755)
 print("wrote", script.resolve())
@@ -260,34 +253,6 @@ restore_intent_tools() {
 }
 trap restore_intent_tools EXIT
 
-# Busy-poll chmod after SetMode a+rX until CodeSign finishes.
-ARCH_ROOT="$DD/Build/Intermediates.noindex/ArchiveIntermediates/Blackout"
-JANITOR_LOG="$RUNNER_TEMP/chmod-janitor.log"
-: > "$JANITOR_LOG"
-(
-  while true; do
-    APP="$ARCH_ROOT/InstallationBuildProductsLocation/Applications/Blackout.app"
-    if [ -d "$APP" ]; then
-      for f in Assets.car PrivacyInfo.xcprivacy embedded.mobileprovision; do
-        if [ -f "$APP/$f" ] && [ -x "$APP/$f" ]; then
-          echo "$(date -u +%H:%M:%S) chmod644 $f" >> "$JANITOR_LOG"
-          /bin/chmod 644 "$APP/$f" || true
-        fi
-      done
-      find "$APP" -type f \( -name '*.car' -o -name '*.xcprivacy' -o -name '*.mobileprovision' -o -name '*.png' \) -perm +111 -exec chmod 644 {} + 2>/dev/null || true
-    fi
-  done
-) &
-JANITOR_PID=$!
-stop_janitor() {
-  kill "$JANITOR_PID" 2>/dev/null || true
-  wait "$JANITOR_PID" 2>/dev/null || true
-  echo "chmod janitor log:"
-  tail -40 "$JANITOR_LOG" || true
-  restore_intent_tools
-}
-trap stop_janitor EXIT
-
 set +e
 rm -rf "$DD" "$ARCHIVE"
 xcodebuild \
@@ -374,6 +339,8 @@ else
     exit 1
   fi
   echo "Recovered app at $APP (archive exit=$ARC) — fallback re-seal"
+rm -f "$APP/PrivacyInfo.xcprivacy" 2>/dev/null || true
+rm -rf "$APP/Metadata.appintents" 2>/dev/null || true
   IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
   if [ -z "$IDLINE" ]; then
     IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
@@ -411,7 +378,7 @@ for pat in ("*.xcprivacy", "*.car", "*.png", "*.plist", "*.json", "*.strings", "
     for p in app.rglob(pat):
         if p.is_file():
             p.chmod(0o644)
-subprocess.call(["/usr/bin/xattr", "-cr", str(app)])
+print("skip whole-app xattr -cr (preserves nested seals)")
 
 # Ensure main + nested binaries stay executable
 for rel in ("Blackout",):
