@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Inspect a TestFlight IPA and rewrite vendor FMWK bundle ids.
+"""Inspect a TestFlight IPA and strip vendor FMWK bundle ids.
 
 33925258357: altool −19000 on com.maplibre.mapbox inside MapLibre.framework.
 33929367958: renaming that to com.crisiskhan.blackout.maplibre still −19000 —
-altool wants an ASC application record for every unique CFBundleIdentifier.
-Nested FMWK must use the parent app id com.crisiskhan.blackout.
+altool without --apple-id/--bundle-id picks a nested FMWK BID and wants an
+ASC application record for it. Do not rewrite nested FMWK onto
+com.crisiskhan.blackout.* (owned collision). Strip CFBundleIdentifier from
+nested FMWK Info.plists. Keep CFBundlePackageType=FMWK.
 Fail closed if Payload/*.app or PlugIns/*.appex is outside
 {com.crisiskhan.blackout, com.crisiskhan.blackout.widgets}.
 No ASC app for MapLibre. No network.
@@ -23,19 +25,13 @@ from typing import Any
 
 APP_BID = "com.crisiskhan.blackout"
 WIDGET_BID = "com.crisiskhan.blackout.widgets"
-ALLOWED_EXECUTABLE_BIDS = frozenset({APP_BID, WIDGET_BID})
 MAPBOX = "com.maplibre.mapbox"
 CHILD_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
+OWNED_PREFIX = "com.crisiskhan.blackout"
 
 
 class InspectError(RuntimeError):
     """IPA payload failed a fail-closed bundle-id check."""
-
-
-def owned_framework_identifier(framework_dirname: str) -> str:
-    """Nested FMWK must share the parent app id. altool looks up every BID."""
-    del framework_dirname
-    return APP_BID
 
 
 def _load_plist(path: Path) -> dict[str, Any]:
@@ -73,6 +69,27 @@ def _set_plist_string(path: Path, key: str, value: str) -> None:
     _dump_plist(path, body)
 
 
+def _delete_plist_key(path: Path, key: str) -> None:
+    """Remove a key from Info.plist. Prefer plutil / PlistBuddy on macOS."""
+    plutil = Path("/usr/bin/plutil")
+    buddy = Path("/usr/libexec/PlistBuddy")
+    if plutil.is_file():
+        subprocess.run(
+            [str(plutil), "-remove", key, str(path)],
+            check=True,
+        )
+        return
+    if buddy.is_file():
+        subprocess.run(
+            [str(buddy), "-c", f"Delete :{key}", str(path)],
+            check=True,
+        )
+        return
+    body = _load_plist(path)
+    body.pop(key, None)
+    _dump_plist(path, body)
+
+
 def _bid(path: Path) -> str:
     try:
         value = _load_plist(path).get("CFBundleIdentifier")
@@ -81,18 +98,25 @@ def _bid(path: Path) -> str:
     return str(value or "")
 
 
-def rewrite_framework_plist(path: Path) -> bool:
-    """Rewrite a FMWK Info.plist off a foreign BID. Keep CFBundlePackageType."""
+def _is_owned_bid(bid: str) -> bool:
+    return bid == OWNED_PREFIX or bid.startswith(OWNED_PREFIX + ".")
+
+
+def strip_framework_identifier(path: Path) -> bool:
+    """Strip CFBundleIdentifier from a FMWK Info.plist. Keep PackageType."""
     body = _load_plist(path)
     pkg = str(body.get("CFBundlePackageType") or "")
     if pkg and pkg != "FMWK":
         return False
-    bid = str(body.get("CFBundleIdentifier") or "")
-    if bid == APP_BID:
+    if "CFBundleIdentifier" not in body:
         return False
-    new_bid = owned_framework_identifier(path.parent.name)
-    _set_plist_string(path, "CFBundleIdentifier", new_bid)
+    _delete_plist_key(path, "CFBundleIdentifier")
     after = _load_plist(path)
+    leftover = after.get("CFBundleIdentifier")
+    if leftover:
+        raise InspectError(
+            f"{path.as_posix()} still CFBundleIdentifier={leftover} after strip"
+        )
     after_pkg = str(after.get("CFBundlePackageType") or "")
     if after_pkg != "FMWK":
         _set_plist_string(path, "CFBundlePackageType", "FMWK")
@@ -100,7 +124,7 @@ def rewrite_framework_plist(path: Path) -> bool:
 
 
 def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
-    """Assert app/widget BIDs and rewrite foreign FMWK ids. True if rewritten."""
+    """Assert app/widget BIDs and strip nested FMWK ids. True if rewritten."""
     if not payload_dir.is_dir():
         raise InspectError(f"missing payload directory {payload_dir}")
     apps = sorted(p for p in payload_dir.glob("*.app") if p.is_dir())
@@ -136,28 +160,35 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
                 continue
             if str(body.get("CFBundlePackageType") or "") != "FMWK":
                 continue
-            if rewrite_framework_plist(plist):
+            if strip_framework_identifier(plist):
                 rewritten = True
-                print(
-                    f"rewrote {plist.as_posix()} "
-                    f"CFBundleIdentifier -> {owned_framework_identifier(plist.parent.name)}"
-                )
-    leftover_foreign = [
-        p
-        for app in apps
-        for p in app.rglob("Info.plist")
-        if MAPBOX.encode() in p.read_bytes() or CHILD_MAPLIBRE.encode() in p.read_bytes()
-    ]
-    if leftover_foreign:
+                print(f"stripped {plist.as_posix()} CFBundleIdentifier (kept FMWK)")
+    leftover_owned = []
+    leftover_fmwk_bid = []
+    for app in apps:
+        for plist in app.rglob("Info.plist"):
+            try:
+                body = _load_plist(plist)
+            except Exception:
+                continue
+            if str(body.get("CFBundlePackageType") or "") != "FMWK":
+                continue
+            fbid = str(body.get("CFBundleIdentifier") or "")
+            if fbid:
+                leftover_fmwk_bid.append(plist)
+            if _is_owned_bid(fbid) or fbid in {MAPBOX, CHILD_MAPLIBRE}:
+                leftover_owned.append(plist)
+    if leftover_fmwk_bid or leftover_owned:
+        paths = leftover_fmwk_bid or leftover_owned
         raise InspectError(
-            "IPA still contains a MapLibre-only bundle id after rewrite: "
-            + ", ".join(p.as_posix() for p in leftover_foreign)
+            "IPA nested FMWK still has CFBundleIdentifier after strip: "
+            + ", ".join(p.as_posix() for p in paths)
         )
     return rewritten
 
 
 def inspect_ipa(ipa_path: Path) -> bool:
-    """Unzip IPA, inspect/rewrite payload, re-zip if rewritten."""
+    """Unzip IPA, inspect/strip payload, re-zip if rewritten."""
     ipa_path = ipa_path.resolve()
     if not ipa_path.is_file():
         raise InspectError(f"missing IPA {ipa_path}")

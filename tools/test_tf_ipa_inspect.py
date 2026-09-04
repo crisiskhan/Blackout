@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""IPA inspect + MapLibre BID rewrite. No network. Fail before implement."""
+"""IPA inspect + MapLibre FMWK BID strip. No network. Fail before implement."""
 from __future__ import annotations
 
 import plistlib
@@ -27,7 +27,7 @@ def _read_plist(path: Path) -> dict:
     return plistlib.loads(path.read_bytes())
 
 
-def _fake_payload(root: Path, *, maplibre_bid: str = MAPBOX, widget: bool = True) -> Path:
+def _fake_payload(root: Path, *, maplibre_bid: str | None = MAPBOX, widget: bool = True) -> Path:
     payload = root / "Payload"
     app = payload / "Blackout.app"
     _write_plist(
@@ -47,32 +47,18 @@ def _fake_payload(root: Path, *, maplibre_bid: str = MAPBOX, widget: bool = True
                 "CFBundleExecutable": "BlackoutWidgets",
             },
         )
-    _write_plist(
-        app / "Frameworks" / "MapLibre.framework" / "Info.plist",
-        {
-            "CFBundleIdentifier": maplibre_bid,
-            "CFBundlePackageType": "FMWK",
-            "CFBundleExecutable": "MapLibre",
-        },
-    )
+    body: dict = {
+        "CFBundlePackageType": "FMWK",
+        "CFBundleExecutable": "MapLibre",
+    }
+    if maplibre_bid is not None:
+        body["CFBundleIdentifier"] = maplibre_bid
+    _write_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist", body)
     return payload
 
 
-class TestOwnedFrameworkIdentifier(unittest.TestCase):
-    def test_nested_fmwk_uses_parent_app_bid(self) -> None:
-        """33929367958: altool −19000 on com.crisiskhan.blackout.maplibre."""
-        self.assertEqual(
-            inspect.owned_framework_identifier("MapLibre.framework"),
-            APP_BID,
-        )
-        self.assertEqual(
-            inspect.owned_framework_identifier("FooBar.framework"),
-            APP_BID,
-        )
-
-
-class TestRewriteFrameworkPlist(unittest.TestCase):
-    def test_rewrites_mapbox_to_owned_and_keeps_fmwk(self) -> None:
+class TestStripFrameworkPlist(unittest.TestCase):
+    def test_strips_mapbox_and_keeps_fmwk(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "MapLibre.framework" / "Info.plist"
             _write_plist(
@@ -83,14 +69,15 @@ class TestRewriteFrameworkPlist(unittest.TestCase):
                     "CFBundleName": "MapLibre",
                 },
             )
-            changed = inspect.rewrite_framework_plist(path)
+            changed = inspect.strip_framework_identifier(path)
             self.assertTrue(changed)
             pl = _read_plist(path)
-            self.assertEqual(pl["CFBundleIdentifier"], APP_BID)
+            self.assertNotIn("CFBundleIdentifier", pl)
             self.assertEqual(pl["CFBundlePackageType"], "FMWK")
             self.assertEqual(pl["CFBundleName"], "MapLibre")
 
-    def test_child_maplibre_bid_is_rewritten_to_app(self) -> None:
+    def test_child_maplibre_bid_is_stripped_not_owned(self) -> None:
+        """33929367958: owned child BID is what altool sought. Do not rewrite to owned."""
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "MapLibre.framework" / "Info.plist"
             _write_plist(
@@ -100,10 +87,12 @@ class TestRewriteFrameworkPlist(unittest.TestCase):
                     "CFBundlePackageType": "FMWK",
                 },
             )
-            self.assertTrue(inspect.rewrite_framework_plist(path))
-            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], APP_BID)
+            self.assertTrue(inspect.strip_framework_identifier(path))
+            pl = _read_plist(path)
+            self.assertNotIn("CFBundleIdentifier", pl)
+            self.assertEqual(pl["CFBundlePackageType"], "FMWK")
 
-    def test_parent_app_bid_on_fmwk_is_left_alone(self) -> None:
+    def test_parent_app_bid_on_fmwk_is_stripped(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "MapLibre.framework" / "Info.plist"
             _write_plist(
@@ -113,12 +102,21 @@ class TestRewriteFrameworkPlist(unittest.TestCase):
                     "CFBundlePackageType": "FMWK",
                 },
             )
-            self.assertFalse(inspect.rewrite_framework_plist(path))
-            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], APP_BID)
+            self.assertTrue(inspect.strip_framework_identifier(path))
+            self.assertNotIn("CFBundleIdentifier", _read_plist(path))
+
+    def test_already_stripped_fmwk_is_left_alone(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "MapLibre.framework" / "Info.plist"
+            _write_plist(path, {"CFBundlePackageType": "FMWK", "CFBundleName": "MapLibre"})
+            self.assertFalse(inspect.strip_framework_identifier(path))
+            pl = _read_plist(path)
+            self.assertNotIn("CFBundleIdentifier", pl)
+            self.assertEqual(pl["CFBundlePackageType"], "FMWK")
 
 
 class TestInspectPayload(unittest.TestCase):
-    def test_rewrites_nested_maplibre_and_accepts_app_and_widget(self) -> None:
+    def test_strips_nested_maplibre_and_accepts_app_and_widget(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             payload = _fake_payload(Path(tmp))
             rewritten = inspect.inspect_and_rewrite_payload(payload)
@@ -134,17 +132,30 @@ class TestInspectPayload(unittest.TestCase):
                 WIDGET_BID,
             )
             ml = _read_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist")
-            self.assertEqual(ml["CFBundleIdentifier"], APP_BID)
+            self.assertNotIn("CFBundleIdentifier", ml)
+            self.assertEqual(ml["CFBundlePackageType"], "FMWK")
+
+    def test_does_not_rewrite_fmwk_onto_owned_bid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = _fake_payload(Path(tmp), maplibre_bid=CHILD_MAPLIBRE)
+            inspect.inspect_and_rewrite_payload(payload)
+            ml = _read_plist(
+                payload / "Blackout.app" / "Frameworks" / "MapLibre.framework" / "Info.plist"
+            )
+            bid = ml.get("CFBundleIdentifier")
+            self.assertTrue(bid in (None, ""))
+            self.assertNotEqual(bid, APP_BID)
+            self.assertNotEqual(bid, CHILD_MAPLIBRE)
             self.assertEqual(ml["CFBundlePackageType"], "FMWK")
 
     def test_widget_optional_when_absent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), widget=False, maplibre_bid=APP_BID)
+            payload = _fake_payload(Path(tmp), widget=False, maplibre_bid=None)
             self.assertFalse(inspect.inspect_and_rewrite_payload(payload))
 
     def test_fail_closed_on_foreign_app_bid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), maplibre_bid=APP_BID)
+            payload = _fake_payload(Path(tmp), maplibre_bid=None)
             _write_plist(
                 payload / "Other.app" / "Info.plist",
                 {"CFBundleIdentifier": "com.example.other", "CFBundlePackageType": "APPL"},
@@ -155,7 +166,7 @@ class TestInspectPayload(unittest.TestCase):
 
     def test_fail_closed_on_watchkit_appex_bid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            payload = _fake_payload(Path(tmp), maplibre_bid=APP_BID)
+            payload = _fake_payload(Path(tmp), maplibre_bid=None)
             _write_plist(
                 payload / "Blackout.app" / "PlugIns" / "Watch.appex" / "Info.plist",
                 {
@@ -169,7 +180,7 @@ class TestInspectPayload(unittest.TestCase):
 
 
 class TestInspectIpa(unittest.TestCase):
-    def test_unzip_rewrite_rezip(self) -> None:
+    def test_unzip_strip_rezip(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             payload = _fake_payload(root)
@@ -185,7 +196,7 @@ class TestInspectIpa(unittest.TestCase):
                     zf.read("Payload/Blackout.app/Frameworks/MapLibre.framework/Info.plist")
                 )
                 app_pl = plistlib.loads(zf.read("Payload/Blackout.app/Info.plist"))
-            self.assertEqual(pl["CFBundleIdentifier"], APP_BID)
+            self.assertNotIn("CFBundleIdentifier", pl)
             self.assertEqual(pl["CFBundlePackageType"], "FMWK")
             self.assertEqual(app_pl["CFBundleIdentifier"], APP_BID)
 

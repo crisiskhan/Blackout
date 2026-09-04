@@ -167,11 +167,49 @@ jobs:
             echo "No IPA. No upload."
             exit 1
           fi
+          if [ -z "${ASC_APP_ID:-}" ]; then
+            echo "ASC_APP_ID empty. No upload."
+            exit 1
+          fi
+          if [ -z "${NEXT_BUILD:-}" ]; then
+            echo "NEXT_BUILD empty. No upload."
+            exit 1
+          fi
+          SHORT="$(python3 - "$IPA" << 'PY'
+          import plistlib, sys, zipfile
+          ipa = sys.argv[1]
+          short = "0.1.0"
+          with zipfile.ZipFile(ipa) as zf:
+              names = [
+                  n
+                  for n in zf.namelist()
+                  if n.endswith("Payload/Blackout.app/Info.plist")
+              ]
+              if names:
+                  pl = plistlib.loads(zf.read(names[0]))
+                  got = str(pl.get("CFBundleShortVersionString") or "").strip()
+                  if got:
+                      short = got
+          print(short)
+          PY
+          )"
+          if [ -z "$SHORT" ]; then
+            echo "CFBundleShortVersionString empty. No upload."
+            exit 1
+          fi
           STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
           set +e
-          xcrun altool --upload-app \
+          # 33929367958: without --apple-id/--bundle-id altool picked the nested
+          # MapLibre FMWK BID and −19000. Bind the primary ASC app only.
+          # --upload-package is the Xcode 16.2 form that consumes these flags;
+          # --file keeps the IPA path explicit. No MapLibre ASC app.
+          xcrun altool --upload-package "$IPA" \
             --type ios \
             --file "$IPA" \
+            --apple-id "$ASC_APP_ID" \
+            --bundle-id com.crisiskhan.blackout \
+            --bundle-version "$NEXT_BUILD" \
+            --bundle-short-version-string "$SHORT" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
             2>&1 | tee "$RUNNER_TEMP/altool.log"

@@ -89,6 +89,36 @@ def test_testflight_workflow_invokes_gate() -> None:
     ok("testflight-internal.yml is dispatch-only and runs test_ci_opt.py first")
 
 
+def test_altool_binds_primary_app() -> None:
+    """33929367958: altool without --apple-id picked nested FMWK BID (−19000)."""
+    text = TF_YML.read_text()
+    parts = text.split("Upload IPA", 1)
+    if len(parts) < 2:
+        fail("Upload IPA step missing")
+    step = parts[1].split("\n      - name:", 1)[0]
+    if "--apple-id" not in step:
+        fail("altool must pass --apple-id so it does not pick a nested FMWK BID")
+    if '"$ASC_APP_ID"' not in step and "${ASC_APP_ID}" not in step:
+        fail("altool --apple-id must bind ASC_APP_ID 6806388963")
+    if "--bundle-id com.crisiskhan.blackout" not in step:
+        fail("altool must bind --bundle-id com.crisiskhan.blackout")
+    if "--bundle-version" not in step:
+        fail("altool must pass --bundle-version")
+    if "--bundle-short-version-string" not in step:
+        fail("altool must pass --bundle-short-version-string")
+    if "ASC_APP_ID empty" not in step and 'ASC_APP_ID:-}' not in step:
+        fail("upload must fail closed when ASC_APP_ID is empty")
+    if "--upload-app" not in step and "--upload-package" not in step:
+        fail("must use xcrun altool --upload-app or --upload-package")
+    if "--type ios" not in step:
+        fail("altool must keep --type ios")
+    if "--apiKey" not in step or "--apiIssuer" not in step:
+        fail("altool must keep API key auth")
+    if "com.crisiskhan.blackout.maplibre" in step or "com.maplibre.mapbox" in step:
+        fail("do not invent an ASC app / apple-id for MapLibre")
+    ok("altool binds primary app via --apple-id + --bundle-id")
+
+
 def test_cpv_inject_model() -> None:
     pbx = PBX.read_text()
     gen = GENERATOR.read_text()
@@ -288,48 +318,56 @@ def test_watch_omitted_from_app_store_archive() -> None:
     ok("Watch omitted from App Store archive; Widget stays; target kept for later")
 
 
-def test_maplibre_framework_not_mapbox_bundle_id() -> None:
-    """33925258357: altool -19000 on com.maplibre.mapbox inside MapLibre.framework."""
+def test_maplibre_framework_not_owned_bundle_id() -> None:
+    """33929367958: do not rewrite FMWK onto owned BIDs that create ASC collisions."""
     slices = [
         ROOT / "Vendor/MapLibre/MapLibre.xcframework/ios-arm64/MapLibre.framework/Info.plist",
         ROOT
         / "Vendor/MapLibre/MapLibre.xcframework/ios-arm64_x86_64-simulator/MapLibre.framework/Info.plist",
     ]
+    owned = {
+        "com.crisiskhan.blackout",
+        "com.crisiskhan.blackout.maplibre",
+    }
     for path in slices:
         if not path.is_file():
             fail(f"missing {path.relative_to(ROOT)}")
         pl = plistlib.loads(path.read_bytes())
         bid = pl.get("CFBundleIdentifier")
         pkg = pl.get("CFBundlePackageType")
-        if bid == "com.maplibre.mapbox":
-            fail(f"{path.relative_to(ROOT)} still com.maplibre.mapbox — altool -19000")
-        if bid == "com.crisiskhan.blackout.maplibre":
+        if bid in owned or (
+            isinstance(bid, str) and bid.startswith("com.crisiskhan.blackout")
+        ):
             fail(
-                f"{path.relative_to(ROOT)} still com.crisiskhan.blackout.maplibre — "
-                "altool -19000 (33929367958); nested FMWK must use the parent app id"
+                f"{path.relative_to(ROOT)} owned FMWK BID {bid} — "
+                "altool −19000; strip or leave foreign, do not rewrite onto owned"
             )
-        if bid != "com.crisiskhan.blackout":
-            fail(f"{path.relative_to(ROOT)} CFBundleIdentifier={bid}")
+        if bid not in (None, "", "com.maplibre.mapbox"):
+            fail(f"{path.relative_to(ROOT)} unexpected FMWK CFBundleIdentifier={bid}")
         if pkg != "FMWK":
             fail(f"{path.relative_to(ROOT)} must stay FMWK, got {pkg}")
     archive = TF_ARCHIVE.read_text()
     helper = TF_IPA_INSPECT.read_text() if TF_IPA_INSPECT.is_file() else ""
     if not TF_IPA_INSPECT.is_file():
-        fail("tools/tf_ipa_inspect.py missing — IPA MapLibre rewrite has no helper")
+        fail("tools/tf_ipa_inspect.py missing — IPA MapLibre inspect has no helper")
     if "com.maplibre.mapbox" not in helper:
-        fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the rewrite stays documented")
-    if "owned_framework_identifier" not in helper or "rewrite_framework_plist" not in helper:
-        fail("tf_ipa_inspect.py must expose the MapLibre BID rewrite helper")
+        fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the −19000 stays documented")
+    if "strip_framework_identifier" not in helper:
+        fail("tf_ipa_inspect.py must strip nested FMWK CFBundleIdentifier")
+    if "owned_framework_identifier" in helper:
+        fail("tf_ipa_inspect.py must not rewrite FMWK onto an owned BID")
+    if "return APP_BID" in helper:
+        fail("tf_ipa_inspect.py must not rewrite FMWK onto com.crisiskhan.blackout")
     if "tf_ipa_inspect.py" not in archive:
         fail("tf-archive.sh must run tools/tf_ipa_inspect.py after the IPA exists")
-    inspect_at = archive.find('tf_ipa_inspect.py --ipa')
+    inspect_at = archive.find("tf_ipa_inspect.py --ipa")
     ready_at = archive.find('echo "IPA ready:')
     if inspect_at < 0 or ready_at < 0 or inspect_at > ready_at:
-        fail("tf-archive.sh must inspect/rewrite the IPA before declaring IPA ready")
+        fail("tf-archive.sh must inspect/strip the IPA before declaring IPA ready")
     if "com.maplibre.mapbox" not in archive:
         fail("tf-archive.sh must keep the com.maplibre.mapbox −19000 note")
     test_tf_ipa_inspect.main()
-    ok("MapLibre.framework id is the parent app; IPA rewrite helper stays")
+    ok("MapLibre.framework is not an owned BID; IPA inspect strips FMWK ids")
 
 
 def test_maplibre_single_embed_via_maplibremap() -> None:
@@ -424,7 +462,8 @@ def main() -> None:
     test_nfc_tag_only()
     test_no_duplicate_widget_info_plist()
     test_watch_omitted_from_app_store_archive()
-    test_maplibre_framework_not_mapbox_bundle_id()
+    test_altool_binds_primary_app()
+    test_maplibre_framework_not_owned_bundle_id()
     test_maplibre_single_embed_via_maplibremap()
     test_asc_reuse_not_delete_create()
     test_crisis_opt_locks()
