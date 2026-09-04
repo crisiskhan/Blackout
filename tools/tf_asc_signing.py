@@ -342,7 +342,7 @@ def write_profile(home: Path, uuid: str, content_b64: str) -> None:
 
 
 def list_app_store_profiles() -> list[dict]:
-    q = urllib.parse.urlencode({"filter[profileType]": "IOS_APP_STORE", "limit": "200"})
+    q = reuse.profile_list_query()
     st, payload = api("GET", "https://api.appstoreconnect.apple.com/v1/profiles?" + q)
     if st in (401, 403):
         die_admin(st, payload)

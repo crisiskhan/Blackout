@@ -12,7 +12,9 @@ profiles stay.
 """
 from __future__ import annotations
 
+import time
 from typing import Any, Callable, Optional
+from urllib.parse import urlencode
 
 KEEP_DIST_IDS = frozenset({"45YLWHL6UP"})
 DIST_TYPES = frozenset({"IOS_DISTRIBUTION", "DISTRIBUTION"})
@@ -30,6 +32,20 @@ BUNDLES = [
     ("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA Local", "IOS"),
 ]
 LOCAL_PROFILE_NAMES = frozenset(name for _ident, name, _plat in BUNDLES)
+PROFILE_LIST_STATES = ("ACTIVE", "INVALID")
+PROFILE_CREATE_RETRIES = 4
+RETRYABLE_PROFILE_CREATE_STATUS = frozenset({500, 502, 503})
+
+
+def profile_list_query() -> str:
+    """Include INVALID. Dist revoke hides Local leftovers from an ACTIVE-only list."""
+    return urlencode(
+        {
+            "filter[profileType]": "IOS_APP_STORE",
+            "filter[profileState]": ",".join(PROFILE_LIST_STATES),
+            "limit": "200",
+        }
+    )
 
 ApiFn = Callable[..., tuple[int, dict[str, Any]]]
 
@@ -269,6 +285,7 @@ def resolve_profile(
     cert_id: str,
     ident: str = "",
     require_cert: bool = False,
+    sleeper: Callable[[float], None] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     match = select_reusable_profile(profiles, name)
     if match is None and require_cert and name in LOCAL_PROFILE_NAMES:
@@ -294,27 +311,31 @@ def resolve_profile(
                 local_profile_replace_failure_message(name, old_id, del_status, del_payload)
             )
         replaced = True
-    status, payload = api(
-        "POST",
-        "https://api.appstoreconnect.apple.com/v1/profiles",
-        {
-            "data": {
-                "type": "profiles",
-                "attributes": {"name": name, "profileType": "IOS_APP_STORE"},
-                "relationships": {
-                    "bundleId": {"data": {"type": "bundleIds", "id": bundle_id}},
-                    "certificates": {"data": [{"type": "certificates", "id": cert_id}]},
-                },
-            }
-        },
+    sleep = sleeper if sleeper is not None else time.sleep
+    body = {
+        "data": {
+            "type": "profiles",
+            "attributes": {"name": name, "profileType": "IOS_APP_STORE"},
+            "relationships": {
+                "bundleId": {"data": {"type": "bundleIds", "id": bundle_id}},
+                "certificates": {"data": [{"type": "certificates", "id": cert_id}]},
+            },
+        }
+    }
+    status, payload = 0, {}
+    created: dict[str, Any] = {}
+    for attempt in range(PROFILE_CREATE_RETRIES):
+        status, payload = api(
+            "POST",
+            "https://api.appstoreconnect.apple.com/v1/profiles",
+            body,
+        )
+        created = payload.get("data") or {}
+        if status in (200, 201) and created.get("id"):
+            return ("replace" if replaced else "create"), created
+        if status not in RETRYABLE_PROFILE_CREATE_STATUS or attempt + 1 >= PROFILE_CREATE_RETRIES:
+            break
+        sleep(1.0)
+    raise ProfileCreateError(
+        profile_create_failure_message(ident or name, name, status, payload)
     )
-    if status not in (200, 201):
-        raise ProfileCreateError(
-            profile_create_failure_message(ident or name, name, status, payload)
-        )
-    created = payload.get("data") or {}
-    if not created.get("id"):
-        raise ProfileCreateError(
-            profile_create_failure_message(ident or name, name, status, payload)
-        )
-    return ("replace" if replaced else "create"), created

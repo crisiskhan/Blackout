@@ -418,6 +418,10 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("tf_asc_reuse.py must replace only Local-named profiles")
     if "select_profile_any_state" not in reuse:
         fail("tf_asc_reuse.py must replace INVALID Local leftovers after Dist prune")
+    if "profile_list_query" not in reuse or "INVALID" not in reuse:
+        fail("TF profile list must include INVALID leftovers after Dist prune")
+    if "profile_list_query" not in sign:
+        fail("tf_asc_signing.py must list profiles via profile_list_query")
     if "HAS_LOCAL_DIST_KEY" not in archive:
         fail("tf-archive.sh must switch on HAS_LOCAL_DIST_KEY")
     if 'signingStyle"] = "manual"' not in archive and "signingStyle'] = 'manual'" not in archive:

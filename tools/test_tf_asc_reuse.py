@@ -123,6 +123,7 @@ class FakeAPI:
         self.post_payload: dict[str, Any] = {
             "data": _profile("NEW", LOCAL_WIDGET_NAME, cert_ids=[LOCAL_DIST])
         }
+        self.post_queue: list[tuple[int, dict[str, Any]]] | None = None
         self.delete_status = 204
         self.delete_payload: dict[str, Any] = {}
         self.get_status = 200
@@ -132,6 +133,8 @@ class FakeAPI:
         self.calls.append((method, url))
         self.bodies.append(body)
         if method == "POST":
+            if self.post_queue:
+                return self.post_queue.pop(0)
             return self.post_status, self.post_payload
         if method == "DELETE":
             return self.delete_status, self.delete_payload
@@ -186,13 +189,42 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
                 name=LOCAL_WIDGET_NAME,
                 bundle_id="bid2",
                 cert_id=LOCAL_DIST,
+                sleeper=lambda _s: None,
             )
         msg = str(ctx.exception)
         self.assertIn("500", msg)
         self.assertIn("UNEXPECTED_ERROR", msg)
         self.assertIn("Not deleting", msg)
         self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
-        self.assertEqual([m for m, _ in api.calls], ["POST"])
+        self.assertGreaterEqual([m for m, _ in api.calls].count("POST"), 1)
+        self.assertTrue(all(m == "POST" for m, _ in api.calls))
+
+    def test_create_500_retries_then_succeeds(self) -> None:
+        """33930228429: widget Local CREATE hit ASC 500 after Dist prune."""
+        api = FakeAPI()
+        err = {
+            "errors": [
+                {"status": "500", "code": "UNEXPECTED_ERROR", "title": "An unexpected error occurred."}
+            ]
+        }
+        api.post_queue = [
+            (500, err),
+            (201, {"data": _profile("NEW", LOCAL_WIDGET_NAME, cert_ids=[LOCAL_DIST])}),
+        ]
+        sleeps: list[float] = []
+        action, match = reuse.resolve_profile(
+            api,
+            [],
+            name=LOCAL_WIDGET_NAME,
+            bundle_id="bid2",
+            cert_id=LOCAL_DIST,
+            sleeper=sleeps.append,
+        )
+        self.assertEqual(action, "create")
+        self.assertEqual(match["id"], "NEW")
+        self.assertEqual([m for m, _ in api.calls], ["POST", "POST"])
+        self.assertEqual(sleeps, [1.0])
+        self.assertFalse(any(m == "DELETE" for m, _ in api.calls))
 
     def test_reuse_local_named_profile_bound_to_local_cert(self) -> None:
         api = FakeAPI()
@@ -372,6 +404,12 @@ class TestResolveProfileGetOrCreate(unittest.TestCase):
 
 
 class TestBundlesPhoneAndWidgetOnly(unittest.TestCase):
+    def test_profile_list_query_includes_invalid(self) -> None:
+        q = reuse.profile_list_query()
+        self.assertIn("IOS_APP_STORE", q)
+        self.assertIn("INVALID", q)
+        self.assertIn("ACTIVE", q)
+
     def test_bundles_omit_watchkitapp(self) -> None:
         ids = [ident for ident, _name, _plat in reuse.BUNDLES]
         self.assertEqual(
