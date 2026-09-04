@@ -714,36 +714,34 @@ jobs:
           PY
           }
           DD="$RUNNER_TEMP/DerivedData"
-          # /usr/bin sealed on GHA — cannot wrap codesign. Busy-poll exact product paths
-          # (full DerivedData find is too slow for the ~250ms Metadata→CodeSign window).
-          JANITOR_LOG="$RUNNER_TEMP/metadata-janitor.log"
-          : > "$JANITOR_LOG"
-          ARCH_ROOT="$DD/Build/Intermediates.noindex/ArchiveIntermediates/Blackout"
-          (
-            while true; do
-              for d in \
-                "$ARCH_ROOT/InstallationBuildProductsLocation/Applications/Blackout.app" \
-                "$ARCH_ROOT/InstallationBuildProductsLocation/Applications/Blackout.app/PlugIns/BlackoutWidgets.appex" \
-                "$ARCH_ROOT/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/BlackoutWidgets.appex" \
-                "$ARCH_ROOT/IntermediateBuildFilesPath/UninstalledProducts/watchos/BlackoutWatch.app"
-              do
-                if [ -d "$d/Metadata.appintents" ]; then
-                  echo "$(date -u +%H:%M:%S) rm $d/Metadata.appintents" >> "$JANITOR_LOG"
-                  rm -rf "$d/Metadata.appintents"
-                fi
-                rm -f "$d"/AppIcon*.png 2>/dev/null || true
-              done
+          # /usr/bin codesign is sealed. Xcode toolchain under /Applications is writable on GHA.
+          # No-op appintentsmetadataprocessor so Metadata.appintents is never written (Crisis-approved
+          # ephemeral runner-only fix). Restore on EXIT.
+          XCTool="/Applications/Xcode_16.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+          for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
+            SRC="$XCTool/$tool"
+            if [ -x "$SRC" ] && [ ! -e "$SRC.blackout-real" ]; then
+              sudo mv "$SRC" "$SRC.blackout-real"
+              # YAML-safe: base64 no-op stub
+              echo 'IyEvYmluL2Jhc2gKIyBCbGFja291dCBHSGEgbm8tb3A6IHNraXAgQXBwIEludGVudHMgbWV0YWRhdGEgZ2VuZXJhdGlvbiAocnVubmVyLU9OTFkpCmV4aXQgMAo=' | base64 -d | sudo tee "$SRC" >/dev/null
+              sudo chmod 755 "$SRC"
+              echo "no-op installed: $tool"
+            elif [ -x "$SRC" ]; then
+              echo "no-op already present: $tool"
+            else
+              echo "WARNING: missing $SRC"
+            fi
+          done
+          restore_intent_tools() {
+            for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
+              SRC="$XCTool/$tool"
+              if [ -e "$SRC.blackout-real" ]; then
+                sudo mv -f "$SRC.blackout-real" "$SRC" 2>/dev/null || true
+                echo "restored $tool"
+              fi
             done
-          ) &
-          JANITOR_PID=$!
-          stop_janitor() {
-            kill "$JANITOR_PID" 2>/dev/null || true
-            wait "$JANITOR_PID" 2>/dev/null || true
-            echo "janitor log (last 40):"
-            tail -40 "$JANITOR_LOG" || true
           }
-          trap stop_janitor EXIT
-          echo "Metadata janitor pid=$JANITOR_PID (busy-poll product paths)"
+          trap restore_intent_tools EXIT
 
           set +e
           rm -rf "$DD" "$ARCHIVE"
