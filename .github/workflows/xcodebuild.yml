@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fail closed on CI opt / CPV gates
+        run: python3 tools/test_ci_opt.py
+
       - name: Select Xcode 16
         run: |
           set -euo pipefail
