@@ -443,6 +443,26 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("do not pass CODE_SIGN_IDENTITY on the xcodebuild archive CLI")
     if "tf_archive_signing.py" not in archive:
         fail("tf-archive.sh must apply Manual Dist via tools/tf_archive_signing.py")
+    # 33931034850: mint iOS Dist first, ExportOptions asked Apple Distribution,
+    # exportArchive looked for 3rd Party Mac Developer Installer, hand-zip
+    # via zip -r, altool 409 "not signed using an Apple submission certificate".
+    dist_loop = sign.find('for ctype in (')
+    ios_pos = sign.find('"IOS_DISTRIBUTION"', dist_loop)
+    apple_pos = sign.find('"DISTRIBUTION"', dist_loop)
+    if dist_loop < 0 or apple_pos < 0 or ios_pos < 0 or apple_pos > ios_pos:
+        fail("tf_asc_signing.py must mint Apple DISTRIBUTION before IOS_DISTRIBUTION")
+    if "DIST_CERT_TYPE" not in sign:
+        fail("tf_asc_signing.py must export DIST_CERT_TYPE for ExportOptions")
+    if '"Apple Distribution"' not in archive or "DIST_CERT_TYPE" not in archive:
+        fail("ExportOptions must set signingCertificate from DIST_CERT_TYPE")
+    if "SigningIdentity" not in archive:
+        fail("xcarchive Info.plist must include SigningIdentity for exportArchive")
+    if "zip -r" in archive or "zip -y" in archive:
+        fail("do not hand-zip the IPA with info-zip — that breaks submission signing")
+    if "ditto -c -k" not in archive:
+        fail("hand-zip must use ditto -c -k so the Dist signature stays intact")
+    if "codesign --verify --deep --strict" not in archive:
+        fail("tf-archive.sh must codesign --verify the IPA app before upload")
     test_tf_archive_signing.main()
     if "watchkitapp" in reuse:
         fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")

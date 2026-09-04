@@ -50,7 +50,13 @@ body = {
 }
 if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
     body["signingStyle"] = "manual"
-    body["signingCertificate"] = "Apple Distribution"
+    # 33931034850: ExportOptions said Apple Distribution while the mint was
+    # IOS_DISTRIBUTION; exportArchive then looked for 3rd Party Mac Developer
+    # Installer. Match the cert type actually imported this flight.
+    ctype = os.environ.get("DIST_CERT_TYPE", "DISTRIBUTION")
+    body["signingCertificate"] = (
+        "iOS Distribution" if ctype == "IOS_DISTRIBUTION" else "Apple Distribution"
+    )
     body["provisioningProfiles"] = profiles
 else:
     body["signingStyle"] = "automatic"
@@ -277,8 +283,11 @@ handzip_ipa() {
   fi
   rm -rf "$EXPORT"
   mkdir -p "$EXPORT/Payload"
-  cp -a "$src" "$EXPORT/Payload/Blackout.app"
-  ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
+  # 33931034850: info-zip of Payload produced an IPA Apple rejected as not
+  # signed with a submission certificate. ditto keeps the Dist seal. Do not
+  # ditto individual product files (Assets.car / PrivacyInfo / provision).
+  ditto "$src" "$EXPORT/Payload/Blackout.app"
+  ( cd "$EXPORT" && ditto -c -k --keepParent --sequesterRsrc Payload Blackout.ipa )
   IPA="$EXPORT/Blackout.ipa"
   echo "hand-zipped $IPA from $src"
 }
@@ -293,18 +302,27 @@ write_xcarchive_plist() {
   [ -n "$bid" ] || bid="com.crisiskhan.blackout"
   [ -n "$ver" ] || ver="$NEXT"
   [ -n "$short" ] || short="0.1.0"
-  "$PYBIN" - "$ARCHIVE/Info.plist" "$bid" "$ver" "$short" "${APPLE_TEAM_ID}" << 'PY'
+  local identity=""
+  IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+  if [ -z "$IDLINE" ]; then
+    IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
+  fi
+  identity=$(printf '%s' "$IDLINE" | sed -n 's/.*"\(.*\)".*/\1/p')
+  "$PYBIN" - "$ARCHIVE/Info.plist" "$bid" "$ver" "$short" "${APPLE_TEAM_ID}" "$identity" << 'PY'
 import datetime, plistlib, sys
-path, bid, ver, short, team = sys.argv[1:]
-body = {
-    "ApplicationProperties": {
+path, bid, ver, short, team, identity = sys.argv[1:]
+props = {
         "ApplicationPath": "Applications/Blackout.app",
         "Architectures": ["arm64"],
         "CFBundleIdentifier": bid,
         "CFBundleShortVersionString": short,
         "CFBundleVersion": ver,
         "Team": team,
-    },
+}
+if identity:
+    props["SigningIdentity"] = identity
+body = {
+    "ApplicationProperties": props,
     "ArchiveVersion": 2,
     "CreationDate": datetime.datetime.utcnow(),
     "Name": "Blackout",
@@ -416,6 +434,16 @@ echo "IPA has no Watch/ companion (phone Internal only)."
 # BID. Strip CFBundleIdentifier from FMWK Info.plists; keep PackageType FMWK.
 # Inspect Payload before declaring IPA ready. No ASC app for MapLibre.
 "$PYBIN" tools/tf_ipa_inspect.py --ipa "$IPA"
+VERIFY="$RUNNER_TEMP/ipa-verify"
+rm -rf "$VERIFY"
+mkdir -p "$VERIFY"
+ditto -x -k "$IPA" "$VERIFY"
+if [ ! -d "$VERIFY/Payload/Blackout.app" ]; then
+  echo "IPA verify extract missing Payload/Blackout.app"
+  exit 1
+fi
+/usr/bin/codesign --verify --deep --strict "$VERIFY/Payload/Blackout.app"
+echo "codesign --verify --deep --strict OK"
 echo "IPA ready: $IPA"
 echo "IPA=$IPA" >> "$GITHUB_ENV"
 echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"

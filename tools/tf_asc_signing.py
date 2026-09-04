@@ -126,7 +126,7 @@ def create_and_import_dist_cert(tmp: Path, keep_id: str | None = None) -> str:
     created = None
     last_st = 0
     last_payload: dict = {}
-    for ctype in ("IOS_DISTRIBUTION", "DISTRIBUTION"):
+    for ctype in ("DISTRIBUTION", "IOS_DISTRIBUTION"):
         st, payload = api(
             "POST",
             "https://api.appstoreconnect.apple.com/v1/certificates",
@@ -283,9 +283,11 @@ def create_and_import_dist_cert(tmp: Path, keep_id: str | None = None) -> str:
         ]
     )
     print(f"IMPORTED distribution cert id={cert_id} into runner keychain (temporary; not a human p12 secret)")
+    cert_type = str((created.get("attributes") or {}).get("certificateType") or "")
     with Path(os.environ["GITHUB_ENV"]).open("a") as fh:
         fh.write("HAS_LOCAL_DIST_KEY=1\n")
         fh.write(f"DIST_CERT_ID={cert_id}\n")
+        fh.write(f"DIST_CERT_TYPE={cert_type}\n")
         fh.write(f"SIGNING_KEYCHAIN={kc}\n")
         fh.write(f"SIGNING_KC_PASS={kc_pass}\n")
     print("identities in signing keychain:")
