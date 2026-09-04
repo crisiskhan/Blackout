@@ -907,10 +907,23 @@ jobs:
               if [ ! -e "$path" ]; then
                 return 0
               fi
-              # Always strip Metadata again immediately before sign
               if [ -d "$path" ]; then
                 rm -rf "$path/Metadata.appintents" 2>/dev/null || true
                 find "$path" -maxdepth 1 -name 'AppIcon*.png' -delete 2>/dev/null || true
+                rm -rf "$path/_CodeSignature" 2>/dev/null || true
+                /usr/bin/xattr -cr "$path" 2>/dev/null || true
+                # Assets.car must not look like nested code / executable
+                if [ -f "$path/Assets.car" ]; then
+                  /bin/chmod a-x "$path/Assets.car" 2>/dev/null || true
+                  /usr/bin/xattr -c "$path/Assets.car" 2>/dev/null || true
+                fi
+                # Sign the main Mach-O inside .app/.appex first when present
+                base="$(basename "$path" .app)"
+                base="$(basename "$base" .appex)"
+                if [ -f "$path/$base" ]; then
+                  /usr/bin/codesign --force --sign "$IDHASH" --timestamp=none "$path/$base"
+                  echo "signed binary $path/$base"
+                fi
               fi
               if [ -n "$ent" ] && [ -f "$ent" ]; then
                 /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ent" --generate-entitlement-der --timestamp=none "$path"
