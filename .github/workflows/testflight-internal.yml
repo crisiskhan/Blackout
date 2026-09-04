@@ -749,11 +749,11 @@ jobs:
             exit 1
           fi
           echo "Recovered app at $APP (archive exit=$ARC)"
-          # Strip the killers
-          find "$APP" -maxdepth 1 -name 'AppIcon*.png' -print -delete || true
+          # Xcode already sealed nested targets + Assets.car. Only Metadata.appintents
+          # made main CodeSign fail. Do not xattr -cr the tree (that made Assets.car
+          # look like unsigned nested code on 3a9dd38).
           find "$APP" -type d -name 'Metadata.appintents' -print -exec rm -rf {} + 2>/dev/null || true
           rm -rf "$APP/_CodeSignature" 2>/dev/null || true
-          /usr/bin/xattr -cr "$APP" || true
           IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
           if [ -z "$IDLINE" ]; then
             IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
