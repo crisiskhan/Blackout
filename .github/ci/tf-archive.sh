@@ -1,9 +1,8 @@
 #!/bin/bash
 # Archive, then recover a signed Blackout.app if xcarchive assembly fails.
-# 33827851150: CodeSign succeeded, then "Archive Missing Bundle Identifier".
-# Source Info.plist now carries CFBundleIdentifier=$(PRODUCT_BUNDLE_IDENTIFIER).
-# Blob-sign logs/injects the processed key and snapshots the .app before
-# xcodebuild tears down InstallationBuildProductsLocation. No xattr / chmod janitor.
+# 33829001016: packaging left Products/Applications/Blackout.app but no
+# xcarchive Info.plist. Do not rm _CodeSignature / re-seal that product.
+# Write Info.plist and exportArchive or hand-zip the signed .app. No xattr.
 set -euo pipefail
 NEXT="${NEXT_CPV:?NEXT_CPV not set}"
 if [ -z "$NEXT" ]; then
@@ -309,12 +308,91 @@ if [ -n "$APP" ] && [ -f "$APP/Info.plist" ]; then
   echo "CFBundleVersion=$(plutil -extract CFBundleVersion raw "$APP/Info.plist" 2>/dev/null || echo missing)"
 fi
 
-if [ "$ARC" -ne 0 ] || [ ! -d "$ARCHIVE/Products/Applications/Blackout.app" ]; then
-  if [ -z "$APP" ] || [ ! -d "$APP" ]; then
-    echo "Archive failed and no recoverable Blackout.app. No upload."
-    exit 1
+handzip_ipa() {
+  local src="$1"
+  if [ ! -d "$src" ] || [ ! -f "$src/Blackout" ]; then
+    echo "hand-zip source missing $src"
+    return 1
   fi
-  echo "Recovered app at $APP (archive exit=$ARC) — blob-sign resources, re-seal main"
+  rm -rf "$EXPORT"
+  mkdir -p "$EXPORT/Payload"
+  cp -a "$src" "$EXPORT/Payload/Blackout.app"
+  ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
+  IPA="$EXPORT/Blackout.ipa"
+  echo "hand-zipped $IPA from $src"
+}
+
+write_xcarchive_plist() {
+  local app="$ARCHIVE/Products/Applications/Blackout.app"
+  [ -d "$app" ] && [ -f "$app/Info.plist" ] || return 1
+  local bid ver short
+  bid="$(plutil -extract CFBundleIdentifier raw "$app/Info.plist" 2>/dev/null || true)"
+  ver="$(plutil -extract CFBundleVersion raw "$app/Info.plist" 2>/dev/null || true)"
+  short="$(plutil -extract CFBundleShortVersionString raw "$app/Info.plist" 2>/dev/null || true)"
+  [ -n "$bid" ] || bid="com.crisiskhan.blackout"
+  [ -n "$ver" ] || ver="$NEXT"
+  [ -n "$short" ] || short="0.1.0"
+  "$PYBIN" - "$ARCHIVE/Info.plist" "$bid" "$ver" "$short" "${APPLE_TEAM_ID}" << 'PY'
+import datetime, plistlib, sys
+path, bid, ver, short, team = sys.argv[1:]
+body = {
+    "ApplicationProperties": {
+        "ApplicationPath": "Applications/Blackout.app",
+        "Architectures": ["arm64"],
+        "CFBundleIdentifier": bid,
+        "CFBundleShortVersionString": short,
+        "CFBundleVersion": ver,
+        "Team": team,
+    },
+    "ArchiveVersion": 2,
+    "CreationDate": datetime.datetime.utcnow(),
+    "Name": "Blackout",
+    "SchemeName": "Blackout",
+}
+plistlib.dump(body, open(path, "wb"))
+print("wrote xcarchive Info.plist", bid, ver)
+PY
+}
+
+try_export_archive() {
+  set +e
+  xcodebuild \
+    -exportArchive \
+    -archivePath "$ARCHIVE" \
+    -exportPath "$EXPORT" \
+    -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+    "${AUTH[@]}" \
+    2>&1 | tee "$RUNNER_TEMP/export.log"
+  EX="${PIPESTATUS[0]}"
+  set -e
+  IPA="$(ls "$EXPORT"/*.ipa 2>/dev/null | head -n 1 || true)"
+  if [ "$EX" -eq 0 ] && [ -n "$IPA" ] && [ -f "$IPA" ]; then
+    echo "exportArchive OK $IPA"
+    return 0
+  fi
+  echo "exportArchive exit=${EX:-?} — will hand-zip"
+  return 1
+}
+
+ARCH_APP="$ARCHIVE/Products/Applications/Blackout.app"
+# 33829001016: archive packaging wrote Products/Applications/Blackout.app +
+# dSYMs/Signatures but no xcarchive Info.plist (exit 70). Official CodeSign
+# of that .app already succeeded. Recover then rm'd _CodeSignature and
+# codesign said "bundle format unrecognized". Do not re-seal a signed product.
+if [ -d "$ARCH_APP" ] && [ -f "$ARCH_APP/Blackout" ]; then
+  echo "Archive product present (archive exit=$ARC) — write Info.plist, no re-seal"
+  write_xcarchive_plist || true
+  if [ -f "$ARCHIVE/Info.plist" ]; then
+    echo "---- archive Info.plist after write ----"
+    plutil -p "$ARCHIVE/Info.plist" || true
+  fi
+  if [ "$ARC" -eq 0 ] || [ -f "$ARCHIVE/Info.plist" ]; then
+    try_export_archive || handzip_ipa "$ARCH_APP"
+  else
+    handzip_ipa "$ARCH_APP"
+  fi
+elif [ -n "$APP" ] && [ -d "$APP" ]; then
+  echo "No archive product — re-seal snapshot $APP"
   IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
   if [ -z "$IDLINE" ]; then
     IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
@@ -333,7 +411,6 @@ if [ "$ARC" -ne 0 ] || [ ! -d "$ARCHIVE/Products/Applications/Blackout.app" ]; t
         --identifier "com.crisiskhan.blackout.$(basename "$f")" "$f"
     fi
   done
-  rm -rf "$APP/_CodeSignature"
   ENT=""
   XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
   if [ -n "$XCENT" ] && [ -f "$XCENT" ]; then
@@ -355,34 +432,11 @@ PY
   else
     /usr/bin/codesign --force --sign "$IDHASH" --generate-entitlement-der "$APP"
   fi
-  echo "main app re-sealed"
-  rm -rf "$EXPORT"
-  mkdir -p "$EXPORT/Payload"
-  cp -a "$APP" "$EXPORT/Payload/Blackout.app"
-  ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
-  IPA="$EXPORT/Blackout.ipa"
+  echo "snapshot re-sealed"
+  handzip_ipa "$APP"
 else
-  echo "Archive OK — exportArchive"
-  set +e
-  xcodebuild \
-    -exportArchive \
-    -archivePath "$ARCHIVE" \
-    -exportPath "$EXPORT" \
-    -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-    "${AUTH[@]}" \
-    2>&1 | tee "$RUNNER_TEMP/export.log"
-  EX="${PIPESTATUS[0]}"
-  set -e
-  IPA="$(ls "$EXPORT"/*.ipa 2>/dev/null | head -n 1 || true)"
-  if [ "$EX" -ne 0 ] || [ -z "$IPA" ] || [ ! -f "$IPA" ]; then
-    echo "exportArchive exit=${EX:-?} — hand-zip from archive Products"
-    APP="$ARCHIVE/Products/Applications/Blackout.app"
-    rm -rf "$EXPORT"
-    mkdir -p "$EXPORT/Payload"
-    cp -a "$APP" "$EXPORT/Payload/Blackout.app"
-    ( cd "$EXPORT" && zip -r -y -q Blackout.ipa Payload )
-    IPA="$EXPORT/Blackout.ipa"
-  fi
+  echo "Archive failed and no recoverable Blackout.app. No upload."
+  exit 1
 fi
 
 if [ -z "${IPA:-}" ] || [ ! -f "$IPA" ]; then
