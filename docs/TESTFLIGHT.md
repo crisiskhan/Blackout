@@ -35,25 +35,32 @@ Do **not** create an ASC Watch companion app just to unblock phone Internal.
 To put Watch back in the uploaded iOS IPA (only after ASC has a companion record for `com.crisiskhan.blackout.watchkitapp`):
 
 1. In `Blackout.xcodeproj/project.pbxproj` (and `tools/v3/generate_project.py` so regen matches): restore **Embed Watch Content** (`dstPath = $(CONTENTS_FOLDER_PATH)/Watch`, copy `BlackoutWatch.app`) on the Blackout target, and restore the Blackout → BlackoutWatch `PBXTargetDependency`.
-2. Add `com.crisiskhan.blackout.watchkitapp` back to the TF profile `BUNDLES` list in `.github/workflows/testflight-internal.yml` (platform `WATCHOS`, not `IOS`) and to the signing `spec` in `.github/ci/tf-archive.sh`.
+2. Add `com.crisiskhan.blackout.watchkitapp` back to `BUNDLES` in `tools/tf_asc_reuse.py` (platform `WATCHOS`, not `IOS`) and to the signing `spec` in `.github/ci/tf-archive.sh`.
 3. Keep Watch `CFBundleIdentifier=$(PRODUCT_BUNDLE_IDENTIFIER)` in `BlackoutWatch/Info.plist`.
 4. Confirm the IPA listing includes `Payload/Blackout.app/Watch/BlackoutWatch.app` before upload. Then remove the “no Watch/ companion” fail-closed check in `tf-archive.sh`, or invert it to require Watch.
 5. Do not bump tree `CURRENT_PROJECT_VERSION`. Do not add a strip script.
 
 Local Watch compile: scheme **BlackoutWatch**, destination `generic/platform=watchOS`. Unsigned `xcodebuild.yml` still builds scheme **Blackout** for iOS only (Widget embedded; Watch not).
 
-GitHub requires the workflow file on the default branch for the Run workflow button. CoS will place ONLY this yml on `main`; PR #4 app code stays unmerged.
+GitHub requires a workflow file on the default branch for the Actions **Run workflow** button. **Do not use that button against `main` until CoS syncs host YAML.** Main still has watchkitapp in `BUNDLES`; tip does not. Tip YAML is the source of truth.
+
+## CoS dispatch (required)
+
+Next TestFlight Internal run **must** use tip host YAML so reuse (not delete+create) is what GHA executes:
+
+```bash
+gh workflow run "TestFlight Internal" --ref cursor/blackout-bible-v3-64d0 -f git_ref=cursor/blackout-bible-v3-64d0
+```
+
+`--ref` selects the workflow file. `-f git_ref=` selects the app tree to archive. Both must be the tip. Do not dispatch `--ref main`. Do not bump tree CPV. Agents must not dispatch.
+
+GHA `33924134240` / `33924251037`: tip still **deleted** stale GHA App Store profiles then POSTed new ones and ASC returned HTTP 500 `UNEXPECTED_ERROR`. Archive never ran; CPV 54 was not minted. Keep Dist cert `45YLWHL6UP`. Reuse ACTIVE profiles named `Blackout iOS App Store GHA` and `Blackout Widgets App Store GHA`. Create a Dist cert or profile only if missing. Never revoke KEEP. Never delete+create as the happy path.
 
 ## How Crisis runs it from iPhone Safari
 
-1. Request Desktop Website.
-2. Open https://github.com/crisiskhan/Blackout/actions/workflows/testflight-internal.yml
-3. Tap Run workflow.
-4. Use workflow from `main` (GitHub only lists dispatch on the default branch). The input `git_ref` default is `cursor/blackout-bible-v3-64d0` — leave it (that is the app tree). Do not archive main’s old app.
-5. Tap Run workflow / green button.
-6. Wait until the job is green, then TestFlight app → Blackout → new build (not 50-series) → Install. Airplane On, BT On. Score `docs/SOLO_QA.md`.
+Safari **Run workflow** lists the default-branch YAML. Until CoS copies **only** this tip yml onto `main` (app tree stays unmerged), Crisis cannot pick tip YAML from the button. CoS runs the `gh workflow run --ref` command above.
 
-Do not run this workflow from a Cursor agent. CoS / Crisis taps Run workflow.
+After a green job: TestFlight app → Blackout → new build (not 50-series) → Install. Airplane On, BT On. Score `docs/SOLO_QA.md`.
 
 ## Mac-optional / do not use
 

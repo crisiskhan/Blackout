@@ -72,6 +72,9 @@ spec = {
     "com.crisiskhan.blackout": pmap.get("com.crisiskhan.blackout", "Blackout iOS App Store GHA"),
     "com.crisiskhan.blackout.widgets": pmap.get("com.crisiskhan.blackout.widgets", "Blackout Widgets App Store GHA"),
 }
+if os.environ.get("HAS_LOCAL_DIST_KEY") != "1":
+    print("no local Dist key — leave Automatic signing for AuthKey (KEEP cert reuse)")
+    raise SystemExit(0)
 def patch_block(block, bundle):
     name = spec[bundle]
     def sub(key, val):

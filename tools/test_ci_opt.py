@@ -13,6 +13,8 @@ import re
 import sys
 from pathlib import Path
 
+import test_tf_asc_reuse
+
 ROOT = Path(__file__).resolve().parents[1]
 
 COMPILE_YML = ROOT / ".github/workflows/xcodebuild.yml"
@@ -20,10 +22,13 @@ TF_YML = ROOT / ".github/workflows/testflight-internal.yml"
 PBX = ROOT / "Blackout.xcodeproj/project.pbxproj"
 GENERATOR = ROOT / "tools/v3/generate_project.py"
 TF_ARCHIVE = ROOT / ".github/ci/tf-archive.sh"
+TF_SIGN = ROOT / "tools/tf_asc_signing.py"
+TF_REUSE = ROOT / "tools/tf_asc_reuse.py"
 WIDGET_PLIST = ROOT / "BlackoutWidgets/Info.plist"
 WATCH_PLIST = ROOT / "BlackoutWatch/Info.plist"
 GATE_INVOKE = "python3 tools/test_ci_opt.py"
 TREE_CPV = "1"
+KEEP_DIST_ID = "45YLWHL6UP"
 
 
 def fail(msg: str) -> None:
@@ -262,6 +267,10 @@ def test_watch_omitted_from_app_store_archive() -> None:
 
     if "com.crisiskhan.blackout.watchkitapp" in tf_yml:
         fail("testflight-internal.yml must not create a Watch App Store profile")
+    sign = TF_SIGN.read_text() if TF_SIGN.is_file() else ""
+    reuse = TF_REUSE.read_text() if TF_REUSE.is_file() else ""
+    if "com.crisiskhan.blackout.watchkitapp" in sign or "com.crisiskhan.blackout.watchkitapp" in reuse:
+        fail("TF ASC signing helpers must not create a Watch App Store profile")
     if "com.crisiskhan.blackout.watchkitapp" in archive:
         fail("tf-archive.sh must not patch Watch signing — Watch is not in the IPA")
     if "com.crisiskhan.blackout.widgets" not in archive:
@@ -269,6 +278,30 @@ def test_watch_omitted_from_app_store_archive() -> None:
     if not re.search(r"Watch/|watchkitapp|BlackoutWatch\.app", archive):
         fail("tf-archive.sh must fail closed if the IPA still embeds Watch")
     ok("Watch omitted from App Store archive; Widget stays; target kept for later")
+
+
+def test_asc_reuse_not_delete_create() -> None:
+    """GHA 33924134240 / 33924251037: delete+create hit ASC 500; archive never ran."""
+    yml = TF_YML.read_text()
+    sign = TF_SIGN.read_text() if TF_SIGN.is_file() else ""
+    reuse = TF_REUSE.read_text() if TF_REUSE.is_file() else ""
+    archive = TF_ARCHIVE.read_text()
+    if "tools/tf_asc_signing.py" not in yml:
+        fail("testflight-internal.yml must run tools/tf_asc_signing.py (reuse helper)")
+    if "PROFILE delete stale" in yml or "PROFILE delete stale" in sign:
+        fail("TF must not delete GHA App Store profiles on the happy path")
+    if "REVOKE orphan" in yml or "REVOKE orphan" in sign:
+        fail("TF must not revoke Dist certs on the happy path")
+    if KEEP_DIST_ID not in reuse:
+        fail(f"tf_asc_reuse.py must pin KEEP Dist cert {KEEP_DIST_ID}")
+    if "resolve_profile" not in reuse or "Not deleting" not in reuse:
+        fail("tf_asc_reuse.py must get-or-create / reuse ACTIVE profiles by name")
+    if "HAS_LOCAL_DIST_KEY" not in archive or "KEEP cert reuse" not in archive:
+        fail("tf-archive.sh must leave Automatic signing when KEEP is reused (no local key)")
+    if "watchkitapp" in reuse:
+        fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")
+    test_tf_asc_reuse.main()
+    ok("ASC Dist cert + profiles reuse KEEP / ACTIVE by name; no delete+create")
 
 
 def test_crisis_opt_locks() -> None:
@@ -293,6 +326,7 @@ def main() -> None:
     test_nfc_tag_only()
     test_no_duplicate_widget_info_plist()
     test_watch_omitted_from_app_store_archive()
+    test_asc_reuse_not_delete_create()
     test_crisis_opt_locks()
 
 
