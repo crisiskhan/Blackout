@@ -34,14 +34,18 @@ struct MapTab: View {
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
             if let pack = runtime.packs?.active, let style = styleURL() {
+                let you = UserPuck.coordinate(
+                    lastKnown: runtime.lastKnownFix,
+                    packCenter: (pack.center.lat, pack.center.lon)
+                )
                 Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
                     .foregroundStyle(Color(white: 0.6))
                 OfflineMapView(
                     styleURL: style,
                     centerLat: pack.center.lat,
                     centerLon: pack.center.lon,
-                    puckLat: runtime.lastKnownFix?.lat ?? pack.center.lat,
-                    puckLon: runtime.lastKnownFix?.lon ?? pack.center.lon,
+                    puckLat: you.lat,
+                    puckLon: you.lon,
                     packSouth: pack.bbox.south,
                     packWest: pack.bbox.west,
                     packNorth: pack.bbox.north,

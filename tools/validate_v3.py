@@ -370,6 +370,14 @@ def tip55_chrome() -> None:
         ok("Map tab hosts MapLibre canvas, not pack-bullet list")
     if "showsUserLocation" not in offline:
         bad("OfflineMapView missing user puck")
+    elif "UserPuck" not in offline or "YouPuckAnnotationView" not in offline:
+        bad("OfflineMapView missing visible YOU fallback puck")
+    elif "viewFor" not in offline:
+        bad("OfflineMapView missing annotation view for YOU puck")
+    elif "didFinishLoading" not in offline:
+        bad("OfflineMapView does not reapply puck after style load")
+    elif 'title = "YOU"' not in pack_style and 'static let title = "YOU"' not in pack_style:
+        bad("UserPuck missing YOU title")
     else:
         ok("OfflineMapView user puck")
     if "MLNPolygon" not in offline and "packSouth" not in offline:

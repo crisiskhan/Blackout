@@ -44,4 +44,50 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(ring.count, 5)
         XCTAssertEqual(ring.first?.lat, ring.last?.lat)
     }
+
+    func testUserPuckFallsBackToPackCenterWhenGPSMissing() {
+        let pack = (lat: 29.95, lon: -81.34)
+        let you = UserPuck.coordinate(lastKnown: nil, packCenter: pack)
+        XCTAssertEqual(you.lat, pack.lat)
+        XCTAssertEqual(you.lon, pack.lon)
+        XCTAssertEqual(UserPuck.title, "YOU")
+    }
+
+    func testUserPuckPrefersLastKnownFix() {
+        let last = (lat: 30.10, lon: -81.50)
+        let you = UserPuck.coordinate(lastKnown: last, packCenter: (29.95, -81.34))
+        XCTAssertEqual(you.lat, last.lat)
+        XCTAssertEqual(you.lon, last.lon)
+    }
+
+    func testUserPuckHaloRingClosesAroundCoordinate() {
+        let ring = UserPuck.haloRing(lat: 29.95, lon: -81.34)
+        XCTAssertEqual(ring.count, UserPuck.haloSteps + 1)
+        XCTAssertEqual(ring.first?.lat, ring.last?.lat)
+        XCTAssertEqual(ring.first?.lon, ring.last?.lon)
+        XCTAssertTrue(ring.contains { abs($0.lat - 29.95) > 0.0001 })
+    }
+
+    func testUserPuckReappliesWhenMapLostTheAnnotation() {
+        let pack = (south: 29.0, west: -82.0, north: 31.0, east: -80.0)
+        let puck = (lat: 29.95, lon: -81.34)
+        XCTAssertTrue(
+            UserPuck.needsReapply(
+                storedPack: pack,
+                storedPuck: puck,
+                pack: pack,
+                puck: puck,
+                mapHasPuck: false
+            )
+        )
+        XCTAssertFalse(
+            UserPuck.needsReapply(
+                storedPack: pack,
+                storedPuck: puck,
+                pack: pack,
+                puck: puck,
+                mapHasPuck: true
+            )
+        )
+    }
 }

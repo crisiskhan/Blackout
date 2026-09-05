@@ -95,6 +95,53 @@ public enum PackGeometry {
     }
 }
 
+/// Self marker when MapLibre `showsUserLocation` has no GPS fix yet.
+public enum UserPuck {
+    public static let title = "YOU"
+    public static let haloRadiusMeters: Double = 80
+    public static let haloSteps = 32
+
+    public static func coordinate(
+        lastKnown: (lat: Double, lon: Double)?,
+        packCenter: (lat: Double, lon: Double)
+    ) -> (lat: Double, lon: Double) {
+        lastKnown ?? packCenter
+    }
+
+    public static func haloRing(
+        lat: Double,
+        lon: Double,
+        radiusMeters: Double = haloRadiusMeters,
+        steps: Int = haloSteps
+    ) -> [(lat: Double, lon: Double)] {
+        let latRad = lat * .pi / 180
+        let metersPerDegLat = 111_320.0
+        let dLat = radiusMeters / metersPerDegLat
+        let dLon = radiusMeters / (metersPerDegLat * max(cos(latRad), 1e-6))
+        var ring: [(lat: Double, lon: Double)] = []
+        ring.reserveCapacity(steps + 1)
+        for i in 0..<steps {
+            let theta = (Double(i) / Double(steps)) * 2 * .pi
+            ring.append((lat + dLat * sin(theta), lon + dLon * cos(theta)))
+        }
+        if let first = ring.first {
+            ring.append(first)
+        }
+        return ring
+    }
+
+    public static func needsReapply(
+        storedPack: (south: Double, west: Double, north: Double, east: Double)?,
+        storedPuck: (lat: Double, lon: Double)?,
+        pack: (south: Double, west: Double, north: Double, east: Double),
+        puck: (lat: Double, lon: Double),
+        mapHasPuck: Bool
+    ) -> Bool {
+        guard mapHasPuck, let storedPack, let storedPuck else { return true }
+        return storedPack != pack || storedPuck != puck
+    }
+}
+
 public enum PackStyle {
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
