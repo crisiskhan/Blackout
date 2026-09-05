@@ -566,70 +566,83 @@ def tip57_map() -> None:
 
 
 def tip58_solo_qa() -> None:
-    """Tip 58 — SOLO_QA no-crash under airplane / NET·NONE. No CPV bump. No TF."""
+    """Tip 58 DoD — five Done lines only. Fail = crash OR dead control. Fix SHA only. No CPV / TF."""
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
     speech = (ROOT / "Packages" / "OfflineSpeech" / "Sources" / "OfflineSpeech" / "OfflineSpeech.swift").read_text()
     marks = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
     ptt = (ROOT / "Packages" / "PTTAudio" / "Sources" / "PTTAudio" / "PTTAudio.swift").read_text()
     red = (ROOT / "Packages" / "RedAlert" / "Sources" / "RedAlert" / "RedAlert.swift").read_text()
     timers = (ROOT / "Packages" / "TimerSync" / "Sources" / "TimerSync" / "TimerSync.swift").read_text()
     mesh = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "MeshDTN.swift").read_text()
     comms = (ROOT / "Blackout" / "CommsTab.swift").read_text()
-
     init = app.split("func arm(")[0]
-    if "fix.arm()" in init:
-        bad("AppRuntime.init arms CLLocation — MARK after kill / scene restore crash")
-    else:
-        ok("launch does not arm CLLocation")
-    if re.search(r"let mgr = CLLocationManager\(\)", app):
-        bad("CLLocationManager constructed at MeshFix init / launch")
-    else:
-        ok("CLLocationManager is lazy until MARK/LOCK-ON")
-    if re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech):
-        bad("AVSpeechSynthesizer constructed on SpeechEngine init (restore crash)")
-    else:
-        ok("AVSpeechSynthesizer is lazy")
-    if "synchronize()" not in marks:
-        bad("MarkStore.save must flush so force-quit restore is honest")
-    else:
-        ok("MarkStore flushes UserDefaults")
 
-    if "TimelineView" not in exp:
-        bad("1-min timer OVERDUE never appears without a tick")
-    else:
-        ok("Expedition ticks overdue plate")
-    if "overdueRowID" not in timers:
-        bad("overdue ForEach needs a distinct row id")
-    else:
-        ok("timer overdue rows use overdueRowID")
-    if 'who.isEmpty ? "ALL"' not in timers and "who.isEmpty" not in timers:
-        bad("timer add must survive empty/nil party who")
-    else:
-        ok("timer add treats empty who as ALL")
+    mark_ok = (
+        'Button("MARK")' in map_tab
+        and "dropMark()" in app
+        and "MarkStore.load" in init
+        and "MarkStore.save" in app
+        and "synchronize()" in marks
+        and "fix.arm()" not in init
+        and re.search(r"let mgr = CLLocationManager\(\)", app) is None
+        and re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech) is None
+    )
+    timer_ok = (
+        'Button("1 MIN TIMER SET")' in exp
+        and 'Button("DONE")' in exp
+        and "TimelineView" in exp
+        and "overdueRowID" in timers
+        and "overduePlate" in exp
+        and ("who.isEmpty" in timers)
+        and "isSOS" in timers
+    )
+    red_ok = (
+        "APPLY RED BAND" in exp
+        and "applySelfRed" in app
+        and "cancelSelfRed" in exp
+        and "isSOS" in red
+        and "openURL" not in red
+        and "tel:" not in red
+        and "911" not in red
+        and "sendRED" in app
+    )
+    ptt_ok = (
+        "HOLD PTT" in comms
+        and "beginPTTSolo" in app
+        and "recordClip" in app
+        and "endPTTSolo" in comms
+        and "AVAudioEngine" not in ptt
+        and "LivePTTHub" not in ptt
+        and "import AVFoundation" not in ptt
+    )
+    peers_ok = (
+        "NO PEERS · LOGGED" in mesh
+        and "sendChip" in mesh
+        and 'chip: "ptt"' in app
+    )
 
-    if "openURL" in red or "tel:" in red or "911" in red:
-        bad("RED path references SOS/911")
+    if not mark_ok:
+        bad("MARK FAIL — crash/dead MARK after kill")
     else:
-        ok("RED plate does not call SOS/911")
-    if "isSOS" not in red:
-        bad("RED plate must expose isSOS=false")
+        ok("Done: MARK after kill — no crash/dead MARK")
+    if not timer_ok:
+        bad("timer FAIL — crash/stuck 1-min overdue + DONE")
     else:
-        ok("RED plate is not SOS")
-
-    if "AVAudioEngine" in ptt or "LivePTTHub" in ptt or "import AVFoundation" in ptt:
-        bad("PTTAudio must stay local/queue — no LivePTTHub or AVAudioEngine")
+        ok("Done: 1-min party timer overdue + DONE — no crash/stuck")
+    if not red_ok:
+        bad("RED FAIL — crash or auto-911")
     else:
-        ok("PTT clip is local/queue, no LivePTTHub")
-    if "beginPTTSolo" not in app or "HOLD PTT" not in comms:
-        bad("solo PTT path missing")
+        ok("Done: Self RED + cancel — no crash, no auto-911")
+    if not ptt_ok:
+        bad("PTT FAIL — crash/hang under NET · NONE")
     else:
-        ok("solo PTT path is HOLD/RELEASE + local clip")
-
-    if "NO PEERS · LOGGED" not in mesh:
-        bad("NO PEERS · LOGGED regress")
+        ok("Done: PTT clip NET · NONE — no crash/hang")
+    if not peers_ok:
+        bad("NO PEERS · LOGGED FAIL — 0-peer chip regress")
     else:
-        ok("NO PEERS · LOGGED still honest at 0 peers")
+        ok("Done: NO PEERS · LOGGED chip at 0 peers")
 
 
 def main() -> None:
