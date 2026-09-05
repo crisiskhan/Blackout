@@ -77,7 +77,7 @@ public struct OfflineMapView: UIViewRepresentable {
         if samePack && samePuck { return }
 
         if let old = coordinator.packOverlay {
-            view.removeOverlay(old)
+            view.remove(old)
         }
         if let old = coordinator.puck {
             view.removeAnnotation(old)
@@ -89,7 +89,7 @@ public struct OfflineMapView: UIViewRepresentable {
             east: packEast
         ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
         let poly = MLNPolygon(coordinates: &ring, count: UInt(ring.count))
-        view.addOverlay(poly)
+        view.add(poly)
         coordinator.packOverlay = poly
         coordinator.packSouth = packSouth
         coordinator.packWest = packWest
