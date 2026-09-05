@@ -145,6 +145,144 @@ class TestManualDistAppWidgetOnly(unittest.TestCase):
         )
 
 
+class TestExportOptionsMatchesKeychainIdentity(unittest.TestCase):
+    """33931034850: ExportOptions Apple Distribution ≠ iPhone Distribution identity."""
+
+    def test_alias_from_iphone_distribution_identity_line(self) -> None:
+        line = f'  1) {HASH} "iPhone Distribution: Crisis Khan (TEAMID12)"'
+        self.assertEqual(signing.dist_certificate_alias(line), "iPhone Distribution")
+
+    def test_alias_from_apple_distribution_identity_line(self) -> None:
+        line = f'  1) {HASH} "Apple Distribution: Crisis Khan (TEAMID12)"'
+        self.assertEqual(signing.dist_certificate_alias(line), "Apple Distribution")
+
+    def test_alias_from_ios_distribution_identity_line(self) -> None:
+        line = f'  1) {HASH} "iOS Distribution: Crisis Khan (TEAMID12)"'
+        self.assertEqual(signing.dist_certificate_alias(line), "iOS Distribution")
+
+    def test_manual_export_options_uses_iphone_distribution_alias(self) -> None:
+        body = signing.export_options_plist(
+            team_id=TEAM,
+            has_local_dist_key=True,
+            profiles={
+                "com.crisiskhan.blackout": "Blackout iOS App Store GHA Local",
+                "com.crisiskhan.blackout.widgets": "Blackout Widgets App Store GHA Local",
+            },
+            signing_certificate=(
+                f'  1) {HASH} "iPhone Distribution: Crisis Khan (TEAMID12)"'
+            ),
+        )
+        self.assertEqual(body["method"], "app-store")
+        self.assertEqual(body["signingStyle"], "manual")
+        self.assertEqual(body["signingCertificate"], "iPhone Distribution")
+        self.assertEqual(
+            body["provisioningProfiles"]["com.crisiskhan.blackout"],
+            "Blackout iOS App Store GHA Local",
+        )
+        self.assertNotIn("installerSigningCertificate", body)
+        self.assertNotEqual(body["signingCertificate"], "Apple Distribution")
+
+    def test_manual_export_options_uses_apple_distribution_when_that_is_in_keychain(self) -> None:
+        body = signing.export_options_plist(
+            team_id=TEAM,
+            has_local_dist_key=True,
+            profiles={"com.crisiskhan.blackout": "Blackout iOS App Store GHA Local"},
+            signing_certificate=f'  1) {HASH} "Apple Distribution: Crisis Khan (TEAMID12)"',
+        )
+        self.assertEqual(body["signingCertificate"], "Apple Distribution")
+
+    def test_manual_export_options_refuses_empty_identity(self) -> None:
+        with self.assertRaises(ValueError):
+            signing.export_options_plist(
+                team_id=TEAM,
+                has_local_dist_key=True,
+                profiles={"com.crisiskhan.blackout": "Blackout iOS App Store GHA Local"},
+                signing_certificate="",
+            )
+
+
+class TestXcarchiveApplicationProperties(unittest.TestCase):
+    def test_fills_empty_and_placeholder_bundle_id(self) -> None:
+        props = signing.xcarchive_application_properties(
+            bid="$(PRODUCT_BUNDLE_IDENTIFIER)",
+            version="54",
+            short_version="0.1.0",
+            team=TEAM,
+            signing_identity="iPhone Distribution: Crisis Khan (TEAMID12)",
+        )
+        self.assertEqual(props["CFBundleIdentifier"], "com.crisiskhan.blackout")
+        self.assertEqual(props["CFBundleVersion"], "54")
+        self.assertEqual(props["Team"], TEAM)
+        self.assertEqual(
+            props["SigningIdentity"],
+            "iPhone Distribution: Crisis Khan (TEAMID12)",
+        )
+
+    def test_empty_bid_and_null_fall_back(self) -> None:
+        for raw in ("", "   ", "(null)"):
+            props = signing.xcarchive_application_properties(
+                bid=raw,
+                version="",
+                short_version="",
+                team=TEAM,
+                default_version="54",
+            )
+            self.assertEqual(props["CFBundleIdentifier"], "com.crisiskhan.blackout")
+            self.assertEqual(props["CFBundleVersion"], "54")
+            self.assertEqual(props["CFBundleShortVersionString"], "0.1.0")
+            self.assertTrue(props["Team"])
+
+    def test_refuses_empty_team(self) -> None:
+        with self.assertRaises(ValueError):
+            signing.xcarchive_application_properties(
+                bid="com.crisiskhan.blackout",
+                version="54",
+                short_version="0.1.0",
+                team="",
+            )
+
+
+class TestSubmissionAuthority(unittest.TestCase):
+    def test_accepts_iphone_and_apple_distribution(self) -> None:
+        iphone = (
+            "Executable=/tmp/Payload/Blackout.app/Blackout\n"
+            "Identifier=com.crisiskhan.blackout\n"
+            "Format=app bundle with Mach-O thin (arm64)\n"
+            "Authority=iPhone Distribution: Crisis Khan (TEAMID12)\n"
+            "Authority=Apple Worldwide Developer Relations Certification Authority\n"
+            "TeamIdentifier=TEAMID12\n"
+        )
+        apple = iphone.replace(
+            "iPhone Distribution: Crisis Khan (TEAMID12)",
+            "Apple Distribution: Crisis Khan (TEAMID12)",
+        )
+        self.assertTrue(signing.submission_authority_ok(iphone))
+        self.assertTrue(signing.submission_authority_ok(apple))
+
+    def test_rejects_development_and_missing_authority(self) -> None:
+        development = (
+            "Executable=/tmp/Payload/Blackout.app/Blackout\n"
+            "Authority=Apple Development: Crisis Khan (TEAMID12)\n"
+            "TeamIdentifier=TEAMID12\n"
+        )
+        self.assertFalse(signing.submission_authority_ok(development))
+        self.assertFalse(signing.submission_authority_ok(""))
+        self.assertFalse(signing.submission_authority_ok("Identifier=com.crisiskhan.blackout\n"))
+
+    def test_handzip_path_requires_authority_verify_and_fail_closed(self) -> None:
+        script = TF_ARCHIVE.read_text()
+        self.assertIn("check-submission-authority", script)
+        self.assertIn("handzip_ipa", script)
+        self.assertNotIn("rm -rf \"$APP/_CodeSignature\"", script)
+        self.assertNotIn("rm -rf \"$src/_CodeSignature\"", script)
+        self.assertIn("re-sign nested", script)
+        self.assertIn("Fail closed", script)
+        export_block = signing.xcodebuild_export_cli_block(script)
+        self.assertNotIn("CODE_SIGN_IDENTITY=", export_block)
+        self.assertIn("-exportArchive", export_block)
+        self.assertIn("write-export-options", script)
+
+
 def main() -> None:
     suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])
     result = unittest.TextTestRunner(verbosity=2).run(suite)

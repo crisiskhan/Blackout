@@ -8,8 +8,10 @@ app and widget buildSettings only. SPM packages stay Automatic.
 """
 from __future__ import annotations
 
+import datetime
 import json
 import os
+import plistlib
 import re
 import sys
 from pathlib import Path
@@ -27,12 +29,120 @@ DIST_IDENTITY_PLACEHOLDER = "iPhone Distribution"
 DIST_IDENTITY_ALIASES = frozenset(
     {"iPhone Distribution", "iOS Distribution", "Apple Distribution"}
 )
+DIST_ALIAS_ORDER = (
+    "iPhone Distribution",
+    "Apple Distribution",
+    "iOS Distribution",
+)
+_MISSING_BUNDLE_IDS = frozenset({"", "$(PRODUCT_BUNDLE_IDENTIFIER)", "(null)"})
 
 _LOCAL_DEFAULTS = {ident: name for ident, name, _plat in reuse.BUNDLES}
 
 
 def default_profile_map() -> dict[str, str]:
     return dict(_LOCAL_DEFAULTS)
+
+
+def dist_certificate_alias(identity_line: str) -> str | None:
+    """ExportOptions signingCertificate from a `security find-identity` line."""
+    text = (identity_line or "").strip()
+    if not text:
+        return None
+    if text in DIST_IDENTITY_ALIASES:
+        return text
+    quoted = re.search(r'"([^"]+)"', text)
+    name = quoted.group(1) if quoted else text
+    for alias in DIST_ALIAS_ORDER:
+        if name == alias or name.startswith(f"{alias}:") or name.startswith(f"{alias} "):
+            return alias
+        if alias in name:
+            return alias
+    return None
+
+
+def dist_identity_common_name(identity_line: str) -> str:
+    quoted = re.search(r'"([^"]+)"', identity_line or "")
+    return quoted.group(1) if quoted else ""
+
+
+def export_options_plist(
+    *,
+    team_id: str,
+    has_local_dist_key: bool,
+    profiles: dict[str, str] | None,
+    signing_certificate: str | None,
+) -> dict[str, object]:
+    """iOS App Store ExportOptions. signingCertificate from find-identity."""
+    body: dict[str, object] = {
+        "method": "app-store",
+        "destination": "export",
+        "teamID": team_id,
+        "uploadSymbols": True,
+        "manageAppVersionAndBuildNumber": False,
+        "stripSwiftSymbols": True,
+    }
+    if profiles and has_local_dist_key:
+        alias = dist_certificate_alias(signing_certificate or "")
+        if not alias:
+            raise ValueError(
+                "ExportOptions signingCertificate requires a Dist find-identity "
+                "alias (iPhone Distribution / Apple Distribution / iOS Distribution)"
+            )
+        body["signingStyle"] = "manual"
+        body["signingCertificate"] = alias
+        body["provisioningProfiles"] = dict(profiles)
+    else:
+        body["signingStyle"] = "automatic"
+    return body
+
+
+def xcarchive_application_properties(
+    *,
+    bid: str,
+    version: str,
+    short_version: str,
+    team: str,
+    signing_identity: str = "",
+    default_version: str = "",
+    default_short: str = "0.1.0",
+) -> dict[str, object]:
+    """Non-empty ApplicationProperties so exportArchive is not 'BID missing'."""
+    ident = (bid or "").strip()
+    if ident in _MISSING_BUNDLE_IDS or ident.startswith("$("):
+        ident = APP_BUNDLE
+    ver = (version or "").strip() or (default_version or "").strip()
+    short = (short_version or "").strip() or default_short
+    team_id = (team or "").strip()
+    if not ident:
+        raise ValueError("xcarchive ApplicationProperties CFBundleIdentifier is empty")
+    if not ver:
+        raise ValueError("xcarchive ApplicationProperties CFBundleVersion is empty")
+    if not team_id:
+        raise ValueError("xcarchive ApplicationProperties Team is empty")
+    props: dict[str, object] = {
+        "ApplicationPath": "Applications/Blackout.app",
+        "Architectures": ["arm64"],
+        "CFBundleIdentifier": ident,
+        "CFBundleShortVersionString": short,
+        "CFBundleVersion": ver,
+        "Team": team_id,
+    }
+    identity = (signing_identity or "").strip()
+    if identity:
+        props["SigningIdentity"] = identity
+    return props
+
+
+def submission_authority_ok(codesign_display: str) -> bool:
+    """True when codesign -d output has an Apple submission Dist Authority."""
+    authorities = re.findall(r"^Authority=(.+)$", codesign_display or "", re.M)
+    if not authorities:
+        authorities = re.findall(r"Authority=([^\n]+)", codesign_display or "")
+    for auth in authorities:
+        for alias in DIST_ALIAS_ORDER:
+            if alias in auth:
+                return True
+    return False
 
 
 def xcodebuild_archive_cli_block(script_text: str) -> str:
@@ -168,10 +278,87 @@ def _cmd_rewrite_hash(identity_hash: str) -> None:
     print("rewrote CODE_SIGN_IDENTITY to exact keychain hash")
 
 
+def _cmd_write_export_options(identity_line: str) -> None:
+    try:
+        body = export_options_plist(
+            team_id=os.environ["APPLE_TEAM_ID"],
+            has_local_dist_key=os.environ.get("HAS_LOCAL_DIST_KEY") == "1",
+            profiles=_load_profiles() or None,
+            signing_certificate=identity_line,
+        )
+    except ValueError as exc:
+        print(exc)
+        raise SystemExit(1) from exc
+    path = Path(os.environ["RUNNER_TEMP"]) / "ExportOptions.plist"
+    with path.open("wb") as fh:
+        plistlib.dump(body, fh)
+    print(
+        "wrote",
+        path,
+        "signingStyle",
+        body["signingStyle"],
+        "signingCertificate",
+        body.get("signingCertificate", ""),
+    )
+
+
+def _cmd_write_xcarchive_plist(
+    path: str,
+    bid: str,
+    version: str,
+    short_version: str,
+    team: str,
+    identity: str,
+    default_version: str,
+) -> None:
+    try:
+        props = xcarchive_application_properties(
+            bid=bid,
+            version=version,
+            short_version=short_version,
+            team=team,
+            signing_identity=identity or dist_identity_common_name(identity),
+            default_version=default_version,
+        )
+    except ValueError as exc:
+        print(exc)
+        raise SystemExit(1) from exc
+    body = {
+        "ApplicationProperties": props,
+        "ArchiveVersion": 2,
+        "CreationDate": datetime.datetime.utcnow(),
+        "Name": "Blackout",
+        "SchemeName": "Blackout",
+    }
+    dest = Path(path)
+    with dest.open("wb") as fh:
+        plistlib.dump(body, fh)
+    print(
+        "wrote xcarchive Info.plist",
+        props["CFBundleIdentifier"],
+        props["CFBundleVersion"],
+        props.get("SigningIdentity", ""),
+    )
+
+
+def _cmd_check_submission_authority(path: str) -> int:
+    text = Path(path).read_text(errors="replace")
+    if not submission_authority_ok(text):
+        print("FAIL not a submission Dist Authority")
+        return 1
+    print("OK submission Dist Authority")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        print("usage: tf_archive_signing.py patch|rewrite-hash HASH", file=sys.stderr)
+        print(
+            "usage: tf_archive_signing.py patch|rewrite-hash HASH|"
+            "write-export-options IDLINE|write-xcarchive-plist ...|"
+            "check-submission-authority FILE",
+            file=sys.stderr,
+        )
         return 2
     cmd = args[0]
     if cmd == "patch":
@@ -183,6 +370,31 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         _cmd_rewrite_hash(args[1])
         return 0
+    if cmd == "write-export-options":
+        _cmd_write_export_options(" ".join(args[1:]))
+        return 0
+    if cmd == "write-xcarchive-plist":
+        if len(args) < 6:
+            print(
+                "write-xcarchive-plist PATH BID VER SHORT TEAM [IDENTITY] [DEFAULT_VER]",
+                file=sys.stderr,
+            )
+            return 2
+        _cmd_write_xcarchive_plist(
+            args[1],
+            args[2],
+            args[3],
+            args[4],
+            args[5],
+            args[6] if len(args) > 6 else "",
+            args[7] if len(args) > 7 else "",
+        )
+        return 0
+    if cmd == "check-submission-authority":
+        if len(args) < 2 or not args[1]:
+            print("check-submission-authority requires a codesign -d dump", file=sys.stderr)
+            return 2
+        return _cmd_check_submission_authority(args[1])
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 2
 

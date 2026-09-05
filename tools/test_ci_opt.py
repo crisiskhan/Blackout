@@ -24,6 +24,7 @@ TF_YML = ROOT / ".github/workflows/testflight-internal.yml"
 PBX = ROOT / "Blackout.xcodeproj/project.pbxproj"
 GENERATOR = ROOT / "tools/v3/generate_project.py"
 TF_ARCHIVE = ROOT / ".github/ci/tf-archive.sh"
+TF_ARCHIVE_SIGNING = ROOT / "tools/tf_archive_signing.py"
 TF_SIGN = ROOT / "tools/tf_asc_signing.py"
 TF_REUSE = ROOT / "tools/tf_asc_reuse.py"
 TF_IPA_INSPECT = ROOT / "tools/tf_ipa_inspect.py"
@@ -398,6 +399,7 @@ def test_asc_reuse_not_delete_create() -> None:
     sign = TF_SIGN.read_text() if TF_SIGN.is_file() else ""
     reuse = TF_REUSE.read_text() if TF_REUSE.is_file() else ""
     archive = TF_ARCHIVE.read_text()
+    signing_helper = TF_ARCHIVE_SIGNING.read_text() if TF_ARCHIVE_SIGNING.is_file() else ""
     if "tools/tf_asc_signing.py" not in yml:
         fail("testflight-internal.yml must run tools/tf_asc_signing.py (reuse helper)")
     if "PROFILE delete stale" in yml or "PROFILE delete stale" in sign:
@@ -430,7 +432,12 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("tf_asc_signing.py must cool down after iOS Local write before Widgets Local")
     if "HAS_LOCAL_DIST_KEY" not in archive:
         fail("tf-archive.sh must switch on HAS_LOCAL_DIST_KEY")
-    if 'signingStyle"] = "manual"' not in archive and "signingStyle'] = 'manual'" not in archive:
+    if (
+        'signingStyle"] = "manual"' not in archive
+        and "signingStyle'] = 'manual'" not in archive
+        and '["signingStyle"] = "manual"' not in signing_helper
+        and '"signingStyle": "manual"' not in signing_helper
+    ):
         fail("tf-archive.sh must use Manual signing when HAS_LOCAL_DIST_KEY=1")
     if "GHA Local" not in archive:
         fail("tf-archive.sh Manual path must default to Local profile names")
@@ -443,26 +450,37 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("do not pass CODE_SIGN_IDENTITY on the xcodebuild archive CLI")
     if "tf_archive_signing.py" not in archive:
         fail("tf-archive.sh must apply Manual Dist via tools/tf_archive_signing.py")
-    # 33931034850: mint iOS Dist first, ExportOptions asked Apple Distribution,
-    # exportArchive looked for 3rd Party Mac Developer Installer, hand-zip
-    # via zip -r, altool 409 "not signed using an Apple submission certificate".
-    dist_loop = sign.find('for ctype in (')
-    ios_pos = sign.find('"IOS_DISTRIBUTION"', dist_loop)
-    apple_pos = sign.find('"DISTRIBUTION"', dist_loop)
-    if dist_loop < 0 or apple_pos < 0 or ios_pos < 0 or apple_pos > ios_pos:
-        fail("tf_asc_signing.py must mint Apple DISTRIBUTION before IOS_DISTRIBUTION")
-    if "DIST_CERT_TYPE" not in sign:
-        fail("tf_asc_signing.py must export DIST_CERT_TYPE for ExportOptions")
-    if '"Apple Distribution"' not in archive or "DIST_CERT_TYPE" not in archive:
-        fail("ExportOptions must set signingCertificate from DIST_CERT_TYPE")
-    if "SigningIdentity" not in archive:
+    # 33931034850: ExportOptions hardcoded Apple Distribution while the
+    # keychain identity was iPhone Distribution; exportArchive looked for
+    # 3rd Party Mac Developer Installer; hand-zip uploaded a non-submission IPA.
+    if "write-export-options" not in archive:
+        fail("tf-archive.sh must write ExportOptions from the Dist find-identity alias")
+    if 'signingCertificate"] = "Apple Distribution"' in archive:
+        fail("do not hard-code ExportOptions signingCertificate to Apple Distribution")
+    if "dist_certificate_alias" not in signing_helper:
+        fail("tf_archive_signing.py must map find-identity CN to a Dist alias")
+    if "submission_authority_ok" not in signing_helper:
+        fail("tf_archive_signing.py must recognize Apple submission Dist Authority")
+    if "check-submission-authority" not in archive:
+        fail("hand-zip must verify codesign Authority before declaring the IPA ready")
+    if "Fail closed" not in archive:
+        fail("hand-zip must fail closed when Authority is not a submission Dist identity")
+    if "re-sign nested" not in archive:
+        fail("incomplete archive-product signature must re-sign nested frameworks/appex")
+    if "SigningIdentity" not in archive and "SigningIdentity" not in signing_helper:
         fail("xcarchive Info.plist must include SigningIdentity for exportArchive")
+    if '"app-store"' not in signing_helper and "app-store-connect" not in signing_helper:
+        fail("ExportOptions method must stay app-store / app-store-connect (iOS)")
+    if "3rd Party Mac Developer Installer" in signing_helper:
+        fail("do not export with 3rd Party Mac Developer Installer")
     if "zip -r" in archive or "zip -y" in archive:
         fail("do not hand-zip the IPA with info-zip — that breaks submission signing")
     if "ditto -c -k" not in archive:
         fail("hand-zip must use ditto -c -k so the Dist signature stays intact")
     if "codesign --verify --deep --strict" not in archive:
         fail("tf-archive.sh must codesign --verify the IPA app before upload")
+    if 'rm -rf "$APP/_CodeSignature"' in archive:
+        fail("do not rm _CodeSignature and leave the archive product unsigned")
     test_tf_archive_signing.main()
     if "watchkitapp" in reuse:
         fail("tf_asc_reuse BUNDLES must stay iOS + widgets only")

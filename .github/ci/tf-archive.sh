@@ -1,8 +1,10 @@
 #!/bin/bash
 # Archive, then recover a signed Blackout.app if xcarchive assembly fails.
 # 33829001016: packaging left Products/Applications/Blackout.app but no
-# xcarchive Info.plist. Do not rm _CodeSignature / re-seal that product.
+# xcarchive Info.plist. Do not rm _CodeSignature and leave unsigned.
 # Write Info.plist and exportArchive or hand-zip the signed .app. No xattr.
+# 33931034850: ExportOptions signingCertificate from find-identity (not a
+# hard-coded Apple Distribution). Hand-zip fail-closed on submission Authority.
 set -euo pipefail
 NEXT="${NEXT_CPV:?NEXT_CPV not set}"
 if [ -z "$NEXT" ]; then
@@ -32,37 +34,20 @@ AUTH=(
   -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 )
 
-"$PYBIN" << 'PY'
-import json, os, plistlib
-from pathlib import Path
-path = os.environ["RUNNER_TEMP"] + "/ExportOptions.plist"
-profiles = {}
-pmap = Path(os.environ["RUNNER_TEMP"]) / "profile_map.json"
-if pmap.exists():
-    profiles = json.loads(pmap.read_text())
-body = {
-    "method": "app-store",
-    "destination": "export",
-    "teamID": os.environ["APPLE_TEAM_ID"],
-    "uploadSymbols": True,
-    "manageAppVersionAndBuildNumber": False,
-    "stripSwiftSymbols": True,
-}
-if profiles and os.environ.get("HAS_LOCAL_DIST_KEY") == "1":
-    body["signingStyle"] = "manual"
-    # 33931034850: ExportOptions said Apple Distribution while the mint was
-    # IOS_DISTRIBUTION; exportArchive then looked for 3rd Party Mac Developer
-    # Installer. Match the cert type actually imported this flight.
-    ctype = os.environ.get("DIST_CERT_TYPE", "DISTRIBUTION")
-    body["signingCertificate"] = (
-        "iOS Distribution" if ctype == "IOS_DISTRIBUTION" else "Apple Distribution"
-    )
-    body["provisioningProfiles"] = profiles
-else:
-    body["signingStyle"] = "automatic"
-plistlib.dump(body, open(path, "wb"))
-print("wrote", path, "signingStyle", body["signingStyle"])
-PY
+# 33931034850: write signingCertificate from the Dist find-identity alias
+# (iPhone Distribution / Apple Distribution / iOS Distribution). Do not
+# hard-code Apple Distribution — that misses an iPhone Distribution keychain
+# identity and exportArchive then looks for 3rd Party Mac Developer Installer.
+IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
+if [ -z "$IDLINE" ]; then
+  IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
+fi
+IDHASH=""
+if [ -n "$IDLINE" ]; then
+  IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
+  echo "Using Dist identity $IDLINE"
+fi
+"$PYBIN" tools/tf_archive_signing.py write-export-options "$IDLINE"
 
 # 33926435868 / 33927056130: HAS_LOCAL_DIST_KEY=1 Manual Dist on
 # com.crisiskhan.blackout + com.crisiskhan.blackout.widgets only
@@ -72,12 +57,7 @@ PY
 # tools/tf_archive_signing.py (iPhone Distribution).
 "$PYBIN" tools/tf_archive_signing.py patch
 
-IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
-if [ -z "$IDLINE" ]; then
-  IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v "CSSMERR" | head -n 1 || true)
-fi
-if [ -n "$IDLINE" ]; then
-  IDHASH=$(printf '%s' "$IDLINE" | awk '{print $2}')
+if [ -n "$IDHASH" ]; then
   echo "Using CODE_SIGN_IDENTITY hash=$IDHASH"
   "$PYBIN" tools/tf_archive_signing.py rewrite-hash "$IDHASH"
 fi
@@ -275,12 +255,130 @@ if [ -n "$APP" ] && [ -f "$APP/Info.plist" ]; then
   echo "CFBundleVersion=$(plutil -extract CFBundleVersion raw "$APP/Info.plist" 2>/dev/null || echo missing)"
 fi
 
+find_local_ios_provision() {
+  local d f name
+  for d in \
+    "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+    "$HOME/Library/MobileDevice/Provisioning Profiles"
+  do
+    [ -d "$d" ] || continue
+    for f in "$d"/*.mobileprovision; do
+      [ -f "$f" ] || continue
+      name=$(security cms -D -i "$f" 2>/dev/null | plutil -extract Name raw -o - - 2>/dev/null || true)
+      if [ "$name" = "Blackout iOS App Store GHA Local" ]; then
+        printf '%s' "$f"
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+
+provision_entitlements() {
+  local prov="$1"
+  local dest="$2"
+  "$PYBIN" - "$prov" "$dest" << 'PY'
+import plistlib, subprocess, sys
+from pathlib import Path
+raw = subprocess.check_output(["security", "cms", "-D", "-i", sys.argv[1]], stderr=subprocess.DEVNULL)
+pl = plistlib.loads(raw)
+Path(sys.argv[2]).write_bytes(plistlib.dumps(pl.get("Entitlements") or {}))
+print("wrote", sys.argv[2])
+PY
+}
+
+verify_submission_app() {
+  local app="$1"
+  local dv="$RUNNER_TEMP/codesign-dv.txt"
+  /usr/bin/codesign -d --verbose=4 "$app" > "$dv" 2>&1 || true
+  if ! /usr/bin/codesign --verify --deep --strict "$app"; then
+    echo "codesign --verify failed for $app"
+    return 1
+  fi
+  if ! "$PYBIN" tools/tf_archive_signing.py check-submission-authority "$dv"; then
+    echo "Fail closed: $app is not signed with an Apple submission Dist identity"
+    return 1
+  fi
+  return 0
+}
+
+resign_submission() {
+  local app="$1"
+  if [ -z "${IDHASH:-}" ]; then
+    echo "No Dist keychain hash for re-sign"
+    return 1
+  fi
+  echo "re-sign nested frameworks/appex then app with Dist hash $IDHASH"
+  # Do not rm _CodeSignature and leave unsigned (33829001016).
+  local prov=""
+  prov="$(find_local_ios_provision || true)"
+  if [ -n "$prov" ] && [ -f "$prov" ]; then
+    cp "$prov" "$app/embedded.mobileprovision"
+    echo "embedded Local iOS provision $prov"
+  elif [ ! -f "$app/embedded.mobileprovision" ]; then
+    echo "No Local iOS embedded.mobileprovision for re-sign"
+    return 1
+  fi
+  local ENT=""
+  local XCENT
+  XCENT="$(find "$DD" -name 'Blackout.app.xcent' 2>/dev/null | head -n 1 || true)"
+  if [ -n "$XCENT" ] && [ -f "$XCENT" ]; then
+    ENT="$XCENT"
+    echo "using xcent $ENT"
+  else
+    ENT="$RUNNER_TEMP/ent-main.plist"
+    provision_entitlements "$app/embedded.mobileprovision" "$ENT"
+  fi
+  if [ -d "$app/Frameworks" ]; then
+    while IFS= read -r fw; do
+      echo "re-sign nested $fw"
+      /usr/bin/codesign --force --sign "$IDHASH" --timestamp --generate-entitlement-der "$fw"
+    done < <(find "$app/Frameworks" -name '*.framework' -print | sort -r)
+  fi
+  if [ -d "$app/PlugIns" ]; then
+    local WENT=""
+    local WXCENT
+    WXCENT="$(find "$DD" -name 'BlackoutWidgets.appex.xcent' 2>/dev/null | head -n 1 || true)"
+    if [ -n "$WXCENT" ] && [ -f "$WXCENT" ]; then
+      WENT="$WXCENT"
+    fi
+    while IFS= read -r appex; do
+      echo "re-sign nested $appex"
+      if [ -n "$WENT" ]; then
+        /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$WENT" --timestamp --generate-entitlement-der "$appex"
+      else
+        /usr/bin/codesign --force --sign "$IDHASH" --timestamp --generate-entitlement-der "$appex"
+      fi
+    done < <(find "$app/PlugIns" -name '*.appex' -print)
+  fi
+  /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --timestamp --generate-entitlement-der "$app"
+  echo "re-signed $app"
+}
+
+ensure_submission_seal() {
+  local app="$1"
+  if verify_submission_app "$app"; then
+    echo "archive product already has submission Authority"
+    return 0
+  fi
+  echo "archive product signature incomplete after archive exit ${ARC:-?} — re-sign nested then app (no rm _CodeSignature)"
+  resign_submission "$app" || {
+    echo "Fail closed: re-sign failed. No altool."
+    exit 1
+  }
+  if ! verify_submission_app "$app"; then
+    echo "Fail closed: re-sign did not produce a submission Dist Authority. No altool."
+    exit 1
+  fi
+}
+
 handzip_ipa() {
   local src="$1"
   if [ ! -d "$src" ] || [ ! -f "$src/Blackout" ]; then
     echo "hand-zip source missing $src"
     return 1
   fi
+  ensure_submission_seal "$src"
   rm -rf "$EXPORT"
   mkdir -p "$EXPORT/Payload"
   # 33931034850: info-zip of Payload produced an IPA Apple rejected as not
@@ -290,47 +388,22 @@ handzip_ipa() {
   ( cd "$EXPORT" && ditto -c -k --keepParent --sequesterRsrc Payload Blackout.ipa )
   IPA="$EXPORT/Blackout.ipa"
   echo "hand-zipped $IPA from $src"
+  if ! verify_submission_app "$EXPORT/Payload/Blackout.app"; then
+    echo "Fail closed: hand-zip Payload/Blackout.app is not a submission Dist signature"
+    exit 1
+  fi
 }
 
 write_xcarchive_plist() {
   local app="$ARCHIVE/Products/Applications/Blackout.app"
   [ -d "$app" ] && [ -f "$app/Info.plist" ] || return 1
-  local bid ver short
+  local bid ver short identity
   bid="$(plutil -extract CFBundleIdentifier raw "$app/Info.plist" 2>/dev/null || true)"
   ver="$(plutil -extract CFBundleVersion raw "$app/Info.plist" 2>/dev/null || true)"
   short="$(plutil -extract CFBundleShortVersionString raw "$app/Info.plist" 2>/dev/null || true)"
-  [ -n "$bid" ] || bid="com.crisiskhan.blackout"
-  [ -n "$ver" ] || ver="$NEXT"
-  [ -n "$short" ] || short="0.1.0"
-  local identity=""
-  IDLINE=$(security find-identity -v -p codesigning "${SIGNING_KEYCHAIN:-}" 2>/dev/null | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-  if [ -z "$IDLINE" ]; then
-    IDLINE=$(security find-identity -v -p codesigning | grep -i Distribution | grep -v CSSMERR | head -n 1 || true)
-  fi
-  identity=$(printf '%s' "$IDLINE" | sed -n 's/.*"\(.*\)".*/\1/p')
-  "$PYBIN" - "$ARCHIVE/Info.plist" "$bid" "$ver" "$short" "${APPLE_TEAM_ID}" "$identity" << 'PY'
-import datetime, plistlib, sys
-path, bid, ver, short, team, identity = sys.argv[1:]
-props = {
-        "ApplicationPath": "Applications/Blackout.app",
-        "Architectures": ["arm64"],
-        "CFBundleIdentifier": bid,
-        "CFBundleShortVersionString": short,
-        "CFBundleVersion": ver,
-        "Team": team,
-}
-if identity:
-    props["SigningIdentity"] = identity
-body = {
-    "ApplicationProperties": props,
-    "ArchiveVersion": 2,
-    "CreationDate": datetime.datetime.utcnow(),
-    "Name": "Blackout",
-    "SchemeName": "Blackout",
-}
-plistlib.dump(body, open(path, "wb"))
-print("wrote xcarchive Info.plist", bid, ver)
-PY
+  identity=$(printf '%s' "${IDLINE:-}" | sed -n 's/.*"\(.*\)".*/\1/p')
+  "$PYBIN" tools/tf_archive_signing.py write-xcarchive-plist \
+    "$ARCHIVE/Info.plist" "$bid" "$ver" "$short" "${APPLE_TEAM_ID}" "$identity" "$NEXT"
 }
 
 try_export_archive() {
@@ -355,19 +428,18 @@ try_export_archive() {
 
 ARCH_APP="$ARCHIVE/Products/Applications/Blackout.app"
 # 33829001016: archive packaging wrote Products/Applications/Blackout.app +
-# dSYMs/Signatures but no xcarchive Info.plist (exit 70). Official CodeSign
-# of that .app already succeeded. Recover then rm'd _CodeSignature and
-# codesign said "bundle format unrecognized". Do not re-seal a signed product.
+# dSYMs/Signatures but no xcarchive Info.plist (exit 70). Recover then rm'd
+# _CodeSignature and codesign said "bundle format unrecognized". Do not
+# rm _CodeSignature. no re-seal of a complete Dist product; re-sign only
+# when hand-zip sees a missing submission Authority.
 if [ -d "$ARCH_APP" ] && [ -f "$ARCH_APP/Blackout" ]; then
-  echo "Archive product present (archive exit=$ARC) — write Info.plist, no re-seal"
-  write_xcarchive_plist || true
-  if [ -f "$ARCHIVE/Info.plist" ]; then
+  echo "Archive product present (archive exit=$ARC) — write Info.plist, no re-seal of a complete Dist product"
+  if write_xcarchive_plist && [ -f "$ARCHIVE/Info.plist" ]; then
     echo "---- archive Info.plist after write ----"
     plutil -p "$ARCHIVE/Info.plist" || true
-  fi
-  if [ "$ARC" -eq 0 ] || [ -f "$ARCHIVE/Info.plist" ]; then
     try_export_archive || handzip_ipa "$ARCH_APP"
   else
+    echo "xcarchive Info.plist write failed — hand-zip safety net"
     handzip_ipa "$ARCH_APP"
   fi
 elif [ -n "$APP" ] && [ -d "$APP" ]; then
@@ -444,6 +516,11 @@ if [ ! -d "$VERIFY/Payload/Blackout.app" ]; then
 fi
 /usr/bin/codesign --verify --deep --strict "$VERIFY/Payload/Blackout.app"
 echo "codesign --verify --deep --strict OK"
+/usr/bin/codesign -d --verbose=4 "$VERIFY/Payload/Blackout.app" > "$RUNNER_TEMP/ipa-codesign-dv.txt" 2>&1 || true
+if ! "$PYBIN" tools/tf_archive_signing.py check-submission-authority "$RUNNER_TEMP/ipa-codesign-dv.txt"; then
+  echo "Fail closed: Payload/Blackout.app is not signed using an Apple submission certificate"
+  exit 1
+fi
 echo "IPA ready: $IPA"
 echo "IPA=$IPA" >> "$GITHUB_ENV"
 echo "NEXT_BUILD=$NEXT" >> "$GITHUB_ENV"
