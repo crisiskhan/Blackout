@@ -512,50 +512,57 @@ def mesh() -> None:
 
 
 def tip57_map() -> None:
-    """ASC 56 void: attach wild street lines, fit pack bbox, YOU stays on canvas."""
+    """Tip 57 acceptance — three Done lines only. No Ask-first / FAB / Expedition / Vision / mesh / Watch."""
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
-    if "wild.geojson" not in pack_style or "wild-roads" not in pack_style:
-        bad("PackStyle does not attach wild.geojson street lines")
-    else:
-        ok("PackStyle attaches wild street lines")
-    if "osm-points" not in pack_style:
-        bad("PackStyle does not draw osm point features")
-    else:
-        ok("PackStyle draws osm point features")
-    if "setVisibleCoordinateBounds" not in offline:
-        bad("OfflineMapView does not fit camera to pack bbox")
-    else:
-        ok("OfflineMapView fits camera to pack bbox")
-    if "lineWidthForPolylineAnnotation" not in offline:
-        bad("OfflineMapView missing visible pack bbox polyline width")
-    else:
-        ok("OfflineMapView strokes pack bbox polyline")
-    if not re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab):
-        bad("Map tab does not pin YOU to pack bbox")
-    else:
-        ok("Map tab pins YOU inside pack bbox")
     wild = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "wild.geojson").read_text())
+    style = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "style.json").read_text())
+    sources = style.get("sources") or {}
+    layers = style.get("layers") or []
     lines = [
         f
         for f in wild.get("features") or []
         if (f.get("geometry") or {}).get("type") in {"LineString", "MultiLineString"}
         and "highway" in (f.get("properties") or {})
     ]
-    if len(lines) < 20:
-        bad("fl-north wild.geojson lost highway line streets")
-    else:
-        ok("fl-north wild.geojson has highway line streets")
-    style = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "style.json").read_text())
-    sources = style.get("sources") or {}
-    layers = style.get("layers") or []
     wild_src = (sources.get("wild") or {}).get("data")
-    has_wild_roads = any(layer.get("id") == "wild-roads" and layer.get("source") == "wild" for layer in layers)
-    if wild_src != "wild.geojson" or not has_wild_roads:
-        bad("fl-north style.json missing wild-roads source/layer")
+    has_wild_roads = any(
+        layer.get("id") == "wild-roads" and layer.get("source") == "wild" for layer in layers
+    )
+    tiles_ok = (
+        len(lines) >= 20
+        and wild_src == "wild.geojson"
+        and has_wild_roads
+        and "wild.geojson" in pack_style
+        and "wild-roads" in pack_style
+        and "prefetchesTiles = false" in offline
+    )
+    bbox_ok = (
+        "setVisibleCoordinateBounds" in offline
+        and "lineWidthForPolylineAnnotation" in offline
+        and "pack-bbox-line" in offline
+        and "MLNPolyline" in offline
+    )
+    you_ok = (
+        "YouPuckAnnotationView" in offline
+        and 'static let title = "YOU"' in pack_style
+        and "showsUserLocation" in offline
+        and "you-puck-core" in offline
+        and re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab) is not None
+    )
+    if not tiles_ok:
+        bad("tiles FAIL — FL NORTH offline street lines not locked")
     else:
-        ok("fl-north style.json draws wild street lines")
+        ok("Done: tiles — offline FL NORTH vector streets (wild.geojson), not maroon void")
+    if not bbox_ok:
+        bad("bbox FAIL — pack region fit/outline not locked")
+    else:
+        ok("Done: bbox — pack region fit + visible outline")
+    if not you_ok:
+        bad("YOU FAIL — on-canvas puck not locked")
+    else:
+        ok("Done: YOU puck — white disk + red ring + YOU on canvas")
 
 
 def main() -> None:
