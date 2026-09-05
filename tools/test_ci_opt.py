@@ -66,6 +66,10 @@ def test_compile_workflow_invokes_gate() -> None:
         fail("xcodebuild.yml missing push trigger")
     if "CURRENT_PROJECT_VERSION=" in text:
         fail("unsigned compile must use tree CPV=1 — do not inject on xcodebuild.yml")
+    if "macos-14" not in text:
+        fail("unsigned xcodebuild.yml must stay macos-14")
+    if "Xcode_26" in text or "26.*" in text:
+        fail("unsigned compile must stay Xcode 16 — do not move xcodebuild.yml to 26")
     ok("xcodebuild.yml runs test_ci_opt.py before xcodebuild")
 
 
@@ -87,6 +91,18 @@ def test_testflight_workflow_invokes_gate() -> None:
         fail("testflight-internal.yml missing app id 6806388963")
     if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
         fail("testflight-internal.yml missing Internal group id")
+    # 33931992681: Xcode 16.2 / iOS 18.2 SDK is rejected. Keep unsigned
+    # compile on macos-14 + Xcode 16. TF archive needs Xcode 26.
+    if re.search(r"runs-on:\s*macos-14", text):
+        fail("33931992681: TF macos-14 is iOS 18.2 SDK; Apple requires iOS 26 SDK")
+    if re.search(r"runs-on:\s*macos-latest", text):
+        fail("do not use macos-latest — pin macos-15 and select Xcode 26")
+    if not re.search(r"runs-on:\s*macos-15", text):
+        fail("TF must run on macos-15 so Xcode 26 is installed")
+    if "Xcode_26" not in text:
+        fail("TF must xcode-select Xcode 26 for the iOS 26 SDK")
+    if "26.*" not in text:
+        fail("TF must accept only Xcode 26.x")
     ok("testflight-internal.yml is dispatch-only and runs test_ci_opt.py first")
 
 
@@ -343,8 +359,11 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
                 f"{path.relative_to(ROOT)} owned FMWK BID {bid} — "
                 "altool −19000; strip or leave foreign, do not rewrite onto owned"
             )
-        if bid not in (None, "", "com.maplibre.mapbox"):
-            fail(f"{path.relative_to(ROOT)} unexpected FMWK CFBundleIdentifier={bid}")
+        if bid != "com.maplibre.mapbox":
+            fail(
+                f"{path.relative_to(ROOT)} FMWK CFBundleIdentifier={bid!r} — "
+                "33931992681: empty BID is invalid; keep vendor com.maplibre.mapbox"
+            )
         if pkg != "FMWK":
             fail(f"{path.relative_to(ROOT)} must stay FMWK, got {pkg}")
     archive = TF_ARCHIVE.read_text()
@@ -353,8 +372,10 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
         fail("tools/tf_ipa_inspect.py missing — IPA MapLibre inspect has no helper")
     if "com.maplibre.mapbox" not in helper:
         fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the −19000 stays documented")
-    if "strip_framework_identifier" not in helper:
-        fail("tf_ipa_inspect.py must strip nested FMWK CFBundleIdentifier")
+    if "strip_framework_identifier" in helper:
+        fail("33931992681: do not strip FMWK BID to empty — Apple rejects ''")
+    if "validate_framework_identifier" not in helper:
+        fail("tf_ipa_inspect.py must require nested FMWK CFBundleIdentifier=com.maplibre.mapbox")
     if "owned_framework_identifier" in helper:
         fail("tf_ipa_inspect.py must not rewrite FMWK onto an owned BID")
     if "return APP_BID" in helper:
@@ -364,11 +385,11 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
     inspect_at = archive.find("tf_ipa_inspect.py --ipa")
     ready_at = archive.find('echo "IPA ready:')
     if inspect_at < 0 or ready_at < 0 or inspect_at > ready_at:
-        fail("tf-archive.sh must inspect/strip the IPA before declaring IPA ready")
+        fail("tf-archive.sh must inspect the IPA before declaring IPA ready")
     if "com.maplibre.mapbox" not in archive:
         fail("tf-archive.sh must keep the com.maplibre.mapbox −19000 note")
     test_tf_ipa_inspect.main()
-    ok("MapLibre.framework is not an owned BID; IPA inspect strips FMWK ids")
+    ok("MapLibre.framework keeps vendor BID; IPA inspect does not strip it")
 
 
 def test_maplibre_single_embed_via_maplibremap() -> None:
@@ -477,6 +498,24 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("do not hand-zip the IPA with info-zip — that breaks submission signing")
     if "ditto -c -k" not in archive:
         fail("hand-zip must use ditto -c -k so the Dist signature stays intact")
+    if "--sequesterRsrc" in archive:
+        fail("33931992681: ditto --sequesterRsrc created reserved Blackout.app/Resources")
+    if "--norsrc" not in archive:
+        fail("hand-zip must ditto --norsrc so the iOS IPA has no resource-fork Resources")
+    if "Blackout.app/Resources" not in archive:
+        fail("tf-archive.sh must fail closed if the IPA contains reserved Blackout.app/Resources")
+    if "Xcode_16.2.app/Contents/Developer/Toolchains" in archive:
+        fail("App Intents no-op must use the selected Xcode 26 toolchain, not hard-coded 16.2")
+    if "xcode-select -p" not in archive:
+        fail("App Intents no-op path must follow xcode-select -p")
+    if "--identifier com.crisiskhan.blackout" not in archive:
+        fail("re-sign must pass --identifier com.crisiskhan.blackout")
+    if "--identifier com.crisiskhan.blackout.widgets" not in archive:
+        fail("re-sign widget must pass --identifier com.crisiskhan.blackout.widgets")
+    if "--identifier com.maplibre.mapbox" not in archive:
+        fail("re-sign MapLibre must pass --identifier com.maplibre.mapbox")
+    if "check-identifier" not in archive:
+        fail("tf-archive.sh must require codesign Identifier to match CFBundleIdentifier")
     if "codesign --verify --deep --strict" not in archive:
         fail("tf-archive.sh must codesign --verify the IPA app before upload")
     if 'rm -rf "$APP/_CodeSignature"' in archive:

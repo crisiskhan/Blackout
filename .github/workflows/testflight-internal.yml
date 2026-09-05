@@ -16,11 +16,12 @@ on:
 jobs:
   upload:
     name: AuthKey archive + Internal upload
-    # macos-14 + Xcode 16 matches unsigned xcodebuild.yml.
-    # macos-latest has only Xcode 26; ExtractAppIntentsMetadata then recreates
-    # Metadata.appintents after the strip script and CodeSign fails
-    # (bundle format unrecognized).
-    runs-on: macos-14
+    # 33931992681: macos-14 + Xcode 16.2 is iOS 18.2 SDK. Apple rejects
+    # that for App Store Connect / TestFlight. Unsigned xcodebuild.yml
+    # stays macos-14 + Xcode 16. Do not use macos-latest (floating default).
+    # macos-15 ships Xcode 26; select 26.x explicitly (image default is 16.4).
+    # Keep App Intents processor no-ops on the selected toolchain.
+    runs-on: macos-15
     timeout-minutes: 90
     permissions:
       contents: read
@@ -52,20 +53,20 @@ jobs:
       - name: Fail closed on TestFlight archive killers
         run: python3 tools/test_ci_opt.py
 
-      - name: Select Xcode 16
+      - name: Select Xcode 26
         run: |
           set -euo pipefail
           ls /Applications | grep -i xcode || true
           xcodebuild -version || true
           selected=""
           for app in \
-            /Applications/Xcode_16.4.app \
-            /Applications/Xcode_16.3.app \
-            /Applications/Xcode_16.2.app \
-            /Applications/Xcode_16.1.app \
-            /Applications/Xcode_16.0.app \
-            /Applications/Xcode_16.app \
-            /Applications/Xcode.app
+            /Applications/Xcode_26.3.app \
+            /Applications/Xcode_26.2.app \
+            /Applications/Xcode_26.1.1.app \
+            /Applications/Xcode_26.1.app \
+            /Applications/Xcode_26.0.1.app \
+            /Applications/Xcode_26.0.app \
+            /Applications/Xcode_26.app
           do
             if [ -d "$app" ]; then
               sudo xcode-select -s "$app"
@@ -77,12 +78,12 @@ jobs:
           xcode-select -p
           ver="$(xcodebuild -version | awk 'NR==1 {print $2}')"
           case "$ver" in
-            16.*)
+            26.*)
               echo "Using Xcode $ver at ${selected:-$(xcode-select -p)}"
               ;;
             *)
-              echo "Need Xcode 16 on macos-14 (got ${ver:-unknown} at ${selected:-none})."
-              echo "Need Xcode 16 on macos-14 for this workflow."
+              echo "Need Xcode 26 on macos-15 (got ${ver:-unknown} at ${selected:-none})."
+              echo "Need Xcode 26 for the iOS 26 SDK. Do not fall back to Xcode 16."
               exit 1
               ;;
           esac

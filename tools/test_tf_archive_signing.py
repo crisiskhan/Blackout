@@ -282,6 +282,25 @@ class TestSubmissionAuthority(unittest.TestCase):
         self.assertIn("-exportArchive", export_block)
         self.assertIn("write-export-options", script)
 
+    def test_identifier_must_match_bundle_id(self) -> None:
+        """33931992681: codesign Identifier=Blackout must match BID."""
+        dump = (
+            "Executable=/tmp/Payload/Blackout.app/Blackout\n"
+            "Identifier=Blackout\n"
+            "Authority=Apple Distribution: Crisis Khan (TEAMID12)\n"
+        )
+        ok = dump.replace("Identifier=Blackout", "Identifier=com.crisiskhan.blackout")
+        self.assertTrue(
+            signing.identifier_matches_bundle(ok, "com.crisiskhan.blackout")
+        )
+        self.assertFalse(
+            signing.identifier_matches_bundle(dump, "com.crisiskhan.blackout")
+        )
+        self.assertFalse(signing.identifier_matches_bundle("", "com.crisiskhan.blackout"))
+        script = TF_ARCHIVE.read_text()
+        self.assertIn("check-identifier", script)
+        self.assertIn("--identifier com.crisiskhan.blackout", script)
+
 
 def main() -> None:
     suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])

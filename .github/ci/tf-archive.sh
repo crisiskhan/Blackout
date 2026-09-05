@@ -67,7 +67,8 @@ fi
 # 33825608089: after Metadata was gone, 644 PrivacyInfo / Assets.car were
 # still "unsigned nested code". 33826265768: blob-sign of those two moved
 # CodeSign to embedded.mobileprovision. Blob-sign all three.
-XCTool="/Applications/Xcode_16.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+DEVELOPER_DIR="$(xcode-select -p)"
+XCTool="$DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
 for tool in appintentsmetadataprocessor appintentsnltrainingprocessor; do
   SRC="$XCTool/$tool"
   if [ -x "$SRC" ] && [ ! -e "$SRC.blackout-real" ]; then
@@ -290,6 +291,7 @@ PY
 verify_submission_app() {
   local app="$1"
   local dv="$RUNNER_TEMP/codesign-dv.txt"
+  local bid
   /usr/bin/codesign -d --verbose=4 "$app" > "$dv" 2>&1 || true
   if ! /usr/bin/codesign --verify --deep --strict "$app"; then
     echo "codesign --verify failed for $app"
@@ -297,6 +299,14 @@ verify_submission_app() {
   fi
   if ! "$PYBIN" tools/tf_archive_signing.py check-submission-authority "$dv"; then
     echo "Fail closed: $app is not signed with an Apple submission Dist identity"
+    return 1
+  fi
+  bid="$(plutil -extract CFBundleIdentifier raw "$app/Info.plist" 2>/dev/null || true)"
+  if [ -z "$bid" ]; then
+    bid="com.crisiskhan.blackout"
+  fi
+  if ! "$PYBIN" tools/tf_archive_signing.py check-identifier "$dv" "$bid"; then
+    echo "Fail closed: $app codesign Identifier does not match CFBundleIdentifier=$bid"
     return 1
   fi
   return 0
@@ -332,7 +342,7 @@ resign_submission() {
   if [ -d "$app/Frameworks" ]; then
     while IFS= read -r fw; do
       echo "re-sign nested $fw"
-      /usr/bin/codesign --force --sign "$IDHASH" --timestamp --generate-entitlement-der "$fw"
+      /usr/bin/codesign --force --sign "$IDHASH" --identifier com.maplibre.mapbox --timestamp --generate-entitlement-der "$fw"
     done < <(find "$app/Frameworks" -name '*.framework' -print | sort -r)
   fi
   if [ -d "$app/PlugIns" ]; then
@@ -345,13 +355,13 @@ resign_submission() {
     while IFS= read -r appex; do
       echo "re-sign nested $appex"
       if [ -n "$WENT" ]; then
-        /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$WENT" --timestamp --generate-entitlement-der "$appex"
+        /usr/bin/codesign --force --sign "$IDHASH" --identifier com.crisiskhan.blackout.widgets --entitlements "$WENT" --timestamp --generate-entitlement-der "$appex"
       else
-        /usr/bin/codesign --force --sign "$IDHASH" --timestamp --generate-entitlement-der "$appex"
+        /usr/bin/codesign --force --sign "$IDHASH" --identifier com.crisiskhan.blackout.widgets --timestamp --generate-entitlement-der "$appex"
       fi
     done < <(find "$app/PlugIns" -name '*.appex' -print)
   fi
-  /usr/bin/codesign --force --sign "$IDHASH" --entitlements "$ENT" --timestamp --generate-entitlement-der "$app"
+  /usr/bin/codesign --force --sign "$IDHASH" --identifier com.crisiskhan.blackout --entitlements "$ENT" --timestamp --generate-entitlement-der "$app"
   echo "re-signed $app"
 }
 
@@ -384,8 +394,9 @@ handzip_ipa() {
   # 33931034850: info-zip of Payload produced an IPA Apple rejected as not
   # signed with a submission certificate. ditto keeps the Dist seal. Do not
   # ditto individual product files (Assets.car / PrivacyInfo / provision).
-  ditto "$src" "$EXPORT/Payload/Blackout.app"
-  ( cd "$EXPORT" && ditto -c -k --keepParent --sequesterRsrc Payload Blackout.ipa )
+  # 33931992681: sequestering resource forks created reserved Blackout.app/Resources.
+  ditto --norsrc "$src" "$EXPORT/Payload/Blackout.app"
+  ( cd "$EXPORT" && ditto -c -k --norsrc --keepParent Payload Blackout.ipa )
   IPA="$EXPORT/Blackout.ipa"
   echo "hand-zipped $IPA from $src"
   if ! verify_submission_app "$EXPORT/Payload/Blackout.app"; then
@@ -502,16 +513,22 @@ if unzip -l "$IPA" | grep -qiE 'Payload/Blackout\.app/Watch/|\.watchkitapp|Black
 fi
 echo "IPA has no Watch/ companion (phone Internal only)."
 # 33925258357 / 33929367958: altool -19000 on com.maplibre.mapbox, then on
-# com.crisiskhan.blackout.maplibre. Do not rewrite nested FMWK onto an owned
-# BID. Strip CFBundleIdentifier from FMWK Info.plists; keep PackageType FMWK.
+# com.crisiskhan.blackout.maplibre when upload was unbound. 33931992681:
+# bound altool then Apple rejected empty FMWK BID. Keep vendor
+# com.maplibre.mapbox. Do not strip. Do not rewrite onto an owned BID.
 # Inspect Payload before declaring IPA ready. No ASC app for MapLibre.
 "$PYBIN" tools/tf_ipa_inspect.py --ipa "$IPA"
 VERIFY="$RUNNER_TEMP/ipa-verify"
 rm -rf "$VERIFY"
 mkdir -p "$VERIFY"
-ditto -x -k "$IPA" "$VERIFY"
+ditto -x -k --norsrc "$IPA" "$VERIFY"
 if [ ! -d "$VERIFY/Payload/Blackout.app" ]; then
   echo "IPA verify extract missing Payload/Blackout.app"
+  exit 1
+fi
+if [ -d "$VERIFY/Payload/Blackout.app/Resources" ]; then
+  echo "Fail closed: IPA contains reserved Blackout.app/Resources (33931992681)"
+  find "$VERIFY/Payload/Blackout.app/Resources" | head -n 40 || true
   exit 1
 fi
 /usr/bin/codesign --verify --deep --strict "$VERIFY/Payload/Blackout.app"
@@ -519,6 +536,10 @@ echo "codesign --verify --deep --strict OK"
 /usr/bin/codesign -d --verbose=4 "$VERIFY/Payload/Blackout.app" > "$RUNNER_TEMP/ipa-codesign-dv.txt" 2>&1 || true
 if ! "$PYBIN" tools/tf_archive_signing.py check-submission-authority "$RUNNER_TEMP/ipa-codesign-dv.txt"; then
   echo "Fail closed: Payload/Blackout.app is not signed using an Apple submission certificate"
+  exit 1
+fi
+if ! "$PYBIN" tools/tf_archive_signing.py check-identifier "$RUNNER_TEMP/ipa-codesign-dv.txt" com.crisiskhan.blackout; then
+  echo "Fail closed: Payload/Blackout.app codesign Identifier must be com.crisiskhan.blackout"
   exit 1
 fi
 echo "IPA ready: $IPA"

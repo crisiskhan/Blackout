@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Inspect a TestFlight IPA and strip vendor FMWK bundle ids.
+"""Inspect a TestFlight IPA. Keep the vendor MapLibre FMWK bundle id.
 
-33925258357: altool −19000 on com.maplibre.mapbox inside MapLibre.framework.
-33929367958: renaming that to com.crisiskhan.blackout.maplibre still −19000 —
-altool without --apple-id/--bundle-id picks a nested FMWK BID and wants an
-ASC application record for it. Do not rewrite nested FMWK onto
-com.crisiskhan.blackout.* (owned collision). Strip CFBundleIdentifier from
-nested FMWK Info.plists. Keep CFBundlePackageType=FMWK.
+33925258357: altool −19000 on com.maplibre.mapbox inside MapLibre.framework
+when upload had no --apple-id/--bundle-id.
+33929367958: renaming that to com.crisiskhan.blackout.maplibre still −19000.
+33931992681: altool is bound to the primary app; Apple then rejected empty
+FMWK CFBundleIdentifier '' and Identifier MapLibre vs $bundleIdentifier.
+Keep vendor com.maplibre.mapbox. Do not strip. Do not rewrite onto
+com.crisiskhan.blackout.* (owned collision). Keep CFBundlePackageType=FMWK.
 Fail closed if Payload/*.app or PlugIns/*.appex is outside
 {com.crisiskhan.blackout, com.crisiskhan.blackout.widgets}.
 No ASC app for MapLibre. No network.
@@ -16,7 +17,6 @@ from __future__ import annotations
 import argparse
 import plistlib
 import shutil
-import subprocess
 import sys
 import tempfile
 import zipfile
@@ -38,58 +38,6 @@ def _load_plist(path: Path) -> dict[str, Any]:
     return plistlib.loads(path.read_bytes())
 
 
-def _dump_plist(path: Path, body: dict[str, Any]) -> None:
-    path.write_bytes(plistlib.dumps(body))
-
-
-def _set_plist_string(path: Path, key: str, value: str) -> None:
-    """Prefer plutil / PlistBuddy on macOS; plistlib everywhere else."""
-    plutil = Path("/usr/bin/plutil")
-    buddy = Path("/usr/libexec/PlistBuddy")
-    if plutil.is_file():
-        subprocess.run(
-            [str(plutil), "-replace", key, "-string", value, str(path)],
-            check=True,
-        )
-        return
-    if buddy.is_file():
-        result = subprocess.run(
-            [str(buddy), "-c", f"Set :{key} {value}", str(path)],
-            check=False,
-        )
-        if result.returncode == 0:
-            return
-        subprocess.run(
-            [str(buddy), "-c", f"Add :{key} string {value}", str(path)],
-            check=True,
-        )
-        return
-    body = _load_plist(path)
-    body[key] = value
-    _dump_plist(path, body)
-
-
-def _delete_plist_key(path: Path, key: str) -> None:
-    """Remove a key from Info.plist. Prefer plutil / PlistBuddy on macOS."""
-    plutil = Path("/usr/bin/plutil")
-    buddy = Path("/usr/libexec/PlistBuddy")
-    if plutil.is_file():
-        subprocess.run(
-            [str(plutil), "-remove", key, str(path)],
-            check=True,
-        )
-        return
-    if buddy.is_file():
-        subprocess.run(
-            [str(buddy), "-c", f"Delete :{key}", str(path)],
-            check=True,
-        )
-        return
-    body = _load_plist(path)
-    body.pop(key, None)
-    _dump_plist(path, body)
-
-
 def _bid(path: Path) -> str:
     try:
         value = _load_plist(path).get("CFBundleIdentifier")
@@ -102,29 +50,22 @@ def _is_owned_bid(bid: str) -> bool:
     return bid == OWNED_PREFIX or bid.startswith(OWNED_PREFIX + ".")
 
 
-def strip_framework_identifier(path: Path) -> bool:
-    """Strip CFBundleIdentifier from a FMWK Info.plist. Keep PackageType."""
+def validate_framework_identifier(path: Path) -> None:
+    """Require vendor FMWK BID. Do not strip. Do not rewrite onto owned."""
     body = _load_plist(path)
     pkg = str(body.get("CFBundlePackageType") or "")
     if pkg and pkg != "FMWK":
-        return False
-    if "CFBundleIdentifier" not in body:
-        return False
-    _delete_plist_key(path, "CFBundleIdentifier")
-    after = _load_plist(path)
-    leftover = after.get("CFBundleIdentifier")
-    if leftover:
+        return
+    bid = str(body.get("CFBundleIdentifier") or "").strip()
+    if bid != MAPBOX:
         raise InspectError(
-            f"{path.as_posix()} still CFBundleIdentifier={leftover} after strip"
+            f"{path.as_posix()} CFBundleIdentifier={bid or 'MISSING'} "
+            f"— require {MAPBOX} (do not strip; do not use owned BID)"
         )
-    after_pkg = str(after.get("CFBundlePackageType") or "")
-    if after_pkg != "FMWK":
-        _set_plist_string(path, "CFBundlePackageType", "FMWK")
-    return True
 
 
 def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
-    """Assert app/widget BIDs and strip nested FMWK ids. True if rewritten."""
+    """Assert app/widget/FMWK BIDs. Never rewrite after signing."""
     if not payload_dir.is_dir():
         raise InspectError(f"missing payload directory {payload_dir}")
     apps = sorted(p for p in payload_dir.glob("*.app") if p.is_dir())
@@ -160,11 +101,9 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
                 continue
             if str(body.get("CFBundlePackageType") or "") != "FMWK":
                 continue
-            if strip_framework_identifier(plist):
-                rewritten = True
-                print(f"stripped {plist.as_posix()} CFBundleIdentifier (kept FMWK)")
+            validate_framework_identifier(plist)
     leftover_owned = []
-    leftover_fmwk_bid = []
+    leftover_bad = []
     for app in apps:
         for plist in app.rglob("Info.plist"):
             try:
@@ -174,14 +113,14 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
             if str(body.get("CFBundlePackageType") or "") != "FMWK":
                 continue
             fbid = str(body.get("CFBundleIdentifier") or "")
-            if fbid:
-                leftover_fmwk_bid.append(plist)
-            if _is_owned_bid(fbid) or fbid in {MAPBOX, CHILD_MAPLIBRE}:
+            if _is_owned_bid(fbid) or fbid == CHILD_MAPLIBRE:
                 leftover_owned.append(plist)
-    if leftover_fmwk_bid or leftover_owned:
-        paths = leftover_fmwk_bid or leftover_owned
+            if fbid != MAPBOX:
+                leftover_bad.append(plist)
+    if leftover_owned or leftover_bad:
+        paths = leftover_owned or leftover_bad
         raise InspectError(
-            "IPA nested FMWK still has CFBundleIdentifier after strip: "
+            "IPA nested FMWK CFBundleIdentifier must be com.maplibre.mapbox: "
             + ", ".join(p.as_posix() for p in paths)
         )
     return rewritten

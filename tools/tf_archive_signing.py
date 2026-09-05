@@ -145,6 +145,22 @@ def submission_authority_ok(codesign_display: str) -> bool:
     return False
 
 
+def codesign_identifier(codesign_display: str) -> str:
+    """Identifier= from `codesign -d --verbose=4`."""
+    match = re.search(r"^Identifier=(.+)$", codesign_display or "", re.M)
+    if match:
+        return match.group(1).strip()
+    match = re.search(r"Identifier=([^\n]+)", codesign_display or "")
+    return match.group(1).strip() if match else ""
+
+
+def identifier_matches_bundle(codesign_display: str, bundle_id: str) -> bool:
+    """33931992681: codesign Identifier must equal CFBundleIdentifier."""
+    ident = codesign_identifier(codesign_display)
+    want = (bundle_id or "").strip()
+    return bool(ident) and bool(want) and ident == want
+
+
 def xcodebuild_archive_cli_block(script_text: str) -> str:
     start = script_text.find('echo "xcodebuild archive..."')
     end = script_text.find("archive 2>&1", start)
@@ -350,13 +366,25 @@ def _cmd_check_submission_authority(path: str) -> int:
     return 0
 
 
+def _cmd_check_identifier(path: str, bundle_id: str) -> int:
+    text = Path(path).read_text(errors="replace")
+    if not identifier_matches_bundle(text, bundle_id):
+        print(
+            f"FAIL codesign Identifier={codesign_identifier(text)!r} "
+            f"!= CFBundleIdentifier={bundle_id!r}"
+        )
+        return 1
+    print(f"OK codesign Identifier={bundle_id}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
         print(
             "usage: tf_archive_signing.py patch|rewrite-hash HASH|"
             "write-export-options IDLINE|write-xcarchive-plist ...|"
-            "check-submission-authority FILE",
+            "check-submission-authority FILE|check-identifier FILE BID",
             file=sys.stderr,
         )
         return 2
@@ -395,6 +423,11 @@ def main(argv: list[str] | None = None) -> int:
             print("check-submission-authority requires a codesign -d dump", file=sys.stderr)
             return 2
         return _cmd_check_submission_authority(args[1])
+    if cmd == "check-identifier":
+        if len(args) < 3 or not args[1] or not args[2]:
+            print("check-identifier requires a codesign -d dump and BID", file=sys.stderr)
+            return 2
+        return _cmd_check_identifier(args[1], args[2])
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 2
 
