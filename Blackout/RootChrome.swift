@@ -1,14 +1,12 @@
 import SwiftUI
 import Tokens
-import RegionalPacks
 
 struct RootChrome: View {
     @Bindable var runtime: AppRuntime
 
     var body: some View {
         ZStack {
-            Color(red: BlackoutTokens.Color.void.r, green: BlackoutTokens.Color.void.g, blue: BlackoutTokens.Color.void.b)
-                .ignoresSafeArea()
+            Theme.void.ignoresSafeArea()
             if !runtime.armed {
                 ARMINGView(runtime: runtime)
             } else {
@@ -22,6 +20,7 @@ struct RootChrome: View {
                 Color(red: 0.55, green: 0.05, blue: 0.05).opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
             }
         }
+        .tint(Theme.accent)
         .preferredColorScheme(.dark)
         .sheet(isPresented: $runtime.showInstruments) {
             InstrumentsView(runtime: runtime)
@@ -60,10 +59,9 @@ struct RootChrome: View {
     }
 
     private var tabBar: some View {
-        HStack {
+        HStack(spacing: 0) {
             ForEach(BlackoutTab.allCases) { t in
-                Button(t.title) { runtime.tab = t }
-                    .foregroundStyle(runtime.tab == t ? Color(white: 0.85) : Color(white: 0.45))
+                tabButton(t)
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
@@ -74,12 +72,22 @@ struct RootChrome: View {
     private var tabColumn: some View {
         VStack {
             ForEach(BlackoutTab.allCases) { t in
-                Button(t.title) { runtime.tab = t }
+                tabButton(t)
                     .rotationEffect(.degrees(-90))
                     .frame(height: 72)
             }
             Spacer()
         }
+    }
+
+    private func tabButton(_ t: BlackoutTab) -> some View {
+        Button(t.title) { runtime.tab = t }
+            .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .allowsTightening(true)
+            .multilineTextAlignment(.center)
+            .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))
     }
 
     @ViewBuilder

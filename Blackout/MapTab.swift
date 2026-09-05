@@ -1,7 +1,6 @@
 import SwiftUI
 import MapLibreMap
 import Search
-import RegionalPacks
 
 struct MapTab: View {
     @Bindable var runtime: AppRuntime
@@ -11,7 +10,7 @@ struct MapTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("MAP").foregroundStyle(Color(white: 0.85))
+                Text("MAP").foregroundStyle(Theme.silver)
                 Spacer()
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
@@ -26,7 +25,7 @@ struct MapTab: View {
                 Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
             }
             if let h = runtime.headingDeg {
-                Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Color(white: 0.7))
+                Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Theme.silver)
             }
             if !runtime.speechChrome.isEmpty {
                 Text(runtime.speechChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
@@ -34,19 +33,27 @@ struct MapTab: View {
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
-            if let pack = runtime.packs?.active {
+            if let pack = runtime.packs?.active, let style = styleURL() {
                 Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
                     .foregroundStyle(Color(white: 0.6))
-                if let root = runtime.packs?.packURL("style.json")?.deletingLastPathComponent(),
-                   let style = try? PackStyle.resolved(styleAt: root.appendingPathComponent("style.json"), packRoot: root) {
-                    OfflineMapView(styleURL: style, centerLat: pack.center.lat, centerLon: pack.center.lon)
-                        .frame(minHeight: 220)
-                }
-                ForEach(RegionalPacks.visible(state: pack.state)) { b in
-                    Text(b.title[runtime.locale] ?? b.id).font(.caption).foregroundStyle(Color(white: 0.7))
-                }
+                OfflineMapView(
+                    styleURL: style,
+                    centerLat: pack.center.lat,
+                    centerLon: pack.center.lon,
+                    puckLat: runtime.lastKnownFix?.lat ?? pack.center.lat,
+                    puckLon: runtime.lastKnownFix?.lon ?? pack.center.lon,
+                    packSouth: pack.bbox.south,
+                    packWest: pack.bbox.west,
+                    packNorth: pack.bbox.north,
+                    packEast: pack.bbox.east
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .layoutPriority(1)
                 Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
                     .font(.caption2).foregroundStyle(Color(white: 0.45))
+            } else {
+                Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
+                Spacer()
             }
             Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
             ForEach(runtime.marks) { m in
@@ -58,18 +65,23 @@ struct MapTab: View {
                     .font(.caption).foregroundStyle(Color(white: 0.7))
             }
             ForEach(hits, id: \.name) { h in
-                Text("\(h.name) · \(h.kind)").foregroundStyle(Color(white: 0.8))
+                Text("\(h.name) · \(h.kind)").foregroundStyle(Theme.silver)
             }
             ScrollView(.horizontal) {
                 HStack {
                     ForEach(MapTool.allCases, id: \.self) { t in
-                        Text(t.rawValue).font(.caption2).padding(6).background(Color(white: 0.12))
+                        Text(t.rawValue).font(.caption2).padding(6).background(Theme.raised)
                     }
                 }
             }
-            Spacer()
         }
         .padding(12)
+    }
+
+    private func styleURL() -> URL? {
+        guard let style = runtime.packs?.packURL("style.json") else { return nil }
+        let root = style.deletingLastPathComponent()
+        return (try? PackStyle.resolved(styleAt: style, packRoot: root)) ?? style
     }
 
     private func search() {

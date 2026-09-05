@@ -6,7 +6,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## ARMING
 
-- [ ] PASS / FAIL / N/A — ENTER unlocks tabs (ARMING → MAP/COMMS/FIELD/EXPEDITION). No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — INITIATE unlocks tabs (ARMING → MAP/COMMS/FIELD/EXPEDITION). Bundled logo is visible. No account prompt. No network/login gate.
 - [ ] PASS / FAIL / N/A — No SOS disk on ARMING.
 - [ ] PASS / FAIL / N/A — Pack list shows real pack names and sizes, **or** chrome `Packs missing from bundle — honest empty.`
 
@@ -38,7 +38,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## EXPEDITION
 
-- [ ] PASS / FAIL / N/A — Water / Fatigue / Exposure sliders change CONDITION.
+- [ ] PASS / FAIL / N/A — Hunger / Thirst / Pain / Water / Fatigue / Exposure sliders change CONDITION.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows `RED` (self RED). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` (not SOS). DONE removes it. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
@@ -50,7 +50,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## WHAT WE CANNOT DO
 
-- [ ] PASS / FAIL / N/A — First ENTER after ARMING shows `WHAT WE CANNOT DO` once. I UNDERSTAND dismisses it. It does not return on later tab changes.
+- [ ] PASS / FAIL / N/A — First INITIATE after ARMING shows `WHAT WE CANNOT DO` once. I UNDERSTAND dismisses it. It does not return on later tab changes.
 
 ## Kill-and-relaunch
 

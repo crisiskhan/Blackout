@@ -66,7 +66,6 @@ struct CommsTab: View {
             ForEach(runtime.mesh.inboundChips, id: \.self) { c in
                 Text("RX \(c.uppercased())").font(.caption).foregroundStyle(Color.orange)
             }
-            SOSHold(runtime: runtime)
             Spacer()
         }
         .padding(12)

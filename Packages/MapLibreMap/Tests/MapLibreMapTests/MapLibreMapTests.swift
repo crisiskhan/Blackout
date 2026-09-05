@@ -21,4 +21,27 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(LockOnChrome.banner(hasGPS: true, hasGraph: false), "")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: true), "")
     }
+
+    func testPackStyleWritesWritableCacheNotBundle() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-style-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-style-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        let geo = pack.appendingPathComponent("osm.geojson")
+        try Data("{\"type\":\"FeatureCollection\",\"features\":[]}".utf8).write(to: geo)
+        let style = pack.appendingPathComponent("style.json")
+        let obj: [String: Any] = [
+            "version": 8,
+            "sources": ["osm": ["type": "geojson", "data": "osm.geojson"]],
+            "layers": [],
+        ]
+        try JSONSerialization.data(withJSONObject: obj).write(to: style)
+        let resolved = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        XCTAssertTrue(resolved.path.hasPrefix(cache.path))
+        XCTAssertFalse(fm.fileExists(atPath: pack.appendingPathComponent("style.resolved.json").path))
+        let ring = PackGeometry.bboxRing(south: 30, west: -82, north: 31, east: -81)
+        XCTAssertEqual(ring.count, 5)
+        XCTAssertEqual(ring.first?.lat, ring.last?.lat)
+    }
 }

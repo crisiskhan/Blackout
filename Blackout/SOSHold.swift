@@ -12,7 +12,7 @@ struct SOSHold: View {
             .font(.caption.weight(.bold))
             .foregroundStyle(Color.white)
             .frame(width: BlackoutTokens.Chrome.sosDiameter, height: BlackoutTokens.Chrome.sosDiameter)
-            .background(Color(red: 0.86, green: 0.14, blue: 0.14))
+            .background(Theme.accent)
             .clipShape(Circle())
             .gesture(
                 DragGesture(minimumDistance: 0)

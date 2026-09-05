@@ -337,6 +337,120 @@ def vessel() -> None:
         ok("kept dispatch-only ASC assign workflow")
 
 
+def tip55_chrome() -> None:
+    """Crisis tip-55 punch list — six must-fix, no Field/Watch/TF expansion."""
+    tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
+    if "r: 0, g: 0, b: 0" not in tokens.replace(" ", "") and "r: 0.0, g: 0.0, b: 0.0" not in tokens.replace(" ", ""):
+        # allow either integer 0 or 0.0 void black
+        void_ok = re.search(r"void\s*=\s*RGBA\(r:\s*0(?:\.0+)?,\s*g:\s*0(?:\.0+)?,\s*b:\s*0(?:\.0+)?", tokens)
+        if not void_ok:
+            bad("tokens void is not black")
+        else:
+            ok("tokens void is black")
+    else:
+        ok("tokens void is black")
+    accent = BlackoutTokens_accent(tokens)
+    if not accent:
+        bad("tokens missing accent #E10600")
+    else:
+        ok("tokens accent #E10600")
+    if "tabCaptionPoints: Double = 10" not in tokens and "tabCaptionPoints = 10" not in tokens:
+        bad("tokens missing 10pt tab caption")
+    else:
+        ok("tokens tab caption 10pt")
+
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
+    pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    if "OfflineMapView(" not in map_tab:
+        bad("Map tab does not host OfflineMapView")
+    elif "RegionalPacks.visible" in map_tab:
+        bad("Map tab still renders pack-bullet / Guide FTS list as canvas")
+    else:
+        ok("Map tab hosts MapLibre canvas, not pack-bullet list")
+    if "showsUserLocation" not in offline:
+        bad("OfflineMapView missing user puck")
+    else:
+        ok("OfflineMapView user puck")
+    if "MLNPolygon" not in offline and "packSouth" not in offline:
+        bad("OfflineMapView missing pack geometry")
+    else:
+        ok("OfflineMapView pack geometry")
+    if "cachesDirectory" not in pack_style and "temporaryDirectory" not in pack_style:
+        bad("PackStyle still writes resolved style into the bundle")
+    else:
+        ok("PackStyle resolves into a writable cache")
+
+    comms = (ROOT / "Blackout" / "CommsTab.swift").read_text()
+    root = (ROOT / "Blackout" / "RootChrome.swift").read_text()
+    if "SOSHold(" in comms:
+        bad("Comms tab still embeds a second SOSHold")
+    elif "SOSHold(" not in root:
+        bad("no remaining SOS hold on Comms chrome")
+    elif "tab == .comms" not in root:
+        bad("contextual SOS is not bound to Comms")
+    else:
+        ok("single Comms SOS hold (no duplicate disk)")
+
+    if "tabCaptionPoints" not in root and "size: 10" not in root:
+        bad("tab bar captions are not 10pt")
+    elif "lineLimit(1)" not in root:
+        bad("tab bar captions still wrap")
+    elif ".expedition" not in (ROOT / "Blackout" / "AppRuntime.swift").read_text():
+        bad("Expedition tab removed")
+    else:
+        ok("tab captions 10pt no wrap; four tabs kept")
+
+    arming = (ROOT / "Blackout" / "ARMINGView.swift").read_text()
+    if '"ENTER"' in arming or "Button(\"ENTER\")" in arming:
+        bad("ARMING still says ENTER")
+    elif "INITIATE" not in arming:
+        bad("ARMING missing INITIATE")
+    else:
+        ok("ARMING primary is INITIATE")
+    if "Logo" not in arming and "AppIcon" not in arming:
+        bad("ARMING missing bundled logo")
+    else:
+        ok("ARMING shows bundled logo")
+    logo = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset" / "Contents.json"
+    if not logo.is_file():
+        bad("Logo.imageset missing")
+    else:
+        ok("Logo.imageset bundled")
+
+    exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
+    vitals = (ROOT / "Packages" / "Vitals" / "Sources" / "Vitals" / "Vitals.swift").read_text()
+    for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
+        if f'slider("{label}"' not in exp and f'slider("{label.lower()}"' not in exp:
+            bad(f"Expedition missing {label} slider")
+            break
+    else:
+        ok("Expedition has six sliders")
+    for field in ("hunger", "thirst", "pain", "water", "fatigue", "weatherExposure"):
+        if f"var {field}" not in vitals:
+            bad(f"PartyVitals missing {field}")
+            break
+    else:
+        ok("PartyVitals has six fields")
+
+    if ".tint(" not in exp and "Theme.accent" not in exp:
+        bad("Expedition sliders still use default system tint")
+    else:
+        ok("Expedition sliders use token tint")
+    if "Theme.accent" not in root and ".tint(" not in root:
+        bad("root chrome does not apply accent tint (links stay system blue)")
+    else:
+        ok("root chrome applies accent tint")
+
+
+def BlackoutTokens_accent(tokens: str) -> bool:
+    if "225.0 / 255.0" in tokens or "225.0/255.0" in tokens:
+        return True
+    if re.search(r"accent\s*=\s*RGBA\(r:\s*0\.882", tokens):
+        return True
+    return False
+
+
 def l10n() -> None:
     text = (ROOT / "Blackout" / "L10n.swift").read_text()
     for key in ("CALL SOS", "LLAMAR SOS", "ROJO", "PARA-SI", "VENCIDO", "ESTOY BIEN", "NET · NONE", "NO VISION MODEL"):
@@ -396,6 +510,7 @@ def main() -> None:
     vessel()
     archive_bundle_id()
     l10n()
+    tip55_chrome()
     sys.exit(fail)
 
 

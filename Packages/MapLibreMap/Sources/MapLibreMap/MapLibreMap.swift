@@ -83,8 +83,20 @@ public enum USNG {
     }
 }
 
+public enum PackGeometry {
+    public static func bboxRing(south: Double, west: Double, north: Double, east: Double) -> [(lat: Double, lon: Double)] {
+        [
+            (south, west),
+            (south, east),
+            (north, east),
+            (north, west),
+            (south, west),
+        ]
+    }
+}
+
 public enum PackStyle {
-    public static func resolved(styleAt styleURL: URL, packRoot: URL) throws -> URL {
+    public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
         var sources = obj["sources"] as? [String: Any] ?? [:]
         for (key, raw) in sources {
@@ -94,7 +106,11 @@ public enum PackStyle {
             sources[key] = src
         }
         obj["sources"] = sources
-        let out = packRoot.appendingPathComponent("style.resolved.json")
+        let cache = cacheDirectory
+            ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
+        let out = cache.appendingPathComponent("\(packRoot.lastPathComponent)-style.resolved.json")
         try JSONSerialization.data(withJSONObject: obj).write(to: out)
         return out
     }

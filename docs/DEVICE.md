@@ -23,4 +23,4 @@ Destination: a physical iPhone (generic iOS device compile is CI only; this doc 
    - Camera: `NSCameraUsageDescription`
    - Motion: `NSMotionUsageDescription`
 7. Product → Run (Cmd-R). First launch may show permission dialogs; Deny is supported.
-8. BEFORE tapping the ARMING unlock: iPhone Control Center — Airplane Mode ON, then Bluetooth ON. Wi-Fi stays off. Cell stays off. Then tap **ENTER** on ARMING (there is no INITIATE button; ENTER is the unlock). Then score `docs/SOLO_QA.md`.
+8. BEFORE tapping the ARMING unlock: iPhone Control Center — Airplane Mode ON, then Bluetooth ON. Wi-Fi stays off. Cell stays off. Then tap **INITIATE** on ARMING. Then score `docs/SOLO_QA.md`.
