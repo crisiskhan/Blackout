@@ -163,7 +163,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
-            if !force, fittedPack == pack { return }
+            if !force, let fitted = fittedPack, fitted == pack { return }
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             let box = PackCamera.bounds(
                 south: spec.packSouth,
