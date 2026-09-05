@@ -511,6 +511,53 @@ def mesh() -> None:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
 
 
+def tip57_map() -> None:
+    """ASC 56 void: attach wild street lines, fit pack bbox, YOU stays on canvas."""
+    pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    if "wild.geojson" not in pack_style or "wild-roads" not in pack_style:
+        bad("PackStyle does not attach wild.geojson street lines")
+    else:
+        ok("PackStyle attaches wild street lines")
+    if "osm-points" not in pack_style:
+        bad("PackStyle does not draw osm point features")
+    else:
+        ok("PackStyle draws osm point features")
+    if "setVisibleCoordinateBounds" not in offline:
+        bad("OfflineMapView does not fit camera to pack bbox")
+    else:
+        ok("OfflineMapView fits camera to pack bbox")
+    if "lineWidthForPolylineAnnotation" not in offline:
+        bad("OfflineMapView missing visible pack bbox polyline width")
+    else:
+        ok("OfflineMapView strokes pack bbox polyline")
+    if not re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab):
+        bad("Map tab does not pin YOU to pack bbox")
+    else:
+        ok("Map tab pins YOU inside pack bbox")
+    wild = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "wild.geojson").read_text())
+    lines = [
+        f
+        for f in wild.get("features") or []
+        if (f.get("geometry") or {}).get("type") in {"LineString", "MultiLineString"}
+        and "highway" in (f.get("properties") or {})
+    ]
+    if len(lines) < 20:
+        bad("fl-north wild.geojson lost highway line streets")
+    else:
+        ok("fl-north wild.geojson has highway line streets")
+    style = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "style.json").read_text())
+    sources = style.get("sources") or {}
+    layers = style.get("layers") or []
+    wild_src = (sources.get("wild") or {}).get("data")
+    has_wild_roads = any(layer.get("id") == "wild-roads" and layer.get("source") == "wild" for layer in layers)
+    if wild_src != "wild.geojson" or not has_wild_roads:
+        bad("fl-north style.json missing wild-roads source/layer")
+    else:
+        ok("fl-north style.json draws wild street lines")
+
+
 def main() -> None:
     modules()
     no_stubs()
@@ -523,6 +570,7 @@ def main() -> None:
     archive_bundle_id()
     l10n()
     tip55_chrome()
+    tip57_map()
     sys.exit(fail)
 
 

@@ -21,6 +21,10 @@
     "hazards": {
       "type": "geojson",
       "data": "layers/hazards.geojson"
+    },
+    "wild": {
+      "type": "geojson",
+      "data": "wild.geojson"
     }
   },
   "layers": [
@@ -91,6 +95,30 @@
       "paint": {
         "line-color": "#c43b3b",
         "line-width": 1.2
+      }
+    },
+    {
+      "id": "wild-roads",
+      "type": "line",
+      "source": "wild",
+      "filter": [
+        "has",
+        "highway"
+      ],
+      "paint": {
+        "line-color": "#e8eef4",
+        "line-width": 2.4
+      }
+    },
+    {
+      "id": "osm-points",
+      "type": "circle",
+      "source": "osm",
+      "paint": {
+        "circle-color": "#c5cdd6",
+        "circle-radius": 2.2,
+        "circle-stroke-color": "#0c0e10",
+        "circle-stroke-width": 0.6
       }
     }
   ],

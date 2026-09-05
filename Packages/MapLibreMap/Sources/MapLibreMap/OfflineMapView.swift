@@ -50,9 +50,10 @@ public struct OfflineMapView: UIViewRepresentable {
         view.allowsRotating = true
         view.shouldRequestAuthorizationToUseLocationServices = true
         view.showsUserLocation = true
+        view.backgroundColor = UIColor(red: 12.0 / 255.0, green: 14.0 / 255.0, blue: 16.0 / 255.0, alpha: 1)
         view.setCenter(
             CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
-            zoomLevel: 13,
+            zoomLevel: 10,
             animated: false
         )
         context.coordinator.apply(overlaySpec, on: view, force: true)
@@ -91,13 +92,16 @@ public struct OfflineMapView: UIViewRepresentable {
 
         var spec: OverlaySpec?
         var packOverlay: MLNPolygon?
+        var packOutline: MLNPolyline?
         var puckHalo: MLNPolygon?
         var puck: MLNPointAnnotation?
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
         var storedPuck: (lat: Double, lon: Double)?
+        var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
+            applyCamera(spec, on: view, force: force)
             let mapHasPuck = (view.annotations ?? []).contains { ann in
                 ann.title == UserPuck.title
                     && abs(ann.coordinate.latitude - spec.puckLat) < 1e-9
@@ -110,9 +114,15 @@ public struct OfflineMapView: UIViewRepresentable {
                 puck: (spec.puckLat, spec.puckLon),
                 mapHasPuck: mapHasPuck
             )
-            if !should { return }
+            if !should {
+                syncStyleOverlays(on: view, spec: spec)
+                return
+            }
 
             if let old = packOverlay {
+                view.remove(old)
+            }
+            if let old = packOutline {
                 view.remove(old)
             }
             if let old = puckHalo {
@@ -131,6 +141,9 @@ public struct OfflineMapView: UIViewRepresentable {
             let poly = MLNPolygon(coordinates: &ring, count: UInt(ring.count))
             view.add(poly)
             packOverlay = poly
+            let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
+            view.add(outline)
+            packOutline = outline
 
             var halo = UserPuck.haloRing(lat: spec.puckLat, lon: spec.puckLon)
                 .map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
@@ -145,11 +158,81 @@ public struct OfflineMapView: UIViewRepresentable {
             puck = you
             storedPack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             storedPuck = (spec.puckLat, spec.puckLon)
+            syncStyleOverlays(on: view, spec: spec)
+        }
+
+        func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
+            let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
+            if !force, fittedPack == pack { return }
+            guard view.bounds.width > 1, view.bounds.height > 1 else { return }
+            let box = PackCamera.bounds(
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            )
+            let bounds = MLNCoordinateBoundsMake(
+                CLLocationCoordinate2D(latitude: box.south, longitude: box.west),
+                CLLocationCoordinate2D(latitude: box.north, longitude: box.east)
+            )
+            let pad = CGFloat(PackCamera.edgePaddingPoints)
+            view.setVisibleCoordinateBounds(
+                bounds,
+                edgePadding: UIEdgeInsets(top: pad, left: 16, bottom: pad, right: 16),
+                animated: false,
+                completionHandler: nil
+            )
+            fittedPack = pack
+        }
+
+        func syncStyleOverlays(on view: MLNMapView, spec: OverlaySpec) {
+            guard let style = view.style else { return }
+            var ring = PackGeometry.bboxRing(
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+            let line = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
+            if let src = style.source(withIdentifier: "pack-bbox-src") as? MLNShapeSource {
+                src.shape = line
+            } else {
+                let src = MLNShapeSource(identifier: "pack-bbox-src", shape: line, options: nil)
+                style.addSource(src)
+                let layer = MLNLineStyleLayer(identifier: "pack-bbox-line", source: src)
+                layer.lineColor = NSExpression(
+                    forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                )
+                layer.lineWidth = NSExpression(forConstantValue: 3)
+                style.addLayer(layer)
+            }
+
+            let you = MLNPointFeature()
+            you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+            if let src = style.source(withIdentifier: "you-puck-src") as? MLNShapeSource {
+                src.shape = you
+            } else {
+                let src = MLNShapeSource(identifier: "you-puck-src", shape: you, options: nil)
+                style.addSource(src)
+                let halo = MLNCircleStyleLayer(identifier: "you-puck-halo", source: src)
+                halo.circleColor = NSExpression(forConstantValue: UIColor(white: 1, alpha: 0.32))
+                halo.circleRadius = NSExpression(forConstantValue: 22)
+                halo.circleStrokeColor = NSExpression(
+                    forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                )
+                halo.circleStrokeWidth = NSExpression(forConstantValue: 3)
+                style.addLayer(halo)
+                let core = MLNCircleStyleLayer(identifier: "you-puck-core", source: src)
+                core.circleColor = NSExpression(forConstantValue: UIColor.white)
+                core.circleRadius = NSExpression(forConstantValue: 8)
+                style.addLayer(core)
+            }
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
             mapView.shouldRequestAuthorizationToUseLocationServices = true
             mapView.showsUserLocation = true
+            fittedPack = nil
             if let spec {
                 apply(spec, on: mapView, force: true)
             }
@@ -190,6 +273,10 @@ public struct OfflineMapView: UIViewRepresentable {
 
         public func mapView(_ mapView: MLNMapView, alphaForShapeAnnotation annotation: MLNShape) -> CGFloat {
             1
+        }
+
+        public func mapView(_ mapView: MLNMapView, lineWidthForPolylineAnnotation annotation: MLNPolyline) -> CGFloat {
+            annotation === packOutline ? 3.5 : 2
         }
     }
 }

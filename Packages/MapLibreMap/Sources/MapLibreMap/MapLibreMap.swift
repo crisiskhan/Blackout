@@ -101,11 +101,47 @@ public enum UserPuck {
     public static let haloRadiusMeters: Double = 80
     public static let haloSteps = 32
 
+    public static func contains(
+        lat: Double,
+        lon: Double,
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> Bool {
+        lat >= min(south, north)
+            && lat <= max(south, north)
+            && lon >= min(west, east)
+            && lon <= max(west, east)
+    }
+
     public static func coordinate(
         lastKnown: (lat: Double, lon: Double)?,
         packCenter: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double) {
         lastKnown ?? packCenter
+    }
+
+    public static func coordinate(
+        lastKnown: (lat: Double, lon: Double)?,
+        packCenter: (lat: Double, lon: Double),
+        packSouth: Double,
+        packWest: Double,
+        packNorth: Double,
+        packEast: Double
+    ) -> (lat: Double, lon: Double) {
+        if let last = lastKnown,
+           contains(
+            lat: last.lat,
+            lon: last.lon,
+            south: packSouth,
+            west: packWest,
+            north: packNorth,
+            east: packEast
+           ) {
+            return last
+        }
+        return packCenter
     }
 
     public static func haloRing(
@@ -142,7 +178,29 @@ public enum UserPuck {
     }
 }
 
+public enum PackCamera {
+    public static let edgePaddingPoints: Double = 28
+
+    public static func bounds(
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> (south: Double, west: Double, north: Double, east: Double) {
+        (
+            min(south, north),
+            min(west, east),
+            max(south, north),
+            max(west, east)
+        )
+    }
+}
+
 public enum PackStyle {
+    public static let wildSourceID = "wild"
+    public static let wildRoadsLayerID = "wild-roads"
+    public static let osmPointsLayerID = "osm-points"
+
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
         var sources = obj["sources"] as? [String: Any] ?? [:]
@@ -153,6 +211,7 @@ public enum PackStyle {
             sources[key] = src
         }
         obj["sources"] = sources
+        attachOfflineVectorLayers(&obj, packRoot: packRoot)
         let cache = cacheDirectory
             ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
@@ -160,5 +219,52 @@ public enum PackStyle {
         let out = cache.appendingPathComponent("\(packRoot.lastPathComponent)-style.resolved.json")
         try JSONSerialization.data(withJSONObject: obj).write(to: out)
         return out
+    }
+
+    public static func attachOfflineVectorLayers(_ obj: inout [String: Any], packRoot: URL) {
+        var sources = obj["sources"] as? [String: Any] ?? [:]
+        var layers = obj["layers"] as? [[String: Any]] ?? []
+        let wildFile = packRoot.appendingPathComponent("wild.geojson")
+        if FileManager.default.fileExists(atPath: wildFile.path) {
+            if var existing = sources[wildSourceID] as? [String: Any] {
+                if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                    existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                    sources[wildSourceID] = existing
+                }
+            } else {
+                sources[wildSourceID] = [
+                    "type": "geojson",
+                    "data": wildFile.absoluteString,
+                ]
+            }
+            if !layers.contains(where: { $0["id"] as? String == wildRoadsLayerID }) {
+                layers.append([
+                    "id": wildRoadsLayerID,
+                    "type": "line",
+                    "source": wildSourceID,
+                    "filter": ["has", "highway"],
+                    "paint": [
+                        "line-color": "#e8eef4",
+                        "line-width": 2.4,
+                    ],
+                ])
+            }
+        }
+        if sources["osm"] != nil,
+           !layers.contains(where: { $0["id"] as? String == osmPointsLayerID }) {
+            layers.append([
+                "id": osmPointsLayerID,
+                "type": "circle",
+                "source": "osm",
+                "paint": [
+                    "circle-color": "#c5cdd6",
+                    "circle-radius": 2.2,
+                    "circle-stroke-color": "#0c0e10",
+                    "circle-stroke-width": 0.6,
+                ],
+            ])
+        }
+        obj["sources"] = sources
+        obj["layers"] = layers
     }
 }

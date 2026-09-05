@@ -437,6 +437,7 @@ def maplibre_style(pack_id: str) -> dict:
             "public-land": {"type": "geojson", "data": "layers/public_land.geojson"},
             "flood": {"type": "geojson", "data": "layers/flood.geojson"},
             "hazards": {"type": "geojson", "data": "layers/hazards.geojson"},
+            "wild": {"type": "geojson", "data": "wild.geojson"},
         },
         "layers": [
             {"id": "void", "type": "background", "paint": {"background-color": "#0c0e10"}},
@@ -477,6 +478,24 @@ def maplibre_style(pack_id: str) -> dict:
                 "type": "line",
                 "source": "hazards",
                 "paint": {"line-color": "#c43b3b", "line-width": 1.2},
+            },
+            {
+                "id": "wild-roads",
+                "type": "line",
+                "source": "wild",
+                "filter": ["has", "highway"],
+                "paint": {"line-color": "#e8eef4", "line-width": 2.4},
+            },
+            {
+                "id": "osm-points",
+                "type": "circle",
+                "source": "osm",
+                "paint": {
+                    "circle-color": "#c5cdd6",
+                    "circle-radius": 2.2,
+                    "circle-stroke-color": "#0c0e10",
+                    "circle-stroke-width": 0.6,
+                },
             },
         ],
         "metadata": {"engine": "maplibre-metal-offline", "network": "deny-all"},

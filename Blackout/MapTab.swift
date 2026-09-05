@@ -36,7 +36,11 @@ struct MapTab: View {
             if let pack = runtime.packs?.active, let style = styleURL() {
                 let you = UserPuck.coordinate(
                     lastKnown: runtime.lastKnownFix,
-                    packCenter: (pack.center.lat, pack.center.lon)
+                    packCenter: (pack.center.lat, pack.center.lon),
+                    packSouth: pack.bbox.south,
+                    packWest: pack.bbox.west,
+                    packNorth: pack.bbox.north,
+                    packEast: pack.bbox.east
                 )
                 Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
                     .foregroundStyle(Color(white: 0.6))

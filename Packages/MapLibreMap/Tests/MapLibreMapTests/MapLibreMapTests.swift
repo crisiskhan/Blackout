@@ -90,4 +90,82 @@ final class MapLibreMapTests: XCTestCase {
             )
         )
     }
+
+    func testUserPuckFallsBackToPackCenterWhenFixIsOutsideBBox() {
+        let elPaso = (lat: 31.8705, lon: -106.5973)
+        let jacksonville = (lat: 30.41, lon: -81.54)
+        let you = UserPuck.coordinate(
+            lastKnown: elPaso,
+            packCenter: jacksonville,
+            packSouth: 30.3,
+            packWest: -81.7,
+            packNorth: 30.52,
+            packEast: -81.38
+        )
+        XCTAssertEqual(you.lat, jacksonville.lat)
+        XCTAssertEqual(you.lon, jacksonville.lon)
+        XCTAssertFalse(
+            UserPuck.contains(
+                lat: elPaso.lat,
+                lon: elPaso.lon,
+                south: 30.3,
+                west: -81.7,
+                north: 30.52,
+                east: -81.38
+            )
+        )
+    }
+
+    func testUserPuckKeepsLastKnownWhenInsideBBox() {
+        let inside = (lat: 30.41, lon: -81.54)
+        let you = UserPuck.coordinate(
+            lastKnown: inside,
+            packCenter: (30.0, -82.0),
+            packSouth: 30.3,
+            packWest: -81.7,
+            packNorth: 30.52,
+            packEast: -81.38
+        )
+        XCTAssertEqual(you.lat, inside.lat)
+        XCTAssertEqual(you.lon, inside.lon)
+    }
+
+    func testPackCameraFitsPackBBoxNotZoom13Center() {
+        let fitted = PackCamera.bounds(south: 30.52, west: -81.38, north: 30.3, east: -81.7)
+        XCTAssertEqual(fitted.south, 30.3)
+        XCTAssertEqual(fitted.west, -81.7)
+        XCTAssertEqual(fitted.north, 30.52)
+        XCTAssertEqual(fitted.east, -81.38)
+        XCTAssertGreaterThan(PackCamera.edgePaddingPoints, 0)
+    }
+
+    func testPackStyleAttachesWildStreetLinesAndOsmPoints() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-wild-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-wild-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        try Data("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"highway\":\"crossing\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[-81.65,30.33]}}]}".utf8)
+            .write(to: pack.appendingPathComponent("osm.geojson"))
+        try Data("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"highway\":\"residential\"},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[-81.48,30.46],[-81.47,30.47]]}}]}".utf8)
+            .write(to: pack.appendingPathComponent("wild.geojson"))
+        let style = pack.appendingPathComponent("style.json")
+        let obj: [String: Any] = [
+            "version": 8,
+            "sources": ["osm": ["type": "geojson", "data": "osm.geojson"]],
+            "layers": [
+                ["id": "roads", "type": "line", "source": "osm", "filter": ["has", "highway"]],
+            ],
+        ]
+        try JSONSerialization.data(withJSONObject: obj).write(to: style)
+        let resolved = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        let parsed = try JSONSerialization.jsonObject(with: Data(contentsOf: resolved)) as? [String: Any]
+        let sources = parsed?["sources"] as? [String: Any]
+        let wild = sources?["wild"] as? [String: Any]
+        XCTAssertEqual(wild?["type"] as? String, "geojson")
+        XCTAssertEqual(wild?["data"] as? String, pack.appendingPathComponent("wild.geojson").absoluteString)
+        let layers = parsed?["layers"] as? [[String: Any]] ?? []
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.wildRoadsLayerID && $0["type"] as? String == "line" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.osmPointsLayerID && $0["type"] as? String == "circle" })
+    }
 }
