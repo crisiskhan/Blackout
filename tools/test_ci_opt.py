@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import test_tf_archive_signing
+import test_tf_asc_assign
 import test_tf_asc_reuse
 import test_tf_ipa_inspect
 
@@ -133,6 +134,18 @@ def test_altool_binds_primary_app() -> None:
         fail("altool must keep API key auth")
     if "com.crisiskhan.blackout.maplibre" in step or "com.maplibre.mapbox" in step:
         fail("do not invent an ASC app / apple-id for MapLibre")
+    assign = text.split("Assign existing Internal", 1)
+    if len(assign) < 2:
+        fail("Assign existing Internal group step missing")
+    assign_step = assign[1].split("\n      - name:", 1)[0]
+    helper = (ROOT / "tools/tf_asc_assign.py").read_text() if (ROOT / "tools/tf_asc_assign.py").is_file() else ""
+    if "tf_asc_assign.py" not in assign_step:
+        fail("assign step must run tools/tf_asc_assign.py from git_ref")
+    if "RETRY assign 404" not in helper or "ASSIGN_BACKOFF" not in helper:
+        fail("33986112949: assign must retry betaGroups 404 after VALID")
+    if "st == 409" not in helper:
+        fail("assign must treat 409 as already assigned")
+    test_tf_asc_assign.main()
     ok("altool binds primary app via --apple-id + --bundle-id")
 
 
