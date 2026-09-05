@@ -18,15 +18,13 @@ struct ExpeditionTab: View {
                 slider("Fatigue", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
                 slider("Exposure", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
                 Button("APPLY RED BAND") {
-                    runtime.red.apply(runtime.vitals)
-                    runtime.mesh.sendRED(from: runtime.mesh.localID, on: runtime.red.isRed)
+                    runtime.applySelfRed()
                 }
                 .foregroundStyle(Theme.accent)
                 if runtime.red.isRed || runtime.mesh.lastRedOn == true {
                     Text(L10n.t("red.plate", runtime.locale)).font(.title.weight(.bold)).foregroundStyle(.red)
                     Button(L10n.t("red.cancel", runtime.locale)) {
-                        runtime.red.cancelRED()
-                        runtime.mesh.sendRED(from: runtime.mesh.localID, on: false)
+                        runtime.cancelSelfRed()
                     }
                 }
                 Text("ROSTER \(runtime.roster.code)")
@@ -61,9 +59,13 @@ struct ExpeditionTab: View {
                         .font(.caption)
                         .foregroundStyle(Color.orange)
                 }
-                ForEach(runtime.timers.overduePlate(), id: \.id) { t in
-                    Text("\(L10n.t("overdue", runtime.locale)) \(t.task) — not SOS")
-                        .foregroundStyle(Color.orange)
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
+                            Text("\(L10n.t("overdue", runtime.locale)) \(t.task) — not SOS")
+                                .foregroundStyle(Color.orange)
+                        }
+                    }
                 }
                 Button("EXPORT PAPER") {
                     let text = PaperGen.export(trip: runtime.trip, roster: runtime.roster, packName: runtime.packs?.active?.name ?? "")

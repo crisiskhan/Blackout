@@ -77,7 +77,6 @@ final class AppRuntime {
         fix.onChange = { [weak self] in
             Task { @MainActor in self?.pullFix() }
         }
-        fix.arm()
         if let root = Self.resourceRoot() {
             packs = try? PackStore(root: root.appendingPathComponent("Packs"), box: box)
             if let id = UserDefaults.standard.string(forKey: "pack.id") {
@@ -113,6 +112,7 @@ final class AppRuntime {
     }
 
     func dropMark() {
+        fix.arm()
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
         guard let lat, let lon else { return }
@@ -146,7 +146,22 @@ final class AppRuntime {
 
     func beginPTTSolo() {
         ptt.beginLive()
+        _ = ptt.recordClip(pcm: Data(repeating: 0, count: 3200), sampleRate: 16_000)
         mesh.sendChip(from: mesh.localID, chip: "ptt")
+    }
+
+    func endPTTSolo() {
+        ptt.endLive()
+    }
+
+    func applySelfRed() {
+        red.apply(vitals)
+        mesh.sendRED(from: mesh.localID, on: red.isRed)
+    }
+
+    func cancelSelfRed() {
+        red.cancelRED()
+        mesh.sendRED(from: mesh.localID, on: false)
     }
 
     func sendFieldToParty(cardID: String) {
@@ -214,9 +229,11 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     var last: CLLocationCoordinate2D?
     var heading: Double?
     var onChange: (() -> Void)?
-    private let mgr = CLLocationManager()
+    private var mgr: CLLocationManager?
 
     func arm() {
+        let mgr = self.mgr ?? CLLocationManager()
+        self.mgr = mgr
         mgr.delegate = self
         switch mgr.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
@@ -231,7 +248,7 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
 
     private func startHeading() {
         guard CLLocationManager.headingAvailable() else { return }
-        mgr.startUpdatingHeading()
+        mgr?.startUpdatingHeading()
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

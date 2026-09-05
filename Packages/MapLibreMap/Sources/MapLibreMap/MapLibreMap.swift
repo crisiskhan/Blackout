@@ -23,7 +23,12 @@ public enum MarkStore {
     public static let key = "map.marks"
 
     public static func save(_ marks: [MapMark], defaults: UserDefaults = .standard) {
-        defaults.set(try? JSONEncoder().encode(marks), forKey: key)
+        if let data = try? JSONEncoder().encode(marks) {
+            defaults.set(data, forKey: key)
+        } else {
+            defaults.removeObject(forKey: key)
+        }
+        defaults.synchronize()
     }
 
     public static func load(defaults: UserDefaults = .standard) -> [MapMark] {

@@ -17,7 +17,8 @@ public final class PTTDeck: @unchecked Sendable {
     public func endLive() { live = false }
 
     public func recordClip(pcm: Data, sampleRate: Double) -> PTTClip {
-        let sec = min(15, Double(pcm.count) / (sampleRate * 2))
+        let rate = sampleRate.isFinite && sampleRate > 0 ? sampleRate : 16_000
+        let sec = min(15, Double(pcm.count) / (rate * 2))
         let clip = PTTClip(pcm: pcm, seconds: sec, opus: OpusLite.encode(pcm))
         last = clip
         box.log("ptt", "clip \(sec)s opus=\(clip.opus.count)")

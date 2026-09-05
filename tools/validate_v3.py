@@ -505,7 +505,7 @@ def mesh() -> None:
         ok("join is QR plus typed party code")
     if "chip.rally" not in comms or "chip.down" not in comms:
         bad("comms missing RALLY/DOWN chips")
-    if "sendRED" not in exp or "sendTimer" not in exp:
+    if "sendRED" not in app or "sendTimer" not in exp:
         bad("RED/timer not wired to mesh")
     else:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
@@ -565,6 +565,73 @@ def tip57_map() -> None:
         ok("Done: YOU puck — white disk + red ring + YOU on canvas")
 
 
+def tip58_solo_qa() -> None:
+    """Tip 58 — SOLO_QA no-crash under airplane / NET·NONE. No CPV bump. No TF."""
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    speech = (ROOT / "Packages" / "OfflineSpeech" / "Sources" / "OfflineSpeech" / "OfflineSpeech.swift").read_text()
+    marks = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
+    ptt = (ROOT / "Packages" / "PTTAudio" / "Sources" / "PTTAudio" / "PTTAudio.swift").read_text()
+    red = (ROOT / "Packages" / "RedAlert" / "Sources" / "RedAlert" / "RedAlert.swift").read_text()
+    timers = (ROOT / "Packages" / "TimerSync" / "Sources" / "TimerSync" / "TimerSync.swift").read_text()
+    mesh = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "MeshDTN.swift").read_text()
+    comms = (ROOT / "Blackout" / "CommsTab.swift").read_text()
+
+    init = app.split("func arm(")[0]
+    if "fix.arm()" in init:
+        bad("AppRuntime.init arms CLLocation — MARK after kill / scene restore crash")
+    else:
+        ok("launch does not arm CLLocation")
+    if re.search(r"let mgr = CLLocationManager\(\)", app):
+        bad("CLLocationManager constructed at MeshFix init / launch")
+    else:
+        ok("CLLocationManager is lazy until MARK/LOCK-ON")
+    if re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech):
+        bad("AVSpeechSynthesizer constructed on SpeechEngine init (restore crash)")
+    else:
+        ok("AVSpeechSynthesizer is lazy")
+    if "synchronize()" not in marks:
+        bad("MarkStore.save must flush so force-quit restore is honest")
+    else:
+        ok("MarkStore flushes UserDefaults")
+
+    if "TimelineView" not in exp:
+        bad("1-min timer OVERDUE never appears without a tick")
+    else:
+        ok("Expedition ticks overdue plate")
+    if "overdueRowID" not in timers:
+        bad("overdue ForEach needs a distinct row id")
+    else:
+        ok("timer overdue rows use overdueRowID")
+    if 'who.isEmpty ? "ALL"' not in timers and "who.isEmpty" not in timers:
+        bad("timer add must survive empty/nil party who")
+    else:
+        ok("timer add treats empty who as ALL")
+
+    if "openURL" in red or "tel:" in red or "911" in red:
+        bad("RED path references SOS/911")
+    else:
+        ok("RED plate does not call SOS/911")
+    if "isSOS" not in red:
+        bad("RED plate must expose isSOS=false")
+    else:
+        ok("RED plate is not SOS")
+
+    if "AVAudioEngine" in ptt or "LivePTTHub" in ptt or "import AVFoundation" in ptt:
+        bad("PTTAudio must stay local/queue — no LivePTTHub or AVAudioEngine")
+    else:
+        ok("PTT clip is local/queue, no LivePTTHub")
+    if "beginPTTSolo" not in app or "HOLD PTT" not in comms:
+        bad("solo PTT path missing")
+    else:
+        ok("solo PTT path is HOLD/RELEASE + local clip")
+
+    if "NO PEERS · LOGGED" not in mesh:
+        bad("NO PEERS · LOGGED regress")
+    else:
+        ok("NO PEERS · LOGGED still honest at 0 peers")
+
+
 def main() -> None:
     modules()
     no_stubs()
@@ -578,6 +645,7 @@ def main() -> None:
     l10n()
     tip55_chrome()
     tip57_map()
+    tip58_solo_qa()
     sys.exit(fail)
 
 

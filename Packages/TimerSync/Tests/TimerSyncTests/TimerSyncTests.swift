@@ -23,4 +23,17 @@ final class TimerSyncTests: XCTestCase {
         b.markDoneTask("1min")
         XCTAssertTrue(b.overduePlate(now: start.addingTimeInterval(61)).isEmpty)
     }
+
+    func testEmptyWhoBecomesALLAndDoneIsSafe() {
+        let b = TimerBoard(box: EventLog())
+        let t = b.add(who: "", task: "1min", duration: 60, subjectAll: true)
+        XCTAssertEqual(t?.who, "ALL")
+        XCTAssertNotEqual(t?.overdueRowID, t?.id)
+        b.markDone("missing")
+        b.markDoneTask("no-such-task")
+        XCTAssertEqual(b.timers.count, 1)
+        if let id = t?.id { b.markDone(id) }
+        XCTAssertTrue(b.timers.isEmpty)
+        XCTAssertFalse(b.isSOS(PartyTimer(id: "x", who: "ALL", task: "1min", duration: 60, started: Date(), subjectAllTurnaround: true)))
+    }
 }

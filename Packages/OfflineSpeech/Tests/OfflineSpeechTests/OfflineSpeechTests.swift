@@ -9,6 +9,12 @@ final class SpeechEngineTests: XCTestCase {
         XCTAssertTrue(s.lastUtterance.contains("STOP"))
     }
 
+    func testInitDoesNotConstructUtterance() {
+        let s = SpeechEngine(box: EventLog())
+        XCTAssertEqual(s.lastUtterance, "")
+        XCTAssertFalse(s.lastFailed)
+    }
+
     func testEmptySpeakIsFailureNotFakeAudio() {
         let s = SpeechEngine(box: EventLog())
         XCTAssertFalse(s.speak("   ", locale: "en"))

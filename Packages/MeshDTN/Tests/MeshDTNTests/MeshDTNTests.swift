@@ -25,6 +25,7 @@ final class MeshDTNTests: XCTestCase {
         net.sendChip(from: net.localID, chip: "ptt")
         XCTAssertTrue(radio.sent.isEmpty)
         XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        XCTAssertEqual(net.nearby.count, 0)
     }
 
     func testConnectedRadioSendsChipRedTimerPOS() {

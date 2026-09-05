@@ -9,7 +9,7 @@ public final class SpeechEngine: @unchecked Sendable {
     public private(set) var lastFailed = false
     private let box: EventLog
     #if canImport(AVFoundation)
-    private let synth = AVSpeechSynthesizer()
+    private var synth: AVSpeechSynthesizer?
     #endif
 
     public init(box: EventLog) { self.box = box }
@@ -24,9 +24,11 @@ public final class SpeechEngine: @unchecked Sendable {
             return false
         }
         #if canImport(AVFoundation)
+        let engine = synth ?? AVSpeechSynthesizer()
+        synth = engine
         let u = AVSpeechUtterance(string: trimmed)
         u.voice = AVSpeechSynthesisVoice(language: locale == "es" ? "es-MX" : "en-US")
-        synth.speak(u)
+        engine.speak(u)
         lastFailed = false
         lastUtterance = "\(locale):\(trimmed)"
         box.log("speech", lastUtterance)

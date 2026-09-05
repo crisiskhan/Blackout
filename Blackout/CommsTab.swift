@@ -52,7 +52,7 @@ struct CommsTab: View {
             Text(L10n.t("net.physics", runtime.locale))
                 .font(.caption).foregroundStyle(Color(white: 0.55))
             Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
-                if runtime.ptt.live { runtime.ptt.endLive() } else { runtime.beginPTTSolo() }
+                if runtime.ptt.live { runtime.endPTTSolo() } else { runtime.beginPTTSolo() }
             }
             Button("15s CLIP") {
                 _ = runtime.ptt.recordClip(pcm: Data(repeating: 0, count: 32000), sampleRate: 16000)

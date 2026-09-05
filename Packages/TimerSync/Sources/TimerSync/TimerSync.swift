@@ -9,6 +9,7 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var started: Date
     public var subjectAllTurnaround: Bool
     public var overdue: Bool { Date().timeIntervalSince(started) > duration }
+    public var overdueRowID: String { "overdue:\(id)" }
 }
 
 public final class TimerBoard: @unchecked Sendable {
@@ -21,6 +22,7 @@ public final class TimerBoard: @unchecked Sendable {
     public func add(who: String, task: String, duration: TimeInterval, subjectAll: Bool, now: Date = Date()) -> PartyTimer? {
         guard timers.filter({ !$0.overdue || true }).count < Self.maxActive else { return nil }
         guard timers.count < Self.maxActive else { return nil }
+        let who = who.isEmpty ? "ALL" : who
         let t = PartyTimer(id: UUID().uuidString, who: who, task: task, duration: duration, started: now, subjectAllTurnaround: subjectAll)
         timers.append(t)
         box.log("timer", "\(who) \(task) \(duration)")

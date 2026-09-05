@@ -22,6 +22,19 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: true), "")
     }
 
+    func testMarkStoreCorruptOrWrongTypeIsHonestlyGone() {
+        let suite = UserDefaults(suiteName: "map.marks.corrupt.\(UUID().uuidString)")!
+        suite.set("not-json", forKey: MarkStore.key)
+        XCTAssertEqual(MarkStore.load(defaults: suite), [])
+        suite.set(Data([0x00, 0x01, 0x02]), forKey: MarkStore.key)
+        XCTAssertEqual(MarkStore.load(defaults: suite), [])
+        MarkStore.save([MapMark(id: "m2", lat: 30.4, lon: -81.5, label: "FL NORTH")], defaults: suite)
+        let back = MarkStore.load(defaults: suite)
+        XCTAssertEqual(back.first?.label, "FL NORTH")
+        MarkStore.save([], defaults: suite)
+        XCTAssertEqual(MarkStore.load(defaults: suite), [])
+    }
+
     func testPackStyleWritesWritableCacheNotBundle() throws {
         let fm = FileManager.default
         let pack = fm.temporaryDirectory.appendingPathComponent("pack-style-\(UUID().uuidString)")
