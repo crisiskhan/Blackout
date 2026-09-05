@@ -193,6 +193,8 @@ xcodebuild \
   CURRENT_PROJECT_VERSION="$NEXT" \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
   CODE_SIGNING_ALLOWED=YES \
+  STANDALONE_ICON_BEHAVIOR=none \
+  ASSETCATALOG_COMPILER_STANDALONE_ICON_BEHAVIOR=none \
   ENABLE_APP_INTENTS_METADATA_GENERATION=NO \
   "${AUTH[@]}" \
   archive 2>&1 | tee "$RUNNER_TEMP/archive.log"
@@ -382,12 +384,23 @@ ensure_submission_seal() {
   fi
 }
 
+prepare_app_for_upload() {
+  local app="$1"
+  echo "flatten reserved Resources on $app"
+  "$PYBIN" tools/tf_ipa_inspect.py --app "$app"
+  if [ -e "$app/Resources" ]; then
+    echo "Fail closed: reserved Resources remains under $app"
+    exit 1
+  fi
+}
+
 handzip_ipa() {
   local src="$1"
   if [ ! -d "$src" ] || [ ! -f "$src/Blackout" ]; then
     echo "hand-zip source missing $src"
     return 1
   fi
+  prepare_app_for_upload "$src"
   ensure_submission_seal "$src"
   rm -rf "$EXPORT"
   mkdir -p "$EXPORT/Payload"
@@ -444,7 +457,8 @@ ARCH_APP="$ARCHIVE/Products/Applications/Blackout.app"
 # rm _CodeSignature. no re-seal of a complete Dist product; re-sign only
 # when hand-zip sees a missing submission Authority.
 if [ -d "$ARCH_APP" ] && [ -f "$ARCH_APP/Blackout" ]; then
-  echo "Archive product present (archive exit=$ARC) — write Info.plist, no re-seal of a complete Dist product"
+  echo "Archive product present (archive exit=$ARC) — flatten reserved Resources, then write Info.plist"
+  prepare_app_for_upload "$ARCH_APP"
   if write_xcarchive_plist && [ -f "$ARCHIVE/Info.plist" ]; then
     echo "---- archive Info.plist after write ----"
     plutil -p "$ARCHIVE/Info.plist" || true
@@ -526,10 +540,39 @@ if [ ! -d "$VERIFY/Payload/Blackout.app" ]; then
   echo "IPA verify extract missing Payload/Blackout.app"
   exit 1
 fi
-if [ -d "$VERIFY/Payload/Blackout.app/Resources" ]; then
+if [ -e "$VERIFY/Payload/Blackout.app/Resources" ]; then
+  echo "IPA still has reserved Resources after inspect — flatten and re-sign"
+  prepare_app_for_upload "$VERIFY/Payload/Blackout.app"
+  resign_submission "$VERIFY/Payload/Blackout.app" || {
+    echo "Fail closed: reserved Resources remains / re-sign failed"
+    exit 1
+  }
+  ( cd "$VERIFY" && ditto -c -k --norsrc --keepParent Payload Blackout.ipa )
+  cp "$VERIFY/Blackout.ipa" "$IPA"
+  rm -rf "$VERIFY"
+  mkdir -p "$VERIFY"
+  ditto -x -k --norsrc "$IPA" "$VERIFY"
+fi
+if [ -e "$VERIFY/Payload/Blackout.app/Resources" ]; then
   echo "Fail closed: IPA contains reserved Blackout.app/Resources (33931992681)"
   find "$VERIFY/Payload/Blackout.app/Resources" | head -n 40 || true
   exit 1
+fi
+if ! verify_submission_app "$VERIFY/Payload/Blackout.app"; then
+  echo "IPA inspect mutated the payload — re-sign then re-zip"
+  resign_submission "$VERIFY/Payload/Blackout.app" || {
+    echo "Fail closed: re-sign after inspect failed. No altool."
+    exit 1
+  }
+  if ! verify_submission_app "$VERIFY/Payload/Blackout.app"; then
+    echo "Fail closed: re-sign after inspect did not produce submission Authority"
+    exit 1
+  fi
+  ( cd "$VERIFY" && ditto -c -k --norsrc --keepParent Payload Blackout.ipa )
+  cp "$VERIFY/Blackout.ipa" "$IPA"
+  rm -rf "$VERIFY"
+  mkdir -p "$VERIFY"
+  ditto -x -k --norsrc "$IPA" "$VERIFY"
 fi
 /usr/bin/codesign --verify --deep --strict "$VERIFY/Payload/Blackout.app"
 echo "codesign --verify --deep --strict OK"

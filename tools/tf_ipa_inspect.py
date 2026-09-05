@@ -50,6 +50,52 @@ def _is_owned_bid(bid: str) -> bool:
     return bid == OWNED_PREFIX or bid.startswith(OWNED_PREFIX + ".")
 
 
+def flatten_reserved_resources(app: Path) -> bool:
+    """Move .app/Resources/* into the .app root. Fail if Resources remains."""
+    reserved = app / "Resources"
+    if not reserved.exists():
+        return False
+    if reserved.is_file():
+        raise InspectError(f"{app.as_posix()} reserved Resources is a file")
+    for child in list(reserved.iterdir()):
+        dest = app / child.name
+        if dest.exists():
+            if dest.is_dir() and child.is_dir():
+                _merge_tree(child, dest)
+                shutil.rmtree(child)
+            else:
+                raise InspectError(
+                    f"cannot flatten {child.as_posix()} onto existing {dest.as_posix()}"
+                )
+        else:
+            shutil.move(str(child), str(dest))
+    if reserved.exists():
+        leftover = list(reserved.iterdir())
+        if leftover:
+            raise InspectError(
+                f"{app.as_posix()} reserved Resources remains: "
+                + ", ".join(p.name for p in leftover)
+            )
+        reserved.rmdir()
+    if reserved.exists():
+        raise InspectError(f"{app.as_posix()} reserved Resources remains")
+    return True
+
+
+def _merge_tree(src: Path, dest: Path) -> None:
+    dest.mkdir(parents=True, exist_ok=True)
+    for child in src.iterdir():
+        target = dest / child.name
+        if child.is_dir():
+            _merge_tree(child, target)
+        elif target.exists():
+            raise InspectError(
+                f"cannot flatten {child.as_posix()} onto existing {target.as_posix()}"
+            )
+        else:
+            shutil.move(str(child), str(target))
+
+
 def validate_framework_identifier(path: Path) -> None:
     """Require vendor FMWK BID. Do not strip. Do not rewrite onto owned."""
     body = _load_plist(path)
@@ -62,6 +108,16 @@ def validate_framework_identifier(path: Path) -> None:
             f"{path.as_posix()} CFBundleIdentifier={bid or 'MISSING'} "
             f"— require {MAPBOX} (do not strip; do not use owned BID)"
         )
+
+
+def prepare_app_bundle(app: Path) -> bool:
+    """Flatten reserved Resources on one .app. Fail closed if it remains."""
+    if not app.is_dir():
+        raise InspectError(f"missing app bundle {app}")
+    changed = flatten_reserved_resources(app)
+    if (app / "Resources").exists():
+        raise InspectError(f"{app.as_posix()} reserved Resources remains")
+    return changed
 
 
 def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
@@ -94,6 +150,10 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
                         f"{appex.as_posix()} CFBundleIdentifier={wbid or 'MISSING'} "
                         f"outside {{{APP_BID}, {WIDGET_BID}}}"
                     )
+        if flatten_reserved_resources(app):
+            rewritten = True
+        if (app / "Resources").exists():
+            raise InspectError(f"{app.as_posix()} reserved Resources remains")
         for plist in app.rglob("Info.plist"):
             try:
                 body = _load_plist(plist)
@@ -155,14 +215,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ipa", type=Path, help="Blackout.ipa to inspect")
     parser.add_argument("--payload", type=Path, help="already-unzipped Payload/")
+    parser.add_argument("--app", type=Path, help="Blackout.app to flatten reserved Resources")
     args = parser.parse_args(argv)
     try:
         if args.ipa is not None:
             inspect_ipa(args.ipa)
         elif args.payload is not None:
             inspect_and_rewrite_payload(args.payload)
+        elif args.app is not None:
+            prepare_app_bundle(args.app)
         else:
-            raise InspectError("pass --ipa or --payload")
+            raise InspectError("pass --ipa, --payload, or --app")
     except InspectError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1

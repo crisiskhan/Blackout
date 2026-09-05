@@ -329,7 +329,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48DC310F0F68C6FA33F515C5 /* Resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,11 +384,11 @@
 			);
 			name = "Copy Resources into app bundle";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Resources/Packs/catalog.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Packs/catalog.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Resources\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\nditto \"${SRC}\" \"${DST}\"\nrm -rf \"${DST}/Resources\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

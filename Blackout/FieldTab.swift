@@ -57,7 +57,7 @@ struct FieldTab: View {
     }
 
     private func load() {
-        guard let root = Bundle.main.resourceURL?.appendingPathComponent("Resources/Field") else { return }
+        guard let root = AppRuntime.resourceRoot()?.appendingPathComponent("Field") else { return }
         let core = (try? Data(contentsOf: root.appendingPathComponent("field.core.json"))) ?? Data()
         let st = runtime.packs?.active?.state.lowercased() ?? "tx"
         let extra = (try? Data(contentsOf: root.appendingPathComponent("field.\(st).json"))) ?? Data()

@@ -376,6 +376,8 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
         fail("33931992681: do not strip FMWK BID to empty — Apple rejects ''")
     if "validate_framework_identifier" not in helper:
         fail("tf_ipa_inspect.py must require nested FMWK CFBundleIdentifier=com.maplibre.mapbox")
+    if "flatten_reserved_resources" not in helper:
+        fail("tf_ipa_inspect.py must flatten reserved Payload/*.app/Resources")
     if "owned_framework_identifier" in helper:
         fail("tf_ipa_inspect.py must not rewrite FMWK onto an owned BID")
     if "return APP_BID" in helper:
@@ -527,6 +529,27 @@ def test_asc_reuse_not_delete_create() -> None:
     ok("ASC local Dist + Local profiles; KEEP Dist is reference-only")
 
 
+def test_no_reserved_resources_in_ios_app_copy() -> None:
+    """33931992681: iOS .app must not contain a top-level Resources directory."""
+    pbx = PBX.read_text()
+    gen = GENERATOR.read_text()
+    archive = TF_ARCHIVE.read_text()
+    if 'UNLOCALIZED_RESOURCES_FOLDER_PATH}/Resources"' in pbx:
+        fail("pbx copy script still lands Packs/Field under reserved .app/Resources")
+    if "UNLOCALIZED_RESOURCES_FOLDER_PATH}/Resources" in gen:
+        fail("generate_project.py would restore reserved .app/Resources")
+    res_phase = pbx.split("/* Begin PBXResourcesBuildPhase", 1)[-1].split(
+        "/* End PBXResourcesBuildPhase", 1
+    )[0]
+    if "Resources in Resources" in res_phase:
+        fail("pbx Resources phase still copies the Resources folder into the iOS .app")
+    if "flatten_reserved_resources" not in archive and "reserved Resources" not in archive:
+        fail("tf-archive.sh must flatten/scrub reserved Resources before IPA ready")
+    if "--app" not in archive:
+        fail("tf-archive.sh must flatten reserved Resources on the .app before hand-zip")
+    ok("iOS app copy flattens Packs/Field into the .app root (no reserved Resources)")
+
+
 def test_crisis_opt_locks() -> None:
     if (ROOT / "tools/strip-app-before-codesign.sh").is_file():
         fail("strip-app-before-codesign.sh must stay deleted")
@@ -552,6 +575,7 @@ def main() -> None:
     test_altool_binds_primary_app()
     test_maplibre_framework_not_owned_bundle_id()
     test_maplibre_single_embed_via_maplibremap()
+    test_no_reserved_resources_in_ios_app_copy()
     test_asc_reuse_not_delete_create()
     test_crisis_opt_locks()
 

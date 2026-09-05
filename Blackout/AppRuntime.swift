@@ -197,7 +197,16 @@ final class AppRuntime {
     }
 
     static func resourceRoot() -> URL? {
-        Bundle.main.resourceURL?.appendingPathComponent("Resources")
+        guard let base = Bundle.main.resourceURL else { return nil }
+        let flat = base.appendingPathComponent("Packs/catalog.json")
+        if FileManager.default.fileExists(atPath: flat.path) {
+            return base
+        }
+        let nested = base.appendingPathComponent("Resources")
+        if FileManager.default.fileExists(atPath: nested.appendingPathComponent("Packs/catalog.json").path) {
+            return nested
+        }
+        return base
     }
 }
 

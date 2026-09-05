@@ -179,6 +179,22 @@ class TestInspectPayload(unittest.TestCase):
             with self.assertRaises(inspect.InspectError):
                 inspect.inspect_and_rewrite_payload(payload)
 
+    def test_flattens_reserved_resources_into_app_root(self) -> None:
+        """33931992681 Iris f30954fa: Blackout.app/Resources is reserved."""
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = _fake_payload(Path(tmp))
+            app = payload / "Blackout.app"
+            packs = app / "Resources" / "Packs"
+            packs.mkdir(parents=True)
+            (packs / "catalog.json").write_text("{}", encoding="utf-8")
+            field = app / "Resources" / "Field"
+            field.mkdir(parents=True)
+            (field / "field.core.json").write_text("{}", encoding="utf-8")
+            inspect.inspect_and_rewrite_payload(payload)
+            self.assertFalse((app / "Resources").exists())
+            self.assertTrue((app / "Packs" / "catalog.json").is_file())
+            self.assertTrue((app / "Field" / "field.core.json").is_file())
+
 
 class TestInspectIpa(unittest.TestCase):
     def test_unzip_keeps_mapbox_no_rezip(self) -> None:

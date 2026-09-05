@@ -126,7 +126,16 @@ final class AppRuntime {
     }
 
     static func resourceRoot() -> URL? {
-        Bundle.main.resourceURL?.appendingPathComponent("Resources")
+        guard let base = Bundle.main.resourceURL else { return nil }
+        let flat = base.appendingPathComponent("Packs/catalog.json")
+        if FileManager.default.fileExists(atPath: flat.path) {
+            return base
+        }
+        let nested = base.appendingPathComponent("Resources")
+        if FileManager.default.fileExists(atPath: nested.appendingPathComponent("Packs/catalog.json").path) {
+            return nested
+        }
+        return base
     }
 }
 
@@ -541,7 +550,7 @@ struct FieldTab: View {
             Button("VISION ADD FRAME") {
                 var cap = GuidedCapture()
                 cap.addFrame([0.2, 0.7, 0.1])
-                if let url = runtime.packs.flatMap({ _ in Bundle.main.url(forResource: "labels.\\(runtime.packs?.active?.state.lowercased() ?? "tx")", withExtension: "json", subdirectory: "Resources/Vision") }),
+                if let url = runtime.packs.flatMap({ _ in Bundle.main.url(forResource: "labels.\\(runtime.packs?.active?.state.lowercased() ?? "tx")", withExtension: "json", subdirectory: "Vision") }),
                    let data = try? Data(contentsOf: url),
                    let book = try? VisionCoreML.load(data) {
                     guess = cap.guess(book: book)
@@ -557,7 +566,7 @@ struct FieldTab: View {
     }
 
     private func load() {
-        guard let root = Bundle.main.resourceURL?.appendingPathComponent("Resources/Field") else { return }
+        guard let root = AppRuntime.resourceRoot()?.appendingPathComponent("Field") else { return }
         let core = (try? Data(contentsOf: root.appendingPathComponent("field.core.json"))) ?? Data()
         let st = runtime.packs?.active?.state.lowercased() ?? "tx"
         let extra = (try? Data(contentsOf: root.appendingPathComponent("field.\\(st).json"))) ?? Data()

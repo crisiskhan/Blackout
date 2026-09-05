@@ -379,13 +379,14 @@ def generate() -> None:
 
     copy_script_raw = """set -e
 SRC="${SRCROOT}/Resources"
-DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Resources"
+DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
 if [ ! -f "${SRC}/Packs/catalog.json" ]; then
   echo "error: Resources/Packs/catalog.json missing" >&2
   exit 1
 fi
 mkdir -p "${DST}"
 ditto "${SRC}" "${DST}"
+rm -rf "${DST}/Resources"
 test -f "${DST}/Packs/catalog.json"
 test -f "${DST}/Field/field.core.json"
 """
@@ -628,7 +629,6 @@ test -f "${DST}/Field/field.core.json"
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				{ids['pack_build']} /* Resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -684,7 +684,7 @@ test -f "${DST}/Field/field.core.json"
 			);
 			name = "Copy Resources into app bundle";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Resources/Packs/catalog.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Packs/catalog.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
