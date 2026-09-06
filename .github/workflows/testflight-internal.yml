@@ -1,7 +1,10 @@
 # No human p12. KEEP Dist 45YLWHL6UP is reference-only. tools/tf_asc_signing.py
 # always mints a runner-local Dist cert and binds Local-named App Store
 # profiles to it. Never revoke KEEP. Never delete KEEP-named GHA profiles.
-# workflow_dispatch only. Never pull_request or push.
+# Fire: push tf: commit on cursor/blackout-bible-v3-64d0, or tag tf-*,
+# or workflow_dispatch git_ref (backup). Never pull_request. Never main.
+# Never External / App Review / production. Do not add environment: —
+# Auto-review / required reviewers must not gate this job.
 # Default unsigned compile is xcodebuild.yml and must stay green without these secrets.
 name: TestFlight Internal
 
@@ -9,9 +12,12 @@ on:
   workflow_dispatch:
     inputs:
       git_ref:
-        description: "App tree to archive (not main)"
+        description: "App tree to archive (not main). Backup when not using a tf: push or tf-* tag."
         required: true
         default: cursor/blackout-bible-v3-64d0
+  push:
+    branches: [cursor/blackout-bible-v3-64d0]
+    tags: ['tf-*']
 
 jobs:
   upload:
@@ -21,6 +27,11 @@ jobs:
     # stays macos-14 + Xcode 16. Do not use macos-latest (floating default).
     # macos-15 ships Xcode 26; select 26.x explicitly (image default is 16.4).
     # Keep App Intents processor no-ops on the selected toolchain.
+    # No GitHub Environment. Do not add environment: or required reviewers.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/tf-')) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/cursor/blackout-bible-v3-64d0' && startsWith(github.event.head_commit.message, 'tf:'))
     runs-on: macos-15
     timeout-minutes: 90
     permissions:
@@ -48,7 +59,8 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.git_ref }}
+          # workflow_dispatch: inputs.git_ref. push branch or tf-* tag: github.sha
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.sha }}
 
       - name: Fail closed on TestFlight archive killers
         run: python3 tools/test_ci_opt.py

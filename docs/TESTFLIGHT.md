@@ -10,6 +10,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - Repo `crisiskhan/Blackout`
 - App tree this job archives: `cursor/blackout-bible-v3-64d0` (never the old app on `main`)
 - Destination: TestFlight Internal only (`28035586-fce6-474f-9bc2-ef0f1f65306e`). No App Review. No External Testing.
+- This job has **no** GitHub `environment:` and must not. Auto-review / required reviewers must not gate Internal upload. If Settings → Environments later names a gate, CoS/Crisis must clear protection on that env (YAML cannot remove Settings-only rules).
 - Repo CPV is 1 and collides; the job sets `CURRENT_PROJECT_VERSION` on the xcodebuild command line (max ASC + 1). It does not commit a bump.
 - A 50-series TestFlight build is the old vessel.
 - Signing: existing ASC AuthKey + automatic signing. No human certificate export.
@@ -56,21 +57,29 @@ Local Watch compile: scheme **BlackoutWatch**, destination `generic/platform=wat
 
 GitHub requires a workflow file on the default branch for the Actions **Run workflow** button. **Do not use that button against `main` until CoS syncs host YAML.** Main still has watchkitapp in `BUNDLES`; tip does not. Tip YAML is the source of truth.
 
-## CoS dispatch (required)
+## How to fire Internal (bible-v3 only)
 
-Next TestFlight Internal run **must** use tip host YAML so reuse (not delete+create) is what GHA executes:
+Push triggers live on tip YAML (`cursor/blackout-bible-v3-64d0`). Do not add `main` as a trigger. Do not merge this job to main to “enable” it — a push to bible-v3 uses the workflow file on that branch.
+
+1. **Commit message** on `cursor/blackout-bible-v3-64d0` starting with `tf:` (example: `tf: streets + tip-58`). Any other prefix (including `ci(tf):`) does **not** upload.
+2. **Tag** matching `tf-*` (example: `git tag tf-58 && git push origin tf-58`). The tagged commit must contain this workflow.
+3. **Backup** `workflow_dispatch` with `git_ref` (same as before):
 
 ```bash
 gh workflow run "TestFlight Internal" --ref cursor/blackout-bible-v3-64d0 -f git_ref=cursor/blackout-bible-v3-64d0
 ```
 
-`--ref` selects the workflow file. `-f git_ref=` selects the app tree to archive. Both must be the tip. Do not dispatch `--ref main`. Do not bump tree CPV. Agents must not dispatch.
+`--ref` selects the workflow file. `-f git_ref=` selects the app tree to archive. Both must be the tip. Do not dispatch `--ref main`. Do not bump tree CPV. Agents must not dispatch a TestFlight upload unless asked to verify.
+
+A push to bible-v3 that does **not** start with `tf:` still starts the workflow file, then **skips** the upload job. That skip is intentional so CI YAML edits do not burn ASC quota.
 
 GHA `33924134240` / `33924251037`: tip still **deleted** stale GHA App Store profiles then POSTed new ones and ASC returned HTTP 500 `UNEXPECTED_ERROR`. Archive never ran; CPV 54 was not minted. Keep Dist cert `45YLWHL6UP` as reference. Always mint a runner-local Dist cert for the archive. Reuse or create Local-named profiles (`Blackout iOS App Store GHA Local` / `Blackout Widgets App Store GHA Local`) bound to that local cert. Do not delete KEEP-named `Blackout iOS App Store GHA` / `Blackout Widgets App Store GHA`. Never revoke KEEP.
 
 ## How Crisis runs it from iPhone Safari
 
-Safari **Run workflow** lists the default-branch YAML. Until CoS copies **only** this tip yml onto `main` (app tree stays unmerged), Crisis cannot pick tip YAML from the button. CoS runs the `gh workflow run --ref` command above.
+Preferred: GitHub → this repo → branch `cursor/blackout-bible-v3-64d0` → edit or commit with message starting `tf:` (or create tag `tf-58` on that tip). That push fires Internal. Do not use a `tf:` prefix on commits that must not upload.
+
+Safari **Run workflow** lists the default-branch YAML and stays the backup. Until CoS copies **only** this tip yml onto `main` (app tree stays unmerged), the button cannot pick tip YAML. CoS can still run the `gh workflow run --ref` command above.
 
 After a green job: TestFlight app → Blackout → new build (not 50-series) → Install. Airplane On, BT On. Score `docs/SOLO_QA.md`.
 
