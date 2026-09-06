@@ -74,6 +74,8 @@ gh workflow run "TestFlight Internal" --ref cursor/blackout-bible-v3-64d0 -f git
 
 A push to bible-v3 that does **not** start with `tf:` still starts the workflow file, then **skips** the upload job. That skip is intentional so CI YAML edits do not burn ASC quota.
 
+First automated Internal upload: this `tf:` push on bible-v3. Tree CPV stays 1. Watch omitted. Internal only.
+
 GHA `33924134240` / `33924251037`: tip still **deleted** stale GHA App Store profiles then POSTed new ones and ASC returned HTTP 500 `UNEXPECTED_ERROR`. Archive never ran; CPV 54 was not minted. Keep Dist cert `45YLWHL6UP` as reference. Always mint a runner-local Dist cert for the archive. Reuse or create Local-named profiles (`Blackout iOS App Store GHA Local` / `Blackout Widgets App Store GHA Local`) bound to that local cert. Do not delete KEEP-named `Blackout iOS App Store GHA` / `Blackout Widgets App Store GHA`. Never revoke KEEP.
 
 ## How Crisis runs it from iPhone Safari
