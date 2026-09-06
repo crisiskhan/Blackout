@@ -78,11 +78,31 @@ def test_testflight_workflow_invokes_gate() -> None:
     text = TF_YML.read_text()
     if "workflow_dispatch:" not in text:
         fail("testflight-internal.yml missing workflow_dispatch")
+    if "git_ref:" not in text:
+        fail("testflight-internal.yml must keep workflow_dispatch git_ref as backup")
     on_block = text.split("jobs:", 1)[0]
-    if re.search(r"^  push:", on_block, re.M) or re.search(
-        r"^  pull_request:", on_block, re.M
-    ):
-        fail("testflight-internal.yml must stay dispatch-only")
+    if re.search(r"^  pull_request:", on_block, re.M):
+        fail("testflight-internal.yml must not use pull_request")
+    if not re.search(r"^  push:", on_block, re.M):
+        fail("testflight-internal.yml must push-trigger bible-v3 tf: commits and tf-* tags")
+    branch_m = re.search(r"branches:\s*\[([^\]]*)\]", on_block)
+    branches = [b.strip() for b in (branch_m.group(1) if branch_m else "").split(",") if b.strip()]
+    if branches != ["cursor/blackout-bible-v3-64d0"]:
+        fail(
+            "TF push branches must be only cursor/blackout-bible-v3-64d0 "
+            f"(got {branches})"
+        )
+    if "tf-*" not in on_block:
+        fail("TF push tags must match tf-*")
+    if "startsWith(github.event.head_commit.message, 'tf:')" not in text:
+        fail("TF branch push must require commit message starting with tf:")
+    if "startsWith(github.ref, 'refs/tags/tf-')" not in text:
+        fail("TF tag push must require refs/tags/tf-")
+    if "inputs.git_ref" not in text or "github.sha" not in text:
+        fail("checkout must use inputs.git_ref on dispatch and github.sha on push")
+    code = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
+    if re.search(r"(?m)^\s*environment\s*:", code):
+        fail("TF must not set environment: (no required reviewers / Auto-review gate)")
     if GATE_INVOKE not in text:
         fail("testflight-internal.yml must run tools/test_ci_opt.py before archive")
     _before_build(text, "testflight-internal.yml", "tf-archive.sh")
@@ -104,7 +124,7 @@ def test_testflight_workflow_invokes_gate() -> None:
         fail("TF must xcode-select Xcode 26 for the iOS 26 SDK")
     if "26.*" not in text:
         fail("TF must accept only Xcode 26.x")
-    ok("testflight-internal.yml is dispatch-only and runs test_ci_opt.py first")
+    ok("testflight-internal.yml fires tf: / tf-* / dispatch; no environment; gate first")
 
 
 def test_altool_binds_primary_app() -> None:
