@@ -39,6 +39,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `33986112949` (`3ae500a`): archive + altool OK, CPV **56** `VALID`, PATCH 200, then `ASSIGN Internal 56 404` (`NOT_FOUND` on that build id). Build is on ASC; Internal group attach raced. Retry betaGroups 404 (15s/30s/60s/90s/120s). 409 stays success (already assigned). CoS must copy the yml so the assign step calls `tools/tf_asc_assign.py`.
 - `33987452079` (`7095fa1`): macos-15 / Xcode 26.3. `exportArchive OK`. CPV **57**. Dist `R8P2DS495P` (`DISTRIBUTION`). altool no errors. ASC `96af7288-860d-4a28-8009-b4a1ed8d47b7` **VALID**. PATCH 200. `ASSIGN Internal 57 204`. Tip-57 streets + pack bbox + YOU. Later tip-58 (`88b1726`) is not in this IPA.
 - `34002236273` (`67f9b5f`): macos-15 / Xcode 26.3. `exportArchive OK`. CPV **58**. Dist `AN8MADVN3Z` (`DISTRIBUTION`). altool no errors. ASC `b4063ed9-f737-4da1-81bf-1206f625e342` **VALID**. PATCH 200. `ASSIGN Internal 58 204`. Tip-58 MARK/timer/RED/PTT plus tip-57 streets.
+- `34002862630` (`919dfa8`): first `tf:` push auto-upload. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **59**. Dist `6L4U8L695G` (`DISTRIBUTION`). altool no errors. ASC `3da30d72-408b-4cd2-a6e7-7009106e97bb` **VALID**. PATCH 200. `ASSIGN Internal 59 204`. Same tip-58 app as 58 (docs-only tree).
 
 ## Watch omitted from App Store archive (re-enable later)
 
