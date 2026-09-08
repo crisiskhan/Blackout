@@ -1,7 +1,13 @@
-"""Vision labels per state + lookalikes. NEVER edible unlock."""
+"""Vision labels per state + lookalikes. NEVER edible unlock.
+
+Only states we ship a map pack for get a label book: TX and NM. A book for
+ground the phone cannot draw is a promise the vessel cannot keep.
+"""
 from __future__ import annotations
 
 from .common import ROOT, write_json
+
+SHIPPED_STATES = ("TX", "NM")
 
 
 def lab(
@@ -13,7 +19,6 @@ def lab(
     leave: bool,
     note: str,
     note_es: str,
-    marine_fl: bool = False,
 ) -> dict:
     return {
         "id": lid,
@@ -22,7 +27,6 @@ def lab(
         "lookalikes": lookalikes,
         "leaveIt": leave,
         "edibleUnlock": False,
-        "marineOrGatorFL": marine_fl,
         "honesty": {
             "en": "Vision is a guess. Percent is not ID. " + note,
             "es": "Vision es una conjetura. El porcentaje no es identificación. " + note_es,
@@ -75,49 +79,16 @@ def nm_labels() -> list[dict]:
     ]
 
 
-def fl_labels() -> list[dict]:
-    return [
-        lab("fl-live-oak", "Live oak", "Encino siempreverde", "tree", ["laurel-oak-lookalike"], False, "Coastal plain oak.", "Encino de la planicie costera."),
-        lab("fl-slash-pine", "Slash pine", "Pino elliotti", "tree", ["longleaf-lookalike"], False, "Flatwoods.", "Pinares húmedos."),
-        lab("fl-sabal", "Sabal palm", "Palma sabal", "tree", ["coconut-lookalike"], False, "State tree. Not a coconut unlock.", "Árbol del estado. No desbloquea coco."),
-        lab("fl-cypress", "Bald cypress", "Ciprés calvo", "tree", ["dawn-redwood-lookalike"], False, "Knees in water.", "Rodillas en el agua."),
-        lab("fl-eastern-diamondback", "Eastern diamondback", "Cascabel diamante oriental", "snake", ["pinesnake-lookalike"], False, "Venomous.", "Venenosa."),
-        lab("fl-cottonmouth", "Cottonmouth", "Boca de algodón", "snake", ["banded-watersnake-lookalike"], False, "Venomous. Water edges.", "Venenosa. Orillas."),
-        lab("fl-coral", "Coral snake", "Coralillo", "snake", ["scarlet-kingsnake-lookalike"], False, "Venomous. Do not use rhyme as ID.", "Venenosa. No uses rimas como ID."),
-        lab("fl-gator", "American alligator", "Caimán americano", "marine_gator", ["crocodile-lookalike"], False, "FL only. Dusk edge hunter.", "Solo FL. Caza la orilla al anochecer.", True),
-        lab("fl-manatee", "Manatee", "Manatí", "marine_gator", ["dolphin-lookalike"], False, "Marine mammal. Do not chase.", "Mamífero marino. No persigas.", True),
-        lab("fl-dolphin", "Bottlenose dolphin", "Delfín nariz de botella", "marine_gator", ["manatee-lookalike"], False, "Marine. Do not feed.", "Marino. No alimentes.", True),
-        lab("fl-raccoon", "Raccoon", "Mapache", "mammal", ["cat-lookalike"], False, "Rabies vector. Do not handle.", "Vector de rabia. No lo tomes."),
-        lab("fl-armadillo", "Nine-banded armadillo", "Armadillo", "mammal", ["possum-lookalike"], False, "Night digger.", "Excava de noche."),
-        *fungi_leave_set("fl"),
-    ]
-
-
-def ny_labels() -> list[dict]:
-    return [
-        lab("ny-sugar-maple", "Sugar maple", "Arce azucarero", "tree", ["norway-maple-lookalike"], False, "Northeast hardwood.", "Madera dura del noreste."),
-        lab("ny-white-oak", "White oak", "Roble blanco", "tree", ["chestnut-oak-lookalike"], False, "Lobed leaves.", "Hojas lobuladas."),
-        lab("ny-hemlock", "Eastern hemlock", "Tsuga del este", "tree", ["balsam-lookalike"], False, "Shade evergreen.", "Siempreverde de sombra."),
-        lab("ny-white-pine", "Eastern white pine", "Pino blanco", "tree", ["red-pine-lookalike"], False, "Five needles.", "Cinco agujas."),
-        lab("ny-timber-rattler", "Timber rattlesnake", "Cascabel de bosque", "snake", ["milksnake-lookalike"], False, "Venomous. Upstate / ledges.", "Venenosa. Norte del estado."),
-        lab("ny-copperhead", "Copperhead", "Cabeza de cobre", "snake", ["watersnake-lookalike"], False, "Venomous. Hudson / ledges.", "Venenosa. Hudson / cornisas."),
-        lab("ny-black-bear", "Black bear", "Oso negro", "mammal", ["dark-dog-lookalike"], False, "Adirondack and Catskill.", "Adirondacks y Catskills."),
-        lab("ny-whitetail", "White-tailed deer", "Venado cola blanca", "mammal", ["dog-lookalike"], False, "Tick host. Dusk roads.", "Hospedero de garrapatas."),
-        lab("ny-moose", "Moose", "Alce", "mammal", ["elk-lookalike"], False, "Adirondack. Do not approach calves.", "Adirondacks. No te acerques a las crías."),
-        *fungi_leave_set("ny"),
-    ]
-
-
 def write_all() -> None:
     root = ROOT / "Resources" / "Vision"
-    mapping = {"TX": tx_labels(), "NM": nm_labels(), "FL": fl_labels(), "NY": ny_labels()}
+    mapping = {"TX": tx_labels(), "NM": nm_labels()}
+    assert tuple(mapping) == SHIPPED_STATES
+    for stale in root.glob("labels.*.json"):
+        if stale.stem.split(".")[-1].upper() not in SHIPPED_STATES:
+            stale.unlink()
     for state, labels in mapping.items():
         kinds = {l["kind"] for l in labels}
         assert "fungi" in kinds
-        if state == "FL":
-            assert any(l["marineOrGatorFL"] for l in labels)
-        else:
-            assert not any(l["marineOrGatorFL"] for l in labels)
         write_json(
             root / f"labels.{state.lower()}.json",
             {

@@ -8,13 +8,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from v3.fetch_packs import PACKS, PRIMARY_PACK_ID, walkable_ids
+from v3.fetch_packs import PACKS, PRIMARY_PACK_ID, union_bbox, walkable_ids
 from v3.slim_packs import should_slim
+
+# Ground already on somebody's phone. Packs may grow past these boxes; they may
+# never quietly retreat inside one.
+COVERAGE_FLOOR = {
+    "tx-west": {"south": 31.70, "west": -106.62, "north": 32.00, "east": -106.35},
+    "tx-east": {"south": 30.08, "west": -97.78, "north": 30.32, "east": -97.20},
+    "nm": {"south": 35.06, "west": -106.68, "north": 35.25, "east": -106.38},
+}
 
 
 def fail(msg: str) -> None:
     print("FAIL", msg)
     raise SystemExit(1)
+
+
+def covers(outer: dict, inner: dict) -> bool:
+    return (
+        outer["south"] <= inner["south"]
+        and outer["west"] <= inner["west"]
+        and outer["north"] >= inner["north"]
+        and outer["east"] >= inner["east"]
+    )
 
 
 def main() -> None:
@@ -37,10 +54,15 @@ def main() -> None:
         fail("slim_packs must not cut tx-west")
     if should_slim(ROOT / "Resources" / "Packs" / "tx-east"):
         fail("slim_packs must not cut TX EAST back to a sticker")
-    union = PACKS["tx-east"]["slices"]["union"]
-    if union["south"] != 30.08 or union["west"] != -97.78 or union["north"] != 30.32 or union["east"] != -97.2:
-        fail(f"tx-east union bbox drifted: {union}")
+    for pid, floor in COVERAGE_FLOOR.items():
+        bb = union_bbox(PACKS[pid]["slices"])
+        if not covers(bb, floor):
+            fail(f"{pid} lost ground a phone already had: {bb} no longer covers {floor}")
+        for key, sl in PACKS[pid]["slices"].items():
+            if not covers(bb, sl):
+                fail(f"{pid} slice {key} pokes outside the pack bbox: {sl}")
     print("OK   walkable packs are NM + TX EAST; default stays tx-west; FL/NY dropped")
+    print("OK   every pack still covers the ground it shipped with")
 
 
 if __name__ == "__main__":

@@ -7,10 +7,10 @@
   "defaultOpen": false,
   "walkable": true,
   "bbox": {
-    "south": 35.06,
-    "west": -106.68,
-    "north": 35.25,
-    "east": -106.38
+    "south": 34.95,
+    "west": -106.85,
+    "north": 35.35,
+    "east": -106.35
   },
   "slices": {
     "metro": {
@@ -22,7 +22,7 @@
         "north": 35.14,
         "east": -106.55
       },
-      "featureCount": 35480
+      "featureCount": 35481
     },
     "wild": {
       "name": "Sandia foothills wild",
@@ -36,15 +36,15 @@
       "featureCount": 2344
     },
     "union": {
-      "name": "Albuquerque / Sandia walkable union",
+      "name": "Albuquerque / Rio Rancho / Sandia union",
       "bbox": {
-        "name": "Albuquerque / Sandia walkable union",
-        "south": 35.06,
-        "west": -106.68,
-        "north": 35.25,
-        "east": -106.38
+        "name": "Albuquerque / Rio Rancho / Sandia union",
+        "south": 34.95,
+        "west": -106.85,
+        "north": 35.35,
+        "east": -106.35
       },
-      "featureCount": 78904
+      "featureCount": 131947
     }
   },
   "banners": [
@@ -53,7 +53,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 67236242,
+  "bytes": 59254410,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -76,58 +76,62 @@
     "wild.geojson"
   ],
   "center": {
-    "lat": 35.155,
-    "lon": -106.53
+    "lat": 35.150000000000006,
+    "lon": -106.6
+  },
+  "home": {
+    "lat": 35.1,
+    "lon": -106.61500000000001
   },
   "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 1350584,
+    "bytes": 1459453,
     "width": 2048,
-    "height": 1297,
+    "height": 1638,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -106.68,
-        35.25
+        -106.85,
+        35.35
       ],
       [
-        -106.38,
-        35.25
+        -106.35,
+        35.35
       ],
       [
-        -106.38,
-        35.06
+        -106.35,
+        34.95
       ],
       [
-        -106.68,
-        35.06
+        -106.85,
+        34.95
       ]
     ]
   },
   "stats": {
-    "features": 79283,
-    "highwayLines": 75303,
-    "namedStreets": 15687,
+    "features": 132120,
+    "highwayLines": 125404,
+    "namedStreets": 29400,
     "sampleStreetNames": [
-      "Richmond Drive Southeast",
-      "Rio Grande del Sol Court Northwest",
-      "Arvilla Avenue Northeast",
-      "Vassar Drive Northeast",
-      "Cottonwood Drive",
-      "Elfego Road Northwest",
-      "Telesfor Sanchez Road Northwest",
-      "Leatherwood Lane Northwest",
-      "San Tesoro Street Northeast",
-      "East Frontage Road",
-      "West Frontage Road",
-      "Barelas Street Southwest"
+      "Mt Yy",
+      "Central Avenue Southwest",
+      "Parnelli Drive Southwest",
+      "Shetland Place Southwest",
+      "De Anza Drive Southwest",
+      "Heron Drive",
+      "Chaps Street Southwest",
+      "Laguna",
+      "Alexis Avenue Southwest",
+      "Reba Avenue Southwest",
+      "Wrangler Street Southwest",
+      "Gschwind Place Southwest"
     ],
-    "water": 3150,
-    "places": 72,
-    "graphEdges": 359382,
-    "graphNodes": 123847,
+    "water": 5443,
+    "places": 131,
+    "graphEdges": 586286,
+    "graphNodes": 205350,
     "streetsVisibleAtWalkingZoom": true
   }
 }

@@ -2,9 +2,9 @@
 
 Offline-first field vessel for iPhone and iPad. Native SwiftUI, iOS 18 Universal, bundle ID `com.crisiskhan.blackout`.
 
-This tree is a **dump-and-replace** of the MapKit-era foundation. It implements BLACKOUT BUILD BIBLE v3: isolated Swift packages for every §3 module, generated §4 Field / Vision / map packs (TX NM FL NY only), MapLibre Metal offline, graph router (Valhalla costing keys + OSM graph), party mesh + DTN, Field stepper, Vision guess pipeline, Watch companion, Live Activity, Action Button / Control Center.
+This tree is a **dump-and-replace** of the MapKit-era foundation. It implements BLACKOUT BUILD BIBLE v3: isolated Swift packages for every §3 module, generated §4 Field / Vision / map packs (TX and NM only), MapLibre Metal offline, graph router (Valhalla costing keys + OSM graph), party mesh + DTN, Field stepper, Vision guess pipeline, Watch companion, Live Activity, Action Button / Control Center.
 
-There is **no account, no analytics, no live weather, no sat modem, no nationwide tiles outside TX NM FL NY**.
+There is **no account, no analytics, no live weather, no sat modem, no nationwide tiles outside TX and NM**.
 
 ## Open in Xcode (Crisis)
 
@@ -26,7 +26,7 @@ With a packed bbox on device and Airplane Mode on:
 - Run a 2 h water timer (OVERDUE plate is not SOS).
 - Walk a Field stepper with pictures, SPEAK, SEND TO PARTY, Español.
 - Point Vision at a plant: percent + lookalikes. Fungi default LEAVE IT. Never edible unlock.
-- Switch TX → FL pack. Regional banners do not leak (no Adirondack ice in FL, no gator in NY).
+- Switch TX WEST → NM pack. A pack for a state we ship no map for can never become active.
 - Export paper.
 
 ## Architecture
@@ -45,13 +45,19 @@ SOS is 56 pt, hold 800 ms. It sits on Comms, Live Activity, Action Button, and C
 
 ## Packs
 
-Real OSM + DEM-derived contours, generated at build time (no runtime uplink). **Default open pack is TX WEST** (El Paso / Franklin Mountains / TX+NM border) — one walkable bbox with street names at walking zoom, a WALK/DRIVE graph built from those same streets, and USGS 3DEP hillshade. **NM** (Albuquerque / Sandia) and **TX EAST** (Austin / Lost Pines) are walkable catalog packs with the same street/graph/attribution bar. They do not steal first-open. FL/NY sticker packs are not catalogued or bundled.
+Real OSM + DEM-derived contours, generated at build time (no runtime uplink). **Default open pack is TX WEST** — one walkable bbox with street names at walking zoom, a WALK/DRIVE graph built from those same streets, and USGS 3DEP hillshade. **NM** and **TX EAST** are walkable catalog packs with the same street/graph/attribution bar. They do not steal first-open. Only TX and NM ship; nothing in the tree carries FL or NY.
 
-| Pack | Metro | Wild |
-|---|---|---|
-| TX WEST (default) | El Paso | Franklin Mountains + El Paso TX+NM border union |
-| TX EAST (walkable) | Austin | Lost Pines / Bastrop + Austin/Lost Pines union |
-| NM (walkable) | Albuquerque | Sandia foothills + Albuquerque/Sandia union |
+| Pack | Ground | Opens on | Wild overlay |
+|---|---|---|---|
+| TX WEST (default) | El Paso up the Anthony corridor to Las Cruces; Socorro and Horizon City east, Santa Teresa and Sunland Park west, Ciudad Juárez across the river | El Paso metro | Franklin Mountains |
+| TX EAST (walkable) | Austin out to Manor and Elgin northeast, Bastrop southeast, Buda south | Austin metro | Lost Pines / Bastrop |
+| NM (walkable) | Albuquerque with Rio Rancho, Bernalillo, South Valley and the Sandia crest | Albuquerque metro | Sandia foothills |
+
+A pack's bbox is the union of its slices; `home` is the metro slice, so the canvas opens on streets rather than on the empty midpoint of a wide box. `tools/test_walkable_next_pack.py` holds a coverage floor: a pack may grow past the ground it shipped with, never retreat inside it.
+
+The wire-format and GeoJSON savings below went straight back into ground. TX WEST now carries 6× the area for the same ~50 MB it always did; NM 3.5×, TX EAST 1.7×.
+
+`graph.json` ships on wire v2 — nodes are dense indices into parallel lat/lon arrays and one `a, b, metres, flags` record carries both directions of a street. `pack_graph` in `tools/v3/fetch_packs.py` writes it and `PackedGraph` in `Packages/Router` reads it; change one and change the other.
 
 Regenerate walkable packs (network at generate time only):
 

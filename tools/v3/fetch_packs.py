@@ -38,6 +38,19 @@ GLYPH_STACK = "Open Sans Regular"
 GLYPH_RANGES = ("0-255", "256-511", "512-767", "768-1023", "8192-8447")
 
 PRIMARY_PACK_ID = "tx-west"
+
+# graph.json wire format. Coordinates at 5 decimals are ~1.1 m — finer than any
+# street the canvas draws — and segment lengths to 0.1 m. The flags say which
+# way a segment may be walked and which way it may be driven, so one record
+# replaces the two directed edges that used to spell it out.
+GRAPH_WIRE_VERSION = 2
+COORD_DP = 5
+METRES_DP = 1
+# Drawn geometry keeps one more decimal than the router graph: 11 cm, so a
+# street never visibly kinks even at full zoom.
+RENDER_DP = 6
+WALK_FORWARD, DRIVE_FORWARD, WALK_BACK, DRIVE_BACK = 1, 2, 4, 8
+
 KEEP_TAGS = {
     "name",
     "ref",
@@ -104,6 +117,15 @@ PACKS = {
                 "north": 31.90,
                 "east": -106.35,
             },
+            # Widest slice, so it sets the pack bbox: the whole I-10 run from
+            # Horizon City through El Paso and Anthony up to Las Cruces.
+            "corridor": {
+                "name": "El Paso / Las Cruces corridor",
+                "south": 31.65,
+                "west": -106.85,
+                "north": 32.40,
+                "east": -106.20,
+            },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
         "walkable": True,
@@ -130,9 +152,9 @@ PACKS = {
             "union": {
                 "name": "Austin / Lost Pines walkable union",
                 "south": 30.08,
-                "west": -97.78,
-                "north": 30.32,
-                "east": -97.2,
+                "west": -97.90,
+                "north": 30.42,
+                "east": -97.20,
             },
         },
         "banners": ["heat-island", "cattle-guard", "hurricane"],
@@ -158,11 +180,11 @@ PACKS = {
                 "east": -106.38,
             },
             "union": {
-                "name": "Albuquerque / Sandia walkable union",
-                "south": 35.06,
-                "west": -106.68,
-                "north": 35.25,
-                "east": -106.38,
+                "name": "Albuquerque / Rio Rancho / Sandia union",
+                "south": 34.95,
+                "west": -106.85,
+                "north": 35.35,
+                "east": -106.35,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
@@ -276,9 +298,16 @@ def merge_osm(parts: list[dict]) -> dict:
     return {"elements": elements}
 
 
-def osm_to_geojson(osm: dict, kind: str) -> dict:
+def osm_to_geojson(osm: dict) -> dict:
+    """OSM elements to the GeoJSON the canvas draws.
+
+    Coordinates keep RENDER_DP decimals — 11 cm, finer than any line MapLibre
+    can put on a phone — instead of Overpass's 7. The OSM element id and the
+    old constant `kind` property are dropped: no style layer filters on them
+    and no Swift reads them, so they were 2 MB of dead weight per pack.
+    """
     nodes = {
-        el["id"]: (el["lon"], el["lat"])
+        el["id"]: (round(el["lon"], RENDER_DP), round(el["lat"], RENDER_DP))
         for el in osm.get("elements", [])
         if el.get("type") == "node" and "lat" in el
     }
@@ -291,14 +320,14 @@ def osm_to_geojson(osm: dict, kind: str) -> dict:
             features.append(
                 {
                     "type": "Feature",
-                    "properties": {"id": el["id"], "kind": "poi", **tags},
-                    "geometry": {"type": "Point", "coordinates": [el["lon"], el["lat"]]},
+                    "properties": tags,
+                    "geometry": {"type": "Point", "coordinates": list(nodes[el["id"]])},
                 }
             )
         elif el.get("type") == "way" and el.get("nodes"):
             if not tags:
                 continue
-            coords = [nodes[n] for n in el["nodes"] if n in nodes]
+            coords = [list(nodes[n]) for n in el["nodes"] if n in nodes]
             if len(coords) < 2:
                 continue
             closed = coords[0] == coords[-1] and len(coords) >= 4
@@ -306,13 +335,7 @@ def osm_to_geojson(osm: dict, kind: str) -> dict:
                 "type": "LineString",
                 "coordinates": coords,
             }
-            features.append(
-                {
-                    "type": "Feature",
-                    "properties": {"id": el["id"], "kind": kind, **tags},
-                    "geometry": geom,
-                }
-            )
+            features.append({"type": "Feature", "properties": tags, "geometry": geom})
     return {"type": "FeatureCollection", "features": features, "attribution": OSM_CREDIT}
 
 
@@ -497,6 +520,82 @@ def compact_graph(g: dict) -> dict:
         "nodes": slim,
         "edges": edges,
     }
+
+
+def pack_graph(g: dict) -> dict:
+    """Squeeze the router graph onto the wire without losing a single turn.
+
+    Nodes stop repeating their OSM id and become dense indices into parallel
+    lat/lon arrays. A street segment stops being two spelled-out edges with
+    `"walk":true,"drive":true` on each and becomes one `a, b, metres, flags`
+    record, where the flags say which way you may walk and which way you may
+    drive. Same directed graph, about a fifth of the bytes.
+
+    Mirrored by PackedGraph in Packages/Router. Change one, change both.
+    """
+    nodes = g.get("nodes") or {}
+    ids = sorted(int(k) for k in nodes)
+    index = {n: i for i, n in enumerate(ids)}
+    lat = [round(float(nodes[str(n)]["lat"]), COORD_DP) for n in ids]
+    lon = [round(float(nodes[str(n)]["lon"]), COORD_DP) for n in ids]
+
+    segments: dict[tuple[int, int, float], int] = {}
+    for e in g.get("edges") or []:
+        a = index.get(int(e["a"]))
+        b = index.get(int(e["b"]))
+        if a is None or b is None:
+            continue
+        metres = round(float(e["m"]), METRES_DP)
+        backward = a > b
+        key = (b, a, metres) if backward else (a, b, metres)
+        flags = 0
+        if e.get("walk"):
+            flags |= WALK_BACK if backward else WALK_FORWARD
+        if e.get("drive"):
+            flags |= DRIVE_BACK if backward else DRIVE_FORWARD
+        segments[key] = segments.get(key, 0) | flags
+
+    flat: list[float] = []
+    for (a, b, metres), flags in segments.items():
+        flat += [a, b, metres, flags]
+    return {
+        "v": GRAPH_WIRE_VERSION,
+        "engine": g.get("engine") or "osm-graph",
+        "valhallaCosting": g.get("valhallaCosting"),
+        "lat": lat,
+        "lon": lon,
+        "e": flat,
+    }
+
+
+def unpack_graph(g: dict) -> dict:
+    """Wire format back to nodes/edges, exactly as RouteGraph.load reads it."""
+    if g.get("v") != GRAPH_WIRE_VERSION:
+        return g
+    lat = g.get("lat") or []
+    lon = g.get("lon") or []
+    nodes = {str(i): {"id": i, "lon": lon[i], "lat": lat[i]} for i in range(len(lat))}
+    flat = g.get("e") or []
+    edges = []
+    for i in range(0, len(flat) - 3, 4):
+        a, b, metres, flags = int(flat[i]), int(flat[i + 1]), float(flat[i + 2]), int(flat[i + 3])
+        if str(a) not in nodes or str(b) not in nodes:
+            continue
+        if flags & (WALK_FORWARD | DRIVE_FORWARD):
+            edges.append({"a": a, "b": b, "m": metres, "walk": bool(flags & WALK_FORWARD), "drive": bool(flags & DRIVE_FORWARD)})
+        if flags & (WALK_BACK | DRIVE_BACK):
+            edges.append({"a": b, "b": a, "m": metres, "walk": bool(flags & WALK_BACK), "drive": bool(flags & DRIVE_BACK)})
+    return {
+        "engine": g.get("engine"),
+        "valhallaCosting": g.get("valhallaCosting"),
+        "nodes": nodes,
+        "edges": edges,
+    }
+
+
+def read_graph(path: Path) -> dict:
+    """Load a pack graph as nodes/edges whatever wire version is on disk."""
+    return unpack_graph(json.loads(path.read_text()))
 
 
 def elevation_grid(south: float, west: float, north: float, east: float, step: float = 0.01) -> dict:
@@ -957,6 +1056,24 @@ def real_layer_features(fc: dict, keys: set[str]) -> dict:
     return {"type": "FeatureCollection", "features": feats[:800], "attribution": OSM_CREDIT}
 
 
+def home_point(slices: dict, bb: dict) -> dict:
+    """Where the canvas opens when there is no GPS fix.
+
+    The bbox midpoint is often terrain: TX WEST's is the Franklin Mountains
+    crest, NM's is the Sandia foothills, TX EAST's is farmland east of Austin.
+    Opening there at walking zoom shows a near-empty canvas, so prefer the
+    metro slice — the part of the pack with the street grid on it.
+    """
+    metro = slices.get("metro") or {}
+    # PACKS holds slice bounds flat; a written manifest nests them under "bbox".
+    metro = metro.get("bbox") or metro
+    box = metro if {"south", "west", "north", "east"} <= set(metro) else bb
+    return {
+        "lat": (box["south"] + box["north"]) / 2,
+        "lon": (box["west"] + box["east"]) / 2,
+    }
+
+
 def union_bbox(slices: dict) -> dict:
     return {
         "south": min(s["south"] for s in slices.values()),
@@ -967,6 +1084,10 @@ def union_bbox(slices: dict) -> dict:
 
 
 def pack_stats(fc: dict, graph: dict) -> dict:
+    # Count the graph the phone loads, not the one we built in memory. Packing
+    # folds exact duplicate records (same pair, same length, same modes) into
+    # one, so the shipped edge count runs a little under the raw one.
+    shipped = unpack_graph(pack_graph(graph))
     feats = fc.get("features") or []
     hwy = [f for f in feats if (f.get("properties") or {}).get("highway") and (f.get("geometry") or {}).get("type") == "LineString"]
     named = [f for f in hwy if (f.get("properties") or {}).get("name") or (f.get("properties") or {}).get("ref")]
@@ -988,8 +1109,8 @@ def pack_stats(fc: dict, graph: dict) -> dict:
         "sampleStreetNames": names,
         "water": len(water),
         "places": len(places),
-        "graphEdges": len(graph.get("edges") or []),
-        "graphNodes": len(graph.get("nodes") or {}),
+        "graphEdges": len(shipped.get("edges") or []),
+        "graphNodes": len(shipped.get("nodes") or {}),
         "streetsVisibleAtWalkingZoom": len(named) >= 50 and len(hwy) >= 200,
     }
 
@@ -1039,10 +1160,10 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
             all_elements.extend(osm.get("elements", []))
         merged = merge_osm([{"elements": all_elements}])
 
-    fc = osm_to_geojson(merged, "pack")
+    fc = osm_to_geojson(merged)
     graph = build_graph(merged)
     write_compact(dest / "osm.geojson", fc)
-    write_compact(dest / "graph.json", graph)
+    write_compact(dest / "graph.json", pack_graph(graph))
 
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -1135,6 +1256,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         "bytes": size,
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+        "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
@@ -1153,10 +1275,10 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
-    raw_graph = json.loads((dest / "graph.json").read_text())
+    raw_graph = read_graph(dest / "graph.json")
     print(f"  compact graph edges={len(raw_graph.get('edges') or [])}", flush=True)
     graph = compact_graph(raw_graph)
-    write_compact(dest / "graph.json", graph)
+    write_compact(dest / "graph.json", pack_graph(graph))
     print(f"  compacted edges={len(graph['edges'])} nodes={len(graph['nodes'])}", flush=True)
 
     pack = PACKS[dest.name]
@@ -1235,6 +1357,7 @@ def finalize_existing(dest: Path) -> dict:
         "bytes": size,
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+        "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,

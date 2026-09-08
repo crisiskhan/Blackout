@@ -18,6 +18,9 @@ final class MapLibreMapTests: XCTestCase {
         MarkStore.save(marks, defaults: suite)
         let back = MarkStore.load(defaults: suite)
         XCTAssertEqual(back, marks)
+        // A mark must come back off disk as the same mark. Deduping the reload
+        // through MarkDrop.merging used to mint a fresh id on every launch.
+        XCTAssertEqual(back.first?.id, "m1")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: false), "OFF GRAPH")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: true, hasGraph: false), "")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: true), "")
@@ -29,9 +32,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
         suite.set(Data([0x00, 0x01, 0x02]), forKey: MarkStore.key)
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
-        MarkStore.save([MapMark(id: "m2", lat: 30.4, lon: -81.5, label: "FL NORTH")], defaults: suite)
+        MarkStore.save([MapMark(id: "m2", lat: 35.0844, lon: -106.6504, label: "NM")], defaults: suite)
         let back = MarkStore.load(defaults: suite)
-        XCTAssertEqual(back.first?.label, "FL NORTH")
+        XCTAssertEqual(back.first?.label, "NM")
         MarkStore.save([], defaults: suite)
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
     }
@@ -107,25 +110,25 @@ final class MapLibreMapTests: XCTestCase {
 
     func testUserPuckFallsBackToPackCenterWhenFixIsOutsideBBox() {
         let elPaso = (lat: 31.8705, lon: -106.5973)
-        let jacksonville = (lat: 30.41, lon: -81.54)
+        let albuquerque = (lat: 35.155, lon: -106.53)
         let you = UserPuck.coordinate(
             lastKnown: elPaso,
-            packCenter: jacksonville,
-            packSouth: 30.3,
-            packWest: -81.7,
-            packNorth: 30.52,
-            packEast: -81.38
+            packCenter: albuquerque,
+            packSouth: 35.06,
+            packWest: -106.68,
+            packNorth: 35.25,
+            packEast: -106.38
         )
-        XCTAssertEqual(you.lat, jacksonville.lat)
-        XCTAssertEqual(you.lon, jacksonville.lon)
+        XCTAssertEqual(you.lat, albuquerque.lat)
+        XCTAssertEqual(you.lon, albuquerque.lon)
         XCTAssertFalse(
             UserPuck.contains(
                 lat: elPaso.lat,
                 lon: elPaso.lon,
-                south: 30.3,
-                west: -81.7,
-                north: 30.52,
-                east: -81.38
+                south: 35.06,
+                west: -106.68,
+                north: 35.25,
+                east: -106.38
             )
         )
     }
@@ -237,7 +240,7 @@ final class MapLibreMapTests: XCTestCase {
     func testMarkStoreLoadUniquesPersistedDuplicateCoords() {
         let suite = UserDefaults(suiteName: "map.marks.dedupe.\(UUID().uuidString)")!
         let clones = (0..<9).map { i in
-            MapMark(id: "m\(i)", lat: 31.8705, lon: -106.5973, label: "FL NORTH")
+            MapMark(id: "m\(i)", lat: 31.8705, lon: -106.5973, label: "TX WEST")
         }
         MarkStore.save(clones, defaults: suite)
         let back = MarkStore.load(defaults: suite)
@@ -261,28 +264,30 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
     }
 
-    func testPackChromeLabelsElPasoOffFLSouthNotFLNorth() {
+    func testPackChromeLabelsElPasoOffTheNMPackNotOntoIt() {
+        // Two packs we actually ship, close enough to confuse: a fix in El Paso
+        // must read OFF PACK against Albuquerque, never borrow that pack's name.
         let elPaso = (lat: 31.8705, lon: -106.5973)
-        let flSouth = (south: 25.72, west: -80.8, north: 25.82, east: -80.18)
+        let nm = (south: 34.95, west: -106.85, north: 35.35, east: -106.35)
         XCTAssertEqual(
-            PackChrome.banner(fix: elPaso, bbox: flSouth),
+            PackChrome.banner(fix: elPaso, bbox: nm),
             PackChrome.offPack
         )
         XCTAssertEqual(
-            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "NM", bbox: nm),
             PackChrome.offPack
         )
         XCTAssertNotEqual(
-            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
-            "FL NORTH"
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "NM", bbox: nm),
+            "NM"
         )
-        let txWest = (south: 31.7, west: -106.62, north: 32.0, east: -106.35)
+        let txWest = (south: 31.65, west: -106.85, north: 32.4, east: -106.2)
         XCTAssertEqual(PackChrome.banner(fix: elPaso, bbox: txWest), "")
         XCTAssertEqual(
             PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "TX WEST", bbox: txWest),
             "TX WEST"
         )
-        XCTAssertEqual(PackChrome.banner(fix: nil, bbox: flSouth), "")
+        XCTAssertEqual(PackChrome.banner(fix: nil, bbox: nm), "")
     }
 
     func testPackBBoxIsOutlineNotFilledSlab() {
@@ -324,30 +329,47 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(RouteLine.shouldDraw(GraphRouter.coordinates(graph: empty, nodeIds: bearing.nodeIds)))
     }
 
-    func testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing() {
-        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: false, hasDestination: true))
-        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: false))
-        XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: true))
+    func testWalkDriveChipAlwaysTapsAndNamesTheBlocker() {
+        XCTAssertTrue(WalkDriveChip.alwaysTappable)
+        let ready = WalkDriveChip.block(
+            hasPack: true,
+            hasUsableGraph: true,
+            hasDestination: true,
+            destinationOnPack: true
+        )
+        XCTAssertNil(ready)
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""),
-            ""
+            WalkDriveChip.block(hasPack: false, hasUsableGraph: true, hasDestination: true, destinationOnPack: true),
+            .noPack
         )
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: true, planChrome: ""),
-            RouteLine.offGraph
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: false, hasDestination: true, destinationOnPack: true),
+            .noGraph
         )
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: false, planChrome: ""),
-            RouteLine.offGraph
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: false, destinationOnPack: false),
+            .noDestination
         )
+        // OFF GRAPH is a routing failure, never "you have not picked a DEST yet".
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""), "")
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: false, planChrome: ""), RouteLine.offGraph)
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: ""), "")
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: ""),
-            ""
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: true, destinationOnPack: false),
+            .destinationOffPack
         )
-        XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: RouteLine.offGraph),
-            RouteLine.offGraph
-        )
+        for block in RouteBlock.allCases {
+            for mode in [TravelMode.walk, .drive] {
+                let said = block.chrome(mode: mode, packName: "TX WEST")
+                XCTAssertFalse(said.isEmpty)
+                XCTAssertTrue(said.contains(WalkDriveChip.verb(mode)))
+            }
+        }
+        XCTAssertTrue(RouteBlock.noPath.chrome(mode: .walk, packName: "").hasPrefix(RouteLine.offGraph))
+        XCTAssertEqual(RouteBlock.noDestination.planChrome, "")
+        XCTAssertEqual(RouteBlock.noPath.planChrome, RouteLine.offGraph)
+        XCTAssertEqual(RouteBlock.noGraph.planChrome, RouteLine.offGraph)
+        XCTAssertTrue(WalkDriveChip.working(mode: .drive).hasPrefix("DRIVE"))
         XCTAssertEqual(MapRuler.chrome(from: nil, to: (lat: 31.80, lon: -106.50)), "RULER —")
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))
@@ -361,7 +383,6 @@ final class MapLibreMapTests: XCTestCase {
             lock: RouteLine.offGraph,
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
-            dest: (lat: 31.7619, lon: -106.4850),
             bearingDeg: 45,
             speak: "SPEAK · 3 TURNS · 300 M"
         )
@@ -371,8 +392,13 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(Set(sprayed.map(\.id)).count, sprayed.count)
         XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
         XCTAssertTrue(sprayed[0].warn)
-        XCTAssertEqual(sprayed[1].text, "DEST 31.7619, -106.4850 · BEARING 45°")
+        // The destination is a pin on the canvas, so this row spends itself on the
+        // heading instead of on a latitude nobody can steer by.
+        XCTAssertEqual(sprayed[1].text, "BEARING 45°")
         XCTAssertFalse(sprayed[1].warn)
+        for line in sprayed {
+            XCTAssertFalse(line.text.contains("DEST 31."))
+        }
         XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 300 M")
         for line in sprayed {
             // Short status chrome, never a wrapped paragraph over the canvas.
@@ -387,7 +413,6 @@ final class MapLibreMapTests: XCTestCase {
                 lock: "",
                 route: "",
                 tool: "",
-                dest: nil,
                 bearingDeg: nil,
                 speak: ""
             ).isEmpty
@@ -396,7 +421,6 @@ final class MapLibreMapTests: XCTestCase {
             lock: "",
             route: "",
             tool: "",
-            dest: nil,
             bearingDeg: 12,
             speak: "   "
         )
@@ -438,6 +462,22 @@ final class MapLibreMapTests: XCTestCase {
             PackStyle.localGlyphURL(template: "https://tiles/{fontstack}.pbf", packRoot: pack),
             "https://tiles/{fontstack}.pbf"
         )
+    }
+
+    func testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty() {
+        let leg = [(lat: 31.7600, lon: -106.4900), (lat: 31.7690, lon: -106.4900)]
+        let meters = RouteSummary.meters(leg)
+        XCTAssertGreaterThan(meters, 900)
+        XCTAssertLessThan(meters, 1100)
+        let walk = RouteSummary.chrome(mode: .walk, coords: leg)
+        XCTAssertTrue(walk.hasPrefix("WALK "))
+        XCTAssertTrue(walk.contains("km"))
+        XCTAssertTrue(walk.contains("min"))
+        let drive = RouteSummary.chrome(mode: .drive, coords: leg)
+        XCTAssertTrue(drive.hasPrefix("DRIVE "))
+        XCTAssertEqual(RouteSummary.distancePhrase(240), "240 m")
+        XCTAssertEqual(RouteSummary.meters([]), 0)
+        XCTAssertTrue(RouteSummary.chrome(mode: .walk, coords: []).hasPrefix(RouteLine.offGraph))
     }
 
     func testRouteTargetPrefersExplicitThenMark() {
@@ -488,6 +528,32 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(
             OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: true)
         )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(
+                force: false,
+                puckNeedsReapply: false,
+                routeNeedsReapply: false,
+                destinationNeedsReapply: true
+            )
+        )
+    }
+
+    func testCanvasOpensWhereStreetNamesRender() {
+        XCTAssertTrue(PackCamera.opensOnStreetNames())
+        XCTAssertGreaterThanOrEqual(PackCamera.openZoom, PackCamera.streetNameMinZoom)
+        XCTAssertFalse(PackCamera.opensOnStreetNames(openZoom: 11, labelMinZoom: 12))
+    }
+
+    func testDestinationPinTracksTheChosenTarget() {
+        let dest = (lat: 31.7619, lon: -106.4850)
+        XCTAssertFalse(DestinationPin.needsReapply(stored: nil, destination: nil))
+        XCTAssertTrue(DestinationPin.needsReapply(stored: nil, destination: dest))
+        XCTAssertTrue(DestinationPin.needsReapply(stored: dest, destination: nil))
+        XCTAssertFalse(DestinationPin.needsReapply(stored: dest, destination: dest))
+        XCTAssertTrue(
+            DestinationPin.needsReapply(stored: dest, destination: (lat: 31.80, lon: -106.4850))
+        )
+        XCTAssertEqual(DestinationPin.sourceID, "dest-pin-src")
     }
 
     func testFixPublishThrottlesHeadingJitterAndKeepsFirstFix() {

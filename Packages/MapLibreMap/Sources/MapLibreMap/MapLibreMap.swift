@@ -37,9 +37,17 @@ public enum MarkStore {
         return uniqued(loaded)
     }
 
+    /// Drop marks that repeat a coordinate, keeping the one already on disk.
+    ///
+    /// `MarkDrop.merging` mints an id because it is dropping a brand new pin.
+    /// Reusing it here renamed every mark on the way back off disk, so a pin
+    /// survived a kill with different identity than it went in with.
     public static func uniqued(_ marks: [MapMark]) -> [MapMark] {
-        marks.reduce(into: [MapMark]()) { acc, mark in
-            acc = MarkDrop.merging(acc, lat: mark.lat, lon: mark.lon, label: mark.label)
+        marks.reduce(into: [MapMark]()) { kept, mark in
+            let clash = kept.contains {
+                MarkDrop.sameCoord(($0.lat, $0.lon), (mark.lat, mark.lon))
+            }
+            if !clash { kept.append(mark) }
         }
     }
 }
@@ -270,6 +278,16 @@ public enum UserPuck {
 
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
+
+    /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
+    /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
+    /// The map therefore opens on YOU at walking zoom; FIT PACK still shows the region.
+    public static let openZoom: Double = 15
+    public static let streetNameMinZoom: Double = 12
+
+    public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
+        openZoom >= labelMinZoom
+    }
 
     public static func bounds(
         south: Double,
@@ -525,9 +543,10 @@ public enum OverlaySync: Sendable {
     public static func needsStyleMutation(
         force: Bool,
         puckNeedsReapply: Bool,
-        routeNeedsReapply: Bool
+        routeNeedsReapply: Bool,
+        destinationNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
     }
 }
 

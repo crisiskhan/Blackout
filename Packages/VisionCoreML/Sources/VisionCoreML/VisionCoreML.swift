@@ -34,7 +34,6 @@ public struct VisionLabel: Codable, Equatable, Sendable {
     public var lookalikes: [String]
     public var leaveIt: Bool
     public var edibleUnlock: Bool
-    public var marineOrGatorFL: Bool
     public var name: [String: String]
 }
 

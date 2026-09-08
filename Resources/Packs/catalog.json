@@ -15,10 +15,10 @@
       "defaultOpen": true,
       "walkable": true,
       "bbox": {
-        "south": 31.7,
-        "west": -106.62,
-        "north": 32.0,
-        "east": -106.35
+        "south": 31.65,
+        "west": -106.85,
+        "north": 32.4,
+        "east": -106.2
       },
       "slices": {
         "metro": {
@@ -41,7 +41,7 @@
             "north": 32.0,
             "east": -106.4
           },
-          "featureCount": 3497
+          "featureCount": 3498
         },
         "border": {
           "name": "El Paso TX+NM border union",
@@ -53,6 +53,17 @@
             "east": -106.35
           },
           "featureCount": 61385
+        },
+        "corridor": {
+          "name": "El Paso / Las Cruces corridor",
+          "bbox": {
+            "name": "El Paso / Las Cruces corridor",
+            "south": 31.65,
+            "west": -106.85,
+            "north": 32.4,
+            "east": -106.2
+          },
+          "featureCount": 128405
         }
       },
       "banners": [
@@ -60,10 +71,11 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 50665555,
+      "bytes": 51550987,
       "files": [
         "border.geojson",
         "contours.geojson",
+        "corridor.geojson",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
         "glyphs/Open Sans Regular/256-511.pbf",
@@ -83,56 +95,62 @@
         "wild.geojson"
       ],
       "center": {
-        "lat": 31.85,
-        "lon": -106.485
+        "lat": 32.025,
+        "lon": -106.525
+      },
+      "home": {
+        "lat": 31.78,
+        "lon": -106.46000000000001
       },
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 2251682,
+        "bytes": 1677239,
+        "width": 2048,
+        "height": 2363,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -106.62,
-            32.0
+            -106.85,
+            32.4
           ],
           [
-            -106.35,
-            32.0
+            -106.2,
+            32.4
           ],
           [
-            -106.35,
-            31.7
+            -106.2,
+            31.65
           ],
           [
-            -106.62,
-            31.7
+            -106.85,
+            31.65
           ]
         ]
       },
       "stats": {
-        "features": 66587,
-        "highwayLines": 63024,
-        "namedStreets": 18984,
+        "features": 128691,
+        "highwayLines": 121593,
+        "namedStreets": 37395,
         "sampleStreetNames": [
-          "Encino Drive",
-          "Hurd Lane",
-          "Brickland Road",
-          "Meadow Vista Boulevard",
-          "Monte Vista Drive",
-          "Low Road",
-          "Antone Street",
-          "Alamo Drive",
-          "Robles Drive",
-          "Derby Road",
-          "3rd Street",
-          "1st Street"
+          "Carretera Samalayuca-El Oasis",
+          "Kamikase",
+          "Transformers",
+          "Potreros",
+          "West Franklin Avenue",
+          "Arizona Avenue",
+          "West Crosby Avenue",
+          "Fewel Street",
+          "East Rio Grande Avenue",
+          "West Main Drive",
+          "West San Francisco Avenue",
+          "West Wyoming Avenue"
         ],
-        "water": 2748,
-        "places": 65,
-        "graphEdges": 264064,
-        "graphNodes": 98322,
+        "water": 5193,
+        "places": 181,
+        "graphEdges": 503279,
+        "graphNodes": 189843,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -146,8 +164,8 @@
       "walkable": true,
       "bbox": {
         "south": 30.08,
-        "west": -97.78,
-        "north": 30.32,
+        "west": -97.9,
+        "north": 30.42,
         "east": -97.2
       },
       "slices": {
@@ -178,11 +196,11 @@
           "bbox": {
             "name": "Austin / Lost Pines walkable union",
             "south": 30.08,
-            "west": -97.78,
-            "north": 30.32,
+            "west": -97.9,
+            "north": 30.42,
             "east": -97.2
           },
-          "featureCount": 97916
+          "featureCount": 205182
         }
       },
       "banners": [
@@ -190,7 +208,7 @@
         "cattle-guard",
         "hurricane"
       ],
-      "bytes": 68780441,
+      "bytes": 81511072,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -213,58 +231,62 @@
         "wild.geojson"
       ],
       "center": {
-        "lat": 30.2,
-        "lon": -97.49000000000001
+        "lat": 30.25,
+        "lon": -97.55000000000001
+      },
+      "home": {
+        "lat": 30.28,
+        "lon": -97.73
       },
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 656739,
+        "bytes": 843065,
         "width": 2048,
-        "height": 847,
+        "height": 994,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -97.78,
-            30.32
+            -97.9,
+            30.42
           ],
           [
             -97.2,
-            30.32
+            30.42
           ],
           [
             -97.2,
             30.08
           ],
           [
-            -97.78,
+            -97.9,
             30.08
           ]
         ]
       },
       "stats": {
-        "features": 98346,
-        "highwayLines": 89502,
-        "namedStreets": 15588,
+        "features": 205740,
+        "highwayLines": 187663,
+        "namedStreets": 33988,
         "sampleStreetNames": [
-          "Savorey Lane",
-          "FM 1327",
-          "Bramble Bush Drive",
-          "Branchwood Drive",
-          "Palmer Road",
-          "Cocao Lane",
-          "Moores Bridge Road",
-          "Wing Feather Drive",
-          "Rockridge Court",
-          "Spring Meadow Road",
-          "Deadwood Drive",
-          "Bucks Run"
+          "Hidatsa Street",
+          "South Interstate 35",
+          "Summer Night Cove",
+          "Nighthawk Lane",
+          "Aster Cove",
+          "Purple Heart Trail",
+          "Phoebe Circle",
+          "Saguaro Drive",
+          "Echo Cove",
+          "Sosebee Parkway",
+          "Bermuda Lane",
+          "Robin Road"
         ],
-        "water": 7073,
-        "places": 192,
-        "graphEdges": 325013,
-        "graphNodes": 119529,
+        "water": 14735,
+        "places": 341,
+        "graphEdges": 690612,
+        "graphNodes": 254590,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -277,10 +299,10 @@
       "defaultOpen": false,
       "walkable": true,
       "bbox": {
-        "south": 35.06,
-        "west": -106.68,
-        "north": 35.25,
-        "east": -106.38
+        "south": 34.95,
+        "west": -106.85,
+        "north": 35.35,
+        "east": -106.35
       },
       "slices": {
         "metro": {
@@ -292,7 +314,7 @@
             "north": 35.14,
             "east": -106.55
           },
-          "featureCount": 35480
+          "featureCount": 35481
         },
         "wild": {
           "name": "Sandia foothills wild",
@@ -306,15 +328,15 @@
           "featureCount": 2344
         },
         "union": {
-          "name": "Albuquerque / Sandia walkable union",
+          "name": "Albuquerque / Rio Rancho / Sandia union",
           "bbox": {
-            "name": "Albuquerque / Sandia walkable union",
-            "south": 35.06,
-            "west": -106.68,
-            "north": 35.25,
-            "east": -106.38
+            "name": "Albuquerque / Rio Rancho / Sandia union",
+            "south": 34.95,
+            "west": -106.85,
+            "north": 35.35,
+            "east": -106.35
           },
-          "featureCount": 78904
+          "featureCount": 131947
         }
       },
       "banners": [
@@ -323,7 +345,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 67236242,
+      "bytes": 59254410,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -346,58 +368,62 @@
         "wild.geojson"
       ],
       "center": {
-        "lat": 35.155,
-        "lon": -106.53
+        "lat": 35.150000000000006,
+        "lon": -106.6
+      },
+      "home": {
+        "lat": 35.1,
+        "lon": -106.61500000000001
       },
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 1350584,
+        "bytes": 1459453,
         "width": 2048,
-        "height": 1297,
+        "height": 1638,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -106.68,
-            35.25
+            -106.85,
+            35.35
           ],
           [
-            -106.38,
-            35.25
+            -106.35,
+            35.35
           ],
           [
-            -106.38,
-            35.06
+            -106.35,
+            34.95
           ],
           [
-            -106.68,
-            35.06
+            -106.85,
+            34.95
           ]
         ]
       },
       "stats": {
-        "features": 79283,
-        "highwayLines": 75303,
-        "namedStreets": 15687,
+        "features": 132120,
+        "highwayLines": 125404,
+        "namedStreets": 29400,
         "sampleStreetNames": [
-          "Richmond Drive Southeast",
-          "Rio Grande del Sol Court Northwest",
-          "Arvilla Avenue Northeast",
-          "Vassar Drive Northeast",
-          "Cottonwood Drive",
-          "Elfego Road Northwest",
-          "Telesfor Sanchez Road Northwest",
-          "Leatherwood Lane Northwest",
-          "San Tesoro Street Northeast",
-          "East Frontage Road",
-          "West Frontage Road",
-          "Barelas Street Southwest"
+          "Mt Yy",
+          "Central Avenue Southwest",
+          "Parnelli Drive Southwest",
+          "Shetland Place Southwest",
+          "De Anza Drive Southwest",
+          "Heron Drive",
+          "Chaps Street Southwest",
+          "Laguna",
+          "Alexis Avenue Southwest",
+          "Reba Avenue Southwest",
+          "Wrangler Street Southwest",
+          "Gschwind Place Southwest"
         ],
-        "water": 3150,
-        "places": 72,
-        "graphEdges": 359382,
-        "graphNodes": 123847,
+        "water": 5443,
+        "places": 131,
+        "graphEdges": 586286,
+        "graphNodes": 205350,
         "streetsVisibleAtWalkingZoom": true
       }
     }

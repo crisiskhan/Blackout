@@ -97,17 +97,14 @@ def field_lines(
     lock: str,
     route: str,
     tool: str,
-    dest: tuple[float, float] | None,
     bearing_deg: float | None,
     speak: str = "",
 ) -> list[str]:
+    """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas, so the
+    middle row carries the heading rather than a latitude nobody can steer by."""
     status = joined([lock, route, tool])
-    fix: list[str] = []
-    if dest is not None:
-        fix.append(f"DEST {dest[0]:.4f}, {dest[1]:.4f}")
-    if bearing_deg is not None:
-        fix.append(f"BEARING {bearing_deg:.0f}°")
-    return [line for line in (status, joined(fix), speak.strip()) if line]
+    fix = "" if bearing_deg is None else f"BEARING {bearing_deg:.0f}°"
+    return [line for line in (status, fix, speak.strip()) if line]
 
 
 def route_chrome(has_graph: bool, has_dest: bool, plan_chrome: str) -> str:
@@ -173,7 +170,6 @@ class FieldChromeTests(unittest.TestCase):
             OFF_GRAPH,
             OFF_GRAPH,
             "TRUE NORTH",
-            (31.7619, -106.4850),
             45,
             "SPEAK · 3 TURNS · 300 M",
         )
@@ -181,7 +177,7 @@ class FieldChromeTests(unittest.TestCase):
             lines,
             [
                 "OFF GRAPH · TRUE NORTH",
-                "DEST 31.7619, -106.4850 · BEARING 45°",
+                "BEARING 45°",
                 "SPEAK · 3 TURNS · 300 M",
             ],
         )
@@ -189,10 +185,11 @@ class FieldChromeTests(unittest.TestCase):
         for line in lines:
             self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
             self.assertNotIn("\n", line)
+            self.assertNotIn("DEST 31.", line)
 
     def test_quiet_field_shows_nothing(self):
-        self.assertEqual(field_lines("", "", "", None, None, ""), [])
-        self.assertEqual(field_lines("", "", "", None, 12, "   "), ["BEARING 12°"])
+        self.assertEqual(field_lines("", "", "", None, ""), [])
+        self.assertEqual(field_lines("", "", "", 12, "   "), ["BEARING 12°"])
 
     def test_off_graph_is_a_routing_failure_not_a_missing_dest(self):
         self.assertEqual(route_chrome(has_graph=True, has_dest=False, plan_chrome=""), "")

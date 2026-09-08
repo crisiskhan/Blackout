@@ -6,6 +6,7 @@ struct SOSHold: View {
     @Bindable var runtime: AppRuntime
     @State private var holding = false
     @State private var armedLocal = false
+    @State private var press = 0
 
     var body: some View {
         Text(L10n.t("sos.call", runtime.locale))
@@ -17,11 +18,15 @@ struct SOSHold: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
-                        if !holding {
-                            holding = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(BlackoutTokens.Chrome.sosHoldMs) / 1000.0) {
-                                if holding { armedLocal = true }
-                            }
+                        guard !holding else { return }
+                        holding = true
+                        press &+= 1
+                        // Tag the press. Tapping, letting go and pressing again left the
+                        // first timer in flight; it saw the second press still holding and
+                        // armed it early, so SOS could fire well short of its 800 ms.
+                        let armed = press
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(BlackoutTokens.Chrome.sosHoldMs) / 1000.0) {
+                            if holding, armed == press { armedLocal = true }
                         }
                     }
                     .onEnded { _ in

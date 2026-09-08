@@ -10,7 +10,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+from v3.fetch_packs import GRAPH_WIRE_VERSION, read_graph
 from v3.generate_project import assert_openstep_plist
+
+# Ground the vessel ships a map pack for. Everything bundled — field books,
+# vision books, banners, packs — has to stay inside this.
+SHIPPED_STATES = ("tx", "nm")
 
 fail = 0
 
@@ -127,7 +132,7 @@ def field_schema() -> None:
             bad(f"core missing thickness {need_id}")
         else:
             ok(f"core has {need_id}")
-    for st in ("tx", "nm", "fl", "ny"):
+    for st in SHIPPED_STATES:
         book = json.loads((root / f"field.{st}.json").read_text())
         if not book["cards"]:
             bad(f"empty field.{st}")
@@ -140,14 +145,56 @@ def field_schema() -> None:
             bad(f"field.{st} missing plant-danger")
         else:
             ok(f"field.{st} snake+plant-danger")
-    fl_ids = {c["id"] for c in json.loads((root / "field.fl.json").read_text())["cards"]}
-    ny_ids = {c["id"] for c in json.loads((root / "field.ny.json").read_text())["cards"]}
-    if "ny-ice-adk" in fl_ids:
-        bad("FL has Adirondack ice")
-    if "fl-gator-dusk" in ny_ids:
-        bad("NY has gator")
-    else:
-        ok("FL/NY regional field cards do not leak")
+    books = {p.stem.split(".")[-1] for p in root.glob("field.*.json")} - {"core"}
+    if books != set(SHIPPED_STATES):
+        bad(f"field books {sorted(books)} — only {list(SHIPPED_STATES)} ship")
+        return
+    claimed = {s for c in core["cards"] for s in c["states"]}
+    for st in SHIPPED_STATES:
+        claimed |= {s for c in json.loads((root / f"field.{st}.json").read_text())["cards"] for s in c["states"]}
+    if not claimed <= {s.upper() for s in SHIPPED_STATES}:
+        bad(f"field cards still claim {sorted(claimed)} — drop states with no map pack")
+        return
+    ok(f"field books are {list(SHIPPED_STATES)} only; no card claims ground we cannot draw")
+
+
+def dropped_regions() -> None:
+    """Florida and New York are off the vessel. Nothing may carry them back in."""
+    dropped = ("fl", "ny")
+    res = ROOT / "Resources"
+    stray = sorted(
+        str(p.relative_to(ROOT))
+        for p in res.rglob("*.json")
+        if p.stem.split(".")[-1] in dropped
+    )
+    if stray:
+        bad(f"dropped-region books still bundled: {stray}")
+        return
+
+    field_root = res / "Field"
+    cited = set()
+    ids = set()
+    for book in field_root.glob("field.*.json"):
+        for card in json.loads(book.read_text())["cards"]:
+            ids.add(card["id"])
+            cited |= {s["image"] for s in card["steps"]}
+    orphans = sorted(p.name for p in (field_root / "images").glob("*.png") if p.name not in cited)
+    if orphans:
+        bad(f"field images no card cites: {orphans}")
+        return
+    for st in SHIPPED_STATES:
+        ids |= {l["id"] for l in json.loads((res / "Vision" / f"labels.{st}.json").read_text())["labels"]}
+    tagged = sorted(i for i in ids if i.split("-")[0] in dropped)
+    if tagged:
+        bad(f"card/label ids from dropped regions: {tagged}")
+        return
+
+    banners = (ROOT / "Packages" / "RegionalPacks" / "Sources" / "RegionalPacks" / "RegionalPacks.swift").read_text()
+    named = sorted(s for s in ("FL", "NY") if f'"{s}"' in banners)
+    if named:
+        bad(f"RegionalPacks still names {named}")
+        return
+    ok("FL/NY dropped: no books, no orphan art, no banners, no ids")
 
 
 def packs() -> None:
@@ -157,9 +204,19 @@ def packs() -> None:
     if have != need:
         bad(f"pack set {have}")
         return
-    if set(cat.get("states") or []) != {"TX", "NM"}:
-        bad(f"catalog states {cat.get('states')} — FL/NY packs are not shipped")
+    upper = {s.upper() for s in SHIPPED_STATES}
+    if set(cat.get("states") or []) != upper:
+        bad(f"catalog states {cat.get('states')} — must be {sorted(upper)}")
         return
+    # Three places name the ground we ship: this file, the catalog PackStore
+    # reads, and the banner list. Field books, vision books and pack switching
+    # all key off them, so a disagreement is a book with no map behind it.
+    banners = (ROOT / "Packages" / "RegionalPacks" / "Sources" / "RegionalPacks" / "RegionalPacks.swift").read_text()
+    declared = re.search(r"shippedStates\s*=\s*\[([^\]]*)\]", banners)
+    if not declared or {s.strip().strip('"') for s in declared.group(1).split(",") if s.strip()} != upper:
+        bad(f"RegionalPacks.shippedStates disagrees with catalog {sorted(upper)}")
+        return
+    ok(f"one shipped-state list: validator, catalog and banners all say {sorted(upper)}")
     for dropped in ("fl-north", "fl-south", "ny-metro", "ny-upstate"):
         if (ROOT / "Resources" / "Packs" / dropped).exists():
             bad(f"{dropped} still bundled — remove from catalog and Resources/Packs")
@@ -176,7 +233,10 @@ def packs() -> None:
                 bad(f"{p['id']} missing {req}")
                 return
         osm = json.loads((d / "osm.geojson").read_text())
-        graph = json.loads((d / "graph.json").read_text())
+        graph = read_graph(d / "graph.json")
+        if json.loads((d / "graph.json").read_text()).get("v") != GRAPH_WIRE_VERSION:
+            bad(f"{p['id']} graph.json is not wire v{GRAPH_WIRE_VERSION} — rebuild the pack")
+            return
         if len(osm.get("features") or []) < 10:
             bad(f"{p['id']} too few OSM features")
             return
@@ -204,7 +264,7 @@ def walkable_pack() -> None:
     d = ROOT / "Resources" / "Packs" / "tx-west"
     osm = json.loads((d / "osm.geojson").read_text())
     style = json.loads((d / "style.json").read_text())
-    graph = json.loads((d / "graph.json").read_text())
+    graph = read_graph(d / "graph.json")
     pack_io = (ROOT / "Packages" / "PackIO" / "Sources" / "PackIO" / "PackIO.swift").read_text()
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
     map_lib = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
@@ -285,7 +345,7 @@ def walkable_next_pack(pack_id: str) -> None:
     cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
     osm = json.loads((d / "osm.geojson").read_text())
     style = json.loads((d / "style.json").read_text())
-    graph = json.loads((d / "graph.json").read_text())
+    graph = read_graph(d / "graph.json")
     if cat.get("defaultPack") != "tx-west" or (cat.get("packs") or [{}])[0].get("id") != "tx-west":
         bad(f"{pack_id} stole default open pack from tx-west")
         return
@@ -367,17 +427,18 @@ def walkable_next_pack(pack_id: str) -> None:
 
 
 def vision() -> None:
-    for st in ("tx", "nm", "fl", "ny"):
-        book = json.loads((ROOT / "Resources" / "Vision" / f"labels.{st}.json").read_text())
+    root = ROOT / "Resources" / "Vision"
+    books = {p.stem.split(".")[-1] for p in root.glob("labels.*.json")}
+    if books != set(SHIPPED_STATES):
+        bad(f"vision books {sorted(books)} — only {list(SHIPPED_STATES)} ship")
+        return
+    for st in SHIPPED_STATES:
+        book = json.loads((root / f"labels.{st}.json").read_text())
         if not book.get("neverEdibleUnlock"):
             bad(f"vision {st} edible unlock")
         kinds = {l["kind"] for l in book["labels"]}
         if "fungi" not in kinds:
             bad(f"vision {st} no fungi")
-        if st == "fl" and not any(l.get("marineOrGatorFL") for l in book["labels"]):
-            bad("FL missing marine/gator")
-        if st != "fl" and any(l.get("marineOrGatorFL") for l in book["labels"]):
-            bad(f"{st} leaked FL marine")
         ok(f"vision {st} n={len(book['labels'])} kinds={sorted(kinds)}")
     vis = (ROOT / "Packages" / "VisionCoreML" / "Sources" / "VisionCoreML" / "VisionCoreML.swift").read_text()
     if "hashValue" in vis or "features.hashValue" in vis:
@@ -773,6 +834,10 @@ def tip58_solo_qa() -> None:
         and "MarkStore.load" in init
         and "MarkStore.save" in app
         and "synchronize()" in marks
+        # Reloading a mark must not rename it. MarkDrop.merging mints a fresh id
+        # for a brand new pin, so routing the reload through it gave every saved
+        # mark a new identity on every launch.
+        and "MarkDrop.merging" not in marks.split("public static func uniqued")[1].split("}")[0]
         and "fix.arm()" not in init
         and re.search(r"let mgr = CLLocationManager\(\)", app) is None
         and re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech) is None
@@ -992,12 +1057,17 @@ def tip62_nav() -> None:
         and "runtime.navigate(mode: .drive)" in map_tab
         and "route: runtime.routeCoords" in map_tab
         and "pickDestination" in map_tab
-        and "walkDriveEnabled" in map_tab
-        and "disabled(!runtime.walkDriveEnabled)" in map_tab
         and "routeChrome" in map_tab
+        # A dead chip tells the field nothing: WALK/DRIVE always tap and always answer.
+        and ".disabled(" not in map_tab
         and "hasDestination" in route_line
+        and "enum RouteBlock" in route_line
+        and "alwaysTappable" in route_line
         and "func navigate(mode: TravelMode)" in app
         and "GraphPlan.line" in app
+        and "WalkDriveChip.block(" in app
+        and "RouteSummary.chrome(" in app
+        and "RouteBlock.noPath" in app
         and "WalkDriveChip" in route_line
         and "convert(point, toCoordinateFrom:" in offline
         and "convertPoint" not in offline
@@ -1016,6 +1086,14 @@ def tip62_nav() -> None:
         and "chromeNet" not in map_tab
         and "layoutPriority(1)" in map_tab
         and "ZStack(alignment: .bottomLeading)" in map_tab
+        # Readouts a field user cannot act on. The destination is a pin, not a
+        # number — and it stays a pin wherever the chrome line is formatted.
+        and "DEST %.4f" not in map_tab
+        and "DEST %.4f" not in route_line
+        and "BEARING %.0f" not in map_tab
+        and "pack.bytes" not in map_tab
+        and "Search FTS" not in map_tab
+        and 'MARK \\(m.label)' not in map_tab
     )
     roads_ok = (
         road_labels is not None
@@ -1031,7 +1109,13 @@ def tip62_nav() -> None:
         "testWalkFindsTwoHopPathAndDriveIgnoresWalkOnlyEdges" in router_tests
         and "testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph" in router_tests
         and "testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords" in map_tests
-        and "testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing" in map_tests
+        and "testWalkDriveChipAlwaysTapsAndNamesTheBlocker" in map_tests
+        and "testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty" in map_tests
+        and "testCanvasOpensWhereStreetNamesRender" in map_tests
+        and "testDestinationPinTracksTheChosenTarget" in map_tests
+        and "testHomeCoordinateFallsBackToCenterWhenAbsent" in (
+            ROOT / "Packages" / "PackIO" / "Tests" / "PackIOTests" / "PackIOTests.swift"
+        ).read_text()
         and "testMapInstrumentChipsAreSixFortyFourPointTargets" in (
             ROOT / "Packages" / "Tokens" / "Tests" / "TokensTests" / "TokensTests.swift"
         ).read_text()
@@ -1042,7 +1126,7 @@ def tip62_nav() -> None:
 
     checks = [
         ("1 44pt tappable chips", chips_ok, "tip-62 chips FAIL — mark/walk/drive/ruler/usng/magTrue not 44pt Buttons"),
-        ("2 WALK/DRIVE route or OFF GRAPH", walk_ok, "tip-62 WALK/DRIVE FAIL — line/disabled/OFF GRAPH/convert API"),
+        ("2 WALK/DRIVE draw or say why", walk_ok, "WALK/DRIVE FAIL — dead chip, no reason line, or convert API"),
         ("3 MARK one-row", mark_one_ok, "tip-62 MARK FAIL — MarkDrop not wired"),
         ("4 debug chrome off canvas", canvas_clean_ok, "tip-62 canvas FAIL — style.json/MapKit debug still on MAP"),
         ("5 walking-zoom road names", roads_ok, "tip-62 roads FAIL — road-labels missing or not walking zoom"),
@@ -1074,6 +1158,7 @@ def main() -> None:
     no_stubs()
     no_old_engine()
     field_schema()
+    dropped_regions()
     packs()
     vision()
     mesh()

@@ -9,6 +9,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
     public var banners: [String]
     public var center: Coord
     public var bbox: BBox
+    /// Where the canvas opens with no GPS fix. The bbox midpoint is often bare
+    /// terrain; `home` is the metro slice, where the street grid is.
+    public var home: Coord?
     public struct Coord: Codable, Equatable, Sendable { public var lat: Double; public var lon: Double }
     public struct BBox: Codable, Equatable, Sendable {
         public var south: Double; public var west: Double; public var north: Double; public var east: Double
@@ -16,6 +19,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
 }
 
 public struct PackCatalog: Codable, Equatable, Sendable {
+    /// States the bundle actually carries map packs for. Absent in hand-built
+    /// catalogs; the shipped one always names them.
+    public var states: [String]? = nil
     public var packs: [PackManifest]
 }
 
@@ -47,7 +53,7 @@ public final class PackStore: @unchecked Sendable {
         guard let pack = catalog.packs.first(where: { $0.id == id }) else {
             throw PackError.missing(id)
         }
-        if pack.state == "FL" && pack.banners.contains("ice-rock") && pack.id.contains("adk") {
+        if let shipped = catalog.states, !shipped.contains(pack.state) {
             throw PackError.regionLeak
         }
         active = pack
@@ -57,6 +63,12 @@ public final class PackStore: @unchecked Sendable {
     public func packURL(_ file: String) -> URL? {
         guard let active else { return nil }
         return root.appendingPathComponent(active.id).appendingPathComponent(file)
+    }
+
+    public func homeCoordinate() -> (lat: Double, lon: Double)? {
+        guard let active else { return nil }
+        let point = active.home ?? active.center
+        return (point.lat, point.lon)
     }
 
     public func hasUsableGraph() -> Bool {
@@ -72,7 +84,7 @@ public final class PackStore: @unchecked Sendable {
 }
 
 public enum GraphProbe: Sendable {
-    /// `{"edges":[]}` is 12 bytes. One test edge is ~57. Shipped TX WEST is ~24MB.
+    /// `{"edges":[]}` is 12 bytes. One test edge is ~57. Shipped TX WEST is ~4.5MB.
     public static let emptyMaxBytes = 32
 
     public static func isUsable(byteCount: Int) -> Bool {
