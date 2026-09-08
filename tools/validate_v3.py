@@ -1106,6 +1106,7 @@ def main() -> None:
     else:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
+    tip68_speak_field()
     sys.exit(fail)
 
 
@@ -1139,6 +1140,62 @@ def tip65_speak() -> None:
         bad("CPV bumped — tree must stay 1")
         return
     ok("Done: SPEAK kept; Walk line hooks intact; CPV 1")
+
+
+def tip68_speak_field() -> None:
+    """Tip 68 — Speak banner reads whole, field is clean, names draw at walking zoom."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_speak_field.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"tip-68 Speak/field contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    route_line = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "RouteLine.swift").read_text()
+    pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+
+    banner_ok = (
+        "ChromeRail" in map_tab
+        and "MapActionChipButtonStyle" in map_tab
+        and "SpeakBanner.lines(runtime.speechChrome)" in map_tab
+        and "speakBannerHeight" in map_tab
+        and 'Button("SPEAK")' in map_tab
+    )
+    field_ok = (
+        "MapFieldChrome.lines(" in map_tab
+        and "enum MapFieldChrome" in route_line
+        and 'magNorth ? "MAG NORTH" : "TRUE NORTH"' in route_line
+        and "Text(runtime.lockChrome)" not in map_tab
+        and "Text(runtime.routeChrome)" not in map_tab
+    )
+    names_ok = (
+        "func localGlyphURL(" in pack_style
+        and "packRoot.appendingPathComponent(glyphs)" not in pack_style
+        and "resolverVersion" in pack_style
+    )
+    keep_ok = (
+        "warmupActiveGraph" in app
+        and "GraphPlan.line" in app
+        and "applyMapKeepAwake" in app
+        and "frame(width: hit, height: hit)" in map_tab
+    )
+
+    checks = [
+        ("1 Speak banner reads whole", banner_ok, "tip-68 Speak banner FAIL — rail/banner still truncates"),
+        ("2 field clean of DEST/TRUE spray", field_ok, "tip-68 field FAIL — chrome rows still spray"),
+        ("3 walking-zoom names", names_ok, "tip-68 names FAIL — glyph template still escaped"),
+        ("Walk cyan + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
+    ]
+    for label, passed, fail_msg in checks:
+        if passed:
+            ok(f"Done: {label}")
+        else:
+            bad(fail_msg)
 
 
 if __name__ == "__main__":
