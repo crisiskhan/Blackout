@@ -36,6 +36,9 @@ public struct PartyRoster: Equatable, Sendable {
         return copy
     }
     public func joining(_ name: String, role: PartyRole) -> PartyRoster {
+        if members.contains(where: { $0.role == role }) {
+            return self
+        }
         var copy = self
         copy.members.append(PartyMember(id: UUID().uuidString, name: name, role: role))
         return copy

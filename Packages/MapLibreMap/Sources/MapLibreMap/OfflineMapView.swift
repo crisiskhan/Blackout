@@ -43,8 +43,13 @@ public struct OfflineMapView: UIViewRepresentable {
     }
 
     public func makeUIView(context: Context) -> MLNMapView {
-        let view = MLNMapView(frame: .zero, styleURL: styleURL)
+        let view = FillingMapView(frame: .zero, styleURL: styleURL)
         view.delegate = context.coordinator
+        view.onBoundsChange = { [weak view] size in
+            guard let view, let spec = context.coordinator.spec else { return }
+            context.coordinator.applyCamera(spec, on: view, force: false)
+            _ = size
+        }
         view.logoView.isHidden = false
         view.prefetchesTiles = false
         view.allowsRotating = true
@@ -91,13 +96,13 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         var spec: OverlaySpec?
-        var packOverlay: MLNPolygon?
         var packOutline: MLNPolyline?
         var puckHalo: MLNPolygon?
         var puck: MLNPointAnnotation?
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
         var storedPuck: (lat: Double, lon: Double)?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
+        var fittedSize: (width: Double, height: Double)?
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
@@ -119,9 +124,6 @@ public struct OfflineMapView: UIViewRepresentable {
                 return
             }
 
-            if let old = packOverlay {
-                view.remove(old)
-            }
             if let old = packOutline {
                 view.remove(old)
             }
@@ -138,9 +140,6 @@ public struct OfflineMapView: UIViewRepresentable {
                 north: spec.packNorth,
                 east: spec.packEast
             ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-            let poly = MLNPolygon(coordinates: &ring, count: UInt(ring.count))
-            view.add(poly)
-            packOverlay = poly
             let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
             view.add(outline)
             packOutline = outline
@@ -163,7 +162,13 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
-            if !force, let fitted = fittedPack, fitted == pack { return }
+            let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
+            if !force, !PackCamera.shouldRefit(
+                fittedPack: fittedPack,
+                pack: pack,
+                fittedSize: fittedSize,
+                size: size
+            ) { return }
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             let box = PackCamera.bounds(
                 south: spec.packSouth,
@@ -183,6 +188,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 completionHandler: nil
             )
             fittedPack = pack
+            fittedSize = size
         }
 
         func syncStyleOverlays(on view: MLNMapView, spec: OverlaySpec) {
@@ -233,6 +239,7 @@ public struct OfflineMapView: UIViewRepresentable {
             mapView.shouldRequestAuthorizationToUseLocationServices = true
             mapView.showsUserLocation = true
             fittedPack = nil
+            fittedSize = nil
             if let spec {
                 apply(spec, on: mapView, force: true)
             }
@@ -261,7 +268,7 @@ public struct OfflineMapView: UIViewRepresentable {
             if annotation === puckHalo {
                 return UIColor(white: 1, alpha: 0.38)
             }
-            return UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 0.16)
+            return .clear
         }
 
         public func mapView(_ mapView: MLNMapView, strokeColorForShapeAnnotation annotation: MLNShape) -> UIColor {
@@ -278,6 +285,15 @@ public struct OfflineMapView: UIViewRepresentable {
         public func mapView(_ mapView: MLNMapView, lineWidthForPolylineAnnotation annotation: MLNPolyline) -> CGFloat {
             annotation === packOutline ? 3.5 : 2
         }
+    }
+}
+
+final class FillingMapView: MLNMapView {
+    var onBoundsChange: ((CGSize) -> Void)?
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        onBoundsChange?(bounds.size)
     }
 }
 

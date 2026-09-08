@@ -15,4 +15,13 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.Color.silver.r, BlackoutTokens.Color.metal.r)
         XCTAssertEqual(BlackoutTokens.Chrome.tabCaptionPoints, 10)
     }
+
+    func testSOSFABIsCommsOnlyNotBrowseMap() {
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false))
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: true))
+        XCTAssertTrue(BlackoutTokens.Chrome.sosFAB(tab: .comms, lockOn: false))
+        XCTAssertTrue(BlackoutTokens.Chrome.sosFAB(tab: .comms, lockOn: true))
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .field, lockOn: false))
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .expedition, lockOn: false))
+    }
 }

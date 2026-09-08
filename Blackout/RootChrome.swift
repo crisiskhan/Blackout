@@ -45,6 +45,7 @@ struct RootChrome: View {
                 tabBar
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var tabBody: some View {
@@ -56,6 +57,7 @@ struct RootChrome: View {
             case .expedition: ExpeditionTab(runtime: runtime)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var tabBar: some View {
@@ -92,7 +94,7 @@ struct RootChrome: View {
 
     @ViewBuilder
     private var contextualSOS: some View {
-        if runtime.lockOn || runtime.tab == .comms {
+        if BlackoutTokens.Chrome.sosFAB(tab: tokenTab, lockOn: runtime.lockOn) {
             VStack {
                 Spacer()
                 HStack {
@@ -103,6 +105,15 @@ struct RootChrome: View {
                 }
             }
             .allowsHitTesting(true)
+        }
+    }
+
+    private var tokenTab: BlackoutTokens.Tab {
+        switch runtime.tab {
+        case .map: return .map
+        case .comms: return .comms
+        case .field: return .field
+        case .expedition: return .expedition
         }
     }
 }

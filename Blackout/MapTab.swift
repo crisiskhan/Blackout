@@ -42,38 +42,50 @@ struct MapTab: View {
                     packNorth: pack.bbox.north,
                     packEast: pack.bbox.east
                 )
+                let offPack = PackChrome.banner(
+                    fix: runtime.lastKnownFix,
+                    bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
+                )
                 Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
                     .foregroundStyle(Color(white: 0.6))
-                OfflineMapView(
-                    styleURL: style,
-                    centerLat: pack.center.lat,
-                    centerLon: pack.center.lon,
-                    puckLat: you.lat,
-                    puckLon: you.lon,
-                    packSouth: pack.bbox.south,
-                    packWest: pack.bbox.west,
-                    packNorth: pack.bbox.north,
-                    packEast: pack.bbox.east
-                )
+                if offPack == PackChrome.offPack {
+                    Text(PackChrome.offPack).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+                }
+                ZStack(alignment: .bottomLeading) {
+                    OfflineMapView(
+                        styleURL: style,
+                        centerLat: pack.center.lat,
+                        centerLon: pack.center.lon,
+                        puckLat: you.lat,
+                        puckLon: you.lon,
+                        packSouth: pack.bbox.south,
+                        packWest: pack.bbox.west,
+                        packNorth: pack.bbox.north,
+                        packEast: pack.bbox.east
+                    )
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
+                            .font(.caption2).foregroundStyle(Color(white: 0.45))
+                        Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
+                        ForEach(runtime.marks) { m in
+                            Text("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))")
+                                .font(.caption).foregroundStyle(Color(white: 0.75))
+                        }
+                        ForEach(runtime.mesh.pips, id: \.from) { p in
+                            Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
+                                .font(.caption).foregroundStyle(Color(white: 0.7))
+                        }
+                        ForEach(hits, id: \.name) { h in
+                            Text("\(h.name) · \(h.kind)").foregroundStyle(Theme.silver)
+                        }
+                    }
+                    .padding(8)
+                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)
-                Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
-                    .font(.caption2).foregroundStyle(Color(white: 0.45))
             } else {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
                 Spacer()
-            }
-            Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
-            ForEach(runtime.marks) { m in
-                Text("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))")
-                    .font(.caption).foregroundStyle(Color(white: 0.75))
-            }
-            ForEach(runtime.mesh.pips, id: \.from) { p in
-                Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
-                    .font(.caption).foregroundStyle(Color(white: 0.7))
-            }
-            ForEach(hits, id: \.name) { h in
-                Text("\(h.name) · \(h.kind)").foregroundStyle(Theme.silver)
             }
             ScrollView(.horizontal) {
                 HStack {
@@ -84,6 +96,7 @@ struct MapTab: View {
             }
         }
         .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private func styleURL() -> URL? {

@@ -8,6 +8,15 @@ public enum BlackoutTokens: Sendable {
         public static let tabCaptionPoints: Double = 10
         public static let dynamicTypeCap: String = "xxxLarge"
         public static let oneThumbGutter: Double = 16
+
+        public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
+            switch tab {
+            case .comms:
+                return true
+            case .map, .field, .expedition:
+                return false
+            }
+        }
     }
 
     public enum Color {

@@ -84,6 +84,7 @@ final class AppRuntime {
             }
         }
         marks = MarkStore.load()
+        relabelMarksForActivePack()
         if UserDefaults.standard.bool(forKey: "cannotDo.seen") {
             sawCannotDo = true
         }
@@ -116,7 +117,15 @@ final class AppRuntime {
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
         guard let lat, let lon else { return }
-        marks.append(MapMark(id: UUID().uuidString, lat: lat, lon: lon, label: packs?.active?.name ?? "mark"))
+        let pack = packs?.active
+        let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
+        let label = PackChrome.markLabel(
+            lat: lat,
+            lon: lon,
+            packName: pack?.name ?? "mark",
+            bbox: bbox
+        )
+        marks = MarkDrop.merging(marks, lat: lat, lon: lon, label: label)
         MarkStore.save(marks)
     }
 
@@ -202,6 +211,21 @@ final class AppRuntime {
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
+        relabelMarksForActivePack()
+    }
+
+    private func relabelMarksForActivePack() {
+        guard let pack = packs?.active else { return }
+        let bbox = (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
+        marks = marks.map { m in
+            MapMark(
+                id: m.id,
+                lat: m.lat,
+                lon: m.lon,
+                label: PackChrome.markLabel(lat: m.lat, lon: m.lon, packName: pack.name, bbox: bbox)
+            )
+        }
+        MarkStore.save(marks)
     }
 
     private func pullFix() {

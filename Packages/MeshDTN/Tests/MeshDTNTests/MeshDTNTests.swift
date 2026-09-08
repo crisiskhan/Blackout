@@ -102,8 +102,22 @@ final class MeshDTNTests: XCTestCase {
         radio.deliver(MeshEnvelope(id: "t2", from: "peer-1", to: "*", kind: "timer.done", body: Data("water".utf8)))
         radio.deliver(MeshEnvelope(id: "c1", from: "peer-1", to: "*", kind: "chip", body: Data("down".utf8)))
         XCTAssertEqual(net.lastRedOn, true)
-        XCTAssertEqual(net.inboundTimers.map(\.done), [false, true])
+        XCTAssertEqual(net.inboundTimers.map(\.done), [true])
+        XCTAssertEqual(net.inboundTimers.count, 1)
         XCTAssertEqual(net.inboundChips, ["down"])
         XCTAssertEqual(net.inbox.count, 4)
+    }
+
+    func testInboundTimerDoneIsOneRowPerTask() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        radio.deliver(MeshEnvelope(id: "t1", from: "peer-1", to: "*", kind: "timer.done", body: Data("1min".utf8)))
+        radio.deliver(MeshEnvelope(id: "t2", from: "peer-1", to: "*", kind: "timer.done", body: Data("1min".utf8)))
+        XCTAssertEqual(net.inboundTimers.count, 1)
+        XCTAssertEqual(net.inboundTimers.first?.task, "1min")
+        XCTAssertTrue(net.inboundTimers.first?.done == true)
     }
 }

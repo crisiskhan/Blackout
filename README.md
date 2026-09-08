@@ -41,7 +41,7 @@ BlackoutWidgets       Live Activity + Control Center CALL SOS
         └── Resources/ Packs, Field, Vision, Español table
 ```
 
-SOS is 56 pt, hold 800 ms. It sits on lock-on, Comms, Live Activity, Action Button, and Control Center — not on Field browse or ARMING. It offers system Emergency SOS and does **not** replace 911.
+SOS is 56 pt, hold 800 ms. It sits on Comms, Live Activity, Action Button, and Control Center — not on browse MAP (lock-on on or off), Field, or ARMING. It offers system Emergency SOS and does **not** replace 911.
 
 ## Packs
 

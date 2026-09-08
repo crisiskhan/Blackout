@@ -399,7 +399,7 @@ def tip55_chrome() -> None:
         bad("Comms tab still embeds a second SOSHold")
     elif "SOSHold(" not in root:
         bad("no remaining SOS hold on Comms chrome")
-    elif "tab == .comms" not in root:
+    elif "tab == .comms" not in root and "sosFAB" not in root:
         bad("contextual SOS is not bound to Comms")
     else:
         ok("single Comms SOS hold (no duplicate disk)")
@@ -645,6 +645,86 @@ def tip58_solo_qa() -> None:
         ok("Done: NO PEERS · LOGGED chip at 0 peers")
 
 
+def tip60_map_chrome() -> None:
+    """Tip 60 — five crisis punch-list fails only. No CPV / TF / Vision / Watch / new packs."""
+    pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    root = (ROOT / "Blackout" / "RootChrome.swift").read_text()
+    tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    roster = (ROOT / "Packages" / "RosterRoles" / "Sources" / "RosterRoles" / "RosterRoles.swift").read_text()
+    timers = (ROOT / "Packages" / "TimerSync" / "Sources" / "TimerSync" / "TimerSync.swift").read_text()
+    mesh = (ROOT / "Packages" / "MeshDTN" / "Sources" / "MeshDTN" / "MeshDTN.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+
+    canvas_ok = (
+        "maxHeight: .infinity" in map_tab
+        and "layoutPriority(1)" in map_tab
+        and re.search(r"\.frame\(maxWidth: \.infinity, maxHeight: \.infinity\)", map_tab) is not None
+        and "PackCamera.shouldRefit" in offline
+        and "fillsBBox" in pack_style
+        and "fillsBBox = false" in pack_style
+        and "packOverlay" not in offline
+        and "225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 0.16" not in offline
+    )
+    mark_ok = (
+        "MarkDrop.merging" in app
+        and "func merging" in pack_style
+        and "sameCoord" in pack_style
+        and "dropMark()" in app
+    )
+    off_pack_ok = (
+        'static let offPack = "OFF PACK"' in pack_style
+        and "PackChrome.banner" in map_tab
+        and "PackChrome.markLabel" in app
+        and ("OFF PACK" in map_tab or "PackChrome.offPack" in map_tab)
+    )
+    sos_ok = (
+        "sosFAB" in tokens
+        and "sosFAB" in root
+        and "runtime.lockOn || runtime.tab == .comms" not in root
+        and "SOSHold(" not in (ROOT / "Blackout" / "CommsTab.swift").read_text()
+        and "SOSHold(" in root
+    )
+    roster_timer_ok = (
+        "firstIndex(where: { $0.role == role })" in roster
+        or "contains(where: { $0.role == role })" in roster
+    ) and (
+        "first(where: { $0.task == task" in timers
+    ) and (
+        "inboundTimers.firstIndex" in mesh or "upsertTimer" in mesh
+    )
+
+    if "CURRENT_PROJECT_VERSION = 1;" not in pbx:
+        bad("CPV bumped — tree must stay 1")
+    elif pbx.count("CURRENT_PROJECT_VERSION = 1;") < 6:
+        bad("CPV not locked at 1 on all configs")
+    else:
+        ok("tree CPV stays 1")
+
+    if not canvas_ok:
+        bad("MAP canvas FAIL — strip or filled red slab")
+    else:
+        ok("Done: MAP canvas fills under search; outline + puck, no red slab")
+    if not mark_ok:
+        bad("MARK FAIL — identical coords still append")
+    else:
+        ok("Done: MARK one tap → one row (coord dedupe)")
+    if not off_pack_ok:
+        bad("OFF PACK FAIL — El Paso still labeled as pack name")
+    else:
+        ok("Done: GPS outside pack chrome is OFF PACK")
+    if not sos_ok:
+        bad("SOS FAIL — CALL SOS still on browse MAP")
+    else:
+        ok("Done: CALL SOS FAB is Comms-only")
+    if not roster_timer_ok:
+        bad("roster/timer FAIL — duplicate nav or 1min ALL DONE")
+    else:
+        ok("Done: one roster row per role; one DONE row per timer id")
+
+
 def main() -> None:
     modules()
     no_stubs()
@@ -659,6 +739,7 @@ def main() -> None:
     tip55_chrome()
     tip57_map()
     tip58_solo_qa()
+    tip60_map_chrome()
     sys.exit(fail)
 
 

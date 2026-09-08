@@ -309,7 +309,7 @@ public final class MeshNet: @unchecked Sendable {
             lastRedOn = String(data: env.body, encoding: .utf8) == "on"
         case "timer.set", "timer.done":
             if let task = String(data: env.body, encoding: .utf8) {
-                inboundTimers.append(MeshTimerEvent(id: env.id, from: env.from, task: task, done: env.kind == "timer.done"))
+                upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: task, done: env.kind == "timer.done"))
             }
         default:
             break
@@ -323,6 +323,14 @@ public final class MeshNet: @unchecked Sendable {
             pips[i] = pip
         } else {
             pips.append(pip)
+        }
+    }
+
+    private func upsertTimer(_ ev: MeshTimerEvent) {
+        if let i = inboundTimers.firstIndex(where: { $0.task == ev.task && $0.from == ev.from }) {
+            inboundTimers[i] = ev
+        } else {
+            inboundTimers.append(ev)
         }
     }
 

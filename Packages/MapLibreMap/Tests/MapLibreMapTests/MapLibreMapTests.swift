@@ -181,4 +181,87 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.wildRoadsLayerID && $0["type"] as? String == "line" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.osmPointsLayerID && $0["type"] as? String == "circle" })
     }
+
+    func testMarkStoreLoadUniquesPersistedDuplicateCoords() {
+        let suite = UserDefaults(suiteName: "map.marks.dedupe.\(UUID().uuidString)")!
+        let clones = (0..<9).map { i in
+            MapMark(id: "m\(i)", lat: 31.8705, lon: -106.5973, label: "FL NORTH")
+        }
+        MarkStore.save(clones, defaults: suite)
+        let back = MarkStore.load(defaults: suite)
+        XCTAssertEqual(back.count, 1)
+        XCTAssertTrue(MarkDrop.sameCoord((back[0].lat, back[0].lon), (31.8705, -106.5973)))
+    }
+
+    func testMarkDropDedupesIdenticalCoordsFromOneTap() {
+        var marks: [MapMark] = []
+        for _ in 0..<9 {
+            marks = MarkDrop.merging(
+                marks,
+                lat: 31.8705,
+                lon: -106.5973,
+                label: PackChrome.offPack
+            )
+        }
+        XCTAssertEqual(marks.count, 1)
+        XCTAssertEqual(marks[0].label, PackChrome.offPack)
+        XCTAssertEqual(MarkDrop.rounded(31.87054), 31.8705)
+        XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
+    }
+
+    func testPackChromeLabelsElPasoOffFLSouthNotFLNorth() {
+        let elPaso = (lat: 31.8705, lon: -106.5973)
+        let flSouth = (south: 25.72, west: -80.8, north: 25.82, east: -80.18)
+        XCTAssertEqual(
+            PackChrome.banner(fix: elPaso, bbox: flSouth),
+            PackChrome.offPack
+        )
+        XCTAssertEqual(
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
+            PackChrome.offPack
+        )
+        XCTAssertNotEqual(
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
+            "FL NORTH"
+        )
+        let txWest = (south: 31.7, west: -106.62, north: 32.0, east: -106.35)
+        XCTAssertEqual(PackChrome.banner(fix: elPaso, bbox: txWest), "")
+        XCTAssertEqual(
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "TX WEST", bbox: txWest),
+            "TX WEST"
+        )
+        XCTAssertEqual(PackChrome.banner(fix: nil, bbox: flSouth), "")
+    }
+
+    func testPackBBoxIsOutlineNotFilledSlab() {
+        XCTAssertFalse(PackOverlay.fillsBBox)
+    }
+
+    func testPackCameraRefitsWhenCanvasGrowsPastStrip() {
+        let pack = (south: 30.3, west: -81.7, north: 30.52, east: -81.38)
+        XCTAssertFalse(
+            PackCamera.shouldRefit(
+                fittedPack: pack,
+                pack: pack,
+                fittedSize: (width: 390, height: 120),
+                size: (width: 0, height: 0)
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldRefit(
+                fittedPack: pack,
+                pack: pack,
+                fittedSize: (width: 390, height: 120),
+                size: (width: 390, height: 640)
+            )
+        )
+        XCTAssertFalse(
+            PackCamera.shouldRefit(
+                fittedPack: pack,
+                pack: pack,
+                fittedSize: (width: 390, height: 640),
+                size: (width: 390, height: 640)
+            )
+        )
+    }
 }

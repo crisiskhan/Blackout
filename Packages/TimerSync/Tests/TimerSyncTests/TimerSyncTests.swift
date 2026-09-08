@@ -36,4 +36,16 @@ final class TimerSyncTests: XCTestCase {
         XCTAssertTrue(b.timers.isEmpty)
         XCTAssertFalse(b.isSOS(PartyTimer(id: "x", who: "ALL", task: "1min", duration: 60, started: Date(), subjectAllTurnaround: true)))
     }
+
+    func testOneRowPerTimerTaskAndDoneId() {
+        let b = TimerBoard(box: EventLog())
+        XCTAssertNotNil(b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true))
+        XCTAssertNil(b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true))
+        XCTAssertEqual(b.timers.count, 1)
+        let id = b.timers[0].id
+        b.markDone(id)
+        b.markDone(id)
+        XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
+        XCTAssertEqual(b.doneLines().count, 1)
+    }
 }

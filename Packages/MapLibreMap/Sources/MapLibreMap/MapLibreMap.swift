@@ -33,8 +33,89 @@ public enum MarkStore {
 
     public static func load(defaults: UserDefaults = .standard) -> [MapMark] {
         guard let data = defaults.data(forKey: key) else { return [] }
-        return (try? JSONDecoder().decode([MapMark].self, from: data)) ?? []
+        let loaded = (try? JSONDecoder().decode([MapMark].self, from: data)) ?? []
+        return uniqued(loaded)
     }
+
+    public static func uniqued(_ marks: [MapMark]) -> [MapMark] {
+        marks.reduce(into: [MapMark]()) { acc, mark in
+            acc = MarkDrop.merging(acc, lat: mark.lat, lon: mark.lon, label: mark.label)
+        }
+    }
+}
+
+public enum MarkDrop {
+    public static let coordPlaces = 4
+
+    public static func rounded(_ value: Double, places: Int = coordPlaces) -> Double {
+        let scale = pow(10.0, Double(places))
+        return (value * scale).rounded() / scale
+    }
+
+    public static func sameCoord(
+        _ a: (lat: Double, lon: Double),
+        _ b: (lat: Double, lon: Double)
+    ) -> Bool {
+        rounded(a.lat) == rounded(b.lat) && rounded(a.lon) == rounded(b.lon)
+    }
+
+    public static func merging(
+        _ marks: [MapMark],
+        lat: Double,
+        lon: Double,
+        label: String
+    ) -> [MapMark] {
+        if marks.contains(where: { sameCoord(($0.lat, $0.lon), (lat, lon)) }) {
+            return marks
+        }
+        return marks + [MapMark(id: UUID().uuidString, lat: lat, lon: lon, label: label)]
+    }
+}
+
+public enum PackChrome {
+    public static let offPack = "OFF PACK"
+
+    public static func banner(
+        fix: (lat: Double, lon: Double)?,
+        bbox: (south: Double, west: Double, north: Double, east: Double)?
+    ) -> String {
+        guard let fix, let bbox else { return "" }
+        if UserPuck.contains(
+            lat: fix.lat,
+            lon: fix.lon,
+            south: bbox.south,
+            west: bbox.west,
+            north: bbox.north,
+            east: bbox.east
+        ) {
+            return ""
+        }
+        return offPack
+    }
+
+    public static func markLabel(
+        lat: Double,
+        lon: Double,
+        packName: String,
+        bbox: (south: Double, west: Double, north: Double, east: Double)?
+    ) -> String {
+        guard let bbox else { return packName }
+        if UserPuck.contains(
+            lat: lat,
+            lon: lon,
+            south: bbox.south,
+            west: bbox.west,
+            north: bbox.north,
+            east: bbox.east
+        ) {
+            return packName
+        }
+        return offPack
+    }
+}
+
+public enum PackOverlay {
+    public static let fillsBBox = false
 }
 
 public enum LockOnChrome {
@@ -198,6 +279,18 @@ public enum PackCamera {
             max(south, north),
             max(west, east)
         )
+    }
+
+    public static func shouldRefit(
+        fittedPack: (south: Double, west: Double, north: Double, east: Double)?,
+        pack: (south: Double, west: Double, north: Double, east: Double),
+        fittedSize: (width: Double, height: Double)?,
+        size: (width: Double, height: Double)
+    ) -> Bool {
+        guard size.width > 1, size.height > 1 else { return false }
+        guard let fittedPack, let fittedSize else { return true }
+        if fittedPack != pack { return true }
+        return abs(fittedSize.width - size.width) > 1 || abs(fittedSize.height - size.height) > 1
     }
 }
 

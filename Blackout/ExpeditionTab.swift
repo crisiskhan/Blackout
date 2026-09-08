@@ -54,6 +54,9 @@ struct ExpeditionTab: View {
                         }
                     }
                 }
+                ForEach(runtime.timers.doneLines(), id: \.self) { line in
+                    Text(line).font(.caption).foregroundStyle(Color(white: 0.7))
+                }
                 ForEach(runtime.mesh.inboundTimers) { ev in
                     Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
                         .font(.caption)
