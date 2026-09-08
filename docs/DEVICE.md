@@ -23,4 +23,4 @@ Destination: a physical iPhone (generic iOS device compile is CI only; this doc 
    - Camera: `NSCameraUsageDescription`
    - Motion: `NSMotionUsageDescription`
 7. Product → Run (Cmd-R). First launch may show permission dialogs; Deny is supported.
-8. BEFORE tapping the ARMING unlock: iPhone Control Center — Airplane Mode ON, then Bluetooth ON. Wi-Fi stays off. Cell stays off. Then tap **INITIATE** on ARMING. Then score `docs/SOLO_QA.md`.
+8. BEFORE tapping the ARMING unlock: iPhone Control Center — Airplane Mode ON, then Bluetooth ON. Wi-Fi stays off. Cell stays off. Then tap **INITIATE** on ARMING. Then score `docs/SOLO_QA.md`. For the next MAP still, score only the tip-60 bar in that file: full-height canvas, pack outline+puck, single MARK, no CALL SOS on browse MAP, no solid-red slab.

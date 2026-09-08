@@ -10,6 +10,16 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 - [ ] PASS / FAIL / N/A — No SOS disk on ARMING.
 - [ ] PASS / FAIL / N/A — Pack list shows real pack names and sizes, **or** chrome `Packs missing from bundle — honest empty.`
 
+## MAP STILL — tip 60 score bar (five only)
+
+Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
+
+- [ ] PASS / FAIL — full-height canvas
+- [ ] PASS / FAIL — pack outline+puck
+- [ ] PASS / FAIL — single MARK
+- [ ] PASS / FAIL — no CALL SOS on browse MAP
+- [ ] PASS / FAIL — no solid-red slab
+
 ## MAP
 
 - [ ] PASS / FAIL / N/A — Active pack draws full-height under the search row (not a ~120pt strip). Pinch-out shows pack outline + YOU puck, no solid-red slab. Caption includes `MapLibre Metal offline` and `no MapKit engine`.

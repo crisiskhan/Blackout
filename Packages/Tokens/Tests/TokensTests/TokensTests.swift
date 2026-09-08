@@ -16,6 +16,24 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.Chrome.tabCaptionPoints, 10)
     }
 
+    func testMapStillScoreBarIsFiveBarsOnly() {
+        XCTAssertEqual(BlackoutTokens.MapStillBar.allCases.count, 5)
+        XCTAssertEqual(
+            BlackoutTokens.MapStillBar.allCases.map(\.rawValue),
+            [
+                "full-height canvas",
+                "pack outline+puck",
+                "single MARK",
+                "no CALL SOS on browse MAP",
+                "no solid-red slab",
+            ]
+        )
+        XCTAssertEqual(
+            BlackoutTokens.MapStillBar.scoreBar,
+            "[full-height canvas] [pack outline+puck] [single MARK] [no CALL SOS on browse MAP] [no solid-red slab]"
+        )
+    }
+
     func testSOSFABIsCommsOnlyNotBrowseMap() {
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: true))

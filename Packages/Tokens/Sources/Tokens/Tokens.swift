@@ -41,6 +41,18 @@ public enum BlackoutTokens: Sendable {
         case map, comms, field, expedition
     }
 
+    public enum MapStillBar: String, CaseIterable, Sendable {
+        case canvas = "full-height canvas"
+        case outlinePuck = "pack outline+puck"
+        case mark = "single MARK"
+        case noSOS = "no CALL SOS on browse MAP"
+        case noSlab = "no solid-red slab"
+
+        public static var scoreBar: String {
+            allCases.map { "[\($0.rawValue)]" }.joined(separator: " ")
+        }
+    }
+
     public static func conditionOnPipOnly(_ raw: String) -> Bool {
         raw == "pip"
     }
