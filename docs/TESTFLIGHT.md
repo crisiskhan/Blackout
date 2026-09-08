@@ -100,3 +100,7 @@ SOURCE GO tip `e4e2e7e91ca3879a22fca1295dea48cbfb2d0618` (product `47a9edfc`). F
 ## Tip 61 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `9ae26f18ee5eb15a6f529b80af4e801c5271a309` BEST IN CLASS TX WEST walkable OSM (~48.3 MB; streets at walking zoom yes). Run `34237111681` uploaded CPV **61** and `ASSIGN Internal 61 204`. Leave 60 until TestFlight shows 61 Ready. Watch omitted. Internal only. Do not re-upload 54–60.
+
+## Tip 62 product (no Internal yet)
+
+WALK/DRIVE on-graph polyline on the existing TX WEST pack. Graph already shipped in tip 61 (`Resources/Packs/tx-west/graph.json`, ~264k edges). Do not `tf:` until CoS+Crisis GO. Tree CPV stays 1. Watch omitted.

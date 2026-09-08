@@ -1,5 +1,6 @@
 import XCTest
 import PackIO
+import Router
 @testable import MapLibreMap
 
 final class MapLibreMapTests: XCTestCase {
@@ -270,6 +271,52 @@ final class MapLibreMapTests: XCTestCase {
 
     func testPackBBoxIsOutlineNotFilledSlab() {
         XCTAssertFalse(PackOverlay.fillsBBox)
+    }
+
+    func testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords() {
+        XCTAssertEqual(RouteLine.sourceID, "route-line-src")
+        XCTAssertEqual(RouteLine.layerID, "route-line")
+        XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
+        XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
+        XCTAssertFalse(RouteLine.shouldDraw([]))
+        XCTAssertFalse(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49)]))
+        XCTAssertTrue(
+            RouteLine.needsReapply(
+                stored: [],
+                route: [(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]
+            )
+        )
+        XCTAssertFalse(
+            RouteLine.needsReapply(
+                stored: [(lat: 31.76, lon: -106.49)],
+                route: [(lat: 31.76, lon: -106.49)]
+            )
+        )
+        let pack = PackManifest(
+            id: "tx-west",
+            name: "TX WEST",
+            state: "TX",
+            bytes: 1,
+            banners: [],
+            center: .init(lat: 31.76, lon: -106.49),
+            bbox: .init(south: 31, west: -107, north: 32, east: -106)
+        )
+        let session = MapSession(pack: pack)
+        let empty = RouteGraph(nodes: [:], edges: [])
+        let bearing = session.navigate(graph: empty, from: 1, to: 2, mode: .walk)
+        XCTAssertEqual(bearing.fallback, .bearingOffGraph)
+        XCTAssertFalse(RouteLine.shouldDraw(GraphRouter.coordinates(graph: empty, nodeIds: bearing.nodeIds)))
+    }
+
+    func testRouteTargetPrefersExplicitThenMark() {
+        let origin = (lat: 31.76, lon: -106.49)
+        let dest = (lat: 31.80, lon: -106.50)
+        let picked = RouteTarget.pick(explicit: dest, lastMark: origin, origin: origin)
+        XCTAssertEqual(picked?.lat, dest.lat)
+        XCTAssertEqual(picked?.lon, dest.lon)
+        let fromMark = RouteTarget.pick(explicit: nil, lastMark: dest, origin: origin)
+        XCTAssertEqual(fromMark?.lat, dest.lat)
+        XCTAssertNil(RouteTarget.pick(explicit: nil, lastMark: nil, origin: origin))
     }
 
     func testPackCameraRefitsWhenCanvasGrowsPastStrip() {

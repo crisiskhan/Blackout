@@ -18,6 +18,7 @@ import CommsUI
 import PTTAudio
 import OfflineSpeech
 import RegionalPacks
+import Router
 
 @MainActor
 @Observable
@@ -52,6 +53,11 @@ final class AppRuntime {
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
+    var navChrome = ""
+    var routeCoords: [(lat: Double, lon: Double)] = []
+    var routeTarget: (lat: Double, lon: Double)?
+    private var graphCache: RouteGraph?
+    private var graphPackID: String?
     private let fix = MeshFix()
 
     init() {
@@ -143,6 +149,44 @@ final class AppRuntime {
         sendPOSIfPossible()
     }
 
+    func pickDestination(lat: Double, lon: Double) {
+        routeTarget = (lat, lon)
+        routeCoords = []
+        navChrome = ""
+    }
+
+    func navigate(mode: TravelMode) {
+        switch mode {
+        case .walk, .drive:
+            break
+        }
+        guard let pack = packs?.active else {
+            clearRoute(chrome: GraphPlan.offGraph)
+            return
+        }
+        let you = UserPuck.coordinate(
+            lastKnown: lastKnownFix,
+            packCenter: (pack.center.lat, pack.center.lon),
+            packSouth: pack.bbox.south,
+            packWest: pack.bbox.west,
+            packNorth: pack.bbox.north,
+            packEast: pack.bbox.east
+        )
+        let dest = RouteTarget.pick(
+            explicit: routeTarget,
+            lastMark: marks.last.map { ($0.lat, $0.lon) },
+            origin: you
+        )
+        guard let dest else {
+            clearRoute(chrome: GraphPlan.offGraph)
+            return
+        }
+        routeTarget = dest
+        let plan = GraphPlan.line(graph: loadedGraph(), from: you, to: dest, mode: mode)
+        routeCoords = plan.coords
+        navChrome = plan.chrome
+    }
+
     func speakMap() {
         let pack = packs?.active?.name ?? "no pack"
         let bearing = headingDeg.map { String(format: "%.0f degrees", $0) } ?? "no heading"
@@ -211,7 +255,24 @@ final class AppRuntime {
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
+        graphCache = nil
+        graphPackID = nil
+        clearRoute(chrome: "")
         relabelMarksForActivePack()
+    }
+
+    private func loadedGraph() -> RouteGraph? {
+        let id = packs?.active?.id
+        if graphPackID != id {
+            graphCache = RouteGraph.load(from: packs?.packURL("graph.json"))
+            graphPackID = id
+        }
+        return graphCache
+    }
+
+    private func clearRoute(chrome: String) {
+        routeCoords = []
+        navChrome = chrome
     }
 
     private func relabelMarksForActivePack() {

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -825,6 +826,91 @@ def tip60_map_chrome() -> None:
     print("OK   MAP still score: " + " ".join(scored))
 
 
+def tip62_nav() -> None:
+    """Tip 62 — WALK/DRIVE on-graph route line. Honest OFF GRAPH. No new packs / CPV / tf:."""
+    router = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "Router.swift").read_text()
+    route_line = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "RouteLine.swift").read_text()
+    offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    router_tests = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
+    map_tests = (
+        ROOT / "Packages" / "MapLibreMap" / "Tests" / "MapLibreMapTests" / "MapLibreMapTests.swift"
+    ).read_text()
+    pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+    catalog = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
+
+    pack_ids = {p.get("id") for p in catalog.get("packs") or []}
+    allowed_packs = {"fl-north", "fl-south", "nm", "ny-metro", "ny-upstate", "tx-east", "tx-west"}
+    if pack_ids != allowed_packs:
+        bad("new packs added — tip-62 TX WEST only")
+        return
+    if "CURRENT_PROJECT_VERSION = 1;" not in pbx or pbx.count("CURRENT_PROJECT_VERSION = 1;") < 6:
+        bad("CPV bumped — tree must stay 1")
+        return
+
+    path_ok = (
+        "func nearestNode" in router
+        and "func coordinates" in router
+        and "enum GraphPlan" in router
+        and 'offGraph = "OFF GRAPH"' in router
+        and "MinHeap" in router
+    )
+    overlay_ok = (
+        'sourceID = "route-line-src"' in route_line
+        and 'layerID = "route-line"' in route_line
+        and "RouteLine.sourceID" in offline
+        and "RouteLine.layerID" in offline
+        and "var routeLine: MLNPolyline?" in offline
+        and "syncRoute" in offline
+        and "onMapTap" in offline
+    )
+    ui_ok = (
+        'Button("WALK")' in map_tab
+        and 'Button("DRIVE")' in map_tab
+        and "runtime.navigate(mode: .walk)" in map_tab
+        and "runtime.navigate(mode: .drive)" in map_tab
+        and "route: runtime.routeCoords" in map_tab
+        and "pickDestination" in map_tab
+        and "navChrome" in map_tab
+        and "func navigate(mode: TravelMode)" in app
+        and "GraphPlan.line" in app
+        and "RouteTarget.pick" in app
+    )
+    tests_ok = (
+        "testWalkFindsTwoHopPathAndDriveIgnoresWalkOnlyEdges" in router_tests
+        and "testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph" in router_tests
+        and "testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords" in map_tests
+        and "OFF GRAPH" in router_tests
+        and "shouldDraw" in map_tests
+    )
+    fake_ok = "bearingFallback" not in app and "GraphPlan.line" in app
+
+    checks = [
+        ("GraphRouter nearest + GraphPlan", path_ok, "tip-62 router missing nearest/plan/OFF GRAPH"),
+        ("route polyline overlay", overlay_ok, "tip-62 OfflineMapView missing route-line overlay"),
+        ("WALK/DRIVE UI hooks", ui_ok, "tip-62 WALK/DRIVE not wired to navigate + dest pick"),
+        ("unit tests path + source hooks", tests_ok, "tip-62 missing GraphRouter/RouteLine tests"),
+        ("no bearing fake route", fake_ok, "tip-62 must not draw bearingFallback as a street line"),
+    ]
+    for label, passed, fail_msg in checks:
+        if passed:
+            ok(f"Done: {label}")
+        else:
+            bad(fail_msg)
+
+    plan = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_graph_plan.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if plan.returncode != 0:
+        bad(f"tip-62 GraphPlan python tests failed\n{plan.stdout}{plan.stderr}")
+    else:
+        ok("Done: GraphPlan python path + OFF GRAPH")
+
+
 def main() -> None:
     modules()
     no_stubs()
@@ -840,6 +926,7 @@ def main() -> None:
     tip57_map()
     tip58_solo_qa()
     tip60_map_chrome()
+    tip62_nav()
     sys.exit(fail)
 
 

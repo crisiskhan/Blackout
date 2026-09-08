@@ -26,6 +26,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit).
 - [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Kill app and relaunch: the same mark is still listed.
 - [ ] PASS / FAIL / N/A — LOCK-ON: if GPS or pack `graph.json` is usable, control shows `LOCKED` and no fake route is drawn. If both GPS and graph are missing, chrome `OFF GRAPH`. If motion/heading is allowed, a `BEARING <deg>°` line appears; if heading is denied, bearing stays empty (no invented course).
+- [ ] PASS / FAIL / N/A — WALK / DRIVE: tap the map, a search hit, or a MARK row to set `DEST`. Then WALK or DRIVE. If the TX WEST graph has a path, a cyan route line follows the streets (not bearing-only chrome). If the graph is missing/empty or there is no path, chrome `OFF GRAPH` and no fake street-following line.
 - [ ] PASS / FAIL / N/A — SPEAK speaks pack name + bearing, **or** chrome `SPEECH FAILED` (do not score a silent fake success).
 - [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (same pack chosen on ARMING).
 - [ ] PASS / FAIL / N/A — Browse MAP (lock-on off): no SOS disk.
