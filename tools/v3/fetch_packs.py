@@ -1,9 +1,11 @@
-"""Fetch real OSM + elevation extracts for TX/NM/FL/NY packs.
+"""Fetch real OSM + elevation extracts for TX/NM walkable packs.
 
 Primary walkable pack is tx-west: one El Paso / Franklin / TX+NM border bbox
 with walking-zoom streets, names, and a graph built from those same ways.
-Next walkable catalog pack is nm (Albuquerque / Sandia). It does not steal
-default open — Crisis keeps tx-west first-open until they say switch.
+Walkable catalog packs: nm (Albuquerque / Sandia) and tx-east (Austin metro
++ Lost Pines / Bastrop). Neither steals default open — Crisis keeps tx-west
+first-open until they say switch. FL/NY sticker packs are not catalogued
+or bundled.
 """
 from __future__ import annotations
 
@@ -19,7 +21,10 @@ from pathlib import Path
 
 from .common import ROOT, haversine_m, write_json
 
-OVERPASS = "https://overpass-api.de/api/interpreter"
+OVERPASS_ENDPOINTS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+]
 ELEV = "https://api.open-meteo.com/v1/elevation"
 USGS_3DEP = (
     "https://elevation.nationalmap.gov/arcgis/rest/services/"
@@ -122,8 +127,16 @@ PACKS = {
                 "north": 30.18,
                 "east": -97.20,
             },
+            "union": {
+                "name": "Austin / Lost Pines walkable union",
+                "south": 30.08,
+                "west": -97.78,
+                "north": 30.32,
+                "east": -97.2,
+            },
         },
         "banners": ["heat-island", "cattle-guard", "hurricane"],
+        "walkable": True,
     },
     "nm": {
         "id": "nm",
@@ -154,94 +167,6 @@ PACKS = {
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
         "walkable": True,
-    },
-    "fl-north": {
-        "id": "fl-north",
-        "name": "FL NORTH",
-        "state": "FL",
-        "slices": {
-            "metro": {
-                "name": "Jacksonville metro",
-                "south": 30.30,
-                "west": -81.70,
-                "north": 30.38,
-                "east": -81.60,
-            },
-            "wild": {
-                "name": "Timucuan / Big Talbot wild",
-                "south": 30.45,
-                "west": -81.48,
-                "north": 30.52,
-                "east": -81.38,
-            },
-        },
-        "banners": ["hurricane", "rip", "gator-dusk", "heat-island"],
-    },
-    "fl-south": {
-        "id": "fl-south",
-        "name": "FL SOUTH",
-        "state": "FL",
-        "slices": {
-            "metro": {
-                "name": "Miami metro",
-                "south": 25.74,
-                "west": -80.28,
-                "north": 25.82,
-                "east": -80.18,
-            },
-            "wild": {
-                "name": "Shark Valley / Everglades wild",
-                "south": 25.72,
-                "west": -80.80,
-                "north": 25.80,
-                "east": -80.70,
-            },
-        },
-        "banners": ["hurricane", "rip", "gator-dusk", "keys-mm", "heat-island"],
-    },
-    "ny-metro": {
-        "id": "ny-metro",
-        "name": "NY METRO",
-        "state": "NY",
-        "slices": {
-            "metro": {
-                "name": "Lower Manhattan metro",
-                "south": 40.70,
-                "west": -74.02,
-                "north": 40.76,
-                "east": -73.97,
-            },
-            "wild": {
-                "name": "Jamaica Bay wild",
-                "south": 40.58,
-                "west": -73.90,
-                "north": 40.64,
-                "east": -73.82,
-            },
-        },
-        "banners": ["subway-north", "hurricane", "heat-island"],
-    },
-    "ny-upstate": {
-        "id": "ny-upstate",
-        "name": "NY UPSTATE",
-        "state": "NY",
-        "slices": {
-            "metro": {
-                "name": "Albany metro",
-                "south": 42.64,
-                "west": -73.80,
-                "north": 42.70,
-                "east": -73.74,
-            },
-            "wild": {
-                "name": "Adirondack High Peaks wild",
-                "south": 44.10,
-                "west": -73.98,
-                "north": 44.16,
-                "east": -73.90,
-            },
-        },
-        "banners": ["ice-rock", "subway-north"],
     },
 }
 
@@ -306,7 +231,15 @@ out body;
 out skel qt;
 """
     body = urllib.parse.urlencode({"data": q}).encode()
-    return _http_json(OVERPASS, data=body, timeout=210)
+    last: Exception | None = None
+    for url in OVERPASS_ENDPOINTS:
+        try:
+            return _http_json(url, data=body, timeout=210)
+        except Exception as exc:
+            last = exc
+            print(f"  overpass fail {url}: {exc}", flush=True)
+            time.sleep(2)
+    raise RuntimeError(f"overpass failed: {last}")
 
 
 def tile_bbox(bb: dict, max_span: float = 0.12) -> list[dict]:
@@ -722,6 +655,19 @@ def fetch_glyphs(dest: Path) -> int:
             break
         else:
             print(f"  glyph miss {rng}: {last}", flush=True)
+    if wrote < len(GLYPH_RANGES):
+        packs_root = dest.parent.parent
+        for sibling_id in ("nm", "tx-west"):
+            src = packs_root / sibling_id / "glyphs" / GLYPH_STACK
+            if not src.is_dir():
+                continue
+            for rng in GLYPH_RANGES:
+                out = stack_dir / f"{rng}.pbf"
+                cand = src / f"{rng}.pbf"
+                if not out.is_file() and cand.is_file():
+                    out.write_bytes(cand.read_bytes())
+                    wrote += 1
+            break
     return wrote
 
 
@@ -1051,11 +997,16 @@ def write_catalog(root: Path) -> None:
         man = root / pid / "manifest.json"
         if man.is_file():
             packs.append(json.loads(man.read_text()))
+    states: list[str] = []
+    for pack in packs:
+        state = pack.get("state")
+        if state and state not in states:
+            states.append(state)
     write_json(
         root / "catalog.json",
         {
             "schema": "blackout-packs-v3",
-            "states": ["TX", "NM", "FL", "NY"],
+            "states": states,
             "defaultPack": PRIMARY_PACK_ID,
             "packs": packs,
         },

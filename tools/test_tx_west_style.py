@@ -179,8 +179,8 @@ def assert_walkable_osm(pack_id: str) -> None:
 def main() -> None:
     if PRIMARY_PACK_ID != "tx-west":
         fail(f"default open pack drifted to {PRIMARY_PACK_ID}")
-    if walkable_ids() != {"tx-west", "nm"}:
-        fail(f"walkable set {walkable_ids()} — keep nm pack and tx-west default open")
+    if walkable_ids() != {"tx-west", "nm", "tx-east"}:
+        fail(f"walkable set {walkable_ids()} — keep nm + tx-east packs and tx-west default open")
 
     catalog = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
     if catalog.get("defaultPack") != "tx-west":
@@ -190,6 +190,11 @@ def main() -> None:
     nm = next((p for p in catalog.get("packs") or [] if p.get("id") == "nm"), None)
     if not nm:
         fail("nm pack missing from catalog")
+    east = next((p for p in catalog.get("packs") or [] if p.get("id") == "tx-east"), None)
+    if not east:
+        fail("tx-east pack missing from catalog")
+    if set(catalog.get("states") or []) != {"TX", "NM"}:
+        fail(f"catalog states must be TX/NM only, got {catalog.get('states')}")
 
     style_path = ROOT / "Resources" / "Packs" / "tx-west" / "style.json"
     style = json.loads(style_path.read_text())
@@ -237,6 +242,7 @@ def main() -> None:
 
     assert_walkable_osm("tx-west")
     assert_walkable_osm("nm")
+    assert_walkable_osm("tx-east")
 
     tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
     if 'voidHex = "#000000"' not in tokens:

@@ -4,6 +4,8 @@
   "state": "TX",
   "kind": "osm-contour-extract",
   "engine": "maplibre",
+  "defaultOpen": false,
+  "walkable": true,
   "bbox": {
     "south": 30.08,
     "west": -97.78,
@@ -20,7 +22,7 @@
         "north": 30.32,
         "east": -97.68
       },
-      "featureCount": 50273
+      "featureCount": 40356
     },
     "wild": {
       "name": "Lost Pines / Bastrop wild",
@@ -31,7 +33,18 @@
         "north": 30.18,
         "east": -97.2
       },
-      "featureCount": 3820
+      "featureCount": 3574
+    },
+    "union": {
+      "name": "Austin / Lost Pines walkable union",
+      "bbox": {
+        "name": "Austin / Lost Pines walkable union",
+        "south": 30.08,
+        "west": -97.78,
+        "north": 30.32,
+        "east": -97.2
+      },
+      "featureCount": 97916
     }
   },
   "banners": [
@@ -39,11 +52,17 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 2063444,
+  "bytes": 68780441,
   "files": [
     "contours.geojson",
     "dem.json",
+    "glyphs/Open Sans Regular/0-255.pbf",
+    "glyphs/Open Sans Regular/256-511.pbf",
+    "glyphs/Open Sans Regular/512-767.pbf",
+    "glyphs/Open Sans Regular/768-1023.pbf",
+    "glyphs/Open Sans Regular/8192-8447.pbf",
     "graph.json",
+    "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
@@ -52,11 +71,62 @@
     "osm.geojson",
     "pois.geojson",
     "style.json",
+    "union.geojson",
     "wild.geojson"
   ],
   "center": {
     "lat": 30.2,
     "lon": -97.49000000000001
   },
-  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+  "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+  "terrain": {
+    "present": true,
+    "file": "hillshade.png",
+    "bytes": 656739,
+    "width": 2048,
+    "height": 847,
+    "attribution": "USGS 3DEP hillshade, build-time only",
+    "coordinates": [
+      [
+        -97.78,
+        30.32
+      ],
+      [
+        -97.2,
+        30.32
+      ],
+      [
+        -97.2,
+        30.08
+      ],
+      [
+        -97.78,
+        30.08
+      ]
+    ]
+  },
+  "stats": {
+    "features": 98346,
+    "highwayLines": 89502,
+    "namedStreets": 15588,
+    "sampleStreetNames": [
+      "Savorey Lane",
+      "FM 1327",
+      "Bramble Bush Drive",
+      "Branchwood Drive",
+      "Palmer Road",
+      "Cocao Lane",
+      "Moores Bridge Road",
+      "Wing Feather Drive",
+      "Rockridge Court",
+      "Spring Meadow Road",
+      "Deadwood Drive",
+      "Bucks Run"
+    ],
+    "water": 7073,
+    "places": 192,
+    "graphEdges": 325013,
+    "graphNodes": 119529,
+    "streetsVisibleAtWalkingZoom": true
+  }
 }

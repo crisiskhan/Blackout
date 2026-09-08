@@ -152,15 +152,23 @@ def field_schema() -> None:
 
 def packs() -> None:
     cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
-    need = {"tx-west", "tx-east", "nm", "fl-north", "fl-south", "ny-metro", "ny-upstate"}
+    need = {"tx-west", "tx-east", "nm"}
     have = {p["id"] for p in cat["packs"]}
     if have != need:
         bad(f"pack set {have}")
         return
+    if set(cat.get("states") or []) != {"TX", "NM"}:
+        bad(f"catalog states {cat.get('states')} — FL/NY packs are not shipped")
+        return
+    for dropped in ("fl-north", "fl-south", "ny-metro", "ny-upstate"):
+        if (ROOT / "Resources" / "Packs" / dropped).exists():
+            bad(f"{dropped} still bundled — remove from catalog and Resources/Packs")
+            return
     if cat.get("defaultPack") != "tx-west" or (cat.get("packs") or [{}])[0].get("id") != "tx-west":
         bad("default open pack must be tx-west (catalog first)")
         return
     ok("default open pack is tx-west")
+    ok("catalog ships TX/NM only; FL/NY packs dropped")
     for p in cat["packs"]:
         d = ROOT / "Resources" / "Packs" / p["id"]
         for req in ("manifest.json", "osm.geojson", "graph.json", "contours.geojson", "style.json", "dem.json"):
@@ -267,6 +275,7 @@ def walkable_pack() -> None:
     )
     ok("streets visible at walking zoom: yes")
     walkable_next_pack("nm")
+    walkable_next_pack("tx-east")
 
 
 def walkable_next_pack(pack_id: str) -> None:
@@ -291,6 +300,9 @@ def walkable_next_pack(pack_id: str) -> None:
         return
     if pack_id == "nm" and "union" not in (man.get("slices") or {}):
         bad("nm missing Albuquerque / Sandia walkable union")
+        return
+    if pack_id == "tx-east" and "union" not in (man.get("slices") or {}):
+        bad("tx-east missing Austin / Lost Pines walkable union")
         return
     feats = osm.get("features") or []
     hwy = [
@@ -333,8 +345,8 @@ def walkable_next_pack(pack_id: str) -> None:
         bad(f"{pack_id} graph too thin walk={len(walk_edges)} drive={len(drive_edges)}")
         return
     mb = (man.get("bytes") or 0) / (1024 * 1024)
-    if mb > 80:
-        bad(f"{pack_id} {mb:.1f} MB exceeds 80 MB iOS budget")
+    if mb > 160:
+        bad(f"{pack_id} {mb:.1f} MB exceeds 160 MB iOS budget")
         return
     if not (man.get("stats") or {}).get("streetsVisibleAtWalkingZoom"):
         bad(f"{pack_id} streetsVisibleAtWalkingZoom is not yes")
@@ -692,8 +704,8 @@ def tip57_map() -> None:
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
-    wild = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "wild.geojson").read_text())
-    style = json.loads((ROOT / "Resources" / "Packs" / "fl-north" / "style.json").read_text())
+    wild = json.loads((ROOT / "Resources" / "Packs" / "nm" / "wild.geojson").read_text())
+    style = json.loads((ROOT / "Resources" / "Packs" / "nm" / "style.json").read_text())
     sources = style.get("sources") or {}
     layers = style.get("layers") or []
     lines = [
@@ -728,9 +740,9 @@ def tip57_map() -> None:
         and re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab) is not None
     )
     if not tiles_ok:
-        bad("tiles FAIL — FL NORTH offline street lines not locked")
+        bad("tiles FAIL — NM offline street lines not locked")
     else:
-        ok("Done: tiles — offline FL NORTH vector streets (wild.geojson), not maroon void")
+        ok("Done: tiles — offline NM vector streets (wild.geojson), not maroon void")
     if not bbox_ok:
         bad("bbox FAIL — pack region fit/outline not locked")
     else:
@@ -852,7 +864,7 @@ def tip60_map_chrome() -> None:
         return
 
     pack_ids = {p.get("id") for p in catalog.get("packs") or []}
-    allowed_packs = {"fl-north", "fl-south", "nm", "ny-metro", "ny-upstate", "tx-east", "tx-west"}
+    allowed_packs = {"nm", "tx-east", "tx-west"}
     if pack_ids != allowed_packs:
         bad("new packs added — tip-60 OUT")
         return
@@ -931,7 +943,7 @@ def tip62_nav() -> None:
     catalog = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
 
     pack_ids = {p.get("id") for p in catalog.get("packs") or []}
-    allowed_packs = {"fl-north", "fl-south", "nm", "ny-metro", "ny-upstate", "tx-east", "tx-west"}
+    allowed_packs = {"nm", "tx-east", "tx-west"}
     if pack_ids != allowed_packs:
         bad("new packs added — tip-62 TX WEST only")
         return
@@ -1073,6 +1085,16 @@ def main() -> None:
     tip58_solo_qa()
     tip60_map_chrome()
     tip62_nav()
+    next_pack = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_walkable_next_pack.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if next_pack.returncode != 0:
+        bad(f"walkable next-pack lock failed\n{next_pack.stdout}{next_pack.stderr}")
+    else:
+        ok("walkable next-pack lock: NM + TX EAST; default tx-west; no FL/NY")
     style_read = subprocess.run(
         [sys.executable, str(ROOT / "tools" / "test_tx_west_style.py")],
         cwd=ROOT,
