@@ -38,4 +38,29 @@ final class PackIOTests: XCTestCase {
         try Data("{\"edges\":[{\"a\":1,\"b\":2,\"m\":10,\"walk\":true,\"drive\":true}]}".utf8).write(to: pack.appendingPathComponent("graph.json"))
         XCTAssertTrue(store.hasUsableGraph())
     }
+
+    func testGraphProbeRejectsEmptyAndAcceptsOneEdgeBytes() {
+        XCTAssertFalse(GraphProbe.isUsable(byteCount: 0))
+        XCTAssertFalse(GraphProbe.isUsable(byteCount: 13))
+        XCTAssertFalse(GraphProbe.isUsable(byteCount: GraphProbe.emptyMaxBytes))
+        XCTAssertTrue(GraphProbe.isUsable(byteCount: 58))
+        XCTAssertTrue(GraphProbe.isUsable(byteCount: 24_357_803))
+    }
+
+    func testHasUsableGraphDoesNotParseFullGraphBytes() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-graph-noload-\(UUID().uuidString)")
+        let pack = root.appendingPathComponent("tx-west")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        let cat = PackCatalog(packs: [
+            PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 1, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
+        ])
+        try JSONEncoder().encode(cat).write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+        let junk = Data(repeating: 0x78, count: 2_000_000)
+        try junk.write(to: pack.appendingPathComponent("graph.json"))
+        let started = Date()
+        XCTAssertTrue(store.hasUsableGraph())
+        XCTAssertLessThan(Date().timeIntervalSince(started), 0.05)
+    }
 }

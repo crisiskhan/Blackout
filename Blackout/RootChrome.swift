@@ -31,6 +31,9 @@ struct RootChrome: View {
         )) {
             CannotDoView(runtime: runtime)
         }
+        .onAppear { runtime.applyMapKeepAwake() }
+        .onChange(of: runtime.tab) { _, _ in runtime.applyMapKeepAwake() }
+        .onChange(of: runtime.armed) { _, _ in runtime.applyMapKeepAwake() }
     }
 
     private var tabChrome: some View {

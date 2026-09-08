@@ -143,14 +143,22 @@ public struct OfflineMapView: UIViewRepresentable {
                     && abs(ann.coordinate.latitude - spec.puckLat) < 1e-9
                     && abs(ann.coordinate.longitude - spec.puckLon) < 1e-9
             }
-            let should = force || UserPuck.needsReapply(
+            let puckNeeds = force || UserPuck.needsReapply(
                 storedPack: storedPack,
                 storedPuck: storedPuck,
                 pack: (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast),
                 puck: (spec.puckLat, spec.puckLon),
                 mapHasPuck: mapHasPuck
             )
-            if !should {
+            let routeNeeds = force || RouteLine.needsReapply(stored: storedRoute, route: spec.route)
+            if !OverlaySync.needsStyleMutation(
+                force: force,
+                puckNeedsReapply: puckNeeds,
+                routeNeedsReapply: routeNeeds
+            ) {
+                return
+            }
+            if !puckNeeds {
                 syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
                 return
