@@ -104,3 +104,7 @@ SOURCE GO tip `9ae26f18ee5eb15a6f529b80af4e801c5271a309` BEST IN CLASS TX WEST w
 ## Tip 62 product (no Internal yet)
 
 WALK/DRIVE on-graph polyline on the existing TX WEST pack. Graph already shipped in tip 61 (`Resources/Packs/tx-west/graph.json`, ~264k edges). Do not `tf:` until CoS+Crisis GO. Tree CPV stays 1. Watch omitted.
+
+## Tip 62 Internal (CoS 2026-09-08 Crisis GO)
+
+SOURCE GO tip `81a8903a82bf9a6f717e960793da72e5b508b39f` MAP instrument five. Factory mode. This `tf:` push injects ASC **62**. Leave 61 until Ready. Watch omitted. Internal only. Do not re-upload 54–61.
