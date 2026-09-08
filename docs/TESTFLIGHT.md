@@ -45,6 +45,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34245270215` (`b0601e2`): tip-62 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **62**. Dist `RMG3W7ARUD` (`DISTRIBUTION`). altool no errors. ASC `198debb6-312a-41ba-b1a7-c4ff6d683456` **VALID**. PATCH 200. `ASSIGN Internal 62 204`. MAP chips + WALK/DRIVE. Leave 61 until TestFlight shows 62 Ready.
 - `34248224189` (`35ad515`): tip-63 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **63**. Dist `7CTCLZKX2Z` (`DISTRIBUTION`). altool no errors. ASC `53323e29-bd51-426e-88bf-bf0fdb557b90` **VALID**. PATCH 200. `ASSIGN Internal 63 204`. NM walkable pack; tx-west default. Leave 62 until TestFlight shows 63 Ready.
 - `34257680002` (`9eb32c4`): tip-64 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **64**. Dist `S3R65K88HJ` (`DISTRIBUTION`). altool no errors. ASC `5116f1c0-09a3-4419-a304-d6ea86914856` **VALID**. PATCH 200. `ASSIGN Internal 64 204`. TX WEST arterial casing + highway refs. Leave 63 until TestFlight shows 64 Ready.
+- `34260710700` (`f401a3d`): tip-65 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **65**. Dist `2T2U9RQMJD` (`DISTRIBUTION`). altool no errors. ASC `94bcaf54-c944-47db-a399-b373a7be2012` **VALID**. PATCH 200. `ASSIGN Internal 65 204`. Speak turn-by-turn + TX EAST. Leave 64 until TestFlight shows 65 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -119,3 +120,7 @@ NM walkable pack tip `52cac90b` merge `42b61974` (~64.1 MB streets yes). tx-west
 ## Tip 64 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `556b4a5b` / merge `999e110a`. Run `34257680002` uploaded CPV **64** and `ASSIGN Internal 64 204`. TX WEST arterial red casing + readable highway refs. Leave 63 until TestFlight shows 64 Ready. Watch omitted. Internal only. Do not re-upload 54–63.
+
+## Tip 65 Internal (CoS 2026-09-08)
+
+SOURCE GO tip `344094f4` / merge `955c3b24`. Run `34260710700` uploaded CPV **65** and `ASSIGN Internal 65 204`. Speak turn-by-turn + names + TX EAST pack. Leave 64 until TestFlight shows 65 Ready. Watch omitted. Internal only. Do not re-upload 54–64.
