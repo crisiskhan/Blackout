@@ -147,6 +147,92 @@ final class RouterTests: XCTestCase {
         XCTAssertFalse(text.contains("Arrive at destination."))
     }
 
+    func testSpeakStatusIsOneShortLineNotTheWalkScript() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let chrome = SpeakStatus.chrome(
+            spoke: true,
+            routeCoords: coords,
+            planChrome: "",
+            destination: (0.0008993, 0.0017966),
+            you: (0.0, 0.0)
+        )
+        XCTAssertEqual(chrome, "SPEAK · 1 TURN · 300 M")
+        XCTAssertEqual(SpeakStatus.turns(coords), 1)
+        // The script the voice speaks must never reach the field.
+        for phrase in ["Walk 200 meters.", "Turn left.", "Arrive at destination."] {
+            XCTAssertFalse(chrome.contains(phrase))
+        }
+        XCTAssertFalse(chrome.contains("\n"))
+        XCTAssertFalse(SpeakStatus.isClipped(chrome))
+        XCTAssertLessThanOrEqual(chrome.count, SpeakStatus.maxCharacters)
+    }
+
+    func testSpeakStatusStaysShortAcrossEveryOutcome() {
+        let outcomes = [
+            SpeakStatus.chrome(
+                spoke: false,
+                routeCoords: [],
+                planChrome: "",
+                destination: nil,
+                you: nil
+            ),
+            SpeakStatus.chrome(
+                spoke: true,
+                routeCoords: [],
+                planChrome: GraphPlan.offGraph,
+                destination: (31.8, -106.5),
+                you: (31.76, -106.49)
+            ),
+            SpeakStatus.chrome(
+                spoke: true,
+                routeCoords: [],
+                planChrome: "",
+                destination: (31.8, -106.5),
+                you: (31.76, -106.49)
+            ),
+            SpeakStatus.chrome(
+                spoke: true,
+                routeCoords: [],
+                planChrome: "",
+                destination: nil,
+                you: nil
+            ),
+        ]
+        XCTAssertEqual(outcomes[0], SpeakStatus.failed)
+        XCTAssertEqual(outcomes[1], "SPEAK · OFF GRAPH")
+        XCTAssertTrue(outcomes[2].hasPrefix("SPEAK · DEST "))
+        XCTAssertEqual(outcomes[3], "SPEAK · SET DEST")
+        for outcome in outcomes {
+            XCTAssertFalse(outcome.isEmpty)
+            XCTAssertFalse(SpeakStatus.isClipped(outcome))
+            XCTAssertLessThanOrEqual(outcome.count, SpeakStatus.maxCharacters)
+        }
+    }
+
+    func testVoiceKeepsTheWholeScriptEvenThoughTheFieldDoesNot() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: [
+                (0.0, 0.0),
+                (0.0, 0.0017966),
+                (0.0008993, 0.0017966),
+            ],
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Turn left."))
+        XCTAssertTrue(text.contains("Arrive at destination."))
+        XCTAssertGreaterThan(text.count, SpeakStatus.maxCharacters)
+    }
+
     private func twoHopWalkOnly() -> RouteGraph {
         RouteGraph(
             nodes: [

@@ -118,3 +118,63 @@ public enum VoiceNav: Sendable {
         return String(format: "%.0f meters", value.rounded())
     }
 }
+
+/// One short line of Speak status for the MAP field. The turn-by-turn script belongs to
+/// the voice and the cyan route line — never to a paragraph painted over the canvas.
+public enum SpeakStatus: Sendable {
+    public static let prefix = "SPEAK"
+    public static let separator = " · "
+    public static let failed = "SPEECH FAILED"
+    public static let offGraph = GraphPlan.offGraph
+    public static let setDest = "SET DEST"
+    public static let ellipsis = "…"
+    /// Wide enough for `SPEAK · 999 TURNS · 99999 M`, narrow enough that no phone has to
+    /// wrap it. Anything longer is a text wall, not status.
+    public static let maxCharacters = 32
+
+    public static func chrome(
+        spoke: Bool,
+        routeCoords: [(lat: Double, lon: Double)],
+        planChrome: String,
+        destination: (lat: Double, lon: Double)?,
+        you: (lat: Double, lon: Double)?
+    ) -> String {
+        guard spoke else { return failed }
+        if routeCoords.count >= 2 {
+            let meters = zip(routeCoords, routeCoords.dropFirst()).reduce(0.0) { acc, pair in
+                acc + GraphRouter.haversine(pair.0.lat, pair.0.lon, pair.1.lat, pair.1.lon)
+            }
+            return line([turnsPhrase(routeCoords), metersPhrase(meters)])
+        }
+        if planChrome == offGraph {
+            return line([offGraph])
+        }
+        if let destination, let you {
+            let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
+            return line(["DEST", metersPhrase(span)])
+        }
+        return line([setDest])
+    }
+
+    public static func turns(_ coords: [(lat: Double, lon: Double)]) -> Int {
+        VoiceNav.steps(coords).filter { $0.hasPrefix("Turn") }.count
+    }
+
+    /// True when a status line lost characters — the tip-67 `INSTRUME…` failure mode.
+    public static func isClipped(_ text: String) -> Bool {
+        text.contains(ellipsis) || text.contains("...")
+    }
+
+    private static func line(_ parts: [String]) -> String {
+        ([prefix] + parts).joined(separator: separator)
+    }
+
+    private static func turnsPhrase(_ coords: [(lat: Double, lon: Double)]) -> String {
+        let count = turns(coords)
+        return count == 1 ? "1 TURN" : "\(count) TURNS"
+    }
+
+    private static func metersPhrase(_ meters: Double) -> String {
+        String(format: "%.0f M", meters.rounded())
+    }
+}

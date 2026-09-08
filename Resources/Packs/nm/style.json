@@ -243,21 +243,21 @@
         ],
         "Point"
       ],
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "circle-color": "#c5cdd6",
         "circle-radius": 2.2,
         "circle-stroke-color": "#0c0e10",
         "circle-stroke-width": 0.6
-      },
-      "layout": {
-        "visibility": "none"
       }
     },
     {
       "id": "road-labels",
       "type": "symbol",
       "source": "osm",
-      "minzoom": 13,
+      "minzoom": 12,
       "filter": [
         "all",
         [
@@ -297,22 +297,28 @@
           [
             "zoom"
           ],
-          13,
-          10,
+          12,
+          12,
+          14,
+          15,
           16,
-          13
+          19,
+          18,
+          22
         ],
         "text-font": [
           "Open Sans Regular"
         ],
         "text-max-angle": 40,
         "text-padding": 2,
-        "text-optional": true
+        "text-optional": true,
+        "symbol-spacing": 100,
+        "text-keep-upright": true
       },
       "paint": {
-        "text-color": "#e8eef4",
-        "text-halo-color": "#0c0e10",
-        "text-halo-width": 1.2
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
+        "text-halo-width": 2.2
       }
     },
     {
@@ -320,6 +326,7 @@
       "type": "symbol",
       "source": "osm",
       "minzoom": 10,
+      "maxzoom": 16,
       "filter": [
         "has",
         "place"
@@ -349,8 +356,8 @@
         "text-optional": true
       },
       "paint": {
-        "text-color": "#f0f4f8",
-        "text-halo-color": "#0c0e10",
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
         "text-halo-width": 1.4
       }
     }

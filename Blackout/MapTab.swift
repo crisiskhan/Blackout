@@ -11,40 +11,9 @@ struct MapTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("MAP").foregroundStyle(Theme.silver)
-                Spacer()
-                Button("SPEAK") { runtime.speakMap() }
-                    .buttonStyle(MapChipButtonStyle())
-                Button("INSTRUMENTS") { runtime.showInstruments = true }
-                Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
-                    runtime.toggleLockOn()
-                }
-            }
+            actionRail
             instrumentRow
-            if !runtime.lockChrome.isEmpty {
-                Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
-            }
-            if !runtime.routeChrome.isEmpty {
-                Text(runtime.routeChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
-            }
-            if !runtime.toolChrome.isEmpty {
-                Text(runtime.toolChrome).font(.caption.weight(.semibold)).foregroundStyle(Theme.silver)
-            }
-            if let dest = runtime.routeTarget {
-                Text(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
-                    .font(.caption).foregroundStyle(Theme.silver)
-            }
-            if let h = runtime.headingDeg {
-                Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Theme.silver)
-            }
-            if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            fieldChrome
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
@@ -109,6 +78,49 @@ struct MapTab: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// SPEAK / INSTRUMENTS / LOCK-ON at their full width. When the line runs out the rail
+    /// wraps instead of letting SwiftUI tail-truncate the longest word.
+    private var actionRail: some View {
+        ChromeRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            Text("MAP")
+                .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            Button("SPEAK") { runtime.speakMap() }
+                .buttonStyle(MapActionChipButtonStyle())
+            Button("INSTRUMENTS") { runtime.showInstruments = true }
+                .buttonStyle(MapActionChipButtonStyle())
+            Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
+                runtime.toggleLockOn()
+            }
+            .buttonStyle(MapActionChipButtonStyle())
+        }
+    }
+
+    /// Up to three short deduped lines. `OFF GRAPH` twice, a bare `TRUE`, DEST, BEARING
+    /// and a full turn-by-turn script used to spray the field; Speak now reports one
+    /// status line here and leaves the script to the voice and the cyan route.
+    private var fieldChrome: some View {
+        ForEach(
+            MapFieldChrome.lines(
+                lock: runtime.lockChrome,
+                route: runtime.routeChrome,
+                tool: runtime.toolChrome,
+                dest: runtime.routeTarget,
+                bearingDeg: runtime.headingDeg,
+                speak: runtime.speechChrome
+            )
+        ) { line in
+            Text(line.text)
+                .font(.caption.weight(line.warn ? .bold : .semibold))
+                .foregroundStyle(line.warn ? Color.orange : Theme.silver)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
     private var instrumentRow: some View {
         HStack(spacing: 4) {
             Button("MARK") { runtime.dropMark() }
@@ -166,5 +178,78 @@ private struct MapChipButtonStyle: ButtonStyle {
             .contentShape(Rectangle())
             .background(Theme.raised)
             .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+}
+
+/// Header chip that keeps its whole label. Fixed point size and `fixedSize` mean the
+/// title can never be tail-truncated; the rail wraps the chip to the next line instead.
+private struct MapActionChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        return configuration.label
+            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .bold))
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
+            .frame(minWidth: hit, minHeight: hit)
+            .contentShape(Rectangle())
+            .background(Theme.raised)
+            .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+}
+
+/// Left-aligned rail that moves a control to the next line when the current one is full.
+private struct ChromeRail: Layout {
+    var spacing: CGFloat
+
+    init(spacing: Double) {
+        self.spacing = CGFloat(spacing)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+        let rows = rowsFitting(maxWidth: proposal.width ?? .infinity, subviews: subviews)
+        let width = rows.map(\.width).max() ?? 0
+        let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        var y = bounds.minY
+        for row in rowsFitting(maxWidth: bounds.width, subviews: subviews) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(
+                    at: CGPoint(x: x, y: y + (row.height - size.height) / 2),
+                    proposal: ProposedViewSize(size)
+                )
+                x += size.width + spacing
+            }
+            y += row.height + spacing
+        }
+    }
+
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func rowsFitting(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var row = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let width = row.indices.isEmpty ? size.width : row.width + spacing + size.width
+            if !row.indices.isEmpty, width > maxWidth {
+                rows.append(row)
+                row = Row(indices: [index], width: size.width, height: size.height)
+            } else {
+                row.indices.append(index)
+                row.width = width
+                row.height = max(row.height, size.height)
+            }
+        }
+        if !row.indices.isEmpty { rows.append(row) }
+        return rows
     }
 }

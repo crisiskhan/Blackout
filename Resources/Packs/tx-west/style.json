@@ -427,14 +427,14 @@
         ],
         "Point"
       ],
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "circle-color": "#B8BDC2",
         "circle-radius": 2.4,
         "circle-stroke-color": "#000000",
         "circle-stroke-width": 0.8
-      },
-      "layout": {
-        "visibility": "none"
       }
     },
     {
@@ -459,7 +459,7 @@
           "name"
         ],
         "symbol-placement": "line",
-        "symbol-spacing": 110,
+        "symbol-spacing": 100,
         "text-size": [
           "interpolate",
           [
@@ -473,9 +473,9 @@
           14,
           15,
           16,
+          19,
           18,
-          17,
-          20
+          22
         ],
         "text-font": [
           "Open Sans Regular"
@@ -534,7 +534,7 @@
           "ref"
         ],
         "symbol-placement": "line",
-        "symbol-spacing": 220,
+        "symbol-spacing": 300,
         "text-size": [
           "interpolate",
           [
@@ -574,6 +574,7 @@
       "type": "symbol",
       "source": "osm",
       "minzoom": 10,
+      "maxzoom": 16,
       "filter": [
         "has",
         "place"

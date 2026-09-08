@@ -59,7 +59,22 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapInk.accentHex, "#E10600")
         XCTAssertEqual(BlackoutTokens.MapInk.roadLabelMinZoom, 12)
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelWalkingSize, 16)
+        XCTAssertGreaterThanOrEqual(
+            BlackoutTokens.MapInk.roadLabelCloseWalkSize,
+            BlackoutTokens.MapInk.roadLabelWalkingSize
+        )
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelHaloWidth, 1.8)
+        XCTAssertLessThanOrEqual(BlackoutTokens.MapInk.roadLabelSpacing, 110)
+        XCTAssertEqual(BlackoutTokens.MapInk.placeLabelMaxZoom, 16)
+    }
+
+    func testMapFieldStaysShortStatusChromeNotAHUD() {
+        XCTAssertEqual(BlackoutTokens.Chrome.fieldChromeMaxLines, 3)
+        XCTAssertGreaterThanOrEqual(
+            BlackoutTokens.Chrome.mapActionChipTextPoints,
+            BlackoutTokens.Chrome.tabCaptionPoints
+        )
+        XCTAssertGreaterThan(BlackoutTokens.Chrome.mapActionChipGutterPoints, 0)
     }
 
     func testSOSFABIsCommsOnlyNotBrowseMap() {

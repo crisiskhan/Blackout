@@ -28,8 +28,11 @@ public enum WalkDriveChip {
         hasUsableGraph && hasDestination
     }
 
+    /// `OFF GRAPH` is a routing failure, not "you have not picked a DEST yet". Reporting
+    /// it before there is a destination sprayed a permanent false alarm down the field.
     public static func chrome(hasUsableGraph: Bool, hasDestination: Bool, planChrome: String) -> String {
-        if !hasUsableGraph || !hasDestination { return RouteLine.offGraph }
+        if !hasUsableGraph { return RouteLine.offGraph }
+        if !hasDestination { return "" }
         return planChrome
     }
 }
@@ -46,7 +49,81 @@ public enum MapRuler {
 }
 
 public enum MagTrueChip {
-    public static func chrome(magNorth: Bool) -> String { magNorth ? "MAG" : "TRUE" }
+    /// A bare `MAG` / `TRUE` token read as stack junk on the field. Say which north.
+    public static func chrome(magNorth: Bool) -> String { magNorth ? "MAG NORTH" : "TRUE NORTH" }
+}
+
+public struct MapFieldLine: Equatable, Sendable, Identifiable {
+    public enum Slot: String, CaseIterable, Sendable {
+        case status, dest, speak
+    }
+
+    public var slot: Slot
+    public var text: String
+    public var warn: Bool
+    public var id: String { slot.rawValue }
+
+    public init(slot: Slot, text: String, warn: Bool) {
+        self.slot = slot
+        self.text = text
+        self.warn = warn
+    }
+}
+
+/// The MAP field chrome stack: at most three short lines, each one deduped. Lock, route
+/// and tool statuses share a line, DEST carries its own bearing, and Speak gets one
+/// status line — never a turn-by-turn paragraph over the canvas.
+public enum MapFieldChrome: Sendable {
+    public static let separator = " · "
+    public static let maxLines = MapFieldLine.Slot.allCases.count
+    public static let alerts = [RouteLine.offGraph, PackChrome.offPack, "SPEECH FAILED"]
+
+    public static func statusLine(lock: String, route: String, tool: String) -> String {
+        joined([lock, route, tool])
+    }
+
+    public static func destLine(dest: (lat: Double, lon: Double)?, bearingDeg: Double?) -> String {
+        var parts: [String] = []
+        if let dest {
+            parts.append(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
+        }
+        if let bearingDeg {
+            parts.append(String(format: "BEARING %.0f°", bearingDeg))
+        }
+        return joined(parts)
+    }
+
+    public static func lines(
+        lock: String,
+        route: String,
+        tool: String,
+        dest: (lat: Double, lon: Double)?,
+        bearingDeg: Double?,
+        speak: String
+    ) -> [MapFieldLine] {
+        [
+            (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
+            (.dest, destLine(dest: dest, bearingDeg: bearingDeg)),
+            (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
+        ]
+        .filter { !$0.1.isEmpty }
+        .map { MapFieldLine(slot: $0.0, text: $0.1, warn: isAlert($0.1)) }
+    }
+
+    public static func isAlert(_ line: String) -> Bool {
+        alerts.contains { line.contains($0) }
+    }
+
+    public static func joined(_ parts: [String]) -> String {
+        var seen: Set<String> = []
+        var kept: [String] = []
+        for raw in parts {
+            let piece = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !piece.isEmpty, seen.insert(piece).inserted else { continue }
+            kept.append(piece)
+        }
+        return kept.joined(separator: separator)
+    }
 }
 
 public enum RouteTarget {
