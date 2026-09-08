@@ -21,4 +21,5 @@ public final class InstrumentBoard: @unchecked Sendable {
     public func attachUSB_C_PTT(_ present: Bool) { state.usbCPTT = present }
     public func attachGNSSPuck(_ present: Bool) { state.externalGNSS = present }
     public func setTrueNorth() { state.magNorth = false }
+    public func toggleMagTrue() { state.magNorth.toggle() }
 }

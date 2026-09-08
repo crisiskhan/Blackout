@@ -10,4 +10,13 @@ final class InstrumentBoardTests: XCTestCase {
         i.torchTap()
         XCTAssertEqual(i.state.torchClicks, 0)
     }
+
+    func testToggleMagTrueFlipsNorthReference() {
+        let i = InstrumentBoard(box: EventLog())
+        XCTAssertTrue(i.state.magNorth)
+        i.toggleMagTrue()
+        XCTAssertFalse(i.state.magNorth)
+        i.toggleMagTrue()
+        XCTAssertTrue(i.state.magNorth)
+    }
 }

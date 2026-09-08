@@ -869,32 +869,80 @@ def tip62_nav() -> None:
         and "syncRoute" in offline
         and "onMapTap" in offline
     )
-    ui_ok = (
-        'Button("WALK")' in map_tab
+    tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
+    style = json.loads((ROOT / "Resources" / "Packs" / "tx-west" / "style.json").read_text())
+    layers = style.get("layers") or []
+    road_labels = next((layer for layer in layers if layer.get("id") == "road-labels"), None)
+
+    chips_ok = (
+        "mapChipHitPoints: Double = 44" in tokens
+        and "enum MapChip" in tokens
+        and 'Button("MARK")' in map_tab
+        and 'Button("WALK")' in map_tab
         and 'Button("DRIVE")' in map_tab
-        and "runtime.navigate(mode: .walk)" in map_tab
+        and 'Button("RULER")' in map_tab
+        and 'Button("USNG")' in map_tab
+        and 'Button("MAG/TRUE")' in map_tab
+        and "MapChipHit" in map_tab
+        and "BlackoutTokens.Chrome.mapChipHitPoints" in map_tab
+        and "ForEach(MapTool.allCases" not in map_tab
+    )
+    walk_ok = (
+        "runtime.navigate(mode: .walk)" in map_tab
         and "runtime.navigate(mode: .drive)" in map_tab
         and "route: runtime.routeCoords" in map_tab
         and "pickDestination" in map_tab
-        and "navChrome" in map_tab
+        and "canRouteOnGraph" in map_tab
+        and "disabled(!runtime.canRouteOnGraph)" in map_tab
+        and "routeChrome" in map_tab
         and "func navigate(mode: TravelMode)" in app
         and "GraphPlan.line" in app
-        and "RouteTarget.pick" in app
+        and "WalkDriveChip" in route_line
+        and "convert(point, toCoordinateFrom:" in offline
+        and "convertPoint" not in offline
+    )
+    mark_one_ok = (
+        "MarkDrop.merging" in app
+        and "dropMark()" in app
+        and 'Button("MARK")' in map_tab
+    )
+    canvas_clean_ok = (
+        "OSMCredit.line" in map_tab
+        and "© OpenStreetMap contributors" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+        and "no MapKit engine" not in map_tab
+        and "MapLibre Metal offline" not in map_tab
+        and "style.json ·" not in map_tab
+        and "chromeNet" not in map_tab
+        and "layoutPriority(1)" in map_tab
+        and "ZStack(alignment: .bottomLeading)" in map_tab
+    )
+    roads_ok = (
+        road_labels is not None
+        and float(road_labels.get("minzoom") or 99) <= 14
+        and "road-labels" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     )
     tests_ok = (
         "testWalkFindsTwoHopPathAndDriveIgnoresWalkOnlyEdges" in router_tests
         and "testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph" in router_tests
         and "testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords" in map_tests
+        and "testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing" in map_tests
+        and "testMapInstrumentChipsAreSixFortyFourPointTargets" in (
+            ROOT / "Packages" / "Tokens" / "Tests" / "TokensTests" / "TokensTests.swift"
+        ).read_text()
         and "OFF GRAPH" in router_tests
         and "shouldDraw" in map_tests
     )
     fake_ok = "bearingFallback" not in app and "GraphPlan.line" in app
 
     checks = [
+        ("1 44pt tappable chips", chips_ok, "tip-62 chips FAIL — mark/walk/drive/ruler/usng/magTrue not 44pt Buttons"),
+        ("2 WALK/DRIVE route or OFF GRAPH", walk_ok, "tip-62 WALK/DRIVE FAIL — line/disabled/OFF GRAPH/convert API"),
+        ("3 MARK one-row", mark_one_ok, "tip-62 MARK FAIL — MarkDrop not wired"),
+        ("4 debug chrome off canvas", canvas_clean_ok, "tip-62 canvas FAIL — style.json/MapKit debug still on MAP"),
+        ("5 walking-zoom road names", roads_ok, "tip-62 roads FAIL — road-labels missing or not walking zoom"),
         ("GraphRouter nearest + GraphPlan", path_ok, "tip-62 router missing nearest/plan/OFF GRAPH"),
         ("route polyline overlay", overlay_ok, "tip-62 OfflineMapView missing route-line overlay"),
-        ("WALK/DRIVE UI hooks", ui_ok, "tip-62 WALK/DRIVE not wired to navigate + dest pick"),
-        ("unit tests path + source hooks", tests_ok, "tip-62 missing GraphRouter/RouteLine tests"),
+        ("unit tests path + source hooks", tests_ok, "tip-62 missing GraphRouter/RouteLine/chip tests"),
         ("no bearing fake route", fake_ok, "tip-62 must not draw bearingFallback as a street line"),
     ]
     for label, passed, fail_msg in checks:

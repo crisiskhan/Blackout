@@ -34,6 +34,25 @@ final class TokensTests: XCTestCase {
         )
     }
 
+    func testMapInstrumentChipsAreSixFortyFourPointTargets() {
+        XCTAssertEqual(BlackoutTokens.Chrome.mapChipHitPoints, 44)
+        XCTAssertEqual(BlackoutTokens.MapChip.allCases.count, 6)
+        XCTAssertEqual(
+            BlackoutTokens.MapChip.allCases.map(\.rawValue),
+            ["mark", "walk", "drive", "ruler", "usng", "magTrue"]
+        )
+        XCTAssertEqual(
+            BlackoutTokens.MapChip.allCases.map(\.title),
+            ["MARK", "WALK", "DRIVE", "RULER", "USNG", "MAG/TRUE"]
+        )
+        XCTAssertTrue(BlackoutTokens.MapChip.walk.requiresGraph)
+        XCTAssertTrue(BlackoutTokens.MapChip.drive.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapChip.mark.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapChip.ruler.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapChip.usng.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapChip.magTrue.requiresGraph)
+    }
+
     func testSOSFABIsCommsOnlyNotBrowseMap() {
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: true))

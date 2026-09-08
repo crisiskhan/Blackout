@@ -2,6 +2,7 @@ import SwiftUI
 import MapLibreMap
 import Search
 import Router
+import Tokens
 
 struct MapTab: View {
     @Bindable var runtime: AppRuntime
@@ -13,22 +14,21 @@ struct MapTab: View {
             HStack {
                 Text("MAP").foregroundStyle(Theme.silver)
                 Spacer()
+                Button("SPEAK") { runtime.speakMap() }
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
                     runtime.toggleLockOn()
                 }
             }
-            HStack {
-                Button("MARK") { runtime.dropMark() }
-                Button("SPEAK") { runtime.speakMap() }
-                Button("WALK") { runtime.navigate(mode: .walk) }
-                Button("DRIVE") { runtime.navigate(mode: .drive) }
-            }
+            instrumentRow
             if !runtime.lockChrome.isEmpty {
                 Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
             }
-            if !runtime.navChrome.isEmpty {
-                Text(runtime.navChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+            if !runtime.routeChrome.isEmpty {
+                Text(runtime.routeChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+            }
+            if !runtime.toolChrome.isEmpty {
+                Text(runtime.toolChrome).font(.caption.weight(.semibold)).foregroundStyle(Theme.silver)
             }
             if let dest = runtime.routeTarget {
                 Text(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
@@ -43,6 +43,12 @@ struct MapTab: View {
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
+            ForEach(hits, id: \.name) { h in
+                Button("\(h.name) · \(h.kind)") {
+                    runtime.pickDestination(lat: h.lat, lon: h.lon)
+                }
+                .foregroundStyle(Theme.silver)
+            }
             if let pack = runtime.packs?.active, let style = styleURL() {
                 let you = UserPuck.coordinate(
                     lastKnown: runtime.lastKnownFix,
@@ -80,57 +86,41 @@ struct MapTab: View {
                             runtime.pickDestination(lat: lat, lon: lon)
                         }
                     )
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
-                            .font(.caption2).foregroundStyle(Color(white: 0.45))
-                        Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
-                        ForEach(runtime.marks) { m in
-                            Button("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))") {
-                                runtime.pickDestination(lat: m.lat, lon: m.lon)
-                            }
-                            .font(.caption).foregroundStyle(Color(white: 0.75))
-                        }
-                        ForEach(runtime.mesh.pips, id: \.from) { p in
-                            Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
-                                .font(.caption).foregroundStyle(Color(white: 0.7))
-                        }
-                        ForEach(hits, id: \.name) { h in
-                            Button("\(h.name) · \(h.kind)") {
-                                runtime.pickDestination(lat: h.lat, lon: h.lon)
-                            }
-                            .foregroundStyle(Theme.silver)
-                        }
-                    }
-                    .padding(8)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)
+                ForEach(runtime.marks) { m in
+                    Button("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))") {
+                        runtime.pickDestination(lat: m.lat, lon: m.lon)
+                    }
+                    .font(.caption).foregroundStyle(Color(white: 0.75))
+                }
             } else {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
                 Spacer()
             }
-            ScrollView(.horizontal) {
-                HStack {
-                    ForEach(MapTool.allCases, id: \.self) { t in
-                        switch t {
-                        case .walk:
-                            Button("WALK") { runtime.navigate(mode: .walk) }
-                                .font(.caption2).padding(6).background(Theme.raised)
-                        case .drive:
-                            Button("DRIVE") { runtime.navigate(mode: .drive) }
-                                .font(.caption2).padding(6).background(Theme.raised)
-                        case .mark, .ruler, .usng, .magTrue, .almanac, .elevProfile,
-                                .avoidPolygon, .shadePrefer, .highLow, .crossing, .truckPin,
-                                .walkBackGPX, .paceCount, .tailGap, .strideCal,
-                                .publicLand, .flood, .highContrast, .paper:
-                            Text(t.rawValue).font(.caption2).padding(6).background(Theme.raised)
-                        }
-                    }
-                }
-            }
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var instrumentRow: some View {
+        HStack(spacing: 6) {
+            Button("MARK") { runtime.dropMark() }
+                .modifier(MapChipHit())
+            Button("WALK") { runtime.navigate(mode: .walk) }
+                .disabled(!runtime.canRouteOnGraph)
+                .modifier(MapChipHit())
+            Button("DRIVE") { runtime.navigate(mode: .drive) }
+                .disabled(!runtime.canRouteOnGraph)
+                .modifier(MapChipHit())
+            Button("RULER") { runtime.tapRuler() }
+                .modifier(MapChipHit())
+            Button("USNG") { runtime.tapUSNG() }
+                .modifier(MapChipHit())
+            Button("MAG/TRUE") { runtime.tapMagTrue() }
+                .modifier(MapChipHit())
+        }
     }
 
     private func styleURL() -> URL? {
@@ -156,5 +146,18 @@ struct MapTab: View {
         } else {
             hits = idx.fts(query)
         }
+    }
+}
+
+private struct MapChipHit: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.caption.weight(.semibold))
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+            )
+            .contentShape(Rectangle())
+            .background(Theme.raised)
     }
 }

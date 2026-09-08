@@ -8,6 +8,7 @@ public enum BlackoutTokens: Sendable {
         public static let tabCaptionPoints: Double = 10
         public static let dynamicTypeCap: String = "xxxLarge"
         public static let oneThumbGutter: Double = 16
+        public static let mapChipHitPoints: Double = 44
 
         public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
             switch tab {
@@ -39,6 +40,28 @@ public enum BlackoutTokens: Sendable {
 
     public enum Tab: String, CaseIterable, Sendable {
         case map, comms, field, expedition
+    }
+
+    public enum MapChip: String, CaseIterable, Sendable {
+        case mark, walk, drive, ruler, usng, magTrue
+
+        public var title: String {
+            switch self {
+            case .mark: return "MARK"
+            case .walk: return "WALK"
+            case .drive: return "DRIVE"
+            case .ruler: return "RULER"
+            case .usng: return "USNG"
+            case .magTrue: return "MAG/TRUE"
+            }
+        }
+
+        public var requiresGraph: Bool {
+            switch self {
+            case .walk, .drive: return true
+            case .mark, .ruler, .usng, .magTrue: return false
+            }
+        }
     }
 
     public enum MapStillBar: String, CaseIterable, Sendable {

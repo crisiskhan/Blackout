@@ -22,7 +22,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## MAP
 
-- [ ] PASS / FAIL / N/A — Active pack draws full-height under the search row (not a ~120pt strip). Pinch-out shows pack outline + YOU puck, no solid-red slab. Caption includes `MapLibre Metal offline` and `no MapKit engine`.
+- [ ] PASS / FAIL / N/A — Active pack draws full-height under the search row (not a ~120pt strip). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
+- [ ] PASS / FAIL / N/A — MAP instrument row: MARK / WALK / DRIVE / RULER / USNG / MAG/TRUE are tappable 44pt chips (not caption labels). Other MapTool leftovers are not in that row.
 - [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit).
 - [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Kill app and relaunch: the same mark is still listed.
 - [ ] PASS / FAIL / N/A — LOCK-ON: if GPS or pack `graph.json` is usable, control shows `LOCKED` and no fake route is drawn. If both GPS and graph are missing, chrome `OFF GRAPH`. If motion/heading is allowed, a `BEARING <deg>°` line appears; if heading is denied, bearing stays empty (no invented course).

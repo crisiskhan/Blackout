@@ -54,8 +54,13 @@ final class AppRuntime {
     var lockChrome = ""
     var speechChrome = ""
     var navChrome = ""
+    var toolChrome = ""
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
+    var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
+    var routeChrome: String {
+        WalkDriveChip.chrome(hasUsableGraph: canRouteOnGraph, planChrome: navChrome)
+    }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
     private let fix = MeshFix()
@@ -160,31 +165,28 @@ final class AppRuntime {
         case .walk, .drive:
             break
         }
-        guard let pack = packs?.active else {
-            clearRoute(chrome: GraphPlan.offGraph)
-            return
-        }
-        let you = UserPuck.coordinate(
-            lastKnown: lastKnownFix,
-            packCenter: (pack.center.lat, pack.center.lon),
-            packSouth: pack.bbox.south,
-            packWest: pack.bbox.west,
-            packNorth: pack.bbox.north,
-            packEast: pack.bbox.east
-        )
-        let dest = RouteTarget.pick(
-            explicit: routeTarget,
-            lastMark: marks.last.map { ($0.lat, $0.lon) },
-            origin: you
-        )
-        guard let dest else {
+        guard canRouteOnGraph, let dest = destination() else {
             clearRoute(chrome: GraphPlan.offGraph)
             return
         }
         routeTarget = dest
-        let plan = GraphPlan.line(graph: loadedGraph(), from: you, to: dest, mode: mode)
+        let plan = GraphPlan.line(graph: loadedGraph(), from: youCoordinate(), to: dest, mode: mode)
         routeCoords = plan.coords
         navChrome = plan.chrome
+    }
+
+    func tapRuler() {
+        toolChrome = MapRuler.chrome(from: youCoordinate(), to: destination())
+    }
+
+    func tapUSNG() {
+        let you = youCoordinate()
+        toolChrome = USNG.label(lat: you.lat, lon: you.lon)
+    }
+
+    func tapMagTrue() {
+        instruments.toggleMagTrue()
+        toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
     }
 
     func speakMap() {
@@ -259,6 +261,26 @@ final class AppRuntime {
         graphPackID = nil
         clearRoute(chrome: "")
         relabelMarksForActivePack()
+    }
+
+    private func youCoordinate() -> (lat: Double, lon: Double) {
+        let pack = packs?.active
+        return UserPuck.coordinate(
+            lastKnown: lastKnownFix,
+            packCenter: (pack?.center.lat ?? 0, pack?.center.lon ?? 0),
+            packSouth: pack?.bbox.south ?? 0,
+            packWest: pack?.bbox.west ?? 0,
+            packNorth: pack?.bbox.north ?? 0,
+            packEast: pack?.bbox.east ?? 0
+        )
+    }
+
+    private func destination() -> (lat: Double, lon: Double)? {
+        RouteTarget.pick(
+            explicit: routeTarget,
+            lastMark: marks.last.map { ($0.lat, $0.lon) },
+            origin: youCoordinate()
+        )
     }
 
     private func loadedGraph() -> RouteGraph? {

@@ -308,6 +308,20 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(RouteLine.shouldDraw(GraphRouter.coordinates(graph: empty, nodeIds: bearing.nodeIds)))
     }
 
+    func testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing() {
+        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: false))
+        XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true))
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: false, planChrome: ""), RouteLine.offGraph)
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, planChrome: ""), "")
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, planChrome: RouteLine.offGraph), RouteLine.offGraph)
+        XCTAssertEqual(MapRuler.chrome(from: nil, to: (lat: 31.80, lon: -106.50)), "RULER —")
+        let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
+        XCTAssertTrue(span.hasPrefix("RULER "))
+        XCTAssertTrue(span.hasSuffix(" m"))
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG")
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE")
+    }
+
     func testRouteTargetPrefersExplicitThenMark() {
         let origin = (lat: 31.76, lon: -106.49)
         let dest = (lat: 31.80, lon: -106.50)

@@ -23,6 +23,30 @@ public enum RouteLine {
     }
 }
 
+public enum WalkDriveChip {
+    public static func isEnabled(hasUsableGraph: Bool) -> Bool { hasUsableGraph }
+
+    public static func chrome(hasUsableGraph: Bool, planChrome: String) -> String {
+        if !hasUsableGraph { return RouteLine.offGraph }
+        return planChrome
+    }
+}
+
+public enum MapRuler {
+    public static func chrome(
+        from: (lat: Double, lon: Double)?,
+        to: (lat: Double, lon: Double)?
+    ) -> String {
+        guard let from, let to else { return "RULER —" }
+        let meters = GraphRouter.haversine(from.lat, from.lon, to.lat, to.lon)
+        return String(format: "RULER %.0f m", meters)
+    }
+}
+
+public enum MagTrueChip {
+    public static func chrome(magNorth: Bool) -> String { magNorth ? "MAG" : "TRUE" }
+}
+
 public enum RouteTarget {
     public static func pick(
         explicit: (lat: Double, lon: Double)?,
