@@ -72,6 +72,7 @@ final class AppRuntime {
     }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
+    private var graphWarmup: Task<RouteGraph?, Never>?
     private let fix = MeshFix()
 
     init() {
@@ -183,18 +184,27 @@ final class AppRuntime {
         }
         routeTarget = dest
         let from = youCoordinate()
+        if graphPackID == packs?.active?.id {
+            let plan = GraphPlan.line(graph: graphCache, from: from, to: dest, mode: mode)
+            routeCoords = plan.coords
+            navChrome = plan.chrome
+            return
+        }
         let id = packs?.active?.id
         let url = packs?.packURL("graph.json")
-        let cached = loadedGraphIfCached()
-        Task.detached { [weak self] in
-            let graph = cached ?? RouteGraph.load(from: url)
+        let inflight = graphWarmup
+        Task { [weak self] in
+            let graph: RouteGraph?
+            if let inflight {
+                graph = await inflight.value
+            } else {
+                graph = await Task.detached { RouteGraph.load(from: url) }.value
+            }
             let plan = GraphPlan.line(graph: graph, from: from, to: dest, mode: mode)
             await MainActor.run {
-                guard let self else { return }
-                if self.packs?.active?.id == id {
-                    self.graphCache = graph
-                    self.graphPackID = id
-                }
+                guard let self, self.packs?.active?.id == id else { return }
+                self.graphCache = graph
+                self.graphPackID = id
                 self.routeCoords = plan.coords
                 self.navChrome = plan.chrome
             }
@@ -293,6 +303,7 @@ final class AppRuntime {
         UserDefaults.standard.set(id, forKey: "pack.id")
         graphCache = nil
         graphPackID = nil
+        graphWarmup = nil
         clearRoute(chrome: "")
         relabelMarksForActivePack()
         warmupActiveGraph()
@@ -324,23 +335,17 @@ final class AppRuntime {
         )
     }
 
-    private func loadedGraphIfCached() -> RouteGraph? {
-        let id = packs?.active?.id
-        if graphPackID == id { return graphCache }
-        return nil
-    }
-
     private func warmupActiveGraph() {
         let id = packs?.active?.id
         let url = packs?.packURL("graph.json")
-        Task.detached { [weak self] in
-            let graph = RouteGraph.load(from: url)
+        let task = Task.detached { RouteGraph.load(from: url) }
+        graphWarmup = task
+        Task { [weak self] in
+            let graph = await task.value
             await MainActor.run {
                 guard let self, self.packs?.active?.id == id else { return }
-                if self.graphPackID != id || self.graphCache == nil {
-                    self.graphCache = graph
-                    self.graphPackID = id
-                }
+                self.graphCache = graph
+                self.graphPackID = id
             }
         }
     }
