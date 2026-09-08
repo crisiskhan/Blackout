@@ -124,7 +124,7 @@ public struct OfflineMapView: UIViewRepresentable {
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
-            let coord = view.convertPoint(point, toCoordinateFromView: view)
+            let coord = view.convert(point, toCoordinateFrom: view)
             onMapTap?(coord.latitude, coord.longitude)
         }
 

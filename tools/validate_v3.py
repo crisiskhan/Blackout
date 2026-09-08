@@ -474,6 +474,10 @@ def tip55_chrome() -> None:
         bad("OfflineMapView uses obsolete MapLibre overlay names (need add/remove)")
     else:
         ok("OfflineMapView uses MapLibre Swift add/remove overlay names")
+    if "convertPoint(" in offline or "toCoordinateFromView:" in offline:
+        bad("OfflineMapView uses obsolete MapLibre convertPoint name (need convert(_:toCoordinateFrom:))")
+    else:
+        ok("OfflineMapView uses MapLibre Swift convert(_:toCoordinateFrom:)")
     if "cachesDirectory" not in pack_style and "temporaryDirectory" not in pack_style:
         bad("PackStyle still writes resolved style into the bundle")
     else:
