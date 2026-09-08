@@ -50,6 +50,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34264110982` (`960a8a2`): tip-67 `tf:` push. Mint OK (`HAS_LOCAL_DIST_KEY=1`), then GET `/v1/builds` HTTP 500 in Next CPV. No IPA. Retry list 500 (15s/30s/60s/90s/120s) via `tools/tf_asc_cpv.py`. Do not re-upload 54–66.
 - `34264462418` (`960a8a2`): tip-67 `workflow_dispatch` with a concatenated `git_ref`. Checkout fetch failed. No IPA.
 - `34264699162` (`960a8a2`): tip-67 `workflow_dispatch` retry. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **67**. Dist `Q8AX4T282L` (`DISTRIBUTION`). altool no errors. ASC `e2cf188e-1fa8-4e07-b306-1e088087c7d0` **VALID**. PATCH 200. `ASSIGN Internal 67 204`. GraphProbe + warmup + keep-awake. Leave 66 until TestFlight shows 67 Ready.
+- `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -136,3 +137,7 @@ SOURCE GO tip `09e4fffe` / merge `1eaa33b5`. Run `34261557379` uploaded CPV **66
 ## Tip 67 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `b7953348` / merge `a72a8478`. Run `34264699162` uploaded CPV **67** and `ASSIGN Internal 67 204`. Map keep-awake + graph warmup. Leave 66 until TestFlight shows 67 Ready. Watch omitted. Internal only. Do not re-upload 54–66.
+
+## Tip 68 Internal (CoS 2026-09-08)
+
+SOURCE GO tip `afb2e2fc` / merge `7abb9e0b`. Run `34269174169` uploaded CPV **68** and `ASSIGN Internal 68 204`. Speak banner finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready. Watch omitted. Internal only. Do not re-upload 54–67.
