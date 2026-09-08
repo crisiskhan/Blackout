@@ -35,6 +35,7 @@ WATCH_PLIST = ROOT / "BlackoutWatch/Info.plist"
 GATE_INVOKE = "python3 tools/test_ci_opt.py"
 AUDIT_INVOKE = "bash tools/audit_offline.sh"
 BIBLE_BRANCH = "cursor/blackout-bible-v3-64d0"
+NODE24_CHECKOUT_MAJOR = 5
 TREE_CPV = "1"
 KEEP_DIST_ID = "45YLWHL6UP"
 
@@ -123,6 +124,35 @@ def test_audit_workflow_gates_bible_prs() -> None:
         if BIBLE_BRANCH not in branches:
             fail(f"{label} must pull_request-trigger on {BIBLE_BRANCH} — tip PRs merge unchecked")
     ok("audit.yml runs the offline invariants on Linux; PRs into bible v3 are gated")
+
+
+def test_checkout_action_runs_on_node24() -> None:
+    """actions/checkout@v4 is a Node 20 action.
+
+    Runner 2.337.0 already forces it onto Node 24 and annotates every job.
+    When that shim goes, testflight-internal.yml is the only ship path and
+    there is no Mac to fall back to. v5.0.0 is that runtime bump and nothing
+    else (v6 moves persisted credentials, v7 rewrites the action as ESM), so
+    the archive keeps the checkout it was debugged with. v5 needs runner
+    2.327.1 or newer; hosted macos-14 / macos-15 / ubuntu are past that.
+    """
+    workflows = sorted(
+        p for p in (ROOT / ".github/workflows").iterdir() if p.suffix in (".yml", ".yaml")
+    )
+    if not workflows:
+        fail("no workflows under .github/workflows")
+    pinned = 0
+    for path in workflows:
+        for major in re.findall(r"uses:\s*actions/checkout@v(\d+)", path.read_text()):
+            pinned += 1
+            if int(major) < NODE24_CHECKOUT_MAJOR:
+                fail(
+                    f"{path.name} pins actions/checkout@v{major} — Node 20 runtime; "
+                    f"v{NODE24_CHECKOUT_MAJOR} or newer runs on Node 24"
+                )
+    if not pinned:
+        fail("no actions/checkout@vN pin found — workflows must check out the tree")
+    ok(f"actions/checkout is v{NODE24_CHECKOUT_MAJOR}+ on {pinned} jobs (Node 24 runtime)")
 
 
 def test_testflight_workflow_invokes_gate() -> None:
@@ -652,6 +682,7 @@ def test_crisis_opt_locks() -> None:
 def main() -> None:
     test_compile_workflow_invokes_gate()
     test_audit_workflow_gates_bible_prs()
+    test_checkout_action_runs_on_node24()
     test_testflight_workflow_invokes_gate()
     test_cpv_inject_model()
     test_nfc_tag_only()
