@@ -57,7 +57,7 @@ jobs:
           done
           echo "ASC AuthKey secrets are present (values not printed)."
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # workflow_dispatch: inputs.git_ref. push branch or tf-* tag: github.sha
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.sha }}
