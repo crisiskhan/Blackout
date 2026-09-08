@@ -171,6 +171,7 @@ final class AppRuntime {
         routeTarget = (lat, lon)
         routeCoords = []
         navChrome = ""
+        toolChrome = ""
     }
 
     func navigate(mode: TravelMode) {

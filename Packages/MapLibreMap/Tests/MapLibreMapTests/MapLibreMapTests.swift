@@ -330,10 +330,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: true))
         XCTAssertEqual(
             WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""),
-            RouteLine.offGraph
+            ""
         )
         XCTAssertEqual(
             WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: true, planChrome: ""),
+            RouteLine.offGraph
+        )
+        XCTAssertEqual(
+            WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: false, planChrome: ""),
             RouteLine.offGraph
         )
         XCTAssertEqual(
@@ -348,8 +352,71 @@ final class MapLibreMapTests: XCTestCase {
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))
         XCTAssertTrue(span.hasSuffix(" m"))
-        XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG")
-        XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE")
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG NORTH")
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE NORTH")
+    }
+
+    func testMapFieldChromeCollapsesDestTrueStackSpray() {
+        let sprayed = MapFieldChrome.lines(
+            lock: RouteLine.offGraph,
+            route: RouteLine.offGraph,
+            tool: MagTrueChip.chrome(magNorth: false),
+            dest: (lat: 31.7619, lon: -106.4850),
+            bearingDeg: 45
+        )
+        XCTAssertEqual(sprayed.count, 2)
+        XCTAssertLessThanOrEqual(sprayed.count, MapFieldChrome.maxLines)
+        XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
+        XCTAssertTrue(sprayed[0].warn)
+        XCTAssertEqual(sprayed[1].text, "DEST 31.7619, -106.4850 · BEARING 45°")
+        XCTAssertFalse(sprayed[1].warn)
+
+        XCTAssertTrue(
+            MapFieldChrome.lines(lock: "", route: "", tool: "", dest: nil, bearingDeg: nil).isEmpty
+        )
+        let bearingOnly = MapFieldChrome.lines(
+            lock: "",
+            route: "",
+            tool: "",
+            dest: nil,
+            bearingDeg: 12
+        )
+        XCTAssertEqual(bearingOnly.map(\.text), ["BEARING 12°"])
+        XCTAssertEqual(
+            MapFieldChrome.joined([" OFF GRAPH ", "OFF GRAPH", "", "RULER 40 m"]),
+            "OFF GRAPH · RULER 40 m"
+        )
+        XCTAssertTrue(MapFieldChrome.isAlert("OFF PACK · TRUE NORTH"))
+        XCTAssertFalse(MapFieldChrome.isAlert("RULER 40 m"))
+    }
+
+    func testPackStyleKeepsLocalGlyphTemplateTokensLiteral() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-glyphs-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-glyphs-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        let style = pack.appendingPathComponent("style.json")
+        try JSONSerialization.data(withJSONObject: [
+            "version": 8,
+            "glyphs": "glyphs/{fontstack}/{range}.pbf",
+            "sources": [:],
+            "layers": [],
+        ]).write(to: style)
+        let out = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        let resolved = try JSONSerialization.jsonObject(with: Data(contentsOf: out)) as? [String: Any]
+        let glyphs = resolved?["glyphs"] as? String ?? ""
+        XCTAssertTrue(glyphs.hasPrefix("file:"))
+        for token in PackStyle.glyphTokens {
+            XCTAssertTrue(glyphs.contains(token), "glyph template lost \(token): \(glyphs)")
+        }
+        XCTAssertFalse(glyphs.contains("%7B"))
+        XCTAssertFalse(glyphs.contains("%7D"))
+        XCTAssertTrue(out.lastPathComponent.contains("v\(PackStyle.resolverVersion)"))
+        XCTAssertEqual(
+            PackStyle.localGlyphURL(template: "https://tiles/{fontstack}.pbf", packRoot: pack),
+            "https://tiles/{fontstack}.pbf"
+        )
     }
 
     func testRouteTargetPrefersExplicitThenMark() {
