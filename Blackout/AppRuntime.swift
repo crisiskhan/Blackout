@@ -54,22 +54,14 @@ final class AppRuntime {
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
+    /// Machine plan state for VoiceNav: "" on graph, `GraphPlan.offGraph` otherwise.
     var navChrome = ""
+    /// What the map says after a WALK/DRIVE tap: the route, or why there isn't one.
+    var routeChrome = ""
     var toolChrome = ""
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
-    var hasRouteDestination: Bool { destination() != nil }
-    var walkDriveEnabled: Bool {
-        WalkDriveChip.isEnabled(hasUsableGraph: canRouteOnGraph, hasDestination: hasRouteDestination)
-    }
-    var routeChrome: String {
-        WalkDriveChip.chrome(
-            hasUsableGraph: canRouteOnGraph,
-            hasDestination: hasRouteDestination,
-            planChrome: navChrome
-        )
-    }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
     private var graphWarmup: Task<RouteGraph?, Never>?
@@ -169,44 +161,53 @@ final class AppRuntime {
 
     func pickDestination(lat: Double, lon: Double) {
         routeTarget = (lat, lon)
-        routeCoords = []
-        navChrome = ""
+        clearRoute(plan: "", chrome: "")
     }
 
     func navigate(mode: TravelMode) {
-        switch mode {
-        case .walk, .drive:
-            break
-        }
-        guard walkDriveEnabled, let dest = destination() else {
-            clearRoute(chrome: GraphPlan.offGraph)
+        let pack = packs?.active
+        let packName = pack?.name ?? ""
+        let dest = destination()
+        if let block = WalkDriveChip.block(
+            hasPack: pack != nil,
+            hasUsableGraph: canRouteOnGraph,
+            hasDestination: dest != nil,
+            destinationOnPack: destinationOnPack(dest)
+        ) {
+            clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
             return
         }
+        guard let dest else { return }
         routeTarget = dest
+        routeCoords = []
+        navChrome = ""
+        routeChrome = WalkDriveChip.working(mode: mode)
         let from = youCoordinate()
-        if graphPackID == packs?.active?.id {
-            let plan = GraphPlan.line(graph: graphCache, from: from, to: dest, mode: mode)
-            routeCoords = plan.coords
-            navChrome = plan.chrome
-            return
-        }
-        let id = packs?.active?.id
+        let id = pack?.id
         let url = packs?.packURL("graph.json")
+        let cached = graphPackID == id ? graphCache : nil
         let inflight = graphWarmup
         Task { [weak self] in
             let graph: RouteGraph?
-            if let inflight {
+            if let cached {
+                graph = cached
+            } else if let inflight {
                 graph = await inflight.value
             } else {
                 graph = await Task.detached { RouteGraph.load(from: url) }.value
             }
-            let plan = GraphPlan.line(graph: graph, from: from, to: dest, mode: mode)
+            let plan = await Task.detached {
+                GraphPlan.line(graph: graph, from: from, to: dest, mode: mode)
+            }.value
             await MainActor.run {
                 guard let self, self.packs?.active?.id == id else { return }
                 self.graphCache = graph
                 self.graphPackID = id
                 self.routeCoords = plan.coords
                 self.navChrome = plan.chrome
+                self.routeChrome = RouteLine.shouldDraw(plan.coords)
+                    ? RouteSummary.chrome(mode: mode, coords: plan.coords)
+                    : RouteBlock.noPath.chrome(mode: mode, packName: packName)
             }
         }
     }
@@ -304,7 +305,8 @@ final class AppRuntime {
         graphCache = nil
         graphPackID = nil
         graphWarmup = nil
-        clearRoute(chrome: "")
+        routeTarget = nil
+        clearRoute(plan: "", chrome: "")
         relabelMarksForActivePack()
         warmupActiveGraph()
     }
@@ -350,9 +352,22 @@ final class AppRuntime {
         }
     }
 
-    private func clearRoute(chrome: String) {
+    private func clearRoute(plan: String, chrome: String) {
         routeCoords = []
-        navChrome = chrome
+        navChrome = plan
+        routeChrome = chrome
+    }
+
+    private func destinationOnPack(_ dest: (lat: Double, lon: Double)?) -> Bool {
+        guard let dest, let pack = packs?.active else { return false }
+        return UserPuck.contains(
+            lat: dest.lat,
+            lon: dest.lon,
+            south: pack.bbox.south,
+            west: pack.bbox.west,
+            north: pack.bbox.north,
+            east: pack.bbox.east
+        )
     }
 
     private func relabelMarksForActivePack() {

@@ -23,14 +23,97 @@ public enum RouteLine {
     }
 }
 
-public enum WalkDriveChip {
-    public static func isEnabled(hasUsableGraph: Bool, hasDestination: Bool) -> Bool {
-        hasUsableGraph && hasDestination
+/// Why a WALK or DRIVE tap could not draw a street line. The chips are never
+/// disabled, so every tap either draws or says one of these out loud.
+public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
+    case noPack
+    case noGraph
+    case noDestination
+    case destinationOffPack
+    case noPath
+
+    /// Plan state handed to VoiceNav. Only a real routing failure is OFF GRAPH;
+    /// an unset destination is a prompt, not a dead end.
+    public var planChrome: String {
+        switch self {
+        case .noDestination:
+            return ""
+        case .noPack, .noGraph, .destinationOffPack, .noPath:
+            return RouteLine.offGraph
+        }
     }
 
-    public static func chrome(hasUsableGraph: Bool, hasDestination: Bool, planChrome: String) -> String {
-        if !hasUsableGraph || !hasDestination { return RouteLine.offGraph }
-        return planChrome
+    public func chrome(mode: TravelMode, packName: String) -> String {
+        let verb = WalkDriveChip.verb(mode)
+        let pack = packName.isEmpty ? "THIS PACK" : packName.uppercased()
+        switch self {
+        case .noPack:
+            return "\(verb) — NO MAP PACK ON THIS PHONE"
+        case .noGraph:
+            return "\(verb) — \(pack) HAS NO STREET GRAPH"
+        case .noDestination:
+            return "\(verb) — TAP THE MAP TO SET A DESTINATION"
+        case .destinationOffPack:
+            return "\(verb) — DESTINATION IS OUTSIDE \(pack)"
+        case .noPath:
+            return "\(RouteLine.offGraph) — NO \(verb) PATH FROM YOU"
+        }
+    }
+}
+
+public enum WalkDriveChip {
+    /// WALK and DRIVE always tap. A dead control tells the field nothing.
+    public static let alwaysTappable = true
+
+    public static func verb(_ mode: TravelMode) -> String {
+        switch mode {
+        case .walk: return "WALK"
+        case .drive: return "DRIVE"
+        }
+    }
+
+    public static func block(
+        hasPack: Bool,
+        hasUsableGraph: Bool,
+        hasDestination: Bool,
+        destinationOnPack: Bool
+    ) -> RouteBlock? {
+        if !hasPack { return .noPack }
+        if !hasUsableGraph { return .noGraph }
+        if !hasDestination { return .noDestination }
+        if !destinationOnPack { return .destinationOffPack }
+        return nil
+    }
+
+    public static func working(mode: TravelMode) -> String {
+        "\(verb(mode)) — PLOTTING…"
+    }
+}
+
+public enum RouteSummary {
+    public static let walkMetersPerSecond = 1.25
+    public static let driveMetersPerSecond = 11.0
+
+    public static func meters(_ coords: [(lat: Double, lon: Double)]) -> Double {
+        guard coords.count >= 2 else { return 0 }
+        return zip(coords, coords.dropFirst()).reduce(0.0) { total, leg in
+            total + GraphRouter.haversine(leg.0.lat, leg.0.lon, leg.1.lat, leg.1.lon)
+        }
+    }
+
+    public static func chrome(mode: TravelMode, coords: [(lat: Double, lon: Double)]) -> String {
+        guard RouteLine.shouldDraw(coords) else {
+            return RouteBlock.noPath.chrome(mode: mode, packName: "")
+        }
+        let total = meters(coords)
+        let speed = mode == .walk ? walkMetersPerSecond : driveMetersPerSecond
+        let minutes = max(1, Int((total / speed / 60).rounded()))
+        return "\(WalkDriveChip.verb(mode)) \(distancePhrase(total)) · ~\(minutes) min"
+    }
+
+    public static func distancePhrase(_ meters: Double) -> String {
+        if meters < 1000 { return String(format: "%.0f m", meters.rounded()) }
+        return String(format: "%.1f km", meters / 1000)
     }
 }
 

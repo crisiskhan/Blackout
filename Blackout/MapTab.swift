@@ -21,15 +21,8 @@ struct MapTab: View {
                     runtime.toggleLockOn()
                 }
             }
-            instrumentRow
             if !runtime.lockChrome.isEmpty {
                 Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
-            }
-            if !runtime.routeChrome.isEmpty {
-                Text(runtime.routeChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
-            }
-            if !runtime.toolChrome.isEmpty {
-                Text(runtime.toolChrome).font(.caption.weight(.semibold)).foregroundStyle(Theme.silver)
             }
             if let dest = runtime.routeTarget {
                 Text(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
@@ -104,20 +97,40 @@ struct MapTab: View {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
                 Spacer()
             }
+            chipAnswer
+            instrumentRow
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// The answer to the last chip tap, printed where the thumb already is.
+    @ViewBuilder
+    private var chipAnswer: some View {
+        if !runtime.routeChrome.isEmpty {
+            Text(runtime.routeChrome)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.orange)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        if !runtime.toolChrome.isEmpty {
+            Text(runtime.toolChrome)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.silver)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// Bottom chip bar. Nothing here is ever disabled — a tap draws, or it says why not.
     private var instrumentRow: some View {
         HStack(spacing: 4) {
             Button("MARK") { runtime.dropMark() }
                 .buttonStyle(MapChipButtonStyle())
             Button("WALK") { runtime.navigate(mode: .walk) }
-                .disabled(!runtime.walkDriveEnabled)
                 .buttonStyle(MapChipButtonStyle())
             Button("DRIVE") { runtime.navigate(mode: .drive) }
-                .disabled(!runtime.walkDriveEnabled)
                 .buttonStyle(MapChipButtonStyle())
             Button("RULER") { runtime.tapRuler() }
                 .buttonStyle(MapChipButtonStyle())
@@ -126,6 +139,7 @@ struct MapTab: View {
             Button("MAG/TRUE") { runtime.tapMagTrue() }
                 .buttonStyle(MapChipButtonStyle())
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func styleURL() -> URL? {

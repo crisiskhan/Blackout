@@ -324,32 +324,65 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(RouteLine.shouldDraw(GraphRouter.coordinates(graph: empty, nodeIds: bearing.nodeIds)))
     }
 
-    func testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing() {
-        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: false, hasDestination: true))
-        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: false))
-        XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: true))
+    func testWalkDriveChipAlwaysTapsAndNamesTheBlocker() {
+        XCTAssertTrue(WalkDriveChip.alwaysTappable)
+        let ready = WalkDriveChip.block(
+            hasPack: true,
+            hasUsableGraph: true,
+            hasDestination: true,
+            destinationOnPack: true
+        )
+        XCTAssertNil(ready)
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""),
-            RouteLine.offGraph
+            WalkDriveChip.block(hasPack: false, hasUsableGraph: true, hasDestination: true, destinationOnPack: true),
+            .noPack
         )
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: true, planChrome: ""),
-            RouteLine.offGraph
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: false, hasDestination: true, destinationOnPack: true),
+            .noGraph
         )
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: ""),
-            ""
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: false, destinationOnPack: false),
+            .noDestination
         )
         XCTAssertEqual(
-            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: RouteLine.offGraph),
-            RouteLine.offGraph
+            WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: true, destinationOnPack: false),
+            .destinationOffPack
         )
+        for block in RouteBlock.allCases {
+            for mode in [TravelMode.walk, .drive] {
+                let said = block.chrome(mode: mode, packName: "TX WEST")
+                XCTAssertFalse(said.isEmpty)
+                XCTAssertTrue(said.contains(WalkDriveChip.verb(mode)))
+            }
+        }
+        XCTAssertTrue(RouteBlock.noPath.chrome(mode: .walk, packName: "").hasPrefix(RouteLine.offGraph))
+        XCTAssertEqual(RouteBlock.noDestination.planChrome, "")
+        XCTAssertEqual(RouteBlock.noPath.planChrome, RouteLine.offGraph)
+        XCTAssertEqual(RouteBlock.noGraph.planChrome, RouteLine.offGraph)
+        XCTAssertTrue(WalkDriveChip.working(mode: .drive).hasPrefix("DRIVE"))
         XCTAssertEqual(MapRuler.chrome(from: nil, to: (lat: 31.80, lon: -106.50)), "RULER —")
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))
         XCTAssertTrue(span.hasSuffix(" m"))
         XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG")
         XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE")
+    }
+
+    func testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty() {
+        let leg = [(lat: 31.7600, lon: -106.4900), (lat: 31.7690, lon: -106.4900)]
+        let meters = RouteSummary.meters(leg)
+        XCTAssertGreaterThan(meters, 900)
+        XCTAssertLessThan(meters, 1100)
+        let walk = RouteSummary.chrome(mode: .walk, coords: leg)
+        XCTAssertTrue(walk.hasPrefix("WALK "))
+        XCTAssertTrue(walk.contains("km"))
+        XCTAssertTrue(walk.contains("min"))
+        let drive = RouteSummary.chrome(mode: .drive, coords: leg)
+        XCTAssertTrue(drive.hasPrefix("DRIVE "))
+        XCTAssertEqual(RouteSummary.distancePhrase(240), "240 m")
+        XCTAssertEqual(RouteSummary.meters([]), 0)
+        XCTAssertTrue(RouteSummary.chrome(mode: .walk, coords: []).hasPrefix(RouteLine.offGraph))
     }
 
     func testRouteTargetPrefersExplicitThenMark() {

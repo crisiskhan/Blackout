@@ -992,12 +992,17 @@ def tip62_nav() -> None:
         and "runtime.navigate(mode: .drive)" in map_tab
         and "route: runtime.routeCoords" in map_tab
         and "pickDestination" in map_tab
-        and "walkDriveEnabled" in map_tab
-        and "disabled(!runtime.walkDriveEnabled)" in map_tab
         and "routeChrome" in map_tab
+        # A dead chip tells the field nothing: WALK/DRIVE always tap and always answer.
+        and ".disabled(" not in map_tab
         and "hasDestination" in route_line
+        and "enum RouteBlock" in route_line
+        and "alwaysTappable" in route_line
         and "func navigate(mode: TravelMode)" in app
         and "GraphPlan.line" in app
+        and "WalkDriveChip.block(" in app
+        and "RouteSummary.chrome(" in app
+        and "RouteBlock.noPath" in app
         and "WalkDriveChip" in route_line
         and "convert(point, toCoordinateFrom:" in offline
         and "convertPoint" not in offline
@@ -1031,7 +1036,8 @@ def tip62_nav() -> None:
         "testWalkFindsTwoHopPathAndDriveIgnoresWalkOnlyEdges" in router_tests
         and "testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph" in router_tests
         and "testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords" in map_tests
-        and "testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing" in map_tests
+        and "testWalkDriveChipAlwaysTapsAndNamesTheBlocker" in map_tests
+        and "testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty" in map_tests
         and "testMapInstrumentChipsAreSixFortyFourPointTargets" in (
             ROOT / "Packages" / "Tokens" / "Tests" / "TokensTests" / "TokensTests.swift"
         ).read_text()
@@ -1042,7 +1048,7 @@ def tip62_nav() -> None:
 
     checks = [
         ("1 44pt tappable chips", chips_ok, "tip-62 chips FAIL — mark/walk/drive/ruler/usng/magTrue not 44pt Buttons"),
-        ("2 WALK/DRIVE route or OFF GRAPH", walk_ok, "tip-62 WALK/DRIVE FAIL — line/disabled/OFF GRAPH/convert API"),
+        ("2 WALK/DRIVE draw or say why", walk_ok, "WALK/DRIVE FAIL — dead chip, no reason line, or convert API"),
         ("3 MARK one-row", mark_one_ok, "tip-62 MARK FAIL — MarkDrop not wired"),
         ("4 debug chrome off canvas", canvas_clean_ok, "tip-62 canvas FAIL — style.json/MapKit debug still on MAP"),
         ("5 walking-zoom road names", roads_ok, "tip-62 roads FAIL — road-labels missing or not walking zoom"),
