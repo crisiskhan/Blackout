@@ -181,14 +181,21 @@ final class MapLibreMapTests: XCTestCase {
         let layers = parsed?["layers"] as? [[String: Any]] ?? []
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.wildRoadsLayerID && $0["type"] as? String == "line" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.osmPointsLayerID && $0["type"] as? String == "circle" })
+        let points = layers.first { $0["id"] as? String == PackStyle.osmPointsLayerID }
+        let pointsLayout = points?["layout"] as? [String: Any]
+        XCTAssertEqual(pointsLayout?["visibility"] as? String, "none")
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadLabelsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadRefsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.placeLabelsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.tracksLayerID && $0["type"] as? String == "line" })
         let roadLabel = layers.first { $0["id"] as? String == PackStyle.roadLabelsLayerID }
         let roadPaint = roadLabel?["paint"] as? [String: Any]
+        let roadLayout = roadLabel?["layout"] as? [String: Any]
         XCTAssertEqual(roadPaint?["text-color"] as? String, PackStyle.silverInk)
         XCTAssertEqual(roadPaint?["text-halo-color"] as? String, PackStyle.voidInk)
+        XCTAssertGreaterThanOrEqual(roadPaint?["text-halo-width"] as? Double ?? 0, 2.0)
+        XCTAssertLessThanOrEqual(roadLayout?["symbol-spacing"] as? Int ?? 999, 110)
+        XCTAssertGreaterThanOrEqual(roadLayout?["text-max-angle"] as? Int ?? 0, 40)
         let refs = layers.first { $0["id"] as? String == PackStyle.roadRefsLayerID }
         let refPaint = refs?["paint"] as? [String: Any]
         XCTAssertEqual(refPaint?["text-color"] as? String, PackStyle.accentInk)

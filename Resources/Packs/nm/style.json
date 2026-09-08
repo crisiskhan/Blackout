@@ -248,6 +248,9 @@
         "circle-radius": 2.2,
         "circle-stroke-color": "#0c0e10",
         "circle-stroke-width": 0.6
+      },
+      "layout": {
+        "visibility": "none"
       }
     },
     {

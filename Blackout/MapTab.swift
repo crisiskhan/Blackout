@@ -15,6 +15,7 @@ struct MapTab: View {
                 Text("MAP").foregroundStyle(Theme.silver)
                 Spacer()
                 Button("SPEAK") { runtime.speakMap() }
+                    .buttonStyle(MapChipButtonStyle())
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
                     runtime.toggleLockOn()
@@ -38,7 +39,11 @@ struct MapTab: View {
                 Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Theme.silver)
             }
             if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+                Text(runtime.speechChrome)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)

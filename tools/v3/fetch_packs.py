@@ -832,6 +832,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "circle",
                 "source": "osm",
                 "filter": ["==", ["geometry-type"], "Point"],
+                "layout": {"visibility": "none"},
                 "paint": {
                     "circle-color": SILVER_INK,
                     "circle-radius": 2.4,
@@ -848,11 +849,11 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "layout": {
                     "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "symbol-spacing": 180,
+                    "symbol-spacing": 110,
                     "text-size": zoom_stops(12, 12, 14, 15, 16, 18, 17, 20),
                     "text-font": [GLYPH_STACK],
-                    "text-max-angle": 32,
-                    "text-padding": 1,
+                    "text-max-angle": 40,
+                    "text-padding": 2,
                     "text-letter-spacing": 0.03,
                     "text-optional": True,
                     "text-keep-upright": True,
@@ -869,7 +870,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "paint": {
                     "text-color": SILVER_INK,
                     "text-halo-color": VOID_INK,
-                    "text-halo-width": 2.0,
+                    "text-halo-width": 2.2,
                     "text-halo-blur": 0.15,
                 },
             },

@@ -1105,7 +1105,40 @@ def main() -> None:
         bad(f"TX WEST walking-zoom style readability failed\n{style_read.stdout}{style_read.stderr}")
     else:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
+    tip65_speak()
     sys.exit(fail)
+
+
+def tip65_speak() -> None:
+    """Tip 65 — finish Speak voice nav. Keep SPEAK. Do not regress Walk line."""
+    voice = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_voice_nav.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if voice.returncode != 0:
+        bad(f"tip-65 VoiceNav tests failed\n{voice.stdout}{voice.stderr}")
+        return
+    ok("Done: VoiceNav full prompt + Speak chip stays")
+
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
+    pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+    if 'Button("SPEAK")' not in map_tab or "runtime.speakMap()" not in map_tab:
+        bad("tip-65 deleted SPEAK")
+        return
+    if "VoiceNav.prompt" not in app or "speechChrome = text" not in app:
+        bad("tip-65 Speak still truncated stub")
+        return
+    if "GraphPlan.line" not in app or "RouteLine.sourceID" not in offline:
+        bad("tip-65 Walk cyan line hooks missing")
+        return
+    if "CURRENT_PROJECT_VERSION = 1;" not in pbx:
+        bad("CPV bumped — tree must stay 1")
+        return
+    ok("Done: SPEAK kept; Walk line hooks intact; CPV 1")
 
 
 if __name__ == "__main__":
