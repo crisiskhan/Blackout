@@ -583,15 +583,33 @@ def pack_graph(g: dict) -> dict:
     lat = [round(float(nodes[str(n)]["lat"]), COORD_DP) for n in ids]
     lon = [round(float(nodes[str(n)]["lon"]), COORD_DP) for n in ids]
 
+    scale = 10**METRES_DP
+    span: dict[tuple[int, int], float] = {}
+
+    def metres_between(a: int, b: int) -> float:
+        """Length of the segment as the shipped coordinates place it.
+
+        Packing rounds coordinates to COORD_DP, which can move an endpoint about
+        a metre. The router steers A* by the straight line between these same
+        shipped points, so a stored length shorter than that line would make the
+        heuristic inadmissible and the "shortest" route no longer shortest.
+        Measure after the rounding and never round the answer down.
+        """
+        if (a, b) not in span:
+            raw = haversine_m(lat[a], lon[a], lat[b], lon[b])
+            span[(a, b)] = max(math.ceil(raw * scale) / scale, 1 / scale)
+        return span[(a, b)]
+
     segments: dict[tuple[int, int, float], int] = {}
     for e in g.get("edges") or []:
         a = index.get(int(e["a"]))
         b = index.get(int(e["b"]))
         if a is None or b is None:
             continue
-        metres = round(float(e["m"]), METRES_DP)
         backward = a > b
-        key = (b, a, metres) if backward else (a, b, metres)
+        lo, hi = (b, a) if backward else (a, b)
+        metres = metres_between(lo, hi)
+        key = (lo, hi, metres)
         flags = 0
         if e.get("walk"):
             flags |= WALK_BACK if backward else WALK_FORWARD
