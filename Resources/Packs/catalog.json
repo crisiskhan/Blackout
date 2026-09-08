@@ -206,6 +206,8 @@
       "state": "NM",
       "kind": "osm-contour-extract",
       "engine": "maplibre",
+      "defaultOpen": false,
+      "walkable": true,
       "bbox": {
         "south": 35.06,
         "west": -106.68,
@@ -222,7 +224,7 @@
             "north": 35.14,
             "east": -106.55
           },
-          "featureCount": 47888
+          "featureCount": 35480
         },
         "wild": {
           "name": "Sandia foothills wild",
@@ -233,7 +235,18 @@
             "north": 35.25,
             "east": -106.38
           },
-          "featureCount": 2483
+          "featureCount": 2344
+        },
+        "union": {
+          "name": "Albuquerque / Sandia walkable union",
+          "bbox": {
+            "name": "Albuquerque / Sandia walkable union",
+            "south": 35.06,
+            "west": -106.68,
+            "north": 35.25,
+            "east": -106.38
+          },
+          "featureCount": 78904
         }
       },
       "banners": [
@@ -242,11 +255,17 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 2125208,
+      "bytes": 67236242,
       "files": [
         "contours.geojson",
         "dem.json",
+        "glyphs/Open Sans Regular/0-255.pbf",
+        "glyphs/Open Sans Regular/256-511.pbf",
+        "glyphs/Open Sans Regular/512-767.pbf",
+        "glyphs/Open Sans Regular/768-1023.pbf",
+        "glyphs/Open Sans Regular/8192-8447.pbf",
         "graph.json",
+        "hillshade.png",
         "layers/flood.geojson",
         "layers/hazards.geojson",
         "layers/public_land.geojson",
@@ -255,13 +274,64 @@
         "osm.geojson",
         "pois.geojson",
         "style.json",
+        "union.geojson",
         "wild.geojson"
       ],
       "center": {
         "lat": 35.155,
         "lon": -106.53
       },
-      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+      "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+      "terrain": {
+        "present": true,
+        "file": "hillshade.png",
+        "bytes": 1350584,
+        "width": 2048,
+        "height": 1297,
+        "attribution": "USGS 3DEP hillshade, build-time only",
+        "coordinates": [
+          [
+            -106.68,
+            35.25
+          ],
+          [
+            -106.38,
+            35.25
+          ],
+          [
+            -106.38,
+            35.06
+          ],
+          [
+            -106.68,
+            35.06
+          ]
+        ]
+      },
+      "stats": {
+        "features": 79283,
+        "highwayLines": 75303,
+        "namedStreets": 15687,
+        "sampleStreetNames": [
+          "Richmond Drive Southeast",
+          "Rio Grande del Sol Court Northwest",
+          "Arvilla Avenue Northeast",
+          "Vassar Drive Northeast",
+          "Cottonwood Drive",
+          "Elfego Road Northwest",
+          "Telesfor Sanchez Road Northwest",
+          "Leatherwood Lane Northwest",
+          "San Tesoro Street Northeast",
+          "East Frontage Road",
+          "West Frontage Road",
+          "Barelas Street Southwest"
+        ],
+        "water": 3150,
+        "places": 72,
+        "graphEdges": 359382,
+        "graphNodes": 123847,
+        "streetsVisibleAtWalkingZoom": true
+      }
     },
     {
       "id": "fl-north",
