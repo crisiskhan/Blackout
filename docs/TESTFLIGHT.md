@@ -109,3 +109,7 @@ WALK/DRIVE on-graph polyline on the existing TX WEST pack. Graph already shipped
 ## Tip 62 Internal (CoS 2026-09-08 Crisis GO)
 
 SOURCE GO tip `81a8903a82bf9a6f717e960793da72e5b508b39f` (tree also has `a410b47` 44pt chips). Factory mode. Run `34245270215` uploaded CPV **62** and `ASSIGN Internal 62 204`. Leave 61 until TestFlight shows 62 Ready. Watch omitted. Internal only. Do not re-upload 54–61.
+
+## Tip 63 Internal (CoS 2026-09-08 Director factory)
+
+NM walkable pack tip `52cac90b` merge `42b61974` (~64.1 MB streets yes). tx-west stays default. Crisis: continue Director factory — do not idle. This `tf:` injects ASC **63**. Leave 62 until Ready if still proving instrument; Watch omitted. Internal only. Do not re-upload 54–62.
