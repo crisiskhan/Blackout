@@ -42,6 +42,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34002862630` (`919dfa8`): first `tf:` push auto-upload. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **59**. Dist `6L4U8L695G` (`DISTRIBUTION`). altool no errors. ASC `3da30d72-408b-4cd2-a6e7-7009106e97bb` **VALID**. PATCH 200. `ASSIGN Internal 59 204`. Same tip-58 app as 58 (docs-only tree).
 - `34232353416` (`b451bb1`): tip-60 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **60**. Dist `U8C9ZLHLTJ` (`DISTRIBUTION`). altool no errors. ASC `4bcbdb70-f766-4d5d-8aff-8315399e56ca` **VALID**. PATCH 200. `ASSIGN Internal 60 204`. Leave 59 until TestFlight shows 60 Ready.
 - `34237111681` (`b947536`): tip-61 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **61**. Dist `422W3DA782` (`DISTRIBUTION`). altool no errors. ASC `b7c98209-6c8d-4f42-a209-cbff4c63c789` **VALID**. PATCH 200. `ASSIGN Internal 61 204`. TX WEST walkable OSM. Leave 60 until TestFlight shows 61 Ready.
+- `34245270215` (`b0601e2`): tip-62 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **62**. Dist `RMG3W7ARUD` (`DISTRIBUTION`). altool no errors. ASC `198debb6-312a-41ba-b1a7-c4ff6d683456` **VALID**. PATCH 200. `ASSIGN Internal 62 204`. MAP chips + WALK/DRIVE. Leave 61 until TestFlight shows 62 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -107,4 +108,4 @@ WALK/DRIVE on-graph polyline on the existing TX WEST pack. Graph already shipped
 
 ## Tip 62 Internal (CoS 2026-09-08 Crisis GO)
 
-SOURCE GO tip `81a8903a82bf9a6f717e960793da72e5b508b39f` MAP instrument five. Factory mode. This `tf:` push injects ASC **62**. Leave 61 until Ready. Watch omitted. Internal only. Do not re-upload 54–61.
+SOURCE GO tip `81a8903a82bf9a6f717e960793da72e5b508b39f` (tree also has `a410b47` 44pt chips). Factory mode. Run `34245270215` uploaded CPV **62** and `ASSIGN Internal 62 204`. Leave 61 until TestFlight shows 62 Ready. Watch omitted. Internal only. Do not re-upload 54–61.
