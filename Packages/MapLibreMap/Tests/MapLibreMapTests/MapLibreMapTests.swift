@@ -192,6 +192,7 @@ final class MapLibreMapTests: XCTestCase {
         let refs = layers.first { $0["id"] as? String == PackStyle.roadRefsLayerID }
         let refPaint = refs?["paint"] as? [String: Any]
         XCTAssertEqual(refPaint?["text-color"] as? String, PackStyle.accentInk)
+        XCTAssertEqual(refPaint?["text-halo-color"] as? String, PackStyle.silverInk)
         XCTAssertEqual(OSMCredit.line, "© OpenStreetMap contributors")
     }
 

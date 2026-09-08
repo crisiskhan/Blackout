@@ -214,10 +214,26 @@ def main() -> None:
         fail("road-refs must appear by walking approach zoom")
     if (refs.get("paint") or {}).get("text-color") != ACCENT:
         fail(f"road-refs must be {ACCENT}")
+    if (refs.get("paint") or {}).get("text-halo-color") != SILVER:
+        fail("road-refs need a silver halo so #E10600 reads on void")
+    if interpolate_at((refs.get("layout") or {}).get("text-size"), 16) < 18:
+        fail("road-refs too small at walking zoom")
+    ref_key = (refs.get("layout") or {}).get("symbol-sort-key")
+    if not isinstance(ref_key, (int, float)) or float(ref_key) > 1:
+        fail("road-refs must sort ahead of local names (symbol-sort-key <= 1)")
 
     casing = next((item for item in style.get("layers") or [] if item.get("id") == "roads-casing"), None)
     if not casing:
         fail("tx-west needs roads-casing so silver streets pop off void")
+    arterial = next((item for item in style.get("layers") or [] if item.get("id") == "roads-arterial-casing"), None)
+    major = next((item for item in style.get("layers") or [] if item.get("id") == "roads-major"), None)
+    if not arterial or not major:
+        fail("tx-west needs arterial red casing and major silver fill")
+    for z in (13, 15, 17):
+        red = interpolate_at((arterial.get("paint") or {}).get("line-width"), z)
+        fill = interpolate_at((major.get("paint") or {}).get("line-width"), z)
+        if red - fill < 1.8:
+            fail(f"arterial red casing invisible under major fill at z{z}: red={red} fill={fill}")
 
     assert_walkable_osm("tx-west")
     assert_walkable_osm("nm")

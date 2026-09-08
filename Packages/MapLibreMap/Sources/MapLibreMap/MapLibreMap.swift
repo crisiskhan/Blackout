@@ -435,14 +435,15 @@ public enum PackStyle {
                 "layout": [
                     "text-field": ["get", "ref"],
                     "symbol-placement": "line",
-                    "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 14, 16, 16, 19],
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 11, 15, 14, 18, 16, 21],
                     "text-font": ["Open Sans Regular"],
                     "text-optional": true,
+                    "symbol-sort-key": 0,
                 ],
                 "paint": [
                     "text-color": accentInk,
-                    "text-halo-color": voidInk,
-                    "text-halo-width": 2.2,
+                    "text-halo-color": silverInk,
+                    "text-halo-width": 2.0,
                 ],
             ])
         }
