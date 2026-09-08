@@ -182,8 +182,16 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.wildRoadsLayerID && $0["type"] as? String == "line" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.osmPointsLayerID && $0["type"] as? String == "circle" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadLabelsLayerID && $0["type"] as? String == "symbol" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadRefsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.placeLabelsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.tracksLayerID && $0["type"] as? String == "line" })
+        let roadLabel = layers.first { $0["id"] as? String == PackStyle.roadLabelsLayerID }
+        let roadPaint = roadLabel?["paint"] as? [String: Any]
+        XCTAssertEqual(roadPaint?["text-color"] as? String, PackStyle.silverInk)
+        XCTAssertEqual(roadPaint?["text-halo-color"] as? String, PackStyle.voidInk)
+        let refs = layers.first { $0["id"] as? String == PackStyle.roadRefsLayerID }
+        let refPaint = refs?["paint"] as? [String: Any]
+        XCTAssertEqual(refPaint?["text-color"] as? String, PackStyle.accentInk)
         XCTAssertEqual(OSMCredit.line, "© OpenStreetMap contributors")
     }
 

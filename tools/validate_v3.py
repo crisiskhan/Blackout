@@ -1007,8 +1007,13 @@ def tip62_nav() -> None:
     )
     roads_ok = (
         road_labels is not None
-        and float(road_labels.get("minzoom") or 99) <= 14
+        and float(road_labels.get("minzoom") or 99) <= 12
+        and (road_labels.get("paint") or {}).get("text-color") == "#B8BDC2"
+        and (road_labels.get("paint") or {}).get("text-halo-color") == "#000000"
+        and float((road_labels.get("paint") or {}).get("text-halo-width") or 0) >= 1.8
+        and any(layer.get("id") == "road-refs" for layer in layers)
         and "road-labels" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+        and "#B8BDC2" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     )
     tests_ok = (
         "testWalkFindsTwoHopPathAndDriveIgnoresWalkOnlyEdges" in router_tests
@@ -1068,6 +1073,16 @@ def main() -> None:
     tip58_solo_qa()
     tip60_map_chrome()
     tip62_nav()
+    style_read = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_tx_west_style.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if style_read.returncode != 0:
+        bad(f"TX WEST walking-zoom style readability failed\n{style_read.stdout}{style_read.stderr}")
+    else:
+        ok("TX WEST walking-zoom streets and names use Blackout ink")
     sys.exit(fail)
 
 

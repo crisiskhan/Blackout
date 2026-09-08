@@ -31,6 +31,16 @@ public enum BlackoutTokens: Sendable {
         public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
     }
 
+    /// Offline MAP ink. Dark red/silver on void so walking-zoom streets and names read.
+    public enum MapInk {
+        public static let voidHex = "#000000"
+        public static let silverHex = "#B8BDC2"
+        public static let accentHex = "#E10600"
+        public static let roadLabelMinZoom: Double = 12
+        public static let roadLabelWalkingSize: Double = 18
+        public static let roadLabelHaloWidth: Double = 2.0
+    }
+
     public struct RGBA: Equatable, Sendable {
         public var r, g, b, a: Double
         public init(r: Double, g: Double, b: Double, a: Double) {

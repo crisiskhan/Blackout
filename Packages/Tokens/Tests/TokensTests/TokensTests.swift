@@ -53,6 +53,15 @@ final class TokensTests: XCTestCase {
         XCTAssertFalse(BlackoutTokens.MapChip.magTrue.requiresGraph)
     }
 
+    func testMapInkIsVoidRedSilver() {
+        XCTAssertEqual(BlackoutTokens.MapInk.voidHex, "#000000")
+        XCTAssertEqual(BlackoutTokens.MapInk.silverHex, "#B8BDC2")
+        XCTAssertEqual(BlackoutTokens.MapInk.accentHex, "#E10600")
+        XCTAssertEqual(BlackoutTokens.MapInk.roadLabelMinZoom, 12)
+        XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelWalkingSize, 16)
+        XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelHaloWidth, 1.8)
+    }
+
     func testSOSFABIsCommsOnlyNotBrowseMap() {
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: true))
