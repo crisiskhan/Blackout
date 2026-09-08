@@ -15,6 +15,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var packWest: Double
     public var packNorth: Double
     public var packEast: Double
+    public var route: [(lat: Double, lon: Double)]
+    public var onMapTap: ((Double, Double) -> Void)?
 
     public init(
         styleURL: URL,
@@ -25,7 +27,9 @@ public struct OfflineMapView: UIViewRepresentable {
         packSouth: Double,
         packWest: Double,
         packNorth: Double,
-        packEast: Double
+        packEast: Double,
+        route: [(lat: Double, lon: Double)] = [],
+        onMapTap: ((Double, Double) -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -36,6 +40,8 @@ public struct OfflineMapView: UIViewRepresentable {
         self.packWest = packWest
         self.packNorth = packNorth
         self.packEast = packEast
+        self.route = route
+        self.onMapTap = onMapTap
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -61,6 +67,11 @@ public struct OfflineMapView: UIViewRepresentable {
             zoomLevel: 10,
             animated: false
         )
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        tap.numberOfTapsRequired = 1
+        tap.delegate = context.coordinator
+        view.addGestureRecognizer(tap)
+        context.coordinator.onMapTap = onMapTap
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -71,6 +82,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
         uiView.shouldRequestAuthorizationToUseLocationServices = true
         uiView.showsUserLocation = true
+        context.coordinator.onMapTap = onMapTap
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
     }
 
@@ -81,11 +93,12 @@ public struct OfflineMapView: UIViewRepresentable {
             packSouth: packSouth,
             packWest: packWest,
             packNorth: packNorth,
-            packEast: packEast
+            packEast: packEast,
+            route: route
         )
     }
 
-    public final class Coordinator: NSObject, MLNMapViewDelegate {
+    public final class Coordinator: NSObject, MLNMapViewDelegate, UIGestureRecognizerDelegate {
         struct OverlaySpec {
             var puckLat: Double
             var puckLon: Double
@@ -93,16 +106,34 @@ public struct OfflineMapView: UIViewRepresentable {
             var packWest: Double
             var packNorth: Double
             var packEast: Double
+            var route: [(lat: Double, lon: Double)]
         }
 
         var spec: OverlaySpec?
+        var onMapTap: ((Double, Double) -> Void)?
         var packOutline: MLNPolyline?
+        var routeLine: MLNPolyline?
         var puckHalo: MLNPolygon?
         var puck: MLNPointAnnotation?
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
         var storedPuck: (lat: Double, lon: Double)?
+        var storedRoute: [(lat: Double, lon: Double)]?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
+
+        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+            guard gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
+            let point = gesture.location(in: view)
+            let coord = view.convertPoint(point, toCoordinateFromView: view)
+            onMapTap?(coord.latitude, coord.longitude)
+        }
+
+        public func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+            true
+        }
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
@@ -120,6 +151,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 mapHasPuck: mapHasPuck
             )
             if !should {
+                syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
                 return
             }
@@ -157,7 +189,27 @@ public struct OfflineMapView: UIViewRepresentable {
             puck = you
             storedPack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             storedPuck = (spec.puckLat, spec.puckLon)
+            syncRoute(on: view, spec: spec, force: true)
             syncStyleOverlays(on: view, spec: spec)
+        }
+
+        func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
+            if !force, !RouteLine.needsReapply(stored: storedRoute, route: spec.route) {
+                return
+            }
+            if let old = routeLine {
+                view.remove(old)
+                routeLine = nil
+            }
+            if RouteLine.shouldDraw(spec.route) {
+                var coords = spec.route.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                let line = MLNPolyline(coordinates: &coords, count: UInt(coords.count))
+                view.add(line)
+                routeLine = line
+            }
+            storedRoute = spec.route
         }
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
@@ -233,6 +285,28 @@ public struct OfflineMapView: UIViewRepresentable {
                 core.circleRadius = NSExpression(forConstantValue: 8)
                 style.addLayer(core)
             }
+
+            if RouteLine.shouldDraw(spec.route) {
+                var coords = spec.route.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                let line = MLNPolyline(coordinates: &coords, count: UInt(coords.count))
+                if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
+                    src.shape = line
+                } else {
+                    let src = MLNShapeSource(identifier: RouteLine.sourceID, shape: line, options: nil)
+                    style.addSource(src)
+                    let layer = MLNLineStyleLayer(identifier: RouteLine.layerID, source: src)
+                    layer.lineColor = NSExpression(
+                        forConstantValue: UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
+                    )
+                    layer.lineWidth = NSExpression(forConstantValue: 4.5)
+                    style.addLayer(layer)
+                }
+            } else if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
+                var empty = [CLLocationCoordinate2D]()
+                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+            }
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
@@ -275,6 +349,9 @@ public struct OfflineMapView: UIViewRepresentable {
             if annotation === puckHalo {
                 return UIColor.white
             }
+            if annotation === routeLine {
+                return UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
+            }
             return UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
         }
 
@@ -283,7 +360,8 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         public func mapView(_ mapView: MLNMapView, lineWidthForPolylineAnnotation annotation: MLNPolyline) -> CGFloat {
-            annotation === packOutline ? 3.5 : 2
+            if annotation === routeLine { return 4.5 }
+            return annotation === packOutline ? 3.5 : 2
         }
     }
 }

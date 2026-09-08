@@ -24,3 +24,4 @@ Destination: a physical iPhone (generic iOS device compile is CI only; this doc 
    - Motion: `NSMotionUsageDescription`
 7. Product → Run (Cmd-R). First launch may show permission dialogs; Deny is supported.
 8. BEFORE tapping the ARMING unlock: iPhone Control Center — Airplane Mode ON, then Bluetooth ON. Wi-Fi stays off. Cell stays off. Then tap **INITIATE** on ARMING. Then score `docs/SOLO_QA.md`. For the next MAP still, score only the tip-60 bar in that file: full-height canvas, pack outline+puck, single MARK, no CALL SOS on browse MAP, no solid-red slab.
+9. After the next Internal (tip 62, not this commit): on MAP, tap a street away from the puck (or a search hit). Confirm `DEST` chrome. Tap **WALK** — a cyan line should follow streets from YOU to DEST. Tap a far empty corner or clear dest and **DRIVE** with no usable path — chrome `OFF GRAPH`, no fake line. Graph was already in the tip-61 TX WEST pack (`Resources/Packs/tx-west/graph.json`).

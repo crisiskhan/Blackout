@@ -1,6 +1,7 @@
 import SwiftUI
 import MapLibreMap
 import Search
+import Router
 
 struct MapTab: View {
     @Bindable var runtime: AppRuntime
@@ -20,9 +21,18 @@ struct MapTab: View {
             HStack {
                 Button("MARK") { runtime.dropMark() }
                 Button("SPEAK") { runtime.speakMap() }
+                Button("WALK") { runtime.navigate(mode: .walk) }
+                Button("DRIVE") { runtime.navigate(mode: .drive) }
             }
             if !runtime.lockChrome.isEmpty {
                 Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+            }
+            if !runtime.navChrome.isEmpty {
+                Text(runtime.navChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
+            }
+            if let dest = runtime.routeTarget {
+                Text(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
+                    .font(.caption).foregroundStyle(Theme.silver)
             }
             if let h = runtime.headingDeg {
                 Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Theme.silver)
@@ -64,22 +74,31 @@ struct MapTab: View {
                         packSouth: pack.bbox.south,
                         packWest: pack.bbox.west,
                         packNorth: pack.bbox.north,
-                        packEast: pack.bbox.east
+                        packEast: pack.bbox.east,
+                        route: runtime.routeCoords,
+                        onMapTap: { lat, lon in
+                            runtime.pickDestination(lat: lat, lon: lon)
+                        }
                     )
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Style \(pack.id)/style.json · MapLibre Metal offline · no MapKit engine")
                             .font(.caption2).foregroundStyle(Color(white: 0.45))
                         Text(runtime.mesh.chromeNet).font(.caption2).foregroundStyle(Color(white: 0.55))
                         ForEach(runtime.marks) { m in
-                            Text("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))")
-                                .font(.caption).foregroundStyle(Color(white: 0.75))
+                            Button("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))") {
+                                runtime.pickDestination(lat: m.lat, lon: m.lon)
+                            }
+                            .font(.caption).foregroundStyle(Color(white: 0.75))
                         }
                         ForEach(runtime.mesh.pips, id: \.from) { p in
                             Text("PIP \(p.from) \(String(format: "%.4f", p.lat)), \(String(format: "%.4f", p.lon))")
                                 .font(.caption).foregroundStyle(Color(white: 0.7))
                         }
                         ForEach(hits, id: \.name) { h in
-                            Text("\(h.name) · \(h.kind)").foregroundStyle(Theme.silver)
+                            Button("\(h.name) · \(h.kind)") {
+                                runtime.pickDestination(lat: h.lat, lon: h.lon)
+                            }
+                            .foregroundStyle(Theme.silver)
                         }
                     }
                     .padding(8)
@@ -93,7 +112,19 @@ struct MapTab: View {
             ScrollView(.horizontal) {
                 HStack {
                     ForEach(MapTool.allCases, id: \.self) { t in
-                        Text(t.rawValue).font(.caption2).padding(6).background(Theme.raised)
+                        switch t {
+                        case .walk:
+                            Button("WALK") { runtime.navigate(mode: .walk) }
+                                .font(.caption2).padding(6).background(Theme.raised)
+                        case .drive:
+                            Button("DRIVE") { runtime.navigate(mode: .drive) }
+                                .font(.caption2).padding(6).background(Theme.raised)
+                        case .mark, .ruler, .usng, .magTrue, .almanac, .elevProfile,
+                                .avoidPolygon, .shadePrefer, .highLow, .crossing, .truckPin,
+                                .walkBackGPX, .paceCount, .tailGap, .strideCal,
+                                .publicLand, .flood, .highContrast, .paper:
+                            Text(t.rawValue).font(.caption2).padding(6).background(Theme.raised)
+                        }
                     }
                 }
             }
