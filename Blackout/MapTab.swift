@@ -206,7 +206,7 @@ private struct ChromeRail: Layout {
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
-        let rows = rows(maxWidth: proposal.width ?? .infinity, subviews: subviews)
+        let rows = rowsFitting(maxWidth: proposal.width ?? .infinity, subviews: subviews)
         let width = rows.map(\.width).max() ?? 0
         let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
         return CGSize(width: proposal.width ?? width, height: height)
@@ -214,7 +214,7 @@ private struct ChromeRail: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
         var y = bounds.minY
-        for row in rows(maxWidth: bounds.width, subviews: subviews) {
+        for row in rowsFitting(maxWidth: bounds.width, subviews: subviews) {
             var x = bounds.minX
             for index in row.indices {
                 let size = subviews[index].sizeThatFits(.unspecified)
@@ -234,7 +234,7 @@ private struct ChromeRail: Layout {
         var height: CGFloat = 0
     }
 
-    private func rows(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+    private func rowsFitting(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
         var rows: [Row] = []
         var row = Row()
         for index in subviews.indices {

@@ -367,13 +367,16 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertEqual(sprayed.count, 3)
         XCTAssertLessThanOrEqual(sprayed.count, MapFieldChrome.maxLines)
+        XCTAssertEqual(sprayed.map(\.slot), [.status, .dest, .speak])
+        XCTAssertEqual(Set(sprayed.map(\.id)).count, sprayed.count)
         XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
         XCTAssertTrue(sprayed[0].warn)
         XCTAssertEqual(sprayed[1].text, "DEST 31.7619, -106.4850 · BEARING 45°")
         XCTAssertFalse(sprayed[1].warn)
         XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 300 M")
         for line in sprayed {
-            XCTAssertLessThanOrEqual(line.text.count, MapFieldChrome.maxCharacters)
+            // Short status chrome, never a wrapped paragraph over the canvas.
+            XCTAssertLessThanOrEqual(line.text.count, 44)
             XCTAssertFalse(line.text.contains("\n"))
         }
     }
@@ -398,6 +401,7 @@ final class MapLibreMapTests: XCTestCase {
             speak: "   "
         )
         XCTAssertEqual(bearingOnly.map(\.text), ["BEARING 12°"])
+        XCTAssertEqual(bearingOnly.map(\.slot), [.dest])
         XCTAssertEqual(
             MapFieldChrome.joined([" OFF GRAPH ", "OFF GRAPH", "", "RULER 40 m"]),
             "OFF GRAPH · RULER 40 m"

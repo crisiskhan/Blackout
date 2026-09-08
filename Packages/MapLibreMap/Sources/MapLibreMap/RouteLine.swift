@@ -54,11 +54,17 @@ public enum MagTrueChip {
 }
 
 public struct MapFieldLine: Equatable, Sendable, Identifiable {
+    public enum Slot: String, CaseIterable, Sendable {
+        case status, dest, speak
+    }
+
+    public var slot: Slot
     public var text: String
     public var warn: Bool
-    public var id: String { text }
+    public var id: String { slot.rawValue }
 
-    public init(text: String, warn: Bool) {
+    public init(slot: Slot, text: String, warn: Bool) {
+        self.slot = slot
         self.text = text
         self.warn = warn
     }
@@ -69,9 +75,7 @@ public struct MapFieldLine: Equatable, Sendable, Identifiable {
 /// status line — never a turn-by-turn paragraph over the canvas.
 public enum MapFieldChrome: Sendable {
     public static let separator = " · "
-    public static let maxLines = 3
-    /// Longest chrome line the field will draw. Past this it is a text wall, not chrome.
-    public static let maxCharacters = 44
+    public static let maxLines = MapFieldLine.Slot.allCases.count
     public static let alerts = [RouteLine.offGraph, PackChrome.offPack, "SPEECH FAILED"]
 
     public static func statusLine(lock: String, route: String, tool: String) -> String {
@@ -98,12 +102,12 @@ public enum MapFieldChrome: Sendable {
         speak: String
     ) -> [MapFieldLine] {
         [
-            statusLine(lock: lock, route: route, tool: tool),
-            destLine(dest: dest, bearingDeg: bearingDeg),
-            speak.trimmingCharacters(in: .whitespacesAndNewlines),
+            (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
+            (.dest, destLine(dest: dest, bearingDeg: bearingDeg)),
+            (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
         ]
-        .filter { !$0.isEmpty }
-        .map { MapFieldLine(text: $0, warn: isAlert($0)) }
+        .filter { !$0.1.isEmpty }
+        .map { MapFieldLine(slot: $0.0, text: $0.1, warn: isAlert($0.1)) }
     }
 
     public static func isAlert(_ line: String) -> Bool {

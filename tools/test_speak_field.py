@@ -259,8 +259,8 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("MapFieldChrome.lines(", self.map_tab)
         self.assertIn("speak: runtime.speechChrome", self.map_tab)
         self.assertIn("enum MapFieldChrome", self.route_line)
-        self.assertIn("maxLines = 3", self.route_line)
-        self.assertIn("maxCharacters = 44", self.route_line)
+        self.assertIn("maxLines = MapFieldLine.Slot.allCases.count", self.route_line)
+        self.assertIn("case status, dest, speak", self.route_line)
         for stale in (
             'Text(runtime.lockChrome)',
             'Text(runtime.routeChrome)',
