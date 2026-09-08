@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Tip 68 — Linux stand-in for the finished Speak banner and the clean MAP field.
+"""Tip 68 — Linux stand-in for Speak-as-voice-and-route and the clean MAP field.
 
-Device tip 67 came back PARTIAL: the Speak row read `INSTRUME… LOCK-ON`, the field
-stacked `OFF GRAPH` twice plus a bare `TRUE`, and street names never drew. These are
-the contracts that keep all three fixed without touching Walk cyan or the PERF work.
+Device tip 67 came back PARTIAL, then the stills showed a second failure: the Speak row
+read `INSTRUME… LOCK-ON`, the field stacked `OFF GRAPH` twice plus a bare `TRUE`, street
+names never drew, and SPEAK painted the whole walk script over the canvas as an orange
+text wall. Speak is voice plus the cyan route line plus one short status line — the
+script never reaches the field. These contracts hold that without touching Walk or PERF.
 """
 from __future__ import annotations
 
 import json
+import math
 import unittest
 from pathlib import Path
 
@@ -16,52 +19,66 @@ ROOT = Path(__file__).resolve().parents[1]
 OFF_GRAPH = "OFF GRAPH"
 OFF_PACK = "OFF PACK"
 SEPARATOR = " · "
-MAX_LINE_CHARACTERS = 46
-MAX_FIELD_LINES = 2
+SPEAK_MAX_CHARACTERS = 32
+FIELD_MAX_CHARACTERS = 44
+MAX_FIELD_LINES = 3
 VOID = "#000000"
 SILVER = "#B8BDC2"
 WALKABLE_PACKS = ("tx-west", "nm", "tx-east")
+SCRIPT_PHRASES = ("Walk ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
 
 
-def sentences(text: str) -> list[str]:
-    out: list[str] = []
-    current = ""
-    for character in text:
-        current += character
-        if character in ".!?":
-            piece = current.strip()
-            if piece:
-                out.append(piece)
-            current = ""
-    tail = current.strip()
-    if tail:
-        out.append(tail)
-    return out
+def haversine(a_lat: float, a_lon: float, b_lat: float, b_lon: float) -> float:
+    r = 6371000.0
+    p1, p2 = math.radians(a_lat), math.radians(b_lat)
+    dp, dl = math.radians(b_lat - a_lat), math.radians(b_lon - a_lon)
+    x = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * r * math.asin(min(1.0, math.sqrt(x)))
 
 
-def wrapped(sentence: str, max_characters: int = MAX_LINE_CHARACTERS) -> list[str]:
-    limit = max(1, max_characters)
-    words = [w for w in sentence.split(" ") if w]
-    rows: list[str] = []
-    row = ""
-    for word in words:
-        if not row:
-            row = word
-        elif len(row) + 1 + len(word) <= limit:
-            row += " " + word
-        else:
-            rows.append(row)
-            row = word
-    if row:
-        rows.append(row)
-    return rows
+def bearing(a_lat: float, a_lon: float, b_lat: float, b_lon: float) -> float:
+    y = math.sin(math.radians(b_lon - a_lon)) * math.cos(math.radians(b_lat))
+    x = math.cos(math.radians(a_lat)) * math.sin(math.radians(b_lat)) - math.sin(
+        math.radians(a_lat)
+    ) * math.cos(math.radians(b_lat)) * math.cos(math.radians(b_lon - a_lon))
+    return (math.degrees(math.atan2(y, x)) + 360.0) % 360.0
 
 
-def banner_lines(text: str, max_characters: int = MAX_LINE_CHARACTERS) -> list[str]:
-    rows: list[str] = []
-    for sentence in sentences(text):
-        rows.extend(wrapped(sentence, max_characters))
-    return rows
+def turns(coords: list[tuple[float, float]]) -> int:
+    count = 0
+    previous: float | None = None
+    for a, b in zip(coords, coords[1:]):
+        brg = bearing(a[0], a[1], b[0], b[1])
+        if previous is not None:
+            delta = (brg - previous + 540.0) % 360.0 - 180.0
+            if abs(delta) >= 35:
+                count += 1
+        previous = brg
+    return count
+
+
+def speak_status(
+    spoke: bool,
+    route_coords: list[tuple[float, float]],
+    plan_chrome: str,
+    dest: tuple[float, float] | None,
+    you: tuple[float, float] | None,
+) -> str:
+    if not spoke:
+        return "SPEECH FAILED"
+    if len(route_coords) >= 2:
+        meters = sum(
+            haversine(a[0], a[1], b[0], b[1]) for a, b in zip(route_coords, route_coords[1:])
+        )
+        count = turns(route_coords)
+        turn_phrase = "1 TURN" if count == 1 else f"{count} TURNS"
+        return SEPARATOR.join(["SPEAK", turn_phrase, f"{round(meters):.0f} M"])
+    if plan_chrome == OFF_GRAPH:
+        return SEPARATOR.join(["SPEAK", OFF_GRAPH])
+    if dest is not None and you is not None:
+        span = haversine(you[0], you[1], dest[0], dest[1])
+        return SEPARATOR.join(["SPEAK", "DEST", f"{round(span):.0f} M"])
+    return SEPARATOR.join(["SPEAK", "SET DEST"])
 
 
 def joined(parts: list[str]) -> str:
@@ -81,15 +98,16 @@ def field_lines(
     route: str,
     tool: str,
     dest: tuple[float, float] | None,
-    bearing: float | None,
+    bearing_deg: float | None,
+    speak: str = "",
 ) -> list[str]:
     status = joined([lock, route, tool])
     fix: list[str] = []
     if dest is not None:
         fix.append(f"DEST {dest[0]:.4f}, {dest[1]:.4f}")
-    if bearing is not None:
-        fix.append(f"BEARING {bearing:.0f}°")
-    return [line for line in (status, joined(fix)) if line]
+    if bearing_deg is not None:
+        fix.append(f"BEARING {bearing_deg:.0f}°")
+    return [line for line in (status, joined(fix), speak.strip()) if line]
 
 
 def route_chrome(has_graph: bool, has_dest: bool, plan_chrome: str) -> str:
@@ -121,47 +139,60 @@ def read(*parts: str) -> str:
     return (ROOT.joinpath(*parts)).read_text()
 
 
-class SpeakBannerTests(unittest.TestCase):
-    def test_full_turn_by_turn_wraps_into_readable_rows(self):
-        text = (
-            "Walk 200 meters. Turn left. Walk 100 meters. Arrive at destination. "
-            "Total 300 meters. Heading 90 degrees."
-        )
-        rows = banner_lines(text)
-        self.assertEqual(rows[0], "Walk 200 meters.")
-        self.assertIn("Turn left.", rows)
-        self.assertIn("Arrive at destination.", rows)
-        self.assertEqual(" ".join(rows), text)
-        for row in rows:
-            self.assertNotIn("…", row)
-            self.assertLessEqual(len(row), MAX_LINE_CHARACTERS)
+class SpeakStatusTests(unittest.TestCase):
+    def test_speak_reports_one_short_line_not_the_walk_script(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        status = speak_status(True, coords, "", (0.0008993, 0.0017966), (0.0, 0.0))
+        self.assertEqual(status, "SPEAK · 1 TURN · 300 M")
+        for phrase in SCRIPT_PHRASES:
+            self.assertNotIn(phrase, status)
+        self.assertNotIn("\n", status)
+        self.assertNotIn("…", status)
+        self.assertLessEqual(len(status), SPEAK_MAX_CHARACTERS)
 
-    def test_rows_break_on_spaces_and_never_mid_word(self):
-        sentence = "Tap WALK for the street path, then SPEAK."
-        rows = wrapped(sentence, 18)
-        self.assertEqual(rows, ["Tap WALK for the", "street path, then", "SPEAK."])
-        self.assertEqual(" ".join(rows), sentence)
-        # The tip-67 failure: a word wider than the row must keep its tail.
-        self.assertEqual(wrapped("INSTRUMENTS", 4), ["INSTRUMENTS"])
-
-    def test_off_graph_and_speech_failed_stay_whole(self):
-        self.assertEqual(
-            banner_lines("OFF GRAPH. No walkable street path from YOU. TX WEST."),
-            ["OFF GRAPH.", "No walkable street path from YOU.", "TX WEST."],
-        )
-        self.assertEqual(banner_lines("SPEECH FAILED"), ["SPEECH FAILED"])
-        self.assertEqual(banner_lines(""), [])
+    def test_every_speak_outcome_stays_short_and_whole(self):
+        outcomes = [
+            speak_status(False, [], "", None, None),
+            speak_status(True, [], OFF_GRAPH, (31.8, -106.5), (31.76, -106.49)),
+            speak_status(True, [], "", (31.8, -106.5), (31.76, -106.49)),
+            speak_status(True, [], "", None, None),
+        ]
+        self.assertEqual(outcomes[0], "SPEECH FAILED")
+        self.assertEqual(outcomes[1], "SPEAK · OFF GRAPH")
+        self.assertTrue(outcomes[2].startswith("SPEAK · DEST "))
+        self.assertEqual(outcomes[3], "SPEAK · SET DEST")
+        for outcome in outcomes:
+            self.assertTrue(outcome)
+            self.assertNotIn("…", outcome)
+            self.assertLessEqual(len(outcome), SPEAK_MAX_CHARACTERS)
 
 
 class FieldChromeTests(unittest.TestCase):
-    def test_dest_true_spray_collapses_to_two_lines(self):
-        lines = field_lines(OFF_GRAPH, OFF_GRAPH, "TRUE NORTH", (31.7619, -106.4850), 45)
-        self.assertEqual(lines, ["OFF GRAPH · TRUE NORTH", "DEST 31.7619, -106.4850 · BEARING 45°"])
+    def test_dest_true_spray_collapses_to_three_short_lines(self):
+        lines = field_lines(
+            OFF_GRAPH,
+            OFF_GRAPH,
+            "TRUE NORTH",
+            (31.7619, -106.4850),
+            45,
+            "SPEAK · 3 TURNS · 300 M",
+        )
+        self.assertEqual(
+            lines,
+            [
+                "OFF GRAPH · TRUE NORTH",
+                "DEST 31.7619, -106.4850 · BEARING 45°",
+                "SPEAK · 3 TURNS · 300 M",
+            ],
+        )
         self.assertLessEqual(len(lines), MAX_FIELD_LINES)
+        for line in lines:
+            self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
+            self.assertNotIn("\n", line)
 
     def test_quiet_field_shows_nothing(self):
-        self.assertEqual(field_lines("", "", "", None, None), [])
-        self.assertEqual(field_lines("", "", "", None, 12), ["BEARING 12°"])
+        self.assertEqual(field_lines("", "", "", None, None, ""), [])
+        self.assertEqual(field_lines("", "", "", None, 12, "   "), ["BEARING 12°"])
 
     def test_off_graph_is_a_routing_failure_not_a_missing_dest(self):
         self.assertEqual(route_chrome(has_graph=True, has_dest=False, plan_chrome=""), "")
@@ -192,22 +223,29 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertIn("mapActionChipTextPoints", chip)
         self.assertNotIn("truncationMode", chip)
 
-    def test_speak_banner_wraps_or_scrolls_the_whole_prompt(self):
-        self.assertIn("SpeakBanner.lines(runtime.speechChrome)", self.map_tab)
-        banner = self.map_tab.split("private var speakBanner")[1].split("private var instrumentRow")[0]
-        self.assertIn("ScrollView(.vertical)", banner)
-        self.assertIn("fixedSize(horizontal: false, vertical: true)", banner)
-        self.assertIn("speakBannerHeight", banner)
-        self.assertNotIn("lineLimit(1)", banner)
-        self.assertNotIn("truncationMode", banner)
-        self.assertIn("enum SpeakBanner", self.voice)
-        self.assertIn("func wrapped(", self.voice)
-        self.assertIn("func speakBannerHeight(", self.tokens)
+    def test_no_walk_script_text_wall_is_painted_on_the_field(self):
+        app = read("Blackout", "AppRuntime.swift")
+        # The field gets a short status line; the script only ever reaches the voice.
+        self.assertIn("SpeakStatus.chrome(", app)
+        self.assertNotIn("speechChrome = text", app)
+        self.assertNotIn("SpeakBanner", self.map_tab)
+        self.assertNotIn("ScrollView", self.map_tab)
+        self.assertIn("enum SpeakStatus", self.voice)
+        self.assertIn("maxCharacters = 32", self.voice)
+        self.assertNotIn("speakBannerHeight", self.tokens)
+        status = self.voice.split("enum SpeakStatus")[1]
+        for phrase in ("Turn left.", "Arrive at destination.", "Total "):
+            self.assertNotIn(phrase, status)
 
-    def test_speak_chip_survives(self):
+    def test_speak_chip_still_speaks_the_whole_prompt(self):
+        app = read("Blackout", "AppRuntime.swift")
         self.assertIn('Button("SPEAK")', self.map_tab)
         self.assertIn("runtime.speakMap()", self.map_tab)
-        self.assertIn("VoiceNav.prompt", read("Blackout", "AppRuntime.swift"))
+        self.assertIn("VoiceNav.prompt", app)
+        self.assertIn("speech.speak(text, locale: locale)", app)
+        speech = read("Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift")
+        self.assertNotIn("prefix(", speech)
+        self.assertIn("AVSpeechUtterance(string: trimmed)", speech)
 
 
 class FieldChromeSourceContracts(unittest.TestCase):
@@ -219,8 +257,10 @@ class FieldChromeSourceContracts(unittest.TestCase):
 
     def test_field_renders_one_deduped_stack(self):
         self.assertIn("MapFieldChrome.lines(", self.map_tab)
+        self.assertIn("speak: runtime.speechChrome", self.map_tab)
         self.assertIn("enum MapFieldChrome", self.route_line)
-        self.assertIn("maxLines = 2", self.route_line)
+        self.assertIn("maxLines = 3", self.route_line)
+        self.assertIn("maxCharacters = 44", self.route_line)
         for stale in (
             'Text(runtime.lockChrome)',
             'Text(runtime.routeChrome)',
@@ -233,10 +273,15 @@ class FieldChromeSourceContracts(unittest.TestCase):
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)
 
-    def test_new_dest_drops_stale_tool_chrome(self):
+    def test_inactive_chrome_goes_quiet(self):
         app = read("Blackout", "AppRuntime.swift")
         pick = app.split("func pickDestination")[1].split("func ")[0]
         self.assertIn('toolChrome = ""', pick)
+        self.assertIn('speechChrome = ""', pick)
+        navigate = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        self.assertIn('speechChrome = ""', navigate)
+        clear = app.split("private func clearRoute(")[1].split("\n    }")[0]
+        self.assertIn('speechChrome = ""', clear)
 
     def test_walk_cyan_route_hooks_are_untouched(self):
         offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")

@@ -119,55 +119,62 @@ public enum VoiceNav: Sendable {
     }
 }
 
-/// Lays a spoken VoiceNav prompt out as banner rows. One sentence per row, wrapped on
-/// spaces, so the MAP banner never has to tail-truncate a word the way `INSTRUME…` did.
-public enum SpeakBanner: Sendable {
-    public static let maxLineCharacters = 46
+/// One short line of Speak status for the MAP field. The turn-by-turn script belongs to
+/// the voice and the cyan route line — never to a paragraph painted over the canvas.
+public enum SpeakStatus: Sendable {
+    public static let prefix = "SPEAK"
+    public static let separator = " · "
+    public static let failed = "SPEECH FAILED"
+    public static let offGraph = GraphPlan.offGraph
+    public static let setDest = "SET DEST"
     public static let ellipsis = "…"
+    /// Wide enough for `SPEAK · 999 TURNS · 99999 M`, narrow enough that no phone has to
+    /// wrap it. Anything longer is a text wall, not status.
+    public static let maxCharacters = 32
 
-    public static func lines(_ text: String, maxCharacters: Int = maxLineCharacters) -> [String] {
-        sentences(text).flatMap { wrapped($0, maxCharacters: maxCharacters) }
-    }
-
-    public static func sentences(_ text: String) -> [String] {
-        var out: [String] = []
-        var current = ""
-        for character in text {
-            current.append(character)
-            guard character == "." || character == "!" || character == "?" else { continue }
-            let piece = current.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !piece.isEmpty { out.append(piece) }
-            current = ""
-        }
-        let tail = current.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !tail.isEmpty { out.append(tail) }
-        return out
-    }
-
-    /// Breaks only on spaces. A word longer than the row keeps its own row whole rather
-    /// than losing its tail.
-    public static func wrapped(_ sentence: String, maxCharacters: Int = maxLineCharacters) -> [String] {
-        let limit = max(1, maxCharacters)
-        let words = sentence.split(separator: " ").map(String.init)
-        guard !words.isEmpty else { return [] }
-        var rows: [String] = []
-        var row = ""
-        for word in words {
-            if row.isEmpty {
-                row = word
-            } else if row.count + 1 + word.count <= limit {
-                row += " " + word
-            } else {
-                rows.append(row)
-                row = word
+    public static func chrome(
+        spoke: Bool,
+        routeCoords: [(lat: Double, lon: Double)],
+        planChrome: String,
+        destination: (lat: Double, lon: Double)?,
+        you: (lat: Double, lon: Double)?
+    ) -> String {
+        guard spoke else { return failed }
+        if routeCoords.count >= 2 {
+            let meters = zip(routeCoords, routeCoords.dropFirst()).reduce(0.0) { acc, pair in
+                acc + GraphRouter.haversine(pair.0.lat, pair.0.lon, pair.1.lat, pair.1.lon)
             }
+            return line([turnsPhrase(routeCoords), metersPhrase(meters)])
         }
-        if !row.isEmpty { rows.append(row) }
-        return rows
+        if planChrome == offGraph {
+            return line([offGraph])
+        }
+        if let destination, let you {
+            let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
+            return line(["DEST", metersPhrase(span)])
+        }
+        return line([setDest])
     }
 
-    /// True when a banner row lost characters — the tip-67 `INSTRUME…` failure mode.
+    public static func turns(_ coords: [(lat: Double, lon: Double)]) -> Int {
+        VoiceNav.steps(coords).filter { $0.hasPrefix("Turn") }.count
+    }
+
+    /// True when a status line lost characters — the tip-67 `INSTRUME…` failure mode.
     public static func isClipped(_ text: String) -> Bool {
         text.contains(ellipsis) || text.contains("...")
+    }
+
+    private static func line(_ parts: [String]) -> String {
+        ([prefix] + parts).joined(separator: separator)
+    }
+
+    private static func turnsPhrase(_ coords: [(lat: Double, lon: Double)]) -> String {
+        let count = turns(coords)
+        return count == 1 ? "1 TURN" : "\(count) TURNS"
+    }
+
+    private static func metersPhrase(_ meters: Double) -> String {
+        String(format: "%.0f M", meters.rounded())
     }
 }

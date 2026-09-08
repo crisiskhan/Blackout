@@ -68,19 +68,8 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapInk.placeLabelMaxZoom, 16)
     }
 
-    func testSpeakBannerGrowsWithPromptThenCapsInsteadOfClipping() {
-        XCTAssertEqual(
-            BlackoutTokens.Chrome.speakBannerHeight(lines: 0),
-            BlackoutTokens.Chrome.speakBannerRowPoints
-        )
-        XCTAssertEqual(
-            BlackoutTokens.Chrome.speakBannerHeight(lines: 3),
-            BlackoutTokens.Chrome.speakBannerRowPoints * 3
-        )
-        XCTAssertEqual(
-            BlackoutTokens.Chrome.speakBannerHeight(lines: 400),
-            BlackoutTokens.Chrome.speakBannerMaxPoints
-        )
+    func testMapFieldStaysShortStatusChromeNotAHUD() {
+        XCTAssertEqual(BlackoutTokens.Chrome.fieldChromeMaxLines, 3)
         XCTAssertGreaterThanOrEqual(
             BlackoutTokens.Chrome.mapActionChipTextPoints,
             BlackoutTokens.Chrome.tabCaptionPoints

@@ -362,24 +362,40 @@ final class MapLibreMapTests: XCTestCase {
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
             dest: (lat: 31.7619, lon: -106.4850),
-            bearingDeg: 45
+            bearingDeg: 45,
+            speak: "SPEAK · 3 TURNS · 300 M"
         )
-        XCTAssertEqual(sprayed.count, 2)
+        XCTAssertEqual(sprayed.count, 3)
         XCTAssertLessThanOrEqual(sprayed.count, MapFieldChrome.maxLines)
         XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
         XCTAssertTrue(sprayed[0].warn)
         XCTAssertEqual(sprayed[1].text, "DEST 31.7619, -106.4850 · BEARING 45°")
         XCTAssertFalse(sprayed[1].warn)
+        XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 300 M")
+        for line in sprayed {
+            XCTAssertLessThanOrEqual(line.text.count, MapFieldChrome.maxCharacters)
+            XCTAssertFalse(line.text.contains("\n"))
+        }
+    }
 
+    func testMapFieldChromeIsSilentWhenNothingIsActive() {
         XCTAssertTrue(
-            MapFieldChrome.lines(lock: "", route: "", tool: "", dest: nil, bearingDeg: nil).isEmpty
+            MapFieldChrome.lines(
+                lock: "",
+                route: "",
+                tool: "",
+                dest: nil,
+                bearingDeg: nil,
+                speak: ""
+            ).isEmpty
         )
         let bearingOnly = MapFieldChrome.lines(
             lock: "",
             route: "",
             tool: "",
             dest: nil,
-            bearingDeg: 12
+            bearingDeg: 12,
+            speak: "   "
         )
         XCTAssertEqual(bearingOnly.map(\.text), ["BEARING 12°"])
         XCTAssertEqual(
@@ -387,6 +403,7 @@ final class MapLibreMapTests: XCTestCase {
             "OFF GRAPH · RULER 40 m"
         )
         XCTAssertTrue(MapFieldChrome.isAlert("OFF PACK · TRUE NORTH"))
+        XCTAssertTrue(MapFieldChrome.isAlert("SPEECH FAILED"))
         XCTAssertFalse(MapFieldChrome.isAlert("RULER 40 m"))
     }
 

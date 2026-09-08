@@ -64,12 +64,14 @@ public struct MapFieldLine: Equatable, Sendable, Identifiable {
     }
 }
 
-/// The MAP field chrome stack. Lock, route and tool statuses collapse into one deduped
-/// line and DEST carries its own bearing, so a second `OFF GRAPH` or a stale `TRUE`
-/// cannot spray extra rows down the canvas.
+/// The MAP field chrome stack: at most three short lines, each one deduped. Lock, route
+/// and tool statuses share a line, DEST carries its own bearing, and Speak gets one
+/// status line — never a turn-by-turn paragraph over the canvas.
 public enum MapFieldChrome: Sendable {
     public static let separator = " · "
-    public static let maxLines = 2
+    public static let maxLines = 3
+    /// Longest chrome line the field will draw. Past this it is a text wall, not chrome.
+    public static let maxCharacters = 44
     public static let alerts = [RouteLine.offGraph, PackChrome.offPack, "SPEECH FAILED"]
 
     public static func statusLine(lock: String, route: String, tool: String) -> String {
@@ -92,11 +94,13 @@ public enum MapFieldChrome: Sendable {
         route: String,
         tool: String,
         dest: (lat: Double, lon: Double)?,
-        bearingDeg: Double?
+        bearingDeg: Double?,
+        speak: String
     ) -> [MapFieldLine] {
         [
             statusLine(lock: lock, route: route, tool: tool),
             destLine(dest: dest, bearingDeg: bearingDeg),
+            speak.trimmingCharacters(in: .whitespacesAndNewlines),
         ]
         .filter { !$0.isEmpty }
         .map { MapFieldLine(text: $0, warn: isAlert($0)) }

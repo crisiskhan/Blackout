@@ -172,9 +172,11 @@ final class AppRuntime {
         routeCoords = []
         navChrome = ""
         toolChrome = ""
+        speechChrome = ""
     }
 
     func navigate(mode: TravelMode) {
+        speechChrome = ""
         switch mode {
         case .walk, .drive:
             break
@@ -237,11 +239,16 @@ final class AppRuntime {
             you: youCoordinate(),
             locale: locale
         )
-        if speech.speak(text, locale: locale) {
-            speechChrome = text
-        } else {
-            speechChrome = "SPEECH FAILED"
-        }
+        // The whole turn-by-turn script goes to the voice. The field only gets one short
+        // status line — the route itself is already drawn in cyan.
+        let spoke = speech.speak(text, locale: locale)
+        speechChrome = SpeakStatus.chrome(
+            spoke: spoke,
+            routeCoords: routeCoords,
+            planChrome: navChrome,
+            destination: destination(),
+            you: youCoordinate()
+        )
     }
 
     func beginPTTSolo() {
@@ -354,6 +361,7 @@ final class AppRuntime {
     private func clearRoute(chrome: String) {
         routeCoords = []
         navChrome = chrome
+        speechChrome = ""
     }
 
     private func relabelMarksForActivePack() {

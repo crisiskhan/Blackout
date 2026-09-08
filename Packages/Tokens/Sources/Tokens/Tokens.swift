@@ -15,14 +15,9 @@ public enum BlackoutTokens: Sendable {
         public static let mapActionChipTextPoints: Double = 11
         public static let mapActionChipGutterPoints: Double = 10
         public static let mapActionRailSpacingPoints: Double = 6
-        public static let speakBannerRowPoints: Double = 24
-        public static let speakBannerMaxPoints: Double = 144
-
-        /// Height of the Speak banner: grows with the wrapped prompt, capped so a long
-        /// turn-by-turn never eats the canvas. Overflow scrolls, it does not clip a word.
-        public static func speakBannerHeight(lines: Int) -> Double {
-            min(Double(max(1, lines)) * speakBannerRowPoints, speakBannerMaxPoints)
-        }
+        /// The MAP field draws short status lines only. A turn-by-turn script belongs to
+        /// the voice and the route line, not to a HUD over the canvas.
+        public static let fieldChromeMaxLines: Int = 3
 
         public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
             switch tab {

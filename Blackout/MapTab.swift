@@ -14,7 +14,6 @@ struct MapTab: View {
             actionRail
             instrumentRow
             fieldChrome
-            speakBanner
             TextField("Search FTS / semantic", text: $query)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
@@ -100,8 +99,9 @@ struct MapTab: View {
         }
     }
 
-    /// One deduped stack instead of a row per chrome string: `OFF GRAPH` twice, a bare
-    /// `TRUE`, DEST and BEARING used to spray five lines across the field.
+    /// Up to three short deduped lines. `OFF GRAPH` twice, a bare `TRUE`, DEST, BEARING
+    /// and a full turn-by-turn script used to spray the field; Speak now reports one
+    /// status line here and leaves the script to the voice and the cyan route.
     private var fieldChrome: some View {
         ForEach(
             MapFieldChrome.lines(
@@ -109,7 +109,8 @@ struct MapTab: View {
                 route: runtime.routeChrome,
                 tool: runtime.toolChrome,
                 dest: runtime.routeTarget,
-                bearingDeg: runtime.headingDeg
+                bearingDeg: runtime.headingDeg,
+                speak: runtime.speechChrome
             )
         ) { line in
             Text(line.text)
@@ -117,29 +118,6 @@ struct MapTab: View {
                 .foregroundStyle(line.warn ? Color.orange : Theme.silver)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    @ViewBuilder
-    private var speakBanner: some View {
-        if !runtime.speechChrome.isEmpty {
-            let rows = SpeakBanner.lines(runtime.speechChrome)
-            ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                        Text(row)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Color.orange)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-            }
-            .frame(
-                maxWidth: .infinity,
-                height: BlackoutTokens.Chrome.speakBannerHeight(lines: rows.count),
-                alignment: .topLeading
-            )
         }
     }
 

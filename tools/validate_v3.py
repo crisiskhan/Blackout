@@ -1130,7 +1130,7 @@ def tip65_speak() -> None:
     if 'Button("SPEAK")' not in map_tab or "runtime.speakMap()" not in map_tab:
         bad("tip-65 deleted SPEAK")
         return
-    if "VoiceNav.prompt" not in app or "speechChrome = text" not in app:
+    if "VoiceNav.prompt" not in app or "speech.speak(text, locale: locale)" not in app:
         bad("tip-65 Speak still truncated stub")
         return
     if "GraphPlan.line" not in app or "RouteLine.sourceID" not in offline:
@@ -1159,15 +1159,20 @@ def tip68_speak_field() -> None:
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
 
-    banner_ok = (
+    voice = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "VoiceNav.swift").read_text()
+    speak_ok = (
         "ChromeRail" in map_tab
         and "MapActionChipButtonStyle" in map_tab
-        and "SpeakBanner.lines(runtime.speechChrome)" in map_tab
-        and "speakBannerHeight" in map_tab
         and 'Button("SPEAK")' in map_tab
+        and "SpeakStatus.chrome(" in app
+        and "speech.speak(text, locale: locale)" in app
+        and "enum SpeakStatus" in voice
+        and "SpeakBanner" not in map_tab
+        and "ScrollView" not in map_tab
     )
     field_ok = (
         "MapFieldChrome.lines(" in map_tab
+        and "speak: runtime.speechChrome" in map_tab
         and "enum MapFieldChrome" in route_line
         and 'magNorth ? "MAG NORTH" : "TRUE NORTH"' in route_line
         and "Text(runtime.lockChrome)" not in map_tab
@@ -1186,7 +1191,7 @@ def tip68_speak_field() -> None:
     )
 
     checks = [
-        ("1 Speak banner reads whole", banner_ok, "tip-68 Speak banner FAIL — rail/banner still truncates"),
+        ("1 Speak is voice + route + short status", speak_ok, "tip-68 Speak FAIL — truncated chrome or a walk-script text wall"),
         ("2 field clean of DEST/TRUE spray", field_ok, "tip-68 field FAIL — chrome rows still spray"),
         ("3 walking-zoom names", names_ok, "tip-68 names FAIL — glyph template still escaped"),
         ("Walk cyan + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
