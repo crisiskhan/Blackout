@@ -363,6 +363,91 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertNil(RouteTarget.pick(explicit: nil, lastMark: nil, origin: origin))
     }
 
+    func testPackStyleSecondResolveDoesNotRewriteCachedFile() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-style-cache-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-style-cache-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        try Data("{\"type\":\"FeatureCollection\",\"features\":[]}".utf8)
+            .write(to: pack.appendingPathComponent("osm.geojson"))
+        let style = pack.appendingPathComponent("style.json")
+        try JSONSerialization.data(withJSONObject: [
+            "version": 8,
+            "sources": ["osm": ["type": "geojson", "data": "osm.geojson"]],
+            "layers": [],
+        ]).write(to: style)
+        let first = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        try Data("STALE".utf8).write(to: first)
+        XCTAssertFalse(PackStyle.needsResolve(styleModified: Date(timeIntervalSince1970: 1), outputModified: Date(timeIntervalSince1970: 2)))
+        XCTAssertTrue(PackStyle.needsResolve(styleModified: Date(timeIntervalSince1970: 3), outputModified: Date(timeIntervalSince1970: 2)))
+        XCTAssertTrue(PackStyle.needsResolve(styleModified: Date(timeIntervalSince1970: 1), outputModified: nil))
+        let second = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        XCTAssertEqual(second, first)
+        XCTAssertEqual(try Data(contentsOf: second), Data("STALE".utf8))
+    }
+
+    func testOverlaySyncSkipsStyleMutationWhenPuckAndRouteHold() {
+        XCTAssertFalse(
+            OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: false)
+        )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(force: true, puckNeedsReapply: false, routeNeedsReapply: false)
+        )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: true, routeNeedsReapply: false)
+        )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: true)
+        )
+    }
+
+    func testFixPublishThrottlesHeadingJitterAndKeepsFirstFix() {
+        XCTAssertTrue(
+            FixPublish.shouldPublish(
+                now: 10,
+                lastPublished: nil,
+                heading: 10,
+                lastHeading: nil,
+                coord: (31.76, -106.49),
+                lastCoord: nil
+            )
+        )
+        XCTAssertFalse(
+            FixPublish.shouldPublish(
+                now: 10.1,
+                lastPublished: 10,
+                heading: 11,
+                lastHeading: 10,
+                coord: (31.76, -106.49),
+                lastCoord: (31.76, -106.49)
+            )
+        )
+        XCTAssertFalse(
+            FixPublish.shouldPublish(
+                now: 10.4,
+                lastPublished: 10,
+                heading: 10.4,
+                lastHeading: 10,
+                coord: (31.76, -106.49),
+                lastCoord: (31.76, -106.49)
+            )
+        )
+        XCTAssertTrue(
+            FixPublish.shouldPublish(
+                now: 10.4,
+                lastPublished: 10,
+                heading: 14,
+                lastHeading: 10,
+                coord: (31.76, -106.49),
+                lastCoord: (31.76, -106.49)
+            )
+        )
+        XCTAssertEqual(FixPublish.headingDelta(359, 1), 2)
+        XCTAssertTrue(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true))
+        XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: false))
+    }
+
     func testPackCameraRefitsWhenCanvasGrowsPastStrip() {
         let pack = (south: 30.3, west: -81.7, north: 30.52, east: -81.38)
         XCTAssertFalse(

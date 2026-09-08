@@ -310,7 +310,32 @@ public enum PackStyle {
     public static let silverInk = "#B8BDC2"
     public static let accentInk = "#E10600"
 
+    private static var resolvedMemory: [String: URL] = [:]
+
+    public static func needsResolve(styleModified: Date?, outputModified: Date?) -> Bool {
+        guard let outputModified else { return true }
+        guard let styleModified else { return false }
+        return styleModified > outputModified
+    }
+
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
+        let memoryKey = packRoot.path
+        if let cached = resolvedMemory[memoryKey] {
+            return cached
+        }
+        let cache = cacheDirectory
+            ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
+        let out = cache.appendingPathComponent("\(packRoot.lastPathComponent)-style.resolved.json")
+        let styleAttrs = try? FileManager.default.attributesOfItem(atPath: styleURL.path)
+        let outAttrs = try? FileManager.default.attributesOfItem(atPath: out.path)
+        let styleModified = styleAttrs?[.modificationDate] as? Date
+        let outputModified = outAttrs?[.modificationDate] as? Date
+        if !needsResolve(styleModified: styleModified, outputModified: outputModified) {
+            resolvedMemory[memoryKey] = out
+            return out
+        }
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
         if let glyphs = obj["glyphs"] as? String, !glyphs.hasPrefix("file:"), !glyphs.contains("://") {
             obj["glyphs"] = packRoot.appendingPathComponent(glyphs).absoluteString
@@ -329,12 +354,8 @@ public enum PackStyle {
         }
         obj["sources"] = sources
         attachOfflineVectorLayers(&obj, packRoot: packRoot)
-        let cache = cacheDirectory
-            ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-            ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
-        let out = cache.appendingPathComponent("\(packRoot.lastPathComponent)-style.resolved.json")
         try JSONSerialization.data(withJSONObject: obj).write(to: out)
+        resolvedMemory[memoryKey] = out
         return out
     }
 
@@ -474,5 +495,52 @@ public enum PackStyle {
         }
         obj["sources"] = sources
         obj["layers"] = layers
+    }
+}
+
+public enum OverlaySync: Sendable {
+    public static func needsStyleMutation(
+        force: Bool,
+        puckNeedsReapply: Bool,
+        routeNeedsReapply: Bool
+    ) -> Bool {
+        force || puckNeedsReapply || routeNeedsReapply
+    }
+}
+
+public enum MapKeepAwake: Sendable {
+    public static func idleTimerDisabled(mapInstrumentActive: Bool) -> Bool {
+        mapInstrumentActive
+    }
+}
+
+public enum FixPublish: Sendable {
+    public static let minInterval: TimeInterval = 0.25
+    public static let minHeadingDelta = 2.0
+    public static let minMoveMeters = 4.0
+
+    public static func headingDelta(_ a: Double, _ b: Double) -> Double {
+        let raw = abs(a - b).truncatingRemainder(dividingBy: 360)
+        return min(raw, 360 - raw)
+    }
+
+    public static func shouldPublish(
+        now: TimeInterval,
+        lastPublished: TimeInterval?,
+        heading: Double?,
+        lastHeading: Double?,
+        coord: (lat: Double, lon: Double)?,
+        lastCoord: (lat: Double, lon: Double)?
+    ) -> Bool {
+        guard let lastPublished else { return true }
+        if now - lastPublished < minInterval { return false }
+        if let heading, let lastHeading, headingDelta(heading, lastHeading) >= minHeadingDelta {
+            return true
+        }
+        if heading != nil && lastHeading == nil { return true }
+        if let coord, let lastCoord {
+            return GraphRouter.haversine(coord.lat, coord.lon, lastCoord.lat, lastCoord.lon) >= minMoveMeters
+        }
+        return coord != nil && lastCoord == nil
     }
 }

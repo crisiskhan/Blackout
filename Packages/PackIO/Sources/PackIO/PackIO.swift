@@ -61,15 +61,22 @@ public final class PackStore: @unchecked Sendable {
 
     public func hasUsableGraph() -> Bool {
         guard let url = packURL("graph.json") else { return false }
-        guard FileManager.default.fileExists(atPath: url.path) else { return false }
-        guard let data = try? Data(contentsOf: url),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let edges = obj["edges"] as? [Any] else { return false }
-        return !edges.isEmpty
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? NSNumber else { return false }
+        return GraphProbe.isUsable(byteCount: size.intValue)
     }
 
     public func realSize(of id: String) -> Int? {
         catalog.packs.first(where: { $0.id == id })?.bytes
+    }
+}
+
+public enum GraphProbe: Sendable {
+    /// `{"edges":[]}` is 12 bytes. One test edge is ~57. Shipped TX WEST is ~24MB.
+    public static let emptyMaxBytes = 32
+
+    public static func isUsable(byteCount: Int) -> Bool {
+        byteCount > emptyMaxBytes
     }
 }
 

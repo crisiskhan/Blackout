@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import CoreLocation
+import UIKit
 import BlackBox
 import PackIO
 import MapLibreMap
@@ -71,6 +72,7 @@ final class AppRuntime {
     }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
+    private var graphWarmup: Task<RouteGraph?, Never>?
     private let fix = MeshFix()
 
     init() {
@@ -107,11 +109,14 @@ final class AppRuntime {
         if UserDefaults.standard.bool(forKey: "cannotDo.seen") {
             sawCannotDo = true
         }
+        warmupActiveGraph()
+        applyMapKeepAwake()
     }
 
     func arm() {
         armed = true
         box.log("arming", "entered tabs")
+        applyMapKeepAwake()
     }
 
     func acknowledgeCannotDo() {
@@ -178,9 +183,32 @@ final class AppRuntime {
             return
         }
         routeTarget = dest
-        let plan = GraphPlan.line(graph: loadedGraph(), from: youCoordinate(), to: dest, mode: mode)
-        routeCoords = plan.coords
-        navChrome = plan.chrome
+        let from = youCoordinate()
+        if graphPackID == packs?.active?.id {
+            let plan = GraphPlan.line(graph: graphCache, from: from, to: dest, mode: mode)
+            routeCoords = plan.coords
+            navChrome = plan.chrome
+            return
+        }
+        let id = packs?.active?.id
+        let url = packs?.packURL("graph.json")
+        let inflight = graphWarmup
+        Task { [weak self] in
+            let graph: RouteGraph?
+            if let inflight {
+                graph = await inflight.value
+            } else {
+                graph = await Task.detached { RouteGraph.load(from: url) }.value
+            }
+            let plan = GraphPlan.line(graph: graph, from: from, to: dest, mode: mode)
+            await MainActor.run {
+                guard let self, self.packs?.active?.id == id else { return }
+                self.graphCache = graph
+                self.graphPackID = id
+                self.routeCoords = plan.coords
+                self.navChrome = plan.chrome
+            }
+        }
     }
 
     func tapRuler() {
@@ -275,8 +303,16 @@ final class AppRuntime {
         UserDefaults.standard.set(id, forKey: "pack.id")
         graphCache = nil
         graphPackID = nil
+        graphWarmup = nil
         clearRoute(chrome: "")
         relabelMarksForActivePack()
+        warmupActiveGraph()
+    }
+
+    func applyMapKeepAwake() {
+        UIApplication.shared.isIdleTimerDisabled = MapKeepAwake.idleTimerDisabled(
+            mapInstrumentActive: armed && tab == .map
+        )
     }
 
     private func youCoordinate() -> (lat: Double, lon: Double) {
@@ -299,13 +335,19 @@ final class AppRuntime {
         )
     }
 
-    private func loadedGraph() -> RouteGraph? {
+    private func warmupActiveGraph() {
         let id = packs?.active?.id
-        if graphPackID != id {
-            graphCache = RouteGraph.load(from: packs?.packURL("graph.json"))
-            graphPackID = id
+        let url = packs?.packURL("graph.json")
+        let task = Task.detached { RouteGraph.load(from: url) }
+        graphWarmup = task
+        Task { [weak self] in
+            let graph = await task.value
+            await MainActor.run {
+                guard let self, self.packs?.active?.id == id else { return }
+                self.graphCache = graph
+                self.graphPackID = id
+            }
         }
-        return graphCache
     }
 
     private func clearRoute(chrome: String) {
@@ -353,6 +395,9 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     var heading: Double?
     var onChange: (() -> Void)?
     private var mgr: CLLocationManager?
+    private var lastPublish: TimeInterval = 0
+    private var publishedHeading: Double?
+    private var publishedCoord: (lat: Double, lon: Double)?
 
     func arm() {
         let mgr = self.mgr ?? CLLocationManager()
@@ -386,12 +431,30 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         last = locations.last?.coordinate
-        onChange?()
+        publishIfNeeded()
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         let trueH = newHeading.trueHeading
         heading = trueH >= 0 ? trueH : newHeading.magneticHeading
+        publishIfNeeded()
+    }
+
+    private func publishIfNeeded() {
+        let now = Date().timeIntervalSince1970
+        let coord = last.map { ($0.latitude, $0.longitude) }
+        let lastStamp = lastPublish > 0 ? lastPublish : nil
+        guard FixPublish.shouldPublish(
+            now: now,
+            lastPublished: lastStamp,
+            heading: heading,
+            lastHeading: publishedHeading,
+            coord: coord,
+            lastCoord: publishedCoord
+        ) else { return }
+        lastPublish = now
+        publishedHeading = heading
+        publishedCoord = coord
         onChange?()
     }
 }
