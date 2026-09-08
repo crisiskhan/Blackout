@@ -33,20 +33,20 @@
       "url": "hillshade.png",
       "coordinates": [
         [
-          -106.62,
-          32.0
+          -106.85,
+          32.4
         ],
         [
-          -106.35,
-          32.0
+          -106.2,
+          32.4
         ],
         [
-          -106.35,
-          31.7
+          -106.2,
+          31.65
         ],
         [
-          -106.62,
-          31.7
+          -106.85,
+          31.65
         ]
       ]
     }
@@ -427,14 +427,14 @@
         ],
         "Point"
       ],
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "circle-color": "#B8BDC2",
         "circle-radius": 2.4,
         "circle-stroke-color": "#000000",
         "circle-stroke-width": 0.8
-      },
-      "layout": {
-        "visibility": "none"
       }
     },
     {

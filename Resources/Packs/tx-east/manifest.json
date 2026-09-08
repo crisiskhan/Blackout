@@ -8,8 +8,8 @@
   "walkable": true,
   "bbox": {
     "south": 30.08,
-    "west": -97.78,
-    "north": 30.32,
+    "west": -97.9,
+    "north": 30.42,
     "east": -97.2
   },
   "slices": {
@@ -40,11 +40,11 @@
       "bbox": {
         "name": "Austin / Lost Pines walkable union",
         "south": 30.08,
-        "west": -97.78,
-        "north": 30.32,
+        "west": -97.9,
+        "north": 30.42,
         "east": -97.2
       },
-      "featureCount": 97916
+      "featureCount": 205182
     }
   },
   "banners": [
@@ -52,7 +52,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 44359084,
+  "bytes": 81511072,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -75,8 +75,8 @@
     "wild.geojson"
   ],
   "center": {
-    "lat": 30.2,
-    "lon": -97.49000000000001
+    "lat": 30.25,
+    "lon": -97.55000000000001
   },
   "home": {
     "lat": 30.28,
@@ -86,51 +86,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 656739,
+    "bytes": 843065,
     "width": 2048,
-    "height": 847,
+    "height": 994,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -97.78,
-        30.32
+        -97.9,
+        30.42
       ],
       [
         -97.2,
-        30.32
+        30.42
       ],
       [
         -97.2,
         30.08
       ],
       [
-        -97.78,
+        -97.9,
         30.08
       ]
     ]
   },
   "stats": {
-    "features": 98346,
-    "highwayLines": 89502,
-    "namedStreets": 15588,
+    "features": 205740,
+    "highwayLines": 187663,
+    "namedStreets": 33988,
     "sampleStreetNames": [
-      "Savorey Lane",
-      "FM 1327",
-      "Bramble Bush Drive",
-      "Branchwood Drive",
-      "Palmer Road",
-      "Cocao Lane",
-      "Moores Bridge Road",
-      "Wing Feather Drive",
-      "Rockridge Court",
-      "Spring Meadow Road",
-      "Deadwood Drive",
-      "Bucks Run"
+      "Hidatsa Street",
+      "South Interstate 35",
+      "Summer Night Cove",
+      "Nighthawk Lane",
+      "Aster Cove",
+      "Purple Heart Trail",
+      "Phoebe Circle",
+      "Saguaro Drive",
+      "Echo Cove",
+      "Sosebee Parkway",
+      "Bermuda Lane",
+      "Robin Road"
     ],
-    "water": 7073,
-    "places": 192,
-    "graphEdges": 324929,
-    "graphNodes": 119529,
+    "water": 14735,
+    "places": 341,
+    "graphEdges": 690612,
+    "graphNodes": 254590,
     "streetsVisibleAtWalkingZoom": true
   }
 }

@@ -7,10 +7,10 @@
   "defaultOpen": true,
   "walkable": true,
   "bbox": {
-    "south": 31.7,
-    "west": -106.62,
-    "north": 32.0,
-    "east": -106.35
+    "south": 31.65,
+    "west": -106.85,
+    "north": 32.4,
+    "east": -106.2
   },
   "slices": {
     "metro": {
@@ -33,7 +33,7 @@
         "north": 32.0,
         "east": -106.4
       },
-      "featureCount": 3497
+      "featureCount": 3498
     },
     "border": {
       "name": "El Paso TX+NM border union",
@@ -45,6 +45,17 @@
         "east": -106.35
       },
       "featureCount": 61385
+    },
+    "corridor": {
+      "name": "El Paso / Las Cruces corridor",
+      "bbox": {
+        "name": "El Paso / Las Cruces corridor",
+        "south": 31.65,
+        "west": -106.85,
+        "north": 32.4,
+        "east": -106.2
+      },
+      "featureCount": 128405
     }
   },
   "banners": [
@@ -52,10 +63,11 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 31062467,
+  "bytes": 51550987,
   "files": [
     "border.geojson",
     "contours.geojson",
+    "corridor.geojson",
     "dem.json",
     "glyphs/Open Sans Regular/0-255.pbf",
     "glyphs/Open Sans Regular/256-511.pbf",
@@ -75,8 +87,8 @@
     "wild.geojson"
   ],
   "center": {
-    "lat": 31.85,
-    "lon": -106.485
+    "lat": 32.025,
+    "lon": -106.525
   },
   "home": {
     "lat": 31.78,
@@ -86,49 +98,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 2251682,
+    "bytes": 1677239,
+    "width": 2048,
+    "height": 2363,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -106.62,
-        32.0
+        -106.85,
+        32.4
       ],
       [
-        -106.35,
-        32.0
+        -106.2,
+        32.4
       ],
       [
-        -106.35,
-        31.7
+        -106.2,
+        31.65
       ],
       [
-        -106.62,
-        31.7
+        -106.85,
+        31.65
       ]
     ]
   },
   "stats": {
-    "features": 66587,
-    "highwayLines": 63024,
-    "namedStreets": 18984,
+    "features": 128691,
+    "highwayLines": 121593,
+    "namedStreets": 37395,
     "sampleStreetNames": [
-      "Encino Drive",
-      "Hurd Lane",
-      "Brickland Road",
-      "Meadow Vista Boulevard",
-      "Monte Vista Drive",
-      "Low Road",
-      "Antone Street",
-      "Alamo Drive",
-      "Robles Drive",
-      "Derby Road",
-      "3rd Street",
-      "1st Street"
+      "Carretera Samalayuca-El Oasis",
+      "Kamikase",
+      "Transformers",
+      "Potreros",
+      "West Franklin Avenue",
+      "Arizona Avenue",
+      "West Crosby Avenue",
+      "Fewel Street",
+      "East Rio Grande Avenue",
+      "West Main Drive",
+      "West San Francisco Avenue",
+      "West Wyoming Avenue"
     ],
-    "water": 2748,
-    "places": 65,
-    "graphEdges": 264057,
-    "graphNodes": 98322,
+    "water": 5193,
+    "places": 181,
+    "graphEdges": 503279,
+    "graphNodes": 189843,
     "streetsVisibleAtWalkingZoom": true
   }
 }

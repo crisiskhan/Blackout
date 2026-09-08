@@ -19,6 +19,7 @@ from v3.fetch_packs import (  # noqa: E402
     WALK_BACK,
     WALK_FORWARD,
     pack_graph,
+    read_graph,
     unpack_graph,
 )
 
@@ -254,6 +255,16 @@ class PackedGraphTests(unittest.TestCase):
             self.assertNotIn("nodes", raw, f"{path.parent.name} still spells out nodes")
             self.assertEqual(len(raw["e"]) % 4, 0, f"{path.parent.name} has a torn segment record")
             self.assertEqual(len(raw["lat"]), len(raw["lon"]))
+
+    def test_a_manifest_counts_the_graph_it_actually_ships(self):
+        # Packing folds duplicate records, so a manifest written off the
+        # pre-pack graph overstates the roads. Count what the phone loads.
+        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.json")):
+            pack = path.parent.name
+            graph = read_graph(path)
+            stats = json.loads((path.parent / "manifest.json").read_text())["stats"]
+            self.assertEqual(stats["graphNodes"], len(graph["nodes"]), f"{pack} miscounts nodes")
+            self.assertEqual(stats["graphEdges"], len(graph["edges"]), f"{pack} miscounts edges")
 
 
 if __name__ == "__main__":

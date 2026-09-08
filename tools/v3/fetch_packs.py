@@ -46,6 +46,9 @@ PRIMARY_PACK_ID = "tx-west"
 GRAPH_WIRE_VERSION = 2
 COORD_DP = 5
 METRES_DP = 1
+# Drawn geometry keeps one more decimal than the router graph: 11 cm, so a
+# street never visibly kinks even at full zoom.
+RENDER_DP = 6
 WALK_FORWARD, DRIVE_FORWARD, WALK_BACK, DRIVE_BACK = 1, 2, 4, 8
 
 KEEP_TAGS = {
@@ -114,6 +117,15 @@ PACKS = {
                 "north": 31.90,
                 "east": -106.35,
             },
+            # Widest slice, so it sets the pack bbox: the whole I-10 run from
+            # Horizon City through El Paso and Anthony up to Las Cruces.
+            "corridor": {
+                "name": "El Paso / Las Cruces corridor",
+                "south": 31.65,
+                "west": -106.85,
+                "north": 32.40,
+                "east": -106.20,
+            },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
         "walkable": True,
@@ -140,9 +152,9 @@ PACKS = {
             "union": {
                 "name": "Austin / Lost Pines walkable union",
                 "south": 30.08,
-                "west": -97.78,
-                "north": 30.32,
-                "east": -97.2,
+                "west": -97.90,
+                "north": 30.42,
+                "east": -97.20,
             },
         },
         "banners": ["heat-island", "cattle-guard", "hurricane"],
@@ -168,11 +180,11 @@ PACKS = {
                 "east": -106.38,
             },
             "union": {
-                "name": "Albuquerque / Sandia walkable union",
-                "south": 35.06,
-                "west": -106.68,
-                "north": 35.25,
-                "east": -106.38,
+                "name": "Albuquerque / Rio Rancho / Sandia union",
+                "south": 34.95,
+                "west": -106.85,
+                "north": 35.35,
+                "east": -106.35,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
@@ -286,9 +298,16 @@ def merge_osm(parts: list[dict]) -> dict:
     return {"elements": elements}
 
 
-def osm_to_geojson(osm: dict, kind: str) -> dict:
+def osm_to_geojson(osm: dict) -> dict:
+    """OSM elements to the GeoJSON the canvas draws.
+
+    Coordinates keep RENDER_DP decimals — 11 cm, finer than any line MapLibre
+    can put on a phone — instead of Overpass's 7. The OSM element id and the
+    old constant `kind` property are dropped: no style layer filters on them
+    and no Swift reads them, so they were 2 MB of dead weight per pack.
+    """
     nodes = {
-        el["id"]: (el["lon"], el["lat"])
+        el["id"]: (round(el["lon"], RENDER_DP), round(el["lat"], RENDER_DP))
         for el in osm.get("elements", [])
         if el.get("type") == "node" and "lat" in el
     }
@@ -301,14 +320,14 @@ def osm_to_geojson(osm: dict, kind: str) -> dict:
             features.append(
                 {
                     "type": "Feature",
-                    "properties": {"id": el["id"], "kind": "poi", **tags},
-                    "geometry": {"type": "Point", "coordinates": [el["lon"], el["lat"]]},
+                    "properties": tags,
+                    "geometry": {"type": "Point", "coordinates": list(nodes[el["id"]])},
                 }
             )
         elif el.get("type") == "way" and el.get("nodes"):
             if not tags:
                 continue
-            coords = [nodes[n] for n in el["nodes"] if n in nodes]
+            coords = [list(nodes[n]) for n in el["nodes"] if n in nodes]
             if len(coords) < 2:
                 continue
             closed = coords[0] == coords[-1] and len(coords) >= 4
@@ -316,13 +335,7 @@ def osm_to_geojson(osm: dict, kind: str) -> dict:
                 "type": "LineString",
                 "coordinates": coords,
             }
-            features.append(
-                {
-                    "type": "Feature",
-                    "properties": {"id": el["id"], "kind": kind, **tags},
-                    "geometry": geom,
-                }
-            )
+            features.append({"type": "Feature", "properties": tags, "geometry": geom})
     return {"type": "FeatureCollection", "features": features, "attribution": OSM_CREDIT}
 
 
@@ -1068,6 +1081,10 @@ def union_bbox(slices: dict) -> dict:
 
 
 def pack_stats(fc: dict, graph: dict) -> dict:
+    # Count the graph the phone loads, not the one we built in memory. Packing
+    # folds exact duplicate records (same pair, same length, same modes) into
+    # one, so the shipped edge count runs a little under the raw one.
+    shipped = unpack_graph(pack_graph(graph))
     feats = fc.get("features") or []
     hwy = [f for f in feats if (f.get("properties") or {}).get("highway") and (f.get("geometry") or {}).get("type") == "LineString"]
     named = [f for f in hwy if (f.get("properties") or {}).get("name") or (f.get("properties") or {}).get("ref")]
@@ -1089,8 +1106,8 @@ def pack_stats(fc: dict, graph: dict) -> dict:
         "sampleStreetNames": names,
         "water": len(water),
         "places": len(places),
-        "graphEdges": len(graph.get("edges") or []),
-        "graphNodes": len(graph.get("nodes") or {}),
+        "graphEdges": len(shipped.get("edges") or []),
+        "graphNodes": len(shipped.get("nodes") or {}),
         "streetsVisibleAtWalkingZoom": len(named) >= 50 and len(hwy) >= 200,
     }
 
@@ -1140,7 +1157,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
             all_elements.extend(osm.get("elements", []))
         merged = merge_osm([{"elements": all_elements}])
 
-    fc = osm_to_geojson(merged, "pack")
+    fc = osm_to_geojson(merged)
     graph = build_graph(merged)
     write_compact(dest / "osm.geojson", fc)
     write_compact(dest / "graph.json", pack_graph(graph))
