@@ -168,17 +168,19 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("No walkable street path from YOU.", blob)
         self.assertIn("Set a destination, then WALK, then SPEAK for turn by turn.", blob)
 
-    def test_speak_chip_stays_and_banner_shows_full_prompt(self):
+    def test_speak_chip_stays_and_voice_gets_the_full_prompt(self):
+        # tip-68 supersedes the tip-65 banner: the complete prompt is spoken, and the
+        # field shows one short status line instead of the walk script.
         app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
         map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         self.assertIn('Button("SPEAK")', map_tab)
         self.assertIn("runtime.speakMap()", map_tab)
         self.assertIn("VoiceNav.prompt", app)
-        self.assertIn("speechChrome = text", app)
+        self.assertIn("speech.speak(text, locale: locale)", app)
+        self.assertIn("SpeakStatus.chrome(", app)
         self.assertNotIn('speech.speak("\\(pack) \\(bearing)"', app)
         self.assertIn("fixedSize(horizontal: false, vertical: true)", map_tab)
-        speech_block = map_tab.split("runtime.speechChrome")[1].split("TextField")[0]
-        self.assertNotIn("lineLimit(1)", speech_block)
+        self.assertNotIn("lineLimit(1)", map_tab.split("MapFieldChrome.lines(")[1])
 
     def test_speech_engine_finishes_the_full_utterance(self):
         speech = (

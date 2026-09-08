@@ -9,6 +9,15 @@ public enum BlackoutTokens: Sendable {
         public static let dynamicTypeCap: String = "xxxLarge"
         public static let oneThumbGutter: Double = 16
         public static let mapChipHitPoints: Double = 44
+        /// MAP header controls (SPEAK / INSTRUMENTS / LOCK-ON) draw their whole word.
+        /// Fixed point size, so an xxxLarge body never squeezes `INSTRUMENTS` into
+        /// `INSTRUME…`; the rail wraps to a second line instead.
+        public static let mapActionChipTextPoints: Double = 11
+        public static let mapActionChipGutterPoints: Double = 10
+        public static let mapActionRailSpacingPoints: Double = 6
+        /// The MAP field draws short status lines only. A turn-by-turn script belongs to
+        /// the voice and the route line, not to a HUD over the canvas.
+        public static let fieldChromeMaxLines: Int = 3
 
         public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
             switch tab {
@@ -37,8 +46,13 @@ public enum BlackoutTokens: Sendable {
         public static let silverHex = "#B8BDC2"
         public static let accentHex = "#E10600"
         public static let roadLabelMinZoom: Double = 12
-        public static let roadLabelWalkingSize: Double = 18
+        public static let roadLabelWalkingSize: Double = 19
+        public static let roadLabelCloseWalkSize: Double = 22
         public static let roadLabelHaloWidth: Double = 2.2
+        public static let roadLabelSpacing: Double = 100
+        /// Town/neighbourhood names stop competing with street names once you are
+        /// inside the block you are walking.
+        public static let placeLabelMaxZoom: Double = 16
     }
 
     public struct RGBA: Equatable, Sendable {

@@ -345,6 +345,10 @@ final class MapLibreMapTests: XCTestCase {
             WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: false, destinationOnPack: false),
             .noDestination
         )
+        // OFF GRAPH is a routing failure, never "you have not picked a DEST yet".
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""), "")
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: false, planChrome: ""), RouteLine.offGraph)
+        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: ""), "")
         XCTAssertEqual(
             WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: true, destinationOnPack: false),
             .destinationOffPack
@@ -365,8 +369,94 @@ final class MapLibreMapTests: XCTestCase {
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))
         XCTAssertTrue(span.hasSuffix(" m"))
-        XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG")
-        XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE")
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG NORTH")
+        XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE NORTH")
+    }
+
+    func testMapFieldChromeCollapsesDestTrueStackSpray() {
+        let sprayed = MapFieldChrome.lines(
+            lock: RouteLine.offGraph,
+            route: RouteLine.offGraph,
+            tool: MagTrueChip.chrome(magNorth: false),
+            bearingDeg: 45,
+            speak: "SPEAK · 3 TURNS · 300 M"
+        )
+        XCTAssertEqual(sprayed.count, 3)
+        XCTAssertLessThanOrEqual(sprayed.count, MapFieldChrome.maxLines)
+        XCTAssertEqual(sprayed.map(\.slot), [.status, .dest, .speak])
+        XCTAssertEqual(Set(sprayed.map(\.id)).count, sprayed.count)
+        XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
+        XCTAssertTrue(sprayed[0].warn)
+        // The destination is a pin on the canvas, so this row spends itself on the
+        // heading instead of on a latitude nobody can steer by.
+        XCTAssertEqual(sprayed[1].text, "BEARING 45°")
+        XCTAssertFalse(sprayed[1].warn)
+        for line in sprayed {
+            XCTAssertFalse(line.text.contains("DEST 31."))
+        }
+        XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 300 M")
+        for line in sprayed {
+            // Short status chrome, never a wrapped paragraph over the canvas.
+            XCTAssertLessThanOrEqual(line.text.count, 44)
+            XCTAssertFalse(line.text.contains("\n"))
+        }
+    }
+
+    func testMapFieldChromeIsSilentWhenNothingIsActive() {
+        XCTAssertTrue(
+            MapFieldChrome.lines(
+                lock: "",
+                route: "",
+                tool: "",
+                bearingDeg: nil,
+                speak: ""
+            ).isEmpty
+        )
+        let bearingOnly = MapFieldChrome.lines(
+            lock: "",
+            route: "",
+            tool: "",
+            bearingDeg: 12,
+            speak: "   "
+        )
+        XCTAssertEqual(bearingOnly.map(\.text), ["BEARING 12°"])
+        XCTAssertEqual(bearingOnly.map(\.slot), [.dest])
+        XCTAssertEqual(
+            MapFieldChrome.joined([" OFF GRAPH ", "OFF GRAPH", "", "RULER 40 m"]),
+            "OFF GRAPH · RULER 40 m"
+        )
+        XCTAssertTrue(MapFieldChrome.isAlert("OFF PACK · TRUE NORTH"))
+        XCTAssertTrue(MapFieldChrome.isAlert("SPEECH FAILED"))
+        XCTAssertFalse(MapFieldChrome.isAlert("RULER 40 m"))
+    }
+
+    func testPackStyleKeepsLocalGlyphTemplateTokensLiteral() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-glyphs-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-glyphs-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        let style = pack.appendingPathComponent("style.json")
+        try JSONSerialization.data(withJSONObject: [
+            "version": 8,
+            "glyphs": "glyphs/{fontstack}/{range}.pbf",
+            "sources": [:],
+            "layers": [],
+        ]).write(to: style)
+        let out = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        let resolved = try JSONSerialization.jsonObject(with: Data(contentsOf: out)) as? [String: Any]
+        let glyphs = resolved?["glyphs"] as? String ?? ""
+        XCTAssertTrue(glyphs.hasPrefix("file:"))
+        for token in PackStyle.glyphTokens {
+            XCTAssertTrue(glyphs.contains(token), "glyph template lost \(token): \(glyphs)")
+        }
+        XCTAssertFalse(glyphs.contains("%7B"))
+        XCTAssertFalse(glyphs.contains("%7D"))
+        XCTAssertTrue(out.lastPathComponent.contains("v\(PackStyle.resolverVersion)"))
+        XCTAssertEqual(
+            PackStyle.localGlyphURL(template: "https://tiles/{fontstack}.pbf", packRoot: pack),
+            "https://tiles/{fontstack}.pbf"
+        )
     }
 
     func testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty() {

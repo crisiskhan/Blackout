@@ -133,40 +133,8 @@ jobs:
         id: ver
         run: |
           set -euo pipefail
-          "$PYBIN" << 'PY'
-          import json, os, time, urllib.parse, urllib.request
-          import jwt
-
-          key = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
-          kid = os.environ["APP_STORE_CONNECT_KEY_ID"].strip()
-          iss = os.environ["APP_STORE_CONNECT_ISSUER_ID"].strip()
-          app = os.environ["ASC_APP_ID"]
-          now = int(time.time())
-          tok = jwt.encode(
-              {"iss": iss, "iat": now, "exp": now + 15 * 60, "aud": "appstoreconnect-v1"},
-              key,
-              algorithm="ES256",
-              headers={"kid": kid, "typ": "JWT"},
-          )
-          if isinstance(tok, bytes):
-              tok = tok.decode()
-          q = urllib.parse.urlencode({"filter[app]": app, "limit": "50", "sort": "-version"})
-          req = urllib.request.Request(
-              "https://api.appstoreconnect.apple.com/v1/builds?" + q,
-              headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"},
-          )
-          with urllib.request.urlopen(req, timeout=45) as resp:
-              data = json.loads(resp.read())
-          nums = []
-          for b in data.get("data") or []:
-              v = str((b.get("attributes") or {}).get("version") or "")
-              if v.isdigit():
-                  nums.append(int(v))
-          nxt = (max(nums) + 1) if nums else 1
-          print(f"ASC existing CFBundleVersion max={max(nums) if nums else 'none'} next={nxt}")
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"next={nxt}\n")
-          PY
+          # 34264110982: mint OK, GET /v1/builds HTTP 500. Retry in helper.
+          "$PYBIN" tools/tf_asc_cpv.py
 
       - name: Archive and export App Store IPA
         env:

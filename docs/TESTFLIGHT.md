@@ -47,6 +47,10 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34257680002` (`9eb32c4`): tip-64 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **64**. Dist `S3R65K88HJ` (`DISTRIBUTION`). altool no errors. ASC `5116f1c0-09a3-4419-a304-d6ea86914856` **VALID**. PATCH 200. `ASSIGN Internal 64 204`. TX WEST arterial casing + highway refs. Leave 63 until TestFlight shows 64 Ready.
 - `34260710700` (`f401a3d`): tip-65 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **65**. Dist `2T2U9RQMJD` (`DISTRIBUTION`). altool no errors. ASC `94bcaf54-c944-47db-a399-b373a7be2012` **VALID**. PATCH 200. `ASSIGN Internal 65 204`. Speak turn-by-turn + TX EAST. Leave 64 until TestFlight shows 65 Ready.
 - `34261557379` (`c55d861`): tip-66 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **66**. Dist `33BKW9XRQN` (`DISTRIBUTION`). altool no errors. ASC `b3310736-f1d6-4ea8-96a4-c40eccb9e770` **VALID**. PATCH 200. `ASSIGN Internal 66 204`. Same Speak + TX EAST tree as 65. Leave 65 until TestFlight shows 66 Ready.
+- `34264110982` (`960a8a2`): tip-67 `tf:` push. Mint OK (`HAS_LOCAL_DIST_KEY=1`), then GET `/v1/builds` HTTP 500 in Next CPV. No IPA. Retry list 500 (15s/30s/60s/90s/120s) via `tools/tf_asc_cpv.py`. Do not re-upload 54–66.
+- `34264462418` (`960a8a2`): tip-67 `workflow_dispatch` with a concatenated `git_ref`. Checkout fetch failed. No IPA.
+- `34264699162` (`960a8a2`): tip-67 `workflow_dispatch` retry. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **67**. Dist `Q8AX4T282L` (`DISTRIBUTION`). altool no errors. ASC `e2cf188e-1fa8-4e07-b306-1e088087c7d0` **VALID**. PATCH 200. `ASSIGN Internal 67 204`. GraphProbe + warmup + keep-awake. Leave 66 until TestFlight shows 67 Ready.
+- `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -129,3 +133,11 @@ SOURCE GO tip `344094f4` / merge `955c3b24`. Run `34260710700` uploaded CPV **65
 ## Tip 66 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `09e4fffe` / merge `1eaa33b5`. Run `34261557379` uploaded CPV **66** and `ASSIGN Internal 66 204`. TX EAST ~65.6 MB; default tx-west. Same Speak tree as 65. Leave 65 until TestFlight shows 66 Ready. Watch omitted. Internal only. Do not re-upload 54–65.
+
+## Tip 67 Internal (CoS 2026-09-08)
+
+SOURCE GO tip `b7953348` / merge `a72a8478`. Run `34264699162` uploaded CPV **67** and `ASSIGN Internal 67 204`. Map keep-awake + graph warmup. Leave 66 until TestFlight shows 67 Ready. Watch omitted. Internal only. Do not re-upload 54–66.
+
+## Tip 68 Internal (CoS 2026-09-08)
+
+SOURCE GO tip `afb2e2fc` / merge `7abb9e0b`. Run `34269174169` uploaded CPV **68** and `ASSIGN Internal 68 204`. Speak banner finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready. Watch omitted. Internal only. Do not re-upload 54–67.

@@ -1082,8 +1082,10 @@ def tip62_nav() -> None:
         and "chromeNet" not in map_tab
         and "layoutPriority(1)" in map_tab
         and "ZStack(alignment: .bottomLeading)" in map_tab
-        # Readouts a field user cannot act on. The destination is a pin, not a number.
+        # Readouts a field user cannot act on. The destination is a pin, not a
+        # number — and it stays a pin wherever the chrome line is formatted.
         and "DEST %.4f" not in map_tab
+        and "DEST %.4f" not in route_line
         and "BEARING %.0f" not in map_tab
         and "pack.bytes" not in map_tab
         and "Search FTS" not in map_tab
@@ -1185,6 +1187,7 @@ def main() -> None:
     else:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
+    tip68_speak_field()
     sys.exit(fail)
 
 
@@ -1208,7 +1211,7 @@ def tip65_speak() -> None:
     if 'Button("SPEAK")' not in map_tab or "runtime.speakMap()" not in map_tab:
         bad("tip-65 deleted SPEAK")
         return
-    if "VoiceNav.prompt" not in app or "speechChrome = text" not in app:
+    if "VoiceNav.prompt" not in app or "speech.speak(text, locale: locale)" not in app:
         bad("tip-65 Speak still truncated stub")
         return
     if "GraphPlan.line" not in app or "RouteLine.sourceID" not in offline:
@@ -1218,6 +1221,67 @@ def tip65_speak() -> None:
         bad("CPV bumped — tree must stay 1")
         return
     ok("Done: SPEAK kept; Walk line hooks intact; CPV 1")
+
+
+def tip68_speak_field() -> None:
+    """Tip 68 — Speak banner reads whole, field is clean, names draw at walking zoom."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_speak_field.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"tip-68 Speak/field contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    route_line = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "RouteLine.swift").read_text()
+    pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+
+    voice = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "VoiceNav.swift").read_text()
+    speak_ok = (
+        "ChromeRail" in map_tab
+        and "MapActionChipButtonStyle" in map_tab
+        and 'Button("SPEAK")' in map_tab
+        and "SpeakStatus.chrome(" in app
+        and "speech.speak(text, locale: locale)" in app
+        and "enum SpeakStatus" in voice
+        and "SpeakBanner" not in map_tab
+        and "ScrollView" not in map_tab
+    )
+    field_ok = (
+        "MapFieldChrome.lines(" in map_tab
+        and "speak: runtime.speechChrome" in map_tab
+        and "enum MapFieldChrome" in route_line
+        and 'magNorth ? "MAG NORTH" : "TRUE NORTH"' in route_line
+        and "Text(runtime.lockChrome)" not in map_tab
+        and "Text(runtime.routeChrome)" not in map_tab
+    )
+    names_ok = (
+        "func localGlyphURL(" in pack_style
+        and "packRoot.appendingPathComponent(glyphs)" not in pack_style
+        and "resolverVersion" in pack_style
+    )
+    keep_ok = (
+        "warmupActiveGraph" in app
+        and "GraphPlan.line" in app
+        and "applyMapKeepAwake" in app
+        and "frame(width: hit, height: hit)" in map_tab
+    )
+
+    checks = [
+        ("1 Speak is voice + route + short status", speak_ok, "tip-68 Speak FAIL — truncated chrome or a walk-script text wall"),
+        ("2 field clean of DEST/TRUE spray", field_ok, "tip-68 field FAIL — chrome rows still spray"),
+        ("3 walking-zoom names", names_ok, "tip-68 names FAIL — glyph template still escaped"),
+        ("Walk cyan + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
+    ]
+    for label, passed, fail_msg in checks:
+        if passed:
+            ok(f"Done: {label}")
+        else:
+            bad(fail_msg)
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import test_tf_archive_signing
 import test_tf_asc_assign
+import test_tf_asc_cpv
 import test_tf_asc_reuse
 import test_tf_ipa_inspect
 
@@ -108,6 +109,15 @@ def test_testflight_workflow_invokes_gate() -> None:
     _before_build(text, "testflight-internal.yml", "tf-archive.sh")
     if "NEXT_CPV:" not in text:
         fail("testflight-internal.yml must pass NEXT_CPV into archive")
+    ver = text.split("Next CFBundleVersion", 1)
+    if len(ver) < 2:
+        fail("Next CFBundleVersion step missing")
+    ver_step = ver[1].split("\n      - name:", 1)[0]
+    helper = (ROOT / "tools/tf_asc_cpv.py").read_text() if (ROOT / "tools/tf_asc_cpv.py").is_file() else ""
+    if "tf_asc_cpv.py" not in ver_step:
+        fail("34264110982: next CPV must run tools/tf_asc_cpv.py from git_ref")
+    if "RETRY list 500" not in helper or "LIST_BACKOFF" not in helper:
+        fail("34264110982: next CPV must retry ASC builds list 500")
     if "6806388963" not in text:
         fail("testflight-internal.yml missing app id 6806388963")
     if "28035586-fce6-474f-9bc2-ef0f1f65306e" not in text:
@@ -166,6 +176,7 @@ def test_altool_binds_primary_app() -> None:
     if "st == 409" not in helper:
         fail("assign must treat 409 as already assigned")
     test_tf_asc_assign.main()
+    test_tf_asc_cpv.main()
     ok("altool binds primary app via --apple-id + --bundle-id")
 
 

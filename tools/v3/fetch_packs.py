@@ -948,8 +948,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "layout": {
                     "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "symbol-spacing": 110,
-                    "text-size": zoom_stops(12, 12, 14, 15, 16, 18, 17, 20),
+                    "symbol-spacing": 100,
+                    "text-size": zoom_stops(12, 12, 14, 15, 16, 19, 18, 22),
                     "text-font": [GLYPH_STACK],
                     "text-max-angle": 40,
                     "text-padding": 2,
@@ -982,7 +982,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "layout": {
                     "text-field": ["get", "ref"],
                     "symbol-placement": "line",
-                    "symbol-spacing": 220,
+                    "symbol-spacing": 300,
                     "text-size": zoom_stops(11, 15, 14, 18, 16, 21, 17, 23),
                     "text-font": [GLYPH_STACK],
                     "text-max-angle": 28,
@@ -1004,6 +1004,9 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "symbol",
                 "source": "osm",
                 "minzoom": 10,
+                # Town names stop stealing collision slots from street names once the
+                # walker is inside the block.
+                "maxzoom": 16,
                 "filter": ["has", "place"],
                 "layout": {
                     "text-field": ["get", "name"],

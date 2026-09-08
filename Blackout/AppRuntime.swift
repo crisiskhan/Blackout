@@ -163,10 +163,16 @@ final class AppRuntime {
 
     func pickDestination(lat: Double, lon: Double) {
         routeTarget = (lat, lon)
-        clearRoute(plan: "", chrome: "")
+        // A new destination invalidates everything the old one produced.
+        routeCoords = []
+        navChrome = ""
+        routeChrome = ""
+        toolChrome = ""
+        speechChrome = ""
     }
 
     func navigate(mode: TravelMode) {
+        speechChrome = ""
         let pack = packs?.active
         let packName = pack?.name ?? ""
         let dest = destination()
@@ -243,11 +249,16 @@ final class AppRuntime {
             you: youCoordinate(),
             locale: locale
         )
-        if speech.speak(text, locale: locale) {
-            speechChrome = text
-        } else {
-            speechChrome = "SPEECH FAILED"
-        }
+        // The whole turn-by-turn script goes to the voice. The field only gets one short
+        // status line — the route itself is already drawn in cyan.
+        let spoke = speech.speak(text, locale: locale)
+        speechChrome = SpeakStatus.chrome(
+            spoke: spoke,
+            routeCoords: routeCoords,
+            planChrome: navChrome,
+            destination: destination(),
+            you: youCoordinate()
+        )
     }
 
     func beginPTTSolo() {
@@ -363,6 +374,7 @@ final class AppRuntime {
         routeCoords = []
         navChrome = plan
         routeChrome = chrome
+        speechChrome = ""
     }
 
     private func destinationOnPack(_ dest: (lat: Double, lon: Double)?) -> Bool {
