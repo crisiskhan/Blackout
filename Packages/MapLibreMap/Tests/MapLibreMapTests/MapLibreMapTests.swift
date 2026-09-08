@@ -18,6 +18,9 @@ final class MapLibreMapTests: XCTestCase {
         MarkStore.save(marks, defaults: suite)
         let back = MarkStore.load(defaults: suite)
         XCTAssertEqual(back, marks)
+        // A mark must come back off disk as the same mark. Deduping the reload
+        // through MarkDrop.merging used to mint a fresh id on every launch.
+        XCTAssertEqual(back.first?.id, "m1")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: false), "OFF GRAPH")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: true, hasGraph: false), "")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: true), "")
@@ -29,9 +32,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
         suite.set(Data([0x00, 0x01, 0x02]), forKey: MarkStore.key)
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
-        MarkStore.save([MapMark(id: "m2", lat: 30.4, lon: -81.5, label: "FL NORTH")], defaults: suite)
+        MarkStore.save([MapMark(id: "m2", lat: 35.0844, lon: -106.6504, label: "NM")], defaults: suite)
         let back = MarkStore.load(defaults: suite)
-        XCTAssertEqual(back.first?.label, "FL NORTH")
+        XCTAssertEqual(back.first?.label, "NM")
         MarkStore.save([], defaults: suite)
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
     }
@@ -237,7 +240,7 @@ final class MapLibreMapTests: XCTestCase {
     func testMarkStoreLoadUniquesPersistedDuplicateCoords() {
         let suite = UserDefaults(suiteName: "map.marks.dedupe.\(UUID().uuidString)")!
         let clones = (0..<9).map { i in
-            MapMark(id: "m\(i)", lat: 31.8705, lon: -106.5973, label: "FL NORTH")
+            MapMark(id: "m\(i)", lat: 31.8705, lon: -106.5973, label: "TX WEST")
         }
         MarkStore.save(clones, defaults: suite)
         let back = MarkStore.load(defaults: suite)
@@ -261,28 +264,30 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
     }
 
-    func testPackChromeLabelsElPasoOffFLSouthNotFLNorth() {
+    func testPackChromeLabelsElPasoOffTheNMPackNotOntoIt() {
+        // Two packs we actually ship, close enough to confuse: a fix in El Paso
+        // must read OFF PACK against Albuquerque, never borrow that pack's name.
         let elPaso = (lat: 31.8705, lon: -106.5973)
-        let flSouth = (south: 25.72, west: -80.8, north: 25.82, east: -80.18)
+        let nm = (south: 34.95, west: -106.85, north: 35.35, east: -106.35)
         XCTAssertEqual(
-            PackChrome.banner(fix: elPaso, bbox: flSouth),
+            PackChrome.banner(fix: elPaso, bbox: nm),
             PackChrome.offPack
         )
         XCTAssertEqual(
-            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "NM", bbox: nm),
             PackChrome.offPack
         )
         XCTAssertNotEqual(
-            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "FL SOUTH", bbox: flSouth),
-            "FL NORTH"
+            PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "NM", bbox: nm),
+            "NM"
         )
-        let txWest = (south: 31.7, west: -106.62, north: 32.0, east: -106.35)
+        let txWest = (south: 31.65, west: -106.85, north: 32.4, east: -106.2)
         XCTAssertEqual(PackChrome.banner(fix: elPaso, bbox: txWest), "")
         XCTAssertEqual(
             PackChrome.markLabel(lat: elPaso.lat, lon: elPaso.lon, packName: "TX WEST", bbox: txWest),
             "TX WEST"
         )
-        XCTAssertEqual(PackChrome.banner(fix: nil, bbox: flSouth), "")
+        XCTAssertEqual(PackChrome.banner(fix: nil, bbox: nm), "")
     }
 
     func testPackBBoxIsOutlineNotFilledSlab() {

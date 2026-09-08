@@ -37,9 +37,17 @@ public enum MarkStore {
         return uniqued(loaded)
     }
 
+    /// Drop marks that repeat a coordinate, keeping the one already on disk.
+    ///
+    /// `MarkDrop.merging` mints an id because it is dropping a brand new pin.
+    /// Reusing it here renamed every mark on the way back off disk, so a pin
+    /// survived a kill with different identity than it went in with.
     public static func uniqued(_ marks: [MapMark]) -> [MapMark] {
-        marks.reduce(into: [MapMark]()) { acc, mark in
-            acc = MarkDrop.merging(acc, lat: mark.lat, lon: mark.lon, label: mark.label)
+        marks.reduce(into: [MapMark]()) { kept, mark in
+            let clash = kept.contains {
+                MarkDrop.sameCoord(($0.lat, $0.lon), (mark.lat, mark.lon))
+            }
+            if !clash { kept.append(mark) }
         }
     }
 }

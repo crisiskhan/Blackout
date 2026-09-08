@@ -834,6 +834,10 @@ def tip58_solo_qa() -> None:
         and "MarkStore.load" in init
         and "MarkStore.save" in app
         and "synchronize()" in marks
+        # Reloading a mark must not rename it. MarkDrop.merging mints a fresh id
+        # for a brand new pin, so routing the reload through it gave every saved
+        # mark a new identity on every launch.
+        and "MarkDrop.merging" not in marks.split("public static func uniqued")[1].split("}")[0]
         and "fix.arm()" not in init
         and re.search(r"let mgr = CLLocationManager\(\)", app) is None
         and re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech) is None
