@@ -204,9 +204,19 @@ def packs() -> None:
     if have != need:
         bad(f"pack set {have}")
         return
-    if set(cat.get("states") or []) != {"TX", "NM"}:
-        bad(f"catalog states {cat.get('states')} — FL/NY packs are not shipped")
+    upper = {s.upper() for s in SHIPPED_STATES}
+    if set(cat.get("states") or []) != upper:
+        bad(f"catalog states {cat.get('states')} — must be {sorted(upper)}")
         return
+    # Three places name the ground we ship: this file, the catalog PackStore
+    # reads, and the banner list. Field books, vision books and pack switching
+    # all key off them, so a disagreement is a book with no map behind it.
+    banners = (ROOT / "Packages" / "RegionalPacks" / "Sources" / "RegionalPacks" / "RegionalPacks.swift").read_text()
+    declared = re.search(r"shippedStates\s*=\s*\[([^\]]*)\]", banners)
+    if not declared or {s.strip().strip('"') for s in declared.group(1).split(",") if s.strip()} != upper:
+        bad(f"RegionalPacks.shippedStates disagrees with catalog {sorted(upper)}")
+        return
+    ok(f"one shipped-state list: validator, catalog and banners all say {sorted(upper)}")
     for dropped in ("fl-north", "fl-south", "ny-metro", "ny-upstate"):
         if (ROOT / "Resources" / "Packs" / dropped).exists():
             bad(f"{dropped} still bundled — remove from catalog and Resources/Packs")
