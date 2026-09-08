@@ -59,7 +59,33 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapInk.accentHex, "#E10600")
         XCTAssertEqual(BlackoutTokens.MapInk.roadLabelMinZoom, 12)
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelWalkingSize, 16)
+        XCTAssertGreaterThanOrEqual(
+            BlackoutTokens.MapInk.roadLabelCloseWalkSize,
+            BlackoutTokens.MapInk.roadLabelWalkingSize
+        )
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelHaloWidth, 1.8)
+        XCTAssertLessThanOrEqual(BlackoutTokens.MapInk.roadLabelSpacing, 110)
+        XCTAssertEqual(BlackoutTokens.MapInk.placeLabelMaxZoom, 16)
+    }
+
+    func testSpeakBannerGrowsWithPromptThenCapsInsteadOfClipping() {
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.speakBannerHeight(lines: 0),
+            BlackoutTokens.Chrome.speakBannerRowPoints
+        )
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.speakBannerHeight(lines: 3),
+            BlackoutTokens.Chrome.speakBannerRowPoints * 3
+        )
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.speakBannerHeight(lines: 400),
+            BlackoutTokens.Chrome.speakBannerMaxPoints
+        )
+        XCTAssertGreaterThanOrEqual(
+            BlackoutTokens.Chrome.mapActionChipTextPoints,
+            BlackoutTokens.Chrome.tabCaptionPoints
+        )
+        XCTAssertGreaterThan(BlackoutTokens.Chrome.mapActionChipGutterPoints, 0)
     }
 
     func testSOSFABIsCommsOnlyNotBrowseMap() {

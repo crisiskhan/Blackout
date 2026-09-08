@@ -118,3 +118,56 @@ public enum VoiceNav: Sendable {
         return String(format: "%.0f meters", value.rounded())
     }
 }
+
+/// Lays a spoken VoiceNav prompt out as banner rows. One sentence per row, wrapped on
+/// spaces, so the MAP banner never has to tail-truncate a word the way `INSTRUME…` did.
+public enum SpeakBanner: Sendable {
+    public static let maxLineCharacters = 46
+    public static let ellipsis = "…"
+
+    public static func lines(_ text: String, maxCharacters: Int = maxLineCharacters) -> [String] {
+        sentences(text).flatMap { wrapped($0, maxCharacters: maxCharacters) }
+    }
+
+    public static func sentences(_ text: String) -> [String] {
+        var out: [String] = []
+        var current = ""
+        for character in text {
+            current.append(character)
+            guard character == "." || character == "!" || character == "?" else { continue }
+            let piece = current.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !piece.isEmpty { out.append(piece) }
+            current = ""
+        }
+        let tail = current.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !tail.isEmpty { out.append(tail) }
+        return out
+    }
+
+    /// Breaks only on spaces. A word longer than the row keeps its own row whole rather
+    /// than losing its tail.
+    public static func wrapped(_ sentence: String, maxCharacters: Int = maxLineCharacters) -> [String] {
+        let limit = max(1, maxCharacters)
+        let words = sentence.split(separator: " ").map(String.init)
+        guard !words.isEmpty else { return [] }
+        var rows: [String] = []
+        var row = ""
+        for word in words {
+            if row.isEmpty {
+                row = word
+            } else if row.count + 1 + word.count <= limit {
+                row += " " + word
+            } else {
+                rows.append(row)
+                row = word
+            }
+        }
+        if !row.isEmpty { rows.append(row) }
+        return rows
+    }
+
+    /// True when a banner row lost characters — the tip-67 `INSTRUME…` failure mode.
+    public static func isClipped(_ text: String) -> Bool {
+        text.contains(ellipsis) || text.contains("...")
+    }
+}

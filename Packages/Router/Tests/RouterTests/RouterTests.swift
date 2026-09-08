@@ -147,6 +147,51 @@ final class RouterTests: XCTestCase {
         XCTAssertFalse(text.contains("Arrive at destination."))
     }
 
+    func testSpeakBannerWrapsWholeWordsAndNeverClips() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: [
+                (0.0, 0.0),
+                (0.0, 0.0017966),
+                (0.0008993, 0.0017966),
+            ],
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        let rows = SpeakBanner.lines(text)
+        XCTAssertEqual(rows.first, "Walk 200 meters.")
+        XCTAssertTrue(rows.contains("Turn left."))
+        XCTAssertTrue(rows.contains("Arrive at destination."))
+        XCTAssertEqual(rows.joined(separator: " "), text)
+        for row in rows {
+            XCTAssertFalse(SpeakBanner.isClipped(row))
+            XCTAssertLessThanOrEqual(row.count, SpeakBanner.maxLineCharacters)
+        }
+    }
+
+    func testSpeakBannerBreaksLongSentencesOnSpacesOnly() {
+        let sentence = "Tap WALK for the street path, then SPEAK."
+        let rows = SpeakBanner.wrapped(sentence, maxCharacters: 18)
+        XCTAssertEqual(rows, ["Tap WALK for the", "street path, then", "SPEAK."])
+        XCTAssertEqual(rows.joined(separator: " "), sentence)
+        for row in rows {
+            XCTAssertFalse(row.hasPrefix(" "))
+            XCTAssertFalse(row.hasSuffix(" "))
+        }
+        // A word wider than the row keeps its tail instead of becoming INSTRUME…
+        XCTAssertEqual(SpeakBanner.wrapped("INSTRUMENTS", maxCharacters: 4), ["INSTRUMENTS"])
+        XCTAssertTrue(SpeakBanner.isClipped("INSTRUME…"))
+        XCTAssertEqual(SpeakBanner.lines(""), [])
+        XCTAssertEqual(SpeakBanner.lines("SPEECH FAILED"), ["SPEECH FAILED"])
+        XCTAssertEqual(
+            SpeakBanner.lines("OFF GRAPH. No walkable street path from YOU. TX WEST."),
+            ["OFF GRAPH.", "No walkable street path from YOU.", "TX WEST."]
+        )
+    }
+
     private func twoHopWalkOnly() -> RouteGraph {
         RouteGraph(
             nodes: [
