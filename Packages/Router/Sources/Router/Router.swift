@@ -147,11 +147,77 @@ public enum GraphPlan {
     }
 }
 
+/// graph.json as the packs ship it. Nodes are dense indices into parallel
+/// lat/lon arrays, and a street segment is one `a, b, metres, flags` record
+/// rather than two directed edges spelling out their own permissions. The
+/// flags say which way you may walk and which way you may drive, so a one-way
+/// street survives the squeeze intact.
+///
+/// Mirrored by `pack_graph` in tools/v3/fetch_packs.py. Change one, change both.
+struct PackedGraph: Decodable {
+    static let wireVersion = 2
+    static let walkForward = 1
+    static let driveForward = 2
+    static let walkBack = 4
+    static let driveBack = 8
+    /// a, b, metres, flags.
+    static let stride = 4
+
+    var version: Int
+    var lat: [Double]
+    var lon: [Double]
+    var segments: [Double]
+
+    private enum CodingKeys: String, CodingKey {
+        case version = "v"
+        case lat
+        case lon
+        case segments = "e"
+    }
+
+    func unpacked() -> RouteGraph? {
+        guard version == Self.wireVersion, lat.count == lon.count, !lat.isEmpty else { return nil }
+        var nodes: [String: GraphNode] = [:]
+        nodes.reserveCapacity(lat.count)
+        for i in lat.indices {
+            nodes[String(i)] = GraphNode(id: i, lon: lon[i], lat: lat[i])
+        }
+        var edges: [GraphEdge] = []
+        edges.reserveCapacity(segments.count / 2)
+        var i = 0
+        while i + Self.stride <= segments.count {
+            let a = Int(segments[i])
+            let b = Int(segments[i + 1])
+            let metres = segments[i + 2]
+            let flags = Int(segments[i + 3])
+            i += Self.stride
+            guard a >= 0, a < lat.count, b >= 0, b < lat.count else { continue }
+            let walkAB = flags & Self.walkForward != 0
+            let driveAB = flags & Self.driveForward != 0
+            if walkAB || driveAB {
+                edges.append(GraphEdge(a: a, b: b, m: metres, walk: walkAB, drive: driveAB))
+            }
+            let walkBA = flags & Self.walkBack != 0
+            let driveBA = flags & Self.driveBack != 0
+            if walkBA || driveBA {
+                edges.append(GraphEdge(a: b, b: a, m: metres, walk: walkBA, drive: driveBA))
+            }
+        }
+        return RouteGraph(nodes: nodes, edges: edges)
+    }
+}
+
 extension RouteGraph {
     public static func load(from url: URL?) -> RouteGraph? {
         guard let url, let data = try? Data(contentsOf: url) else { return nil }
-        guard let g = try? JSONDecoder().decode(RouteGraph.self, from: data) else { return nil }
-        if g.edges.isEmpty || g.nodes.isEmpty { return nil }
+        let decoder = JSONDecoder()
+        var g: RouteGraph?
+        if let packed = try? decoder.decode(PackedGraph.self, from: data) {
+            g = packed.unpacked()
+        } else {
+            g = try? decoder.decode(RouteGraph.self, from: data)
+        }
+        guard let g, !g.edges.isEmpty, !g.nodes.isEmpty else { return nil }
         return g
     }
 }

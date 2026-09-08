@@ -72,6 +72,36 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(RouteGraph.load(from: ok)?.edges.count, 1)
     }
 
+    func testPackedGraphKeepsEveryTurnIncludingOneWays() throws {
+        // Three nodes in a line. The first segment is two-way (flags 15); the
+        // second may only be taken west to east (flags 3), like a one-way street.
+        let packed = """
+        {"v":2,"engine":"osm-graph","lat":[0,0,0],"lon":[0,0.01,0.02],\
+        "e":[0,1,100,15,1,2,100,3]}
+        """
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("packed-graph-\(UUID().uuidString).json")
+        try Data(packed.utf8).write(to: url)
+
+        let g = try XCTUnwrap(RouteGraph.load(from: url))
+        XCTAssertEqual(g.nodes.count, 3)
+        XCTAssertEqual(g.edges.count, 3)
+        XCTAssertEqual(g.nodes["2"]?.lon, 0.02)
+
+        let out = try XCTUnwrap(GraphRouter.route(graph: g, from: 0, to: 2, mode: .walk))
+        XCTAssertEqual(out.nodeIds, [0, 1, 2])
+        XCTAssertEqual(out.meters, 200)
+        XCTAssertNotNil(GraphRouter.route(graph: g, from: 0, to: 2, mode: .drive))
+        XCTAssertNil(GraphRouter.route(graph: g, from: 2, to: 0, mode: .walk))
+    }
+
+    func testPackedGraphRefusesAnUnknownWireVersion() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("future-graph-\(UUID().uuidString).json")
+        try Data("{\"v\":99,\"lat\":[0],\"lon\":[0],\"e\":[0,0,0,1]}".utf8).write(to: url)
+        XCTAssertNil(RouteGraph.load(from: url))
+    }
+
     func testVoiceNavOnGraphLeftTurnIsCompleteNotTruncated() {
         let coords: [(lat: Double, lon: Double)] = [
             (0.0, 0.0),

@@ -84,7 +84,7 @@ public final class PackStore: @unchecked Sendable {
 }
 
 public enum GraphProbe: Sendable {
-    /// `{"edges":[]}` is 12 bytes. One test edge is ~57. Shipped TX WEST is ~24MB.
+    /// `{"edges":[]}` is 12 bytes. One test edge is ~57. Shipped TX WEST is ~4.5MB.
     public static let emptyMaxBytes = 32
 
     public static func isUsable(byteCount: Int) -> Bool {

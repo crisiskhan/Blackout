@@ -52,7 +52,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 68780441,
+  "bytes": 44359084,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -129,7 +129,7 @@
     ],
     "water": 7073,
     "places": 192,
-    "graphEdges": 325013,
+    "graphEdges": 324929,
     "graphNodes": 119529,
     "streetsVisibleAtWalkingZoom": true
   }

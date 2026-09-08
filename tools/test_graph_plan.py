@@ -2,21 +2,29 @@
 """Linux stand-in for Router GraphPlan unit tests (no Swift on this agent)."""
 from __future__ import annotations
 
+import json
 import math
 import re
+import sys
 import unittest
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+
+from v3.fetch_packs import (  # noqa: E402
+    DRIVE_BACK,
+    DRIVE_FORWARD,
+    GRAPH_WIRE_VERSION,
+    WALK_BACK,
+    WALK_FORWARD,
+    pack_graph,
+    unpack_graph,
+)
 
 OFF_GRAPH = "OFF GRAPH"
-ROUTE_LINE = (
-    Path(__file__).resolve().parents[1]
-    / "Packages"
-    / "MapLibreMap"
-    / "Sources"
-    / "MapLibreMap"
-    / "RouteLine.swift"
-)
+ROUTE_LINE = ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "RouteLine.swift"
+ROUTER = ROOT / "Packages" / "Router" / "Sources" / "Router" / "Router.swift"
 
 
 def route_block_cases() -> list[str]:
@@ -174,10 +182,78 @@ class WalkDriveChipTests(unittest.TestCase):
     def test_chips_are_never_disabled_and_never_silent(self):
         src = ROUTE_LINE.read_text()
         self.assertIn("alwaysTappable = true", src)
-        map_tab = (Path(__file__).resolve().parents[1] / "Blackout" / "MapTab.swift").read_text()
+        map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         self.assertNotIn(".disabled(", map_tab)
         for chip in ("MARK", "WALK", "DRIVE", "RULER", "USNG", "MAG/TRUE"):
             self.assertIn(f'Button("{chip}")', map_tab)
+
+
+class PackedGraphTests(unittest.TestCase):
+    """The wire format must lose bytes, never turns."""
+
+    def one_way_pair(self) -> dict:
+        # 1 -> 2 both ways; 2 -> 3 forward only, like a one-way street.
+        return {
+            "engine": "osm-graph",
+            "valhallaCosting": None,
+            "nodes": {
+                "11": {"id": 11, "lon": 0.0, "lat": 0.0},
+                "22": {"id": 22, "lon": 0.01, "lat": 0.0},
+                "33": {"id": 33, "lon": 0.02, "lat": 0.0},
+            },
+            "edges": [
+                {"a": 11, "b": 22, "m": 100.0, "walk": True, "drive": True},
+                {"a": 22, "b": 11, "m": 100.0, "walk": True, "drive": True},
+                {"a": 22, "b": 33, "m": 100.0, "walk": True, "drive": False},
+            ],
+        }
+
+    def test_round_trip_keeps_direction_and_mode(self):
+        packed = pack_graph(self.one_way_pair())
+        self.assertEqual(packed["v"], GRAPH_WIRE_VERSION)
+        self.assertEqual(packed["lat"], [0.0, 0.0, 0.0])
+        self.assertEqual(packed["lon"], [0.0, 0.01, 0.02])
+        # Two segments, four numbers each: a, b, metres, flags.
+        self.assertEqual(len(packed["e"]), 8)
+        self.assertEqual(packed["e"][3], WALK_FORWARD | DRIVE_FORWARD | WALK_BACK | DRIVE_BACK)
+        self.assertEqual(packed["e"][7], WALK_FORWARD)
+
+        back = unpack_graph(packed)
+        walkable = {(e["a"], e["b"]) for e in back["edges"] if e["walk"]}
+        drivable = {(e["a"], e["b"]) for e in back["edges"] if e["drive"]}
+        self.assertEqual(walkable, {(0, 1), (1, 0), (1, 2)})
+        self.assertEqual(drivable, {(0, 1), (1, 0)})
+        self.assertEqual({e["m"] for e in back["edges"]}, {100.0})
+
+    def test_a_one_way_street_never_becomes_two_way(self):
+        packed = pack_graph(self.one_way_pair())
+        back = unpack_graph(packed)
+        self.assertNotIn((2, 1), {(e["a"], e["b"]) for e in back["edges"]})
+
+    def test_swift_reader_agrees_with_the_python_writer(self):
+        src = ROUTER.read_text()
+        self.assertIn(f"static let wireVersion = {GRAPH_WIRE_VERSION}", src)
+        for name, value in (
+            ("walkForward", WALK_FORWARD),
+            ("driveForward", DRIVE_FORWARD),
+            ("walkBack", WALK_BACK),
+            ("driveBack", DRIVE_BACK),
+        ):
+            self.assertIn(f"static let {name} = {value}", src, f"Swift disagrees on {name}")
+        self.assertIn('case version = "v"', src)
+        self.assertIn('case segments = "e"', src)
+        self.assertIn("PackedGraph.self", src)
+
+    def test_every_shipped_pack_is_on_the_wire_format(self):
+        packs = ROOT / "Resources" / "Packs"
+        graphs = sorted(packs.glob("*/graph.json"))
+        self.assertTrue(graphs)
+        for path in graphs:
+            raw = json.loads(path.read_text())
+            self.assertEqual(raw.get("v"), GRAPH_WIRE_VERSION, f"{path.parent.name} ships a stale graph")
+            self.assertNotIn("nodes", raw, f"{path.parent.name} still spells out nodes")
+            self.assertEqual(len(raw["e"]) % 4, 0, f"{path.parent.name} has a torn segment record")
+            self.assertEqual(len(raw["lat"]), len(raw["lon"]))
 
 
 if __name__ == "__main__":

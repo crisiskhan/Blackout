@@ -88,7 +88,7 @@ final class PackIOTests: XCTestCase {
         XCTAssertFalse(GraphProbe.isUsable(byteCount: 13))
         XCTAssertFalse(GraphProbe.isUsable(byteCount: GraphProbe.emptyMaxBytes))
         XCTAssertTrue(GraphProbe.isUsable(byteCount: 58))
-        XCTAssertTrue(GraphProbe.isUsable(byteCount: 24_357_803))
+        XCTAssertTrue(GraphProbe.isUsable(byteCount: 4_749_212))
     }
 
     func testHasUsableGraphDoesNotParseFullGraphBytes() throws {

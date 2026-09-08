@@ -60,7 +60,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 50665555,
+      "bytes": 31062467,
       "files": [
         "border.geojson",
         "contours.geojson",
@@ -135,7 +135,7 @@
         ],
         "water": 2748,
         "places": 65,
-        "graphEdges": 264064,
+        "graphEdges": 264057,
         "graphNodes": 98322,
         "streetsVisibleAtWalkingZoom": true
       }
@@ -194,7 +194,7 @@
         "cattle-guard",
         "hurricane"
       ],
-      "bytes": 68780441,
+      "bytes": 44359084,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -271,7 +271,7 @@
         ],
         "water": 7073,
         "places": 192,
-        "graphEdges": 325013,
+        "graphEdges": 324929,
         "graphNodes": 119529,
         "streetsVisibleAtWalkingZoom": true
       }
@@ -331,7 +331,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 67236242,
+      "bytes": 40579497,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -408,7 +408,7 @@
         ],
         "water": 3150,
         "places": 72,
-        "graphEdges": 359382,
+        "graphEdges": 359364,
         "graphNodes": 123847,
         "streetsVisibleAtWalkingZoom": true
       }

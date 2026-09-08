@@ -52,7 +52,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 50665555,
+  "bytes": 31062467,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -127,7 +127,7 @@
     ],
     "water": 2748,
     "places": 65,
-    "graphEdges": 264064,
+    "graphEdges": 264057,
     "graphNodes": 98322,
     "streetsVisibleAtWalkingZoom": true
   }
