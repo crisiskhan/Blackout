@@ -1021,6 +1021,12 @@ def tip62_nav() -> None:
         and "chromeNet" not in map_tab
         and "layoutPriority(1)" in map_tab
         and "ZStack(alignment: .bottomLeading)" in map_tab
+        # Readouts a field user cannot act on. The destination is a pin, not a number.
+        and "DEST %.4f" not in map_tab
+        and "BEARING %.0f" not in map_tab
+        and "pack.bytes" not in map_tab
+        and "Search FTS" not in map_tab
+        and 'MARK \\(m.label)' not in map_tab
     )
     roads_ok = (
         road_labels is not None
@@ -1038,6 +1044,11 @@ def tip62_nav() -> None:
         and "testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords" in map_tests
         and "testWalkDriveChipAlwaysTapsAndNamesTheBlocker" in map_tests
         and "testRouteSummaryReportsDrawnLineAndStaysHonestWhenEmpty" in map_tests
+        and "testCanvasOpensWhereStreetNamesRender" in map_tests
+        and "testDestinationPinTracksTheChosenTarget" in map_tests
+        and "testHomeCoordinateFallsBackToCenterWhenAbsent" in (
+            ROOT / "Packages" / "PackIO" / "Tests" / "PackIOTests" / "PackIOTests.swift"
+        ).read_text()
         and "testMapInstrumentChipsAreSixFortyFourPointTargets" in (
             ROOT / "Packages" / "Tokens" / "Tests" / "TokensTests" / "TokensTests.swift"
         ).read_text()

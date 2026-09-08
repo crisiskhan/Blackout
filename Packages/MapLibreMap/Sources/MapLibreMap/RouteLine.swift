@@ -23,6 +23,30 @@ public enum RouteLine {
     }
 }
 
+/// The chosen destination, drawn on the canvas so the map does not need to
+/// print raw latitude and longitude to say where you are headed.
+public enum DestinationPin {
+    public static let sourceID = "dest-pin-src"
+    public static let ringLayerID = "dest-pin-ring"
+    public static let coreLayerID = "dest-pin-core"
+    public static let ringRadius: Double = 13
+    public static let coreRadius: Double = 5
+
+    public static func needsReapply(
+        stored: (lat: Double, lon: Double)?,
+        destination: (lat: Double, lon: Double)?
+    ) -> Bool {
+        switch (stored, destination) {
+        case (nil, nil):
+            return false
+        case let (a?, b?):
+            return a.lat != b.lat || a.lon != b.lon
+        default:
+            return true
+        }
+    }
+}
+
 /// Why a WALK or DRIVE tap could not draw a street line. The chips are never
 /// disabled, so every tap either draws or says one of these out loud.
 public enum RouteBlock: String, Equatable, Sendable, CaseIterable {

@@ -427,14 +427,14 @@
         ],
         "Point"
       ],
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "circle-color": "#B8BDC2",
         "circle-radius": 2.4,
         "circle-stroke-color": "#000000",
         "circle-stroke-width": 0.8
-      },
-      "layout": {
-        "visibility": "none"
       }
     },
     {
@@ -459,7 +459,7 @@
           "name"
         ],
         "symbol-placement": "line",
-        "symbol-spacing": 180,
+        "symbol-spacing": 110,
         "text-size": [
           "interpolate",
           [
@@ -480,8 +480,8 @@
         "text-font": [
           "Open Sans Regular"
         ],
-        "text-max-angle": 32,
-        "text-padding": 1,
+        "text-max-angle": 40,
+        "text-padding": 2,
         "text-letter-spacing": 0.03,
         "text-optional": true,
         "text-keep-upright": true,
@@ -508,7 +508,7 @@
       "paint": {
         "text-color": "#B8BDC2",
         "text-halo-color": "#000000",
-        "text-halo-width": 2.0,
+        "text-halo-width": 2.2,
         "text-halo-blur": 0.15
       }
     },

@@ -271,6 +271,16 @@ public enum UserPuck {
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
 
+    /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
+    /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
+    /// The map therefore opens on YOU at walking zoom; FIT PACK still shows the region.
+    public static let openZoom: Double = 15
+    public static let streetNameMinZoom: Double = 12
+
+    public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
+        openZoom >= labelMinZoom
+    }
+
     public static func bounds(
         south: Double,
         west: Double,
@@ -502,9 +512,10 @@ public enum OverlaySync: Sendable {
     public static func needsStyleMutation(
         force: Bool,
         puckNeedsReapply: Bool,
-        routeNeedsReapply: Bool
+        routeNeedsReapply: Bool,
+        destinationNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
     }
 }
 

@@ -433,6 +433,32 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(
             OverlaySync.needsStyleMutation(force: false, puckNeedsReapply: false, routeNeedsReapply: true)
         )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(
+                force: false,
+                puckNeedsReapply: false,
+                routeNeedsReapply: false,
+                destinationNeedsReapply: true
+            )
+        )
+    }
+
+    func testCanvasOpensWhereStreetNamesRender() {
+        XCTAssertTrue(PackCamera.opensOnStreetNames())
+        XCTAssertGreaterThanOrEqual(PackCamera.openZoom, PackCamera.streetNameMinZoom)
+        XCTAssertFalse(PackCamera.opensOnStreetNames(openZoom: 11, labelMinZoom: 12))
+    }
+
+    func testDestinationPinTracksTheChosenTarget() {
+        let dest = (lat: 31.7619, lon: -106.4850)
+        XCTAssertFalse(DestinationPin.needsReapply(stored: nil, destination: nil))
+        XCTAssertTrue(DestinationPin.needsReapply(stored: nil, destination: dest))
+        XCTAssertTrue(DestinationPin.needsReapply(stored: dest, destination: nil))
+        XCTAssertFalse(DestinationPin.needsReapply(stored: dest, destination: dest))
+        XCTAssertTrue(
+            DestinationPin.needsReapply(stored: dest, destination: (lat: 31.80, lon: -106.4850))
+        )
+        XCTAssertEqual(DestinationPin.sourceID, "dest-pin-src")
     }
 
     func testFixPublishThrottlesHeadingJitterAndKeepsFirstFix() {

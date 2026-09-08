@@ -7,6 +7,7 @@ Washed charcoal/gray + 10–13pt labels fail this contract. Tokens are
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -159,6 +160,83 @@ def assert_readable_style(style: dict, label: str) -> None:
         fail(f"{label} network must stay deny-all")
 
 
+def open_zoom() -> float:
+    """PackCamera.openZoom — the zoom the canvas actually opens at."""
+    src = (
+        ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift"
+    ).read_text()
+    found = re.search(r"openZoom: Double = ([0-9.]+)", src)
+    if not found:
+        fail("PackCamera.openZoom missing — canvas has no declared open zoom")
+    return float(found.group(1))
+
+
+def assert_opens_on_street_names(pack_id: str, zoom: float) -> None:
+    """Fitting a whole pack bbox lands near z11 and hides every street name.
+
+    The canvas must open at or above the zoom where this pack's own style
+    starts drawing road labels, or TX WEST reads as unnamed lines again.
+    """
+    style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+    labels = layer(style, "road-labels")
+    minzoom = float(labels.get("minzoom") or 0)
+    if zoom < minzoom:
+        fail(f"{pack_id} opens at z{zoom} but road-labels start at z{minzoom} — no street names on open")
+    size = interpolate_at((labels.get("layout") or {}).get("text-size"), zoom)
+    if size < 14:
+        fail(f"{pack_id} street names are {size}pt at the open zoom z{zoom}")
+    offline = (
+        ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift"
+    ).read_text()
+    if "zoomLevel: PackCamera.openZoom" not in offline:
+        fail("OfflineMapView must open the camera at PackCamera.openZoom")
+    if "setVisibleCoordinateBounds" not in offline or "func fitPack" not in offline:
+        fail("FIT PACK must still be able to show the whole region")
+    print(f"OK   {pack_id} opens at z{zoom}; road names {size:.0f}pt from z{minzoom}")
+
+
+def assert_home_is_on_streets(pack_id: str) -> None:
+    """`home` is where the canvas opens with no GPS. It must have streets on it.
+
+    The bbox midpoint does not: TX WEST's is the Franklin Mountains crest and
+    TX EAST's is farmland east of Austin. Opening at walking zoom there paints
+    a near-empty canvas that reads as a broken map.
+    """
+    pack = ROOT / "Resources" / "Packs" / pack_id
+    man = json.loads((pack / "manifest.json").read_text())
+    home = man.get("home")
+    if not home:
+        fail(f"{pack_id} manifest has no home point")
+    catalog = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
+    listed = next((p for p in catalog.get("packs") or [] if p.get("id") == pack_id), {})
+    if listed.get("home") != home:
+        fail(f"{pack_id} catalog home {listed.get('home')} does not match manifest {home}")
+    bb = man["bbox"]
+    if not (bb["south"] <= home["lat"] <= bb["north"] and bb["west"] <= home["lon"] <= bb["east"]):
+        fail(f"{pack_id} home {home} is outside its own pack")
+
+    # A walking-zoom screen at z15 is roughly 0.01deg tall on an iPhone.
+    reach = 0.02
+    osm = json.loads((pack / "osm.geojson").read_text())
+    named = 0
+    for feature in osm.get("features") or []:
+        props = feature.get("properties") or {}
+        if not props.get("highway") or not props.get("name"):
+            continue
+        geom = feature.get("geometry") or {}
+        if geom.get("type") != "LineString":
+            continue
+        for lon, lat in geom.get("coordinates") or []:
+            if abs(lat - home["lat"]) <= reach and abs(lon - home["lon"]) <= reach:
+                named += 1
+                break
+        if named >= 40:
+            break
+    if named < 40:
+        fail(f"{pack_id} home {home} has only {named} named streets within {reach}deg — opens on empty terrain")
+    print(f"OK   {pack_id} home {home['lat']:.3f},{home['lon']:.3f} opens on named streets")
+
+
 def assert_walkable_osm(pack_id: str) -> None:
     pack = ROOT / "Resources" / "Packs" / pack_id
     osm_path = pack / "osm.geojson"
@@ -209,6 +287,12 @@ def main() -> None:
     style = json.loads(style_path.read_text())
     assert_readable_style(style, "tx-west/style.json")
 
+    # NM shipped before the readability pass and kept 10pt labels with no casing.
+    # Every walkable pack now answers to the same contract.
+    for pack_id in sorted(walkable_ids() - {"tx-west"}):
+        sibling = ROOT / "Resources" / "Packs" / pack_id / "style.json"
+        assert_readable_style(json.loads(sibling.read_text()), f"{pack_id}/style.json")
+
     existing = json.loads(style_path.read_text())
     hill = existing.get("sources", {}).get("hillshade")
     hillshade = None
@@ -252,6 +336,11 @@ def main() -> None:
     assert_walkable_osm("tx-west")
     assert_walkable_osm("nm")
     assert_walkable_osm("tx-east")
+
+    zoom = open_zoom()
+    for pack_id in sorted(walkable_ids()):
+        assert_opens_on_street_names(pack_id, zoom)
+        assert_home_is_on_streets(pack_id)
 
     tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
     if 'voidHex = "#000000"' not in tokens:
