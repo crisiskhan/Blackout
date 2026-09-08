@@ -21,6 +21,7 @@ import test_tf_ipa_inspect
 ROOT = Path(__file__).resolve().parents[1]
 
 COMPILE_YML = ROOT / ".github/workflows/xcodebuild.yml"
+AUDIT_YML = ROOT / ".github/workflows/audit.yml"
 TF_YML = ROOT / ".github/workflows/testflight-internal.yml"
 PBX = ROOT / "Blackout.xcodeproj/project.pbxproj"
 GENERATOR = ROOT / "tools/v3/generate_project.py"
@@ -32,6 +33,8 @@ TF_IPA_INSPECT = ROOT / "tools/tf_ipa_inspect.py"
 WIDGET_PLIST = ROOT / "BlackoutWidgets/Info.plist"
 WATCH_PLIST = ROOT / "BlackoutWatch/Info.plist"
 GATE_INVOKE = "python3 tools/test_ci_opt.py"
+AUDIT_INVOKE = "bash tools/audit_offline.sh"
+BIBLE_BRANCH = "cursor/blackout-bible-v3-64d0"
 TREE_CPV = "1"
 KEEP_DIST_ID = "45YLWHL6UP"
 
@@ -56,6 +59,24 @@ def _before_build(text: str, label: str, marker: str) -> None:
         fail(f"{label} runs {GATE_INVOKE} after {marker}")
 
 
+def _pull_request_branches(text: str, label: str) -> list[str]:
+    on_block = text.split("jobs:", 1)[0]
+    lines = on_block.splitlines()
+    start = -1
+    for i, line in enumerate(lines):
+        if line.rstrip() == "  pull_request:":
+            start = i
+            break
+    if start < 0:
+        fail(f"{label} missing pull_request trigger")
+    block: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.strip() and not line.startswith("    "):
+            break
+        block.append(line)
+    return re.findall(r"^\s*-\s*(\S+)", "\n".join(block), re.M)
+
+
 def test_compile_workflow_invokes_gate() -> None:
     text = COMPILE_YML.read_text()
     if GATE_INVOKE not in text:
@@ -72,6 +93,36 @@ def test_compile_workflow_invokes_gate() -> None:
     if "Xcode_26" in text or "26.*" in text:
         fail("unsigned compile must stay Xcode 16 — do not move xcodebuild.yml to 26")
     ok("xcodebuild.yml runs test_ci_opt.py before xcodebuild")
+
+
+def test_audit_workflow_gates_bible_prs() -> None:
+    """Product invariants must run before merge, not after.
+
+    tools/audit_offline.sh chains validate_v3.py, which chains test_graph_plan
+    / test_walkable_next_pack / test_tx_west_style / test_voice_nav. No
+    workflow invoked that chain, and PRs into bible v3 reported no checks at
+    all, so merge c99b927 was the first build to see the obsolete MapLibre
+    convertPoint (34241309663 exit 65) — after it was already on the branch.
+    """
+    if not AUDIT_YML.is_file():
+        fail("missing .github/workflows/audit.yml — CI would not run the offline invariants")
+    text = AUDIT_YML.read_text()
+    if AUDIT_INVOKE not in text:
+        fail(f"audit.yml must run {AUDIT_INVOKE}")
+    if GATE_INVOKE not in text:
+        fail("audit.yml must run tools/test_ci_opt.py before the offline audit")
+    _before_build(text, "audit.yml", AUDIT_INVOKE)
+    if not re.search(r"runs-on:\s*ubuntu-", text):
+        fail("audit.yml must stay on a Linux runner — the audit needs no Xcode")
+    if re.search(r"runs-on:\s*macos", text):
+        fail("audit.yml must not spend a macOS runner on a text audit")
+    if "secrets." in text:
+        fail("audit.yml is a no-secret gate — it must not read ASC credentials")
+    for label, path in (("audit.yml", AUDIT_YML), ("xcodebuild.yml", COMPILE_YML)):
+        branches = _pull_request_branches(path.read_text(), label)
+        if BIBLE_BRANCH not in branches:
+            fail(f"{label} must pull_request-trigger on {BIBLE_BRANCH} — tip PRs merge unchecked")
+    ok("audit.yml runs the offline invariants on Linux; PRs into bible v3 are gated")
 
 
 def test_testflight_workflow_invokes_gate() -> None:
@@ -600,6 +651,7 @@ def test_crisis_opt_locks() -> None:
 
 def main() -> None:
     test_compile_workflow_invokes_gate()
+    test_audit_workflow_gates_bible_prs()
     test_testflight_workflow_invokes_gate()
     test_cpv_inject_model()
     test_nfc_tag_only()

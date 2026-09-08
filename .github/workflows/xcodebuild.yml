@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - main
+      - cursor/blackout-bible-v3-64d0
 
 jobs:
   build:

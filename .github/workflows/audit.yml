@@ -1,0 +1,32 @@
+# Product invariants for bible v3. tools/audit_offline.sh chains
+# tools/validate_v3.py, which chains test_graph_plan / test_walkable_next_pack /
+# test_tx_west_style / test_voice_nav. That chain is the machine-readable
+# "Locked (do not regress)" list; before this workflow nothing ran it in CI and
+# PRs into cursor/blackout-bible-v3-64d0 reported no checks at all.
+# Pure stdlib, no Xcode, no network, no secrets — keep it on Linux so a broken
+# invariant is caught without spending a macOS runner. Never uploads to ASC.
+name: audit
+
+on:
+  push:
+    branches:
+      - cursor/blackout-bible-v3-64d0
+      - main
+  pull_request:
+    branches:
+      - main
+      - cursor/blackout-bible-v3-64d0
+
+jobs:
+  audit:
+    name: offline invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail closed on CI opt / CPV gates
+        run: python3 tools/test_ci_opt.py
+
+      - name: Offline product invariants
+        run: bash tools/audit_offline.sh
