@@ -128,6 +128,15 @@ def assert_readable_style(style: dict, label: str) -> None:
         fail(f"{label} road names too small at z14: {interpolate_at(size, 14)}")
     if interpolate_at(size, 16) < 16:
         fail(f"{label} road names too small at z16: {interpolate_at(size, 16)}")
+    layout = labels.get("layout") or {}
+    if float(layout.get("symbol-spacing") or 999) > 110:
+        fail(f"{label} road-label spacing too sparse at walking zoom: {layout.get('symbol-spacing')}")
+    if float(layout.get("text-max-angle") or 0) < 40:
+        fail(f"{label} road-label max-angle too tight: {layout.get('text-max-angle')}")
+    points = next((item for item in layers if item.get("id") == "osm-points"), None)
+    vis = ((points or {}).get("layout") or {}).get("visibility")
+    if vis != "none":
+        fail(f"{label} osm-points must stay quiet (visibility none), got {vis}")
 
     blob = dump_json(style)
     if ACCENT.lower() not in blob:

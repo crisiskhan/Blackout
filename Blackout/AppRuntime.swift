@@ -199,9 +199,17 @@ final class AppRuntime {
 
     func speakMap() {
         let pack = packs?.active?.name ?? "no pack"
-        let bearing = headingDeg.map { String(format: "%.0f degrees", $0) } ?? "no heading"
-        if speech.speak("\(pack) \(bearing)", locale: locale) {
-            speechChrome = ""
+        let text = VoiceNav.prompt(
+            packName: pack,
+            headingDeg: headingDeg,
+            routeCoords: routeCoords,
+            planChrome: navChrome,
+            destination: destination(),
+            you: youCoordinate(),
+            locale: locale
+        )
+        if speech.speak(text, locale: locale) {
+            speechChrome = text
         } else {
             speechChrome = "SPEECH FAILED"
         }

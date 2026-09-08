@@ -72,6 +72,81 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(RouteGraph.load(from: ok)?.edges.count, 1)
     }
 
+    func testVoiceNavOnGraphLeftTurnIsCompleteNotTruncated() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Turn left."))
+        XCTAssertTrue(text.contains("Walk 100 meters."))
+        XCTAssertTrue(text.contains("Arrive at destination."))
+        XCTAssertTrue(text.contains("Total 300 meters."))
+        XCTAssertTrue(text.contains("Heading 90 degrees."))
+        XCTAssertFalse(text.hasSuffix("Walk"))
+        XCTAssertNotEqual(text, "TX WEST 90 degrees")
+        XCTAssertGreaterThan(text.count, 40)
+    }
+
+    func testVoiceNavOffGraphIsFullHonestSentence() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 45,
+            routeCoords: [],
+            planChrome: GraphPlan.offGraph,
+            destination: (31.8, -106.5),
+            you: (31.76, -106.49),
+            locale: "en"
+        )
+        XCTAssertTrue(text.hasPrefix("OFF GRAPH."))
+        XCTAssertTrue(text.contains("No walkable street path from YOU."))
+        XCTAssertTrue(text.contains("TX WEST."))
+        XCTAssertTrue(text.contains("Heading 45 degrees."))
+        XCTAssertGreaterThan(text.count, 24)
+    }
+
+    func testVoiceNavNoRouteExplainsHowToStart() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: nil,
+            routeCoords: [],
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(text.contains("TX WEST."))
+        XCTAssertTrue(text.contains("Heading unavailable."))
+        XCTAssertTrue(text.contains("Set a destination, then WALK, then SPEAK for turn by turn."))
+        XCTAssertNotEqual(text.trimmingCharacters(in: .whitespacesAndNewlines), "TX WEST no heading")
+    }
+
+    func testVoiceNavDestWithoutLineDoesNotInventStreets() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 12,
+            routeCoords: [],
+            planChrome: "",
+            destination: (31.80, -106.50),
+            you: (31.76, -106.49),
+            locale: "en"
+        )
+        XCTAssertTrue(text.contains("Destination set."))
+        XCTAssertTrue(text.contains("Tap WALK for the street path, then SPEAK."))
+        XCTAssertFalse(text.contains("Turn left."))
+        XCTAssertFalse(text.contains("Arrive at destination."))
+    }
+
     private func twoHopWalkOnly() -> RouteGraph {
         RouteGraph(
             nodes: [

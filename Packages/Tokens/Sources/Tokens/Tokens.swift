@@ -38,7 +38,7 @@ public enum BlackoutTokens: Sendable {
         public static let accentHex = "#E10600"
         public static let roadLabelMinZoom: Double = 12
         public static let roadLabelWalkingSize: Double = 18
-        public static let roadLabelHaloWidth: Double = 2.0
+        public static let roadLabelHaloWidth: Double = 2.2
     }
 
     public struct RGBA: Equatable, Sendable {

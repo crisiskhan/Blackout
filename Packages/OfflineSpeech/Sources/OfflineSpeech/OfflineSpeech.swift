@@ -26,8 +26,14 @@ public final class SpeechEngine: @unchecked Sendable {
         #if canImport(AVFoundation)
         let engine = synth ?? AVSpeechSynthesizer()
         synth = engine
+        if engine.isSpeaking {
+            engine.stopSpeaking(at: .immediate)
+        }
         let u = AVSpeechUtterance(string: trimmed)
         u.voice = AVSpeechSynthesisVoice(language: locale == "es" ? "es-MX" : "en-US")
+        u.rate = AVSpeechUtteranceDefaultSpeechRate
+        u.preUtteranceDelay = 0.12
+        u.postUtteranceDelay = 0.2
         engine.speak(u)
         lastFailed = false
         lastUtterance = "\(locale):\(trimmed)"

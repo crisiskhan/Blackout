@@ -15,6 +15,14 @@ final class SpeechEngineTests: XCTestCase {
         XCTAssertFalse(s.lastFailed)
     }
 
+    func testFullTurnByTurnUtteranceIsNotTruncated() {
+        let s = SpeechEngine(box: EventLog())
+        let line = "Walk 200 meters. Turn left. Walk 100 meters. Arrive at destination. Total 300 meters. Heading 90 degrees."
+        XCTAssertTrue(s.speak(line, locale: "en") || s.lastFailed)
+        XCTAssertTrue(s.lastUtterance.contains("Arrive at destination.") || s.lastFailed)
+        XCTAssertFalse(s.lastUtterance.contains("TX WEST 90 degrees") && !s.lastUtterance.contains("Arrive"))
+    }
+
     func testEmptySpeakIsFailureNotFakeAudio() {
         let s = SpeechEngine(box: EventLog())
         XCTAssertFalse(s.speak("   ", locale: "en"))

@@ -373,6 +373,9 @@ public enum PackStyle {
                 "id": osmPointsLayerID,
                 "type": "circle",
                 "source": "osm",
+                "layout": [
+                    "visibility": "none",
+                ],
                 "paint": [
                     "circle-color": silverInk,
                     "circle-radius": 2.4,
@@ -411,16 +414,18 @@ public enum PackStyle {
                 "layout": [
                     "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "symbol-spacing": 180,
+                    "symbol-spacing": 110,
                     "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 14, 15, 16, 18, 17, 20],
                     "text-font": ["Open Sans Regular"],
-                    "text-padding": 1,
+                    "text-max-angle": 40,
+                    "text-padding": 2,
                     "text-optional": true,
+                    "text-keep-upright": true,
                 ],
                 "paint": [
                     "text-color": silverInk,
                     "text-halo-color": voidInk,
-                    "text-halo-width": 2.0,
+                    "text-halo-width": 2.2,
                 ],
             ])
         }
