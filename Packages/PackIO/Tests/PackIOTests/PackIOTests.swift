@@ -13,12 +13,29 @@ final class PackIOTests: XCTestCase {
     }
 
     func testPreferPrimaryPutsTXWestFirst() {
-        let fl = PackManifest(id: "fl-north", name: "FL NORTH", state: "FL", bytes: 1, banners: [], center: .init(lat: 30.4, lon: -81.5), bbox: .init(south: 30, west: -82, north: 31, east: -81))
+        let nm = PackManifest(id: "nm", name: "NM", state: "NM", bytes: 1, banners: [], center: .init(lat: 35.15, lon: -106.53), bbox: .init(south: 35.06, west: -106.68, north: 35.25, east: -106.38))
         let tx = PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 2, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
-        let ordered = PackStore.preferPrimary([fl, tx])
-        XCTAssertEqual(ordered.map(\.id), ["tx-west", "fl-north"])
+        let ordered = PackStore.preferPrimary([nm, tx])
+        XCTAssertEqual(ordered.map(\.id), ["tx-west", "nm"])
         XCTAssertEqual(PackStore.defaultPackID, "tx-west")
         XCTAssertEqual(PackStore.osmAttribution, "© OpenStreetMap contributors")
+    }
+
+    func testSwitchRefusesAPackOffTheStatesWeShip() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-states-\(UUID().uuidString)")
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        let tx = PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 2, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
+        let stray = PackManifest(id: "fl-north", name: "FL NORTH", state: "FL", bytes: 1, banners: [], center: .init(lat: 30.4, lon: -81.5), bbox: .init(south: 30, west: -82, north: 31, east: -81))
+        try JSONEncoder().encode(PackCatalog(states: ["TX", "NM"], packs: [tx, stray]))
+            .write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+        XCTAssertThrowsError(try store.switchTo("fl-north")) { error in
+            XCTAssertEqual(error as? PackError, .regionLeak)
+        }
+        XCTAssertEqual(store.active?.id, "tx-west")
+        try store.switchTo("tx-west")
+        XCTAssertEqual(store.active?.id, "tx-west")
     }
 
     func testHasUsableGraphIsHonestWhenEmpty() throws {

@@ -58,16 +58,15 @@
       "id": "tx-heat-island",
       "category": "environment",
       "states": [
-        "TX",
-        "FL"
+        "TX"
       ],
       "title": {
         "en": "City heat island",
         "es": "Isla de calor urbana"
       },
       "situation": {
-        "en": "Pavement, no shade, and a party still moving in El Paso, Austin, Miami, or Jacksonville afternoon.",
-        "es": "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin, Miami o Jacksonville."
+        "en": "Pavement, no shade, and a party still moving in an El Paso, Austin, or Albuquerque afternoon.",
+        "es": "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin o Albuquerque."
       },
       "stop_if": [
         {
@@ -106,10 +105,9 @@
     },
     {
       "schema": "1.4",
-      "id": "fl-hurricane-paper",
+      "id": "tx-hurricane-paper",
       "category": "environment",
       "states": [
-        "FL",
         "TX"
       ],
       "title": {

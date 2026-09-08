@@ -173,6 +173,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
 }
 
 public struct PackCatalog: Codable, Equatable, Sendable {
+    /// States the bundle actually carries map packs for. Absent in hand-built
+    /// catalogs; the shipped one always names them.
+    public var states: [String]? = nil
     public var packs: [PackManifest]
 }
 
@@ -204,7 +207,7 @@ public final class PackStore: @unchecked Sendable {
         guard let pack = catalog.packs.first(where: { $0.id == id }) else {
             throw PackError.missing(id)
         }
-        if pack.state == "FL" && pack.banners.contains("ice-rock") && pack.id.contains("adk") {
+        if let shipped = catalog.states, !shipped.contains(pack.state) {
             throw PackError.regionLeak
         }
         active = pack
@@ -250,12 +253,29 @@ final class PackIOTests: XCTestCase {
     }
 
     func testPreferPrimaryPutsTXWestFirst() {
-        let fl = PackManifest(id: "fl-north", name: "FL NORTH", state: "FL", bytes: 1, banners: [], center: .init(lat: 30.4, lon: -81.5), bbox: .init(south: 30, west: -82, north: 31, east: -81))
+        let nm = PackManifest(id: "nm", name: "NM", state: "NM", bytes: 1, banners: [], center: .init(lat: 35.15, lon: -106.53), bbox: .init(south: 35.06, west: -106.68, north: 35.25, east: -106.38))
         let tx = PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 2, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
-        let ordered = PackStore.preferPrimary([fl, tx])
-        XCTAssertEqual(ordered.map(\.id), ["tx-west", "fl-north"])
+        let ordered = PackStore.preferPrimary([nm, tx])
+        XCTAssertEqual(ordered.map(\.id), ["tx-west", "nm"])
         XCTAssertEqual(PackStore.defaultPackID, "tx-west")
         XCTAssertEqual(PackStore.osmAttribution, "© OpenStreetMap contributors")
+    }
+
+    func testSwitchRefusesAPackOffTheStatesWeShip() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-states-\(UUID().uuidString)")
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        let tx = PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 2, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
+        let stray = PackManifest(id: "fl-north", name: "FL NORTH", state: "FL", bytes: 1, banners: [], center: .init(lat: 30.4, lon: -81.5), bbox: .init(south: 30, west: -82, north: 31, east: -81))
+        try JSONEncoder().encode(PackCatalog(states: ["TX", "NM"], packs: [tx, stray]))
+            .write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+        XCTAssertThrowsError(try store.switchTo("fl-north")) { error in
+            XCTAssertEqual(error as? PackError, .regionLeak)
+        }
+        XCTAssertEqual(store.active?.id, "tx-west")
+        try store.switchTo("tx-west")
+        XCTAssertEqual(store.active?.id, "tx-west")
     }
 }
 ''',
@@ -956,27 +976,29 @@ public struct Banner: Equatable, Sendable, Identifiable {
 }
 
 public enum RegionalPacks {
+    /// Ground the vessel carries a map pack for. A banner anywhere else is
+    /// advice with no map behind it.
+    public static let shippedStates = ["TX", "NM"]
+
     public static let all: [Banner] = [
-        Banner(id: "hurricane", states: ["TX", "FL"], title: ["en": "Hurricane procedure + paper", "es": "Huracán: procedimiento y papel"]),
+        Banner(id: "hurricane", states: ["TX"], title: ["en": "Hurricane procedure + paper", "es": "Huracán: procedimiento y papel"]),
         Banner(id: "monsoon", states: ["NM"], title: ["en": "Monsoon wash", "es": "Cárcava de monzón"]),
-        Banner(id: "rip", states: ["FL"], title: ["en": "Rip current", "es": "Resaca"]),
-        Banner(id: "heat-island", states: ["TX", "FL"], title: ["en": "Heat island", "es": "Isla de calor"]),
-        Banner(id: "ice-rock", states: ["NM", "NY"], title: ["en": "Ice on rock", "es": "Hielo en la roca"]),
+        Banner(id: "heat-island", states: ["TX"], title: ["en": "Heat island", "es": "Isla de calor"]),
+        Banner(id: "ice-rock", states: ["NM"], title: ["en": "Ice on rock", "es": "Hielo en la roca"]),
         Banner(id: "border-hospitals", states: ["TX", "NM"], title: ["en": "Border hospitals", "es": "Hospitales de la frontera"]),
-        Banner(id: "keys-mm", states: ["FL"], title: ["en": "Keys mile marker", "es": "Milla de los Keys"]),
-        Banner(id: "subway-north", states: ["NY"], title: ["en": "Subway walk to air", "es": "Metro al aire"]),
         Banner(id: "cattle-guard", states: ["TX", "NM"], title: ["en": "Cattle guard", "es": "Paso canadiense"]),
-        Banner(id: "gator-dusk", states: ["FL"], title: ["en": "Gator at dusk", "es": "Caimán al anochecer"]),
     ]
 
     public static func visible(state: String) -> [Banner] {
         all.filter { $0.states.contains(state) }
     }
 
+    /// No banner may claim ground we ship no pack for, and no shipped state may
+    /// come up empty.
     public static func assertNoLeaks() -> Bool {
-        let fl = visible(state: "FL").map(\.id)
-        let ny = visible(state: "NY").map(\.id)
-        return !fl.contains("ice-rock") && !ny.contains("gator-dusk")
+        let shipped = Set(shippedStates)
+        let scoped = all.allSatisfy { !$0.states.isEmpty && Set($0.states).isSubset(of: shipped) }
+        return scoped && shippedStates.allSatisfy { !visible(state: $0).isEmpty }
     }
 }
 ''',
@@ -987,11 +1009,13 @@ public enum RegionalPacks {
 @testable import RegionalPacks
 
 final class RegionalPacksTests: XCTestCase {
-    func testNoCrossCoastLeaks() {
+    func testBannersStayOnGroundWeShip() {
         XCTAssertTrue(RegionalPacks.assertNoLeaks())
-        XCTAssertFalse(RegionalPacks.visible(state: "FL").map(\.id).contains("ice-rock"))
-        XCTAssertFalse(RegionalPacks.visible(state: "NY").map(\.id).contains("gator-dusk"))
-        XCTAssertTrue(RegionalPacks.visible(state: "FL").map(\.id).contains("gator-dusk"))
+        XCTAssertEqual(RegionalPacks.shippedStates, ["TX", "NM"])
+        XCTAssertTrue(RegionalPacks.visible(state: "FL").isEmpty)
+        XCTAssertTrue(RegionalPacks.visible(state: "NY").isEmpty)
+        XCTAssertTrue(RegionalPacks.visible(state: "TX").map(\.id).contains("heat-island"))
+        XCTAssertTrue(RegionalPacks.visible(state: "NM").map(\.id).contains("monsoon"))
     }
 }
 ''',
@@ -1220,7 +1244,6 @@ public struct VisionLabel: Codable, Equatable, Sendable {
     public var lookalikes: [String]
     public var leaveIt: Bool
     public var edibleUnlock: Bool
-    public var marineOrGatorFL: Bool
     public var name: [String: String]
 }
 
@@ -1254,7 +1277,7 @@ public enum VisionCoreML {
 final class VisionCoreMLTests: XCTestCase {
     func testNeverEdible() throws {
         let book = VisionBook(state: "TX", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: [
-            VisionLabel(id: "tx-amanita", kind: "fungi", lookalikes: ["x"], leaveIt: true, edibleUnlock: false, marineOrGatorFL: false, name: ["en": "Amanita"])
+            VisionLabel(id: "tx-amanita", kind: "fungi", lookalikes: ["x"], leaveIt: true, edibleUnlock: false, name: ["en": "Amanita"])
         ])
         let g = VisionCoreML.classify(features: [0.2, 0.8], book: book)
         XCTAssertFalse(g.edible)

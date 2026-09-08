@@ -1,8 +1,13 @@
-"""Generate field.core + per-state Field JSON (v1.4 schema, EN+ES)."""
+"""Generate field.core + per-state Field JSON (v1.4 schema, EN+ES).
+
+Only states with a bundled map pack get a book. A card for ground the phone
+cannot draw is advice with no map behind it.
+"""
 from __future__ import annotations
 
 from .common import ROOT, diagram_png, write_json
 
+SHIPPED_STATES = ("TX", "NM")
 CATEGORIES = [
     "medical",
     "trauma",
@@ -55,7 +60,7 @@ def card(
         "schema": "1.4",
         "id": cid,
         "category": category,
-        "states": states or ["TX", "NM", "FL", "NY"],
+        "states": states or list(SHIPPED_STATES),
         "title": {"en": title, "es": title_es},
         "situation": {"en": situation, "es": situation_es},
         "stop_if": [{"en": a, "es": b} for a, b in stop_if],
@@ -591,8 +596,8 @@ def state_cards() -> list[dict]:
             "environment",
             "City heat island",
             "Isla de calor urbana",
-            "Pavement, no shade, and a party still moving in El Paso, Austin, Miami, or Jacksonville afternoon.",
-            "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin, Miami o Jacksonville.",
+            "Pavement, no shade, and a party still moving in an El Paso, Austin, or Albuquerque afternoon.",
+            "Pavimento, sin sombra, y el grupo sigue en la tarde de El Paso, Austin o Albuquerque.",
             [("You have a cooled interior and water.", "Tienes un interior fresco y agua.")],
             "Same as heat collapse if they stop making sense.",
             "Igual que el colapso por calor si dejan de tener sentido.",
@@ -610,7 +615,7 @@ def state_cards() -> list[dict]:
                     tick_s=900,
                 )
             ],
-            states=["TX", "FL"],
+            states=["TX"],
         ),
         card(
             "nm-monsoon",
@@ -642,8 +647,8 @@ def state_cards() -> list[dict]:
             "environment",
             "Ice on rock",
             "Hielo en la roca",
-            "Sandia or high NM rock with a film of ice. Same problem as Adirondack ledge ice — not a Florida card.",
-            "Roca alta de Sandia con una película de hielo. El mismo problema que el hielo de cornisa en Adirondacks.",
+            "Sandia or high NM rock with a film of ice. Any high ledge in a spring freeze reads the same.",
+            "Roca alta de Sandia con una película de hielo. Cualquier cornisa alta en helada se lee igual.",
             [("You can walk a dry dirt bypass.", "Puedes ir por un bypass de tierra seca.")],
             "A sliding fall is trauma. Do not 'just try the slab'.",
             "Una caída al resbalar es trauma. No 'pruebes la losa'.",
@@ -660,86 +665,10 @@ def state_cards() -> list[dict]:
                     "Corten la cumbre si el viento carga más escarcha.",
                 )
             ],
-            states=["NM", "NY"],
+            states=["NM"],
         ),
         card(
-            "fl-rip",
-            "water",
-            "Rip current",
-            "Corriente de resaca",
-            "Florida beach. The party is being pulled off the sand. No live NWS — you have eyes and a procedure.",
-            "Playa de Florida. El grupo se va mar adentro. Sin NWS en vivo: ojos y procedimiento.",
-            [("You are already back in thigh-deep water that is not pulling.", "Ya estás en agua a los muslos que no jala.")],
-            "Drowning is care you cannot do past CPR on the sand. Offer Emergency SOS from the beach, not from the rip.",
-            "El ahogo es cuidado que no das más allá de RCP en la arena. Emergency SOS desde la playa, no desde la resaca.",
-            [
-                step(
-                    "Do not fight straight in. Swim parallel to the beach until the pull eases, then angle in. If you cannot swim, float and raise an arm. Shore party does not make a second victim.",
-                    "The rip is a narrow river. Sideways exits it.",
-                    "A child in a rip: throw a board or line if you have it. Do not send another child.",
-                    "Stop the hero swim if you are already tired on the sand.",
-                    "rip.png",
-                    "No pelees derecho a la orilla. Nada paralelo hasta que afloje, luego en ángulo. Si no nadas, flota y alza un brazo.",
-                    "La resaca es un río angosto. De lado se sale.",
-                    "Niño en la resaca: lanza tabla o cuerda. No mandes a otro niño.",
-                    "No hagas el nado héroe si ya estás cansado en la arena.",
-                    party={"1": "Float, signal, parallel.", "2": "One swims parallel; one stays on sand with eyes and SOS offer.", "4": "Two on sand (spot + SOS), one throw bag, one swimmer max."},
-                )
-            ],
-            states=["FL"],
-        ),
-        card(
-            "fl-gator-dusk",
-            "animals",
-            "Gator at dusk",
-            "Caimán al anochecer",
-            "Fresh water in Florida. Dusk, a dog, or a kid at the edge. This card does not exist in NY packs.",
-            "Agua dulce en Florida. Anochecer, un perro o un niño en la orilla. Esta tarjeta no existe en packs de NY.",
-            [("You are already well back from the waterline and the animal is gone.", "Ya estás lejos de la orilla y el animal se fue.")],
-            "A bite is a bleed and a trauma hospital. Do not 'move the gator'.",
-            "Una mordida es hemorragia y hospital de trauma. No 'muevas al caimán'.",
-            [
-                step(
-                    "Leash the dog. Child in hand, not at the bloom of water. Do not feed. If you see eyes, back up on the same path. Night: torch 3× at the bank before you fill bottles.",
-                    "They hunt the edge. You do not need to win a stare.",
-                    "No wading 'just to the knees' at dusk.",
-                    "Stop fishing that hole if a slide mark is fresh.",
-                    "gator-dusk.png",
-                    "Perro con correa. Niño de la mano. No alimentes. Si ves ojos, retrocede por el mismo camino. Noche: linterna 3× antes de llenar botellas.",
-                    "Cazan la orilla. No tienes que ganar la mirada.",
-                    "Sin meterse 'hasta las rodillas' al anochecer.",
-                    "No pesques ese hueco si la marca de arrastre está fresca.",
-                )
-            ],
-            states=["FL"],
-        ),
-        card(
-            "fl-keys-mm",
-            "nav",
-            "Keys mile marker",
-            "Milla de los Keys",
-            "Overseas Highway. Mile markers are the handrail. Hospitals and exits are sparse.",
-            "Carretera Overseas. Las millas son la baranda. Hospitales y salidas son pocos.",
-            [("You know the last MM and the next town.", "Sabes la última MM y el próximo pueblo.")],
-            "A wreck on a two-lane causeway is care that has to come from a marked MM.",
-            "Un choque en un puente de dos carriles necesita una MM marcada.",
-            [
-                step(
-                    "Write the mile marker on the trip brief and the paper sheet. If you stop, stand off the pavement. Hurricane: this card is a road, not a shelter.",
-                    "Without an MM, help cannot find a dot in the water.",
-                    "Kids stay in the vehicle if you are on a narrow shoulder.",
-                    "Stop walking the bridge in a storm — there is no honest high ground.",
-                    "keys-mm.png",
-                    "Anota la milla en el brief y en el papel. Si paras, fuera del pavimento.",
-                    "Sin MM, no encuentran un punto en el agua.",
-                    "Los niños en el vehículo si el acotamiento es estrecho.",
-                    "No camines el puente en tormenta.",
-                )
-            ],
-            states=["FL"],
-        ),
-        card(
-            "fl-hurricane-paper",
+            "tx-hurricane-paper",
             "environment",
             "Hurricane — procedure and paper",
             "Huracán — procedimiento y papel",
@@ -761,57 +690,7 @@ def state_cards() -> list[dict]:
                     "No 'aguantes' en una isla de barrera porque el mapa se ve bonito.",
                 )
             ],
-            states=["FL", "TX"],
-        ),
-        card(
-            "ny-subway-north",
-            "nav",
-            "Subway — walk north to air",
-            "Metro — camina al norte al aire",
-            "NYC underground. You need out. Station names and north are the handrail. Not a gator card.",
-            "Bajo tierra en NYC. Necesitas salir. Los nombres de estación y el norte son la baranda.",
-            [("You can see sky and a street plate.", "Ves cielo y una placa de calle.")],
-            "Smoke or a crush is care on the platform. Do not go deeper 'to find a better train'.",
-            "Humo o una estampida es cuidado en el andén. No bajes más 'a buscar un tren mejor'.",
-            [
-                step(
-                    "Follow the walkway toward the numbered street increase if you already know you entered south — or follow EXIT signs to the street, then check the map pack. Stay off the track bed unless the platform is on fire.",
-                    "The tunnel is not a trail. Trains still move.",
-                    "Child's hand. No scavenger hunt down the tube.",
-                    "Stop if you hear a train — wall, face in, wait.",
-                    "subway-north.png",
-                    "Sigue la pasarela a la salida, luego el pack. No bajes a las vías salvo que el andén arda.",
-                    "El túnel no es un sendero. Los trenes siguen.",
-                    "Mano del niño. Sin explorar el tubo.",
-                    "Si oyes tren: pared, cara adentro, espera.",
-                )
-            ],
-            states=["NY"],
-        ),
-        card(
-            "ny-ice-adk",
-            "environment",
-            "Adirondack ice",
-            "Hielo de Adirondacks",
-            "Upstate ledge, spring crust, or a waterfall path. Florida packs must not show this card.",
-            "Cornisa del norte del estado, costra de primavera o una ruta de cascada. Los packs de Florida no deben mostrar esta tarjeta.",
-            [("You turned around to dirt.", "Ya diste la vuelta a la tierra.")],
-            "A sliding fall into a drainage is a trauma evac.",
-            "Una caída a un desagüe es evacuación de trauma.",
-            [
-                step(
-                    "Turn around early. If you continue, one at a time, spots below, no glissade on unknown runouts. Paper the turnaround time on the party timer.",
-                    "Ice under leaves is how Adirondack afternoons go bad.",
-                    "Kids do not 'ski' the slab on their shoes.",
-                    "Stop if the last pip shows you still above the ice line at dusk.",
-                    "adk-ice.png",
-                    "Da la vuelta temprano. Si sigues, uno por uno, nadie trineo en una salida desconocida.",
-                    "El hielo bajo las hojas es cómo se pone mala la tarde.",
-                    "Los niños no 'esquían' la losa.",
-                    "Para si el último pip te deja sobre la línea de hielo al oscurecer.",
-                )
-            ],
-            states=["NY"],
+            states=["TX"],
         ),
         card(
             "tx-nm-border-hospital",
@@ -927,26 +806,6 @@ def thickness_state() -> list[dict]:
             "Same US pit-viper rule: still limb, walk out if you can, Emergency SOS if a net exists.",
             "Misma regla de víbora de foseta: extremidad quieta, camina si puedes, Emergency SOS si hay red.",
         ),
-        (
-            "fl-snake",
-            ["FL"],
-            "Florida cottonmouth / diamondback",
-            "Boca de algodón / cascabel de Florida",
-            "Water edge or palmetto. Cottonmouth or eastern diamondback. This card does not exist in NY packs.",
-            "Orilla o palmito. Boca de algodón o cascabel del este. Esta tarjeta no existe en packs de NY.",
-            "Do not 'move the snake off the trail' with your hands. Pit-viper first aid, then care.",
-            "No 'quites la culebra del sendero' con las manos. Primeros auxilios de foseta y luego cuidado.",
-        ),
-        (
-            "ny-snake",
-            ["NY"],
-            "Timber rattlesnake / copperhead",
-            "Cascabel de bosque / cabeza de cobre",
-            "Hudson ledge or Adirondack talus. Timber rattlesnake or copperhead. No cottonmouth card here.",
-            "Cornisa del Hudson o talud de Adirondacks. Cascabel de bosque o cabeza de cobre. Aquí no hay boca de algodón.",
-            "Still limb at heart level. No ice. Walk to a road if you can. Florida packs must not show this card.",
-            "Extremidad quieta al corazón. Sin hielo. Camina a un camino si puedes. Los packs de Florida no deben ver esta tarjeta.",
-        ),
     ]
     plants = [
         (
@@ -968,26 +827,6 @@ def thickness_state() -> list[dict]:
             "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible.",
             "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
             "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda.",
-        ),
-        (
-            "fl-plant-danger",
-            ["FL"],
-            "Manchineel — do not stand under it in rain",
-            "Manzanillo — no te pares debajo si llueve",
-            "Beach apple on the Florida coast. Sap burns skin and eyes. Fruit is not a snack. This card is FL only.",
-            "Manzana de playa en la costa de Florida. La savia quema piel y ojos. El fruto no es tentempié. Solo FL.",
-            "Do not take cover under manchineel in rain. Do not burn the wood. Rinse sap with water, then care.",
-            "No te refugies bajo el manzanillo si llueve. No quemes la madera. Enjuaga savia con agua y busca cuidado.",
-        ),
-        (
-            "ny-plant-danger",
-            ["NY"],
-            "Giant hogweed / poison ivy",
-            "Hogweed gigante / hiedra venenosa",
-            "Road-edge hogweed or a shiny ivy that already itched. Do not eat either. NY only — not a manchineel card.",
-            "Hogweed al borde del camino o hiedra brillante que ya pica. No comas ninguna. Solo NY.",
-            "Hogweed sap plus sun burns like a chemical. Cover skin, wash with soap, do not scratch open.",
-            "La savia de hogweed más sol quema como químico. Cubre piel, lava con jabón, no te rasques hasta abrir.",
         ),
     ]
     out = []
@@ -1069,6 +908,9 @@ def write_images(cards: list[dict]) -> None:
                 continue
             seen.add(name)
             diagram_png(img_root / name, kind, name)
+    for orphan in img_root.glob("*.png"):
+        if orphan.name not in seen:
+            orphan.unlink()
 
 
 def write_all() -> None:
@@ -1077,6 +919,10 @@ def write_all() -> None:
     all_cards = core + extra
     write_images(all_cards)
     field_root = ROOT / "Resources" / "Field"
+    for stale in field_root.glob("field.*.json"):
+        book = stale.stem.split(".")[-1]
+        if book != "core" and book.upper() not in SHIPPED_STATES:
+            stale.unlink()
     write_json(
         field_root / "field.core.json",
         {
@@ -1085,7 +931,7 @@ def write_all() -> None:
             "cards": [c for c in core],
         },
     )
-    for state in ("TX", "NM", "FL", "NY"):
+    for state in SHIPPED_STATES:
         write_json(
             field_root / f"field.{state.lower()}.json",
             {

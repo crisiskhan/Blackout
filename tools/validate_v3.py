@@ -12,6 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from v3.generate_project import assert_openstep_plist
 
+# Ground the vessel ships a map pack for. Everything bundled — field books,
+# vision books, banners, packs — has to stay inside this.
+SHIPPED_STATES = ("tx", "nm")
+
 fail = 0
 
 
@@ -127,7 +131,7 @@ def field_schema() -> None:
             bad(f"core missing thickness {need_id}")
         else:
             ok(f"core has {need_id}")
-    for st in ("tx", "nm", "fl", "ny"):
+    for st in SHIPPED_STATES:
         book = json.loads((root / f"field.{st}.json").read_text())
         if not book["cards"]:
             bad(f"empty field.{st}")
@@ -140,14 +144,56 @@ def field_schema() -> None:
             bad(f"field.{st} missing plant-danger")
         else:
             ok(f"field.{st} snake+plant-danger")
-    fl_ids = {c["id"] for c in json.loads((root / "field.fl.json").read_text())["cards"]}
-    ny_ids = {c["id"] for c in json.loads((root / "field.ny.json").read_text())["cards"]}
-    if "ny-ice-adk" in fl_ids:
-        bad("FL has Adirondack ice")
-    if "fl-gator-dusk" in ny_ids:
-        bad("NY has gator")
-    else:
-        ok("FL/NY regional field cards do not leak")
+    books = {p.stem.split(".")[-1] for p in root.glob("field.*.json")} - {"core"}
+    if books != set(SHIPPED_STATES):
+        bad(f"field books {sorted(books)} — only {list(SHIPPED_STATES)} ship")
+        return
+    claimed = {s for c in core["cards"] for s in c["states"]}
+    for st in SHIPPED_STATES:
+        claimed |= {s for c in json.loads((root / f"field.{st}.json").read_text())["cards"] for s in c["states"]}
+    if not claimed <= {s.upper() for s in SHIPPED_STATES}:
+        bad(f"field cards still claim {sorted(claimed)} — drop states with no map pack")
+        return
+    ok(f"field books are {list(SHIPPED_STATES)} only; no card claims ground we cannot draw")
+
+
+def dropped_regions() -> None:
+    """Florida and New York are off the vessel. Nothing may carry them back in."""
+    dropped = ("fl", "ny")
+    res = ROOT / "Resources"
+    stray = sorted(
+        str(p.relative_to(ROOT))
+        for p in res.rglob("*.json")
+        if p.stem.split(".")[-1] in dropped
+    )
+    if stray:
+        bad(f"dropped-region books still bundled: {stray}")
+        return
+
+    field_root = res / "Field"
+    cited = set()
+    ids = set()
+    for book in field_root.glob("field.*.json"):
+        for card in json.loads(book.read_text())["cards"]:
+            ids.add(card["id"])
+            cited |= {s["image"] for s in card["steps"]}
+    orphans = sorted(p.name for p in (field_root / "images").glob("*.png") if p.name not in cited)
+    if orphans:
+        bad(f"field images no card cites: {orphans}")
+        return
+    for st in SHIPPED_STATES:
+        ids |= {l["id"] for l in json.loads((res / "Vision" / f"labels.{st}.json").read_text())["labels"]}
+    tagged = sorted(i for i in ids if i.split("-")[0] in dropped)
+    if tagged:
+        bad(f"card/label ids from dropped regions: {tagged}")
+        return
+
+    banners = (ROOT / "Packages" / "RegionalPacks" / "Sources" / "RegionalPacks" / "RegionalPacks.swift").read_text()
+    named = sorted(s for s in ("FL", "NY") if f'"{s}"' in banners)
+    if named:
+        bad(f"RegionalPacks still names {named}")
+        return
+    ok("FL/NY dropped: no books, no orphan art, no banners, no ids")
 
 
 def packs() -> None:
@@ -367,17 +413,18 @@ def walkable_next_pack(pack_id: str) -> None:
 
 
 def vision() -> None:
-    for st in ("tx", "nm", "fl", "ny"):
-        book = json.loads((ROOT / "Resources" / "Vision" / f"labels.{st}.json").read_text())
+    root = ROOT / "Resources" / "Vision"
+    books = {p.stem.split(".")[-1] for p in root.glob("labels.*.json")}
+    if books != set(SHIPPED_STATES):
+        bad(f"vision books {sorted(books)} — only {list(SHIPPED_STATES)} ship")
+        return
+    for st in SHIPPED_STATES:
+        book = json.loads((root / f"labels.{st}.json").read_text())
         if not book.get("neverEdibleUnlock"):
             bad(f"vision {st} edible unlock")
         kinds = {l["kind"] for l in book["labels"]}
         if "fungi" not in kinds:
             bad(f"vision {st} no fungi")
-        if st == "fl" and not any(l.get("marineOrGatorFL") for l in book["labels"]):
-            bad("FL missing marine/gator")
-        if st != "fl" and any(l.get("marineOrGatorFL") for l in book["labels"]):
-            bad(f"{st} leaked FL marine")
         ok(f"vision {st} n={len(book['labels'])} kinds={sorted(kinds)}")
     vis = (ROOT / "Packages" / "VisionCoreML" / "Sources" / "VisionCoreML" / "VisionCoreML.swift").read_text()
     if "hashValue" in vis or "features.hashValue" in vis:
@@ -1091,6 +1138,7 @@ def main() -> None:
     no_stubs()
     no_old_engine()
     field_schema()
+    dropped_regions()
     packs()
     vision()
     mesh()

@@ -107,16 +107,15 @@
       "id": "nm-ice-rock",
       "category": "environment",
       "states": [
-        "NM",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Ice on rock",
         "es": "Hielo en la roca"
       },
       "situation": {
-        "en": "Sandia or high NM rock with a film of ice. Same problem as Adirondack ledge ice — not a Florida card.",
-        "es": "Roca alta de Sandia con una película de hielo. El mismo problema que el hielo de cornisa en Adirondacks."
+        "en": "Sandia or high NM rock with a film of ice. Any high ledge in a spring freeze reads the same.",
+        "es": "Roca alta de Sandia con una película de hielo. Cualquier cornisa alta en helada se lee igual."
       },
       "stop_if": [
         {

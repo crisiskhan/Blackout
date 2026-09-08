@@ -8,9 +8,7 @@
       "category": "medical",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Adult CPR",
@@ -114,9 +112,7 @@
       "category": "trauma",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Pack a bad bleed",
@@ -195,9 +191,7 @@
       "category": "environment",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Heat collapse",
@@ -257,9 +251,7 @@
       "category": "water",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Make water less bad",
@@ -319,9 +311,7 @@
       "category": "fire",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Stove and small fire",
@@ -375,9 +365,7 @@
       "category": "shelter",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Tarp or debris lean-to",
@@ -436,9 +424,7 @@
       "category": "nav",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Stop and locate",
@@ -493,9 +479,7 @@
       "category": "plants",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Unknown plant",
@@ -549,9 +533,7 @@
       "category": "animals",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Bite or envenomation",
@@ -606,9 +588,7 @@
       "category": "fungi",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Fungi — leave it",
@@ -662,9 +642,7 @@
       "category": "food",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Cook what you already trust",
@@ -723,9 +701,7 @@
       "category": "signaling",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Be found",
@@ -784,9 +760,7 @@
       "category": "tactics",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Form up",
@@ -846,9 +820,7 @@
       "category": "medical",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Airway — they cannot breathe",
@@ -903,9 +875,7 @@
       "category": "trauma",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "They fell — do not twist",
@@ -959,9 +929,7 @@
       "category": "trauma",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Closed fracture / bad angulation",
@@ -1020,9 +988,7 @@
       "category": "environment",
       "states": [
         "TX",
-        "NM",
-        "FL",
-        "NY"
+        "NM"
       ],
       "title": {
         "en": "Cold and wet — stop the slide",

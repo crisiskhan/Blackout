@@ -19,6 +19,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
 }
 
 public struct PackCatalog: Codable, Equatable, Sendable {
+    /// States the bundle actually carries map packs for. Absent in hand-built
+    /// catalogs; the shipped one always names them.
+    public var states: [String]? = nil
     public var packs: [PackManifest]
 }
 
@@ -50,7 +53,7 @@ public final class PackStore: @unchecked Sendable {
         guard let pack = catalog.packs.first(where: { $0.id == id }) else {
             throw PackError.missing(id)
         }
-        if pack.state == "FL" && pack.banners.contains("ice-rock") && pack.id.contains("adk") {
+        if let shipped = catalog.states, !shipped.contains(pack.state) {
             throw PackError.regionLeak
         }
         active = pack

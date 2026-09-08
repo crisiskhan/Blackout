@@ -13,26 +13,28 @@ public struct Banner: Equatable, Sendable, Identifiable {
 }
 
 public enum RegionalPacks {
+    /// Ground the vessel carries a map pack for. A banner anywhere else is
+    /// advice with no map behind it.
+    public static let shippedStates = ["TX", "NM"]
+
     public static let all: [Banner] = [
-        Banner(id: "hurricane", states: ["TX", "FL"], title: ["en": "Hurricane procedure + paper", "es": "Huracán: procedimiento y papel"]),
+        Banner(id: "hurricane", states: ["TX"], title: ["en": "Hurricane procedure + paper", "es": "Huracán: procedimiento y papel"]),
         Banner(id: "monsoon", states: ["NM"], title: ["en": "Monsoon wash", "es": "Cárcava de monzón"]),
-        Banner(id: "rip", states: ["FL"], title: ["en": "Rip current", "es": "Resaca"]),
-        Banner(id: "heat-island", states: ["TX", "FL"], title: ["en": "Heat island", "es": "Isla de calor"]),
-        Banner(id: "ice-rock", states: ["NM", "NY"], title: ["en": "Ice on rock", "es": "Hielo en la roca"]),
+        Banner(id: "heat-island", states: ["TX"], title: ["en": "Heat island", "es": "Isla de calor"]),
+        Banner(id: "ice-rock", states: ["NM"], title: ["en": "Ice on rock", "es": "Hielo en la roca"]),
         Banner(id: "border-hospitals", states: ["TX", "NM"], title: ["en": "Border hospitals", "es": "Hospitales de la frontera"]),
-        Banner(id: "keys-mm", states: ["FL"], title: ["en": "Keys mile marker", "es": "Milla de los Keys"]),
-        Banner(id: "subway-north", states: ["NY"], title: ["en": "Subway walk to air", "es": "Metro al aire"]),
         Banner(id: "cattle-guard", states: ["TX", "NM"], title: ["en": "Cattle guard", "es": "Paso canadiense"]),
-        Banner(id: "gator-dusk", states: ["FL"], title: ["en": "Gator at dusk", "es": "Caimán al anochecer"]),
     ]
 
     public static func visible(state: String) -> [Banner] {
         all.filter { $0.states.contains(state) }
     }
 
+    /// No banner may claim ground we ship no pack for, and no shipped state may
+    /// come up empty.
     public static func assertNoLeaks() -> Bool {
-        let fl = visible(state: "FL").map(\.id)
-        let ny = visible(state: "NY").map(\.id)
-        return !fl.contains("ice-rock") && !ny.contains("gator-dusk")
+        let shipped = Set(shippedStates)
+        let scoped = all.allSatisfy { !$0.states.isEmpty && Set($0.states).isSubset(of: shipped) }
+        return scoped && shippedStates.allSatisfy { !visible(state: $0).isEmpty }
     }
 }

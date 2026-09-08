@@ -107,25 +107,25 @@ final class MapLibreMapTests: XCTestCase {
 
     func testUserPuckFallsBackToPackCenterWhenFixIsOutsideBBox() {
         let elPaso = (lat: 31.8705, lon: -106.5973)
-        let jacksonville = (lat: 30.41, lon: -81.54)
+        let albuquerque = (lat: 35.155, lon: -106.53)
         let you = UserPuck.coordinate(
             lastKnown: elPaso,
-            packCenter: jacksonville,
-            packSouth: 30.3,
-            packWest: -81.7,
-            packNorth: 30.52,
-            packEast: -81.38
+            packCenter: albuquerque,
+            packSouth: 35.06,
+            packWest: -106.68,
+            packNorth: 35.25,
+            packEast: -106.38
         )
-        XCTAssertEqual(you.lat, jacksonville.lat)
-        XCTAssertEqual(you.lon, jacksonville.lon)
+        XCTAssertEqual(you.lat, albuquerque.lat)
+        XCTAssertEqual(you.lon, albuquerque.lon)
         XCTAssertFalse(
             UserPuck.contains(
                 lat: elPaso.lat,
                 lon: elPaso.lon,
-                south: 30.3,
-                west: -81.7,
-                north: 30.52,
-                east: -81.38
+                south: 35.06,
+                west: -106.68,
+                north: 35.25,
+                east: -106.38
             )
         )
     }
