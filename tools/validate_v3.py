@@ -883,18 +883,21 @@ def tip62_nav() -> None:
         and 'Button("RULER")' in map_tab
         and 'Button("USNG")' in map_tab
         and 'Button("MAG/TRUE")' in map_tab
-        and "MapChipHit" in map_tab
+        and "MapChipButtonStyle" in map_tab
         and "BlackoutTokens.Chrome.mapChipHitPoints" in map_tab
+        and "frame(width: hit, height: hit)" in map_tab
         and "ForEach(MapTool.allCases" not in map_tab
+        and "font(.caption2)" not in map_tab
     )
     walk_ok = (
         "runtime.navigate(mode: .walk)" in map_tab
         and "runtime.navigate(mode: .drive)" in map_tab
         and "route: runtime.routeCoords" in map_tab
         and "pickDestination" in map_tab
-        and "canRouteOnGraph" in map_tab
-        and "disabled(!runtime.canRouteOnGraph)" in map_tab
+        and "walkDriveEnabled" in map_tab
+        and "disabled(!runtime.walkDriveEnabled)" in map_tab
         and "routeChrome" in map_tab
+        and "hasDestination" in route_line
         and "func navigate(mode: TravelMode)" in app
         and "GraphPlan.line" in app
         and "WalkDriveChip" in route_line

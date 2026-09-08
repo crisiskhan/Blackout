@@ -58,8 +58,16 @@ final class AppRuntime {
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
+    var hasRouteDestination: Bool { destination() != nil }
+    var walkDriveEnabled: Bool {
+        WalkDriveChip.isEnabled(hasUsableGraph: canRouteOnGraph, hasDestination: hasRouteDestination)
+    }
     var routeChrome: String {
-        WalkDriveChip.chrome(hasUsableGraph: canRouteOnGraph, planChrome: navChrome)
+        WalkDriveChip.chrome(
+            hasUsableGraph: canRouteOnGraph,
+            hasDestination: hasRouteDestination,
+            planChrome: navChrome
+        )
     }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
@@ -165,7 +173,7 @@ final class AppRuntime {
         case .walk, .drive:
             break
         }
-        guard canRouteOnGraph, let dest = destination() else {
+        guard walkDriveEnabled, let dest = destination() else {
             clearRoute(chrome: GraphPlan.offGraph)
             return
         }

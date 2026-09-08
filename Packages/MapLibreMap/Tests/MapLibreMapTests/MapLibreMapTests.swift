@@ -309,11 +309,25 @@ final class MapLibreMapTests: XCTestCase {
     }
 
     func testWalkDriveChipDisablesWithoutGraphAndNeverDrawsBearing() {
-        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: false))
-        XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true))
-        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: false, planChrome: ""), RouteLine.offGraph)
-        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, planChrome: ""), "")
-        XCTAssertEqual(WalkDriveChip.chrome(hasUsableGraph: true, planChrome: RouteLine.offGraph), RouteLine.offGraph)
+        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: false, hasDestination: true))
+        XCTAssertFalse(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: false))
+        XCTAssertTrue(WalkDriveChip.isEnabled(hasUsableGraph: true, hasDestination: true))
+        XCTAssertEqual(
+            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: false, planChrome: ""),
+            RouteLine.offGraph
+        )
+        XCTAssertEqual(
+            WalkDriveChip.chrome(hasUsableGraph: false, hasDestination: true, planChrome: ""),
+            RouteLine.offGraph
+        )
+        XCTAssertEqual(
+            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: ""),
+            ""
+        )
+        XCTAssertEqual(
+            WalkDriveChip.chrome(hasUsableGraph: true, hasDestination: true, planChrome: RouteLine.offGraph),
+            RouteLine.offGraph
+        )
         XCTAssertEqual(MapRuler.chrome(from: nil, to: (lat: 31.80, lon: -106.50)), "RULER —")
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))

@@ -24,10 +24,12 @@ public enum RouteLine {
 }
 
 public enum WalkDriveChip {
-    public static func isEnabled(hasUsableGraph: Bool) -> Bool { hasUsableGraph }
+    public static func isEnabled(hasUsableGraph: Bool, hasDestination: Bool) -> Bool {
+        hasUsableGraph && hasDestination
+    }
 
-    public static func chrome(hasUsableGraph: Bool, planChrome: String) -> String {
-        if !hasUsableGraph { return RouteLine.offGraph }
+    public static func chrome(hasUsableGraph: Bool, hasDestination: Bool, planChrome: String) -> String {
+        if !hasUsableGraph || !hasDestination { return RouteLine.offGraph }
         return planChrome
     }
 }

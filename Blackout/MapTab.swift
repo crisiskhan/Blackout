@@ -105,21 +105,21 @@ struct MapTab: View {
     }
 
     private var instrumentRow: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             Button("MARK") { runtime.dropMark() }
-                .modifier(MapChipHit())
+                .buttonStyle(MapChipButtonStyle())
             Button("WALK") { runtime.navigate(mode: .walk) }
-                .disabled(!runtime.canRouteOnGraph)
-                .modifier(MapChipHit())
+                .disabled(!runtime.walkDriveEnabled)
+                .buttonStyle(MapChipButtonStyle())
             Button("DRIVE") { runtime.navigate(mode: .drive) }
-                .disabled(!runtime.canRouteOnGraph)
-                .modifier(MapChipHit())
+                .disabled(!runtime.walkDriveEnabled)
+                .buttonStyle(MapChipButtonStyle())
             Button("RULER") { runtime.tapRuler() }
-                .modifier(MapChipHit())
+                .buttonStyle(MapChipButtonStyle())
             Button("USNG") { runtime.tapUSNG() }
-                .modifier(MapChipHit())
+                .buttonStyle(MapChipButtonStyle())
             Button("MAG/TRUE") { runtime.tapMagTrue() }
-                .modifier(MapChipHit())
+                .buttonStyle(MapChipButtonStyle())
         }
     }
 
@@ -149,15 +149,17 @@ struct MapTab: View {
     }
 }
 
-private struct MapChipHit: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .font(.caption.weight(.semibold))
-            .frame(
-                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
-                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
-            )
+private struct MapChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        return configuration.label
+            .font(.system(size: 10, weight: .bold))
+            .lineLimit(2)
+            .minimumScaleFactor(0.55)
+            .multilineTextAlignment(.center)
+            .frame(width: hit, height: hit)
             .contentShape(Rectangle())
             .background(Theme.raised)
+            .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }
