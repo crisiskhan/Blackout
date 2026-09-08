@@ -2,19 +2,41 @@
 
 Offline-first field app for iPhone and iPad. Native SwiftUI, iOS 18+, Universal, bundle ID `com.crisiskhan.blackout`.
 
-This repository is a **foundation pass**: it opens and builds in Xcode, paints Map chrome with no account and no network, and keeps expeditions / breadcrumbs / SOS / sealed messages on-device across kill. It is **not** a v1 ship of live mesh 1/N, a world map, or auto-911.
+This repository is a **foundation + wave 2 slice 1** pass: native SwiftUI, file-tile Map with a radar HUD, a bundled field guide, expeditions / breadcrumbs / SOS / sealed messages on-device, and a **same-party hopping mesh** (Multipeer, store-and-forward, no WAN). It is **not** a v1 ship of stranger Radar, satellite, or auto-911.
 
-## Open in Xcode (Crisis)
+## Compile (Crisis — no Mac)
 
-1. Install **Xcode 16** (iOS 18 SDK). This project uses Xcode 16 file-system synchronized groups.
-2. Open `Blackout.xcodeproj`. Do not add CocoaPods, SPM remotes, Expo, or React Native.
-3. Select the **Blackout** scheme, then an iPhone or iPad simulator / device.
-4. Signing:
-   - Target **Blackout** → Signing & Capabilities.
-   - Enable **Automatically manage signing**.
-   - Team: your Apple Developer team (Crisis Khan).
-   - Bundle Identifier is already `com.crisiskhan.blackout`.
-5. Build and run. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
+Crisis has an iPhone and an ASUS. There is **no local `xcodebuild`**. The compile signal is GitHub Actions on this branch / PR:
+
+- Workflow: `.github/workflows/ios-compile.yml`
+- Runner: `macos-14`, Xcode 16, scheme **Blackout**
+- Unsigned: `CODE_SIGNING_ALLOWED=NO` `CODE_SIGNING_REQUIRED=NO` (compile only — not a device install, not TestFlight)
+- A red X on the Actions check is a compile failure. A green check is “it built.”
+
+### TestFlight (Crisis — no Mac)
+
+`.github/workflows/ios-testflight.yml` archives **Release** for `generic/platform=iOS` (device, not Simulator) on **macos-26 / Xcode 26** (iOS 26 SDK) and uploads to App Store Connect (app record **CKBlackout**, bundle `com.crisiskhan.blackout`). Minimum iOS stays **18.0**. It is **`workflow_dispatch` only** — it does not run on push. Unsigned compile stays `.github/workflows/ios-compile.yml` (`pull_request` + push `main`). Do not run `xcodebuild` locally.
+
+### Field Packs (GitHub Releases)
+
+First-open catalog shows **Florida, Texas, and New Mexico as Ready** — they are copied into the IPA at TestFlight archive time. No skippable download gate for those three. Optional extras (El Paso, Las Cruces, Albuquerque) can still be downloaded later. **Never blocks SOS.** Denver **DefaultPack** stays the tiny fallback when GPS is outside the three. States: no wifi / downloading / ready / failed / skip. New York is not shipped.
+
+Archive-only fetch (not the unsigned compile job): `tools/fetch_bundled_field_packs.sh` curls the three zips, verifies sha256, ROOT-flattens into `BundledFieldPacks/us-tx` `us-nm` `us-fl`. Packs stay in separate folders so tile `z/x/y.png` names cannot collide. City-only zips are not copied into the IPA. Pack zips are **not** committed to git.
+
+Host: **GitHub Releases** tag `packs-v1` on `crisiskhan/Blackout` (no Blackout cloud):
+
+```
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/texas.pack.zip
+  208461647 B  sha256 dc74d8069ca161f0c818dcfb760037d79ae96c9da777b550f095cf0b9569bbfb
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/new-mexico.pack.zip
+  77478829 B   sha256 2e605b0a386c6fbfa1288e5bea4ef96f42ddd5c60633f954b42c8c0e7665a4a8
+https://github.com/crisiskhan/Blackout/releases/download/packs-v1/florida.pack.zip
+  79093063 B   sha256 49d27c808c49fc894a1ba1021f951966560408c1ebe808f4c0d158e0c238b62d
+```
+
+Optional city-pack downloads live only in `Packages/Packs` (`BlackoutPacks`). User-initiated from Field Packs, never on boot, SOS, Map paint, or Guide ask. Integrity SHA-256. Resume via HTTP Range. Fail closed: airplane uses whatever packs are already on disk (bundled Denver + the three statewide + any extra).
+
+Do not add paid map APIs. Do not use MapKit as the airplane base map. Do not add CocoaPods, SPM remotes, Expo, or React Native. Bundle ID is `com.crisiskhan.blackout`. First launch is not gated on login, network, or a permission grant. Local lock stays **off** until you enable it in Settings.
 
 ### Capabilities to enable
 
@@ -27,7 +49,7 @@ Optional later: **Background Modes → Location** only if you add always-on brea
 ### Cold launch checks
 
 - Airplane Mode on, no Apple ID wall: Map tab, dusk chrome, bundled Front Range sample (or the honest no-pack canvas), SOS FAB above the tab bar, gear.
-- Deny location / camera / mic / Bluetooth: Guide, Skills, bundled map, messaging, and SOS still work. Gated surfaces use `DesignSystem.PermissionDenied`. Long-press the map **or** tap **Drop pin at pack center** when GPS is denied and there is no last-known.
+- Deny location / camera / mic / Bluetooth: Guide ask (type), Skills, bundled map, messaging, and SOS still work. GPS denied uses **DEAD RECKONING** (compass + step length) from last-known or a manual pin. Long-press the map **or** tap **Drop pin at pack center**.
 - Create an expedition, start breadcrumbs, arm SOS, kill the app, relaunch: all three still present (tracking flag + trail restore).
 - Send-to-self message: decrypts after relaunch. SwiftData has ciphertext only — no plaintext body column. Compose drafts persist in UserDefaults.
 
@@ -38,34 +60,67 @@ The target copies `Blackout/DefaultPack` two ways so a synchronized-group miss c
 1. **Copy Bundle Resources** — folder reference `Blackout/DefaultPack`.
 2. **Run Script** “Copy DefaultPack into app bundle” (`ditto` into `$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack`). The script **fails the build** if `manifest.json` is missing.
 
-After a Mac build:
+Source proof (no Mac required): `Blackout/DefaultPack/manifest.json` and `Blackout/DefaultPack/tiles/` (`tiles/z/x/y.png`) are in the tree; `Blackout/GuidePack/articles.jsonl` is 284 lines. The Copy Bundle Resources + ditto phases fail the **Actions** `xcodebuild` if `manifest.json` **or tile PNGs** are missing from DefaultPack.
 
-```bash
-# From the built app (Product → Show Build Folder in Xcode, or):
-APP=$(find ~/Library/Developer/Xcode/DerivedData -name Blackout.app -type d | head -1)
-test -f "$APP/DefaultPack/manifest.json" && echo "PACK OK $APP/DefaultPack"
-ls "$APP/DefaultPack/tiles"
-```
-
-On device/simulator: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
+On device: Map HUD reads `file tiles · no Apple base map`. If the pack is missing you get the **honest no-pack canvas**, not a spinner.
 
 ## Verify airplane map / zero Apple tile traffic (H1)
 
 Map chrome does **not** instantiate Apple’s map view. Tiles come from `BundledTileOverlay` (`MKTileOverlay` subclass, `canReplaceMapContent = true`, `urlTemplate = nil`) via `loadTile` / `tileData` reading `file://` with `Data(contentsOf:)`. Pinching outside the pack swaps to the no-pack canvas (void + copy + Return to pack). Missing tiles paint void locally — never a gray spinner waiting on WAN.
 
-On a Mac, airplane mode + run:
+Source proof (no Mac / no local `xcodebuild`):
 
-1. Enable Airplane Mode (and disable Wi-Fi on the simulator if needed).
-2. Cold-launch Blackout. Map should paint DefaultPack in a few seconds.
-3. Confirm **no Apple tile hosts**:
-   - Xcode **Debug → Network** (or Instruments → Network): first-paint Map should show **no** connections to `gspe*.ls.apple.com`, `gscdn*.apple.com`, `configuration.ls.apple.com`, or `cdn*.apple-mapkit.com`.
-   - Console.app filter `Blackout` + `ls.apple` / `mapkit` while on the Map tab.
-   - Charles / Proxyman: no MapKit raster/vector tile URLs after launch onto Map.
-4. Pinch/pan past the Front Range window: you must see the honest **Outside DefaultPack** canvas, not Apple gray tiles.
+- `grep -R MKMapView Packages/Maps` is comments-only; there is no `MKMapView(` constructor.
+- `./tools/audit_offline.sh` fails if `URLSession` or `MKMapView(` appears.
+- GitHub Actions `.github/workflows/ios-compile.yml` is the compile signal.
 
-Source proof: `grep -R MKMapView Packages/Maps` is comments-only; there is no `MKMapView(` constructor. `./tools/audit_offline.sh` fails if `URLSession` or `MKMapView(` appears.
+Device airplane-mode tile proof is a later iPhone check, not an ASUS `xcodebuild`.
 
-This Linux environment **cannot run xcodebuild**. The checks above are what a Mac airplane test must prove.
+## Wave 1.5 (this pass)
+
+Still airplane-first. Still no `URLSession` on Map / SOS / Guide. Live mesh is **1 nearby phone** on the same local radio.
+
+1. **Radar HUD** on Map — polar rings + 3s red.glow sweep on the file-tile terrain (never a black disc). Pinch still zooms the map. Heading-up / north-up. 0 peers: self + sweep only, no fake people. Members would be filled silver disks; strangers hollow rings. Tap self is not a peer sheet. `RadarPeerSheet` exists for later blips. Sweep haptic only if a blip would be crossed; sweep audio default **off**.
+2. **Guide ask-engine** — Field tab: ask bar first, taxonomy chips, situation cards remain. Type now; on-device mic if permitted else type. `Blackout/GuidePack/` has **284** Rockies/Denver articles + inverted index (situation, water, fire, shelter, first aid, signaling, navigation, weather, plants/food, animals, tools, bushcraft, skills). Extractive snippets from the pack. Plants never get an edible verdict. `SystemLanguageModel` only if `availability == .available`, grounded on retrieved text, never first paint, never wait/download.
+3. **Dead reckoning** — compass + step-length IMU when GPS is denied or cold. HUD chip **DEAD RECKONING**. Manual pin still works.
+4. **Viewshed + slope** — toggles on Map chrome from bundled DEM. Copy says sample-quality, not USGS.
+5. **SOS pictograms** — language-free siren, strobe, satellite/OS SOS, cancel on the confirm panel, plus existing slide. Still no auto-dial.
+6. **Last ~2% battery** — SOS-only shell. RootView reads `battery.isCritical` and **unmounts** Map, Comms, Field, and Expedition (no TabView, no iPad sidebar, no gear, no Settings sheet). Banner `CRITICAL · SOS only`, last-known line or text **Drop pin** (writes the existing manual pin, does not paint the map), existing SOS confirm, 88pt FAB (hold 1.5s presents, slide commits, tap never fires). GPS/DR sensors stop. Plug-in restores the previous tab/sidebar. **Extreme Saver** is unchanged and *above* 2%: 4-tab chrome, SOS + coarse nav + radar. Last-2% does **not** write that profile.
+7. **LiDAR range** — shown only when ARKit scene-depth / mesh reconstruction exists. Hidden otherwise. No error sheet.
+8. **Missed check-in** — opt-in per expedition, default OFF. Timer lives on `AppContainer` so it keeps running if Expedition is unmounted (including last-2%). On miss: open SOS confirm. Does not auto-arm. Does not auto-911. No mesh notify.
+
+Verify GuidePack in the tree (284 articles; Actions copies it into the app via the same fail-if-missing ditto phase):
+
+```bash
+test -f Blackout/GuidePack/manifest.json && wc -l Blackout/GuidePack/articles.jsonl
+```
+
+## Feature 1 — Navigate (on-pack)
+
+Walk / Drive turn-by-turn lives on the **Map tab** (not a fifth tab). Isolated `MapsRouting` owns the graph reader, A\*, search, maneuvers, and spoken prompt text. Mesh stays a dumb pipe; the router never imports it.
+
+Navigator LOOK is DS v1 §10.2: default canvas is vector streets from `geometry.bin` (`map.land`, not USGS topo). Topo is a Layers toggle, default off. Streets cannot be turned off. Tokens are aliases of locked hexes — no invented greens or MUTCD shield colors. Follow-puck is `map.self` (`red.core`). Turn chevrons draw only for a live next maneuver.
+
+There is no Apple offline routing API. No `MKDirections`, no `MKLocalSearch`, no Apple tiles, no `URLSession` on search / route / guidance / reroute. Display stays the existing file-tile canvas (`BundledTileOverlay` + `file://`). Voice is `AVSpeechSynthesizer`, on-device voices only. Background audio stays off.
+
+### Pack contract (reader, not generator)
+
+When a mounted covering Field Pack has `routing/`, load it from that pack root on disk (not Denver DefaultPack, not a URL):
+
+```
+routing/graph.bin
+routing/names.bin
+routing/geometry.bin
+routing/routing.json
+```
+
+`manifest.json` key: `"routing": "routing/routing.json"`.
+
+Format is **`blackout-routing-v1`**. Layouts (little-endian, packed) are in `Packages/Maps/ROUTING.md`. El Paso (`us-tx-el-paso`) is first: bbox W−106.885 S31.3619 E−106.085 N32.1619, center 31.7619, −106.485, profiles `[walk, drive]`.
+
+Denver `DefaultPack` does **not** ship a routing graph. Archive ditto copies `routing/` from packs-v1 when the staged zip has it (El Paso metro clip in `texas.pack.zip` / `el-paso.pack.zip`). Missing `routing/` or a checksum / magic fail is honest empty — never a fake turn list, never a WAN call.
+
+ODbL attribution is already in `routing.json`; it is surfaced as a caption. No new legal screen.
 
 ## Architecture
 
@@ -84,7 +139,7 @@ Blackout app          composition root only (wires protocols)
 
 - **Feature → Core + kits it needs.** Features talk persistence through `PersistenceServing`. SwiftData `@Model` types stay inside Persistence.
 - **Kit → Core only.**
-- **Mesh is a dumb pipe** (`Envelope` is opaque). This pass’s façade always reports **0 nearby** and treats that as success.
+- **Mesh is a dumb pipe** (`Envelope` is opaque). Isolated `BlackoutMesh` / `MeshFacade` uses MultipeerConnectivity only (local radio, no WAN). **1/N:** MeshPill goes 0→1 for one connected phone; N>1 routing is out of scope. Zero nearby is still calm success. Crypto peer hello + ECDH stay in Crypto; inbound persist stays in Persistence via the composition root. City Field Packs (El Paso / Las Cruces / Albuquerque) relay as `MCSession.sendResource` zip bytes; Packs owns zip, catalog SHA-256, and install. Crypto does not re-box the ~8MB pack — the Multipeer session is already encrypted.
 - **No URLSession** on the critical path.
 - **No WKWebView, no analytics, no accounts, no CloudKit.** SwiftData `cloudKitDatabase: .none`.
 - If SwiftData cannot open **on disk**, the UI shows `StoreFailure`. There is **no** in-memory fallback (a kill would wipe SOS / expeditions / messages).
@@ -104,12 +159,13 @@ Tokens live in `DesignSystem` as `enum BlackoutDS`. Do not fork `PermissionDenie
 
 - **iPhone:** 4-tab `TabView` — Map (cold launch default), Comms, Field, Expedition. SOS is not a tab.
 - **iPad regular:** 280pt sidebar, same four destinations. Expedition is a first-class lead surface. Compact falls back to the tab bar.
-- **SOS FAB:** 88pt red circle. Overlay ignores the bottom safe area and pads `16 + tabBar(49) + homeIndicator(34)` on iPhone so the FAB sits **above the tab bar**, not in it. iPad regular: `16 + 34` (16pt above the home indicator). Cannot hide. Extreme Saver does not hide it.
+- **SOS FAB:** 88pt red circle. Overlay ignores the bottom safe area and pads `16 + tabBar(49) + homeIndicator(34)` on iPhone so the FAB sits **above the tab bar**, not in it. iPad regular: `16 + 34` (16pt above the home indicator). Cannot hide. Extreme Saver and last-2% SOS-only do not hide it.
   - Hold 1.5s → confirm cover (**unarmed**, haptic light). Tap never fires. Hold alone does not arm.
   - Slide to confirm → **log first**. If `logSOS` throws, the UI shows `StoreFailure` and SOS stays **unarmed**.
   - X before slide: dismiss, still unarmed. X after slide: dismiss; the local alert already went out.
   - After arm, primary control is **user-initiated OS Emergency SOS** (side + volume hardware gesture). **Never auto-dial 911.**
-- **Field:** segmented Guide | Skills | Vision. Vision never says edible. Unknown is valid.
+- **Field:** Ask bar first, then taxonomy, then situation cards. GuidePack is on-device. Vision never says edible. Unknown is valid. Extreme Saver and last-2% pause Vision.
+- **Radar HUD:** Default on Map. Not a tab. Not a black disc.
 - **Chat status:** Sealed | Queued | On mesh. Never delivery ticks. Message bodies are not printed or os_logged.
 - **Dark / dusk only.** No light mode. Commits use metal, not red. Red is live/danger/SOS only.
 
@@ -129,13 +185,15 @@ That also rewrites `Blackout.xcodeproj` and the app icon.
 
 ## This-pass limitations
 
-- No live Multipeer 1/N, no public BLE SOS beacon.
+- No live Multipeer 1/N, no stranger radio blips, no vitals send, no map-pack relay (wave 2).
 - No world map. Map rendering is the bundled file-tile canvas or the honest empty canvas.
-- No auto-911, no fall detection / Auto-SOS.
+- No auto-911, no fall detection / Auto-SOS. Missed check-in never auto-arms.
 - No backend, no Expo, no third-party SDKs.
 - Voice PTT is local record/playback only. Live PTT-over-mesh is wave 2.
-- Extreme Saver does not hide SOS and does not disable coarse Navigate.
+- Extreme Saver (named profile, above 2%) does not hide SOS and does not disable coarse Navigate or the radar HUD.
+- Last ~2% battery is SOS-only: radar HUD and coarse nav hide; SOS FAB stays. It is not Extreme Saver and does not rewrite the named profile.
 - Breadcrumb tracking restores after kill in the foreground; it is not a Background Modes location session.
+- Foundation Models run only when the OS already reports `.available`. This Linux environment cannot prove that path.
 
 ## QA v1 musts (fail closed)
 

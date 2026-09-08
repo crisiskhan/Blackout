@@ -1,4 +1,5 @@
 {
+  "schema": 1,
   "attribution": "GENERATED SAMPLE \u2014 not a USGS or GNIS extract. Synthetic points of interest for the Denver / Front Range area, for offline UI development only.",
   "region": {
     "name": "Front Range sample",
@@ -70,6 +71,104 @@
       "kind": "water",
       "lat": 39.8,
       "lon": -105.15
+    },
+    {
+      "id": "foothills-cafe",
+      "name": "Foothills Cafe",
+      "kind": "cafe",
+      "lat": 39.739,
+      "lon": -105.21
+    },
+    {
+      "id": "front-range-market",
+      "name": "Front Range Market",
+      "kind": "grocery",
+      "lat": 39.745,
+      "lon": -105.18
+    },
+    {
+      "id": "canyon-fuel",
+      "name": "Canyon Fuel",
+      "kind": "fuel",
+      "lat": 39.73,
+      "lon": -105.28
+    },
+    {
+      "id": "ridge-lodge",
+      "name": "Ridge Lodge",
+      "kind": "lodging",
+      "lat": 39.76,
+      "lon": -105.32
+    },
+    {
+      "id": "mesa-kitchen",
+      "name": "Mesa Kitchen",
+      "kind": "restaurant",
+      "lat": 39.742,
+      "lon": -105.25
+    },
+    {
+      "id": "foothills-pharmacy",
+      "name": "Foothills Pharmacy",
+      "kind": "pharmacy",
+      "lat": 39.741,
+      "lon": -105.20
+    },
+    {
+      "id": "canyon-school",
+      "name": "Canyon School",
+      "kind": "school",
+      "lat": 39.748,
+      "lon": -105.22
+    },
+    {
+      "id": "front-range-police",
+      "name": "Front Range Police",
+      "kind": "police",
+      "lat": 39.736,
+      "lon": -105.19
+    },
+    {
+      "id": "ridge-bank",
+      "name": "Ridge Bank",
+      "kind": "bank",
+      "lat": 39.743,
+      "lon": -105.17
+    },
+    {
+      "id": "mesa-hardware",
+      "name": "Mesa Hardware",
+      "kind": "hardware",
+      "lat": 39.747,
+      "lon": -105.24
+    },
+    {
+      "id": "canyon-grill",
+      "name": "Canyon Grill",
+      "kind": "fast_food",
+      "lat": 39.735,
+      "lon": -105.23
+    },
+    {
+      "id": "ridge-hotel",
+      "name": "Ridge Hotel",
+      "kind": "hotel",
+      "lat": 39.752,
+      "lon": -105.30
+    },
+    {
+      "id": "clear-spring",
+      "name": "Clear Spring",
+      "kind": "spring",
+      "lat": 39.78,
+      "lon": -105.40
+    },
+    {
+      "id": "ridge-office",
+      "name": "Ridge Survey Office",
+      "kind": "office",
+      "lat": 39.738,
+      "lon": -105.16
     }
   ]
 }

@@ -1,0 +1,169 @@
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: true
+
+jobs:
+  testflight:
+    name: TestFlight Blackout
+    runs-on: macos-26
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    env:
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail closed on TestFlight archive killers
+        run: python3 tools/test_ci_opt.py
+
+      - name: Select Xcode 26
+        run: |
+          set -euo pipefail
+          ls /Applications | grep -i xcode || true
+          app=""
+          if [ -d /Applications/Xcode_26.6.app ]; then
+            app="/Applications/Xcode_26.6.app"
+          else
+            app="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || true)"
+          fi
+          if [ -z "${app}" ]; then
+            echo "Xcode 26 not found. App Store Connect requires the iOS 26 SDK." >&2
+            exit 1
+          fi
+          sudo xcode-select -s "${app}/Contents/Developer"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Write API key and ExportOptions
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import os
+          import pathlib
+          import plistlib
+          import stat
+          import sys
+
+          required = (
+              "APP_STORE_CONNECT_API_KEY",
+              "APP_STORE_CONNECT_KEY_ID",
+              "APP_STORE_CONNECT_ISSUER_ID",
+              "APPLE_TEAM_ID",
+          )
+          missing = [name for name in required if not os.environ.get(name)]
+          if missing:
+              print("Missing required App Store Connect secrets.", file=sys.stderr)
+              sys.exit(1)
+
+          runner_temp = pathlib.Path(os.environ["RUNNER_TEMP"])
+          key_id = os.environ["APP_STORE_CONNECT_KEY_ID"]
+          key_path = runner_temp / f"AuthKey_{key_id}.p8"
+          pem = os.environ["APP_STORE_CONNECT_API_KEY"].replace("\r\n", "\n").strip() + "\n"
+          key_path.write_text(pem, encoding="utf-8")
+          key_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+          export_path = runner_temp / "ExportOptions.plist"
+          with export_path.open("wb") as fh:
+              plistlib.dump(
+                  {
+                      "method": "app-store-connect",
+                      "destination": "upload",
+                      "signingStyle": "automatic",
+                      "teamID": os.environ["APPLE_TEAM_ID"],
+                      "uploadSymbols": True,
+                  },
+                  fh,
+              )
+
+          github_env = pathlib.Path(os.environ["GITHUB_ENV"])
+          with github_env.open("a", encoding="utf-8") as fh:
+              fh.write(f"AUTH_KEY_PATH={key_path}\n")
+              fh.write(f"EXPORT_OPTIONS_PATH={export_path}\n")
+          PY
+
+      - name: Prune leftover Apple Development certs
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
+          PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_prune_development_certs.sh
+
+      - name: Fetch statewide Field Packs (FL TX NM)
+        run: |
+          set -euo pipefail
+          bash tools/fetch_bundled_field_packs.sh
+
+      - name: Archive Blackout (Release, device)
+        env:
+          FIELD_PACKS_REQUIRED: "1"
+        run: |
+          set -euo pipefail
+          echo "ASC_NOT_BEFORE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          xcodebuild \
+            -project Blackout.xcodeproj \
+            -scheme Blackout \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/Blackout.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$AUTH_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            archive
+
+      - name: Probe DefaultPack tiles inside xcarchive .app
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/Blackout.xcarchive/Products/Applications/Blackout.app"
+          bash tools/probe_defaultpack_app.sh "${APP}"
+          bash tools/probe_fieldpacks_app.sh "${APP}"
+
+      - name: Export and upload to App Store Connect
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/BlackoutExport"
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/Blackout.xcarchive" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PATH" \
+            -exportPath "$RUNNER_TEMP/BlackoutExport" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$AUTH_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic
+
+      - name: Poll ASC, clear compliance, assign Internal
+        env:
+          ASC_APP_ID: "6806388963"
+          ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
+        run: |
+          set -euo pipefail
+          if [ -z "${ASC_NOT_BEFORE:-}" ]; then
+            echo "ASC_NOT_BEFORE missing; refusing to assign a stale build" >&2
+            exit 1
+          fi
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
+          PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_assign_internal.sh
+
+      - name: Remove API key
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -n "${AUTH_KEY_PATH:-}" ]; then
+            rm -f "$AUTH_KEY_PATH"
+          fi

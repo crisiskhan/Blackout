@@ -81,7 +81,15 @@ public final class PersistenceService: PersistenceServing {
     }
 
     public func saveMessage(_ record: MessageRecordDTO) throws {
-        context.insert(MessageRecord(record))
+        let target = record.id.rawValue
+        let descriptor = FetchDescriptor<MessageRecord>(
+            predicate: #Predicate { $0.id == target }
+        )
+        if let existing = try context.fetch(descriptor).first {
+            existing.apply(record)
+        } else {
+            context.insert(MessageRecord(record))
+        }
         try context.save()
     }
 

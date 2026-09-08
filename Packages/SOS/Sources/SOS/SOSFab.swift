@@ -11,45 +11,97 @@ public struct SOSFab: View {
     let persistence: any PersistenceServing
     @Bindable var mesh: MeshFacade
     @Bindable var battery: BatteryService
+    @Bindable var roster: PartyRoster
 
     @State private var showConfirm = false
     @State private var isArmed = false
     @State private var showArmedPanel = false
     @State private var storeError: String?
+    var presentConfirm: Binding<Bool>?
+    var coverOpen: Binding<Bool>?
+    var suppressPersistedArmedAutoPresent: Bool
+    var showsDisk: Bool
 
-    private static let armedKey = "com.crisiskhan.blackout.sos.armed"
+    private static let armedKey = BlackoutKeys.sosArmed
 
     public init(
         location: LocationService,
         persistence: any PersistenceServing,
         mesh: MeshFacade,
-        battery: BatteryService
+        battery: BatteryService,
+        roster: PartyRoster,
+        presentConfirm: Binding<Bool>? = nil,
+        coverOpen: Binding<Bool>? = nil,
+        suppressPersistedArmedAutoPresent: Bool = false,
+        showsDisk: Bool = true
     ) {
         self.location = location
         self.persistence = persistence
         self.mesh = mesh
         self.battery = battery
+        self.roster = roster
+        self.presentConfirm = presentConfirm
+        self.coverOpen = coverOpen
+        self.suppressPersistedArmedAutoPresent = suppressPersistedArmedAutoPresent
+        self.showsDisk = showsDisk
         _isArmed = State(initialValue: UserDefaults.standard.bool(forKey: Self.armedKey))
     }
 
     public var body: some View {
-        Button(action: {}) {
-            ZStack {
-                Circle()
-                    .fill(BlackoutDS.Red.core)
-                Circle()
-                    .stroke(isArmed ? BlackoutDS.Silver.metal : BlackoutDS.Red.hot, lineWidth: 3)
-                Text("SOS")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(BlackoutDS.Silver.metal)
+        Group {
+            if showsDisk {
+                disk
+            } else {
+                Color.clear.frame(width: 0, height: 0)
             }
-            .frame(width: BlackoutDS.Hit.sos, height: BlackoutDS.Hit.sos)
-            .shadow(color: BlackoutDS.Red.blood.opacity(0.55), radius: 12, y: 4)
+        }
+        .fullScreenCover(isPresented: $showConfirm) {
+            SOSConfirmCover(
+                location: location,
+                mesh: mesh,
+                roster: roster,
+                storeError: $storeError,
+                onArm: arm,
+                onDismissUnarmed: { showConfirm = false }
+            )
+        }
+        .fullScreenCover(isPresented: $showArmedPanel) {
+            SOSArmedPanel(
+                location: location,
+                mesh: mesh,
+                roster: roster,
+                onDismiss: { showArmedPanel = false }
+            )
+        }
+        .opacity(showsDisk && battery.hidesSOS ? 0 : 1)
+        .allowsHitTesting(!showsDisk || !battery.hidesSOS)
+        .overlay(alignment: .top) {
+            if let storeError, !showConfirm, !showArmedPanel, showsDisk {
+                StoreFailure(storeError)
+                    .frame(width: 280)
+                    .offset(y: -120)
+            }
+        }
+        .onAppear { consumePresentConfirm() }
+        .onChange(of: presentConfirm?.wrappedValue ?? false) { _, requested in
+            if requested { consumePresentConfirm() }
+        }
+        .onChange(of: showConfirm) { _, _ in publishCover() }
+        .onChange(of: showArmedPanel) { _, _ in publishCover() }
+    }
+
+    private var disk: some View {
+        Button(action: {}) {
+            Text("SOS")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(BlackoutDS.Silver.metal)
+                .frame(width: BlackoutDS.Hit.sos, height: BlackoutDS.Hit.sos)
+                .metalDisk(isArmed ? .bright : .hazard, diameter: BlackoutDS.Hit.sos)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("SOS. Hold to arm.")
         .simultaneousGesture(
-            LongPressGesture(minimumDuration: 1.5)
+            LongPressGesture(minimumDuration: SOSChrome.holdSeconds)
                 .onEnded { _ in
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     if isArmed {
@@ -59,29 +111,6 @@ public struct SOSFab: View {
                     }
                 }
         )
-        .fullScreenCover(isPresented: $showConfirm) {
-            SOSConfirmCover(
-                meshCount: mesh.nearbyPeerCount,
-                storeError: $storeError,
-                onArm: arm,
-                onDismissUnarmed: { showConfirm = false }
-            )
-        }
-        .fullScreenCover(isPresented: $showArmedPanel) {
-            SOSArmedPanel(
-                meshCount: mesh.nearbyPeerCount,
-                onDismiss: { showArmedPanel = false }
-            )
-        }
-        .opacity(battery.hidesSOS ? 0 : 1)
-        .allowsHitTesting(!battery.hidesSOS)
-        .overlay(alignment: .top) {
-            if let storeError, !showConfirm, !showArmedPanel {
-                StoreFailure(storeError)
-                    .frame(width: 280)
-                    .offset(y: -120)
-            }
-        }
     }
 
     private func arm() {
@@ -90,7 +119,7 @@ public struct SOSFab: View {
             armedAt: Date(),
             latitude: fix?.latitude,
             longitude: fix?.longitude,
-            note: "Armed offline. Mesh peers: \(mesh.nearbyPeerCount)."
+            note: "Armed offline. Party peers: \(roster.peerCount)."
         )
         do {
             try persistence.logSOS(event)
@@ -105,95 +134,180 @@ public struct SOSFab: View {
         showConfirm = false
         showArmedPanel = true
         storeError = nil
-        let envelope = Envelope(
-            kind: .sosAlert,
-            ciphertext: Data("sos".utf8),
-            sender: BlackoutID(),
-            recipient: BlackoutID()
-        )
-        if mesh.nearbyPeerCount > 0 {
-            mesh.send(envelope)
+        if SOSConfirm.shouldSendMesh(peerCount: mesh.nearbyPeerCount) {
+            mesh.send(
+                SOSConfirm.meshEnvelope(
+                    sender: roster.localID,
+                    recipient: roster.recipientID,
+                    callsign: roster.identity.callsign
+                )
+            )
         }
+    }
+
+    private func consumePresentConfirm() {
+        guard presentConfirm?.wrappedValue == true else { return }
+        if showsDisk {
+            if isArmed {
+                if SOSArmedRestore.shouldAutoPresentArmedOverlay(
+                    persistedArmed: true,
+                    presentRequested: true,
+                    newBinaryLaunch: suppressPersistedArmedAutoPresent
+                ) {
+                    showArmedPanel = true
+                }
+            } else {
+                showConfirm = true
+            }
+        } else {
+            showConfirm = true
+        }
+        presentConfirm?.wrappedValue = false
+    }
+
+    private func publishCover() {
+        coverOpen?.wrappedValue = showConfirm || showArmedPanel
     }
 }
 
 public struct SOSConfirmCover: View {
-    var meshCount: Int
+    @Bindable var location: LocationService
+    @Bindable var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
     @Binding var storeError: String?
     var onArm: () -> Void
     var onDismissUnarmed: () -> Void
+    @State private var strobeOn = false
+    @State private var controller: SOSConfirmController?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    public var body: some View {
+        GeometryReader { geo in
+            let thumbHeight = geo.size.height * CGFloat(SOSChrome.confirmThumbZone)
+            ZStack {
+                BlackoutDS.Surface.hazard.ignoresSafeArea()
+                if strobeOn {
+                    SOSStrobeWash(reduceMotion: reduceMotion)
+                }
+                VStack(spacing: 0) {
+                    VStack {
+                        Spacer(minLength: 24)
+                        RedEyeOMark(point: CGFloat(BrandChromeLock.sosConfirmRedEye))
+                            .clipShape(Circle())
+                        Spacer(minLength: 12)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .accessibilityHidden(true)
+
+                    VStack(spacing: 16) {
+                        SlideToConfirm(
+                            SOSChrome.confirmPhrase,
+                            knobStyle: SOSChrome.confirmKnobIsSOS ? .sos : .metal,
+                            knobSize: CGFloat(SOSChrome.confirmHit)
+                        ) {
+                            controller?.stopSpeech()
+                            onArm()
+                        }
+                        CrisisLockActionStrip(strobeOn: strobeOn) { control in
+                            handle(control)
+                        }
+                        if let storeError {
+                            StoreFailure(storeError)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 18)
+                    .frame(height: thumbHeight, alignment: .bottom)
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("SOS confirm. Slide to arm. Tap never fires.")
+        .preferredColorScheme(.dark)
+        .onAppear { bindController() }
+        .onDisappear {
+            controller?.stopSpeech()
+            strobeOn = false
+        }
+    }
+
+    private func handle(_ control: SOSCrisisLockControl) {
+        switch control {
+        case .cancel:
+            controller?.stopSpeech()
+            strobeOn = false
+            onDismissUnarmed()
+        case .strobe, .speakCoords, .share, .call911:
+            if let action = control.confirmAction {
+                perform(action)
+            }
+        }
+    }
+
+    private func bindController() {
+        controller = SOSConfirmController(location: location, mesh: mesh, roster: roster)
+    }
+
+    private func perform(_ action: SOSConfirmAction) {
+        if controller == nil { bindController() }
+        controller?.perform(action, strobeOn: &strobeOn)
+    }
+}
+
+public struct SOSArmedPanel: View {
+    var location: LocationService
+    @Bindable var mesh: MeshFacade
+    @Bindable var roster: PartyRoster
+    var onDismiss: () -> Void
+    @State private var strobeOn = false
+    @State private var showSystemSOS = false
+    @State private var controller: SOSConfirmController?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         ZStack(alignment: .topTrailing) {
             BlackoutDS.Surface.hazard.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 20) {
-                Text("SOS")
+            if strobeOn {
+                SOSStrobeWash(reduceMotion: reduceMotion)
+            }
+            VStack(alignment: .leading, spacing: 16) {
+                Text("SOS armed")
                     .font(BlackoutDS.titleFont())
                     .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Unarmed. Holding the button only opened this cover. Slide to arm, log, and alert peers when they exist.")
+                Text("Logged on-device. Party peers: \(roster.peerCount). Closing this panel does not disarm. The alert already went out locally.")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.mid)
                     .lineSpacing(7)
-                MeshPill(nearbyCount: meshCount)
-                SlideToConfirm("Slide to arm") {
-                    onArm()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        SOSConfirmActionList(strobeOn: strobeOn) { action in
+                            perform(action)
+                        }
+                        MeshPill(nearbyCount: mesh.nearbyPeerCount)
+                        MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
+                            showSystemSOS = true
+                        }
+                        Text("Never auto-dials 911. You start the OS Emergency SOS gesture.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.steel)
+                    }
                 }
-                if let storeError {
-                    StoreFailure(storeError)
-                }
-                Text("X dismisses unarmed if you have not slid. Blackout never auto-dials 911.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.steel)
-                Spacer()
             }
             .padding(24)
             Button {
-                onDismissUnarmed()
+                dismissWithoutDisarming()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(BlackoutDS.Silver.bright)
                     .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
+                    .contentShape(Rectangle())
             }
-            .padding(12)
-        }
-        .preferredColorScheme(.dark)
-    }
-}
-
-public struct SOSArmedPanel: View {
-    var meshCount: Int
-    var onDismiss: () -> Void
-    @State private var showSystemSOS = false
-
-    public var body: some View {
-        ZStack(alignment: .topTrailing) {
-            BlackoutDS.Surface.hazard.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 20) {
-                Text("SOS armed")
-                    .font(BlackoutDS.titleFont())
-                    .foregroundStyle(BlackoutDS.Red.hot)
-                Text("Logged on-device. Mesh peers: \(meshCount). Closing this panel does not disarm. The alert already went out locally.")
-                    .font(BlackoutDS.bodyFont())
-                    .foregroundStyle(BlackoutDS.Silver.mid)
-                    .lineSpacing(7)
-                MeshPill(nearbyCount: meshCount)
-                MetalButton("Emergency SOS (system)", height: BlackoutDS.Hit.lg) {
-                    showSystemSOS = true
-                }
-                Text("Never auto-dials 911. You start the OS Emergency SOS gesture.")
-                    .font(BlackoutDS.captionFont())
-                    .foregroundStyle(BlackoutDS.Silver.steel)
-                Spacer()
-            }
-            .padding(24)
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(BlackoutDS.Silver.bright)
-                    .frame(width: BlackoutDS.Hit.sm, height: BlackoutDS.Hit.sm)
-            }
-            .padding(12)
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close. Does not disarm.")
+            .padding(.trailing, 12)
+            .padding(.top, 12)
+            .safeAreaPadding(.top)
         }
         .sheet(isPresented: $showSystemSOS) {
             SystemEmergencySOSView()
@@ -201,6 +315,26 @@ public struct SOSArmedPanel: View {
                 .presentationDetents([.medium, .large])
         }
         .preferredColorScheme(.dark)
+        .onDisappear {
+            controller?.stopSpeech()
+            strobeOn = false
+        }
+    }
+
+    private func bindController() {
+        controller = SOSConfirmController(location: location, mesh: mesh, roster: roster)
+    }
+
+    private func perform(_ action: SOSConfirmAction) {
+        if controller == nil { bindController() }
+        controller?.perform(action, strobeOn: &strobeOn)
+    }
+
+    private func dismissWithoutDisarming() {
+        controller?.stopSpeech()
+        strobeOn = false
+        // Closing does not write BlackoutKeys.sosArmed. Product keeps the arm.
+        onDismiss()
     }
 }
 

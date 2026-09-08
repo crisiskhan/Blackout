@@ -1,13 +1,10 @@
-# DefaultPack — generated Front Range sample
+# DefaultPack — USGS Front Range sample
 
-This folder is a **generated sample**, not a USGS, OpenStreetMap, or commercial map extract.
+USGS National Map topo for a Denver / Front Range window. Public domain. Not a world map.
 
-- Region: Denver-adjacent Colorado Front Range (synthetic)
-- Tiles: a handful of z/x/y PNGs at zooms 10–12
-- DEM: small altitude table (`dem.json`)
-- POI: a handful of labeled sample points (`poi.json`)
+- Center 39.74, −105.3 · span 0.32 / 0.50 · z10–z12
+- Tiles: `tiles/{z}/{x}/{y}.png` fetched at pack-build time from USGSTopo
+- DEM / POI: `dem.json` and `poi.json` stay on disk for slope / towns UI
+- Refresh tiles with `python3 tools/fetch_defaultpack_usgs.py`
 
-Blackout loads these over `file://` via `MKTileOverlay.loadTile` using local `Data(contentsOf:)`.
-It does **not** fetch tiles at runtime. Extra regions are a later Files-based pass.
-
-Do not treat elevations, POIs, or tile colors as authoritative.
+Blackout paints these files locally. Map paint does not use MapKit or URLSession.

@@ -17,7 +17,14 @@ public protocol PersistenceServing: AnyObject {
 @MainActor
 public protocol CryptoServing: AnyObject {
     var localIdentity: BlackoutID { get }
+    /// Opaque local-radio hello (identity + agreement public). Mesh transports this blindly.
+    var localAdvertisement: Data { get }
+    /// First registered radio peer, else self. Used to seal one message to one nearby phone.
+    var preferredRecipient: BlackoutID { get }
+    func registerPeerAdvertisement(_ data: Data)
+    func setPartyCode(_ code: String?)
     func seal(_ plaintext: Data, to recipient: BlackoutID) throws -> Data
+    func seal(_ plaintext: Data, partyCode: String) throws -> Data
     func open(_ ciphertext: Data) throws -> Data
 }
 
@@ -29,6 +36,8 @@ public protocol LocationServing: AnyObject {
     var navigationFix: LocationFix? { get }
     var headingDegrees: Double? { get }
     var isUpdating: Bool { get }
+    var isDeadReckoning: Bool { get }
+    var motionDenied: Bool { get }
     func requestWhenInUse()
     func startUpdating()
     func stopUpdating()
@@ -40,9 +49,13 @@ public protocol LocationServing: AnyObject {
 public protocol MeshServing: AnyObject {
     var nearbyPeerCount: Int { get }
     var statusLine: String { get }
+    var inboundSequence: UInt64 { get }
+    var isRunning: Bool { get }
     func start()
     func stop()
-    func send(_ envelope: Envelope)
+    @discardableResult
+    func send(_ envelope: Envelope) -> MeshSendResult
+    func setLocalAdvertisement(_ data: Data)
 }
 
 @MainActor
@@ -52,12 +65,20 @@ public protocol BatteryServing: AnyObject {
     var isCharging: Bool { get }
     var hidesSOS: Bool { get }
     var coarseNavigateEnabled: Bool { get }
+    /// ≤2% and not charging. RootView must unmount Map/Comms/Field/Expedition. Never hide SOS.
+    var isCritical: Bool { get }
+    /// Named Extreme Saver profile while above 2%. 4-tab chrome, SOS + coarse nav + radar. Not last-2%.
+    var isExtremeSaver: Bool { get }
+    var pausesCameraAndPTT: Bool { get }
 }
 
 @MainActor
 public protocol MapPackServing: AnyObject {
     var pack: MapPackSnapshot? { get }
     func elevationMeters(latitude: Double, longitude: Double) -> Double?
+    func slopeDegrees(latitude: Double, longitude: Double) -> Double?
+    func viewshed(fromLatitude: Double, fromLongitude: Double, observerHeightMeters: Double) -> [ViewshedRay]
+    var hasDEM: Bool { get }
 }
 
 @MainActor
@@ -66,6 +87,7 @@ public protocol AppLockServing: AnyObject {
     var isUnlocked: Bool { get }
     func lock()
     func unlock() async -> Bool
+    func unlockSession()
 }
 
 @MainActor

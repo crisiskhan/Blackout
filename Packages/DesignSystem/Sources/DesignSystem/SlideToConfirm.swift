@@ -1,30 +1,42 @@
 import SwiftUI
 
+public enum SlideKnobStyle: Sendable, Equatable {
+    case metal
+    case sos
+}
+
 public struct SlideToConfirm: View {
     private let phrase: String
+    private let knobStyle: SlideKnobStyle
+    private let knobSize: CGFloat
     private let onConfirm: () -> Void
     @State private var offset: CGFloat = 0
-    @State private var trackWidth: CGFloat = 0
 
-    public init(_ phrase: String = "Slide to arm", onConfirm: @escaping () -> Void) {
+    public init(
+        _ phrase: String = "Slide to arm",
+        knobStyle: SlideKnobStyle = .metal,
+        knobSize: CGFloat = BlackoutDS.Hit.lg,
+        onConfirm: @escaping () -> Void
+    ) {
         self.phrase = phrase
+        self.knobStyle = knobStyle
+        self.knobSize = knobSize
         self.onConfirm = onConfirm
     }
 
     public var body: some View {
         GeometryReader { geo in
-            let knob: CGFloat = BlackoutDS.Hit.lg
+            let knob = knobSize
             let maxTravel = max(0, geo.size.width - knob - 8)
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                Capsule()
                     .fill(BlackoutDS.Surface.sunken)
-                Text(phrase)
+                Text(trackPhrase)
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Silver.dim)
                     .frame(maxWidth: .infinity)
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(BlackoutDS.Silver.metal)
-                    .frame(width: knob - 8, height: knob - 8)
+                    .padding(.horizontal, knob + 8)
+                knobView
                     .padding(4)
                     .offset(x: offset)
                     .gesture(
@@ -43,12 +55,46 @@ public struct SlideToConfirm: View {
                     )
                     .accessibilityLabel(phrase)
             }
-            .onAppear { trackWidth = geo.size.width }
         }
-        .frame(height: BlackoutDS.Hit.lg)
+        .frame(height: knobSize + 8)
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            Capsule()
                 .stroke(BlackoutDS.Silver.edge, lineWidth: 0.5)
         )
+    }
+
+    private var trackPhrase: String {
+        switch knobStyle {
+        case .metal:
+            return phrase
+        case .sos:
+            return phrase.hasSuffix(">") ? phrase : "\(phrase) >"
+        }
+    }
+
+    @ViewBuilder
+    private var knobView: some View {
+        switch knobStyle {
+        case .metal:
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(BlackoutDS.Silver.metal)
+                .frame(width: knobSize - 8, height: knobSize - 8)
+        case .sos:
+            ZStack {
+                Circle()
+                    .fill(BlackoutDS.Red.core)
+                Circle()
+                    .stroke(BlackoutDS.Red.hot, lineWidth: 2)
+                Text("SOS")
+                    .font(.system(size: sosLabelSize, weight: .bold))
+                    .foregroundStyle(BlackoutDS.Silver.metal)
+            }
+            .frame(width: knobSize, height: knobSize)
+            .shadow(color: BlackoutDS.Red.blood.opacity(0.55), radius: 8, y: 2)
+        }
+    }
+
+    private var sosLabelSize: CGFloat {
+        knobSize >= 64 ? 14 : 12
     }
 }

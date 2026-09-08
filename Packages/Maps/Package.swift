@@ -6,6 +6,7 @@ let package = Package(
     platforms: [.iOS("18.0")],
     products: [
         .library(name: "Maps", targets: ["Maps"]),
+        .library(name: "MapsChrome", targets: ["MapsChrome"]),
     ],
     dependencies: [
         .package(path: "../BlackoutCore"),
@@ -16,14 +17,28 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "MapsRouting",
+            dependencies: []
+        ),
+        .target(
+            name: "MapsChrome",
+            dependencies: []
+        ),
+        .target(
             name: "Maps",
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
-                "BlackoutLocation",
-                "BlackoutMesh",
-                "BlackoutBattery",
+                "MapsRouting",
+                "MapsChrome",
+                .product(name: "BlackoutLocation", package: "Location"),
+                .product(name: "BlackoutMesh", package: "Mesh"),
+                .product(name: "BlackoutBattery", package: "Battery"),
             ]
+        ),
+        .testTarget(
+            name: "MapsTests",
+            dependencies: ["MapsRouting", "MapsChrome"]
         ),
     ]
 )

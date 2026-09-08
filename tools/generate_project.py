@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Xcode project, DefaultPack tiles, and AppIcon. No network."""
+"""Generate Xcode project. AppIcon comes from brand/emblem.jpeg. Verify DefaultPack USGS tiles. No network."""
 from __future__ import annotations
 
 import hashlib
@@ -95,144 +95,58 @@ def make_tile_pixels(z: int, x: int, y: int, size: int = 256) -> bytes:
 
 
 def generate_default_pack() -> None:
+    """Do not rewrite USGS field-pack tiles. generate_project.py is offline."""
     pack = ROOT / "Blackout" / "DefaultPack"
+    manifest_path = pack / "manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit("DefaultPack/manifest.json missing")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("kind") != "field-pack":
+        raise SystemExit("DefaultPack must stay USGS field-pack tiles; will not generate stubs")
     tiles_root = pack / "tiles"
-    # Denver-adjacent Front Range window
-    west, south, east, north = -105.60, 39.55, -104.92, 40.02
-    zooms = (10, 11, 12)
-    written = []
-    for z in zooms:
-        x0, y1 = lonlat_to_tile(west, south, z)
-        x1, y0 = lonlat_to_tile(east, north, z)
-        if x0 > x1:
-            x0, x1 = x1, x0
-        if y0 > y1:
-            y0, y1 = y1, y0
-        for x in range(x0, x1 + 1):
-            for y in range(y0, y1 + 1):
-                path = tiles_root / str(z) / str(x) / f"{y}.png"
-                write_png(path, 256, 256, make_tile_pixels(z, x, y))
-                written.append({"z": z, "x": x, "y": y})
-
-    pois = {
-        "attribution": (
-            "GENERATED SAMPLE — not a USGS or GNIS extract. Synthetic points of interest "
-            "for the Denver / Front Range area, for offline UI development only."
-        ),
-        "region": {
-            "name": "Front Range sample",
-            "west": west,
-            "south": south,
-            "east": east,
-            "north": north,
-        },
-        "pois": [
-            {"id": "denver", "name": "Denver", "kind": "city", "lat": 39.7392, "lon": -104.9903},
-            {"id": "boulder", "name": "Boulder", "kind": "city", "lat": 40.0150, "lon": -105.2705},
-            {"id": "golden", "name": "Golden", "kind": "city", "lat": 39.7555, "lon": -105.2211},
-            {"id": "idaho-springs", "name": "Idaho Springs", "kind": "town", "lat": 39.7425, "lon": -105.5136},
-            {"id": "evans", "name": "Mount Evans", "kind": "summit", "lat": 39.5883, "lon": -105.6438},
-            {"id": "trailhead", "name": "Front Range Trailhead", "kind": "trailhead", "lat": 39.633, "lon": -105.60},
-            {"id": "ranger", "name": "Foothills Ranger Station", "kind": "ranger", "lat": 39.72, "lon": -105.35},
-            {"id": "hospital", "name": "Plains Medical Center", "kind": "hospital", "lat": 39.739, "lon": -104.990},
-            {"id": "reservoir", "name": "Foothills Reservoir", "kind": "water", "lat": 39.80, "lon": -105.15},
-        ],
-    }
-    (pack / "poi.json").write_text(json.dumps(pois, indent=2) + "\n")
-
-    cell = 0.05
-    lons = []
-    lon = west
-    while lon <= east + 1e-9:
-        lons.append(round(lon, 4))
-        lon += cell
-    lats = []
-    lat = south
-    while lat <= north + 1e-9:
-        lats.append(round(lat, 4))
-        lat += cell
-    grid = [[round(sample_elevation(lo, la), 1) for lo in lons] for la in lats]
-    dem = {
-        "attribution": (
-            "GENERATED SAMPLE — not a USGS DEM. Synthetic altitude table covering a "
-            "Denver-adjacent Front Range window, for offline topography UI only."
-        ),
-        "west": west,
-        "south": south,
-        "east": east,
-        "north": north,
-        "cellDegrees": cell,
-        "unit": "meters",
-        "lons": lons,
-        "lats": lats,
-        "grid": grid,
-    }
-    (pack / "dem.json").write_text(json.dumps(dem, indent=2) + "\n")
-
-    manifest = {
-        "name": "Front Range sample",
-        "kind": "generated-sample",
-        "disclaimer": (
-            "This is a tiny generated Rockies / Denver-adjacent sample pack, NOT a world map "
-            "and NOT a USGS extract. Tiles, DEM, and POIs are synthetic. Extra regions later "
-            "via Files, never URLSession."
-        ),
-        "center": {"lat": 39.74, "lon": -105.25},
-        "span": {"lat": 0.48, "lon": 0.70},
-        "minZoom": 10,
-        "maxZoom": 12,
-        "tileTemplate": "tiles/{z}/{x}/{y}.png",
-        "poi": "poi.json",
-        "dem": "dem.json",
-        "tileCount": len(written),
-        "tiles": written,
-    }
-    (pack / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    (pack / "README.md").write_text(
-        """# DefaultPack — generated Front Range sample
-
-This folder is a **generated sample**, not a USGS, OpenStreetMap, or commercial map extract.
-
-- Region: Denver-adjacent Colorado Front Range (synthetic)
-- Tiles: a handful of z/x/y PNGs at zooms 10–12
-- DEM: small altitude table (`dem.json`)
-- POI: a handful of labeled sample points (`poi.json`)
-
-Blackout loads these over `file://` via `MKTileOverlay.loadTile` using local `Data(contentsOf:)`.
-It does **not** fetch tiles at runtime. Extra regions are a later Files-based pass.
-
-Do not treat elevations, POIs, or tile colors as authoritative.
-"""
-    )
-    print(f"DefaultPack: {len(written)} tiles -> {pack}")
+    need = int(manifest.get("tileCount") or 0)
+    pngs = list(tiles_root.rglob("*.png")) if tiles_root.is_dir() else []
+    if len(pngs) < need:
+        raise SystemExit(f"DefaultPack has {len(pngs)} PNGs, manifest tileCount is {need}")
+    for rel in ("tiles/10/211/387.png", "tiles/12/848/1553.png"):
+        path = pack / rel
+        if not path.is_file() or path.stat().st_size < 8000:
+            raise SystemExit(f"DefaultPack probe missing or stub: {rel}")
+    print(f"DefaultPack: kept {len(pngs)} USGS field-pack tiles")
 
 
 def generate_app_icon() -> None:
-    size = 1024
-    pix = bytearray(size * size * 4)
-    cx = cy = size / 2
-    for py in range(size):
-        for px in range(size):
-            dx = px - cx
-            dy = py - cy
-            r = math.hypot(dx, dy)
-            i = (py * size + px) * 4
-            # void background
-            rr, gg, bb = 7, 8, 10
-            # faint raised disc
-            if r < 430:
-                rr, gg, bb = 12, 14, 18
-            # silver ring
-            if 390 < r < 420:
-                rr, gg, bb = 197, 205, 214
-            # SOS red core (icon only — product chrome uses the FAB for live red)
-            if r < 280:
-                rr, gg, bb = 255, 43, 43
-            if r < 210:
-                rr, gg, bb = 139, 20, 20
-            pix[i : i + 4] = bytes((rr, gg, bb, 255))
+    """Rasterize the locked emblem. Never synthesize the old red-disc placeholder."""
+    import shutil
+    import subprocess
+
+    emblem = ROOT / "brand" / "emblem.jpeg"
     icon_dir = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
-    write_png(icon_dir / "AppIcon.png", size, size, bytes(pix))
+    dest = icon_dir / "AppIcon.png"
+    if not emblem.is_file():
+        raise SystemExit("brand/emblem.jpeg missing; will not synthesize a red-disc AppIcon")
+    icon_dir.mkdir(parents=True, exist_ok=True)
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg:
+        subprocess.run(
+            [
+                ffmpeg,
+                "-y",
+                "-i",
+                str(emblem),
+                "-vf",
+                "scale=1024:1024:flags=lanczos",
+                "-pix_fmt",
+                "rgb24",
+                str(dest),
+            ],
+            check=True,
+            capture_output=True,
+        )
+    elif dest.is_file() and dest.stat().st_size > 50_000:
+        print("AppIcon: kept existing emblem PNG (ffmpeg not available)")
+    else:
+        raise SystemExit("ffmpeg required to render AppIcon from brand/emblem.jpeg")
     (icon_dir / "Contents.json").write_text(
         json.dumps(
             {
@@ -250,6 +164,7 @@ def generate_app_icon() -> None:
         )
         + "\n"
     )
+    print(f"AppIcon: {dest.stat().st_size} bytes from brand/emblem.jpeg")
 
 
 def generate_accent() -> None:
@@ -294,6 +209,7 @@ PACKAGES = [
     ("Messaging", "Messaging"),
     ("VoicePTT", "VoicePTT"),
     ("Maps", "Maps"),
+    ("Packs", "BlackoutPacks"),
     ("SOS", "SOS"),
     ("Expeditions", "Expeditions"),
     ("Field", "Field"),
@@ -344,8 +260,9 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
                 "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
                 "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
+                "CODE_SIGN_ENTITLEMENTS": "Supporting/Blackout.entitlements",
                 "CODE_SIGN_STYLE": "Automatic",
-                "CURRENT_PROJECT_VERSION": "1",
+                "CURRENT_PROJECT_VERSION": "53",
                 "DEVELOPMENT_TEAM": "",
                 "ENABLE_PREVIEWS": "YES",
                 "GENERATE_INFOPLIST_FILE": "YES",
@@ -353,11 +270,17 @@ def xc_settings(is_target: bool, debug: bool) -> str:
                 "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.navigation",
                 "INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription": "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.",
                 "INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription": "Mesh uses Bluetooth only when you opt in. Zero nearby peers is a valid field state. Deny is supported.",
+                "INFOPLIST_KEY_NSBonjourServices": "_blckout-mesh._tcp",
+                "INFOPLIST_KEY_NSLocalNetworkUsageDescription": "Blackout finds one nearby phone on the same local radio. No internet and no account. Deny keeps Map, Guide, and SOS working. Zero nearby is a valid field state.",
                 "INFOPLIST_KEY_NSCameraUsageDescription": "Field Vision classifies a still on this device. Deny is supported — Guide and Skills still work.",
                 "INFOPLIST_KEY_NSFaceIDUsageDescription": "Optional on-device lock. Nothing is sent anywhere.",
                 "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "Blackout uses GPS for last-known fix, breadcrumbs, and elevation. Deny is supported. Map pack, compass, messaging, and SOS still work.",
                 "INFOPLIST_KEY_NSMicrophoneUsageDescription": "Voice PTT records locally on this device. Deny is supported.",
-                "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading when GPS is denied or coarse. Deny is supported.",
+                    "INFOPLIST_KEY_NSMotionUsageDescription": "Compass heading and step-length dead reckoning when GPS is denied or cold. Deny is supported.",
+                    "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "On-device speech for the Field guide ask bar and Comms compose. If denied, type instead.",
+                "INFOPLIST_KEY_NFCReaderUsageDescription": "Blackout shares a local party code over NFC. No account. Deny still lets you type or scan the 4–8 code.",
+                "INFOPLIST_KEY_NSSupportsLiveActivities": "NO",
+                "INFOPLIST_FILE": "Supporting/Blackout-Info.plist",
                 "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
                 "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
                 "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
@@ -380,7 +303,9 @@ def xc_settings(is_target: bool, debug: bool) -> str:
     lines = ["\t\t\t\tisa = XCBuildConfiguration;", "\t\t\t\tbuildSettings = {"]
     for k in sorted(common):
         v = common[k]
-        if v == "" or " " in v or "$" in v:
+        # Commas (TARGETED_DEVICE_FAMILY = 1,2) and leading dashes (-Onone)
+        # must be quoted or the OpenStep plist parser dies on xcodebuild.
+        if v == "" or any(c in v for c in ' "$,;') or v.startswith("-"):
             lines.append(f'\t\t\t\t\t{k} = "{v}";')
         else:
             lines.append(f"\t\t\t\t\t{k} = {v};")
@@ -391,6 +316,9 @@ def xc_settings(is_target: bool, debug: bool) -> str:
 
 
 def generate_xcodeproj() -> None:
+    # Crisis 21:41: do not embed BlackoutWidgets.appex until Map is green.
+    # The leftover widget target may stay in pbxproj; the app target must not
+    # depend on it or copy it in Embed Foundation Extensions.
     ids = {
         "app_ref": oid("app_ref"),
         "sync": oid("sync_blackout"),
@@ -408,8 +336,10 @@ def generate_xcodeproj() -> None:
         "tgt_debug": oid("tgt_debug"),
         "tgt_release": oid("tgt_release"),
         "pack_ref": oid("pack_folder_ref"),
-        "pack_build": oid("pack_in_resources"),
         "copy_script": oid("copy_defaultpack_phase"),
+        "guide_ref": oid("guide_folder_ref"),
+        "copy_guide": oid("copy_guidepack_phase"),
+        "copy_fieldpacks": oid("copy_fieldpacks_phase"),
         "sync_ex": oid("sync_exceptions"),
     }
     pkg_ref = {folder: oid(f"pkgref-{folder}") for folder, _ in PACKAGES}
@@ -432,23 +362,28 @@ def generate_xcodeproj() -> None:
         build_files.append(
             f"\t\t{pkg_link[product]} /* {product} in Frameworks */ = {{isa = PBXBuildFile; productRef = {pkg_dep[product]} /* {product} */; }};"
         )
-    build_files.append(
-        f"\t\t{ids['pack_build']} /* DefaultPack in Resources */ = {{isa = PBXBuildFile; fileRef = {ids['pack_ref']} /* DefaultPack */; }};"
-    )
 
     copy_script_raw = """set -e
-SRC="${SRCROOT}/Blackout/DefaultPack"
-DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DefaultPack"
+exec "${SRCROOT}/tools/copy_defaultpack.sh"
+"""
+    copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    copy_guide_raw = """set -e
+SRC="${SRCROOT}/Blackout/GuidePack"
+DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GuidePack"
 if [ ! -f "${SRC}/manifest.json" ]; then
-  echo "error: DefaultPack missing at ${SRC}" >&2
+  echo "error: GuidePack missing at ${SRC}" >&2
   exit 1
 fi
 mkdir -p "${DST}"
 ditto "${SRC}" "${DST}"
-echo "Copied DefaultPack -> ${DST}"
+echo "Copied GuidePack -> ${DST}"
 test -f "${DST}/manifest.json"
 """
-    copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    copy_guide = copy_guide_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    copy_fieldpacks_raw = """set -e
+exec "${SRCROOT}/tools/copy_fieldpacks.sh"
+"""
+    copy_fieldpacks = copy_fieldpacks_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     local_refs = []
     for folder, _ in PACKAGES:
@@ -482,14 +417,19 @@ test -f "${DST}/manifest.json"
 
 /* Begin PBXFileReference section */
 		{ids['app_ref']} /* Blackout.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; }};
-		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; lastKnownFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
+		{ids['pack_ref']} /* DefaultPack */ = {{isa = PBXFileReference; explicitFileType = folder; name = DefaultPack; path = Blackout/DefaultPack; sourceTree = "<group>"; }};
+		{ids['guide_ref']} /* GuidePack */ = {{isa = PBXFileReference; explicitFileType = folder; name = GuidePack; path = Blackout/GuidePack; sourceTree = "<group>"; }};
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		{ids['sync']} /* Blackout */ = {{
- mar			isa = PBXFileSystemSynchronizedRootGroup;
+			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				{ids['sync_ex']} /* Exceptions for "Blackout" folder in "Blackout" target */,
+			);
+			explicitFolders = (
+				DefaultPack,
+				GuidePack,
 			);
 			path = Blackout;
 			sourceTree = "<group>";
@@ -513,6 +453,7 @@ test -f "${DST}/manifest.json"
 			children = (
 				{ids['sync']} /* Blackout */,
 				{ids['pack_ref']} /* DefaultPack */,
+				{ids['guide_ref']} /* GuidePack */,
 				{ids['products']} /* Products */,
 			);
 			sourceTree = "<group>";
@@ -536,6 +477,8 @@ test -f "${DST}/manifest.json"
 				{ids['fw']} /* Frameworks */,
 				{ids['resources']} /* Resources */,
 				{ids['copy_script']} /* Copy DefaultPack into app bundle */,
+				{ids['copy_guide']} /* Copy GuidePack into app bundle */,
+				{ids['copy_fieldpacks']} /* Copy FieldPacks into app bundle */,
 			);
 			buildRules = (
 			);
@@ -595,7 +538,6 @@ test -f "${DST}/manifest.json"
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				{ids['pack_build']} /* DefaultPack in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -614,7 +556,6 @@ test -f "${DST}/manifest.json"
 /* Begin PBXShellScriptBuildPhase section */
 		{ids['copy_script']} /* Copy DefaultPack into app bundle */ = {{
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -622,16 +563,58 @@ test -f "${DST}/manifest.json"
 			);
 			inputPaths = (
 				"$(SRCROOT)/Blackout/DefaultPack/manifest.json",
+				"$(SRCROOT)/Blackout/DefaultPack/tiles/10/211/387.png",
+				"$(SRCROOT)/tools/copy_defaultpack.sh",
 			);
 			name = "Copy DefaultPack into app bundle";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/manifest.json",
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultPack/tiles/10/211/387.png",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "{copy_script}";
+		}};
+		{ids['copy_guide']} /* Copy GuidePack into app bundle */ = {{
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Blackout/GuidePack/manifest.json",
+			);
+			name = "Copy GuidePack into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GuidePack/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "{copy_guide}";
+		}};
+		{ids['copy_fieldpacks']} /* Copy FieldPacks into app bundle */ = {{
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/tools/copy_fieldpacks.sh",
+			);
+			name = "Copy FieldPacks into app bundle";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "{copy_fieldpacks}";
 		}};
 /* End PBXShellScriptBuildPhase section */
 
@@ -640,6 +623,7 @@ test -f "${DST}/manifest.json"
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				DefaultPack,
+				GuidePack,
 			);
 			target = {ids['target']} /* Blackout */;
 		}};
@@ -789,6 +773,8 @@ def main() -> None:
     generate_app_icon()
     generate_accent()
     generate_xcodeproj()
+    import subprocess
+    subprocess.run(["python3", str(ROOT / "tools" / "generate_guide_pack.py")], check=True)
 
 
 if __name__ == "__main__":

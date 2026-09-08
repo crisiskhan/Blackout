@@ -1,0 +1,205 @@
+{
+  "pack": "blackout-art",
+  "version": "2026-08-29",
+  "craft": "dark-arts competence, not gamification. No badges, streaks, XP, confetti, cartoon empties, emoji. Allure = contrast, metal, haptics, Radar sweep + SOS slide only.",
+  "source_of_truth": "/workspace/blackout-ds-v1.md",
+  "tokens": "/workspace/BlackoutTokens.swift",
+  "logo_lock": "/workspace/blackout-logo/",
+  "stranger_radar_default": "OFF",
+  "sos_pictograms": "skipped -- already-in-app 88pt SOS disk + SF Symbols. Do not put emblem on SOS disk.",
+  "do_not": [
+    "replace tab SF Symbols",
+    "watermark Map",
+    "put emblem on SOS disk",
+    "use lockup in-app",
+    "reopen tokens, 4 tabs, SOS 88pt, Map 6-line bar, or logo placement (section 1.6)",
+    "badges / streaks / XP / confetti / cartoon empties / emoji"
+  ],
+  "splash": {
+    "asset": "splash-wordmark@{1,2,3}x.png",
+    "hold_ms_max": 1200,
+    "placement": "wordmark centered on bg.void #07080A, width <=280pt on 393"
+  },
+  "assets": [
+    {
+      "file": "splash-wordmark@3x.png",
+      "path": "/workspace/blackout-art/splash-wordmark@3x.png",
+      "w": 1179,
+      "h": 2556,
+      "bytes": 189197,
+      "scale": "3x",
+      "binds": [
+        "Launch / splash"
+      ],
+      "notes": "Locked wordmark only, centered on bg.void. Hold <=1.2s then Map. No emblem, no tagline."
+    },
+    {
+      "file": "splash-wordmark@2x.png",
+      "path": "/workspace/blackout-art/splash-wordmark@2x.png",
+      "w": 786,
+      "h": 1704,
+      "bytes": 88328,
+      "scale": "2x",
+      "binds": [
+        "Launch / splash"
+      ],
+      "notes": "Same as @3x for 2x devices."
+    },
+    {
+      "file": "splash-wordmark@1x.png",
+      "path": "/workspace/blackout-art/splash-wordmark@1x.png",
+      "w": 393,
+      "h": 852,
+      "bytes": 26388,
+      "scale": "1x",
+      "binds": [
+        "Launch / splash"
+      ],
+      "notes": "Same as @3x for 1x / catalog."
+    },
+    {
+      "file": "about-wordmark-240pt@3x.png",
+      "path": "/workspace/blackout-art/about-wordmark-240pt@3x.png",
+      "w": 720,
+      "h": 321,
+      "bytes": 125512,
+      "scale": "3x",
+      "binds": [
+        "About",
+        "Expedition overflow About"
+      ],
+      "notes": "Wordmark 240pt-wide (720px @3x) on void. Place above callsign. Not the lockup."
+    },
+    {
+      "file": "empty-map-no-pack.png",
+      "path": "/workspace/blackout-art/empty-map-no-pack.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 1703471,
+      "binds": [
+        "Map empty / deny (no pack)"
+      ],
+      "notes": "One raised metal card. Copy: MAP / No pack for this area. Never watermark the map."
+    },
+    {
+      "file": "empty-comms-zero.png",
+      "path": "/workspace/blackout-art/empty-comms-zero.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 1882881,
+      "binds": [
+        "Comms empty (0 nearby)"
+      ],
+      "notes": "One raised metal card. Copy: COMMS / No one nearby. No mascot."
+    },
+    {
+      "file": "empty-field-guide-idle.png",
+      "path": "/workspace/blackout-art/empty-field-guide-idle.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 2175869,
+      "binds": [
+        "Field / Guide idle"
+      ],
+      "notes": "One raised metal card. Copy: GUIDE / Ask the field guide. Ask bar remains first."
+    },
+    {
+      "file": "empty-expedition-none.png",
+      "path": "/workspace/blackout-art/empty-expedition-none.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 1671202,
+      "binds": [
+        "Expedition empty (none active)"
+      ],
+      "notes": "One raised metal card. Copy: EXPEDITION / None active. Pair with metal New expedition."
+    },
+    {
+      "file": "pack-el-paso.png",
+      "path": "/workspace/blackout-art/pack-el-paso.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 3366859,
+      "pack_id": "el-paso",
+      "binds": [
+        "Field Packs sheet",
+        "pack card El Paso"
+      ],
+      "notes": "Metal plate, etched topo, not a photo-real map."
+    },
+    {
+      "file": "pack-las-cruces.png",
+      "path": "/workspace/blackout-art/pack-las-cruces.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 2753437,
+      "pack_id": "las-cruces",
+      "binds": [
+        "Field Packs sheet",
+        "pack card Las Cruces"
+      ],
+      "notes": "Metal plate, not a photo-real map."
+    },
+    {
+      "file": "pack-albuquerque.png",
+      "path": "/workspace/blackout-art/pack-albuquerque.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 2839835,
+      "pack_id": "albuquerque",
+      "binds": [
+        "Field Packs sheet",
+        "pack card Albuquerque"
+      ],
+      "notes": "Metal plate, not a photo-real map."
+    },
+    {
+      "file": "pack-texas.png",
+      "path": "/workspace/blackout-art/pack-texas.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 2582909,
+      "pack_id": "texas",
+      "binds": [
+        "Field Packs sheet",
+        "pack card Texas"
+      ],
+      "notes": "Metal plate with state silhouette, not a photo-real map."
+    },
+    {
+      "file": "pack-new-mexico.png",
+      "path": "/workspace/blackout-art/pack-new-mexico.png",
+      "w": 1536,
+      "h": 1024,
+      "bytes": 3198115,
+      "pack_id": "new-mexico",
+      "binds": [
+        "Field Packs sheet",
+        "pack card New Mexico"
+      ],
+      "notes": "Metal plate with state + Zia, not a photo-real map."
+    },
+    {
+      "file": "marketing-lockup-1200x630.png",
+      "path": "/workspace/blackout-art/marketing-lockup-1200x630.png",
+      "w": 1200,
+      "h": 630,
+      "bytes": 224361,
+      "binds": [
+        "Marketing share-card 1200x630"
+      ],
+      "notes": "Locked lockup composited. NOT in-app."
+    },
+    {
+      "file": "marketing-lockup-1080x1080.png",
+      "path": "/workspace/blackout-art/marketing-lockup-1080x1080.png",
+      "w": 1080,
+      "h": 1080,
+      "bytes": 514434,
+      "binds": [
+        "Marketing share-card 1080x1080"
+      ],
+      "notes": "Locked lockup composited. NOT in-app."
+    }
+  ]
+}

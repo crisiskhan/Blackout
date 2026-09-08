@@ -3,70 +3,167 @@ import BlackoutLocation
 import DesignSystem
 import SwiftUI
 
-public struct ExpeditionsRootView: View {
+public struct ExpeditionsRootView<PacksPlate: View>: View {
     let persistence: any PersistenceServing
     @Bindable var location: LocationService
+    @Bindable var roster: PartyRoster
+    var onBroadcast: (Envelope) -> Void
+    var onCommitCallsign: (String) -> Void
+    var onCreateParty: () -> Void
+    var onJoinParty: (String) -> Bool
+    var onLeaveParty: () -> Void
+    var leaveBehindOn: Bool
+    var nightRed: Bool
+    var onLeaveBehind: (Bool) -> Void
+    var onNightRed: (Bool) -> Void
+    var onStartFieldMode: (FieldJobMode) -> Void
+    var packsPlate: PacksPlate
 
     @State private var items: [ExpeditionRecordDTO] = []
     @State private var editor: ExpeditionRecordDTO?
     @State private var crumbs: [BreadcrumbRecordDTO] = []
     @State private var tracking = false
     @State private var showAdmin = false
+    @State private var showAbout = false
     @State private var storeError: String?
 
-    private static let trackingKey = "com.crisiskhan.blackout.crumbs.tracking"
-    private static let trackingExpeditionKey = "com.crisiskhan.blackout.crumbs.expedition"
-
-    public init(persistence: any PersistenceServing, location: LocationService) {
+    public init(
+        persistence: any PersistenceServing,
+        location: LocationService,
+        roster: PartyRoster,
+        onBroadcast: @escaping (Envelope) -> Void = { _ in },
+        onCommitCallsign: @escaping (String) -> Void = { _ in },
+        onCreateParty: @escaping () -> Void = {},
+        onJoinParty: @escaping (String) -> Bool = { _ in false },
+        onLeaveParty: @escaping () -> Void = {},
+        leaveBehindOn: Bool = false,
+        nightRed: Bool = false,
+        onLeaveBehind: @escaping (Bool) -> Void = { _ in },
+        onNightRed: @escaping (Bool) -> Void = { _ in },
+        onStartFieldMode: @escaping (FieldJobMode) -> Void = { _ in },
+        @ViewBuilder packsPlate: () -> PacksPlate
+    ) {
         self.persistence = persistence
         self.location = location
-        _tracking = State(initialValue: UserDefaults.standard.bool(forKey: Self.trackingKey))
+        self.roster = roster
+        self.onBroadcast = onBroadcast
+        self.onCommitCallsign = onCommitCallsign
+        self.onCreateParty = onCreateParty
+        self.onJoinParty = onJoinParty
+        self.onLeaveParty = onLeaveParty
+        self.leaveBehindOn = leaveBehindOn
+        self.nightRed = nightRed
+        self.onLeaveBehind = onLeaveBehind
+        self.onNightRed = onNightRed
+        self.onStartFieldMode = onStartFieldMode
+        self.packsPlate = packsPlate()
+        _tracking = State(initialValue: UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking))
     }
 
     public var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
-                        .font(BlackoutDS.captionFont())
-                        .foregroundStyle(BlackoutDS.Silver.dim)
-                        .listRowBackground(Color.clear)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ScreenHeader(ExpeditionPauseCopy.title, subtitle: ExpeditionPauseCopy.subtitle)
                     if let storeError {
                         StoreFailure(storeError)
-                            .listRowBackground(Color.clear)
                     }
-                    MetalButton("New expedition", height: BlackoutDS.Hit.md) {
-                        editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
+                    if LeaveBehindRelayPolicy.isActive(
+                        enabled: leaveBehindOn,
+                        expeditionOpen: items.contains(where: \.isOpen),
+                        batteryCritical: false
+                    ) {
+                        Text(LeaveBehindRelayPolicy.banner)
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Red.sun)
                     }
-                    GhostButton("Admin dashboard", height: BlackoutDS.Hit.sm) {
-                        showAdmin = true
+                    pausePanel("Roster") {
+                        PartyVitalsPlate(
+                            roster: roster,
+                            fix: location.navigationFix,
+                            onBroadcast: onBroadcast,
+                            onCommitCallsign: onCommitCallsign,
+                            onCreateParty: onCreateParty,
+                            onJoinParty: onJoinParty,
+                            onLeaveParty: {
+                                onLeaveBehind(false)
+                                onLeaveParty()
+                            },
+                            onStartFieldMode: onStartFieldMode
+                        )
                     }
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                ForEach(items) { item in
-                    Button {
-                        editor = item
-                    } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(item.name)
+                    pausePanel("Gear") {
+                        OutingGearPlate()
+                    }
+                    pausePanel("Packs") {
+                        Text(ExpeditionPauseCopy.packsReady)
+                            .font(BlackoutDS.bodyFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        packsPlate
+                    }
+                    pausePanel("Settings") {
+                        Text("Breadcrumb tracking restores after kill while the expedition stays open. It is on-device; this pass does not use Background Modes.")
+                            .font(BlackoutDS.captionFont())
+                            .foregroundStyle(BlackoutDS.Silver.dim)
+                        let relayOn = LeaveBehindRelayPolicy.isActive(
+                            enabled: leaveBehindOn,
+                            expeditionOpen: items.contains(where: \.isOpen),
+                            batteryCritical: false
+                        )
+                        MetalButton(
+                            relayOn ? "Relay on" : LeaveBehindRelayPolicy.control,
+                            height: BlackoutDS.Hit.sm
+                        ) {
+                            onLeaveBehind(!leaveBehindOn)
+                        }
+                        .opacity(items.contains(where: \.isOpen) ? 1 : 0.38)
+                        .disabled(!items.contains(where: \.isOpen))
+                        MetalButton(nightRed ? "Night red on" : "Night red", height: BlackoutDS.Hit.sm) {
+                            onNightRed(!nightRed)
+                        }
+                        MetalButton("New expedition", height: BlackoutDS.Hit.md) {
+                            editor = ExpeditionRecordDTO(name: "Field \(items.count + 1)")
+                        }
+                        GhostButton(ExpeditionPauseCopy.about, height: BlackoutDS.Hit.sm) {
+                            showAbout = true
+                        }
+                        GhostButton("Admin dashboard", height: BlackoutDS.Hit.sm) {
+                            showAdmin = true
+                        }
+                        if items.isEmpty {
+                            Text("No expeditions yet.")
                                 .font(BlackoutDS.bodyFont())
-                                .foregroundStyle(BlackoutDS.Silver.bright)
-                            Text(item.isOpen ? "Open" : "Closed")
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(item.isOpen ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.dim)
-                            Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(BlackoutDS.captionFont())
-                                .foregroundStyle(BlackoutDS.Silver.steel)
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
+                        ForEach(items) { item in
+                            Button {
+                                editor = item
+                            } label: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(item.name)
+                                        .font(BlackoutDS.bodyFont())
+                                        .foregroundStyle(BlackoutDS.Silver.bright)
+                                    Text(item.isOpen ? "Open" : "Closed")
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(item.isOpen ? BlackoutDS.Semantic.ok : BlackoutDS.Silver.dim)
+                                    Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                        .font(BlackoutDS.captionFont())
+                                        .foregroundStyle(BlackoutDS.Silver.steel)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .listRowBackground(BlackoutDS.Surface.raised)
                 }
+                .padding(20)
+                .padding(.bottom, 120)
             }
-            .scrollContentBackground(.hidden)
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
+            .colorMultiply(nightRed ? Color(red: 1, green: 0.55, blue: 0.55) : .white)
+            .preferredColorScheme(.dark)
             .navigationTitle("Expedition")
-            .toolbar {
+            .swiftUIToolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if let open = items.first(where: \.isOpen) {
                         Button(tracking ? "Stop crumbs" : "Start crumbs") {
@@ -86,6 +183,9 @@ public struct ExpeditionsRootView: View {
             .navigationDestination(isPresented: $showAdmin) {
                 AdminDashboardView(persistence: persistence)
             }
+            .navigationDestination(isPresented: $showAbout) {
+                AboutChromeView(callsign: roster.identity.callsign)
+            }
             .task { reload() }
             .task(id: tracking) {
                 guard tracking else { return }
@@ -99,6 +199,19 @@ public struct ExpeditionsRootView: View {
         }
     }
 
+    private func pausePanel<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        HUDPanel {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(BlackoutDS.titleFont())
+                    .foregroundStyle(BlackoutDS.Silver.bright)
+                content()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
+        }
+    }
+
     private func reload() {
         do {
             items = try persistence.expeditions()
@@ -108,6 +221,12 @@ public struct ExpeditionsRootView: View {
             } else {
                 crumbs = []
                 setTracking(false, expedition: nil)
+                onLeaveBehind(false)
+                OutingMemoryStore.clearIfOutingEnded(openExpeditionID: nil)
+                OutingGearStore.clearIfOutingEnded(openExpeditionID: nil)
+            }
+            if let open = items.first(where: \.isOpen) {
+                OutingMemoryStore.clearIfOutingEnded(openExpeditionID: open.id.rawValue.uuidString)
             }
             storeError = nil
         } catch {
@@ -116,8 +235,8 @@ public struct ExpeditionsRootView: View {
     }
 
     private func restoreTracking(for expedition: ExpeditionRecordDTO) {
-        let stored = UserDefaults.standard.bool(forKey: Self.trackingKey)
-        let id = UserDefaults.standard.string(forKey: Self.trackingExpeditionKey)
+        let stored = UserDefaults.standard.bool(forKey: BlackoutKeys.crumbsTracking)
+        let id = UserDefaults.standard.string(forKey: BlackoutKeys.crumbsExpedition)
         tracking = stored && id == expedition.id.rawValue.uuidString && expedition.isOpen
     }
 
@@ -128,11 +247,11 @@ public struct ExpeditionsRootView: View {
 
     private func setTracking(_ value: Bool, expedition: ExpeditionRecordDTO?) {
         tracking = value
-        UserDefaults.standard.set(value, forKey: Self.trackingKey)
+        UserDefaults.standard.set(value, forKey: BlackoutKeys.crumbsTracking)
         if let expedition, value {
-            UserDefaults.standard.set(expedition.id.rawValue.uuidString, forKey: Self.trackingExpeditionKey)
+            UserDefaults.standard.set(expedition.id.rawValue.uuidString, forKey: BlackoutKeys.crumbsExpedition)
         } else if !value {
-            UserDefaults.standard.removeObject(forKey: Self.trackingExpeditionKey)
+            UserDefaults.standard.removeObject(forKey: BlackoutKeys.crumbsExpedition)
         }
     }
 
@@ -141,7 +260,8 @@ public struct ExpeditionsRootView: View {
         let crumb = BreadcrumbRecordDTO(
             expeditionID: expedition.id,
             latitude: fix?.latitude,
-            longitude: fix?.longitude
+            longitude: fix?.longitude,
+            estimated: DeadReckoningHonesty.crumbEstimated(fix: fix)
         )
         do {
             try persistence.appendBreadcrumb(crumb)
@@ -151,6 +271,36 @@ public struct ExpeditionsRootView: View {
             storeError = error.localizedDescription
             setTracking(false, expedition: expedition)
         }
+    }
+}
+
+extension ExpeditionsRootView where PacksPlate == EmptyView {
+    public init(
+        persistence: any PersistenceServing,
+        location: LocationService,
+        roster: PartyRoster,
+        onBroadcast: @escaping (Envelope) -> Void = { _ in },
+        onCommitCallsign: @escaping (String) -> Void = { _ in },
+        onCreateParty: @escaping () -> Void = {},
+        onJoinParty: @escaping (String) -> Bool = { _ in false },
+        onLeaveParty: @escaping () -> Void = {}
+    ) {
+        self.init(
+            persistence: persistence,
+            location: location,
+            roster: roster,
+            onBroadcast: onBroadcast,
+            onCommitCallsign: onCommitCallsign,
+            onCreateParty: onCreateParty,
+            onJoinParty: onJoinParty,
+            onLeaveParty: onLeaveParty,
+            leaveBehindOn: false,
+            nightRed: false,
+            onLeaveBehind: { _ in },
+            onNightRed: { _ in },
+            onStartFieldMode: { _ in },
+            packsPlate: { EmptyView() }
+        )
     }
 }
 
@@ -175,6 +325,9 @@ struct ExpeditionEditor: View {
                         .padding(14)
                         .frame(height: BlackoutDS.Hit.sm)
                         .background(BlackoutDS.Surface.sunken)
+                    Text(PartyIdentityCopy.outingNameHint)
+                        .font(BlackoutDS.captionFont())
+                        .foregroundStyle(BlackoutDS.Silver.dim)
                     TextField("Notes", text: $record.notes, axis: .vertical)
                         .font(BlackoutDS.bodyFont())
                         .foregroundStyle(BlackoutDS.Silver.mid)
@@ -190,6 +343,32 @@ struct ExpeditionEditor: View {
                     }
                     GhostButton("Drop breadcrumb") {
                         drop()
+                    }
+                    Toggle(isOn: $record.checkInEnabled) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Missed check-in")
+                                .foregroundStyle(BlackoutDS.Silver.bright)
+                            Text("Default off. Local timer on the app container — visiting Expedition is not required. Miss opens SOS confirm. Never auto-arms, never auto-911, no mesh this pass.")
+                                .font(BlackoutDS.captionFont())
+                                .foregroundStyle(BlackoutDS.Silver.dim)
+                        }
+                    }
+                    .tint(BlackoutDS.Silver.metal)
+                    if record.checkInEnabled {
+                        Stepper(
+                            "Every \(max(1, record.checkInIntervalSeconds / 60)) min",
+                            value: Binding(
+                                get: { max(1, record.checkInIntervalSeconds / 60) },
+                                set: { record.checkInIntervalSeconds = max(60, $0 * 60) }
+                            ),
+                            in: 5...180,
+                            step: 5
+                        )
+                        .foregroundStyle(BlackoutDS.Silver.bright)
+                        GhostButton("Check in now") {
+                            record.lastCheckInAt = Date()
+                            save()
+                        }
                     }
                     ReturnToStartView(crumbs: crumbs, location: location)
                     Text("\(crumbs.count) breadcrumbs. Nil coordinates are stored when GPS is denied and no manual pin exists.")
@@ -218,6 +397,9 @@ struct ExpeditionEditor: View {
             record.startLatitude = fix.latitude
             record.startLongitude = fix.longitude
         }
+        if record.checkInEnabled, record.lastCheckInAt == nil {
+            record.lastCheckInAt = Date()
+        }
         do {
             try persistence.upsertExpedition(record)
             storeError = nil
@@ -232,7 +414,8 @@ struct ExpeditionEditor: View {
         let crumb = BreadcrumbRecordDTO(
             expeditionID: record.id,
             latitude: fix?.latitude,
-            longitude: fix?.longitude
+            longitude: fix?.longitude,
+            estimated: DeadReckoningHonesty.crumbEstimated(fix: fix)
         )
         do {
             try persistence.appendBreadcrumb(crumb)

@@ -18,8 +18,12 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
-                "BlackoutMesh",
+                .product(name: "BlackoutMesh", package: "Mesh"),
             ]
+        ),
+        .testTarget(
+            name: "MessagingTests",
+            dependencies: ["Messaging"]
         ),
     ]
 )

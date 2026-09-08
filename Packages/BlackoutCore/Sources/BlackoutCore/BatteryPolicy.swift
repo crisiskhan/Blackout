@@ -22,7 +22,7 @@ public enum BatteryPolicy: String, Codable, Sendable, CaseIterable, Identifiable
         case .saver:
             return "Slower location cadence. SOS stays visible."
         case .extremeSaver:
-            return "Coarse Navigate only. SOS stays visible and armed. Camera PTT may pause."
+            return "SOS + coarse Navigate + radar HUD. Camera / PTT / Vision pause. SOS stays visible. Last ~2% is a separate SOS-only mode — not this profile."
         }
     }
 }

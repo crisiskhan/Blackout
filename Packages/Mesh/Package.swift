@@ -15,7 +15,16 @@ let package = Package(
             name: "BlackoutMesh",
             dependencies: [
                 "BlackoutCore",
+            ],
+            linkerSettings: [
+                .linkedFramework("MultipeerConnectivity"),
+                .linkedFramework("CoreBluetooth"),
+                .linkedFramework("Network"),
             ]
+        ),
+        .testTarget(
+            name: "MeshTests",
+            dependencies: ["BlackoutMesh"]
         ),
     ]
 )

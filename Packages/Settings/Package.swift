@@ -20,9 +20,9 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
-                "BlackoutBattery",
-                "BlackoutLocation",
-                "BlackoutMesh",
+                .product(name: "BlackoutBattery", package: "Battery"),
+                .product(name: "BlackoutLocation", package: "Location"),
+                .product(name: "BlackoutMesh", package: "Mesh"),
             ]
         ),
     ]

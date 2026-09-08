@@ -17,7 +17,16 @@ let package = Package(
             dependencies: [
                 "BlackoutCore",
                 "DesignSystem",
+            ],
+            linkerSettings: [
+                .linkedFramework("AVFoundation"),
+                .linkedFramework("MediaPlayer"),
+                .linkedFramework("UIKit"),
             ]
+        ),
+        .testTarget(
+            name: "VoicePTTTests",
+            dependencies: ["VoicePTT"]
         ),
     ]
 )

@@ -1,0 +1,36 @@
+name: ASC assign existing
+
+on:
+  workflow_dispatch:
+    inputs:
+      want_build:
+        description: "CFBundleVersion to assign (empty = CURRENT_PROJECT_VERSION from pbxproj)"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  assign:
+    name: Assign existing ASC build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      ASC_APP_ID: "6806388963"
+      ASC_INTERNAL_GROUP_ID: "28035586-fce6-474f-9bc2-ef0f1f65306e"
+      ASC_NOT_BEFORE: "2000-01-01T00:00:00Z"
+      WANT_BUILD: ${{ inputs.want_build }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Poll ASC, clear compliance, assign Internal
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/asc-venv"
+          "$RUNNER_TEMP/asc-venv/bin/pip" install -q PyJWT cryptography
+          PATH="$RUNNER_TEMP/asc-venv/bin:$PATH" bash tools/asc_assign_internal.sh

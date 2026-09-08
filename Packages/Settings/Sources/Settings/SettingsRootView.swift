@@ -10,36 +10,71 @@ public struct SettingsRootView: View {
     @Bindable var location: LocationService
     @Bindable var mesh: MeshFacade
     @Bindable var lock: AppLockService
+    private let callsign: String
 
     public init(
         battery: BatteryService,
         location: LocationService,
         mesh: MeshFacade,
-        lock: AppLockService
+        lock: AppLockService,
+        callsign: String = Callsign.defaultValue,
+        onFieldPacks: (() -> Void)? = nil
     ) {
         self.battery = battery
         self.location = location
         self.mesh = mesh
         self.lock = lock
+        self.callsign = callsign
+        self.onFieldPacks = onFieldPacks
     }
+
+    private let onFieldPacks: (() -> Void)?
+    @State private var showAbout = false
 
     public var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     ScreenHeader("Settings", subtitle: "Local only. No account. No analytics.")
+                    fieldPacksBlock
                     batteryBlock
                     locationBlock
                     lockBlock
                     meshBlock
                     privacyBlock
                     limitsBlock
+                    aboutBlock
                 }
                 .padding(20)
                 .padding(.bottom, 120)
             }
             .background(BlackoutDS.Surface.base.ignoresSafeArea())
             .navigationTitle("Settings")
+            .navigationDestination(isPresented: $showAbout) {
+                AboutChromeView(callsign: callsign)
+            }
+        }
+    }
+
+    private var aboutBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            GhostButton(BrandChromeLock.aboutTitle, height: BlackoutDS.Hit.sm) {
+                showAbout = true
+            }
+        }
+    }
+
+    private var fieldPacksBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Field Packs")
+                .font(BlackoutDS.titleFont())
+                .foregroundStyle(BlackoutDS.Silver.bright)
+            Text("Open the Packs plate to Get a city or Update maps on Wi-Fi. Ready is disk-only. DefaultPack stays the Denver fallback.")
+                .font(BlackoutDS.bodyFont())
+                .foregroundStyle(BlackoutDS.Silver.dim)
+            if let onFieldPacks {
+                GhostButton("Open Packs plate", height: BlackoutDS.Hit.sm, action: onFieldPacks)
+            }
         }
     }
 
@@ -51,6 +86,11 @@ public struct SettingsRootView: View {
             Text(levelCopy)
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
+            if battery.isCritical {
+                Text("Last ~2% is SOS-only. Map, Comms, Field, and Expedition unmount. The SOS FAB stays. This is not Extreme Saver.")
+                    .font(BlackoutDS.bodyFont())
+                    .foregroundStyle(BlackoutDS.Red.hot)
+            }
             ForEach(BatteryPolicy.allCases) { policy in
                 Button {
                     battery.policy = policy
@@ -102,7 +142,7 @@ public struct SettingsRootView: View {
                     location.startUpdating()
                 }
             } else {
-                Text("Authorized. Coarse Navigate remains on in Extreme Saver.")
+                Text("Authorized. Coarse Navigate remains on in Extreme Saver. Last ~2% hides it (SOS-only).")
                     .font(BlackoutDS.bodyFont())
                     .foregroundStyle(BlackoutDS.Semantic.ok)
             }
@@ -133,7 +173,7 @@ public struct SettingsRootView: View {
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
             MeshPill(nearbyCount: mesh.nearbyPeerCount)
-            Text("Façade only this pass. Live 1/N is not included. Zero nearby is calm success.")
+            Text("Local radio, no WAN, no account. One nearby phone can take a sealed message. Zero nearby is calm success. Stranger Radar stays off.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
         }
@@ -156,7 +196,7 @@ public struct SettingsRootView: View {
             Text("This pass")
                 .font(BlackoutDS.titleFont())
                 .foregroundStyle(BlackoutDS.Silver.bright)
-            Text("No live mesh, no world map, no auto-911, no fall detection, no backend. DefaultPack is a generated Front Range sample, not a USGS extract.")
+            Text("Mesh is one nearby phone on the same local radio — no WAN, no account, no N>1 routing. No world map, no auto-911, no fall detection, no backend. DefaultPack is a generated Front Range sample, not a USGS extract.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.mid)
                 .lineSpacing(7)
@@ -172,38 +212,31 @@ public struct SettingsRootView: View {
 
 public struct LockGateView: View {
     @Bindable var lock: AppLockService
-    @State private var failed = false
+    private let onHoldSOS: (() -> Void)?
 
-    public init(lock: AppLockService) {
+    public init(lock: AppLockService, onHoldSOS: (() -> Void)? = nil) {
         self.lock = lock
+        self.onHoldSOS = onHoldSOS
     }
 
     public var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 28) {
             Spacer()
-            Text("Blackout")
-                .font(BlackoutDS.titleFont())
-                .foregroundStyle(BlackoutDS.Silver.bright)
+            MetalRingLockup(diameter: CGFloat(BrandChromeLock.lockupMaxPoint))
             Text("On-device lock. Nothing to sign in to.")
                 .font(BlackoutDS.bodyFont())
                 .foregroundStyle(BlackoutDS.Silver.dim)
-            MetalButton("Unlock", height: BlackoutDS.Hit.lg) {
-                Task {
-                    let ok = await lock.unlock()
-                    failed = !ok
-                }
-            }
-            if failed {
-                PermissionDenied(
-                    kind: .localAuthentication,
-                    reason: "Device authentication failed or is unavailable. Data stays on disk; it was not uploaded."
-                )
-                .padding(.horizontal, 20)
-            }
+                .multilineTextAlignment(.center)
             Spacer()
+            SlideToUnlock(onHoldSOS: onHoldSOS) {
+                lock.unlockSession()
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 36)
         }
-        .padding(24)
+        .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BlackoutDS.Surface.void.ignoresSafeArea())
+        .accessibilityLabel("Blackout lock. Slide to unlock.")
     }
 }
