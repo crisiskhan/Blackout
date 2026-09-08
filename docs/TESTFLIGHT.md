@@ -90,3 +90,7 @@ After a green job: TestFlight app → Blackout → new build (not 50-series) →
 ## Mac-optional / do not use
 
 Do not export a p12. Unsigned `.github/workflows/xcodebuild.yml` does not read ASC secrets and must stay green without them.
+
+## Tip 60 Internal (CoS 2026-09-08)
+
+SOURCE GO tip `e4e2e7e91ca3879a22fca1295dea48cbfb2d0618` (product `47a9edfc`). Five chrome PASS. This `tf:` push injects ASC **60**. Leave 59 until Ready. Watch omitted. Internal only. Do not re-upload 54–59.
