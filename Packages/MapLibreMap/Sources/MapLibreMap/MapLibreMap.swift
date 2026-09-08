@@ -303,8 +303,12 @@ public enum PackStyle {
     public static let wildRoadsLayerID = "wild-roads"
     public static let osmPointsLayerID = "osm-points"
     public static let roadLabelsLayerID = "road-labels"
+    public static let roadRefsLayerID = "road-refs"
     public static let placeLabelsLayerID = "place-labels"
     public static let tracksLayerID = "tracks"
+    public static let voidInk = "#000000"
+    public static let silverInk = "#B8BDC2"
+    public static let accentInk = "#E10600"
 
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
@@ -357,8 +361,8 @@ public enum PackStyle {
                     "source": wildSourceID,
                     "filter": ["has", "highway"],
                     "paint": [
-                        "line-color": "#e8eef4",
-                        "line-width": 2.4,
+                        "line-color": silverInk,
+                        "line-width": 2.6,
                     ],
                 ])
             }
@@ -370,10 +374,10 @@ public enum PackStyle {
                 "type": "circle",
                 "source": "osm",
                 "paint": [
-                    "circle-color": "#c5cdd6",
-                    "circle-radius": 2.2,
-                    "circle-stroke-color": "#0c0e10",
-                    "circle-stroke-width": 0.6,
+                    "circle-color": silverInk,
+                    "circle-radius": 2.4,
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 0.8,
                 ],
             ])
         }
@@ -390,8 +394,9 @@ public enum PackStyle {
                     ["literal", ["track", "path", "footway", "bridleway", "cycleway", "steps"]],
                 ],
                 "paint": [
-                    "line-color": "#c4b48a",
-                    "line-width": 1.2,
+                    "line-color": silverInk,
+                    "line-opacity": 0.72,
+                    "line-width": 2.4,
                 ],
             ])
         }
@@ -401,18 +406,44 @@ public enum PackStyle {
                 "id": roadLabelsLayerID,
                 "type": "symbol",
                 "source": "osm",
-                "minzoom": 13,
+                "minzoom": 12,
                 "filter": ["all", ["has", "highway"], ["has", "name"]],
                 "layout": [
                     "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "text-size": 11,
+                    "symbol-spacing": 180,
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 14, 15, 16, 18, 17, 20],
                     "text-font": ["Open Sans Regular"],
+                    "text-padding": 1,
+                    "text-optional": true,
                 ],
                 "paint": [
-                    "text-color": "#e8eef4",
-                    "text-halo-color": "#0c0e10",
-                    "text-halo-width": 1.2,
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 2.0,
+                ],
+            ])
+        }
+        if sources["osm"] != nil,
+           !layers.contains(where: { $0["id"] as? String == roadRefsLayerID }) {
+            layers.append([
+                "id": roadRefsLayerID,
+                "type": "symbol",
+                "source": "osm",
+                "minzoom": 11,
+                "filter": ["all", ["has", "highway"], ["has", "ref"]],
+                "layout": [
+                    "text-field": ["get", "ref"],
+                    "symbol-placement": "line",
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 11, 15, 14, 18, 16, 21],
+                    "text-font": ["Open Sans Regular"],
+                    "text-optional": true,
+                    "symbol-sort-key": 0,
+                ],
+                "paint": [
+                    "text-color": accentInk,
+                    "text-halo-color": silverInk,
+                    "text-halo-width": 2.0,
                 ],
             ])
         }
@@ -426,13 +457,13 @@ public enum PackStyle {
                 "filter": ["has", "place"],
                 "layout": [
                     "text-field": ["get", "name"],
-                    "text-size": 13,
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 10, 13, 14, 18],
                     "text-font": ["Open Sans Regular"],
                 ],
                 "paint": [
-                    "text-color": "#f0f4f8",
-                    "text-halo-color": "#0c0e10",
-                    "text-halo-width": 1.4,
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 2.0,
                 ],
             ])
         }

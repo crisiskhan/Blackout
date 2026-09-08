@@ -61,7 +61,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.allowsRotating = true
         view.shouldRequestAuthorizationToUseLocationServices = true
         view.showsUserLocation = true
-        view.backgroundColor = UIColor(red: 12.0 / 255.0, green: 14.0 / 255.0, blue: 16.0 / 255.0, alpha: 1)
+        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
         view.setCenter(
             CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
             zoomLevel: 10,
@@ -300,7 +300,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     layer.lineColor = NSExpression(
                         forConstantValue: UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
                     )
-                    layer.lineWidth = NSExpression(forConstantValue: 4.5)
+                    layer.lineWidth = NSExpression(forConstantValue: 6.5)
                     style.addLayer(layer)
                 }
             } else if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
@@ -360,7 +360,7 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         public func mapView(_ mapView: MLNMapView, lineWidthForPolylineAnnotation annotation: MLNPolyline) -> CGFloat {
-            if annotation === routeLine { return 4.5 }
+            if annotation === routeLine { return 6.5 }
             return annotation === packOutline ? 3.5 : 2
         }
     }

@@ -56,6 +56,21 @@ KEEP_TAGS = {
     "access",
 }
 OSM_CREDIT = "© OpenStreetMap contributors"
+VOID_INK = "#000000"
+ACCENT_INK = "#E10600"
+SILVER_INK = "#B8BDC2"
+TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
+MAJOR_HIGHWAYS = [
+    "motorway",
+    "motorway_link",
+    "trunk",
+    "trunk_link",
+    "primary",
+    "primary_link",
+    "secondary",
+    "secondary_link",
+]
+ARTERIAL_HIGHWAYS = ["motorway", "trunk", "primary"]
 
 PACKS = {
     "tx-west": {
@@ -710,7 +725,18 @@ def fetch_glyphs(dest: Path) -> int:
     return wrote
 
 
+def zoom_stops(*pairs: float) -> list:
+    expr: list = ["interpolate", ["linear"], ["zoom"]]
+    expr.extend(pairs)
+    return expr
+
+
+def highway_in(values: list[str]) -> list:
+    return ["in", ["get", "highway"], ["literal", values]]
+
+
 def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
+    """Blackout void/red/silver style. Streets and names must read at walking zoom."""
     sources: dict = {
         "osm": {
             "type": "geojson",
@@ -724,7 +750,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "wild": {"type": "geojson", "data": "wild.geojson"},
     }
     layers: list[dict] = [
-        {"id": "void", "type": "background", "paint": {"background-color": "#0c0e10"}},
+        {"id": "void", "type": "background", "paint": {"background-color": VOID_INK}},
     ]
     if hillshade and hillshade.get("present"):
         sources["hillshade"] = {
@@ -737,29 +763,35 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "id": "hillshade",
                 "type": "raster",
                 "source": "hillshade",
-                "paint": {"raster-opacity": 0.38},
+                "paint": {
+                    "raster-opacity": 0.16,
+                    "raster-saturation": -0.65,
+                    "raster-brightness-max": 0.38,
+                    "raster-contrast": 0.12,
+                },
             }
         )
+    street = ["all", ["has", "highway"], ["!", highway_in(TRACK_HIGHWAYS)]]
     layers.extend(
         [
             {
                 "id": "public-land-fill",
                 "type": "fill",
                 "source": "public-land",
-                "paint": {"fill-color": "#1a2a1a", "fill-opacity": 0.28},
+                "paint": {"fill-color": "#0a140a", "fill-opacity": 0.34},
             },
             {
                 "id": "flood-fill",
                 "type": "fill",
                 "source": "flood",
-                "paint": {"fill-color": "#143044", "fill-opacity": 0.28},
+                "paint": {"fill-color": "#0a1822", "fill-opacity": 0.34},
             },
             {
                 "id": "water-fill",
                 "type": "fill",
                 "source": "osm",
                 "filter": ["==", ["get", "natural"], "water"],
-                "paint": {"fill-color": "#1a3a4a", "fill-opacity": 0.7},
+                "paint": {"fill-color": "#142430", "fill-opacity": 0.82},
             },
             {
                 "id": "water",
@@ -767,40 +799,73 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["has", "waterway"],
                 "paint": {
-                    "line-color": "#3a6a88",
-                    "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.8, 15, 2.6],
+                    "line-color": "#3d6478",
+                    "line-width": zoom_stops(10, 0.8, 15, 2.6),
                 },
             },
             {
                 "id": "contours",
                 "type": "line",
                 "source": "contours",
-                "paint": {"line-color": "#6a7060", "line-width": 0.55, "line-opacity": 0.55},
+                "paint": {"line-color": "#2a2e28", "line-width": 0.45, "line-opacity": 0.4},
             },
             {
-                "id": "tracks",
+                "id": "roads-casing",
                 "type": "line",
                 "source": "osm",
-                "minzoom": 12,
-                "filter": [
-                    "in",
-                    ["get", "highway"],
-                    ["literal", ["track", "path", "footway", "bridleway", "cycleway", "steps"]],
-                ],
+                "filter": street,
+                "layout": {"line-cap": "round", "line-join": "round"},
                 "paint": {
-                    "line-color": "#c4b48a",
-                    "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.7, 16, 2.0],
-                    "line-dasharray": [2, 1.1],
+                    "line-color": VOID_INK,
+                    "line-width": zoom_stops(10, 4.2, 13, 6.8, 15, 10.6, 17, 16.8),
+                    "line-opacity": 0.96,
+                },
+            },
+            {
+                "id": "roads-arterial-casing",
+                "type": "line",
+                "source": "osm",
+                "filter": highway_in(ARTERIAL_HIGHWAYS),
+                "layout": {"line-cap": "round", "line-join": "round"},
+                "paint": {
+                    "line-color": ACCENT_INK,
+                    "line-width": zoom_stops(10, 3.6, 13, 5.6, 15, 9.0, 17, 15.0),
+                    "line-opacity": 0.92,
                 },
             },
             {
                 "id": "roads",
                 "type": "line",
                 "source": "osm",
-                "filter": ["has", "highway"],
+                "filter": street,
+                "layout": {"line-cap": "round", "line-join": "round"},
                 "paint": {
-                    "line-color": "#c5cdd6",
-                    "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.7, 13, 1.5, 15, 3.4, 17, 6.2],
+                    "line-color": SILVER_INK,
+                    "line-width": zoom_stops(10, 0.9, 13, 2.4, 15, 5.0, 17, 9.4),
+                },
+            },
+            {
+                "id": "roads-major",
+                "type": "line",
+                "source": "osm",
+                "filter": highway_in(MAJOR_HIGHWAYS),
+                "layout": {"line-cap": "round", "line-join": "round"},
+                "paint": {
+                    "line-color": SILVER_INK,
+                    "line-width": zoom_stops(10, 1.4, 13, 3.2, 15, 6.6, 17, 12.0),
+                },
+            },
+            {
+                "id": "tracks",
+                "type": "line",
+                "source": "osm",
+                "minzoom": 12,
+                "filter": highway_in(TRACK_HIGHWAYS),
+                "paint": {
+                    "line-color": SILVER_INK,
+                    "line-opacity": 0.72,
+                    "line-width": zoom_stops(12, 0.9, 16, 2.4),
+                    "line-dasharray": [2, 1.1],
                 },
             },
             {
@@ -808,13 +873,13 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "line",
                 "source": "wild",
                 "filter": ["has", "highway"],
-                "paint": {"line-color": "#e8eef4", "line-width": 2.4},
+                "paint": {"line-color": SILVER_INK, "line-width": 2.6},
             },
             {
                 "id": "hazards",
                 "type": "line",
                 "source": "hazards",
-                "paint": {"line-color": "#c43b3b", "line-width": 1.2},
+                "paint": {"line-color": ACCENT_INK, "line-width": 1.4},
             },
             {
                 "id": "osm-points",
@@ -822,31 +887,70 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["==", ["geometry-type"], "Point"],
                 "paint": {
-                    "circle-color": "#c5cdd6",
-                    "circle-radius": 2.2,
-                    "circle-stroke-color": "#0c0e10",
-                    "circle-stroke-width": 0.6,
+                    "circle-color": SILVER_INK,
+                    "circle-radius": 2.4,
+                    "circle-stroke-color": VOID_INK,
+                    "circle-stroke-width": 0.8,
                 },
             },
             {
                 "id": "road-labels",
                 "type": "symbol",
                 "source": "osm",
-                "minzoom": 13,
-                "filter": ["all", ["has", "highway"], ["any", ["has", "name"], ["has", "ref"]]],
+                "minzoom": 12,
+                "filter": ["all", ["has", "highway"], ["has", "name"]],
                 "layout": {
-                    "text-field": ["coalesce", ["get", "name"], ["get", "ref"]],
+                    "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 16, 13],
+                    "symbol-spacing": 180,
+                    "text-size": zoom_stops(12, 12, 14, 15, 16, 18, 17, 20),
                     "text-font": [GLYPH_STACK],
-                    "text-max-angle": 40,
-                    "text-padding": 2,
+                    "text-max-angle": 32,
+                    "text-padding": 1,
+                    "text-letter-spacing": 0.03,
                     "text-optional": True,
+                    "text-keep-upright": True,
+                    "symbol-sort-key": [
+                        "match",
+                        ["get", "highway"],
+                        ["motorway", "trunk", "primary"],
+                        1,
+                        ["secondary", "tertiary"],
+                        2,
+                        3,
+                    ],
                 },
                 "paint": {
-                    "text-color": "#e8eef4",
-                    "text-halo-color": "#0c0e10",
-                    "text-halo-width": 1.2,
+                    "text-color": SILVER_INK,
+                    "text-halo-color": VOID_INK,
+                    "text-halo-width": 2.0,
+                    "text-halo-blur": 0.15,
+                },
+            },
+            {
+                "id": "road-refs",
+                "type": "symbol",
+                "source": "osm",
+                "minzoom": 11,
+                "filter": ["all", ["has", "highway"], ["has", "ref"]],
+                "layout": {
+                    "text-field": ["get", "ref"],
+                    "symbol-placement": "line",
+                    "symbol-spacing": 220,
+                    "text-size": zoom_stops(11, 15, 14, 18, 16, 21, 17, 23),
+                    "text-font": [GLYPH_STACK],
+                    "text-max-angle": 28,
+                    "text-padding": 1,
+                    "text-letter-spacing": 0.06,
+                    "text-optional": True,
+                    "text-keep-upright": True,
+                    "symbol-sort-key": 0,
+                },
+                "paint": {
+                    "text-color": ACCENT_INK,
+                    "text-halo-color": SILVER_INK,
+                    "text-halo-width": 2.0,
+                    "text-halo-blur": 0.05,
                 },
             },
             {
@@ -857,15 +961,16 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "filter": ["has", "place"],
                 "layout": {
                     "text-field": ["get", "name"],
-                    "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16],
+                    "text-size": zoom_stops(10, 13, 14, 18),
                     "text-font": [GLYPH_STACK],
                     "text-anchor": "top",
                     "text-optional": True,
+                    "text-letter-spacing": 0.04,
                 },
                 "paint": {
-                    "text-color": "#f0f4f8",
-                    "text-halo-color": "#0c0e10",
-                    "text-halo-width": 1.4,
+                    "text-color": SILVER_INK,
+                    "text-halo-color": VOID_INK,
+                    "text-halo-width": 2.0,
                 },
             },
         ]
@@ -881,6 +986,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             "network": "deny-all",
             "attribution": OSM_CREDIT,
             "walkingZoom": True,
+            "palette": "blackout-void-red-silver",
+            "tokens": {"void": VOID_INK, "accent": ACCENT_INK, "silver": SILVER_INK},
         },
     }
 
