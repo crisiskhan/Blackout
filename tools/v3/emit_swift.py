@@ -177,6 +177,9 @@ public struct PackCatalog: Codable, Equatable, Sendable {
 }
 
 public final class PackStore: @unchecked Sendable {
+    public static let defaultPackID = "tx-west"
+    public static let osmAttribution = "© OpenStreetMap contributors"
+
     public private(set) var active: PackManifest?
     public private(set) var catalog: PackCatalog
     private let box: BlackBox
@@ -186,8 +189,15 @@ public final class PackStore: @unchecked Sendable {
         self.root = root
         self.box = box
         let data = try Data(contentsOf: root.appendingPathComponent("catalog.json"))
-        self.catalog = try JSONDecoder().decode(PackCatalog.self, from: data)
-        self.active = catalog.packs.first
+        let decoded = try JSONDecoder().decode(PackCatalog.self, from: data)
+        self.catalog = PackCatalog(packs: Self.preferPrimary(decoded.packs))
+        self.active = catalog.packs.first(where: { $0.id == Self.defaultPackID }) ?? catalog.packs.first
+    }
+
+    public static func preferPrimary(_ packs: [PackManifest]) -> [PackManifest] {
+        let primary = packs.filter { $0.id == defaultPackID }
+        let rest = packs.filter { $0.id != defaultPackID }
+        return primary + rest
     }
 
     public func switchTo(_ id: String) throws {
@@ -204,6 +214,15 @@ public final class PackStore: @unchecked Sendable {
     public func packURL(_ file: String) -> URL? {
         guard let active else { return nil }
         return root.appendingPathComponent(active.id).appendingPathComponent(file)
+    }
+
+    public func hasUsableGraph() -> Bool {
+        guard let url = packURL("graph.json") else { return false }
+        guard FileManager.default.fileExists(atPath: url.path) else { return false }
+        guard let data = try? Data(contentsOf: url),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let edges = obj["edges"] as? [Any] else { return false }
+        return !edges.isEmpty
     }
 
     public func realSize(of id: String) -> Int? {
@@ -228,6 +247,15 @@ final class PackIOTests: XCTestCase {
         let data = try JSONEncoder().encode(cat)
         let back = try JSONDecoder().decode(PackCatalog.self, from: data)
         XCTAssertEqual(back.packs.first?.id, "tx-west")
+    }
+
+    func testPreferPrimaryPutsTXWestFirst() {
+        let fl = PackManifest(id: "fl-north", name: "FL NORTH", state: "FL", bytes: 1, banners: [], center: .init(lat: 30.4, lon: -81.5), bbox: .init(south: 30, west: -82, north: 31, east: -81))
+        let tx = PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 2, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
+        let ordered = PackStore.preferPrimary([fl, tx])
+        XCTAssertEqual(ordered.map(\.id), ["tx-west", "fl-north"])
+        XCTAssertEqual(PackStore.defaultPackID, "tx-west")
+        XCTAssertEqual(PackStore.osmAttribution, "© OpenStreetMap contributors")
     }
 }
 ''',

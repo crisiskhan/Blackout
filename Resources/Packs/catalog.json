@@ -6,7 +6,263 @@
     "FL",
     "NY"
   ],
+  "defaultPack": "tx-west",
   "packs": [
+    {
+      "id": "tx-west",
+      "name": "TX WEST",
+      "state": "TX",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "defaultOpen": true,
+      "walkable": true,
+      "bbox": {
+        "south": 31.7,
+        "west": -106.62,
+        "north": 32.0,
+        "east": -106.35
+      },
+      "slices": {
+        "metro": {
+          "name": "El Paso metro",
+          "bbox": {
+            "name": "El Paso metro",
+            "south": 31.74,
+            "west": -106.52,
+            "north": 31.82,
+            "east": -106.4
+          },
+          "featureCount": 22003
+        },
+        "wild": {
+          "name": "Franklin Mountains wild",
+          "bbox": {
+            "name": "Franklin Mountains wild",
+            "south": 31.88,
+            "west": -106.52,
+            "north": 32.0,
+            "east": -106.4
+          },
+          "featureCount": 3497
+        },
+        "border": {
+          "name": "El Paso TX+NM border union",
+          "bbox": {
+            "name": "El Paso TX+NM border union",
+            "south": 31.7,
+            "west": -106.62,
+            "north": 31.9,
+            "east": -106.35
+          },
+          "featureCount": 61385
+        }
+      },
+      "banners": [
+        "heat-island",
+        "cattle-guard",
+        "border-hospitals"
+      ],
+      "bytes": 50665555,
+      "files": [
+        "border.geojson",
+        "contours.geojson",
+        "dem.json",
+        "glyphs/Open Sans Regular/0-255.pbf",
+        "glyphs/Open Sans Regular/256-511.pbf",
+        "glyphs/Open Sans Regular/512-767.pbf",
+        "glyphs/Open Sans Regular/768-1023.pbf",
+        "glyphs/Open Sans Regular/8192-8447.pbf",
+        "graph.json",
+        "hillshade.png",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 31.85,
+        "lon": -106.485
+      },
+      "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+      "terrain": {
+        "present": true,
+        "file": "hillshade.png",
+        "bytes": 2251682,
+        "attribution": "USGS 3DEP hillshade, build-time only",
+        "coordinates": [
+          [
+            -106.62,
+            32.0
+          ],
+          [
+            -106.35,
+            32.0
+          ],
+          [
+            -106.35,
+            31.7
+          ],
+          [
+            -106.62,
+            31.7
+          ]
+        ]
+      },
+      "stats": {
+        "features": 66587,
+        "highwayLines": 63024,
+        "namedStreets": 18984,
+        "sampleStreetNames": [
+          "Encino Drive",
+          "Hurd Lane",
+          "Brickland Road",
+          "Meadow Vista Boulevard",
+          "Monte Vista Drive",
+          "Low Road",
+          "Antone Street",
+          "Alamo Drive",
+          "Robles Drive",
+          "Derby Road",
+          "3rd Street",
+          "1st Street"
+        ],
+        "water": 2748,
+        "places": 65,
+        "graphEdges": 264064,
+        "graphNodes": 98322,
+        "streetsVisibleAtWalkingZoom": true
+      }
+    },
+    {
+      "id": "tx-east",
+      "name": "TX EAST",
+      "state": "TX",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 30.08,
+        "west": -97.78,
+        "north": 30.32,
+        "east": -97.2
+      },
+      "slices": {
+        "metro": {
+          "name": "Austin metro",
+          "bbox": {
+            "name": "Austin metro",
+            "south": 30.24,
+            "west": -97.78,
+            "north": 30.32,
+            "east": -97.68
+          },
+          "featureCount": 50273
+        },
+        "wild": {
+          "name": "Lost Pines / Bastrop wild",
+          "bbox": {
+            "name": "Lost Pines / Bastrop wild",
+            "south": 30.08,
+            "west": -97.32,
+            "north": 30.18,
+            "east": -97.2
+          },
+          "featureCount": 3820
+        }
+      },
+      "banners": [
+        "heat-island",
+        "cattle-guard",
+        "hurricane"
+      ],
+      "bytes": 2063444,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 30.2,
+        "lon": -97.49000000000001
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
+    {
+      "id": "nm",
+      "name": "NM",
+      "state": "NM",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "bbox": {
+        "south": 35.06,
+        "west": -106.68,
+        "north": 35.25,
+        "east": -106.38
+      },
+      "slices": {
+        "metro": {
+          "name": "Albuquerque metro",
+          "bbox": {
+            "name": "Albuquerque metro",
+            "south": 35.06,
+            "west": -106.68,
+            "north": 35.14,
+            "east": -106.55
+          },
+          "featureCount": 47888
+        },
+        "wild": {
+          "name": "Sandia foothills wild",
+          "bbox": {
+            "name": "Sandia foothills wild",
+            "south": 35.15,
+            "west": -106.5,
+            "north": 35.25,
+            "east": -106.38
+          },
+          "featureCount": 2483
+        }
+      },
+      "banners": [
+        "monsoon",
+        "ice-rock",
+        "cattle-guard",
+        "border-hospitals"
+      ],
+      "bytes": 2125208,
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "graph.json",
+        "layers/flood.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.geojson",
+        "pois.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "center": {
+        "lat": 35.155,
+        "lon": -106.53
+      },
+      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+    },
     {
       "id": "fl-north",
       "name": "FL NORTH",
@@ -135,69 +391,6 @@
       "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
     },
     {
-      "id": "nm",
-      "name": "NM",
-      "state": "NM",
-      "kind": "osm-contour-extract",
-      "engine": "maplibre",
-      "bbox": {
-        "south": 35.06,
-        "west": -106.68,
-        "north": 35.25,
-        "east": -106.38
-      },
-      "slices": {
-        "metro": {
-          "name": "Albuquerque metro",
-          "bbox": {
-            "name": "Albuquerque metro",
-            "south": 35.06,
-            "west": -106.68,
-            "north": 35.14,
-            "east": -106.55
-          },
-          "featureCount": 47888
-        },
-        "wild": {
-          "name": "Sandia foothills wild",
-          "bbox": {
-            "name": "Sandia foothills wild",
-            "south": 35.15,
-            "west": -106.5,
-            "north": 35.25,
-            "east": -106.38
-          },
-          "featureCount": 2483
-        }
-      },
-      "banners": [
-        "monsoon",
-        "ice-rock",
-        "cattle-guard",
-        "border-hospitals"
-      ],
-      "bytes": 2125208,
-      "files": [
-        "contours.geojson",
-        "dem.json",
-        "graph.json",
-        "layers/flood.geojson",
-        "layers/hazards.geojson",
-        "layers/public_land.geojson",
-        "manifest.json",
-        "metro.geojson",
-        "osm.geojson",
-        "pois.geojson",
-        "style.json",
-        "wild.geojson"
-      ],
-      "center": {
-        "lat": 35.155,
-        "lon": -106.53
-      },
-      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
-    },
-    {
       "id": "ny-metro",
       "name": "NY METRO",
       "state": "NY",
@@ -317,142 +510,6 @@
       "center": {
         "lat": 43.4,
         "lon": -73.86
-      },
-      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
-    },
-    {
-      "id": "tx-east",
-      "name": "TX EAST",
-      "state": "TX",
-      "kind": "osm-contour-extract",
-      "engine": "maplibre",
-      "bbox": {
-        "south": 30.08,
-        "west": -97.78,
-        "north": 30.32,
-        "east": -97.2
-      },
-      "slices": {
-        "metro": {
-          "name": "Austin metro",
-          "bbox": {
-            "name": "Austin metro",
-            "south": 30.24,
-            "west": -97.78,
-            "north": 30.32,
-            "east": -97.68
-          },
-          "featureCount": 50273
-        },
-        "wild": {
-          "name": "Lost Pines / Bastrop wild",
-          "bbox": {
-            "name": "Lost Pines / Bastrop wild",
-            "south": 30.08,
-            "west": -97.32,
-            "north": 30.18,
-            "east": -97.2
-          },
-          "featureCount": 3820
-        }
-      },
-      "banners": [
-        "heat-island",
-        "cattle-guard",
-        "hurricane"
-      ],
-      "bytes": 2063444,
-      "files": [
-        "contours.geojson",
-        "dem.json",
-        "graph.json",
-        "layers/flood.geojson",
-        "layers/hazards.geojson",
-        "layers/public_land.geojson",
-        "manifest.json",
-        "metro.geojson",
-        "osm.geojson",
-        "pois.geojson",
-        "style.json",
-        "wild.geojson"
-      ],
-      "center": {
-        "lat": 30.2,
-        "lon": -97.49000000000001
-      },
-      "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
-    },
-    {
-      "id": "tx-west",
-      "name": "TX WEST",
-      "state": "TX",
-      "kind": "osm-contour-extract",
-      "engine": "maplibre",
-      "bbox": {
-        "south": 31.7,
-        "west": -106.62,
-        "north": 32.0,
-        "east": -106.35
-      },
-      "slices": {
-        "metro": {
-          "name": "El Paso metro",
-          "bbox": {
-            "name": "El Paso metro",
-            "south": 31.74,
-            "west": -106.52,
-            "north": 31.82,
-            "east": -106.4
-          },
-          "featureCount": 23698
-        },
-        "wild": {
-          "name": "Franklin Mountains wild",
-          "bbox": {
-            "name": "Franklin Mountains wild",
-            "south": 31.88,
-            "west": -106.52,
-            "north": 32.0,
-            "east": -106.4
-          },
-          "featureCount": 3744
-        },
-        "border": {
-          "name": "El Paso TX+NM border union",
-          "bbox": {
-            "name": "El Paso TX+NM border union",
-            "south": 31.7,
-            "west": -106.62,
-            "north": 31.9,
-            "east": -106.35
-          },
-          "featureCount": 65648
-        }
-      },
-      "banners": [
-        "heat-island",
-        "cattle-guard",
-        "border-hospitals"
-      ],
-      "bytes": 2289897,
-      "files": [
-        "border.geojson",
-        "contours.geojson",
-        "dem.json",
-        "graph.json",
-        "layers/flood.geojson",
-        "layers/hazards.geojson",
-        "layers/public_land.geojson",
-        "manifest.json",
-        "metro.geojson",
-        "osm.geojson",
-        "pois.geojson",
-        "style.json",
-        "wild.geojson"
-      ],
-      "center": {
-        "lat": 31.85,
-        "lon": -106.485
       },
       "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
     }

@@ -138,7 +138,7 @@ final class AppRuntime {
         fix.arm()
         pullFix()
         let hasGPS = fix.last != nil || lastKnownFix != nil
-        let hasGraph = packs?.packURL("graph.json") != nil
+        let hasGraph = packs?.hasUsableGraph() ?? false
         lockChrome = LockOnChrome.banner(hasGPS: hasGPS, hasGraph: hasGraph)
         sendPOSIfPossible()
     }

@@ -48,6 +48,9 @@ struct MapTab: View {
                 )
                 Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
                     .foregroundStyle(Color(white: 0.6))
+                Text(OSMCredit.line)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color(white: 0.7))
                 if offPack == PackChrome.offPack {
                     Text(PackChrome.offPack).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
                 }

@@ -4,6 +4,8 @@
   "state": "TX",
   "kind": "osm-contour-extract",
   "engine": "maplibre",
+  "defaultOpen": true,
+  "walkable": true,
   "bbox": {
     "south": 31.7,
     "west": -106.62,
@@ -20,7 +22,7 @@
         "north": 31.82,
         "east": -106.4
       },
-      "featureCount": 23698
+      "featureCount": 22003
     },
     "wild": {
       "name": "Franklin Mountains wild",
@@ -31,7 +33,7 @@
         "north": 32.0,
         "east": -106.4
       },
-      "featureCount": 3744
+      "featureCount": 3497
     },
     "border": {
       "name": "El Paso TX+NM border union",
@@ -42,7 +44,7 @@
         "north": 31.9,
         "east": -106.35
       },
-      "featureCount": 65648
+      "featureCount": 61385
     }
   },
   "banners": [
@@ -50,12 +52,18 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 2289897,
+  "bytes": 50665555,
   "files": [
     "border.geojson",
     "contours.geojson",
     "dem.json",
+    "glyphs/Open Sans Regular/0-255.pbf",
+    "glyphs/Open Sans Regular/256-511.pbf",
+    "glyphs/Open Sans Regular/512-767.pbf",
+    "glyphs/Open Sans Regular/768-1023.pbf",
+    "glyphs/Open Sans Regular/8192-8447.pbf",
     "graph.json",
+    "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
@@ -70,5 +78,53 @@
     "lat": 31.85,
     "lon": -106.485
   },
-  "attribution": "© OpenStreetMap contributors. Elevation via Open-Meteo DEM at generate time. No runtime uplink."
+  "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+  "terrain": {
+    "present": true,
+    "file": "hillshade.png",
+    "bytes": 2251682,
+    "attribution": "USGS 3DEP hillshade, build-time only",
+    "coordinates": [
+      [
+        -106.62,
+        32.0
+      ],
+      [
+        -106.35,
+        32.0
+      ],
+      [
+        -106.35,
+        31.7
+      ],
+      [
+        -106.62,
+        31.7
+      ]
+    ]
+  },
+  "stats": {
+    "features": 66587,
+    "highwayLines": 63024,
+    "namedStreets": 18984,
+    "sampleStreetNames": [
+      "Encino Drive",
+      "Hurd Lane",
+      "Brickland Road",
+      "Meadow Vista Boulevard",
+      "Monte Vista Drive",
+      "Low Road",
+      "Antone Street",
+      "Alamo Drive",
+      "Robles Drive",
+      "Derby Road",
+      "3rd Street",
+      "1st Street"
+    ],
+    "water": 2748,
+    "places": 65,
+    "graphEdges": 264064,
+    "graphNodes": 98322,
+    "streetsVisibleAtWalkingZoom": true
+  }
 }

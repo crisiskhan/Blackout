@@ -180,6 +180,41 @@ final class MapLibreMapTests: XCTestCase {
         let layers = parsed?["layers"] as? [[String: Any]] ?? []
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.wildRoadsLayerID && $0["type"] as? String == "line" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.osmPointsLayerID && $0["type"] as? String == "circle" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadLabelsLayerID && $0["type"] as? String == "symbol" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.placeLabelsLayerID && $0["type"] as? String == "symbol" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.tracksLayerID && $0["type"] as? String == "line" })
+        XCTAssertEqual(OSMCredit.line, "© OpenStreetMap contributors")
+    }
+
+    func testPackStyleRewritesLocalGlyphsAndHillshadeNotTileHosts() throws {
+        let fm = FileManager.default
+        let pack = fm.temporaryDirectory.appendingPathComponent("pack-glyphs-\(UUID().uuidString)")
+        let cache = fm.temporaryDirectory.appendingPathComponent("cache-glyphs-\(UUID().uuidString)")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        try fm.createDirectory(at: cache, withIntermediateDirectories: true)
+        try Data("{\"type\":\"FeatureCollection\",\"features\":[]}".utf8).write(to: pack.appendingPathComponent("osm.geojson"))
+        try Data("png".utf8).write(to: pack.appendingPathComponent("hillshade.png"))
+        let style = pack.appendingPathComponent("style.json")
+        let obj: [String: Any] = [
+            "version": 8,
+            "glyphs": "glyphs/{fontstack}/{range}.pbf",
+            "sources": [
+                "osm": ["type": "geojson", "data": "osm.geojson"],
+                "hillshade": ["type": "image", "url": "hillshade.png"],
+            ],
+            "layers": [["id": "roads", "type": "line", "source": "osm"]],
+        ]
+        try JSONSerialization.data(withJSONObject: obj).write(to: style)
+        let resolved = try PackStyle.resolved(styleAt: style, packRoot: pack, cacheDirectory: cache)
+        let parsed = try JSONSerialization.jsonObject(with: Data(contentsOf: resolved)) as? [String: Any]
+        let glyphs = parsed?["glyphs"] as? String ?? ""
+        XCTAssertTrue(glyphs.hasPrefix("file:"))
+        XCTAssertTrue(glyphs.contains("glyphs/{fontstack}/{range}.pbf"))
+        XCTAssertFalse(glyphs.contains("googleapis"))
+        XCTAssertFalse(glyphs.contains("apple.com"))
+        let sources = parsed?["sources"] as? [String: Any]
+        let hill = sources?["hillshade"] as? [String: Any]
+        XCTAssertEqual(hill?["url"] as? String, pack.appendingPathComponent("hillshade.png").absoluteString)
     }
 
     func testMarkStoreLoadUniquesPersistedDuplicateCoords() {

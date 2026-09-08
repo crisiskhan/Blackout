@@ -45,17 +45,25 @@ SOS is 56 pt, hold 800 ms. It sits on Comms, Live Activity, Action Button, and C
 
 ## Packs
 
-Real OSM + DEM-derived contours, generated at build time (no runtime uplink):
+Real OSM + DEM-derived contours, generated at build time (no runtime uplink). **Default open pack is TX WEST** (El Paso / Franklin Mountains / TX+NM border) — one walkable bbox with street names at walking zoom, a WALK/DRIVE graph built from those same streets, and USGS 3DEP hillshade. Other catalog packs stay on disk but are demoted so they do not steal first-open.
 
 | Pack | Metro | Wild |
 |---|---|---|
-| TX WEST | El Paso | Franklin Mountains + El Paso TX+NM border union |
+| TX WEST (default) | El Paso | Franklin Mountains + El Paso TX+NM border union |
 | TX EAST | Austin | Lost Pines / Bastrop |
 | NM | Albuquerque | Sandia foothills |
 | FL NORTH | Jacksonville | Timucuan / Big Talbot |
 | FL SOUTH | Miami | Shark Valley / Everglades |
 | NY METRO | Lower Manhattan | Jamaica Bay |
 | NY UPSTATE | Albany | Adirondack High Peaks |
+
+Regenerate the walkable primary pack (network at generate time only):
+
+```bash
+python3 -c "from tools.v3.fetch_packs import main; main(['tx-west'])"
+```
+
+`slim_packs` skips `tx-west` so walking-zoom density is not cut back to a sticker extract.
 
 ## Verify (Linux)
 
@@ -77,7 +85,8 @@ python3 tools/validate_v3.py
 ## Regenerating content
 
 ```bash
-# OSM/DEM extracts (network at generate time only)
-python3 -c "from tools.v3.fetch_packs import main; main()"
+# OSM/DEM extracts (network at generate time only). Primary walkable pack:
+python3 -c "from tools.v3.fetch_packs import main; main(['tx-west'])"
+# Do not slim tx-west. generate_v3 still slims demoted catalog packs only.
 python3 tools/generate_v3.py
 ```

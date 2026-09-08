@@ -156,6 +156,10 @@ def packs() -> None:
     if have != need:
         bad(f"pack set {have}")
         return
+    if cat.get("defaultPack") != "tx-west" or (cat.get("packs") or [{}])[0].get("id") != "tx-west":
+        bad("default open pack must be tx-west (catalog first)")
+        return
+    ok("default open pack is tx-west")
     for p in cat["packs"]:
         d = ROOT / "Resources" / "Packs" / p["id"]
         for req in ("manifest.json", "osm.geojson", "graph.json", "contours.geojson", "style.json", "dem.json"):
@@ -174,12 +178,93 @@ def packs() -> None:
         if "metro" not in slices or "wild" not in slices:
             bad(f"{p['id']} missing metro/wild")
             return
+        style_text = (d / "style.json").read_text()
+        if "googleapis" in style_text or "apple.com/maps" in style_text or "mapkit" in style_text.lower():
+            bad(f"{p['id']} style has Google/Apple tile hosts")
+            return
         ok(f"pack {p['id']} bytes={p['bytes']} osm={len(osm['features'])} edges={len(graph['edges'])}")
     tw = json.loads((ROOT / "Resources" / "Packs" / "tx-west" / "manifest.json").read_text())
     if "border" not in tw.get("slices", {}):
         bad("tx-west missing El Paso border union")
     else:
         ok("El Paso TX+NM border union present")
+    walkable_pack()
+
+
+def walkable_pack() -> None:
+    d = ROOT / "Resources" / "Packs" / "tx-west"
+    osm = json.loads((d / "osm.geojson").read_text())
+    style = json.loads((d / "style.json").read_text())
+    graph = json.loads((d / "graph.json").read_text())
+    pack_io = (ROOT / "Packages" / "PackIO" / "Sources" / "PackIO" / "PackIO.swift").read_text()
+    map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    map_lib = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+    app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+    feats = osm.get("features") or []
+    hwy = [
+        f
+        for f in feats
+        if (f.get("properties") or {}).get("highway")
+        and (f.get("geometry") or {}).get("type") == "LineString"
+    ]
+    named = [f for f in hwy if (f.get("properties") or {}).get("name") or (f.get("properties") or {}).get("ref")]
+    water = [
+        f
+        for f in feats
+        if (f.get("properties") or {}).get("waterway") or (f.get("properties") or {}).get("natural") == "water"
+    ]
+    layers = style.get("layers") or []
+    layer_ids = {layer.get("id") for layer in layers}
+    road_labels = next((layer for layer in layers if layer.get("id") == "road-labels"), None)
+    if len(named) < 200 or len(hwy) < 1000:
+        bad(f"tx-west walking streets too thin named={len(named)} hwy={len(hwy)}")
+        return
+    if not water:
+        bad("tx-west missing water features")
+        return
+    if "road-labels" not in layer_ids or "place-labels" not in layer_ids or "tracks" not in layer_ids:
+        bad(f"tx-west style missing walking label layers {layer_ids}")
+        return
+    if not road_labels or (road_labels.get("minzoom") or 99) > 14:
+        bad("road-labels must appear at walking zoom (minzoom <= 14)")
+        return
+    if "roads" not in layer_ids:
+        bad("tx-west missing roads layer")
+        return
+    glyphs = style.get("glyphs") or ""
+    if glyphs.startswith("http") or "googleapis" in glyphs or "mapbox.com" in glyphs:
+        bad("tx-west glyphs must be local, not a tile host")
+        return
+    if not (d / "glyphs" / "Open Sans Regular" / "0-255.pbf").is_file():
+        bad("tx-west missing local Open Sans glyphs")
+        return
+    walk_edges = [e for e in (graph.get("edges") or []) if e.get("walk")]
+    drive_edges = [e for e in (graph.get("edges") or []) if e.get("drive")]
+    if len(walk_edges) < 1000 or len(drive_edges) < 1000:
+        bad(f"tx-west graph too thin walk={len(walk_edges)} drive={len(drive_edges)}")
+        return
+    if 'defaultPackID = "tx-west"' not in pack_io or "func hasUsableGraph" not in pack_io:
+        bad("PackStore must default to tx-west and expose honest hasUsableGraph")
+        return
+    if "OSMCredit.line" not in map_tab or "© OpenStreetMap contributors" not in map_lib:
+        bad("MAP chrome missing © OpenStreetMap contributors")
+        return
+    if "hasUsableGraph()" not in app:
+        bad("LOCK-ON must use hasUsableGraph for honest OFF GRAPH")
+        return
+    sample = next(
+        (
+            (f.get("properties") or {}).get("name")
+            for f in named
+            if (f.get("properties") or {}).get("name")
+        ),
+        None,
+    )
+    ok(
+        f"tx-west walkable named={len(named)} hwy={len(hwy)} water={len(water)} "
+        f"walk_edges={len(walk_edges)} sample={sample}"
+    )
+    ok("streets visible at walking zoom: yes")
 
 
 def vision() -> None:

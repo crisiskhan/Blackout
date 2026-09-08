@@ -118,6 +118,10 @@ public enum PackOverlay {
     public static let fillsBBox = false
 }
 
+public enum OSMCredit {
+    public static let line = "© OpenStreetMap contributors"
+}
+
 public enum LockOnChrome {
     public static func banner(hasGPS: Bool, hasGraph: Bool) -> String {
         if hasGPS || hasGraph { return "" }
@@ -298,15 +302,26 @@ public enum PackStyle {
     public static let wildSourceID = "wild"
     public static let wildRoadsLayerID = "wild-roads"
     public static let osmPointsLayerID = "osm-points"
+    public static let roadLabelsLayerID = "road-labels"
+    public static let placeLabelsLayerID = "place-labels"
+    public static let tracksLayerID = "tracks"
 
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
+        if let glyphs = obj["glyphs"] as? String, !glyphs.hasPrefix("file:"), !glyphs.contains("://") {
+            obj["glyphs"] = packRoot.appendingPathComponent(glyphs).absoluteString
+        }
         var sources = obj["sources"] as? [String: Any] ?? [:]
         for (key, raw) in sources {
-            guard var src = raw as? [String: Any], src["type"] as? String == "geojson",
-                  let rel = src["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") else { continue }
-            src["data"] = packRoot.appendingPathComponent(rel).absoluteString
-            sources[key] = src
+            guard var src = raw as? [String: Any] else { continue }
+            let kind = src["type"] as? String
+            if kind == "geojson", let rel = src["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                src["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[key] = src
+            } else if kind == "image", let rel = src["url"] as? String, !rel.hasPrefix("file:"), !rel.contains("://") {
+                src["url"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[key] = src
+            }
         }
         obj["sources"] = sources
         attachOfflineVectorLayers(&obj, packRoot: packRoot)
@@ -359,6 +374,65 @@ public enum PackStyle {
                     "circle-radius": 2.2,
                     "circle-stroke-color": "#0c0e10",
                     "circle-stroke-width": 0.6,
+                ],
+            ])
+        }
+        if sources["osm"] != nil,
+           !layers.contains(where: { $0["id"] as? String == tracksLayerID }) {
+            layers.append([
+                "id": tracksLayerID,
+                "type": "line",
+                "source": "osm",
+                "minzoom": 12,
+                "filter": [
+                    "in",
+                    ["get", "highway"],
+                    ["literal", ["track", "path", "footway", "bridleway", "cycleway", "steps"]],
+                ],
+                "paint": [
+                    "line-color": "#c4b48a",
+                    "line-width": 1.2,
+                ],
+            ])
+        }
+        if sources["osm"] != nil,
+           !layers.contains(where: { $0["id"] as? String == roadLabelsLayerID }) {
+            layers.append([
+                "id": roadLabelsLayerID,
+                "type": "symbol",
+                "source": "osm",
+                "minzoom": 13,
+                "filter": ["all", ["has", "highway"], ["has", "name"]],
+                "layout": [
+                    "text-field": ["get", "name"],
+                    "symbol-placement": "line",
+                    "text-size": 11,
+                    "text-font": ["Open Sans Regular"],
+                ],
+                "paint": [
+                    "text-color": "#e8eef4",
+                    "text-halo-color": "#0c0e10",
+                    "text-halo-width": 1.2,
+                ],
+            ])
+        }
+        if sources["osm"] != nil,
+           !layers.contains(where: { $0["id"] as? String == placeLabelsLayerID }) {
+            layers.append([
+                "id": placeLabelsLayerID,
+                "type": "symbol",
+                "source": "osm",
+                "minzoom": 10,
+                "filter": ["has", "place"],
+                "layout": [
+                    "text-field": ["get", "name"],
+                    "text-size": 13,
+                    "text-font": ["Open Sans Regular"],
+                ],
+                "paint": [
+                    "text-color": "#f0f4f8",
+                    "text-halo-color": "#0c0e10",
+                    "text-halo-width": 1.4,
                 ],
             ])
         }

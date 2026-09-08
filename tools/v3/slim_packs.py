@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .common import ROOT, write_json
+from .fetch_packs import PRIMARY_PACK_ID, write_catalog
 
 
 def simplify_line(coords: list, step: int) -> list:
@@ -67,10 +68,24 @@ def slim_dem(path: Path) -> dict:
     return d
 
 
+def refresh_manifest_bytes(pack_dir: Path) -> dict:
+    files = [p for p in pack_dir.rglob("*") if p.is_file()]
+    size = sum(p.stat().st_size for p in files)
+    man_path = pack_dir / "manifest.json"
+    man = json.loads(man_path.read_text())
+    man["bytes"] = size
+    man["files"] = sorted(str(p.relative_to(pack_dir)) for p in files)
+    write_json(man_path, man)
+    return man
+
+
 def main() -> None:
     root = ROOT / "Resources" / "Packs"
-    catalog_packs = []
     for pack_dir in sorted(p for p in root.iterdir() if p.is_dir()):
+        if pack_dir.name == PRIMARY_PACK_ID:
+            man = refresh_manifest_bytes(pack_dir)
+            print(pack_dir.name, man["bytes"], "PRIMARY skip slim")
+            continue
         if (pack_dir / "osm.geojson").exists():
             write_json(pack_dir / "osm.geojson", slim_fc(pack_dir / "osm.geojson", 1800, 4))
         if (pack_dir / "graph.json").exists():
@@ -85,16 +100,9 @@ def main() -> None:
             if extra.name in {"osm.geojson", "contours.geojson", "pois.geojson"}:
                 continue
             write_json(extra, slim_fc(extra, 400, 6))
-        files = [p for p in pack_dir.rglob("*") if p.is_file()]
-        size = sum(p.stat().st_size for p in files)
-        man_path = pack_dir / "manifest.json"
-        man = json.loads(man_path.read_text())
-        man["bytes"] = size
-        man["files"] = sorted(str(p.relative_to(pack_dir)) for p in files)
-        write_json(man_path, man)
-        catalog_packs.append(man)
-        print(pack_dir.name, size)
-    write_json(root / "catalog.json", {"schema": "blackout-packs-v3", "states": ["TX", "NM", "FL", "NY"], "packs": catalog_packs})
+        man = refresh_manifest_bytes(pack_dir)
+        print(pack_dir.name, man["bytes"])
+    write_catalog(root)
 
 
 if __name__ == "__main__":
