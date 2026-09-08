@@ -41,6 +41,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34002236273` (`67f9b5f`): macos-15 / Xcode 26.3. `exportArchive OK`. CPV **58**. Dist `AN8MADVN3Z` (`DISTRIBUTION`). altool no errors. ASC `b4063ed9-f737-4da1-81bf-1206f625e342` **VALID**. PATCH 200. `ASSIGN Internal 58 204`. Tip-58 MARK/timer/RED/PTT plus tip-57 streets.
 - `34002862630` (`919dfa8`): first `tf:` push auto-upload. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **59**. Dist `6L4U8L695G` (`DISTRIBUTION`). altool no errors. ASC `3da30d72-408b-4cd2-a6e7-7009106e97bb` **VALID**. PATCH 200. `ASSIGN Internal 59 204`. Same tip-58 app as 58 (docs-only tree).
 - `34232353416` (`b451bb1`): tip-60 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **60**. Dist `U8C9ZLHLTJ` (`DISTRIBUTION`). altool no errors. ASC `4bcbdb70-f766-4d5d-8aff-8315399e56ca` **VALID**. PATCH 200. `ASSIGN Internal 60 204`. Leave 59 until TestFlight shows 60 Ready.
+- `34237111681` (`b947536`): tip-61 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **61**. Dist `422W3DA782` (`DISTRIBUTION`). altool no errors. ASC `b7c98209-6c8d-4f42-a209-cbff4c63c789` **VALID**. PATCH 200. `ASSIGN Internal 61 204`. TX WEST walkable OSM. Leave 60 until TestFlight shows 61 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -98,4 +99,4 @@ SOURCE GO tip `e4e2e7e91ca3879a22fca1295dea48cbfb2d0618` (product `47a9edfc`). F
 
 ## Tip 61 Internal (CoS 2026-09-08)
 
-SOURCE GO tip `9ae26f18ee5eb15a6f529b80af4e801c5271a309` BEST IN CLASS TX WEST walkable OSM (~48.3 MB; streets at walking zoom yes). This `tf:` push injects ASC **61**. Leave 60 until Ready. Watch omitted. Internal only. Do not re-upload 54–60.
+SOURCE GO tip `9ae26f18ee5eb15a6f529b80af4e801c5271a309` BEST IN CLASS TX WEST walkable OSM (~48.3 MB; streets at walking zoom yes). Run `34237111681` uploaded CPV **61** and `ASSIGN Internal 61 204`. Leave 60 until TestFlight shows 61 Ready. Watch omitted. Internal only. Do not re-upload 54–60.
