@@ -266,6 +266,92 @@ def walkable_pack() -> None:
         f"walk_edges={len(walk_edges)} sample={sample}"
     )
     ok("streets visible at walking zoom: yes")
+    walkable_next_pack("nm")
+
+
+def walkable_next_pack(pack_id: str) -> None:
+    """Tip-61 quality bar on the next catalog pack. Must not steal tx-west default."""
+    d = ROOT / "Resources" / "Packs" / pack_id
+    man = json.loads((d / "manifest.json").read_text())
+    cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
+    osm = json.loads((d / "osm.geojson").read_text())
+    style = json.loads((d / "style.json").read_text())
+    graph = json.loads((d / "graph.json").read_text())
+    if cat.get("defaultPack") != "tx-west" or (cat.get("packs") or [{}])[0].get("id") != "tx-west":
+        bad(f"{pack_id} stole default open pack from tx-west")
+        return
+    if man.get("defaultOpen"):
+        bad(f"{pack_id} must not set defaultOpen")
+        return
+    if not man.get("walkable"):
+        bad(f"{pack_id} missing walkable flag — still a sticker")
+        return
+    if "© OpenStreetMap" not in (man.get("attribution") or ""):
+        bad(f"{pack_id} missing © OpenStreetMap attribution")
+        return
+    if pack_id == "nm" and "union" not in (man.get("slices") or {}):
+        bad("nm missing Albuquerque / Sandia walkable union")
+        return
+    feats = osm.get("features") or []
+    hwy = [
+        f
+        for f in feats
+        if (f.get("properties") or {}).get("highway")
+        and (f.get("geometry") or {}).get("type") == "LineString"
+    ]
+    named = [f for f in hwy if (f.get("properties") or {}).get("name") or (f.get("properties") or {}).get("ref")]
+    water = [
+        f
+        for f in feats
+        if (f.get("properties") or {}).get("waterway") or (f.get("properties") or {}).get("natural") == "water"
+    ]
+    layers = style.get("layers") or []
+    layer_ids = {layer.get("id") for layer in layers}
+    road_labels = next((layer for layer in layers if layer.get("id") == "road-labels"), None)
+    if len(named) < 200 or len(hwy) < 1000:
+        bad(f"{pack_id} walking streets too thin named={len(named)} hwy={len(hwy)}")
+        return
+    if not water:
+        bad(f"{pack_id} missing water features")
+        return
+    if "road-labels" not in layer_ids or "place-labels" not in layer_ids or "tracks" not in layer_ids:
+        bad(f"{pack_id} style missing walking label layers {layer_ids}")
+        return
+    if not road_labels or (road_labels.get("minzoom") or 99) > 14:
+        bad(f"{pack_id} road-labels must appear at walking zoom (minzoom <= 14)")
+        return
+    glyphs = style.get("glyphs") or ""
+    if glyphs.startswith("http") or "googleapis" in glyphs or "mapbox.com" in glyphs:
+        bad(f"{pack_id} glyphs must be local, not a tile host")
+        return
+    if not (d / "glyphs" / "Open Sans Regular" / "0-255.pbf").is_file():
+        bad(f"{pack_id} missing local Open Sans glyphs")
+        return
+    walk_edges = [e for e in (graph.get("edges") or []) if e.get("walk")]
+    drive_edges = [e for e in (graph.get("edges") or []) if e.get("drive")]
+    if len(walk_edges) < 1000 or len(drive_edges) < 1000:
+        bad(f"{pack_id} graph too thin walk={len(walk_edges)} drive={len(drive_edges)}")
+        return
+    mb = (man.get("bytes") or 0) / (1024 * 1024)
+    if mb > 80:
+        bad(f"{pack_id} {mb:.1f} MB exceeds 80 MB iOS budget")
+        return
+    if not (man.get("stats") or {}).get("streetsVisibleAtWalkingZoom"):
+        bad(f"{pack_id} streetsVisibleAtWalkingZoom is not yes")
+        return
+    sample = next(
+        (
+            (f.get("properties") or {}).get("name")
+            for f in named
+            if (f.get("properties") or {}).get("name")
+        ),
+        None,
+    )
+    ok(
+        f"{pack_id} walkable named={len(named)} hwy={len(hwy)} water={len(water)} "
+        f"walk_edges={len(walk_edges)} mb={mb:.1f} sample={sample}"
+    )
+    ok(f"{pack_id} streets visible at walking zoom: yes")
 
 
 def vision() -> None:

@@ -2,6 +2,8 @@
 
 Primary walkable pack is tx-west: one El Paso / Franklin / TX+NM border bbox
 with walking-zoom streets, names, and a graph built from those same ways.
+Next walkable catalog pack is nm (Albuquerque / Sandia). It does not steal
+default open — Crisis keeps tx-west first-open until they say switch.
 """
 from __future__ import annotations
 
@@ -127,8 +129,16 @@ PACKS = {
                 "north": 35.25,
                 "east": -106.38,
             },
+            "union": {
+                "name": "Albuquerque / Sandia walkable union",
+                "south": 35.06,
+                "west": -106.68,
+                "north": 35.25,
+                "east": -106.38,
+            },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
+        "walkable": True,
     },
     "fl-north": {
         "id": "fl-north",
@@ -219,6 +229,10 @@ PACKS = {
         "banners": ["ice-rock", "subway-north"],
     },
 }
+
+
+def walkable_ids() -> set[str]:
+    return {pid for pid, pack in PACKS.items() if pack.get("walkable")}
 
 
 def write_compact(path: Path, data: object) -> None:
@@ -1151,7 +1165,7 @@ def finalize_existing(dest: Path) -> dict:
         "state": pack["state"],
         "kind": "osm-contour-extract",
         "engine": "maplibre",
-        "defaultOpen": True,
+        "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
         "walkable": True,
         "bbox": bb,
         "slices": slice_summaries,
