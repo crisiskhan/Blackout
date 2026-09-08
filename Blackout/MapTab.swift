@@ -11,34 +11,30 @@ struct MapTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("MAP").foregroundStyle(Theme.silver)
-                Spacer()
+            HStack(spacing: 8) {
                 Button("SPEAK") { runtime.speakMap() }
                     .buttonStyle(MapChipButtonStyle())
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.silver)
+                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                Spacer()
+                if let heading = runtime.headingDeg {
+                    Text(String(format: "%.0f°", heading))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.silver)
+                }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
                     runtime.toggleLockOn()
                 }
+                .font(.caption.weight(.bold))
+                .foregroundStyle(runtime.lockOn ? Theme.accent : Theme.silver)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             }
             if !runtime.lockChrome.isEmpty {
                 Text(runtime.lockChrome).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
             }
-            if let dest = runtime.routeTarget {
-                Text(String(format: "DEST %.4f, %.4f", dest.lat, dest.lon))
-                    .font(.caption).foregroundStyle(Theme.silver)
-            }
-            if let h = runtime.headingDeg {
-                Text(String(format: "BEARING %.0f°", h)).font(.caption).foregroundStyle(Theme.silver)
-            }
-            if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            TextField("Search FTS / semantic", text: $query)
+            TextField("Search this pack", text: $query)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit { search() }
             ForEach(hits, id: \.name) { h in
@@ -48,9 +44,10 @@ struct MapTab: View {
                 .foregroundStyle(Theme.silver)
             }
             if let pack = runtime.packs?.active, let style = styleURL() {
+                let home = pack.home ?? pack.center
                 let you = UserPuck.coordinate(
                     lastKnown: runtime.lastKnownFix,
-                    packCenter: (pack.center.lat, pack.center.lon),
+                    packCenter: (home.lat, home.lon),
                     packSouth: pack.bbox.south,
                     packWest: pack.bbox.west,
                     packNorth: pack.bbox.north,
@@ -60,19 +57,11 @@ struct MapTab: View {
                     fix: runtime.lastKnownFix,
                     bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
                 )
-                Text("\(pack.name) · \(pack.bytes / 1024) KB · \(pack.state)")
-                    .foregroundStyle(Color(white: 0.6))
-                Text(OSMCredit.line)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color(white: 0.7))
-                if offPack == PackChrome.offPack {
-                    Text(PackChrome.offPack).font(.caption.weight(.bold)).foregroundStyle(Color.orange)
-                }
                 ZStack(alignment: .bottomLeading) {
                     OfflineMapView(
                         styleURL: style,
-                        centerLat: pack.center.lat,
-                        centerLon: pack.center.lon,
+                        centerLat: you.lat,
+                        centerLon: you.lon,
                         puckLat: you.lat,
                         puckLon: you.lon,
                         packSouth: pack.bbox.south,
@@ -80,19 +69,16 @@ struct MapTab: View {
                         packNorth: pack.bbox.north,
                         packEast: pack.bbox.east,
                         route: runtime.routeCoords,
+                        destination: runtime.routeTarget,
+                        fitToken: runtime.fitPackToken,
                         onMapTap: { lat, lon in
                             runtime.pickDestination(lat: lat, lon: lon)
                         }
                     )
+                    canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)
-                ForEach(runtime.marks) { m in
-                    Button("MARK \(m.label) \(String(format: "%.4f", m.lat)), \(String(format: "%.4f", m.lon))") {
-                        runtime.pickDestination(lat: m.lat, lon: m.lon)
-                    }
-                    .font(.caption).foregroundStyle(Color(white: 0.75))
-                }
             } else {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
                 Spacer()
@@ -102,6 +88,35 @@ struct MapTab: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// Everything the canvas is allowed to say: which pack, who drew it, and
+    /// one way back out to the whole region. No byte counts, no raw coordinates.
+    private func canvasFooter(packName: String, offPack: Bool) -> some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                if offPack {
+                    Text(PackChrome.offPack)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(Color.orange)
+                }
+                Text(packName)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Theme.silver)
+                Text(OSMCredit.line)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color(white: 0.7))
+            }
+            Spacer()
+            Button("FIT PACK") { runtime.fitPack() }
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(Theme.silver)
+                .frame(minWidth: 72, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .contentShape(Rectangle())
+        }
+        .padding(.horizontal, 8)
+        .padding(.bottom, 6)
+        .background(Theme.void.opacity(0.66))
     }
 
     /// The answer to the last chip tap, printed where the thumb already is.
@@ -119,6 +134,13 @@ struct MapTab: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.silver)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        if !runtime.speechChrome.isEmpty {
+            Text(runtime.speechChrome)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.orange)
+                .lineLimit(3)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }

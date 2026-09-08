@@ -61,6 +61,8 @@ final class AppRuntime {
     var toolChrome = ""
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
+    /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
+    var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
@@ -212,6 +214,10 @@ final class AppRuntime {
         }
     }
 
+    func fitPack() {
+        fitPackToken += 1
+    }
+
     func tapRuler() {
         toolChrome = MapRuler.chrome(from: youCoordinate(), to: destination())
     }
@@ -319,9 +325,10 @@ final class AppRuntime {
 
     private func youCoordinate() -> (lat: Double, lon: Double) {
         let pack = packs?.active
+        let home = packs?.homeCoordinate()
         return UserPuck.coordinate(
             lastKnown: lastKnownFix,
-            packCenter: (pack?.center.lat ?? 0, pack?.center.lon ?? 0),
+            packCenter: (home?.lat ?? pack?.center.lat ?? 0, home?.lon ?? pack?.center.lon ?? 0),
             packSouth: pack?.bbox.south ?? 0,
             packWest: pack?.bbox.west ?? 0,
             packNorth: pack?.bbox.north ?? 0,

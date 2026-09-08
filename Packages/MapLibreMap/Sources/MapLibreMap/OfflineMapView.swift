@@ -16,6 +16,9 @@ public struct OfflineMapView: UIViewRepresentable {
     public var packNorth: Double
     public var packEast: Double
     public var route: [(lat: Double, lon: Double)]
+    public var destination: (lat: Double, lon: Double)?
+    /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
+    public var fitToken: Int
     public var onMapTap: ((Double, Double) -> Void)?
 
     public init(
@@ -29,6 +32,8 @@ public struct OfflineMapView: UIViewRepresentable {
         packNorth: Double,
         packEast: Double,
         route: [(lat: Double, lon: Double)] = [],
+        destination: (lat: Double, lon: Double)? = nil,
+        fitToken: Int = 0,
         onMapTap: ((Double, Double) -> Void)? = nil
     ) {
         self.styleURL = styleURL
@@ -41,6 +46,8 @@ public struct OfflineMapView: UIViewRepresentable {
         self.packNorth = packNorth
         self.packEast = packEast
         self.route = route
+        self.destination = destination
+        self.fitToken = fitToken
         self.onMapTap = onMapTap
     }
 
@@ -64,7 +71,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
         view.setCenter(
             CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
-            zoomLevel: 10,
+            zoomLevel: PackCamera.openZoom,
             animated: false
         )
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
@@ -94,7 +101,9 @@ public struct OfflineMapView: UIViewRepresentable {
             packWest: packWest,
             packNorth: packNorth,
             packEast: packEast,
-            route: route
+            route: route,
+            destination: destination,
+            fitToken: fitToken
         )
     }
 
@@ -107,6 +116,8 @@ public struct OfflineMapView: UIViewRepresentable {
             var packNorth: Double
             var packEast: Double
             var route: [(lat: Double, lon: Double)]
+            var destination: (lat: Double, lon: Double)?
+            var fitToken: Int
         }
 
         var spec: OverlaySpec?
@@ -118,8 +129,10 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
         var storedPuck: (lat: Double, lon: Double)?
         var storedRoute: [(lat: Double, lon: Double)]?
+        var storedDestination: (lat: Double, lon: Double)?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
+        var fittedFitToken = 0
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -151,16 +164,22 @@ public struct OfflineMapView: UIViewRepresentable {
                 mapHasPuck: mapHasPuck
             )
             let routeNeeds = force || RouteLine.needsReapply(stored: storedRoute, route: spec.route)
+            let destNeeds = force || DestinationPin.needsReapply(
+                stored: storedDestination,
+                destination: spec.destination
+            )
             if !OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
-                routeNeedsReapply: routeNeeds
+                routeNeedsReapply: routeNeeds,
+                destinationNeedsReapply: destNeeds
             ) {
                 return
             }
             if !puckNeeds {
                 syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
+                storedDestination = spec.destination
                 return
             }
 
@@ -199,6 +218,7 @@ public struct OfflineMapView: UIViewRepresentable {
             storedPuck = (spec.puckLat, spec.puckLon)
             syncRoute(on: view, spec: spec, force: true)
             syncStyleOverlays(on: view, spec: spec)
+            storedDestination = spec.destination
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -221,15 +241,32 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
+            guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
+            if spec.fitToken != fittedFitToken {
+                fittedFitToken = spec.fitToken
+                fitPack(spec, on: view)
+                fittedPack = pack
+                fittedSize = size
+                return
+            }
             if !force, !PackCamera.shouldRefit(
                 fittedPack: fittedPack,
                 pack: pack,
                 fittedSize: fittedSize,
                 size: size
             ) { return }
-            guard view.bounds.width > 1, view.bounds.height > 1 else { return }
+            view.setCenter(
+                CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon),
+                zoomLevel: PackCamera.openZoom,
+                animated: false
+            )
+            fittedPack = pack
+            fittedSize = size
+        }
+
+        func fitPack(_ spec: OverlaySpec, on view: MLNMapView) {
             let box = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
@@ -247,8 +284,6 @@ public struct OfflineMapView: UIViewRepresentable {
                 animated: false,
                 completionHandler: nil
             )
-            fittedPack = pack
-            fittedSize = size
         }
 
         func syncStyleOverlays(on view: MLNMapView, spec: OverlaySpec) {
@@ -292,6 +327,36 @@ public struct OfflineMapView: UIViewRepresentable {
                 core.circleColor = NSExpression(forConstantValue: UIColor.white)
                 core.circleRadius = NSExpression(forConstantValue: 8)
                 style.addLayer(core)
+            }
+
+            if let dest = spec.destination {
+                let pin = MLNPointFeature()
+                pin.coordinate = CLLocationCoordinate2D(latitude: dest.lat, longitude: dest.lon)
+                if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                    src.shape = pin
+                } else {
+                    let src = MLNShapeSource(identifier: DestinationPin.sourceID, shape: pin, options: nil)
+                    style.addSource(src)
+                    let ring = MLNCircleStyleLayer(identifier: DestinationPin.ringLayerID, source: src)
+                    ring.circleColor = NSExpression(forConstantValue: UIColor.clear)
+                    ring.circleRadius = NSExpression(forConstantValue: DestinationPin.ringRadius)
+                    ring.circleStrokeColor = NSExpression(
+                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    )
+                    ring.circleStrokeWidth = NSExpression(forConstantValue: 3)
+                    style.addLayer(ring)
+                    let core = MLNCircleStyleLayer(identifier: DestinationPin.coreLayerID, source: src)
+                    core.circleColor = NSExpression(
+                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    )
+                    core.circleRadius = NSExpression(forConstantValue: DestinationPin.coreRadius)
+                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    core.circleStrokeWidth = NSExpression(forConstantValue: 1.5)
+                    style.addLayer(core)
+                }
+            } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                var empty = [CLLocationCoordinate2D]()
+                src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }
 
             if RouteLine.shouldDraw(spec.route) {

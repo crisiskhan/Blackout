@@ -954,6 +954,24 @@ def real_layer_features(fc: dict, keys: set[str]) -> dict:
     return {"type": "FeatureCollection", "features": feats[:800], "attribution": OSM_CREDIT}
 
 
+def home_point(slices: dict, bb: dict) -> dict:
+    """Where the canvas opens when there is no GPS fix.
+
+    The bbox midpoint is often terrain: TX WEST's is the Franklin Mountains
+    crest, NM's is the Sandia foothills, TX EAST's is farmland east of Austin.
+    Opening there at walking zoom shows a near-empty canvas, so prefer the
+    metro slice — the part of the pack with the street grid on it.
+    """
+    metro = slices.get("metro") or {}
+    # PACKS holds slice bounds flat; a written manifest nests them under "bbox".
+    metro = metro.get("bbox") or metro
+    box = metro if {"south", "west", "north", "east"} <= set(metro) else bb
+    return {
+        "lat": (box["south"] + box["north"]) / 2,
+        "lon": (box["west"] + box["east"]) / 2,
+    }
+
+
 def union_bbox(slices: dict) -> dict:
     return {
         "south": min(s["south"] for s in slices.values()),
@@ -1132,6 +1150,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         "bytes": size,
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+        "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
@@ -1232,6 +1251,7 @@ def finalize_existing(dest: Path) -> dict:
         "bytes": size,
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+        "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,

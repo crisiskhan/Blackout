@@ -39,6 +39,33 @@ final class PackIOTests: XCTestCase {
         XCTAssertTrue(store.hasUsableGraph())
     }
 
+    func testHomeCoordinateFallsBackToCenterWhenAbsent() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-home-\(UUID().uuidString)")
+        try fm.createDirectory(at: root.appendingPathComponent("tx-west"), withIntermediateDirectories: true)
+        let bare = PackManifest(
+            id: "tx-west",
+            name: "TX WEST",
+            state: "TX",
+            bytes: 1,
+            banners: [],
+            center: .init(lat: 31.85, lon: -106.485),
+            bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35)
+        )
+        try JSONEncoder().encode(PackCatalog(packs: [bare]))
+            .write(to: root.appendingPathComponent("catalog.json"))
+        let withoutHome = try PackStore(root: root, box: EventLog())
+        XCTAssertEqual(withoutHome.homeCoordinate()?.lat, 31.85)
+
+        var withHome = bare
+        withHome.home = .init(lat: 31.78, lon: -106.46)
+        try JSONEncoder().encode(PackCatalog(packs: [withHome]))
+            .write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+        XCTAssertEqual(store.homeCoordinate()?.lat, 31.78)
+        XCTAssertEqual(store.homeCoordinate()?.lon, -106.46)
+    }
+
     func testGraphProbeRejectsEmptyAndAcceptsOneEdgeBytes() {
         XCTAssertFalse(GraphProbe.isUsable(byteCount: 0))
         XCTAssertFalse(GraphProbe.isUsable(byteCount: 13))

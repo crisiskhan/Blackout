@@ -9,6 +9,9 @@ public struct PackManifest: Codable, Equatable, Sendable {
     public var banners: [String]
     public var center: Coord
     public var bbox: BBox
+    /// Where the canvas opens with no GPS fix. The bbox midpoint is often bare
+    /// terrain; `home` is the metro slice, where the street grid is.
+    public var home: Coord?
     public struct Coord: Codable, Equatable, Sendable { public var lat: Double; public var lon: Double }
     public struct BBox: Codable, Equatable, Sendable {
         public var south: Double; public var west: Double; public var north: Double; public var east: Double
@@ -57,6 +60,12 @@ public final class PackStore: @unchecked Sendable {
     public func packURL(_ file: String) -> URL? {
         guard let active else { return nil }
         return root.appendingPathComponent(active.id).appendingPathComponent(file)
+    }
+
+    public func homeCoordinate() -> (lat: Double, lon: Double)? {
+        guard let active else { return nil }
+        let point = active.home ?? active.center
+        return (point.lat, point.lon)
     }
 
     public func hasUsableGraph() -> Bool {

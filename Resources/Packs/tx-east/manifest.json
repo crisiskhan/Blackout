@@ -78,6 +78,10 @@
     "lat": 30.2,
     "lon": -97.49000000000001
   },
+  "home": {
+    "lat": 30.28,
+    "lon": -97.73
+  },
   "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
