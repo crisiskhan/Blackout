@@ -361,6 +361,52 @@ def clip_features(fc: dict, sl: dict) -> dict:
     return {"type": "FeatureCollection", "features": feats, "attribution": OSM_CREDIT}
 
 
+BLOCKED = {"no", "private"}
+ALLOWED = {"yes", "designated", "permissive", "destination"}
+
+
+def way_access(
+    tags: dict, highway: str, walk_set: set[str], drive_set: set[str]
+) -> tuple[bool, bool]:
+    """Who is actually allowed down this way, not just what it is tagged as."""
+    walk = highway in walk_set
+    drive = highway in drive_set
+    if tags.get("access") in BLOCKED:
+        walk = False
+        drive = False
+    foot = tags.get("foot")
+    if foot in BLOCKED:
+        walk = False
+    elif foot in ALLOWED:
+        walk = True
+    if (tags.get("motor_vehicle") or tags.get("vehicle")) in BLOCKED:
+        drive = False
+    return walk, drive
+
+
+def way_directions(tags: dict) -> tuple[bool, bool, bool, bool]:
+    """Direction is per travel mode.
+
+    `oneway` is a rule about cars. A pedestrian walks a one-way street in both
+    directions, so folding the car restriction into the walk graph invented
+    detours -- and sometimes no path at all -- on the side of the street the
+    traffic happens to run against. Only `oneway:foot` binds feet.
+    """
+    def sides(value: str | None) -> tuple[bool, bool]:
+        # "-1" means the traffic runs against the way's node order, so the
+        # passable direction is the reverse one, not neither.
+        if value == "-1":
+            return False, True
+        return True, value not in {"yes", "1", "true"}
+
+    ow = tags.get("oneway")
+    if tags.get("junction") in {"roundabout", "circular"} and ow is None:
+        ow = "yes"
+    drive_fwd, drive_back = sides(ow)
+    walk_fwd, walk_back = sides(tags.get("oneway:foot"))
+    return walk_fwd, walk_back, drive_fwd, drive_back
+
+
 def build_graph(osm: dict) -> dict:
     nodes = {
         el["id"]: {"id": el["id"], "lon": el["lon"], "lat": el["lat"]}
@@ -409,31 +455,29 @@ def build_graph(osm: dict) -> dict:
         highway = tags.get("highway")
         if el.get("type") != "way" or not highway or not el.get("nodes"):
             continue
-        walk_ok = highway in walk_ok_set
-        drive_ok = highway in drive_ok_set
+        walk_ok, drive_ok = way_access(tags, highway, walk_ok_set, drive_ok_set)
         if not walk_ok and not drive_ok:
             continue
-        oneway = tags.get("oneway") in {"yes", "1", "true"}
+        walk_fwd, walk_back, drive_fwd, drive_back = way_directions(tags)
         ids = [n for n in el["nodes"] if n in nodes]
         for a, b in zip(ids, ids[1:]):
             na, nb = nodes[a], nodes[b]
             dist = haversine_m(na["lat"], na["lon"], nb["lat"], nb["lon"])
             if dist <= 0:
                 continue
-            rec = {
-                "a": a,
-                "b": b,
-                "m": round(dist, 2),
-                "walk": walk_ok,
-                "drive": drive_ok,
-            }
-            edges.append(rec)
-            used.add(a)
-            used.add(b)
-            if not oneway:
-                back = dict(rec)
-                back["a"], back["b"] = b, a
-                edges.append(back)
+            for (x, y), walk_dir, drive_dir in (
+                ((a, b), walk_fwd, drive_fwd),
+                ((b, a), walk_back, drive_back),
+            ):
+                walk = walk_ok and walk_dir
+                drive = drive_ok and drive_dir
+                if not walk and not drive:
+                    continue
+                edges.append(
+                    {"a": x, "b": y, "m": round(dist, 2), "walk": walk, "drive": drive}
+                )
+                used.add(x)
+                used.add(y)
     slim_nodes = {str(k): v for k, v in nodes.items() if k in used}
     return compact_graph(
         {
