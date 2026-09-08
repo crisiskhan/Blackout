@@ -47,6 +47,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34257680002` (`9eb32c4`): tip-64 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **64**. Dist `S3R65K88HJ` (`DISTRIBUTION`). altool no errors. ASC `5116f1c0-09a3-4419-a304-d6ea86914856` **VALID**. PATCH 200. `ASSIGN Internal 64 204`. TX WEST arterial casing + highway refs. Leave 63 until TestFlight shows 64 Ready.
 - `34260710700` (`f401a3d`): tip-65 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **65**. Dist `2T2U9RQMJD` (`DISTRIBUTION`). altool no errors. ASC `94bcaf54-c944-47db-a399-b373a7be2012` **VALID**. PATCH 200. `ASSIGN Internal 65 204`. Speak turn-by-turn + TX EAST. Leave 64 until TestFlight shows 65 Ready.
 - `34261557379` (`c55d861`): tip-66 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **66**. Dist `33BKW9XRQN` (`DISTRIBUTION`). altool no errors. ASC `b3310736-f1d6-4ea8-96a4-c40eccb9e770` **VALID**. PATCH 200. `ASSIGN Internal 66 204`. Same Speak + TX EAST tree as 65. Leave 65 until TestFlight shows 66 Ready.
+- `34264110982` (`960a8a2`): tip-67 `tf:` push. Mint OK (`HAS_LOCAL_DIST_KEY=1`), then GET `/v1/builds` HTTP 500 in Next CPV. No IPA. Retry list 500 (15s/30s/60s/90s/120s) via `tools/tf_asc_cpv.py`. Do not re-upload 54–66.
 
 ## Watch omitted from App Store archive (re-enable later)
 
