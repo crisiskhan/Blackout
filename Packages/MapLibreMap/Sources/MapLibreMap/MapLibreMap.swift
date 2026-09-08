@@ -309,6 +309,10 @@ public enum PackStyle {
     public static let voidInk = "#000000"
     public static let silverInk = "#B8BDC2"
     public static let accentInk = "#E10600"
+    public static let glyphTokens = ["{fontstack}", "{range}"]
+    /// Bump when the resolver changes: a phone that already cached a resolved style must
+    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens.
+    public static let resolverVersion = 2
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -316,6 +320,21 @@ public enum PackStyle {
         guard let outputModified else { return true }
         guard let styleModified else { return false }
         return styleModified > outputModified
+    }
+
+    /// `URL.appendingPathComponent` percent-escapes `{` and `}`, which turned the local
+    /// glyph template into `.../%7Bfontstack%7D/%7Brange%7D.pbf`. MapLibre substitutes
+    /// only literal `{fontstack}` / `{range}`, so every glyph range 404'd and no street
+    /// name could draw at any zoom. Build the file URL by string so the tokens survive.
+    public static func localGlyphURL(template: String, packRoot: URL) -> String {
+        guard !template.isEmpty, !template.hasPrefix("file:"), !template.contains("://") else {
+            return template
+        }
+        var base = packRoot.absoluteString
+        if !base.hasSuffix("/") { base += "/" }
+        var relative = Substring(template)
+        while relative.hasPrefix("/") { relative = relative.dropFirst() }
+        return base + relative
     }
 
     public static func resolved(styleAt styleURL: URL, packRoot: URL, cacheDirectory: URL? = nil) throws -> URL {
@@ -327,7 +346,9 @@ public enum PackStyle {
             ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
-        let out = cache.appendingPathComponent("\(packRoot.lastPathComponent)-style.resolved.json")
+        let out = cache.appendingPathComponent(
+            "\(packRoot.lastPathComponent)-style.resolved.v\(resolverVersion).json"
+        )
         let styleAttrs = try? FileManager.default.attributesOfItem(atPath: styleURL.path)
         let outAttrs = try? FileManager.default.attributesOfItem(atPath: out.path)
         let styleModified = styleAttrs?[.modificationDate] as? Date
@@ -337,8 +358,8 @@ public enum PackStyle {
             return out
         }
         var obj = try JSONSerialization.jsonObject(with: Data(contentsOf: styleURL)) as? [String: Any] ?? [:]
-        if let glyphs = obj["glyphs"] as? String, !glyphs.hasPrefix("file:"), !glyphs.contains("://") {
-            obj["glyphs"] = packRoot.appendingPathComponent(glyphs).absoluteString
+        if let glyphs = obj["glyphs"] as? String {
+            obj["glyphs"] = localGlyphURL(template: glyphs, packRoot: packRoot)
         }
         var sources = obj["sources"] as? [String: Any] ?? [:]
         for (key, raw) in sources {
@@ -435,8 +456,8 @@ public enum PackStyle {
                 "layout": [
                     "text-field": ["get", "name"],
                     "symbol-placement": "line",
-                    "symbol-spacing": 110,
-                    "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 14, 15, 16, 18, 17, 20],
+                    "symbol-spacing": 100,
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 14, 15, 16, 19, 18, 22],
                     "text-font": ["Open Sans Regular"],
                     "text-max-angle": 40,
                     "text-padding": 2,
@@ -461,6 +482,7 @@ public enum PackStyle {
                 "layout": [
                     "text-field": ["get", "ref"],
                     "symbol-placement": "line",
+                    "symbol-spacing": 300,
                     "text-size": ["interpolate", ["linear"], ["zoom"], 11, 15, 14, 18, 16, 21],
                     "text-font": ["Open Sans Regular"],
                     "text-optional": true,
@@ -480,6 +502,7 @@ public enum PackStyle {
                 "type": "symbol",
                 "source": "osm",
                 "minzoom": 10,
+                "maxzoom": 16,
                 "filter": ["has", "place"],
                 "layout": [
                     "text-field": ["get", "name"],
