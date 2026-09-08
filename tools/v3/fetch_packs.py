@@ -137,12 +137,14 @@ PACKS = {
             # the middle of it; the room goes to Fort Bliss and the Franklins,
             # Santa Teresa and Sunland Park west, Horizon City east, and the
             # I-10 run north through Anthony to Las Cruces and the Organs.
+            # South and west sit a whole tile below the previous edge so the
+            # Overpass grid still lands on tiles already fetched.
             "region": {
                 "name": "El Paso / Las Cruces / Organ Mountains region",
-                "south": 31.45,
-                "west": -107.05,
-                "north": 32.55,
-                "east": -106.00,
+                "south": 31.33,
+                "west": -107.17,
+                "north": 32.67,
+                "east": -105.85,
             },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
@@ -217,10 +219,10 @@ PACKS = {
             # Sandia crest east, South Valley and Isleta south, Rio Puerco west.
             "region": {
                 "name": "Albuquerque / Bernalillo / Isleta region",
-                "south": 34.85,
-                "west": -106.95,
-                "north": 35.45,
-                "east": -106.25,
+                "south": 34.73,
+                "west": -107.07,
+                "north": 35.57,
+                "east": -106.13,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
