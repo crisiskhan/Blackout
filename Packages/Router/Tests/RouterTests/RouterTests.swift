@@ -35,6 +35,74 @@ final class RouterTests: XCTestCase {
         XCTAssertNil(GraphRouter.nearestNode(graph: RouteGraph(nodes: [:], edges: []), lat: 0, lon: 0))
     }
 
+    /// Weights are the true distance between the points. That is the only shape
+    /// in which the search's straight-line estimate stays under the road left to
+    /// run, and so the only shape in which it still returns the shortest route.
+    private func measuredGraph(
+        _ points: [Int: (lat: Double, lon: Double)],
+        _ links: [(Int, Int)]
+    ) -> RouteGraph {
+        var nodes: [String: GraphNode] = [:]
+        for (id, c) in points { nodes[String(id)] = GraphNode(id: id, lon: c.lon, lat: c.lat) }
+        var edges: [GraphEdge] = []
+        for (a, b) in links {
+            let m = GraphRouter.haversine(points[a]!.lat, points[a]!.lon, points[b]!.lat, points[b]!.lon)
+            edges.append(GraphEdge(a: a, b: b, m: m, walk: true, drive: true))
+            edges.append(GraphEdge(a: b, b: a, m: m, walk: true, drive: true))
+        }
+        return RouteGraph(nodes: nodes, edges: edges)
+    }
+
+    func testRouteTakesTheShorterWayNotTheOnePointingAtTheDestination() {
+        // Both ways reach node 4. Going through 2 bulges much further north, so
+        // steering by the straight line must not be what picks the route.
+        let g = measuredGraph(
+            [1: (0, 0), 2: (0.010, 0.010), 3: (0.001, 0.010), 4: (0, 0.020)],
+            [(1, 2), (2, 4), (1, 3), (3, 4)]
+        )
+        let r = GraphRouter.route(graph: g, from: 1, to: 4, mode: .walk)
+        XCTAssertEqual(r?.nodeIds, [1, 3, 4])
+        let long = GraphRouter.route(graph: g, from: 1, to: 4, mode: .walk, avoid: [3])
+        XCTAssertEqual(long?.nodeIds, [1, 2, 4])
+        XCTAssertGreaterThan(long!.meters, r!.meters)
+    }
+
+    func testRouteWalksAwayFromTheDestinationWhenThatIsTheOnlyWay() {
+        // 3 and 4 do not touch. The only path leaves the direct line entirely.
+        let g = measuredGraph(
+            [1: (0, 0), 2: (0, 0.01), 3: (0, 0.02), 4: (0, 0.04), 5: (0.03, 0.03)],
+            [(1, 2), (2, 3), (3, 5), (5, 4)]
+        )
+        XCTAssertEqual(GraphRouter.route(graph: g, from: 1, to: 4, mode: .walk)?.nodeIds, [1, 2, 3, 5, 4])
+    }
+
+    func testNearestNodeWidensUntilItCanBeatEveryCellItHasNotRead() {
+        // Spread wider than one grid cell so the search has to expand, and probe
+        // from a point outside every cell holding a node.
+        var nodes: [String: GraphNode] = [:]
+        for i in 0..<40 {
+            nodes[String(i + 1)] = GraphNode(id: i + 1, lon: -106.0 - Double(i) * 0.05, lat: 31.0 + Double(i) * 0.03)
+        }
+        let g = RouteGraph(nodes: nodes, edges: [])
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 31.0, lon: -106.0), 1)
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 32.17, lon: -107.95), 40)
+        for probe in [(lat: 30.0, lon: -104.0), (lat: 31.5, lon: -106.9), (lat: 35.0, lon: -110.0)] {
+            var best = (id: -1, metres: Double.infinity)
+            for n in g.nodes.values {
+                let d = GraphRouter.haversine(probe.lat, probe.lon, n.lat, n.lon)
+                if d < best.metres { best = (n.id, d) }
+            }
+            XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: probe.lat, lon: probe.lon), best.id)
+        }
+    }
+
+    func testIndexKeepsTheTwoModesApart() {
+        let g = twoHopWalkOnly()
+        XCTAssertFalse(g.index.links(.walk).isEmpty)
+        XCTAssertTrue(g.index.links(.drive).isEmpty)
+        XCTAssertEqual(g.index.point.count, g.nodes.count)
+    }
+
     func testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph() {
         let g = twoHopWalkOnly()
         let walk = GraphPlan.line(graph: g, from: (lat: 0, lon: 0), to: (lat: 0, lon: 0.02), mode: .walk)
