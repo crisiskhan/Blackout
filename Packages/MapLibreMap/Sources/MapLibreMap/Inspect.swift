@@ -85,11 +85,16 @@ public enum Inspect {
     public static let holdLiftTo = 0.3
 
     /// Everything the map drew under the thumb, and which of it the card is
-    /// about. Water wins over ground and ground over roads: the point of
-    /// holding is to find what is out there, and a road is already drawn with
-    /// its name on it. Within a rank a named record beats an unnamed one.
+    /// about.
+    ///
+    /// Water first, because finding water is what holding a place is for.
+    /// After that a record the survey named beats one it did not: a name means
+    /// somebody stood at that exact thing, while ground cover is a sheet laid
+    /// under everything, and a town polygon covers every street in El Paso.
+    /// Only then does kind decide, so ground still beats an unnamed track —
+    /// out there the biome is the answer and the track is not.
     public static func pick(_ found: [[String: String]]) -> [String: String] {
-        func rank(_ tags: [String: String]) -> Int {
+        func kindRank(_ tags: [String: String]) -> Int {
             switch read(tags: tags).kind {
             case .water: return 0
             case .land: return 1
@@ -101,12 +106,15 @@ public enum Inspect {
         func named(_ tags: [String: String]) -> Bool {
             !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
         }
+        func rank(_ tags: [String: String]) -> (Int, Int, Int) {
+            let kind = kindRank(tags)
+            return (kind == 0 ? 0 : 1, named(tags) ? 0 : 1, kind)
+        }
         return found
             .filter { !$0.isEmpty }
             .min { a, b in
                 let (ra, rb) = (rank(a), rank(b))
                 if ra != rb { return ra < rb }
-                if named(a) != named(b) { return named(a) }
                 return a.count > b.count
             } ?? [:]
     }
@@ -485,6 +493,18 @@ public enum Inspect {
                     klass: "Irrigated ground", kind: .land, sure: 74,
                     why: "mapped as worked ground, which in this country means a ditch reaches it",
                     advice: .field, field: plantCard, unnamedPenalty: 4
+                )
+            case "salt_pond":
+                return Reading(
+                    klass: "Salt flat", kind: .land, sure: 78,
+                    why: "a drawn boundary around worked salt ground, so the outline is exact",
+                    advice: .field, field: heatCard, unnamedPenalty: 4
+                )
+            case "residential":
+                return Reading(
+                    klass: "Built-up ground", kind: .land, sure: 70,
+                    why: "a boundary somebody drew round houses and streets, so the edge is firmer than the middle",
+                    advice: .field, field: lostCard, unnamedPenalty: 4
                 )
             default:
                 break

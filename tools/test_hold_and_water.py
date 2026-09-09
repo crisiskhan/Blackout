@@ -226,27 +226,70 @@ def assert_the_record_survives_tiling(pack_id: str) -> None:
     print(f"OK   {pack_id} water={dict(sorted(found_water.items()))} land={dict(sorted(found_land.items()))}")
 
 
+def swift_branches_on(swift: str) -> set[tuple[str, str]]:
+    """The `(tag, value)` pairs `Inspect.swift` actually tests for.
+
+    Reading the file for a bare `"residential"` is not enough: the word is in
+    the list of paved highway kinds, so a search finds it while the land
+    reader walks straight past `landuse=residential` into Open ground. That is
+    the exact miss this catches, so it has to read the branches.
+    """
+    pairs: set[tuple[str, str]] = set()
+    for key, value in re.findall(r't\["(\w+)"\]\s*==\s*"([\w:]+)"', swift):
+        pairs.add((key, value))
+
+    def cases_in(block: str, key: str) -> None:
+        for case in re.findall(r"case ([^:\n]+):", block):
+            for literal in re.findall(r'"([\w:]+)"', case):
+                pairs.add((key, literal))
+
+    # `switch t["content"] { ... }`, and the bound form the tag switches use:
+    # `if let made = t["man_made"] { switch made { ... } }`.
+    for match in re.finditer(r'switch t\["(\w+)"\]\s*\{', swift):
+        cases_in(brace_body(swift, match.end() - 1), match.group(1))
+    for match in re.finditer(r'if let (\w+) = t\["(\w+)"\]', swift):
+        bound, key = match.group(1), match.group(2)
+        rest = swift[match.end():]
+        opened = re.search(r"switch " + re.escape(bound) + r"\s*\{", rest)
+        if opened:
+            cases_in(brace_body(rest, opened.end() - 1), key)
+    return pairs
+
+
+def brace_body(text: str, open_brace: int) -> str:
+    """The text between `text[open_brace]` and the `}` that closes it."""
+    depth = 0
+    for i in range(open_brace, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[open_brace + 1:i]
+    return text[open_brace + 1:]
+
+
 def assert_the_tiler_and_the_card_know_the_same_words() -> None:
     """Anything the tiler draws, the card has to be able to name.
 
     These live in two languages and drift silently: the tiler starts shipping
-    `natural=scrub` and the card keeps calling it Open ground, so the layer
-    appears and holding it says nothing. Every tag value the tiler classes on
-    has to appear in the Swift reader.
+    `landuse=residential` as town-coloured ground, the card never learns the
+    tag, and holding the whole of El Paso answers "nothing is mapped at this
+    point". So every record the tiler gives a class to has to be a record the
+    card branches on.
     """
     swift = (MAP / "Inspect.swift").read_text()
+    branches = swift_branches_on(swift)
     missing = []
     for tags in EVERY_KIND_OF_THING:
-        kind = water_class(tags) or land_class(tags)
-        if kind is None:
+        if (water_class(tags) or land_class(tags)) is None:
             fail(f"the tiler classes nothing for {tags}")
-        for value in tags.values():
-            if f'"{value}"' not in swift:
-                missing.append(f"{tags} -> {value}")
+        if not any((key, value) in branches for key, value in tags.items()):
+            missing.append(tags)
     if missing:
-        fail(f"the tiler draws these but the card cannot name them: {sorted(set(missing))}")
+        fail(f"the tiler draws these and the card reads straight past them: {missing}")
     classed = {water_class(t) or land_class(t) for t in EVERY_KIND_OF_THING}
-    print(f"OK   card names every one of the {len(classed)} classes the tiler draws")
+    print(f"OK   card branches on every one of the {len(classed)} classes the tiler draws")
 
 
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:
@@ -276,6 +319,7 @@ def main() -> None:
     assert_the_card_offers_exactly_two_actions()
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()
+    assert_the_tiler_and_the_card_know_the_same_words()
     for pack_id in PACKS:
         assert_style_draws_ground_and_water(pack_id)
         assert_the_pack_says_when_it_was_pulled(pack_id)

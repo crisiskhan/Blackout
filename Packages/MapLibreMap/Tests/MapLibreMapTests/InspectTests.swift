@@ -71,6 +71,30 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.read(tags: ["man_made": "storage_tank", "content": "sewage"]).advice, .leave)
     }
 
+    func testGroundTheMapColoursInIsNeverReadAsOpenGround() {
+        // Every record below is one the tiler gives a class and a colour. When
+        // the reader has no branch for one, the map paints the ground and
+        // holding it answers "nothing is mapped at this point" — which is what
+        // 8,107 `landuse=residential` polygons across the three packs did.
+        for tags in Self.everyKindOfThing where !tags.isEmpty {
+            XCTAssertNotEqual(
+                Inspect.read(tags: tags).kind, .nothing,
+                "\(tags) is drawn on the map and reads back as open ground"
+            )
+        }
+    }
+
+    func testATownReadsAsBuiltUpGroundAndASaltPondAsASaltFlat() {
+        let town = Inspect.read(tags: ["landuse": "residential"])
+        XCTAssertEqual(town.klass, "Built-up ground")
+        XCTAssertEqual(town.kind, .land)
+        XCTAssertEqual(town.fieldCardID, Inspect.lostCard)
+
+        let salt = Inspect.read(tags: ["landuse": "salt_pond"])
+        XCTAssertEqual(salt.klass, "Salt flat")
+        XCTAssertEqual(salt.kind, .land)
+    }
+
     func testWaterSaysTreatAndRunoffSaysLeaveItAndGroundSendsYouToField() {
         XCTAssertEqual(Inspect.read(tags: ["natural": "spring"]).advice, .treat)
         XCTAssertEqual(Inspect.read(tags: ["waterway": "canal"]).advice, .treat)
@@ -94,15 +118,41 @@ final class InspectTests: XCTestCase {
         }
     }
 
-    func testWaterOutranksGroundAndGroundOutranksRoad() {
-        // Holding where a wash crosses a road is a question about the wash. The
-        // road already has its name written along it.
+    func testWaterOutranksEverythingElseUnderTheThumb() {
+        // Holding where a wash crosses a named road is a question about the
+        // wash. The road already has its name written along it, and finding
+        // water is what holding a place is for.
         let found: [[String: String]] = [
             ["highway": "residential", "name": "Alameda Ave"],
             ["natural": "scrub"],
             ["waterway": "stream"],
         ]
         XCTAssertEqual(Inspect.pick(found)["waterway"], "stream")
+    }
+
+    func testATownPolygonDoesNotSwallowTheStreetYouHeld() {
+        // `landuse=residential` is a sheet under the whole of El Paso, so on
+        // kind alone it would answer every hold in the city with the same
+        // anonymous ground. A record the survey named wins instead.
+        let downtown: [[String: String]] = [
+            ["landuse": "residential"],
+            ["highway": "secondary", "name": "Alameda Ave"],
+        ]
+        XCTAssertEqual(Inspect.pick(downtown)["name"], "Alameda Ave")
+
+        // Out of town the rule flips back: an unnamed track is not the answer
+        // to "what is this ground", and the biome is.
+        let backcountry: [[String: String]] = [
+            ["natural": "scrub"],
+            ["highway": "track"],
+        ]
+        XCTAssertEqual(Inspect.pick(backcountry)["natural"], "scrub")
+
+        // Water still outranks both, named or not.
+        XCTAssertEqual(
+            Inspect.pick(downtown + [["waterway": "ditch"]])["waterway"],
+            "ditch"
+        )
     }
 
     func testANamedRecordWinsOverAnUnnamedOneOfTheSameKind() {
@@ -181,14 +231,26 @@ final class InspectTests: XCTestCase {
         ["natural": "peak", "name": "North Franklin"],
         ["natural": "wood"],
         ["natural": "scrub"],
+        ["natural": "heath"],
         ["natural": "sand"],
+        ["natural": "dune"],
         ["natural": "wetland"],
         ["natural": "bare_rock"],
+        ["natural": "scree"],
+        ["natural": "cliff"],
         ["natural": "grassland"],
         ["boundary": "protected_area"],
+        ["boundary": "national_park"],
+        ["leisure": "nature_reserve"],
         ["leisure": "park"],
         ["landuse": "forest"],
         ["landuse": "farmland"],
+        ["landuse": "orchard"],
+        ["landuse": "meadow"],
+        ["landuse": "vineyard"],
+        ["landuse": "basin"],
+        ["landuse": "salt_pond"],
+        ["landuse": "residential"],
         ["place": "city", "name": "El Paso"],
         ["place": "hamlet"],
         ["highway": "residential", "name": "Alameda Ave"],
