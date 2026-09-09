@@ -4,21 +4,17 @@ import Foundation
 ///
 /// MapLibre's PMTiles source strips the `pmtiles://` prefix and hands whatever
 /// is left back to its own loader, so the tail has to be a URL that loader can
-/// already fetch — the same `file://` form the glyphs use. The alternative
-/// spelling (a bare absolute path) is kept only so the render probe can prove
-/// which one the renderer honours instead of us assuming.
+/// already fetch — the same `file://` form the glyphs use. Measured on a
+/// simulator against a real archive rather than assumed:
+///
+///     pmtiles://file:///…/osm.pmtiles   999 features drawn
+///     pmtiles:///…/osm.pmtiles            0 features drawn
 public enum PMTilesURL {
     public static let scheme = "pmtiles://"
 
-    /// The spelling the app ships. Wraps the `file://` URL that this codebase
-    /// already knows MapLibre resolves, because glyphs load the same way.
+    /// The spelling the app ships.
     public static func shipped(for archive: URL) -> String {
         scheme + archive.absoluteString
-    }
-
-    /// Every spelling worth testing, best guess first.
-    public static func candidates(for archive: URL) -> [String] {
-        [shipped(for: archive), scheme + archive.path]
     }
 
     /// True when a style source string is a PMTiles reference the resolver
