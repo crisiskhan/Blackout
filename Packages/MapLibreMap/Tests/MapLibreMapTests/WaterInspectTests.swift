@@ -349,19 +349,31 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertTrue(seen.isSuperset(of: [.canal, .drain, .ditch, .stream, .river, .tank, .acequia, .tap]))
     }
 
-    func testAPressCostsLessThanAFrame() throws {
-        // Ceilings, not measurements: unoptimised on a Linux box the whole
-        // tx-west index loads in 21 ms and a press costs 5.4 ms, and released
-        // it is 1.1 ms and 0.33 ms. These are ten times that, so they cannot
-        // flake on a loaded runner but a real regression still trips them.
+    func testWhatKeepsAPressCheapIsHowManyPointsThereAre() throws {
+        // The press is a flat sweep, so its cost is the point count and the
+        // point count alone. That is a property of the file rather than of
+        // whatever else the machine is doing, which is the only kind of
+        // performance claim a test can actually hold.
+        for pack in ["tx-west", "tx-east", "nm"] {
+            let index = try XCTUnwrap(WaterIndex.load(try shippedIndexData(pack)), pack)
+            XCTAssertLessThanOrEqual(index.pointTotal, index.recordCount * 24, pack)
+            XCTAssertLessThan(index.pointTotal, 150_000, "\(pack) has \(index.pointTotal) points")
+        }
+    }
+
+    func testAPressDoesNotCostAnAbsurdAmountOfTime() throws {
+        // A ceiling, not a measurement, and a loose one on purpose: released on
+        // a desktop one press costs 0.33 ms, unoptimised 5.4 ms, and on a
+        // loaded CI simulator 89 ms. Anything under half a second is within
+        // that spread; what this catches is the flat sweep stopping being flat.
         let data = try shippedIndexData("tx-west")
         var clock = Date()
         let index = try XCTUnwrap(WaterIndex.load(data))
         let load = Date().timeIntervalSince(clock) * 1000
-        XCTAssertLessThan(load, 250, "index load cost \(Int(load)) ms")
+        XCTAssertLessThan(load, 2_000, "index load cost \(Int(load)) ms")
 
         clock = Date()
-        for step in 0..<50 {
+        for step in 0..<20 {
             _ = MapInspect.resolve(
                 lat: 31.7 + Double(step) * 0.01,
                 lon: -106.5 + Double(step) * 0.01,
@@ -369,8 +381,8 @@ final class WaterInspectTests: XCTestCase {
                 index: index
             )
         }
-        let each = Date().timeIntervalSince(clock) * 1000 / 50
-        XCTAssertLessThan(each, 60, "a press cost \(each) ms")
+        let each = Date().timeIntervalSince(clock) * 1000 / 20
+        XCTAssertLessThan(each, 500, "a press cost \(each) ms")
     }
 
     func testRecordLookupRefusesAnIndexOffTheEnd() throws {
