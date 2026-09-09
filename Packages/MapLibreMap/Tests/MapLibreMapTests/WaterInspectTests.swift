@@ -347,6 +347,30 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertTrue(seen.isSuperset(of: [.canal, .drain, .ditch, .stream, .river, .tank, .acequia, .tap]))
     }
 
+    func testAPressCostsLessThanAFrame() throws {
+        // Ceilings, not measurements: unoptimised on a Linux box the whole
+        // tx-west index loads in 21 ms and a press costs 5.4 ms, and released
+        // it is 1.1 ms and 0.33 ms. These are ten times that, so they cannot
+        // flake on a loaded runner but a real regression still trips them.
+        let data = try shippedIndexData("tx-west")
+        var clock = Date()
+        let index = try XCTUnwrap(WaterIndex.load(data))
+        let load = Date().timeIntervalSince(clock) * 1000
+        XCTAssertLessThan(load, 250, "index load cost \(Int(load)) ms")
+
+        clock = Date()
+        for step in 0..<50 {
+            _ = MapInspect.resolve(
+                lat: 31.7 + Double(step) * 0.01,
+                lon: -106.5 + Double(step) * 0.01,
+                zoom: 16,
+                index: index
+            )
+        }
+        let each = Date().timeIntervalSince(clock) * 1000 / 50
+        XCTAssertLessThan(each, 60, "a press cost \(each) ms")
+    }
+
     func testRecordLookupRefusesAnIndexOffTheEnd() throws {
         let index = try XCTUnwrap(WaterIndex.load(try shippedIndexData("tx-west")))
         XCTAssertNil(index.record(at: -1))

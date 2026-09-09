@@ -379,8 +379,9 @@ public enum PackStyle {
     public static let accentInk = "#E10600"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens.
-    public static let resolverVersion = 2
+    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens; v3 gates the
+    /// water lines and attaches the class marks.
+    public static let resolverVersion = 3
 
     private static var resolvedMemory: [String: URL] = [:]
 
