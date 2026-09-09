@@ -110,6 +110,25 @@ def assert_sos_is_not_on_the_map_hold() -> None:
     print("OK   map hold never calls SOS")
 
 
+def assert_the_credit_survives_the_card() -> None:
+    """The card covers the footer, and the footer carried OSM's line.
+
+    Capping the card at half the screen means the map keeps drawing above it,
+    so the attribution has to move up there with it. Hiding the footer and
+    stopping there drops the credit for as long as a card is open, and the
+    older guards only check that the string is somewhere in the file.
+    """
+    body = (APP / "MapTab.swift").read_text()
+    if "OSMCredit.line" not in body:
+        fail("MapTab does not credit OpenStreetMap at all")
+    if not any(
+        "OSMCredit.line" in brace_body(body, match.end() - 1)
+        for match in re.finditer(r"runtime\.held != nil \{", body)
+    ):
+        fail("the hold card hides the footer and takes the OpenStreetMap credit with it")
+    print("OK   OpenStreetMap keeps its credit while the card is open")
+
+
 def assert_the_card_offers_exactly_two_actions() -> None:
     """Two buttons. A third turns a glance into a menu."""
     body = (APP / "HoldCard.swift").read_text()
@@ -317,6 +336,7 @@ def main() -> None:
     assert_the_card_never_sells_the_water()
     assert_sos_is_not_on_the_map_hold()
     assert_the_card_offers_exactly_two_actions()
+    assert_the_credit_survives_the_card()
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()
     assert_the_tiler_and_the_card_know_the_same_words()

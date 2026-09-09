@@ -69,6 +69,22 @@ struct MapTab: View {
                         )
                     }
                 }
+                .overlay(alignment: .topLeading) {
+                    // The card takes the bottom of the canvas and the footer's
+                    // credit with it, but the top half is still drawing OSM's
+                    // map. The line has to stay wherever the map is, so it
+                    // moves up above the scrim rather than going away.
+                    if runtime.held != nil {
+                        Text(OSMCredit.line)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(Color(white: 0.75))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Theme.void.opacity(0.66))
+                            .padding(6)
+                            .allowsHitTesting(false)
+                    }
+                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)
                 .animation(.spring(response: 0.28, dampingFraction: 0.9), value: runtime.held)
