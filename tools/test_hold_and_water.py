@@ -437,6 +437,33 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
 
 
+def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
+    """FIELD has already chosen the card. Do not make anyone choose it again.
+
+    The tab used to draw the whole card list and hang the open card's steps
+    underneath it, so arriving from a hold on the ground put you in front of
+    seventeen titles with the answer pushed off the bottom of a phone. One
+    card open, or the list, never both — and an open card has to carry the way
+    back to the list, or a hold is a one-way door into it.
+    """
+    tab = (APP / "FieldTab.swift").read_text()
+    opened = re.search(r"if let (\w+) = stepper \{", tab)
+    if not opened:
+        fail("FieldTab does not branch on whether a card is open")
+    held = brace_body(tab, opened.end() - 1)
+    if "List(cards)" in held:
+        fail("FieldTab draws the card list over the card the hold already picked")
+    if "ALL CARDS" not in tab:
+        fail("an open card has no way back to the list, so a hold is a one-way door into it")
+    rest = tab[opened.end() + len(held):]
+    fallback = re.match(r"\}\s*else \{", rest)
+    if not fallback:
+        fail("FieldTab has no list to fall back to when no card is open")
+    if "List(cards)" not in brace_body(rest, fallback.end() - 1):
+        fail("FieldTab never shows the card list at all")
+    print("OK   a land hold opens one card's steps, with the list behind ALL CARDS")
+
+
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:
     manifest = json.loads((ROOT / "Resources" / "Packs" / pack_id / "manifest.json").read_text())
     when = manifest.get("osmFetched")
@@ -468,6 +495,7 @@ def main() -> None:
     assert_the_tiler_and_the_card_know_the_same_words()
     assert_a_hold_reads_the_pack_and_not_the_apps_own_ink()
     assert_every_field_card_the_map_can_open_is_really_shipped()
+    assert_a_land_hold_opens_the_stepper_and_not_the_menu()
     for pack_id in PACKS:
         assert_style_draws_ground_and_water(pack_id)
         assert_the_pack_says_when_it_was_pulled(pack_id)

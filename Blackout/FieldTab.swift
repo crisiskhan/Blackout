@@ -12,35 +12,16 @@ struct FieldTab: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("FIELD").foregroundStyle(Color(white: 0.85))
             Text(L10n.t("stop.if", runtime.locale)).font(.caption)
-            List(cards) { c in
-                Button(runtime.locale == "es" ? c.title.es : c.title.en) {
-                    stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
-                }
-            }
+            // One card open, or the list. Never both. The map's FIELD button
+            // has already chosen a card, and landing on the list with the
+            // steps pushed under it makes you hunt for the thing you picked.
             if let s = stepper {
-                Text(s.step.`do`.en)
-                Text(s.step.child.en).font(.caption)
-                if let bpm = s.step.metronomeBpm { Text("CPR \(bpm)").font(.caption) }
-                HStack {
-                    Button("NEXT") { var x = s; x.next(); stepper = x }
-                    Button("SPEAK") {
-                        var x = s; x.speak(); stepper = x
-                        if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech) {
-                            runtime.speechChrome = "SPEECH FAILED"
-                        } else {
-                            runtime.speechChrome = ""
-                        }
+                open(s)
+            } else {
+                List(cards) { c in
+                    Button(loc(c.title)) {
+                        stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
                     }
-                    Button("SEND TO PARTY") {
-                        var x = s
-                        x.send()
-                        stepper = x
-                        runtime.sendFieldToParty(cardID: s.card.id)
-                    }
-                }
-                Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
-                if !runtime.speechChrome.isEmpty {
-                    Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)
                 }
             }
             Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
@@ -55,6 +36,68 @@ struct FieldTab: View {
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .padding(8)
+    }
+
+    /// Every card ships both languages. The list was reading the locale and
+    /// the steps were not, so a Spanish reader picked a card by its Spanish
+    /// title and then got the instructions in English.
+    private func loc(_ text: FieldLoc) -> String {
+        runtime.locale == "es" ? text.es : text.en
+    }
+
+    /// One card, open at one step, with the way back to the list on it. The
+    /// map comes straight in here, so without that way back a hold on the
+    /// ground would be a one-way door into a single card.
+    private func open(_ s: StepperState) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(loc(s.card.title))
+                    .font(.headline)
+                    .foregroundStyle(Color(white: 0.9))
+                Spacer(minLength: 8)
+                Button("ALL CARDS") { stepper = nil }
+                    .font(.caption.weight(.bold))
+            }
+            Text("STEP \(s.index + 1) OF \(s.card.steps.count)")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(Color(white: 0.55))
+            Text(loc(s.step.`do`))
+            Text(loc(s.step.child)).font(.caption)
+            if let bpm = s.step.metronomeBpm { Text("CPR \(bpm)").font(.caption) }
+            HStack {
+                // On the last step NEXT did nothing at all, which reads as a
+                // broken button rather than the end of the card.
+                Button(s.isLast ? "DONE" : "NEXT") {
+                    if s.isLast {
+                        stepper = nil
+                    } else {
+                        var x = s
+                        x.next()
+                        stepper = x
+                    }
+                }
+                Button("SPEAK") {
+                    var x = s; x.speak(); stepper = x
+                    if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech) {
+                        runtime.speechChrome = "SPEECH FAILED"
+                    } else {
+                        runtime.speechChrome = ""
+                    }
+                }
+                Button("SEND TO PARTY") {
+                    var x = s
+                    x.send()
+                    stepper = x
+                    runtime.sendFieldToParty(cardID: s.card.id)
+                }
+            }
+            Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
+            if !runtime.speechChrome.isEmpty {
+                Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func load() {
