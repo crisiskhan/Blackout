@@ -131,8 +131,10 @@ jobs:
                 -scheme "$pkg" \
                 -destination "id=${{ steps.sim.outputs.udid }}" \
                 CODE_SIGNING_ALLOWED=NO ) > "/tmp/$pkg.log" 2>&1 || fail=1
-            grep -E "error:|Testing failed|failed \(|XCTAssert" "/tmp/$pkg.log" | sort -u | head -60
-            grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2
+            # `|| true` on every grep: the step's shell runs with -e, so a grep
+            # that simply finds nothing would end the run before the next package.
+            grep -E "error:|Testing failed|XCTAssert" "/tmp/$pkg.log" | sort -u | head -60 || true
+            grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2 || true
             echo "::endgroup::"
           done
           echo '--- what each pmtiles spelling did ---'

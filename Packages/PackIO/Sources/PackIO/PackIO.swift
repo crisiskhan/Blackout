@@ -85,7 +85,10 @@ public final class PackStore: @unchecked Sendable {
         self.box = box
         let data = try Data(contentsOf: root.appendingPathComponent("catalog.json"))
         let decoded = try JSONDecoder().decode(PackCatalog.self, from: data)
-        self.catalog = PackCatalog(packs: Self.preferPrimary(decoded.packs))
+        // Reordering the packs must not lose the list of states we ship. It did,
+        // which left `switchTo`'s region-leak check reading a nil list and
+        // waving through every pack in the catalog.
+        self.catalog = PackCatalog(states: decoded.states, packs: Self.preferPrimary(decoded.packs))
         self.active = catalog.packs.first(where: { $0.id == Self.defaultPackID }) ?? catalog.packs.first
     }
 
