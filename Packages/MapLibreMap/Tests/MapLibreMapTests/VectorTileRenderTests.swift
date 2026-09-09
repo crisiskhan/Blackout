@@ -15,20 +15,7 @@ import XCTest
 /// query the features under the viewport.
 @MainActor
 final class VectorTileRenderTests: XCTestCase {
-    /// The repo checkout, found from this file rather than a bundle, because the
-    /// packs are source data and are not copied into the test bundle.
-    private static var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // MapLibreMapTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // MapLibreMap
-            .deletingLastPathComponent()  // Packages
-            .deletingLastPathComponent()  // repo root
-    }
-
-    private static var packRoot: URL {
-        repoRoot.appendingPathComponent("Resources/Packs/tx-west")
-    }
+    private static var packRoot: URL { RenderHarness.txWest }
 
     private static let downtownElPaso = CLLocationCoordinate2D(latitude: 31.7587, longitude: -106.4869)
 
@@ -100,64 +87,20 @@ final class VectorTileRenderTests: XCTestCase {
         return out
     }
 
-    /// Boot a map, wait for it to settle, and hand back what it put on screen.
-    private static func withRenderedMap<T>(
-        style: URL,
-        at centre: CLLocationCoordinate2D,
-        zoom: Double,
-        read: (MLNMapView) -> T,
-        fallback: T
-    ) throws -> T {
-        let frame = CGRect(x: 0, y: 0, width: 512, height: 512)
-        let window = UIWindow(frame: frame)
-        let view = MLNMapView(frame: frame, styleURL: style)
-        let watcher = IdleWatcher()
-        view.delegate = watcher
-        window.addSubview(view)
-        window.makeKeyAndVisible()
-        view.setCenter(centre, zoomLevel: zoom, animated: false)
-
-        // Pump the run loop rather than block it; the renderer needs it to turn.
-        let deadline = Date().addingTimeInterval(60)
-        while !watcher.idle, Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
-        }
-        defer {
-            view.removeFromSuperview()
-            window.isHidden = true
-        }
-        guard watcher.idle else {
-            XCTFail("map never finished drawing: \(watcher.failure ?? "timed out")")
-            return fallback
-        }
-        return read(view)
-    }
-
     private static func render(style: URL, at centre: CLLocationCoordinate2D, zoom: Double, layer: String) throws -> Int {
-        try withRenderedMap(style: style, at: centre, zoom: zoom, read: { view in
+        try RenderHarness.withRenderedMap(style: style, at: centre, zoom: zoom, read: { view in
             view.visibleFeatures(in: view.bounds, styleLayerIdentifiers: [layer]).count
         }, fallback: 0)
     }
 
     private static func renderedNames(style: URL, at centre: CLLocationCoordinate2D, zoom: Double) throws -> Set<String> {
-        try withRenderedMap(style: style, at: centre, zoom: zoom, read: { view in
+        try RenderHarness.withRenderedMap(style: style, at: centre, zoom: zoom, read: { view in
             var names = Set<String>()
             for feature in view.visibleFeatures(in: view.bounds, styleLayerIdentifiers: ["roads"]) {
                 if let name = feature.attributes["name"] as? String { names.insert(name) }
             }
             return names
         }, fallback: [])
-    }
-
-    private final class IdleWatcher: NSObject, MLNMapViewDelegate {
-        private(set) var idle = false
-        private(set) var failure: String?
-
-        func mapViewDidBecomeIdle(_ mapView: MLNMapView) { idle = true }
-        func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-            failure = error.localizedDescription
-            idle = true
-        }
     }
 }
 #endif
