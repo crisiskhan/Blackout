@@ -41,6 +41,7 @@ EVERY_KIND_OF_THING: tuple[dict[str, str], ...] = tuple(
         {"man_made": "water_well"},
         {"man_made": "water_tank"},
         {"man_made": "storage_tank"},
+        {"man_made": "storage_tank", "content": "water"},
         {"man_made": "cistern"},
         {"man_made": "reservoir_covered"},
         {"amenity": "drinking_water"},

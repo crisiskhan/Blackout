@@ -201,12 +201,12 @@ public enum Inspect {
                     advice: .treat,
                     field: waterCard
                 )
-            case "water_tank", "storage_tank", "reservoir_covered":
+            case "water_tank":
                 return Reading(
-                    klass: "Tank",
+                    klass: "Water tank",
                     kind: .water,
-                    sure: 72,
-                    why: "mapped as a tank; what is in it now is not recorded",
+                    sure: 74,
+                    why: "mapped as a water tank; how full it is now is not recorded",
                     advice: .treat,
                     field: waterCard
                 )
@@ -219,6 +219,8 @@ public enum Inspect {
                     advice: .treat,
                     field: waterCard
                 )
+            case "storage_tank", "reservoir_covered":
+                return tank(t)
             default:
                 break
             }
@@ -351,6 +353,55 @@ public enum Inspect {
             )
         }
         return nil
+    }
+
+    /// A plain storage tank, which is only water if the record says so.
+    ///
+    /// Around El Paso only 110 of 585 storage tanks carry `content=water`. 470
+    /// say nothing at all and a few say fuel. Calling the silent ones water
+    /// would invent a supply that is as likely to be diesel, so they are read
+    /// as what they are — a tank nobody wrote the contents of — and the card
+    /// says leave it rather than treat it.
+    private static func tank(_ t: [String: String]) -> Reading {
+        switch t["content"] {
+        case "water", "drinking_water", "rainwater":
+            return Reading(
+                klass: "Water tank",
+                kind: .water,
+                sure: 74,
+                why: "the record says this tank holds water; how full it is now is not recorded",
+                advice: .treat,
+                field: waterCard
+            )
+        case "wastewater", "sewage", "slurry":
+            return Reading(
+                klass: "Waste tank",
+                kind: .water,
+                sure: 76,
+                why: "the record says this tank holds waste",
+                advice: .leave,
+                field: waterCard
+            )
+        case .some(let content) where content != "unknown":
+            return Reading(
+                klass: "Tank, holds \(content)",
+                kind: .water,
+                sure: 74,
+                why: "the record names the contents, and they are not water",
+                advice: .leave,
+                field: waterCard
+            )
+        default:
+            return Reading(
+                klass: "Tank, contents unrecorded",
+                kind: .water,
+                sure: 42,
+                why: "a tank is mapped here and nobody wrote down what is in it; out here that is as often fuel as water",
+                advice: .leave,
+                field: waterCard,
+                unnamedPenalty: 2
+            )
+        }
     }
 
     private static func land(_ t: [String: String]) -> Reading? {

@@ -109,10 +109,17 @@ WATER_CLASS_ZOOM = {
     "acequia": 13,
     "drain": 13,
     "tank": 13,
+    "tank_other": 13,
     "well": 13,
     "tap": 13,
     "channel": 13,
 }
+
+# A tank is only water if the record says so. Around El Paso only 110 of 585
+# storage tanks carry `content=water`; 470 say nothing at all and a few say
+# fuel. Drawing all of them as water would invent a supply that is as likely
+# to be diesel, so the unrecorded ones get their own class and their own ink.
+WATER_CONTENT = {"water", "drinking_water", "rainwater", "wastewater", "sewage"}
 
 
 def water_class(props: dict) -> str | None:
@@ -129,8 +136,13 @@ def water_class(props: dict) -> str | None:
         return "spring"
     if made == "water_well":
         return "well"
-    if made in ("water_tank", "storage_tank", "cistern", "reservoir_covered"):
+    if made in ("water_tank", "cistern"):
         return "tank"
+    if made in ("storage_tank", "reservoir_covered"):
+        content = props.get("content")
+        if content in WATER_CONTENT:
+            return "tank"
+        return "tank_other"
     if props.get("amenity") == "drinking_water":
         return "tap"
     if way:
@@ -246,6 +258,7 @@ RECORD_TAGS = (
     "waterway",
     "man_made",
     "water",
+    "content",
     "landuse",
     "leisure",
     "boundary",

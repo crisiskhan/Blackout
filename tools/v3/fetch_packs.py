@@ -79,6 +79,9 @@ KEEP_TAGS = {
     # wash that is dry eleven months a year.
     "man_made",
     "water",
+    # Whether a tank holds water or diesel. Without it a storage tank is an
+    # unknown, and an unknown drawn as water is a lie.
+    "content",
     "intermittent",
     "seasonal",
     "boundary",
@@ -1174,15 +1177,26 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             },
             {
                 # Springs, wells, tanks and taps. A ring, not a badge: it says
-                # the record puts water here, not that the water is good.
+                # the record puts water here, not that the water is good. A
+                # tank whose contents nobody recorded gets a grey ring instead
+                # of the water ring, because out here it is as likely to be
+                # diesel.
                 "id": "water-points",
                 "type": "circle",
                 "source": "osm",
-                "filter": ["in", ["get", "class"], ["literal", ["spring", "well", "tank", "tap"]]],
+                "filter": [
+                    "in",
+                    ["get", "class"],
+                    ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
+                ],
                 "paint": {
                     "circle-color": "#142430",
                     "circle-radius": zoom_stops(12, 2.2, 15, 5.0),
-                    "circle-stroke-color": "#6f97a8",
+                    "circle-stroke-color": [
+                        "match", ["get", "class"],
+                        "tank_other", "#5a5f66",
+                        "#6f97a8",
+                    ],
                     "circle-stroke-width": 1.4,
                 },
             },

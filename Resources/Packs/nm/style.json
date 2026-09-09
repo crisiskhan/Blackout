@@ -259,6 +259,7 @@
             "spring",
             "well",
             "tank",
+            "tank_other",
             "tap"
           ]
         ]
@@ -278,7 +279,16 @@
           15,
           5.0
         ],
-        "circle-stroke-color": "#6f97a8",
+        "circle-stroke-color": [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          "tank_other",
+          "#5a5f66",
+          "#6f97a8"
+        ],
         "circle-stroke-width": 1.4
       },
       "source-layer": "water"

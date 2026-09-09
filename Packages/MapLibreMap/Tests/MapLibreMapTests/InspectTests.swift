@@ -48,6 +48,29 @@ final class InspectTests: XCTestCase {
         }
     }
 
+    func testATankIsOnlyWaterIfTheRecordSaysSo() {
+        // Around El Paso only 110 of 585 storage tanks say `content=water`.
+        // 470 say nothing, and a few say fuel. The silent ones must not be
+        // offered as a supply.
+        let silent = Inspect.read(tags: ["man_made": "storage_tank"])
+        XCTAssertEqual(silent.klass, "Tank, contents unrecorded")
+        XCTAssertEqual(silent.advice, .leave)
+        XCTAssertLessThan(silent.sure, 50)
+
+        let water = Inspect.read(tags: ["man_made": "storage_tank", "content": "water"])
+        XCTAssertEqual(water.klass, "Water tank")
+        XCTAssertEqual(water.advice, .treat)
+        XCTAssertGreaterThan(water.sure, silent.sure)
+
+        let fuel = Inspect.read(tags: ["man_made": "storage_tank", "content": "fuel"])
+        XCTAssertEqual(fuel.advice, .leave)
+        XCTAssertTrue(fuel.klass.contains("fuel"), fuel.klass)
+
+        // A tank tagged as water outright needs no content to be believed.
+        XCTAssertEqual(Inspect.read(tags: ["man_made": "water_tank"]).advice, .treat)
+        XCTAssertEqual(Inspect.read(tags: ["man_made": "storage_tank", "content": "sewage"]).advice, .leave)
+    }
+
     func testWaterSaysTreatAndRunoffSaysLeaveItAndGroundSendsYouToField() {
         XCTAssertEqual(Inspect.read(tags: ["natural": "spring"]).advice, .treat)
         XCTAssertEqual(Inspect.read(tags: ["waterway": "canal"]).advice, .treat)
@@ -135,6 +158,12 @@ final class InspectTests: XCTestCase {
         ["man_made": "water_well"],
         ["man_made": "water_tank"],
         ["man_made": "cistern"],
+        ["man_made": "storage_tank"],
+        ["man_made": "storage_tank", "content": "water"],
+        ["man_made": "storage_tank", "content": "fuel"],
+        ["man_made": "storage_tank", "content": "sewage"],
+        ["man_made": "storage_tank", "content": "unknown"],
+        ["man_made": "reservoir_covered"],
         ["amenity": "drinking_water"],
         ["waterway": "river", "name": "Rio Grande"],
         ["waterway": "stream"],
