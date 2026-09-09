@@ -121,6 +121,31 @@ WATER_CLASS_ZOOM = {
 # to be diesel, so the unrecorded ones get their own class and their own ink.
 WATER_CONTENT = {"water", "drinking_water", "rainwater", "wastewater", "sewage"}
 
+# Water the style draws as a dot rather than a shape, so it has to reach the
+# tile as a point.
+#
+# These are mapped both ways in OSM — around El Paso 302 of 583 storage tanks
+# are an outline and the rest are a node — and `water-points` is a circle
+# layer, which has nothing sensible to do with a ring. Between 5m and 32m
+# across, every one of them is a pixel or two at the deepest zoom the archive
+# holds, so the outline was never going to be worth anything on the glass. The
+# centre is: it draws at every zoom and it is where a thumb lands when you hold
+# the tank you can see.
+WATER_POINT_CLASSES = {"spring", "well", "tank", "tank_other", "tap"}
+
+# An unnamed pool the size of a room and an unnamed reservoir read identically
+# off the tags — both are a bare `natural=water`. The outline knows the
+# difference, so carry it: measured off the whole record before the tile clips
+# it, or a pool that straddles a tile edge would shrink at the seam.
+WATER_SPAN_CLASSES = {"body"}
+
+
+def span_metres(geom) -> int:
+    """The longest side of a record's bounding box, on the ground."""
+    west, south, east, north = geom.bounds
+    lat = math.radians((south + north) / 2.0)
+    return int(round(max((east - west) * 111320.0 * math.cos(lat), (north - south) * 110540.0)))
+
 
 def water_class(props: dict) -> str | None:
     """Which kind of water a record is, in the same words the card uses.
@@ -323,6 +348,10 @@ def read_layers(pack: Path) -> dict[str, Layer]:
         if kind:
             keep = {k: v for k, v in props.items() if k in RECORD_TAGS}
             keep["class"] = kind
+            if kind in WATER_SPAN_CLASSES and geom.geom_type in ("Polygon", "MultiPolygon"):
+                keep["span_m"] = span_metres(geom)
+            if kind in WATER_POINT_CLASSES and geom.geom_type != "Point":
+                geom = geom.representative_point()
             water.add(geom, keep, WATER_CLASS_ZOOM.get(kind, WATERWAY_ZOOM))
             continue
         ground = land_class(props)

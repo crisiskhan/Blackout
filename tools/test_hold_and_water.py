@@ -260,6 +260,74 @@ def assert_the_record_survives_tiling(pack_id: str) -> None:
     print(f"OK   {pack_id} water={dict(sorted(found_water.items()))} land={dict(sorted(found_land.items()))}")
 
 
+def circle_layer_classes(pack_id: str) -> dict[str, set[str] | None]:
+    """Source layers a circle draws, and which classes it filters down to.
+
+    `None` means the layer takes everything in that source layer.
+    """
+    style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+    drawn: dict[str, set[str] | None] = {}
+    for layer in style["layers"]:
+        if layer.get("type") != "circle":
+            continue
+        source_layer = layer.get("source-layer")
+        if not source_layer:
+            continue
+        classes: set[str] | None = None
+        filt = layer.get("filter")
+        if isinstance(filt, list) and len(filt) == 3 and filt[0] == "in" and filt[1] == ["get", "class"]:
+            literal = filt[2]
+            if isinstance(literal, list) and literal and literal[0] == "literal":
+                classes = set(literal[1])
+        existing = drawn.get(source_layer, set())
+        drawn[source_layer] = None if classes is None or existing is None else existing | classes
+    return drawn
+
+
+def assert_what_the_style_draws_as_a_dot_is_a_point_in_the_tile(pack_id: str) -> None:
+    """A circle layer has nothing sensible to do with a ring.
+
+    Storage tanks are mapped both ways in OSM, and 302 of the 583 around El
+    Paso came through as an outline between 5 and 32 metres across. At the
+    deepest zoom the archive holds that is a pixel or two, and `water-points`
+    is a circle, `water-fill` only takes `body` and `reservoir`, and the line
+    layers only take channels — so those 302 tanks matched no layer at all.
+    They were in the pack, they were in the tile, and there was nothing on the
+    glass to hold. The tiler centres them now, and this is what stops the
+    outlines coming back.
+    """
+    drawn = circle_layer_classes(pack_id)
+    if not drawn:
+        fail(f"{pack_id} style has no circle layers, so the dots are gone")
+    pack = ROOT / "Resources" / "Packs" / pack_id
+    home = json.loads((pack / "manifest.json").read_text())["home"]
+    rings: dict[str, int] = {}
+    dots = 0
+    with open(pack / "osm.pmtiles", "rb") as fh:
+        reader = Reader(MmapSource(fh))
+        for z, span in ((14, 3), (11, 2)):
+            cx, cy = lonlat_to_tile(home["lon"], home["lat"], z)
+            for dx in range(-span, span + 1):
+                for dy in range(-span, span + 1):
+                    blob = reader.get(z, int(cx) + dx, int(cy) + dy)
+                    if not blob:
+                        continue
+                    tile = mapbox_vector_tile.decode(gzip.decompress(blob))
+                    for source_layer, classes in drawn.items():
+                        for feature in tile.get(source_layer, {}).get("features", []):
+                            kind = feature["properties"].get("class")
+                            if classes is not None and kind not in classes:
+                                continue
+                            if feature["geometry"]["type"] == "Point":
+                                dots += 1
+                            else:
+                                key = f"{source_layer}/{kind}"
+                                rings[key] = rings.get(key, 0) + 1
+    if rings:
+        fail(f"{pack_id} tiles a shape where the style draws a dot, so it lands on no layer: {rings}")
+    print(f"OK   {pack_id} every one of {dots} dots the style draws is a point in the tile")
+
+
 def swift_branches_on(swift: str) -> set[tuple[str, str]]:
     """The `(tag, value)` pairs `Inspect.swift` actually tests for.
 
@@ -500,6 +568,7 @@ def main() -> None:
         assert_style_draws_ground_and_water(pack_id)
         assert_the_pack_says_when_it_was_pulled(pack_id)
         assert_the_record_survives_tiling(pack_id)
+        assert_what_the_style_draws_as_a_dot_is_a_point_in_the_tile(pack_id)
     print("PASS hold card and the water/land layer")
 
 

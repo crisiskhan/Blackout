@@ -64,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 33997346,
+  "bytes": 34046073,
   "files": [
     "contours.geojson",
     "dem.json",
