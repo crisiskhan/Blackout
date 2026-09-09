@@ -46,6 +46,7 @@ struct HoldCardView: View {
                         }
                 )
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .transition(.opacity)
     }
 
@@ -66,11 +67,10 @@ struct HoldCardView: View {
         .background(glass)
         .overlay(alignment: .top) {
             // One red hairline so the card reads as this app's and not as a
-            // system sheet.
+            // system sheet. The card's own clip rounds its ends.
             Rectangle()
                 .fill(Theme.accent)
                 .frame(height: 2)
-                .clipShape(UnevenRoundedRectangle(topLeadingRadius: corner, topTrailingRadius: corner))
         }
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
