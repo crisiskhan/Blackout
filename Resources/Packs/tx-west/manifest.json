@@ -7,10 +7,10 @@
   "defaultOpen": true,
   "walkable": true,
   "bbox": {
-    "south": 31.65,
-    "west": -106.85,
-    "north": 32.4,
-    "east": -106.2
+    "south": 31.33,
+    "west": -107.17,
+    "north": 32.67,
+    "east": -105.85
   },
   "slices": {
     "metro": {
@@ -56,6 +56,17 @@
         "east": -106.2
       },
       "featureCount": 128405
+    },
+    "region": {
+      "name": "El Paso / Las Cruces / Organ Mountains region",
+      "bbox": {
+        "name": "El Paso / Las Cruces / Organ Mountains region",
+        "south": 31.33,
+        "west": -107.17,
+        "north": 32.67,
+        "east": -105.85
+      },
+      "featureCount": 167585
     }
   },
   "banners": [
@@ -63,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 51550987,
+  "bytes": 57951988,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -83,12 +94,13 @@
     "metro.geojson",
     "osm.geojson",
     "pois.geojson",
+    "region.geojson",
     "style.json",
     "wild.geojson"
   ],
   "center": {
-    "lat": 32.025,
-    "lon": -106.525
+    "lat": 32.0,
+    "lon": -106.50999999999999
   },
   "home": {
     "lat": 31.78,
@@ -98,51 +110,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 1677239,
+    "bytes": 1551373,
     "width": 2048,
-    "height": 2363,
+    "height": 2079,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -106.85,
-        32.4
+        -107.17,
+        32.67
       ],
       [
-        -106.2,
-        32.4
+        -105.85,
+        32.67
       ],
       [
-        -106.2,
-        31.65
+        -105.85,
+        31.33
       ],
       [
-        -106.85,
-        31.65
+        -107.17,
+        31.33
       ]
     ]
   },
   "stats": {
-    "features": 128691,
-    "highwayLines": 121593,
-    "namedStreets": 37395,
+    "features": 167752,
+    "highwayLines": 156241,
+    "namedStreets": 53804,
     "sampleStreetNames": [
-      "Carretera Samalayuca-El Oasis",
-      "Kamikase",
-      "Transformers",
-      "Potreros",
-      "West Franklin Avenue",
-      "Arizona Avenue",
-      "West Crosby Avenue",
-      "Fewel Street",
-      "East Rio Grande Avenue",
-      "West Main Drive",
-      "West San Francisco Avenue",
-      "West Wyoming Avenue"
+      "Carretera Ciudad Juárez-Miguel Ahumada",
+      "Carretera Miguel Ahumada-Ciudad Juárez",
+      "Dunas",
+      "Calle Ramal a Samalayuca",
+      "Calle Fidel Holguin",
+      "Calle Vicente Guerrero",
+      "Calle Ignacio Allende",
+      "Calle José María Morelos",
+      "Calle Samalayuca",
+      "Calle Miguel Hidalgo y Costilla",
+      "Calle Agustín Esparza",
+      "Calle Pedro Avalos"
     ],
-    "water": 5193,
-    "places": 181,
-    "graphEdges": 503279,
-    "graphNodes": 189843,
+    "water": 8715,
+    "places": 389,
+    "graphEdges": 673021,
+    "graphNodes": 237242,
     "streetsVisibleAtWalkingZoom": true
   }
 }

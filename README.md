@@ -49,13 +49,25 @@ Real OSM + DEM-derived contours, generated at build time (no runtime uplink). **
 
 | Pack | Ground | Opens on | Wild overlay |
 |---|---|---|---|
-| TX WEST (default) | El Paso up the Anthony corridor to Las Cruces; Socorro and Horizon City east, Santa Teresa and Sunland Park west, Ciudad Juárez across the river | El Paso metro | Franklin Mountains |
-| TX EAST (walkable) | Austin out to Manor and Elgin northeast, Bastrop southeast, Buda south | Austin metro | Lost Pines / Bastrop |
-| NM (walkable) | Albuquerque with Rio Rancho, Bernalillo, South Valley and the Sandia crest | Albuquerque metro | Sandia foothills |
+| TX WEST (default) | El Paso and Ciudad Juárez in the middle; north up the Anthony corridor through Las Cruces and Mesilla to the Organ Mountains, Santa Teresa and Sunland Park west, Socorro and Horizon City east, Samalayuca desert south | El Paso metro | Franklin Mountains |
+| TX EAST (walkable) | Austin out to Pflugerville and Manor north, Elgin and Bastrop east, Buda and Kyle south | Austin metro | Lost Pines / Bastrop |
+| NM (walkable) | Albuquerque with Corrales, Rio Rancho, Bernalillo and Placitas north, the Sandia crest east, South Valley and Isleta south, Rio Puerco west | Albuquerque metro | Sandia foothills |
 
 A pack's bbox is the union of its slices; `home` is the metro slice, so the canvas opens on streets rather than on the empty midpoint of a wide box. `tools/test_walkable_next_pack.py` holds a coverage floor: a pack may grow past the ground it shipped with, never retreat inside it.
 
-The wire-format and GeoJSON savings below went straight back into ground. TX WEST now carries 6× the area for the same ~50 MB it always did; NM 3.5×, TX EAST 1.7×.
+The wire-format and GeoJSON savings below go straight back into ground. Against what CPV 69 put on phones, TX WEST covers 3.6× the area, NM 4.0×, TX EAST 1.4× — and the three packs together still weigh 0.20 GB, because Douglas-Peucker at 1.1 m drops about a third of the vertices OSM ships without changing a line the canvas can draw.
+
+| Pack | Bytes | Highway lines | Named streets | Graph |
+|---|---|---|---|---|
+| TX WEST | 58.0 MB | 156,241 | 53,804 | 237,242 nodes / 673,021 edges |
+| NM | 56.8 MB | 144,884 | 35,716 | 221,604 nodes / 650,667 edges |
+| TX EAST | 86.5 MB | 251,209 | 45,194 | 307,954 nodes / 874,075 edges |
+
+### The walk graph walks
+
+`oneway` is a rule about cars. Folding it into both travel modes left 37,863 of tx-west's walk edges (7.6%) one-directional, inventing detours — and on short blocks no path at all — purely on the side of the street the traffic runs against. Direction is per mode now: `oneway` binds cars, only `oneway:foot` binds feet, and `oneway=-1` means the reverse direction is the passable one rather than neither. `foot=no`, `access=private` and `motor_vehicle=no` keep routes nobody may take out of the graph. Rebuilt, tx-west is down to 3 one-way walk edges — the genuine `oneway:foot` ways — while car one-ways still stand at 9.6%.
+
+`RouteGraph` carries a `GraphIndex` built once when a pack loads: adjacency per mode, node positions, and a 0.02° grid. Nearest-node reads the rings around a tap and stops when no further ring could hold anything closer. The search adds the straight line to the destination to its ordering, which only returns the true shortest path if no stored length undershoots the line it spans — so `pack_graph` measures each segment between the coordinates it actually ships and rounds up.
 
 `graph.json` ships on wire v2 — nodes are dense indices into parallel lat/lon arrays and one `a, b, metres, flags` record carries both directions of a street. `pack_graph` in `tools/v3/fetch_packs.py` writes it and `PackedGraph` in `Packages/Router` reads it; change one and change the other.
 
