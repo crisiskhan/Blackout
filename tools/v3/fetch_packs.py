@@ -142,10 +142,10 @@ PACKS = {
             # Overpass grid still lands on tiles already fetched.
             "region": {
                 "name": "El Paso / Las Cruces / Organ Mountains region",
-                "south": 31.33,
-                "west": -107.17,
-                "north": 32.67,
-                "east": -105.85,
+                "south": 30.95,
+                "west": -107.60,
+                "north": 33.15,
+                "east": -105.35,
             },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
@@ -220,10 +220,10 @@ PACKS = {
             # Sandia crest east, South Valley and Isleta south, Rio Puerco west.
             "region": {
                 "name": "Albuquerque / Bernalillo / Isleta region",
-                "south": 34.73,
-                "west": -107.07,
-                "north": 35.57,
-                "east": -106.13,
+                "south": 34.35,
+                "west": -107.45,
+                "north": 35.95,
+                "east": -105.65,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
