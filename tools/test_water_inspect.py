@@ -30,6 +30,7 @@ TOKENS_SWIFT = ROOT / "Packages/Tokens/Sources/Tokens/Tokens.swift"
 MAP_TAB = ROOT / "Blackout/MapTab.swift"
 CARD = ROOT / "Blackout/MapInspectCard.swift"
 FIELD_TAB = ROOT / "Blackout/FieldTab.swift"
+RUNTIME = ROOT / "Blackout/AppRuntime.swift"
 
 
 def style_of(pack_id: str) -> dict:
@@ -407,3 +408,20 @@ class HoldToInspect(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestFieldHandoffDefersTeardown(unittest.TestCase):
+    """ASC 72: Field on the glass card must not tear the card down in-stack."""
+
+    def test_open_field_queues_tab_and_close_off_the_button_stack(self):
+        runtime = RUNTIME.read_text(encoding="utf-8")
+        start = runtime.index("func openField(cardID: String)")
+        body = runtime[start : runtime.index("func toggleLockOn()", start)]
+        self.assertIn("pendingFieldCardID = cardID", body)
+        self.assertIn("Task { @MainActor in", body)
+        self.assertIn("tab = .field", body)
+        self.assertIn("closeInspect()", body)
+        # Teardown must not run synchronously before the Task.
+        sync = body.split("Task { @MainActor in", 1)[0]
+        self.assertNotIn("tab = .field", sync)
+        self.assertNotIn("closeInspect()", sync)
