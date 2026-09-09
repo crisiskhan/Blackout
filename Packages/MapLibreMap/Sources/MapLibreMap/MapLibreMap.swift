@@ -389,6 +389,9 @@ public enum PackStyle {
             } else if kind == "image", let rel = src["url"] as? String, !rel.hasPrefix("file:"), !rel.contains("://") {
                 src["url"] = packRoot.appendingPathComponent(rel).absoluteString
                 sources[key] = src
+            } else if kind == "vector", let rel = src["url"] as? String, PMTilesURL.isRelative(rel) {
+                src["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[key] = src
             }
         }
         obj["sources"] = sources
