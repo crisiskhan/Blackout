@@ -89,13 +89,81 @@ z12. Footways and paths come in at z13 with the residential grid.
 
 The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
 before and NM 3.65×, while all three packs together drop from 201.0 MB to
-89.9 MB.
+96.7 MB — and that figure now carries the water and land-cover layer as well.
 
-| Pack | Ships | of which streets | of which graph | Highway lines | Named streets | Graph |
+| Pack | Ships | of which tiles | of which graph | Highway lines | Named streets | Graph |
 |---|---|---|---|---|---|---|
-| TX WEST | 32.1 MB | 15.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
-| NM | 31.8 MB | 13.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
-| TX EAST | 26.0 MB | 11.5 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+| TX WEST | 33.1 MB | 16.7 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 34.0 MB | 15.8 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX EAST | 29.6 MB | 15.1 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+
+### Hold a place to read the record
+
+The map answers a thumb held still for 0.4s. The recogniser fails if the thumb
+drifts more than 12pt, so a drag is still a drag and no card appears; a tap is
+made to wait on the hold, so a press that becomes a card cannot also move the
+destination out from under it. The probe reads a 44pt box rather than a point
+— a thumb is not a pixel — and ranks what it finds: water over ground, ground
+over roads, named over unnamed. A road already has its name written along it,
+so holding one where a wash crosses it is a question about the wash.
+
+The card is content-sized and capped at half the screen, and the held point
+gets its own bright pin over the scrim, so the place is never behind the thing
+describing it. Tap the dim map or drag the card down to close. Two actions,
+FIELD and MARK. There is no third and there is no SOS: SOS is a Comms button,
+and a thumb resting on a map is not a call for help. `MARK` marks the held
+place rather than the fix, and carries the record's name into the label.
+
+`SURE %` is confidence **in the record**, and the line beside it says why. It
+is never a rating of the water. An unnamed `waterway=stream` reads *"the record
+says stream and no more; out here that is usually dry between rains"* at 52% —
+a statement about the survey, not the drink. What to do about the water is the
+`DO` row's job, and Field's. `tools/test_hold_and_water.py` fails the build if
+any word of permission — potable, drinkable, safe to drink, edible — reaches
+either file, and if the card ever grows a third button or reaches for SOS.
+
+### Water and ground
+
+The first fetch asked for streets, waterways and lakes. It never asked for the
+springs, wells and stock tanks that are the only water in most of this country,
+nor for the scrub, sand and bare rock that say what the ground is. A second
+narrow pass (`fetch_packs.py --resources`) fetches exactly those over the same
+bbox and merges them into the extract already on disk. It is additive: the
+router's graph is re-encoded from the bytes already there rather than rebuilt,
+so all three `graph.bin` came out byte-identical, which is the proof the El
+Paso streets did not move.
+
+| Records added | TX WEST | NM |
+|---|---|---|
+| Springs / wells / tanks | 15 / 75 / 922 | 99 / 268 / 1,271 |
+| Acequias and ditches | 522 | 3,326 |
+| Drains | 3,121 | 1,968 |
+| Canals and rivers | 1,343 | 1,095 |
+| Desert, sand and rock | 809 | 2,045 |
+| Built-up ground | 1,838 | 2,743 |
+
+Tinajas are not in this table because they are not in the record. A handful of
+features carry the word in a name — `Cañon la Tinaja` is a wash, `Cerros Ojo
+Caliente` is a hill — and classing on a name would be the map guessing. An
+unnamed `natural=water` polygon in this country reads *"mapped as standing
+water with no name, which often means a stock tank or a seasonal pool"*, which
+is what the record actually supports.
+
+Ground cover draws as a quiet fill from the archive floor and fades to almost
+nothing by street zoom, where the streets carry the map; the inks are all
+within a few points of black so they can never compete with a silver street or
+a red route. Rivers and canals come in at z10 where you are choosing a
+direction. A wash is drawn dashed, because a solid stroke would promise water
+that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
+not a badge — the ring says the record puts water here, not that it is good.
+There are no animal icons, no edible dots, and no number anywhere that could be
+read as safe to drink.
+
+Repairing geometry is part of tiling now. OSM has plenty of areas whose ring
+crosses itself, and Shapely indexes them happily then throws on the first tile
+that clips one — a single bad polygon near Austin killed a whole pack build.
+`repair()` runs `make_valid` and keeps only the parts with the original's
+dimension, so a broken polygon cannot come back as a stray line.
 
 ### The walk graph walks
 

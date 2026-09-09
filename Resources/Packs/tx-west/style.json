@@ -71,6 +71,57 @@
       }
     },
     {
+      "id": "land-fill",
+      "type": "fill",
+      "source": "osm",
+      "paint": {
+        "fill-color": [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          "desert",
+          "#17120c",
+          "playa",
+          "#1a1a1e",
+          "mountain",
+          "#121417",
+          "bosque",
+          "#0b1410",
+          "woodland",
+          "#0a120d",
+          "farm",
+          "#0e1410",
+          "town",
+          "#141417",
+          "park",
+          "#0a140a",
+          "protected",
+          "#0c1310",
+          "#101010"
+        ],
+        "fill-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.62,
+          11,
+          0.46,
+          13,
+          0.22,
+          14,
+          0.12
+        ]
+      },
+      "source-layer": "land"
+    },
+    {
       "id": "public-land-fill",
       "type": "fill",
       "source": "public-land",
@@ -93,12 +144,18 @@
       "type": "fill",
       "source": "osm",
       "filter": [
-        "==",
+        "in",
         [
           "get",
-          "natural"
+          "class"
         ],
-        "water"
+        [
+          "literal",
+          [
+            "body",
+            "reservoir"
+          ]
+        ]
       ],
       "paint": {
         "fill-color": "#142430",
@@ -111,8 +168,21 @@
       "type": "line",
       "source": "osm",
       "filter": [
-        "has",
-        "waterway"
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "river",
+            "canal",
+            "creek",
+            "acequia",
+            "dam"
+          ]
+        ]
       ],
       "paint": {
         "line-color": "#3d6478",
@@ -129,6 +199,87 @@
           15,
           2.6
         ]
+      },
+      "source-layer": "water"
+    },
+    {
+      "id": "water-ephemeral",
+      "type": "line",
+      "source": "osm",
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "wash",
+            "drain",
+            "channel"
+          ]
+        ]
+      ],
+      "paint": {
+        "line-color": "#2f4a59",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          12,
+          0.7,
+          15,
+          2.0
+        ],
+        "line-dasharray": [
+          2.5,
+          2.0
+        ]
+      },
+      "source-layer": "water"
+    },
+    {
+      "id": "water-points",
+      "type": "circle",
+      "source": "osm",
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "spring",
+            "well",
+            "tank",
+            "tap"
+          ]
+        ]
+      ],
+      "paint": {
+        "circle-color": "#142430",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          12,
+          2.2,
+          15,
+          5.0
+        ],
+        "circle-stroke-color": "#6f97a8",
+        "circle-stroke-width": 1.4
       },
       "source-layer": "water"
     },
@@ -444,6 +595,60 @@
         "circle-stroke-width": 0.8
       },
       "source-layer": "place"
+    },
+    {
+      "id": "water-labels",
+      "type": "symbol",
+      "source": "osm",
+      "minzoom": 12,
+      "filter": [
+        "all",
+        [
+          "has",
+          "name"
+        ],
+        [
+          "has",
+          "class"
+        ]
+      ],
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "symbol-placement": "line",
+        "symbol-spacing": 240,
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          12,
+          11,
+          15,
+          14,
+          18,
+          17
+        ],
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-max-angle": 40,
+        "text-padding": 2,
+        "text-optional": true,
+        "text-keep-upright": true
+      },
+      "paint": {
+        "text-color": "#7fa6b8",
+        "text-halo-color": "#000000",
+        "text-halo-width": 2.0,
+        "text-halo-blur": 0.15
+      },
+      "source-layer": "water"
     },
     {
       "id": "road-labels",

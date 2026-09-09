@@ -22,7 +22,7 @@
         "north": 31.82,
         "east": -106.4
       },
-      "featureCount": 22003
+      "featureCount": 22169
     },
     "wild": {
       "name": "Franklin Mountains wild",
@@ -33,7 +33,7 @@
         "north": 32.0,
         "east": -106.4
       },
-      "featureCount": 3498
+      "featureCount": 3591
     },
     "border": {
       "name": "El Paso TX+NM border union",
@@ -44,7 +44,7 @@
         "north": 31.9,
         "east": -106.35
       },
-      "featureCount": 61385
+      "featureCount": 62261
     },
     "corridor": {
       "name": "El Paso / Las Cruces corridor",
@@ -55,7 +55,7 @@
         "north": 32.4,
         "east": -106.2
       },
-      "featureCount": 128406
+      "featureCount": 133488
     },
     "region": {
       "name": "El Paso / Las Cruces / Organ Mountains region",
@@ -66,7 +66,7 @@
         "north": 33.15,
         "east": -105.35
       },
-      "featureCount": 196185
+      "featureCount": 203231
     }
   },
   "banners": [
@@ -74,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 32138074,
+  "bytes": 33089636,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -106,6 +106,7 @@
     "lat": 31.78,
     "lon": -106.46000000000001
   },
+  "osmFetched": "2026-09-09",
   "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
@@ -132,7 +133,7 @@
     ]
   },
   "stats": {
-    "features": 196573,
+    "features": 203622,
     "highwayLines": 173901,
     "namedStreets": 60153,
     "sampleStreetNames": [
@@ -149,8 +150,8 @@
       "FM 34",
       "Love Road"
     ],
-    "water": 19457,
-    "places": 481,
+    "water": 19466,
+    "places": 484,
     "graphEdges": 742351,
     "graphNodes": 263512,
     "streetsVisibleAtWalkingZoom": true
