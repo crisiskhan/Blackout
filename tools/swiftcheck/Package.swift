@@ -40,7 +40,7 @@ let package = Package(
         ),
         .testTarget(
             name: "MapLibreMapTests",
-            dependencies: ["MapLibreMap", "PackIO", "Router"],
+            dependencies: ["MapLibreMap", "PackIO", "Router", "BlackBox"],
             path: "Tests/MapLibreMapTests"
         ),
         .testTarget(

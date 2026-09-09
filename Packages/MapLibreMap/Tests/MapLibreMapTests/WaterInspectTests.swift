@@ -1,3 +1,5 @@
+import BlackBox
+import PackIO
 import XCTest
 
 @testable import MapLibreMap
@@ -470,6 +472,59 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertTrue(onIt.isWater)
         XCTAssertTrue(beside.isWater)
         XCTAssertLessThan(sureBeside, sureOnIt)
+    }
+
+    // MARK: - The whole path, the way the app walks it
+
+    func testAPressIsAnsweredFromThePackTheStoreOpened() throws {
+        // Catalogue on disk, active pack, the file it names, the index, the
+        // finding. This is the path AppRuntime takes and the only one that
+        // proves `layers/water.bin` is where the store thinks it is.
+        let root = try repoRoot().appendingPathComponent("Resources/Packs")
+        let store = try PackStore(root: root, box: EventLog())
+        XCTAssertEqual(store.active?.id, "tx-west")
+
+        let url = try XCTUnwrap(store.packURL("layers/water.bin"))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path), url.path)
+        let index = try XCTUnwrap(WaterIndex.load(from: url))
+        let finding = MapInspect.resolve(lat: 31.73561, lon: -106.4382, zoom: 16, index: index)
+        XCTAssertTrue(finding.isWater)
+        XCTAssertTrue(finding.title.contains("Acequia Madre"), finding.title)
+    }
+
+    func testEveryShippedPackAnswersFromItsOwnWater() throws {
+        let root = try repoRoot().appendingPathComponent("Resources/Packs")
+        let store = try PackStore(root: root, box: EventLog())
+        for pack in store.catalog.packs {
+            try store.switchTo(pack.id)
+            let url = try XCTUnwrap(store.packURL("layers/water.bin"), pack.id)
+            let index = try XCTUnwrap(WaterIndex.load(from: url), pack.id)
+            XCTAssertGreaterThan(index.recordCount, 10_000, pack.id)
+            // Somewhere in the middle of the pack, water or not, the answer
+            // comes back rather than throwing or hanging.
+            let finding = MapInspect.resolve(
+                lat: pack.center.lat,
+                lon: pack.center.lon,
+                zoom: 15,
+                index: index
+            )
+            XCTAssertFalse(finding.title.isEmpty, pack.id)
+            XCTAssertFalse(finding.doLine.isEmpty, pack.id)
+            XCTAssertFalse(finding.fieldCardID.isEmpty, pack.id)
+        }
+    }
+
+    func testThePackDecidesTheWaterRatherThanTheLastOneOpened() throws {
+        let root = try repoRoot().appendingPathComponent("Resources/Packs")
+        let store = try PackStore(root: root, box: EventLog())
+        try store.switchTo("nm")
+        let nm = try XCTUnwrap(WaterIndex.load(from: store.packURL("layers/water.bin")))
+        try store.switchTo("tx-west")
+        let tx = try XCTUnwrap(WaterIndex.load(from: store.packURL("layers/water.bin")))
+        XCTAssertNotEqual(nm.recordCount, tx.recordCount)
+        // An Albuquerque acequia is in the NM pack and not in the TX one.
+        XCTAssertNotNil(nm.nearest(lat: 35.10, lon: -106.65, withinMeters: 2_000))
+        XCTAssertNil(tx.nearest(lat: 35.10, lon: -106.65, withinMeters: 2_000))
     }
 
     // MARK: - Field and Mark
