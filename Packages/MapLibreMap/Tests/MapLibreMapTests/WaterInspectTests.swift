@@ -495,6 +495,12 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertEqual(InspectField.cardID(for: .land(nearest: hit)), "nav-lost")
     }
 
+    func testTheHandoffNamesTheProcedureBeforeItIsTaken() {
+        XCTAssertEqual(InspectField.label(for: InspectField.water), "FIELD · WATER")
+        XCTAssertEqual(InspectField.label(for: InspectField.land), "FIELD · LOST")
+        XCTAssertEqual(InspectField.label(for: "something-else"), "FIELD")
+    }
+
     func testAMarkKeepsWhatItWasOfWhenThePackIsReadAgain() {
         let relabelled = MarkLabel.relabel(
             existing: "ACEQUIA · Acequia Madre",

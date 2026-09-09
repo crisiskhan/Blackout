@@ -79,8 +79,10 @@ struct MapInspectCard: View {
 
     private var actions: some View {
         HStack(spacing: 8) {
-            Button("FIELD") { runtime.openField(cardID: finding.fieldCardID) }
-                .buttonStyle(InspectActionStyle(filled: true))
+            Button(InspectField.label(for: finding.fieldCardID)) {
+                runtime.openField(cardID: finding.fieldCardID)
+            }
+            .buttonStyle(InspectActionStyle(filled: true))
             Button("MARK") { runtime.markInspection() }
                 .buttonStyle(InspectActionStyle(filled: false))
             Spacer(minLength: 0)

@@ -444,6 +444,16 @@ public enum InspectField {
         case .land: return land
         }
     }
+
+    /// What the button says. Naming the procedure means the handoff is visible
+    /// before it is taken rather than after.
+    public static func label(for cardID: String) -> String {
+        switch cardID {
+        case water: return "FIELD · WATER"
+        case land: return "FIELD · LOST"
+        default: return "FIELD"
+        }
+    }
 }
 
 public struct InspectFinding: Equatable, Sendable {

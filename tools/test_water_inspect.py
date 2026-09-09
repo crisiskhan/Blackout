@@ -361,7 +361,7 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn('Text("SURE \\(sure)%")', card)
         self.assertIn('label: "WHY"', card)
         self.assertIn('label: "DO"', card)
-        self.assertIn('Button("FIELD")', card)
+        self.assertIn("InspectField.label(for: finding.fieldCardID)", card)
         self.assertIn('Button("MARK")', card)
         self.assertIn("runtime.openField(cardID: finding.fieldCardID)", card)
         self.assertIn("runtime.markInspection()", card)
