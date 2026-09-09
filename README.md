@@ -89,13 +89,13 @@ z12. Footways and paths come in at z13 with the residential grid.
 
 The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
 before and NM 3.65×, while all three packs together drop from 201.0 MB to
-96.7 MB — and that figure now carries the water and land-cover layer as well.
+97.1 MB — and that figure now carries the water and land-cover layer as well.
 
 | Pack | Ships | of which tiles | of which graph | Highway lines | Named streets | Graph |
 |---|---|---|---|---|---|---|
-| TX WEST | 33.1 MB | 16.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| TX WEST | 33.2 MB | 16.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
 | NM | 34.0 MB | 15.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
-| TX EAST | 29.6 MB | 15.1 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+| TX EAST | 29.8 MB | 15.3 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
 
 ### Hold a place to read the record
 
@@ -175,6 +175,17 @@ line just said treat it, so FIELD opens the treat tree and nothing else. A
 guard reads the ids out of `Inspect.swift` and checks them against the shipped
 books, because both sides are hand-written strings in two different languages.
 
+Arriving there used to land on a menu. The tab drew all seventeen card titles
+in a `List` and hung the open card's steps underneath them, which is fine when
+you came to browse and useless when the map already chose: on a phone the list
+ate the height and the answer was below the fold. It shows one card or the
+list, never both, with `ALL CARDS` on the open card so a hold is not a one-way
+door into it. Two things surfaced while moving it. Every card ships both
+languages and the list read the locale while the steps did not, so a Spanish
+reader picked a card by its Spanish title and got the instructions in English.
+And `NEXT` on the last step called a `next()` that guards on `isLast`, so it
+did nothing at all — it says `DONE` and closes.
+
 `SURE %` is confidence **in the record**, and the line beside it says why. It
 is never a rating of the water. An unnamed `waterway=stream` reads *"the record
 says stream and no more; out here that is usually dry between rains"* at 52% —
@@ -219,12 +230,34 @@ instead of the water one, and the card names an unlabelled tank as exactly
 that: *"a tank is mapped here and nobody wrote down what is in it"*, SURE 42%,
 leave it.
 
-Tinajas are not in this table because they are not in the record. A handful of
-features carry the word in a name — `Cañon la Tinaja` is a wash, `Cerros Ojo
-Caliente` is a hill — and classing on a name would be the map guessing. An
-unnamed `natural=water` polygon in this country reads *"mapped as standing
-water with no name, which often means a stock tank or a seasonal pool"*, which
-is what the record actually supports.
+Splitting the ink was only half of it. A tank is mapped both ways in OSM, as a
+node or as an outline, and 302 of the 583 around El Paso came through as
+outlines. `water-points` is a circle layer, which has nothing sensible to do
+with a ring; `water-fill` only takes `body` and `reservoir`; the line layers
+only take channels. So a little over half the tanks in the pack matched no
+layer at all — fetched, classed, in the tile, and nothing on the glass to hold.
+Between 5m and 32m across they were never worth an outline at z14 anyway, so
+the tiler centres spring, well, tank, tank_other and tap now, and the circle
+draws every one of them at every zoom. The guard reads the circle layers out of
+`style.json`, works out which classes each one claims, and fails if any of them
+reach a tile as anything but a point.
+
+Tinajas are not in this table because nothing in the record is tagged as one.
+Searching both extracts for the word and its neighbours — *tinaja*, *charco*,
+*hueco*, *ojo*, *aguaje* — returns 189 features and almost every one is a
+street: `Calle Ojo Caliente`, `Hueco Tanks Road`, `Ojo de la Vaca Road`. Class
+on a name and the map puts a rock pool in the middle of a subdivision.
+
+What the record does know is the outline, and that is the whole difference
+between a rock pool and a ranch reservoir. 230 unnamed `natural=water` polygons
+across TX WEST and NM are under 100 m², and 45 of the 51 in TX WEST are outside
+any mapped town. So the tiler measures each water body's longest side off the
+whole record — before the tile clips it, or a pool sitting on a tile seam would
+shrink at the join — and the card passes the measurement on and stops there.
+Nine metres reads *"the outline is only about 9m across — a rock pool, a trough
+and a dugout all read this way"*; seventy reads as a stock tank or a pool that
+fills after rain. The size never moves `SURE`, because it is a fact about the
+outline and not about the water.
 
 Ground cover draws as a quiet fill from the archive floor and fades to almost
 nothing by street zoom, where the streets carry the map; the inks are all
@@ -324,6 +357,16 @@ Two jobs, both required, both on every pull request whatever it targets.
 `Blackout generic iOS device` compiles the app and runs all twelve Python
 guards. `Swift tests on a simulator` boots a simulator and runs every package
 suite in `Packages/*/Tests`, discovered rather than listed.
+
+That simulator is the only place some questions can be asked. Unit tests prove
+the card reads a bag of tags correctly and the Python guards prove the tags are
+in the pack, but between the two sit a tile archive, a style, a 44pt query and
+a layer skip-list, and every one of them can silently answer nothing — which is
+exactly where the 302 unholdable tanks were hiding. `HoldOnTheGlassTests` boots
+the style the app boots, points the camera at four coordinates read back out of
+the shipped archive, and calls the app's own `record(under:on:)`. Each
+coordinate was picked by scanning the tiles for a feature with nothing of equal
+rank within twice the probe box, so a pass is not luck.
 
 That second job is newer than the tests it runs. Nothing had ever compiled
 them — no CI invoked them, and the packages are iOS-only so `swift test`
