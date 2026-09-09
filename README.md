@@ -89,13 +89,13 @@ z12. Footways and paths come in at z13 with the residential grid.
 
 The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
 before and NM 3.65×, while all three packs together drop from 201.0 MB to
-100.1 MB.
+89.9 MB.
 
-| Pack | Ships | of which streets | Highway lines | Named streets | Graph |
-|---|---|---|---|---|---|
-| TX WEST | 35.4 MB | 15.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
-| NM | 35.5 MB | 13.9 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
-| TX EAST | 29.2 MB | 11.5 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+| Pack | Ships | of which streets | of which graph | Highway lines | Named streets | Graph |
+|---|---|---|---|---|---|---|
+| TX WEST | 32.1 MB | 15.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 31.8 MB | 13.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX EAST | 26.0 MB | 11.5 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
 
 ### The walk graph walks
 
@@ -103,7 +103,45 @@ before and NM 3.65×, while all three packs together drop from 201.0 MB to
 
 `RouteGraph` carries a `GraphIndex` built once when a pack loads: adjacency per mode, node positions, and a 0.02° grid. Nearest-node reads the rings around a tap and stops when no further ring could hold anything closer. The search adds the straight line to the destination to its ordering, which only returns the true shortest path if no stored length undershoots the line it spans — so `pack_graph` measures each segment between the coordinates it actually ships and rounds up.
 
-`graph.json` ships on wire v2 — nodes are dense indices into parallel lat/lon arrays and one `a, b, metres, flags` record carries both directions of a street. `pack_graph` in `tools/v3/fetch_packs.py` writes it and `PackedGraph` in `Packages/Router` reads it; change one and change the other.
+### The graph is bytes, not text
+
+Once the streets moved to tiles, the graph was the largest file in every pack
+and the slowest thing in the app: 13–15 MB of JSON that took **1.7–2.2 seconds**
+a pack to load on a simulator, nearly all of it JSONDecoder turning four million
+numbers into arrays. None of that work bought anything the bytes did not already
+say. `graph.bin` is the arrays themselves — coordinates as `int32` at 1e7, links
+grouped by source node, lengths as millimetres — laid out in the order the router
+holds them, so loading is a length check and a copy. The scales are chosen so the
+numbers land on the same `Double`s the JSON parsed to rather than merely near
+ones, and the file is mapped rather than read, so pages fault in as touched.
+
+In memory the graph was four dictionaries whose values were a fresh array per
+node — about 700,000 heap allocations for NM, 76 MB to hold, and a hash on every
+step of every search — even though the ids off the wire were already dense. Links
+now sit in one compressed-sparse-row layout with a walk bit and a drive bit each,
+so both modes share the storage instead of duplicating the larger half of it.
+
+Ids are positions everywhere now, including for graphs built by hand, so a set
+of ids that skips one leaves a hole rather than being renumbered under the
+caller. Holes are NaN and stay out of the lookup grid; without that they would
+have been nodes at 0,0 that every distant tap snapped to.
+
+Rows are sorted, so the same graph always encodes to the same bytes. That is
+what makes the next paragraph checkable.
+
+`compact_graph` collapses degree-2 chains, and it is **not idempotent** —
+collapsing a chain can leave its neighbours degree-2, so another pass finds more
+to collapse. It belongs to the fetch, once. The rebuild path was calling it a
+second time, which took TX WEST from 263,512 nodes to 251,334, then 249,254,
+each pass quietly straightening another slice of the route drawn on the glass
+and nothing saying so. Rebuild now re-encodes the graph and leaves its shape
+alone, and `tools/test_graph_plan.py` fails if re-encoding a shipped pack
+changes a single byte.
+
+`tools/v3/graphbin.py` writes the file and `GraphBinary` in `Packages/Router`
+reads it; change one and change the other, which a guard checks field by field.
+The older `graph.json` wire v2 reader is still there so a pack predating this
+still routes, but nothing generates it.
 
 Regenerate walkable packs (network at generate time only):
 
