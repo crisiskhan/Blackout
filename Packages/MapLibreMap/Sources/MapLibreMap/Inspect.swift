@@ -43,6 +43,9 @@ public enum Inspect {
         public var advice: Advice
         /// Field card this opens. Core cards only, so it is there in every state.
         public var fieldCardID: String
+        /// State cards that answer this ground better than the core one, best
+        /// first. A state book may not be loaded, so these are only preferences.
+        public var localCardIDs: [String]
         /// When the pack's OSM was pulled, as the manifest recorded it.
         public var packDate: String?
 
@@ -54,6 +57,7 @@ public enum Inspect {
             why: String,
             advice: Advice,
             fieldCardID: String,
+            localCardIDs: [String] = [],
             packDate: String? = nil
         ) {
             self.title = title
@@ -63,11 +67,19 @@ public enum Inspect {
             self.why = why
             self.advice = advice
             self.fieldCardID = fieldCardID
+            self.localCardIDs = localCardIDs
             self.packDate = packDate
         }
 
         public var sureLine: String { "SURE \(sure)% — \(why)" }
         public var doLine: String { advice.line }
+
+        /// Cards to try in order when FIELD is pressed. The state's own card
+        /// answers the ground better than the core one — holding a subdivision
+        /// in El Paso wants the heat island, not "stop and locate" — but only
+        /// the state that wrote it ships it. The core card is always last, so
+        /// FIELD lands somewhere no matter which book is open.
+        public var fieldRoute: [String] { localCardIDs + [fieldCardID] }
     }
 
     public static let unnamed = "Unnamed"
@@ -141,6 +153,13 @@ public enum Inspect {
     public static let coldCard = "env-cold"
     public static let lostCard = "nav-lost"
 
+    // State cards that describe one kind of ground exactly. Each is only in
+    // the book of the state that wrote it, so each is a preference over a core
+    // card and never a replacement for one.
+    public static let heatIslandCard = "tx-heat-island"
+    public static let iceRockCard = "nm-ice-rock"
+    public static let ranchRoadCard = "tx-cattle-guard"
+
     /// One row of the reading table: how a feature is recognised, and what the
     /// card says once it has been.
     private struct Reading {
@@ -150,6 +169,7 @@ public enum Inspect {
         var why: String
         var advice: Advice
         var field: String
+        var local: [String] = []
         /// Applied when the record carries no name, because an unnamed feature
         /// is one nobody surveyed closely.
         var unnamedPenalty: Int = 8
@@ -172,6 +192,7 @@ public enum Inspect {
             why: why,
             advice: reading.advice,
             fieldCardID: reading.field,
+            localCardIDs: reading.local,
             packDate: packDate
         )
     }
@@ -427,6 +448,7 @@ public enum Inspect {
                 why: "a surveyed point, so the position is firm",
                 advice: .field,
                 field: coldCard,
+                local: [iceRockCard],
                 unnamedPenalty: 10
             )
         }
@@ -460,7 +482,7 @@ public enum Inspect {
                 return Reading(
                     klass: "Rock", kind: .land, sure: 74,
                     why: "mapped as bare rock, which holds no shade and no water",
-                    advice: .field, field: coldCard, unnamedPenalty: 2
+                    advice: .field, field: coldCard, local: [iceRockCard], unnamedPenalty: 2
                 )
             case "grassland":
                 return Reading(
@@ -510,7 +532,7 @@ public enum Inspect {
                 return Reading(
                     klass: "Built-up ground", kind: .land, sure: 70,
                     why: "a boundary somebody drew round houses and streets, so the edge is firmer than the middle",
-                    advice: .field, field: lostCard, unnamedPenalty: 4
+                    advice: .field, field: lostCard, local: [heatIslandCard], unnamedPenalty: 4
                 )
             default:
                 break
@@ -541,6 +563,7 @@ public enum Inspect {
             let foot = ["path", "footway", "steps", "bridleway", "cycleway", "pedestrian"]
             let klass: String
             var sure = 84
+            var local: [String] = []
             if paved.contains(highway) {
                 klass = "Road"
             } else if foot.contains(highway) {
@@ -549,6 +572,9 @@ public enum Inspect {
             } else if highway == "track" {
                 klass = "Track"
                 sure = 72
+                // A track out here is a ranch road, and a ranch road is where
+                // the grate across it takes an ankle.
+                local = [ranchRoadCard]
             } else if highway == "service" {
                 klass = "Service road"
                 sure = 78
@@ -558,7 +584,7 @@ public enum Inspect {
             return Reading(
                 klass: klass, kind: .street, sure: sure,
                 why: "drawn from its centreline, so the line is the way itself",
-                advice: .field, field: lostCard, unnamedPenalty: 6
+                advice: .field, field: lostCard, local: local, unnamedPenalty: 6
             )
         }
         return nil

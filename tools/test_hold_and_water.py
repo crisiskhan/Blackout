@@ -66,6 +66,7 @@ CRITTER_WORDS = ("animal-icon", "wildlife-icon", "critter")
 
 MAP = ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap"
 APP = ROOT / "Blackout"
+FIELD = ROOT / "Resources" / "Field"
 TOKENS = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
 
 
@@ -319,6 +320,58 @@ def assert_the_tiler_and_the_card_know_the_same_words() -> None:
     print(f"OK   card branches on every one of the {len(classed)} classes the tiler draws")
 
 
+def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
+    """FIELD has to land on a card, and the id at the end of the list has to
+    be one every state ships.
+
+    The hold card asks for the state's own card first — Texas wrote a heat
+    island card, New Mexico wrote one about ice on rock — and the state book
+    holding it is often not the one that is loaded, so falling through is the
+    normal case rather than a fault. That makes the last id on the list the
+    only one that has to be there, and it has to be in `field.core.json`. Both
+    halves are ids written out by hand in Swift against a corpus in JSON, so a
+    rename on either side is silent: FIELD switches the tab and shows the list.
+    """
+    swift = (MAP / "Inspect.swift").read_text()
+    ids = dict(re.findall(r'static let (\w+Card) = "([\w-]+)"', swift))
+    if not ids:
+        fail("Inspect names no Field cards at all")
+
+    books = {path.stem.split(".")[-1]: json.loads(path.read_text()) for path in FIELD.glob("field.*.json")}
+    shipped = {name: {card["id"] for card in book["cards"]} for name, book in books.items()}
+    if "core" not in shipped:
+        fail("no core Field book to fall back to")
+    everywhere = shipped["core"]
+    states = set().union(*(cards for name, cards in shipped.items() if name != "core"))
+
+    def named(block: str) -> list[str]:
+        return [ids[word] for word in re.findall(r"\w+Card", block) if word in ids]
+
+    fallbacks = named(" ".join(re.findall(r"field: (\w+Card)", swift)))
+    if not fallbacks:
+        fail("no reading falls back to a core card")
+    for card in fallbacks:
+        if card not in everywhere:
+            fail(f"a hold falls back to {card}, which field.core.json does not ship")
+
+    preferred = named(" ".join(re.findall(r"local\s*[:=]\s*\[([^\]]*)\]", swift)))
+    if not preferred:
+        fail("no ground prefers its own state's card — the biome route is gone")
+    for card in preferred:
+        if card in everywhere:
+            fail(f"{card} is core, so preferring it over a core card does nothing")
+        if card not in states:
+            fail(f"a hold prefers {card}, which no state book ships")
+
+    # And the tab has to walk the list rather than take the head of it.
+    jump = brace_body(tab := (APP / "FieldTab.swift").read_text(), tab.index("private func jump()"))
+    if "fieldJump" not in jump or "first" not in jump:
+        fail("FieldTab does not resolve the hold card's list of cards")
+    if re.search(r"cards\.first\(where: \{ \$0\.id == id \}\)", jump):
+        fail("FieldTab takes only the first id, so a state card that is not loaded opens nothing")
+    print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
+
+
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:
     manifest = json.loads((ROOT / "Resources" / "Packs" / pack_id / "manifest.json").read_text())
     when = manifest.get("osmFetched")
@@ -348,6 +401,7 @@ def main() -> None:
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()
     assert_the_tiler_and_the_card_know_the_same_words()
+    assert_every_field_card_the_map_can_open_is_really_shipped()
     for pack_id in PACKS:
         assert_style_draws_ground_and_water(pack_id)
         assert_the_pack_says_when_it_was_pulled(pack_id)

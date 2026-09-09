@@ -53,9 +53,10 @@ final class AppRuntime {
     var marks: [MapMark] = []
     /// The inspect card the map is holding open. `nil` whenever it is clear.
     var held: HeldPoint?
-    /// Field card the FIELD tab should open the next time it appears, set by
-    /// the hold card's FIELD button.
-    var fieldJump: String?
+    /// Cards the FIELD tab should try to open the next time it appears, best
+    /// first, set by the hold card's FIELD button. The last one is always core,
+    /// so the walk down the list cannot come up empty.
+    var fieldJump: [String]?
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
@@ -189,7 +190,7 @@ final class AppRuntime {
     /// there. Water reaches the treat tree; ground reaches its own biome card.
     func openFieldFromHold() {
         guard let point = held else { return }
-        fieldJump = point.card.fieldCardID
+        fieldJump = point.card.fieldRoute
         held = nil
         tab = .field
     }

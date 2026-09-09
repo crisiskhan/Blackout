@@ -69,12 +69,16 @@ struct FieldTab: View {
         jump()
     }
 
-    /// The map's hold card asked for one card by id. Open it and clear the
-    /// request, so coming back to FIELD later lands on the list as usual.
+    /// The map's hold card named the cards that answer the ground it held,
+    /// best first. Take the first one this state's book actually has — the
+    /// heat island card only ships in Texas, the ice-on-rock card only in New
+    /// Mexico — and fall through to the core card at the end of the list.
+    /// Then clear the request, so coming back to FIELD later lands on the list
+    /// as usual.
     private func jump() {
-        guard let id = runtime.fieldJump else { return }
+        guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
-        guard let card = cards.first(where: { $0.id == id }) else { return }
+        guard let card = route.lazy.compactMap({ id in cards.first { $0.id == id } }).first else { return }
         stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 }

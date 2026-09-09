@@ -104,16 +104,55 @@ final class InspectTests: XCTestCase {
     }
 
     func testEveryCardOpensAFieldCardThatEveryStateShips() {
-        // Field books are core plus one state. Routing a hold at a TX-only card
-        // would open nothing in New Mexico.
+        // Field books are core plus one state. A state card answers the ground
+        // better where it ships — the heat island in Texas, ice on rock in New
+        // Mexico — so the card may ask for one first. But the state book that
+        // has it may not be the one that is loaded, so the walk down the list
+        // only ends somewhere if the last id on it is in every book.
         let core: Set<String> = [
             Inspect.waterCard, Inspect.plantCard, Inspect.heatCard,
             Inspect.coldCard, Inspect.lostCard,
         ]
         for tags in Self.everyKindOfThing {
-            XCTAssertTrue(
-                core.contains(Inspect.read(tags: tags).fieldCardID),
-                "\(tags) opens \(Inspect.read(tags: tags).fieldCardID)"
+            let card = Inspect.read(tags: tags)
+            XCTAssertEqual(card.fieldRoute.last, card.fieldCardID)
+            XCTAssertTrue(core.contains(card.fieldCardID), "\(tags) opens \(card.fieldCardID)")
+            for preferred in card.localCardIDs {
+                XCTAssertFalse(
+                    core.contains(preferred),
+                    "\(preferred) is a core card, so preferring it over one is a no-op"
+                )
+            }
+            XCTAssertEqual(
+                Set(card.fieldRoute).count, card.fieldRoute.count,
+                "\(tags) asks for the same card twice"
+            )
+        }
+    }
+
+    func testGroundWithAStateCardOfItsOwnAsksForThatFirst() {
+        // A subdivision at three in the afternoon is the heat island card, not
+        // "stop and locate". A track is a ranch road, and a ranch road is where
+        // the cattle guard takes an ankle. Rock in New Mexico ices over.
+        XCTAssertEqual(
+            Inspect.read(tags: ["landuse": "residential"]).fieldRoute,
+            [Inspect.heatIslandCard, Inspect.lostCard]
+        )
+        XCTAssertEqual(
+            Inspect.read(tags: ["highway": "track"]).fieldRoute,
+            [Inspect.ranchRoadCard, Inspect.lostCard]
+        )
+        XCTAssertEqual(
+            Inspect.read(tags: ["natural": "bare_rock"]).fieldRoute,
+            [Inspect.iceRockCard, Inspect.coldCard]
+        )
+        // Water is the one thing that never diverts. Holding a spring asks the
+        // treat tree and nothing else, because that is what the DO line just
+        // promised.
+        for tags in Self.everyKindOfThing where Inspect.read(tags: tags).kind == .water {
+            XCTAssertEqual(
+                Inspect.read(tags: tags).fieldRoute, [Inspect.waterCard],
+                "\(tags) says treat and then opens something other than the water card"
             )
         }
     }
