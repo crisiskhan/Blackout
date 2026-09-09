@@ -71,6 +71,36 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.read(tags: ["man_made": "storage_tank", "content": "sewage"]).advice, .leave)
     }
 
+    /// Nothing in OSM is tagged as a tinaja, so the map cannot call anything
+    /// one. What it can do is pass on the size of the outline it drew, which
+    /// is the difference between a rock pool and a ranch reservoir and is the
+    /// only part of the question the record can actually answer.
+    func testUnnamedWaterCarriesTheSizeOfItsOwnOutline() {
+        let pool = Inspect.read(tags: ["natural": "water", "span_m": "9"])
+        XCTAssertTrue(pool.why.contains("9m across"), pool.why)
+        XCTAssertTrue(pool.why.contains("rock pool"), pool.why)
+
+        let tank = Inspect.read(tags: ["natural": "water", "span_m": "70"])
+        XCTAssertTrue(tank.why.contains("70m across"), tank.why)
+        XCTAssertFalse(tank.why.contains("rock pool"), "a 70m pool is not a rock pool: \(tank.why)")
+
+        // Size is a fact about the outline and must not move confidence in the
+        // record, or shrink into a verdict on the water.
+        XCTAssertEqual(pool.sure, tank.sure)
+        XCTAssertEqual(pool.advice, .treat)
+        XCTAssertEqual(pool.klass, "Water body")
+
+        // A record whose outline was never measured still has to read.
+        let unmeasured = Inspect.read(tags: ["natural": "water"])
+        XCTAssertFalse(unmeasured.why.isEmpty)
+        XCTAssertFalse(unmeasured.why.contains("across"), unmeasured.why)
+
+        // A name beats a measurement: if the record knows what it is, say that.
+        let named = Inspect.read(tags: ["natural": "water", "span_m": "9", "name": "Ascarate Lake"])
+        XCTAssertEqual(named.title, "Ascarate Lake")
+        XCTAssertFalse(named.why.contains("across"), named.why)
+    }
+
     func testGroundTheMapColoursInIsNeverReadAsOpenGround() {
         // Every record below is one the tiler gives a class and a colour. When
         // the reader has no branch for one, the map paints the ground and

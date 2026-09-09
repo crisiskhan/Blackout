@@ -384,10 +384,29 @@ public enum Inspect {
                 advice: .treat,
                 field: waterCard,
                 unnamedPenalty: 14,
-                unnamedWhy: "mapped as standing water with no name, which often means a stock tank or a seasonal pool"
+                unnamedWhy: unnamedWaterWhy(t)
             )
         }
         return nil
+    }
+
+    /// Water is a rock pool at this size and a reservoir at that one, and a
+    /// bare `natural=water` says neither. The outline does, so the tiler
+    /// measures it and the card passes the measurement on and stops there. A
+    /// tinaja is not a class anyone can hold, because nothing in the record is
+    /// tagged as one — but a hold on nine metres of unnamed water in a canyon
+    /// can at least say it is nine metres, and let the reader draw their own
+    /// conclusion. It is a fact about the outline, never about the water.
+    static let smallWaterSpanMetres = 15
+
+    private static func unnamedWaterWhy(_ t: [String: String]) -> String {
+        guard let raw = t["span_m"], let across = Int(raw), across > 0 else {
+            return "mapped as standing water with no name, which often means a stock tank or a seasonal pool"
+        }
+        if across <= smallWaterSpanMetres {
+            return "mapped as standing water with no name, and the outline is only about \(across)m across — a rock pool, a trough and a dugout all read this way"
+        }
+        return "mapped as standing water with no name and about \(across)m across, which out here usually means a stock tank or a pool that fills after rain"
     }
 
     /// A plain storage tank, which is only water if the record says so.
