@@ -320,6 +320,60 @@ def assert_the_tiler_and_the_card_know_the_same_words() -> None:
     print(f"OK   card branches on every one of the {len(classed)} classes the tiler draws")
 
 
+def swift_constants() -> dict[tuple[str, str], str]:
+    """`Type.name` -> the string it is declared as, across the map sources."""
+    found: dict[tuple[str, str], str] = {}
+    for path in MAP.glob("*.swift"):
+        body = path.read_text()
+        for match in re.finditer(r"\benum (\w+)\s*[:{]", body):
+            opened = body.find("{", match.end() - 1)
+            for name, value in re.findall(
+                r'static let (\w+)(?::\s*\w+)? = "([^"]+)"', brace_body(body, opened)
+            ):
+                found[(match.group(1), name)] = value
+    return found
+
+
+def assert_a_hold_reads_the_pack_and_not_the_apps_own_ink() -> None:
+    """The probe has to skip every layer the app draws for itself.
+
+    A hold asks MapLibre what is under the thumb and gets back whatever the
+    style drew there, which includes the route line, the puck and the two
+    pins. None of those is a record — they are the app talking to itself — and
+    a pin the card reads as a feature would come back as "Open ground" laid
+    over the spring the thumb was actually on. The skip list is written out by
+    hand, so a layer added later is in the answer until somebody remembers it.
+    """
+    names = swift_constants()
+
+    def resolve(expr: str) -> str:
+        expr = expr.strip()
+        if expr.startswith('"'):
+            return expr.strip('"')
+        owner, _, name = expr.partition(".")
+        if (owner, name) not in names:
+            fail(f"cannot resolve the layer id {expr}")
+        return names[(owner, name)]
+
+    swift = (MAP / "Inspect.swift").read_text()
+    opener = "overlayLayerIDs: Set<String> = ["
+    skips = swift[swift.index(opener) + len(opener):]
+    skips = skips[:skips.index("]")]
+    listed = {resolve(part) for part in skips.split(",") if part.strip()}
+    drawn = {
+        resolve(expr)
+        for path in MAP.glob("*.swift")
+        for expr in re.findall(r"MLN\w*StyleLayer\(identifier: ([^,]+),", path.read_text())
+    }
+    if not drawn:
+        fail("no style layers found at all — the scan is looking in the wrong place")
+    if drawn - listed:
+        fail(f"the app draws {sorted(drawn - listed)} and a hold would read them as records")
+    if listed - drawn:
+        fail(f"the skip list names {sorted(listed - drawn)}, which nothing draws")
+    print(f"OK   a hold looks through all {len(drawn)} layers the app draws for itself")
+
+
 def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     """FIELD has to land on a card, and the id at the end of the list has to
     be one every state ships.
@@ -401,6 +455,7 @@ def main() -> None:
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()
     assert_the_tiler_and_the_card_know_the_same_words()
+    assert_a_hold_reads_the_pack_and_not_the_apps_own_ink()
     assert_every_field_card_the_map_can_open_is_really_shipped()
     for pack_id in PACKS:
         assert_style_draws_ground_and_water(pack_id)
