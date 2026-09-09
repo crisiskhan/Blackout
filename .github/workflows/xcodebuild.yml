@@ -5,12 +5,10 @@ on:
     branches:
       - cursor/blackout-bible-v3-64d0
       - main
-  # Work integrates on bible-v3, not main, so a PR that only targeted main was
-  # never compiled before it merged. Compile the branch people actually review.
+  # No base filter. Listing bases meant a PR stacked on another branch got no
+  # checks at all and looked green by having nothing to be green about, which
+  # is worse than a red one.
   pull_request:
-    branches:
-      - main
-      - cursor/blackout-bible-v3-64d0
 
 jobs:
   build:
