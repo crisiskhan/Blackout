@@ -30,7 +30,7 @@ final class GraphLoadCostTests: XCTestCase {
     func testWhatEachShippedGraphCostsToLoadAndSearch() throws {
         var measured = 0
         for pack in ["tx-west", "nm", "tx-east"] {
-            let url = Self.packsRoot.appendingPathComponent("\(pack)/graph.json")
+            let url = Self.packsRoot.appendingPathComponent("\(pack)/graph.bin")
             guard FileManager.default.fileExists(atPath: url.path) else { continue }
             measured += 1
 
@@ -66,7 +66,7 @@ final class GraphLoadCostTests: XCTestCase {
     /// A route has to come back inside the time a thumb waits, on the largest
     /// pack we ship, or the map cannot grow any further.
     func testRoutingStaysQuickOnTheBiggestPack() throws {
-        let url = Self.packsRoot.appendingPathComponent("nm/graph.json")
+        let url = Self.packsRoot.appendingPathComponent("nm/graph.bin")
         try XCTSkipUnless(FileManager.default.fileExists(atPath: url.path), "no nm graph in this checkout")
         let graph = try XCTUnwrap(RouteGraph.load(from: url))
         let probe = try XCTUnwrap(Self.probes["nm"])

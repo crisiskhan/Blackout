@@ -331,6 +331,46 @@ final class RouterTests: XCTestCase {
         XCTAssertGreaterThan(text.count, SpeakStatus.maxCharacters)
     }
 
+    /// The binary reader trusts two numbers in the header to size every array
+    /// after it, so anything that does not add up has to be refused before it
+    /// is believed rather than read past the end of the file.
+    func testTheBinaryReaderRefusesBytesThatDoNotAddUp() throws {
+        let dir = FileManager.default.temporaryDirectory
+        func write(_ bytes: [UInt8], _ name: String) throws -> URL {
+            let url = dir.appendingPathComponent("\(name)-\(UUID().uuidString).bin")
+            try Data(bytes).write(to: url)
+            return url
+        }
+        // One node at 0,0 with no links: a real header, but a graph with
+        // nothing to route on, which load() reports as no graph at all.
+        var good: [UInt8] = Array("BLKTGRF".utf8) + [1]
+        good += [3, 0, 0, 0]  // version
+        good += [1, 0, 0, 0]  // one node
+        good += [0, 0, 0, 0]  // no links
+        good += [0, 0, 0, 0]  // reserved
+        good += [0, 0, 0, 0]  // latE7
+        good += [0, 0, 0, 0]  // lonE7
+        good += [0, 0, 0, 0]  // rowStart[0]
+        good += [0, 0, 0, 0]  // rowStart[1]
+        XCTAssertNil(RouteGraph.load(from: try write(good, "linkless")))
+
+        var wrongMagic = good
+        wrongMagic[0] = 0x42
+        XCTAssertNil(RouteGraph.load(from: try write(wrongMagic, "magic")))
+
+        var wrongVersion = good
+        wrongVersion[8] = 99
+        XCTAssertNil(RouteGraph.load(from: try write(wrongVersion, "version")))
+
+        // Header claims far more than the file carries.
+        var overclaims = good
+        overclaims[16] = 0xFF
+        XCTAssertNil(RouteGraph.load(from: try write(overclaims, "overclaims")))
+
+        XCTAssertNil(RouteGraph.load(from: try write(Array(good.prefix(20)), "truncated")))
+        XCTAssertNil(RouteGraph.load(from: try write([], "empty")))
+    }
+
     /// Ids are positions, so a set that skips one leaves a hole. The hole must
     /// stay a hole: holding lat/lon 0,0 there would put a phantom node off the
     /// coast of Africa that every tap in an empty area snapped to.
@@ -352,9 +392,12 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(g.linkCount, 1, "a link into an empty slot was kept")
         XCTAssertEqual(g.index.neighbours(of: 0, mode: .walk).map(\.to), [3])
 
-        // Nothing may snap to a hole, from near it or from Null Island itself.
         XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 31.76, lon: -106.49), 0)
-        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 0, lon: 0), 0)
+        // Standing on 0,0 finds nothing at all, and that is the proof: an
+        // unfilled slot left holding 0,0 would be the closest thing here.
+        // El Paso is far outside the ring search's reach, so nil is the honest
+        // answer rather than a node a hemisphere away.
+        XCTAssertNil(GraphRouter.nearestNode(graph: g, lat: 0, lon: 0))
         XCTAssertNil(GraphRouter.route(graph: g, from: 0, to: 1, mode: .walk))
         XCTAssertEqual(GraphRouter.route(graph: g, from: 0, to: 3, mode: .walk)?.nodeIds, [0, 3])
         XCTAssertEqual(GraphRouter.coordinates(graph: g, nodeIds: [0, 1, 3]).count, 2)

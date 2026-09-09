@@ -63,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 29177942,
+  "bytes": 25981104,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -72,7 +72,7 @@
     "glyphs/Open Sans Regular/512-767.pbf",
     "glyphs/Open Sans Regular/768-1023.pbf",
     "glyphs/Open Sans Regular/8192-8447.pbf",
-    "graph.json",
+    "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",

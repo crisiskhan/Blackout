@@ -6,12 +6,14 @@ import json
 import math
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
+from v3 import graphbin  # noqa: E402
 from v3.common import haversine_m  # noqa: E402
 from v3.fetch_packs import (  # noqa: E402
     DRIVE_BACK,
@@ -21,6 +23,7 @@ from v3.fetch_packs import (  # noqa: E402
     WALK_FORWARD,
     pack_graph,
     read_graph,
+    write_graph_binary,
     unpack_graph,
     way_access,
     way_directions,
@@ -259,21 +262,59 @@ class PackedGraphTests(unittest.TestCase):
         self.assertIn('case segments = "e"', src)
         self.assertIn("PackedGraph.self", src)
 
+    def test_swift_reader_agrees_with_the_binary_writer(self):
+        """The two ends of graph.bin have to spell the header the same way."""
+        src = ROUTER.read_text()
+        self.assertIn(f'static let version: UInt32 = {graphbin.VERSION}', src)
+        self.assertIn(f"static let header = {graphbin.HEADER.size}", src)
+        self.assertIn('Array("BLKTGRF".utf8) + [1]', src)
+        self.assertEqual(graphbin.MAGIC, b"BLKTGRF\x01")
+        # Bit for bit, or a one-way street changes direction on the phone.
+        self.assertIn(f"static let walkBit: UInt8 = {graphbin.WALK_BIT}", src)
+        self.assertIn(f"static let driveBit: UInt8 = {graphbin.DRIVE_BIT}", src)
+        self.assertIn("/ 1e7", src)
+        self.assertEqual(graphbin.COORD_SCALE, 10_000_000)
+        self.assertIn("/ 1000", src)
+        self.assertEqual(graphbin.METRE_SCALE, 1_000)
+
     def test_every_shipped_pack_is_on_the_wire_format(self):
         packs = ROOT / "Resources" / "Packs"
-        graphs = sorted(packs.glob("*/graph.json"))
-        self.assertTrue(graphs)
+        graphs = sorted(packs.glob("*/graph.bin"))
+        self.assertTrue(graphs, "no pack ships a binary graph")
+        self.assertFalse(sorted(packs.glob("*/graph.json")), "a pack still carries the JSON graph")
         for path in graphs:
-            raw = json.loads(path.read_text())
-            self.assertEqual(raw.get("v"), GRAPH_WIRE_VERSION, f"{path.parent.name} ships a stale graph")
-            self.assertNotIn("nodes", raw, f"{path.parent.name} still spells out nodes")
-            self.assertEqual(len(raw["e"]) % 4, 0, f"{path.parent.name} has a torn segment record")
-            self.assertEqual(len(raw["lat"]), len(raw["lon"]))
+            pack = path.parent.name
+            # read() checks magic, version and that the length matches the
+            # counts in the header, so it raises on anything torn.
+            g = graphbin.read(path)
+            self.assertEqual(len(g["lat"]), len(g["lon"]), f"{pack} lat/lon disagree")
+            self.assertEqual(g["rowStart"][0], 0, f"{pack} first row does not start at zero")
+            self.assertEqual(g["rowStart"][-1], len(g["target"]), f"{pack} rows do not end at the link count")
+            self.assertEqual(sorted(g["rowStart"]), list(g["rowStart"]), f"{pack} rows are out of order")
+            self.assertTrue(all(0 <= t < len(g["lat"]) for t in g["target"]), f"{pack} links off the end")
+            self.assertTrue(all(m > 0 for m in g["mode"]), f"{pack} carries a link nobody may take")
+
+    def test_rebuilding_a_pack_leaves_its_graph_alone(self):
+        """`--rebuild` re-encodes the graph; it must not reshape it.
+
+        compact_graph collapses degree-2 chains, and running it over its own
+        output finds more to collapse — 263,512 nodes to 251,334 to 249,254 on
+        TX WEST. It belongs to the fetch, once. If the finalize path ever calls
+        it again, every rebuild straightens another slice of the drawn route
+        and nothing says so. This is that alarm.
+        """
+        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.bin")):
+            pack = path.parent.name
+            before = path.read_bytes()
+            graph = read_graph(path)
+            out = Path(tempfile.mkdtemp()) / "graph.bin"
+            write_graph_binary(out, graph)
+            self.assertEqual(before, out.read_bytes(), f"{pack} changes when it is only re-encoded")
 
     def test_a_manifest_counts_the_graph_it_actually_ships(self):
         # Packing folds duplicate records, so a manifest written off the
         # pre-pack graph overstates the roads. Count what the phone loads.
-        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.json")):
+        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.bin")):
             pack = path.parent.name
             graph = read_graph(path)
             stats = json.loads((path.parent / "manifest.json").read_text())["stats"]
@@ -320,7 +361,7 @@ class WalkGraphTests(unittest.TestCase):
         self.assertEqual(self.passable({"oneway": "yes"}, "motorway"), (False, False, True, False))
 
     def test_shipped_walk_graphs_are_two_way_on_the_ordinary_street(self):
-        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.json")):
+        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.bin")):
             graph = read_graph(path)
             walk = {(e["a"], e["b"]) for e in graph["edges"] if e["walk"]}
             if not walk:

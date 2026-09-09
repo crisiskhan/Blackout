@@ -219,13 +219,21 @@ public final class PackStore: @unchecked Sendable {
         return root.appendingPathComponent(active.id).appendingPathComponent(file)
     }
 
+    /// Where the active pack keeps its routing graph. `graph.bin` is what the
+    /// packs ship; the JSON name is only still looked for so an older pack
+    /// sitting on a phone keeps routing.
+    public func graphURL() -> URL? {
+        guard let binary = packURL("graph.bin") else { return nil }
+        // packURL only builds a path, so the fallback has to ask the disk.
+        if FileManager.default.fileExists(atPath: binary.path) { return binary }
+        return packURL("graph.json")
+    }
+
     public func hasUsableGraph() -> Bool {
-        guard let url = packURL("graph.json") else { return false }
-        guard FileManager.default.fileExists(atPath: url.path) else { return false }
-        guard let data = try? Data(contentsOf: url),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let edges = obj["edges"] as? [Any] else { return false }
-        return !edges.isEmpty
+        guard let url = graphURL() else { return false }
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? NSNumber else { return false }
+        return GraphProbe.isUsable(byteCount: size.intValue)
     }
 
     public func realSize(of id: String) -> Int? {

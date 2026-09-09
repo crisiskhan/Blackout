@@ -64,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 35504530,
+  "bytes": 31795418,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -73,7 +73,7 @@
     "glyphs/Open Sans Regular/512-767.pbf",
     "glyphs/Open Sans Regular/768-1023.pbf",
     "glyphs/Open Sans Regular/8192-8447.pbf",
-    "graph.json",
+    "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",
@@ -100,8 +100,6 @@
     "present": true,
     "file": "hillshade.png",
     "bytes": 2030551,
-    "width": 2048,
-    "height": 1820,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [

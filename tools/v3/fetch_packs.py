@@ -21,7 +21,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-from . import tiles
+from . import graphbin, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -746,8 +746,34 @@ def unpack_graph(g: dict) -> dict:
     }
 
 
+def write_graph_binary(path: Path, graph: dict) -> int:
+    """Write the router graph as `graph.bin`, and say how big it came out.
+
+    `pack_graph` still does the thinking — dense ids, one record per segment,
+    lengths measured after coordinate rounding so they never fall under the
+    straight line the router steers by. This only lays the same numbers out as
+    fixed-width arrays grouped by source node, which is the shape the phone
+    reads them in. It parses nothing on the other end.
+    """
+    packed = pack_graph(graph)
+    lat, lon, flat = packed["lat"], packed["lon"], packed["e"]
+    segments: dict[tuple[int, int, float], int] = {}
+    for i in range(0, len(flat) - 3, 4):
+        key = (int(flat[i]), int(flat[i + 1]), float(flat[i + 2]))
+        segments[key] = segments.get(key, 0) | int(flat[i + 3])
+    csr = graphbin.csr_from_segments(len(lat), segments)
+    return graphbin.write(path, lat, lon, csr["rowStart"], csr["target"], csr["millis"], csr["mode"])
+
+
 def read_graph(path: Path) -> dict:
-    """Load a pack graph as nodes/edges whatever wire version is on disk."""
+    """Load a pack graph as nodes/edges whatever is on disk."""
+    if path.suffix == ".bin":
+        g = graphbin.read(path)
+        nodes = {
+            str(i): {"id": i, "lon": g["lon"][i], "lat": g["lat"][i]}
+            for i in range(len(g["lat"]))
+        }
+        return {"engine": "osm-graph", "valhallaCosting": None, "nodes": nodes, "edges": graphbin.edges(g)}
     return unpack_graph(json.loads(path.read_text()))
 
 
@@ -1369,7 +1395,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     fc = osm_to_geojson(merged)
     graph = build_graph(merged)
     write_compact(dest / "osm.geojson", fc)
-    write_compact(dest / "graph.json", pack_graph(graph))
+    write_graph_binary(dest / "graph.bin", graph)
     build_tiles(dest, pack)
 
     slice_summaries = {}
@@ -1482,11 +1508,15 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
-    raw_graph = read_graph(dest / "graph.json")
-    print(f"  compact graph edges={len(raw_graph.get('edges') or [])}", flush=True)
-    graph = compact_graph(raw_graph)
-    write_compact(dest / "graph.json", pack_graph(graph))
-    print(f"  compacted edges={len(graph['edges'])} nodes={len(graph['nodes'])}", flush=True)
+    # The graph on disk is already what `build_graph` compacted during the
+    # fetch, and compaction is not a no-op the second time: collapsing a chain
+    # can leave its neighbours degree-2, so another pass finds more to collapse.
+    # Measured on TX WEST it took 263,512 nodes to 251,334, then 249,254, each
+    # pass quietly straightening another slice of the drawn route. So this path
+    # re-encodes the graph and leaves its shape alone.
+    graph = read_graph(dest / ("graph.bin" if (dest / "graph.bin").exists() else "graph.json"))
+    write_graph_binary(dest / "graph.bin", graph)
+    print(f"  graph nodes={len(graph['nodes'])} edges={len(graph['edges'])}", flush=True)
 
     pack = PACKS[dest.name]
     build_tiles(dest, pack)

@@ -97,11 +97,24 @@ public struct GraphIndex: Sendable {
         self.target = target
         self.metres = metres
         self.mode = mode
+        (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
+    }
 
+    /// Links already grouped by source, as `graph.bin` stores them. Nothing to
+    /// count, sort or bucket — only the lookup grid still has to be built.
+    init(offset: [Int32], target: [Int32], metres: [Double], mode: [UInt8], lat: [Double], lon: [Double]) {
+        self.offset = offset
+        self.target = target
+        self.metres = metres
+        self.mode = mode
+        (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
+    }
+
+    private static func grid(lat: [Double], lon: [Double]) -> ([Int32], [Int64: Range<Int>]) {
         var keyed = [(key: Int64, node: Int32)]()
-        keyed.reserveCapacity(nodeCount)
-        for n in 0..<nodeCount where !lat[n].isNaN {
-            keyed.append((Self.cell(lat: lat[n], lon: lon[n]), Int32(n)))
+        keyed.reserveCapacity(lat.count)
+        for n in 0..<lat.count where !lat[n].isNaN {
+            keyed.append((cell(lat: lat[n], lon: lon[n]), Int32(n)))
         }
         keyed.sort { $0.key < $1.key }
         var cellNode = [Int32](repeating: 0, count: keyed.count)
@@ -109,14 +122,12 @@ public struct GraphIndex: Sendable {
         var start = 0
         for i in 0..<keyed.count {
             cellNode[i] = keyed[i].node
-            let last = i == keyed.count - 1
-            if last || keyed[i].key != keyed[i + 1].key {
+            if i == keyed.count - 1 || keyed[i].key != keyed[i + 1].key {
                 cellSpan[keyed[i].key] = start..<(i + 1)
                 start = i + 1
             }
         }
-        self.cellNode = cellNode
-        self.cellSpan = cellSpan
+        return (cellNode, cellSpan)
     }
 
     static func cell(lat: Double, lon: Double) -> Int64 {
@@ -191,6 +202,12 @@ public struct RouteGraph: Sendable {
         self.lat = lat
         self.lon = lon
         self.index = GraphIndex(nodeCount: lat.count, edges: edges, lat: lat, lon: lon)
+    }
+
+    init(lat: [Double], lon: [Double], index: GraphIndex) {
+        self.lat = lat
+        self.lon = lon
+        self.index = index
     }
 }
 
@@ -411,6 +428,75 @@ struct PackedGraph: Decodable {
     }
 }
 
+/// `graph.bin`: the arrays the router wants, in the order it wants them.
+///
+/// The JSON form cost 1.7-2.2 seconds a pack on a simulator, nearly all of it
+/// JSONDecoder turning four million numbers into arrays, and it was the
+/// largest file in every pack. None of that work bought anything the bytes did
+/// not already say, so loading is now a length check and a copy.
+///
+/// Written by tools/v3/graphbin.py. Change one, change both.
+enum GraphBinary {
+    static let magic: [UInt8] = Array("BLKTGRF".utf8) + [1]
+    static let version: UInt32 = 3
+    static let header = 24
+
+    static func load(_ data: Data) -> RouteGraph? {
+        data.withUnsafeBytes { raw -> RouteGraph? in
+            guard raw.count >= header else { return nil }
+            for (i, byte) in magic.enumerated() {
+                guard raw[i] == byte else { return nil }
+            }
+            guard u32(raw, 8) == version else { return nil }
+
+            let nodes = Int(u32(raw, 12))
+            let links = Int(u32(raw, 16))
+            // Every offset below is derived from these two counts, so checking
+            // the total length once means no read past the end afterwards.
+            let want = header + 4 * nodes * 2 + 4 * (nodes + 1) + 4 * links * 2 + links
+            guard nodes > 0, raw.count == want else { return nil }
+
+            var at = header
+            let latE7: [Int32] = copy(raw, &at, nodes)
+            let lonE7: [Int32] = copy(raw, &at, nodes)
+            let offset: [Int32] = copy(raw, &at, nodes + 1)
+            let target: [Int32] = copy(raw, &at, links)
+            let millimetres: [UInt32] = copy(raw, &at, links)
+            let mode: [UInt8] = copy(raw, &at, links)
+
+            // Scales chosen so this division lands on the same Double the JSON
+            // form parsed to, rather than merely a near one.
+            let lat = latE7.map { Double($0) / 1e7 }
+            let lon = lonE7.map { Double($0) / 1e7 }
+            let metres = millimetres.map { Double($0) / 1000 }
+
+            guard offset.last.map({ Int($0) == links }) == true else { return nil }
+            return RouteGraph(
+                lat: lat,
+                lon: lon,
+                index: GraphIndex(offset: offset, target: target, metres: metres, mode: mode, lat: lat, lon: lon)
+            )
+        }
+    }
+
+    /// Little-endian by hand, so the header reads the same whatever the
+    /// machine would have done with an aligned load.
+    private static func u32(_ raw: UnsafeRawBufferPointer, _ at: Int) -> UInt32 {
+        UInt32(raw[at]) | UInt32(raw[at + 1]) << 8 | UInt32(raw[at + 2]) << 16 | UInt32(raw[at + 3]) << 24
+    }
+
+    private static func copy<T>(_ raw: UnsafeRawBufferPointer, _ at: inout Int, _ count: Int) -> [T] {
+        let bytes = count * MemoryLayout<T>.stride
+        defer { at += bytes }
+        guard count > 0, let base = raw.baseAddress else { return [] }
+        let from = base + at
+        return [T](unsafeUninitializedCapacity: count) { buffer, initialised in
+            memcpy(buffer.baseAddress!, from, bytes)
+            initialised = count
+        }
+    }
+}
+
 /// The shape graphs shipped in before the packed wire format. Kept so an old
 /// pack on a phone still routes; nothing generates it now.
 private struct LooseGraph: Decodable {
@@ -420,7 +506,13 @@ private struct LooseGraph: Decodable {
 
 extension RouteGraph {
     public static func load(from url: URL?) -> RouteGraph? {
-        guard let url, let data = try? Data(contentsOf: url) else { return nil }
+        // Mapped rather than read: the binary form is laid out to be copied
+        // straight out of the file, so its pages fault in as they are touched
+        // instead of all landing in memory first.
+        guard let url, let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
+        if let binary = GraphBinary.load(data) {
+            return binary.isEmpty ? nil : binary
+        }
         let decoder = JSONDecoder()
         var g: RouteGraph?
         if let packed = try? decoder.decode(PackedGraph.self, from: data) {
