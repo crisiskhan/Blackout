@@ -323,7 +323,7 @@ final class MapLibreMapTests: XCTestCase {
             bbox: .init(south: 31, west: -107, north: 32, east: -106)
         )
         let session = MapSession(pack: pack)
-        let empty = RouteGraph(nodes: [:], edges: [])
+        let empty = RouteGraph(nodes: [], edges: [])
         let bearing = session.navigate(graph: empty, from: 1, to: 2, mode: .walk)
         XCTAssertEqual(bearing.fallback, .bearingOffGraph)
         XCTAssertFalse(RouteLine.shouldDraw(GraphRouter.coordinates(graph: empty, nodeIds: bearing.nodeIds)))

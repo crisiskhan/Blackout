@@ -4,7 +4,7 @@ import XCTest
 final class RouterTests: XCTestCase {
     func testOnGraphAndBearing() {
         let g = RouteGraph(
-            nodes: ["1": .init(id: 1, lon: 0, lat: 0), "2": .init(id: 2, lon: 0.01, lat: 0)],
+            nodes: [.init(id: 1, lon: 0, lat: 0), .init(id: 2, lon: 0.01, lat: 0)],
             edges: [.init(a: 1, b: 2, m: 100, walk: true, drive: true)]
         )
         let r = GraphRouter.route(graph: g, from: 1, to: 2, mode: .walk)!
@@ -32,7 +32,7 @@ final class RouterTests: XCTestCase {
         let coords = GraphRouter.coordinates(graph: g, nodeIds: [1, 2, 3])
         XCTAssertEqual(coords.map(\.lon), [0, 0.01, 0.02])
         XCTAssertEqual(coords.map(\.lat), [0, 0, 0])
-        XCTAssertNil(GraphRouter.nearestNode(graph: RouteGraph(nodes: [:], edges: []), lat: 0, lon: 0))
+        XCTAssertNil(GraphRouter.nearestNode(graph: RouteGraph(nodes: [], edges: []), lat: 0, lon: 0))
     }
 
     /// Weights are the true distance between the points. That is the only shape
@@ -42,8 +42,7 @@ final class RouterTests: XCTestCase {
         _ points: [Int: (lat: Double, lon: Double)],
         _ links: [(Int, Int)]
     ) -> RouteGraph {
-        var nodes: [String: GraphNode] = [:]
-        for (id, c) in points { nodes[String(id)] = GraphNode(id: id, lon: c.lon, lat: c.lat) }
+        let nodes = points.map { GraphNode(id: $0.key, lon: $0.value.lon, lat: $0.value.lat) }
         var edges: [GraphEdge] = []
         for (a, b) in links {
             let m = GraphRouter.haversine(points[a]!.lat, points[a]!.lon, points[b]!.lat, points[b]!.lon)
@@ -79,18 +78,18 @@ final class RouterTests: XCTestCase {
     func testNearestNodeWidensUntilItCanBeatEveryCellItHasNotRead() {
         // Spread wider than one grid cell so the search has to expand, and probe
         // from a point outside every cell holding a node.
-        var nodes: [String: GraphNode] = [:]
-        for i in 0..<40 {
-            nodes[String(i + 1)] = GraphNode(id: i + 1, lon: -106.0 - Double(i) * 0.05, lat: 31.0 + Double(i) * 0.03)
+        let nodes = (0..<40).map {
+            GraphNode(id: $0 + 1, lon: -106.0 - Double($0) * 0.05, lat: 31.0 + Double($0) * 0.03)
         }
         let g = RouteGraph(nodes: nodes, edges: [])
         XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 31.0, lon: -106.0), 1)
         XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 32.17, lon: -107.95), 40)
         for probe in [(lat: 30.0, lon: -104.0), (lat: 31.5, lon: -106.9), (lat: 35.0, lon: -110.0)] {
             var best = (id: -1, metres: Double.infinity)
-            for n in g.nodes.values {
-                let d = GraphRouter.haversine(probe.lat, probe.lon, n.lat, n.lon)
-                if d < best.metres { best = (n.id, d) }
+            for id in 0..<g.nodeCount {
+                guard let p = g.point(id) else { continue }
+                let d = GraphRouter.haversine(probe.lat, probe.lon, p.lat, p.lon)
+                if d < best.metres { best = (id, d) }
             }
             XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: probe.lat, lon: probe.lon), best.id)
         }
@@ -98,9 +97,10 @@ final class RouterTests: XCTestCase {
 
     func testIndexKeepsTheTwoModesApart() {
         let g = twoHopWalkOnly()
-        XCTAssertFalse(g.index.links(.walk).isEmpty)
-        XCTAssertTrue(g.index.links(.drive).isEmpty)
-        XCTAssertEqual(g.index.point.count, g.nodes.count)
+        XCTAssertTrue(g.index.hasAnyLink(.walk))
+        XCTAssertFalse(g.index.hasAnyLink(.drive))
+        XCTAssertEqual(g.index.neighbours(of: 1, mode: .walk).map(\.to), [2])
+        XCTAssertTrue(g.index.neighbours(of: 1, mode: .drive).isEmpty)
     }
 
     func testGraphPlanDrawsOnGraphLineAndStaysHonestOffGraph() {
@@ -120,7 +120,7 @@ final class RouterTests: XCTestCase {
         XCTAssertTrue(missing.coords.isEmpty)
 
         let empty = GraphPlan.line(
-            graph: RouteGraph(nodes: [:], edges: []),
+            graph: RouteGraph(nodes: [], edges: []),
             from: (lat: 0, lon: 0),
             to: (lat: 0, lon: 0.02),
             mode: .walk
@@ -137,7 +137,7 @@ final class RouterTests: XCTestCase {
         XCTAssertNil(RouteGraph.load(from: empty))
         let ok = FileManager.default.temporaryDirectory.appendingPathComponent("ok-graph-\(UUID().uuidString).json")
         try Data("{\"nodes\":{\"1\":{\"id\":1,\"lon\":0,\"lat\":0}},\"edges\":[{\"a\":1,\"b\":1,\"m\":0,\"walk\":true,\"drive\":true}]}".utf8).write(to: ok)
-        XCTAssertEqual(RouteGraph.load(from: ok)?.edges.count, 1)
+        XCTAssertEqual(RouteGraph.load(from: ok)?.linkCount, 1)
     }
 
     func testPackedGraphKeepsEveryTurnIncludingOneWays() throws {
@@ -152,9 +152,9 @@ final class RouterTests: XCTestCase {
         try Data(packed.utf8).write(to: url)
 
         let g = try XCTUnwrap(RouteGraph.load(from: url))
-        XCTAssertEqual(g.nodes.count, 3)
-        XCTAssertEqual(g.edges.count, 3)
-        XCTAssertEqual(g.nodes["2"]?.lon, 0.02)
+        XCTAssertEqual(g.nodeCount, 3)
+        XCTAssertEqual(g.linkCount, 3)
+        XCTAssertEqual(g.point(2)?.lon, 0.02)
 
         let out = try XCTUnwrap(GraphRouter.route(graph: g, from: 0, to: 2, mode: .walk))
         XCTAssertEqual(out.nodeIds, [0, 1, 2])
@@ -331,12 +331,41 @@ final class RouterTests: XCTestCase {
         XCTAssertGreaterThan(text.count, SpeakStatus.maxCharacters)
     }
 
+    /// Ids are positions, so a set that skips one leaves a hole. The hole must
+    /// stay a hole: holding lat/lon 0,0 there would put a phantom node off the
+    /// coast of Africa that every tap in an empty area snapped to.
+    func testASkippedIdIsAHoleAndNotANodeAtNullIsland() {
+        let g = RouteGraph(
+            nodes: [
+                .init(id: 0, lon: -106.49, lat: 31.76),
+                .init(id: 3, lon: -106.48, lat: 31.77),
+            ],
+            edges: [
+                .init(a: 0, b: 3, m: 1400, walk: true, drive: true),
+                // Points at a slot nobody placed; must be dropped, not followed.
+                .init(a: 0, b: 1, m: 5, walk: true, drive: true),
+            ]
+        )
+        XCTAssertNil(g.point(1))
+        XCTAssertNil(g.point(2))
+        XCTAssertNotNil(g.point(3))
+        XCTAssertEqual(g.linkCount, 1, "a link into an empty slot was kept")
+        XCTAssertEqual(g.index.neighbours(of: 0, mode: .walk).map(\.to), [3])
+
+        // Nothing may snap to a hole, from near it or from Null Island itself.
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 31.76, lon: -106.49), 0)
+        XCTAssertEqual(GraphRouter.nearestNode(graph: g, lat: 0, lon: 0), 0)
+        XCTAssertNil(GraphRouter.route(graph: g, from: 0, to: 1, mode: .walk))
+        XCTAssertEqual(GraphRouter.route(graph: g, from: 0, to: 3, mode: .walk)?.nodeIds, [0, 3])
+        XCTAssertEqual(GraphRouter.coordinates(graph: g, nodeIds: [0, 1, 3]).count, 2)
+    }
+
     private func twoHopWalkOnly() -> RouteGraph {
         RouteGraph(
             nodes: [
-                "1": .init(id: 1, lon: 0, lat: 0),
-                "2": .init(id: 2, lon: 0.01, lat: 0),
-                "3": .init(id: 3, lon: 0.02, lat: 0),
+                .init(id: 1, lon: 0, lat: 0),
+                .init(id: 2, lon: 0.01, lat: 0),
+                .init(id: 3, lon: 0.02, lat: 0),
             ],
             edges: [
                 .init(a: 1, b: 2, m: 100, walk: true, drive: false),
