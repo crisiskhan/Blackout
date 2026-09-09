@@ -80,6 +80,45 @@ public enum MarkDrop {
     }
 }
 
+/// What a mark's label is made of.
+///
+/// A mark used to be labelled with the pack it was dropped in, and every read
+/// off disk rewrote all of them so the OFF PACK flag stayed truthful. Once a
+/// press can mark a named acequia, that rewrite would throw the name away, so
+/// the label is now a subject plus an optional flag and only the flag moves.
+public enum MarkLabel {
+    public static let separator = " · "
+    public static var offPackSuffix: String { separator + PackChrome.offPack }
+
+    /// What the mark is of, with the pack flag taken off.
+    public static func subject(of label: String) -> String {
+        guard label.hasSuffix(offPackSuffix) else { return label }
+        return String(label.dropLast(offPackSuffix.count))
+    }
+
+    public static func flagged(subject: String, offPack: Bool) -> String {
+        offPack ? subject + offPackSuffix : subject
+    }
+
+    /// Re-flag a mark for the pack it is being read under.
+    ///
+    /// A subject that is only a pack name describes nothing, so it keeps
+    /// following the pack exactly as it always has. Anything else is what the
+    /// mark was of, and only its flag moves.
+    public static func relabel(
+        existing: String,
+        packName: String,
+        packNames: [String],
+        offPack: Bool
+    ) -> String {
+        let was = subject(of: existing)
+        if was.isEmpty || was == PackChrome.offPack || packNames.contains(was) {
+            return offPack ? PackChrome.offPack : packName
+        }
+        return flagged(subject: was, offPack: offPack)
+    }
+}
+
 public enum PackChrome {
     public static let offPack = "OFF PACK"
 
@@ -330,6 +369,11 @@ public enum PackStyle {
     /// so the mapping lives here rather than being repeated at each call site.
     public static let roadSourceLayer = "road"
     public static let placeSourceLayer = "place"
+    public static let waterLineLayerID = "water"
+    public static let waterDetailSourceID = "water-detail"
+    public static let waterDetailPointsLayerID = "water-detail-points"
+    public static let waterDetailLabelsLayerID = "water-detail-labels"
+    public static let waterInk = "#3d6478"
     public static let voidInk = "#000000"
     public static let silverInk = "#B8BDC2"
     public static let accentInk = "#E10600"
@@ -410,6 +454,7 @@ public enum PackStyle {
     public static func attachOfflineVectorLayers(_ obj: inout [String: Any], packRoot: URL) {
         var sources = obj["sources"] as? [String: Any] ?? [:]
         var layers = obj["layers"] as? [[String: Any]] ?? []
+        attachWaterLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
@@ -551,6 +596,74 @@ public enum PackStyle {
         obj["sources"] = sources
         obj["layers"] = layers
     }
+
+    /// Water by zoom, on a pack that may predate it.
+    ///
+    /// Packs built since this landed carry all of it in `style.json` already,
+    /// so on those this changes nothing. On one that is already on a phone it
+    /// adds the class marks if the file is there, and it gates the water lines
+    /// either way — that layer was drawing from zoom 10 while the tile archive
+    /// has carried no waterway below 11 since streets became tiles.
+    public static func attachWaterLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        for index in layers.indices where layers[index]["id"] as? String == waterLineLayerID {
+            if layers[index]["minzoom"] == nil {
+                layers[index]["minzoom"] = WaterZoom.lineMinZoom
+            }
+        }
+
+        let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
+        guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
+        if var existing = sources[waterDetailSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[waterDetailSourceID] = existing
+            }
+        } else {
+            sources[waterDetailSourceID] = [
+                "type": "geojson",
+                "data": detailFile.absoluteString,
+            ]
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+            layers.append([
+                "id": waterDetailPointsLayerID,
+                "type": "circle",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.detailMinZoom,
+                "paint": [
+                    "circle-color": waterInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                    "circle-stroke-color": silverInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailLabelsLayerID }) {
+            layers.append([
+                "id": waterDetailLabelsLayerID,
+                "type": "symbol",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.labelMinZoom,
+                "layout": [
+                    "text-field": ["coalesce", ["get", "name"], ["get", "class"]],
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 15, 11, 18, 15],
+                    "text-font": ["Open Sans Regular"],
+                    "text-anchor": "left",
+                    "text-offset": [0.6, 0],
+                    "text-optional": true,
+                ],
+                "paint": [
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 2.0,
+                ],
+            ])
+        }
+    }
 }
 
 public enum OverlaySync: Sendable {
@@ -558,9 +671,10 @@ public enum OverlaySync: Sendable {
         force: Bool,
         puckNeedsReapply: Bool,
         routeNeedsReapply: Bool,
-        destinationNeedsReapply: Bool = false
+        destinationNeedsReapply: Bool = false,
+        inspectNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply
     }
 }
 
