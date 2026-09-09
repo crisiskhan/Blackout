@@ -60,15 +60,19 @@ struct MapTab: View {
                                 runtime.inspect(lat: lat, lon: lon, zoom: zoom)
                             }
                         )
-                        if runtime.inspection == nil {
+                        // The card sits on the footer rather than over it: the
+                        // credit line is not something that gets to disappear
+                        // because a press landed on a creek.
+                        VStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            if let finding = runtime.inspection {
+                                MapInspectCard(
+                                    runtime: runtime,
+                                    finding: finding,
+                                    maxHeight: CGFloat(cardHeight)
+                                )
+                            }
                             canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
-                        }
-                        if let finding = runtime.inspection {
-                            MapInspectCard(
-                                runtime: runtime,
-                                finding: finding,
-                                maxHeight: CGFloat(cardHeight)
-                            )
                         }
                     }
                     .frame(width: canvas.size.width, height: canvas.size.height)

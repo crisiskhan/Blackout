@@ -181,7 +181,7 @@ final class AppRuntime {
                 self.waterCache = index
                 self.waterPackID = id
                 self.inspection = finding
-                self.box.log("inspect", "\(finding.title) sure=\(finding.sure.map(String.init) ?? "-")")
+                self.box.log("inspect", "\(finding.title) sure=\(finding.sure.map { "\($0)" } ?? "-")")
             }
         }
     }
