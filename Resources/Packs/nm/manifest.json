@@ -7,10 +7,10 @@
   "defaultOpen": false,
   "walkable": true,
   "bbox": {
-    "south": 34.73,
-    "west": -107.07,
-    "north": 35.57,
-    "east": -106.13
+    "south": 34.35,
+    "west": -107.45,
+    "north": 35.95,
+    "east": -105.65
   },
   "slices": {
     "metro": {
@@ -50,12 +50,12 @@
       "name": "Albuquerque / Bernalillo / Isleta region",
       "bbox": {
         "name": "Albuquerque / Bernalillo / Isleta region",
-        "south": 34.73,
-        "west": -107.07,
-        "north": 35.57,
-        "east": -106.13
+        "south": 34.35,
+        "west": -107.45,
+        "north": 35.95,
+        "east": -105.65
       },
-      "featureCount": 154382
+      "featureCount": 227988
     }
   },
   "banners": [
@@ -64,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 56758608,
+  "bytes": 31795418,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -73,14 +73,14 @@
     "glyphs/Open Sans Regular/512-767.pbf",
     "glyphs/Open Sans Regular/768-1023.pbf",
     "glyphs/Open Sans Regular/8192-8447.pbf",
-    "graph.json",
+    "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
     "manifest.json",
     "metro.geojson",
-    "osm.geojson",
+    "osm.pmtiles",
     "pois.geojson",
     "region.geojson",
     "style.json",
@@ -88,8 +88,8 @@
     "wild.geojson"
   ],
   "center": {
-    "lat": 35.15,
-    "lon": -106.6
+    "lat": 35.150000000000006,
+    "lon": -106.55000000000001
   },
   "home": {
     "lat": 35.1,
@@ -99,51 +99,49 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 1828931,
-    "width": 2048,
-    "height": 1830,
+    "bytes": 2030551,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -107.07,
-        35.57
+        -107.45,
+        35.95
       ],
       [
-        -106.13,
-        35.57
+        -105.65,
+        35.95
       ],
       [
-        -106.13,
-        34.73
+        -105.65,
+        34.35
       ],
       [
-        -107.07,
-        34.73
+        -107.45,
+        34.35
       ]
     ]
   },
   "stats": {
-    "features": 154557,
-    "highwayLines": 144884,
-    "namedStreets": 35716,
+    "features": 228210,
+    "highwayLines": 210634,
+    "namedStreets": 52195,
     "sampleStreetNames": [
-      "Indian Service Rt 548",
-      "Indian Service Rt 549",
-      "State Road 6",
-      "Landfill Road",
-      "Los Ranchos Road",
-      "Viper Den Road",
-      "Lluvia Road",
-      "Camino Largo",
-      "Duarte Road",
-      "Dalies Road",
-      "Conejo Road",
-      "Corona Road"
+      "Forest Road 123",
+      "County Road 27",
+      "Indian Service Route 7030",
+      "Indian Service Route 7032",
+      "Forest 354 Road",
+      "County Road 12",
+      "County Road 51",
+      "County Road E-62",
+      "El Center",
+      "Old Highway 60",
+      "Headquarters Road",
+      "Wildflower Loop"
     ],
-    "water": 8099,
-    "places": 222,
-    "graphEdges": 650667,
-    "graphNodes": 221604,
+    "water": 14451,
+    "places": 419,
+    "graphEdges": 880638,
+    "graphNodes": 312157,
     "streetsVisibleAtWalkingZoom": true
   }
 }

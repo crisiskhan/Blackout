@@ -63,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 86517599,
+  "bytes": 25981104,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -72,14 +72,14 @@
     "glyphs/Open Sans Regular/512-767.pbf",
     "glyphs/Open Sans Regular/768-1023.pbf",
     "glyphs/Open Sans Regular/8192-8447.pbf",
-    "graph.json",
+    "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
     "manifest.json",
     "metro.geojson",
-    "osm.geojson",
+    "osm.pmtiles",
     "pois.geojson",
     "region.geojson",
     "style.json",
@@ -99,8 +99,6 @@
     "present": true,
     "file": "hillshade.png",
     "bytes": 1044475,
-    "width": 2048,
-    "height": 1228,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
@@ -141,8 +139,8 @@
     ],
     "water": 19180,
     "places": 410,
-    "graphEdges": 874075,
-    "graphNodes": 307954,
+    "graphEdges": 848575,
+    "graphNodes": 296343,
     "streetsVisibleAtWalkingZoom": true
   }
 }

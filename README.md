@@ -49,19 +49,53 @@ Real OSM + DEM-derived contours, generated at build time (no runtime uplink). **
 
 | Pack | Ground | Opens on | Wild overlay |
 |---|---|---|---|
-| TX WEST (default) | El Paso and Ciudad Juárez in the middle; north up the Anthony corridor through Las Cruces and Mesilla to the Organ Mountains, Santa Teresa and Sunland Park west, Socorro and Horizon City east, Samalayuca desert south | El Paso metro | Franklin Mountains |
+| TX WEST (default) | El Paso and Ciudad Juárez in the middle; north through Las Cruces and Mesilla past Hatch, west across the Potrillos to the Animas, east over the Hueco Mountains toward Sierra Blanca, south to Fabens, Tornillo and the Samalayuca desert | El Paso metro | Franklin Mountains |
 | TX EAST (walkable) | Austin out to Pflugerville and Manor north, Elgin and Bastrop east, Buda and Kyle south | Austin metro | Lost Pines / Bastrop |
-| NM (walkable) | Albuquerque with Corrales, Rio Rancho, Bernalillo and Placitas north, the Sandia crest east, South Valley and Isleta south, Rio Puerco west | Albuquerque metro | Sandia foothills |
+| NM (walkable) | Albuquerque in the middle; north through Bernalillo and Placitas to Santa Fe, east over the Sandia crest into the Estancia basin, south past Isleta to Los Lunas and Belen, west to the Rio Puerco | Albuquerque metro | Sandia foothills |
 
 A pack's bbox is the union of its slices; `home` is the metro slice, so the canvas opens on streets rather than on the empty midpoint of a wide box. `tools/test_walkable_next_pack.py` holds a coverage floor: a pack may grow past the ground it shipped with, never retreat inside it.
 
-The wire-format and GeoJSON savings below go straight back into ground. Against what CPV 69 put on phones, TX WEST covers 3.6× the area, NM 4.0×, TX EAST 1.4× — and the three packs together still weigh 0.20 GB, because Douglas-Peucker at 1.1 m drops about a third of the vertices OSM ships without changing a line the canvas can draw.
+### Streets ride as vector tiles
 
-| Pack | Bytes | Highway lines | Named streets | Graph |
-|---|---|---|---|---|
-| TX WEST | 58.0 MB | 156,241 | 53,804 | 237,242 nodes / 673,021 edges |
-| NM | 56.8 MB | 144,884 | 35,716 | 221,604 nodes / 650,667 edges |
-| TX EAST | 86.5 MB | 251,209 | 45,194 | 307,954 nodes / 874,075 edges |
+Each pack used to hold its whole street network in one `geojson` source, so
+opening TX WEST meant MapLibre parsing 42 MB of text before it drew a line, and
+the parse was the ceiling on how much ground a pack could carry. Streets now
+ship as a PMTiles archive the vendored MapLibre reads natively, and the canvas
+pays for the tiles under the viewport instead of the whole pack.
+
+The spelling is not a guess. MapLibre links a PMTiles reader but documents no
+local-file URL form, so a simulator was pointed at a real archive and asked:
+
+```
+pmtiles://file:///…/tx-west/osm.pmtiles   999 features drawn
+pmtiles:///…/tx-west/osm.pmtiles            0 features drawn
+```
+
+`osm.geojson` is build input now, not cargo. Nothing outside tests ever read it,
+so the resource copy step leaves it behind and the manifests stop counting it.
+Every named street survives the cut, checked name by name against the source:
+28,036 in, 28,036 out for TX WEST, and the same for the other two.
+
+A vector source is addressed by layer, so a layer that names no `source-layer`
+draws nothing and says nothing about it — the style still parses, the source
+still loads, the streets are simply gone. `tools/test_tx_west_style.py` holds
+both the style on disk and the layers the app injects at runtime to naming one.
+
+Zoom decides what a tile carries, chosen from the data rather than a round
+number. Service roads are a third of all geometry and read as noise above your
+own block, so they arrive at z14. Tracks are 13% but fall in rural tiles holding
+nothing else, and out there they are the only line to follow, so they arrive at
+z12. Footways and paths come in at z13 with the residential grid.
+
+The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
+before and NM 3.65×, while all three packs together drop from 201.0 MB to
+89.9 MB.
+
+| Pack | Ships | of which streets | of which graph | Highway lines | Named streets | Graph |
+|---|---|---|---|---|---|---|
+| TX WEST | 32.1 MB | 15.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 31.8 MB | 13.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX EAST | 26.0 MB | 11.5 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
 
 ### The walk graph walks
 
@@ -69,7 +103,45 @@ The wire-format and GeoJSON savings below go straight back into ground. Against 
 
 `RouteGraph` carries a `GraphIndex` built once when a pack loads: adjacency per mode, node positions, and a 0.02° grid. Nearest-node reads the rings around a tap and stops when no further ring could hold anything closer. The search adds the straight line to the destination to its ordering, which only returns the true shortest path if no stored length undershoots the line it spans — so `pack_graph` measures each segment between the coordinates it actually ships and rounds up.
 
-`graph.json` ships on wire v2 — nodes are dense indices into parallel lat/lon arrays and one `a, b, metres, flags` record carries both directions of a street. `pack_graph` in `tools/v3/fetch_packs.py` writes it and `PackedGraph` in `Packages/Router` reads it; change one and change the other.
+### The graph is bytes, not text
+
+Once the streets moved to tiles, the graph was the largest file in every pack
+and the slowest thing in the app: 13–15 MB of JSON that took **1.7–2.2 seconds**
+a pack to load on a simulator, nearly all of it JSONDecoder turning four million
+numbers into arrays. None of that work bought anything the bytes did not already
+say. `graph.bin` is the arrays themselves — coordinates as `int32` at 1e7, links
+grouped by source node, lengths as millimetres — laid out in the order the router
+holds them, so loading is a length check and a copy. The scales are chosen so the
+numbers land on the same `Double`s the JSON parsed to rather than merely near
+ones, and the file is mapped rather than read, so pages fault in as touched.
+
+In memory the graph was four dictionaries whose values were a fresh array per
+node — about 700,000 heap allocations for NM, 76 MB to hold, and a hash on every
+step of every search — even though the ids off the wire were already dense. Links
+now sit in one compressed-sparse-row layout with a walk bit and a drive bit each,
+so both modes share the storage instead of duplicating the larger half of it.
+
+Ids are positions everywhere now, including for graphs built by hand, so a set
+of ids that skips one leaves a hole rather than being renumbered under the
+caller. Holes are NaN and stay out of the lookup grid; without that they would
+have been nodes at 0,0 that every distant tap snapped to.
+
+Rows are sorted, so the same graph always encodes to the same bytes. That is
+what makes the next paragraph checkable.
+
+`compact_graph` collapses degree-2 chains, and it is **not idempotent** —
+collapsing a chain can leave its neighbours degree-2, so another pass finds more
+to collapse. It belongs to the fetch, once. The rebuild path was calling it a
+second time, which took TX WEST from 263,512 nodes to 251,334, then 249,254,
+each pass quietly straightening another slice of the route drawn on the glass
+and nothing saying so. Rebuild now re-encodes the graph and leaves its shape
+alone, and `tools/test_graph_plan.py` fails if re-encoding a shipped pack
+changes a single byte.
+
+`tools/v3/graphbin.py` writes the file and `GraphBinary` in `Packages/Router`
+reads it; change one and change the other, which a guard checks field by field.
+The older `graph.json` wire v2 reader is still there so a pack predating this
+still routes, but nothing generates it.
 
 Regenerate walkable packs (network at generate time only):
 
@@ -84,9 +156,35 @@ python3 -c "from tools.v3.fetch_packs import main; main(['tx-east'])"
 ## Verify (Linux)
 
 ```bash
+pip install -r tools/requirements.txt
 ./tools/audit_offline.sh
 python3 tools/validate_v3.py
 ```
+
+## Verify (CI)
+
+Two jobs, both required, both on every pull request whatever it targets.
+
+`Blackout generic iOS device` compiles the app and runs all twelve Python
+guards. `Swift tests on a simulator` boots a simulator and runs every package
+suite in `Packages/*/Tests`, discovered rather than listed.
+
+That second job is newer than the tests it runs. Nothing had ever compiled
+them — no CI invoked them, and the packages are iOS-only so `swift test`
+cannot — so the whole Swift suite was decoration, and four packages' tests did
+not build at all. What the compiler found once it was pointed at them:
+
+- `PackManifest`, `PackCatalog` and the four `FieldCorpus` types are public and
+  were decodable from disk but not constructible from any other module, because
+  a struct's memberwise initialiser stays internal. That is what made the suites
+  uncompilable.
+- `PackStore` reordered the catalog through an initialiser that dropped
+  `states`, so `switchTo`'s region-leak check read a nil list and waved through
+  every pack in the catalog. `testSwitchRefusesAPackOffTheStatesWeShip` had been
+  asserting otherwise, unexecuted, the whole time.
+
+It also does the one check no file inspection can: it loads a real pack, waits
+for the map to go idle, and counts the streets it drew.
 
 ## Verify (Mac)
 

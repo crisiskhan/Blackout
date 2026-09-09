@@ -6,10 +6,15 @@ Washed charcoal/gray + 10–13pt labels fail this contract. Tokens are
 """
 from __future__ import annotations
 
+import gzip
 import json
 import re
 import sys
 from pathlib import Path
+
+import mapbox_vector_tile
+from pmtiles.reader import MmapSource, Reader
+from pmtiles.tile import TileType
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -20,6 +25,7 @@ from v3.fetch_packs import (  # noqa: E402
     maplibre_style,
     walkable_ids,
 )
+from v3.tiles import MIN_ZOOM, lonlat_to_tile  # noqa: E402
 
 VOID = "#000000"
 ACCENT = "#E10600"
@@ -238,29 +244,123 @@ def assert_home_is_on_streets(pack_id: str) -> None:
 
 
 def assert_walkable_osm(pack_id: str) -> None:
+    """The streets have to survive the trip into the tile archive.
+
+    This used to weigh `osm.geojson` and count its features. The streets now
+    ship as vector tiles, so weighing the file no longer says anything about
+    what a phone can draw — an archive can be the right size and still decode
+    to nothing. Open the archive the app opens, pull the tiles over the spot
+    the app opens on, and count the streets that come back out.
+    """
     pack = ROOT / "Resources" / "Packs" / pack_id
-    osm_path = pack / "osm.geojson"
-    if not osm_path.is_file():
-        fail(f"{pack_id} missing osm.geojson")
-    mb = osm_path.stat().st_size / (1024 * 1024)
-    if mb < 15:
-        fail(f"{pack_id} OSM {mb:.1f} MB looks like a sticker — do not replace walkable data")
-    osm = json.loads(osm_path.read_text())
-    feats = osm.get("features") or []
-    hwy = [
-        f
-        for f in feats
-        if (f.get("properties") or {}).get("highway")
-        and (f.get("geometry") or {}).get("type") == "LineString"
+    archive = pack / "osm.pmtiles"
+    if not archive.is_file():
+        fail(f"{pack_id} missing osm.pmtiles")
+    mb = archive.stat().st_size / (1024 * 1024)
+    if mb < 2.0:
+        fail(f"{pack_id} tiles {mb:.1f} MB looks like a sticker — do not replace walkable data")
+
+    manifest = json.loads((pack / "manifest.json").read_text())
+    home = manifest["home"]
+    with open(archive, "rb") as fh:
+        reader = Reader(MmapSource(fh))
+        header = reader.header()
+        if TileType(header["tile_type"]) is not TileType.MVT:
+            fail(f"{pack_id} archive is not vector tiles: {TileType(header['tile_type']).name}")
+        if header["max_zoom"] < 14:
+            fail(f"{pack_id} archive stops at z{header['max_zoom']} — too coarse to walk by")
+        if header["min_zoom"] > MIN_ZOOM:
+            fail(f"{pack_id} archive starts at z{header['min_zoom']} — zooming out goes blank")
+        bounds_cover(pack_id, header, manifest["bbox"])
+
+        # The nine tiles around where the canvas opens, which is the ground the
+        # phone is guaranteed to draw first.
+        z = 14
+        cx, cy = lonlat_to_tile(home["lon"], home["lat"], z)
+        streets, named = 0, set()
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                blob = reader.get(z, int(cx) + dx, int(cy) + dy)
+                if not blob:
+                    continue
+                road = mapbox_vector_tile.decode(gzip.decompress(blob)).get("road")
+                if not road:
+                    continue
+                streets += len(road["features"])
+                for feature in road["features"]:
+                    label = feature["properties"].get("name") or feature["properties"].get("ref")
+                    if label:
+                        named.add(label)
+    if streets < 1000 or len(named) < 200:
+        fail(f"{pack_id} walking streets too thin at home: hwy={streets} named={len(named)}")
+    print(f"OK   {pack_id} tiles {mb:.1f} MB z{header['min_zoom']}-{header['max_zoom']} "
+          f"hwy={streets} named={len(named)} around home")
+
+
+def bounds_cover(pack_id: str, header: dict, bbox: dict) -> None:
+    """An archive that quietly covers less ground than the pack claims is a lie."""
+    slack = 1e-3
+    got = {
+        "south": header["min_lat_e7"] / 1e7,
+        "north": header["max_lat_e7"] / 1e7,
+        "west": header["min_lon_e7"] / 1e7,
+        "east": header["max_lon_e7"] / 1e7,
+    }
+    short = [
+        edge
+        for edge, inside in (
+            ("south", got["south"] <= bbox["south"] + slack),
+            ("north", got["north"] >= bbox["north"] - slack),
+            ("west", got["west"] <= bbox["west"] + slack),
+            ("east", got["east"] >= bbox["east"] - slack),
+        )
+        if not inside
     ]
-    named = [
-        f
-        for f in hwy
-        if (f.get("properties") or {}).get("name") or (f.get("properties") or {}).get("ref")
-    ]
-    if len(hwy) < 1000 or len(named) < 200:
-        fail(f"{pack_id} walking streets too thin hwy={len(hwy)} named={len(named)}")
-    print(f"OK   {pack_id} OSM {mb:.1f} MB hwy={len(hwy)} named={len(named)}")
+    if short:
+        fail(f"{pack_id} tile archive falls short of the pack bbox on {', '.join(short)}: {got} vs {bbox}")
+
+
+def assert_every_tile_layer_names_its_slice(pack_id: str) -> None:
+    """A vector layer with no `source-layer` draws nothing, and says nothing.
+
+    This is the quietest way to break the map: the style still parses, the
+    source still loads, the layer is still there, and the streets are simply
+    gone. Check both the style on disk and the layers the app injects at run
+    time, because the second set is what appears when a style is missing one.
+    """
+    style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+    vector = {
+        name
+        for name, src in (style.get("sources") or {}).items()
+        if (src or {}).get("type") == "vector"
+    }
+    for layer in style.get("layers") or []:
+        if layer.get("source") in vector and not layer.get("source-layer"):
+            fail(f"{pack_id} style layer {layer['id']!r} reads a vector source with no source-layer — it draws nothing")
+
+    swift = (
+        ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift"
+    ).read_text()
+    injected = re.findall(r'"source": "osm",\n(\s*)"source-layer"', swift)
+    declared = swift.count('"source": "osm",')
+    if len(injected) != declared:
+        fail(
+            f"{declared - len(injected)} runtime-injected layer(s) read the osm source without a "
+            "source-layer; they would draw nothing on the phone"
+        )
+
+
+def assert_source_geojson_stays_off_the_phone(pack_id: str) -> None:
+    """`osm.geojson` is build input now, not cargo. Keep it out of the bundle."""
+    manifest = json.loads((ROOT / "Resources" / "Packs" / pack_id / "manifest.json").read_text())
+    files = manifest.get("files") or []
+    if "osm.geojson" in files:
+        fail(f"{pack_id} manifest still ships osm.geojson — that is ~50 MB the phone never reads")
+    if "osm.pmtiles" not in files:
+        fail(f"{pack_id} manifest does not list osm.pmtiles")
+    script = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+    if "--exclude 'Packs/*/osm.geojson'" not in script:
+        fail("the resource copy step no longer excludes osm.geojson; the IPA would carry it again")
 
 
 def main() -> None:
@@ -333,9 +433,10 @@ def main() -> None:
         if red - fill < 1.8:
             fail(f"arterial red casing invisible under major fill at z{z}: red={red} fill={fill}")
 
-    assert_walkable_osm("tx-west")
-    assert_walkable_osm("nm")
-    assert_walkable_osm("tx-east")
+    for pack_id in ("tx-west", "nm", "tx-east"):
+        assert_walkable_osm(pack_id)
+        assert_every_tile_layer_names_its_slice(pack_id)
+        assert_source_geojson_stays_off_the_phone(pack_id)
 
     zoom = open_zoom()
     for pack_id in sorted(walkable_ids()):

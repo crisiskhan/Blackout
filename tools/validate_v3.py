@@ -228,15 +228,14 @@ def packs() -> None:
     ok("catalog ships TX/NM only; FL/NY packs dropped")
     for p in cat["packs"]:
         d = ROOT / "Resources" / "Packs" / p["id"]
-        for req in ("manifest.json", "osm.geojson", "graph.json", "contours.geojson", "style.json", "dem.json"):
+        for req in ("manifest.json", "osm.geojson", "graph.bin", "contours.geojson", "style.json", "dem.json"):
             if not (d / req).is_file():
                 bad(f"{p['id']} missing {req}")
                 return
         osm = json.loads((d / "osm.geojson").read_text())
-        graph = read_graph(d / "graph.json")
-        if json.loads((d / "graph.json").read_text()).get("v") != GRAPH_WIRE_VERSION:
-            bad(f"{p['id']} graph.json is not wire v{GRAPH_WIRE_VERSION} — rebuild the pack")
-            return
+        # read_graph raises if the magic or version is wrong, so reaching the
+        # next line is itself the version check.
+        graph = read_graph(d / "graph.bin")
         if len(osm.get("features") or []) < 10:
             bad(f"{p['id']} too few OSM features")
             return
@@ -264,7 +263,7 @@ def walkable_pack() -> None:
     d = ROOT / "Resources" / "Packs" / "tx-west"
     osm = json.loads((d / "osm.geojson").read_text())
     style = json.loads((d / "style.json").read_text())
-    graph = read_graph(d / "graph.json")
+    graph = read_graph(d / "graph.bin")
     pack_io = (ROOT / "Packages" / "PackIO" / "Sources" / "PackIO" / "PackIO.swift").read_text()
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
     map_lib = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
@@ -345,7 +344,7 @@ def walkable_next_pack(pack_id: str) -> None:
     cat = json.loads((ROOT / "Resources" / "Packs" / "catalog.json").read_text())
     osm = json.loads((d / "osm.geojson").read_text())
     style = json.loads((d / "style.json").read_text())
-    graph = read_graph(d / "graph.json")
+    graph = read_graph(d / "graph.bin")
     if cat.get("defaultPack") != "tx-west" or (cat.get("packs") or [{}])[0].get("id") != "tx-west":
         bad(f"{pack_id} stole default open pack from tx-west")
         return

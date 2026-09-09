@@ -2,6 +2,8 @@ import Foundation
 
 public enum TravelMode: String, Sendable { case walk, drive }
 
+/// A node as callers describe one when building a graph by hand. Storage keeps
+/// nothing of this shape — see `RouteGraph`.
 public struct GraphNode: Codable, Sendable {
     public var id: Int
     public var lon: Double
@@ -12,6 +14,8 @@ public struct GraphNode: Codable, Sendable {
         self.lat = lat
     }
 }
+
+/// One directed link, likewise a description rather than how it is held.
 public struct GraphEdge: Codable, Sendable {
     public var a: Int
     public var b: Int
@@ -26,52 +30,104 @@ public struct GraphEdge: Codable, Sendable {
         self.drive = drive
     }
 }
-/// Everything routing needs that the wire format does not carry: who adjoins
-/// whom per travel mode, where each node sits without a dictionary of `String`
-/// keys, and a coarse grid to find the nearest node without reading them all.
-///
-/// Built once when a pack's graph loads, on the thread that loaded it. Deriving
-/// it per tap meant every WALK re-walked half a million edges before it started
-/// searching, and that cost grows with the map.
-public struct GraphIndex: Sendable {
-    public struct Link: Sendable {
-        public let to: Int
-        public let m: Double
-    }
 
-    public struct Point: Sendable {
-        public let lat: Double
-        public let lon: Double
-    }
+/// Adjacency and a lookup grid, both as flat arrays indexed by node.
+///
+/// This used to be four dictionaries whose values were per-node arrays, which
+/// meant one heap allocation for every node in the pack — around 700,000 of
+/// them for NM — and a hash on every step of every search. Node ids coming off
+/// the wire are already dense, so none of that bought anything.
+///
+/// Links are held once in source order (the compressed-sparse-row layout):
+/// `span(of:)` gives the slice of `target`/`metres`/`mode` belonging to a node.
+/// Both travel modes share one set of links with a bit each, because nearly
+/// every street is walkable and drivable and storing them apart duplicated the
+/// larger half of the structure.
+public struct GraphIndex: Sendable {
+    static let walkBit: UInt8 = 1
+    static let driveBit: UInt8 = 2
 
     static let cellDegrees = 0.02
     private static let cellStride: Int64 = 100_000
 
-    let walk: [Int: [Link]]
-    let drive: [Int: [Link]]
-    let point: [Int: Point]
-    let cells: [Int64: [Int]]
+    /// `offset[n] ..< offset[n + 1]` are node n's links. Count is nodes + 1.
+    let offset: [Int32]
+    let target: [Int32]
+    let metres: [Double]
+    let mode: [UInt8]
 
-    init(nodes: [String: GraphNode], edges: [GraphEdge]) {
-        var walk: [Int: [Link]] = [:]
-        var drive: [Int: [Link]] = [:]
-        walk.reserveCapacity(nodes.count)
-        drive.reserveCapacity(nodes.count)
-        for e in edges {
-            if e.walk { walk[e.a, default: []].append(Link(to: e.b, m: e.m)) }
-            if e.drive { drive[e.a, default: []].append(Link(to: e.b, m: e.m)) }
+    /// Node ids grouped by grid cell, and where each cell's group sits.
+    let cellNode: [Int32]
+    let cellSpan: [Int64: Range<Int>]
+
+    init(nodeCount: Int, edges: [GraphEdge], lat: [Double], lon: [Double]) {
+        // Both passes below have to agree on which edges count, or the second
+        // leaves unfilled slots that read as links to node zero. A link to a
+        // slot no node was placed in is dropped here rather than left to turn
+        // the search's distance estimate into NaN later.
+        func usable(_ e: GraphEdge) -> Bool {
+            e.a >= 0 && e.a < nodeCount && e.b >= 0 && e.b < nodeCount
+                && !lat[e.a].isNaN && !lat[e.b].isNaN
         }
-        var point: [Int: Point] = [:]
-        var cells: [Int64: [Int]] = [:]
-        point.reserveCapacity(nodes.count)
-        for n in nodes.values {
-            point[n.id] = Point(lat: n.lat, lon: n.lon)
-            cells[Self.cell(lat: n.lat, lon: n.lon), default: []].append(n.id)
+        var counts = [Int32](repeating: 0, count: nodeCount + 1)
+        for e in edges where usable(e) {
+            counts[e.a] += 1
         }
-        self.walk = walk
-        self.drive = drive
-        self.point = point
-        self.cells = cells
+        var offset = [Int32](repeating: 0, count: nodeCount + 1)
+        var running: Int32 = 0
+        for n in 0..<nodeCount {
+            offset[n] = running
+            running += counts[n]
+        }
+        offset[nodeCount] = running
+
+        let total = Int(running)
+        var target = [Int32](repeating: 0, count: total)
+        var metres = [Double](repeating: 0, count: total)
+        var mode = [UInt8](repeating: 0, count: total)
+        var cursor = offset
+        for e in edges where usable(e) {
+            let slot = Int(cursor[e.a])
+            cursor[e.a] += 1
+            target[slot] = Int32(e.b)
+            metres[slot] = e.m
+            mode[slot] = (e.walk ? Self.walkBit : 0) | (e.drive ? Self.driveBit : 0)
+        }
+        self.offset = offset
+        self.target = target
+        self.metres = metres
+        self.mode = mode
+        (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
+    }
+
+    /// Links already grouped by source, as `graph.bin` stores them. Nothing to
+    /// count, sort or bucket — only the lookup grid still has to be built.
+    init(offset: [Int32], target: [Int32], metres: [Double], mode: [UInt8], lat: [Double], lon: [Double]) {
+        self.offset = offset
+        self.target = target
+        self.metres = metres
+        self.mode = mode
+        (self.cellNode, self.cellSpan) = Self.grid(lat: lat, lon: lon)
+    }
+
+    private static func grid(lat: [Double], lon: [Double]) -> ([Int32], [Int64: Range<Int>]) {
+        var keyed = [(key: Int64, node: Int32)]()
+        keyed.reserveCapacity(lat.count)
+        for n in 0..<lat.count where !lat[n].isNaN {
+            keyed.append((cell(lat: lat[n], lon: lon[n]), Int32(n)))
+        }
+        keyed.sort { $0.key < $1.key }
+        var cellNode = [Int32](repeating: 0, count: keyed.count)
+        var cellSpan: [Int64: Range<Int>] = [:]
+        var start = 0
+        for i in 0..<keyed.count {
+            cellNode[i] = keyed[i].node
+            if i == keyed.count - 1 || keyed[i].key != keyed[i + 1].key {
+                cellSpan[keyed[i].key] = start..<(i + 1)
+                start = i + 1
+            }
+        }
+        return (cellNode, cellSpan)
     }
 
     static func cell(lat: Double, lon: Double) -> Int64 {
@@ -80,39 +136,83 @@ public struct GraphIndex: Sendable {
 
     static func cell(y: Int64, x: Int64) -> Int64 { y &* cellStride &+ x }
 
-    func links(_ mode: TravelMode) -> [Int: [Link]] {
+    static func bit(_ mode: TravelMode) -> UInt8 {
         switch mode {
-        case .walk: return walk
-        case .drive: return drive
+        case .walk: return walkBit
+        case .drive: return driveBit
         }
+    }
+
+    func span(of node: Int) -> Range<Int> {
+        guard node >= 0, node + 1 < offset.count else { return 0..<0 }
+        let from = Int(offset[node])
+        let upto = Int(offset[node + 1])
+        // Readers validate the table, but a Range built backwards traps, so
+        // this stays cheap rather than trusting.
+        guard from <= upto, upto <= target.count else { return 0..<0 }
+        return from..<upto
+    }
+
+    /// Where a node's links go, for the one mode. Builds an array, so it is for
+    /// tests and callers who want to look — searches read the storage directly.
+    public func neighbours(of node: Int, mode travel: TravelMode) -> [(to: Int, metres: Double)] {
+        let want = Self.bit(travel)
+        return span(of: node).compactMap { i -> (to: Int, metres: Double)? in
+            guard mode[i] & want != 0 else { return nil }
+            return (to: Int(target[i]), metres: metres[i])
+        }
+    }
+
+    /// Whether the graph can be travelled this way at all.
+    public func hasAnyLink(_ travel: TravelMode) -> Bool {
+        let want = Self.bit(travel)
+        return mode.contains { $0 & want != 0 }
     }
 }
 
-public struct RouteGraph: Codable, Sendable {
-    public let nodes: [String: GraphNode]
-    public let edges: [GraphEdge]
+/// A pack's street network, held the way the wire format already describes it:
+/// parallel `lat`/`lon` arrays addressed by a dense node id, plus the links.
+public struct RouteGraph: Sendable {
+    public let lat: [Double]
+    public let lon: [Double]
     public let index: GraphIndex
 
-    private enum CodingKeys: String, CodingKey { case nodes, edges }
+    public var nodeCount: Int { lat.count }
+    public var linkCount: Int { index.target.count }
+    public var isEmpty: Bool { lat.isEmpty || index.target.isEmpty }
 
-    public init(nodes: [String: GraphNode], edges: [GraphEdge]) {
-        self.nodes = nodes
-        self.edges = edges
-        self.index = GraphIndex(nodes: nodes, edges: edges)
+    public func point(_ id: Int) -> (lat: Double, lon: Double)? {
+        guard id >= 0, id < lat.count, !lat[id].isNaN else { return nil }
+        return (lat[id], lon[id])
     }
 
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(
-            nodes: try c.decode([String: GraphNode].self, forKey: .nodes),
-            edges: try c.decode([GraphEdge].self, forKey: .edges)
-        )
+    /// Build from loose nodes and edges. An id is a position, so ids that skip
+    /// leave unused slots rather than getting renumbered behind the caller's
+    /// back — a route asked for by id has to come back under that same id.
+    /// Unused slots hold NaN and are left out of the lookup grid, so nothing
+    /// can snap to a node that was never placed.
+    public init(nodes: [GraphNode], edges: [GraphEdge]) {
+        let span = (nodes.map(\.id).max() ?? -1) + 1
+        var lat = [Double](repeating: .nan, count: max(0, span))
+        var lon = [Double](repeating: .nan, count: max(0, span))
+        for n in nodes where n.id >= 0 {
+            lat[n.id] = n.lat
+            lon[n.id] = n.lon
+        }
+        self.init(lat: lat, lon: lon, edges: edges)
     }
 
-    public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(nodes, forKey: .nodes)
-        try c.encode(edges, forKey: .edges)
+    /// Straight from the wire, where ids are already positions.
+    init(lat: [Double], lon: [Double], edges: [GraphEdge]) {
+        self.lat = lat
+        self.lon = lon
+        self.index = GraphIndex(nodeCount: lat.count, edges: edges, lat: lat, lon: lon)
+    }
+
+    init(lat: [Double], lon: [Double], index: GraphIndex) {
+        self.lat = lat
+        self.lon = lon
+        self.index = index
     }
 }
 
@@ -134,52 +234,62 @@ public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOf
 
 public enum GraphRouter {
     public static func route(graph: RouteGraph, from: Int, to: Int, mode: TravelMode, avoid: Set<Int> = []) -> RouteResult? {
+        let n = graph.nodeCount
+        guard graph.point(from) != nil, let goal = graph.point(to) else { return nil }
         let index = graph.index
-        let adj = index.links(mode)
-        let goal = index.point[to]
+        let want = GraphIndex.bit(mode)
+        let goalLat = goal.lat
+        let goalLon = goal.lon
+
         // Straight line to the destination never overstates the road left to
         // run, so steering the search by it returns the same route plain
         // Dijkstra did while settling a fraction of the nodes.
-        func remaining(_ n: Int) -> Double {
-            guard let goal, let p = index.point[n] else { return 0 }
-            return haversine(p.lat, p.lon, goal.lat, goal.lon)
+        func remaining(_ node: Int) -> Double {
+            haversine(graph.lat[node], graph.lon[node], goalLat, goalLon)
         }
-        var dist: [Int: Double] = [from: 0]
-        var prev: [Int: Int] = [:]
+
+        // Flat arrays rather than dictionaries: ids are positions, so there is
+        // nothing to hash, and the search touches these on every relaxation.
+        var dist = [Double](repeating: .infinity, count: n)
+        var prev = [Int32](repeating: -1, count: n)
+        var seen = [Bool](repeating: false, count: n)
+        dist[from] = 0
         var heap = MinHeap()
         heap.push(from, remaining(from))
-        var seen: Set<Int> = []
+
         while let (u, _) = heap.pop() {
-            if seen.contains(u) { continue }
-            seen.insert(u)
+            if seen[u] { continue }
+            seen[u] = true
             if u == to { break }
-            let du = dist[u] ?? .infinity
-            for link in adj[u] ?? [] {
-                if avoid.contains(link.to) { continue }
-                let alt = du + link.m
-                if alt < (dist[link.to] ?? .infinity) {
-                    dist[link.to] = alt
-                    prev[link.to] = u
-                    heap.push(link.to, alt + remaining(link.to))
+            let du = dist[u]
+            for i in index.span(of: u) {
+                guard index.mode[i] & want != 0 else { continue }
+                let v = Int(index.target[i])
+                if avoid.contains(v) { continue }
+                let alt = du + index.metres[i]
+                if alt < dist[v] {
+                    dist[v] = alt
+                    prev[v] = Int32(u)
+                    heap.push(v, alt + remaining(v))
                 }
             }
         }
-        guard dist[to] != nil else { return nil }
+        guard dist[to] < .infinity else { return nil }
         var path = [to]
         var cur = to
-        while let p = prev[cur] {
-            path.append(p)
-            cur = p
+        while prev[cur] >= 0 {
+            cur = Int(prev[cur])
+            path.append(cur)
         }
         path.reverse()
-        return RouteResult(nodeIds: path, meters: dist[to] ?? 0, mode: mode, fallback: .onGraph)
+        return RouteResult(nodeIds: path, meters: dist[to], mode: mode, fallback: .onGraph)
     }
 
     /// Nearest node by way of the grid, so snapping a tap to the street network
     /// reads the cells around it rather than every node in the pack.
     public static func nearestNode(graph: RouteGraph, lat: Double, lon: Double) -> Int? {
         let index = graph.index
-        if index.point.isEmpty { return nil }
+        if graph.nodeCount == 0 { return nil }
         let cy = Int64((lat / GraphIndex.cellDegrees).rounded(.down))
         let cx = Int64((lon / GraphIndex.cellDegrees).rounded(.down))
         // Shortest a degree gets at this latitude, so the ring bound below can
@@ -187,10 +297,10 @@ public enum GraphRouter {
         let metresPerDegree = min(110_540.0, 111_320.0 * cos(lat * .pi / 180))
         var best: (id: Int, metres: Double)?
         func scan(_ y: Int64, _ x: Int64) {
-            guard let ids = index.cells[GraphIndex.cell(y: y, x: x)] else { return }
-            for id in ids {
-                guard let p = index.point[id] else { continue }
-                let d = haversine(lat, lon, p.lat, p.lon)
+            guard let span = index.cellSpan[GraphIndex.cell(y: y, x: x)] else { return }
+            for slot in span {
+                let id = Int(index.cellNode[slot])
+                let d = haversine(lat, lon, graph.lat[id], graph.lon[id])
                 if best == nil || d < best!.metres { best = (id, d) }
             }
         }
@@ -227,9 +337,7 @@ public enum GraphRouter {
     private static let maxRing: Int64 = 512
 
     public static func coordinates(graph: RouteGraph, nodeIds: [Int]) -> [(lat: Double, lon: Double)] {
-        nodeIds.compactMap { id in
-            graph.nodes[String(id)].map { (lat: $0.lat, lon: $0.lon) }
-        }
+        nodeIds.compactMap { graph.point($0) }
     }
 
     public static func bearingFallback(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double) -> RouteResult {
@@ -255,7 +363,7 @@ public enum GraphPlan {
         to: (lat: Double, lon: Double),
         mode: TravelMode
     ) -> (coords: [(lat: Double, lon: Double)], chrome: String) {
-        guard let graph, !graph.edges.isEmpty, !graph.nodes.isEmpty,
+        guard let graph, !graph.isEmpty,
               let a = GraphRouter.nearestNode(graph: graph, lat: from.lat, lon: from.lon),
               let b = GraphRouter.nearestNode(graph: graph, lat: to.lat, lon: to.lon),
               let r = GraphRouter.route(graph: graph, from: a, to: b, mode: mode),
@@ -299,11 +407,6 @@ struct PackedGraph: Decodable {
 
     func unpacked() -> RouteGraph? {
         guard version == Self.wireVersion, lat.count == lon.count, !lat.isEmpty else { return nil }
-        var nodes: [String: GraphNode] = [:]
-        nodes.reserveCapacity(lat.count)
-        for i in lat.indices {
-            nodes[String(i)] = GraphNode(id: i, lon: lon[i], lat: lat[i])
-        }
         var edges: [GraphEdge] = []
         edges.reserveCapacity(segments.count / 2)
         var i = 0
@@ -325,21 +428,119 @@ struct PackedGraph: Decodable {
                 edges.append(GraphEdge(a: b, b: a, m: metres, walk: walkBA, drive: driveBA))
             }
         }
-        return RouteGraph(nodes: nodes, edges: edges)
+        // Ids are already positions here, so skip the renumbering pass.
+        return RouteGraph(lat: lat, lon: lon, edges: edges)
     }
+}
+
+/// `graph.bin`: the arrays the router wants, in the order it wants them.
+///
+/// The JSON form cost 1.7-2.2 seconds a pack on a simulator, nearly all of it
+/// JSONDecoder turning four million numbers into arrays, and it was the
+/// largest file in every pack. None of that work bought anything the bytes did
+/// not already say, so loading is now a length check and a copy.
+///
+/// Written by tools/v3/graphbin.py. Change one, change both.
+enum GraphBinary {
+    static let magic: [UInt8] = Array("BLKTGRF".utf8) + [1]
+    static let version: UInt32 = 3
+    static let header = 24
+
+    static func load(_ data: Data) -> RouteGraph? {
+        data.withUnsafeBytes { raw -> RouteGraph? in
+            guard raw.count >= header else { return nil }
+            for (i, byte) in magic.enumerated() {
+                guard raw[i] == byte else { return nil }
+            }
+            guard u32(raw, 8) == version else { return nil }
+
+            let nodes = Int(u32(raw, 12))
+            let links = Int(u32(raw, 16))
+            // Every offset below is derived from these two counts, so checking
+            // the total length once means no read past the end afterwards.
+            let want = header + 4 * nodes * 2 + 4 * (nodes + 1) + 4 * links * 2 + links
+            guard nodes > 0, raw.count == want else { return nil }
+
+            var at = header
+            let latE7: [Int32] = copy(raw, &at, nodes)
+            let lonE7: [Int32] = copy(raw, &at, nodes)
+            let offset: [Int32] = copy(raw, &at, nodes + 1)
+            let target: [Int32] = copy(raw, &at, links)
+            let millimetres: [UInt32] = copy(raw, &at, links)
+            let mode: [UInt8] = copy(raw, &at, links)
+
+            // Scales chosen so this division lands on the same Double the JSON
+            // form parsed to, rather than merely a near one.
+            let lat = latE7.map { Double($0) / 1e7 }
+            let lon = lonE7.map { Double($0) / 1e7 }
+            let metres = millimetres.map { Double($0) / 1000 }
+
+            // Length alone does not make the table sane. Rows that run
+            // backwards would build an invalid Range and links pointing past
+            // the end would read off the array, both of them a crash rather
+            // than a refusal, so the table is checked before it is believed.
+            var previous: Int32 = 0
+            for row in offset {
+                guard row >= previous, Int(row) <= links else { return nil }
+                previous = row
+            }
+            guard Int(previous) == links else { return nil }
+            guard target.allSatisfy({ $0 >= 0 && Int($0) < nodes }) else { return nil }
+
+            return RouteGraph(
+                lat: lat,
+                lon: lon,
+                index: GraphIndex(offset: offset, target: target, metres: metres, mode: mode, lat: lat, lon: lon)
+            )
+        }
+    }
+
+    /// Little-endian by hand, so the header reads the same whatever the
+    /// machine would have done with an aligned load.
+    private static func u32(_ raw: UnsafeRawBufferPointer, _ at: Int) -> UInt32 {
+        UInt32(raw[at]) | UInt32(raw[at + 1]) << 8 | UInt32(raw[at + 2]) << 16 | UInt32(raw[at + 3]) << 24
+    }
+
+    private static func copy<T>(_ raw: UnsafeRawBufferPointer, _ at: inout Int, _ count: Int) -> [T] {
+        let bytes = count * MemoryLayout<T>.stride
+        defer { at += bytes }
+        guard count > 0, let base = raw.baseAddress else { return [] }
+        let from = base + at
+        return [T](unsafeUninitializedCapacity: count) { buffer, initialised in
+            memcpy(buffer.baseAddress!, from, bytes)
+            initialised = count
+        }
+    }
+}
+
+/// The shape graphs shipped in before the packed wire format. Kept so an old
+/// pack on a phone still routes; nothing generates it now.
+private struct LooseGraph: Decodable {
+    var nodes: [String: GraphNode]
+    var edges: [GraphEdge]
 }
 
 extension RouteGraph {
     public static func load(from url: URL?) -> RouteGraph? {
-        guard let url, let data = try? Data(contentsOf: url) else { return nil }
+        // Mapped rather than read: the binary form is laid out to be copied
+        // straight out of the file, so its pages fault in as they are touched
+        // instead of all landing in memory first.
+        guard let url, let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
+        if let binary = GraphBinary.load(data) {
+            return binary.isEmpty ? nil : binary
+        }
         let decoder = JSONDecoder()
         var g: RouteGraph?
         if let packed = try? decoder.decode(PackedGraph.self, from: data) {
             g = packed.unpacked()
-        } else {
-            g = try? decoder.decode(RouteGraph.self, from: data)
+        } else if let loose = try? decoder.decode(LooseGraph.self, from: data) {
+            // Ids are positions, so a file claiming id 10^9 for three nodes is
+            // corrupt rather than sparse, and would ask for gigabytes.
+            let ids = loose.nodes.values.map(\.id)
+            guard let top = ids.max(), top >= 0, top < max(4096, ids.count * 8) else { return nil }
+            g = RouteGraph(nodes: Array(loose.nodes.values), edges: loose.edges)
         }
-        guard let g, !g.edges.isEmpty, !g.nodes.isEmpty else { return nil }
+        guard let g, !g.isEmpty else { return nil }
         return g
     }
 }

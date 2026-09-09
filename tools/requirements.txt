@@ -1,0 +1,5 @@
+# Build-time only. Nothing here ships to the phone; the app reads the tiles
+# these produce, not the tools.
+pmtiles==3.7.0
+mapbox-vector-tile==2.2.0
+shapely==2.1.2

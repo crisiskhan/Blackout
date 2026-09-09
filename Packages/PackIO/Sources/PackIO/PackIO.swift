@@ -12,9 +12,50 @@ public struct PackManifest: Codable, Equatable, Sendable {
     /// Where the canvas opens with no GPS fix. The bbox midpoint is often bare
     /// terrain; `home` is the metro slice, where the street grid is.
     public var home: Coord?
-    public struct Coord: Codable, Equatable, Sendable { public var lat: Double; public var lon: Double }
+
+    /// A struct's memberwise init is internal, so every other module could read
+    /// a manifest off disk but not build one. That quietly made the map tests
+    /// uncompilable, which is why they had never run.
+    public init(
+        id: String,
+        name: String,
+        state: String,
+        bytes: Int,
+        banners: [String],
+        center: Coord,
+        bbox: BBox,
+        home: Coord? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.state = state
+        self.bytes = bytes
+        self.banners = banners
+        self.center = center
+        self.bbox = bbox
+        self.home = home
+    }
+
+    public struct Coord: Codable, Equatable, Sendable {
+        public var lat: Double
+        public var lon: Double
+        public init(lat: Double, lon: Double) {
+            self.lat = lat
+            self.lon = lon
+        }
+    }
+
     public struct BBox: Codable, Equatable, Sendable {
-        public var south: Double; public var west: Double; public var north: Double; public var east: Double
+        public var south: Double
+        public var west: Double
+        public var north: Double
+        public var east: Double
+        public init(south: Double, west: Double, north: Double, east: Double) {
+            self.south = south
+            self.west = west
+            self.north = north
+            self.east = east
+        }
     }
 }
 
@@ -23,6 +64,11 @@ public struct PackCatalog: Codable, Equatable, Sendable {
     /// catalogs; the shipped one always names them.
     public var states: [String]? = nil
     public var packs: [PackManifest]
+
+    public init(states: [String]? = nil, packs: [PackManifest]) {
+        self.states = states
+        self.packs = packs
+    }
 }
 
 public final class PackStore: @unchecked Sendable {
@@ -39,7 +85,10 @@ public final class PackStore: @unchecked Sendable {
         self.box = box
         let data = try Data(contentsOf: root.appendingPathComponent("catalog.json"))
         let decoded = try JSONDecoder().decode(PackCatalog.self, from: data)
-        self.catalog = PackCatalog(packs: Self.preferPrimary(decoded.packs))
+        // Reordering the packs must not lose the list of states we ship. It did,
+        // which left `switchTo`'s region-leak check reading a nil list and
+        // waving through every pack in the catalog.
+        self.catalog = PackCatalog(states: decoded.states, packs: Self.preferPrimary(decoded.packs))
         self.active = catalog.packs.first(where: { $0.id == Self.defaultPackID }) ?? catalog.packs.first
     }
 
@@ -71,8 +120,22 @@ public final class PackStore: @unchecked Sendable {
         return (point.lat, point.lon)
     }
 
+    /// Where the active pack keeps its routing graph. `graph.bin` is what the
+    /// packs ship; the JSON name is only still looked for so an older pack
+    /// sitting on a phone keeps routing.
+    public func graphURL() -> URL? {
+        guard let binary = packURL("graph.bin") else { return nil }
+        // packURL only builds a path, so the disk has to be asked. The fallback
+        // applies only where there is something to fall back to; with neither
+        // present the answer is the name packs actually ship under.
+        let fm = FileManager.default
+        if fm.fileExists(atPath: binary.path) { return binary }
+        guard let legacy = packURL("graph.json"), fm.fileExists(atPath: legacy.path) else { return binary }
+        return legacy
+    }
+
     public func hasUsableGraph() -> Bool {
-        guard let url = packURL("graph.json") else { return false }
+        guard let url = graphURL() else { return false }
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
               let size = attrs[.size] as? NSNumber else { return false }
         return GraphProbe.isUsable(byteCount: size.intValue)

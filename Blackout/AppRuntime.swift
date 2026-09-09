@@ -192,7 +192,7 @@ final class AppRuntime {
         routeChrome = WalkDriveChip.working(mode: mode)
         let from = youCoordinate()
         let id = pack?.id
-        let url = packs?.packURL("graph.json")
+        let url = packs?.graphURL()
         let cached = graphPackID == id ? graphCache : nil
         let inflight = graphWarmup
         Task { [weak self] in
@@ -357,7 +357,7 @@ final class AppRuntime {
 
     private func warmupActiveGraph() {
         let id = packs?.active?.id
-        let url = packs?.packURL("graph.json")
+        let url = packs?.graphURL()
         let task = Task.detached { RouteGraph.load(from: url) }
         graphWarmup = task
         Task { [weak self] in

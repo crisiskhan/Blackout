@@ -28,7 +28,7 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.nearby.count, 0)
     }
 
-    func testConnectedRadioSendsChipRedTimerPOS() {
+    func testConnectedRadioSendsChipRedTimerPOS() throws {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)
         net.attach(radio)
@@ -44,7 +44,7 @@ final class MeshDTNTests: XCTestCase {
         net.sendPOS(from: net.localID, lat: 31.76, lon: -106.49)
         XCTAssertEqual(radio.sent.count, 5)
         XCTAssertEqual(Set(radio.sent.map(\.kind)), ["chip", "red", "timer.set", "timer.done", "pos"])
-        XCTAssertEqual(net.pips.first?.lat, 31.76, accuracy: 0.01)
+        XCTAssertEqual(try XCTUnwrap(net.pips.first).lat, 31.76, accuracy: 0.01)
     }
 
     func testPartyMeshUUIDStableForCode() {

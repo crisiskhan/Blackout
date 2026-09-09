@@ -21,6 +21,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
+from . import graphbin, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -141,10 +142,10 @@ PACKS = {
             # Overpass grid still lands on tiles already fetched.
             "region": {
                 "name": "El Paso / Las Cruces / Organ Mountains region",
-                "south": 31.33,
-                "west": -107.17,
-                "north": 32.67,
-                "east": -105.85,
+                "south": 30.95,
+                "west": -107.60,
+                "north": 33.15,
+                "east": -105.35,
             },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
@@ -219,10 +220,10 @@ PACKS = {
             # Sandia crest east, South Valley and Isleta south, Rio Puerco west.
             "region": {
                 "name": "Albuquerque / Bernalillo / Isleta region",
-                "south": 34.73,
-                "west": -107.07,
-                "north": 35.57,
-                "east": -106.13,
+                "south": 34.35,
+                "west": -107.45,
+                "north": 35.95,
+                "east": -105.65,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
@@ -745,8 +746,34 @@ def unpack_graph(g: dict) -> dict:
     }
 
 
+def write_graph_binary(path: Path, graph: dict) -> int:
+    """Write the router graph as `graph.bin`, and say how big it came out.
+
+    `pack_graph` still does the thinking — dense ids, one record per segment,
+    lengths measured after coordinate rounding so they never fall under the
+    straight line the router steers by. This only lays the same numbers out as
+    fixed-width arrays grouped by source node, which is the shape the phone
+    reads them in. It parses nothing on the other end.
+    """
+    packed = pack_graph(graph)
+    lat, lon, flat = packed["lat"], packed["lon"], packed["e"]
+    segments: dict[tuple[int, int, float], int] = {}
+    for i in range(0, len(flat) - 3, 4):
+        key = (int(flat[i]), int(flat[i + 1]), float(flat[i + 2]))
+        segments[key] = segments.get(key, 0) | int(flat[i + 3])
+    csr = graphbin.csr_from_segments(len(lat), segments)
+    return graphbin.write(path, lat, lon, csr["rowStart"], csr["target"], csr["millis"], csr["mode"])
+
+
 def read_graph(path: Path) -> dict:
-    """Load a pack graph as nodes/edges whatever wire version is on disk."""
+    """Load a pack graph as nodes/edges whatever is on disk."""
+    if path.suffix == ".bin":
+        g = graphbin.read(path)
+        nodes = {
+            str(i): {"id": i, "lon": g["lon"][i], "lat": g["lat"][i]}
+            for i in range(len(g["lat"]))
+        }
+        return {"engine": "osm-graph", "valhallaCosting": None, "nodes": nodes, "edges": graphbin.edges(g)}
     return unpack_graph(json.loads(path.read_text()))
 
 
@@ -932,12 +959,32 @@ def highway_in(values: list[str]) -> list:
     return ["in", ["get", "highway"], ["literal", values]]
 
 
+# `osm.geojson` stays in the tree as the input the vector tiles are built from,
+# but the app's copy step leaves it behind. The manifest describes what a phone
+# receives, so it must not count a file the phone never sees.
+NOT_SHIPPED = {"osm.geojson"}
+
+
+def shipped_files(dest: Path) -> list[Path]:
+    return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
+
+
+def build_tiles(dest: Path, pack: dict) -> dict:
+    """Cut the pack's streets into the vector tiles the canvas reads."""
+    info = tiles.build(dest, union_bbox(pack["slices"]), pack["name"])
+    print(f"  tiled {pack['id']} {info['tiles']:,} tiles {info['bytes'] / 1e6:.1f} MB", flush=True)
+    return info
+
+
 def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
     """Blackout void/red/silver style. Streets and names must read at walking zoom."""
     sources: dict = {
+        # Streets ride as vector tiles. As one `geojson` blob the canvas had to
+        # parse the entire pack before drawing anything, which both slowed the
+        # open and put a ceiling on how much ground a pack could carry.
         "osm": {
-            "type": "geojson",
-            "data": "osm.geojson",
+            "type": "vector",
+            "url": "pmtiles://osm.pmtiles",
             "attribution": OSM_CREDIT,
         },
         "contours": {"type": "geojson", "data": "contours.geojson"},
@@ -1176,6 +1223,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             },
         ]
     )
+    stamp_source_layers(layers)
     return {
         "version": 8,
         "name": f"Blackout {pack_id}",
@@ -1191,6 +1239,38 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             "tokens": {"void": VOID_INK, "accent": ACCENT_INK, "silver": SILVER_INK},
         },
     }
+
+
+# Which slice of the tile archive each style layer reads. A vector source is
+# addressed by layer, unlike the single undifferentiated blob it replaced, so
+# every layer drawing from `osm` has to name where it looks.
+OSM_SOURCE_LAYER = {
+    "water-fill": "water",
+    "water": "water",
+    "roads-casing": "road",
+    "roads-arterial-casing": "road",
+    "roads": "road",
+    "roads-major": "road",
+    "tracks": "road",
+    "osm-points": "place",
+    "road-labels": "road",
+    "road-refs": "road",
+    "place-labels": "place",
+}
+
+
+def stamp_source_layers(layers: list[dict]) -> None:
+    """Point every `osm` layer at its slice, and refuse to guess for new ones."""
+    for layer in layers:
+        if layer.get("source") != "osm":
+            continue
+        known = OSM_SOURCE_LAYER.get(layer["id"])
+        if known is None:
+            raise SystemExit(
+                f"style layer {layer['id']!r} reads the tile source but no source-layer "
+                "is declared for it; add one to OSM_SOURCE_LAYER or it draws nothing"
+            )
+        layer["source-layer"] = known
 
 
 def real_layer_features(fc: dict, keys: set[str]) -> dict:
@@ -1315,7 +1395,8 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     fc = osm_to_geojson(merged)
     graph = build_graph(merged)
     write_compact(dest / "osm.geojson", fc)
-    write_compact(dest / "graph.json", pack_graph(graph))
+    write_graph_binary(dest / "graph.bin", graph)
+    build_tiles(dest, pack)
 
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -1387,7 +1468,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
 
     stats = pack_stats(fc, graph)
-    files = [p for p in dest.rglob("*") if p.is_file()]
+    files = shipped_files(dest)
     size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
@@ -1427,13 +1508,18 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
-    raw_graph = read_graph(dest / "graph.json")
-    print(f"  compact graph edges={len(raw_graph.get('edges') or [])}", flush=True)
-    graph = compact_graph(raw_graph)
-    write_compact(dest / "graph.json", pack_graph(graph))
-    print(f"  compacted edges={len(graph['edges'])} nodes={len(graph['nodes'])}", flush=True)
+    # The graph on disk is already what `build_graph` compacted during the
+    # fetch, and compaction is not a no-op the second time: collapsing a chain
+    # can leave its neighbours degree-2, so another pass finds more to collapse.
+    # Measured on TX WEST it took 263,512 nodes to 251,334, then 249,254, each
+    # pass quietly straightening another slice of the drawn route. So this path
+    # re-encodes the graph and leaves its shape alone.
+    graph = read_graph(dest / ("graph.bin" if (dest / "graph.bin").exists() else "graph.json"))
+    write_graph_binary(dest / "graph.bin", graph)
+    print(f"  graph nodes={len(graph['nodes'])} edges={len(graph['edges'])}", flush=True)
 
     pack = PACKS[dest.name]
+    build_tiles(dest, pack)
     bb = union_bbox(pack["slices"])
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -1488,7 +1574,7 @@ def finalize_existing(dest: Path) -> dict:
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
     stats = pack_stats(fc, graph)
-    files = [p for p in dest.rglob("*") if p.is_file()]
+    files = shipped_files(dest)
     size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
@@ -1536,5 +1622,23 @@ def main(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def rebuild(ids: list[str] | None = None) -> None:
+    """Redo tiles, style and manifest from the OSM already on disk.
+
+    Overpass is slow and rate-limited, and most changes here are to how the
+    data is cut rather than to the data. This re-runs everything downstream of
+    the fetch so a style or tiling change does not cost an hour of network.
+    """
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("REBUILD", pid, flush=True)
+        finalize_existing(root / pid)
+    write_catalog(root)
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:] or None)
+    argv = sys.argv[1:]
+    if argv and argv[0] == "--rebuild":
+        rebuild(argv[1:] or None)
+    else:
+        main(argv or None)

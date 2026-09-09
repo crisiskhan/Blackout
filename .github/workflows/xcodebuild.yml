@@ -5,12 +5,10 @@ on:
     branches:
       - cursor/blackout-bible-v3-64d0
       - main
-  # Work integrates on bible-v3, not main, so a PR that only targeted main was
-  # never compiled before it merged. Compile the branch people actually review.
+  # No base filter. Listing bases meant a PR stacked on another branch got no
+  # checks at all and looked green by having nothing to be green about, which
+  # is worse than a red one.
   pull_request:
-    branches:
-      - main
-      - cursor/blackout-bible-v3-64d0
 
 jobs:
   build:
@@ -22,6 +20,32 @@ jobs:
 
       - name: Fail closed on CI opt / CPV gates
         run: python3 tools/test_ci_opt.py
+
+      - name: Install pack tooling
+        # A venv, because the runner's python is externally managed and refuses
+        # a plain `pip install`.
+        run: |
+          set -euo pipefail
+          python3 -m venv /tmp/packtools
+          /tmp/packtools/bin/pip install -q -r tools/requirements.txt
+
+      - name: Guards
+        # Every one of these existed and none of them ran anywhere. A guard
+        # nobody runs is a comment.
+        run: |
+          set -uo pipefail
+          fail=0
+          for guard in tools/test_*.py tools/validate_v3.py; do
+            printf '%-40s' "$guard"
+            if out=$(/tmp/packtools/bin/python "$guard" 2>&1); then
+              echo PASS
+            else
+              echo FAIL
+              echo "$out" | tail -25
+              fail=1
+            fi
+          done
+          exit $fail
 
       - name: Select Xcode 16
         run: |
@@ -58,3 +82,64 @@ jobs:
             CODE_SIGN_IDENTITY= \
             DEVELOPMENT_TEAM= \
             build
+
+  swift-tests:
+    # The Swift suites had never been compiled: no CI ran them and the packages
+    # are iOS-only, so `swift test` cannot. They were decoration. This job puts
+    # them on a simulator, which is also the only place a claim like "the map
+    # draws a street" can be checked at all.
+    name: Swift tests on a simulator
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          set -euo pipefail
+          for app in /Applications/Xcode_16.4.app /Applications/Xcode_16.3.app \
+                     /Applications/Xcode_16.2.app /Applications/Xcode_16.1.app \
+                     /Applications/Xcode_16.app /Applications/Xcode.app
+          do
+            if [ -d "$app" ]; then sudo xcode-select -s "$app"; break; fi
+          done
+          xcodebuild -version
+
+      - name: Pick an iPhone simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          udid=$(xcrun simctl list devices available \
+            | sed -n '/-- iOS 1[89]/,/^-- /p;/-- iOS [2-9][0-9]/,/^-- /p' \
+            | grep iPhone \
+            | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' \
+            | head -1)
+          test -n "$udid" || { echo 'no iOS 18+ iPhone simulator on this runner'; exit 1; }
+          echo "picked $udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$udid" || true
+
+      - name: Run the suites
+        run: |
+          set -uo pipefail
+          fail=0
+          # Every package that has tests, discovered rather than listed, so a
+          # new suite is covered the day it lands instead of the day someone
+          # remembers to add it here.
+          for pkg in $(ls -d Packages/*/Tests 2>/dev/null | cut -d/ -f2); do
+            echo "::group::$pkg"
+            ( cd "Packages/$pkg" && xcodebuild test \
+                -scheme "$pkg" \
+                -destination "id=${{ steps.sim.outputs.udid }}" \
+                CODE_SIGNING_ALLOWED=NO ) > "/tmp/$pkg.log" 2>&1 || fail=1
+            # `|| true` on every grep: the step's shell runs with -e, so a grep
+            # that simply finds nothing would end the run before the next package.
+            grep -E "error:|Testing failed|XCTAssert" "/tmp/$pkg.log" | sort -u | head -60 || true
+            grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2 || true
+            echo "::endgroup::"
+          done
+          echo '--- the map put this many streets on the glass ---'
+          grep "PMTILES-SPELLING" /tmp/MapLibreMap.log || echo "no render line (probe did not run)"
+          echo "--- what the routing graphs cost ---"
+          grep "GRAPH-COST" /tmp/Router.log || echo "no graph cost lines"
+          exit $fail

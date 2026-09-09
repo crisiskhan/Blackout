@@ -324,6 +324,12 @@ public enum PackStyle {
     public static let roadRefsLayerID = "road-refs"
     public static let placeLabelsLayerID = "place-labels"
     public static let tracksLayerID = "tracks"
+
+    /// Streets arrive as vector tiles, which are addressed by layer. A layer on
+    /// the `osm` source that does not name one draws nothing at all, silently,
+    /// so the mapping lives here rather than being repeated at each call site.
+    public static let roadSourceLayer = "road"
+    public static let placeSourceLayer = "place"
     public static let voidInk = "#000000"
     public static let silverInk = "#B8BDC2"
     public static let accentInk = "#E10600"
@@ -389,6 +395,9 @@ public enum PackStyle {
             } else if kind == "image", let rel = src["url"] as? String, !rel.hasPrefix("file:"), !rel.contains("://") {
                 src["url"] = packRoot.appendingPathComponent(rel).absoluteString
                 sources[key] = src
+            } else if kind == "vector", let rel = src["url"] as? String, PMTilesURL.isRelative(rel) {
+                src["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[key] = src
             }
         }
         obj["sources"] = sources
@@ -433,6 +442,7 @@ public enum PackStyle {
                 "id": osmPointsLayerID,
                 "type": "circle",
                 "source": "osm",
+                "source-layer": placeSourceLayer,
                 "layout": [
                     "visibility": "none",
                 ],
@@ -450,6 +460,7 @@ public enum PackStyle {
                 "id": tracksLayerID,
                 "type": "line",
                 "source": "osm",
+                "source-layer": roadSourceLayer,
                 "minzoom": 12,
                 "filter": [
                     "in",
@@ -469,6 +480,7 @@ public enum PackStyle {
                 "id": roadLabelsLayerID,
                 "type": "symbol",
                 "source": "osm",
+                "source-layer": roadSourceLayer,
                 "minzoom": 12,
                 "filter": ["all", ["has", "highway"], ["has", "name"]],
                 "layout": [
@@ -495,6 +507,7 @@ public enum PackStyle {
                 "id": roadRefsLayerID,
                 "type": "symbol",
                 "source": "osm",
+                "source-layer": roadSourceLayer,
                 "minzoom": 11,
                 "filter": ["all", ["has", "highway"], ["has", "ref"]],
                 "layout": [
@@ -519,6 +532,7 @@ public enum PackStyle {
                 "id": placeLabelsLayerID,
                 "type": "symbol",
                 "source": "osm",
+                "source-layer": placeSourceLayer,
                 "minzoom": 10,
                 "maxzoom": 16,
                 "filter": ["has", "place"],

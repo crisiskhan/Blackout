@@ -56,6 +56,30 @@ final class PackIOTests: XCTestCase {
         XCTAssertTrue(store.hasUsableGraph())
     }
 
+    /// Packs ship `graph.bin`; the JSON name is only still looked for so a pack
+    /// predating that keeps routing. Getting the order wrong would send the app
+    /// at a file that is not there and leave WALK dead with no explanation.
+    func testTheGraphIsFoundAsBinaryFirstAndJSONOnlyAsAFallback() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("packio-graphurl-\(UUID().uuidString)")
+        let pack = root.appendingPathComponent("tx-west")
+        try fm.createDirectory(at: pack, withIntermediateDirectories: true)
+        let cat = PackCatalog(packs: [
+            PackManifest(id: "tx-west", name: "TX WEST", state: "TX", bytes: 1, banners: [], center: .init(lat: 31.76, lon: -106.49), bbox: .init(south: 31.7, west: -106.62, north: 32.0, east: -106.35))
+        ])
+        try JSONEncoder().encode(cat).write(to: root.appendingPathComponent("catalog.json"))
+        let store = try PackStore(root: root, box: EventLog())
+
+        // Neither on disk: still names the binary, so nothing has to special-case nil.
+        XCTAssertEqual(store.graphURL()?.lastPathComponent, "graph.bin")
+
+        try Data(repeating: 0, count: 64).write(to: pack.appendingPathComponent("graph.json"))
+        XCTAssertEqual(store.graphURL()?.lastPathComponent, "graph.json", "an older pack stopped routing")
+
+        try Data(repeating: 0, count: 64).write(to: pack.appendingPathComponent("graph.bin"))
+        XCTAssertEqual(store.graphURL()?.lastPathComponent, "graph.bin", "the shipped graph lost to the fallback")
+    }
+
     func testHomeCoordinateFallsBackToCenterWhenAbsent() throws {
         let fm = FileManager.default
         let root = fm.temporaryDirectory.appendingPathComponent("packio-home-\(UUID().uuidString)")
