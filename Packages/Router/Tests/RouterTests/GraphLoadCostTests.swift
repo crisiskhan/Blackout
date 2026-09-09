@@ -9,6 +9,9 @@ import XCTest
 /// growing. Numbers here come from the graphs that actually ship, measured on a
 /// simulator, and are printed so a change that makes them worse is visible in
 /// the CI log rather than only on someone's phone.
+///
+/// They are unoptimised-build numbers and the shipped app is built optimised,
+/// so read them against each other rather than as what a phone does.
 final class GraphLoadCostTests: XCTestCase {
     private static var packsRoot: URL {
         URL(fileURLWithPath: #filePath)
@@ -59,6 +62,14 @@ final class GraphLoadCostTests: XCTestCase {
 
             XCTAssertNotNil(walk, "\(pack): no walking route between two downtown points")
             XCTAssertGreaterThan(walk?.nodeIds.count ?? 0, 2, "\(pack): route is a straight hop, not a path")
+
+            // Ceilings, not targets. Held is the one that matters: the graph
+            // stays resident for as long as the pack is open, so it is what
+            // decides whether iOS reclaims the app while it is in a pocket.
+            // Both are generous because tests build unoptimised — what is
+            // being caught is a return to the old shape, not a slow afternoon.
+            XCTAssertLessThan(held, 40, "\(pack) holds \(Int(held))MB; it held 17MB when this was written")
+            XCTAssertLessThan(loadMs, 2500, "\(pack) took \(Self.ms(loadMs)) to load; it took under 1.2s when this was written")
         }
         try XCTSkipIf(measured == 0, "no shipped graphs in this checkout")
     }
