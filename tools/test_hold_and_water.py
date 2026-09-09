@@ -423,12 +423,17 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
         if card not in states:
             fail(f"a hold prefers {card}, which no state book ships")
 
-    # And the tab has to walk the list rather than take the head of it.
-    jump = brace_body(tab := (APP / "FieldTab.swift").read_text(), tab.index("private func jump()"))
-    if "fieldJump" not in jump or "first" not in jump:
-        fail("FieldTab does not resolve the hold card's list of cards")
-    if re.search(r"cards\.first\(where: \{ \$0\.id == id \}\)", jump):
-        fail("FieldTab takes only the first id, so a state card that is not loaded opens nothing")
+    # The runtime has to hand over the whole route, and the tab has to walk it
+    # rather than take the head. Either half alone loses the fallback, and it
+    # only shows up in the state that does not ship the preferred card.
+    if not re.search(r"var fieldJump: \[String\]\?", (APP / "AppRuntime.swift").read_text()):
+        fail("the hold card hands FIELD one id, so a card the loaded book lacks has nothing behind it")
+    tab = (APP / "FieldTab.swift").read_text()
+    jump = brace_body(tab, tab.index("private func jump()"))
+    if "runtime.fieldJump" not in jump:
+        fail("FieldTab never reads the hold card's request")
+    if not re.search(r"for \w+ in route\b", jump):
+        fail("FieldTab does not walk the route, so a state card that is not loaded opens nothing")
     print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
 
 

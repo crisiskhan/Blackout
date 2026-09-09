@@ -78,7 +78,10 @@ struct FieldTab: View {
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
-        guard let card = route.lazy.compactMap({ id in cards.first { $0.id == id } }).first else { return }
-        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+        for id in route {
+            guard let card = cards.first(where: { $0.id == id }) else { continue }
+            stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+            return
+        }
     }
 }
