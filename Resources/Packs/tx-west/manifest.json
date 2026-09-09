@@ -7,10 +7,10 @@
   "defaultOpen": true,
   "walkable": true,
   "bbox": {
-    "south": 31.33,
-    "west": -107.17,
-    "north": 32.67,
-    "east": -105.85
+    "south": 30.95,
+    "west": -107.6,
+    "north": 33.15,
+    "east": -105.35
   },
   "slices": {
     "metro": {
@@ -55,18 +55,18 @@
         "north": 32.4,
         "east": -106.2
       },
-      "featureCount": 128405
+      "featureCount": 128406
     },
     "region": {
       "name": "El Paso / Las Cruces / Organ Mountains region",
       "bbox": {
         "name": "El Paso / Las Cruces / Organ Mountains region",
-        "south": 31.33,
-        "west": -107.17,
-        "north": 32.67,
-        "east": -105.85
+        "south": 30.95,
+        "west": -107.6,
+        "north": 33.15,
+        "east": -105.35
       },
-      "featureCount": 167585
+      "featureCount": 196185
     }
   },
   "banners": [
@@ -74,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 24571573,
+  "bytes": 35377375,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -99,8 +99,8 @@
     "wild.geojson"
   ],
   "center": {
-    "lat": 32.0,
-    "lon": -106.50999999999999
+    "lat": 32.05,
+    "lon": -106.475
   },
   "home": {
     "lat": 31.78,
@@ -110,49 +110,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 1551373,
+    "bytes": 1780529,
+    "width": 2048,
+    "height": 2002,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -107.17,
-        32.67
+        -107.6,
+        33.15
       ],
       [
-        -105.85,
-        32.67
+        -105.35,
+        33.15
       ],
       [
-        -105.85,
-        31.33
+        -105.35,
+        30.95
       ],
       [
-        -107.17,
-        31.33
+        -107.6,
+        30.95
       ]
     ]
   },
   "stats": {
-    "features": 167752,
-    "highwayLines": 156241,
-    "namedStreets": 53804,
+    "features": 196573,
+    "highwayLines": 173901,
+    "namedStreets": 60153,
     "sampleStreetNames": [
       "Carretera Ciudad Juárez-Miguel Ahumada",
       "Carretera Miguel Ahumada-Ciudad Juárez",
-      "Dunas",
-      "Calle Ramal a Samalayuca",
-      "Calle Fidel Holguin",
-      "Calle Vicente Guerrero",
-      "Calle Ignacio Allende",
-      "Calle José María Morelos",
-      "Calle Samalayuca",
-      "Calle Miguel Hidalgo y Costilla",
-      "Calle Agustín Esparza",
-      "Calle Pedro Avalos"
+      "Ranch Road 192",
+      "Quitman Pass Road",
+      "Indian Hot Spring Road",
+      "Camino a El Pajarito",
+      "Esperanza Cut-Off",
+      "Finley Road",
+      "Esperanza Road",
+      "I 10",
+      "FM 34",
+      "Love Road"
     ],
-    "water": 8715,
-    "places": 389,
-    "graphEdges": 648436,
-    "graphNodes": 226272,
+    "water": 19457,
+    "places": 481,
+    "graphEdges": 742351,
+    "graphNodes": 263512,
     "streetsVisibleAtWalkingZoom": true
   }
 }
