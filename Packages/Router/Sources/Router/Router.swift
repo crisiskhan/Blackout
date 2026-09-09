@@ -93,6 +93,11 @@ public struct RouteGraph: Codable, Sendable {
     public let edges: [GraphEdge]
     public let index: GraphIndex
 
+    /// Size of the graph, named so callers do not have to know which of the
+    /// two stores above happens to hold it.
+    public var nodeCount: Int { nodes.count }
+    public var linkCount: Int { edges.count }
+
     private enum CodingKeys: String, CodingKey { case nodes, edges }
 
     public init(nodes: [String: GraphNode], edges: [GraphEdge]) {

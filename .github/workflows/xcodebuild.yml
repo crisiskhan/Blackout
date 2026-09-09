@@ -139,5 +139,7 @@ jobs:
             echo "::endgroup::"
           done
           echo '--- the map put this many streets on the glass ---'
-          grep 'PMTILES-SPELLING' /tmp/MapLibreMap.log || echo 'no render line (probe did not run)'
+          grep "PMTILES-SPELLING" /tmp/MapLibreMap.log || echo "no render line (probe did not run)"
+          echo "--- what the routing graphs cost ---"
+          grep "GRAPH-COST" /tmp/Router.log || echo "no graph cost lines"
           exit $fail
