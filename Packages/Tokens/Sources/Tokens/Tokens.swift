@@ -22,7 +22,12 @@ public enum BlackoutTokens: Sendable {
         /// screen, so the pin the thumb is holding is never behind it.
         public static let holdCardMaxHeightFraction: Double = 0.5
         public static let holdCardCornerPoints: Double = 18
+        /// The scrim is graded rather than flat. It has to read as "the map is
+        /// not taking taps right now" everywhere, but half of the point of
+        /// capping the card is that the pin stays visible, and a flat 55% wash
+        /// over the top half dulls the one thing the card is about.
         public static let holdCardScrimOpacity: Double = 0.55
+        public static let holdCardScrimTopOpacity: Double = 0.14
         /// How far the card has to be dragged down before it goes.
         public static let holdCardDismissDragPoints: Double = 44
         /// Field and Mark. A third button turns a glance into a menu, and SOS

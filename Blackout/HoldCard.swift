@@ -41,28 +41,48 @@ struct HoldCardView: View {
                 canvas.size.height * CGFloat(BlackoutTokens.Chrome.holdCardMaxHeightFraction)
             )
             ZStack(alignment: .bottom) {
-                Theme.void
-                    .opacity(BlackoutTokens.Chrome.holdCardScrimOpacity)
-                    .contentShape(Rectangle())
-                    .onTapGesture(perform: onClose)
-                    .accessibilityLabel("Close card")
-                    .accessibilityAddTraits(.isButton)
+                scrim
                 card(cappedAt: cap)
-                    .offset(y: max(0, drag))
-                    .gesture(
-                        DragGesture(minimumDistance: 8)
-                            .onChanged { drag = $0.translation.height }
-                            .onEnded { value in
-                                if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
-                                    onClose()
-                                }
-                                drag = 0
-                            }
-                    )
+                    .offset(y: drag)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // The drag sits on the stack rather than on the card, so a swipe
+            // down over the dim map puts the card away exactly like a swipe
+            // down over the card does. On the card alone, the whole top half
+            // of the screen answers a swipe with nothing, and a surface that
+            // ignores you is one people decide is broken.
+            .gesture(
+                DragGesture(minimumDistance: 8)
+                    .onChanged { drag = max(0, $0.translation.height) }
+                    .onEnded { value in
+                        if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
+                            onClose()
+                        }
+                        withAnimation(.spring(response: 0.24, dampingFraction: 0.85)) { drag = 0 }
+                    }
+            )
+            // VoiceOver stays inside the card while it is up, the same way the
+            // scrim keeps a thumb out of the map.
+            .accessibilityAddTraits(.isModal)
         }
         .transition(.opacity)
+    }
+
+    /// Heavy behind the card, nearly clear over the pin. Flat, it would dim the
+    /// one place the card is talking about.
+    private var scrim: some View {
+        LinearGradient(
+            colors: [
+                Theme.void.opacity(BlackoutTokens.Chrome.holdCardScrimTopOpacity),
+                Theme.void.opacity(BlackoutTokens.Chrome.holdCardScrimOpacity),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onClose)
+        .accessibilityLabel("Close card")
+        .accessibilityAddTraits(.isButton)
     }
 
     /// Sized to its content until it reaches `cap`, then squeezed rather than
