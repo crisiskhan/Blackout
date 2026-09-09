@@ -108,7 +108,13 @@ def assert_sos_is_not_on_the_map_hold() -> None:
         fail("MapTab does not wire the hold")
     if re.search(r"onMapHold.*SOS", body, re.S | re.I):
         fail("the map hold path reaches for SOS")
-    print("OK   map hold never calls SOS")
+    # The other half of the same rule. `.isModal` is the tidy way to write a
+    # card over a map and it hides everything outside its own subtree from
+    # VoiceOver, tab bar included — and Comms, which is where SOS is, is on
+    # the tab bar. A card must not be able to put SOS out of reach.
+    if "isModal" in code_only((APP / "HoldCard.swift").read_text()):
+        fail("the card traps VoiceOver, so a screen reader cannot reach Comms while it is open")
+    print("OK   map hold never calls SOS, and never puts Comms out of reach")
 
 
 def assert_the_credit_survives_the_card() -> None:

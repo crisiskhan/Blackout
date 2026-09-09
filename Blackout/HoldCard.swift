@@ -61,9 +61,12 @@ struct HoldCardView: View {
                         withAnimation(.spring(response: 0.24, dampingFraction: 0.85)) { drag = 0 }
                     }
             )
-            // VoiceOver stays inside the card while it is up, the same way the
-            // scrim keeps a thumb out of the map.
-            .accessibilityAddTraits(.isModal)
+            // Deliberately not `.isModal`. It would be the tidy thing for a
+            // card over a map, and it hides everything outside its own
+            // subtree from VoiceOver — including the tab bar, and Comms is on
+            // the tab bar. Nothing this app puts on the screen is allowed to
+            // put SOS out of reach. The scrim reads as a Close button, so
+            // there is a way out without trapping anyone in here.
         }
         .transition(.opacity)
     }

@@ -57,6 +57,10 @@ struct MapTab: View {
                             runtime.holdInspect(lat: lat, lon: lon, tags: tags)
                         }
                     )
+                    // The scrim already keeps a thumb off the canvas. This is
+                    // the same thing for VoiceOver, and only the canvas: the
+                    // tab bar stays reachable, because Comms is on it.
+                    .accessibilityHidden(runtime.held != nil)
                     if runtime.held == nil {
                         canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
                     }
