@@ -1,3 +1,7 @@
+// MapLibre and UIKit are iOS-only, and so is everything in this file. The
+// guard is what lets the rest of the module — the chrome, the geometry, the
+// water index — compile and be tested off a Mac.
+#if canImport(UIKit)
 import CoreLocation
 import Foundation
 import MapLibre
@@ -19,7 +23,15 @@ public struct OfflineMapView: UIViewRepresentable {
     public var destination: (lat: Double, lon: Double)?
     /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
+    /// Where the last stationary press landed, drawn so the card has something
+    /// on the glass to be talking about.
+    public var inspectPin: (lat: Double, lon: Double)?
+    /// How much of the bottom of the map the card is covering, in points.
+    public var inspectCardHeight: Double
     public var onMapTap: ((Double, Double) -> Void)?
+    /// A press that stayed put: latitude, longitude, and the zoom it happened
+    /// at, because how much ground a thumb covers depends on the zoom.
+    public var onInspect: ((Double, Double, Double) -> Void)?
 
     public init(
         styleURL: URL,
@@ -34,7 +46,10 @@ public struct OfflineMapView: UIViewRepresentable {
         route: [(lat: Double, lon: Double)] = [],
         destination: (lat: Double, lon: Double)? = nil,
         fitToken: Int = 0,
-        onMapTap: ((Double, Double) -> Void)? = nil
+        inspectPin: (lat: Double, lon: Double)? = nil,
+        inspectCardHeight: Double = 0,
+        onMapTap: ((Double, Double) -> Void)? = nil,
+        onInspect: ((Double, Double, Double) -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -48,7 +63,10 @@ public struct OfflineMapView: UIViewRepresentable {
         self.route = route
         self.destination = destination
         self.fitToken = fitToken
+        self.inspectPin = inspectPin
+        self.inspectCardHeight = inspectCardHeight
         self.onMapTap = onMapTap
+        self.onInspect = onInspect
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -78,7 +96,21 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.numberOfTapsRequired = 1
         tap.delegate = context.coordinator
         view.addGestureRecognizer(tap)
+        // A finger that stays put asks about the ground under it. A finger that
+        // moves is moving the map, and `allowableMovement` is what makes those
+        // two different: drift past it before the clock runs out and this never
+        // recognises, so the pan MapLibre already owns is all that happens.
+        let press = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleInspectPress(_:))
+        )
+        press.minimumPressDuration = InspectGesture.minimumPressSeconds
+        press.allowableMovement = CGFloat(InspectGesture.allowableMovementPoints)
+        press.delegate = context.coordinator
+        view.addGestureRecognizer(press)
+        context.coordinator.inspectPress = press
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onInspect = onInspect
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -90,6 +122,7 @@ public struct OfflineMapView: UIViewRepresentable {
         uiView.shouldRequestAuthorizationToUseLocationServices = true
         uiView.showsUserLocation = true
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onInspect = onInspect
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
     }
 
@@ -103,7 +136,9 @@ public struct OfflineMapView: UIViewRepresentable {
             packEast: packEast,
             route: route,
             destination: destination,
-            fitToken: fitToken
+            fitToken: fitToken,
+            inspectPin: inspectPin,
+            inspectCardHeight: inspectCardHeight
         )
     }
 
@@ -118,10 +153,19 @@ public struct OfflineMapView: UIViewRepresentable {
             var route: [(lat: Double, lon: Double)]
             var destination: (lat: Double, lon: Double)?
             var fitToken: Int
+            var inspectPin: (lat: Double, lon: Double)?
+            var inspectCardHeight: Double
         }
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
+        var onInspect: ((Double, Double, Double) -> Void)?
+        weak var inspectPress: UILongPressGestureRecognizer?
+        /// Set the moment a press is recognised and cleared when the next touch
+        /// lands, so the tap that ends the same touch does not also pick a
+        /// destination behind the card that just opened.
+        var pressBeganInspect = false
+        var storedInspectPin: (lat: Double, lon: Double)?
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
         var puckHalo: MLNPolygon?
@@ -136,9 +180,35 @@ public struct OfflineMapView: UIViewRepresentable {
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
+            // A press already answered for this touch.
+            guard !pressBeganInspect else { return }
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             onMapTap?(coord.latitude, coord.longitude)
+        }
+
+        @objc func handleInspectPress(_ gesture: UILongPressGestureRecognizer) {
+            guard gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
+            pressBeganInspect = true
+            let point = gesture.location(in: view)
+            let coord = view.convert(point, toCoordinateFrom: view)
+            liftForCard(on: view, pressY: Double(point.y))
+            onInspect?(coord.latitude, coord.longitude, view.zoomLevel)
+        }
+
+        /// Slide the map up if the card is about to sit on top of the pin.
+        func liftForCard(on view: MLNMapView, pressY: Double) {
+            let cardHeight = spec?.inspectCardHeight ?? 0
+            guard cardHeight > 0, view.bounds.height > 1 else { return }
+            let lift = InspectCard.liftPoints(
+                pressY: pressY,
+                screenHeight: Double(view.bounds.height),
+                cardHeight: cardHeight
+            )
+            guard lift > 0 else { return }
+            let centre = view.convert(view.centerCoordinate, toPointTo: view)
+            let moved = CGPoint(x: centre.x, y: centre.y - CGFloat(lift))
+            view.setCenter(view.convert(moved, toCoordinateFrom: view), animated: true)
         }
 
         public func gestureRecognizer(
@@ -146,6 +216,18 @@ public struct OfflineMapView: UIViewRepresentable {
             shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
         ) -> Bool {
             true
+        }
+
+        public func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldReceive touch: UITouch
+        ) -> Bool {
+            // Called as the finger lands, before any action fires, which is the
+            // one moment the latch can be cleared without racing the tap.
+            if gestureRecognizer === inspectPress {
+                pressBeganInspect = false
+            }
+            return true
         }
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
@@ -168,11 +250,16 @@ public struct OfflineMapView: UIViewRepresentable {
                 stored: storedDestination,
                 destination: spec.destination
             )
+            let inspectNeeds = force || InspectPin.needsReapply(
+                stored: storedInspectPin,
+                pin: spec.inspectPin
+            )
             if !OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
                 routeNeedsReapply: routeNeeds,
-                destinationNeedsReapply: destNeeds
+                destinationNeedsReapply: destNeeds,
+                inspectNeedsReapply: inspectNeeds
             ) {
                 return
             }
@@ -180,6 +267,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
                 storedDestination = spec.destination
+                storedInspectPin = spec.inspectPin
                 return
             }
 
@@ -219,6 +307,7 @@ public struct OfflineMapView: UIViewRepresentable {
             syncRoute(on: view, spec: spec, force: true)
             syncStyleOverlays(on: view, spec: spec)
             storedDestination = spec.destination
+            storedInspectPin = spec.inspectPin
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -359,6 +448,34 @@ public struct OfflineMapView: UIViewRepresentable {
                 src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }
 
+            if let press = spec.inspectPin {
+                let pin = MLNPointFeature()
+                pin.coordinate = CLLocationCoordinate2D(latitude: press.lat, longitude: press.lon)
+                if let src = style.source(withIdentifier: InspectPin.sourceID) as? MLNShapeSource {
+                    src.shape = pin
+                } else {
+                    let src = MLNShapeSource(identifier: InspectPin.sourceID, shape: pin, options: nil)
+                    style.addSource(src)
+                    let ring = MLNCircleStyleLayer(identifier: InspectPin.ringLayerID, source: src)
+                    ring.circleColor = NSExpression(forConstantValue: UIColor.clear)
+                    ring.circleRadius = NSExpression(forConstantValue: InspectPin.ringRadius)
+                    ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                    style.addLayer(ring)
+                    let core = MLNCircleStyleLayer(identifier: InspectPin.coreLayerID, source: src)
+                    core.circleColor = NSExpression(
+                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    )
+                    core.circleRadius = NSExpression(forConstantValue: InspectPin.coreRadius)
+                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    core.circleStrokeWidth = NSExpression(forConstantValue: 1.5)
+                    style.addLayer(core)
+                }
+            } else if let src = style.source(withIdentifier: InspectPin.sourceID) as? MLNShapeSource {
+                var empty = [CLLocationCoordinate2D]()
+                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+            }
+
             if RouteLine.shouldDraw(spec.route) {
                 var coords = spec.route.map {
                     CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
@@ -480,3 +597,5 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         super.init(coder: coder)
     }
 }
+
+#endif

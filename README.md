@@ -89,13 +89,13 @@ z12. Footways and paths come in at z13 with the residential grid.
 
 The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
 before and NM 3.65×, while all three packs together drop from 201.0 MB to
-89.9 MB.
+89.9 MB — 93.4 MB once the water layers below are counted.
 
-| Pack | Ships | of which streets | of which graph | Highway lines | Named streets | Graph |
-|---|---|---|---|---|---|---|
-| TX WEST | 32.1 MB | 15.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
-| NM | 31.8 MB | 13.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
-| TX EAST | 26.0 MB | 11.5 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+| Pack | Ships | of which streets | of which graph | of which water | Highway lines | Named streets | Graph |
+|---|---|---|---|---|---|---|---|
+| TX WEST | 33.8 MB | 15.8 MB | 9.8 MB | 1.6 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 32.8 MB | 13.9 MB | 11.7 MB | 1.0 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX EAST | 26.8 MB | 11.5 MB | 11.2 MB | 0.8 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
 
 ### The walk graph walks
 
@@ -143,6 +143,66 @@ reads it; change one and change the other, which a guard checks field by field.
 The older `graph.json` wire v2 reader is still there so a pack predating this
 still routes, but nothing generates it.
 
+### Water is classified, not just drawn
+
+The extract already carried every waterway and water polygon Overpass returned.
+What it did not carry is *what kind of water each one is* in the words used on
+the ground — tank, acequia, tinaja, playa. Those live in the name, and reading
+names is where this gets dangerous:
+
+```
+tx-west  "Playa Lateral"       waterway=drain    an irrigation lateral
+tx-west  "Playa Drain Canal"   waterway=canal    an irrigation canal
+tx-west  "Mule Springs Creek"  waterway=stream   a creek
+tx-west  "Cañon la Tinaja"     waterway=stream   a creek in a canyon
+```
+
+Eighty-two tx-west features carry "playa" in the name and not one of them is a
+playa. So a name may name **standing** water only, never a channel: a tank, a
+tinaja, a playa and a spring all sit still, and a line that moves is whatever
+its tag says. The single exception is `acequia`, because an acequia *is* a
+channel and the word is the channel's own name — all 247 across the three packs
+are tagged ditch, canal, drain or stream and named "Acequia Madre", "Pueblo
+Acequia", "Griegos Acequia".
+
+Two files come out, because drawing and answering want different things.
+`layers/water.geojson` is one mark per feature for the seven classes a line or
+a fill cannot already say, small enough to sit in the style without putting a
+parse back in front of the map opening. `layers/water.bin` is what a press is
+measured against: every record including the creeks and the ponds, sampled
+every 250 m along its length so a press in the middle of a three-kilometre
+stream still finds it. As JSON that came to 13.3 MB for tx-west and would have
+cost a parse of all of it to answer one press, so it is the same treatment the
+graph got — arrays in the order the reader wants them, mapped rather than read.
+
+| Pack | Records | Draw | Index | Populated classes |
+|---|---|---|---|---|
+| TX WEST | 19,547 | 0.65 MB | 0.99 MB | stream 12,106 · drain 3,114 · water 1,957 · canal 1,282 · ditch 522 · tank 218 · dam 166 · reservoir 65 · river 49 · acequia 34 · tap 24 · playa 8 · tinaja 1 · wetland 1 |
+| NM | 14,599 | 0.40 MB | 0.57 MB | stream 5,625 · ditch 3,121 · drain 1,968 · water 1,944 · canal 665 · dam 437 · river 422 · acequia 213 · tap 125 · tank 48 · reservoir 25 · playa 3 · spring 2 · wetland 1 |
+| TX EAST | 19,416 | 0.21 MB | 0.61 MB | water 9,446 · stream 5,675 · drain 1,649 · river 1,214 · ditch 615 · dam 553 · tap 249 · canal 8 · spring 6 · reservoir 1 |
+
+Springs, playas and tinajas are thin on purpose. Overpass was never asked for
+`natural=spring`, so the packs hold one; the rest of what the name search turns
+up is creeks and irrigation laterals, and the classifier is built to leave those
+alone rather than to make the table look fuller. The vocabulary is complete and
+the data fills what it fills.
+
+Zoom decides what the water says. The fill draws from the bottom of the range,
+so far out the water is the shape of the ground and nothing else. Lines wait
+for z11, which is where the tile archive actually starts carrying waterways —
+below it that layer was promising geometry the file does not hold. The class
+marks arrive at z14 and their names at z15. `WaterZoom` in `Packages/MapLibreMap`
+and `tools/v3/water.py` hold the same four numbers, and a guard reads both.
+
+The layers derive from the `osm.geojson` already in the tree, so regenerating
+them needs no network and reproduces the shipped bytes exactly — which is what
+a guard checks:
+
+```bash
+python3 -m tools.v3.water --refresh
+git diff --stat Resources/Packs   # nothing
+```
+
 Regenerate walkable packs (network at generate time only):
 
 ```bash
@@ -161,11 +221,24 @@ pip install -r tools/requirements.txt
 python3 tools/validate_v3.py
 ```
 
+The Swift packages are iOS-only, so `swift test` refuses them and the suite
+normally needs a Mac. `tools/swiftcheck` is a harness that points at the same
+sources through symlinks with no platform floor, which runs everything that is
+only Foundation — the water index, the map chrome, the pack catalogue:
+
+```bash
+swift test --package-path tools/swiftcheck   # 92 tests
+```
+
+It is not a product and CI does not run it; the iOS-only files drop out through
+the `#if canImport(UIKit)` they carry. What it cannot cover is anything that
+needs UIKit, SwiftUI or a renderer, which is what the simulator job is for.
+
 ## Verify (CI)
 
 Two jobs, both required, both on every pull request whatever it targets.
 
-`Blackout generic iOS device` compiles the app and runs all twelve Python
+`Blackout generic iOS device` compiles the app and runs all thirteen Python
 guards. `Swift tests on a simulator` boots a simulator and runs every package
 suite in `Packages/*/Tests`, discovered rather than listed.
 

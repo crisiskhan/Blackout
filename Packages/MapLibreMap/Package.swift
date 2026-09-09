@@ -18,6 +18,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "MapLibreMap", dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"]),
-        .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap", "Router"]),
+        .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap", "PackIO", "Router", "BlackBox"]),
     ]
 )

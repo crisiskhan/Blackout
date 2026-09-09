@@ -35,25 +35,47 @@ struct MapTab: View {
                     fix: runtime.lastKnownFix,
                     bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
                 )
-                ZStack(alignment: .bottomLeading) {
-                    OfflineMapView(
-                        styleURL: style,
-                        centerLat: you.lat,
-                        centerLon: you.lon,
-                        puckLat: you.lat,
-                        puckLon: you.lon,
-                        packSouth: pack.bbox.south,
-                        packWest: pack.bbox.west,
-                        packNorth: pack.bbox.north,
-                        packEast: pack.bbox.east,
-                        route: runtime.routeCoords,
-                        destination: runtime.routeTarget,
-                        fitToken: runtime.fitPackToken,
-                        onMapTap: { lat, lon in
-                            runtime.pickDestination(lat: lat, lon: lon)
+                GeometryReader { canvas in
+                    let cardHeight = InspectCard.maxHeight(screenHeight: Double(canvas.size.height))
+                    ZStack(alignment: .bottomLeading) {
+                        OfflineMapView(
+                            styleURL: style,
+                            centerLat: you.lat,
+                            centerLon: you.lon,
+                            puckLat: you.lat,
+                            puckLon: you.lon,
+                            packSouth: pack.bbox.south,
+                            packWest: pack.bbox.west,
+                            packNorth: pack.bbox.north,
+                            packEast: pack.bbox.east,
+                            route: runtime.routeCoords,
+                            destination: runtime.routeTarget,
+                            fitToken: runtime.fitPackToken,
+                            inspectPin: runtime.inspectPin,
+                            inspectCardHeight: cardHeight,
+                            onMapTap: { lat, lon in
+                                runtime.pickDestination(lat: lat, lon: lon)
+                            },
+                            onInspect: { lat, lon, zoom in
+                                runtime.inspect(lat: lat, lon: lon, zoom: zoom)
+                            }
+                        )
+                        // The card sits on the footer rather than over it: the
+                        // credit line is not something that gets to disappear
+                        // because a press landed on a creek.
+                        VStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            if let finding = runtime.inspection {
+                                MapInspectCard(
+                                    runtime: runtime,
+                                    finding: finding,
+                                    maxHeight: CGFloat(cardHeight)
+                                )
+                            }
+                            canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
                         }
-                    )
-                    canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
+                    }
+                    .frame(width: canvas.size.width, height: canvas.size.height)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)

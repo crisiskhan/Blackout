@@ -24,6 +24,10 @@
       "type": "geojson",
       "data": "layers/hazards.geojson"
     },
+    "water-detail": {
+      "type": "geojson",
+      "data": "layers/water.geojson"
+    },
     "wild": {
       "type": "geojson",
       "data": "wild.geojson"
@@ -110,6 +114,7 @@
       "id": "water",
       "type": "line",
       "source": "osm",
+      "minzoom": 11,
       "filter": [
         "has",
         "waterway"
@@ -124,13 +129,37 @@
           [
             "zoom"
           ],
-          10,
+          11,
           0.8,
           15,
           2.6
         ]
       },
       "source-layer": "water"
+    },
+    {
+      "id": "water-detail-points",
+      "type": "circle",
+      "source": "water-detail",
+      "minzoom": 14,
+      "paint": {
+        "circle-color": "#3d6478",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          14,
+          2.6,
+          17,
+          5.2
+        ],
+        "circle-stroke-color": "#B8BDC2",
+        "circle-stroke-width": 1.1
+      }
     },
     {
       "id": "contours",
@@ -620,6 +649,52 @@
         "text-halo-width": 2.0
       },
       "source-layer": "place"
+    },
+    {
+      "id": "water-detail-labels",
+      "type": "symbol",
+      "source": "water-detail",
+      "minzoom": 15,
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name"
+          ],
+          [
+            "get",
+            "class"
+          ]
+        ],
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          11,
+          18,
+          15
+        ],
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-anchor": "left",
+        "text-offset": [
+          0.6,
+          0
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
+        "text-halo-width": 2.0
+      }
     }
   ],
   "metadata": {

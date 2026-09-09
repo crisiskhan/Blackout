@@ -52,7 +52,11 @@ struct FieldTab: View {
                 .font(.caption2)
                 .foregroundStyle(Color(white: 0.5))
         }
-        .onAppear(perform: load)
+        .onAppear {
+            load()
+            openRequestedCard()
+        }
+        .onChange(of: runtime.pendingFieldCardID) { _, _ in openRequestedCard() }
         .padding(8)
     }
 
@@ -65,5 +69,15 @@ struct FieldTab: View {
         if let state = runtime.packs?.active?.state {
             cards = FieldCorpus.visible(cards, state: state)
         }
+    }
+
+    /// A press on the map hands a card id over and this tab opens it at step
+    /// one. The request is cleared either way, so a card that is not in this
+    /// state's book leaves the list showing rather than the tab stuck asking.
+    private func openRequestedCard() {
+        guard let wanted = runtime.pendingFieldCardID else { return }
+        runtime.pendingFieldCardID = nil
+        guard let card = cards.first(where: { $0.id == wanted }) else { return }
+        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 }

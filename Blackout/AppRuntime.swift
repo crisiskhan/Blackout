@@ -61,12 +61,21 @@ final class AppRuntime {
     var toolChrome = ""
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
+    /// What the last stationary press found, and where it landed. Both are nil
+    /// whenever the card is closed.
+    var inspection: InspectFinding?
+    var inspectPin: (lat: Double, lon: Double)?
+    /// A Field card the map asked for. FieldTab opens it and puts this back.
+    var pendingFieldCardID: String?
     /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     private var graphCache: RouteGraph?
     private var graphPackID: String?
     private var graphWarmup: Task<RouteGraph?, Never>?
+    private var waterCache: WaterIndex?
+    private var waterPackID: String?
+    private var waterWarmup: Task<WaterIndex?, Never>?
     private let fix = MeshFix()
 
     init() {
@@ -104,6 +113,7 @@ final class AppRuntime {
             sawCannotDo = true
         }
         warmupActiveGraph()
+        warmupActiveWater()
         applyMapKeepAwake()
     }
 
@@ -145,6 +155,66 @@ final class AppRuntime {
         )
         marks = MarkDrop.merging(marks, lat: lat, lon: lon, label: label)
         MarkStore.save(marks)
+    }
+
+    /// A press that stayed put. Answer it from the pack on disk — no network,
+    /// no model, just the water the pack was built with.
+    func inspect(lat: Double, lon: Double, zoom: Double) {
+        inspectPin = (lat, lon)
+        let id = packs?.active?.id
+        let cached = waterPackID == id ? waterCache : nil
+        let inflight = waterWarmup
+        Task { [weak self] in
+            let index: WaterIndex?
+            if let cached {
+                index = cached
+            } else if let inflight {
+                index = await inflight.value
+            } else {
+                index = nil
+            }
+            let finding = await Task.detached {
+                MapInspect.resolve(lat: lat, lon: lon, zoom: zoom, index: index)
+            }.value
+            await MainActor.run {
+                guard let self, self.packs?.active?.id == id else { return }
+                self.waterCache = index
+                self.waterPackID = id
+                self.inspection = finding
+                self.box.log("inspect", "\(finding.title) sure=\(finding.sure.map { "\($0)" } ?? "-")")
+            }
+        }
+    }
+
+    func closeInspect() {
+        inspection = nil
+        inspectPin = nil
+    }
+
+    /// MARK on the card pins what was inspected, not where the phone is.
+    func markInspection() {
+        guard let finding = inspection else { return }
+        marks = MarkDrop.merging(
+            marks,
+            lat: finding.lat,
+            lon: finding.lon,
+            label: MarkLabel.flagged(
+                subject: finding.markLabel,
+                offPack: !coordinateOnPack(lat: finding.lat, lon: finding.lon)
+            )
+        )
+        MarkStore.save(marks)
+        box.log("mark", finding.markLabel)
+        toolChrome = "MARKED \(finding.markLabel)"
+    }
+
+    /// FIELD on the card hands off to the procedure that matches what was
+    /// pressed, on the tab that owns procedures.
+    func openField(cardID: String) {
+        pendingFieldCardID = cardID
+        tab = .field
+        closeInspect()
+        applyMapKeepAwake()
     }
 
     func toggleLockOn() {
@@ -322,10 +392,15 @@ final class AppRuntime {
         graphCache = nil
         graphPackID = nil
         graphWarmup = nil
+        waterCache = nil
+        waterPackID = nil
+        waterWarmup = nil
         routeTarget = nil
         clearRoute(plan: "", chrome: "")
+        closeInspect()
         relabelMarksForActivePack()
         warmupActiveGraph()
+        warmupActiveWater()
     }
 
     func applyMapKeepAwake() {
@@ -391,16 +466,48 @@ final class AppRuntime {
 
     private func relabelMarksForActivePack() {
         guard let pack = packs?.active else { return }
-        let bbox = (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
+        let names = packs?.catalog.packs.map(\.name) ?? []
         marks = marks.map { m in
             MapMark(
                 id: m.id,
                 lat: m.lat,
                 lon: m.lon,
-                label: PackChrome.markLabel(lat: m.lat, lon: m.lon, packName: pack.name, bbox: bbox)
+                label: MarkLabel.relabel(
+                    existing: m.label,
+                    packName: pack.name,
+                    packNames: names,
+                    offPack: !coordinateOnPack(lat: m.lat, lon: m.lon)
+                )
             )
         }
         MarkStore.save(marks)
+    }
+
+    private func coordinateOnPack(lat: Double, lon: Double) -> Bool {
+        guard let pack = packs?.active else { return false }
+        return UserPuck.contains(
+            lat: lat,
+            lon: lon,
+            south: pack.bbox.south,
+            west: pack.bbox.west,
+            north: pack.bbox.north,
+            east: pack.bbox.east
+        )
+    }
+
+    private func warmupActiveWater() {
+        let id = packs?.active?.id
+        let url = packs?.packURL("layers/water.bin")
+        let task = Task.detached { WaterIndex.load(from: url) }
+        waterWarmup = task
+        Task { [weak self] in
+            let index = await task.value
+            await MainActor.run {
+                guard let self, self.packs?.active?.id == id else { return }
+                self.waterCache = index
+                self.waterPackID = id
+            }
+        }
     }
 
     private func pullFix() {

@@ -74,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 32138074,
+  "bytes": 33783005,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -90,6 +90,8 @@
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
+    "layers/water.bin",
+    "layers/water.geojson",
     "manifest.json",
     "metro.geojson",
     "osm.pmtiles",
