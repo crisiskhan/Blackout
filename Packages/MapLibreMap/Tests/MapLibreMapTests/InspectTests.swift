@@ -131,28 +131,39 @@ final class InspectTests: XCTestCase {
     }
 
     func testATownPolygonDoesNotSwallowTheStreetYouHeld() {
-        // `landuse=residential` is a sheet under the whole of El Paso, so on
-        // kind alone it would answer every hold in the city with the same
-        // anonymous ground. A record the survey named wins instead.
+        // `landuse=residential` is a sheet under every street in the city, so
+        // on kind alone it would answer every hold downtown with the same
+        // anonymous ground.
         let downtown: [[String: String]] = [
             ["landuse": "residential"],
             ["highway": "secondary", "name": "Alameda Ave"],
         ]
         XCTAssertEqual(Inspect.pick(downtown)["name"], "Alameda Ave")
 
-        // Out of town the rule flips back: an unnamed track is not the answer
-        // to "what is this ground", and the biome is.
+        // Naming the subdivision must not put it back in front. This is the
+        // real Las Cruces case: Gramercy Park over East Amador Avenue.
+        let named: [[String: String]] = [
+            ["landuse": "residential", "name": "Gramercy Park"],
+            ["highway": "secondary", "name": "East Amador Avenue"],
+        ]
+        XCTAssertEqual(Inspect.pick(named)["highway"], "secondary")
+
+        // Out of town the rule flips: an unnamed track is not the answer to
+        // "what is this ground", and the biome is.
         let backcountry: [[String: String]] = [
             ["natural": "scrub"],
             ["highway": "track"],
         ]
         XCTAssertEqual(Inspect.pick(backcountry)["natural"], "scrub")
 
-        // Water still outranks both, named or not.
+        // A named piece of ground still beats a track nobody named.
         XCTAssertEqual(
-            Inspect.pick(downtown + [["waterway": "ditch"]])["waterway"],
-            "ditch"
+            Inspect.pick([["natural": "wetland", "name": "Mesilla Bosque"], ["highway": "track"]])["name"],
+            "Mesilla Bosque"
         )
+
+        // Water outranks all of it, named or not.
+        XCTAssertEqual(Inspect.pick(named + [["waterway": "ditch"]])["waterway"], "ditch")
     }
 
     func testANamedRecordWinsOverAnUnnamedOneOfTheSameKind() {

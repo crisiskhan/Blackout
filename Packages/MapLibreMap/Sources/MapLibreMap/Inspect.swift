@@ -87,28 +87,34 @@ public enum Inspect {
     /// Everything the map drew under the thumb, and which of it the card is
     /// about.
     ///
-    /// Water first, because finding water is what holding a place is for.
-    /// After that a record the survey named beats one it did not: a name means
-    /// somebody stood at that exact thing, while ground cover is a sheet laid
-    /// under everything, and a town polygon covers every street in El Paso.
-    /// Only then does kind decide, so ground still beats an unnamed track —
-    /// out there the biome is the answer and the track is not.
+    /// Water first: finding water is what holding a place is for, so holding
+    /// where a wash crosses a road is a question about the wash.
+    ///
+    /// After that, a record the survey named beats one it did not, because a
+    /// name means somebody stood at that exact thing. Between two named
+    /// records take the smaller: a street is a line you aimed at, landcover is
+    /// a sheet you cannot miss. `landuse=residential` is drawn under every
+    /// street in Las Cruces, so without that a hold downtown answers with the
+    /// subdivision instead of the road under the thumb. Between two unnamed
+    /// records take the ground, because out there the biome is the answer and
+    /// an unnamed ranch track is not.
+    ///
+    /// Sampling 4,000 points across the tx-west pack, a street and a piece of
+    /// ground are both under the thumb 1.5% of the time, and that split is
+    /// roughly even between the two rules — which is why it takes both.
     public static func pick(_ found: [[String: String]]) -> [String: String] {
-        func kindRank(_ tags: [String: String]) -> Int {
-            switch read(tags: tags).kind {
-            case .water: return 0
-            case .land: return 1
-            case .place: return 2
-            case .street: return 3
-            case .nothing: return 4
+        func rank(_ tags: [String: String]) -> Int {
+            let named = !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
+            switch (read(tags: tags).kind, named) {
+            case (.water, _): return 0
+            case (.street, true): return 1
+            case (.land, true): return 2
+            case (.place, true): return 3
+            case (.land, false): return 4
+            case (.street, false): return 5
+            case (.place, false): return 6
+            case (.nothing, _): return 7
             }
-        }
-        func named(_ tags: [String: String]) -> Bool {
-            !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
-        }
-        func rank(_ tags: [String: String]) -> (Int, Int, Int) {
-            let kind = kindRank(tags)
-            return (kind == 0 ? 0 : 1, named(tags) ? 0 : 1, kind)
         }
         return found
             .filter { !$0.isEmpty }
