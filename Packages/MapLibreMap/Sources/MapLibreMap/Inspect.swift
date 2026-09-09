@@ -79,6 +79,10 @@ public enum Inspect {
     public static let holdDriftPoints = 12.0
     /// A thumb covers more than a pixel, so the probe reads a box this wide.
     public static let holdProbePoints = 44.0
+    /// A thumb landing below this much of the canvas would be behind the card,
+    /// so the map slides to put the held place this far down from the top.
+    public static let holdLiftBelow = 0.45
+    public static let holdLiftTo = 0.3
 
     /// Everything the map drew under the thumb, and which of it the card is
     /// about. Water wins over ground and ground over roads: the point of

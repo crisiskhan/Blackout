@@ -175,6 +175,22 @@ public struct OfflineMapView: UIViewRepresentable {
             let coord = view.convert(point, toCoordinateFrom: view)
             holdTick.impactOccurred()
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view))
+            liftIntoView(point, on: view)
+        }
+
+        /// Slide the map so the held place is above the card instead of behind
+        /// it. Capping the card at half the screen keeps the top half clear;
+        /// this is what puts the pin up there when the thumb landed low.
+        func liftIntoView(_ point: CGPoint, on view: MLNMapView) {
+            let height = view.bounds.height
+            guard height > 1, point.y > height * Inspect.holdLiftBelow else { return }
+            let drop = point.y - height * Inspect.holdLiftTo
+            let moved = view.convert(
+                CGPoint(x: view.bounds.midX, y: view.bounds.midY + drop),
+                toCoordinateFrom: view
+            )
+            guard CLLocationCoordinate2DIsValid(moved) else { return }
+            view.setCenter(moved, animated: true)
         }
 
         /// What the pack drew under the thumb. Only the style's own data layers
@@ -199,7 +215,6 @@ public struct OfflineMapView: UIViewRepresentable {
             return Inspect.pick(found.map { feature in
                 var tags: [String: String] = [:]
                 for (key, value) in feature.attributes {
-                    guard let key = key as? String else { continue }
                     if let text = value as? String {
                         tags[key] = text
                     } else if let number = value as? NSNumber {

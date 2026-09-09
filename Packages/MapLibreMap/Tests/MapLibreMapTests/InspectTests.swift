@@ -110,6 +110,16 @@ final class InspectTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(Inspect.holdProbePoints, 40)
     }
 
+    func testALowHoldIsLiftedAboveWhereTheCardWillBe() {
+        // Lifting has to move the point up, never down.
+        XCTAssertLessThan(Inspect.holdLiftTo, Inspect.holdLiftBelow)
+        // The card takes the bottom half, so a point already in the top half is
+        // left where it is. This module cannot see Tokens; the guard in
+        // tools/test_hold_and_water.py ties this to the card's actual cap.
+        XCTAssertLessThanOrEqual(Inspect.holdLiftBelow, 0.5)
+        XCTAssertGreaterThan(Inspect.holdLiftTo, 0)
+    }
+
     func testThePackDateIsPrintedWhenThereIsOneAndOmittedWhenThereIsNot() {
         XCTAssertEqual(Inspect.read(tags: [:], packDate: "2026-09-09").packDate, "2026-09-09")
         // A pack with no recorded fetch says nothing rather than inventing a day.

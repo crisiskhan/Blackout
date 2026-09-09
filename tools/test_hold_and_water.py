@@ -65,6 +65,7 @@ CRITTER_WORDS = ("animal-icon", "wildlife-icon", "critter")
 
 MAP = ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap"
 APP = ROOT / "Blackout"
+TOKENS = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
 
 
 def fail(msg: str) -> None:
@@ -117,10 +118,9 @@ def assert_the_card_offers_exactly_two_actions() -> None:
     for want in ("FIELD", "MARK"):
         if f'"{want}"' not in body:
             fail(f"hold card is missing its {want} action")
-    tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
-    if "holdCardMaxActions: Int = 2" not in tokens:
+    if "holdCardMaxActions: Int = 2" not in TOKENS:
         fail("holdCardMaxActions is not 2")
-    if "holdCardMaxHeightFraction: Double = 0.5" not in tokens:
+    if "holdCardMaxHeightFraction: Double = 0.5" not in TOKENS:
         fail("the card is not capped at half the screen")
     print("OK   hold card offers FIELD and MARK and nothing else")
 
@@ -137,7 +137,26 @@ def assert_a_hold_is_not_a_pan() -> None:
     inspect = (MAP / "Inspect.swift").read_text()
     if "holdSeconds = 0.4" not in inspect:
         fail("the hold is not 0.4s")
-    print("OK   a thumb that moves pans the map instead")
+    if "liftIntoView" not in body:
+        fail("a hold low on the canvas would open the card over its own pin")
+    # MapLibreMap cannot import Tokens, so the two halves of "the pin stays
+    # visible" are only tied together here: the card owns the bottom half, and
+    # a point below that gets lifted clear of it.
+    cap = float(number(TOKENS, "holdCardMaxHeightFraction"))
+    below = float(number(inspect, "holdLiftBelow"))
+    lift = float(number(inspect, "holdLiftTo"))
+    if below > 1 - cap:
+        fail(f"the card covers the bottom {cap:.0%} but holds are only lifted below {below:.0%}")
+    if not 0 < lift < below:
+        fail(f"a hold at {below:.0%} would be lifted to {lift:.0%}, which is not above it")
+    print(f"OK   a thumb that moves pans the map, and one below {below:.0%} is lifted to {lift:.0%}")
+
+
+def number(body: str, name: str) -> str:
+    found = re.search(rf"{name}(?::\s*Double)?\s*=\s*([0-9.]+)", body)
+    if not found:
+        fail(f"cannot find {name}")
+    return found.group(1)
 
 
 def assert_style_draws_ground_and_water(pack_id: str) -> None:
