@@ -63,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 25981104,
+  "bytes": 26801061,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -77,6 +77,8 @@
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
+    "layers/water.bin",
+    "layers/water.geojson",
     "manifest.json",
     "metro.geojson",
     "osm.pmtiles",

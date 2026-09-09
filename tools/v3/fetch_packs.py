@@ -21,7 +21,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-from . import graphbin, tiles
+from . import graphbin, tiles, water
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -969,6 +969,27 @@ def shipped_files(dest: Path) -> list[Path]:
     return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
 
 
+def write_manifest(dest: Path, manifest: dict) -> dict:
+    """Write the manifest, and then agree with it.
+
+    `bytes` and `files` describe the pack including `manifest.json`, so writing
+    the manifest changes the thing the manifest is describing. Counting once
+    left the shipped number 18 bytes under the truth on every pack — small, but
+    it means the number cannot be checked against the disk, and a number that
+    cannot be checked is a number that can drift. Two or three passes settle it.
+    """
+    for _ in range(6):
+        files = shipped_files(dest)
+        size = sum(p.stat().st_size for p in files)
+        names = sorted(str(p.relative_to(dest)) for p in files)
+        if manifest.get("bytes") == size and manifest.get("files") == names:
+            return manifest
+        manifest["bytes"] = size
+        manifest["files"] = names
+        write_json(dest / "manifest.json", manifest)
+    raise SystemExit(f"{dest.name} manifest size will not settle")
+
+
 def build_tiles(dest: Path, pack: dict) -> dict:
     """Cut the pack's streets into the vector tiles the canvas reads."""
     info = tiles.build(dest, union_bbox(pack["slices"]), pack["name"])
@@ -991,6 +1012,9 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "public-land": {"type": "geojson", "data": "layers/public_land.geojson"},
         "flood": {"type": "geojson", "data": "layers/flood.geojson"},
         "hazards": {"type": "geojson", "data": "layers/hazards.geojson"},
+        # Classified water marks. Small on purpose: the lines and fills are
+        # already in the tiles, so this only carries what a line cannot say.
+        "water-detail": {"type": "geojson", "data": "layers/water.geojson"},
         "wild": {"type": "geojson", "data": "wild.geojson"},
     }
     layers: list[dict] = [
@@ -1037,14 +1061,35 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "filter": ["==", ["get", "natural"], "water"],
                 "paint": {"fill-color": "#142430", "fill-opacity": 0.82},
             },
+            # Zoomed out, water is the shape of the ground and nothing else:
+            # the fill above draws from the bottom of the range and the lines
+            # wait. They wait until 11 because that is where the archive starts
+            # carrying waterways — under it this layer was promising geometry
+            # the tiles do not hold.
             {
                 "id": "water",
                 "type": "line",
                 "source": "osm",
+                "minzoom": water.LINE_MIN_ZOOM,
                 "filter": ["has", "waterway"],
                 "paint": {
                     "line-color": "#3d6478",
-                    "line-width": zoom_stops(10, 0.8, 15, 2.6),
+                    "line-width": zoom_stops(11, 0.8, 15, 2.6),
+                },
+            },
+            # Close in, each spring, tank, acequia, drain, playa, tinaja and
+            # canal gets a mark saying which it is. One palette, no icons — the
+            # word does the work.
+            {
+                "id": "water-detail-points",
+                "type": "circle",
+                "source": "water-detail",
+                "minzoom": water.DETAIL_MIN_ZOOM,
+                "paint": {
+                    "circle-color": "#3d6478",
+                    "circle-radius": zoom_stops(14, 2.6, 17, 5.2),
+                    "circle-stroke-color": SILVER_INK,
+                    "circle-stroke-width": 1.1,
                 },
             },
             {
@@ -1214,6 +1259,27 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "text-anchor": "top",
                     "text-optional": True,
                     "text-letter-spacing": 0.04,
+                },
+                "paint": {
+                    "text-color": SILVER_INK,
+                    "text-halo-color": VOID_INK,
+                    "text-halo-width": 2.0,
+                },
+            },
+            # Last, so street names win the collision and water names take
+            # whatever room is left rather than covering the way out.
+            {
+                "id": "water-detail-labels",
+                "type": "symbol",
+                "source": "water-detail",
+                "minzoom": water.LABEL_MIN_ZOOM,
+                "layout": {
+                    "text-field": ["coalesce", ["get", "name"], ["get", "class"]],
+                    "text-size": zoom_stops(15, 11, 18, 15),
+                    "text-font": [GLYPH_STACK],
+                    "text-anchor": "left",
+                    "text-offset": [0.6, 0],
+                    "text-optional": True,
                 },
                 "paint": {
                     "text-color": SILVER_INK,
@@ -1441,6 +1507,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         dest / "layers" / "hazards.geojson",
         {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT},
     )
+    water.build(dest)
 
     hillshade_meta: dict = {"present": False, "reason": "not requested"}
     if walkable:
@@ -1468,8 +1535,6 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
 
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
@@ -1486,17 +1551,17 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         "bbox": bb,
         "slices": slice_summaries,
         "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
+        "bytes": 0,
+        "files": [],
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
         "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
     }
-    write_json(dest / "manifest.json", manifest)
+    write_manifest(dest, manifest)
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,
@@ -1552,6 +1617,7 @@ def finalize_existing(dest: Path) -> dict:
         },
     )
     write_compact(dest / "layers" / "hazards.geojson", {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT})
+    water.build(dest)
 
     hill = dest / "hillshade.png"
     hillshade_meta: dict = {"present": False, "reason": "no hillshade.png"}
@@ -1574,8 +1640,6 @@ def finalize_existing(dest: Path) -> dict:
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
@@ -1592,17 +1656,17 @@ def finalize_existing(dest: Path) -> dict:
         "bbox": bb,
         "slices": slice_summaries,
         "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
+        "bytes": 0,
+        "files": [],
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
         "home": home_point(pack["slices"], bb),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
     }
-    write_json(dest / "manifest.json", manifest)
+    write_manifest(dest, manifest)
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,
