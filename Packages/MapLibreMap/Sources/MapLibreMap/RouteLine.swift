@@ -25,6 +25,23 @@ public enum RouteLine {
 
 /// The chosen destination, drawn on the canvas so the map does not need to
 /// print raw latitude and longitude to say where you are headed.
+/// The place the inspect card is about. Drawn brighter and wider than the
+/// destination pin because it has to read through the card's own scrim.
+public enum HoldPin {
+    public static let sourceID = "hold-pin-src"
+    public static let ringLayerID = "hold-pin-ring"
+    public static let coreLayerID = "hold-pin-core"
+    public static let ringRadius: Double = 19
+    public static let coreRadius: Double = 6
+
+    public static func needsReapply(
+        stored: (lat: Double, lon: Double)?,
+        held: (lat: Double, lon: Double)?
+    ) -> Bool {
+        DestinationPin.needsReapply(stored: stored, destination: held)
+    }
+}
+
 public enum DestinationPin {
     public static let sourceID = "dest-pin-src"
     public static let ringLayerID = "dest-pin-ring"

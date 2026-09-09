@@ -1,0 +1,485 @@
+import Foundation
+
+/// What one held point on the map turns out to be.
+///
+/// Everything here reads the pack's own record and says what it found. It never
+/// says a thing is safe to drink, safe to eat, or safe to touch — those are
+/// judgements no offline record can make, and a number next to them would be
+/// read as permission. `sure` is confidence that the feature is really there
+/// and really is what it claims, nothing more, and `why` says so in a line.
+public enum Inspect {
+    public enum Kind: String, Sendable, Equatable {
+        case water
+        case land
+        case street
+        case place
+        case nothing
+    }
+
+    /// What to do with the thing, in the only three shapes that are honest:
+    /// run the water tree over it, leave it alone, or read the ground's card.
+    public enum Advice: String, Sendable, Equatable {
+        case treat
+        case leave
+        case field
+
+        public var line: String {
+            switch self {
+            case .treat: return "Treat it. Field has the steps."
+            case .leave: return "Leave it. Runoff, not a source."
+            case .field: return "Field has the card for this ground."
+            }
+        }
+    }
+
+    public struct Card: Sendable, Equatable {
+        /// The record's name, or `Unnamed` — never a guess at one.
+        public var title: String
+        public var klass: String
+        public var kind: Kind
+        /// Confidence the record is right about what this is. Not drinkability.
+        public var sure: Int
+        public var why: String
+        public var advice: Advice
+        /// Field card this opens. Core cards only, so it is there in every state.
+        public var fieldCardID: String
+        /// When the pack's OSM was pulled, as the manifest recorded it.
+        public var packDate: String?
+
+        public init(
+            title: String,
+            klass: String,
+            kind: Kind,
+            sure: Int,
+            why: String,
+            advice: Advice,
+            fieldCardID: String,
+            packDate: String? = nil
+        ) {
+            self.title = title
+            self.klass = klass
+            self.kind = kind
+            self.sure = sure
+            self.why = why
+            self.advice = advice
+            self.fieldCardID = fieldCardID
+            self.packDate = packDate
+        }
+
+        public var sureLine: String { "SURE \(sure)% — \(why)" }
+        public var doLine: String { advice.line }
+    }
+
+    public static let unnamed = "Unnamed"
+
+    /// How long a thumb has to stay put before the card comes up, and how far
+    /// it may drift first. Past that drift the map pans and no card appears,
+    /// because a hold that moves was a pan all along.
+    public static let holdSeconds = 0.4
+    public static let holdDriftPoints = 12.0
+    /// A thumb covers more than a pixel, so the probe reads a box this wide.
+    public static let holdProbePoints = 44.0
+
+    /// Everything the map drew under the thumb, and which of it the card is
+    /// about. Water wins over ground and ground over roads: the point of
+    /// holding is to find what is out there, and a road is already drawn with
+    /// its name on it. Within a rank a named record beats an unnamed one.
+    public static func pick(_ found: [[String: String]]) -> [String: String] {
+        func rank(_ tags: [String: String]) -> Int {
+            switch read(tags: tags).kind {
+            case .water: return 0
+            case .land: return 1
+            case .place: return 2
+            case .street: return 3
+            case .nothing: return 4
+            }
+        }
+        func named(_ tags: [String: String]) -> Bool {
+            !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
+        }
+        return found
+            .filter { !$0.isEmpty }
+            .min { a, b in
+                let (ra, rb) = (rank(a), rank(b))
+                if ra != rb { return ra < rb }
+                if named(a) != named(b) { return named(a) }
+                return a.count > b.count
+            } ?? [:]
+    }
+
+    /// Style layers the app draws itself. They carry no record worth reading,
+    /// so a hold looks straight through them.
+    public static let overlayLayerIDs: Set<String> = [
+        "pack-bbox-line", "you-puck-halo", "you-puck-core",
+        DestinationPin.ringLayerID, DestinationPin.coreLayerID, RouteLine.layerID,
+        HoldPin.ringLayerID, HoldPin.coreLayerID,
+    ]
+
+    // Core Field cards, which every state ships, so a hold can never open a
+    // card that is not in the book.
+    public static let waterCard = "water-disinfect"
+    public static let plantCard = "plant-unknown"
+    public static let heatCard = "env-heat-collapse"
+    public static let coldCard = "env-cold"
+    public static let lostCard = "nav-lost"
+
+    /// One row of the reading table: how a feature is recognised, and what the
+    /// card says once it has been.
+    private struct Reading {
+        var klass: String
+        var kind: Kind
+        var sure: Int
+        var why: String
+        var advice: Advice
+        var field: String
+        /// Applied when the record carries no name, because an unnamed feature
+        /// is one nobody surveyed closely.
+        var unnamedPenalty: Int = 8
+        var unnamedKlass: String?
+        var unnamedWhy: String?
+    }
+
+    public static func read(tags: [String: String], packDate: String? = nil) -> Card {
+        let name = (tags["name"] ?? tags["ref"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let named = !name.isEmpty
+        let reading = match(tags)
+        let klass = named ? reading.klass : (reading.unnamedKlass ?? reading.klass)
+        let why = named ? reading.why : (reading.unnamedWhy ?? reading.why)
+        let sure = max(5, min(97, named ? reading.sure : reading.sure - reading.unnamedPenalty))
+        return Card(
+            title: named ? name : unnamed,
+            klass: klass,
+            kind: reading.kind,
+            sure: sure,
+            why: why,
+            advice: reading.advice,
+            fieldCardID: reading.field,
+            packDate: packDate
+        )
+    }
+
+    // MARK: - The table
+
+    private static func match(_ t: [String: String]) -> Reading {
+        if let r = water(t) { return r }
+        if let r = land(t) { return r }
+        if let r = builtUp(t) { return r }
+        return Reading(
+            klass: "Open ground",
+            kind: .nothing,
+            sure: 20,
+            why: "nothing is mapped at this point, so this is the ground around it",
+            advice: .field,
+            field: lostCard,
+            unnamedPenalty: 0
+        )
+    }
+
+    private static func water(_ t: [String: String]) -> Reading? {
+        if t["natural"] == "spring" {
+            return Reading(
+                klass: "Spring",
+                kind: .water,
+                sure: 78,
+                why: "mapped as a spring; whether it runs today is not in the record",
+                advice: .treat,
+                field: waterCard
+            )
+        }
+        if let made = t["man_made"] {
+            switch made {
+            case "water_well":
+                return Reading(
+                    klass: "Well",
+                    kind: .water,
+                    sure: 75,
+                    why: "mapped as a well; the record does not say if it still draws",
+                    advice: .treat,
+                    field: waterCard
+                )
+            case "water_tank", "storage_tank", "reservoir_covered":
+                return Reading(
+                    klass: "Tank",
+                    kind: .water,
+                    sure: 72,
+                    why: "mapped as a tank; what is in it now is not recorded",
+                    advice: .treat,
+                    field: waterCard
+                )
+            case "cistern":
+                return Reading(
+                    klass: "Cistern",
+                    kind: .water,
+                    sure: 70,
+                    why: "mapped as a cistern; the record says nothing about its state",
+                    advice: .treat,
+                    field: waterCard
+                )
+            default:
+                break
+            }
+        }
+        if t["amenity"] == "drinking_water" {
+            return Reading(
+                klass: "Tap",
+                kind: .water,
+                sure: 80,
+                why: "mapped as a public tap, which means someone plumbed it, not that it flows",
+                advice: .treat,
+                field: waterCard
+            )
+        }
+        if let way = t["waterway"] {
+            switch way {
+            case "river":
+                return Reading(
+                    klass: "River",
+                    kind: .water,
+                    sure: 88,
+                    why: "a river is mapped from its channel, so the line is where the water runs",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 6
+                )
+            case "stream":
+                return Reading(
+                    klass: "Creek",
+                    kind: .water,
+                    sure: 70,
+                    why: "named in the record as a stream",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 18,
+                    unnamedKlass: "Wash or stream",
+                    unnamedWhy: "the record says stream and no more; out here that is usually dry between rains"
+                )
+            case "canal":
+                return Reading(
+                    klass: "Canal",
+                    kind: .water,
+                    sure: 82,
+                    why: "a dug channel, so it is where the record puts it; whether it is charged is seasonal",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 6
+                )
+            case "ditch":
+                return Reading(
+                    klass: "Acequia or ditch",
+                    kind: .water,
+                    sure: 68,
+                    why: "a dug channel; the record does not separate an acequia from field drainage",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 8
+                )
+            case "drain":
+                return Reading(
+                    klass: "Drain",
+                    kind: .water,
+                    sure: 74,
+                    why: "mapped as a drain, which carries what runs off the ground above it",
+                    advice: .leave,
+                    field: waterCard,
+                    unnamedPenalty: 4
+                )
+            case "dam", "dam_crest":
+                return Reading(
+                    klass: "Dam",
+                    kind: .water,
+                    sure: 80,
+                    why: "a structure, so it is mapped where it stands",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 6
+                )
+            case "weir", "lock_gate", "fish_pass":
+                return Reading(
+                    klass: "Weir",
+                    kind: .water,
+                    sure: 74,
+                    why: "a structure in the channel, mapped where it stands",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 6
+                )
+            case "wadi":
+                return Reading(
+                    klass: "Wash",
+                    kind: .water,
+                    sure: 62,
+                    why: "mapped as a dry channel that carries water only after rain",
+                    advice: .treat,
+                    field: waterCard,
+                    unnamedPenalty: 6
+                )
+            default:
+                return Reading(
+                    klass: "Channel",
+                    kind: .water,
+                    sure: 58,
+                    why: "the record calls this \(way) and gives nothing further",
+                    advice: .treat,
+                    field: waterCard
+                )
+            }
+        }
+        if t["landuse"] == "reservoir" || t["landuse"] == "basin" || t["water"] == "reservoir" {
+            return Reading(
+                klass: "Reservoir or tank",
+                kind: .water,
+                sure: 76,
+                why: "mapped as held water; the level is not in the record",
+                advice: .treat,
+                field: waterCard
+            )
+        }
+        if t["natural"] == "water" {
+            return Reading(
+                klass: "Water body",
+                kind: .water,
+                sure: 82,
+                why: "mapped as standing water, from its edge",
+                advice: .treat,
+                field: waterCard,
+                unnamedPenalty: 14,
+                unnamedWhy: "mapped as standing water with no name, which often means a stock tank or a seasonal pool"
+            )
+        }
+        return nil
+    }
+
+    private static func land(_ t: [String: String]) -> Reading? {
+        if t["natural"] == "peak" {
+            return Reading(
+                klass: "Peak",
+                kind: .land,
+                sure: 86,
+                why: "a surveyed point, so the position is firm",
+                advice: .field,
+                field: coldCard,
+                unnamedPenalty: 10
+            )
+        }
+        if let natural = t["natural"] {
+            switch natural {
+            case "wood":
+                return Reading(
+                    klass: "Woodland", kind: .land, sure: 76,
+                    why: "mapped as tree cover; the edge moves with the years",
+                    advice: .field, field: plantCard, unnamedPenalty: 4
+                )
+            case "scrub", "heath":
+                return Reading(
+                    klass: "Desert scrub", kind: .land, sure: 72,
+                    why: "mapped as low brush, which is the open ground of this country",
+                    advice: .field, field: heatCard, unnamedPenalty: 2
+                )
+            case "sand", "dune":
+                return Reading(
+                    klass: "Sand or playa floor", kind: .land, sure: 70,
+                    why: "mapped as bare sand; a playa floor reads the same way and floods after rain",
+                    advice: .field, field: heatCard, unnamedPenalty: 2
+                )
+            case "wetland":
+                return Reading(
+                    klass: "Bosque or wetland", kind: .land, sure: 74,
+                    why: "mapped as wet ground, which is where the cottonwoods stand along the river",
+                    advice: .field, field: plantCard, unnamedPenalty: 4
+                )
+            case "bare_rock", "scree", "ridge", "cliff":
+                return Reading(
+                    klass: "Rock", kind: .land, sure: 74,
+                    why: "mapped as bare rock, which holds no shade and no water",
+                    advice: .field, field: coldCard, unnamedPenalty: 2
+                )
+            case "grassland":
+                return Reading(
+                    klass: "Grassland", kind: .land, sure: 70,
+                    why: "mapped as open grass",
+                    advice: .field, field: heatCard, unnamedPenalty: 2
+                )
+            default:
+                break
+            }
+        }
+        if t["boundary"] == "protected_area" || t["boundary"] == "national_park" || t["leisure"] == "nature_reserve" {
+            return Reading(
+                klass: "Protected land", kind: .land, sure: 84,
+                why: "a drawn boundary, so the line is exact even where the ground is not",
+                advice: .field, field: plantCard, unnamedPenalty: 4
+            )
+        }
+        if t["leisure"] == "park" {
+            return Reading(
+                klass: "Park", kind: .land, sure: 80,
+                why: "a drawn boundary around kept ground",
+                advice: .field, field: plantCard, unnamedPenalty: 6
+            )
+        }
+        if let use = t["landuse"] {
+            switch use {
+            case "forest":
+                return Reading(
+                    klass: "Woodland", kind: .land, sure: 76,
+                    why: "mapped as worked timber, so there is tree cover and usually a track in",
+                    advice: .field, field: plantCard, unnamedPenalty: 4
+                )
+            case "farmland", "orchard", "meadow", "vineyard", "recreation_ground":
+                return Reading(
+                    klass: "Irrigated ground", kind: .land, sure: 74,
+                    why: "mapped as worked ground, which in this country means a ditch reaches it",
+                    advice: .field, field: plantCard, unnamedPenalty: 4
+                )
+            default:
+                break
+            }
+        }
+        return nil
+    }
+
+    private static func builtUp(_ t: [String: String]) -> Reading? {
+        if let place = t["place"] {
+            let klass: String
+            switch place {
+            case "city": klass = "City"
+            case "town": klass = "Town"
+            case "village": klass = "Village"
+            case "hamlet": klass = "Hamlet"
+            case "suburb", "neighbourhood", "quarter": klass = "Neighbourhood"
+            default: klass = "Settlement"
+            }
+            return Reading(
+                klass: klass, kind: .place, sure: 84,
+                why: "a named place in the record, put at its centre rather than its edge",
+                advice: .field, field: lostCard, unnamedPenalty: 20
+            )
+        }
+        if let highway = t["highway"] {
+            let paved = ["motorway", "trunk", "primary", "secondary", "tertiary", "residential", "unclassified", "living_street"]
+            let foot = ["path", "footway", "steps", "bridleway", "cycleway", "pedestrian"]
+            let klass: String
+            var sure = 84
+            if paved.contains(highway) {
+                klass = "Road"
+            } else if foot.contains(highway) {
+                klass = "Trail"
+                sure = 74
+            } else if highway == "track" {
+                klass = "Track"
+                sure = 72
+            } else if highway == "service" {
+                klass = "Service road"
+                sure = 78
+            } else {
+                klass = "Road"
+            }
+            return Reading(
+                klass: klass, kind: .street, sure: sure,
+                why: "drawn from its centreline, so the line is the way itself",
+                advice: .field, field: lostCard, unnamedPenalty: 6
+            )
+        }
+        return nil
+    }
+}

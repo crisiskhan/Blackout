@@ -51,6 +51,11 @@ final class AppRuntime {
     var locale = "en"
     var lastKnownFix: (lat: Double, lon: Double)?
     var marks: [MapMark] = []
+    /// The inspect card the map is holding open. `nil` whenever it is clear.
+    var held: HeldPoint?
+    /// Field card the FIELD tab should open the next time it appears, set by
+    /// the hold card's FIELD button.
+    var fieldJump: String?
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
@@ -135,16 +140,58 @@ final class AppRuntime {
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
         guard let lat, let lon else { return }
+        dropMark(lat: lat, lon: lon)
+    }
+
+    /// A mark on a place the thumb chose rather than on the fix. `name` is the
+    /// record's own name when it has one; it goes in front of the coordinate
+    /// label so a list of marks reads as places instead of numbers.
+    func dropMark(lat: Double, lon: Double, name: String? = nil) {
         let pack = packs?.active
         let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
-        let label = PackChrome.markLabel(
+        let coords = PackChrome.markLabel(
             lat: lat,
             lon: lon,
             packName: pack?.name ?? "mark",
             bbox: bbox
         )
+        let named = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let label = named.isEmpty || named == Inspect.unnamed ? coords : "\(named) · \(coords)"
         marks = MarkDrop.merging(marks, lat: lat, lon: lon, label: label)
         MarkStore.save(marks)
+    }
+
+    // MARK: - Hold to inspect
+
+    /// A thumb stayed put long enough to mean it. Read the record under it and
+    /// raise the card. This never calls SOS and never routes anywhere; it only
+    /// says what is there.
+    func holdInspect(lat: Double, lon: Double, tags: [String: String]) {
+        held = HeldPoint(
+            lat: lat,
+            lon: lon,
+            card: Inspect.read(tags: tags, packDate: packs?.active?.osmFetched)
+        )
+    }
+
+    func closeHold() {
+        held = nil
+    }
+
+    /// MARK on the card puts the mark on the held place, not on the fix.
+    func markHeld() {
+        guard let point = held, !point.marked else { return }
+        dropMark(lat: point.lat, lon: point.lon, name: point.card.title)
+        held?.marked = true
+    }
+
+    /// FIELD on the card hands the matching card to the FIELD tab and goes
+    /// there. Water reaches the treat tree; ground reaches its own biome card.
+    func openFieldFromHold() {
+        guard let point = held else { return }
+        fieldJump = point.card.fieldCardID
+        held = nil
+        tab = .field
     }
 
     func toggleLockOn() {

@@ -17,9 +17,13 @@ public struct OfflineMapView: UIViewRepresentable {
     public var packEast: Double
     public var route: [(lat: Double, lon: Double)]
     public var destination: (lat: Double, lon: Double)?
+    /// The point the inspect card is about, marked so the card never hides it.
+    public var held: (lat: Double, lon: Double)?
     /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
     public var onMapTap: ((Double, Double) -> Void)?
+    /// A thumb held still on a place, with whatever the pack has drawn there.
+    public var onMapHold: ((Double, Double, [String: String]) -> Void)?
 
     public init(
         styleURL: URL,
@@ -33,8 +37,10 @@ public struct OfflineMapView: UIViewRepresentable {
         packEast: Double,
         route: [(lat: Double, lon: Double)] = [],
         destination: (lat: Double, lon: Double)? = nil,
+        held: (lat: Double, lon: Double)? = nil,
         fitToken: Int = 0,
-        onMapTap: ((Double, Double) -> Void)? = nil
+        onMapTap: ((Double, Double) -> Void)? = nil,
+        onMapHold: ((Double, Double, [String: String]) -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -47,8 +53,10 @@ public struct OfflineMapView: UIViewRepresentable {
         self.packEast = packEast
         self.route = route
         self.destination = destination
+        self.held = held
         self.fitToken = fitToken
         self.onMapTap = onMapTap
+        self.onMapHold = onMapHold
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -78,7 +86,21 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.numberOfTapsRequired = 1
         tap.delegate = context.coordinator
         view.addGestureRecognizer(tap)
+        let hold = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleHold(_:))
+        )
+        hold.minimumPressDuration = Inspect.holdSeconds
+        // A thumb that travels further than this was panning, so the hold
+        // fails and MapLibre keeps the drag.
+        hold.allowableMovement = CGFloat(Inspect.holdDriftPoints)
+        hold.delegate = context.coordinator
+        view.addGestureRecognizer(hold)
+        // A tap that lands inside a hold would fire on lift and move the
+        // destination out from under the card.
+        tap.require(toFail: hold)
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onMapHold = onMapHold
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -90,6 +112,7 @@ public struct OfflineMapView: UIViewRepresentable {
         uiView.shouldRequestAuthorizationToUseLocationServices = true
         uiView.showsUserLocation = true
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onMapHold = onMapHold
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
     }
 
@@ -103,6 +126,7 @@ public struct OfflineMapView: UIViewRepresentable {
             packEast: packEast,
             route: route,
             destination: destination,
+            held: held,
             fitToken: fitToken
         )
     }
@@ -117,11 +141,14 @@ public struct OfflineMapView: UIViewRepresentable {
             var packEast: Double
             var route: [(lat: Double, lon: Double)]
             var destination: (lat: Double, lon: Double)?
+            var held: (lat: Double, lon: Double)?
             var fitToken: Int
         }
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
+        var onMapHold: ((Double, Double, [String: String]) -> Void)?
+        private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
         var puckHalo: MLNPolygon?
@@ -130,6 +157,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedPuck: (lat: Double, lon: Double)?
         var storedRoute: [(lat: Double, lon: Double)]?
         var storedDestination: (lat: Double, lon: Double)?
+        var storedHeld: (lat: Double, lon: Double)?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
         var fittedFitToken = 0
@@ -139,6 +167,47 @@ public struct OfflineMapView: UIViewRepresentable {
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             onMapTap?(coord.latitude, coord.longitude)
+        }
+
+        @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
+            guard gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
+            let point = gesture.location(in: view)
+            let coord = view.convert(point, toCoordinateFrom: view)
+            holdTick.impactOccurred()
+            onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view))
+        }
+
+        /// What the pack drew under the thumb. Only the style's own data layers
+        /// are asked; the puck, the route and the pin are the app talking to
+        /// itself and have no record behind them.
+        func record(under point: CGPoint, on view: MLNMapView) -> [String: String] {
+            guard let style = view.style else { return [:] }
+            let readable = Set(
+                style.layers
+                    .map(\.identifier)
+                    .filter { !Inspect.overlayLayerIDs.contains($0) }
+            )
+            guard !readable.isEmpty else { return [:] }
+            let reach = CGFloat(Inspect.holdProbePoints)
+            let box = CGRect(
+                x: point.x - reach / 2,
+                y: point.y - reach / 2,
+                width: reach,
+                height: reach
+            )
+            let found = view.visibleFeatures(in: box, styleLayerIdentifiers: readable)
+            return Inspect.pick(found.map { feature in
+                var tags: [String: String] = [:]
+                for (key, value) in feature.attributes {
+                    guard let key = key as? String else { continue }
+                    if let text = value as? String {
+                        tags[key] = text
+                    } else if let number = value as? NSNumber {
+                        tags[key] = number.stringValue
+                    }
+                }
+                return tags
+            })
         }
 
         public func gestureRecognizer(
@@ -168,11 +237,14 @@ public struct OfflineMapView: UIViewRepresentable {
                 stored: storedDestination,
                 destination: spec.destination
             )
+            // Both pins live in the same style pass, so either one moving is
+            // reason enough to run it.
+            let heldNeeds = force || HoldPin.needsReapply(stored: storedHeld, held: spec.held)
             if !OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
                 routeNeedsReapply: routeNeeds,
-                destinationNeedsReapply: destNeeds
+                destinationNeedsReapply: destNeeds || heldNeeds
             ) {
                 return
             }
@@ -180,6 +252,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
                 storedDestination = spec.destination
+                storedHeld = spec.held
                 return
             }
 
@@ -219,6 +292,7 @@ public struct OfflineMapView: UIViewRepresentable {
             syncRoute(on: view, spec: spec, force: true)
             syncStyleOverlays(on: view, spec: spec)
             storedDestination = spec.destination
+            storedHeld = spec.held
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -355,6 +429,34 @@ public struct OfflineMapView: UIViewRepresentable {
                     style.addLayer(core)
                 }
             } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                var empty = [CLLocationCoordinate2D]()
+                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+            }
+
+            if let point = spec.held {
+                let mark = MLNPointFeature()
+                mark.coordinate = CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
+                if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
+                    src.shape = mark
+                } else {
+                    let src = MLNShapeSource(identifier: HoldPin.sourceID, shape: mark, options: nil)
+                    style.addSource(src)
+                    let ring = MLNCircleStyleLayer(identifier: HoldPin.ringLayerID, source: src)
+                    ring.circleColor = NSExpression(forConstantValue: UIColor(white: 1, alpha: 0.18))
+                    ring.circleRadius = NSExpression(forConstantValue: HoldPin.ringRadius)
+                    ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                    style.addLayer(ring)
+                    let core = MLNCircleStyleLayer(identifier: HoldPin.coreLayerID, source: src)
+                    core.circleColor = NSExpression(
+                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    )
+                    core.circleRadius = NSExpression(forConstantValue: HoldPin.coreRadius)
+                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                    style.addLayer(core)
+                }
+            } else if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
                 var empty = [CLLocationCoordinate2D]()
                 src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }

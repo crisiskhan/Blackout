@@ -18,6 +18,16 @@ public enum BlackoutTokens: Sendable {
         /// The MAP field draws short status lines only. A turn-by-turn script belongs to
         /// the voice and the route line, not to a HUD over the canvas.
         public static let fieldChromeMaxLines: Int = 3
+        /// The inspect card. It grows to its content and stops at half the
+        /// screen, so the pin the thumb is holding is never behind it.
+        public static let holdCardMaxHeightFraction: Double = 0.5
+        public static let holdCardCornerPoints: Double = 18
+        public static let holdCardScrimOpacity: Double = 0.55
+        /// How far the card has to be dragged down before it goes.
+        public static let holdCardDismissDragPoints: Double = 44
+        /// Field and Mark. A third button turns a glance into a menu, and SOS
+        /// is never one of them — it lives on Comms and nowhere else.
+        public static let holdCardMaxActions: Int = 2
 
         public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
             switch tab {

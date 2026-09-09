@@ -53,6 +53,7 @@ struct FieldTab: View {
                 .foregroundStyle(Color(white: 0.5))
         }
         .onAppear(perform: load)
+        .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .padding(8)
     }
 
@@ -65,5 +66,15 @@ struct FieldTab: View {
         if let state = runtime.packs?.active?.state {
             cards = FieldCorpus.visible(cards, state: state)
         }
+        jump()
+    }
+
+    /// The map's hold card asked for one card by id. Open it and clear the
+    /// request, so coming back to FIELD later lands on the list as usual.
+    private func jump() {
+        guard let id = runtime.fieldJump else { return }
+        runtime.fieldJump = nil
+        guard let card = cards.first(where: { $0.id == id }) else { return }
+        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 }
