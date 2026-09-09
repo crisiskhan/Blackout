@@ -210,11 +210,18 @@ final class AppRuntime {
 
     /// FIELD on the card hands off to the procedure that matches what was
     /// pressed, on the tab that owns procedures.
+    ///
+    /// The card button that calls this still owns the stack. Switching tab and
+    /// nil-ing `inspection` here tore the card out from under that button and
+    /// crashed on device (ASC 72). Queue the teardown for the next main turn
+    /// so the button can finish first; the Field id is latched already.
     func openField(cardID: String) {
         pendingFieldCardID = cardID
-        tab = .field
-        closeInspect()
-        applyMapKeepAwake()
+        Task { @MainActor in
+            tab = .field
+            closeInspect()
+            applyMapKeepAwake()
+        }
     }
 
     func toggleLockOn() {
