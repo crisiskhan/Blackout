@@ -369,6 +369,23 @@ final class RouterTests: XCTestCase {
 
         XCTAssertNil(RouteGraph.load(from: try write(Array(good.prefix(20)), "truncated")))
         XCTAssertNil(RouteGraph.load(from: try write([], "empty")))
+
+        // Right length, sane header, nonsense table: two nodes and one link,
+        // with the rows running backwards and the link pointing off the end.
+        // Believing either builds a Range that traps or reads past an array.
+        var twoNodes: [UInt8] = Array("BLKTGRF".utf8) + [1]
+        twoNodes += [3, 0, 0, 0] + [2, 0, 0, 0] + [1, 0, 0, 0] + [0, 0, 0, 0]
+        twoNodes += [0, 0, 0, 0, 0, 0, 0, 0]  // latE7 x2
+        twoNodes += [0, 0, 0, 0, 0, 0, 0, 0]  // lonE7 x2
+        let rowsOK: [UInt8] = [0, 0, 0, 0] + [1, 0, 0, 0] + [1, 0, 0, 0]
+        let rowsBackwards: [UInt8] = [1, 0, 0, 0] + [0, 0, 0, 0] + [1, 0, 0, 0]
+        let linkInRange: [UInt8] = [1, 0, 0, 0]
+        let linkOffTheEnd: [UInt8] = [9, 0, 0, 0]
+        let tail: [UInt8] = [10, 0, 0, 0] + [3]  // one millimetre value, one mode byte
+
+        XCTAssertNotNil(RouteGraph.load(from: try write(twoNodes + rowsOK + linkInRange + tail, "sane")))
+        XCTAssertNil(RouteGraph.load(from: try write(twoNodes + rowsBackwards + linkInRange + tail, "backwards")))
+        XCTAssertNil(RouteGraph.load(from: try write(twoNodes + rowsOK + linkOffTheEnd + tail, "offend")))
     }
 
     /// Ids are positions, so a set that skips one leaves a hole. The hole must

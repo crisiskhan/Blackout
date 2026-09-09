@@ -145,7 +145,12 @@ public struct GraphIndex: Sendable {
 
     func span(of node: Int) -> Range<Int> {
         guard node >= 0, node + 1 < offset.count else { return 0..<0 }
-        return Int(offset[node])..<Int(offset[node + 1])
+        let from = Int(offset[node])
+        let upto = Int(offset[node + 1])
+        // Readers validate the table, but a Range built backwards traps, so
+        // this stays cheap rather than trusting.
+        guard from <= upto, upto <= target.count else { return 0..<0 }
+        return from..<upto
     }
 
     /// Where a node's links go, for the one mode. Builds an array, so it is for
@@ -470,7 +475,18 @@ enum GraphBinary {
             let lon = lonE7.map { Double($0) / 1e7 }
             let metres = millimetres.map { Double($0) / 1000 }
 
-            guard offset.last.map({ Int($0) == links }) == true else { return nil }
+            // Length alone does not make the table sane. Rows that run
+            // backwards would build an invalid Range and links pointing past
+            // the end would read off the array, both of them a crash rather
+            // than a refusal, so the table is checked before it is believed.
+            var previous: Int32 = 0
+            for row in offset {
+                guard row >= previous, Int(row) <= links else { return nil }
+                previous = row
+            }
+            guard Int(previous) == links else { return nil }
+            guard target.allSatisfy({ $0 >= 0 && Int($0) < nodes }) else { return nil }
+
             return RouteGraph(
                 lat: lat,
                 lon: lon,
