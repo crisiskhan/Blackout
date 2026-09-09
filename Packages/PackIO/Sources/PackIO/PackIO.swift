@@ -12,9 +12,50 @@ public struct PackManifest: Codable, Equatable, Sendable {
     /// Where the canvas opens with no GPS fix. The bbox midpoint is often bare
     /// terrain; `home` is the metro slice, where the street grid is.
     public var home: Coord?
-    public struct Coord: Codable, Equatable, Sendable { public var lat: Double; public var lon: Double }
+
+    /// A struct's memberwise init is internal, so every other module could read
+    /// a manifest off disk but not build one. That quietly made the map tests
+    /// uncompilable, which is why they had never run.
+    public init(
+        id: String,
+        name: String,
+        state: String,
+        bytes: Int,
+        banners: [String],
+        center: Coord,
+        bbox: BBox,
+        home: Coord? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.state = state
+        self.bytes = bytes
+        self.banners = banners
+        self.center = center
+        self.bbox = bbox
+        self.home = home
+    }
+
+    public struct Coord: Codable, Equatable, Sendable {
+        public var lat: Double
+        public var lon: Double
+        public init(lat: Double, lon: Double) {
+            self.lat = lat
+            self.lon = lon
+        }
+    }
+
     public struct BBox: Codable, Equatable, Sendable {
-        public var south: Double; public var west: Double; public var north: Double; public var east: Double
+        public var south: Double
+        public var west: Double
+        public var north: Double
+        public var east: Double
+        public init(south: Double, west: Double, north: Double, east: Double) {
+            self.south = south
+            self.west = west
+            self.north = north
+            self.east = east
+        }
     }
 }
 
@@ -23,6 +64,11 @@ public struct PackCatalog: Codable, Equatable, Sendable {
     /// catalogs; the shipped one always names them.
     public var states: [String]? = nil
     public var packs: [PackManifest]
+
+    public init(states: [String]? = nil, packs: [PackManifest]) {
+        self.states = states
+        self.packs = packs
+    }
 }
 
 public final class PackStore: @unchecked Sendable {

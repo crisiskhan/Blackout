@@ -23,6 +23,27 @@ jobs:
       - name: Fail closed on CI opt / CPV gates
         run: python3 tools/test_ci_opt.py
 
+      - name: Install pack tooling
+        run: python3 -m pip install -q -r tools/requirements.txt
+
+      - name: Guards
+        # Every one of these existed and none of them ran anywhere. A guard
+        # nobody runs is a comment.
+        run: |
+          set -uo pipefail
+          fail=0
+          for guard in tools/test_*.py tools/validate_v3.py; do
+            printf '%-40s' "$guard"
+            if out=$(python3 "$guard" 2>&1); then
+              echo PASS
+            else
+              echo FAIL
+              echo "$out" | tail -25
+              fail=1
+            fi
+          done
+          exit $fail
+
       - name: Select Xcode 16
         run: |
           set -euo pipefail
@@ -59,13 +80,14 @@ jobs:
             DEVELOPMENT_TEAM= \
             build
 
-  render:
-    # Every other guard in this repo reads bytes. This one boots a simulator and
-    # asks the map what it actually drew, because "the pack renders" is the claim
-    # no file check can make and the only one whose failure ships a blank screen.
-    name: Map renders a street
+  swift-tests:
+    # The Swift suites had never been compiled: no CI ran them and the packages
+    # are iOS-only, so `swift test` cannot. They were decoration. This job puts
+    # them on a simulator, which is also the only place a claim like "the map
+    # draws a street" can be checked at all.
+    name: Swift tests on a simulator
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -84,7 +106,6 @@ jobs:
         id: sim
         run: |
           set -euo pipefail
-          xcrun simctl list devices available
           udid=$(xcrun simctl list devices available \
             | sed -n '/-- iOS 1[89]/,/^-- /p;/-- iOS [2-9][0-9]/,/^-- /p' \
             | grep iPhone \
@@ -95,18 +116,20 @@ jobs:
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$udid" || true
 
-      - name: Render the shipped pack
-        working-directory: Packages/MapLibreMap
+      - name: Run the suites
         run: |
-          set -euo pipefail
-          set -o pipefail
-          xcodebuild test \
-            -scheme MapLibreMap \
-            -destination "id=${{ steps.sim.outputs.udid }}" \
-            -only-testing:MapLibreMapTests/VectorTileRenderTests \
-            CODE_SIGNING_ALLOWED=NO 2>&1 | tee render.log
-
-      - name: What each pmtiles spelling did
-        if: always()
-        working-directory: Packages/MapLibreMap
-        run: grep 'PMTILES-SPELLING' render.log || echo 'probe produced no spelling lines'
+          set -uo pipefail
+          fail=0
+          for pkg in PackIO Router Tokens TimerSync MeshDTN MapLibreMap; do
+            echo "::group::$pkg"
+            ( cd "Packages/$pkg" && xcodebuild test \
+                -scheme "$pkg" \
+                -destination "id=${{ steps.sim.outputs.udid }}" \
+                CODE_SIGNING_ALLOWED=NO ) > "/tmp/$pkg.log" 2>&1 || fail=1
+            grep -E "error:|Testing failed|failed \(|XCTAssert" "/tmp/$pkg.log" | sort -u | head -60
+            grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2
+            echo "::endgroup::"
+          done
+          echo '--- what each pmtiles spelling did ---'
+          grep 'PMTILES-SPELLING' /tmp/MapLibreMap.log || echo 'no spelling lines (probe did not run)'
+          exit $fail

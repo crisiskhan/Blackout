@@ -4,8 +4,8 @@
   "glyphs": "glyphs/{fontstack}/{range}.pbf",
   "sources": {
     "osm": {
-      "type": "geojson",
-      "data": "osm.geojson",
+      "type": "vector",
+      "url": "pmtiles://osm.pmtiles",
       "attribution": "© OpenStreetMap contributors"
     },
     "contours": {
@@ -103,7 +103,8 @@
       "paint": {
         "fill-color": "#142430",
         "fill-opacity": 0.82
-      }
+      },
+      "source-layer": "water"
     },
     {
       "id": "water",
@@ -128,7 +129,8 @@
           15,
           2.6
         ]
-      }
+      },
+      "source-layer": "water"
     },
     {
       "id": "contours",
@@ -196,7 +198,8 @@
           16.8
         ],
         "line-opacity": 0.96
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "roads-arterial-casing",
@@ -241,7 +244,8 @@
           15.0
         ],
         "line-opacity": 0.92
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "roads",
@@ -298,7 +302,8 @@
           17,
           9.4
         ]
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "roads-major",
@@ -347,7 +352,8 @@
           17,
           12.0
         ]
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "tracks",
@@ -392,7 +398,8 @@
           2,
           1.1
         ]
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "wild-roads",
@@ -435,7 +442,8 @@
         "circle-radius": 2.4,
         "circle-stroke-color": "#000000",
         "circle-stroke-width": 0.8
-      }
+      },
+      "source-layer": "place"
     },
     {
       "id": "road-labels",
@@ -510,7 +518,8 @@
         "text-halo-color": "#000000",
         "text-halo-width": 2.2,
         "text-halo-blur": 0.15
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "road-refs",
@@ -567,7 +576,8 @@
         "text-halo-color": "#B8BDC2",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.05
-      }
+      },
+      "source-layer": "road"
     },
     {
       "id": "place-labels",
@@ -608,7 +618,8 @@
         "text-color": "#B8BDC2",
         "text-halo-color": "#000000",
         "text-halo-width": 2.0
-      }
+      },
+      "source-layer": "place"
     }
   ],
   "metadata": {

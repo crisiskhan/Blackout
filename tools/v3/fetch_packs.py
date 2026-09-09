@@ -21,6 +21,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
+from . import tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -932,12 +933,32 @@ def highway_in(values: list[str]) -> list:
     return ["in", ["get", "highway"], ["literal", values]]
 
 
+# `osm.geojson` stays in the tree as the input the vector tiles are built from,
+# but the app's copy step leaves it behind. The manifest describes what a phone
+# receives, so it must not count a file the phone never sees.
+NOT_SHIPPED = {"osm.geojson"}
+
+
+def shipped_files(dest: Path) -> list[Path]:
+    return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
+
+
+def build_tiles(dest: Path, pack: dict) -> dict:
+    """Cut the pack's streets into the vector tiles the canvas reads."""
+    info = tiles.build(dest, union_bbox(pack["slices"]), pack["name"])
+    print(f"  tiled {pack['id']} {info['tiles']:,} tiles {info['bytes'] / 1e6:.1f} MB", flush=True)
+    return info
+
+
 def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
     """Blackout void/red/silver style. Streets and names must read at walking zoom."""
     sources: dict = {
+        # Streets ride as vector tiles. As one `geojson` blob the canvas had to
+        # parse the entire pack before drawing anything, which both slowed the
+        # open and put a ceiling on how much ground a pack could carry.
         "osm": {
-            "type": "geojson",
-            "data": "osm.geojson",
+            "type": "vector",
+            "url": "pmtiles://osm.pmtiles",
             "attribution": OSM_CREDIT,
         },
         "contours": {"type": "geojson", "data": "contours.geojson"},
@@ -1176,6 +1197,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             },
         ]
     )
+    stamp_source_layers(layers)
     return {
         "version": 8,
         "name": f"Blackout {pack_id}",
@@ -1191,6 +1213,38 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             "tokens": {"void": VOID_INK, "accent": ACCENT_INK, "silver": SILVER_INK},
         },
     }
+
+
+# Which slice of the tile archive each style layer reads. A vector source is
+# addressed by layer, unlike the single undifferentiated blob it replaced, so
+# every layer drawing from `osm` has to name where it looks.
+OSM_SOURCE_LAYER = {
+    "water-fill": "water",
+    "water": "water",
+    "roads-casing": "road",
+    "roads-arterial-casing": "road",
+    "roads": "road",
+    "roads-major": "road",
+    "tracks": "road",
+    "osm-points": "place",
+    "road-labels": "road",
+    "road-refs": "road",
+    "place-labels": "place",
+}
+
+
+def stamp_source_layers(layers: list[dict]) -> None:
+    """Point every `osm` layer at its slice, and refuse to guess for new ones."""
+    for layer in layers:
+        if layer.get("source") != "osm":
+            continue
+        known = OSM_SOURCE_LAYER.get(layer["id"])
+        if known is None:
+            raise SystemExit(
+                f"style layer {layer['id']!r} reads the tile source but no source-layer "
+                "is declared for it; add one to OSM_SOURCE_LAYER or it draws nothing"
+            )
+        layer["source-layer"] = known
 
 
 def real_layer_features(fc: dict, keys: set[str]) -> dict:
@@ -1316,6 +1370,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     graph = build_graph(merged)
     write_compact(dest / "osm.geojson", fc)
     write_compact(dest / "graph.json", pack_graph(graph))
+    build_tiles(dest, pack)
 
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -1387,7 +1442,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
 
     stats = pack_stats(fc, graph)
-    files = [p for p in dest.rglob("*") if p.is_file()]
+    files = shipped_files(dest)
     size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
@@ -1434,6 +1489,7 @@ def finalize_existing(dest: Path) -> dict:
     print(f"  compacted edges={len(graph['edges'])} nodes={len(graph['nodes'])}", flush=True)
 
     pack = PACKS[dest.name]
+    build_tiles(dest, pack)
     bb = union_bbox(pack["slices"])
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -1488,7 +1544,7 @@ def finalize_existing(dest: Path) -> dict:
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
     stats = pack_stats(fc, graph)
-    files = [p for p in dest.rglob("*") if p.is_file()]
+    files = shipped_files(dest)
     size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
@@ -1536,5 +1592,23 @@ def main(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def rebuild(ids: list[str] | None = None) -> None:
+    """Redo tiles, style and manifest from the OSM already on disk.
+
+    Overpass is slow and rate-limited, and most changes here are to how the
+    data is cut rather than to the data. This re-runs everything downstream of
+    the fetch so a style or tiling change does not cost an hour of network.
+    """
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("REBUILD", pid, flush=True)
+        finalize_existing(root / pid)
+    write_catalog(root)
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:] or None)
+    argv = sys.argv[1:]
+    if argv and argv[0] == "--rebuild":
+        rebuild(argv[1:] or None)
+    else:
+        main(argv or None)

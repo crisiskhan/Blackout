@@ -82,7 +82,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 57951988,
+      "bytes": 24571573,
       "files": [
         "border.geojson",
         "contours.geojson",
@@ -100,7 +100,7 @@
         "layers/public_land.geojson",
         "manifest.json",
         "metro.geojson",
-        "osm.geojson",
+        "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
         "style.json",
@@ -119,8 +119,6 @@
         "present": true,
         "file": "hillshade.png",
         "bytes": 1551373,
-        "width": 2048,
-        "height": 2079,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
@@ -161,8 +159,8 @@
         ],
         "water": 8715,
         "places": 389,
-        "graphEdges": 673021,
-        "graphNodes": 237242,
+        "graphEdges": 648436,
+        "graphNodes": 226272,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -231,7 +229,7 @@
         "cattle-guard",
         "hurricane"
       ],
-      "bytes": 86517599,
+      "bytes": 29177942,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -247,7 +245,7 @@
         "layers/public_land.geojson",
         "manifest.json",
         "metro.geojson",
-        "osm.geojson",
+        "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
         "style.json",
@@ -267,8 +265,6 @@
         "present": true,
         "file": "hillshade.png",
         "bytes": 1044475,
-        "width": 2048,
-        "height": 1228,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
@@ -309,8 +305,8 @@
         ],
         "water": 19180,
         "places": 410,
-        "graphEdges": 874075,
-        "graphNodes": 307954,
+        "graphEdges": 848575,
+        "graphNodes": 296343,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -380,7 +376,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 56758608,
+      "bytes": 22987838,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -396,7 +392,7 @@
         "layers/public_land.geojson",
         "manifest.json",
         "metro.geojson",
-        "osm.geojson",
+        "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
         "style.json",
@@ -416,8 +412,6 @@
         "present": true,
         "file": "hillshade.png",
         "bytes": 1828931,
-        "width": 2048,
-        "height": 1830,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
@@ -458,8 +452,8 @@
         ],
         "water": 8099,
         "places": 222,
-        "graphEdges": 650667,
-        "graphNodes": 221604,
+        "graphEdges": 633860,
+        "graphNodes": 214136,
         "streetsVisibleAtWalkingZoom": true
       }
     }

@@ -41,8 +41,15 @@ ROAD_ZOOM = (
     (10, {"primary", "primary_link"}),
     (11, {"secondary", "secondary_link"}),
     (12, {"tertiary", "tertiary_link"}),
+    # Tracks come in early despite being 13% of all geometry: they are rural, so
+    # they land in tiles that hold almost nothing else, and they are the only
+    # thing drawn out where someone on foot most needs a line to follow.
+    (12, {"track"}),
     (13, {"residential", "unclassified", "living_street"}),
-    (14, {"service", "track", "path", "footway", "cycleway", "bridleway", "pedestrian", "steps"}),
+    (13, {"path", "footway", "cycleway", "bridleway", "pedestrian", "steps"}),
+    # Driveways and parking aisles are a third of the whole pack and read as
+    # noise anywhere above the block you are standing on.
+    (14, {"service"}),
 )
 PLACE_ZOOM = (
     (MIN_ZOOM, {"city", "town"}),
