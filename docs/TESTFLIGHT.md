@@ -51,6 +51,8 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34264462418` (`960a8a2`): tip-67 `workflow_dispatch` with a concatenated `git_ref`. Checkout fetch failed. No IPA.
 - `34264699162` (`960a8a2`): tip-67 `workflow_dispatch` retry. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **67**. Dist `Q8AX4T282L` (`DISTRIBUTION`). altool no errors. ASC `e2cf188e-1fa8-4e07-b306-1e088087c7d0` **VALID**. PATCH 200. `ASSIGN Internal 67 204`. GraphProbe + warmup + keep-awake. Leave 66 until TestFlight shows 67 Ready.
 - `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
+- `34288225891` (`bd5441a`): tip-69 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **69**. Dist `359MDUJD57` (`DISTRIBUTION`). altool no errors. ASC `50c4b07a-2df1-4ea8-9fc5-4faa8d2a0c23` **VALID**. PATCH 200. `ASSIGN Internal 69 204`. Pack grow TX/NM + mark persist. Leave 68 until TestFlight shows 69 Ready.
+- `34321942875` (`bd5441a`): tip-69 `workflow_dispatch` after 69 was already VALID. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **70**. Dist `U2FRLZL7R9` (`DISTRIBUTION`). altool no errors. ASC `ec6a12f1-5f34-4d52-8009-3fb0334da82e` **VALID**. PATCH 200. `ASSIGN Internal 70 204`. Same tip-69 tree as 69. Do not re-upload 54–70.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -141,3 +143,11 @@ SOURCE GO tip `b7953348` / merge `a72a8478`. Run `34264699162` uploaded CPV **67
 ## Tip 68 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `afb2e2fc` / merge `7abb9e0b`. Run `34269174169` uploaded CPV **68** and `ASSIGN Internal 68 204`. Speak banner finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready. Watch omitted. Internal only. Do not re-upload 54–67.
+
+## Tip 69 Internal (CoS 2026-09-08)
+
+SOURCE tip `f403052b` / merge `d3b65501`. Run `34288225891` uploaded CPV **69** and `ASSIGN Internal 69 204`. TX/NM pack grow + mark persist. Leave 68 until TestFlight shows 69 Ready. Watch omitted. Internal only. Do not re-upload 54–68.
+
+## Tip 70 Internal (same product as 69)
+
+Run `34321942875` uploaded the same `bd5441a` tree as CPV **70** and `ASSIGN Internal 70 204`. Duplicate dispatch after 69 was already VALID. Leave 69 until TestFlight shows 70 Ready, or stay on 69. Watch omitted. Internal only. Do not re-upload 54–70.
