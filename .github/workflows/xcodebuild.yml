@@ -125,7 +125,10 @@ jobs:
         run: |
           set -uo pipefail
           fail=0
-          for pkg in PackIO Router Tokens TimerSync MeshDTN MapLibreMap; do
+          # Every package that has tests, discovered rather than listed, so a
+          # new suite is covered the day it lands instead of the day someone
+          # remembers to add it here.
+          for pkg in $(ls -d Packages/*/Tests 2>/dev/null | cut -d/ -f2); do
             echo "::group::$pkg"
             ( cd "Packages/$pkg" && xcodebuild test \
                 -scheme "$pkg" \
@@ -137,6 +140,6 @@ jobs:
             grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2 || true
             echo "::endgroup::"
           done
-          echo '--- what each pmtiles spelling did ---'
-          grep 'PMTILES-SPELLING' /tmp/MapLibreMap.log || echo 'no spelling lines (probe did not run)'
+          echo '--- the map put this many streets on the glass ---'
+          grep 'PMTILES-SPELLING' /tmp/MapLibreMap.log || echo 'no render line (probe did not run)'
           exit $fail
