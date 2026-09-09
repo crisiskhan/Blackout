@@ -169,6 +169,14 @@ def assert_a_hold_is_not_a_pan() -> None:
         fail(f"the card covers the bottom {cap:.0%} but holds are only lifted below {below:.0%}")
     if not 0 < lift < below:
         fail(f"a hold at {below:.0%} would be lifted to {lift:.0%}, which is not above it")
+    # The lift measures the canvas, so the cap has to as well. Half an 852pt
+    # screen is most of a 529pt map, so a screen-sized card lands back on top
+    # of the pin the camera just moved out from under it.
+    card = (APP / "HoldCard.swift").read_text()
+    if "UIScreen" in card:
+        fail("the card is capped against the screen, not the canvas the pin is in")
+    if "GeometryReader" not in card:
+        fail("the card never measures the canvas it is capped against")
     print(f"OK   a thumb that moves pans the map, and one below {below:.0%} is lifted to {lift:.0%}")
 
 

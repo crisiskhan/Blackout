@@ -23,34 +23,53 @@ struct HoldCardView: View {
 
     @State private var drag: CGFloat = 0
 
+    /// Floor for the cap, for the one layout pass where the canvas has not been
+    /// measured yet. Below this the card cannot show a headline and two
+    /// buttons, and a card you cannot press is worse than a tall one.
+    private static let smallestUsableCard: CGFloat = 180
+
     private var corner: CGFloat { CGFloat(BlackoutTokens.Chrome.holdCardCornerPoints) }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Theme.void
-                .opacity(BlackoutTokens.Chrome.holdCardScrimOpacity)
-                .contentShape(Rectangle())
-                .onTapGesture(perform: onClose)
-                .accessibilityLabel("Close card")
-                .accessibilityAddTraits(.isButton)
-            card
-                .offset(y: max(0, drag))
-                .gesture(
-                    DragGesture(minimumDistance: 8)
-                        .onChanged { drag = $0.translation.height }
-                        .onEnded { value in
-                            if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
-                                onClose()
+        // The cap is measured against the canvas, not the screen. The canvas is
+        // the shorter of the two, and it is the one the pin is in: half a
+        // 852pt screen is most of a 529pt map, so a screen-sized cap would put
+        // the card back over the place the camera just lifted into view.
+        GeometryReader { canvas in
+            let cap = max(
+                Self.smallestUsableCard,
+                canvas.size.height * CGFloat(BlackoutTokens.Chrome.holdCardMaxHeightFraction)
+            )
+            ZStack(alignment: .bottom) {
+                Theme.void
+                    .opacity(BlackoutTokens.Chrome.holdCardScrimOpacity)
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: onClose)
+                    .accessibilityLabel("Close card")
+                    .accessibilityAddTraits(.isButton)
+                card(cappedAt: cap)
+                    .offset(y: max(0, drag))
+                    .gesture(
+                        DragGesture(minimumDistance: 8)
+                            .onChanged { drag = $0.translation.height }
+                            .onEnded { value in
+                                if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
+                                    onClose()
+                                }
+                                drag = 0
                             }
-                            drag = 0
-                        }
-                )
+                    )
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .transition(.opacity)
     }
 
-    private var card: some View {
+    /// Sized to its content until it reaches `cap`, then squeezed rather than
+    /// cut off. Nothing here is `fixedSize`, so under a short canvas the
+    /// sentences give up lines while the grabber and the two buttons — the
+    /// only parts that have to stay hittable — keep their height.
+    private func card(cappedAt cap: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             grabber
             headline
@@ -62,8 +81,7 @@ struct HoldCardView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(maxHeight: capHeight, alignment: .top)
+        .frame(maxHeight: cap, alignment: .top)
         .background(glass)
         .overlay(alignment: .top) {
             // One red hairline so the card reads as this app's and not as a
@@ -147,7 +165,7 @@ struct HoldCardView: View {
                     Text(note)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Theme.silver)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(4)
                 }
             }
             Spacer(minLength: 0)
@@ -170,11 +188,6 @@ struct HoldCardView: View {
             }
             .buttonStyle(HoldActionStyle(filled: held.marked))
         }
-    }
-
-    private var capHeight: CGFloat {
-        let screen = UIScreen.main.bounds.height
-        return max(180, screen * CGFloat(BlackoutTokens.Chrome.holdCardMaxHeightFraction))
     }
 }
 
