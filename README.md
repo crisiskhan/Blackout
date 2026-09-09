@@ -106,12 +106,27 @@ destination out from under it. The probe reads a 44pt box rather than a point
 — a thumb is not a pixel — and ranks what it finds. Water comes first, because
 finding water is what holding a place is for: holding where a wash crosses a
 road is a question about the wash, and the road already has its name written
-along it. After that a record the survey named beats one it did not, and only
-then does kind decide. That ordering is not cosmetic. `landuse=residential` is
-a sheet laid under every street in El Paso, so ranking on kind alone answered
-every hold downtown with the same anonymous ground; ranking names first returns
-the street you aimed at, while an unnamed track in the desert still loses to
-the biome around it.
+along it. After that a record the survey named beats one it did not, because a
+name means somebody stood at that exact thing. Then, between two named records,
+take the smaller: a street is a line you aimed at, landcover is a sheet you
+cannot miss. Between two unnamed ones take the ground, because out there the
+biome is the answer and a ranch track is not.
+
+That last pair of rules cost two passes to get right. `landuse=residential` is
+drawn under every street in El Paso and Las Cruces, so ranking on kind alone
+answered every hold downtown with the same anonymous ground. Ranking names
+first fixed the unnamed case and left the named one: Gramercy Park still
+answered for East Amador Avenue, because both are named and land sat above
+street. Sampling 4,000 points across the tx-west pack, a street and a piece of
+ground are both under the thumb 1.5% of the time, split about evenly between
+the two cases — which is why it takes both rules and not either one.
+
+The probe also has to look straight through the eight layers the app draws for
+itself: the route line, the puck, and both pins. None of them carries a record,
+and a hold that read the pin it just dropped would answer "Open ground" over
+the spring underneath it. The skip list is written by hand, so a guard resolves
+both sides — the layers the code constructs and the ids the list names — and
+fails either way round.
 
 The card is content-sized and capped at half the **canvas**, and the held point
 gets its own bright pin over the scrim, so the place is never behind the thing
@@ -120,11 +135,45 @@ most of a 529pt map, and the first cut measured the screen, so the card landed
 back on top of the pin the camera had just lifted clear. Squeezing it to the
 map meant the content could no longer be `fixedSize` either — under a short
 canvas the sentences give up lines so FIELD and MARK keep their 44pt rather
-than being clipped off the bottom. Tap the dim map or drag the card down to
-close. Two actions,
-FIELD and MARK. There is no third and there is no SOS: SOS is a Comms button,
-and a thumb resting on a map is not a call for help. `MARK` marks the held
-place rather than the fix, and carries the record's name into the label.
+than being clipped off the bottom. The scrim over the rest of the canvas is
+graded, 14% over the pin and 55% behind the card: flat, it dimmed the one thing
+the card was talking about, which undid half the reason for capping the card at
+all.
+
+Tap the dim map or swipe down to close. The swipe is on the whole canvas rather
+than on the card, because a card-only swipe meant the top half of the screen
+answered the gesture with nothing, and a surface that ignores you is one people
+decide is broken.
+
+Two actions, FIELD and MARK. There is no third and there is no SOS: SOS is a
+Comms button, and a thumb resting on a map is not a call for help. That rule
+has a second half that is easy to miss. `.isModal` is the tidy way to write a
+card over a map — VoiceOver stays inside it instead of wandering onto the
+canvas — and it hides everything outside its own subtree, tab bar included, and
+Comms is on the tab bar. So the tidy version put SOS out of reach for anyone
+using a screen reader. The canvas is hidden from VoiceOver instead, which is
+what the scrim already does for a thumb, and only the canvas.
+
+`MARK` marks the held place rather than the fix, and carries the record's name
+into the label. Marks merge by coordinate, so the card opens reading `MARKED`
+when there is already one there — the button used to offer a mark it would not
+make.
+
+`FIELD` opens the card that answers that ground. Every reading names an ordered
+route rather than one id: the state cards that describe that exact ground,
+then the core card behind them. Texas wrote a heat island card — *"pavement, no
+shade, and a party still moving in an El Paso, Austin, or Albuquerque
+afternoon"* — and New Mexico wrote one about ice on rock, and each ships only
+in its own state's book, so every hold used to fall back to one of five core
+cards and a subdivision at three in the afternoon opened "Stop and locate".
+FIELD now walks the route and takes the first card the loaded book has. Falling
+through is the normal case, not a fault, so the last id on every route is a
+core one and the tab cannot come up empty. Three routes so far: built-up ground
+to the heat island, rock and peaks to ice on rock, and a track to the cattle
+guard, because a track out here is a ranch road. Water never diverts — the `DO`
+line just said treat it, so FIELD opens the treat tree and nothing else. A
+guard reads the ids out of `Inspect.swift` and checks them against the shipped
+books, because both sides are hand-written strings in two different languages.
 
 `SURE %` is confidence **in the record**, and the line beside it says why. It
 is never a rating of the water. An unnamed `waterway=stream` reads *"the record
