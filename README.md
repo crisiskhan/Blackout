@@ -93,8 +93,8 @@ before and NM 3.65×, while all three packs together drop from 201.0 MB to
 
 | Pack | Ships | of which tiles | of which graph | Highway lines | Named streets | Graph |
 |---|---|---|---|---|---|---|
-| TX WEST | 33.1 MB | 16.7 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
-| NM | 34.0 MB | 15.8 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX WEST | 33.1 MB | 16.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 34.0 MB | 15.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
 | TX EAST | 29.6 MB | 15.1 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
 
 ### Hold a place to read the record
@@ -103,13 +103,25 @@ The map answers a thumb held still for 0.4s. The recogniser fails if the thumb
 drifts more than 12pt, so a drag is still a drag and no card appears; a tap is
 made to wait on the hold, so a press that becomes a card cannot also move the
 destination out from under it. The probe reads a 44pt box rather than a point
-— a thumb is not a pixel — and ranks what it finds: water over ground, ground
-over roads, named over unnamed. A road already has its name written along it,
-so holding one where a wash crosses it is a question about the wash.
+— a thumb is not a pixel — and ranks what it finds. Water comes first, because
+finding water is what holding a place is for: holding where a wash crosses a
+road is a question about the wash, and the road already has its name written
+along it. After that a record the survey named beats one it did not, and only
+then does kind decide. That ordering is not cosmetic. `landuse=residential` is
+a sheet laid under every street in El Paso, so ranking on kind alone answered
+every hold downtown with the same anonymous ground; ranking names first returns
+the street you aimed at, while an unnamed track in the desert still loses to
+the biome around it.
 
-The card is content-sized and capped at half the screen, and the held point
+The card is content-sized and capped at half the **canvas**, and the held point
 gets its own bright pin over the scrim, so the place is never behind the thing
-describing it. Tap the dim map or drag the card down to close. Two actions,
+describing it. The canvas is the ruler that matters: half an 852pt screen is
+most of a 529pt map, and the first cut measured the screen, so the card landed
+back on top of the pin the camera had just lifted clear. Squeezing it to the
+map meant the content could no longer be `fixedSize` either — under a short
+canvas the sentences give up lines so FIELD and MARK keep their 44pt rather
+than being clipped off the bottom. Tap the dim map or drag the card down to
+close. Two actions,
 FIELD and MARK. There is no third and there is no SOS: SOS is a Comms button,
 and a thumb resting on a map is not a call for help. `MARK` marks the held
 place rather than the fix, and carries the record's name into the label.
@@ -121,6 +133,12 @@ a statement about the survey, not the drink. What to do about the water is the
 `DO` row's job, and Field's. `tools/test_hold_and_water.py` fails the build if
 any word of permission — potable, drinkable, safe to drink, edible — reaches
 either file, and if the card ever grows a third button or reaches for SOS.
+
+It also keeps OpenStreetMap's line on screen. The credit lived in the canvas
+footer, and raising a card hid the footer while the map kept drawing above it.
+The three older guards all pass a file that does this, because they only check
+that the string is somewhere in `MapTab.swift`; the new one checks it is inside
+a branch that runs while a card is up.
 
 ### Water and ground
 
@@ -141,6 +159,16 @@ Paso streets did not move.
 | Canals and rivers | 1,343 | 1,095 |
 | Desert, sand and rock | 809 | 2,045 |
 | Built-up ground | 1,838 | 2,743 |
+
+A tank is only water if the record says so. Around El Paso the pack holds 585
+`man_made=storage_tank` records and **110** of them carry `content=water`; 470
+say nothing at all and a few say fuel. The first cut drew every one with the
+water ring and told you to treat it, which invents a supply that is as likely
+to be diesel. `content` now travels from Overpass into the tile, the tiler
+splits `tank` from `tank_other` on it, the style gives `tank_other` a grey ring
+instead of the water one, and the card names an unlabelled tank as exactly
+that: *"a tank is mapped here and nobody wrote down what is in it"*, SURE 42%,
+leave it.
 
 Tinajas are not in this table because they are not in the record. A handful of
 features carry the word in a name — `Cañon la Tinaja` is a wash, `Cerros Ojo
@@ -164,6 +192,17 @@ crosses itself, and Shapely indexes them happily then throws on the first tile
 that clips one — a single bad polygon near Austin killed a whole pack build.
 `repair()` runs `make_valid` and keeps only the parts with the original's
 dimension, so a broken polygon cannot come back as a stray line.
+
+The tiler and the card keep two taxonomies in two languages, so a guard walks
+every record the tiler can class and checks the reader branches on it. The
+first version of that guard searched `Inspect.swift` for the tag's text and was
+satisfied by `"residential"` appearing in the list of paved highway kinds —
+while the land reader had no branch for `landuse=residential` at all. It also
+was never called from `main()`. 8,107 polygons across the three packs — every
+built-up part of El Paso, Las Cruces and Austin — were painted as town ground
+and answered *"nothing is mapped at this point"* when held. `landuse=salt_pond`
+was missing the same way. The guard now parses the branches the reader actually
+takes, so a tag that only appears in an unrelated list no longer counts.
 
 ### The walk graph walks
 
