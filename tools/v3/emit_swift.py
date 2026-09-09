@@ -224,9 +224,13 @@ public final class PackStore: @unchecked Sendable {
     /// sitting on a phone keeps routing.
     public func graphURL() -> URL? {
         guard let binary = packURL("graph.bin") else { return nil }
-        // packURL only builds a path, so the fallback has to ask the disk.
-        if FileManager.default.fileExists(atPath: binary.path) { return binary }
-        return packURL("graph.json")
+        // packURL only builds a path, so the disk has to be asked. The fallback
+        // applies only where there is something to fall back to; with neither
+        // present the answer is the name packs actually ship under.
+        let fm = FileManager.default
+        if fm.fileExists(atPath: binary.path) { return binary }
+        guard let legacy = packURL("graph.json"), fm.fileExists(atPath: legacy.path) else { return binary }
+        return legacy
     }
 
     public func hasUsableGraph() -> Bool {
