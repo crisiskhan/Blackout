@@ -41,20 +41,20 @@ final class HoldOnTheGlassTests: XCTestCase {
     // MARK: - The two holds the build is gated on
 
     func testHoldingAWaterTankSaysWater() throws {
-        let card = try hold(at: Self.waterTank, zoom: 16)
-        XCTAssertEqual(card?.klass, "Water tank", "a content=water tank did not read as water: \(describe(card))")
-        XCTAssertEqual(card?.kind, .water)
-        XCTAssertEqual(card?.advice, .treat, "water still has to be treated")
-        XCTAssertGreaterThanOrEqual(card?.sure ?? 0, 70, "the record says what is in it, so be sure of it")
+        let held = try hold(at: Self.waterTank, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Water tank", "a content=water tank did not read as water: \(held)")
+        XCTAssertEqual(held.card?.kind, .water, "\(held)")
+        XCTAssertEqual(held.card?.advice, .treat, "water still has to be treated: \(held)")
+        XCTAssertGreaterThanOrEqual(held.card?.sure ?? 0, 70, "the record says what is in it, so be sure of it: \(held)")
     }
 
     func testHoldingEmptyDesertSaysGround() throws {
-        let card = try hold(at: Self.emptyDesert, zoom: 15)
-        XCTAssertNotNil(card, "holding empty desert put nothing on the glass")
-        XCTAssertEqual(card?.kind, .land, "empty desert did not read as ground: \(describe(card))")
-        XCTAssertEqual(card?.title, "Unnamed", "the record has no name for it and the card must not invent one")
-        XCTAssertFalse(card?.klass.isEmpty ?? true, "ground came back with no class at all")
-        XCTAssertEqual(card?.advice, .field, "empty ground sends you to Field")
+        let held = try hold(at: Self.emptyDesert, zoom: 15)
+        XCTAssertNotNil(held.card, "holding empty desert put nothing on the glass")
+        XCTAssertEqual(held.card?.kind, .land, "empty desert did not read as ground: \(held)")
+        XCTAssertEqual(held.card?.title, "Unnamed", "the record has no name for it and the card invented one: \(held)")
+        XCTAssertFalse(held.card?.klass.isEmpty ?? true, "ground came back with no class at all: \(held)")
+        XCTAssertEqual(held.card?.advice, .field, "empty ground sends you to Field: \(held)")
     }
 
     // MARK: - The ones that keep it honest
@@ -63,20 +63,20 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `man_made=storage_tank` sounds like it holds some. Around El Paso only
     /// 110 of 585 storage tanks carry `content=water`.
     func testHoldingATankWithNoContentDoesNotPromiseWater() throws {
-        let card = try hold(at: Self.silentTank, zoom: 16)
-        XCTAssertNotNil(card, "holding a mapped tank put nothing on the glass")
-        XCTAssertNotEqual(card?.klass, "Water tank", "a tank with no content tag was read as water: \(describe(card))")
-        XCTAssertEqual(card?.advice, .leave, "an unknown tank is a leave-it")
-        XCTAssertLessThan(card?.sure ?? 100, 60, "nobody wrote down what is in it, so do not sound sure")
+        let held = try hold(at: Self.silentTank, zoom: 16)
+        XCTAssertNotNil(held.card, "holding a mapped tank put nothing on the glass")
+        XCTAssertNotEqual(held.card?.klass, "Water tank", "a tank with no content was read as water: \(held)")
+        XCTAssertEqual(held.card?.advice, .leave, "an unknown tank is a leave-it: \(held)")
+        XCTAssertLessThan(held.card?.sure ?? 100, 60, "nobody wrote down what is in it, so do not sound sure: \(held)")
     }
 
     func testHoldingNamedGroundUsesTheNameTheRecordGaveIt() throws {
-        let card = try hold(at: Self.namedGround, zoom: 15)
-        XCTAssertNotNil(card, "holding the Sierra de Ciudad Juárez put nothing on the glass")
-        XCTAssertEqual(card?.kind, .land)
+        let held = try hold(at: Self.namedGround, zoom: 15)
+        XCTAssertNotNil(held.card, "holding the Sierra de Ciudad Juárez put nothing on the glass")
+        XCTAssertEqual(held.card?.kind, .land, "\(held)")
         XCTAssertTrue(
-            card?.title.contains("Sierra de Ciudad Juárez") ?? false,
-            "the ground is named in the record and the card dropped it: \(describe(card))"
+            held.card?.title.contains("Sierra de Ciudad Juárez") ?? false,
+            "the ground is named in the record and the card dropped it: \(held)"
         )
     }
 
@@ -84,22 +84,24 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Field card to open. A reading with an empty `why` renders as `SURE 68% —`
     /// and looks broken.
     func testEveryHoldOnTheGlassFillsInTheWholeCard() throws {
+        let pulled = try Self.packDate()
         for (place, coordinate, zoom) in [
             ("water tank", Self.waterTank, 16.0),
             ("silent tank", Self.silentTank, 16.0),
             ("empty desert", Self.emptyDesert, 15.0),
             ("named ground", Self.namedGround, 15.0),
         ] {
-            guard let card = try hold(at: coordinate, zoom: zoom) else {
+            let held = try hold(at: coordinate, zoom: zoom)
+            guard let card = held.card else {
                 XCTFail("\(place) put nothing on the glass")
                 continue
             }
-            XCTAssertFalse(card.title.isEmpty, "\(place) has no title")
-            XCTAssertFalse(card.klass.isEmpty, "\(place) has no class")
-            XCTAssertFalse(card.why.isEmpty, "\(place) has no reason, so SURE reads as a bare number")
-            XCTAssertFalse(card.fieldCardID.isEmpty, "\(place) opens no Field card")
-            XCTAssertEqual(card.packDate, try Self.packDate(), "\(place) lost the pack date")
-            XCTAssertTrue((1...100).contains(card.sure), "\(place) SURE out of range: \(card.sure)")
+            XCTAssertFalse(card.title.isEmpty, "\(place) has no title: \(held)")
+            XCTAssertFalse(card.klass.isEmpty, "\(place) has no class: \(held)")
+            XCTAssertFalse(card.why.isEmpty, "\(place) has no reason, so SURE reads as a bare number: \(held)")
+            XCTAssertFalse(card.fieldCardID.isEmpty, "\(place) opens no Field card: \(held)")
+            XCTAssertEqual(card.packDate, pulled, "\(place) lost the pack date: \(held)")
+            XCTAssertTrue((1...100).contains(card.sure), "\(place) SURE out of range: \(held)")
         }
     }
 
@@ -114,8 +116,10 @@ final class HoldOnTheGlassTests: XCTestCase {
         return try XCTUnwrap(manifest?["osmFetched"] as? String, "the pack does not say when it was pulled")
     }
 
-    /// Hold in the middle of the viewport, through the app's own probe.
-    private func hold(at centre: CLLocationCoordinate2D, zoom: Double) throws -> Inspect.Card? {
+    /// Hold in the middle of the viewport, through the app's own probe. The
+    /// tags come back alongside the card so a red assertion can say whether
+    /// the tile was wrong or the reading of it was.
+    private func hold(at centre: CLLocationCoordinate2D, zoom: Double) throws -> Held {
         let pack = RenderHarness.txWest
         _ = try RenderHarness.requireArchive(in: pack)
         let style = try RenderHarness.shippedStyle(pack: pack)
@@ -131,13 +135,21 @@ final class HoldOnTheGlassTests: XCTestCase {
             },
             fallback: [:]
         )
-        guard !tags.isEmpty else { return nil }
-        return Inspect.read(tags: tags, packDate: try Self.packDate())
+        guard !tags.isEmpty else { return Held(tags: [:], card: nil) }
+        return Held(tags: tags, card: Inspect.read(tags: tags, packDate: try Self.packDate()))
     }
 
-    private func describe(_ card: Inspect.Card?) -> String {
-        guard let card else { return "nothing" }
-        return "\(card.title) / \(card.klass) / \(card.kind) / \(card.sureLine)"
+    private struct Held: CustomStringConvertible {
+        var tags: [String: String]
+        var card: Inspect.Card?
+
+        var description: String {
+            let probed = tags.isEmpty
+                ? "the probe found nothing"
+                : tags.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: " ")
+            guard let card else { return probed }
+            return "\(card.title) / \(card.klass) / \(card.kind) / \(card.sureLine)  [\(probed)]"
+        }
     }
 }
 #endif
