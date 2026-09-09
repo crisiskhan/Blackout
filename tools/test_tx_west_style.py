@@ -320,6 +320,36 @@ def bounds_cover(pack_id: str, header: dict, bbox: dict) -> None:
         fail(f"{pack_id} tile archive falls short of the pack bbox on {', '.join(short)}: {got} vs {bbox}")
 
 
+def assert_every_tile_layer_names_its_slice(pack_id: str) -> None:
+    """A vector layer with no `source-layer` draws nothing, and says nothing.
+
+    This is the quietest way to break the map: the style still parses, the
+    source still loads, the layer is still there, and the streets are simply
+    gone. Check both the style on disk and the layers the app injects at run
+    time, because the second set is what appears when a style is missing one.
+    """
+    style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+    vector = {
+        name
+        for name, src in (style.get("sources") or {}).items()
+        if (src or {}).get("type") == "vector"
+    }
+    for layer in style.get("layers") or []:
+        if layer.get("source") in vector and not layer.get("source-layer"):
+            fail(f"{pack_id} style layer {layer['id']!r} reads a vector source with no source-layer — it draws nothing")
+
+    swift = (
+        ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift"
+    ).read_text()
+    injected = re.findall(r'"source": "osm",\n(\s*)"source-layer"', swift)
+    declared = swift.count('"source": "osm",')
+    if len(injected) != declared:
+        fail(
+            f"{declared - len(injected)} runtime-injected layer(s) read the osm source without a "
+            "source-layer; they would draw nothing on the phone"
+        )
+
+
 def assert_source_geojson_stays_off_the_phone(pack_id: str) -> None:
     """`osm.geojson` is build input now, not cargo. Keep it out of the bundle."""
     manifest = json.loads((ROOT / "Resources" / "Packs" / pack_id / "manifest.json").read_text())
@@ -405,6 +435,7 @@ def main() -> None:
 
     for pack_id in ("tx-west", "nm", "tx-east"):
         assert_walkable_osm(pack_id)
+        assert_every_tile_layer_names_its_slice(pack_id)
         assert_source_geojson_stays_off_the_phone(pack_id)
 
     zoom = open_zoom()

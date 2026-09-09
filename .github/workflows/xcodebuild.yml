@@ -24,7 +24,12 @@ jobs:
         run: python3 tools/test_ci_opt.py
 
       - name: Install pack tooling
-        run: python3 -m pip install -q -r tools/requirements.txt
+        # A venv, because the runner's python is externally managed and refuses
+        # a plain `pip install`.
+        run: |
+          set -euo pipefail
+          python3 -m venv /tmp/packtools
+          /tmp/packtools/bin/pip install -q -r tools/requirements.txt
 
       - name: Guards
         # Every one of these existed and none of them ran anywhere. A guard
@@ -34,7 +39,7 @@ jobs:
           fail=0
           for guard in tools/test_*.py tools/validate_v3.py; do
             printf '%-40s' "$guard"
-            if out=$(python3 "$guard" 2>&1); then
+            if out=$(/tmp/packtools/bin/python "$guard" 2>&1); then
               echo PASS
             else
               echo FAIL
