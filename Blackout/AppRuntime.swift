@@ -171,7 +171,11 @@ final class AppRuntime {
         held = HeldPoint(
             lat: lat,
             lon: lon,
-            card: Inspect.read(tags: tags, packDate: packs?.active?.osmFetched)
+            card: Inspect.read(tags: tags, packDate: packs?.active?.osmFetched),
+            // Holding a spring marked last week has to open reading MARKED.
+            // Marks merge by coordinate, so pressing MARK there does nothing,
+            // and a button that offers something it will not do is a lie.
+            marked: marks.contains { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }
         )
     }
 

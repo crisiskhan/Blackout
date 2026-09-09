@@ -232,6 +232,17 @@ public struct OfflineMapView: UIViewRepresentable {
             true
         }
 
+        public func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldReceive touch: UITouch
+        ) -> Bool {
+            // Touch-down is the 0.4s of notice the haptic engine wants. Cold,
+            // the tick arrives after the card, and the whole point of it is to
+            // say the card is coming.
+            if gestureRecognizer is UILongPressGestureRecognizer { holdTick.prepare() }
+            return true
+        }
+
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
             applyCamera(spec, on: view, force: force)
