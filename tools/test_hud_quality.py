@@ -622,6 +622,7 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("noModelGuess", field)
         self.assertIn("LEAVE IT", vis + field + read("Blackout", "L10n.swift"))
         self.assertIn("VNClassifyImageRequest", still)
+        self.assertIn("VisionCoreML.VisionObservation", still)
         self.assertIn("AVCapturePhotoOutput", still)
         self.assertIn("CAPTURE", still)
         self.assertIn("requestAccess", still)

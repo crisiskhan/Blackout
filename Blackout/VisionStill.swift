@@ -11,7 +11,7 @@ import Vision
 import VisionCoreML
 
 enum SystemVision {
-    static func observations(from image: CGImage) -> [VisionObservation]? {
+    static func observations(from image: CGImage) -> [VisionCoreML.VisionObservation]? {
         #if canImport(Vision)
         let request = VNClassifyImageRequest()
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -22,7 +22,7 @@ enum SystemVision {
         }
         let results = request.results ?? []
         return results.prefix(8).map {
-            VisionObservation(identifier: $0.identifier, confidence: Double($0.confidence))
+            VisionCoreML.VisionObservation(identifier: $0.identifier, confidence: Double($0.confidence))
         }
         #else
         return nil
