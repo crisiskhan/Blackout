@@ -55,6 +55,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34464769463` (`15516ec`): HUD tag `tf-80`. CPV **80**. Compass mark as App Icon and boot logo. Leave 79 until TestFlight shows 80 Ready.
 - `34480452541` (`98bb68a`): HUD tag `tf-81`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **81**. Dist `TPTQ6GKWZ7` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 81`, then ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. `ASSIGN Internal 81 204`. HUD on every tab + hold water classify + named marks. Leave 80 until TestFlight shows 81 Ready.
 - `34491969097` (`323aa7f`): HUD tag `tf-82`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **82**. Dist `8872S8A8NY` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 82`, then ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. `ASSIGN Internal 82 204`. Textless compass + HUD mark language through the instrument. Leave 81 until TestFlight shows 82 Ready.
+- `34502826993` (`3abaf58`): HUD tag `tf-83`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **83**. Dist `947QX8HSZ9` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 83`, then ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. `ASSIGN Internal 83 204`. Expedition HUD + FIELD vision still + COMMS call. Leave 82 until TestFlight shows 83 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -156,4 +157,8 @@ HUD tree `98bb68a` tagged `tf-81`. Run `34480452541` uploaded CPV **81** and `AS
 
 ## HUD 82 Internal (Crisis GO)
 
-HUD tree `323aa7f` tagged `tf-82`. Run `34491969097` uploaded CPV **82** and `ASSIGN Internal 82 204`. Dist `8872S8A8NY`. ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. Textless compass on the home screen and boot; overlay titles carry the mark; selected tab is the reticle; SOS silver ring; INSTRUMENTS is HUD. Leave 81 until TestFlight shows 82 Ready. Watch omitted. Internal only. Do not re-upload 54–81. Next Internal after 82 would be **83**.
+HUD tree `323aa7f` tagged `tf-82`. Run `34491969097` uploaded CPV **82** and `ASSIGN Internal 82 204`. Dist `8872S8A8NY`. ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. Textless compass on the home screen and boot; overlay titles carry the mark; selected tab is the reticle; SOS silver ring; INSTRUMENTS is HUD. Leave 81 until TestFlight shows 82 Ready. Watch omitted. Internal only. Do not re-upload 54–81.
+
+## HUD 83 Internal (Crisis GO)
+
+HUD tree `3abaf58` tagged `tf-83`. Run `34502826993` uploaded CPV **83** and `ASSIGN Internal 83 204`. Dist `947QX8HSZ9`. ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. Expedition condition rails; FIELD book + VISION still (pack-book name / UNKNOWN / NO VISION MODEL, never edible); COMMS HOLD PTT, real mic clip, LEAVE NET. Leave 82 until TestFlight shows 83 Ready. Watch omitted. Internal only. Do not re-upload 54–82. Next Internal after 83 would be **84**.
