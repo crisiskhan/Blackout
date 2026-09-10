@@ -242,6 +242,15 @@ draws every one of them at every zoom. The guard reads the circle layers out of
 `style.json`, works out which classes each one claims, and fails if any of them
 reach a tile as anything but a point.
 
+Centring them was not enough to hold them. CI put a finger on a real
+`content=water` tank west of the pass and the probe came back empty; the same
+hold on a silent tank answered with the desert under it. MapLibre's
+`visibleFeatures` only returns what the style drew large enough to hit, and a
+tank is a five-point ring. The hold now asks the pack's own vector source for
+any spring, well, tank or tap inside the same 44pt box, and the style carries a
+second circle the size of that box, inked at zero, so the painted query and the
+thumb agree. The source is named `osm` so a pin the app drew cannot answer.
+
 Tinajas are not in this table because nothing in the record is tagged as one.
 Searching both extracts for the word and its neighbours — *tinaja*, *charco*,
 *hueco*, *ojo*, *aguaje* — returns 189 features and almost every one is a

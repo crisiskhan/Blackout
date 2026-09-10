@@ -1201,6 +1201,27 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 },
             },
             {
+                # The ring above is 5 points at street zoom. MapLibre's
+                # visibleFeatures only returns what the style drew large enough
+                # to hit, so a hold on the tank you can see came back empty.
+                # This one is the size of the hold itself, inked at zero, so
+                # the painted query and the thumb agree.
+                "id": "water-points-hit",
+                "type": "circle",
+                "source": "osm",
+                "filter": [
+                    "in",
+                    ["get", "class"],
+                    ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
+                ],
+                "paint": {
+                    "circle-color": "#142430",
+                    "circle-opacity": 0,
+                    "circle-radius": 22,
+                    "circle-stroke-width": 0,
+                },
+            },
+            {
                 "id": "contours",
                 "type": "line",
                 "source": "contours",
@@ -1430,6 +1451,7 @@ OSM_SOURCE_LAYER = {
     "water": "water",
     "water-ephemeral": "water",
     "water-points": "water",
+    "water-points-hit": "water",
     "water-labels": "water",
     "roads-casing": "road",
     "roads-arterial-casing": "road",

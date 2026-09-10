@@ -197,7 +197,10 @@ def number(body: str, name: str) -> str:
 def assert_style_draws_ground_and_water(pack_id: str) -> None:
     style = maplibre_style(pack_id, None)
     layers = {l["id"]: l for l in style["layers"]}
-    for want in ("land-fill", "water-fill", "water", "water-ephemeral", "water-points", "water-labels"):
+    for want in (
+        "land-fill", "water-fill", "water", "water-ephemeral",
+        "water-points", "water-points-hit", "water-labels",
+    ):
         if want not in layers:
             fail(f"{pack_id} style is missing {want}")
     for layer in style["layers"]:
@@ -448,6 +451,31 @@ def assert_a_hold_reads_the_pack_and_not_the_apps_own_ink() -> None:
     print(f"OK   a hold looks through all {len(drawn)} layers the app draws for itself")
 
 
+def assert_a_hold_asks_the_pack_not_just_the_paint() -> None:
+    """A tank is a five-point circle. Asking only what was painted misses it.
+
+    CI held a real `content=water` tank on Texas West and the probe came back
+    empty; the same hold on a silent tank answered with the desert under it.
+    MapLibre's own docs say `visibleFeatures` only returns what the style drew
+    large enough to hit. The hold has to ask the pack's vector source for the
+    point records inside the same 44pt box, and it has to name that source so
+    a pin the app drew cannot answer.
+    """
+    view = (MAP / "OfflineMapView.swift").read_text()
+    inspect = (MAP / "Inspect.swift").read_text()
+    if "visibleFeatures" not in view:
+        fail("a hold no longer asks what was painted, so fills and lines go unread")
+    if "features(sourceLayerIdentifiers:" not in view:
+        fail("a hold never asks the pack's own source, so a tank that draws as a dot cannot be held")
+    if "Inspect.packSourceID" not in view:
+        fail("a hold does not name the pack source, so it may read a pin as a record")
+    if 'packSourceID = "osm"' not in inspect:
+        fail("the pack source id drifted off the source the style actually uses")
+    if "packPointClasses" not in inspect:
+        fail("the hold no longer names the point classes the tiler emits")
+    print("OK   a hold asks the pack for the points the paint is too small to admit")
+
+
 def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     """FIELD has to land on a card, and the id at the end of the list has to
     be one every state ships.
@@ -562,6 +590,7 @@ def main() -> None:
     assert_the_generator_cannot_undo_the_audit()
     assert_the_tiler_and_the_card_know_the_same_words()
     assert_a_hold_reads_the_pack_and_not_the_apps_own_ink()
+    assert_a_hold_asks_the_pack_not_just_the_paint()
     assert_every_field_card_the_map_can_open_is_really_shipped()
     assert_a_land_hold_opens_the_stepper_and_not_the_menu()
     for pack_id in PACKS:

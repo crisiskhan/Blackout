@@ -193,9 +193,15 @@ public struct OfflineMapView: UIViewRepresentable {
             view.setCenter(moved, animated: true)
         }
 
-        /// What the pack drew under the thumb. Only the style's own data layers
-        /// are asked; the puck, the route and the pin are the app talking to
-        /// itself and have no record behind them.
+        /// What the pack recorded under the thumb.
+        ///
+        /// Painted layers are asked first — fills and lines come back that way.
+        /// Points do not: a tank is a five-point circle, and MapLibre's own
+        /// docs say `visibleFeatures` only returns what the style drew large
+        /// enough to hit. So the same 44pt box is then asked of the pack's
+        /// vector source, and any spring, well, tank or tap whose coordinate
+        /// falls inside it is added to the ranking. The puck, the route and
+        /// the pin are still skipped: they are the app talking to itself.
         func record(under point: CGPoint, on view: MLNMapView) -> [String: String] {
             guard let style = view.style else { return [:] }
             let readable = Set(
@@ -203,7 +209,6 @@ public struct OfflineMapView: UIViewRepresentable {
                     .map(\.identifier)
                     .filter { !Inspect.overlayLayerIDs.contains($0) }
             )
-            guard !readable.isEmpty else { return [:] }
             let reach = CGFloat(Inspect.holdProbePoints)
             let box = CGRect(
                 x: point.x - reach / 2,
@@ -211,18 +216,43 @@ public struct OfflineMapView: UIViewRepresentable {
                 width: reach,
                 height: reach
             )
-            let found = view.visibleFeatures(in: box, styleLayerIdentifiers: readable)
-            return Inspect.pick(found.map { feature in
-                var tags: [String: String] = [:]
-                for (key, value) in feature.attributes {
-                    if let text = value as? String {
-                        tags[key] = text
-                    } else if let number = value as? NSNumber {
-                        tags[key] = number.stringValue
-                    }
+            let painted = readable.isEmpty
+                ? []
+                : view.visibleFeatures(in: box, styleLayerIdentifiers: readable)
+            let points = packPoints(in: box, on: view, style: style)
+            return Inspect.pick((painted + points).map(Self.tags(from:)))
+        }
+
+        /// Points the style drew too small for `visibleFeatures` to admit.
+        /// Restricted to the pack's own source so a hold cannot read a pin.
+        private func packPoints(
+            in box: CGRect,
+            on view: MLNMapView,
+            style: MLNStyle
+        ) -> [MLNFeature] {
+            guard let source = style.source(withIdentifier: Inspect.packSourceID) as? MLNVectorTileSource
+            else { return [] }
+            let bounds = view.convert(box, toCoordinateBoundsFrom: view)
+            return source
+                .features(sourceLayerIdentifiers: Inspect.packPointSourceLayers, predicate: nil)
+                .filter { feature in
+                    guard let klass = feature.attributes["class"] as? String,
+                          Inspect.packPointClasses.contains(klass)
+                    else { return false }
+                    return MLNCoordinateInCoordinateBounds(feature.coordinate, bounds)
                 }
-                return tags
-            })
+        }
+
+        private static func tags(from feature: MLNFeature) -> [String: String] {
+            var tags: [String: String] = [:]
+            for (key, value) in feature.attributes {
+                if let text = value as? String {
+                    tags[key] = text
+                } else if let number = value as? NSNumber {
+                    tags[key] = number.stringValue
+                }
+            }
+            return tags
         }
 
         public func gestureRecognizer(

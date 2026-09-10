@@ -243,6 +243,15 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick(found)["name"], "Franklin Canal")
     }
 
+    func testTheHoldNamesThePointClassesTheTilerEmits() {
+        XCTAssertEqual(Inspect.packSourceID, "osm")
+        XCTAssertEqual(Inspect.packPointSourceLayers, ["water"])
+        XCTAssertEqual(
+            Inspect.packPointClasses,
+            ["spring", "well", "tank", "tank_other", "tap"]
+        )
+    }
+
     func testPickIgnoresTheAppsOwnOverlays() {
         // The puck, the route and the pins carry no record. They are excluded
         // by layer before the probe ever sees them, and an empty bag of tags

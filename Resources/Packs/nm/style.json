@@ -294,6 +294,35 @@
       "source-layer": "water"
     },
     {
+      "id": "water-points-hit",
+      "type": "circle",
+      "source": "osm",
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "spring",
+            "well",
+            "tank",
+            "tank_other",
+            "tap"
+          ]
+        ]
+      ],
+      "paint": {
+        "circle-color": "#142430",
+        "circle-opacity": 0,
+        "circle-radius": 22,
+        "circle-stroke-width": 0
+      },
+      "source-layer": "water"
+    },
+    {
       "id": "contours",
       "type": "line",
       "source": "contours",

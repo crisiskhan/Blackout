@@ -137,6 +137,21 @@ public enum Inspect {
             } ?? [:]
     }
 
+    /// The vector source the packs put the record in. A hold reads this, not
+    /// only the pixels the style chose to paint: a tank is a five-point circle
+    /// and `visibleFeatures` will not give it back.
+    public static let packSourceID = "osm"
+
+    /// Source layers a hold will take a point from. Springs, wells, tanks and
+    /// taps live in `water` as points; the rest of the record is a fill or a
+    /// line and the painted query already finds those.
+    public static let packPointSourceLayers: Set<String> = ["water"]
+
+    /// `class` values the tiler emits as a point so the style can draw a ring.
+    public static let packPointClasses: Set<String> = [
+        "spring", "well", "tank", "tank_other", "tap",
+    ]
+
     /// Style layers the app draws itself. They carry no record worth reading,
     /// so a hold looks straight through them.
     public static let overlayLayerIDs: Set<String> = [
