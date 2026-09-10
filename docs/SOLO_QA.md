@@ -4,11 +4,11 @@ Setup: Airplane On, Bluetooth On, Wi-Fi off, cell off, ONE phone, no second devi
 
 Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavior you saw.
 
-## ARMING
+## BOOT
 
-- [ ] PASS / FAIL / N/A — INITIATE unlocks tabs (ARMING → MAP/COMMS/FIELD/EXPED). Bundled logo is visible. No account prompt. No network/login gate.
-- [ ] PASS / FAIL / N/A — No SOS disk on ARMING.
-- [ ] PASS / FAIL / N/A — Pack list shows real pack names and sizes, **or** chrome `Packs missing from bundle — honest empty.`
+- [ ] PASS / FAIL / N/A — Cold launch is the logo on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP/COMMS/FIELD/EXPED.
+- [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
 ## MAP STILL — tip 60 score bar (five only)
 
@@ -33,7 +33,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — MAP HUD reads whole words: search field, `INST`, `LOCK`/`LOCKED`, dock `MARK` `WALK` `DRIVE` `SPEAK`. No `INSTRUME…`, no `…` on those controls. INST opens INSTRUMENTS. SPEAK is on the dock, not the header.
 - [ ] PASS / FAIL / N/A — Field chrome is at most three short lines and each one fits on its line. Status (`OFF GRAPH` / `TRUE NORTH` / `RULER …`) reads once — never `OFF GRAPH` twice, never a bare `TRUE`. DEST and BEARING share a line: `DEST 31.7619, -106.4850 · BEARING 45°`. With a good pack and no DEST picked yet, there is no `OFF GRAPH` at all, and the Speak line is gone until you tap SPEAK again.
 - [ ] PASS / FAIL / N/A — Pinch to walking zoom (a block or two across): silver street names are drawn on the streets with a black halo and are legible at arm's length. If no name draws at any zoom, the glyph template failed — report it.
-- [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (same pack chosen on ARMING).
+- [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (TX WEST first-open, or the pack last chosen in INST).
 - [ ] PASS / FAIL / N/A — Browse MAP (lock-on off): no SOS disk.
 
 ## COMMS (solo, no peer)
@@ -63,14 +63,15 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 ## INSTRUMENTS
 
 - [ ] PASS / FAIL / N/A — MAP → INST opens the instruments sheet. MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
+- [ ] PASS / FAIL / N/A — INST → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. Left-hand and night-red live here, not on boot.
 
 ## WHAT WE CANNOT DO
 
-- [ ] PASS / FAIL / N/A — First INITIATE after ARMING shows `WHAT WE CANNOT DO` once. I UNDERSTAND dismisses it. It does not return on later tab changes.
+- [ ] PASS / FAIL / N/A — First ACTIVATE shows `WHAT WE CANNOT DO` once. I UNDERSTAND dismisses it. It does not return on later tab changes.
 
 ## Kill-and-relaunch
 
 - [ ] PASS / FAIL / N/A — Party code typed on COMMS is still there after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — MAP marks are still listed after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — `WHAT WE CANNOT DO` stays dismissed after kill-and-relaunch.
-- [ ] PASS / FAIL / N/A — Pack selected on ARMING is still the active pack on MAP after kill-and-relaunch.
+- [ ] PASS / FAIL / N/A — Pack selected in INST → PACKS is still the active pack on MAP after kill-and-relaunch.

@@ -35,6 +35,9 @@ final class TokensTests: XCTestCase {
     }
 
     func testMapInstrumentChipsAreDockPlusSheet() {
+        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoPoints, 196)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootActivateHeight, 56)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootMinSeconds, 0.8)
         XCTAssertEqual(BlackoutTokens.Chrome.hudTabReservePoints, 52)
         XCTAssertEqual(BlackoutTokens.Chrome.hudSideReservePoints, 72)
         XCTAssertEqual(BlackoutTokens.Chrome.mapChipHitPoints, 44)

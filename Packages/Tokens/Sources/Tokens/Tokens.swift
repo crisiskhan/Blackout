@@ -13,6 +13,11 @@ public enum BlackoutTokens: Sendable {
         /// Overlay left-hand tab column on MAP.
         public static let hudSideReservePoints: Double = 72
         public static let mapChipHitPoints: Double = 44
+        /// Title-screen mark. Large enough to read as the product, not a chip.
+        public static let bootLogoPoints: Double = 196
+        public static let bootActivateHeight: Double = 56
+        /// Even a warm launch holds the logo long enough to land, then ACTIVATE.
+        public static let bootMinSeconds: Double = 0.8
         /// Overlay chips on the canvas (INST / LOCK). Fixed point size so an
         /// xxxLarge body never squeezes a word into a tail-ellipsis.
         public static let mapActionChipTextPoints: Double = 11

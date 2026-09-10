@@ -9,6 +9,41 @@ struct InstrumentsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    sectionLabel("PACKS")
+                    if let packs = runtime.packs {
+                        ForEach(packs.catalog.packs, id: \.id) { p in
+                            Button {
+                                runtime.switchPack(p.id)
+                            } label: {
+                                HStack {
+                                    Text(p.name)
+                                    Spacer()
+                                    if runtime.packs?.active?.id == p.id {
+                                        Text("LIVE")
+                                            .foregroundStyle(Theme.accent)
+                                    }
+                                }
+                            }
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                            .padding(.horizontal, 12)
+                            .background(Theme.raised)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+                    } else {
+                        Text("Packs missing from bundle — honest empty.")
+                            .font(.caption)
+                            .foregroundStyle(Color(white: 0.5))
+                    }
+
+                    sectionLabel("HUD")
+                    hudToggle("Left-hand column", $runtime.leftHand)
+                    hudToggle("Night-red", Binding(
+                        get: { runtime.night.enabled },
+                        set: { runtime.night.enabled = $0 }
+                    ))
+
                     sectionLabel("MAP")
                     HStack(spacing: 1) {
                         Button("RULER") { runtime.tapRuler() }

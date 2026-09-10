@@ -664,14 +664,20 @@ def tip55_chrome() -> None:
     arming = (ROOT / "Blackout" / "ARMINGView.swift").read_text()
     if '"ENTER"' in arming or "Button(\"ENTER\")" in arming:
         bad("ARMING still says ENTER")
-    elif "INITIATE" not in arming:
-        bad("ARMING missing INITIATE")
+    elif "ACTIVATE" not in arming:
+        bad("ARMING missing ACTIVATE")
+    elif "INITIATE" in arming:
+        bad("ARMING still says INITIATE — the boot is ACTIVATE")
     else:
-        ok("ARMING primary is INITIATE")
+        ok("ARMING primary is ACTIVATE")
     if "Logo" not in arming and "AppIcon" not in arming:
         bad("ARMING missing bundled logo")
     else:
         ok("ARMING shows bundled logo")
+    if "ForEach(packs.catalog.packs" in arming:
+        bad("ARMING is still a pack menu")
+    else:
+        ok("ARMING is a boot screen, not a pack menu")
     logo = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset" / "Contents.json"
     if not logo.is_file():
         bad("Logo.imageset missing")
