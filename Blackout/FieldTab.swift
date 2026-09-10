@@ -3,62 +3,162 @@ import FieldCorpus
 import FieldStepper
 import FieldSpeech
 import Tokens
+import VisionCoreML
 
 struct FieldTab: View {
     @Bindable var runtime: AppRuntime
     @State private var cards: [FieldCard] = []
     @State private var stepper: StepperState?
+    @State private var guess: VisionGuess?
+    @State private var showVision = false
 
     var body: some View {
         HUDPage(
             title: "FIELD",
-            status: openStatus,
-            statusTone: .silver
+            status: fieldStatus,
+            statusTone: fieldTone
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 // One card open, or the list. Never both. The map's FIELD button
                 // has already chosen a card, and landing on the list with the
                 // steps pushed under it makes you hunt for the thing you picked.
-                if let s = stepper {
-                    ScrollView {
-                        open(s)
-                    }
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 1) {
-                            ForEach(cards) { c in
-                                if cards.first(where: { $0.category == c.category })?.id == c.id {
-                                    Text(c.category.uppercased())
-                                        .font(.system(size: 11, weight: .heavy))
-                                        .foregroundStyle(Color(white: 0.5))
-                                        .padding(.top, 10)
-                                        .padding(.bottom, 4)
-                                }
-                                Button(loc(c.title)) {
-                                    stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
-                                }
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(Theme.silver)
-                                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                                .padding(.horizontal, 12)
-                                .background(Theme.raised)
-                            }
+                Group {
+                    if let s = stepper {
+                        ScrollView {
+                            open(s)
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    } else {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 1) {
+                                ForEach(cards) { c in
+                                    if cards.first(where: { $0.category == c.category })?.id == c.id {
+                                        Text(c.category.uppercased())
+                                            .font(.system(size: 11, weight: .heavy))
+                                            .foregroundStyle(Color(white: 0.5))
+                                            .padding(.top, 10)
+                                            .padding(.bottom, 4)
+                                    }
+                                    Button(loc(c.title)) {
+                                        stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                                    }
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(Theme.silver)
+                                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                                    .padding(.horizontal, 12)
+                                    .background(Theme.raised)
+                                }
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
                     }
                 }
-                Text(L10n.t("vision.none", runtime.locale))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.warn)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                visionHUD
             }
+        }
+        .sheet(isPresented: $showVision) {
+            #if canImport(AVFoundation) && canImport(UIKit)
+            VisionStill(
+                onImage: { image in
+                    showVision = false
+                    applyVision(image: image)
+                },
+                onFail: {
+                    showVision = false
+                    applyVision(image: nil)
+                },
+                onCancel: { showVision = false }
+            )
+            .ignoresSafeArea()
+            .presentationBackground(Theme.void)
+            #endif
         }
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
     }
 
-    private var openStatus: String {
-        guard let s = stepper else { return "" }
-        return "STEP \(s.index + 1) OF \(s.card.steps.count)"
+    private var fieldStatus: String {
+        if let s = stepper {
+            return "STEP \(s.index + 1) OF \(s.card.steps.count)"
+        }
+        guard let g = guess else { return "" }
+        if g.noModel { return L10n.t("vision.none", runtime.locale) }
+        if g.leaveIt {
+            return "\(g.name) · \(L10n.t("vision.leave", runtime.locale))"
+        }
+        return g.name
+    }
+
+    private var fieldTone: HUDStatusTone {
+        if stepper != nil { return .silver }
+        if let g = guess, g.noModel || g.leaveIt { return .warn }
+        return .silver
+    }
+
+    @ViewBuilder
+    private var visionHUD: some View {
+        sectionLabel("VISION")
+        Button("VISION") {
+            #if canImport(AVFoundation) && canImport(UIKit)
+            showVision = true
+            #else
+            guess = VisionCoreML.noModelGuess()
+            #endif
+        }
+        .buttonStyle(HUDActionStyle(filled: true))
+        if let g = guess {
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    if g.noModel {
+                        Text(L10n.t("vision.none", runtime.locale))
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(g.name)
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(g.leaveIt ? Theme.warn : Theme.silver)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if g.leaveIt {
+                            Text(L10n.t("vision.leave", runtime.locale))
+                                .font(.system(size: 18, weight: .heavy))
+                                .foregroundStyle(Theme.warn)
+                        }
+                        if !g.leaveIt {
+                            ForEach(g.lookalikes, id: \.self) { word in
+                                Text(word)
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.silver)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func applyVision(image: CGImage?) {
+        guard let image else {
+            guess = VisionCoreML.noModelGuess()
+            return
+        }
+        let book = runtime.visionBook()
+        let locale = runtime.locale
+        DispatchQueue.global(qos: .userInitiated).async {
+            let observations = SystemVision.observations(from: image)
+            let next: VisionGuess
+            if let observations, let book {
+                next = VisionCoreML.classify(
+                    observations: observations,
+                    book: book,
+                    locale: locale
+                )
+            } else {
+                next = VisionCoreML.noModelGuess()
+            }
+            DispatchQueue.main.async { guess = next }
+        }
     }
 
     /// Every card ships both languages. The list was reading the locale and

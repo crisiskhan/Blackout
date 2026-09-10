@@ -52,7 +52,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
-- [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS. `NO VISION MODEL` stays (no percent, no hash-to-label ID). No CoreML lecture under it.
+- [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.
+- [ ] PASS / FAIL / N/A — VISION captures one still. Result is `UNKNOWN` or a pack-book name. Fungi is `LEAVE IT`. Never edible. No percent. Camera deny or no classifier: `NO VISION MODEL`. No CoreML lecture.
 
 ## EXPEDITION
 

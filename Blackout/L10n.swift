@@ -16,6 +16,7 @@ enum L10n {
         "chip.water": ["en": "WATER", "es": "AGUA"],
         "net.none": ["en": "NET · NONE", "es": "RED · NINGUNA"],
         "vision.none": ["en": "NO VISION MODEL", "es": "SIN MODELO DE VISIÓN"],
+        "vision.leave": ["en": "LEAVE IT", "es": "DÉJALO"],
         "chip.rally": ["en": "RALLY", "es": "REUNIR"],
         "chip.down": ["en": "DOWN", "es": "CAÍDO"],
         "scan.qr": ["en": "SCAN QR", "es": "ESCANEAR QR"],

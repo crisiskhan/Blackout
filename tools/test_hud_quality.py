@@ -489,6 +489,7 @@ class FieldInstrumentTests(unittest.TestCase):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("STOP-IF", qa)
         self.assertIn("open step", qa.lower())
+        self.assertIn("VISION captures one still", qa)
 
 
 class CommsInstrumentTests(unittest.TestCase):
@@ -563,6 +564,55 @@ class ExpeditionKitPaperTests(unittest.TestCase):
         self.assertIn('Button("EXPORT PAPER")', exped)
         self.assertIn("paperText", exped)
         self.assertIn("PaperGen.export", exped)
+
+
+class VisionInstrumentTests(unittest.TestCase):
+    """One still. Pack-book name or UNKNOWN. Never hash-to-label. Never edible."""
+
+    def test_field_has_hud_capture_not_a_fake_id(self):
+        field = read("Blackout", "FieldTab.swift")
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        still = read("Blackout", "VisionStill.swift")
+        self.assertIn('Button("VISION")', field)
+        self.assertIn("VisionStill", field)
+        self.assertIn('L10n.t("vision.none"', field)
+        self.assertIn('L10n.t("vision.leave"', field)
+        self.assertNotIn("VISION ADD FRAME", field)
+        self.assertNotIn("g.percent", field)
+        self.assertNotIn("edible=", field)
+        self.assertNotIn("honesty", field)
+        self.assertIn("classify(observations:", vis)
+        self.assertIn("onDeviceModelPresent = false", vis)
+        self.assertIn("NO VISION MODEL", vis)
+        self.assertNotIn("hashValue", vis)
+        self.assertIn("unknownGuess", vis)
+        self.assertIn("noModelGuess", field)
+        self.assertIn("LEAVE IT", vis + field + read("Blackout", "L10n.swift"))
+        self.assertIn("VNClassifyImageRequest", still)
+        self.assertIn("AVCapturePhotoOutput", still)
+        self.assertIn("CAPTURE", still)
+        self.assertIn("requestAccess", still)
+        self.assertIn("Vision/labels.tx.json", read("Blackout.xcodeproj", "project.pbxproj"))
+
+    def test_matcher_needles_are_in_the_package(self):
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift").lower()
+        for needle in (
+            "mushroom",
+            "cactus",
+            "rattlesnake",
+            "coyote",
+            "yucca",
+            "unknown",
+        ):
+            self.assertIn(needle, vis, needle)
+
+    def test_solo_qa_scores_a_still_not_a_percent(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("VISION captures one still", qa)
+        self.assertIn("UNKNOWN", qa)
+        self.assertIn("LEAVE IT", qa)
+        self.assertIn("NO VISION MODEL", qa)
+        self.assertIn("No percent", qa)
 
 
 if __name__ == "__main__":

@@ -389,6 +389,7 @@ ditto "${SRC}" "${DST}"
 rm -rf "${DST}/Resources"
 test -f "${DST}/Packs/catalog.json"
 test -f "${DST}/Field/field.core.json"
+test -f "${DST}/Vision/labels.tx.json"
 """
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 

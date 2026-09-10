@@ -22,6 +22,7 @@ import OfflineSpeech
 import RegionalPacks
 import Router
 import Tokens
+import VisionCoreML
 
 @MainActor
 @Observable
@@ -431,6 +432,14 @@ final class AppRuntime {
 
     func sendFieldToParty(cardID: String) {
         mesh.sendChip(from: mesh.localID, chip: "field:\(cardID)")
+    }
+
+    func visionBook() -> VisionBook? {
+        let state = packs?.active?.state.lowercased() ?? "tx"
+        guard let root = Self.resourceRoot() else { return nil }
+        let url = root.appendingPathComponent("Vision/labels.\(state).json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? VisionCoreML.load(data)
     }
 
     func sendPOSIfPossible() {

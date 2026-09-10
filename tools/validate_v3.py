@@ -449,8 +449,16 @@ def vision() -> None:
     field_tab = (ROOT / "Blackout" / "FieldTab.swift").read_text()
     if "VISION ADD FRAME" in field_tab or "g.percent" in field_tab:
         bad("Field tab still presents a fake Vision ID")
+    elif "edible=" in field_tab:
+        bad("Field still dumps edible debug")
+    elif 'Button("VISION")' not in field_tab:
+        bad("FIELD missing VISION capture")
     else:
         ok("Field tab does not present a fake Vision percent")
+    if "classify(observations:" not in vis:
+        bad("Vision has no observation matcher")
+    else:
+        ok("Vision matches system observations to the pack book")
 
 
 def archive_bundle_id() -> None:
