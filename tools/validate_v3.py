@@ -1205,6 +1205,7 @@ def main() -> None:
     tip65_speak()
     tip68_speak_field()
     hud_quality()
+    water_inspect()
     sys.exit(fail)
 
 
@@ -1313,6 +1314,20 @@ def hud_quality() -> None:
         bad(f"HUD quality contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: HUD quality — whole words, every tab, keep Map, quiet bearing")
+
+
+def water_inspect() -> None:
+    """Hold names the water the packs already carry — class, nearest, marks."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_water_inspect.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"water inspect contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: hold water classify — STOCK TANK / TINAJA / nearest / FIELD · WATER")
 
 
 if __name__ == "__main__":

@@ -62,8 +62,8 @@ struct MapTab: View {
                     runtime.pickDestination(lat: lat, lon: lon)
                     hits = []
                 },
-                onMapHold: { lat, lon, tags in
-                    runtime.holdInspect(lat: lat, lon: lon, tags: tags)
+                onMapHold: { lat, lon, tags, zoom in
+                    runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
                 }
             )
             .ignoresSafeArea()

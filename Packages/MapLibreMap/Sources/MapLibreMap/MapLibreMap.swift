@@ -324,6 +324,11 @@ public enum PackStyle {
     public static let roadRefsLayerID = "road-refs"
     public static let placeLabelsLayerID = "place-labels"
     public static let tracksLayerID = "tracks"
+    public static let waterLineLayerID = "water"
+    public static let waterDetailSourceID = "water-detail"
+    public static let waterDetailPointsLayerID = "water-detail-points"
+    public static let waterDetailLabelsLayerID = "water-detail-labels"
+    public static let waterInk = "#3d6478"
 
     /// Streets arrive as vector tiles, which are addressed by layer. A layer on
     /// the `osm` source that does not name one draws nothing at all, silently,
@@ -335,8 +340,8 @@ public enum PackStyle {
     public static let accentInk = "#E10600"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens.
-    public static let resolverVersion = 2
+    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`.
+    public static let resolverVersion = 3
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -410,6 +415,7 @@ public enum PackStyle {
     public static func attachOfflineVectorLayers(_ obj: inout [String: Any], packRoot: URL) {
         var sources = obj["sources"] as? [String: Any] ?? [:]
         var layers = obj["layers"] as? [[String: Any]] ?? []
+        attachWaterLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
@@ -551,6 +557,72 @@ public enum PackStyle {
         obj["sources"] = sources
         obj["layers"] = layers
     }
+
+    /// Water by zoom, on a pack that may predate the class-mark file.
+    ///
+    /// Packs that already carry the marks in `style.json` are left alone.
+    /// Others get the dots if `layers/water.geojson` is on disk, and water
+    /// lines are gated at the zoom the tiles actually carry waterways.
+    public static func attachWaterLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        for index in layers.indices where layers[index]["id"] as? String == waterLineLayerID {
+            if layers[index]["minzoom"] == nil {
+                layers[index]["minzoom"] = WaterZoom.lineMinZoom
+            }
+        }
+
+        let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
+        guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
+        if var existing = sources[waterDetailSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[waterDetailSourceID] = existing
+            }
+        } else {
+            sources[waterDetailSourceID] = [
+                "type": "geojson",
+                "data": detailFile.absoluteString,
+            ]
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+            layers.append([
+                "id": waterDetailPointsLayerID,
+                "type": "circle",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.detailMinZoom,
+                "paint": [
+                    "circle-color": waterInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                    "circle-stroke-color": silverInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailLabelsLayerID }) {
+            layers.append([
+                "id": waterDetailLabelsLayerID,
+                "type": "symbol",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.labelMinZoom,
+                "layout": [
+                    "text-field": ["coalesce", ["get", "name"], ["get", "class"]],
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 15, 11, 18, 15],
+                    "text-font": ["Open Sans Regular"],
+                    "text-anchor": "left",
+                    "text-offset": [0.6, 0],
+                    "text-optional": true,
+                ],
+                "paint": [
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 2.0,
+                ],
+            ])
+        }
+    }
 }
 
 public enum OverlaySync: Sendable {
@@ -558,9 +630,10 @@ public enum OverlaySync: Sendable {
         force: Bool,
         puckNeedsReapply: Bool,
         routeNeedsReapply: Bool,
-        destinationNeedsReapply: Bool = false
+        destinationNeedsReapply: Bool = false,
+        inspectNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply
     }
 }
 

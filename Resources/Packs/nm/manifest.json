@@ -64,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 34046073,
+  "bytes": 35034326,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -78,6 +78,8 @@
     "layers/flood.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
+    "layers/water.bin",
+    "layers/water.geojson",
     "manifest.json",
     "metro.geojson",
     "osm.pmtiles",
@@ -96,7 +98,7 @@
     "lon": -106.61500000000001
   },
   "osmFetched": "2026-09-09",
-  "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+  "attribution": "\u00a9 OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
     "file": "hillshade.png",

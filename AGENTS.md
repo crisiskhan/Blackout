@@ -64,8 +64,8 @@ python3 tools/test_hud_quality.py
 
 `audit_offline.sh` runs `validate_v3.py`, which runs `test_graph_plan.py`,
 `test_walkable_next_pack.py`, `test_tx_west_style.py`, `test_voice_nav.py`,
-`test_speak_field.py` and `test_hud_quality.py`. That chain is the executable form of the
-"Locked (do not regress)" list every tip PR restates by hand.
+`test_speak_field.py`, `test_hud_quality.py` and `test_water_inspect.py`. That chain is the
+executable form of the "Locked (do not regress)" list every tip PR restates by hand.
 
 A new invariant ships as a new check in that chain, in the same commit as the behavior it
 protects. If a guard is wrong, change the guard on purpose — do not route around it.

@@ -202,7 +202,7 @@ struct HoldCardView: View {
     private var actions: some View {
         HStack(spacing: 8) {
             Button(action: onField) {
-                Text("FIELD")
+                Text(held.card.kind == .water ? "FIELD · WATER" : "FIELD")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(HoldActionStyle(filled: false))

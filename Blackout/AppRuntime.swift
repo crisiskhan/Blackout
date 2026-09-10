@@ -77,6 +77,10 @@ final class AppRuntime {
     private var graphsByPack: [String: RouteGraph] = [:]
     private var graphPackID: String?
     private var graphWarmup: Task<RouteGraph?, Never>?
+    private var waterCache: WaterIndex?
+    private var watersByPack: [String: WaterIndex] = [:]
+    private var waterPackID: String?
+    private var waterWarmup: Task<WaterIndex?, Never>?
     private var bootTask: Task<Void, Never>?
     private let fix = MeshFix()
 
@@ -183,11 +187,20 @@ final class AppRuntime {
     /// A thumb stayed put long enough to mean it. Read the record under it and
     /// raise the card. This never calls SOS and never routes anywhere; it only
     /// says what is there.
-    func holdInspect(lat: Double, lon: Double, tags: [String: String]) {
+    func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
+        let id = packs?.active?.id
+        let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
             lat: lat,
             lon: lon,
-            card: Inspect.read(tags: tags, packDate: packs?.active?.osmFetched),
+            card: Inspect.resolve(
+                tags: tags,
+                lat: lat,
+                lon: lon,
+                zoom: zoom,
+                index: index,
+                packDate: packs?.active?.osmFetched
+            ),
             // Holding a spring marked last week has to open reading MARKED.
             // Marks merge by coordinate, so pressing MARK there does nothing,
             // and a button that offers something it will not do is a lie.
@@ -442,6 +455,8 @@ final class AppRuntime {
         relabelMarksForActivePack()
         graphCache = graphsByPack[id]
         graphPackID = id
+        waterCache = watersByPack[id]
+        waterPackID = id
         if let pack = packs?.active, let root = Self.resourceRoot()?.appendingPathComponent("Packs") {
             let packRoot = root.appendingPathComponent(pack.id)
             bootStyleURL = try? PackStyle.resolved(
@@ -452,6 +467,10 @@ final class AppRuntime {
         if graphCache == nil {
             graphWarmup = nil
             warmupActiveGraph()
+        }
+        if waterCache == nil {
+            waterWarmup = nil
+            warmupActiveWater()
         }
     }
 
@@ -499,6 +518,7 @@ final class AppRuntime {
         let steps = Double(catalog.count * 2 + 1)
         var done = 0.0
         var loaded: [String: RouteGraph] = [:]
+        var waters: [String: WaterIndex] = [:]
         for pack in catalog {
             bootStage = .loading(pack.name.uppercased())
             let root = store.packRoot(id: pack.id)
@@ -510,9 +530,14 @@ final class AppRuntime {
             done += 1
             bootProgress = done / steps
             let url = store.graphURL(for: pack.id)
+            let waterURL = root.appendingPathComponent("layers/water.bin")
             let graph = await Task.detached { RouteGraph.load(from: url) }.value
+            let water = await Task.detached { WaterIndex.load(from: waterURL) }.value
             if let graph {
                 loaded[pack.id] = graph
+            }
+            if let water {
+                waters[pack.id] = water
             }
             done += 1
             bootProgress = done / steps
@@ -521,9 +546,12 @@ final class AppRuntime {
         done += 1
         bootProgress = 1
         graphsByPack = loaded
+        watersByPack = waters
         if let id = store.active?.id {
             graphCache = loaded[id]
             graphPackID = id
+            waterCache = waters[id]
+            waterPackID = id
         }
         let remain = BlackoutTokens.Chrome.bootMinSeconds - Date().timeIntervalSince(started)
         if remain > 0 {
@@ -551,6 +579,24 @@ final class AppRuntime {
                 guard let self, self.packs?.active?.id == id else { return }
                 self.graphCache = graph
                 self.graphPackID = id
+            }
+        }
+    }
+
+    private func warmupActiveWater() {
+        let id = packs?.active?.id
+        let url = packs?.packURL("layers/water.bin")
+        let task = Task.detached { WaterIndex.load(from: url) }
+        waterWarmup = task
+        Task { [weak self] in
+            let index = await task.value
+            await MainActor.run {
+                guard let self, self.packs?.active?.id == id else { return }
+                self.waterCache = index
+                self.waterPackID = id
+                if let id, let index {
+                    self.watersByPack[id] = index
+                }
             }
         }
     }

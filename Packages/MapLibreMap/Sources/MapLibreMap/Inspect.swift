@@ -48,6 +48,8 @@ public enum Inspect {
         public var localCardIDs: [String]
         /// When the pack's OSM was pulled, as the manifest recorded it.
         public var packDate: String?
+        /// Class-specific field voice when we have it. Generic treat/leave otherwise.
+        public var doDetail: String?
 
         public init(
             title: String,
@@ -58,7 +60,8 @@ public enum Inspect {
             advice: Advice,
             fieldCardID: String,
             localCardIDs: [String] = [],
-            packDate: String? = nil
+            packDate: String? = nil,
+            doDetail: String? = nil
         ) {
             self.title = title
             self.klass = klass
@@ -69,10 +72,11 @@ public enum Inspect {
             self.fieldCardID = fieldCardID
             self.localCardIDs = localCardIDs
             self.packDate = packDate
+            self.doDetail = doDetail
         }
 
         public var sureLine: String { "SURE \(sure)% — \(why)" }
-        public var doLine: String { advice.line }
+        public var doLine: String { doDetail ?? advice.line }
 
         /// Cards to try in order when FIELD is pressed. The state's own card
         /// answers the ground better than the core one — holding a subdivision
@@ -208,7 +212,8 @@ public enum Inspect {
             advice: reading.advice,
             fieldCardID: reading.field,
             localCardIDs: reading.local,
-            packDate: packDate
+            packDate: packDate,
+            doDetail: fieldDoLine(klass: klass, kind: reading.kind, advice: reading.advice)
         )
     }
 

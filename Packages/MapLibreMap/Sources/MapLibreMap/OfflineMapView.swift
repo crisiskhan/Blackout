@@ -25,8 +25,9 @@ public struct OfflineMapView: UIViewRepresentable {
     /// value that has to live on the Metal view.
     public var interactive: Bool
     public var onMapTap: ((Double, Double) -> Void)?
-    /// A thumb held still on a place, with whatever the pack has drawn there.
-    public var onMapHold: ((Double, Double, [String: String]) -> Void)?
+    /// A thumb held still on a place, with whatever the pack has drawn there,
+    /// and the zoom so the water index can claim the same ground the thumb covers.
+    public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
 
@@ -47,7 +48,7 @@ public struct OfflineMapView: UIViewRepresentable {
         trackUser: Bool = true,
         interactive: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
-        onMapHold: ((Double, Double, [String: String]) -> Void)? = nil
+        onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -167,7 +168,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
-        var onMapHold: ((Double, Double, [String: String]) -> Void)?
+        var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
         var trackUser = true
         var interactive = true
         private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
@@ -196,7 +197,7 @@ public struct OfflineMapView: UIViewRepresentable {
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             holdTick.impactOccurred()
-            onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view))
+            onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
             liftIntoView(point, on: view)
         }
 

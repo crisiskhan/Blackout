@@ -133,6 +133,12 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.read(tags: ["natural": "scrub"]).advice, .field)
     }
 
+    func testANamedRiverDoLineIsTheRiverNotTheGenericTreat() {
+        let card = Inspect.read(tags: ["waterway": "river", "name": "Rio Grande"])
+        XCTAssertEqual(card.doLine, WaterClass.river.doLine)
+        XCTAssertNotEqual(card.doLine, Inspect.Advice.treat.line)
+    }
+
     func testEveryCardOpensAFieldCardThatEveryStateShips() {
         // Field books are core plus one state. A state card answers the ground
         // better where it ships — the heat island in Texas, ice on rock in New

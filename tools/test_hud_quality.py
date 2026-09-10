@@ -203,5 +203,49 @@ class OffGridNoDisclaimerTests(unittest.TestCase):
         self.assertIn("NO VISION MODEL", qa)
 
 
+class WaterClassifyOnHoldTests(unittest.TestCase):
+    """Hold names the water the packs already carry — not a generic treat line."""
+
+    def test_every_pack_ships_the_water_index(self):
+        for pack in ("tx-west", "tx-east", "nm"):
+            bin_path = ROOT / "Resources" / "Packs" / pack / "layers" / "water.bin"
+            geo = ROOT / "Resources" / "Packs" / pack / "layers" / "water.geojson"
+            self.assertTrue(bin_path.is_file(), pack)
+            self.assertTrue(geo.is_file(), pack)
+            self.assertGreater(bin_path.stat().st_size, 1024, pack)
+
+    def test_hold_reads_the_index_and_speaks_in_classes(self):
+        water = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "WaterInspect.swift")
+        inspect = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "Inspect.swift")
+        runtime = read("Blackout", "AppRuntime.swift")
+        hold = read("Blackout", "HoldCard.swift")
+        style = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("enum WaterClass", water)
+        self.assertIn("TINAJA", water)
+        self.assertIn("STOCK TANK", water)
+        self.assertIn("ACEQUIA", water)
+        self.assertIn("struct WaterIndex", water)
+        self.assertIn("func resolve(", inspect + water)
+        self.assertIn("doDetail", inspect)
+        self.assertIn("streetWaterOverrideMeters", water)
+        self.assertIn("WaterIndex", runtime)
+        self.assertIn("warmupActiveWater", runtime)
+        self.assertIn("func holdInspect(", runtime)
+        self.assertIn("zoom: Double", runtime)
+        self.assertIn("attachWaterLayers", style)
+        self.assertIn("FIELD · WATER", hold)
+        self.assertNotIn("WaterSure.disclaimer", hold)
+        self.assertIn("zoom", tab.lower())
+        self.assertIn("Dip clear of the churned edge", water)
+
+    def test_solo_qa_scores_the_class_not_a_generic_treat(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("STOCK TANK", qa)
+        self.assertIn("TINAJA", qa)
+        self.assertIn("nearest water", qa.lower())
+        self.assertIn("FIELD · WATER", qa)
+
+
 if __name__ == "__main__":
     unittest.main()
