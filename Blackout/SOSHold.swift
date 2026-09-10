@@ -59,7 +59,7 @@ struct SOSHold: View {
                 }
         )
         .accessibilityLabel(L10n.t("sos.call", runtime.locale))
-        .accessibilityHint(L10n.t("sos.offer", runtime.locale))
+        .accessibilityHint(L10n.t("sos.hold", runtime.locale))
         .accessibilityAddTraits(.isButton)
     }
 

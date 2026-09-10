@@ -159,11 +159,12 @@ struct HoldCardView: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // SURE is confidence in the record.
             row(
                 key: "SURE",
                 value: "\(held.card.sure)%",
                 note: held.card.why,
-                hint: "Confidence in the record, not in the water."
+                hint: nil
             )
             row(key: "DO", value: nil, note: held.card.doLine, hint: nil)
             if let date = held.card.packDate {

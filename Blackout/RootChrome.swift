@@ -27,12 +27,6 @@ struct RootChrome: View {
         .sheet(isPresented: $runtime.showInstruments) {
             InstrumentsView(runtime: runtime)
         }
-        .fullScreenCover(isPresented: Binding(
-            get: { runtime.armed && !runtime.sawCannotDo },
-            set: { if !$0 { runtime.acknowledgeCannotDo() } }
-        )) {
-            CannotDoView(runtime: runtime)
-        }
         .onAppear { runtime.applyMapKeepAwake() }
         .onChange(of: runtime.tab) { _, _ in runtime.applyMapKeepAwake() }
         .onChange(of: runtime.armed) { _, _ in runtime.applyMapKeepAwake() }

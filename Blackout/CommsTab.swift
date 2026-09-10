@@ -38,10 +38,6 @@ struct CommsTab: View {
                             }
                         }
                     }
-                    Text(L10n.t("net.physics", runtime.locale))
-                        .font(.caption)
-                        .foregroundStyle(Color(white: 0.45))
-                        .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 1) {
                         Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
                             if runtime.ptt.live { runtime.endPTTSolo() } else { runtime.beginPTTSolo() }

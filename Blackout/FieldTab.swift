@@ -37,8 +37,6 @@ struct FieldTab: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
                 }
-                Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
-                Text(L10n.t("sos.offer", runtime.locale)).font(.caption2).foregroundStyle(Color(white: 0.55))
                 Text(L10n.t("vision.none", runtime.locale))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Color.orange)

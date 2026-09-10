@@ -7,7 +7,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 ## BOOT
 
 - [ ] PASS / FAIL / N/A — Cold launch is the logo on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No account prompt. No network/login gate.
-- [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP/COMMS/FIELD/EXPEDITION.
+- [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP. No lawyer sheet. Tabs are live.
 - [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
 ## MAP STILL — tip 60 score bar (five only)
@@ -51,14 +51,13 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Open a card. NEXT advances the step.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the card, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
-- [ ] PASS / FAIL / N/A — CALL SOS is text only: `CALL SOS` plus `Offers iPhone Emergency SOS. Does not replace 911.` No SOS disk on FIELD.
-- [ ] PASS / FAIL / N/A — Vision chrome is `NO VISION MODEL` (no percent, no hash-to-label ID). No CoreML lecture under it.
+- [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS. `NO VISION MODEL` stays (no percent, no hash-to-label ID). No CoreML lecture under it.
 
 ## EXPEDITION
 
 - [ ] PASS / FAIL / N/A — Hunger / Thirst / Pain / Water / Fatigue / Exposure sliders change CONDITION.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows `RED` (self RED). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
-- [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` (not SOS). DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. Solo set/done chrome `NO PEERS · LOGGED`.
+- [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.
 
@@ -67,13 +66,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens the instruments sheet. MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
 - [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. Left-hand and night-red live here, not on boot.
 
-## WHAT WE CANNOT DO
-
-- [ ] PASS / FAIL / N/A — First ACTIVATE shows `WHAT WE CANNOT DO` once. I UNDERSTAND dismisses it. It does not return on later tab changes.
-
 ## Kill-and-relaunch
 
 - [ ] PASS / FAIL / N/A — Party code typed on COMMS is still there after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — MAP marks are still listed after kill-and-relaunch.
-- [ ] PASS / FAIL / N/A — `WHAT WE CANNOT DO` stays dismissed after kill-and-relaunch.
 - [ ] PASS / FAIL / N/A — Pack selected in INSTRUMENTS → PACKS is still the active pack on MAP after kill-and-relaunch.

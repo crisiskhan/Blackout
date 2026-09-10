@@ -25,9 +25,12 @@ unfinished tabs.
 - BEARING is quiet unless there is somewhere to walk (destination, drawn route, or
   LOCK-ON).
 - Honesty over debug. `NET · NONE` and `NO VISION MODEL` stay. `Whisper <10 m: yes`
-  does not.
-- When a later branch already proved a better way, port it onto the product tree.
-  Do not leave a crash fix or a quieter chrome on a dead line.
+  does not. Capability honesty is not lawyer copy.
+- Off-grid instrument: the glass carries no lawyer copy. No `WHAT WE CANNOT DO`
+  gate, no "does not replace 911", no `I UNDERSTAND`. SOS still never auto-dials.
+- Take methods, aesthetics, and techniques from anywhere they already work — later
+  branches, other apps, HUD games, field manuals. Source does not matter. The phone
+  in airplane mode does.
 - Evidence in the PR. Adjectives are not a score.
 
 ## Where work lands

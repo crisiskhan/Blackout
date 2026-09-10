@@ -32,7 +32,7 @@ With a packed bbox on device and Airplane Mode on:
 ## Architecture
 
 ```
-Blackout app          ARMING, four tabs, contextual SOS, I AM OK, cannot-do once
+Blackout app          ARMING, four tabs, contextual SOS, I AM OK
 BlackoutWatch         lock-on, SOS, I AM OK, last pip, subject timer
 BlackoutWidgets       Live Activity + Control Center CALL SOS
         │

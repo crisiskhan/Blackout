@@ -140,5 +140,68 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         self.assertIn("BEARING", device)
 
 
+class OffGridNoDisclaimerTests(unittest.TestCase):
+    """Airplane-mode instrument. Lawyer copy does not belong on the glass."""
+
+    PRODUCT_ROOTS = ("Blackout", "Resources/Field")
+    CYA = (
+        "does not replace",
+        "no reemplaza",
+        "what we cannot do",
+        "i understand",
+        "no 911 auto-dial",
+        "eat-from-photo",
+        "comer-de-foto",
+        "edible unlock",
+        "desbloqueo comestible",
+        "confidence in the record, not in the water",
+        "— not sos",
+    )
+
+    def _hits(self, phrase: str) -> list[str]:
+        found: list[str] = []
+        needle = phrase.lower()
+        for rel in self.PRODUCT_ROOTS:
+            root = ROOT / rel
+            for path in root.rglob("*"):
+                if not path.is_file() or path.suffix.lower() not in {".swift", ".json", ".md"}:
+                    continue
+                if needle in path.read_text(errors="replace").lower():
+                    found.append(str(path.relative_to(ROOT)))
+        return found
+
+    def test_glass_has_no_cya_copy(self):
+        for phrase in self.CYA:
+            hits = self._hits(phrase)
+            self.assertEqual(hits, [], f"{phrase!r} still in {hits}")
+        self.assertFalse((ROOT / "Blackout" / "CannotDoView.swift").exists())
+        field = read("Blackout", "FieldTab.swift")
+        self.assertNotIn("sos.offer", field)
+        self.assertNotIn('L10n.t("sos.call"', field)
+        l10n = read("Blackout", "L10n.swift")
+        self.assertNotIn("sos.offer", l10n)
+        self.assertNotIn("fullScreenCover", read("Blackout", "RootChrome.swift"))
+        self.assertNotIn("sawCannotDo", read("Blackout", "AppRuntime.swift"))
+        self.assertNotIn("acknowledgeCannotDo", read("Blackout", "AppRuntime.swift"))
+        self.assertNotIn("net.physics", read("Blackout", "CommsTab.swift"))
+        self.assertIn("NO VISION MODEL", l10n)
+        self.assertIn("NET · NONE", l10n)
+
+    def test_agents_says_off_grid_no_disclaimers_take_methods(self):
+        agents = read("AGENTS.md")
+        lowered = agents.lower()
+        self.assertIn("off-grid", lowered)
+        self.assertIn("lawyer copy", lowered)
+        self.assertIn("from anywhere", lowered)
+
+    def test_solo_qa_activate_goes_to_map(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertNotIn("WHAT WE CANNOT DO", qa)
+        self.assertNotIn("I UNDERSTAND", qa)
+        self.assertNotIn("Does not replace 911", qa)
+        self.assertIn("ACTIVATE", qa)
+        self.assertIn("NO VISION MODEL", qa)
+
+
 if __name__ == "__main__":
     unittest.main()

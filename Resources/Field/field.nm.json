@@ -174,8 +174,8 @@
         }
       ],
       "get_to_care": {
-        "en": "This card lists how to use the pack POIs. It does not replace 911 or a Border Patrol roadblock decision.",
-        "es": "Esta tarjeta dice cómo usar los POI del pack. No reemplaza al 911."
+        "en": "Use the pack POIs for the next water and road.",
+        "es": "Esta tarjeta dice cómo usar los POI del pack."
       },
       "speak": true,
       "sendToParty": true,
@@ -271,8 +271,8 @@
         "es": "Datura y cholla saltarina"
       },
       "situation": {
-        "en": "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower. No edible unlock.",
-        "es": "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible."
+        "en": "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower.",
+        "es": "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor."
       },
       "stop_if": [
         {
@@ -297,8 +297,8 @@
             "es": "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
           },
           "why": {
-            "en": "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
-            "es": "Comer-de-foto está apagado. El desbloqueo comestible está apagado."
+            "en": "A pretty flower is not a calorie.",
+            "es": "Una flor bonita no es una caloría."
           },
           "child": {
             "en": "Child does not carry the pretty seed as a toy.",

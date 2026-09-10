@@ -33,8 +33,8 @@
         }
       ],
       "get_to_care": {
-        "en": "Get trained help and an AED. This card does not replace Emergency SOS or 911.",
-        "es": "Consigue ayuda entrenada y un DEA. Esta tarjeta no reemplaza Emergency SOS ni el 911."
+        "en": "Get trained help and an AED.",
+        "es": "Consigue ayuda entrenada y un DEA."
       },
       "speak": true,
       "sendToParty": true,
@@ -936,7 +936,7 @@
         "es": "Fractura cerrada / mala angulación"
       },
       "situation": {
-        "en": "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed. No eat-from-photo. No 911 auto-dial.",
+        "en": "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed.",
         "es": "Una extremidad está doblada donde no debe, o no carga peso después de una caída. La piel está cerrada."
       },
       "stop_if": [
@@ -1009,8 +1009,8 @@
         }
       ],
       "get_to_care": {
-        "en": "Rewarm trunk first. Get to care for confusion that does not clear. This card does not replace Emergency SOS.",
-        "es": "Recalienta el tronco primero. Busca cuidado si la confusión no pasa. No reemplaza Emergency SOS."
+        "en": "Rewarm trunk first. Get to care for confusion that does not clear.",
+        "es": "Recalienta el tronco primero. Busca cuidado si la confusión no pasa."
       },
       "speak": true,
       "sendToParty": true,

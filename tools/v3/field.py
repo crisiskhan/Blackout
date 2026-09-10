@@ -86,8 +86,8 @@ def core_cards() -> list[dict]:
                 ("Scene becomes unsafe (fire, collapse, traffic).", "La escena se vuelve insegura."),
                 ("You are too exhausted to continue and no one can take over.", "Estás agotado y nadie puede relevarte."),
             ],
-            "Get trained help and an AED. This card does not replace Emergency SOS or 911.",
-            "Consigue ayuda entrenada y un DEA. Esta tarjeta no reemplaza Emergency SOS ni el 911.",
+            "Get trained help and an AED.",
+            "Consigue ayuda entrenada y un DEA.",
             [
                 step(
                     "Check response and look at the chest for 10 seconds. If no normal breathing, start compressions.",
@@ -700,8 +700,8 @@ def state_cards() -> list[dict]:
             "El Paso / southern NM. Trauma may be on one side of a line you cannot see on a dirt road.",
             "El Paso / sur de NM. El trauma puede estar de un lado de una línea que no ves en un camino de tierra.",
             [("You already have a named hospital from the pack POI list.", "Ya tienes un hospital con nombre de la lista POI del pack.")],
-            "This card lists how to use the pack POIs. It does not replace 911 or a Border Patrol roadblock decision.",
-            "Esta tarjeta dice cómo usar los POI del pack. No reemplaza al 911.",
+            "Use the pack POIs for the next water and road.",
+            "Esta tarjeta dice cómo usar los POI del pack.",
             [
                 step(
                     "Search the pack for hospital / clinic. Note the name on paper. Do not assume the closest pin is the trauma center. If a net exists, Emergency SOS; if not, drive the marked road, not the wash.",
@@ -728,7 +728,7 @@ def thickness_core() -> list[dict]:
             "trauma",
             "Closed fracture / bad angulation",
             "Fractura cerrada / mala angulación",
-            "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed. No eat-from-photo. No 911 auto-dial.",
+            "A limb is bent where it should not bend, or they cannot take weight after a fall. Skin is closed.",
             "Una extremidad está doblada donde no debe, o no carga peso después de una caída. La piel está cerrada.",
             [
                 ("They can take weight and the limb looks like the other one.", "Puede cargar peso y la extremidad se ve como la otra."),
@@ -762,8 +762,8 @@ def thickness_core() -> list[dict]:
                 ("They are dry, fed, and talking sense in a wind break.", "Están secos, comidos y hablan con sentido en un abrigo."),
                 ("They are unconscious or not shivering in obvious cold — this is evacuation, not a snack.", "Están inconscientes o no tiemblan con frío obvio: es evacuación, no un snack."),
             ],
-            "Rewarm trunk first. Get to care for confusion that does not clear. This card does not replace Emergency SOS.",
-            "Recalienta el tronco primero. Busca cuidado si la confusión no pasa. No reemplaza Emergency SOS.",
+            "Rewarm trunk first. Get to care for confusion that does not clear.",
+            "Recalienta el tronco primero. Busca cuidado si la confusión no pasa.",
             [
                 step(
                     "Stop walking into wind. Change out of wet next-to-skin layers. Put the cold person in a bag or tarp with a warm body. Warm sweet drink only if they can swallow sitting up.",
@@ -813,8 +813,8 @@ def thickness_state() -> list[dict]:
             ["TX"],
             "Texas plant danger — do not chew",
             "Planta peligrosa de Texas — no mastiques",
-            "Oleander hedge or Texas mountain laurel seed. Pretty is not food. No eat-from-photo. Edible unlock is off.",
-            "Seto de adelfa o semilla de Texas mountain laurel. Lo bonito no es comida. Sin comer-de-foto.",
+            "Oleander hedge or Texas mountain laurel seed. Pretty is not food.",
+            "Seto de adelfa o semilla de Texas mountain laurel. Lo bonito no es comida.",
             "Oleander and mountain laurel seeds can stop a heart. Do not make tea. Wash sap off skin and eyes with water.",
             "Adelfa y las semillas pueden parar un corazón. No hagas té. Lava savia de piel y ojos con agua.",
         ),
@@ -823,8 +823,8 @@ def thickness_state() -> list[dict]:
             ["NM"],
             "Datura and jumping cholla",
             "Datura y cholla saltarina",
-            "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower. No edible unlock.",
-            "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible.",
+            "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower.",
+            "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor.",
             "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
             "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda.",
         ),
@@ -880,12 +880,12 @@ def thickness_state() -> list[dict]:
                 [
                     step(
                         "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
-                        "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
+                        "A pretty flower is not a calorie.",
                         "Child does not carry the pretty seed as a toy.",
                         "Stop if they start vomiting or see halos — sit, watch airway, offer Emergency SOS if a net exists.",
                         f"{cid}.png",
                         "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto.",
-                        "Comer-de-foto está apagado. El desbloqueo comestible está apagado.",
+                        "Una flor bonita no es una caloría.",
                         "El niño no lleva la semilla bonita de juguete.",
                         "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",
                     )

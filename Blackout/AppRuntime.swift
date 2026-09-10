@@ -44,7 +44,6 @@ final class AppRuntime {
     var ptt: PTTDeck
     var speech: SpeechEngine
     var armed = false
-    var sawCannotDo = false
     var bootStage: BootStage = .cold
     var bootProgress: Double = 0
     var bootStyleURL: URL?
@@ -112,9 +111,6 @@ final class AppRuntime {
         }
         marks = MarkStore.load()
         relabelMarksForActivePack()
-        if UserDefaults.standard.bool(forKey: "cannotDo.seen") {
-            sawCannotDo = true
-        }
         bootVessel()
         applyMapKeepAwake()
     }
@@ -142,11 +138,6 @@ final class AppRuntime {
         armed = true
         box.log("arming", "activated")
         applyMapKeepAwake()
-    }
-
-    func acknowledgeCannotDo() {
-        sawCannotDo = true
-        UserDefaults.standard.set(true, forKey: "cannotDo.seen")
     }
 
     func joinNet() {
@@ -327,8 +318,7 @@ final class AppRuntime {
     }
 
     /// SOS is a mesh-wide alert, not a label. The hold wakes the radio if it
-    /// is down, lights every peer with chip + RED + POS, and still does not
-    /// replace 911.
+    /// is down, lights every peer with chip + RED + POS, and never auto-dials.
     var hudCrisis: Bool {
         red.isRed || comms.chips.contains(.sos)
     }
@@ -344,7 +334,7 @@ final class AppRuntime {
         red.force(true)
         mesh.sendRED(from: mesh.localID, on: true)
         sendPOSIfPossible()
-        box.log("sos", "mesh SOS + offer system Emergency SOS — does not replace 911")
+        box.log("sos", "mesh SOS armed")
     }
 
     /// I AM OK is the all-clear: the mesh hears it, the SOS chip goes dark,

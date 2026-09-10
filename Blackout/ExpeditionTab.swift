@@ -90,7 +90,7 @@ struct ExpeditionTab: View {
                             TimelineView(.periodic(from: .now, by: 1)) { context in
                                 VStack(alignment: .leading, spacing: 4) {
                                     ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
-                                        Text("\(L10n.t("overdue", runtime.locale)) \(t.task) — not SOS")
+                                        Text("\(L10n.t("overdue", runtime.locale)) \(t.task)")
                                             .foregroundStyle(Color.orange)
                                     }
                                 }

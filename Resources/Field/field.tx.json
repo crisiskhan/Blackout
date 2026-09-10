@@ -175,8 +175,8 @@
         }
       ],
       "get_to_care": {
-        "en": "This card lists how to use the pack POIs. It does not replace 911 or a Border Patrol roadblock decision.",
-        "es": "Esta tarjeta dice cómo usar los POI del pack. No reemplaza al 911."
+        "en": "Use the pack POIs for the next water and road.",
+        "es": "Esta tarjeta dice cómo usar los POI del pack."
       },
       "speak": true,
       "sendToParty": true,
@@ -272,8 +272,8 @@
         "es": "Planta peligrosa de Texas — no mastiques"
       },
       "situation": {
-        "en": "Oleander hedge or Texas mountain laurel seed. Pretty is not food. No eat-from-photo. Edible unlock is off.",
-        "es": "Seto de adelfa o semilla de Texas mountain laurel. Lo bonito no es comida. Sin comer-de-foto."
+        "en": "Oleander hedge or Texas mountain laurel seed. Pretty is not food.",
+        "es": "Seto de adelfa o semilla de Texas mountain laurel. Lo bonito no es comida."
       },
       "stop_if": [
         {
@@ -298,8 +298,8 @@
             "es": "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
           },
           "why": {
-            "en": "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
-            "es": "Comer-de-foto está apagado. El desbloqueo comestible está apagado."
+            "en": "A pretty flower is not a calorie.",
+            "es": "Una flor bonita no es una caloría."
           },
           "child": {
             "en": "Child does not carry the pretty seed as a toy.",
