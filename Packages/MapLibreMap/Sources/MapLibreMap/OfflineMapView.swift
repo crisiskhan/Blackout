@@ -108,11 +108,35 @@ public struct OfflineMapView: UIViewRepresentable {
         press.allowableMovement = CGFloat(InspectGesture.allowableMovementPoints)
         press.delegate = context.coordinator
         view.addGestureRecognizer(press)
+        context.coordinator.mapTap = tap
         context.coordinator.inspectPress = press
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onInspect = onInspect
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
+    }
+
+    /// Field on the glass card leaves Map for FieldTab. Without this, MapLibre's
+    /// Metal view and the inspect gestures outlive the SwiftUI host and ASC 73
+    /// still crashed on that handoff after openField was deferred.
+    public static func dismantleUIView(_ uiView: MLNMapView, coordinator: Coordinator) {
+        uiView.delegate = nil
+        (uiView as? FillingMapView)?.onBoundsChange = nil
+        if let tap = coordinator.mapTap {
+            uiView.removeGestureRecognizer(tap)
+        }
+        if let press = coordinator.inspectPress {
+            uiView.removeGestureRecognizer(press)
+        }
+        coordinator.mapTap = nil
+        coordinator.inspectPress = nil
+        coordinator.onMapTap = nil
+        coordinator.onInspect = nil
+        coordinator.spec = nil
+        coordinator.pressBeganInspect = false
+        if let annotations = uiView.annotations, !annotations.isEmpty {
+            uiView.removeAnnotations(annotations)
+        }
     }
 
     public func updateUIView(_ uiView: MLNMapView, context: Context) {
@@ -160,6 +184,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
         var onInspect: ((Double, Double, Double) -> Void)?
+        weak var mapTap: UITapGestureRecognizer?
         weak var inspectPress: UILongPressGestureRecognizer?
         /// Set the moment a press is recognised and cleared when the next touch
         /// lands, so the tap that ends the same touch does not also pick a

@@ -425,3 +425,14 @@ class TestFieldHandoffDefersTeardown(unittest.TestCase):
         sync = body.split("Task { @MainActor in", 1)[0]
         self.assertNotIn("tab = .field", sync)
         self.assertNotIn("closeInspect()", sync)
+
+
+class TestOfflineMapDismantlesOnLeave(unittest.TestCase):
+    """ASC 73: Field leave must tear MapLibre down, not leave gestures live."""
+
+    def test_offline_map_declares_dismantle(self):
+        src = OFFLINE_SWIFT.read_text(encoding="utf-8")
+        self.assertIn("public static func dismantleUIView", src)
+        self.assertIn("uiView.delegate = nil", src)
+        self.assertIn("removeGestureRecognizer", src)
+        self.assertIn("coordinator.onInspect = nil", src)
