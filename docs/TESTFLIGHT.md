@@ -51,6 +51,9 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34264462418` (`960a8a2`): tip-67 `workflow_dispatch` with a concatenated `git_ref`. Checkout fetch failed. No IPA.
 - `34264699162` (`960a8a2`): tip-67 `workflow_dispatch` retry. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **67**. Dist `Q8AX4T282L` (`DISTRIBUTION`). altool no errors. ASC `e2cf188e-1fa8-4e07-b306-1e088087c7d0` **VALID**. PATCH 200. `ASSIGN Internal 67 204`. GraphProbe + warmup + keep-awake. Leave 66 until TestFlight shows 67 Ready.
 - `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
+- `34463051408` (`9911aaf`): HUD tag `tf-79`. CPV **79**. Unnamed tank sure. Leave 78 until TestFlight showed 79 Ready.
+- `34464769463` (`15516ec`): HUD tag `tf-80`. CPV **80**. Compass mark as App Icon and boot logo. Leave 79 until TestFlight shows 80 Ready.
+- `34480452541` (`98bb68a`): HUD tag `tf-81`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **81**. Dist `TPTQ6GKWZ7` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 81`, then ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. `ASSIGN Internal 81 204`. HUD on every tab + hold water classify + named marks. Leave 80 until TestFlight shows 81 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -141,3 +144,11 @@ SOURCE GO tip `b7953348` / merge `a72a8478`. Run `34264699162` uploaded CPV **67
 ## Tip 68 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `afb2e2fc` / merge `7abb9e0b`. Run `34269174169` uploaded CPV **68** and `ASSIGN Internal 68 204`. Speak banner finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready. Watch omitted. Internal only. Do not re-upload 54–67.
+
+## HUD 79–80 Internal
+
+HUD side path, not bible-v3. Tag `tf-79` (`9911aaf`, run `34463051408`) uploaded CPV **79**. Tag `tf-80` (`15516ec`, run `34464769463`) uploaded CPV **80** — compass mark as App Icon and boot logo. Watch omitted. Internal only. Do not re-upload 54–80.
+
+## HUD 81 Internal (Crisis GO)
+
+HUD tree `98bb68a` tagged `tf-81`. Run `34480452541` uploaded CPV **81** and `ASSIGN Internal 81 204`. Dist `TPTQ6GKWZ7`. ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. Keep Map mounted, classify hold water, named marks survive pack re-read. Leave 80 until TestFlight shows 81 Ready. Watch omitted. Internal only. Do not re-upload 54–80. Next Internal after 81 would be **82**.
