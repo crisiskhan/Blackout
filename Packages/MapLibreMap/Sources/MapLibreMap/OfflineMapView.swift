@@ -642,7 +642,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
         public func mapView(
             _ mapView: MLNMapView,
-            regionIsChangingWithReason reason: MLNCameraChangeReason
+            regionIsChangingWith reason: MLNCameraChangeReason
         ) {
             if reason.contains(.gesturePan)
                 || reason.contains(.gesturePinch)
