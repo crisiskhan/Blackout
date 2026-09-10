@@ -30,6 +30,7 @@ TOKENS_SWIFT = ROOT / "Packages/Tokens/Sources/Tokens/Tokens.swift"
 MAP_TAB = ROOT / "Blackout/MapTab.swift"
 CARD = ROOT / "Blackout/MapInspectCard.swift"
 FIELD_TAB = ROOT / "Blackout/FieldTab.swift"
+ROOT_CHROME = ROOT / "Blackout/RootChrome.swift"
 RUNTIME = ROOT / "Blackout/AppRuntime.swift"
 
 
@@ -436,3 +437,17 @@ class TestOfflineMapDismantlesOnLeave(unittest.TestCase):
         self.assertIn("uiView.delegate = nil", src)
         self.assertIn("removeGestureRecognizer", src)
         self.assertIn("coordinator.onInspect = nil", src)
+
+
+class TestMapStaysMountedAcrossTabs(unittest.TestCase):
+    """ASC 72/73: Field must not destroy MapTab / MapLibre."""
+
+    def test_root_keeps_map_mounted_under_other_tabs(self):
+        src = ROOT_CHROME.read_text(encoding="utf-8")
+        # Must not be an exclusive switch that only builds Map on .map.
+        self.assertIn("MapTab(runtime: runtime)", src)
+        self.assertIn("opacity(runtime.tab == .map ? 1 : 0)", src)
+        self.assertIn("allowsHitTesting(runtime.tab == .map)", src)
+        # The old crash pattern: switch with Map only on .map case.
+        exclusive = "case .map: MapTab(runtime: runtime)"
+        self.assertNotIn(exclusive, src)
