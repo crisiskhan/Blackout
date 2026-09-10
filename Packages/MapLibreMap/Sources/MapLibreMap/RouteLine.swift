@@ -202,6 +202,18 @@ public enum MapFieldChrome: Sendable {
         return String(format: "BEARING %.0f°", bearingDeg)
     }
 
+    /// Inactive chrome stays quiet: no BEARING row unless there is somewhere
+    /// to walk (dest, drawn route, or LOCK-ON).
+    public static func activeBearing(
+        headingDeg: Double?,
+        hasDestination: Bool,
+        lockOn: Bool,
+        hasRoute: Bool
+    ) -> Double? {
+        guard hasDestination || lockOn || hasRoute else { return nil }
+        return headingDeg
+    }
+
     public static func lines(
         lock: String,
         route: String,

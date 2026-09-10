@@ -26,6 +26,7 @@ SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/WaterInspect.swift"
 GESTURE_SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/InspectGesture.swift"
 MAP_SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/MapLibreMap.swift"
 OFFLINE_SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/OfflineMapView.swift"
+ROUTE_SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/RouteLine.swift"
 TOKENS_SWIFT = ROOT / "Packages/Tokens/Sources/Tokens/Tokens.swift"
 MAP_TAB = ROOT / "Blackout/MapTab.swift"
 CARD = ROOT / "Blackout/MapInspectCard.swift"
@@ -451,3 +452,13 @@ class TestMapStaysMountedAcrossTabs(unittest.TestCase):
         # The old crash pattern: switch with Map only on .map case.
         exclusive = "case .map: MapTab(runtime: runtime)"
         self.assertNotIn(exclusive, src)
+
+
+class TestQuietInactiveBearing(unittest.TestCase):
+    def test_bearing_stays_nil_without_dest_route_or_lock(self):
+        # Mirror MapFieldChrome.activeBearing — empty mission ⇒ quiet chrome.
+        src = ROUTE_SWIFT.read_text(encoding="utf-8")
+        self.assertIn("func activeBearing(", src)
+        tab = MAP_TAB.read_text(encoding="utf-8")
+        self.assertIn("MapFieldChrome.activeBearing(", tab)
+        self.assertNotIn("bearingDeg: runtime.headingDeg,", tab)
