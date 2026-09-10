@@ -5,7 +5,7 @@ import PTTAudio
 import RosterRoles
 
 public enum Chip: String, CaseIterable, Sendable, Hashable {
-    case ok, formUp, wait, water, lostKid, overdue, rally, down
+    case ok, formUp, wait, water, lostKid, overdue, rally, down, sos
 }
 
 public struct CommsState: Sendable {
@@ -31,4 +31,5 @@ public struct CommsState: Sendable {
     public mutating func lostKid() { chips.append(.lostKid) }
     public mutating func rally() { chips.append(.rally) }
     public mutating func down() { chips.append(.down) }
+    public mutating func sos() { chips.append(.sos) }
 }

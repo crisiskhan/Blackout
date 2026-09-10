@@ -2,6 +2,7 @@ import SwiftUI
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
+import Tokens
 
 struct FieldTab: View {
     @Bindable var runtime: AppRuntime
@@ -10,7 +11,9 @@ struct FieldTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("FIELD").foregroundStyle(Color(white: 0.85))
+            Text("FIELD")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
             Text(L10n.t("stop.if", runtime.locale)).font(.caption)
             // One card open, or the list. Never both. The map's FIELD button
             // has already chosen a card, and landing on the list with the
@@ -18,10 +21,20 @@ struct FieldTab: View {
             if let s = stepper {
                 open(s)
             } else {
-                List(cards) { c in
-                    Button(loc(c.title)) {
-                        stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 1) {
+                        ForEach(cards) { c in
+                            Button(loc(c.title)) {
+                                stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                            }
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Theme.silver)
+                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                            .padding(.horizontal, 12)
+                            .background(Theme.raised)
+                        }
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
             Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
@@ -52,11 +65,13 @@ struct FieldTab: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
                 Text(loc(s.card.title))
-                    .font(.headline)
-                    .foregroundStyle(Color(white: 0.9))
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(Color.white)
                 Spacer(minLength: 8)
                 Button("ALL CARDS") { stepper = nil }
-                    .font(.caption.weight(.bold))
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             }
             Text("STEP \(s.index + 1) OF \(s.card.steps.count)")
                 .font(.caption2.weight(.bold))
@@ -76,6 +91,7 @@ struct FieldTab: View {
                         stepper = x
                     }
                 }
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 Button("SPEAK") {
                     var x = s; x.speak(); stepper = x
                     if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech) {
@@ -84,13 +100,17 @@ struct FieldTab: View {
                         runtime.speechChrome = ""
                     }
                 }
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 Button("SEND TO PARTY") {
                     var x = s
                     x.send()
                     stepper = x
                     runtime.sendFieldToParty(cardID: s.card.id)
                 }
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             }
+            .font(.system(size: 12, weight: .heavy))
+            .foregroundStyle(Theme.silver)
             Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
             if !runtime.speechChrome.isEmpty {
                 Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)

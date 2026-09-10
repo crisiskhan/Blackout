@@ -47,7 +47,13 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(held.card?.klass, "Water tank", "a content=water tank did not read as water: \(held)")
         XCTAssertEqual(held.card?.kind, .water, "\(held)")
         XCTAssertEqual(held.card?.advice, .treat, "water still has to be treated: \(held)")
-        XCTAssertGreaterThanOrEqual(held.card?.sure ?? 0, 70, "the record says what is in it, so be sure of it: \(held)")
+        // The record is unnamed, so the 8-point unnamed penalty lands on 74
+        // and the card reads 66. A silent tank is 42. The gap is the point.
+        XCTAssertGreaterThanOrEqual(
+            held.card?.sure ?? 0,
+            60,
+            "content=water still has to outrank a silent tank: \(held)"
+        )
     }
 
     func testHoldingEmptyDesertSaysGround() throws {

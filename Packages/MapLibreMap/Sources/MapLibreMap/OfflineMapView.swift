@@ -24,6 +24,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onMapTap: ((Double, Double) -> Void)?
     /// A thumb held still on a place, with whatever the pack has drawn there.
     public var onMapHold: ((Double, Double, [String: String]) -> Void)?
+    /// Boot preview must not ask for GPS. The live MAP still does.
+    public var trackUser: Bool
 
     public init(
         styleURL: URL,
@@ -39,6 +41,7 @@ public struct OfflineMapView: UIViewRepresentable {
         destination: (lat: Double, lon: Double)? = nil,
         held: (lat: Double, lon: Double)? = nil,
         fitToken: Int = 0,
+        trackUser: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
         onMapHold: ((Double, Double, [String: String]) -> Void)? = nil
     ) {
@@ -55,6 +58,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.destination = destination
         self.held = held
         self.fitToken = fitToken
+        self.trackUser = trackUser
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
     }
@@ -74,8 +78,8 @@ public struct OfflineMapView: UIViewRepresentable {
         view.logoView.isHidden = false
         view.prefetchesTiles = false
         view.allowsRotating = true
-        view.shouldRequestAuthorizationToUseLocationServices = true
-        view.showsUserLocation = true
+        view.shouldRequestAuthorizationToUseLocationServices = trackUser
+        view.showsUserLocation = trackUser
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
         view.setCenter(
             CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
@@ -101,6 +105,7 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.require(toFail: hold)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.trackUser = trackUser
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -109,10 +114,11 @@ public struct OfflineMapView: UIViewRepresentable {
         if uiView.styleURL != styleURL {
             uiView.styleURL = styleURL
         }
-        uiView.shouldRequestAuthorizationToUseLocationServices = true
-        uiView.showsUserLocation = true
+        uiView.shouldRequestAuthorizationToUseLocationServices = trackUser
+        uiView.showsUserLocation = trackUser
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.trackUser = trackUser
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
     }
 
@@ -148,6 +154,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String]) -> Void)?
+        var trackUser = true
         private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
@@ -560,8 +567,8 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-            mapView.shouldRequestAuthorizationToUseLocationServices = true
-            mapView.showsUserLocation = true
+            mapView.shouldRequestAuthorizationToUseLocationServices = trackUser
+            mapView.showsUserLocation = trackUser
             fittedPack = nil
             fittedSize = nil
             if let spec {

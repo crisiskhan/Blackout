@@ -3,7 +3,7 @@ import XCTest
 
 final class TokensTests: XCTestCase {
     func testSOSGeometry() {
-        XCTAssertEqual(BlackoutTokens.Chrome.sosDiameter, 56)
+        XCTAssertEqual(BlackoutTokens.Chrome.sosDiameter, 64)
         XCTAssertEqual(BlackoutTokens.Chrome.sosHoldMs, 800)
         XCTAssertEqual(BlackoutTokens.Tab.allCases.count, 4)
     }
@@ -34,23 +34,26 @@ final class TokensTests: XCTestCase {
         )
     }
 
-    func testMapInstrumentChipsAreSixFortyFourPointTargets() {
+    func testMapInstrumentChipsAreDockPlusSheet() {
+        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoPoints, 196)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootActivateHeight, 56)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootMinSeconds, 0.8)
+        XCTAssertEqual(BlackoutTokens.Chrome.hudTabReservePoints, 52)
+        XCTAssertEqual(BlackoutTokens.Chrome.hudSideReservePoints, 72)
         XCTAssertEqual(BlackoutTokens.Chrome.mapChipHitPoints, 44)
-        XCTAssertEqual(BlackoutTokens.MapChip.allCases.count, 6)
+        XCTAssertEqual(BlackoutTokens.MapDock.allCases.count, 4)
         XCTAssertEqual(
-            BlackoutTokens.MapChip.allCases.map(\.rawValue),
-            ["mark", "walk", "drive", "ruler", "usng", "magTrue"]
+            BlackoutTokens.MapDock.allCases.map(\.title),
+            ["MARK", "WALK", "DRIVE", "SPEAK"]
         )
         XCTAssertEqual(
-            BlackoutTokens.MapChip.allCases.map(\.title),
-            ["MARK", "WALK", "DRIVE", "RULER", "USNG", "MAG/TRUE"]
+            BlackoutTokens.MapInstrument.allCases.map(\.title),
+            ["RULER", "USNG", "MAG/TRUE"]
         )
-        XCTAssertTrue(BlackoutTokens.MapChip.walk.requiresGraph)
-        XCTAssertTrue(BlackoutTokens.MapChip.drive.requiresGraph)
-        XCTAssertFalse(BlackoutTokens.MapChip.mark.requiresGraph)
-        XCTAssertFalse(BlackoutTokens.MapChip.ruler.requiresGraph)
-        XCTAssertFalse(BlackoutTokens.MapChip.usng.requiresGraph)
-        XCTAssertFalse(BlackoutTokens.MapChip.magTrue.requiresGraph)
+        XCTAssertTrue(BlackoutTokens.MapDock.walk.requiresGraph)
+        XCTAssertTrue(BlackoutTokens.MapDock.drive.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapDock.mark.requiresGraph)
+        XCTAssertFalse(BlackoutTokens.MapDock.speak.requiresGraph)
     }
 
     func testMapInkIsVoidRedSilver() {
@@ -70,7 +73,7 @@ final class TokensTests: XCTestCase {
 
     func testMapFieldStaysShortStatusChromeNotAHUD() {
         XCTAssertEqual(BlackoutTokens.Chrome.fieldChromeMaxLines, 3)
-        XCTAssertGreaterThanOrEqual(
+        XCTAssertGreaterThan(
             BlackoutTokens.Chrome.mapActionChipTextPoints,
             BlackoutTokens.Chrome.tabCaptionPoints
         )

@@ -20,6 +20,7 @@ import PTTAudio
 import OfflineSpeech
 import RegionalPacks
 import Router
+import Tokens
 
 @MainActor
 @Observable
@@ -44,6 +45,9 @@ final class AppRuntime {
     var speech: SpeechEngine
     var armed = false
     var sawCannotDo = false
+    var bootStage: BootStage = .cold
+    var bootProgress: Double = 0
+    var bootStyleURL: URL?
     var leftHand = false
     var tab: BlackoutTab = .map
     var lockOn = false
@@ -71,8 +75,10 @@ final class AppRuntime {
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     private var graphCache: RouteGraph?
+    private var graphsByPack: [String: RouteGraph] = [:]
     private var graphPackID: String?
     private var graphWarmup: Task<RouteGraph?, Never>?
+    private var bootTask: Task<Void, Never>?
     private let fix = MeshFix()
 
     init() {
@@ -109,13 +115,32 @@ final class AppRuntime {
         if UserDefaults.standard.bool(forKey: "cannotDo.seen") {
             sawCannotDo = true
         }
-        warmupActiveGraph()
+        bootVessel()
         applyMapKeepAwake()
     }
 
+    var bootReady: Bool {
+        switch bootStage {
+        case .ready, .failed:
+            return true
+        case .cold, .loading:
+            return false
+        }
+    }
+
+    /// Cold launch: read every shipped pack, resolve its style, load its graph.
+    /// ACTIVATE stays dark until this finishes. TX WEST is still the first map.
+    func bootVessel() {
+        guard bootTask == nil else { return }
+        bootTask = Task { [weak self] in
+            await self?.runBoot()
+        }
+    }
+
     func arm() {
+        guard bootReady else { return }
         armed = true
-        box.log("arming", "entered tabs")
+        box.log("arming", "activated")
         applyMapKeepAwake()
     }
 
@@ -245,7 +270,7 @@ final class AppRuntime {
         let from = youCoordinate()
         let id = pack?.id
         let url = packs?.graphURL()
-        let cached = graphPackID == id ? graphCache : nil
+        let cached = id.flatMap { graphsByPack[$0] } ?? (graphPackID == id ? graphCache : nil)
         let inflight = graphWarmup
         Task { [weak self] in
             let graph: RouteGraph?
@@ -278,16 +303,54 @@ final class AppRuntime {
 
     func tapRuler() {
         toolChrome = MapRuler.chrome(from: youCoordinate(), to: destination())
+        showInstruments = false
     }
 
     func tapUSNG() {
         let you = youCoordinate()
         toolChrome = USNG.label(lat: you.lat, lon: you.lon)
+        showInstruments = false
     }
 
     func tapMagTrue() {
         instruments.toggleMagTrue()
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
+        showInstruments = false
+    }
+
+    /// SOS is a mesh-wide alert, not a label. The hold wakes the radio if it
+    /// is down, lights every peer with chip + RED + POS, and still does not
+    /// replace 911.
+    var hudCrisis: Bool {
+        red.isRed || comms.chips.contains(.sos)
+    }
+
+    func offerSOS() {
+        if mesh.radio == nil {
+            joinNet()
+        }
+        if !comms.chips.contains(.sos) {
+            comms.chips.append(.sos)
+        }
+        mesh.sendChip(from: mesh.localID, chip: Chip.sos.rawValue)
+        red.force(true)
+        mesh.sendRED(from: mesh.localID, on: true)
+        sendPOSIfPossible()
+        box.log("sos", "mesh SOS + offer system Emergency SOS — does not replace 911")
+    }
+
+    /// I AM OK is the all-clear: the mesh hears it, the SOS chip goes dark,
+    /// and a RED plate we lit goes dark.
+    func iamOK() {
+        comms.chips.removeAll { $0 == .sos }
+        if !comms.chips.contains(.ok) {
+            comms.chips.append(.ok)
+        }
+        mesh.sendChip(from: mesh.localID, chip: Chip.ok.rawValue)
+        if red.isRed {
+            cancelSelfRed()
+        }
+        box.log("ok", "I AM OK")
     }
 
     func speakMap() {
@@ -360,8 +423,13 @@ final class AppRuntime {
                 timers.markDoneTask(task)
             }
         case "chip":
-            if let raw = String(data: env.body, encoding: .utf8), let chip = Chip(rawValue: raw) {
-                comms.chips.append(chip)
+            if let raw = String(data: env.body, encoding: .utf8) {
+                if raw == Chip.sos.rawValue {
+                    red.force(true)
+                }
+                if let chip = Chip(rawValue: raw) {
+                    comms.chips.append(chip)
+                }
             }
         default:
             break
@@ -371,13 +439,22 @@ final class AppRuntime {
     func switchPack(_ id: String) {
         try? packs?.switchTo(id)
         UserDefaults.standard.set(id, forKey: "pack.id")
-        graphCache = nil
-        graphPackID = nil
-        graphWarmup = nil
         routeTarget = nil
         clearRoute(plan: "", chrome: "")
         relabelMarksForActivePack()
-        warmupActiveGraph()
+        graphCache = graphsByPack[id]
+        graphPackID = id
+        if let pack = packs?.active, let root = Self.resourceRoot()?.appendingPathComponent("Packs") {
+            let packRoot = root.appendingPathComponent(pack.id)
+            bootStyleURL = try? PackStyle.resolved(
+                styleAt: packRoot.appendingPathComponent("style.json"),
+                packRoot: packRoot
+            )
+        }
+        if graphCache == nil {
+            graphWarmup = nil
+            warmupActiveGraph()
+        }
     }
 
     func applyMapKeepAwake() {
@@ -405,6 +482,64 @@ final class AppRuntime {
             lastMark: marks.last.map { ($0.lat, $0.lon) },
             origin: youCoordinate()
         )
+    }
+
+    private func runBoot() async {
+        let started = Date()
+        bootStage = .loading("PACKS")
+        bootProgress = 0.04
+        guard let store = packs else {
+            bootStage = .failed("Packs missing from bundle — honest empty.")
+            bootProgress = 0
+            return
+        }
+        let catalog = store.catalog.packs
+        guard !catalog.isEmpty else {
+            bootStage = .failed("Packs missing from bundle — honest empty.")
+            return
+        }
+        let steps = Double(catalog.count * 2 + 1)
+        var done = 0.0
+        var loaded: [String: RouteGraph] = [:]
+        for pack in catalog {
+            bootStage = .loading(pack.name.uppercased())
+            let root = store.packRoot(id: pack.id)
+            let style = root.appendingPathComponent("style.json")
+            let resolved = try? PackStyle.resolved(styleAt: style, packRoot: root)
+            if pack.id == store.active?.id {
+                bootStyleURL = resolved
+            }
+            done += 1
+            bootProgress = done / steps
+            let url = store.graphURL(for: pack.id)
+            let graph = await Task.detached { RouteGraph.load(from: url) }.value
+            if let graph {
+                loaded[pack.id] = graph
+            }
+            done += 1
+            bootProgress = done / steps
+        }
+        prefetchField()
+        done += 1
+        bootProgress = 1
+        graphsByPack = loaded
+        if let id = store.active?.id {
+            graphCache = loaded[id]
+            graphPackID = id
+        }
+        let remain = BlackoutTokens.Chrome.bootMinSeconds - Date().timeIntervalSince(started)
+        if remain > 0 {
+            try? await Task.sleep(nanoseconds: UInt64(remain * 1_000_000_000))
+        }
+        bootStage = .ready
+        box.log("boot", "ready packs=\(loaded.count)")
+    }
+
+    private func prefetchField() {
+        guard let root = Self.resourceRoot()?.appendingPathComponent("Field") else { return }
+        for name in ["field.core.json", "field.tx.json", "field.nm.json"] {
+            _ = try? Data(contentsOf: root.appendingPathComponent(name), options: .mappedIfSafe)
+        }
     }
 
     private func warmupActiveGraph() {
@@ -545,6 +680,26 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     }
 }
 
+enum BootStage: Equatable {
+    case cold
+    case loading(String)
+    case ready
+    case failed(String)
+
+    var line: String {
+        switch self {
+        case .cold:
+            return ""
+        case .loading(let name):
+            return name
+        case .ready:
+            return "READY"
+        case .failed(let why):
+            return why
+        }
+    }
+}
+
 enum BlackoutTab: String, CaseIterable, Identifiable {
     case map, comms, field, expedition
     var id: String { rawValue }
@@ -553,7 +708,7 @@ enum BlackoutTab: String, CaseIterable, Identifiable {
         case .map: return "MAP"
         case .comms: return "COMMS"
         case .field: return "FIELD"
-        case .expedition: return "EXPEDITION"
+        case .expedition: return "EXPED"
         }
     }
 }

@@ -106,7 +106,9 @@ def assert_sos_is_not_on_the_map_hold() -> None:
     body = held.read_text()
     if "onMapHold" not in body:
         fail("MapTab does not wire the hold")
-    if re.search(r"onMapHold.*SOS", body, re.S | re.I):
+    # Holding the map must not fire SOS. A lit mesh may show an all-clear
+    # strip on the HUD; that is not a hold-to-SOS control.
+    if "offerSOS" in body or "SOSHold" in body:
         fail("the map hold path reaches for SOS")
     # The other half of the same rule. `.isModal` is the tidy way to write a
     # card over a map and it hides everything outside its own subtree from
@@ -555,7 +557,7 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     fallback = re.match(r"\}\s*else \{", rest)
     if not fallback:
         fail("FieldTab has no list to fall back to when no card is open")
-    if "List(cards)" not in brace_body(rest, fallback.end() - 1):
+    if "ForEach(cards)" not in brace_body(rest, fallback.end() - 1):
         fail("FieldTab never shows the card list at all")
     print("OK   a land hold opens one card's steps, with the list behind ALL CARDS")
 

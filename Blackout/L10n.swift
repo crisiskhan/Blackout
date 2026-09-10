@@ -3,7 +3,8 @@ import Foundation
 enum L10n {
     static let table: [String: [String: String]] = [
         "sos.call": ["en": "CALL SOS", "es": "LLAMAR SOS"],
-        "sos.offer": ["en": "Offers iPhone Emergency SOS. Does not replace 911.", "es": "Ofrece Emergency SOS del iPhone. No reemplaza al 911."],
+        "sos.offer": ["en": "Offers iPhone Emergency SOS. Does not replace 911. Also lights the mesh.", "es": "Ofrece Emergency SOS del iPhone. No reemplaza al 911. También enciende la malla."],
+        "sos.mesh": ["en": "SOS · MESH", "es": "SOS · MALLA"],
         "red.plate": ["en": "RED", "es": "ROJO"],
         "red.cancel": ["en": "CANCEL RED", "es": "CANCELAR ROJO"],
         "stop.if": ["en": "STOP-IF", "es": "PARA-SI"],

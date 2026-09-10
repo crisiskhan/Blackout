@@ -11,7 +11,9 @@ struct RootChrome: View {
                 ARMINGView(runtime: runtime)
             } else {
                 tabChrome
-                if runtime.mesh.joined {
+                // Map and Comms carry their own I AM OK. Field / Exped get
+                // the corner chip only while SOS or RED is actually lit.
+                if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
                     IAMOKBar(runtime: runtime)
                 }
                 contextualSOS
@@ -37,18 +39,28 @@ struct RootChrome: View {
     }
 
     private var tabChrome: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: runtime.leftHand ? .leading : .bottom) {
+            tabBody
+                .padding(.bottom, overlayBottomPad)
+                .padding(.leading, overlayLeadingPad)
             if runtime.leftHand {
-                HStack(alignment: .top, spacing: 0) {
-                    tabColumn.frame(width: 72)
-                    tabBody
-                }
+                tabColumn.frame(width: BlackoutTokens.Chrome.hudSideReservePoints)
             } else {
-                tabBody
                 tabBar
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// MAP draws under the strip. Other tabs keep their content off it.
+    private var overlayBottomPad: CGFloat {
+        if runtime.leftHand || runtime.tab == .map { return 0 }
+        return CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+    }
+
+    private var overlayLeadingPad: CGFloat {
+        if !runtime.leftHand || runtime.tab == .map { return 0 }
+        return CGFloat(BlackoutTokens.Chrome.hudSideReservePoints)
     }
 
     private var tabBody: some View {
@@ -70,29 +82,51 @@ struct RootChrome: View {
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
-        .padding(.horizontal, 8)
-        .background(Color(white: 0.08))
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+        .padding(.bottom, 2)
+        .background(Theme.void.opacity(0.94))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Theme.silver.opacity(0.18))
+                .frame(height: 1)
+        }
     }
 
     private var tabColumn: some View {
-        VStack {
+        VStack(spacing: 4) {
             ForEach(BlackoutTab.allCases) { t in
                 tabButton(t)
                     .rotationEffect(.degrees(-90))
-                    .frame(height: 72)
+                    .frame(height: BlackoutTokens.Chrome.hudSideReservePoints)
             }
             Spacer()
+        }
+        .background(Theme.void.opacity(0.94))
+        .overlay(alignment: .trailing) {
+            Rectangle()
+                .fill(Theme.silver.opacity(0.18))
+                .frame(width: 1)
         }
     }
 
     private func tabButton(_ t: BlackoutTab) -> some View {
-        Button(t.title) { runtime.tab = t }
-            .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .semibold))
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-            .allowsTightening(true)
-            .multilineTextAlignment(.center)
-            .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))
+        Button {
+            runtime.tab = t
+        } label: {
+            VStack(spacing: 3) {
+                Text(t.title)
+                    .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .allowsTightening(true)
+                    .multilineTextAlignment(.center)
+                Rectangle()
+                    .fill(runtime.tab == t ? Theme.accent : Color.clear)
+                    .frame(width: 18, height: 2)
+            }
+        }
+        .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))
     }
 
     @ViewBuilder
@@ -104,11 +138,17 @@ struct RootChrome: View {
                     Spacer()
                     SOSHold(runtime: runtime)
                         .padding(.trailing, 16)
-                        .padding(.bottom, 72)
+                        .padding(.bottom, sosBottomPad)
                 }
             }
             .allowsHitTesting(true)
         }
+    }
+
+    private var sosBottomPad: CGFloat {
+        let gutter = CGFloat(BlackoutTokens.Chrome.oneThumbGutter)
+        if runtime.leftHand { return gutter }
+        return gutter + CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
     }
 
     private var tokenTab: BlackoutTokens.Tab {

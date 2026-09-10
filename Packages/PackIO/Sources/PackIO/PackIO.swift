@@ -116,9 +116,13 @@ public final class PackStore: @unchecked Sendable {
         box.log("pack", "switched \(id) bytes=\(pack.bytes)")
     }
 
+    public func packRoot(id: String) -> URL {
+        root.appendingPathComponent(id)
+    }
+
     public func packURL(_ file: String) -> URL? {
         guard let active else { return nil }
-        return root.appendingPathComponent(active.id).appendingPathComponent(file)
+        return packRoot(id: active.id).appendingPathComponent(file)
     }
 
     public func homeCoordinate() -> (lat: Double, lon: Double)? {
@@ -131,13 +135,16 @@ public final class PackStore: @unchecked Sendable {
     /// packs ship; the JSON name is only still looked for so an older pack
     /// sitting on a phone keeps routing.
     public func graphURL() -> URL? {
-        guard let binary = packURL("graph.bin") else { return nil }
-        // packURL only builds a path, so the disk has to be asked. The fallback
-        // applies only where there is something to fall back to; with neither
-        // present the answer is the name packs actually ship under.
+        guard let id = active?.id else { return nil }
+        return graphURL(for: id)
+    }
+
+    public func graphURL(for packID: String) -> URL? {
+        let binary = packRoot(id: packID).appendingPathComponent("graph.bin")
         let fm = FileManager.default
         if fm.fileExists(atPath: binary.path) { return binary }
-        guard let legacy = packURL("graph.json"), fm.fileExists(atPath: legacy.path) else { return binary }
+        let legacy = packRoot(id: packID).appendingPathComponent("graph.json")
+        guard fm.fileExists(atPath: legacy.path) else { return binary }
         return legacy
     }
 

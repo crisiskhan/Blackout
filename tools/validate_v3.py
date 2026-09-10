@@ -664,14 +664,20 @@ def tip55_chrome() -> None:
     arming = (ROOT / "Blackout" / "ARMINGView.swift").read_text()
     if '"ENTER"' in arming or "Button(\"ENTER\")" in arming:
         bad("ARMING still says ENTER")
-    elif "INITIATE" not in arming:
-        bad("ARMING missing INITIATE")
+    elif "ACTIVATE" not in arming:
+        bad("ARMING missing ACTIVATE")
+    elif "INITIATE" in arming:
+        bad("ARMING still says INITIATE — the boot is ACTIVATE")
     else:
-        ok("ARMING primary is INITIATE")
+        ok("ARMING primary is ACTIVATE")
     if "Logo" not in arming and "AppIcon" not in arming:
         bad("ARMING missing bundled logo")
     else:
         ok("ARMING shows bundled logo")
+    if "ForEach(packs.catalog.packs" in arming:
+        bad("ARMING is still a pack menu")
+    else:
+        ok("ARMING is a boot screen, not a pack menu")
     logo = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset" / "Contents.json"
     if not logo.is_file():
         bad("Logo.imageset missing")
@@ -967,6 +973,9 @@ def tip60_map_chrome() -> None:
         and "SOSHold(" not in comms
         and "SOSHold(" in root
         and "case .map, .field, .expedition" in tokens
+        and "func offerSOS()" in app
+        and "Chip.sos" in app
+        and "hudCrisis" in app
     )
     slab_ok = (
         "fillsBBox = false" in pack_style
@@ -1032,24 +1041,28 @@ def tip62_nav() -> None:
         and "onMapTap" in offline
     )
     tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
+    inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
     style = json.loads((ROOT / "Resources" / "Packs" / "tx-west" / "style.json").read_text())
     layers = style.get("layers") or []
     road_labels = next((layer for layer in layers if layer.get("id") == "road-labels"), None)
 
     chips_ok = (
         "mapChipHitPoints: Double = 44" in tokens
-        and "enum MapChip" in tokens
+        and "enum MapDock" in tokens
+        and "enum MapInstrument" in tokens
         and 'Button("MARK")' in map_tab
         and 'Button("WALK")' in map_tab
         and 'Button("DRIVE")' in map_tab
-        and 'Button("RULER")' in map_tab
-        and 'Button("USNG")' in map_tab
-        and 'Button("MAG/TRUE")' in map_tab
-        and "MapChipButtonStyle" in map_tab
+        and 'Button("SPEAK")' in map_tab
+        and 'Button("INST")' in map_tab
+        and 'Button("RULER")' in inst
+        and 'Button("USNG")' in inst
+        and 'Button("MAG/TRUE")' in inst
+        and "HUDDockStyle" in map_tab
         and "BlackoutTokens.Chrome.mapChipHitPoints" in map_tab
-        and "frame(width: hit, height: hit)" in map_tab
+        and "hudTabReservePoints" in map_tab
         and "ForEach(MapTool.allCases" not in map_tab
-        and "font(.caption2)" not in map_tab
+        and ".disabled(" not in map_tab
     )
     walk_ok = (
         "runtime.navigate(mode: .walk)" in map_tab
@@ -1115,7 +1128,7 @@ def tip62_nav() -> None:
         and "testHomeCoordinateFallsBackToCenterWhenAbsent" in (
             ROOT / "Packages" / "PackIO" / "Tests" / "PackIOTests" / "PackIOTests.swift"
         ).read_text()
-        and "testMapInstrumentChipsAreSixFortyFourPointTargets" in (
+        and "testMapInstrumentChipsAreDockPlusSheet" in (
             ROOT / "Packages" / "Tokens" / "Tests" / "TokensTests" / "TokensTests.swift"
         ).read_text()
         and "OFF GRAPH" in router_tests
@@ -1245,8 +1258,8 @@ def tip68_speak_field() -> None:
 
     voice = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "VoiceNav.swift").read_text()
     speak_ok = (
-        "ChromeRail" in map_tab
-        and "MapActionChipButtonStyle" in map_tab
+        "HUDDockStyle" in map_tab
+        and "HUDOverlayChipStyle" in map_tab
         and 'Button("SPEAK")' in map_tab
         and "SpeakStatus.chrome(" in app
         and "speech.speak(text, locale: locale)" in app
@@ -1271,7 +1284,7 @@ def tip68_speak_field() -> None:
         "warmupActiveGraph" in app
         and "GraphPlan.line" in app
         and "applyMapKeepAwake" in app
-        and "frame(width: hit, height: hit)" in map_tab
+        and "mapChipHitPoints" in map_tab
     )
 
     checks = [

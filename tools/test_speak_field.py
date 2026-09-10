@@ -203,22 +203,21 @@ class FieldChromeTests(unittest.TestCase):
 class SpeakChromeSourceContracts(unittest.TestCase):
     def setUp(self):
         self.map_tab = read("Blackout", "MapTab.swift")
+        self.theme = read("Blackout", "Theme.swift")
         self.tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         self.voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
 
     def test_header_controls_cannot_be_tail_truncated(self):
-        # tip-67 shipped a plain Button("INSTRUMENTS") in a fixed HStack; at the xxxLarge
-        # cap SwiftUI truncated the widest label to INSTRUME… next to LOCK-ON.
-        self.assertIn("ChromeRail", self.map_tab)
-        self.assertIn("MapActionChipButtonStyle", self.map_tab)
-        header = self.map_tab.split("private var actionRail")[1].split("private var")[0]
-        for title in ('Button("SPEAK")', 'Button("INSTRUMENTS")', '"LOCKED" : "LOCK-ON"'):
-            self.assertIn(title, header)
-            self.assertIn("MapActionChipButtonStyle", header)
-        chip = self.map_tab.split("private struct MapActionChipButtonStyle")[1]
-        self.assertIn("fixedSize(horizontal: true, vertical: false)", chip)
-        self.assertIn("mapActionChipTextPoints", chip)
-        self.assertNotIn("truncationMode", chip)
+        # Overlay chips keep their whole word; SPEAK sits in the thumb dock.
+        self.assertIn("HUDOverlayChipStyle", self.map_tab)
+        self.assertIn("HUDDockStyle", self.map_tab)
+        self.assertIn('Button("SPEAK")', self.map_tab)
+        self.assertIn("runtime.speakMap()", self.map_tab)
+        self.assertIn("fixedSize(horizontal: true, vertical: false)", self.theme)
+        self.assertNotIn("truncationMode", self.map_tab)
+        self.assertNotIn("truncationMode", self.theme)
+        self.assertIn('Button("INST")', self.map_tab)
+        self.assertIn('"LOCKED" : "LOCK"', self.map_tab)
 
     def test_no_walk_script_text_wall_is_painted_on_the_field(self):
         app = read("Blackout", "AppRuntime.swift")
@@ -377,9 +376,12 @@ class WalkingZoomNameContracts(unittest.TestCase):
 class NoRegressionContracts(unittest.TestCase):
     def test_instrument_chips_and_canvas_survive(self):
         map_tab = read("Blackout", "MapTab.swift")
-        for title in ("MARK", "WALK", "DRIVE", "RULER", "USNG", "MAG/TRUE"):
+        inst = read("Blackout", "InstrumentsView.swift")
+        for title in ("MARK", "WALK", "DRIVE", "SPEAK"):
             self.assertIn(f'Button("{title}")', map_tab)
-        self.assertIn("frame(width: hit, height: hit)", map_tab)
+        for title in ("RULER", "USNG", "MAG/TRUE"):
+            self.assertIn(f'Button("{title}")', inst)
+        self.assertIn("mapChipHitPoints", map_tab)
         self.assertIn("layoutPriority(1)", map_tab)
         self.assertIn("OSMCredit.line", map_tab)
 

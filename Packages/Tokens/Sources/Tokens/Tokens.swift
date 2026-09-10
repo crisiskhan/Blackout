@@ -2,19 +2,29 @@ import Foundation
 
 public enum BlackoutTokens: Sendable {
     public enum Chrome {
-        public static let sosDiameter: Double = 56
+        public static let sosDiameter: Double = 64
         public static let sosHoldMs: Int = 800
         public static let tabCount: Int = 4
         public static let tabCaptionPoints: Double = 10
         public static let dynamicTypeCap: String = "xxxLarge"
         public static let oneThumbGutter: Double = 16
+        /// Overlay tab strip on MAP so the canvas is the whole screen.
+        public static let hudTabReservePoints: Double = 52
+        /// Overlay left-hand tab column on MAP.
+        public static let hudSideReservePoints: Double = 72
         public static let mapChipHitPoints: Double = 44
-        /// MAP header controls (SPEAK / INSTRUMENTS / LOCK-ON) draw their whole word.
-        /// Fixed point size, so an xxxLarge body never squeezes `INSTRUMENTS` into
-        /// `INSTRUME…`; the rail wraps to a second line instead.
+        /// Title-screen mark. Large enough to read as the product, not a chip.
+        public static let bootLogoPoints: Double = 196
+        public static let bootActivateHeight: Double = 56
+        /// Even a warm launch holds the logo long enough to land, then ACTIVATE.
+        public static let bootMinSeconds: Double = 0.8
+        /// Overlay chips on the canvas (INST / LOCK). Fixed point size so an
+        /// xxxLarge body never squeezes a word into a tail-ellipsis.
         public static let mapActionChipTextPoints: Double = 11
         public static let mapActionChipGutterPoints: Double = 10
         public static let mapActionRailSpacingPoints: Double = 6
+        /// Hits shown over the map. A ScrollView on MAP is banned, so this is a hard cap.
+        public static let mapSearchHitCap: Int = 5
         /// The MAP field draws short status lines only. A turn-by-turn script belongs to
         /// the voice and the route line, not to a HUD over the canvas.
         public static let fieldChromeMaxLines: Int = 3
@@ -81,24 +91,37 @@ public enum BlackoutTokens: Sendable {
         case map, comms, field, expedition
     }
 
-    public enum MapChip: String, CaseIterable, Sendable {
-        case mark, walk, drive, ruler, usng, magTrue
+    /// The four controls that live under the thumb on MAP. Walk and Drive
+    /// still need a graph; Speak and Mark do not.
+    public enum MapDock: String, CaseIterable, Sendable {
+        case mark, walk, drive, speak
 
         public var title: String {
             switch self {
             case .mark: return "MARK"
             case .walk: return "WALK"
             case .drive: return "DRIVE"
-            case .ruler: return "RULER"
-            case .usng: return "USNG"
-            case .magTrue: return "MAG/TRUE"
+            case .speak: return "SPEAK"
             }
         }
 
         public var requiresGraph: Bool {
             switch self {
             case .walk, .drive: return true
-            case .mark, .ruler, .usng, .magTrue: return false
+            case .mark, .speak: return false
+            }
+        }
+    }
+
+    /// Ruler / grid / north live with the other instruments, not on the canvas.
+    public enum MapInstrument: String, CaseIterable, Sendable {
+        case ruler, usng, magTrue
+
+        public var title: String {
+            switch self {
+            case .ruler: return "RULER"
+            case .usng: return "USNG"
+            case .magTrue: return "MAG/TRUE"
             }
         }
     }
