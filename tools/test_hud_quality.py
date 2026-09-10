@@ -378,5 +378,91 @@ class HUDSyncTests(unittest.TestCase):
         self.assertIn("case .speak:", tab)
 
 
+YELLOW_AT = 0.45
+RED_AT = 0.8
+RAIL_STEPS = (0.0, 0.2, 0.45, 0.8, 1.0)
+
+
+def snap_rail(raw: float) -> float:
+    """Mirror of PartyVitals.snap — midpoint and above belongs to the worse tick."""
+    clamped = min(1.0, max(0.0, raw))
+    for i in range(len(RAIL_STEPS) - 1):
+        mid = (RAIL_STEPS[i] + RAIL_STEPS[i + 1]) / 2
+        if clamped < mid:
+            return RAIL_STEPS[i]
+    return RAIL_STEPS[-1]
+
+
+def band_from_worst(worst: float, flags: tuple[str, ...] = ()) -> str:
+    """Mirror of PartyVitals.band."""
+    if "RED" in flags or worst >= RED_AT:
+        return "red"
+    if worst >= YELLOW_AT:
+        return "yellow"
+    return "green"
+
+
+class ExpeditionHUDTests(unittest.TestCase):
+    """EXPEDITION is a HUD, not a Settings energy dump."""
+
+    def test_rail_math_matches_band_edges(self):
+        self.assertEqual(snap_rail(-1), 0.0)
+        self.assertEqual(snap_rail(0.1), 0.2)
+        self.assertEqual(snap_rail(0.32), 0.2)
+        self.assertEqual(snap_rail(0.325), 0.45)
+        self.assertEqual(snap_rail(0.5), 0.45)
+        self.assertEqual(snap_rail(0.625), 0.8)
+        self.assertEqual(snap_rail(0.89), 0.8)
+        self.assertEqual(snap_rail(0.9), 1.0)
+        self.assertEqual(snap_rail(1.2), 1.0)
+        self.assertEqual(band_from_worst(0.2), "green")
+        self.assertEqual(band_from_worst(0.45), "yellow")
+        self.assertEqual(band_from_worst(0.8), "red")
+        self.assertEqual(band_from_worst(0.2, ("RED",)), "red")
+
+    def test_condition_rails_not_system_sliders(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        vitals = read("Packages", "Vitals", "Sources", "Vitals", "Vitals.swift")
+        for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
+            self.assertIn(f'slider("{label}"', exped, label)
+        self.assertNotIn("Slider(", exped)
+        self.assertIn("PartyVitals.snap", exped)
+        self.assertIn("struct HUDVitalsRail", exped)
+        self.assertIn("static let yellowAt", vitals)
+        self.assertIn("static let redAt", vitals)
+        self.assertIn("static let railSteps", vitals)
+        self.assertIn("0.45", vitals)
+        self.assertIn("0.8", vitals)
+        self.assertIn("[0,0.2,0.45,0.8,1.0]", vitals.replace(" ", ""))
+
+    def test_page_sections_and_red_plate(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        theme = read("Blackout", "Theme.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        self.assertIn("enum HUDStatusTone", theme)
+        self.assertIn("case crisis", theme)
+        self.assertIn("statusTone:", exped)
+        self.assertIn("statusTone:", comms)
+        self.assertIn("redPlate", exped)
+        self.assertNotIn(".title.weight(.bold)", exped)
+        self.assertIn("HUDDockStyle()", exped)
+        self.assertIn('Button("1 MIN TIMER SET")', exped)
+        self.assertIn('Button("2H WATER TIMER SET")', exped)
+        self.assertIn('Button("APPLY RED BAND")', exped)
+        self.assertIn('Button("JOIN NAV")', exped)
+        self.assertIn('Button("EXPORT PAPER")', exped)
+        for section in ("CONDITION", "RED", "ROSTER", "TIMERS", "PAPER"):
+            self.assertIn(f'sectionLabel("{section}")', exped, section)
+        self.assertIn('L10n.t("overdue"', exped)
+        self.assertNotIn("not SOS", exped)
+        self.assertNotIn("not sos", exped.lower())
+
+    def test_solo_qa_scores_rails_and_hud_red(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("condition rails", qa.lower())
+        self.assertIn("HUD RED plate", qa)
+        self.assertNotIn("Exposure sliders change CONDITION", qa)
+
+
 if __name__ == "__main__":
     unittest.main()

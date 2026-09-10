@@ -690,10 +690,16 @@ def tip55_chrome() -> None:
     vitals = (ROOT / "Packages" / "Vitals" / "Sources" / "Vitals" / "Vitals.swift").read_text()
     for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
         if f'slider("{label}"' not in exp and f'slider("{label.lower()}"' not in exp:
-            bad(f"Expedition missing {label} slider")
+            bad(f"Expedition missing {label} rail")
             break
     else:
-        ok("Expedition has six sliders")
+        ok("Expedition has six condition rails")
+    if "Slider(" in exp:
+        bad("Expedition still uses system Slider")
+    elif "PartyVitals.snap" not in exp:
+        bad("Expedition rails do not snap to band ticks")
+    else:
+        ok("Expedition rails are HUD ticks, not system Slider")
     for field in ("hunger", "thirst", "pain", "water", "fatigue", "weatherExposure"):
         if f"var {field}" not in vitals:
             bad(f"PartyVitals missing {field}")
@@ -701,10 +707,10 @@ def tip55_chrome() -> None:
     else:
         ok("PartyVitals has six fields")
 
-    if ".tint(" not in exp and "Theme.accent" not in exp:
-        bad("Expedition sliders still use default system tint")
+    if "Theme.accent" not in exp:
+        bad("Expedition still uses default system tint")
     else:
-        ok("Expedition sliders use token tint")
+        ok("Expedition rails use token ink")
     if "Theme.accent" not in root and ".tint(" not in root:
         bad("root chrome does not apply accent tint (links stay system blue)")
     else:

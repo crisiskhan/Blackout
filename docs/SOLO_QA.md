@@ -55,8 +55,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## EXPEDITION
 
-- [ ] PASS / FAIL / N/A — Hunger / Thirst / Pain / Water / Fatigue / Exposure sliders change CONDITION.
-- [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows `RED` (self RED). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
+- [ ] PASS / FAIL / N/A — Hunger / Thirst / Pain / Water / Fatigue / Exposure condition rails change CONDITION. Ticks are GREEN / YELLOW / RED (not iOS sliders). Header CONDITION uses warn ink on YELLOW and the HUD RED plate ink on RED.
+- [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows the HUD RED plate (`RED`, not a system title). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.

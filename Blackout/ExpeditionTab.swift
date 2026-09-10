@@ -10,10 +10,12 @@ struct ExpeditionTab: View {
     var body: some View {
         HUDPage(
             title: "EXPEDITION",
-            status: "CONDITION \(runtime.vitals.band.rawValue.uppercased())"
+            status: "CONDITION \(runtime.vitals.band.rawValue.uppercased())",
+            statusTone: statusTone
         ) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 16) {
+                    sectionLabel("CONDITION")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 10) {
                             slider("Hunger", Binding(get: { runtime.vitals.hunger }, set: { runtime.vitals.hunger = $0 }))
@@ -24,79 +26,98 @@ struct ExpeditionTab: View {
                             slider("Exposure", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
                         }
                     }
+
+                    sectionLabel("RED")
                     Button("APPLY RED BAND") {
                         runtime.applySelfRed()
                     }
                     .buttonStyle(HUDActionStyle(filled: true))
                     if runtime.red.isRed || runtime.mesh.lastRedOn == true {
-                        Text(L10n.t("red.plate", runtime.locale))
-                            .font(.title.weight(.bold))
-                            .foregroundStyle(Theme.accent)
-                        Button(L10n.t("red.cancel", runtime.locale)) {
-                            runtime.cancelSelfRed()
-                        }
-                        .buttonStyle(HUDActionStyle(filled: false))
+                        redPlate
                     }
+
+                    sectionLabel("ROSTER")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("ROSTER \(runtime.roster.code)")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                            PartyQRImage(code: runtime.roster.code)
-                            Text(runtime.mesh.chromeNet)
-                                .font(.caption)
-                                .foregroundStyle(Theme.warn)
+                            HStack(alignment: .top, spacing: 12) {
+                                PartyQRImage(code: runtime.roster.code)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("ROSTER \(runtime.roster.code)")
+                                        .font(.system(size: 13, weight: .heavy))
+                                        .foregroundStyle(Theme.silver)
+                                    Text(runtime.mesh.chromeNet)
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(Theme.warn)
+                                }
+                            }
                             ForEach(runtime.roster.members) { m in
                                 Text("\(m.role.rawValue) \(m.name)")
+                                    .font(.system(size: 13, weight: .heavy))
                                     .foregroundStyle(Theme.silver)
                             }
                             Button("JOIN NAV") { runtime.roster = runtime.roster.joining("Nav", role: .nav) }
                                 .buttonStyle(HUDActionStyle(filled: false))
                         }
                     }
+
+                    sectionLabel("TIMERS")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Button("1 MIN TIMER SET") {
-                                if runtime.timers.add(who: "ALL", task: "1min", duration: 60, subjectAll: true) != nil {
-                                    runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "1min", done: false)
+                            VStack(spacing: 1) {
+                                Button("1 MIN TIMER SET") {
+                                    if runtime.timers.add(who: "ALL", task: "1min", duration: 60, subjectAll: true) != nil {
+                                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "1min", done: false)
+                                    }
                                 }
-                            }
-                            .buttonStyle(HUDActionStyle(filled: false))
-                            Button("2H WATER TIMER SET") {
-                                if runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true) != nil {
-                                    runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "water", done: false)
+                                .buttonStyle(HUDDockStyle())
+                                Button("2H WATER TIMER SET") {
+                                    if runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true) != nil {
+                                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "water", done: false)
+                                    }
                                 }
+                                .buttonStyle(HUDDockStyle())
                             }
-                            .buttonStyle(HUDActionStyle(filled: false))
+                            .background(Theme.raised)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                            )
                             ForEach(runtime.timers.timers, id: \.id) { t in
                                 HStack {
                                     Text("\(t.task) \(t.who)")
+                                        .font(.system(size: 13, weight: .heavy))
                                         .foregroundStyle(Theme.silver)
+                                    Spacer(minLength: 8)
                                     Button("DONE") {
                                         runtime.timers.markDone(t.id)
                                         runtime.mesh.sendTimer(from: runtime.mesh.localID, task: t.task, done: true)
                                     }
                                     .buttonStyle(HUDOverlayChipStyle())
                                 }
+                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                             }
                             ForEach(runtime.timers.doneLines(), id: \.self) { line in
-                                Text(line).font(.caption).foregroundStyle(Color(white: 0.7))
+                                Text(line)
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(Color(white: 0.7))
                             }
                             ForEach(runtime.mesh.inboundTimers) { ev in
                                 Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
-                                    .font(.caption)
+                                    .font(.caption.weight(.bold))
                                     .foregroundStyle(Theme.warn)
                             }
                             TimelineView(.periodic(from: .now, by: 1)) { context in
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: 6) {
                                     ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
-                                        Text("\(L10n.t("overdue", runtime.locale)) \(t.task)")
-                                            .foregroundStyle(Theme.warn)
+                                        overdueRow(t)
                                     }
                                 }
                             }
                         }
                     }
+
+                    sectionLabel("PAPER")
                     Button("EXPORT PAPER") {
                         let text = PaperGen.export(trip: runtime.trip, roster: runtime.roster, packName: runtime.packs?.active?.name ?? "")
                         runtime.box.log("paper", text)
@@ -104,15 +125,131 @@ struct ExpeditionTab: View {
                     .buttonStyle(HUDActionStyle(filled: false))
                 }
             }
-            .tint(Theme.accent)
         }
     }
 
-    private func slider(_ title: String, _ value: Binding<Double>) -> some View {
-        VStack(alignment: .leading) {
-            Text(title).foregroundStyle(Theme.silver)
-            Slider(value: value, in: 0...1)
-                .tint(Theme.accent)
+    private var statusTone: HUDStatusTone {
+        if runtime.red.isRed || runtime.mesh.lastRedOn == true {
+            return .crisis
         }
+        switch runtime.vitals.band {
+        case .green: return .silver
+        case .yellow: return .warn
+        case .red: return .crisis
+        }
+    }
+
+    private var redPlate: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(Theme.accent)
+                .frame(width: 10, height: 10)
+            Text(L10n.t("red.plate", runtime.locale))
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(Theme.accent)
+            Spacer(minLength: 8)
+            Button(L10n.t("red.cancel", runtime.locale)) {
+                runtime.cancelSelfRed()
+            }
+            .buttonStyle(HUDOverlayChipStyle())
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Theme.accent.opacity(0.16))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Theme.accent, lineWidth: 1.5)
+        )
+    }
+
+    private func overdueRow(_ t: PartyTimer) -> some View {
+        Text("\(L10n.t("overdue", runtime.locale)) \(t.task)")
+            .font(.system(size: 13, weight: .heavy))
+            .foregroundStyle(Theme.warn)
+            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+            .padding(.horizontal, 12)
+            .background(Theme.warn.opacity(0.16))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Theme.warn, lineWidth: 1)
+            )
+    }
+
+    private func sectionLabel(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 11, weight: .heavy))
+            .foregroundStyle(Color(white: 0.5))
+    }
+
+    private func slider(_ title: String, _ value: Binding<Double>) -> some View {
+        HUDVitalsRail(title: title, value: value)
+    }
+}
+
+/// 44pt metal rail. Five ticks aligned to PartyVitals band math. Not a system Slider.
+struct HUDVitalsRail: View {
+    let title: String
+    @Binding var value: Double
+
+    var body: some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+            GeometryReader { geo in
+                let width = geo.size.width
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Theme.raised)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(ink.opacity(0.88))
+                        .frame(width: max(0, width * CGFloat(value)))
+                    ForEach(Array(PartyVitals.railSteps.enumerated()), id: \.offset) { _, step in
+                        if step > 0 && step < 1 {
+                            Rectangle()
+                                .fill(Theme.silver.opacity(0.4))
+                                .frame(width: 1, height: hit * 0.5)
+                                .offset(x: width * CGFloat(step))
+                        }
+                    }
+                }
+                .frame(height: hit)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                )
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0).onChanged { gesture in
+                        guard width > 0 else { return }
+                        value = PartyVitals.snap(gesture.location.x / width)
+                    }
+                )
+            }
+            .frame(height: hit)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value.formatted(.number.precision(.fractionLength(2))))
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment:
+                value = PartyVitals.step(value, 1)
+            case .decrement:
+                value = PartyVitals.step(value, -1)
+            @unknown default:
+                break
+            }
+        }
+    }
+
+    private var ink: Color {
+        if value >= PartyVitals.redAt { return Theme.accent }
+        if value >= PartyVitals.yellowAt { return Theme.warn }
+        return Theme.silver
     }
 }

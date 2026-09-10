@@ -96,23 +96,38 @@ struct HUDOverlayChipStyle: ButtonStyle {
     }
 }
 
+/// Status ink on a HUD page. Silver is idle, warn is overdue / off-net, crisis is RED.
+enum HUDStatusTone: Sendable {
+    case silver
+    case warn
+    case crisis
+
+    var ink: Color {
+        switch self {
+        case .silver: return Theme.silver
+        case .warn: return Theme.warn
+        case .crisis: return Theme.accent
+        }
+    }
+}
+
 /// Glass page over the still-mounted map. COMMS / FIELD / EXPEDITION speak
 /// this language so they are not a form dump next to a HUD.
 struct HUDPage<Content: View>: View {
     let title: String
     var status: String = ""
-    var warn: Bool = false
+    var statusTone: HUDStatusTone = .silver
     var content: Content
 
     init(
         title: String,
         status: String = "",
-        warn: Bool = false,
+        statusTone: HUDStatusTone = .silver,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.status = status
-        self.warn = warn
+        self.statusTone = statusTone
         self.content = content()
     }
 
@@ -127,7 +142,7 @@ struct HUDPage<Content: View>: View {
                 if !status.isEmpty {
                     Text(status)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(warn ? Theme.warn : Theme.silver)
+                        .foregroundStyle(statusTone.ink)
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
                 }

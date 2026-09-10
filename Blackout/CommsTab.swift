@@ -10,7 +10,7 @@ struct CommsTab: View {
         HUDPage(
             title: "COMMS",
             status: runtime.mesh.chromeNet,
-            warn: !runtime.mesh.joined
+            statusTone: runtime.mesh.joined ? .silver : .warn
         ) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {

@@ -13,4 +13,15 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(axes.band, .red)
         XCTAssertEqual(PartyVitals(hunger: 0.5, thirst: 0.1, pain: 0.1, water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .yellow)
     }
+
+    func testRailSnapsToBandTicks() {
+        XCTAssertEqual(PartyVitals.yellowAt, 0.45)
+        XCTAssertEqual(PartyVitals.redAt, 0.8)
+        XCTAssertEqual(PartyVitals.railSteps, [0, 0.2, 0.45, 0.8, 1.0])
+        XCTAssertEqual(PartyVitals.snap(0.1), 0.2)
+        XCTAssertEqual(PartyVitals.snap(0.625), 0.8)
+        XCTAssertEqual(PartyVitals.step(0.2, 1), 0.45)
+        XCTAssertEqual(PartyVitals.step(0.2, -1), 0.0)
+        XCTAssertEqual(PartyVitals.step(1.0, 1), 1.0)
+    }
 }
