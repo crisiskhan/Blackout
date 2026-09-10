@@ -112,6 +112,7 @@ struct MapTab: View {
         VStack(spacing: 8) {
             topBar
             if !hits.isEmpty { hitList }
+            if hits.isEmpty { markList }
             Spacer(minLength: 0)
             fieldChrome
                 .allowsHitTesting(false)
@@ -163,12 +164,35 @@ struct MapTab: View {
                 }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Theme.silver)
-                .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                 .padding(.horizontal, 12)
             }
         }
         .background(Theme.glass())
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private var markList: some View {
+        let rows = Array(runtime.marks.suffix(BlackoutTokens.Chrome.mapSearchHitCap).reversed())
+        return Group {
+            if !rows.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(rows) { m in
+                        Button(m.label) {
+                            runtime.pickDestination(lat: m.lat, lon: m.lon)
+                        }
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                        .padding(.horizontal, 12)
+                    }
+                }
+                .background(Theme.glass())
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
     }
 
     /// Up to three short deduped lines, printed where the thumb already is.
@@ -295,10 +319,7 @@ struct MapTab: View {
             }
             Spacer()
             Button("FIT PACK") { runtime.fitPack() }
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(Theme.silver)
-                .frame(minWidth: 72, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                .contentShape(Rectangle())
+                .buttonStyle(HUDOverlayChipStyle())
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 2)

@@ -85,7 +85,7 @@ struct IAMOKBar: View {
                 .font(.system(size: 11, weight: .heavy))
                 .foregroundStyle(Theme.silver)
                 .padding(.horizontal, 12)
-                .frame(minHeight: 36)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 .background(Theme.glass())
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .overlay(

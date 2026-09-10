@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import CoreLocation
 import UIKit
+import AVFoundation
 import BlackBox
 import PackIO
 import MapLibreMap
@@ -395,6 +396,27 @@ final class AppRuntime {
 
     func endPTTSolo() {
         ptt.endLive()
+    }
+
+    func tapTorch() {
+        instruments.torchTap()
+        applyTorch(level: instruments.state.torchClicks)
+    }
+
+    private func applyTorch(level: Int) {
+        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
+        do {
+            try device.lockForConfiguration()
+            if level == 0 {
+                device.torchMode = .off
+            } else if device.isTorchModeSupported(.on) {
+                let fraction = Float(level) / 3.0
+                try device.setTorchModeOn(level: max(0.1, min(1, fraction)))
+            }
+            device.unlockForConfiguration()
+        } catch {
+            box.log("torch", "lamp failed")
+        }
     }
 
     func applySelfRed() {

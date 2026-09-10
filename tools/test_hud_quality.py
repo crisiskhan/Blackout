@@ -464,5 +464,106 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertNotIn("Exposure sliders change CONDITION", qa)
 
 
+class FieldInstrumentTests(unittest.TestCase):
+    """FIELD is the book, not a title list with a STOP-IF caption."""
+
+    def test_open_card_is_the_whole_instrument(self):
+        field = read("Blackout", "FieldTab.swift")
+        speech = read("Packages", "FieldSpeech", "Sources", "FieldSpeech", "FieldSpeech.swift")
+        self.assertIn("s.card.stop_if", field)
+        self.assertIn("s.card.situation", field)
+        self.assertIn("get_to_care", field)
+        self.assertIn("s.step.why", field)
+        self.assertIn("s.step.stop", field)
+        self.assertIn("tickSeconds", field)
+        self.assertIn('L10n.t("stop.if"', field)
+        self.assertIn('Button("ALL CARDS")', field)
+        self.assertIn('Button("SPEAK")', field)
+        self.assertIn('Button("SEND TO PARTY")', field)
+        self.assertIn('L10n.t("vision.none"', field)
+        self.assertIn("step: s.index", field)
+        self.assertIn("step: Int", speech)
+        self.assertIn("ForEach(cards)", field)
+
+    def test_solo_qa_scores_stop_if_and_step_speak(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("STOP-IF", qa)
+        self.assertIn("open step", qa.lower())
+
+
+class CommsInstrumentTests(unittest.TestCase):
+    """Party chips that already exist in L10n belong on the rail."""
+
+    def test_party_chip_rail_is_complete(self):
+        comms = read("Blackout", "CommsTab.swift")
+        state = read("Packages", "CommsUI", "Sources", "CommsUI", "CommsUI.swift")
+        self.assertIn('L10n.t("form.up"', comms)
+        self.assertIn('L10n.t("lost.kid"', comms)
+        self.assertIn('L10n.t("chip.wait"', comms)
+        self.assertIn('L10n.t("chip.water"', comms)
+        self.assertIn('L10n.t("chip.rally"', comms)
+        self.assertIn('L10n.t("chip.down"', comms)
+        self.assertIn("func wait()", state)
+        self.assertIn("func water()", state)
+        self.assertIn("HOLD PTT", comms)
+        self.assertIn("JOIN LOCAL NET", comms)
+        self.assertNotIn("Whisper <10 m", comms)
+
+    def test_solo_qa_scores_form_up_and_lost_kid(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("FORM UP", qa)
+        self.assertIn("LOST KID", qa)
+
+
+class InstrumentsSunTorchTests(unittest.TestCase):
+    """BODY and SUN are instruments, not a settings dump."""
+
+    def test_sun_and_torch_are_on_the_sheet(self):
+        inst = read("Blackout", "InstrumentsView.swift")
+        runtime = read("Blackout", "AppRuntime.swift")
+        almanac = read("Packages", "Almanac", "Sources", "Almanac", "Almanac.swift")
+        self.assertIn("Almanac.sun", inst)
+        self.assertIn("RISE", inst)
+        self.assertIn("SET", inst)
+        self.assertIn('Button("Torch 3×")', inst)
+        self.assertIn("tapTorch()", inst)
+        self.assertIn("func tapTorch()", runtime)
+        self.assertIn("setTorchModeOn", runtime)
+        self.assertIn("func clock(", almanac)
+        self.assertNotIn("Screen buffer OFF default", inst)
+
+    def test_solo_qa_scores_sun_and_torch(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("RISE", qa)
+        self.assertIn("Torch 3×", qa)
+
+
+class MapMarksGlassTests(unittest.TestCase):
+    """Persisted marks are a DEST list on the canvas, 44pt, no scroll."""
+
+    def test_marks_and_hits_are_44pt(self):
+        tab = read("Blackout", "MapTab.swift")
+        sos = read("Blackout", "SOSHold.swift")
+        self.assertIn("runtime.marks", tab)
+        self.assertIn("pickDestination(lat: m.lat, lon: m.lon)", tab)
+        self.assertIn("mapChipHitPoints", tab)
+        self.assertNotIn("minHeight: 36", tab)
+        self.assertIn('Button("FIT PACK")', tab)
+        self.assertIn("HUDOverlayChipStyle()", tab)
+        self.assertIn("mapChipHitPoints", sos)
+
+
+class ExpeditionKitPaperTests(unittest.TestCase):
+    def test_kit_trip_and_paper_are_on_glass(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn('sectionLabel("KIT")', exped)
+        self.assertIn('sectionLabel("TRIP")', exped)
+        self.assertIn("runtime.kit", exped)
+        self.assertIn("runtime.trip.brief", exped)
+        self.assertIn('Button("EXPORT PAPER")', exped)
+        self.assertIn("paperText", exped)
+        self.assertIn("PaperGen.export", exped)
+
+
 if __name__ == "__main__":
     unittest.main()

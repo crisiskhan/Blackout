@@ -1,6 +1,7 @@
 import SwiftUI
 import BatteryAuction
 import Tokens
+import Almanac
 
 struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
@@ -61,8 +62,20 @@ struct InstrumentsView: View {
                             .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
                     )
 
+                    sectionLabel("SUN")
+                    sunPlate
+
                     sectionLabel("BODY")
-                    hudButton("Torch 3×") { runtime.instruments.torchTap() }
+                    Button("Torch 3×") { runtime.tapTorch() }
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .background(Theme.raised)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    Text(torchWord)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Color(white: 0.45) : Theme.accent)
                     hudButton("Compass cal") { runtime.instruments.calibrateCompass() }
                     hudButton("True north") { runtime.instruments.setTrueNorth() }
                     hudToggle("USB-C PTT present", Binding(
@@ -87,9 +100,6 @@ struct InstrumentsView: View {
                         set: { runtime.power.setPocket($0) }
                     ))
                     Text("Hot-spare \(runtime.power.hotSparePayload())")
-                        .font(.caption)
-                        .foregroundStyle(Color(white: 0.55))
-                    Text("Screen buffer OFF default: \(!runtime.power.state.screenBuffer)")
                         .font(.caption)
                         .foregroundStyle(Color(white: 0.55))
 
@@ -117,6 +127,39 @@ struct InstrumentsView: View {
         .padding(.horizontal, 16)
         .padding(.top, 16)
         .padding(.bottom, 8)
+    }
+
+    private var torchWord: String {
+        let n = runtime.instruments.state.torchClicks
+        return n == 0 ? "OFF" : "\(n)"
+    }
+
+    @ViewBuilder
+    private var sunPlate: some View {
+        if let pack = runtime.packs?.active {
+            let day = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+            let sun = Almanac.sun(lat: pack.center.lat, lon: pack.center.lon, dayOfYear: day)
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("RISE \(Almanac.clock(sun.sunriseHour))")
+                        Spacer()
+                        Text("SET \(Almanac.clock(sun.sunsetHour))")
+                    }
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    if Almanac.shadePreferSummer(month: Calendar.current.component(.month, from: Date())) {
+                        Text("SHADE")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.warn)
+                    }
+                }
+            }
+        } else {
+            Text("Packs missing from bundle — honest empty.")
+                .font(.caption)
+                .foregroundStyle(Color(white: 0.5))
+        }
     }
 
     private func sectionLabel(_ title: String) -> some View {

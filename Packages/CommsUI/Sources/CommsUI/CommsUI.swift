@@ -29,6 +29,8 @@ public struct CommsState: Sendable {
     public var whisperOK: Bool { whisperMeters < 10 }
     public mutating func formUp() { chips.append(.formUp) }
     public mutating func lostKid() { chips.append(.lostKid) }
+    public mutating func wait() { chips.append(.wait) }
+    public mutating func water() { chips.append(.water) }
     public mutating func rally() { chips.append(.rally) }
     public mutating func down() { chips.append(.down) }
     public mutating func sos() { chips.append(.sos) }

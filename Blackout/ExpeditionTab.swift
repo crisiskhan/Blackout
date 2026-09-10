@@ -6,6 +6,7 @@ import Tokens
 
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
+    @State private var paperText = ""
 
     var body: some View {
         HUDPage(
@@ -117,12 +118,71 @@ struct ExpeditionTab: View {
                         }
                     }
 
+                    sectionLabel("KIT")
+                    HUDGlassCard {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(runtime.kit.items) { item in
+                                Button {
+                                    if item.working {
+                                        runtime.kit.markFailed(item.id, hazard: item.failureHazard ?? "FAILED")
+                                    } else {
+                                        runtime.kit.setWorking(item.id, working: true)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(item.name.uppercased())
+                                            .foregroundStyle(Theme.silver)
+                                        Spacer()
+                                        Text(item.working ? "OK" : "FAILED")
+                                            .foregroundStyle(item.working ? Theme.accent : Theme.warn)
+                                    }
+                                }
+                                .font(.system(size: 13, weight: .heavy))
+                                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                            }
+                            ForEach(runtime.kit.hazards, id: \.self) { hazard in
+                                Text(hazard.uppercased())
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(Theme.warn)
+                            }
+                        }
+                    }
+
+                    sectionLabel("TRIP")
+                    HUDGlassCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            TextField("BRIEF", text: Binding(
+                                get: { runtime.trip.brief },
+                                set: { runtime.trip.brief = $0 }
+                            ))
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.silver)
+                            .padding(.horizontal, 10)
+                            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                            .background(Theme.raised)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            Text("DUE \(dueClock)")
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(runtime.trip.overdue() ? Theme.warn : Theme.silver)
+                        }
+                    }
+
                     sectionLabel("PAPER")
                     Button("EXPORT PAPER") {
                         let text = PaperGen.export(trip: runtime.trip, roster: runtime.roster, packName: runtime.packs?.active?.name ?? "")
+                        paperText = text
                         runtime.box.log("paper", text)
                     }
                     .buttonStyle(HUDActionStyle(filled: false))
+                    if !paperText.isEmpty {
+                        HUDGlassCard {
+                            Text(paperText)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
             }
         }
@@ -181,6 +241,10 @@ struct ExpeditionTab: View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
             .foregroundStyle(Color(white: 0.5))
+    }
+
+    private var dueClock: String {
+        runtime.trip.dueBack.formatted(date: .abbreviated, time: .shortened)
     }
 
     private func slider(_ title: String, _ value: Binding<Double>) -> some View {

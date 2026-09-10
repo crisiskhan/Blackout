@@ -25,7 +25,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INSTRUMENTS + LOCK-ON overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
 - [ ] PASS / FAIL / N/A — MAP thumb dock: MARK / WALK / DRIVE / SPEAK are equal-width 44pt cells (never disabled). INSTRUMENTS and LOCK-ON sit under search as whole words (they wrap; they never become `INST` or `INSTRUME…`). RULER / USNG / MAG/TRUE live in INSTRUMENTS, not on the canvas. Other MapTool leftovers are not on MAP.
 - [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit). Hits cap at five — no scroll on MAP.
-- [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Kill app and relaunch: the same mark is still listed.
+- [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Marks sit as 44pt glass rows on MAP (tap one to set DEST). Kill app and relaunch: the same mark is still listed.
 - [ ] PASS / FAIL / N/A — LOCK-ON: if GPS or pack `graph.json` is usable, control shows `LOCKED` and no fake route is drawn. If both GPS and graph are missing, chrome `OFF GRAPH`. `BEARING <deg>°` only appears when there is somewhere to walk (a destination, a drawn route, or LOCK-ON). Idle heading with no dest is quiet. If heading is denied, bearing stays empty (no invented course).
 - [ ] PASS / FAIL / N/A — WALK / DRIVE: tap the map, a search hit, or a MARK row to set `DEST`. Then WALK or DRIVE. If the TX WEST graph has a path, a cyan route line follows the streets (not bearing-only chrome). If the graph is missing/empty or there is no path, chrome `OFF GRAPH` and no fake street-following line.
 - [ ] PASS / FAIL / N/A — SPEAK chip stays visible. After DEST + WALK, SPEAK **speaks** the whole turn-by-turn out loud (Walk / Turn / Arrive) while the cyan route line stays on the map. Score the voice and the line, not text on the canvas. Volume up, silent switch off.
@@ -40,6 +40,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 - [ ] PASS / FAIL / N/A — Chrome starts `NET · NONE` (not `NET · MPC` / `NET · BLE` with nobody connected).
 - [ ] PASS / FAIL / N/A — RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
+- [ ] PASS / FAIL / N/A — FORM UP / LOST KID / WAIT / WATER chips log locally the same way. Whole words on the rail.
 - [ ] PASS / FAIL / N/A — HOLD PTT: chrome `NO PEERS · LOGGED`. Button stays `HOLD PTT` / `RELEASE PTT` — does not claim sent.
 - [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only (64pt, pulsing while held, visible SOS). Browse MAP (lock-on on or off) has no SOS FAB. After hold: mesh chip + RED + POS (`SOS · MESH` plate), not a caption. I AM OK clears it.
 - [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar.
@@ -48,8 +49,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## FIELD
 
-- [ ] PASS / FAIL / N/A — Open a card. NEXT advances the step.
-- [ ] PASS / FAIL / N/A — SPEAK speaks the card, **or** chrome `SPEECH FAILED`.
+- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list.
+- [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS. `NO VISION MODEL` stays (no percent, no hash-to-label ID). No CoreML lecture under it.
 
@@ -59,11 +60,12 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows the HUD RED plate (`RED`, not a system title). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
+- [ ] PASS / FAIL / N/A — KIT plates toggle OK / FAILED and show the hazard. TRIP brief is on the glass. EXPORT PAPER shows the paper on the glass (still logs).
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.
 
 ## INSTRUMENTS
 
-- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
+- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). Torch 3× cycles OFF / 1 / 2 / 3 and drives the lamp. SUN shows RISE / SET for the open pack (offline almanac, not weather). Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
 - [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. Left-hand and night-red live here, not on boot.
 
 ## Kill-and-relaunch

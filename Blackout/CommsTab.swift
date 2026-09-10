@@ -32,6 +32,22 @@ struct CommsTab: View {
                             runtime.comms.down()
                             runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.down.rawValue)
                         }
+                        chip(L10n.t("form.up", runtime.locale)) {
+                            runtime.comms.formUp()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.formUp.rawValue)
+                        }
+                        chip(L10n.t("lost.kid", runtime.locale)) {
+                            runtime.comms.lostKid()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.lostKid.rawValue)
+                        }
+                        chip(L10n.t("chip.wait", runtime.locale)) {
+                            runtime.comms.wait()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.wait.rawValue)
+                        }
+                        chip(L10n.t("chip.water", runtime.locale)) {
+                            runtime.comms.water()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.water.rawValue)
+                        }
                         if runtime.mesh.joined {
                             chip(L10n.t("ok.chip", runtime.locale)) {
                                 runtime.iamOK()
@@ -105,7 +121,7 @@ struct CommsTab: View {
     private var log: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(runtime.comms.chips, id: \.self) { c in
-                Text(c.rawValue.uppercased())
+                Text(chipWord(c))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(c == .sos ? Theme.accent : Theme.silver)
             }
@@ -147,5 +163,19 @@ struct CommsTab: View {
     private func chip(_ title: String, action: @escaping () -> Void) -> some View {
         Button(title, action: action)
             .buttonStyle(HUDOverlayChipStyle())
+    }
+
+    private func chipWord(_ c: Chip) -> String {
+        switch c {
+        case .ok: return L10n.t("ok.chip", runtime.locale)
+        case .formUp: return L10n.t("form.up", runtime.locale)
+        case .wait: return L10n.t("chip.wait", runtime.locale)
+        case .water: return L10n.t("chip.water", runtime.locale)
+        case .lostKid: return L10n.t("lost.kid", runtime.locale)
+        case .overdue: return L10n.t("overdue", runtime.locale)
+        case .rally: return L10n.t("chip.rally", runtime.locale)
+        case .down: return L10n.t("chip.down", runtime.locale)
+        case .sos: return L10n.t("sos.mesh", runtime.locale)
+        }
     }
 }

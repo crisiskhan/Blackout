@@ -24,4 +24,10 @@ public struct KitBag: Equatable, Sendable {
             items[i].failureHazard = hazard
         }
     }
+
+    public mutating func setWorking(_ id: String, working: Bool) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            items[i].working = working
+        }
+    }
 }
