@@ -609,10 +609,15 @@ final class AppRuntime {
     }
 
     private func destinationOnPack(_ dest: (lat: Double, lon: Double)?) -> Bool {
-        guard let dest, let pack = packs?.active else { return false }
+        guard let dest else { return false }
+        return coordinateOnPack(lat: dest.lat, lon: dest.lon)
+    }
+
+    private func coordinateOnPack(lat: Double, lon: Double) -> Bool {
+        guard let pack = packs?.active else { return false }
         return UserPuck.contains(
-            lat: dest.lat,
-            lon: dest.lon,
+            lat: lat,
+            lon: lon,
             south: pack.bbox.south,
             west: pack.bbox.west,
             north: pack.bbox.north,
@@ -622,13 +627,18 @@ final class AppRuntime {
 
     private func relabelMarksForActivePack() {
         guard let pack = packs?.active else { return }
-        let bbox = (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
+        let names = packs?.catalog.packs.map(\.name) ?? []
         marks = marks.map { m in
             MapMark(
                 id: m.id,
                 lat: m.lat,
                 lon: m.lon,
-                label: PackChrome.markLabel(lat: m.lat, lon: m.lon, packName: pack.name, bbox: bbox)
+                label: MarkLabel.relabel(
+                    existing: m.label,
+                    packName: pack.name,
+                    packNames: names,
+                    offPack: !coordinateOnPack(lat: m.lat, lon: m.lon)
+                )
             )
         }
         MarkStore.save(marks)

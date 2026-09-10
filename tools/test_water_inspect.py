@@ -382,6 +382,8 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("OSMCredit.line", MAP_TAB.read_text())
         self.assertIn("func resolve(", INSPECT.read_text() + SWIFT.read_text())
         self.assertIn("WaterIndex", (ROOT / "Blackout/AppRuntime.swift").read_text())
+        self.assertIn("enum MarkLabel", MAP_SWIFT.read_text())
+        self.assertIn("MarkLabel.relabel", (ROOT / "Blackout/AppRuntime.swift").read_text())
 
 
 if __name__ == "__main__":

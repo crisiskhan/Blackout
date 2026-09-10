@@ -80,6 +80,45 @@ public enum MarkDrop {
     }
 }
 
+/// What a mark's label is made of.
+///
+/// A mark used to be labelled with the pack it was dropped in, and every read
+/// off disk rewrote all of them so the OFF PACK flag stayed truthful. Once a
+/// press can mark a named acequia, that rewrite would throw the name away, so
+/// the label is now a subject plus an optional flag and only the flag moves.
+public enum MarkLabel {
+    public static let separator = " · "
+    public static var offPackSuffix: String { separator + PackChrome.offPack }
+
+    /// What the mark is of, with the pack flag taken off.
+    public static func subject(of label: String) -> String {
+        guard label.hasSuffix(offPackSuffix) else { return label }
+        return String(label.dropLast(offPackSuffix.count))
+    }
+
+    public static func flagged(subject: String, offPack: Bool) -> String {
+        offPack ? subject + offPackSuffix : subject
+    }
+
+    /// Re-flag a mark for the pack it is being read under.
+    ///
+    /// A subject that is only a pack name describes nothing, so it keeps
+    /// following the pack exactly as it always has. Anything else is what the
+    /// mark was of, and only its flag moves.
+    public static func relabel(
+        existing: String,
+        packName: String,
+        packNames: [String],
+        offPack: Bool
+    ) -> String {
+        let was = subject(of: existing)
+        if was.isEmpty || was == PackChrome.offPack || packNames.contains(was) {
+            return offPack ? PackChrome.offPack : packName
+        }
+        return flagged(subject: was, offPack: offPack)
+    }
+}
+
 public enum PackChrome {
     public static let offPack = "OFF PACK"
 
