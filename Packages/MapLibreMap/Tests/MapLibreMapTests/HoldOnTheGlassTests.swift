@@ -22,14 +22,16 @@ import XCTest
 /// `Resources/Packs/tx-west/osm.geojson`.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
-    /// A `content=water` storage tank west of the pass. The record says what is
-    /// in it, so the card is allowed to say water.
-    private static let waterTank = CLLocationCoordinate2D(latitude: 31.78359, longitude: -106.70104)
+    /// `representative_point` of a `content=water` storage tank 3.8 km west of
+    /// home, taken from `osm.geojson` — the same point the tiler wrote into
+    /// the archive. Do not reverse-project decoded tile pixels: the Python
+    /// decoder flips Y and the first coordinates were 1.7 km off, which is
+    /// why CI held empty ground and said the probe found nothing.
+    private static let waterTank = CLLocationCoordinate2D(latitude: 31.792096, longitude: -106.497210)
 
-    /// A storage tank carrying no `content` at all, which is what most tanks
-    /// out here are. There is a service road 35 tile units off, so this one
-    /// also checks that water outranks the street beside it.
-    private static let silentTank = CLLocationCoordinate2D(latitude: 31.92497, longitude: -106.76375)
+    /// A storage tank 500 m from home with no `content` at all. Most tanks
+    /// out here are this one, and the card has to say so.
+    private static let silentTank = CLLocationCoordinate2D(latitude: 31.775803, longitude: -106.462400)
 
     /// Unnamed desert on the north-west edge of the pack, with nothing else
     /// mapped within twice the probe box. This is the empty-ground hold.
@@ -128,10 +130,19 @@ final class HoldOnTheGlassTests: XCTestCase {
             at: centre,
             zoom: zoom,
             read: { view in
-                OfflineMapView.Coordinator().record(
+                let tags = OfflineMapView.Coordinator().record(
                     under: CGPoint(x: view.bounds.midX, y: view.bounds.midY),
                     on: view
                 )
+                if tags.isEmpty {
+                    let source = view.style?.source(withIdentifier: Inspect.packSourceID) as? MLNVectorTileSource
+                    let loaded = source?.features(
+                        sourceLayerIdentifiers: Inspect.packPointSourceLayers,
+                        predicate: nil
+                    ).count ?? -1
+                    print("HOLD-EMPTY \(centre.latitude),\(centre.longitude) sourcePoints=\(loaded)")
+                }
+                return tags
             },
             fallback: [:]
         )

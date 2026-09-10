@@ -1216,7 +1216,10 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 ],
                 "paint": {
                     "circle-color": "#142430",
-                    "circle-opacity": 0,
+                    # Zero opacity is treated as not drawn, so visibleFeatures
+                    # skips it. One percent is enough for the query and not
+                    # enough for a thumb to see a second ring.
+                    "circle-opacity": 0.01,
                     "circle-radius": 22,
                     "circle-stroke-width": 0,
                 },

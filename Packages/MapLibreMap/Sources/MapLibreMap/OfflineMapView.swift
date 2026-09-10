@@ -232,13 +232,32 @@ public struct OfflineMapView: UIViewRepresentable {
         ) -> [MLNFeature] {
             guard let source = style.source(withIdentifier: Inspect.packSourceID) as? MLNVectorTileSource
             else { return [] }
-            let bounds = view.convert(box, toCoordinateBoundsFrom: view)
+            // `convert(_:toCoordinateBoundsFrom:)` has been seen to hand back
+            // a north-west / south-east pair. The inline bounds test wants
+            // south-west / north-east, and an inverted box drops every point.
+            // The four corners, then min/max, cannot invert.
+            let corners = [
+                CGPoint(x: box.minX, y: box.minY),
+                CGPoint(x: box.maxX, y: box.minY),
+                CGPoint(x: box.minX, y: box.maxY),
+                CGPoint(x: box.maxX, y: box.maxY),
+            ].map { view.convert($0, toCoordinateFrom: view) }
+            let south = corners.map(\.latitude).min() ?? 0
+            let north = corners.map(\.latitude).max() ?? 0
+            let west = corners.map(\.longitude).min() ?? 0
+            let east = corners.map(\.longitude).max() ?? 0
+            let bounds = MLNCoordinateBounds(
+                sw: CLLocationCoordinate2D(latitude: south, longitude: west),
+                ne: CLLocationCoordinate2D(latitude: north, longitude: east)
+            )
             return source
                 .features(sourceLayerIdentifiers: Inspect.packPointSourceLayers, predicate: nil)
                 .filter { feature in
-                    guard let klass = feature.attributes["class"] as? String,
-                          Inspect.packPointClasses.contains(klass)
-                    else { return false }
+                    let tags = Self.tags(from: feature)
+                    let isPoint = Inspect.packPointClasses.contains(tags["class"] ?? "")
+                        || ["storage_tank", "water_tank", "water_well", "cistern", "reservoir_covered"]
+                        .contains(tags["man_made"] ?? "")
+                    guard isPoint else { return false }
                     return MLNCoordinateInCoordinateBounds(feature.coordinate, bounds)
                 }
         }

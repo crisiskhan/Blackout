@@ -316,7 +316,7 @@
       ],
       "paint": {
         "circle-color": "#142430",
-        "circle-opacity": 0,
+        "circle-opacity": 0.01,
         "circle-radius": 22,
         "circle-stroke-width": 0
       },
