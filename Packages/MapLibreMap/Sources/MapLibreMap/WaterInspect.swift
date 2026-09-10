@@ -438,6 +438,20 @@ public enum InspectField {
     public static let water = "water-disinfect"
     public static let land = "nav-lost"
 
+    public enum Procedure: Sendable, Equatable {
+        case water
+        case plant
+        case bite
+        case cave
+        case shelter
+        case lost
+        case heat
+        case cold
+        case fungi
+        case food
+        case field
+    }
+
     public static func cardID(for subject: InspectSubject) -> String {
         switch subject {
         case .water: return water
@@ -445,14 +459,82 @@ public enum InspectField {
         }
     }
 
+    public static func procedure(for cardID: String) -> Procedure {
+        switch cardID {
+        case water:
+            return .water
+        case Inspect.plantCard, Inspect.plantTXCard, Inspect.plantNMCard, Inspect.plantUseCard:
+            return .plant
+        case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.biteCard:
+            return .bite
+        case Inspect.caveCard:
+            return .cave
+        case Inspect.shelterCard:
+            return .shelter
+        case land:
+            return .lost
+        case Inspect.heatCard, Inspect.heatIslandCard:
+            return .heat
+        case Inspect.coldCard, Inspect.iceRockCard:
+            return .cold
+        case Inspect.fungiCard:
+            return .fungi
+        case Inspect.gameCard, "food-cook":
+            return .food
+        default:
+            return .field
+        }
+    }
+
     /// What the button says. Naming the procedure means the handoff is visible
     /// before it is taken rather than after.
     public static func label(for cardID: String) -> String {
-        switch cardID {
-        case water: return "FIELD · WATER"
-        case land: return "FIELD · LOST"
-        default: return "FIELD"
+        switch procedure(for: cardID) {
+        case .water: return "FIELD · WATER"
+        case .plant: return "FIELD · PLANT"
+        case .bite: return "FIELD · BITE"
+        case .cave: return "FIELD · CAVE"
+        case .shelter: return "FIELD · SHELTER"
+        case .lost: return "FIELD · LOST"
+        case .heat: return "FIELD · HEAT"
+        case .cold: return "FIELD · COLD"
+        case .fungi: return "FIELD · FUNGI"
+        case .food: return "FIELD · FOOD"
+        case .field: return "FIELD"
         }
+    }
+
+    /// What the last step of a jumped card becomes when another card on the
+    /// hold's route is still waiting. Naming the next procedure is the same
+    /// honesty as the hold button: you see the handoff before you take it.
+    public static func nextAction(for cardID: String) -> String {
+        switch procedure(for: cardID) {
+        case .water: return "NEXT · WATER"
+        case .plant: return "NEXT · PLANT"
+        case .bite: return "NEXT · BITE"
+        case .cave: return "NEXT · CAVE"
+        case .shelter: return "NEXT · SHELTER"
+        case .lost: return "NEXT · LOST"
+        case .heat: return "NEXT · HEAT"
+        case .cold: return "NEXT · COLD"
+        case .fungi: return "NEXT · FUNGI"
+        case .food: return "NEXT · FOOD"
+        case .field: return "NEXT"
+        }
+    }
+
+    /// The hold's route, minus cards this book's load does not have.
+    /// Texas has no ice-on-rock card; New Mexico has no heat-island. The
+    /// state's own card is first when it is present, and the core cards
+    /// behind it still run.
+    public static func presentRoute(_ route: [String], in book: Set<String>) -> [String] {
+        var seen = Set<String>()
+        var out: [String] = []
+        for id in route {
+            guard book.contains(id), seen.insert(id).inserted else { continue }
+            out.append(id)
+        }
+        return out
     }
 }
 
@@ -604,22 +686,64 @@ extension Inspect {
     public static let streetWaterOverrideMeters = 15.0
 
     public static func fieldDoLine(klass: String, kind: Kind, advice: Advice) -> String? {
-        guard kind == .water else { return nil }
-        if advice == .leave { return nil }
-        if let mapped = WaterClass.fromHUDKlass(klass) {
-            return mapped.doLine
+        switch kind {
+        case .water:
+            if advice == .leave { return nil }
+            if let mapped = WaterClass.fromHUDKlass(klass) {
+                return mapped.doLine
+            }
+            switch klass {
+            case "Well":
+                return "A well is a hole. If it draws, take it. Settle, filter cloth, boil."
+            case "Cistern":
+                return "Covered storage. Dip, settle, filter cloth, boil."
+            case "Weir":
+                return WaterClass.dam.doLine
+            case "Channel":
+                return WaterClass.water.doLine
+            default:
+                return WaterClass.water.doLine
+            }
+        case .land:
+            return landDoLine(klass)
+        case .street:
+            if klass == "Track" {
+                return "A ranch road is where the grate takes an ankle. Field has the card."
+            }
+            return "A way is mapped here. Field has stop-and-locate."
+        case .place:
+            return "A named place. Stop. Field has stop-and-locate."
+        case .nothing:
+            return "Nothing is mapped here. Stop and locate before you walk."
         }
+    }
+
+    private static func landDoLine(_ klass: String) -> String {
         switch klass {
-        case "Well":
-            return "A well is a hole. If it draws, take it. Settle, filter cloth, boil."
-        case "Cistern":
-            return "Covered storage. Dip, settle, filter cloth, boil."
-        case "Weir":
-            return WaterClass.dam.doLine
-        case "Channel":
-            return WaterClass.water.doLine
+        case "Woodland":
+            return "Shade, wind, deadfall. Not a meal. Field has the plant cards."
+        case "Bosque or wetland":
+            return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant cards."
+        case "Desert scrub", "Grassland", "Sand or playa floor":
+            return "Open country. Vipers use this cover. Field has the bite card."
+        case "Cave or hole":
+            return "A hole in the record. Dark, still air, cold. Do not go in alone."
+        case "Peak":
+            return "High ground. Wind and cold. Field has the ice and cold cards."
+        case "Rock":
+            return "Bare rock. No shade. Ice films over. Field has the cold card."
+        case "Named tree", "Tree":
+            return "A surveyed tree. Shade and wood, not a meal. Field has the plant cards."
+        case "Park", "Protected land":
+            return "Kept or protected ground. Field has the plant cards."
+        case "Irrigated ground":
+            return "Worked ground. A ditch reaches it. Field has the plant cards."
+        case "Salt flat":
+            return "Open, hot, and empty. Vipers use the edge. Field has the bite card."
+        case "Built-up ground":
+            return "Pavement and little shade. Field has the heat island card."
         default:
-            return WaterClass.water.doLine
+            return Advice.field.line
         }
     }
 
@@ -697,6 +821,7 @@ extension Inspect {
             advice: painted.advice,
             fieldCardID: painted.fieldCardID,
             localCardIDs: painted.localCardIDs,
+            extraCoreIDs: painted.extraCoreIDs,
             packDate: painted.packDate,
             doDetail: painted.doDetail
         )

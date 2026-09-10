@@ -147,7 +147,9 @@ final class InspectTests: XCTestCase {
         // only ends somewhere if the last id on it is in every book.
         let core: Set<String> = [
             Inspect.waterCard, Inspect.plantCard, Inspect.heatCard,
-            Inspect.coldCard, Inspect.lostCard,
+            Inspect.coldCard, Inspect.lostCard, Inspect.plantUseCard,
+            Inspect.caveCard, Inspect.biteCard, Inspect.shelterCard,
+            Inspect.fungiCard, Inspect.gameCard,
         ]
         for tags in Self.everyKindOfThing {
             let card = Inspect.read(tags: tags)
@@ -158,6 +160,10 @@ final class InspectTests: XCTestCase {
                     core.contains(preferred),
                     "\(preferred) is a core card, so preferring it over one is a no-op"
                 )
+            }
+            for extra in card.extraCoreIDs {
+                XCTAssertTrue(core.contains(extra), "\(extra) is not a core card")
+                XCTAssertNotEqual(extra, card.fieldCardID, "\(tags) lists \(extra) twice")
             }
             XCTAssertEqual(
                 Set(card.fieldRoute).count, card.fieldRoute.count,
@@ -191,6 +197,106 @@ final class InspectTests: XCTestCase {
                 "\(tags) says treat and then opens something other than the water card"
             )
         }
+    }
+
+    func testWoodlandOpensThePacksPlantCardsBeforeUnknown() {
+        // Tree cover is not a meal. The state's plant-danger card is the one
+        // that names oleander or datura; plant-use is shade and deadfall; the
+        // unknown-plant card is last so FIELD still lands with only the core book.
+        let wood = Inspect.read(tags: ["natural": "wood"])
+        XCTAssertEqual(wood.klass, "Woodland")
+        XCTAssertEqual(
+            Array(wood.fieldRoute.prefix(2)),
+            [Inspect.plantTXCard, Inspect.plantNMCard]
+        )
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.plantUseCard))
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.shelterCard))
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.biteCard))
+        XCTAssertEqual(wood.fieldRoute.last, Inspect.plantCard)
+        XCTAssertEqual(InspectField.label(for: wood.fieldRoute[0]), "FIELD · PLANT")
+        XCTAssertFalse(wood.doLine.lowercased().contains("edible"), wood.doLine)
+    }
+
+    func testDesertScrubOpensThePacksBiteCardsBeforeHeat() {
+        // Open country is where this pack's snakes actually live. The map
+        // must not draw an animal; it must open the bite cards.
+        let scrub = Inspect.read(tags: ["natural": "scrub"])
+        XCTAssertEqual(scrub.klass, "Desert scrub")
+        XCTAssertEqual(
+            Array(scrub.fieldRoute.prefix(2)),
+            [Inspect.snakeTXCard, Inspect.snakeNMCard]
+        )
+        XCTAssertTrue(scrub.fieldRoute.contains(Inspect.biteCard))
+        XCTAssertTrue(scrub.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertTrue(scrub.fieldRoute.contains(Inspect.plantUseCard))
+        XCTAssertEqual(scrub.fieldRoute.last, Inspect.heatCard)
+        XCTAssertEqual(InspectField.label(for: scrub.fieldRoute[0]), "FIELD · BITE")
+        XCTAssertFalse(scrub.why.lowercased().contains("edible"), scrub.why)
+    }
+
+    func testACaveRecordOpensTheCaveCardAndAPeakStaysCold() {
+        let cave = Inspect.read(tags: ["natural": "cave", "name": "Hueco Tanks Cave"])
+        XCTAssertEqual(cave.klass, "Cave or hole")
+        XCTAssertEqual(cave.fieldRoute, [Inspect.caveCard])
+        XCTAssertEqual(InspectField.label(for: cave.fieldRoute[0]), "FIELD · CAVE")
+
+        let hole = Inspect.read(tags: ["natural": "sinkhole"])
+        XCTAssertEqual(hole.klass, "Cave or hole")
+        XCTAssertEqual(hole.fieldRoute.last, Inspect.caveCard)
+
+        let peak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"])
+        XCTAssertEqual(peak.klass, "Peak")
+        XCTAssertEqual(peak.fieldRoute, [Inspect.iceRockCard, Inspect.coldCard])
+        XCTAssertEqual(InspectField.label(for: peak.fieldRoute[0]), "FIELD · COLD")
+    }
+
+    func testANamedTreeIsPlantGroundNotAMeal() {
+        let tree = Inspect.read(tags: ["natural": "tree", "name": "El Paso Cottonwood"])
+        XCTAssertEqual(tree.title, "El Paso Cottonwood")
+        XCTAssertEqual(tree.klass, "Named tree")
+        XCTAssertEqual(tree.fieldRoute.last, Inspect.plantCard)
+        XCTAssertTrue(tree.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertFalse(tree.doLine.lowercased().contains("edible"), tree.doLine)
+    }
+
+    func testTheLoadedBookDropsTheOtherStatesCardAndKeepsTheCoreTrail() {
+        // A Texas pack has no New Mexico plant-danger card. The hold still
+        // named both; FIELD has to skip the missing one and keep plant-use,
+        // shelter, fungi and game so DONE can walk the rest of the ground.
+        let wood = Inspect.read(tags: ["natural": "wood"]).fieldRoute
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.plantUseCard, Inspect.biteCard,
+            Inspect.shelterCard, Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(wood, in: texas),
+            [
+                Inspect.plantTXCard, Inspect.plantUseCard, Inspect.biteCard,
+                Inspect.shelterCard, Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+            ]
+        )
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.plantUseCard), "NEXT · PLANT")
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.shelterCard), "NEXT · SHELTER")
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.fungiCard), "NEXT · FUNGI")
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.gameCard), "NEXT · FOOD")
+
+        let scrub = Inspect.read(tags: ["natural": "scrub"]).fieldRoute
+        let nm: Set<String> = [
+            Inspect.snakeNMCard, Inspect.plantNMCard, Inspect.biteCard,
+            Inspect.gameCard, Inspect.heatCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(scrub, in: nm).prefix(3).map { $0 },
+            [Inspect.snakeNMCard, Inspect.plantNMCard, Inspect.biteCard]
+        )
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.biteCard), "NEXT · BITE")
+        XCTAssertEqual(InspectField.nextAction(for: Inspect.heatCard), "NEXT · HEAT")
+
+        // Water is one card. DONE stays DONE.
+        XCTAssertEqual(
+            InspectField.presentRoute([Inspect.waterCard], in: [Inspect.waterCard]),
+            [Inspect.waterCard]
+        )
     }
 
     func testWaterOutranksEverythingElseUnderTheThumb() {
@@ -249,12 +355,43 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick(found)["name"], "Franklin Canal")
     }
 
+    func testACaveOrPeakUnderTheThumbBeatsTheStreetBesideIt() {
+        // A surveyed hole is the question. The road next to it already has
+        // its name on the canvas.
+        XCTAssertEqual(
+            Inspect.pick([
+                ["highway": "residential", "name": "Alameda Ave"],
+                ["natural": "sinkhole"],
+            ])["natural"],
+            "sinkhole"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["highway": "track", "name": "North Franklin Trail"],
+                ["natural": "peak", "name": "North Franklin"],
+            ])["natural"],
+            "peak"
+        )
+        // Water still outranks a cave. Finding water is what holding is for.
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "sinkhole"],
+                ["natural": "spring"],
+            ])["natural"],
+            "spring"
+        )
+    }
+
     func testTheHoldNamesThePointClassesTheTilerEmits() {
         XCTAssertEqual(Inspect.packSourceID, "osm")
-        XCTAssertEqual(Inspect.packPointSourceLayers, ["water"])
+        XCTAssertEqual(Inspect.packPointSourceLayers, ["water", "place"])
         XCTAssertEqual(
             Inspect.packPointClasses,
             ["spring", "well", "tank", "tank_other", "tap"]
+        )
+        XCTAssertEqual(
+            Inspect.packGroundPointNaturals,
+            ["peak", "sinkhole", "cave", "cave_entrance", "tree"]
         )
     }
 
@@ -326,6 +463,10 @@ final class InspectTests: XCTestCase {
         ["natural": "water"],
         ["natural": "water", "name": "Elephant Butte"],
         ["natural": "peak", "name": "North Franklin"],
+        ["natural": "cave", "name": "Hueco Tanks Cave"],
+        ["natural": "cave_entrance"],
+        ["natural": "sinkhole"],
+        ["natural": "tree", "name": "El Paso Cottonwood"],
         ["natural": "wood"],
         ["natural": "scrub"],
         ["natural": "heath"],

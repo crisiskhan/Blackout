@@ -127,7 +127,7 @@ def field_schema() -> None:
     else:
         ok(f"field.core {len(core['cards'])} cards categories={sorted(cats)}")
     core_ids = {c["id"] for c in core["cards"]}
-    for need_id in ("med-bleed-pack", "trauma-fracture", "env-heat-collapse", "env-cold", "water-disinfect", "nav-lost", "shelter-tarp", "sig-mirror"):
+    for need_id in ("med-bleed-pack", "trauma-fracture", "env-heat-collapse", "env-cold", "water-disinfect", "nav-lost", "shelter-tarp", "sig-mirror", "plant-use", "cave-dark", "food-game"):
         if need_id not in core_ids:
             bad(f"core missing thickness {need_id}")
         else:

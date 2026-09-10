@@ -295,6 +295,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 .filter { feature in
                     let tags = Self.tags(from: feature)
                     let isPoint = Inspect.packPointClasses.contains(tags["class"] ?? "")
+                        || Inspect.packGroundPointNaturals.contains(tags["natural"] ?? "")
                         || ["storage_tank", "water_tank", "water_well", "cistern", "reservoir_covered"]
                         .contains(tags["man_made"] ?? "")
                     guard isPoint else { return false }

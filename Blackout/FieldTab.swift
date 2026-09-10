@@ -2,6 +2,7 @@ import SwiftUI
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
+import MapLibreMap
 import Tokens
 import VisionCoreML
 
@@ -9,6 +10,7 @@ struct FieldTab: View {
     @Bindable var runtime: AppRuntime
     @State private var cards: [FieldCard] = []
     @State private var stepper: StepperState?
+    @State private var fieldTrail: [String] = []
     @State private var guess: VisionGuess?
     @State private var showVision = false
 
@@ -46,6 +48,7 @@ struct FieldTab: View {
                                                 .padding(.bottom, 4)
                                         }
                                         Button(loc(c.title)) {
+                                            fieldTrail = []
                                             stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
                                         }
                                         .font(.system(size: 15, weight: .semibold))
@@ -192,7 +195,7 @@ struct FieldTab: View {
                     .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(Color.white)
                 Spacer(minLength: 8)
-                Button("ALL CARDS") { stepper = nil }
+                Button("ALL CARDS") { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
             Text(loc(s.card.situation))
@@ -259,10 +262,13 @@ struct FieldTab: View {
 
             HStack(spacing: 8) {
                 // On the last step NEXT did nothing at all, which reads as a
-                // broken button rather than the end of the card.
-                Button(s.isLast ? "DONE" : "NEXT") {
+                // broken button rather than the end of the card. A hold that
+                // named a trail of plant / bite / use cards still has work
+                // after this one — name that procedure the same way the hold
+                // button did, then open it. ALL CARDS dumps the rest.
+                Button(stepTitle(s)) {
                     if s.isLast {
-                        stepper = nil
+                        advanceTrail()
                     } else {
                         var x = s
                         x.next()
@@ -320,16 +326,39 @@ struct FieldTab: View {
     /// The map's hold card named the cards that answer the ground it held,
     /// best first. Take the first one this state's book actually has — the
     /// heat island card only ships in Texas, the ice-on-rock card only in New
-    /// Mexico — and fall through to the core card at the end of the list.
-    /// Then clear the request, so coming back to FIELD later lands on the list
-    /// as usual.
+    /// Mexico — and keep the rest of the route as a trail so DONE can open
+    /// plant-use after plant-danger, bite after the state's snake, shelter
+    /// after the trees. ALL CARDS dumps the trail.
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
-        for id in route {
-            guard let card = cards.first(where: { $0.id == id }) else { continue }
-            stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
-            return
+        let present = InspectField.presentRoute(route, in: Set(cards.map(\.id)))
+        guard let first = present.first,
+              let card = cards.first(where: { $0.id == first })
+        else { return }
+        fieldTrail = Array(present.dropFirst())
+        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+    }
+
+    private func leaveCard() {
+        fieldTrail = []
+        stepper = nil
+    }
+
+    private func advanceTrail() {
+        while !fieldTrail.isEmpty {
+            let id = fieldTrail.removeFirst()
+            if let card = cards.first(where: { $0.id == id }) {
+                stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+                return
+            }
         }
+        stepper = nil
+    }
+
+    private func stepTitle(_ s: StepperState) -> String {
+        if !s.isLast { return "NEXT" }
+        if let id = fieldTrail.first { return InspectField.nextAction(for: id) }
+        return "DONE"
     }
 }

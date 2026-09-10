@@ -367,7 +367,13 @@ public enum PackStyle {
     public static let waterDetailSourceID = "water-detail"
     public static let waterDetailPointsLayerID = "water-detail-points"
     public static let waterDetailLabelsLayerID = "water-detail-labels"
+    public static let groundPointsLayerID = "ground-points"
+    public static let groundLabelsLayerID = "ground-labels"
     public static let waterInk = "#6E747A"
+    /// Peaks and holes live on the pack's place slice from this zoom, same as
+    /// the tiler's POI floor. Closer than that they are noise; farther they
+    /// are not in the tiles.
+    public static let groundMinZoom: Double = 13
 
     /// Streets arrive as vector tiles, which are addressed by layer. A layer on
     /// the `osm` source that does not name one draws nothing at all, silently,
@@ -379,8 +385,9 @@ public enum PackStyle {
     public static let accentInk = "#E10600"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`.
-    public static let resolverVersion = 4
+    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`
+    /// and silver ground marks for peaks, holes and named trees.
+    public static let resolverVersion = 5
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -455,6 +462,7 @@ public enum PackStyle {
         var sources = obj["sources"] as? [String: Any] ?? [:]
         var layers = obj["layers"] as? [[String: Any]] ?? []
         attachWaterLayers(&sources, &layers, packRoot: packRoot)
+        attachGroundLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
@@ -638,6 +646,38 @@ public enum PackStyle {
                     "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
                     "circle-stroke-color": silverInk,
                     "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+    }
+
+    /// Peaks, holes and named trees the extract already put on the place slice.
+    /// Silver circles, no labels, no animals. A hold reads the record; the
+    /// mark only says something is here.
+    public static func attachGroundLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot _: URL
+    ) {
+        layers.removeAll { $0["id"] as? String == groundLabelsLayerID }
+        guard sources["osm"] != nil else { return }
+        if !layers.contains(where: { $0["id"] as? String == groundPointsLayerID }) {
+            layers.append([
+                "id": groundPointsLayerID,
+                "type": "circle",
+                "source": "osm",
+                "source-layer": placeSourceLayer,
+                "minzoom": groundMinZoom,
+                "filter": [
+                    "in",
+                    ["get", "natural"],
+                    ["literal", Array(Inspect.packGroundPointNaturals).sorted()],
+                ],
+                "paint": [
+                    "circle-color": silverInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.6],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 0.9,
                 ],
             ])
         }

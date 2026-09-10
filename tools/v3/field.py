@@ -780,6 +780,90 @@ def thickness_core() -> list[dict]:
                 )
             ],
         ),
+        card(
+            "plant-use",
+            "plants",
+            "Trees and brush — use, don't eat",
+            "Árboles y matorral — úsalos, no los comas",
+            "You are in tree cover, bosque, or a park. Shade, wind, and deadfall are the uses. This is not a meal.",
+            "Estás en arbolado, bosque o parque. Sombra, viento y madera muerta. Esto no es una comida.",
+            [
+                ("You already have known food and a roof.", "Ya tienes comida conocida y techo."),
+                ("Lips, tongue, or skin are already burning — that is a medical card, not a use card.", "Labios, lengua o piel ya arden: eso es médico, no uso."),
+            ],
+            "Vision is a guess. Nothing in this app unlocks a meal. If they chewed bark or seed, get to care for vomiting, trouble breathing, or collapse.",
+            "Vision es una conjetura. Nada aquí desbloquea una comida. Si masticaron corteza o semilla, busca cuidado.",
+            [
+                step(
+                    "Use the trees: shade on the south side, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+                    "A tree is calories only after a name you already trust. Shade is the honest use today.",
+                    "Take the leaf or pod out of a child's hand. No tiny taste.",
+                    "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+                    "plant-use.png",
+                    "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores.",
+                    "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto.",
+                    "Saca la hoja o vaina de la mano del niño. Sin probadita.",
+                    "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",
+                    party={"1": "Shade and sit.", "2": "One makes shade, one fetches deadfall.", "4": "Shade / fire / water / watch the rest."},
+                )
+            ],
+        ),
+        card(
+            "cave-dark",
+            "environment",
+            "Cave or hole — do not go in alone",
+            "Cueva o hueco — no entres solo",
+            "A hole, sink, or cave mouth is in the record. Air, dark, and cold. Not a tour.",
+            "Hay un hueco, dolina o boca de cueva en el registro. Aire, oscuridad y frío. No es un tour.",
+            [
+                ("You can stay in daylight and the party knows where you are.", "Puedes quedarte a la luz y el grupo sabe dónde estás."),
+                ("Someone is already inside and not answering — that is search, not this card.", "Alguien ya está adentro y no responde: eso es búsqueda, no esta tarjeta."),
+            ],
+            "Hypothermia and bad air are the field facts. A fall in the dark is trauma. Get to care for confusion, a fall, or anyone who will not wake.",
+            "Hipotermia y mal aire son los hechos. Una caída en la oscuridad es trauma. Busca cuidado si hay confusión, una caída o alguien que no despierta.",
+            [
+                step(
+                    "Stay in daylight unless the party knows you are going in and one person stays out. Light in hand before the mouth. Feel the air — if a flame dies or you get a headache, back out. Do not chimney a sinkhole.",
+                    "Caves kill by cold, air, and a step you cannot see. A phone light is not a plan.",
+                    "A child does not go in. They sit with the person who stays out.",
+                    "Stop at the mouth if you cannot see the floor, if water is running, or if anyone is already cold.",
+                    "cave-dark.png",
+                    "Quédate a la luz salvo que el grupo sepa que entras y uno se quede fuera. Luz en la mano. Si una llama muere o duele la cabeza, sal. No te metas a una dolina.",
+                    "Las cuevas matan por frío, aire y un paso que no ves. La linterna del teléfono no es un plan.",
+                    "El niño no entra. Se sienta con quien se queda fuera.",
+                    "Para en la boca si no ves el piso, si corre agua o si alguien ya tiene frío.",
+                    party={"1": "Stay out. Mark the mouth.", "2": "One in sight of daylight, one outside.", "4": "One in / one at mouth / one with kit / one on watch."},
+                )
+            ],
+        ),
+        card(
+            "food-game",
+            "food",
+            "Meat you already have",
+            "Carne que ya tienes",
+            "You have an animal you already took, or someone handed you meat. This is not a hunting map and it does not know where animals are.",
+            "Tienes un animal que ya cazaste, o te pasaron carne. Esto no es un mapa de caza y no sabe dónde están los animales.",
+            [
+                ("The meat is commercially sealed and undamaged.", "La carne es comercial, sellada e intacta."),
+                ("You did not see it die, it smells like death, or flies have had it — leave it.", "No lo viste morir, huele a muerte o ya lo tuvieron las moscas: déjalo."),
+            ],
+            "Gut illness is care if they cannot keep fluids down. This card does not ID a species and does not unlock a kill.",
+            "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no identifica especie ni desbloquea una caza.",
+            [
+                step(
+                    "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+                    "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
+                    "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
+                    "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
+                    "food-game.png",
+                    "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo.",
+                    "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas.",
+                    "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar.",
+                    "Si prende la grasa: tapa, no agua. Para si huele a muerte.",
+                    party={"1": "Cook through or leave it.", "2": "One guts away from camp, one watches the pot.", "4": "Gut / cook / water / keep animals and kids off the pile."},
+                )
+            ],
+        ),
     ]
 
 

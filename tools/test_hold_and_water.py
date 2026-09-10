@@ -145,8 +145,14 @@ def assert_the_card_offers_exactly_two_actions() -> None:
     if len(buttons) != 2:
         fail(f"hold card has {len(buttons)} actions, expected 2")
     for want in ("FIELD", "MARK"):
-        if f'"{want}"' not in body:
+        if want == "FIELD" and "InspectField.label" in body:
+            continue
+        if f'"{want}"' not in body and want != "FIELD":
             fail(f"hold card is missing its {want} action")
+        if want == "MARK" and '"MARK"' not in body and "MARKED" not in body:
+            fail("hold card is missing its MARK action")
+    if "InspectField.label" not in body:
+        fail("hold card does not name the Field procedure from the route")
     if "holdCardMaxActions: Int = 2" not in TOKENS:
         fail("holdCardMaxActions is not 2")
     if "holdCardMaxHeightFraction: Double = 0.5" not in TOKENS:
@@ -521,6 +527,13 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
         if card not in states:
             fail(f"a hold prefers {card}, which no state book ships")
 
+    extras = named(" ".join(re.findall(r"extra\s*[:=]\s*\[([^\]]*)\]", swift)))
+    if not extras:
+        fail("no ground lists extra core cards — woodland never opens plant-use or bite")
+    for card in extras:
+        if card not in everywhere:
+            fail(f"a hold lists extra core {card}, which field.core.json does not ship")
+
     # The runtime has to hand over the whole route, and the tab has to walk it
     # rather than take the head. Either half alone loses the fallback, and it
     # only shows up in the state that does not ship the preferred card.
@@ -530,7 +543,7 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     jump = brace_body(tab, tab.index("private func jump()"))
     if "runtime.fieldJump" not in jump:
         fail("FieldTab never reads the hold card's request")
-    if not re.search(r"for \w+ in route\b", jump):
+    if "InspectField.presentRoute" not in jump and not re.search(r"for \w+ in route\b", jump):
         fail("FieldTab does not walk the route, so a state card that is not loaded opens nothing")
     print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
 

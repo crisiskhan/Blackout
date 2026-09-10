@@ -51,10 +51,13 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar. COMMS chip rail does not show I AM OK just because the radio is up.
 - [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS. SCAN QR has CLOSE. Camera deny is `CAMERA DENIED`, not a black void.
 - [ ] PASS / FAIL / N/A — Hold a water/ground feature → FIELD. Card names the class (STOCK TANK / TINAJA / ACEQUIA / RIVER), not a generic water. DO is the class field line. Empty ground names nearest water within 2 km. FIELD · WATER jumps. The hold card must not crash. Returning to MAP still has the canvas (MapLibre was not torn down).
+- [ ] PASS / FAIL / N/A — Hold woodland / bosque / park → Woodland, Bosque or Park. DO is shade and deadfall, not a meal. Button `FIELD · PLANT` opens that state's plant-danger card (or plant-use / unknown if the state book is missing). Last step becomes `NEXT · PLANT` (use), then `NEXT · BITE`, `NEXT · SHELTER`, `NEXT · FUNGI`, `NEXT · FOOD`. Never edible.
+- [ ] PASS / FAIL / N/A — Hold desert scrub → Desert scrub. DO names vipers. `FIELD · BITE` opens that state's snake card. Last step becomes `NEXT · BITE` (core bite), then plant / food / heat. No animal icon on the canvas. The map does not claim a snake is standing there.
+- [ ] PASS / FAIL / N/A — Hold a silver peak or sinkhole mark (circle, no class label) → Peak or Cave or hole. `FIELD · COLD` on a peak, `FIELD · CAVE` on a hole. Do not go in alone. No tourist cave guide.
 
 ## FIELD
 
-- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list.
+- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list and dumps any remaining biome trail.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.

@@ -202,7 +202,7 @@ struct HoldCardView: View {
     private var actions: some View {
         HStack(spacing: 8) {
             Button(action: onField) {
-                Text(held.card.kind == .water ? "FIELD · WATER" : "FIELD")
+                Text(InspectField.label(for: held.card.fieldRoute.first ?? held.card.fieldCardID))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(HoldActionStyle(filled: false))

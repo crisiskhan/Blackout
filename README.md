@@ -280,7 +280,13 @@ direction. A wash is drawn dashed, because a solid stroke would promise water
 that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
 not a badge — the ring says the record puts water here, not that it is good.
 There are no animal icons, no edible dots, and no number anywhere that could be
-read as safe to drink.
+read as safe to drink. Peaks, sinkholes and named trees are silver circles on
+records the extract actually has. Holding woodland opens that pack's plant
+cards; holding scrub opens that pack's bite cards; holding a hole opens the
+cave card. FIELD then walks the rest of the route — plant-use, shelter, bite
+treatment, meat you already have — as `NEXT · PLANT` / `NEXT · BITE` rather
+than dumping you on the list after the first card. Animals of this country
+live in the Field book, not as GPS pins.
 
 Repairing geometry is part of tiling now. OSM has plenty of areas whose ring
 crosses itself, and Shapely indexes them happily then throws on the first tile

@@ -237,7 +237,8 @@ class WaterClassifyOnHoldTests(unittest.TestCase):
         self.assertIn("func holdInspect(", runtime)
         self.assertIn("zoom: Double", runtime)
         self.assertIn("attachWaterLayers", style)
-        self.assertIn("FIELD · WATER", hold)
+        self.assertIn("InspectField.label", hold)
+        self.assertIn("FIELD · WATER", water)
         self.assertNotIn("WaterSure.disclaimer", hold)
         self.assertIn("zoom", tab.lower())
         self.assertIn("Dip clear of the churned edge", water)
@@ -248,6 +249,9 @@ class WaterClassifyOnHoldTests(unittest.TestCase):
         self.assertIn("TINAJA", qa)
         self.assertIn("nearest water", qa.lower())
         self.assertIn("FIELD · WATER", qa)
+        self.assertIn("FIELD · PLANT", qa)
+        self.assertIn("FIELD · BITE", qa)
+        self.assertIn("FIELD · CAVE", qa)
 
 
 def png_ihdr(path: Path) -> tuple[int, int, int]:
@@ -478,6 +482,9 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("tickSeconds", field)
         self.assertIn('L10n.t("stop.if"', field)
         self.assertIn('Button("ALL CARDS")', field)
+        self.assertIn("leaveCard()", field)
+        self.assertIn("fieldTrail", field)
+        self.assertIn("InspectField.nextAction", field)
         self.assertIn('Button("SPEAK")', field)
         self.assertIn('Button("SEND TO PARTY")', field)
         self.assertIn('L10n.t("vision.none"', field)

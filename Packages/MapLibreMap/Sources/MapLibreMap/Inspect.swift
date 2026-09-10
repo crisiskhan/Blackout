@@ -46,6 +46,10 @@ public enum Inspect {
         /// State cards that answer this ground better than the core one, best
         /// first. A state book may not be loaded, so these are only preferences.
         public var localCardIDs: [String]
+        /// Core cards that sit between the state's book and the last fallback.
+        /// Woodland wants plant-use and shelter after Texas plant-danger; they
+        /// cannot live in `localCardIDs` because those must be state-only.
+        public var extraCoreIDs: [String]
         /// When the pack's OSM was pulled, as the manifest recorded it.
         public var packDate: String?
         /// Class-specific field voice when we have it. Generic treat/leave otherwise.
@@ -60,6 +64,7 @@ public enum Inspect {
             advice: Advice,
             fieldCardID: String,
             localCardIDs: [String] = [],
+            extraCoreIDs: [String] = [],
             packDate: String? = nil,
             doDetail: String? = nil
         ) {
@@ -71,6 +76,7 @@ public enum Inspect {
             self.advice = advice
             self.fieldCardID = fieldCardID
             self.localCardIDs = localCardIDs
+            self.extraCoreIDs = extraCoreIDs
             self.packDate = packDate
             self.doDetail = doDetail
         }
@@ -81,9 +87,17 @@ public enum Inspect {
         /// Cards to try in order when FIELD is pressed. The state's own card
         /// answers the ground better than the core one — holding a subdivision
         /// in El Paso wants the heat island, not "stop and locate" — but only
-        /// the state that wrote it ships it. The core card is always last, so
-        /// FIELD lands somewhere no matter which book is open.
-        public var fieldRoute: [String] { localCardIDs + [fieldCardID] }
+        /// the state that wrote it ships it. Extra core cards sit next, then
+        /// the last core card, so FIELD lands somewhere no matter which book is
+        /// open.
+        public var fieldRoute: [String] {
+            var seen = Set<String>()
+            var out: [String] = []
+            for id in localCardIDs + extraCoreIDs + [fieldCardID] {
+                if seen.insert(id).inserted { out.append(id) }
+            }
+            return out
+        }
     }
 
     public static let unnamed = "Unnamed"
@@ -121,15 +135,26 @@ public enum Inspect {
     public static func pick(_ found: [[String: String]]) -> [String: String] {
         func rank(_ tags: [String: String]) -> Int {
             let named = !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
-            switch (read(tags: tags).kind, named) {
-            case (.water, _): return 0
-            case (.street, true): return 1
-            case (.land, true): return 2
-            case (.place, true): return 3
-            case (.land, false): return 4
-            case (.street, false): return 5
-            case (.place, false): return 6
-            case (.nothing, _): return 7
+            let notable = packGroundPointNaturals.contains(tags["natural"] ?? "")
+            switch read(tags: tags).kind {
+            case .water:
+                return 0
+            case .land where notable:
+                return 1
+            case .street where named:
+                return 2
+            case .land where named:
+                return 3
+            case .place where named:
+                return 4
+            case .land:
+                return 5
+            case .street:
+                return 6
+            case .place:
+                return 7
+            case .nothing:
+                return 8
             }
         }
         return found
@@ -149,11 +174,18 @@ public enum Inspect {
     /// Source layers a hold will take a point from. Springs, wells, tanks and
     /// taps live in `water` as points; the rest of the record is a fill or a
     /// line and the painted query already finds those.
-    public static let packPointSourceLayers: Set<String> = ["water"]
+    public static let packPointSourceLayers: Set<String> = ["water", "place"]
 
     /// `class` values the tiler emits as a point so the style can draw a ring.
     public static let packPointClasses: Set<String> = [
         "spring", "well", "tank", "tank_other", "tap",
+    ]
+
+    /// Point records on the pack's `place` slice that a hold has to name even
+    /// when the style drew them too small to hit. Peaks, holes and named
+    /// trees. Never an animal — range is the Field book, not a GPS pin.
+    public static let packGroundPointNaturals: Set<String> = [
+        "peak", "sinkhole", "cave", "cave_entrance", "tree",
     ]
 
     /// Style layers the app draws itself. They carry no record worth reading,
@@ -169,9 +201,15 @@ public enum Inspect {
     // card that is not in the book.
     public static let waterCard = "water-disinfect"
     public static let plantCard = "plant-unknown"
+    public static let plantUseCard = "plant-use"
     public static let heatCard = "env-heat-collapse"
     public static let coldCard = "env-cold"
     public static let lostCard = "nav-lost"
+    public static let caveCard = "cave-dark"
+    public static let biteCard = "animal-bite"
+    public static let shelterCard = "shelter-tarp"
+    public static let fungiCard = "fungi-leave"
+    public static let gameCard = "food-game"
 
     // State cards that describe one kind of ground exactly. Each is only in
     // the book of the state that wrote it, so each is a preference over a core
@@ -179,6 +217,10 @@ public enum Inspect {
     public static let heatIslandCard = "tx-heat-island"
     public static let iceRockCard = "nm-ice-rock"
     public static let ranchRoadCard = "tx-cattle-guard"
+    public static let snakeTXCard = "tx-snake"
+    public static let snakeNMCard = "nm-snake"
+    public static let plantTXCard = "tx-plant-danger"
+    public static let plantNMCard = "nm-plant-danger"
 
     /// One row of the reading table: how a feature is recognised, and what the
     /// card says once it has been.
@@ -190,6 +232,7 @@ public enum Inspect {
         var advice: Advice
         var field: String
         var local: [String] = []
+        var extra: [String] = []
         /// Applied when the record carries no name, because an unnamed feature
         /// is one nobody surveyed closely.
         var unnamedPenalty: Int = 8
@@ -213,6 +256,7 @@ public enum Inspect {
             advice: reading.advice,
             fieldCardID: reading.field,
             localCardIDs: reading.local,
+            extraCoreIDs: reading.extra,
             packDate: packDate,
             doDetail: fieldDoLine(klass: klass, kind: reading.kind, advice: reading.advice)
         )
@@ -494,29 +538,53 @@ public enum Inspect {
         }
         if let natural = t["natural"] {
             switch natural {
-            case "wood":
+            case "cave", "cave_entrance", "sinkhole":
                 return Reading(
-                    klass: "Woodland", kind: .land, sure: 76,
+                    klass: "Cave or hole",
+                    kind: .land,
+                    sure: 80,
+                    why: "a hole in the record; air, dark and cold are the facts, not a tourist guide",
+                    advice: .field,
+                    field: caveCard,
+                    unnamedPenalty: 6,
+                    unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
+                )
+            case "tree":
+                return plantCover(
+                    klass: "Named tree",
+                    sure: 78,
+                    why: "a surveyed tree; shade and wood, not a meal",
+                    unnamedPenalty: 8,
+                    unnamedKlass: "Tree",
+                    unnamedWhy: "a tree is mapped here with no name"
+                )
+            case "wood":
+                return plantCover(
+                    klass: "Woodland",
+                    sure: 76,
                     why: "mapped as tree cover; the edge moves with the years",
-                    advice: .field, field: plantCard, unnamedPenalty: 4
+                    unnamedPenalty: 4
                 )
             case "scrub", "heath":
-                return Reading(
-                    klass: "Desert scrub", kind: .land, sure: 72,
+                return snakeCountry(
+                    klass: "Desert scrub",
+                    sure: 72,
                     why: "mapped as low brush, which is the open ground of this country",
-                    advice: .field, field: heatCard, unnamedPenalty: 2
+                    unnamedPenalty: 2
                 )
             case "sand", "dune":
-                return Reading(
-                    klass: "Sand or playa floor", kind: .land, sure: 70,
+                return snakeCountry(
+                    klass: "Sand or playa floor",
+                    sure: 70,
                     why: "mapped as bare sand; a playa floor reads the same way and floods after rain",
-                    advice: .field, field: heatCard, unnamedPenalty: 2
+                    unnamedPenalty: 2
                 )
             case "wetland":
-                return Reading(
-                    klass: "Bosque or wetland", kind: .land, sure: 74,
+                return plantCover(
+                    klass: "Bosque or wetland",
+                    sure: 74,
                     why: "mapped as wet ground, which is where the cottonwoods stand along the river",
-                    advice: .field, field: plantCard, unnamedPenalty: 4
+                    unnamedPenalty: 4
                 )
             case "bare_rock", "scree", "ridge", "cliff":
                 return Reading(
@@ -525,48 +593,54 @@ public enum Inspect {
                     advice: .field, field: coldCard, local: [iceRockCard], unnamedPenalty: 2
                 )
             case "grassland":
-                return Reading(
-                    klass: "Grassland", kind: .land, sure: 70,
+                return snakeCountry(
+                    klass: "Grassland",
+                    sure: 70,
                     why: "mapped as open grass",
-                    advice: .field, field: heatCard, unnamedPenalty: 2
+                    unnamedPenalty: 2
                 )
             default:
                 break
             }
         }
         if t["boundary"] == "protected_area" || t["boundary"] == "national_park" || t["leisure"] == "nature_reserve" {
-            return Reading(
-                klass: "Protected land", kind: .land, sure: 84,
+            return plantCover(
+                klass: "Protected land",
+                sure: 84,
                 why: "a drawn boundary, so the line is exact even where the ground is not",
-                advice: .field, field: plantCard, unnamedPenalty: 4
+                unnamedPenalty: 4
             )
         }
         if t["leisure"] == "park" {
-            return Reading(
-                klass: "Park", kind: .land, sure: 80,
+            return plantCover(
+                klass: "Park",
+                sure: 80,
                 why: "a drawn boundary around kept ground",
-                advice: .field, field: plantCard, unnamedPenalty: 6
+                unnamedPenalty: 6
             )
         }
         if let use = t["landuse"] {
             switch use {
             case "forest":
-                return Reading(
-                    klass: "Woodland", kind: .land, sure: 76,
+                return plantCover(
+                    klass: "Woodland",
+                    sure: 76,
                     why: "mapped as worked timber, so there is tree cover and usually a track in",
-                    advice: .field, field: plantCard, unnamedPenalty: 4
+                    unnamedPenalty: 4
                 )
             case "farmland", "orchard", "meadow", "vineyard", "recreation_ground":
-                return Reading(
-                    klass: "Irrigated ground", kind: .land, sure: 74,
+                return plantCover(
+                    klass: "Irrigated ground",
+                    sure: 74,
                     why: "mapped as worked ground, which in this country means a ditch reaches it",
-                    advice: .field, field: plantCard, unnamedPenalty: 4
+                    unnamedPenalty: 4
                 )
             case "salt_pond":
-                return Reading(
-                    klass: "Salt flat", kind: .land, sure: 78,
+                return snakeCountry(
+                    klass: "Salt flat",
+                    sure: 78,
                     why: "a drawn boundary around worked salt ground, so the outline is exact",
-                    advice: .field, field: heatCard, unnamedPenalty: 4
+                    unnamedPenalty: 4
                 )
             case "residential":
                 return Reading(
@@ -579,6 +653,50 @@ public enum Inspect {
             }
         }
         return nil
+    }
+
+    /// Tree cover, parks, bosque: danger first, then use, then unknown.
+    private static func plantCover(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int,
+        unnamedKlass: String? = nil,
+        unnamedWhy: String? = nil
+    ) -> Reading {
+        Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [plantTXCard, plantNMCard],
+            extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
+            unnamedPenalty: unnamedPenalty,
+            unnamedKlass: unnamedKlass,
+            unnamedWhy: unnamedWhy
+        )
+    }
+
+    /// Open country: the state's snakes, then bite, then heat.
+    private static func snakeCountry(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int
+    ) -> Reading {
+        Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: heatCard,
+            local: [snakeTXCard, snakeNMCard, plantTXCard, plantNMCard],
+            extra: [biteCard, plantUseCard, gameCard],
+            unnamedPenalty: unnamedPenalty
+        )
     }
 
     private static func builtUp(_ t: [String: String]) -> Reading? {

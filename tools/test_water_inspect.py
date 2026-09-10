@@ -341,22 +341,35 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("held.card.title", card)
         self.assertIn('key: "SURE"', card)
         self.assertIn('key: "DO"', card)
-        self.assertIn("FIELD · WATER", card)
-        self.assertIn('"FIELD"', card)
+        self.assertIn("InspectField.label", card)
+        self.assertIn("held.card.fieldRoute", card)
         self.assertIn("MARKED", card)
         self.assertIn("onField", card)
         self.assertIn("onMark", card)
+        self.assertNotIn("animal-icon", card)
+        self.assertNotIn("edible", card.lower())
 
     def test_a_press_opens_the_matching_field_stepper(self):
         inspect = INSPECT.read_text()
         self.assertIn('waterCard = "water-disinfect"', inspect)
         self.assertIn('lostCard = "nav-lost"', inspect)
+        self.assertIn('plantUseCard = "plant-use"', inspect)
+        self.assertIn('caveCard = "cave-dark"', inspect)
+        self.assertIn('snakeTXCard = "tx-snake"', inspect)
         book = json.loads((ROOT / "Resources/Field/field.core.json").read_text())
         ids = {card["id"] for card in book["cards"]}
         self.assertIn("nav-lost", ids)
         self.assertIn("water-disinfect", ids)
+        self.assertIn("plant-use", ids)
+        self.assertIn("cave-dark", ids)
+        self.assertIn("food-game", ids)
+        self.assertIn("animal-bite", ids)
         field = FIELD_TAB.read_text()
         self.assertIn("runtime.fieldJump", field)
+        self.assertIn("InspectField.presentRoute", field)
+        self.assertIn("fieldTrail", field)
+        self.assertIn("advanceTrail", field)
+        self.assertIn("InspectField.nextAction", field)
         self.assertIn("StepperState(card: card, index: 0", field)
 
     def test_sos_stays_on_comms(self):
@@ -392,6 +405,95 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("WaterIndex", (ROOT / "Blackout/AppRuntime.swift").read_text())
         self.assertIn("enum MarkLabel", MAP_SWIFT.read_text())
         self.assertIn("MarkLabel.relabel", (ROOT / "Blackout/AppRuntime.swift").read_text())
+
+
+class GroundFieldSync(unittest.TestCase):
+    """Hold names the biome; FIELD opens that pack's plant, bite, cave cards.
+
+    The map must not invent wildlife GPS. Range is the Field book of the
+    open pack. Marks are silver circles on records the extract actually has.
+    """
+
+    def test_the_button_names_the_procedure_from_the_route(self):
+        field = SWIFT.read_text()
+        self.assertIn('case .water: return "FIELD · WATER"', field)
+        self.assertIn('case .plant: return "FIELD · PLANT"', field)
+        self.assertIn('case .bite: return "FIELD · BITE"', field)
+        self.assertIn('case .cave: return "FIELD · CAVE"', field)
+        self.assertIn('case .lost: return "FIELD · LOST"', field)
+        hold = CARD.read_text()
+        self.assertIn("InspectField.label(for:", hold)
+        self.assertIn("fieldRoute.first", hold)
+        self.assertNotIn("held.card.kind == .water", hold)
+
+    def test_woodland_and_scrub_ask_for_the_state_books(self):
+        inspect = INSPECT.read_text()
+        self.assertIn("plantTXCard, plantNMCard", inspect)
+        self.assertIn("snakeTXCard, snakeNMCard", inspect)
+        self.assertIn("extra: [plantUseCard", inspect)
+        self.assertIn("extra: [biteCard", inspect)
+        self.assertIn('plantUseCard = "plant-use"', inspect)
+        self.assertIn('caveCard = "cave-dark"', inspect)
+        self.assertIn("packGroundPointNaturals", inspect)
+        self.assertIn('"place"', inspect)
+
+    def test_ground_marks_are_circles_without_class_labels_or_animals(self):
+        swift = MAP_SWIFT.read_text()
+        self.assertIn("attachGroundLayers", swift)
+        self.assertIn("groundPointsLayerID", swift)
+        self.assertIn("groundLabelsLayerID", swift)
+        self.assertIn(
+            'layers.removeAll { $0["id"] as? String == groundLabelsLayerID }',
+            swift,
+        )
+        self.assertIn("packGroundPointNaturals", INSPECT.read_text())
+        self.assertNotIn("animal-icon", swift.lower())
+        self.assertNotIn("wildlife-icon", swift.lower())
+        self.assertNotIn("edible", swift.lower())
+        inspect = INSPECT.read_text()
+        overlay = inspect.split("overlayLayerIDs", 1)[1].split("waterCard", 1)[0]
+        self.assertNotIn("groundPointsLayerID", overlay)
+        self.assertNotIn("groundLabelsLayerID", overlay)
+
+    def test_the_next_fetch_asks_for_caves_and_trees(self):
+        fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
+        self.assertIn("sinkhole|cave|cave_entrance|tree", fetch)
+        self.assertIn('node["natural"="cave"]', fetch)
+        self.assertIn('node["natural"="tree"]', fetch)
+
+    def test_the_core_book_ships_the_biome_cards(self):
+        book = json.loads((ROOT / "Resources/Field/field.core.json").read_text())
+        ids = {card["id"] for card in book["cards"]}
+        for cid in ("plant-use", "cave-dark", "food-game", "plant-unknown", "animal-bite", "fungi-leave"):
+            self.assertIn(cid, ids, cid)
+        by_id = {card["id"]: card for card in book["cards"]}
+        for cid in ("plant-use", "cave-dark", "food-game"):
+            blob = json.dumps(by_id[cid]).lower()
+            self.assertNotIn("edible", blob, cid)
+            self.assertNotIn("safe to eat", blob, cid)
+
+    def test_solo_qa_scores_the_biome_handoff(self):
+        qa = (ROOT / "docs/SOLO_QA.md").read_text()
+        self.assertIn("FIELD · PLANT", qa)
+        self.assertIn("FIELD · BITE", qa)
+        self.assertIn("FIELD · CAVE", qa)
+        self.assertIn("NEXT · PLANT", qa)
+        self.assertIn("NEXT · BITE", qa)
+        self.assertIn("No animal icon", qa)
+        self.assertIn("Never edible", qa)
+
+    def test_done_walks_the_rest_of_the_pack_route(self):
+        field = SWIFT.read_text()
+        self.assertIn('case .plant: return "NEXT · PLANT"', field)
+        self.assertIn('case .bite: return "NEXT · BITE"', field)
+        self.assertIn('case .shelter: return "NEXT · SHELTER"', field)
+        self.assertIn("func presentRoute(", field)
+        tab = FIELD_TAB.read_text()
+        self.assertIn("InspectField.presentRoute", tab)
+        self.assertIn("fieldTrail", tab)
+        self.assertIn("leaveCard()", tab)
+        self.assertIn("advanceTrail()", tab)
+        self.assertNotIn('Button(s.isLast ? "DONE" : "NEXT")', tab)
 
 
 if __name__ == "__main__":

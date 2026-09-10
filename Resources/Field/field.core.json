@@ -1041,6 +1041,183 @@
           }
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "plant-use",
+      "category": "plants",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Trees and brush — use, don't eat",
+        "es": "Árboles y matorral — úsalos, no los comas"
+      },
+      "situation": {
+        "en": "You are in tree cover, bosque, or a park. Shade, wind, and deadfall are the uses. This is not a meal.",
+        "es": "Estás en arbolado, bosque o parque. Sombra, viento y madera muerta. Esto no es una comida."
+      },
+      "stop_if": [
+        {
+          "en": "You already have known food and a roof.",
+          "es": "Ya tienes comida conocida y techo."
+        },
+        {
+          "en": "Lips, tongue, or skin are already burning — that is a medical card, not a use card.",
+          "es": "Labios, lengua o piel ya arden: eso es médico, no uso."
+        }
+      ],
+      "get_to_care": {
+        "en": "Vision is a guess. Nothing in this app unlocks a meal. If they chewed bark or seed, get to care for vomiting, trouble breathing, or collapse.",
+        "es": "Vision es una conjetura. Nada aquí desbloquea una comida. Si masticaron corteza o semilla, busca cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Use the trees: shade on the south side, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+            "es": "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
+          },
+          "why": {
+            "en": "A tree is calories only after a name you already trust. Shade is the honest use today.",
+            "es": "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto."
+          },
+          "child": {
+            "en": "Take the leaf or pod out of a child's hand. No tiny taste.",
+            "es": "Saca la hoja o vaina de la mano del niño. Sin probadita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "plant-use.png",
+          "party": {
+            "1": "Shade and sit.",
+            "2": "One makes shade, one fetches deadfall.",
+            "4": "Shade / fire / water / watch the rest."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "cave-dark",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Cave or hole — do not go in alone",
+        "es": "Cueva o hueco — no entres solo"
+      },
+      "situation": {
+        "en": "A hole, sink, or cave mouth is in the record. Air, dark, and cold. Not a tour.",
+        "es": "Hay un hueco, dolina o boca de cueva en el registro. Aire, oscuridad y frío. No es un tour."
+      },
+      "stop_if": [
+        {
+          "en": "You can stay in daylight and the party knows where you are.",
+          "es": "Puedes quedarte a la luz y el grupo sabe dónde estás."
+        },
+        {
+          "en": "Someone is already inside and not answering — that is search, not this card.",
+          "es": "Alguien ya está adentro y no responde: eso es búsqueda, no esta tarjeta."
+        }
+      ],
+      "get_to_care": {
+        "en": "Hypothermia and bad air are the field facts. A fall in the dark is trauma. Get to care for confusion, a fall, or anyone who will not wake.",
+        "es": "Hipotermia y mal aire son los hechos. Una caída en la oscuridad es trauma. Busca cuidado si hay confusión, una caída o alguien que no despierta."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Stay in daylight unless the party knows you are going in and one person stays out. Light in hand before the mouth. Feel the air — if a flame dies or you get a headache, back out. Do not chimney a sinkhole.",
+            "es": "Quédate a la luz salvo que el grupo sepa que entras y uno se quede fuera. Luz en la mano. Si una llama muere o duele la cabeza, sal. No te metas a una dolina."
+          },
+          "why": {
+            "en": "Caves kill by cold, air, and a step you cannot see. A phone light is not a plan.",
+            "es": "Las cuevas matan por frío, aire y un paso que no ves. La linterna del teléfono no es un plan."
+          },
+          "child": {
+            "en": "A child does not go in. They sit with the person who stays out.",
+            "es": "El niño no entra. Se sienta con quien se queda fuera."
+          },
+          "stop": {
+            "en": "Stop at the mouth if you cannot see the floor, if water is running, or if anyone is already cold.",
+            "es": "Para en la boca si no ves el piso, si corre agua o si alguien ya tiene frío."
+          },
+          "image": "cave-dark.png",
+          "party": {
+            "1": "Stay out. Mark the mouth.",
+            "2": "One in sight of daylight, one outside.",
+            "4": "One in / one at mouth / one with kit / one on watch."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "food-game",
+      "category": "food",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Meat you already have",
+        "es": "Carne que ya tienes"
+      },
+      "situation": {
+        "en": "You have an animal you already took, or someone handed you meat. This is not a hunting map and it does not know where animals are.",
+        "es": "Tienes un animal que ya cazaste, o te pasaron carne. Esto no es un mapa de caza y no sabe dónde están los animales."
+      },
+      "stop_if": [
+        {
+          "en": "The meat is commercially sealed and undamaged.",
+          "es": "La carne es comercial, sellada e intacta."
+        },
+        {
+          "en": "You did not see it die, it smells like death, or flies have had it — leave it.",
+          "es": "No lo viste morir, huele a muerte o ya lo tuvieron las moscas: déjalo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gut illness is care if they cannot keep fluids down. This card does not ID a species and does not unlock a kill.",
+        "es": "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no identifica especie ni desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+            "es": "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo."
+          },
+          "why": {
+            "en": "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
+            "es": "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas."
+          },
+          "child": {
+            "en": "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
+            "es": "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
+            "es": "Si prende la grasa: tapa, no agua. Para si huele a muerte."
+          },
+          "image": "food-game.png",
+          "party": {
+            "1": "Cook through or leave it.",
+            "2": "One guts away from camp, one watches the pot.",
+            "4": "Gut / cook / water / keep animals and kids off the pile."
+          }
+        }
+      ]
     }
   ]
 }

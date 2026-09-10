@@ -305,7 +305,7 @@ def slim_tags(tags: dict) -> dict:
 
 
 RESOURCE_TAGS = {
-    "natural": "^(spring|scrub|sand|dune|bare_rock|scree|wetland|heath|grassland|sinkhole)$",
+    "natural": "^(spring|scrub|sand|dune|bare_rock|scree|wetland|heath|grassland|sinkhole|cave|cave_entrance|tree)$",
     "man_made": "^(water_well|water_tank|storage_tank|cistern|reservoir_covered)$",
     "landuse": "^(farmland|orchard|meadow|vineyard|basin|salt_pond|greenhouse_horticulture|residential)$",
 }
@@ -352,6 +352,9 @@ def overpass_bbox(south: float, west: float, north: float, east: float) -> dict:
   node["amenity"~"hospital|clinic|doctors|pharmacy|police|fire_station|drinking_water|shelter"]({south},{west},{north},{east});
   node["emergency"="assembly_point"]({south},{west},{north},{east});
   node["natural"="peak"]({south},{west},{north},{east});
+  node["natural"="cave"]({south},{west},{north},{east});
+  node["natural"="cave_entrance"]({south},{west},{north},{east});
+  node["natural"="tree"]({south},{west},{north},{east});
   node["place"~"city|town|village|hamlet|suburb|neighbourhood|quarter"]({south},{west},{north},{east});
 );
 out body;

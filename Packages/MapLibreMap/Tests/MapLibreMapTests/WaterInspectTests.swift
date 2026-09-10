@@ -120,6 +120,23 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.waterDetailLabelsLayerID })
     }
 
+    func testGroundMarksAreCirclesOnThePacksPlaceLayerWithNoLabels() throws {
+        let pack = try packRoot(named: "ground-marks", water: false)
+        var sources: [String: Any] = ["osm": ["type": "vector", "url": "pmtiles://osm.pmtiles"]]
+        var layers: [[String: Any]] = [["id": "roads", "type": "line", "source": "osm"]]
+        PackStyle.attachGroundLayers(&sources, &layers, packRoot: pack)
+
+        let marks = try XCTUnwrap(layers.first { $0["id"] as? String == PackStyle.groundPointsLayerID })
+        XCTAssertEqual(marks["type"] as? String, "circle")
+        XCTAssertEqual(marks["source"] as? String, "osm")
+        XCTAssertEqual(marks["source-layer"] as? String, PackStyle.placeSourceLayer)
+        XCTAssertEqual(marks["minzoom"] as? Double, PackStyle.groundMinZoom)
+        XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.groundLabelsLayerID })
+        let compact = String(describing: layers)
+        XCTAssertFalse(compact.contains("animal"), compact)
+        XCTAssertFalse(compact.contains("edible"), compact)
+    }
+
     func testAPackWithoutTheFileGetsNoMarksRatherThanAnEmptySource() throws {
         let pack = try packRoot(named: "water-none", water: false)
         var sources: [String: Any] = [:]
@@ -541,7 +558,7 @@ final class WaterInspectTests: XCTestCase {
         let root = try repoRoot()
         let book = try Data(contentsOf: root.appendingPathComponent("Resources/Field/field.core.json"))
         let text = try XCTUnwrap(String(data: book, encoding: .utf8))
-        for id in [InspectField.water, InspectField.land] {
+        for id in [InspectField.water, InspectField.land, Inspect.caveCard, Inspect.plantUseCard, Inspect.gameCard] {
             XCTAssertTrue(text.contains("\"id\": \"\(id)\""), "field.core.json has no card \(id)")
         }
     }
@@ -561,6 +578,17 @@ final class WaterInspectTests: XCTestCase {
     func testTheHandoffNamesTheProcedureBeforeItIsTaken() {
         XCTAssertEqual(InspectField.label(for: InspectField.water), "FIELD · WATER")
         XCTAssertEqual(InspectField.label(for: InspectField.land), "FIELD · LOST")
+        XCTAssertEqual(InspectField.label(for: Inspect.plantCard), "FIELD · PLANT")
+        XCTAssertEqual(InspectField.label(for: Inspect.plantTXCard), "FIELD · PLANT")
+        XCTAssertEqual(InspectField.label(for: Inspect.plantUseCard), "FIELD · PLANT")
+        XCTAssertEqual(InspectField.label(for: Inspect.snakeTXCard), "FIELD · BITE")
+        XCTAssertEqual(InspectField.label(for: Inspect.biteCard), "FIELD · BITE")
+        XCTAssertEqual(InspectField.label(for: Inspect.caveCard), "FIELD · CAVE")
+        XCTAssertEqual(InspectField.label(for: Inspect.shelterCard), "FIELD · SHELTER")
+        XCTAssertEqual(InspectField.label(for: Inspect.heatCard), "FIELD · HEAT")
+        XCTAssertEqual(InspectField.label(for: Inspect.coldCard), "FIELD · COLD")
+        XCTAssertEqual(InspectField.label(for: Inspect.fungiCard), "FIELD · FUNGI")
+        XCTAssertEqual(InspectField.label(for: Inspect.gameCard), "FIELD · FOOD")
         XCTAssertEqual(InspectField.label(for: "something-else"), "FIELD")
     }
 
