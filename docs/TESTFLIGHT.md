@@ -56,6 +56,7 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34480452541` (`98bb68a`): HUD tag `tf-81`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **81**. Dist `TPTQ6GKWZ7` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 81`, then ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. `ASSIGN Internal 81 204`. HUD on every tab + hold water classify + named marks. Leave 80 until TestFlight shows 81 Ready.
 - `34491969097` (`323aa7f`): HUD tag `tf-82`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **82**. Dist `8872S8A8NY` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 82`, then ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. `ASSIGN Internal 82 204`. Textless compass + HUD mark language through the instrument. Leave 81 until TestFlight shows 82 Ready.
 - `34502826993` (`3abaf58`): HUD tag `tf-83`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **83**. Dist `947QX8HSZ9` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 83`, then ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. `ASSIGN Internal 83 204`. Expedition HUD + FIELD vision still + COMMS call. Leave 82 until TestFlight shows 83 Ready.
+- `34536953430` (`4ec42d4`): HUD tag `tf-84`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **84**. Dist `WK9VCHNP39` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 84`, then ASC `e0ac0030-87e3-4952-b2a7-8336dffe99ef` **VALID**. PATCH 200. `ASSIGN Internal 84 204`. Scarce red, no fake party bodies, chrome that actually sleeps. Leave 83 until TestFlight shows 84 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -161,4 +162,8 @@ HUD tree `323aa7f` tagged `tf-82`. Run `34491969097` uploaded CPV **82** and `AS
 
 ## HUD 83 Internal (Crisis GO)
 
-HUD tree `3abaf58` tagged `tf-83`. Run `34502826993` uploaded CPV **83** and `ASSIGN Internal 83 204`. Dist `947QX8HSZ9`. ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. Expedition condition rails; FIELD book + VISION still (pack-book name / UNKNOWN / NO VISION MODEL, never edible); COMMS HOLD PTT, real mic clip, LEAVE NET. Leave 82 until TestFlight shows 83 Ready. Watch omitted. Internal only. Do not re-upload 54–82. Next Internal after 83 would be **84**.
+HUD tree `3abaf58` tagged `tf-83`. Run `34502826993` uploaded CPV **83** and `ASSIGN Internal 83 204`. Dist `947QX8HSZ9`. ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. Expedition condition rails; FIELD book + VISION still (pack-book name / UNKNOWN / NO VISION MODEL, never edible); COMMS HOLD PTT, real mic clip, LEAVE NET. Leave 82 until TestFlight shows 83 Ready. Watch omitted. Internal only. Do not re-upload 54–82.
+
+## HUD 84 Internal (Crisis GO)
+
+HUD tree `4ec42d4` tagged `tf-84`. Run `34536953430` uploaded CPV **84** and `ASSIGN Internal 84 204`. Dist `WK9VCHNP39`. ASC `e0ac0030-87e3-4952-b2a7-8336dffe99ef` **VALID**. PATCH 200. Unsigned compile [34536170362](https://github.com/crisiskhan/Blackout/actions/runs/34536170362) (generic device + simulator). No fake party body on YOU; highway refs and the walk line silver; water class labels off the canvas; hit/mark rows fade; LAYOUT can place SOS. Leave 83 until TestFlight shows 84 Ready. Watch omitted. Internal only. Do not re-upload 54–83. Next Internal after 84 would be **85**.
