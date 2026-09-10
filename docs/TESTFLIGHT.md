@@ -53,6 +53,11 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
 - `34288225891` (`bd5441a`): tip-69 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **69**. Dist `359MDUJD57` (`DISTRIBUTION`). altool no errors. ASC `50c4b07a-2df1-4ea8-9fc5-4faa8d2a0c23` **VALID**. PATCH 200. `ASSIGN Internal 69 204`. Pack grow TX/NM + mark persist. Leave 68 until TestFlight shows 69 Ready.
 - `34321942875` (`git_ref=be8c8f3`, run headSha `bd5441a`): tip-71 vector-tiles `workflow_dispatch`. Checkout was `be8c8f36ebd7dcedf4cd9bd4cb38e7de489549bb` (`tf: tip-71 vector tiles + TX/NM growth inject 71` on `cursor/map-vector-tiles-514a`), not `bd5441a`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **70**. Dist `U2FRLZL7R9` (`DISTRIBUTION`). altool no errors. ASC `ec6a12f1-5f34-4d52-8009-3fb0334da82e` **VALID**. PATCH 200. `ASSIGN Internal 70 204`. Streets as PMTiles; not the tip-69 geojson tree. Do not re-upload 54–70.
+- `34355103501` (`git_ref=cf5f8af`, run headSha `2fd19a9`): `workflow_dispatch`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **71**. Dist `L84K748D52` (`DISTRIBUTION`). altool no errors. ASC `24405094-85b7-4a33-8e06-698b8842a45b` **VALID**. PATCH 200. `ASSIGN Internal 71 204`. Checkout `tf: tip-73 graph as bytes` (`76MB→17MB`).
+- `34385749629` (`git_ref=d38a5fd`, run headSha `2fd19a9`): `workflow_dispatch`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **72**. Dist `GN5NAK43RV` (`DISTRIBUTION`). altool no errors. ASC `a93feefe-7b6e-4a00-8f32-08ee767e7cba` **VALID**. PATCH 200. `ASSIGN Internal 72 204`. Hold-press bound (wall-clock ceiling off).
+- `34403713391` (`git_ref=92aade6`, run headSha `2fd19a9`): `workflow_dispatch`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **73**. Dist `3QBX38DZ54` (`DISTRIBUTION`). altool no errors. ASC `33b77794-0772-4b89-8e98-1e98ad34019f` **VALID**. PATCH 200. `ASSIGN Internal 73 204`. Field on inspect card must not tear the card (ASC 72 crash).
+- `34422190754` (`git_ref=a2dd143`, run headSha `2fd19a9`): `workflow_dispatch`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **74**. Dist `Q28U66QG4J` (`DISTRIBUTION`). altool no errors. ASC `298f5c0e-573f-4259-8bd7-299a57b8b697` **VALID**. PATCH 200. `ASSIGN Internal 74 204`. Dismantle MapLibre when Field leaves the map (ASC 73 crash).
+- `34426480725` (`git_ref=36296d1`, run headSha `2fd19a9`): `workflow_dispatch`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **75**. Dist `25785V2N3N` (`DISTRIBUTION`). altool no errors. ASC `5cf3db5b-980b-443b-a311-a27645ca9045` **VALID**. First `ASSIGN Internal 75 422` (`MISSING_EXPORT_COMPLIANCE`). Assign job `34427487845` then PATCH 200 / `ASSIGN 75 204`. Keep Map mounted when Field opens. Do not re-upload 54–75.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -151,3 +156,18 @@ SOURCE tip `f403052b` / merge `d3b65501`. Run `34288225891` uploaded CPV **69** 
 ## Tip 70 Internal (tip-71 vector tiles, not 69)
 
 Run `34321942875` dispatched `git_ref=be8c8f3` (`tf: tip-71 vector tiles + TX/NM growth inject 71`). CPV **70** and `ASSIGN Internal 70 204`. GitHub run headSha stayed `bd5441a` (bible-v3 at dispatch); checkout was the vector-tiles tip. Streets ship as PMTiles (packs 201.0 MB → 100.1 MB; TX WEST 2.8× ground, NM 3.65×). Not the same IPA as 69. Leave 69 until TestFlight shows 70 Ready, then 70. Watch omitted. Internal only. Do not re-upload 54–70.
+
+## Tip 71–74 Internal (dispatched off bible-v3 workflow file)
+
+GitHub run headSha stayed `2fd19a9`. Checkout `git_ref` is the product.
+
+- **71** `cf5f8af` / `34355103501` — graph as bytes (`76MB→17MB`). `ASSIGN Internal 71 204`.
+- **72** `d38a5fd` / `34385749629` — hold-press bound. `ASSIGN Internal 72 204`.
+- **73** `92aade6` / `34403713391` — Field inspect-card teardown crash. `ASSIGN Internal 73 204`.
+- **74** `a2dd143` / `34422190754` — dismantle MapLibre when Field leaves. `ASSIGN Internal 74 204`.
+
+Leave the last Ready build until the next CPV shows Ready. Watch omitted. Internal only. Do not re-upload.
+
+## Tip 75 Internal (Map stays mounted)
+
+SOURCE `36296d1` (`chrome: keep Map mounted when Field opens`). Run `34426480725` uploaded CPV **75**. First Internal attach 422 (`MISSING_EXPORT_COMPLIANCE`). Assign job `34427487845` PATCH 200 / `ASSIGN 75 204` → `IN_BETA_TESTING`. Leave 74 until TestFlight shows 75 Ready. Watch omitted. Internal only. Do not re-upload 54–75. Next mint would be **76**.
