@@ -42,6 +42,10 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.Chrome.hudSideReservePoints, 72)
         XCTAssertEqual(BlackoutTokens.Chrome.mapChipHitPoints, 44)
         XCTAssertEqual(BlackoutTokens.MapDock.allCases.count, 4)
+        XCTAssertEqual(BlackoutTokens.MapOverlay.instrumentsTitle, "INSTRUMENTS")
+        XCTAssertEqual(BlackoutTokens.MapOverlay.lockOnTitle, "LOCK-ON")
+        XCTAssertEqual(BlackoutTokens.MapOverlay.lockTitle(locked: false), "LOCK-ON")
+        XCTAssertEqual(BlackoutTokens.MapOverlay.lockTitle(locked: true), "LOCKED")
         XCTAssertEqual(
             BlackoutTokens.MapDock.allCases.map(\.title),
             ["MARK", "WALK", "DRIVE", "SPEAK"]

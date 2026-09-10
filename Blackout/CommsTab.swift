@@ -7,19 +7,83 @@ struct CommsTab: View {
     @State private var scanQR = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("COMMS")
+        HUDPage(
+            title: "COMMS",
+            status: runtime.mesh.chromeNet,
+            warn: !runtime.mesh.joined
+        ) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    if meshSOS {
+                        sosPlate
+                    }
+                    partyCard
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        chip("ALL") { runtime.comms.setChannel("ALL") }
+                        chip("1:1") { runtime.comms.setChannel("1:1") }
+                        chip("RADIO CHECK") { runtime.comms.radioCheck() }
+                    }
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        chip(L10n.t("chip.rally", runtime.locale)) {
+                            runtime.comms.rally()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.rally.rawValue)
+                        }
+                        chip(L10n.t("chip.down", runtime.locale)) {
+                            runtime.comms.down()
+                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.down.rawValue)
+                        }
+                        if runtime.mesh.joined {
+                            chip(L10n.t("ok.chip", runtime.locale)) {
+                                runtime.iamOK()
+                            }
+                        }
+                    }
+                    Text(L10n.t("net.physics", runtime.locale))
+                        .font(.caption)
+                        .foregroundStyle(Color(white: 0.45))
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 1) {
+                        Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
+                            if runtime.ptt.live { runtime.endPTTSolo() } else { runtime.beginPTTSolo() }
+                        }
+                        .buttonStyle(HUDDockStyle())
+                        Button("15s CLIP") {
+                            _ = runtime.ptt.recordClip(pcm: Data(repeating: 0, count: 32000), sampleRate: 16000)
+                        }
+                        .buttonStyle(HUDDockStyle())
+                    }
+                    .background(Theme.raised)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                    )
+                    Button(runtime.mesh.joined ? "NET JOINED" : "JOIN LOCAL NET") {
+                        runtime.joinNet()
+                    }
                     .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.silver)
-                Spacer()
-                Text(runtime.mesh.chromeNet)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(runtime.mesh.joined ? Theme.silver : Color.orange)
+                    .foregroundStyle(runtime.mesh.joined ? Theme.silver : Theme.accent)
+                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                    .background(Theme.raised)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    log
+                }
             }
-            if meshSOS {
-                sosPlate
+        }
+        .sheet(isPresented: $scanQR) {
+            #if canImport(AVFoundation) && canImport(UIKit)
+            PartyQRScanner { raw in
+                runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
+                runtime.mesh.partyCode = runtime.roster.code
+                scanQR = false
+                runtime.joinNet()
             }
+            #endif
+        }
+    }
+
+    private var partyCard: some View {
+        HUDGlassCard {
             HStack(alignment: .top, spacing: 12) {
                 PartyQRImage(code: runtime.roster.code)
                 VStack(alignment: .leading, spacing: 8) {
@@ -40,53 +104,14 @@ struct CommsTab: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .textInputAutocapitalization(.characters)
                     Button(L10n.t("scan.qr", runtime.locale)) { scanQR = true }
-                        .font(.system(size: 12, weight: .heavy))
-                        .foregroundStyle(Theme.silver)
-                        .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                        .buttonStyle(HUDOverlayChipStyle())
                 }
             }
-            HStack(spacing: 8) {
-                chip("ALL") { runtime.comms.setChannel("ALL") }
-                chip("1:1") { runtime.comms.setChannel("1:1") }
-                chip("RADIO CHECK") { runtime.comms.radioCheck() }
-            }
-            HStack(spacing: 8) {
-                chip(L10n.t("chip.rally", runtime.locale)) {
-                    runtime.comms.rally()
-                    runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.rally.rawValue)
-                }
-                chip(L10n.t("chip.down", runtime.locale)) {
-                    runtime.comms.down()
-                    runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.down.rawValue)
-                }
-                if runtime.mesh.joined {
-                    chip(L10n.t("ok.chip", runtime.locale)) {
-                        runtime.iamOK()
-                    }
-                }
-            }
-            Text("Whisper <10 m: \(runtime.comms.whisperOK ? "yes" : "no")")
-                .font(.caption)
-                .foregroundStyle(Color(white: 0.55))
-            Text(L10n.t("net.physics", runtime.locale))
-                .font(.caption)
-                .foregroundStyle(Color(white: 0.45))
-            HStack(spacing: 8) {
-                chip(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
-                    if runtime.ptt.live { runtime.endPTTSolo() } else { runtime.beginPTTSolo() }
-                }
-                chip("15s CLIP") {
-                    _ = runtime.ptt.recordClip(pcm: Data(repeating: 0, count: 32000), sampleRate: 16000)
-                }
-            }
-            Button(runtime.mesh.joined ? "NET JOINED" : "JOIN LOCAL NET") {
-                runtime.joinNet()
-            }
-            .font(.system(size: 13, weight: .heavy))
-            .foregroundStyle(runtime.mesh.joined ? Theme.silver : Theme.accent)
-            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+    }
+
+    private var log: some View {
+        VStack(alignment: .leading, spacing: 4) {
             ForEach(runtime.comms.chips, id: \.self) { c in
                 Text(c.rawValue.uppercased())
                     .font(.caption.weight(.bold))
@@ -97,18 +122,6 @@ struct CommsTab: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Color.orange)
             }
-            Spacer(minLength: 0)
-        }
-        .padding(12)
-        .sheet(isPresented: $scanQR) {
-            #if canImport(AVFoundation) && canImport(UIKit)
-            PartyQRScanner { raw in
-                runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
-                runtime.mesh.partyCode = runtime.roster.code
-                scanQR = false
-                runtime.joinNet()
-            }
-            #endif
         }
     }
 
@@ -141,14 +154,6 @@ struct CommsTab: View {
 
     private func chip(_ title: String, action: @escaping () -> Void) -> some View {
         Button(title, action: action)
-            .font(.system(size: 11, weight: .heavy))
-            .foregroundStyle(Theme.silver)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .allowsTightening(true)
-            .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .buttonStyle(HUDOverlayChipStyle())
     }
 }

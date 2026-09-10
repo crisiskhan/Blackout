@@ -10,45 +10,42 @@ struct FieldTab: View {
     @State private var stepper: StepperState?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("FIELD")
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(Theme.silver)
-            Text(L10n.t("stop.if", runtime.locale)).font(.caption)
-            // One card open, or the list. Never both. The map's FIELD button
-            // has already chosen a card, and landing on the list with the
-            // steps pushed under it makes you hunt for the thing you picked.
-            if let s = stepper {
-                open(s)
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 1) {
-                        ForEach(cards) { c in
-                            Button(loc(c.title)) {
-                                stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+        HUDPage(title: "FIELD") {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.t("stop.if", runtime.locale))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color(white: 0.55))
+                // One card open, or the list. Never both. The map's FIELD button
+                // has already chosen a card, and landing on the list with the
+                // steps pushed under it makes you hunt for the thing you picked.
+                if let s = stepper {
+                    open(s)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 1) {
+                            ForEach(cards) { c in
+                                Button(loc(c.title)) {
+                                    stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                                }
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(Theme.silver)
+                                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                                .padding(.horizontal, 12)
+                                .background(Theme.raised)
                             }
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(Theme.silver)
-                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                            .padding(.horizontal, 12)
-                            .background(Theme.raised)
                         }
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
+                Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
+                Text(L10n.t("sos.offer", runtime.locale)).font(.caption2).foregroundStyle(Color(white: 0.55))
+                Text(L10n.t("vision.none", runtime.locale))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.orange)
             }
-            Text(L10n.t("sos.call", runtime.locale)).font(.caption.weight(.bold))
-            Text(L10n.t("sos.offer", runtime.locale)).font(.caption2).foregroundStyle(Color(white: 0.55))
-            Text(L10n.t("vision.none", runtime.locale))
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.orange)
-            Text("No on-device CoreML model ships in this build. Hash-to-label is not an ID. Fungi default LEAVE IT. Edible unlock is off.")
-                .font(.caption2)
-                .foregroundStyle(Color(white: 0.5))
         }
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
-        .padding(8)
     }
 
     /// Every card ships both languages. The list was reading the locale and
@@ -62,24 +59,35 @@ struct FieldTab: View {
     /// map comes straight in here, so without that way back a hold on the
     /// ground would be a one-way door into a single card.
     private func open(_ s: StepperState) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text(loc(s.card.title))
                     .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(Color.white)
                 Spacer(minLength: 8)
                 Button("ALL CARDS") { stepper = nil }
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundStyle(Theme.silver)
-                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                    .buttonStyle(HUDOverlayChipStyle())
             }
             Text("STEP \(s.index + 1) OF \(s.card.steps.count)")
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(Color(white: 0.55))
-            Text(loc(s.step.`do`))
-            Text(loc(s.step.child)).font(.caption)
-            if let bpm = s.step.metronomeBpm { Text("CPR \(bpm)").font(.caption) }
-            HStack {
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(loc(s.step.`do`))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.silver)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(loc(s.step.child))
+                        .font(.caption)
+                        .foregroundStyle(Color(white: 0.7))
+                    if let bpm = s.step.metronomeBpm {
+                        Text("CPR \(bpm)")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
+            HStack(spacing: 8) {
                 // On the last step NEXT did nothing at all, which reads as a
                 // broken button rather than the end of the card.
                 Button(s.isLast ? "DONE" : "NEXT") {
@@ -91,7 +99,7 @@ struct FieldTab: View {
                         stepper = x
                     }
                 }
-                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .buttonStyle(HUDActionStyle(filled: true))
                 Button("SPEAK") {
                     var x = s; x.speak(); stepper = x
                     if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech) {
@@ -100,17 +108,15 @@ struct FieldTab: View {
                         runtime.speechChrome = ""
                     }
                 }
-                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                Button("SEND TO PARTY") {
-                    var x = s
-                    x.send()
-                    stepper = x
-                    runtime.sendFieldToParty(cardID: s.card.id)
-                }
-                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .buttonStyle(HUDActionStyle(filled: false))
             }
-            .font(.system(size: 12, weight: .heavy))
-            .foregroundStyle(Theme.silver)
+            Button("SEND TO PARTY") {
+                var x = s
+                x.send()
+                stepper = x
+                runtime.sendFieldToParty(cardID: s.card.id)
+            }
+            .buttonStyle(HUDActionStyle(filled: false))
             Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
             if !runtime.speechChrome.isEmpty {
                 Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)

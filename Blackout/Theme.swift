@@ -39,7 +39,7 @@ struct HUDDockStyle: ButtonStyle {
     }
 }
 
-/// Overlay chip that keeps its whole word. Used for INST and LOCK on the canvas.
+/// Overlay chip that keeps its whole word. Used for INSTRUMENTS and LOCK-ON.
 struct HUDOverlayChipStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
@@ -57,5 +57,145 @@ struct HUDOverlayChipStyle: ButtonStyle {
                     .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+}
+
+/// Glass page over the still-mounted map. COMMS / FIELD / EXPEDITION speak
+/// this language so they are not a form dump next to a HUD.
+struct HUDPage<Content: View>: View {
+    let title: String
+    var status: String = ""
+    var warn: Bool = false
+    var content: Content
+
+    init(
+        title: String,
+        status: String = "",
+        warn: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title
+        self.status = status
+        self.warn = warn
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(title)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                Spacer(minLength: 8)
+                if !status.isEmpty {
+                    Text(status)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(warn ? Color.orange : Theme.silver)
+                        .multilineTextAlignment(.trailing)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            content
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Theme.glass(opacity: 0.78))
+    }
+}
+
+struct HUDGlassCard<Content: View>: View {
+    var content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.glass())
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+            )
+    }
+}
+
+struct HUDActionStyle: ButtonStyle {
+    var filled: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .heavy))
+            .foregroundStyle(filled ? Color.white : Theme.silver)
+            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            .contentShape(Rectangle())
+            .background(filled ? Theme.accent : Theme.raised)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+}
+
+/// Left-aligned rail that moves a control to the next line when the current one is full.
+/// INSTRUMENTS never becomes INST, and it never becomes INSTRUME….
+struct HUDWrapRail: Layout {
+    var spacing: CGFloat
+
+    init(spacing: Double) {
+        self.spacing = CGFloat(spacing)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+        let rows = rowsFitting(maxWidth: proposal.width ?? .infinity, subviews: subviews)
+        let width = rows.map(\.width).max() ?? 0
+        let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        var y = bounds.minY
+        for row in rowsFitting(maxWidth: bounds.width, subviews: subviews) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(
+                    at: CGPoint(x: x, y: y + (row.height - size.height) / 2),
+                    proposal: ProposedViewSize(size)
+                )
+                x += size.width + spacing
+            }
+            y += row.height + spacing
+        }
+    }
+
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func rowsFitting(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var row = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let width = row.indices.isEmpty ? size.width : row.width + spacing + size.width
+            if !row.indices.isEmpty, width > maxWidth {
+                rows.append(row)
+                row = Row(indices: [index], width: size.width, height: size.height)
+            } else {
+                row.indices.append(index)
+                row.width = width
+                row.height = max(row.height, size.height)
+            }
+        }
+        if !row.indices.isEmpty { rows.append(row) }
+        return rows
     }
 }

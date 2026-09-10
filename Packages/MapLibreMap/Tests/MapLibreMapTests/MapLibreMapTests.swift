@@ -407,6 +407,52 @@ final class MapLibreMapTests: XCTestCase {
         }
     }
 
+    func testActiveBearingIsQuietWithoutSomewhereToWalk() {
+        XCTAssertNil(
+            MapFieldChrome.activeBearing(
+                headingDeg: 12,
+                hasDestination: false,
+                lockOn: false,
+                hasRoute: false
+            )
+        )
+        XCTAssertEqual(
+            MapFieldChrome.activeBearing(
+                headingDeg: 45,
+                hasDestination: true,
+                lockOn: false,
+                hasRoute: false
+            ),
+            45
+        )
+        XCTAssertEqual(
+            MapFieldChrome.activeBearing(
+                headingDeg: 10,
+                hasDestination: false,
+                lockOn: true,
+                hasRoute: false
+            ),
+            10
+        )
+        XCTAssertEqual(
+            MapFieldChrome.activeBearing(
+                headingDeg: 8,
+                hasDestination: false,
+                lockOn: false,
+                hasRoute: true
+            ),
+            8
+        )
+        XCTAssertNil(
+            MapFieldChrome.activeBearing(
+                headingDeg: nil,
+                hasDestination: true,
+                lockOn: false,
+                hasRoute: false
+            )
+        )
+    }
+
     func testMapFieldChromeIsSilentWhenNothingIsActive() {
         XCTAssertTrue(
             MapFieldChrome.lines(

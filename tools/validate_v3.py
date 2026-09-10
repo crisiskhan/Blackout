@@ -1054,7 +1054,7 @@ def tip62_nav() -> None:
         and 'Button("WALK")' in map_tab
         and 'Button("DRIVE")' in map_tab
         and 'Button("SPEAK")' in map_tab
-        and 'Button("INST")' in map_tab
+        and 'Button("INSTRUMENTS")' in map_tab
         and 'Button("RULER")' in inst
         and 'Button("USNG")' in inst
         and 'Button("MAG/TRUE")' in inst
@@ -1204,6 +1204,7 @@ def main() -> None:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
     tip68_speak_field()
+    hud_quality()
     sys.exit(fail)
 
 
@@ -1298,6 +1299,20 @@ def tip68_speak_field() -> None:
             ok(f"Done: {label}")
         else:
             bad(fail_msg)
+
+
+def hud_quality() -> None:
+    """Quality bar — HUD on every tab, quiet bearing, keep Map mounted, deferred Field."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_hud_quality.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"HUD quality contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: HUD quality — whole words, every tab, keep Map, quiet bearing")
 
 
 if __name__ == "__main__":

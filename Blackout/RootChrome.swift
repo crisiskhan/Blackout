@@ -64,12 +64,22 @@ struct RootChrome: View {
     }
 
     private var tabBody: some View {
-        Group {
+        // MapLibre dies if MapTab is destroyed while Field opens from the
+        // hold card (ASC 72/73). Keep Map mounted under every tab. The other
+        // tabs are glass over it so the ground is still there.
+        ZStack {
+            MapTab(runtime: runtime)
+                .allowsHitTesting(runtime.tab == .map)
+                .accessibilityHidden(runtime.tab != .map)
             switch runtime.tab {
-            case .map: MapTab(runtime: runtime)
-            case .comms: CommsTab(runtime: runtime)
-            case .field: FieldTab(runtime: runtime)
-            case .expedition: ExpeditionTab(runtime: runtime)
+            case .map:
+                EmptyView()
+            case .comms:
+                CommsTab(runtime: runtime)
+            case .field:
+                FieldTab(runtime: runtime)
+            case .expedition:
+                ExpeditionTab(runtime: runtime)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -118,7 +128,7 @@ struct RootChrome: View {
                 Text(t.title)
                     .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .heavy))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.55)
                     .allowsTightening(true)
                     .multilineTextAlignment(.center)
                 Rectangle()

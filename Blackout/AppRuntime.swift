@@ -217,11 +217,19 @@ final class AppRuntime {
 
     /// FIELD on the card hands the matching card to the FIELD tab and goes
     /// there. Water reaches the treat tree; ground reaches its own biome card.
+    ///
+    /// The card button that calls this still owns the stack. Switching tab and
+    /// nil-ing `held` here tore the card out from under that button and crashed
+    /// on device (ASC 72). Queue the teardown for the next main turn so the
+    /// button can finish first; the Field route is latched already.
     func openFieldFromHold() {
         guard let point = held else { return }
         fieldJump = point.card.fieldRoute
-        held = nil
-        tab = .field
+        Task { @MainActor in
+            tab = .field
+            closeHold()
+            applyMapKeepAwake()
+        }
     }
 
     func toggleLockOn() {
@@ -708,7 +716,7 @@ enum BlackoutTab: String, CaseIterable, Identifiable {
         case .map: return "MAP"
         case .comms: return "COMMS"
         case .field: return "FIELD"
-        case .expedition: return "EXPED"
+        case .expedition: return "EXPEDITION"
         }
     }
 }

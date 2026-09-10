@@ -67,11 +67,11 @@ struct MapTab: View {
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
             .accessibilityHidden(runtime.held != nil)
-            if runtime.held == nil {
+            if runtime.tab == .map, runtime.held == nil {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if let held = runtime.held {
+            if runtime.tab == .map, let held = runtime.held {
                 HoldCardView(
                     held: held,
                     onField: { runtime.openFieldFromHold() },
@@ -85,7 +85,7 @@ struct MapTab: View {
             // The card takes the bottom of the canvas and the footer's credit
             // with it, but the top half is still drawing OSM's map. The line
             // has to stay wherever the map is.
-            if runtime.held != nil {
+            if runtime.tab == .map, runtime.held != nil {
                 Text(OSMCredit.line)
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(Color(white: 0.75))
@@ -123,7 +123,7 @@ struct MapTab: View {
     }
 
     private var topBar: some View {
-        HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
             TextField("SEARCH", text: $query)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
@@ -138,14 +138,14 @@ struct MapTab: View {
                         .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
                 )
                 .onSubmit { search() }
-            Button("INST") { runtime.showInstruments = true }
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                Button("INSTRUMENTS") { runtime.showInstruments = true }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
+                    runtime.toggleLockOn()
+                }
                 .buttonStyle(HUDOverlayChipStyle())
-                .accessibilityLabel("INSTRUMENTS")
-            Button(runtime.lockOn ? "LOCKED" : "LOCK") {
-                runtime.toggleLockOn()
             }
-            .buttonStyle(HUDOverlayChipStyle())
-            .accessibilityLabel(runtime.lockOn ? "LOCKED" : "LOCK-ON")
         }
     }
 
@@ -173,7 +173,12 @@ struct MapTab: View {
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
             tool: runtime.toolChrome,
-            bearingDeg: runtime.headingDeg,
+            bearingDeg: MapFieldChrome.activeBearing(
+                headingDeg: runtime.headingDeg,
+                hasDestination: runtime.routeTarget != nil,
+                lockOn: runtime.lockOn,
+                hasRoute: !runtime.routeCoords.isEmpty
+            ),
             speak: runtime.speechChrome
         )
         return Group {
