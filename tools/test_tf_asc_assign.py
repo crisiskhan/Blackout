@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import unittest
 from typing import Any
+import time
 
 import tf_asc_assign as assign
 
@@ -38,6 +39,45 @@ def _build(bid: str, version: str, state: str = "VALID") -> dict:
         ]
     }
 
+
+
+
+class TestPatchRetries401(unittest.TestCase):
+    def test_patch_401_then_200_then_assign(self):
+        # tip-75: VALID + PATCH 401 → ASSIGN 422. Retry PATCH before ASSIGN.
+        build = {
+            "data": [
+                {
+                    "id": "b75",
+                    "attributes": {
+                        "version": "75",
+                        "processingState": "VALID",
+                        "usesNonExemptEncryption": None,
+                    },
+                }
+            ]
+        }
+        api = FakeAPI(
+            [
+                ("GET", 200, build),
+                ("PATCH", 401, {"errors": [{"status": "401"}]}),
+                ("PATCH", 200, {}),
+                ("POST", 204, {}),
+            ]
+        )
+        slept: list[float] = []
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="75",
+            sleep=slept.append,
+            deadline=time.time() + 1000,
+            now=time.time,
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual([c[0] for c in api.calls], ["GET", "PATCH", "PATCH", "POST"])
+        self.assertTrue(slept)
 
 class TestAssignInternalRetries404(unittest.TestCase):
     def test_404_then_204(self) -> None:
