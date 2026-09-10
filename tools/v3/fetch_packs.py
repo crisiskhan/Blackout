@@ -9,6 +9,7 @@ or bundled.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import hashlib
 import json
 import math
@@ -72,6 +73,17 @@ KEEP_TAGS = {
     "emergency",
     "leisure",
     "landuse",
+    # A tank, a well and a cistern are all `man_made`, and they are the only
+    # water most of this country has. `water` separates a stock pond from a
+    # reservoir, and `intermittent` is the difference between a creek and a
+    # wash that is dry eleven months a year.
+    "man_made",
+    "water",
+    # Whether a tank holds water or diesel. Without it a storage tank is an
+    # unknown, and an unknown drawn as water is a lie.
+    "content",
+    "intermittent",
+    "seasonal",
     "boundary",
     "tracktype",
     "surface",
@@ -88,6 +100,24 @@ VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
 TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
+# Ground cover ink. All of it is within a few points of black on purpose: the
+# job is to tell desert from bosque at a glance without ever competing with a
+# silver street or a red route. Anything the tiler classes and this does not
+# name falls through to the default and draws as plain ground.
+LAND_INK = [
+    "match",
+    ["get", "class"],
+    "desert", "#17120c",
+    "playa", "#1a1a1e",
+    "mountain", "#121417",
+    "bosque", "#0b1410",
+    "woodland", "#0a120d",
+    "farm", "#0e1410",
+    "town", "#141417",
+    "park", "#0a140a",
+    "protected", "#0c1310",
+    "#101010",
+]
 MAJOR_HIGHWAYS = [
     "motorway",
     "motorway_link",
@@ -271,6 +301,40 @@ def slim_tags(tags: dict) -> dict:
     return {k: v for k, v in tags.items() if k in KEEP_TAGS}
 
 
+RESOURCE_TAGS = {
+    "natural": "^(spring|scrub|sand|dune|bare_rock|scree|wetland|heath|grassland|sinkhole)$",
+    "man_made": "^(water_well|water_tank|storage_tank|cistern|reservoir_covered)$",
+    "landuse": "^(farmland|orchard|meadow|vineyard|basin|salt_pond|greenhouse_horticulture|residential)$",
+}
+
+
+def overpass_resources(south: float, west: float, north: float, east: float) -> dict:
+    """The water and ground the first pass never asked for.
+
+    The original query fetched streets, waterways and lakes. It did not fetch
+    the springs, wells and stock tanks that are the only water out here, and it
+    did not fetch the scrub, sand and bare rock that say what the ground is.
+    This is a second, narrow pass for exactly those, run over the same bbox so
+    it merges into the extract already on disk instead of replacing it.
+    """
+    box = f"{south},{west},{north},{east}"
+    lines = []
+    for key, pattern in RESOURCE_TAGS.items():
+        lines.append(f'  node["{key}"~"{pattern}"]({box});')
+        lines.append(f'  way["{key}"~"{pattern}"]({box});')
+    body = "\n".join(lines)
+    q = f"""
+[out:json][timeout:180];
+(
+{body}
+);
+out body;
+>;
+out skel qt;
+"""
+    return _overpass(q, f"res:{box}")
+
+
 def overpass_bbox(south: float, west: float, north: float, east: float) -> dict:
     q = f"""
 [out:json][timeout:180];
@@ -291,11 +355,19 @@ out body;
 >;
 out skel qt;
 """
+    return _overpass(q, f"{south},{west},{north},{east}")
+
+
+def _overpass(q: str, cache_key: str) -> dict:
     body = urllib.parse.urlencode({"data": q}).encode()
     # A pack is well over a hundred tiles now, so one refused slot must not
     # throw away the tiles already paid for. Cache each answer on disk and back
     # off rather than failing the run.
-    key = hashlib.sha1(f"{south},{west},{north},{east}".encode()).hexdigest()[:16]
+    #
+    # The query is part of the key, not just the bbox. Asking a wider question
+    # about the same ground has to miss the cache, or adding a tag would
+    # silently reuse answers from before it was asked for.
+    key = hashlib.sha1(f"{cache_key}\n{q}".encode()).hexdigest()[:16]
     cached = OVERPASS_CACHE / f"{key}.json"
     if cached.is_file():
         try:
@@ -962,7 +1034,35 @@ def highway_in(values: list[str]) -> list:
 # `osm.geojson` stays in the tree as the input the vector tiles are built from,
 # but the app's copy step leaves it behind. The manifest describes what a phone
 # receives, so it must not count a file the phone never sees.
-NOT_SHIPPED = {"osm.geojson"}
+STAMP = "osm.fetched"
+# Build-time only. The extract is the tiler's input, and the date it carries
+# reaches the phone through the manifest rather than as a loose file.
+NOT_SHIPPED = {"osm.geojson", STAMP}
+
+
+def stamp_fetch(dest: Path) -> str:
+    """Record the day this pack's OSM was pulled, next to the extract itself.
+
+    The manifest is rebuilt every time the tiling changes, so the date cannot
+    live only there or a restyle would silently re-date year-old records. It
+    lives in a file that is only written when Overpass is actually called.
+    """
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    (dest / STAMP).write_text(day + "\n", encoding="utf-8")
+    return day
+
+
+def osm_fetched(dest: Path) -> str | None:
+    """The recorded pull date, or nothing. Never a guess.
+
+    A pack built before this was recorded has no honest answer, and the card
+    prints no date at all rather than implying the record is fresh.
+    """
+    stamp = dest / STAMP
+    if not stamp.is_file():
+        return None
+    day = stamp.read_text().strip()
+    return day or None
 
 
 def shipped_files(dest: Path) -> list[Path]:
@@ -1019,6 +1119,18 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
     layers.extend(
         [
             {
+                # What kind of empty the empty ground is. Loudest zoomed out,
+                # where there is nothing else to look at, and almost gone by
+                # the zoom you walk at, where the streets do the talking.
+                "id": "land-fill",
+                "type": "fill",
+                "source": "osm",
+                "paint": {
+                    "fill-color": LAND_INK,
+                    "fill-opacity": zoom_stops(6, 0.62, 11, 0.46, 13, 0.22, 14, 0.12),
+                },
+            },
+            {
                 "id": "public-land-fill",
                 "type": "fill",
                 "source": "public-land",
@@ -1034,17 +1146,82 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "id": "water-fill",
                 "type": "fill",
                 "source": "osm",
-                "filter": ["==", ["get", "natural"], "water"],
+                "filter": ["in", ["get", "class"], ["literal", ["body", "reservoir"]]],
                 "paint": {"fill-color": "#142430", "fill-opacity": 0.82},
             },
             {
+                # Rivers and canals: the shape of the country, drawn from the
+                # zoom where you pick a direction.
                 "id": "water",
                 "type": "line",
                 "source": "osm",
-                "filter": ["has", "waterway"],
+                "filter": ["in", ["get", "class"], ["literal", ["river", "canal", "creek", "acequia", "dam"]]],
                 "paint": {
                     "line-color": "#3d6478",
                     "line-width": zoom_stops(10, 0.8, 15, 2.6),
+                },
+            },
+            {
+                # A wash is a line that is dry most of the year, and a solid
+                # stroke would promise water that is not there. Dashes say
+                # sometimes without needing a word.
+                "id": "water-ephemeral",
+                "type": "line",
+                "source": "osm",
+                "filter": ["in", ["get", "class"], ["literal", ["wash", "drain", "channel"]]],
+                "paint": {
+                    "line-color": "#2f4a59",
+                    "line-width": zoom_stops(12, 0.7, 15, 2.0),
+                    "line-dasharray": [2.5, 2.0],
+                },
+            },
+            {
+                # Springs, wells, tanks and taps. A ring, not a badge: it says
+                # the record puts water here, not that the water is good. A
+                # tank whose contents nobody recorded gets a grey ring instead
+                # of the water ring, because out here it is as likely to be
+                # diesel.
+                "id": "water-points",
+                "type": "circle",
+                "source": "osm",
+                "filter": [
+                    "in",
+                    ["get", "class"],
+                    ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
+                ],
+                "paint": {
+                    "circle-color": "#142430",
+                    "circle-radius": zoom_stops(12, 2.2, 15, 5.0),
+                    "circle-stroke-color": [
+                        "match", ["get", "class"],
+                        "tank_other", "#5a5f66",
+                        "#6f97a8",
+                    ],
+                    "circle-stroke-width": 1.4,
+                },
+            },
+            {
+                # The ring above is 5 points at street zoom. MapLibre's
+                # visibleFeatures only returns what the style drew large enough
+                # to hit, so a hold on the tank you can see came back empty.
+                # This one is the size of the hold itself, inked at zero, so
+                # the painted query and the thumb agree.
+                "id": "water-points-hit",
+                "type": "circle",
+                "source": "osm",
+                "filter": [
+                    "in",
+                    ["get", "class"],
+                    ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
+                ],
+                "paint": {
+                    "circle-color": "#142430",
+                    # Zero opacity is treated as not drawn, so visibleFeatures
+                    # skips it. One percent is enough for the query and not
+                    # enough for a thumb to see a second ring.
+                    "circle-opacity": 0.01,
+                    "circle-radius": 22,
+                    "circle-stroke-width": 0,
                 },
             },
             {
@@ -1136,6 +1313,33 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "circle-radius": 2.4,
                     "circle-stroke-color": VOID_INK,
                     "circle-stroke-width": 0.8,
+                },
+            },
+            {
+                # Named water, in the water's own colour so it never reads as
+                # a street. Only named records: printing "Unnamed" across a
+                # wash would be the map talking to itself.
+                "id": "water-labels",
+                "type": "symbol",
+                "source": "osm",
+                "minzoom": 12,
+                "filter": ["all", ["has", "name"], ["has", "class"]],
+                "layout": {
+                    "text-field": ["get", "name"],
+                    "symbol-placement": "line",
+                    "symbol-spacing": 240,
+                    "text-size": zoom_stops(12, 11, 15, 14, 18, 17),
+                    "text-font": [GLYPH_STACK],
+                    "text-max-angle": 40,
+                    "text-padding": 2,
+                    "text-optional": True,
+                    "text-keep-upright": True,
+                },
+                "paint": {
+                    "text-color": "#7fa6b8",
+                    "text-halo-color": VOID_INK,
+                    "text-halo-width": 2.0,
+                    "text-halo-blur": 0.15,
                 },
             },
             {
@@ -1245,8 +1449,13 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
 # addressed by layer, unlike the single undifferentiated blob it replaced, so
 # every layer drawing from `osm` has to name where it looks.
 OSM_SOURCE_LAYER = {
+    "land-fill": "land",
     "water-fill": "water",
     "water": "water",
+    "water-ephemeral": "water",
+    "water-points": "water",
+    "water-points-hit": "water",
+    "water-labels": "water",
     "roads-casing": "road",
     "roads-arterial-casing": "road",
     "roads": "road",
@@ -1394,6 +1603,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
 
     fc = osm_to_geojson(merged)
     graph = build_graph(merged)
+    stamp_fetch(dest)
     write_compact(dest / "osm.geojson", fc)
     write_graph_binary(dest / "graph.bin", graph)
     build_tiles(dest, pack)
@@ -1490,6 +1700,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
         "home": home_point(pack["slices"], bb),
+        "osmFetched": osm_fetched(dest),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
@@ -1503,6 +1714,57 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     )
     print(f"  sample streets: {stats['sampleStreetNames']}", flush=True)
     return manifest
+
+
+def feature_key(f: dict) -> str:
+    """A feature's identity for merge purposes.
+
+    `osm_to_geojson` drops the OSM element id, so two passes over the same
+    ground have to be reconciled on what they draw instead. Shape plus tags is
+    exact enough: two records with the same geometry and the same tags are the
+    same record however many tiles returned it.
+    """
+    props = json.dumps(f.get("properties") or {}, sort_keys=True, separators=(",", ":"))
+    geom = json.dumps(f.get("geometry") or {}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(f"{props}|{geom}".encode()).hexdigest()
+
+
+def grow_resources(dest: Path, pack: dict, span: float = 0.5) -> dict:
+    """Add the water and land-cover records to a pack already on disk.
+
+    Purely additive. Nothing is removed and no street is touched, so the graph
+    the router walks comes out of this byte-identical — which is the check that
+    proves the El Paso map still works.
+    """
+    fc = json.loads((dest / "osm.geojson").read_text())
+    before = len(fc["features"])
+    have = {feature_key(f) for f in fc["features"]}
+
+    bb = union_bbox(pack["slices"])
+    # Resource records are sparse next to streets, so these tiles can be four
+    # times the width the street pass needs and still answer in a couple of
+    # seconds.
+    tiles = tile_bbox(bb, max_span=span)
+    print(f"  resources {pack['id']} tiles={len(tiles)}", flush=True)
+    parts = []
+    for i, tile in enumerate(tiles, 1):
+        print(f"  tile {i}/{len(tiles)} {tile}", flush=True)
+        parts.append(overpass_resources(tile["south"], tile["west"], tile["north"], tile["east"]))
+        time.sleep(1.0)
+
+    grown = osm_to_geojson(merge_osm(parts))
+    added = []
+    for f in grown["features"]:
+        key = feature_key(f)
+        if key in have:
+            continue
+        have.add(key)
+        added.append(f)
+    fc["features"].extend(added)
+    stamp_fetch(dest)
+    write_compact(dest / "osm.geojson", fc)
+    print(f"  resources {pack['id']} {before} -> {len(fc['features'])} features (+{len(added)})", flush=True)
+    return {"before": before, "added": len(added), "after": len(fc["features"])}
 
 
 def finalize_existing(dest: Path) -> dict:
@@ -1596,6 +1858,7 @@ def finalize_existing(dest: Path) -> dict:
         "files": sorted(str(p.relative_to(dest)) for p in files),
         "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
         "home": home_point(pack["slices"], bb),
+        "osmFetched": osm_fetched(dest),
         "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
         "terrain": hillshade_meta,
         "stats": stats,
@@ -1636,9 +1899,26 @@ def rebuild(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def resources(ids: list[str] | None = None) -> None:
+    """Add the water and land-cover pass to packs already on disk, then rebuild.
+
+    Additive only. The router's graph is re-encoded from the bytes already
+    there rather than rebuilt from the extract, so growing a pack this way
+    cannot move a street.
+    """
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("RESOURCES", pid, flush=True)
+        grow_resources(root / pid, PACKS[pid])
+        finalize_existing(root / pid)
+    write_catalog(root)
+
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
+    elif argv and argv[0] == "--resources":
+        resources(argv[1:] or None)
     else:
         main(argv or None)

@@ -22,7 +22,7 @@
         "north": 30.32,
         "east": -97.68
       },
-      "featureCount": 40384
+      "featureCount": 41274
     },
     "wild": {
       "name": "Lost Pines / Bastrop wild",
@@ -33,7 +33,7 @@
         "north": 30.18,
         "east": -97.2
       },
-      "featureCount": 3574
+      "featureCount": 3636
     },
     "union": {
       "name": "Austin / Lost Pines walkable union",
@@ -44,7 +44,7 @@
         "north": 30.42,
         "east": -97.2
       },
-      "featureCount": 205210
+      "featureCount": 210348
     },
     "region": {
       "name": "Austin / Bastrop / Buda region",
@@ -55,7 +55,7 @@
         "north": 30.5,
         "east": -97.2
       },
-      "featureCount": 274066
+      "featureCount": 280644
     }
   },
   "banners": [
@@ -63,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 25981104,
+  "bytes": 29842885,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -94,6 +94,7 @@
     "lat": 30.28,
     "lon": -97.73
   },
+  "osmFetched": "2026-09-09",
   "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
@@ -120,7 +121,7 @@
     ]
   },
   "stats": {
-    "features": 274496,
+    "features": 281108,
     "highwayLines": 251209,
     "namedStreets": 45194,
     "sampleStreetNames": [
@@ -137,8 +138,8 @@
       "Robin Road",
       "Dahlstrom"
     ],
-    "water": 19180,
-    "places": 410,
+    "water": 19181,
+    "places": 417,
     "graphEdges": 848575,
     "graphNodes": 296343,
     "streetsVisibleAtWalkingZoom": true

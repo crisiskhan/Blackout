@@ -17,9 +17,13 @@ public struct OfflineMapView: UIViewRepresentable {
     public var packEast: Double
     public var route: [(lat: Double, lon: Double)]
     public var destination: (lat: Double, lon: Double)?
+    /// The point the inspect card is about, marked so the card never hides it.
+    public var held: (lat: Double, lon: Double)?
     /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
     public var onMapTap: ((Double, Double) -> Void)?
+    /// A thumb held still on a place, with whatever the pack has drawn there.
+    public var onMapHold: ((Double, Double, [String: String]) -> Void)?
 
     public init(
         styleURL: URL,
@@ -33,8 +37,10 @@ public struct OfflineMapView: UIViewRepresentable {
         packEast: Double,
         route: [(lat: Double, lon: Double)] = [],
         destination: (lat: Double, lon: Double)? = nil,
+        held: (lat: Double, lon: Double)? = nil,
         fitToken: Int = 0,
-        onMapTap: ((Double, Double) -> Void)? = nil
+        onMapTap: ((Double, Double) -> Void)? = nil,
+        onMapHold: ((Double, Double, [String: String]) -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -47,8 +53,10 @@ public struct OfflineMapView: UIViewRepresentable {
         self.packEast = packEast
         self.route = route
         self.destination = destination
+        self.held = held
         self.fitToken = fitToken
         self.onMapTap = onMapTap
+        self.onMapHold = onMapHold
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -78,7 +86,21 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.numberOfTapsRequired = 1
         tap.delegate = context.coordinator
         view.addGestureRecognizer(tap)
+        let hold = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleHold(_:))
+        )
+        hold.minimumPressDuration = Inspect.holdSeconds
+        // A thumb that travels further than this was panning, so the hold
+        // fails and MapLibre keeps the drag.
+        hold.allowableMovement = CGFloat(Inspect.holdDriftPoints)
+        hold.delegate = context.coordinator
+        view.addGestureRecognizer(hold)
+        // A tap that lands inside a hold would fire on lift and move the
+        // destination out from under the card.
+        tap.require(toFail: hold)
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onMapHold = onMapHold
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -90,6 +112,7 @@ public struct OfflineMapView: UIViewRepresentable {
         uiView.shouldRequestAuthorizationToUseLocationServices = true
         uiView.showsUserLocation = true
         context.coordinator.onMapTap = onMapTap
+        context.coordinator.onMapHold = onMapHold
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
     }
 
@@ -103,6 +126,7 @@ public struct OfflineMapView: UIViewRepresentable {
             packEast: packEast,
             route: route,
             destination: destination,
+            held: held,
             fitToken: fitToken
         )
     }
@@ -117,11 +141,14 @@ public struct OfflineMapView: UIViewRepresentable {
             var packEast: Double
             var route: [(lat: Double, lon: Double)]
             var destination: (lat: Double, lon: Double)?
+            var held: (lat: Double, lon: Double)?
             var fitToken: Int
         }
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
+        var onMapHold: ((Double, Double, [String: String]) -> Void)?
+        private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
         var puckHalo: MLNPolygon?
@@ -130,6 +157,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedPuck: (lat: Double, lon: Double)?
         var storedRoute: [(lat: Double, lon: Double)]?
         var storedDestination: (lat: Double, lon: Double)?
+        var storedHeld: (lat: Double, lon: Double)?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
         var fittedFitToken = 0
@@ -141,11 +169,127 @@ public struct OfflineMapView: UIViewRepresentable {
             onMapTap?(coord.latitude, coord.longitude)
         }
 
+        @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
+            guard gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
+            let point = gesture.location(in: view)
+            let coord = view.convert(point, toCoordinateFrom: view)
+            holdTick.impactOccurred()
+            onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view))
+            liftIntoView(point, on: view)
+        }
+
+        /// Slide the map so the held place is above the card instead of behind
+        /// it. Capping the card at half the screen keeps the top half clear;
+        /// this is what puts the pin up there when the thumb landed low.
+        func liftIntoView(_ point: CGPoint, on view: MLNMapView) {
+            let height = view.bounds.height
+            guard height > 1, point.y > height * Inspect.holdLiftBelow else { return }
+            let drop = point.y - height * Inspect.holdLiftTo
+            let moved = view.convert(
+                CGPoint(x: view.bounds.midX, y: view.bounds.midY + drop),
+                toCoordinateFrom: view
+            )
+            guard CLLocationCoordinate2DIsValid(moved) else { return }
+            view.setCenter(moved, animated: true)
+        }
+
+        /// What the pack recorded under the thumb.
+        ///
+        /// Painted layers are asked first — fills and lines come back that way.
+        /// Points do not: a tank is a five-point circle, and MapLibre's own
+        /// docs say `visibleFeatures` only returns what the style drew large
+        /// enough to hit. So the same 44pt box is then asked of the pack's
+        /// vector source, and any spring, well, tank or tap whose coordinate
+        /// falls inside it is added to the ranking. The puck, the route and
+        /// the pin are still skipped: they are the app talking to itself.
+        func record(under point: CGPoint, on view: MLNMapView) -> [String: String] {
+            guard let style = view.style else { return [:] }
+            let readable = Set(
+                style.layers
+                    .map(\.identifier)
+                    .filter { !Inspect.overlayLayerIDs.contains($0) }
+            )
+            let reach = CGFloat(Inspect.holdProbePoints)
+            let box = CGRect(
+                x: point.x - reach / 2,
+                y: point.y - reach / 2,
+                width: reach,
+                height: reach
+            )
+            let painted = readable.isEmpty
+                ? []
+                : view.visibleFeatures(in: box, styleLayerIdentifiers: readable)
+            let points = packPoints(in: box, on: view, style: style)
+            return Inspect.pick((painted + points).map(Self.tags(from:)))
+        }
+
+        /// Points the style drew too small for `visibleFeatures` to admit.
+        /// Restricted to the pack's own source so a hold cannot read a pin.
+        private func packPoints(
+            in box: CGRect,
+            on view: MLNMapView,
+            style: MLNStyle
+        ) -> [MLNFeature] {
+            guard let source = style.source(withIdentifier: Inspect.packSourceID) as? MLNVectorTileSource
+            else { return [] }
+            // `convert(_:toCoordinateBoundsFrom:)` has been seen to hand back
+            // a north-west / south-east pair. The inline bounds test wants
+            // south-west / north-east, and an inverted box drops every point.
+            // The four corners, then min/max, cannot invert.
+            let corners = [
+                CGPoint(x: box.minX, y: box.minY),
+                CGPoint(x: box.maxX, y: box.minY),
+                CGPoint(x: box.minX, y: box.maxY),
+                CGPoint(x: box.maxX, y: box.maxY),
+            ].map { view.convert($0, toCoordinateFrom: view) }
+            let south = corners.map(\.latitude).min() ?? 0
+            let north = corners.map(\.latitude).max() ?? 0
+            let west = corners.map(\.longitude).min() ?? 0
+            let east = corners.map(\.longitude).max() ?? 0
+            let bounds = MLNCoordinateBounds(
+                sw: CLLocationCoordinate2D(latitude: south, longitude: west),
+                ne: CLLocationCoordinate2D(latitude: north, longitude: east)
+            )
+            return source
+                .features(sourceLayerIdentifiers: Inspect.packPointSourceLayers, predicate: nil)
+                .filter { feature in
+                    let tags = Self.tags(from: feature)
+                    let isPoint = Inspect.packPointClasses.contains(tags["class"] ?? "")
+                        || ["storage_tank", "water_tank", "water_well", "cistern", "reservoir_covered"]
+                        .contains(tags["man_made"] ?? "")
+                    guard isPoint else { return false }
+                    return MLNCoordinateInCoordinateBounds(feature.coordinate, bounds)
+                }
+        }
+
+        private static func tags(from feature: MLNFeature) -> [String: String] {
+            var tags: [String: String] = [:]
+            for (key, value) in feature.attributes {
+                if let text = value as? String {
+                    tags[key] = text
+                } else if let number = value as? NSNumber {
+                    tags[key] = number.stringValue
+                }
+            }
+            return tags
+        }
+
         public func gestureRecognizer(
             _ gestureRecognizer: UIGestureRecognizer,
             shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
         ) -> Bool {
             true
+        }
+
+        public func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldReceive touch: UITouch
+        ) -> Bool {
+            // Touch-down is the 0.4s of notice the haptic engine wants. Cold,
+            // the tick arrives after the card, and the whole point of it is to
+            // say the card is coming.
+            if gestureRecognizer is UILongPressGestureRecognizer { holdTick.prepare() }
+            return true
         }
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
@@ -168,11 +312,14 @@ public struct OfflineMapView: UIViewRepresentable {
                 stored: storedDestination,
                 destination: spec.destination
             )
+            // Both pins live in the same style pass, so either one moving is
+            // reason enough to run it.
+            let heldNeeds = force || HoldPin.needsReapply(stored: storedHeld, held: spec.held)
             if !OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
                 routeNeedsReapply: routeNeeds,
-                destinationNeedsReapply: destNeeds
+                destinationNeedsReapply: destNeeds || heldNeeds
             ) {
                 return
             }
@@ -180,6 +327,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 syncRoute(on: view, spec: spec, force: force)
                 syncStyleOverlays(on: view, spec: spec)
                 storedDestination = spec.destination
+                storedHeld = spec.held
                 return
             }
 
@@ -219,6 +367,7 @@ public struct OfflineMapView: UIViewRepresentable {
             syncRoute(on: view, spec: spec, force: true)
             syncStyleOverlays(on: view, spec: spec)
             storedDestination = spec.destination
+            storedHeld = spec.held
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -355,6 +504,34 @@ public struct OfflineMapView: UIViewRepresentable {
                     style.addLayer(core)
                 }
             } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                var empty = [CLLocationCoordinate2D]()
+                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+            }
+
+            if let point = spec.held {
+                let mark = MLNPointFeature()
+                mark.coordinate = CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
+                if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
+                    src.shape = mark
+                } else {
+                    let src = MLNShapeSource(identifier: HoldPin.sourceID, shape: mark, options: nil)
+                    style.addSource(src)
+                    let ring = MLNCircleStyleLayer(identifier: HoldPin.ringLayerID, source: src)
+                    ring.circleColor = NSExpression(forConstantValue: UIColor(white: 1, alpha: 0.18))
+                    ring.circleRadius = NSExpression(forConstantValue: HoldPin.ringRadius)
+                    ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                    style.addLayer(ring)
+                    let core = MLNCircleStyleLayer(identifier: HoldPin.coreLayerID, source: src)
+                    core.circleColor = NSExpression(
+                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    )
+                    core.circleRadius = NSExpression(forConstantValue: HoldPin.coreRadius)
+                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                    core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                    style.addLayer(core)
+                }
+            } else if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
                 var empty = [CLLocationCoordinate2D]()
                 src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }

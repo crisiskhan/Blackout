@@ -22,7 +22,7 @@
         "north": 35.14,
         "east": -106.55
       },
-      "featureCount": 35481
+      "featureCount": 36173
     },
     "wild": {
       "name": "Sandia foothills wild",
@@ -33,7 +33,7 @@
         "north": 35.25,
         "east": -106.38
       },
-      "featureCount": 2344
+      "featureCount": 2676
     },
     "union": {
       "name": "Albuquerque / Rio Rancho / Sandia union",
@@ -44,7 +44,7 @@
         "north": 35.35,
         "east": -106.35
       },
-      "featureCount": 131947
+      "featureCount": 136418
     },
     "region": {
       "name": "Albuquerque / Bernalillo / Isleta region",
@@ -55,7 +55,7 @@
         "north": 35.95,
         "east": -105.65
       },
-      "featureCount": 227988
+      "featureCount": 235914
     }
   },
   "banners": [
@@ -64,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 31795418,
+  "bytes": 34046073,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -95,6 +95,7 @@
     "lat": 35.1,
     "lon": -106.61500000000001
   },
+  "osmFetched": "2026-09-09",
   "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
@@ -121,7 +122,7 @@
     ]
   },
   "stats": {
-    "features": 228210,
+    "features": 236140,
     "highwayLines": 210634,
     "namedStreets": 52195,
     "sampleStreetNames": [
@@ -138,8 +139,8 @@
       "Headquarters Road",
       "Wildflower Loop"
     ],
-    "water": 14451,
-    "places": 419,
+    "water": 14453,
+    "places": 471,
     "graphEdges": 880638,
     "graphNodes": 312157,
     "streetsVisibleAtWalkingZoom": true

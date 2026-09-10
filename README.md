@@ -89,13 +89,215 @@ z12. Footways and paths come in at z13 with the residential grid.
 
 The bytes that freed went back into ground. TX WEST covers 2.8× the area it did
 before and NM 3.65×, while all three packs together drop from 201.0 MB to
-89.9 MB.
+97.1 MB — and that figure now carries the water and land-cover layer as well.
 
-| Pack | Ships | of which streets | of which graph | Highway lines | Named streets | Graph |
+| Pack | Ships | of which tiles | of which graph | Highway lines | Named streets | Graph |
 |---|---|---|---|---|---|---|
-| TX WEST | 32.1 MB | 15.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
-| NM | 31.8 MB | 13.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
-| TX EAST | 26.0 MB | 11.5 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+| TX WEST | 33.2 MB | 16.8 MB | 9.8 MB | 173,901 | 60,153 | 263,512 nodes / 742,351 edges |
+| NM | 34.0 MB | 15.9 MB | 11.7 MB | 210,634 | 52,195 | 312,157 nodes / 880,638 edges |
+| TX EAST | 29.8 MB | 15.3 MB | 11.2 MB | 251,209 | 45,194 | 296,343 nodes / 848,575 edges |
+
+### Hold a place to read the record
+
+The map answers a thumb held still for 0.4s. The recogniser fails if the thumb
+drifts more than 12pt, so a drag is still a drag and no card appears; a tap is
+made to wait on the hold, so a press that becomes a card cannot also move the
+destination out from under it. The probe reads a 44pt box rather than a point
+— a thumb is not a pixel — and ranks what it finds. Water comes first, because
+finding water is what holding a place is for: holding where a wash crosses a
+road is a question about the wash, and the road already has its name written
+along it. After that a record the survey named beats one it did not, because a
+name means somebody stood at that exact thing. Then, between two named records,
+take the smaller: a street is a line you aimed at, landcover is a sheet you
+cannot miss. Between two unnamed ones take the ground, because out there the
+biome is the answer and a ranch track is not.
+
+That last pair of rules cost two passes to get right. `landuse=residential` is
+drawn under every street in El Paso and Las Cruces, so ranking on kind alone
+answered every hold downtown with the same anonymous ground. Ranking names
+first fixed the unnamed case and left the named one: Gramercy Park still
+answered for East Amador Avenue, because both are named and land sat above
+street. Sampling 4,000 points across the tx-west pack, a street and a piece of
+ground are both under the thumb 1.5% of the time, split about evenly between
+the two cases — which is why it takes both rules and not either one.
+
+The probe also has to look straight through the eight layers the app draws for
+itself: the route line, the puck, and both pins. None of them carries a record,
+and a hold that read the pin it just dropped would answer "Open ground" over
+the spring underneath it. The skip list is written by hand, so a guard resolves
+both sides — the layers the code constructs and the ids the list names — and
+fails either way round.
+
+The card is content-sized and capped at half the **canvas**, and the held point
+gets its own bright pin over the scrim, so the place is never behind the thing
+describing it. The canvas is the ruler that matters: half an 852pt screen is
+most of a 529pt map, and the first cut measured the screen, so the card landed
+back on top of the pin the camera had just lifted clear. Squeezing it to the
+map meant the content could no longer be `fixedSize` either — under a short
+canvas the sentences give up lines so FIELD and MARK keep their 44pt rather
+than being clipped off the bottom. The scrim over the rest of the canvas is
+graded, 14% over the pin and 55% behind the card: flat, it dimmed the one thing
+the card was talking about, which undid half the reason for capping the card at
+all.
+
+Tap the dim map or swipe down to close. The swipe is on the whole canvas rather
+than on the card, because a card-only swipe meant the top half of the screen
+answered the gesture with nothing, and a surface that ignores you is one people
+decide is broken.
+
+Two actions, FIELD and MARK. There is no third and there is no SOS: SOS is a
+Comms button, and a thumb resting on a map is not a call for help. That rule
+has a second half that is easy to miss. `.isModal` is the tidy way to write a
+card over a map — VoiceOver stays inside it instead of wandering onto the
+canvas — and it hides everything outside its own subtree, tab bar included, and
+Comms is on the tab bar. So the tidy version put SOS out of reach for anyone
+using a screen reader. The canvas is hidden from VoiceOver instead, which is
+what the scrim already does for a thumb, and only the canvas.
+
+`MARK` marks the held place rather than the fix, and carries the record's name
+into the label. Marks merge by coordinate, so the card opens reading `MARKED`
+when there is already one there — the button used to offer a mark it would not
+make.
+
+`FIELD` opens the card that answers that ground. Every reading names an ordered
+route rather than one id: the state cards that describe that exact ground,
+then the core card behind them. Texas wrote a heat island card — *"pavement, no
+shade, and a party still moving in an El Paso, Austin, or Albuquerque
+afternoon"* — and New Mexico wrote one about ice on rock, and each ships only
+in its own state's book, so every hold used to fall back to one of five core
+cards and a subdivision at three in the afternoon opened "Stop and locate".
+FIELD now walks the route and takes the first card the loaded book has. Falling
+through is the normal case, not a fault, so the last id on every route is a
+core one and the tab cannot come up empty. Three routes so far: built-up ground
+to the heat island, rock and peaks to ice on rock, and a track to the cattle
+guard, because a track out here is a ranch road. Water never diverts — the `DO`
+line just said treat it, so FIELD opens the treat tree and nothing else. A
+guard reads the ids out of `Inspect.swift` and checks them against the shipped
+books, because both sides are hand-written strings in two different languages.
+
+Arriving there used to land on a menu. The tab drew all seventeen card titles
+in a `List` and hung the open card's steps underneath them, which is fine when
+you came to browse and useless when the map already chose: on a phone the list
+ate the height and the answer was below the fold. It shows one card or the
+list, never both, with `ALL CARDS` on the open card so a hold is not a one-way
+door into it. Two things surfaced while moving it. Every card ships both
+languages and the list read the locale while the steps did not, so a Spanish
+reader picked a card by its Spanish title and got the instructions in English.
+And `NEXT` on the last step called a `next()` that guards on `isLast`, so it
+did nothing at all — it says `DONE` and closes.
+
+`SURE %` is confidence **in the record**, and the line beside it says why. It
+is never a rating of the water. An unnamed `waterway=stream` reads *"the record
+says stream and no more; out here that is usually dry between rains"* at 52% —
+a statement about the survey, not the drink. What to do about the water is the
+`DO` row's job, and Field's. `tools/test_hold_and_water.py` fails the build if
+any word of permission — potable, drinkable, safe to drink, edible — reaches
+either file, and if the card ever grows a third button or reaches for SOS.
+
+It also keeps OpenStreetMap's line on screen. The credit lived in the canvas
+footer, and raising a card hid the footer while the map kept drawing above it.
+The three older guards all pass a file that does this, because they only check
+that the string is somewhere in `MapTab.swift`; the new one checks it is inside
+a branch that runs while a card is up.
+
+### Water and ground
+
+The first fetch asked for streets, waterways and lakes. It never asked for the
+springs, wells and stock tanks that are the only water in most of this country,
+nor for the scrub, sand and bare rock that say what the ground is. A second
+narrow pass (`fetch_packs.py --resources`) fetches exactly those over the same
+bbox and merges them into the extract already on disk. It is additive: the
+router's graph is re-encoded from the bytes already there rather than rebuilt,
+so all three `graph.bin` came out byte-identical, which is the proof the El
+Paso streets did not move.
+
+| Records added | TX WEST | NM |
+|---|---|---|
+| Springs / wells / tanks | 15 / 75 / 922 | 99 / 268 / 1,271 |
+| Acequias and ditches | 522 | 3,326 |
+| Drains | 3,121 | 1,968 |
+| Canals and rivers | 1,343 | 1,095 |
+| Desert, sand and rock | 809 | 2,045 |
+| Built-up ground | 1,838 | 2,743 |
+
+A tank is only water if the record says so. Around El Paso the pack holds 585
+`man_made=storage_tank` records and **110** of them carry `content=water`; 470
+say nothing at all and a few say fuel. The first cut drew every one with the
+water ring and told you to treat it, which invents a supply that is as likely
+to be diesel. `content` now travels from Overpass into the tile, the tiler
+splits `tank` from `tank_other` on it, the style gives `tank_other` a grey ring
+instead of the water one, and the card names an unlabelled tank as exactly
+that: *"a tank is mapped here and nobody wrote down what is in it"*, SURE 42%,
+leave it.
+
+Splitting the ink was only half of it. A tank is mapped both ways in OSM, as a
+node or as an outline, and 302 of the 583 around El Paso came through as
+outlines. `water-points` is a circle layer, which has nothing sensible to do
+with a ring; `water-fill` only takes `body` and `reservoir`; the line layers
+only take channels. So a little over half the tanks in the pack matched no
+layer at all — fetched, classed, in the tile, and nothing on the glass to hold.
+Between 5m and 32m across they were never worth an outline at z14 anyway, so
+the tiler centres spring, well, tank, tank_other and tap now, and the circle
+draws every one of them at every zoom. The guard reads the circle layers out of
+`style.json`, works out which classes each one claims, and fails if any of them
+reach a tile as anything but a point.
+
+Centring them was not enough to hold them. CI put a finger on what it thought was a real
+`content=water` tank and the probe came back empty; the same
+hold on a silent tank answered with the desert under it. The coordinates
+had been reverse-projected from decoded tile pixels, and the decoder flips
+Y, so the camera was as much as 1.7 km from the tank. The holds now use
+the `representative_point` the tiler wrote, from the extract. Even on the
+right point, `visibleFeatures` only returns what the style drew large enough
+to hit, and a tank is a five-point ring. The hold now asks the pack's own
+vector source for any spring, well, tank or tap inside the same 44pt box,
+and the style carries a second circle the size of that box at 1% opacity —
+zero reads as not drawn. The source is named `osm` so a pin the app drew
+cannot answer.
+
+Tinajas are not in this table because nothing in the record is tagged as one.
+Searching both extracts for the word and its neighbours — *tinaja*, *charco*,
+*hueco*, *ojo*, *aguaje* — returns 189 features and almost every one is a
+street: `Calle Ojo Caliente`, `Hueco Tanks Road`, `Ojo de la Vaca Road`. Class
+on a name and the map puts a rock pool in the middle of a subdivision.
+
+What the record does know is the outline, and that is the whole difference
+between a rock pool and a ranch reservoir. 230 unnamed `natural=water` polygons
+across TX WEST and NM are under 100 m², and 45 of the 51 in TX WEST are outside
+any mapped town. So the tiler measures each water body's longest side off the
+whole record — before the tile clips it, or a pool sitting on a tile seam would
+shrink at the join — and the card passes the measurement on and stops there.
+Nine metres reads *"the outline is only about 9m across — a rock pool, a trough
+and a dugout all read this way"*; seventy reads as a stock tank or a pool that
+fills after rain. The size never moves `SURE`, because it is a fact about the
+outline and not about the water.
+
+Ground cover draws as a quiet fill from the archive floor and fades to almost
+nothing by street zoom, where the streets carry the map; the inks are all
+within a few points of black so they can never compete with a silver street or
+a red route. Rivers and canals come in at z10 where you are choosing a
+direction. A wash is drawn dashed, because a solid stroke would promise water
+that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
+not a badge — the ring says the record puts water here, not that it is good.
+There are no animal icons, no edible dots, and no number anywhere that could be
+read as safe to drink.
+
+Repairing geometry is part of tiling now. OSM has plenty of areas whose ring
+crosses itself, and Shapely indexes them happily then throws on the first tile
+that clips one — a single bad polygon near Austin killed a whole pack build.
+`repair()` runs `make_valid` and keeps only the parts with the original's
+dimension, so a broken polygon cannot come back as a stray line.
+
+The tiler and the card keep two taxonomies in two languages, so a guard walks
+every record the tiler can class and checks the reader branches on it. The
+first version of that guard searched `Inspect.swift` for the tag's text and was
+satisfied by `"residential"` appearing in the list of paved highway kinds —
+while the land reader had no branch for `landuse=residential` at all. It also
+was never called from `main()`. 8,107 polygons across the three packs — every
+built-up part of El Paso, Las Cruces and Austin — were painted as town ground
+and answered *"nothing is mapped at this point"* when held. `landuse=salt_pond`
+was missing the same way. The guard now parses the branches the reader actually
+takes, so a tag that only appears in an unrelated list no longer counts.
 
 ### The walk graph walks
 
@@ -168,6 +370,16 @@ Two jobs, both required, both on every pull request whatever it targets.
 `Blackout generic iOS device` compiles the app and runs all twelve Python
 guards. `Swift tests on a simulator` boots a simulator and runs every package
 suite in `Packages/*/Tests`, discovered rather than listed.
+
+That simulator is the only place some questions can be asked. Unit tests prove
+the card reads a bag of tags correctly and the Python guards prove the tags are
+in the pack, but between the two sit a tile archive, a style, a 44pt query and
+a layer skip-list, and every one of them can silently answer nothing — which is
+exactly where the 302 unholdable tanks were hiding. `HoldOnTheGlassTests` boots
+the style the app boots, points the camera at four coordinates read back out of
+the shipped archive, and calls the app's own `record(under:on:)`. Each
+coordinate was picked by scanning the tiles for a feature with nothing of equal
+rank within twice the probe box, so a pass is not luck.
 
 That second job is newer than the tests it runs. Nothing had ever compiled
 them — no CI invoked them, and the packages are iOS-only so `swift test`

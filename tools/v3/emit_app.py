@@ -7,8 +7,21 @@ from .common import ROOT
 
 
 def w(path: Path, text: str) -> None:
+    """Write a generated file, but never over one that has been edited by hand.
+
+    Every file this module emits has since diverged: the map screen, the
+    runtime, the tabs, and the two extension stubs that had to be gutted
+    before the archive would sign. Emitting on top of them would undo the
+    audit and put the Watch and intents machinery back in the build. So a
+    file that already exists with different bytes is left where it is and
+    reported, and this module only fills in what is genuinely missing.
+    """
+    body = text if text.endswith("\n") else text + "\n"
+    if path.exists() and path.read_text(encoding="utf-8") != body:
+        print(f"kept hand-edited {path}")
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
+    path.write_text(body, encoding="utf-8")
 
 
 def emit() -> None:

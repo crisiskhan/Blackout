@@ -12,6 +12,11 @@ public struct PackManifest: Codable, Equatable, Sendable {
     /// Where the canvas opens with no GPS fix. The bbox midpoint is often bare
     /// terrain; `home` is the metro slice, where the street grid is.
     public var home: Coord?
+    /// The day this pack's OpenStreetMap extract was pulled, `YYYY-MM-DD`. The
+    /// inspect card prints it so nobody reads a record as current when it is a
+    /// year old. Optional because packs built before it existed have no honest
+    /// answer, and a made-up date is worse than none.
+    public var osmFetched: String?
 
     /// A struct's memberwise init is internal, so every other module could read
     /// a manifest off disk but not build one. That quietly made the map tests
@@ -24,7 +29,8 @@ public struct PackManifest: Codable, Equatable, Sendable {
         banners: [String],
         center: Coord,
         bbox: BBox,
-        home: Coord? = nil
+        home: Coord? = nil,
+        osmFetched: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -34,6 +40,7 @@ public struct PackManifest: Codable, Equatable, Sendable {
         self.center = center
         self.bbox = bbox
         self.home = home
+        self.osmFetched = osmFetched
     }
 
     public struct Coord: Codable, Equatable, Sendable {

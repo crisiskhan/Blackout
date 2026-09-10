@@ -22,7 +22,13 @@ import mapbox_vector_tile
 from pmtiles.tile import Compression, TileType, zxy_to_tileid
 from pmtiles.writer import Writer
 from shapely.geometry import box, shape
+from shapely.ops import unary_union
 from shapely.strtree import STRtree
+from shapely.validation import make_valid
+
+# How many dimensions a shape covers, so a repaired polygon is not allowed to
+# come back as the stray line where its ring crossed itself.
+DIMENSION = {"Polygon": 2, "MultiPolygon": 2, "LineString": 1, "MultiLineString": 1, "Point": 0, "MultiPoint": 0}
 
 EXTENT = 4096
 # Slop around each tile so a street crossing the seam still joins up instead of
@@ -60,6 +66,141 @@ PLACE_ZOOM = (
 POI_ZOOM = 13
 WATER_ZOOM = 9
 WATERWAY_ZOOM = 11
+
+# Ground cover, drawn as a quiet fill under everything else so the empty parts
+# of the pack say what kind of empty they are. It comes in at the archive floor
+# and stops before street zoom, where the streets themselves carry the map.
+LAND_ZOOM = MIN_ZOOM
+LAND_CLASS = {
+    ("natural", "scrub"): "desert",
+    ("natural", "heath"): "desert",
+    ("natural", "grassland"): "desert",
+    ("natural", "sand"): "playa",
+    ("natural", "dune"): "playa",
+    ("landuse", "salt_pond"): "playa",
+    ("landuse", "basin"): "playa",
+    ("natural", "bare_rock"): "mountain",
+    ("natural", "scree"): "mountain",
+    ("natural", "ridge"): "mountain",
+    ("natural", "cliff"): "mountain",
+    ("natural", "wetland"): "bosque",
+    ("natural", "wood"): "woodland",
+    ("landuse", "forest"): "woodland",
+    ("landuse", "farmland"): "farm",
+    ("landuse", "orchard"): "farm",
+    ("landuse", "meadow"): "farm",
+    ("landuse", "vineyard"): "farm",
+    ("landuse", "residential"): "town",
+    ("leisure", "park"): "park",
+}
+
+# When each kind of water earns its place. Rivers and canals are the shape of
+# the country and belong at the zoom where you are choosing a direction; a
+# stock tank or an unnamed wash is only useful once you could walk to it.
+WATER_CLASS_ZOOM = {
+    "river": 10,
+    "canal": 10,
+    "body": WATER_ZOOM,
+    "reservoir": 11,
+    "dam": 12,
+    "spring": 12,
+    "creek": 12,
+    "wash": 13,
+    "acequia": 13,
+    "drain": 13,
+    "tank": 13,
+    "tank_other": 13,
+    "well": 13,
+    "tap": 13,
+    "channel": 13,
+}
+
+# A tank is only water if the record says so. Around El Paso only 110 of 585
+# storage tanks carry `content=water`; 470 say nothing at all and a few say
+# fuel. Drawing all of them as water would invent a supply that is as likely
+# to be diesel, so the unrecorded ones get their own class and their own ink.
+WATER_CONTENT = {"water", "drinking_water", "rainwater", "wastewater", "sewage"}
+
+# Water the style draws as a dot rather than a shape, so it has to reach the
+# tile as a point.
+#
+# These are mapped both ways in OSM — around El Paso 302 of 583 storage tanks
+# are an outline and the rest are a node — and `water-points` is a circle
+# layer, which has nothing sensible to do with a ring. Between 5m and 32m
+# across, every one of them is a pixel or two at the deepest zoom the archive
+# holds, so the outline was never going to be worth anything on the glass. The
+# centre is: it draws at every zoom and it is where a thumb lands when you hold
+# the tank you can see.
+WATER_POINT_CLASSES = {"spring", "well", "tank", "tank_other", "tap"}
+
+# An unnamed pool the size of a room and an unnamed reservoir read identically
+# off the tags — both are a bare `natural=water`. The outline knows the
+# difference, so carry it: measured off the whole record before the tile clips
+# it, or a pool that straddles a tile edge would shrink at the seam.
+WATER_SPAN_CLASSES = {"body"}
+
+
+def span_metres(geom) -> int:
+    """The longest side of a record's bounding box, on the ground."""
+    west, south, east, north = geom.bounds
+    lat = math.radians((south + north) / 2.0)
+    return int(round(max((east - west) * 111320.0 * math.cos(lat), (north - south) * 110540.0)))
+
+
+def water_class(props: dict) -> str | None:
+    """Which kind of water a record is, in the same words the card uses.
+
+    The raw tags travel into the tile alongside this, because the hold card
+    reads the record itself. This is only so the style can decide what to draw
+    and at which zoom.
+    """
+    natural = props.get("natural")
+    made = props.get("man_made")
+    way = props.get("waterway")
+    if natural == "spring":
+        return "spring"
+    if made == "water_well":
+        return "well"
+    if made in ("water_tank", "cistern"):
+        return "tank"
+    if made in ("storage_tank", "reservoir_covered"):
+        content = props.get("content")
+        if content in WATER_CONTENT:
+            return "tank"
+        return "tank_other"
+    if props.get("amenity") == "drinking_water":
+        return "tap"
+    if way:
+        if way == "river":
+            return "river"
+        if way == "canal":
+            return "canal"
+        if way == "ditch":
+            return "acequia"
+        if way == "drain":
+            return "drain"
+        if way in ("dam", "dam_crest", "weir", "lock_gate", "fish_pass"):
+            return "dam"
+        if way in ("stream", "wadi"):
+            # An unnamed channel out here runs after rain and is dry the rest
+            # of the year. That is a different thing from a creek, and holding
+            # one has to say so.
+            return "creek" if props.get("name") else "wash"
+        return "channel"
+    if props.get("landuse") in ("reservoir", "basin") or props.get("water") == "reservoir":
+        return "reservoir"
+    if natural == "water":
+        return "body"
+    return None
+
+
+def land_class(props: dict) -> str | None:
+    for key, value in LAND_CLASS.items():
+        if props.get(key[0]) == key[1]:
+            return value
+    if props.get("boundary") in ("protected_area", "national_park") or props.get("leisure") == "nature_reserve":
+        return "protected"
+    return None
 
 
 def road_min_zoom(highway: str) -> int:
@@ -134,10 +275,54 @@ class Layer:
         return out
 
 
+# Tags the hold card reads off a tile. The card describes the record, so the
+# record has to survive tiling rather than being flattened into a colour.
+RECORD_TAGS = (
+    "name",
+    "natural",
+    "waterway",
+    "man_made",
+    "water",
+    "content",
+    "landuse",
+    "leisure",
+    "boundary",
+    "amenity",
+    "intermittent",
+)
+
+
+def repair(geom):
+    """Make a geometry safe to clip against a tile, or drop it.
+
+    OSM has plenty of areas whose ring crosses itself — a field traced twice,
+    a lake with a pinched neck. Shapely will index them happily and then throw
+    a topology error the moment a tile tries to clip one, which killed a whole
+    pack build over a single bad polygon near Austin. Repair rather than
+    refuse: `make_valid` keeps the shape and fixes the ring, and only the
+    parts with the same dimension as the original are kept so a broken polygon
+    cannot come back as a stray line.
+    """
+    if geom.is_valid:
+        return geom
+    fixed = make_valid(geom)
+    if fixed.is_empty:
+        return None
+    if fixed.geom_type != "GeometryCollection":
+        return fixed
+    wanted = DIMENSION.get(geom.geom_type)
+    parts = [g for g in fixed.geoms if DIMENSION.get(g.geom_type) == wanted]
+    if not parts:
+        return None
+    merged = unary_union(parts)
+    return None if merged.is_empty else merged
+
+
 def read_layers(pack: Path) -> dict[str, Layer]:
-    """Split the pack's street GeoJSON into the source layers the style names."""
+    """Split the pack's GeoJSON into the source layers the style names."""
     road = Layer("road")
     water = Layer("water")
+    land = Layer("land")
     place = Layer("place")
     fc = json.loads((pack / "osm.geojson").read_text())
     for feat in fc["features"]:
@@ -148,6 +333,9 @@ def read_layers(pack: Path) -> dict[str, Layer]:
             continue
         if geom.is_empty:
             continue
+        geom = repair(geom)
+        if geom is None or geom.is_empty:
+            continue
         highway = props.get("highway")
         if highway:
             keep = {"highway": highway}
@@ -155,11 +343,24 @@ def read_layers(pack: Path) -> dict[str, Layer]:
                 if props.get(k):
                     keep[k] = props[k]
             road.add(geom, keep, road_min_zoom(highway))
-        elif props.get("natural") == "water" or props.get("waterway"):
-            keep = {k: v for k, v in props.items() if k in ("natural", "waterway", "name")}
-            zoom = WATER_ZOOM if props.get("natural") == "water" else WATERWAY_ZOOM
-            water.add(geom, keep, zoom)
-        elif geom.geom_type == "Point":
+            continue
+        kind = water_class(props)
+        if kind:
+            keep = {k: v for k, v in props.items() if k in RECORD_TAGS}
+            keep["class"] = kind
+            if kind in WATER_SPAN_CLASSES and geom.geom_type in ("Polygon", "MultiPolygon"):
+                keep["span_m"] = span_metres(geom)
+            if kind in WATER_POINT_CLASSES and geom.geom_type != "Point":
+                geom = geom.representative_point()
+            water.add(geom, keep, WATER_CLASS_ZOOM.get(kind, WATERWAY_ZOOM))
+            continue
+        ground = land_class(props)
+        if ground and geom.geom_type in ("Polygon", "MultiPolygon"):
+            keep = {k: v for k, v in props.items() if k in RECORD_TAGS}
+            keep["class"] = ground
+            land.add(geom, keep, LAND_ZOOM)
+            continue
+        if geom.geom_type == "Point":
             keep = {
                 k: v
                 for k, v in props.items()
@@ -167,7 +368,7 @@ def read_layers(pack: Path) -> dict[str, Layer]:
             }
             if keep:
                 place.add(geom, keep, place_min_zoom(props))
-    layers = {"road": road, "water": water, "place": place}
+    layers = {"land": land, "road": road, "water": water, "place": place}
     for layer in layers.values():
         layer.index()
     return layers
@@ -197,7 +398,12 @@ def encode_tile(layers: dict[str, Layer], z: int, x: int, y: int) -> bytes | Non
             continue
         feats = []
         for geom, props in found:
-            clipped = geom.intersection(region)
+            try:
+                clipped = geom.intersection(region)
+            except Exception:
+                # Repaired at load, so this is rare, but one stubborn shape
+                # must not cost the pack every tile it appears in.
+                continue
             if clipped.is_empty:
                 continue
             shifted = _to_tile_geometry(clipped, to_tile)
@@ -291,10 +497,14 @@ def build(pack: Path, bbox: dict, name: str) -> dict:
                 "format": "pbf",
                 "attribution": "© OpenStreetMap contributors",
                 "vector_layers": [
+                    {"id": "land", "minzoom": LAND_ZOOM, "maxzoom": MAX_ZOOM,
+                     "fields": {"class": "String", "natural": "String", "landuse": "String",
+                                "leisure": "String", "boundary": "String", "name": "String"}},
                     {"id": "road", "minzoom": MIN_ZOOM, "maxzoom": MAX_ZOOM,
                      "fields": {"highway": "String", "name": "String", "ref": "String"}},
                     {"id": "water", "minzoom": WATER_ZOOM, "maxzoom": MAX_ZOOM,
-                     "fields": {"natural": "String", "waterway": "String", "name": "String"}},
+                     "fields": {"class": "String", "natural": "String", "waterway": "String",
+                                "man_made": "String", "amenity": "String", "name": "String"}},
                     {"id": "place", "minzoom": MIN_ZOOM, "maxzoom": MAX_ZOOM,
                      "fields": {"place": "String", "name": "String", "amenity": "String"}},
                 ],

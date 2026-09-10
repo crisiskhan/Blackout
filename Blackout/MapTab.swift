@@ -48,15 +48,50 @@ struct MapTab: View {
                         packEast: pack.bbox.east,
                         route: runtime.routeCoords,
                         destination: runtime.routeTarget,
+                        held: runtime.held.map { (lat: $0.lat, lon: $0.lon) },
                         fitToken: runtime.fitPackToken,
                         onMapTap: { lat, lon in
                             runtime.pickDestination(lat: lat, lon: lon)
+                        },
+                        onMapHold: { lat, lon, tags in
+                            runtime.holdInspect(lat: lat, lon: lon, tags: tags)
                         }
                     )
-                    canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
+                    // The scrim already keeps a thumb off the canvas. This is
+                    // the same thing for VoiceOver, and only the canvas: the
+                    // tab bar stays reachable, because Comms is on it.
+                    .accessibilityHidden(runtime.held != nil)
+                    if runtime.held == nil {
+                        canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
+                    }
+                    if let held = runtime.held {
+                        HoldCardView(
+                            held: held,
+                            onField: { runtime.openFieldFromHold() },
+                            onMark: { runtime.markHeld() },
+                            onClose: { runtime.closeHold() }
+                        )
+                    }
+                }
+                .overlay(alignment: .topLeading) {
+                    // The card takes the bottom of the canvas and the footer's
+                    // credit with it, but the top half is still drawing OSM's
+                    // map. The line has to stay wherever the map is, so it
+                    // moves up above the scrim rather than going away.
+                    if runtime.held != nil {
+                        Text(OSMCredit.line)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(Color(white: 0.75))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Theme.void.opacity(0.66))
+                            .padding(6)
+                            .allowsHitTesting(false)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .layoutPriority(1)
+                .animation(.spring(response: 0.28, dampingFraction: 0.9), value: runtime.held)
             } else {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
                 Spacer()
