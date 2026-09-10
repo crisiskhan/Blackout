@@ -52,12 +52,23 @@ struct RootChrome: View {
     }
 
     private var tabBody: some View {
-        Group {
+        // MapLibre dies if MapTab is destroyed while Field opens from the
+        // inspect card (ASC 72/73). Keep Map mounted under every tab; hide it
+        // when another tab is selected instead of switching it out of the tree.
+        ZStack {
+            MapTab(runtime: runtime)
+                .opacity(runtime.tab == .map ? 1 : 0)
+                .allowsHitTesting(runtime.tab == .map)
+                .accessibilityHidden(runtime.tab != .map)
             switch runtime.tab {
-            case .map: MapTab(runtime: runtime)
-            case .comms: CommsTab(runtime: runtime)
-            case .field: FieldTab(runtime: runtime)
-            case .expedition: ExpeditionTab(runtime: runtime)
+            case .map:
+                EmptyView()
+            case .comms:
+                CommsTab(runtime: runtime)
+            case .field:
+                FieldTab(runtime: runtime)
+            case .expedition:
+                ExpeditionTab(runtime: runtime)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
