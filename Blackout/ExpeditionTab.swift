@@ -9,8 +9,12 @@ struct ExpeditionTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("EXPEDITION").foregroundStyle(Color(white: 0.85))
+                Text("EXPED")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
                 Text("CONDITION \(runtime.vitals.band.rawValue.uppercased())")
+                    .font(.system(size: 15, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
                 slider("Hunger", Binding(get: { runtime.vitals.hunger }, set: { runtime.vitals.hunger = $0 }))
                 slider("Thirst", Binding(get: { runtime.vitals.thirst }, set: { runtime.vitals.thirst = $0 }))
                 slider("Pain", Binding(get: { runtime.vitals.pain }, set: { runtime.vitals.pain = $0 }))
@@ -20,7 +24,11 @@ struct ExpeditionTab: View {
                 Button("APPLY RED BAND") {
                     runtime.applySelfRed()
                 }
+                .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Theme.accent)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(Theme.raised)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 if runtime.red.isRed || runtime.mesh.lastRedOn == true {
                     Text(L10n.t("red.plate", runtime.locale)).font(.title.weight(.bold)).foregroundStyle(.red)
                     Button(L10n.t("red.cancel", runtime.locale)) {

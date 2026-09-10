@@ -6,7 +6,7 @@ struct CannotDoView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("WHAT WE CANNOT DO").font(.title2.weight(.semibold))
-            Text("No 911 replacement. SOS offers system Emergency SOS only.")
+            Text("SOS lights the party mesh. System Emergency SOS is separate. Neither replaces 911.")
             Text("No sat modem. No live weather. Hurricane card is procedure + paper.")
             Text("Mesh without LoRa is tens of meters plus DTN when people meet.")
             Text("Airplane: no sockets. Features work locally or log local.")

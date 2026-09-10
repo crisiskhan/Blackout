@@ -3,6 +3,7 @@ import MapLibreMap
 import Search
 import Router
 import Tokens
+import PackIO
 
 struct MapTab: View {
     @Bindable var runtime: AppRuntime
@@ -10,112 +11,251 @@ struct MapTab: View {
     @State private var hits: [SearchHit] = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            actionRail
-            TextField("Search this pack", text: $query)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit { search() }
-            ForEach(hits, id: \.name) { h in
-                Button("\(h.name) · \(h.kind)") {
-                    runtime.pickDestination(lat: h.lat, lon: h.lon)
-                }
-                .foregroundStyle(Theme.silver)
-            }
+        ZStack {
+            Theme.void.ignoresSafeArea()
             if let pack = runtime.packs?.active, let style = styleURL() {
-                let home = pack.home ?? pack.center
-                let you = UserPuck.coordinate(
-                    lastKnown: runtime.lastKnownFix,
-                    packCenter: (home.lat, home.lon),
-                    packSouth: pack.bbox.south,
-                    packWest: pack.bbox.west,
-                    packNorth: pack.bbox.north,
-                    packEast: pack.bbox.east
-                )
-                let offPack = PackChrome.banner(
-                    fix: runtime.lastKnownFix,
-                    bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
-                )
-                ZStack(alignment: .bottomLeading) {
-                    OfflineMapView(
-                        styleURL: style,
-                        centerLat: you.lat,
-                        centerLon: you.lon,
-                        puckLat: you.lat,
-                        puckLon: you.lon,
-                        packSouth: pack.bbox.south,
-                        packWest: pack.bbox.west,
-                        packNorth: pack.bbox.north,
-                        packEast: pack.bbox.east,
-                        route: runtime.routeCoords,
-                        destination: runtime.routeTarget,
-                        held: runtime.held.map { (lat: $0.lat, lon: $0.lon) },
-                        fitToken: runtime.fitPackToken,
-                        onMapTap: { lat, lon in
-                            runtime.pickDestination(lat: lat, lon: lon)
-                        },
-                        onMapHold: { lat, lon, tags in
-                            runtime.holdInspect(lat: lat, lon: lon, tags: tags)
-                        }
-                    )
-                    // The scrim already keeps a thumb off the canvas. This is
-                    // the same thing for VoiceOver, and only the canvas: the
-                    // tab bar stays reachable, because Comms is on it.
-                    .accessibilityHidden(runtime.held != nil)
-                    if runtime.held == nil {
-                        canvasFooter(packName: pack.name, offPack: offPack == PackChrome.offPack)
-                    }
-                    if let held = runtime.held {
-                        HoldCardView(
-                            held: held,
-                            onField: { runtime.openFieldFromHold() },
-                            onMark: { runtime.markHeld() },
-                            onClose: { runtime.closeHold() }
-                        )
-                    }
-                }
-                .overlay(alignment: .topLeading) {
-                    // The card takes the bottom of the canvas and the footer's
-                    // credit with it, but the top half is still drawing OSM's
-                    // map. The line has to stay wherever the map is, so it
-                    // moves up above the scrim rather than going away.
-                    if runtime.held != nil {
-                        Text(OSMCredit.line)
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Color(white: 0.75))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Theme.void.opacity(0.66))
-                            .padding(6)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .layoutPriority(1)
-                .animation(.spring(response: 0.28, dampingFraction: 0.9), value: runtime.held)
+                canvas(pack: pack, style: style)
             } else {
-                Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
-                Spacer()
+                Text("Packs missing from bundle — honest empty.")
+                    .foregroundStyle(Color(white: 0.5))
+                    .padding(16)
             }
-            fieldChrome
-            instrumentRow
         }
-        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    /// SPEAK / INSTRUMENTS / LOCK-ON at their full width. When the line runs out the rail
-    /// wraps instead of letting SwiftUI tail-truncate the longest word.
-    private var actionRail: some View {
-        ChromeRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-            Button("SPEAK") { runtime.speakMap() }
-                .buttonStyle(MapActionChipButtonStyle())
-            Button("INSTRUMENTS") { runtime.showInstruments = true }
-                .buttonStyle(MapActionChipButtonStyle())
-            Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
+    @ViewBuilder
+    private func canvas(pack: PackManifest, style: URL) -> some View {
+        let home = pack.home ?? pack.center
+        let you = UserPuck.coordinate(
+            lastKnown: runtime.lastKnownFix,
+            packCenter: (home.lat, home.lon),
+            packSouth: pack.bbox.south,
+            packWest: pack.bbox.west,
+            packNorth: pack.bbox.north,
+            packEast: pack.bbox.east
+        )
+        let offPack = PackChrome.banner(
+            fix: runtime.lastKnownFix,
+            bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
+        ) == PackChrome.offPack
+        ZStack(alignment: .bottomLeading) {
+            OfflineMapView(
+                styleURL: style,
+                centerLat: you.lat,
+                centerLon: you.lon,
+                puckLat: you.lat,
+                puckLon: you.lon,
+                packSouth: pack.bbox.south,
+                packWest: pack.bbox.west,
+                packNorth: pack.bbox.north,
+                packEast: pack.bbox.east,
+                route: runtime.routeCoords,
+                destination: runtime.routeTarget,
+                held: runtime.held.map { (lat: $0.lat, lon: $0.lon) },
+                fitToken: runtime.fitPackToken,
+                onMapTap: { lat, lon in
+                    runtime.pickDestination(lat: lat, lon: lon)
+                    hits = []
+                },
+                onMapHold: { lat, lon, tags in
+                    runtime.holdInspect(lat: lat, lon: lon, tags: tags)
+                }
+            )
+            .ignoresSafeArea()
+            // The scrim already keeps a thumb off the canvas. This is the
+            // same thing for VoiceOver, and only the canvas: the tab bar
+            // stays reachable, because Comms is on it.
+            .accessibilityHidden(runtime.held != nil)
+            if runtime.held == nil {
+                hud(packName: pack.name, offPack: offPack)
+                    .padding(hudReserve)
+            }
+            if let held = runtime.held {
+                HoldCardView(
+                    held: held,
+                    onField: { runtime.openFieldFromHold() },
+                    onMark: { runtime.markHeld() },
+                    onClose: { runtime.closeHold() }
+                )
+                .padding(hudReserve)
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            // The card takes the bottom of the canvas and the footer's credit
+            // with it, but the top half is still drawing OSM's map. The line
+            // has to stay wherever the map is.
+            if runtime.held != nil {
+                Text(OSMCredit.line)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color(white: 0.75))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Theme.void.opacity(0.66))
+                    .padding(6)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .layoutPriority(1)
+        .animation(.spring(response: 0.28, dampingFraction: 0.9), value: runtime.held)
+    }
+
+    /// Everything that is not the map, sitting on the map. Search, lock and
+    /// instruments at the top; status and the four thumb cells at the bottom.
+    /// Ruler, grid and north live in Instruments — they are not a walk.
+    private func hud(packName: String, offPack: Bool) -> some View {
+        VStack(spacing: 8) {
+            topBar
+            if !hits.isEmpty { hitList }
+            Spacer(minLength: 0)
+            fieldChrome
+                .allowsHitTesting(false)
+            if runtime.hudCrisis {
+                crisisStrip
+            }
+            dock
+            canvasFooter(packName: packName, offPack: offPack)
+        }
+        .padding(.horizontal, 10)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 8) {
+            TextField("SEARCH", text: $query)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.silver)
+                .padding(.horizontal, 12)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .background(Theme.glass())
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                )
+                .onSubmit { search() }
+            Button("INST") { runtime.showInstruments = true }
+                .buttonStyle(HUDOverlayChipStyle())
+                .accessibilityLabel("INSTRUMENTS")
+            Button(runtime.lockOn ? "LOCKED" : "LOCK") {
                 runtime.toggleLockOn()
             }
-            .buttonStyle(MapActionChipButtonStyle())
+            .buttonStyle(HUDOverlayChipStyle())
+            .accessibilityLabel(runtime.lockOn ? "LOCKED" : "LOCK-ON")
         }
+    }
+
+    private var hitList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap), id: \.name) { h in
+                Button("\(h.name) · \(h.kind)") {
+                    runtime.pickDestination(lat: h.lat, lon: h.lon)
+                    hits = []
+                    query = ""
+                }
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.silver)
+                .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                .padding(.horizontal, 12)
+            }
+        }
+        .background(Theme.glass())
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    /// Up to three short deduped lines, printed where the thumb already is.
+    private var fieldChrome: some View {
+        let lines = MapFieldChrome.lines(
+            lock: runtime.lockChrome,
+            route: runtime.routeChrome,
+            tool: runtime.toolChrome,
+            bearingDeg: runtime.headingDeg,
+            speak: runtime.speechChrome
+        )
+        return Group {
+            if !lines.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(lines) { line in
+                        Text(line.text)
+                            .font(.caption.weight(line.warn ? .bold : .semibold))
+                            .foregroundStyle(line.warn ? Color.orange : Theme.silver)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Theme.glass(opacity: 0.62))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+        }
+    }
+
+    /// The overlay tab strip (or left-hand column) sits on the canvas. HUD
+    /// chrome has to stop short of it or MARK / FIELD land under a tab.
+    private var hudReserve: EdgeInsets {
+        if runtime.leftHand {
+            return EdgeInsets(
+                top: 0,
+                leading: CGFloat(BlackoutTokens.Chrome.hudSideReservePoints),
+                bottom: 0,
+                trailing: 0
+            )
+        }
+        return EdgeInsets(
+            top: 0,
+            leading: 0,
+            bottom: CGFloat(BlackoutTokens.Chrome.hudTabReservePoints),
+            trailing: 0
+        )
+    }
+
+    /// SOS is a mesh event. This strip is the all-clear, not a second SOS.
+    private var crisisStrip: some View {
+        HStack(spacing: 8) {
+            Text(L10n.t("sos.mesh", runtime.locale))
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.accent)
+                .minimumScaleFactor(0.8)
+                .allowsTightening(true)
+            Spacer(minLength: 8)
+            Button(L10n.t("ok.chip", runtime.locale)) { runtime.iamOK() }
+                .buttonStyle(HUDOverlayChipStyle())
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
+        .background(Theme.glass(opacity: 0.78))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Theme.accent.opacity(0.85), lineWidth: 1)
+        )
+    }
+
+    /// Four cells, equal width, 44pt. Nothing here is ever disabled — a tap
+    /// draws, or it says why not.
+    private var dock: some View {
+        HStack(spacing: 1) {
+            Button("MARK") { runtime.dropMark() }
+                .buttonStyle(HUDDockStyle())
+            Button("WALK") { runtime.navigate(mode: .walk) }
+                .buttonStyle(HUDDockStyle())
+            Button("DRIVE") { runtime.navigate(mode: .drive) }
+                .buttonStyle(HUDDockStyle())
+            Button("SPEAK") { runtime.speakMap() }
+                .buttonStyle(HUDDockStyle())
+        }
+        .background(Theme.raised)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+        )
+        .frame(maxWidth: .infinity)
     }
 
     /// Everything the canvas is allowed to say: which pack, who drew it, and
@@ -143,48 +283,7 @@ struct MapTab: View {
                 .contentShape(Rectangle())
         }
         .padding(.horizontal, 8)
-        .padding(.bottom, 6)
-        .background(Theme.void.opacity(0.66))
-    }
-
-    /// Up to three short deduped lines, printed where the thumb already is. Lock, the
-    /// answer to the last chip tap and the tool readout share the first line; the
-    /// heading gets the second; Speak reports one status line on the third.
-    private var fieldChrome: some View {
-        ForEach(
-            MapFieldChrome.lines(
-                lock: runtime.lockChrome,
-                route: runtime.routeChrome,
-                tool: runtime.toolChrome,
-                bearingDeg: runtime.headingDeg,
-                speak: runtime.speechChrome
-            )
-        ) { line in
-            Text(line.text)
-                .font(.caption.weight(line.warn ? .bold : .semibold))
-                .foregroundStyle(line.warn ? Color.orange : Theme.silver)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    /// Bottom chip bar. Nothing here is ever disabled — a tap draws, or it says why not.
-    private var instrumentRow: some View {
-        HStack(spacing: 4) {
-            Button("MARK") { runtime.dropMark() }
-                .buttonStyle(MapChipButtonStyle())
-            Button("WALK") { runtime.navigate(mode: .walk) }
-                .buttonStyle(MapChipButtonStyle())
-            Button("DRIVE") { runtime.navigate(mode: .drive) }
-                .buttonStyle(MapChipButtonStyle())
-            Button("RULER") { runtime.tapRuler() }
-                .buttonStyle(MapChipButtonStyle())
-            Button("USNG") { runtime.tapUSNG() }
-                .buttonStyle(MapChipButtonStyle())
-            Button("MAG/TRUE") { runtime.tapMagTrue() }
-                .buttonStyle(MapChipButtonStyle())
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 2)
     }
 
     private func styleURL() -> URL? {
@@ -203,100 +302,18 @@ struct MapTab: View {
                 guard let props = f["properties"] as? [String: Any],
                       let geom = f["geometry"] as? [String: Any],
                       let coords = geom["coordinates"] as? [Double], coords.count >= 2 else { return nil }
-                return ["name": props["name"] as? String ?? props["amenity"] as? String ?? "poi", "kind": props["amenity"] as? String ?? props["natural"] as? String ?? "poi", "lat": coords[1], "lon": coords[0]]
+                return [
+                    "name": props["name"] as? String ?? props["amenity"] as? String ?? "poi",
+                    "kind": props["amenity"] as? String ?? props["natural"] as? String ?? "poi",
+                    "lat": coords[1],
+                    "lon": coords[0],
+                ]
             }
-            hits = SearchIndex(pois: pois).fts(query)
-            if hits.isEmpty { hits = SearchIndex(pois: pois).semantic(query) }
+            let found = SearchIndex(pois: pois)
+            hits = found.fts(query)
+            if hits.isEmpty { hits = found.semantic(query) }
         } else {
             hits = idx.fts(query)
         }
-    }
-}
-
-private struct MapChipButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        let hit = BlackoutTokens.Chrome.mapChipHitPoints
-        return configuration.label
-            .font(.system(size: 10, weight: .bold))
-            .lineLimit(2)
-            .minimumScaleFactor(0.55)
-            .multilineTextAlignment(.center)
-            .frame(width: hit, height: hit)
-            .contentShape(Rectangle())
-            .background(Theme.raised)
-            .opacity(configuration.isPressed ? 0.65 : 1)
-    }
-}
-
-/// Header chip that keeps its whole label. Fixed point size and `fixedSize` mean the
-/// title can never be tail-truncated; the rail wraps the chip to the next line instead.
-private struct MapActionChipButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        let hit = BlackoutTokens.Chrome.mapChipHitPoints
-        return configuration.label
-            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .bold))
-            .fixedSize(horizontal: true, vertical: false)
-            .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
-            .frame(minWidth: hit, minHeight: hit)
-            .contentShape(Rectangle())
-            .background(Theme.raised)
-            .opacity(configuration.isPressed ? 0.65 : 1)
-    }
-}
-
-/// Left-aligned rail that moves a control to the next line when the current one is full.
-private struct ChromeRail: Layout {
-    var spacing: CGFloat
-
-    init(spacing: Double) {
-        self.spacing = CGFloat(spacing)
-    }
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
-        let rows = rowsFitting(maxWidth: proposal.width ?? .infinity, subviews: subviews)
-        let width = rows.map(\.width).max() ?? 0
-        let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
-        return CGSize(width: proposal.width ?? width, height: height)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
-        var y = bounds.minY
-        for row in rowsFitting(maxWidth: bounds.width, subviews: subviews) {
-            var x = bounds.minX
-            for index in row.indices {
-                let size = subviews[index].sizeThatFits(.unspecified)
-                subviews[index].place(
-                    at: CGPoint(x: x, y: y + (row.height - size.height) / 2),
-                    proposal: ProposedViewSize(size)
-                )
-                x += size.width + spacing
-            }
-            y += row.height + spacing
-        }
-    }
-
-    private struct Row {
-        var indices: [Int] = []
-        var width: CGFloat = 0
-        var height: CGFloat = 0
-    }
-
-    private func rowsFitting(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
-        var rows: [Row] = []
-        var row = Row()
-        for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
-            let width = row.indices.isEmpty ? size.width : row.width + spacing + size.width
-            if !row.indices.isEmpty, width > maxWidth {
-                rows.append(row)
-                row = Row(indices: [index], width: size.width, height: size.height)
-            } else {
-                row.indices.append(index)
-                row.width = width
-                row.height = max(row.height, size.height)
-            }
-        }
-        if !row.indices.isEmpty { rows.append(row) }
-        return rows
     }
 }

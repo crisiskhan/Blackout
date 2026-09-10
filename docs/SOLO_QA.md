@@ -6,7 +6,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## ARMING
 
-- [ ] PASS / FAIL / N/A — INITIATE unlocks tabs (ARMING → MAP/COMMS/FIELD/EXPEDITION). Bundled logo is visible. No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — INITIATE unlocks tabs (ARMING → MAP/COMMS/FIELD/EXPED). Bundled logo is visible. No account prompt. No network/login gate.
 - [ ] PASS / FAIL / N/A — No SOS disk on ARMING.
 - [ ] PASS / FAIL / N/A — Pack list shows real pack names and sizes, **or** chrome `Packs missing from bundle — honest empty.`
 
@@ -22,15 +22,15 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## MAP
 
-- [ ] PASS / FAIL / N/A — Active pack draws full-height under the search row (not a ~120pt strip). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
-- [ ] PASS / FAIL / N/A — MAP instrument row: MARK / WALK / DRIVE / RULER / USNG / MAG/TRUE are tappable 44pt chips (not caption labels). Other MapTool leftovers are not in that row.
-- [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit).
+- [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INST + LOCK overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
+- [ ] PASS / FAIL / N/A — MAP thumb dock: MARK / WALK / DRIVE / SPEAK are equal-width 44pt cells (never disabled). INST and LOCK sit on the search row as whole words (INST, LOCK / LOCKED). RULER / USNG / MAG/TRUE live in INST → INSTRUMENTS, not on the canvas. Other MapTool leftovers are not on MAP.
+- [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit). Hits cap at five — no scroll on MAP.
 - [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Kill app and relaunch: the same mark is still listed.
-- [ ] PASS / FAIL / N/A — LOCK-ON: if GPS or pack `graph.json` is usable, control shows `LOCKED` and no fake route is drawn. If both GPS and graph are missing, chrome `OFF GRAPH`. If motion/heading is allowed, a `BEARING <deg>°` line appears; if heading is denied, bearing stays empty (no invented course).
+- [ ] PASS / FAIL / N/A — LOCK: if GPS or pack `graph.json` is usable, control shows `LOCKED` and no fake route is drawn. If both GPS and graph are missing, chrome `OFF GRAPH`. If motion/heading is allowed, a `BEARING <deg>°` line appears; if heading is denied, bearing stays empty (no invented course). VoiceOver still says LOCK-ON.
 - [ ] PASS / FAIL / N/A — WALK / DRIVE: tap the map, a search hit, or a MARK row to set `DEST`. Then WALK or DRIVE. If the TX WEST graph has a path, a cyan route line follows the streets (not bearing-only chrome). If the graph is missing/empty or there is no path, chrome `OFF GRAPH` and no fake street-following line.
 - [ ] PASS / FAIL / N/A — SPEAK chip stays visible. After DEST + WALK, SPEAK **speaks** the whole turn-by-turn out loud (Walk / Turn / Arrive) while the cyan route line stays on the map. Score the voice and the line, not text on the canvas. Volume up, silent switch off.
 - [ ] PASS / FAIL / N/A — SPEAK paints **no** walk script on the field. The only Speak chrome is one short line: `SPEAK · 3 TURNS · 300 M` (or `SPEAK · DEST 1240 M` / `SPEAK · SET DEST` / `SPEAK · OFF GRAPH` / `SPEECH FAILED`). Any orange paragraph, `Walk … Turn … Arrive` text, or multi-line HUD over the canvas is a FAIL.
-- [ ] PASS / FAIL / N/A — MAP header reads whole words: `MAP` `SPEAK` `INSTRUMENTS` `LOCK-ON`/`LOCKED`. No `INSTRUME…`, no `…` anywhere in the header. Set Settings → Display → Text Size to the largest non-accessibility step and re-check: controls wrap to a second line, they do not clip mid-word.
+- [ ] PASS / FAIL / N/A — MAP HUD reads whole words: search field, `INST`, `LOCK`/`LOCKED`, dock `MARK` `WALK` `DRIVE` `SPEAK`. No `INSTRUME…`, no `…` on those controls. INST opens INSTRUMENTS. SPEAK is on the dock, not the header.
 - [ ] PASS / FAIL / N/A — Field chrome is at most three short lines and each one fits on its line. Status (`OFF GRAPH` / `TRUE NORTH` / `RULER …`) reads once — never `OFF GRAPH` twice, never a bare `TRUE`. DEST and BEARING share a line: `DEST 31.7619, -106.4850 · BEARING 45°`. With a good pack and no DEST picked yet, there is no `OFF GRAPH` at all, and the Speak line is gone until you tap SPEAK again.
 - [ ] PASS / FAIL / N/A — Pinch to walking zoom (a block or two across): silver street names are drawn on the streets with a black halo and are legible at arm's length. If no name draws at any zoom, the glyph template failed — report it.
 - [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (same pack chosen on ARMING).
@@ -41,8 +41,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Chrome starts `NET · NONE` (not `NET · MPC` / `NET · BLE` with nobody connected).
 - [ ] PASS / FAIL / N/A — RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
 - [ ] PASS / FAIL / N/A — HOLD PTT: chrome `NO PEERS · LOGGED`. Button stays `HOLD PTT` / `RELEASE PTT` — does not claim sent.
-- [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only. Browse MAP (lock-on on or off) has no CALL SOS FAB.
-- [ ] PASS / FAIL / N/A — I AM OK is hidden while not joined (`NET · NONE`). No IAMOK bar.
+- [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only (64pt, pulsing while held, visible SOS). Browse MAP (lock-on on or off) has no SOS FAB. After hold: mesh chip + RED + POS (`SOS · MESH` plate), not a caption. I AM OK clears it.
+- [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar.
 
 ## FIELD
 
@@ -62,7 +62,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## INSTRUMENTS
 
-- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens the instruments sheet (torch / compass / auction / ES·EN).
+- [ ] PASS / FAIL / N/A — MAP → INST opens the instruments sheet. MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
 
 ## WHAT WE CANNOT DO
 

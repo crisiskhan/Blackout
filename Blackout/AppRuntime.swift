@@ -278,16 +278,54 @@ final class AppRuntime {
 
     func tapRuler() {
         toolChrome = MapRuler.chrome(from: youCoordinate(), to: destination())
+        showInstruments = false
     }
 
     func tapUSNG() {
         let you = youCoordinate()
         toolChrome = USNG.label(lat: you.lat, lon: you.lon)
+        showInstruments = false
     }
 
     func tapMagTrue() {
         instruments.toggleMagTrue()
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
+        showInstruments = false
+    }
+
+    /// SOS is a mesh-wide alert, not a label. The hold wakes the radio if it
+    /// is down, lights every peer with chip + RED + POS, and still does not
+    /// replace 911.
+    var hudCrisis: Bool {
+        red.isRed || comms.chips.contains(.sos)
+    }
+
+    func offerSOS() {
+        if mesh.radio == nil {
+            joinNet()
+        }
+        if !comms.chips.contains(.sos) {
+            comms.chips.append(.sos)
+        }
+        mesh.sendChip(from: mesh.localID, chip: Chip.sos.rawValue)
+        red.force(true)
+        mesh.sendRED(from: mesh.localID, on: true)
+        sendPOSIfPossible()
+        box.log("sos", "mesh SOS + offer system Emergency SOS — does not replace 911")
+    }
+
+    /// I AM OK is the all-clear: the mesh hears it, the SOS chip goes dark,
+    /// and a RED plate we lit goes dark.
+    func iamOK() {
+        comms.chips.removeAll { $0 == .sos }
+        if !comms.chips.contains(.ok) {
+            comms.chips.append(.ok)
+        }
+        mesh.sendChip(from: mesh.localID, chip: Chip.ok.rawValue)
+        if red.isRed {
+            cancelSelfRed()
+        }
+        box.log("ok", "I AM OK")
     }
 
     func speakMap() {
@@ -360,8 +398,13 @@ final class AppRuntime {
                 timers.markDoneTask(task)
             }
         case "chip":
-            if let raw = String(data: env.body, encoding: .utf8), let chip = Chip(rawValue: raw) {
-                comms.chips.append(chip)
+            if let raw = String(data: env.body, encoding: .utf8) {
+                if raw == Chip.sos.rawValue {
+                    red.force(true)
+                }
+                if let chip = Chip(rawValue: raw) {
+                    comms.chips.append(chip)
+                }
             }
         default:
             break
@@ -553,7 +596,7 @@ enum BlackoutTab: String, CaseIterable, Identifiable {
         case .map: return "MAP"
         case .comms: return "COMMS"
         case .field: return "FIELD"
-        case .expedition: return "EXPEDITION"
+        case .expedition: return "EXPED"
         }
     }
 }

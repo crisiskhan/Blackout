@@ -18,19 +18,28 @@ struct ARMINGView: View {
                     Button("\(p.name)  ·  \(p.bytes / 1024) KB") {
                         runtime.switchPack(p.id)
                     }
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Theme.silver)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .background(Theme.raised)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             } else {
                 Text("Packs missing from bundle — honest empty.").foregroundStyle(Color(white: 0.5))
             }
             Toggle("Left-hand column", isOn: $runtime.leftHand)
                 .tint(Theme.accent)
+                .frame(minHeight: 44)
             Toggle("Night-red", isOn: Binding(get: { runtime.night.enabled }, set: { runtime.night.enabled = $0 }))
                 .tint(Theme.accent)
+                .frame(minHeight: 44)
             Button("INITIATE") { runtime.arm() }
+                .font(.system(size: 16, weight: .heavy))
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .background(Theme.accent)
-                .foregroundStyle(Theme.silver)
+                .foregroundStyle(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
         .padding(24)
     }

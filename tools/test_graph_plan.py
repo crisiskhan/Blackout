@@ -190,9 +190,12 @@ class WalkDriveChipTests(unittest.TestCase):
         src = ROUTE_LINE.read_text()
         self.assertIn("alwaysTappable = true", src)
         map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+        inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
         self.assertNotIn(".disabled(", map_tab)
-        for chip in ("MARK", "WALK", "DRIVE", "RULER", "USNG", "MAG/TRUE"):
+        for chip in ("MARK", "WALK", "DRIVE", "SPEAK"):
             self.assertIn(f'Button("{chip}")', map_tab)
+        for chip in ("RULER", "USNG", "MAG/TRUE"):
+            self.assertIn(f'Button("{chip}")', inst)
 
 
 class PackedGraphTests(unittest.TestCase):
