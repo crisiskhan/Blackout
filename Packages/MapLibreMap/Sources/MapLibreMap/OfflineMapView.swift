@@ -82,7 +82,7 @@ public struct OfflineMapView: UIViewRepresentable {
             _ = size
         }
         applyInteraction(view)
-        view.logoView.isHidden = false
+        view.logoView.isHidden = true
         view.prefetchesTiles = false
         view.allowsRotating = true
         view.shouldRequestAuthorizationToUseLocationServices = trackUser

@@ -191,9 +191,11 @@ class WalkDriveChipTests(unittest.TestCase):
         self.assertIn("alwaysTappable = true", src)
         map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
+        tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
         self.assertNotIn(".disabled(", map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", map_tab)
         for chip in ("MARK", "WALK", "DRIVE", "SPEAK"):
-            self.assertIn(f'Button("{chip}")', map_tab)
+            self.assertIn(f'return "{chip}"', tokens)
         for chip in ("RULER", "USNG", "MAG/TRUE"):
             self.assertIn(f'Button("{chip}")', inst)
 

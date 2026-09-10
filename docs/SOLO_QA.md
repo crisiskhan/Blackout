@@ -43,7 +43,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — HOLD PTT: chrome `NO PEERS · LOGGED`. Button stays `HOLD PTT` / `RELEASE PTT` — does not claim sent.
 - [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only (64pt, pulsing while held, visible SOS). Browse MAP (lock-on on or off) has no SOS FAB. After hold: mesh chip + RED + POS (`SOS · MESH` plate), not a caption. I AM OK clears it.
 - [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar.
-- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Tab strip reads EXPEDITION, not EXPED. No `Whisper <10 m` dump on COMMS.
+- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS.
 - [ ] PASS / FAIL / N/A — Hold a water/ground feature → FIELD. Card names the class (STOCK TANK / TINAJA / ACEQUIA / RIVER), not a generic water. DO is the class field line. Empty ground names nearest water within 2 km. FIELD · WATER jumps. The hold card must not crash. Returning to MAP still has the canvas (MapLibre was not torn down).
 
 ## FIELD
@@ -63,7 +63,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## INSTRUMENTS
 
-- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens the instruments sheet. MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
+- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). Torch / compass / auction / ES·EN still there. Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
 - [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. Left-hand and night-red live here, not on boot.
 
 ## Kill-and-relaunch

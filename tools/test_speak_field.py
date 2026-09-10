@@ -219,7 +219,7 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         # Overlay chips keep their whole word; SPEAK sits in the thumb dock.
         self.assertIn("HUDOverlayChipStyle", self.map_tab)
         self.assertIn("HUDDockStyle", self.map_tab)
-        self.assertIn('Button("SPEAK")', self.map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", self.map_tab)
         self.assertIn("runtime.speakMap()", self.map_tab)
         self.assertIn("fixedSize(horizontal: true, vertical: false)", self.theme)
         self.assertNotIn("truncationMode", self.map_tab)
@@ -244,7 +244,7 @@ class SpeakChromeSourceContracts(unittest.TestCase):
 
     def test_speak_chip_still_speaks_the_whole_prompt(self):
         app = read("Blackout", "AppRuntime.swift")
-        self.assertIn('Button("SPEAK")', self.map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", self.map_tab)
         self.assertIn("runtime.speakMap()", self.map_tab)
         self.assertIn("VoiceNav.prompt", app)
         self.assertIn("speech.speak(text, locale: locale)", app)
@@ -387,7 +387,8 @@ class NoRegressionContracts(unittest.TestCase):
         map_tab = read("Blackout", "MapTab.swift")
         inst = read("Blackout", "InstrumentsView.swift")
         for title in ("MARK", "WALK", "DRIVE", "SPEAK"):
-            self.assertIn(f'Button("{title}")', map_tab)
+            self.assertIn(f'return "{title}"', read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift"))
+        self.assertIn("BlackoutTokens.MapDock.allCases", map_tab)
         for title in ("RULER", "USNG", "MAG/TRUE"):
             self.assertIn(f'Button("{title}")', inst)
         self.assertIn("mapChipHitPoints", map_tab)

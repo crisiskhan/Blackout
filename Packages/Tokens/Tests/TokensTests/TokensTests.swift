@@ -12,8 +12,11 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.Color.void, BlackoutTokens.RGBA(r: 0, g: 0, b: 0, a: 1))
         XCTAssertEqual(BlackoutTokens.Color.accent, BlackoutTokens.RGBA(r: 225.0 / 255.0, g: 6.0 / 255.0, b: 0, a: 1))
         XCTAssertEqual(BlackoutTokens.Color.sos, BlackoutTokens.Color.accent)
+        XCTAssertEqual(BlackoutTokens.Color.warn, BlackoutTokens.RGBA(r: 1.0, g: 149.0 / 255.0, b: 0, a: 1))
         XCTAssertEqual(BlackoutTokens.Color.silver.r, BlackoutTokens.Color.metal.r)
         XCTAssertEqual(BlackoutTokens.Chrome.tabCaptionPoints, 10)
+        XCTAssertEqual(BlackoutTokens.Chrome.hudMarkPoints, 20)
+        XCTAssertEqual(BlackoutTokens.Chrome.hudReticlePoints, 10)
     }
 
     func testMapStillScoreBarIsFiveBarsOnly() {

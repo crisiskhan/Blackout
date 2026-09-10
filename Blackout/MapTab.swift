@@ -191,7 +191,7 @@ struct MapTab: View {
                     ForEach(lines) { line in
                         Text(line.text)
                             .font(.caption.weight(line.warn ? .bold : .semibold))
-                            .foregroundStyle(line.warn ? Color.orange : Theme.silver)
+                            .foregroundStyle(line.warn ? Theme.warn : Theme.silver)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -249,14 +249,10 @@ struct MapTab: View {
     /// draws, or it says why not.
     private var dock: some View {
         HStack(spacing: 1) {
-            Button("MARK") { runtime.dropMark() }
-                .buttonStyle(HUDDockStyle())
-            Button("WALK") { runtime.navigate(mode: .walk) }
-                .buttonStyle(HUDDockStyle())
-            Button("DRIVE") { runtime.navigate(mode: .drive) }
-                .buttonStyle(HUDDockStyle())
-            Button("SPEAK") { runtime.speakMap() }
-                .buttonStyle(HUDDockStyle())
+            ForEach(BlackoutTokens.MapDock.allCases, id: \.self) { cell in
+                Button(cell.title) { tapDock(cell) }
+                    .buttonStyle(HUDDockStyle())
+            }
         }
         .background(Theme.raised)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -267,6 +263,19 @@ struct MapTab: View {
         .frame(maxWidth: .infinity)
     }
 
+    private func tapDock(_ cell: BlackoutTokens.MapDock) {
+        switch cell {
+        case .mark:
+            runtime.dropMark()
+        case .walk:
+            runtime.navigate(mode: .walk)
+        case .drive:
+            runtime.navigate(mode: .drive)
+        case .speak:
+            runtime.speakMap()
+        }
+    }
+
     /// Everything the canvas is allowed to say: which pack, who drew it, and
     /// one way back out to the whole region. No byte counts, no raw coordinates.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
@@ -275,7 +284,7 @@ struct MapTab: View {
                 if offPack {
                     Text(PackChrome.offPack)
                         .font(.caption2.weight(.bold))
-                        .foregroundStyle(Color.orange)
+                        .foregroundStyle(Theme.warn)
                 }
                 Text(packName)
                     .font(.caption2.weight(.bold))

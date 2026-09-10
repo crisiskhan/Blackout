@@ -31,7 +31,7 @@ struct ExpeditionTab: View {
                     if runtime.red.isRed || runtime.mesh.lastRedOn == true {
                         Text(L10n.t("red.plate", runtime.locale))
                             .font(.title.weight(.bold))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Theme.accent)
                         Button(L10n.t("red.cancel", runtime.locale)) {
                             runtime.cancelSelfRed()
                         }
@@ -45,7 +45,7 @@ struct ExpeditionTab: View {
                             PartyQRImage(code: runtime.roster.code)
                             Text(runtime.mesh.chromeNet)
                                 .font(.caption)
-                                .foregroundStyle(Color.orange)
+                                .foregroundStyle(Theme.warn)
                             ForEach(runtime.roster.members) { m in
                                 Text("\(m.role.rawValue) \(m.name)")
                                     .foregroundStyle(Theme.silver)
@@ -85,13 +85,13 @@ struct ExpeditionTab: View {
                             ForEach(runtime.mesh.inboundTimers) { ev in
                                 Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
                                     .font(.caption)
-                                    .foregroundStyle(Color.orange)
+                                    .foregroundStyle(Theme.warn)
                             }
                             TimelineView(.periodic(from: .now, by: 1)) { context in
                                 VStack(alignment: .leading, spacing: 4) {
                                     ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
                                         Text("\(L10n.t("overdue", runtime.locale)) \(t.task)")
-                                            .foregroundStyle(Color.orange)
+                                            .foregroundStyle(Theme.warn)
                                     }
                                 }
                             }

@@ -15,6 +15,10 @@ public enum BlackoutTokens: Sendable {
         public static let mapChipHitPoints: Double = 44
         /// Title-screen mark. Square compass, same as the App Icon. Not a chip.
         public static let bootLogoPoints: Double = 196
+        /// Overlay-page mark. Same compass, small enough to sit beside a title.
+        public static let hudMarkPoints: Double = 20
+        /// Selected-tab tick. The logo's center reticle, not a random underline.
+        public static let hudReticlePoints: Double = 10
         public static let bootActivateHeight: Double = 56
         /// Even a warm launch holds the logo long enough to land, then ACTIVATE.
         public static let bootMinSeconds: Double = 0.8
@@ -62,6 +66,8 @@ public enum BlackoutTokens: Sendable {
         public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
         public static let accent = RGBA(r: 225.0 / 255.0, g: 6.0 / 255.0, b: 0, a: 1)
         public static let sos = accent
+        /// HUD warn. One ink for OFF GRAPH / OVERDUE / NO VISION MODEL — not system orange.
+        public static let warn = RGBA(r: 1.0, g: 149.0 / 255.0, b: 0, a: 1)
         public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
     }
 

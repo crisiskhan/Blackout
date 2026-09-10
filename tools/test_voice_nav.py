@@ -173,7 +173,7 @@ class VoiceNavSourceContracts(unittest.TestCase):
         # field shows one short status line instead of the walk script.
         app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
         map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
-        self.assertIn('Button("SPEAK")', map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", map_tab)
         self.assertIn("runtime.speakMap()", map_tab)
         self.assertIn("VoiceNav.prompt", app)
         self.assertIn("speech.speak(text, locale: locale)", app)

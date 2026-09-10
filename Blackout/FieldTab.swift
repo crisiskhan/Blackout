@@ -39,7 +39,7 @@ struct FieldTab: View {
                 }
                 Text(L10n.t("vision.none", runtime.locale))
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.orange)
+                    .foregroundStyle(Theme.warn)
             }
         }
         .onAppear(perform: load)
@@ -115,9 +115,9 @@ struct FieldTab: View {
                 runtime.sendFieldToParty(cardID: s.card.id)
             }
             .buttonStyle(HUDActionStyle(filled: false))
-            Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Color.orange)
+            Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Theme.warn)
             if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome).font(.caption).foregroundStyle(Color.orange)
+                Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
             }
             Spacer(minLength: 0)
         }

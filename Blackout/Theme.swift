@@ -6,6 +6,7 @@ enum Theme {
     static var accent: Color { Color(rgba: BlackoutTokens.Color.accent) }
     static var silver: Color { Color(rgba: BlackoutTokens.Color.silver) }
     static var raised: Color { Color(rgba: BlackoutTokens.Color.raised) }
+    static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
 
     /// Dark glass the HUD sits on. Blur alone lets streets through the type.
     static func glass(opacity: Double = 0.72) -> some View {
@@ -19,6 +20,41 @@ enum Theme {
 extension Color {
     init(rgba: BlackoutTokens.RGBA) {
         self.init(red: rgba.r, green: rgba.g, blue: rgba.b, opacity: rgba.a)
+    }
+}
+
+/// The product mark on the glass. Same compass as the App Icon and boot.
+struct HUDMark: View {
+    var points: Double = BlackoutTokens.Chrome.hudMarkPoints
+
+    var body: some View {
+        Image("Logo")
+            .resizable()
+            .scaledToFit()
+            .frame(width: CGFloat(points), height: CGFloat(points))
+            .accessibilityHidden(true)
+    }
+}
+
+/// The logo's center, as a selected-tab tick. Not a random underline.
+struct HUDReticle: View {
+    var lit: Bool
+
+    var body: some View {
+        let ink = lit ? Theme.accent : Color.clear
+        let size = CGFloat(BlackoutTokens.Chrome.hudReticlePoints)
+        return ZStack {
+            Circle()
+                .stroke(ink, lineWidth: 1)
+            Rectangle()
+                .fill(ink)
+                .frame(width: size, height: 1)
+            Rectangle()
+                .fill(ink)
+                .frame(width: 1, height: size)
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }
 
@@ -82,7 +118,8 @@ struct HUDPage<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                HUDMark()
                 Text(title)
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.silver)
@@ -90,7 +127,7 @@ struct HUDPage<Content: View>: View {
                 if !status.isEmpty {
                     Text(status)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(warn ? Color.orange : Theme.silver)
+                        .foregroundStyle(warn ? Theme.warn : Theme.silver)
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
                 }

@@ -133,9 +133,9 @@ struct HoldCardView: View {
     }
 
     private var grabber: some View {
-        Capsule()
+        Rectangle()
             .fill(Theme.silver.opacity(0.4))
-            .frame(width: 36, height: 4)
+            .frame(width: 36, height: 3)
             .frame(maxWidth: .infinity)
             .accessibilityHidden(true)
     }

@@ -313,5 +313,70 @@ class CompassMarkTests(unittest.TestCase):
         )
 
 
+class HUDSyncTests(unittest.TestCase):
+    """The mark is the instrument — boot, overlay pages, tabs, SOS, instruments."""
+
+    def test_pages_and_instruments_carry_the_mark(self):
+        theme = read("Blackout", "Theme.swift")
+        self.assertIn("struct HUDMark", theme)
+        self.assertIn("struct HUDReticle", theme)
+        self.assertIn('Image("Logo")', theme)
+        self.assertIn("HUDMark()", theme)
+        root = read("Blackout", "RootChrome.swift")
+        self.assertIn("HUDReticle(lit:", root)
+        self.assertNotIn("frame(width: 18, height: 2)", root)
+        inst = read("Blackout", "InstrumentsView.swift")
+        self.assertIn("HUDMark()", inst)
+        self.assertIn("INSTRUMENTS", inst)
+        self.assertIn('Button("CLOSE")', inst)
+        self.assertNotIn("NavigationStack", inst)
+        self.assertNotIn("pickerStyle", inst)
+        self.assertNotIn("Toggle(title, isOn", inst)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("compass mark", qa.lower())
+        self.assertIn("reticle", qa.lower())
+        self.assertIn("QUIET", qa)
+
+    def test_warn_ink_is_one_token(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        self.assertIn("static let warn", tokens)
+        for name in (
+            "MapTab.swift",
+            "CommsTab.swift",
+            "FieldTab.swift",
+            "ExpeditionTab.swift",
+            "Theme.swift",
+            "HoldCard.swift",
+            "SOSHold.swift",
+            "InstrumentsView.swift",
+            "RootChrome.swift",
+        ):
+            text = read("Blackout", name)
+            self.assertNotIn("Color.orange", text, name)
+            self.assertNotIn(".foregroundStyle(.red)", text, name)
+
+    def test_sos_iamok_and_hold_are_plates_not_capsules(self):
+        sos = read("Blackout", "SOSHold.swift")
+        self.assertNotIn("Capsule()", sos)
+        self.assertIn("Theme.silver", sos)
+        hold = read("Blackout", "HoldCard.swift")
+        self.assertNotIn("Capsule()", hold)
+
+    def test_vendor_logo_stays_off_the_canvas(self):
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        self.assertIn("logoView.isHidden = true", offline)
+        self.assertNotIn("logoView.isHidden = false", offline)
+
+    def test_dock_is_the_token_rail(self):
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("BlackoutTokens.MapDock.allCases", tab)
+        self.assertIn("case .mark:", tab)
+        self.assertIn("case .walk:", tab)
+        self.assertIn("case .drive:", tab)
+        self.assertIn("case .speak:", tab)
+
+
 if __name__ == "__main__":
     unittest.main()

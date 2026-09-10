@@ -26,6 +26,7 @@ struct RootChrome: View {
         .preferredColorScheme(.dark)
         .sheet(isPresented: $runtime.showInstruments) {
             InstrumentsView(runtime: runtime)
+                .presentationBackground(Theme.void)
         }
         .onAppear { runtime.applyMapKeepAwake() }
         .onChange(of: runtime.tab) { _, _ in runtime.applyMapKeepAwake() }
@@ -128,9 +129,7 @@ struct RootChrome: View {
                     .minimumScaleFactor(1)
                     .allowsTightening(true)
                     .multilineTextAlignment(.center)
-                Rectangle()
-                    .fill(runtime.tab == t ? Theme.accent : Color.clear)
-                    .frame(width: 18, height: 2)
+                HUDReticle(lit: runtime.tab == t)
             }
         }
         .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))

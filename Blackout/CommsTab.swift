@@ -57,11 +57,7 @@ struct CommsTab: View {
                     Button(runtime.mesh.joined ? "NET JOINED" : "JOIN LOCAL NET") {
                         runtime.joinNet()
                     }
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(runtime.mesh.joined ? Theme.silver : Theme.accent)
-                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .buttonStyle(HUDActionStyle(filled: !runtime.mesh.joined))
                     log
                 }
             }
@@ -116,7 +112,7 @@ struct CommsTab: View {
             ForEach(runtime.mesh.inboundChips, id: \.self) { c in
                 Text("RX \(c.uppercased())")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.orange)
+                    .foregroundStyle(Theme.warn)
             }
         }
     }

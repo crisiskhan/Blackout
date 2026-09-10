@@ -836,7 +836,7 @@ def tip58_solo_qa() -> None:
     init = app.split("func arm(")[0]
 
     mark_ok = (
-        'Button("MARK")' in map_tab
+        'case .mark:' in map_tab
         and "dropMark()" in app
         and "MarkStore.load" in init
         and "MarkStore.save" in app
@@ -965,7 +965,7 @@ def tip60_map_chrome() -> None:
         and "func merging" in pack_style
         and "sameCoord" in pack_style
         and "func uniqued" in pack_style
-        and 'Button("MARK")' in map_tab
+        and "case .mark:" in map_tab
         and "dropMark()" in app
     )
     sos_ok = (
@@ -1052,10 +1052,11 @@ def tip62_nav() -> None:
         "mapChipHitPoints: Double = 44" in tokens
         and "enum MapDock" in tokens
         and "enum MapInstrument" in tokens
-        and 'Button("MARK")' in map_tab
-        and 'Button("WALK")' in map_tab
-        and 'Button("DRIVE")' in map_tab
-        and 'Button("SPEAK")' in map_tab
+        and "BlackoutTokens.MapDock.allCases" in map_tab
+        and "case .mark:" in map_tab
+        and "case .walk:" in map_tab
+        and "case .drive:" in map_tab
+        and "case .speak:" in map_tab
         and "BlackoutTokens.MapOverlay.instrumentsTitle" in map_tab
         and 'Button("RULER")' in inst
         and 'Button("USNG")' in inst
@@ -1089,11 +1090,12 @@ def tip62_nav() -> None:
     mark_one_ok = (
         "MarkDrop.merging" in app
         and "dropMark()" in app
-        and 'Button("MARK")' in map_tab
+        and "case .mark:" in map_tab
     )
     canvas_clean_ok = (
         "OSMCredit.line" in map_tab
         and "© OpenStreetMap contributors" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+        and "logoView.isHidden = true" in offline
         and "no MapKit engine" not in map_tab
         and "MapLibre Metal offline" not in map_tab
         and "style.json ·" not in map_tab
@@ -1228,7 +1230,7 @@ def tip65_speak() -> None:
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
-    if 'Button("SPEAK")' not in map_tab or "runtime.speakMap()" not in map_tab:
+    if "BlackoutTokens.MapDock.allCases" not in map_tab or "runtime.speakMap()" not in map_tab:
         bad("tip-65 deleted SPEAK")
         return
     if "VoiceNav.prompt" not in app or "speech.speak(text, locale: locale)" not in app:
@@ -1264,7 +1266,7 @@ def tip68_speak_field() -> None:
     speak_ok = (
         "HUDDockStyle" in map_tab
         and "HUDOverlayChipStyle" in map_tab
-        and 'Button("SPEAK")' in map_tab
+        and "BlackoutTokens.MapDock.allCases" in map_tab
         and "SpeakStatus.chrome(" in app
         and "speech.speak(text, locale: locale)" in app
         and "enum SpeakStatus" in voice

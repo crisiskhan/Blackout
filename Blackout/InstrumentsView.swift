@@ -6,7 +6,8 @@ struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
 
     var body: some View {
-        NavigationStack {
+        VStack(alignment: .leading, spacing: 0) {
+            header
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     sectionLabel("PACKS")
@@ -74,15 +75,13 @@ struct InstrumentsView: View {
                     ))
 
                     sectionLabel("POWER")
-                    Picker("Auction", selection: Binding(
-                        get: { runtime.power.state.mode },
-                        set: { runtime.power.set($0) }
-                    )) {
-                        ForEach(PowerMode.allCases, id: \.self) { m in
-                            Text(m.rawValue.uppercased()).tag(m)
+                    HStack(spacing: 1) {
+                        ForEach(PowerMode.allCases, id: \.self) { mode in
+                            Button(mode.rawValue.uppercased()) { runtime.power.set(mode) }
+                                .buttonStyle(HUDActionStyle(filled: runtime.power.state.mode == mode))
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     hudToggle("Pocket", Binding(
                         get: { runtime.power.state.pocket },
                         set: { runtime.power.setPocket($0) }
@@ -100,11 +99,24 @@ struct InstrumentsView: View {
                 }
                 .padding(16)
             }
-            .background(Theme.void)
-            .navigationTitle("INSTRUMENTS")
-            .toolbarBackground(Theme.void, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
+        .background(Theme.void)
+        .preferredColorScheme(.dark)
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            HUDMark()
+            Text("INSTRUMENTS")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+            Spacer(minLength: 8)
+            Button("CLOSE") { runtime.showInstruments = false }
+                .buttonStyle(HUDOverlayChipStyle())
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
     }
 
     private func sectionLabel(_ title: String) -> some View {
@@ -123,14 +135,23 @@ struct InstrumentsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
+    /// 44pt plate. ON / OFF is the instrument, not a system Toggle.
     private func hudToggle(_ title: String, _ value: Binding<Bool>) -> some View {
-        Toggle(title, isOn: value)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(Theme.silver)
-            .tint(Theme.accent)
-            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .padding(.horizontal, 12)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        Button {
+            value.wrappedValue.toggle()
+        } label: {
+            HStack {
+                Text(title)
+                    .foregroundStyle(Theme.silver)
+                Spacer()
+                Text(value.wrappedValue ? "ON" : "OFF")
+                    .foregroundStyle(value.wrappedValue ? Theme.accent : Color(white: 0.45))
+            }
+        }
+        .font(.system(size: 13, weight: .heavy))
+        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+        .padding(.horizontal, 12)
+        .background(Theme.raised)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }

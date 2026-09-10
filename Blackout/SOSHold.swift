@@ -29,6 +29,12 @@ struct SOSHold: View {
                         width: BlackoutTokens.Chrome.sosDiameter,
                         height: BlackoutTokens.Chrome.sosDiameter
                     )
+                Circle()
+                    .stroke(Theme.silver.opacity(0.55), lineWidth: 1.5)
+                    .frame(
+                        width: BlackoutTokens.Chrome.sosDiameter,
+                        height: BlackoutTokens.Chrome.sosDiameter
+                    )
                 Text("SOS")
                     .font(.system(size: 16, weight: .heavy))
                     .foregroundStyle(Color.white)
@@ -81,8 +87,11 @@ struct IAMOKBar: View {
                 .padding(.horizontal, 12)
                 .frame(minHeight: 36)
                 .background(Theme.glass())
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                )
                 Spacer()
             }
             Spacer()
