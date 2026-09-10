@@ -33,7 +33,7 @@ struct ExpeditionTab: View {
                     Button("APPLY RED BAND") {
                         runtime.applySelfRed()
                     }
-                    .buttonStyle(HUDActionStyle(filled: true))
+                    .buttonStyle(HUDActionStyle(filled: true, crisis: true))
                     if runtime.red.isRed || runtime.mesh.lastRedOn == true {
                         redPlate
                     }
@@ -114,7 +114,7 @@ struct ExpeditionTab: View {
                             ForEach(runtime.timers.doneLines(), id: \.self) { line in
                                 Text(line)
                                     .font(.caption.weight(.bold))
-                                    .foregroundStyle(Color(white: 0.7))
+                                    .foregroundStyle(Theme.silver.opacity(0.7))
                             }
                             ForEach(runtime.mesh.inboundTimers) { ev in
                                 Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
@@ -147,7 +147,7 @@ struct ExpeditionTab: View {
                                             .foregroundStyle(Theme.silver)
                                         Spacer()
                                         Text(item.working ? "OK" : "FAILED")
-                                            .foregroundStyle(item.working ? Theme.accent : Theme.warn)
+                                            .foregroundStyle(item.working ? Theme.silver : Theme.accent)
                                     }
                                 }
                                 .font(.system(size: 13, weight: .heavy))
@@ -156,7 +156,7 @@ struct ExpeditionTab: View {
                             ForEach(runtime.kit.hazards, id: \.self) { hazard in
                                 Text(hazard.uppercased())
                                     .font(.caption.weight(.bold))
-                                    .foregroundStyle(Theme.warn)
+                                    .foregroundStyle(Theme.accent)
                             }
                         }
                     }
@@ -177,7 +177,7 @@ struct ExpeditionTab: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             Text("DUE \(dueClock)")
                                 .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(runtime.trip.overdue() ? Theme.warn : Theme.silver)
+                                .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)
                         }
                     }
 
@@ -239,21 +239,21 @@ struct ExpeditionTab: View {
     private func overdueRow(_ t: PartyTimer) -> some View {
         Text("\(L10n.t("overdue", runtime.locale)) \(t.task)")
             .font(.system(size: 13, weight: .heavy))
-            .foregroundStyle(Theme.warn)
+            .foregroundStyle(Theme.accent)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
             .padding(.horizontal, 12)
-            .background(Theme.warn.opacity(0.16))
+            .background(Theme.accent.opacity(0.16))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.warn, lineWidth: 1)
+                    .strokeBorder(Theme.accent, lineWidth: 1)
             )
     }
 
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
-            .foregroundStyle(Color(white: 0.5))
+            .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
     private var dueClock: String {

@@ -110,7 +110,7 @@ struct ARMINGView: View {
         VStack(spacing: 10) {
             Text(runtime.bootStage.line)
                 .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(runtime.bootReady ? Theme.silver : Color(white: 0.55))
+                .foregroundStyle(runtime.bootReady ? Theme.silver : Theme.silver.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: 16)
@@ -135,7 +135,7 @@ struct ARMINGView: View {
         }
         .font(.system(size: 16, weight: .heavy))
         .tracking(4)
-        .foregroundStyle(runtime.bootReady ? Color.white : Color(white: 0.45))
+        .foregroundStyle(runtime.bootReady ? Color.white : Theme.silver.opacity(0.45))
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
         .background(runtime.bootReady ? Theme.accent : Theme.raised)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))

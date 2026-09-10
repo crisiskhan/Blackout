@@ -670,9 +670,10 @@ public enum OverlaySync: Sendable {
         puckNeedsReapply: Bool,
         routeNeedsReapply: Bool,
         destinationNeedsReapply: Bool = false,
-        inspectNeedsReapply: Bool = false
+        inspectNeedsReapply: Bool = false,
+        partyNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply || partyNeedsReapply
     }
 }
 
@@ -685,8 +686,8 @@ public enum MapKeepAwake: Sendable {
 /// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. The Metal view has
 /// to take this itself, and a hold card owns the canvas while it is up.
 public enum MapCanvasHit: Sendable {
-    public static func enabled(onMap: Bool, holding: Bool) -> Bool {
-        onMap && !holding
+    public static func enabled(onMap: Bool, holding: Bool, arranging: Bool = false) -> Bool {
+        onMap && !holding && !arranging
     }
 }
 

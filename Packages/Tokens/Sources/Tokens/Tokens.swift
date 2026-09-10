@@ -47,6 +47,13 @@ public enum BlackoutTokens: Sendable {
         /// Field and Mark. A third button turns a glance into a menu, and SOS
         /// is never one of them — it lives on Comms and nowhere else.
         public static let holdCardMaxActions: Int = 2
+        /// MAP chrome sleeps so the world can feel like it might disappear.
+        public static let chromeIdleSeconds: Double = 3.2
+        public static let chromeAsleepOpacity: Double = 0.08
+        public static let chromeSleepSeconds: Double = 1.15
+        public static let chromeWakeSeconds: Double = 0.55
+        /// Every control but the live one.
+        public static let chromeDimOpacity: Double = 0.28
 
         public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
             switch tab {
@@ -60,14 +67,14 @@ public enum BlackoutTokens: Sendable {
 
     public enum Color {
         public static let void = RGBA(r: 0, g: 0, b: 0, a: 1)
-        public static let raised = RGBA(r: 0.09, g: 0.10, b: 0.12, a: 1)
+        public static let raised = RGBA(r: 0.05, g: 0.05, b: 0.05, a: 1)
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silver = metal
-        public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
+        public static let silverEdge = silver
         public static let accent = RGBA(r: 225.0 / 255.0, g: 6.0 / 255.0, b: 0, a: 1)
         public static let sos = accent
-        /// HUD warn. One ink for OFF GRAPH / OVERDUE / NO VISION MODEL — not system orange.
-        public static let warn = RGBA(r: 1.0, g: 149.0 / 255.0, b: 0, a: 1)
+        /// Honesty ink. Crisis (SOS / RED / OVERDUE) uses accent. No leftover orange.
+        public static let warn = silver
         public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
     }
 

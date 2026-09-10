@@ -58,7 +58,7 @@ struct HoldCardView: View {
                         if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
                             onClose()
                         }
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.85)) { drag = 0 }
+                        withAnimation(Theme.Motion.heavy) { drag = 0 }
                     }
             )
             // Deliberately not `.isModal`. It would be the tidy thing for a
@@ -149,7 +149,7 @@ struct HoldCardView: View {
                 .minimumScaleFactor(0.7)
             Text(held.card.klass.uppercased())
                 .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.silver)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -224,7 +224,7 @@ private struct HoldActionStyle: ButtonStyle {
             .foregroundStyle(filled ? Color.white : Theme.silver)
             .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .contentShape(Rectangle())
-            .background(filled ? Theme.accent : Theme.raised)
+            .background(filled ? Theme.silver.opacity(0.22) : Theme.raised)
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)

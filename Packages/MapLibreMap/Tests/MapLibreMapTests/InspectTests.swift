@@ -267,6 +267,8 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(RouteLine.layerID))
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(HoldPin.ringLayerID))
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(DestinationPin.coreLayerID))
+        XCTAssertTrue(Inspect.overlayLayerIDs.contains(PartyPips.haloLayerID))
+        XCTAssertTrue(Inspect.overlayLayerIDs.contains(PartyPips.coreLayerID))
     }
 
     func testTheHoldIsShortEnoughToFeelInstantAndTightEnoughToStayAPan() {

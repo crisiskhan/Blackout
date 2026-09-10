@@ -41,7 +41,7 @@ struct FieldTab: View {
                                         if cards.first(where: { $0.category == c.category })?.id == c.id {
                                             Text(c.category.uppercased())
                                                 .font(.system(size: 11, weight: .heavy))
-                                                .foregroundStyle(Color(white: 0.5))
+                                                .foregroundStyle(Theme.silver.opacity(0.5))
                                                 .padding(.top, 10)
                                                 .padding(.bottom, 4)
                                         }
@@ -99,7 +99,10 @@ struct FieldTab: View {
 
     private var fieldTone: HUDStatusTone {
         if stepper != nil { return .silver }
-        if let g = guess, g.noModel || g.leaveIt { return .warn }
+        if let g = guess {
+            if g.leaveIt { return .crisis }
+            if g.noModel { return .warn }
+        }
         return .silver
     }
 
@@ -126,12 +129,12 @@ struct FieldTab: View {
                     } else {
                         Text(g.name)
                             .font(.system(size: 18, weight: .heavy))
-                            .foregroundStyle(g.leaveIt ? Theme.warn : Theme.silver)
+                            .foregroundStyle(g.leaveIt ? Theme.accent : Theme.silver)
                             .fixedSize(horizontal: false, vertical: true)
                         if g.leaveIt {
                             Text(L10n.t("vision.leave", runtime.locale))
                                 .font(.system(size: 18, weight: .heavy))
-                                .foregroundStyle(Theme.warn)
+                                .foregroundStyle(Theme.accent)
                         }
                         if !g.leaveIt {
                             ForEach(g.lookalikes, id: \.self) { word in
@@ -194,22 +197,22 @@ struct FieldTab: View {
             }
             Text(loc(s.card.situation))
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(Color(white: 0.7))
+                .foregroundStyle(Theme.silver.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
 
             sectionLabel(L10n.t("stop.if", runtime.locale))
             ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
                 Text(loc(line))
                     .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.warn)
+                    .foregroundStyle(Theme.accent)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
-                    .background(Theme.warn.opacity(0.14))
+                    .background(Theme.accent.opacity(0.14))
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.warn.opacity(0.55), lineWidth: 1)
+                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: 1)
                     )
             }
 
@@ -221,15 +224,15 @@ struct FieldTab: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Text(loc(s.step.why))
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color(white: 0.7))
+                        .foregroundStyle(Theme.silver.opacity(0.7))
                         .fixedSize(horizontal: false, vertical: true)
                     Text(loc(s.step.child))
                         .font(.caption)
-                        .foregroundStyle(Color(white: 0.7))
+                        .foregroundStyle(Theme.silver.opacity(0.7))
                         .fixedSize(horizontal: false, vertical: true)
                     Text(loc(s.step.stop))
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(Theme.warn)
+                        .foregroundStyle(Theme.accent)
                         .fixedSize(horizontal: false, vertical: true)
                     if let tick = s.step.tickSeconds {
                         Text("TICK \(tick)s")
@@ -295,7 +298,7 @@ struct FieldTab: View {
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
-            .foregroundStyle(Color(white: 0.5))
+            .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
     private func load() {

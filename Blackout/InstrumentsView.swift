@@ -22,7 +22,7 @@ struct InstrumentsView: View {
                                     Spacer()
                                     if runtime.packs?.active?.id == p.id {
                                         Text("LIVE")
-                                            .foregroundStyle(Theme.accent)
+                                            .foregroundStyle(Theme.silver)
                                     }
                                 }
                             }
@@ -45,6 +45,16 @@ struct InstrumentsView: View {
                         get: { runtime.night.enabled },
                         set: { runtime.night.enabled = $0 }
                     ))
+                    hudToggle("LAYOUT", Binding(
+                        get: { runtime.hudLayoutMode },
+                        set: { on in
+                            runtime.hudLayoutMode = on
+                            runtime.pulse()
+                            if on { runtime.showInstruments = false }
+                        }
+                    ))
+                    Button("RESET HUD") { runtime.resetHUD() }
+                        .buttonStyle(HUDActionStyle(filled: false))
 
                     sectionLabel("MAP")
                     HStack(spacing: 1) {
@@ -75,7 +85,7 @@ struct InstrumentsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     Text(torchWord)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Color(white: 0.45) : Theme.accent)
+                        .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Theme.silver.opacity(0.45) : Theme.silver)
                     hudButton("COMPASS CAL") { runtime.instruments.calibrateCompass() }
                     hudButton("TRUE NORTH") { runtime.instruments.setTrueNorth() }
                     hudToggle("USB-C PTT", Binding(
@@ -101,7 +111,7 @@ struct InstrumentsView: View {
                     ))
                     Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(Color(white: 0.55))
+                        .foregroundStyle(Theme.silver.opacity(0.55))
 
                     hudButton("ES / EN") {
                         runtime.locale = runtime.locale == "es" ? "en" : "es"
@@ -165,7 +175,7 @@ struct InstrumentsView: View {
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
-            .foregroundStyle(Color(white: 0.5))
+            .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
     private func hudButton(_ title: String, action: @escaping () -> Void) -> some View {
@@ -188,7 +198,7 @@ struct InstrumentsView: View {
                     .foregroundStyle(Theme.silver)
                 Spacer()
                 Text(value.wrappedValue ? "ON" : "OFF")
-                    .foregroundStyle(value.wrappedValue ? Theme.accent : Color(white: 0.45))
+                    .foregroundStyle(value.wrappedValue ? Theme.silver : Theme.silver.opacity(0.45))
             }
         }
         .font(.system(size: 13, weight: .heavy))

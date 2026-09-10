@@ -64,6 +64,27 @@ public enum DestinationPin {
     }
 }
 
+/// Bodies on the canvas. Silver only — red stays scarce.
+public enum PartyPips {
+    public static let sourceID = "party-pips-src"
+    public static let haloLayerID = "party-pips-halo"
+    public static let coreLayerID = "party-pips-core"
+    public static let haloRadius: Double = 16
+    public static let coreRadius: Double = 7
+
+    public static func needsReapply(
+        stored: [(lat: Double, lon: Double)]?,
+        pips: [(lat: Double, lon: Double)]
+    ) -> Bool {
+        guard let stored else { return true }
+        if stored.count != pips.count { return true }
+        for (a, b) in zip(stored, pips) {
+            if a.lat != b.lat || a.lon != b.lon { return true }
+        }
+        return false
+    }
+}
+
 /// Why a WALK or DRIVE tap could not draw a street line. The chips are never
 /// disabled, so every tap either draws or says one of these out loud.
 public enum RouteBlock: String, Equatable, Sendable, CaseIterable {

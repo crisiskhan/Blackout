@@ -30,6 +30,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
+    public var pips: [(lat: Double, lon: Double)]
+    public var onPulse: (() -> Void)?
 
     public init(
         styleURL: URL,
@@ -48,7 +50,9 @@ public struct OfflineMapView: UIViewRepresentable {
         trackUser: Bool = true,
         interactive: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
-        onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil
+        onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil,
+        pips: [(lat: Double, lon: Double)] = [],
+        onPulse: (() -> Void)? = nil
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -67,6 +71,8 @@ public struct OfflineMapView: UIViewRepresentable {
         self.interactive = interactive
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
+        self.pips = pips
+        self.onPulse = onPulse
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -111,6 +117,7 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.require(toFail: hold)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
         context.coordinator.apply(overlaySpec, on: view, force: true)
@@ -126,6 +133,7 @@ public struct OfflineMapView: UIViewRepresentable {
         applyInteraction(uiView)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
@@ -151,7 +159,8 @@ public struct OfflineMapView: UIViewRepresentable {
             route: route,
             destination: destination,
             held: held,
-            fitToken: fitToken
+            fitToken: fitToken,
+            pips: pips
         )
     }
 
@@ -167,11 +176,13 @@ public struct OfflineMapView: UIViewRepresentable {
             var destination: (lat: Double, lon: Double)?
             var held: (lat: Double, lon: Double)?
             var fitToken: Int
+            var pips: [(lat: Double, lon: Double)]
         }
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
+        var onPulse: (() -> Void)?
         var trackUser = true
         var interactive = true
         private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
@@ -184,6 +195,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedRoute: [(lat: Double, lon: Double)]?
         var storedDestination: (lat: Double, lon: Double)?
         var storedHeld: (lat: Double, lon: Double)?
+        var storedPips: [(lat: Double, lon: Double)]?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
         var fittedFitToken = 0
@@ -193,6 +205,7 @@ public struct OfflineMapView: UIViewRepresentable {
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             onMapTap?(coord.latitude, coord.longitude)
+            onPulse?()
         }
 
         @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
@@ -201,6 +214,7 @@ public struct OfflineMapView: UIViewRepresentable {
             let coord = view.convert(point, toCoordinateFrom: view)
             holdTick.impactOccurred()
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
+            onPulse?()
             liftIntoView(point, on: view)
         }
 
@@ -341,11 +355,13 @@ public struct OfflineMapView: UIViewRepresentable {
             // Both pins live in the same style pass, so either one moving is
             // reason enough to run it.
             let heldNeeds = force || HoldPin.needsReapply(stored: storedHeld, held: spec.held)
+            let partyNeeds = force || PartyPips.needsReapply(stored: storedPips, pips: spec.pips)
             if !OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
                 routeNeedsReapply: routeNeeds,
-                destinationNeedsReapply: destNeeds || heldNeeds
+                destinationNeedsReapply: destNeeds || heldNeeds,
+                partyNeedsReapply: partyNeeds
             ) {
                 return
             }
@@ -354,6 +370,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 syncStyleOverlays(on: view, spec: spec)
                 storedDestination = spec.destination
                 storedHeld = spec.held
+                storedPips = spec.pips
                 return
             }
 
@@ -394,6 +411,7 @@ public struct OfflineMapView: UIViewRepresentable {
             syncStyleOverlays(on: view, spec: spec)
             storedDestination = spec.destination
             storedHeld = spec.held
+            storedPips = spec.pips
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -477,7 +495,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 style.addSource(src)
                 let layer = MLNLineStyleLayer(identifier: "pack-bbox-line", source: src)
                 layer.lineColor = NSExpression(
-                    forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
                 )
                 layer.lineWidth = NSExpression(forConstantValue: 3)
                 style.addLayer(layer)
@@ -583,6 +601,33 @@ public struct OfflineMapView: UIViewRepresentable {
                 var empty = [CLLocationCoordinate2D]()
                 src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }
+
+            let partyShapes = spec.pips.map { pip -> MLNPointFeature in
+                let mark = MLNPointFeature()
+                mark.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                return mark
+            }
+            let party = MLNShapeCollectionFeature.shapeCollection(withShapes: partyShapes)
+            if let src = style.source(withIdentifier: PartyPips.sourceID) as? MLNShapeSource {
+                src.shape = party
+            } else {
+                let src = MLNShapeSource(identifier: PartyPips.sourceID, shape: party, options: nil)
+                style.addSource(src)
+                let halo = MLNCircleStyleLayer(identifier: PartyPips.haloLayerID, source: src)
+                halo.circleColor = NSExpression(
+                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28)
+                )
+                halo.circleRadius = NSExpression(forConstantValue: PartyPips.haloRadius)
+                style.addLayer(halo)
+                let core = MLNCircleStyleLayer(identifier: PartyPips.coreLayerID, source: src)
+                core.circleColor = NSExpression(
+                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+                )
+                core.circleRadius = NSExpression(forConstantValue: PartyPips.coreRadius)
+                core.circleStrokeColor = NSExpression(forConstantValue: UIColor.black)
+                core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                style.addLayer(core)
+            }
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
@@ -592,6 +637,22 @@ public struct OfflineMapView: UIViewRepresentable {
             fittedSize = nil
             if let spec {
                 apply(spec, on: mapView, force: true)
+            }
+        }
+
+        public func mapView(
+            _ mapView: MLNMapView,
+            regionIsChangingWithReason reason: MLNCameraChangeReason
+        ) {
+            if reason.contains(.gesturePan)
+                || reason.contains(.gesturePinch)
+                || reason.contains(.gestureRotate)
+                || reason.contains(.gestureTilt)
+                || reason.contains(.gestureZoomIn)
+                || reason.contains(.gestureZoomOut)
+                || reason.contains(.gestureOneFingerZoom)
+            {
+                onPulse?()
             }
         }
 
@@ -628,7 +689,7 @@ public struct OfflineMapView: UIViewRepresentable {
             if annotation === routeLine {
                 return UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
             }
-            return UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+            return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
         }
 
         public func mapView(_ mapView: MLNMapView, alphaForShapeAnnotation annotation: MLNShape) -> CGFloat {
@@ -654,29 +715,22 @@ final class FillingMapView: MLNMapView {
 final class YouPuckAnnotationView: MLNAnnotationView {
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
-        bounds = CGRect(x: 0, y: 0, width: 44, height: 52)
+        bounds = CGRect(x: 0, y: 0, width: 36, height: 36)
         backgroundColor = .clear
         isOpaque = false
         scalesWithViewingDistance = false
 
-        let halo = UIView(frame: CGRect(x: 4, y: 0, width: 36, height: 36))
+        let halo = UIView(frame: CGRect(x: 0, y: 0, width: 36, height: 36))
         halo.backgroundColor = UIColor(white: 1, alpha: 0.28)
         halo.layer.cornerRadius = 18
         addSubview(halo)
 
-        let core = UIView(frame: CGRect(x: 12, y: 8, width: 20, height: 20))
+        let core = UIView(frame: CGRect(x: 8, y: 8, width: 20, height: 20))
         core.backgroundColor = .white
         core.layer.cornerRadius = 10
         core.layer.borderWidth = 3
         core.layer.borderColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
         addSubview(core)
-
-        let label = UILabel(frame: CGRect(x: 0, y: 36, width: 44, height: 16))
-        label.text = UserPuck.title
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 9, weight: .heavy)
-        label.textColor = .white
-        addSubview(label)
     }
 
     required init?(coder: NSCoder) {

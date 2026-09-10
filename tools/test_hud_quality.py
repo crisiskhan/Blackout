@@ -708,5 +708,130 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("HUNGER", qa)
 
 
+ASLEEP = 0.08
+DIM = 0.28
+
+
+def chrome_opacity(*, awake: bool, crisis: bool, arranging: bool) -> float:
+    """MAP chrome sleeps. SOS / RED / LAYOUT do not."""
+    if crisis or arranging:
+        return 1.0
+    return 1.0 if awake else ASLEEP
+
+
+def piece_opacity(*, focus: str, piece: str) -> float:
+    """One control is alive. SOS is never the one that goes dim."""
+    if piece == "sos":
+        return 1.0
+    if not focus or focus == piece:
+        return 1.0
+    return DIM
+
+
+def reset_layout(placed: dict[str, tuple[float, float]]) -> dict[str, tuple[float, float]]:
+    return {key: (0.0, 0.0) for key in placed}
+
+
+class HUDSeductionTests(unittest.TestCase):
+    """Visual pull without lying about water, SOS, or the net."""
+
+    def test_idle_chrome_sleeps_and_crisis_does_not(self):
+        self.assertEqual(chrome_opacity(awake=True, crisis=False, arranging=False), 1.0)
+        self.assertEqual(chrome_opacity(awake=False, crisis=False, arranging=False), ASLEEP)
+        self.assertEqual(chrome_opacity(awake=False, crisis=True, arranging=False), 1.0)
+        self.assertEqual(chrome_opacity(awake=False, crisis=False, arranging=True), 1.0)
+
+    def test_one_control_alive_and_sos_never_dims(self):
+        self.assertEqual(piece_opacity(focus="search", piece="search"), 1.0)
+        self.assertEqual(piece_opacity(focus="search", piece="dock"), DIM)
+        self.assertEqual(piece_opacity(focus="", piece="dock"), 1.0)
+        self.assertEqual(piece_opacity(focus="dock", piece="sos"), 1.0)
+
+    def test_reset_hud_returns_every_piece_to_origin(self):
+        placed = {"search": (12.0, -8.0), "dock": (0.0, 40.0), "sos": (4.0, 10.0)}
+        self.assertEqual(reset_layout(placed), {k: (0.0, 0.0) for k in placed})
+
+    def test_source_has_the_hooks(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        tab = read("Blackout", "MapTab.swift")
+        root = read("Blackout", "RootChrome.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        hold = read("Blackout", "HoldCard.swift")
+        theme = read("Blackout", "Theme.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        inspect = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "Inspect.swift")
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        layout_path = ROOT.joinpath("Blackout", "HUDLayout.swift")
+        self.assertTrue(layout_path.is_file(), "HUDLayout.swift")
+        layout = layout_path.read_text()
+        puck = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
+        self.assertIn("chromeIdleSeconds", tokens)
+        self.assertIn("3.2", tokens)
+        self.assertIn("chromeAsleepOpacity", tokens)
+        self.assertIn("0.08", tokens)
+        self.assertIn("chromeSleepSeconds", tokens)
+        self.assertIn("chromeDimOpacity", tokens)
+        self.assertIn("func pulse()", app)
+        self.assertIn("var chromeAwake", app)
+        self.assertIn("var hudLayoutMode", app)
+        self.assertIn("func resetHUD()", app)
+        self.assertIn("RESET HUD", inst)
+        self.assertIn("LAYOUT", inst)
+        self.assertIn("hudLayout", layout)
+        self.assertIn("hud.layout", layout)
+        self.assertNotIn(".spring(", tab)
+        self.assertNotIn(".spring(", hold)
+        self.assertIn("easeInOut", theme)
+        self.assertIn("enum PartyPips", route)
+        self.assertIn("runtime.mesh.pips", tab)
+        self.assertIn("PartyPips.haloLayerID", inspect)
+        self.assertIn("regionIsChangingWithReason", offline)
+        self.assertIn("onPulse", offline)
+        self.assertIn("arranging:", tab)
+        self.assertNotIn("149.0 / 255.0", tokens)
+        self.assertIn("warn=silver", tokens.replace(" ", ""))
+        self.assertNotIn("label.text = UserPuck.title", puck)
+        self.assertIn('static let title = "YOU"', read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ))
+        self.assertIn("OSMCredit.line", tab)
+        self.assertIn("0.12, green: 0.82, blue: 0.94", offline)
+        self.assertIn("NET · NONE", read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift"))
+        self.assertNotIn("WaterSure.disclaimer", hold)
+        self.assertNotIn("tel://911", tab + root + hold)
+        for name in (
+            "MapTab.swift",
+            "RootChrome.swift",
+            "HoldCard.swift",
+            "CommsTab.swift",
+            "FieldTab.swift",
+            "ExpeditionTab.swift",
+            "InstrumentsView.swift",
+            "ARMINGView.swift",
+            "Theme.swift",
+            "HUDLayout.swift",
+        ):
+            body = read("Blackout", name)
+            self.assertNotIn("Color(white:", body, name)
+            self.assertNotIn(".foregroundStyle(.red)", body, name)
+            self.assertNotIn("Color.blue", body, name)
+            self.assertNotIn(".spring(", body, name)
+
+    def test_solo_qa_scores_the_hook(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("chrome fades", qa.lower())
+        self.assertIn("RESET HUD", qa)
+        self.assertIn("LAYOUT", qa)
+        self.assertIn("party dots", qa.lower())
+        self.assertIn("no bounce", qa.lower())
+        self.assertIn("NET · NONE", qa)
+        self.assertNotIn("does not replace 911", qa)
+        self.assertNotIn("I UNDERSTAND", qa)
+
+
 if __name__ == "__main__":
     unittest.main()
+

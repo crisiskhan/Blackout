@@ -7,6 +7,19 @@ enum Theme {
     static var silver: Color { Color(rgba: BlackoutTokens.Color.silver) }
     static var raised: Color { Color(rgba: BlackoutTokens.Color.raised) }
     static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
+    static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
+
+    enum Motion {
+        static var sleep: Animation {
+            .easeInOut(duration: BlackoutTokens.Chrome.chromeSleepSeconds)
+        }
+        static var wake: Animation {
+            .easeOut(duration: BlackoutTokens.Chrome.chromeWakeSeconds)
+        }
+        static var heavy: Animation {
+            .easeInOut(duration: BlackoutTokens.Chrome.chromeSleepSeconds)
+        }
+    }
 
     /// Dark glass the HUD sits on. Blur alone lets streets through the type.
     static func glass(opacity: Double = 0.72) -> some View {
@@ -39,9 +52,10 @@ struct HUDMark: View {
 /// The logo's center, as a selected-tab tick. Not a random underline.
 struct HUDReticle: View {
     var lit: Bool
+    var crisis: Bool = false
 
     var body: some View {
-        let ink = lit ? Theme.accent : Color.clear
+        let ink = lit ? (crisis ? Theme.accent : Theme.silver) : Color.clear
         let size = CGFloat(BlackoutTokens.Chrome.hudReticlePoints)
         return ZStack {
             Circle()
@@ -176,6 +190,7 @@ struct HUDGlassCard<Content: View>: View {
 
 struct HUDActionStyle: ButtonStyle {
     var filled: Bool
+    var crisis: Bool = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -183,7 +198,7 @@ struct HUDActionStyle: ButtonStyle {
             .foregroundStyle(filled ? Color.white : Theme.silver)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .contentShape(Rectangle())
-            .background(filled ? Theme.accent : Theme.raised)
+            .background(filled ? (crisis ? Theme.accent : Theme.silver.opacity(0.22)) : Theme.raised)
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)

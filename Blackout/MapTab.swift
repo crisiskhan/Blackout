@@ -17,7 +17,7 @@ struct MapTab: View {
                 canvas(pack: pack, style: style)
             } else {
                 Text("Packs missing from bundle — honest empty.")
-                    .foregroundStyle(Color(white: 0.5))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
                     .padding(16)
             }
         }
@@ -56,7 +56,8 @@ struct MapTab: View {
                 fitToken: runtime.fitPackToken,
                 interactive: MapCanvasHit.enabled(
                     onMap: runtime.tab == .map,
-                    holding: runtime.held != nil
+                    holding: runtime.held != nil,
+                    arranging: runtime.hudLayoutMode
                 ),
                 onMapTap: { lat, lon in
                     runtime.pickDestination(lat: lat, lon: lon)
@@ -64,7 +65,9 @@ struct MapTab: View {
                 },
                 onMapHold: { lat, lon, tags, zoom in
                     runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
-                }
+                },
+                pips: runtime.mesh.pips.map { (lat: $0.lat, lon: $0.lon) },
+                onPulse: { runtime.pulse() }
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the
@@ -92,7 +95,7 @@ struct MapTab: View {
             if runtime.tab == .map, runtime.held != nil {
                 Text(OSMCredit.line)
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color(white: 0.75))
+                    .foregroundStyle(Theme.silver.opacity(0.75))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Theme.void.opacity(0.66))
@@ -102,7 +105,9 @@ struct MapTab: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .layoutPriority(1)
-        .animation(.spring(response: 0.28, dampingFraction: 0.9), value: runtime.held)
+        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
+        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
+        .animation(Theme.Motion.heavy, value: runtime.held)
     }
 
     /// Everything that is not the map, sitting on the map. Search, lock and
@@ -110,47 +115,94 @@ struct MapTab: View {
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
-            topBar
+            HUDPlaced(
+                offset: runtime.hudLayout.search,
+                arranging: runtime.hudLayoutMode,
+                veil: runtime.chromeVeil,
+                alive: runtime.alive(.search),
+                onMove: { runtime.hudLayout.search = $0 },
+                onStore: { runtime.hudLayout.save() }
+            ) {
+                searchField
+            }
+            HUDPlaced(
+                offset: runtime.hudLayout.overlay,
+                arranging: runtime.hudLayoutMode,
+                veil: runtime.chromeVeil,
+                alive: runtime.alive(.overlay),
+                onMove: { runtime.hudLayout.overlay = $0 },
+                onStore: { runtime.hudLayout.save() }
+            ) {
+                overlayRail
+            }
             if !hits.isEmpty { hitList }
             if hits.isEmpty { markList }
             Spacer(minLength: 0)
             fieldChrome
+                .opacity(runtime.chromeVeil)
                 .allowsHitTesting(false)
             if runtime.hudCrisis {
                 crisisStrip
             }
-            dock
-            canvasFooter(packName: packName, offPack: offPack)
+            HUDPlaced(
+                offset: runtime.hudLayout.dock,
+                arranging: runtime.hudLayoutMode,
+                veil: runtime.chromeVeil,
+                alive: runtime.alive(.dock),
+                onMove: { runtime.hudLayout.dock = $0 },
+                onStore: { runtime.hudLayout.save() }
+            ) {
+                dock
+            }
+            HUDPlaced(
+                offset: runtime.hudLayout.footer,
+                arranging: runtime.hudLayoutMode,
+                veil: runtime.chromeVeil,
+                alive: runtime.alive(.footer),
+                onMove: { runtime.hudLayout.footer = $0 },
+                onStore: { runtime.hudLayout.save() }
+            ) {
+                canvasFooter(packName: packName, offPack: offPack)
+            }
+            osmCredit
         }
         .padding(.horizontal, 10)
         .padding(.top, 8)
         .padding(.bottom, 4)
     }
 
-    private var topBar: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            TextField("SEARCH", text: $query)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Theme.silver)
-                .padding(.horizontal, 12)
-                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                .background(Theme.glass())
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
-                )
-                .onSubmit { search() }
-            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                Button(BlackoutTokens.MapOverlay.instrumentsTitle) { runtime.showInstruments = true }
-                    .buttonStyle(HUDOverlayChipStyle())
-                Button(BlackoutTokens.MapOverlay.lockTitle(locked: runtime.lockOn)) {
-                    runtime.toggleLockOn()
-                }
-                .buttonStyle(HUDOverlayChipStyle())
+    private var searchField: some View {
+        TextField("SEARCH", text: $query)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(Theme.silver)
+            .padding(.horizontal, 12)
+            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            .background(Theme.glass())
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+            )
+            .onSubmit {
+                runtime.touch(.search)
+                search()
             }
+            .onTapGesture { runtime.touch(.search) }
+    }
+
+    private var overlayRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            Button(BlackoutTokens.MapOverlay.instrumentsTitle) {
+                runtime.touch(.overlay)
+                runtime.showInstruments = true
+            }
+            .buttonStyle(HUDOverlayChipStyle())
+            Button(BlackoutTokens.MapOverlay.lockTitle(locked: runtime.lockOn)) {
+                runtime.toggleLockOn()
+            }
+            .buttonStyle(HUDOverlayChipStyle())
         }
     }
 
@@ -288,6 +340,7 @@ struct MapTab: View {
     }
 
     private func tapDock(_ cell: BlackoutTokens.MapDock) {
+        runtime.touch(.dock)
         switch cell {
         case .mark:
             runtime.dropMark()
@@ -308,21 +361,29 @@ struct MapTab: View {
                 if offPack {
                     Text(PackChrome.offPack)
                         .font(.caption2.weight(.bold))
-                        .foregroundStyle(Theme.warn)
+                        .foregroundStyle(Theme.accent)
                 }
                 Text(packName)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.silver)
-                Text(OSMCredit.line)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Color(white: 0.7))
             }
             Spacer()
-            Button("FIT PACK") { runtime.fitPack() }
+            Button("FIT PACK") {
+                runtime.touch(.footer)
+                runtime.fitPack()
+            }
                 .buttonStyle(HUDOverlayChipStyle())
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 2)
+    }
+
+    /// License stays when chrome sleeps. Pack name can fade; this cannot.
+    private var osmCredit: some View {
+        Text(OSMCredit.line)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(Theme.silver.opacity(0.75))
+            .allowsHitTesting(false)
     }
 
     private func styleURL() -> URL? {

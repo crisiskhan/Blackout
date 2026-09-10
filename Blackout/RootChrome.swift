@@ -19,7 +19,7 @@ struct RootChrome: View {
                 contextualSOS
             }
             if runtime.night.enabled {
-                Color(red: 0.55, green: 0.05, blue: 0.05).opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
+                Theme.nightRed.opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
             }
         }
         .tint(Theme.accent)
@@ -28,8 +28,14 @@ struct RootChrome: View {
             InstrumentsView(runtime: runtime)
                 .presentationBackground(Theme.void)
         }
-        .onAppear { runtime.applyMapKeepAwake() }
-        .onChange(of: runtime.tab) { _, _ in runtime.applyMapKeepAwake() }
+        .onAppear {
+            runtime.applyMapKeepAwake()
+            runtime.pulse()
+        }
+        .onChange(of: runtime.tab) { _, _ in
+            runtime.applyMapKeepAwake()
+            runtime.pulse()
+        }
         .onChange(of: runtime.armed) { _, _ in runtime.applyMapKeepAwake() }
     }
 
@@ -43,6 +49,9 @@ struct RootChrome: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
+        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
+        .animation(Theme.Motion.heavy, value: runtime.hudLayoutMode)
     }
 
     /// Overlay pages sit above the tab strip. MapTab stays full-bleed so a
@@ -84,42 +93,60 @@ struct RootChrome: View {
     }
 
     private var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(BlackoutTab.allCases) { t in
-                tabButton(t)
-                    .frame(maxWidth: .infinity, minHeight: 44)
+        placedTabs {
+            HStack(spacing: 0) {
+                ForEach(BlackoutTab.allCases) { t in
+                    tabButton(t)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
             }
-        }
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
-        .padding(.bottom, 2)
-        .background(Theme.void.opacity(0.94))
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Theme.silver.opacity(0.18))
-                .frame(height: 1)
+            .padding(.horizontal, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 2)
+            .background(Theme.void.opacity(0.94))
+            .overlay(alignment: .top) {
+                Rectangle()
+                    .fill(Theme.silver.opacity(0.18))
+                    .frame(height: 1)
+            }
         }
     }
 
     private var tabColumn: some View {
-        VStack(spacing: 4) {
-            ForEach(BlackoutTab.allCases) { t in
-                tabButton(t)
-                    .rotationEffect(.degrees(-90))
-                    .frame(height: BlackoutTokens.Chrome.hudSideReservePoints)
+        placedTabs {
+            VStack(spacing: 4) {
+                ForEach(BlackoutTab.allCases) { t in
+                    tabButton(t)
+                        .rotationEffect(.degrees(-90))
+                        .frame(height: BlackoutTokens.Chrome.hudSideReservePoints)
+                }
+                Spacer()
             }
-            Spacer()
+            .background(Theme.void.opacity(0.94))
+            .overlay(alignment: .trailing) {
+                Rectangle()
+                    .fill(Theme.silver.opacity(0.18))
+                    .frame(width: 1)
+            }
         }
-        .background(Theme.void.opacity(0.94))
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(Theme.silver.opacity(0.18))
-                .frame(width: 1)
+    }
+
+    private func placedTabs<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        HUDPlaced(
+            offset: runtime.hudLayout.tabs,
+            arranging: runtime.hudLayoutMode,
+            veil: runtime.tab == .map ? runtime.chromeVeil : 1,
+            alive: runtime.alive(.tabs),
+            onMove: { runtime.hudLayout.tabs = $0 },
+            onStore: { runtime.hudLayout.save() }
+        ) {
+            content()
         }
     }
 
     private func tabButton(_ t: BlackoutTab) -> some View {
         Button {
+            runtime.touch(.tabs)
             runtime.tab = t
         } label: {
             VStack(spacing: 3) {
@@ -129,10 +156,10 @@ struct RootChrome: View {
                     .minimumScaleFactor(1)
                     .allowsTightening(true)
                     .multilineTextAlignment(.center)
-                HUDReticle(lit: runtime.tab == t)
+                HUDReticle(lit: runtime.tab == t, crisis: runtime.hudCrisis)
             }
         }
-        .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))
+        .foregroundStyle(runtime.tab == t ? Theme.silver : Theme.silver.opacity(0.45))
     }
 
     @ViewBuilder
@@ -142,9 +169,18 @@ struct RootChrome: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    SOSHold(runtime: runtime)
-                        .padding(.trailing, 16)
-                        .padding(.bottom, sosBottomPad)
+                    HUDPlaced(
+                        offset: runtime.hudLayout.sos,
+                        arranging: runtime.hudLayoutMode,
+                        veil: 1,
+                        alive: 1,
+                        onMove: { runtime.hudLayout.sos = $0 },
+                        onStore: { runtime.hudLayout.save() }
+                    ) {
+                        SOSHold(runtime: runtime)
+                            .padding(.trailing, 16)
+                            .padding(.bottom, sosBottomPad)
+                    }
                 }
             }
             .allowsHitTesting(true)

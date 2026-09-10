@@ -35,6 +35,8 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Pinch to walking zoom (a block or two across): silver street names are drawn on the streets with a black halo and are legible at arm's length. If no name draws at any zoom, the glyph template failed — report it.
 - [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (TX WEST first-open, or the pack last chosen in INSTRUMENTS).
 - [ ] PASS / FAIL / N/A — Browse MAP (lock-on off): no SOS disk.
+- [ ] PASS / FAIL / N/A — After ~3s idle on MAP, chrome fades (search, dock, tabs toward black; no bounce). Touch / pan / pinch / hold brings the pulse back. SOS never fades. OSM credit stays. Hold-to-inspect is the map's words — almost no labels on the canvas besides the credit.
+- [ ] PASS / FAIL / N/A — Party dots (silver bodies, no names) appear on the map when POS peers exist. Solo with nobody is empty — not fake people. Red only when it matters (SOS / RED / OVERDUE / YOU ring / dest / hold pin) — not on JOIN LOCAL NET / VISION / RADIO CHECK.
 
 ## COMMS (solo, no peer)
 
@@ -71,6 +73,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 - [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). `TORCH 3×` cycles OFF / 1 / 2 / 3 and drives the lamp. SUN shows RISE / SET for the open pack (offline almanac, not weather). Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
 - [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. `LEFT HAND` and `NIGHT RED` live here, not on boot.
+- [ ] PASS / FAIL / N/A — INSTRUMENTS `LAYOUT` lets every HUD plate move (search, overlay, dock, footer, tabs, SOS). Placements survive kill-and-relaunch. `RESET HUD` returns every piece to origin.
 
 ## Kill-and-relaunch
 

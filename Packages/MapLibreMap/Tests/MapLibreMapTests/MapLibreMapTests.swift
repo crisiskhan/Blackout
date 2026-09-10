@@ -582,6 +582,14 @@ final class MapLibreMapTests: XCTestCase {
                 destinationNeedsReapply: true
             )
         )
+        XCTAssertTrue(
+            OverlaySync.needsStyleMutation(
+                force: false,
+                puckNeedsReapply: false,
+                routeNeedsReapply: false,
+                partyNeedsReapply: true
+            )
+        )
     }
 
     func testCanvasOpensWhereStreetNamesRender() {
@@ -649,6 +657,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(MapCanvasHit.enabled(onMap: true, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: false, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: true, holding: true))
+        XCTAssertFalse(MapCanvasHit.enabled(onMap: true, holding: false, arranging: true))
     }
 
     func testPackCameraRefitsWhenCanvasGrowsPastStrip() {

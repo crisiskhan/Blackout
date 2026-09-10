@@ -53,6 +53,10 @@ final class AppRuntime {
     var tab: BlackoutTab = .map
     var lockOn = false
     var showInstruments = false
+    var chromeAwake = true
+    var hudLayoutMode = false
+    var hudLayout = HUDLayout.load()
+    var hudFocus: HUDFocus = .none
     var locale = "en"
     var lastKnownFix: (lat: Double, lon: Double)?
     var marks: [MapMark] = []
@@ -89,6 +93,7 @@ final class AppRuntime {
     private var waterWarmup: Task<WaterIndex?, Never>?
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
+    private var pulseTask: Task<Void, Never>?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
     private var pttHold = false
     /// CLIP tap is waiting on the mic. Not live yet.
@@ -153,6 +158,7 @@ final class AppRuntime {
         armed = true
         box.log("arming", "activated")
         applyMapKeepAwake()
+        pulse()
     }
 
     func joinNet() {
@@ -181,6 +187,7 @@ final class AppRuntime {
     }
 
     func dropMark() {
+        pulse()
         fix.arm()
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
@@ -212,6 +219,7 @@ final class AppRuntime {
     /// raise the card. This never calls SOS and never routes anywhere; it only
     /// says what is there.
     func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
+        pulse()
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
@@ -234,6 +242,7 @@ final class AppRuntime {
 
     func closeHold() {
         held = nil
+        pulse()
     }
 
     /// MARK on the card puts the mark on the held place, not on the fix.
@@ -261,6 +270,7 @@ final class AppRuntime {
     }
 
     func toggleLockOn() {
+        touch(.overlay)
         lockOn.toggle()
         if !lockOn {
             lockChrome = ""
@@ -275,6 +285,7 @@ final class AppRuntime {
     }
 
     func pickDestination(lat: Double, lon: Double) {
+        pulse()
         routeTarget = (lat, lon)
         // A new destination invalidates everything the old one produced.
         routeCoords = []
@@ -285,6 +296,7 @@ final class AppRuntime {
     }
 
     func navigate(mode: TravelMode) {
+        touch(.dock)
         speechChrome = ""
         let pack = packs?.active
         let packName = pack?.name ?? ""
@@ -360,7 +372,41 @@ final class AppRuntime {
         red.isRed || comms.chips.contains(.sos)
     }
 
+    var chromeVeil: Double {
+        HUDPulse.opacity(awake: chromeAwake, crisis: hudCrisis, arranging: hudLayoutMode)
+    }
+
+    func alive(_ piece: HUDFocus) -> Double {
+        if hudLayoutMode { return 1 }
+        return HUDPulse.piece(focus: hudFocus, piece: piece)
+    }
+
+    func touch(_ piece: HUDFocus) {
+        hudFocus = piece
+        pulse()
+    }
+
+    func pulse() {
+        chromeAwake = true
+        pulseTask?.cancel()
+        pulseTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
+            if Task.isCancelled { return }
+            if hudCrisis || hudLayoutMode || held != nil { return }
+            hudFocus = .none
+            chromeAwake = false
+        }
+    }
+
+    func resetHUD() {
+        hudLayout = .origin
+        hudLayout.save()
+        hudLayoutMode = false
+        pulse()
+    }
+
     func offerSOS() {
+        pulse()
         if mesh.radio == nil {
             joinNet()
         }
@@ -390,6 +436,7 @@ final class AppRuntime {
     }
 
     func speakMap() {
+        touch(.dock)
         let pack = packs?.active?.name ?? "no pack"
         let text = VoiceNav.prompt(
             packName: pack,

@@ -162,6 +162,7 @@ public enum Inspect {
         "pack-bbox-line", "you-puck-halo", "you-puck-core",
         DestinationPin.ringLayerID, DestinationPin.coreLayerID, RouteLine.layerID,
         HoldPin.ringLayerID, HoldPin.coreLayerID,
+        PartyPips.haloLayerID, PartyPips.coreLayerID,
     ]
 
     // Core Field cards, which every state ships, so a hold can never open a

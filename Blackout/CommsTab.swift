@@ -246,7 +246,7 @@ struct CommsTab: View {
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
-            .foregroundStyle(Color(white: 0.5))
+            .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
     private func chip(_ title: String, action: @escaping () -> Void) -> some View {
