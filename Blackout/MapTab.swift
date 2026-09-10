@@ -143,7 +143,12 @@ struct MapTab: View {
                 lock: runtime.lockChrome,
                 route: runtime.routeChrome,
                 tool: runtime.toolChrome,
-                bearingDeg: runtime.headingDeg,
+                bearingDeg: MapFieldChrome.activeBearing(
+                    headingDeg: runtime.headingDeg,
+                    hasDestination: runtime.routeTarget != nil,
+                    lockOn: runtime.lockOn,
+                    hasRoute: !runtime.routeCoords.isEmpty
+                ),
                 speak: runtime.speechChrome
             )
         ) { line in

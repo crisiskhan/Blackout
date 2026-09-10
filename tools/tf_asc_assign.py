@@ -23,6 +23,7 @@ except ImportError:  # unit tests never call _http
     jwt = None
 
 ASSIGN_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
+PATCH_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
 INTERNAL_GROUP = "28035586-fce6-474f-9bc2-ef0f1f65306e"
 ASC_APP = "6806388963"
 
@@ -77,18 +78,33 @@ def assign_internal(
             continue
         bid = target["id"]
         if target.get("usesNonExemptEncryption") is None:
-            st, data = api(
-                "PATCH",
-                f"https://api.appstoreconnect.apple.com/v1/builds/{bid}",
-                {
-                    "data": {
-                        "type": "builds",
-                        "id": bid,
-                        "attributes": {"usesNonExemptEncryption": False},
-                    }
-                },
-            )
-            print("PATCH", target["version"], st)
+            # tip-75: PATCH 401 then ASSIGN 422 not-testable. Retry transient
+            # auth/compliance races before attempting Internal assign.
+            patch_tries = 0
+            while True:
+                st, data = api(
+                    "PATCH",
+                    f"https://api.appstoreconnect.apple.com/v1/builds/{bid}",
+                    {
+                        "data": {
+                            "type": "builds",
+                            "id": bid,
+                            "attributes": {"usesNonExemptEncryption": False},
+                        }
+                    },
+                )
+                print("PATCH", target["version"], st)
+                if st < 400:
+                    break
+                if st in (401, 403, 409, 429, 500, 502, 503, 504) and patch_tries < len(PATCH_BACKOFF):
+                    wait = PATCH_BACKOFF[patch_tries]
+                    patch_tries += 1
+                    print(json.dumps(data)[:500])
+                    print("RETRY patch", st, "in", int(wait), "s")
+                    sleep(wait)
+                    continue
+                print(json.dumps(data)[:500])
+                return 1
         st, data = api(
             "POST",
             f"https://api.appstoreconnect.apple.com/v1/betaGroups/{group}/relationships/builds",
