@@ -65,6 +65,8 @@ final class AppRuntime {
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
+    /// Mic deny on CALL. Empty unless the last arm failed.
+    var commsChrome = ""
     /// Machine plan state for VoiceNav: "" on graph, `GraphPlan.offGraph` otherwise.
     var navChrome = ""
     /// What the map says after a WALK/DRIVE tap: the route, or why there isn't one.
@@ -84,6 +86,7 @@ final class AppRuntime {
     private var waterPackID: String?
     private var waterWarmup: Task<WaterIndex?, Never>?
     private var bootTask: Task<Void, Never>?
+    private var clipTask: Task<Void, Never>?
     private let fix = MeshFix()
 
     init() {
@@ -152,6 +155,16 @@ final class AppRuntime {
         persistPartyCode()
         if mesh.radio == nil { mesh.attach(LiveMeshRadio()) }
         mesh.startLocal()
+    }
+
+    func leaveNet() {
+        clipTask?.cancel()
+        clipTask = nil
+        if ptt.live { endPTTSolo() }
+        _ = PTTMic.shared.stop()
+        mesh.stopLocal()
+        comms.radioCheck(heard: false)
+        commsChrome = ""
     }
 
     func persistPartyCode() {
@@ -343,7 +356,7 @@ final class AppRuntime {
             joinNet()
         }
         if !comms.chips.contains(.sos) {
-            comms.chips.append(.sos)
+            comms.push(.sos)
         }
         mesh.sendChip(from: mesh.localID, chip: Chip.sos.rawValue)
         red.force(true)
@@ -357,7 +370,7 @@ final class AppRuntime {
     func iamOK() {
         comms.chips.removeAll { $0 == .sos }
         if !comms.chips.contains(.ok) {
-            comms.chips.append(.ok)
+            comms.push(.ok)
         }
         mesh.sendChip(from: mesh.localID, chip: Chip.ok.rawValue)
         if red.isRed {
@@ -390,13 +403,55 @@ final class AppRuntime {
     }
 
     func beginPTTSolo() {
+        if clipTask != nil { finishClip() }
+        guard !ptt.live else { return }
         ptt.beginLive()
-        _ = ptt.recordClip(pcm: Data(repeating: 0, count: 3200), sampleRate: 16_000)
-        mesh.sendChip(from: mesh.localID, chip: "ptt")
+        commsChrome = ""
+        mesh.sendChip(from: mesh.localID, chip: "ptt", to: meshDest)
+        PTTMic.shared.arm { [weak self] ok in
+            guard let self else { return }
+            if !ok { self.commsChrome = "MIC DENIED" }
+        }
     }
 
     func endPTTSolo() {
+        let pcm = PTTMic.shared.stop()
         ptt.endLive()
+        _ = ptt.recordClip(pcm: pcm, sampleRate: 16_000)
+        if !pcm.isEmpty, let opus = ptt.last?.opus {
+            mesh.sendVoice(from: mesh.localID, opus: opus, to: meshDest)
+        }
+    }
+
+    func captureClip() {
+        if clipTask != nil {
+            finishClip()
+            return
+        }
+        if ptt.live { endPTTSolo() }
+        commsChrome = ""
+        PTTMic.shared.arm { [weak self] ok in
+            guard let self else { return }
+            if !ok {
+                self.commsChrome = "MIC DENIED"
+                _ = self.ptt.recordClip(pcm: Data(), sampleRate: 16_000)
+                return
+            }
+            self.clipTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(15))
+                self.finishClip()
+            }
+        }
+    }
+
+    func radioCheckParty() {
+        comms.radioCheck(heard: mesh.joined)
+        mesh.sendChip(from: mesh.localID, chip: "radio", to: meshDest)
+    }
+
+    func sendPartyChip(_ chip: Chip) {
+        comms.push(chip)
+        mesh.sendChip(from: mesh.localID, chip: chip.rawValue, to: meshDest)
     }
 
     func tapTorch() {
@@ -432,6 +487,20 @@ final class AppRuntime {
 
     func sendFieldToParty(cardID: String) {
         mesh.sendChip(from: mesh.localID, chip: "field:\(cardID)")
+    }
+
+    private var meshDest: String {
+        comms.meshTo(nearby: mesh.nearby)
+    }
+
+    private func finishClip() {
+        clipTask?.cancel()
+        clipTask = nil
+        let pcm = PTTMic.shared.stop()
+        _ = ptt.recordClip(pcm: pcm, sampleRate: 16_000)
+        if !pcm.isEmpty, let opus = ptt.last?.opus {
+            mesh.sendVoice(from: mesh.localID, opus: opus, to: meshDest)
+        }
     }
 
     func visionBook() -> VisionBook? {
@@ -470,8 +539,12 @@ final class AppRuntime {
                     red.force(true)
                 }
                 if let chip = Chip(rawValue: raw) {
-                    comms.chips.append(chip)
+                    comms.push(chip)
                 }
+            }
+        case "voice":
+            if let pcm = OpusLite.decode(env.body) {
+                PTTMic.shared.play(pcm)
             }
         default:
             break

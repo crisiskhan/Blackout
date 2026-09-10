@@ -39,12 +39,14 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 ## COMMS (solo, no peer)
 
 - [ ] PASS / FAIL / N/A — Chrome starts `NET · NONE` (not `NET · MPC` / `NET · BLE` with nobody connected).
+- [ ] PASS / FAIL / N/A — JOIN LOCAL NET starts the radio. Button becomes `LEAVE NET`. Still `NET · NONE` until a real peer. LEAVE NET returns to `NET · NONE`. No `NET JOINED` dead control.
 - [ ] PASS / FAIL / N/A — RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
 - [ ] PASS / FAIL / N/A — FORM UP / LOST KID / WAIT / WATER chips log locally the same way. Whole words on the rail.
-- [ ] PASS / FAIL / N/A — HOLD PTT: chrome `NO PEERS · LOGGED`. Button stays `HOLD PTT` / `RELEASE PTT` — does not claim sent.
+- [ ] PASS / FAIL / N/A — HOLD PTT is a hold, not a tap. Press: `PTT` (RELEASE PTT). Release ends. Chrome `NO PEERS · LOGGED`. Mic deny: `MIC DENIED`. Does not claim sent. 15s CLIP records the mic or `MIC DENIED` — not silence zeros.
+- [ ] PASS / FAIL / N/A — RADIO CHECK writes a radio chip. Solo chrome `NO PEERS · LOGGED`. Does not light as heard without a peer.
 - [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only (64pt, pulsing while held, visible SOS). Browse MAP (lock-on on or off) has no SOS FAB. After hold: mesh chip + RED + POS (`SOS · MESH` plate), not a caption. I AM OK clears it.
-- [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar.
-- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS.
+- [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar. COMMS chip rail does not show I AM OK just because the radio is up.
+- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS. SCAN QR has CLOSE.
 - [ ] PASS / FAIL / N/A — Hold a water/ground feature → FIELD. Card names the class (STOCK TANK / TINAJA / ACEQUIA / RIVER), not a generic water. DO is the class field line. Empty ground names nearest water within 2 km. FIELD · WATER jumps. The hold card must not crash. Returning to MAP still has the canvas (MapLibre was not torn down).
 
 ## FIELD

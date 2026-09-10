@@ -510,10 +510,43 @@ class CommsInstrumentTests(unittest.TestCase):
         self.assertIn("JOIN LOCAL NET", comms)
         self.assertNotIn("Whisper <10 m", comms)
 
+    def test_call_is_a_hold_and_the_net_can_leave(self):
+        comms = read("Blackout", "CommsTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        ptt = read("Packages", "PTTAudio", "Sources", "PTTAudio", "PTTAudio.swift")
+        mic = read("Blackout", "PTTMic.swift")
+        scan = read("Blackout", "PartyJoin.swift")
+        self.assertIn("LEAVE NET", comms)
+        self.assertIn("DragGesture", comms)
+        self.assertIn("endPTTSolo()", comms)
+        self.assertIn("beginPTTSolo()", comms)
+        self.assertIn("captureClip()", comms)
+        self.assertIn("radioCheckParty()", comms)
+        self.assertIn("RADIO CHECK", comms)
+        self.assertIn('sectionLabel("CALL")', comms)
+        self.assertIn('sectionLabel("CHIPS")', comms)
+        self.assertIn("MIC DENIED", app)
+        self.assertIn("sendVoice", app)
+        self.assertIn('chip: "ptt"', app)
+        self.assertIn("recordClip", app)
+        self.assertIn("listening", mesh)
+        self.assertIn("sendVoice", mesh)
+        self.assertNotIn("Data(repeating: 0", comms)
+        self.assertNotIn("Data(repeating: 0", app)
+        self.assertNotIn("AVAudioEngine", ptt)
+        self.assertNotIn("import AVFoundation", ptt)
+        self.assertIn("AVAudioRecorder", mic)
+        self.assertIn("CLOSE", scan)
+        self.assertNotIn("NET JOINED", comms)
+
     def test_solo_qa_scores_form_up_and_lost_kid(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("FORM UP", qa)
         self.assertIn("LOST KID", qa)
+        self.assertIn("LEAVE NET", qa)
+        self.assertIn("MIC DENIED", qa)
+        self.assertIn("hold, not a tap", qa.lower())
 
 
 class InstrumentsSunTorchTests(unittest.TestCase):

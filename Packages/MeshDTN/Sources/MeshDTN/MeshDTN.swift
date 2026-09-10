@@ -178,6 +178,7 @@ public final class MeshNet: @unchecked Sendable {
     public private(set) var inboundTimers: [MeshTimerEvent] = []
     public private(set) var lastRedOn: Bool?
     public private(set) var chromeNet = "NET · NONE"
+    public private(set) var listening = false
     public var airplane = true
     public var loRaBrickPresent = false
     public var partyCode = ""
@@ -201,11 +202,13 @@ public final class MeshNet: @unchecked Sendable {
         }
         nearby = []
         joined = false
+        listening = false
         refreshChrome()
         guard let radio else {
             box.log("mesh", "NET NONE local writes only")
             return
         }
+        listening = true
         radio.start(partyCode: partyCode, onPeer: { [weak self] peer in
             self?.heardPeer(peer)
         }, onLost: { [weak self] peer in
@@ -220,6 +223,7 @@ public final class MeshNet: @unchecked Sendable {
         radio?.stop()
         nearby = []
         joined = false
+        listening = false
         refreshChrome()
         box.log("mesh", "radio stopped")
     }
@@ -246,8 +250,12 @@ public final class MeshNet: @unchecked Sendable {
         upsertPip(MeshPip(from: from, lat: lat, lon: lon))
     }
 
-    public func sendChip(from: String, chip: String) {
-        enqueue(make(from: from, kind: "chip", body: Data(chip.utf8)))
+    public func sendChip(from: String, chip: String, to: String = "*") {
+        enqueue(make(from: from, kind: "chip", body: Data(chip.utf8), to: to))
+    }
+
+    public func sendVoice(from: String, opus: Data, to: String = "*") {
+        enqueue(make(from: from, kind: "voice", body: opus, to: to))
     }
 
     public func sendRED(from: String, on: Bool) {
@@ -271,8 +279,8 @@ public final class MeshNet: @unchecked Sendable {
         return !nearby.isEmpty
     }
 
-    private func make(from: String, kind: String, body: Data) -> MeshEnvelope {
-        MeshEnvelope(id: UUID().uuidString, from: from, to: "*", kind: kind, body: body)
+    private func make(from: String, kind: String, body: Data, to: String = "*") -> MeshEnvelope {
+        MeshEnvelope(id: UUID().uuidString, from: from, to: to, kind: kind, body: body)
     }
 
     private func heardPeer(_ peer: String) {
@@ -286,6 +294,7 @@ public final class MeshNet: @unchecked Sendable {
         nearby.removeAll { $0 == peer }
         refreshChrome()
         box.log("mesh", "lost \(peer) \(chromeNet)")
+        onPeersChanged?()
     }
 
     private func receive(_ env: MeshEnvelope) {
@@ -304,6 +313,9 @@ public final class MeshNet: @unchecked Sendable {
         case "chip":
             if let name = String(data: env.body, encoding: .utf8) {
                 inboundChips.append(name)
+                if inboundChips.count > 16 {
+                    inboundChips.removeFirst(inboundChips.count - 16)
+                }
             }
         case "red":
             lastRedOn = String(data: env.body, encoding: .utf8) == "on"

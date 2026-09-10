@@ -28,6 +28,33 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.nearby.count, 0)
     }
 
+    func testListeningIsNotAFakePeer() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.partyCode = "ABC123"
+        net.startLocal()
+        XCTAssertTrue(net.listening)
+        XCTAssertFalse(net.joined)
+        XCTAssertEqual(net.chromeNet, "NET · NONE")
+        net.stopLocal()
+        XCTAssertFalse(net.listening)
+        XCTAssertEqual(net.chromeNet, "NET · NONE")
+    }
+
+    func testVoiceAndOneToOneStayLocalWithoutAPeer() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendChip(from: net.localID, chip: "rally", to: "peer-1")
+        net.sendVoice(from: net.localID, opus: Data([0x4F, 0x50, 0x55, 0x53, 0, 0, 0, 0]))
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertEqual(net.store.map(\.kind), ["chip", "voice"])
+        XCTAssertEqual(net.store.first?.to, "peer-1")
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+    }
+
     func testConnectedRadioSendsChipRedTimerPOS() throws {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)

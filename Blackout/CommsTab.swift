@@ -5,64 +5,37 @@ import Tokens
 struct CommsTab: View {
     @Bindable var runtime: AppRuntime
     @State private var scanQR = false
+    @State private var pttDown = false
 
     var body: some View {
         HUDPage(
             title: "COMMS",
-            status: runtime.mesh.chromeNet,
-            statusTone: runtime.mesh.joined ? .silver : .warn
+            status: pageStatus,
+            statusTone: pageTone
         ) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 16) {
                     if meshSOS {
                         sosPlate
                     }
+
+                    sectionLabel("PARTY")
                     partyCard
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        chip("ALL") { runtime.comms.setChannel("ALL") }
-                        chip("1:1") { runtime.comms.setChannel("1:1") }
-                        chip("RADIO CHECK") { runtime.comms.radioCheck() }
-                    }
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        chip(L10n.t("chip.rally", runtime.locale)) {
-                            runtime.comms.rally()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.rally.rawValue)
-                        }
-                        chip(L10n.t("chip.down", runtime.locale)) {
-                            runtime.comms.down()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.down.rawValue)
-                        }
-                        chip(L10n.t("form.up", runtime.locale)) {
-                            runtime.comms.formUp()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.formUp.rawValue)
-                        }
-                        chip(L10n.t("lost.kid", runtime.locale)) {
-                            runtime.comms.lostKid()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.lostKid.rawValue)
-                        }
-                        chip(L10n.t("chip.wait", runtime.locale)) {
-                            runtime.comms.wait()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.wait.rawValue)
-                        }
-                        chip(L10n.t("chip.water", runtime.locale)) {
-                            runtime.comms.water()
-                            runtime.mesh.sendChip(from: runtime.mesh.localID, chip: Chip.water.rawValue)
-                        }
-                        if runtime.mesh.joined {
-                            chip(L10n.t("ok.chip", runtime.locale)) {
-                                runtime.iamOK()
-                            }
+
+                    sectionLabel("NET")
+                    Button(runtime.mesh.listening ? "LEAVE NET" : "JOIN LOCAL NET") {
+                        if runtime.mesh.listening {
+                            runtime.leaveNet()
+                        } else {
+                            runtime.joinNet()
                         }
                     }
+                    .buttonStyle(HUDActionStyle(filled: !runtime.mesh.listening))
                     HStack(spacing: 1) {
-                        Button(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT") {
-                            if runtime.ptt.live { runtime.endPTTSolo() } else { runtime.beginPTTSolo() }
-                        }
-                        .buttonStyle(HUDDockStyle())
-                        Button("15s CLIP") {
-                            _ = runtime.ptt.recordClip(pcm: Data(repeating: 0, count: 32000), sampleRate: 16000)
-                        }
-                        .buttonStyle(HUDDockStyle())
+                        Button("ALL") { runtime.comms.setChannel("ALL") }
+                            .buttonStyle(HUDDockStyle())
+                        Button("1:1") { runtime.comms.setChannel("1:1") }
+                            .buttonStyle(HUDDockStyle())
                     }
                     .background(Theme.raised)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -70,24 +43,96 @@ struct CommsTab: View {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
                             .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
                     )
-                    Button(runtime.mesh.joined ? "NET JOINED" : "JOIN LOCAL NET") {
-                        runtime.joinNet()
+                    if !runtime.mesh.nearby.isEmpty {
+                        sectionLabel("PEERS")
+                        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                            ForEach(runtime.mesh.nearby, id: \.self) { name in
+                                chip(peerWord(name)) {
+                                    runtime.comms.pickPeer(name)
+                                }
+                            }
+                        }
                     }
-                    .buttonStyle(HUDActionStyle(filled: !runtime.mesh.joined))
-                    log
+
+                    sectionLabel("CALL")
+                    HStack(spacing: 1) {
+                        pttPad
+                        Button("15s CLIP") { runtime.captureClip() }
+                            .buttonStyle(HUDDockStyle())
+                    }
+                    .background(Theme.raised)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                    )
+                    Button("RADIO CHECK") { runtime.radioCheckParty() }
+                        .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
+                    if !runtime.commsChrome.isEmpty {
+                        Text(runtime.commsChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    sectionLabel("CHIPS")
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        chip(L10n.t("chip.rally", runtime.locale)) {
+                            runtime.sendPartyChip(.rally)
+                        }
+                        chip(L10n.t("chip.down", runtime.locale)) {
+                            runtime.sendPartyChip(.down)
+                        }
+                        chip(L10n.t("form.up", runtime.locale)) {
+                            runtime.sendPartyChip(.formUp)
+                        }
+                        chip(L10n.t("lost.kid", runtime.locale)) {
+                            runtime.sendPartyChip(.lostKid)
+                        }
+                        chip(L10n.t("chip.wait", runtime.locale)) {
+                            runtime.sendPartyChip(.wait)
+                        }
+                        chip(L10n.t("chip.water", runtime.locale)) {
+                            runtime.sendPartyChip(.water)
+                        }
+                    }
+
+                    if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
+                        sectionLabel("LOG")
+                        HUDGlassCard { log }
+                    }
                 }
             }
         }
         .sheet(isPresented: $scanQR) {
             #if canImport(AVFoundation) && canImport(UIKit)
-            PartyQRScanner { raw in
-                runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
-                runtime.mesh.partyCode = runtime.roster.code
-                scanQR = false
-                runtime.joinNet()
-            }
+            PartyQRScanner(
+                onCode: { raw in
+                    runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
+                    runtime.mesh.partyCode = runtime.roster.code
+                    scanQR = false
+                    runtime.joinNet()
+                },
+                onCancel: { scanQR = false }
+            )
+            .ignoresSafeArea()
+            .presentationBackground(Theme.void)
             #endif
         }
+    }
+
+    private var pageStatus: String {
+        if runtime.ptt.live { return "PTT" }
+        if runtime.comms.channel == "1:1" {
+            return "1:1 · \(runtime.mesh.chromeNet)"
+        }
+        return runtime.mesh.chromeNet
+    }
+
+    private var pageTone: HUDStatusTone {
+        if runtime.hudCrisis { return .crisis }
+        if runtime.mesh.joined { return .silver }
+        return .warn
     }
 
     private var partyCard: some View {
@@ -118,16 +163,43 @@ struct CommsTab: View {
         }
     }
 
+    private var pttPad: some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        return Text(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT")
+            .font(.system(size: 12, weight: .heavy))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .allowsTightening(true)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
+            .contentShape(Rectangle())
+            .foregroundStyle(runtime.ptt.live ? Color.white : Theme.silver)
+            .background(runtime.ptt.live ? Theme.accent : Theme.raised.opacity(pttDown ? 0.55 : 1))
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !pttDown {
+                            pttDown = true
+                            runtime.beginPTTSolo()
+                        }
+                    }
+                    .onEnded { _ in
+                        pttDown = false
+                        runtime.endPTTSolo()
+                    }
+            )
+    }
+
     private var log: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            ForEach(runtime.comms.chips, id: \.self) { c in
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(runtime.comms.chips.suffix(8).enumerated()), id: \.offset) { _, c in
                 Text(chipWord(c))
-                    .font(.caption.weight(.bold))
+                    .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(c == .sos ? Theme.accent : Theme.silver)
             }
-            ForEach(runtime.mesh.inboundChips, id: \.self) { c in
-                Text("RX \(c.uppercased())")
-                    .font(.caption.weight(.bold))
+            ForEach(Array(runtime.mesh.inboundChips.suffix(8).enumerated()), id: \.offset) { _, raw in
+                Text("RX · \(inboundWord(raw))")
+                    .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
             }
         }
@@ -160,9 +232,28 @@ struct CommsTab: View {
         runtime.comms.chips.contains(.sos) || runtime.mesh.inboundChips.contains(Chip.sos.rawValue)
     }
 
+    private func sectionLabel(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 11, weight: .heavy))
+            .foregroundStyle(Color(white: 0.5))
+    }
+
     private func chip(_ title: String, action: @escaping () -> Void) -> some View {
         Button(title, action: action)
             .buttonStyle(HUDOverlayChipStyle())
+    }
+
+    private func peerWord(_ name: String) -> String {
+        let clean = name.replacingOccurrences(of: "-", with: "")
+        return String(clean.prefix(6)).uppercased()
+    }
+
+    private func inboundWord(_ raw: String) -> String {
+        if let chip = Chip(rawValue: raw) { return chipWord(chip) }
+        if raw == "ptt" { return "PTT" }
+        if raw == "radio" { return "RADIO" }
+        if raw.hasPrefix("field:") { return "FIELD" }
+        return raw.uppercased()
     }
 
     private func chipWord(_ c: Chip) -> String {
