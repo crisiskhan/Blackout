@@ -27,34 +27,36 @@ struct FieldTab: View {
                         ScrollView {
                             open(s)
                         }
-                    } else if cards.isEmpty {
-                        HUDGlassCard {
-                            Text("FIELD BOOK · NONE")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.warn)
-                        }
                     } else {
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 1) {
-                                ForEach(cards) { c in
-                                    if cards.first(where: { $0.category == c.category })?.id == c.id {
-                                        Text(c.category.uppercased())
-                                            .font(.system(size: 11, weight: .heavy))
-                                            .foregroundStyle(Color(white: 0.5))
-                                            .padding(.top, 10)
-                                            .padding(.bottom, 4)
-                                    }
-                                    Button(loc(c.title)) {
-                                        stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
-                                    }
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundStyle(Theme.silver)
-                                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                                    .padding(.horizontal, 12)
-                                    .background(Theme.raised)
-                                }
+                        if cards.isEmpty {
+                            HUDGlassCard {
+                                Text("FIELD BOOK · NONE")
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.warn)
                             }
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        } else {
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 1) {
+                                    ForEach(cards) { c in
+                                        if cards.first(where: { $0.category == c.category })?.id == c.id {
+                                            Text(c.category.uppercased())
+                                                .font(.system(size: 11, weight: .heavy))
+                                                .foregroundStyle(Color(white: 0.5))
+                                                .padding(.top, 10)
+                                                .padding(.bottom, 4)
+                                        }
+                                        Button(loc(c.title)) {
+                                            stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                                        }
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Theme.silver)
+                                        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                                        .padding(.horizontal, 12)
+                                        .background(Theme.raised)
+                                    }
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
                         }
                     }
                 }

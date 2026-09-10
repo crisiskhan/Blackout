@@ -70,7 +70,7 @@ struct ExpeditionTab: View {
                                     runtime.roster = runtime.roster.joining("Nav", role: .nav)
                                 }
                             }
-                                .buttonStyle(HUDActionStyle(filled: false))
+                            .buttonStyle(HUDActionStyle(filled: false))
                         }
                     }
 
