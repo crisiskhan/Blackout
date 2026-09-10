@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
+from v3.common import haversine_m  # noqa: E402
 from v3.fetch_packs import (  # noqa: E402
     DRIVE_BACK,
     DRIVE_FORWARD,
@@ -21,6 +22,8 @@ from v3.fetch_packs import (  # noqa: E402
     pack_graph,
     read_graph,
     unpack_graph,
+    way_access,
+    way_directions,
 )
 
 OFF_GRAPH = "OFF GRAPH"
@@ -224,7 +227,18 @@ class PackedGraphTests(unittest.TestCase):
         drivable = {(e["a"], e["b"]) for e in back["edges"] if e["drive"]}
         self.assertEqual(walkable, {(0, 1), (1, 0), (1, 2)})
         self.assertEqual(drivable, {(0, 1), (1, 0)})
-        self.assertEqual({e["m"] for e in back["edges"]}, {100.0})
+        # A segment is as long as the coordinates it ships say it is. The router
+        # steers A* by the straight line between those same points, so a stored
+        # length under that line would cost it the shortest route.
+        for e in back["edges"]:
+            span = haversine_m(
+                back["nodes"][str(e["a"])]["lat"],
+                back["nodes"][str(e["a"])]["lon"],
+                back["nodes"][str(e["b"])]["lat"],
+                back["nodes"][str(e["b"])]["lon"],
+            )
+            self.assertGreaterEqual(e["m"], span)
+            self.assertLess(e["m"] - span, 1.0)
 
     def test_a_one_way_street_never_becomes_two_way(self):
         packed = pack_graph(self.one_way_pair())
@@ -265,6 +279,58 @@ class PackedGraphTests(unittest.TestCase):
             stats = json.loads((path.parent / "manifest.json").read_text())["stats"]
             self.assertEqual(stats["graphNodes"], len(graph["nodes"]), f"{pack} miscounts nodes")
             self.assertEqual(stats["graphEdges"], len(graph["edges"]), f"{pack} miscounts edges")
+
+
+WALK_SET = {
+    "path", "footway", "track", "residential", "unclassified", "service",
+    "tertiary", "tertiary_link", "secondary", "secondary_link", "primary",
+    "primary_link", "living_street", "pedestrian", "steps", "bridleway", "cycleway",
+}
+DRIVE_SET = {
+    "motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link",
+    "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified",
+    "residential", "service", "living_street",
+}
+
+
+class WalkGraphTests(unittest.TestCase):
+    def passable(self, tags: dict, highway: str) -> tuple[bool, bool, bool, bool]:
+        walk, drive = way_access(tags, highway, WALK_SET, DRIVE_SET)
+        walk_fwd, walk_back, drive_fwd, drive_back = way_directions(tags)
+        return walk and walk_fwd, walk and walk_back, drive and drive_fwd, drive and drive_back
+
+    def test_a_one_way_street_is_a_rule_about_cars_not_feet(self):
+        self.assertEqual(self.passable({"oneway": "yes"}, "residential"), (True, True, True, False))
+        self.assertEqual(self.passable({"junction": "roundabout"}, "tertiary"), (True, True, True, False))
+
+    def test_only_oneway_foot_turns_a_pedestrian_around(self):
+        tags = {"oneway": "yes", "oneway:foot": "yes"}
+        self.assertEqual(self.passable(tags, "residential"), (True, False, True, False))
+
+    def test_a_reversed_one_way_runs_backward_not_nowhere(self):
+        self.assertEqual(self.passable({"oneway": "-1"}, "residential"), (True, True, False, True))
+
+    def test_a_way_nobody_may_take_stays_out_of_the_graph(self):
+        self.assertEqual(self.passable({"foot": "no"}, "footway"), (False, False, False, False))
+        self.assertEqual(self.passable({"access": "private"}, "service"), (False, False, False, False))
+
+    def test_feet_go_where_cars_cannot_and_the_reverse(self):
+        self.assertEqual(self.passable({"motor_vehicle": "no"}, "pedestrian"), (True, True, False, False))
+        self.assertEqual(self.passable({}, "steps"), (True, True, False, False))
+        self.assertEqual(self.passable({"oneway": "yes"}, "motorway"), (False, False, True, False))
+
+    def test_shipped_walk_graphs_are_two_way_on_the_ordinary_street(self):
+        for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.json")):
+            graph = read_graph(path)
+            walk = {(e["a"], e["b"]) for e in graph["edges"] if e["walk"]}
+            if not walk:
+                continue
+            stranded = sum(1 for a, b in walk if (b, a) not in walk)
+            share = stranded / len(walk)
+            # Only oneway:foot and steps-with-direction should be one-way on
+            # foot, and those are rare. A pack full of them means the car rule
+            # leaked back into the walk graph.
+            self.assertLess(share, 0.01, f"{path.parent.name}: {share:.1%} of walk edges are one-way")
 
 
 if __name__ == "__main__":

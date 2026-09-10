@@ -7,10 +7,10 @@
   "defaultOpen": false,
   "walkable": true,
   "bbox": {
-    "south": 34.95,
-    "west": -106.85,
-    "north": 35.35,
-    "east": -106.35
+    "south": 34.73,
+    "west": -107.07,
+    "north": 35.57,
+    "east": -106.13
   },
   "slices": {
     "metro": {
@@ -45,6 +45,17 @@
         "east": -106.35
       },
       "featureCount": 131947
+    },
+    "region": {
+      "name": "Albuquerque / Bernalillo / Isleta region",
+      "bbox": {
+        "name": "Albuquerque / Bernalillo / Isleta region",
+        "south": 34.73,
+        "west": -107.07,
+        "north": 35.57,
+        "east": -106.13
+      },
+      "featureCount": 154382
     }
   },
   "banners": [
@@ -53,7 +64,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 59254410,
+  "bytes": 56758608,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -71,12 +82,13 @@
     "metro.geojson",
     "osm.geojson",
     "pois.geojson",
+    "region.geojson",
     "style.json",
     "union.geojson",
     "wild.geojson"
   ],
   "center": {
-    "lat": 35.150000000000006,
+    "lat": 35.15,
     "lon": -106.6
   },
   "home": {
@@ -87,51 +99,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 1459453,
+    "bytes": 1828931,
     "width": 2048,
-    "height": 1638,
+    "height": 1830,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -106.85,
-        35.35
+        -107.07,
+        35.57
       ],
       [
-        -106.35,
-        35.35
+        -106.13,
+        35.57
       ],
       [
-        -106.35,
-        34.95
+        -106.13,
+        34.73
       ],
       [
-        -106.85,
-        34.95
+        -107.07,
+        34.73
       ]
     ]
   },
   "stats": {
-    "features": 132120,
-    "highwayLines": 125404,
-    "namedStreets": 29400,
+    "features": 154557,
+    "highwayLines": 144884,
+    "namedStreets": 35716,
     "sampleStreetNames": [
-      "Mt Yy",
-      "Central Avenue Southwest",
-      "Parnelli Drive Southwest",
-      "Shetland Place Southwest",
-      "De Anza Drive Southwest",
-      "Heron Drive",
-      "Chaps Street Southwest",
-      "Laguna",
-      "Alexis Avenue Southwest",
-      "Reba Avenue Southwest",
-      "Wrangler Street Southwest",
-      "Gschwind Place Southwest"
+      "Indian Service Rt 548",
+      "Indian Service Rt 549",
+      "State Road 6",
+      "Landfill Road",
+      "Los Ranchos Road",
+      "Viper Den Road",
+      "Lluvia Road",
+      "Camino Largo",
+      "Duarte Road",
+      "Dalies Road",
+      "Conejo Road",
+      "Corona Road"
     ],
-    "water": 5443,
-    "places": 131,
-    "graphEdges": 586286,
-    "graphNodes": 205350,
+    "water": 8099,
+    "places": 222,
+    "graphEdges": 650667,
+    "graphNodes": 221604,
     "streetsVisibleAtWalkingZoom": true
   }
 }

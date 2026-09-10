@@ -26,12 +26,93 @@ public struct GraphEdge: Codable, Sendable {
         self.drive = drive
     }
 }
+/// Everything routing needs that the wire format does not carry: who adjoins
+/// whom per travel mode, where each node sits without a dictionary of `String`
+/// keys, and a coarse grid to find the nearest node without reading them all.
+///
+/// Built once when a pack's graph loads, on the thread that loaded it. Deriving
+/// it per tap meant every WALK re-walked half a million edges before it started
+/// searching, and that cost grows with the map.
+public struct GraphIndex: Sendable {
+    public struct Link: Sendable {
+        public let to: Int
+        public let m: Double
+    }
+
+    public struct Point: Sendable {
+        public let lat: Double
+        public let lon: Double
+    }
+
+    static let cellDegrees = 0.02
+    private static let cellStride: Int64 = 100_000
+
+    let walk: [Int: [Link]]
+    let drive: [Int: [Link]]
+    let point: [Int: Point]
+    let cells: [Int64: [Int]]
+
+    init(nodes: [String: GraphNode], edges: [GraphEdge]) {
+        var walk: [Int: [Link]] = [:]
+        var drive: [Int: [Link]] = [:]
+        walk.reserveCapacity(nodes.count)
+        drive.reserveCapacity(nodes.count)
+        for e in edges {
+            if e.walk { walk[e.a, default: []].append(Link(to: e.b, m: e.m)) }
+            if e.drive { drive[e.a, default: []].append(Link(to: e.b, m: e.m)) }
+        }
+        var point: [Int: Point] = [:]
+        var cells: [Int64: [Int]] = [:]
+        point.reserveCapacity(nodes.count)
+        for n in nodes.values {
+            point[n.id] = Point(lat: n.lat, lon: n.lon)
+            cells[Self.cell(lat: n.lat, lon: n.lon), default: []].append(n.id)
+        }
+        self.walk = walk
+        self.drive = drive
+        self.point = point
+        self.cells = cells
+    }
+
+    static func cell(lat: Double, lon: Double) -> Int64 {
+        cell(y: Int64((lat / cellDegrees).rounded(.down)), x: Int64((lon / cellDegrees).rounded(.down)))
+    }
+
+    static func cell(y: Int64, x: Int64) -> Int64 { y &* cellStride &+ x }
+
+    func links(_ mode: TravelMode) -> [Int: [Link]] {
+        switch mode {
+        case .walk: return walk
+        case .drive: return drive
+        }
+    }
+}
+
 public struct RouteGraph: Codable, Sendable {
-    public var nodes: [String: GraphNode]
-    public var edges: [GraphEdge]
+    public let nodes: [String: GraphNode]
+    public let edges: [GraphEdge]
+    public let index: GraphIndex
+
+    private enum CodingKeys: String, CodingKey { case nodes, edges }
+
     public init(nodes: [String: GraphNode], edges: [GraphEdge]) {
         self.nodes = nodes
         self.edges = edges
+        self.index = GraphIndex(nodes: nodes, edges: edges)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            nodes: try c.decode([String: GraphNode].self, forKey: .nodes),
+            edges: try c.decode([GraphEdge].self, forKey: .edges)
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(nodes, forKey: .nodes)
+        try c.encode(edges, forKey: .edges)
     }
 }
 
@@ -53,32 +134,33 @@ public enum RouteFallback: String, Equatable, Sendable { case onGraph, bearingOf
 
 public enum GraphRouter {
     public static func route(graph: RouteGraph, from: Int, to: Int, mode: TravelMode, avoid: Set<Int> = []) -> RouteResult? {
-        var adj: [Int: [(Int, Double)]] = [:]
-        for e in graph.edges {
-            let ok: Bool
-            switch mode {
-            case .walk: ok = e.walk
-            case .drive: ok = e.drive
-            }
-            if ok { adj[e.a, default: []].append((e.b, e.m)) }
+        let index = graph.index
+        let adj = index.links(mode)
+        let goal = index.point[to]
+        // Straight line to the destination never overstates the road left to
+        // run, so steering the search by it returns the same route plain
+        // Dijkstra did while settling a fraction of the nodes.
+        func remaining(_ n: Int) -> Double {
+            guard let goal, let p = index.point[n] else { return 0 }
+            return haversine(p.lat, p.lon, goal.lat, goal.lon)
         }
         var dist: [Int: Double] = [from: 0]
         var prev: [Int: Int] = [:]
         var heap = MinHeap()
-        heap.push(from, 0)
+        heap.push(from, remaining(from))
         var seen: Set<Int> = []
-        while let (u, du) = heap.pop() {
-            if du > (dist[u] ?? .infinity) { continue }
+        while let (u, _) = heap.pop() {
             if seen.contains(u) { continue }
             seen.insert(u)
             if u == to { break }
-            for (v, w) in adj[u] ?? [] {
-                if avoid.contains(v) { continue }
-                let alt = (dist[u] ?? .infinity) + w
-                if alt < (dist[v] ?? .infinity) {
-                    dist[v] = alt
-                    prev[v] = u
-                    heap.push(v, alt)
+            let du = dist[u] ?? .infinity
+            for link in adj[u] ?? [] {
+                if avoid.contains(link.to) { continue }
+                let alt = du + link.m
+                if alt < (dist[link.to] ?? .infinity) {
+                    dist[link.to] = alt
+                    prev[link.to] = u
+                    heap.push(link.to, alt + remaining(link.to))
                 }
             }
         }
@@ -93,16 +175,56 @@ public enum GraphRouter {
         return RouteResult(nodeIds: path, meters: dist[to] ?? 0, mode: mode, fallback: .onGraph)
     }
 
+    /// Nearest node by way of the grid, so snapping a tap to the street network
+    /// reads the cells around it rather than every node in the pack.
     public static func nearestNode(graph: RouteGraph, lat: Double, lon: Double) -> Int? {
-        var best: (Int, Double)?
-        for n in graph.nodes.values {
-            let d = haversine(lat, lon, n.lat, n.lon)
-            if best == nil || d < best!.1 {
-                best = (n.id, d)
+        let index = graph.index
+        if index.point.isEmpty { return nil }
+        let cy = Int64((lat / GraphIndex.cellDegrees).rounded(.down))
+        let cx = Int64((lon / GraphIndex.cellDegrees).rounded(.down))
+        // Shortest a degree gets at this latitude, so the ring bound below can
+        // never claim more coverage than it has.
+        let metresPerDegree = min(110_540.0, 111_320.0 * cos(lat * .pi / 180))
+        var best: (id: Int, metres: Double)?
+        func scan(_ y: Int64, _ x: Int64) {
+            guard let ids = index.cells[GraphIndex.cell(y: y, x: x)] else { return }
+            for id in ids {
+                guard let p = index.point[id] else { continue }
+                let d = haversine(lat, lon, p.lat, p.lon)
+                if best == nil || d < best!.metres { best = (id, d) }
             }
         }
-        return best?.0
+        var ring: Int64 = 0
+        while ring <= maxRing {
+            // Walk the ring's edge only. Re-reading its whole square each time
+            // turned a widening search into a cubic one.
+            if ring == 0 {
+                scan(cy, cx)
+            } else {
+                for dx in -ring...ring {
+                    scan(cy - ring, cx + dx)
+                    scan(cy + ring, cx + dx)
+                }
+                if ring > 1 {
+                    for dy in (-ring + 1)...(ring - 1) {
+                        scan(cy + dy, cx - ring)
+                        scan(cy + dy, cx + ring)
+                    }
+                }
+            }
+            // Everything still unread sits at least this far out, so once the
+            // best is inside that, no further ring can beat it.
+            if let best, best.metres <= Double(ring) * GraphIndex.cellDegrees * metresPerDegree {
+                return best.id
+            }
+            ring += 1
+        }
+        return best?.id
     }
+
+    /// Far enough to cross any pack we ship; stops a tap in open water from
+    /// sweeping the grid forever.
+    private static let maxRing: Int64 = 512
 
     public static func coordinates(graph: RouteGraph, nodeIds: [Int]) -> [(lat: Double, lon: Double)] {
         nodeIds.compactMap { id in

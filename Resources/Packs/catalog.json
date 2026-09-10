@@ -15,10 +15,10 @@
       "defaultOpen": true,
       "walkable": true,
       "bbox": {
-        "south": 31.65,
-        "west": -106.85,
-        "north": 32.4,
-        "east": -106.2
+        "south": 31.33,
+        "west": -107.17,
+        "north": 32.67,
+        "east": -105.85
       },
       "slices": {
         "metro": {
@@ -64,6 +64,17 @@
             "east": -106.2
           },
           "featureCount": 128405
+        },
+        "region": {
+          "name": "El Paso / Las Cruces / Organ Mountains region",
+          "bbox": {
+            "name": "El Paso / Las Cruces / Organ Mountains region",
+            "south": 31.33,
+            "west": -107.17,
+            "north": 32.67,
+            "east": -105.85
+          },
+          "featureCount": 167585
         }
       },
       "banners": [
@@ -71,7 +82,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 51550987,
+      "bytes": 57951988,
       "files": [
         "border.geojson",
         "contours.geojson",
@@ -91,12 +102,13 @@
         "metro.geojson",
         "osm.geojson",
         "pois.geojson",
+        "region.geojson",
         "style.json",
         "wild.geojson"
       ],
       "center": {
-        "lat": 32.025,
-        "lon": -106.525
+        "lat": 32.0,
+        "lon": -106.50999999999999
       },
       "home": {
         "lat": 31.78,
@@ -106,51 +118,51 @@
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 1677239,
+        "bytes": 1551373,
         "width": 2048,
-        "height": 2363,
+        "height": 2079,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -106.85,
-            32.4
+            -107.17,
+            32.67
           ],
           [
-            -106.2,
-            32.4
+            -105.85,
+            32.67
           ],
           [
-            -106.2,
-            31.65
+            -105.85,
+            31.33
           ],
           [
-            -106.85,
-            31.65
+            -107.17,
+            31.33
           ]
         ]
       },
       "stats": {
-        "features": 128691,
-        "highwayLines": 121593,
-        "namedStreets": 37395,
+        "features": 167752,
+        "highwayLines": 156241,
+        "namedStreets": 53804,
         "sampleStreetNames": [
-          "Carretera Samalayuca-El Oasis",
-          "Kamikase",
-          "Transformers",
-          "Potreros",
-          "West Franklin Avenue",
-          "Arizona Avenue",
-          "West Crosby Avenue",
-          "Fewel Street",
-          "East Rio Grande Avenue",
-          "West Main Drive",
-          "West San Francisco Avenue",
-          "West Wyoming Avenue"
+          "Carretera Ciudad Juárez-Miguel Ahumada",
+          "Carretera Miguel Ahumada-Ciudad Juárez",
+          "Dunas",
+          "Calle Ramal a Samalayuca",
+          "Calle Fidel Holguin",
+          "Calle Vicente Guerrero",
+          "Calle Ignacio Allende",
+          "Calle José María Morelos",
+          "Calle Samalayuca",
+          "Calle Miguel Hidalgo y Costilla",
+          "Calle Agustín Esparza",
+          "Calle Pedro Avalos"
         ],
-        "water": 5193,
-        "places": 181,
-        "graphEdges": 503279,
-        "graphNodes": 189843,
+        "water": 8715,
+        "places": 389,
+        "graphEdges": 673021,
+        "graphNodes": 237242,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -163,9 +175,9 @@
       "defaultOpen": false,
       "walkable": true,
       "bbox": {
-        "south": 30.08,
-        "west": -97.9,
-        "north": 30.42,
+        "south": 30.05,
+        "west": -97.95,
+        "north": 30.5,
         "east": -97.2
       },
       "slices": {
@@ -178,7 +190,7 @@
             "north": 30.32,
             "east": -97.68
           },
-          "featureCount": 40356
+          "featureCount": 40384
         },
         "wild": {
           "name": "Lost Pines / Bastrop wild",
@@ -200,7 +212,18 @@
             "north": 30.42,
             "east": -97.2
           },
-          "featureCount": 205182
+          "featureCount": 205210
+        },
+        "region": {
+          "name": "Austin / Bastrop / Buda region",
+          "bbox": {
+            "name": "Austin / Bastrop / Buda region",
+            "south": 30.05,
+            "west": -97.95,
+            "north": 30.5,
+            "east": -97.2
+          },
+          "featureCount": 274066
         }
       },
       "banners": [
@@ -208,7 +231,7 @@
         "cattle-guard",
         "hurricane"
       ],
-      "bytes": 81511072,
+      "bytes": 86517599,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -226,13 +249,14 @@
         "metro.geojson",
         "osm.geojson",
         "pois.geojson",
+        "region.geojson",
         "style.json",
         "union.geojson",
         "wild.geojson"
       ],
       "center": {
-        "lat": 30.25,
-        "lon": -97.55000000000001
+        "lat": 30.275,
+        "lon": -97.575
       },
       "home": {
         "lat": 30.28,
@@ -242,51 +266,51 @@
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 843065,
+        "bytes": 1044475,
         "width": 2048,
-        "height": 994,
+        "height": 1228,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -97.9,
-            30.42
+            -97.95,
+            30.5
           ],
           [
             -97.2,
-            30.42
+            30.5
           ],
           [
             -97.2,
-            30.08
+            30.05
           ],
           [
-            -97.9,
-            30.08
+            -97.95,
+            30.05
           ]
         ]
       },
       "stats": {
-        "features": 205740,
-        "highwayLines": 187663,
-        "namedStreets": 33988,
+        "features": 274496,
+        "highwayLines": 251209,
+        "namedStreets": 45194,
         "sampleStreetNames": [
           "Hidatsa Street",
-          "South Interstate 35",
           "Summer Night Cove",
           "Nighthawk Lane",
           "Aster Cove",
-          "Purple Heart Trail",
+          "El Secreto Street",
           "Phoebe Circle",
           "Saguaro Drive",
           "Echo Cove",
           "Sosebee Parkway",
           "Bermuda Lane",
-          "Robin Road"
+          "Robin Road",
+          "Dahlstrom"
         ],
-        "water": 14735,
-        "places": 341,
-        "graphEdges": 690612,
-        "graphNodes": 254590,
+        "water": 19180,
+        "places": 410,
+        "graphEdges": 874075,
+        "graphNodes": 307954,
         "streetsVisibleAtWalkingZoom": true
       }
     },
@@ -299,10 +323,10 @@
       "defaultOpen": false,
       "walkable": true,
       "bbox": {
-        "south": 34.95,
-        "west": -106.85,
-        "north": 35.35,
-        "east": -106.35
+        "south": 34.73,
+        "west": -107.07,
+        "north": 35.57,
+        "east": -106.13
       },
       "slices": {
         "metro": {
@@ -337,6 +361,17 @@
             "east": -106.35
           },
           "featureCount": 131947
+        },
+        "region": {
+          "name": "Albuquerque / Bernalillo / Isleta region",
+          "bbox": {
+            "name": "Albuquerque / Bernalillo / Isleta region",
+            "south": 34.73,
+            "west": -107.07,
+            "north": 35.57,
+            "east": -106.13
+          },
+          "featureCount": 154382
         }
       },
       "banners": [
@@ -345,7 +380,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 59254410,
+      "bytes": 56758608,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -363,12 +398,13 @@
         "metro.geojson",
         "osm.geojson",
         "pois.geojson",
+        "region.geojson",
         "style.json",
         "union.geojson",
         "wild.geojson"
       ],
       "center": {
-        "lat": 35.150000000000006,
+        "lat": 35.15,
         "lon": -106.6
       },
       "home": {
@@ -379,51 +415,51 @@
       "terrain": {
         "present": true,
         "file": "hillshade.png",
-        "bytes": 1459453,
+        "bytes": 1828931,
         "width": 2048,
-        "height": 1638,
+        "height": 1830,
         "attribution": "USGS 3DEP hillshade, build-time only",
         "coordinates": [
           [
-            -106.85,
-            35.35
+            -107.07,
+            35.57
           ],
           [
-            -106.35,
-            35.35
+            -106.13,
+            35.57
           ],
           [
-            -106.35,
-            34.95
+            -106.13,
+            34.73
           ],
           [
-            -106.85,
-            34.95
+            -107.07,
+            34.73
           ]
         ]
       },
       "stats": {
-        "features": 132120,
-        "highwayLines": 125404,
-        "namedStreets": 29400,
+        "features": 154557,
+        "highwayLines": 144884,
+        "namedStreets": 35716,
         "sampleStreetNames": [
-          "Mt Yy",
-          "Central Avenue Southwest",
-          "Parnelli Drive Southwest",
-          "Shetland Place Southwest",
-          "De Anza Drive Southwest",
-          "Heron Drive",
-          "Chaps Street Southwest",
-          "Laguna",
-          "Alexis Avenue Southwest",
-          "Reba Avenue Southwest",
-          "Wrangler Street Southwest",
-          "Gschwind Place Southwest"
+          "Indian Service Rt 548",
+          "Indian Service Rt 549",
+          "State Road 6",
+          "Landfill Road",
+          "Los Ranchos Road",
+          "Viper Den Road",
+          "Lluvia Road",
+          "Camino Largo",
+          "Duarte Road",
+          "Dalies Road",
+          "Conejo Road",
+          "Corona Road"
         ],
-        "water": 5443,
-        "places": 131,
-        "graphEdges": 586286,
-        "graphNodes": 205350,
+        "water": 8099,
+        "places": 222,
+        "graphEdges": 650667,
+        "graphNodes": 221604,
         "streetsVisibleAtWalkingZoom": true
       }
     }

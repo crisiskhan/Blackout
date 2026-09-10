@@ -14,9 +14,9 @@ from v3.slim_packs import should_slim
 # Ground already on somebody's phone. Packs may grow past these boxes; they may
 # never quietly retreat inside one.
 COVERAGE_FLOOR = {
-    "tx-west": {"south": 31.70, "west": -106.62, "north": 32.00, "east": -106.35},
-    "tx-east": {"south": 30.08, "west": -97.78, "north": 30.32, "east": -97.20},
-    "nm": {"south": 35.06, "west": -106.68, "north": 35.25, "east": -106.38},
+    "tx-west": {"south": 31.65, "west": -106.85, "north": 32.40, "east": -106.20},
+    "tx-east": {"south": 30.08, "west": -97.90, "north": 30.42, "east": -97.20},
+    "nm": {"south": 34.95, "west": -106.85, "north": 35.35, "east": -106.35},
 }
 
 

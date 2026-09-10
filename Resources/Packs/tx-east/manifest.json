@@ -7,9 +7,9 @@
   "defaultOpen": false,
   "walkable": true,
   "bbox": {
-    "south": 30.08,
-    "west": -97.9,
-    "north": 30.42,
+    "south": 30.05,
+    "west": -97.95,
+    "north": 30.5,
     "east": -97.2
   },
   "slices": {
@@ -22,7 +22,7 @@
         "north": 30.32,
         "east": -97.68
       },
-      "featureCount": 40356
+      "featureCount": 40384
     },
     "wild": {
       "name": "Lost Pines / Bastrop wild",
@@ -44,7 +44,18 @@
         "north": 30.42,
         "east": -97.2
       },
-      "featureCount": 205182
+      "featureCount": 205210
+    },
+    "region": {
+      "name": "Austin / Bastrop / Buda region",
+      "bbox": {
+        "name": "Austin / Bastrop / Buda region",
+        "south": 30.05,
+        "west": -97.95,
+        "north": 30.5,
+        "east": -97.2
+      },
+      "featureCount": 274066
     }
   },
   "banners": [
@@ -52,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 81511072,
+  "bytes": 86517599,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -70,13 +81,14 @@
     "metro.geojson",
     "osm.geojson",
     "pois.geojson",
+    "region.geojson",
     "style.json",
     "union.geojson",
     "wild.geojson"
   ],
   "center": {
-    "lat": 30.25,
-    "lon": -97.55000000000001
+    "lat": 30.275,
+    "lon": -97.575
   },
   "home": {
     "lat": 30.28,
@@ -86,51 +98,51 @@
   "terrain": {
     "present": true,
     "file": "hillshade.png",
-    "bytes": 843065,
+    "bytes": 1044475,
     "width": 2048,
-    "height": 994,
+    "height": 1228,
     "attribution": "USGS 3DEP hillshade, build-time only",
     "coordinates": [
       [
-        -97.9,
-        30.42
+        -97.95,
+        30.5
       ],
       [
         -97.2,
-        30.42
+        30.5
       ],
       [
         -97.2,
-        30.08
+        30.05
       ],
       [
-        -97.9,
-        30.08
+        -97.95,
+        30.05
       ]
     ]
   },
   "stats": {
-    "features": 205740,
-    "highwayLines": 187663,
-    "namedStreets": 33988,
+    "features": 274496,
+    "highwayLines": 251209,
+    "namedStreets": 45194,
     "sampleStreetNames": [
       "Hidatsa Street",
-      "South Interstate 35",
       "Summer Night Cove",
       "Nighthawk Lane",
       "Aster Cove",
-      "Purple Heart Trail",
+      "El Secreto Street",
       "Phoebe Circle",
       "Saguaro Drive",
       "Echo Cove",
       "Sosebee Parkway",
       "Bermuda Lane",
-      "Robin Road"
+      "Robin Road",
+      "Dahlstrom"
     ],
-    "water": 14735,
-    "places": 341,
-    "graphEdges": 690612,
-    "graphNodes": 254590,
+    "water": 19180,
+    "places": 410,
+    "graphEdges": 874075,
+    "graphNodes": 307954,
     "streetsVisibleAtWalkingZoom": true
   }
 }

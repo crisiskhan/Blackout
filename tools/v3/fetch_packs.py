@@ -9,9 +9,11 @@ or bundled.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -48,7 +50,14 @@ COORD_DP = 5
 METRES_DP = 1
 # Drawn geometry keeps one more decimal than the router graph: 11 cm, so a
 # street never visibly kinks even at full zoom.
+OVERPASS_TRIES = 6
+OVERPASS_CACHE = Path(tempfile.gettempdir()) / "blackout-overpass"
+
 RENDER_DP = 6
+# Douglas-Peucker tolerance in degrees. 1e-5 is about 1.1 m — under one lane
+# width, so the canvas draws the same street and the pack buys area with the
+# vertices it stops shipping.
+RENDER_EPS = 1e-5
 WALK_FORWARD, DRIVE_FORWARD, WALK_BACK, DRIVE_BACK = 1, 2, 4, 8
 
 KEEP_TAGS = {
@@ -117,14 +126,25 @@ PACKS = {
                 "north": 31.90,
                 "east": -106.35,
             },
-            # Widest slice, so it sets the pack bbox: the whole I-10 run from
-            # Horizon City through El Paso and Anthony up to Las Cruces.
             "corridor": {
                 "name": "El Paso / Las Cruces corridor",
                 "south": 31.65,
                 "west": -106.85,
                 "north": 32.40,
                 "east": -106.20,
+            },
+            # Widest slice, so it sets the pack bbox. El Paso and Juarez stay in
+            # the middle of it; the room goes to Fort Bliss and the Franklins,
+            # Santa Teresa and Sunland Park west, Horizon City east, and the
+            # I-10 run north through Anthony to Las Cruces and the Organs.
+            # South and west sit a whole tile below the previous edge so the
+            # Overpass grid still lands on tiles already fetched.
+            "region": {
+                "name": "El Paso / Las Cruces / Organ Mountains region",
+                "south": 31.33,
+                "west": -107.17,
+                "north": 32.67,
+                "east": -105.85,
             },
         },
         "banners": ["heat-island", "cattle-guard", "border-hospitals"],
@@ -156,6 +176,15 @@ PACKS = {
                 "north": 30.42,
                 "east": -97.20,
             },
+            # Widest slice: Austin core out to Pflugerville and Manor north,
+            # Elgin and Bastrop east, Buda and Kyle south.
+            "region": {
+                "name": "Austin / Bastrop / Buda region",
+                "south": 30.05,
+                "west": -97.95,
+                "north": 30.50,
+                "east": -97.20,
+            },
         },
         "banners": ["heat-island", "cattle-guard", "hurricane"],
         "walkable": True,
@@ -185,6 +214,15 @@ PACKS = {
                 "west": -106.85,
                 "north": 35.35,
                 "east": -106.35,
+            },
+            # Widest slice: Albuquerque out to Bernalillo and Placitas north,
+            # Sandia crest east, South Valley and Isleta south, Rio Puerco west.
+            "region": {
+                "name": "Albuquerque / Bernalillo / Isleta region",
+                "south": 34.73,
+                "west": -107.07,
+                "north": 35.57,
+                "east": -106.13,
             },
         },
         "banners": ["monsoon", "ice-rock", "cattle-guard", "border-hospitals"],
@@ -253,14 +291,30 @@ out body;
 out skel qt;
 """
     body = urllib.parse.urlencode({"data": q}).encode()
-    last: Exception | None = None
-    for url in OVERPASS_ENDPOINTS:
+    # A pack is well over a hundred tiles now, so one refused slot must not
+    # throw away the tiles already paid for. Cache each answer on disk and back
+    # off rather than failing the run.
+    key = hashlib.sha1(f"{south},{west},{north},{east}".encode()).hexdigest()[:16]
+    cached = OVERPASS_CACHE / f"{key}.json"
+    if cached.is_file():
         try:
-            return _http_json(url, data=body, timeout=210)
-        except Exception as exc:
-            last = exc
-            print(f"  overpass fail {url}: {exc}", flush=True)
-            time.sleep(2)
+            return json.loads(cached.read_text())
+        except Exception:
+            cached.unlink(missing_ok=True)
+    last: Exception | None = None
+    for attempt in range(OVERPASS_TRIES):
+        for url in OVERPASS_ENDPOINTS:
+            try:
+                out = _http_json(url, data=body, timeout=210)
+                OVERPASS_CACHE.mkdir(parents=True, exist_ok=True)
+                cached.write_text(json.dumps(out, separators=(",", ":")))
+                return out
+            except Exception as exc:
+                last = exc
+                print(f"  overpass fail {url}: {exc}", flush=True)
+        wait = min(60, 4 * 2**attempt)
+        print(f"  overpass retry {attempt + 1}/{OVERPASS_TRIES} in {wait}s", flush=True)
+        time.sleep(wait)
     raise RuntimeError(f"overpass failed: {last}")
 
 
@@ -298,6 +352,42 @@ def merge_osm(parts: list[dict]) -> dict:
     return {"elements": elements}
 
 
+def simplify(coords: list[list[float]], eps: float) -> list[list[float]]:
+    """Douglas-Peucker, so a street costs the bytes its shape needs.
+
+    OSM carries survey-grade vertices. At the zooms a phone draws, a run of
+    points inside a metre of the same straight line is bytes the canvas cannot
+    show. Endpoints are always kept, so ways still meet where they met.
+    """
+    if len(coords) < 3 or eps <= 0:
+        return coords
+    keep = [False] * len(coords)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(coords) - 1)]
+    while stack:
+        i, j = stack.pop()
+        ax, ay = coords[i]
+        bx, by = coords[j]
+        dx, dy = bx - ax, by - ay
+        den = dx * dx + dy * dy
+        far = -1.0
+        pick = -1
+        for k in range(i + 1, j):
+            px, py = coords[k]
+            if den == 0:
+                d = math.hypot(px - ax, py - ay)
+            else:
+                t = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / den))
+                d = math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+            if d > far:
+                far, pick = d, k
+        if far > eps and pick > 0:
+            keep[pick] = True
+            stack.append((i, pick))
+            stack.append((pick, j))
+    return [c for c, k in zip(coords, keep) if k]
+
+
 def osm_to_geojson(osm: dict) -> dict:
     """OSM elements to the GeoJSON the canvas draws.
 
@@ -331,10 +421,10 @@ def osm_to_geojson(osm: dict) -> dict:
             if len(coords) < 2:
                 continue
             closed = coords[0] == coords[-1] and len(coords) >= 4
-            geom = {"type": "Polygon", "coordinates": [coords]} if closed and tags.get("highway") is None else {
-                "type": "LineString",
-                "coordinates": coords,
-            }
+            if closed and tags.get("highway") is None:
+                geom = {"type": "Polygon", "coordinates": [simplify(coords, RENDER_EPS)]}
+            else:
+                geom = {"type": "LineString", "coordinates": simplify(coords, RENDER_EPS)}
             features.append({"type": "Feature", "properties": tags, "geometry": geom})
     return {"type": "FeatureCollection", "features": features, "attribution": OSM_CREDIT}
 
@@ -359,6 +449,52 @@ def clip_features(fc: dict, sl: dict) -> dict:
         if sl["south"] <= lat <= sl["north"] and sl["west"] <= lon <= sl["east"]:
             feats.append(f)
     return {"type": "FeatureCollection", "features": feats, "attribution": OSM_CREDIT}
+
+
+BLOCKED = {"no", "private"}
+ALLOWED = {"yes", "designated", "permissive", "destination"}
+
+
+def way_access(
+    tags: dict, highway: str, walk_set: set[str], drive_set: set[str]
+) -> tuple[bool, bool]:
+    """Who is actually allowed down this way, not just what it is tagged as."""
+    walk = highway in walk_set
+    drive = highway in drive_set
+    if tags.get("access") in BLOCKED:
+        walk = False
+        drive = False
+    foot = tags.get("foot")
+    if foot in BLOCKED:
+        walk = False
+    elif foot in ALLOWED:
+        walk = True
+    if (tags.get("motor_vehicle") or tags.get("vehicle")) in BLOCKED:
+        drive = False
+    return walk, drive
+
+
+def way_directions(tags: dict) -> tuple[bool, bool, bool, bool]:
+    """Direction is per travel mode.
+
+    `oneway` is a rule about cars. A pedestrian walks a one-way street in both
+    directions, so folding the car restriction into the walk graph invented
+    detours -- and sometimes no path at all -- on the side of the street the
+    traffic happens to run against. Only `oneway:foot` binds feet.
+    """
+    def sides(value: str | None) -> tuple[bool, bool]:
+        # "-1" means the traffic runs against the way's node order, so the
+        # passable direction is the reverse one, not neither.
+        if value == "-1":
+            return False, True
+        return True, value not in {"yes", "1", "true"}
+
+    ow = tags.get("oneway")
+    if tags.get("junction") in {"roundabout", "circular"} and ow is None:
+        ow = "yes"
+    drive_fwd, drive_back = sides(ow)
+    walk_fwd, walk_back = sides(tags.get("oneway:foot"))
+    return walk_fwd, walk_back, drive_fwd, drive_back
 
 
 def build_graph(osm: dict) -> dict:
@@ -409,31 +545,29 @@ def build_graph(osm: dict) -> dict:
         highway = tags.get("highway")
         if el.get("type") != "way" or not highway or not el.get("nodes"):
             continue
-        walk_ok = highway in walk_ok_set
-        drive_ok = highway in drive_ok_set
+        walk_ok, drive_ok = way_access(tags, highway, walk_ok_set, drive_ok_set)
         if not walk_ok and not drive_ok:
             continue
-        oneway = tags.get("oneway") in {"yes", "1", "true"}
+        walk_fwd, walk_back, drive_fwd, drive_back = way_directions(tags)
         ids = [n for n in el["nodes"] if n in nodes]
         for a, b in zip(ids, ids[1:]):
             na, nb = nodes[a], nodes[b]
             dist = haversine_m(na["lat"], na["lon"], nb["lat"], nb["lon"])
             if dist <= 0:
                 continue
-            rec = {
-                "a": a,
-                "b": b,
-                "m": round(dist, 2),
-                "walk": walk_ok,
-                "drive": drive_ok,
-            }
-            edges.append(rec)
-            used.add(a)
-            used.add(b)
-            if not oneway:
-                back = dict(rec)
-                back["a"], back["b"] = b, a
-                edges.append(back)
+            for (x, y), walk_dir, drive_dir in (
+                ((a, b), walk_fwd, drive_fwd),
+                ((b, a), walk_back, drive_back),
+            ):
+                walk = walk_ok and walk_dir
+                drive = drive_ok and drive_dir
+                if not walk and not drive:
+                    continue
+                edges.append(
+                    {"a": x, "b": y, "m": round(dist, 2), "walk": walk, "drive": drive}
+                )
+                used.add(x)
+                used.add(y)
     slim_nodes = {str(k): v for k, v in nodes.items() if k in used}
     return compact_graph(
         {
@@ -539,15 +673,33 @@ def pack_graph(g: dict) -> dict:
     lat = [round(float(nodes[str(n)]["lat"]), COORD_DP) for n in ids]
     lon = [round(float(nodes[str(n)]["lon"]), COORD_DP) for n in ids]
 
+    scale = 10**METRES_DP
+    span: dict[tuple[int, int], float] = {}
+
+    def metres_between(a: int, b: int) -> float:
+        """Length of the segment as the shipped coordinates place it.
+
+        Packing rounds coordinates to COORD_DP, which can move an endpoint about
+        a metre. The router steers A* by the straight line between these same
+        shipped points, so a stored length shorter than that line would make the
+        heuristic inadmissible and the "shortest" route no longer shortest.
+        Measure after the rounding and never round the answer down.
+        """
+        if (a, b) not in span:
+            raw = haversine_m(lat[a], lon[a], lat[b], lon[b])
+            span[(a, b)] = max(math.ceil(raw * scale) / scale, 1 / scale)
+        return span[(a, b)]
+
     segments: dict[tuple[int, int, float], int] = {}
     for e in g.get("edges") or []:
         a = index.get(int(e["a"]))
         b = index.get(int(e["b"]))
         if a is None or b is None:
             continue
-        metres = round(float(e["m"]), METRES_DP)
         backward = a > b
-        key = (b, a, metres) if backward else (a, b, metres)
+        lo, hi = (b, a) if backward else (a, b)
+        metres = metres_between(lo, hi)
+        key = (lo, hi, metres)
         flags = 0
         if e.get("walk"):
             flags |= WALK_BACK if backward else WALK_FORWARD
