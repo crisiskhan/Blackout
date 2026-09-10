@@ -125,7 +125,9 @@ final class HoldOnTheGlassTests: XCTestCase {
         let pack = RenderHarness.txWest
         _ = try RenderHarness.requireArchive(in: pack)
         let style = try RenderHarness.shippedStyle(pack: pack)
-        let tags = try RenderHarness.withRenderedMap(
+        // `fallback: [:]` on its own is `[AnyHashable: Any]`, and that type
+        // then becomes T — the probe already returns `[String: String]`.
+        let tags: [String: String] = try RenderHarness.withRenderedMap(
             style: style,
             at: centre,
             zoom: zoom,
