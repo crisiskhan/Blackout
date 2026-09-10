@@ -8,10 +8,17 @@ import UIKit
 #if canImport(Vision)
 import Vision
 #endif
-import VisionCoreML
+
+/// Do not import the VisionCoreML package here. Apple Vision plus the
+/// matcher enum of the same name makes the pack observation type
+/// unnameable in this file. FIELD maps these hits onto the matcher.
+struct SystemVisionHit: Equatable, Sendable {
+    var identifier: String
+    var confidence: Double
+}
 
 enum SystemVision {
-    static func observations(from image: CGImage) -> [VisionCoreML.VisionObservation]? {
+    static func observations(from image: CGImage) -> [SystemVisionHit]? {
         #if canImport(Vision)
         let request = VNClassifyImageRequest()
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -22,7 +29,7 @@ enum SystemVision {
         }
         let results = request.results ?? []
         return results.prefix(8).map {
-            VisionCoreML.VisionObservation(identifier: $0.identifier, confidence: Double($0.confidence))
+            SystemVisionHit(identifier: $0.identifier, confidence: Double($0.confidence))
         }
         #else
         return nil

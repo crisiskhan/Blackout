@@ -150,7 +150,9 @@ struct FieldTab: View {
             let next: VisionGuess
             if let observations, let book {
                 next = VisionCoreML.classify(
-                    observations: observations,
+                    observations: observations.map {
+                        VisionObservation(identifier: $0.identifier, confidence: $0.confidence)
+                    },
                     book: book,
                     locale: locale
                 )
