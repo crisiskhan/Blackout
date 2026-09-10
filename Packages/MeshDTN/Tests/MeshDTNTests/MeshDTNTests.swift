@@ -71,7 +71,41 @@ final class MeshDTNTests: XCTestCase {
         net.sendPOS(from: net.localID, lat: 31.76, lon: -106.49)
         XCTAssertEqual(radio.sent.count, 5)
         XCTAssertEqual(Set(radio.sent.map(\.kind)), ["chip", "red", "timer.set", "timer.done", "pos"])
+        XCTAssertTrue(net.pips.isEmpty)
+    }
+
+    func testSoloPOSDoesNotPaintABodyOnYou() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendPOS(from: net.localID, lat: 31.7, lon: -106.4)
+        XCTAssertTrue(net.pips.isEmpty)
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+    }
+
+    func testPeerPOSPaintsADotAndLostPeerClearsIt() {
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        radio.deliver(MeshEnvelope(
+            id: "p1",
+            from: "peer-1",
+            to: "*",
+            kind: "pos",
+            body: Data("31.76,-106.49".utf8)
+        ))
+        XCTAssertEqual(net.pips.count, 1)
+        XCTAssertEqual(try XCTUnwrap(net.pips.first).from, "peer-1")
         XCTAssertEqual(try XCTUnwrap(net.pips.first).lat, 31.76, accuracy: 0.01)
+        radio.losePeer("peer-1")
+        XCTAssertTrue(net.pips.isEmpty)
+        net.sendPOS(from: net.localID, lat: 31.8, lon: -106.5)
+        XCTAssertTrue(net.pips.isEmpty)
+        net.stopLocal()
+        XCTAssertTrue(net.pips.isEmpty)
     }
 
     func testPartyMeshUUIDStableForCode() {

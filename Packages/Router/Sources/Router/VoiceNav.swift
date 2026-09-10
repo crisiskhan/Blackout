@@ -120,7 +120,7 @@ public enum VoiceNav: Sendable {
 }
 
 /// One short line of Speak status for the MAP field. The turn-by-turn script belongs to
-/// the voice and the cyan route line — never to a paragraph painted over the canvas.
+/// the voice and the silver route line — never to a paragraph painted over the canvas.
 public enum SpeakStatus: Sendable {
     public static let prefix = "SPEAK"
     public static let separator = " · "

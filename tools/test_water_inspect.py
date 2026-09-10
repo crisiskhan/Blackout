@@ -214,12 +214,17 @@ class ZoomGates(unittest.TestCase):
         self.assertIn("attachWaterLayers", swift)
         self.assertIn("WaterZoom.lineMinZoom", swift)
 
-    def test_the_class_marks_and_then_their_names_come_in_close(self):
+    def test_the_class_marks_come_in_close_without_printing_class(self):
         swift = MAP_SWIFT.read_text()
         self.assertIn("waterDetailPointsLayerID", swift)
         self.assertIn("waterDetailLabelsLayerID", swift)
         self.assertIn("WaterZoom.detailMinZoom", swift)
-        self.assertIn("WaterZoom.labelMinZoom", swift)
+        self.assertIn("let labelMinZoom: Double = 15", SWIFT.read_text())
+        self.assertIn(
+            'layers.removeAll { $0["id"] as? String == waterDetailLabelsLayerID }',
+            swift,
+        )
+        self.assertNotIn('["coalesce", ["get", "name"], ["get", "class"]]', swift)
         self.assertGreater(water.LABEL_MIN_ZOOM, water.DETAIL_MIN_ZOOM)
 
     def test_the_marks_read_the_shipped_file_and_nothing_remote(self):
@@ -359,7 +364,9 @@ class HoldToInspect(unittest.TestCase):
         block = tokens.split("func sosFAB")[1].split("public enum Color")[0]
         self.assertIn("case .comms:", block)
         self.assertIn("return true", block)
-        self.assertIn("case .map, .field, .expedition:", block)
+        self.assertIn("case .map:", block)
+        self.assertIn("return arranging", block)
+        self.assertIn("case .field, .expedition:", block)
         self.assertIn("return false", block)
         self.assertNotIn("SOSHold(", MAP_TAB.read_text())
         self.assertNotIn("SOSHold(", CARD.read_text())
@@ -375,7 +382,8 @@ class HoldToInspect(unittest.TestCase):
 
     def test_the_map_still_draws_what_it_already_proved(self):
         offline = OFFLINE_SWIFT.read_text()
-        self.assertIn("red: 0.12, green: 0.82, blue: 0.94", offline)
+        self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
+        self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("UserPuck.title", offline)
         self.assertIn("DestinationPin.sourceID", offline)
         self.assertIn('public static let line = "© OpenStreetMap contributors"', MAP_SWIFT.read_text())

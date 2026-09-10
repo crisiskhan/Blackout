@@ -509,7 +509,9 @@ public struct OfflineMapView: UIViewRepresentable {
                 let src = MLNShapeSource(identifier: "you-puck-src", shape: you, options: nil)
                 style.addSource(src)
                 let halo = MLNCircleStyleLayer(identifier: "you-puck-halo", source: src)
-                halo.circleColor = NSExpression(forConstantValue: UIColor(white: 1, alpha: 0.32))
+                halo.circleColor = NSExpression(
+                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.32)
+                )
                 halo.circleRadius = NSExpression(forConstantValue: 22)
                 halo.circleStrokeColor = NSExpression(
                     forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
@@ -561,7 +563,9 @@ public struct OfflineMapView: UIViewRepresentable {
                     let src = MLNShapeSource(identifier: HoldPin.sourceID, shape: mark, options: nil)
                     style.addSource(src)
                     let ring = MLNCircleStyleLayer(identifier: HoldPin.ringLayerID, source: src)
-                    ring.circleColor = NSExpression(forConstantValue: UIColor(white: 1, alpha: 0.18))
+                    ring.circleColor = NSExpression(
+                        forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.18)
+                    )
                     ring.circleRadius = NSExpression(forConstantValue: HoldPin.ringRadius)
                     ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
                     ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
@@ -592,7 +596,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     style.addSource(src)
                     let layer = MLNLineStyleLayer(identifier: RouteLine.layerID, source: src)
                     layer.lineColor = NSExpression(
-                        forConstantValue: UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
+                        forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
                     )
                     layer.lineWidth = NSExpression(forConstantValue: 6.5)
                     style.addLayer(layer)
@@ -678,6 +682,11 @@ public struct OfflineMapView: UIViewRepresentable {
             }
         }
 
+        public func mapViewRegionIsChanging(_ mapView: MLNMapView) {
+            _ = mapView
+            onPulse?()
+        }
+
         public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
             if annotation is MLNUserLocation {
                 return nil
@@ -693,13 +702,13 @@ public struct OfflineMapView: UIViewRepresentable {
             style.puckShadowColor = .black
             style.puckShadowOpacity = 0.85
             style.puckArrowFillColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-            style.haloFillColor = UIColor(white: 1, alpha: 0.35)
+            style.haloFillColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.35)
             return style
         }
 
         public func mapView(_ mapView: MLNMapView, fillColorForPolygonAnnotation annotation: MLNPolygon) -> UIColor {
             if annotation === puckHalo {
-                return UIColor(white: 1, alpha: 0.38)
+                return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.38)
             }
             return .clear
         }
@@ -709,7 +718,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 return UIColor.white
             }
             if annotation === routeLine {
-                return UIColor(red: 0.12, green: 0.82, blue: 0.94, alpha: 1)
+                return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
             }
             return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
         }
@@ -743,7 +752,7 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         scalesWithViewingDistance = false
 
         let halo = UIView(frame: CGRect(x: 0, y: 0, width: 36, height: 36))
-        halo.backgroundColor = UIColor(white: 1, alpha: 0.28)
+        halo.backgroundColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28)
         halo.layer.cornerRadius = 18
         addSubview(halo)
 

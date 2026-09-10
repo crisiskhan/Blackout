@@ -6,7 +6,7 @@
     "osm": {
       "type": "vector",
       "url": "pmtiles://osm.pmtiles",
-      "attribution": "© OpenStreetMap contributors"
+      "attribution": "\u00a9 OpenStreetMap contributors"
     },
     "contours": {
       "type": "geojson",
@@ -158,7 +158,7 @@
         ]
       ],
       "paint": {
-        "fill-color": "#142430",
+        "fill-color": "#1A1C1E",
         "fill-opacity": 0.82
       },
       "source-layer": "water"
@@ -185,7 +185,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#3d6478",
+        "line-color": "#6E747A",
         "line-width": [
           "interpolate",
           [
@@ -222,7 +222,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#2f4a59",
+        "line-color": "#54595E",
         "line-width": [
           "interpolate",
           [
@@ -265,7 +265,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#6E747A",
         "circle-radius": [
           "interpolate",
           [
@@ -287,7 +287,7 @@
           ],
           "tank_other",
           "#5a5f66",
-          "#6f97a8"
+          "#B8BDC2"
         ],
         "circle-stroke-width": 1.4
       },
@@ -315,7 +315,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#1A1C1E",
         "circle-opacity": 0.01,
         "circle-radius": 22,
         "circle-stroke-width": 0
@@ -816,8 +816,8 @@
         "symbol-sort-key": 0
       },
       "paint": {
-        "text-color": "#E10600",
-        "text-halo-color": "#B8BDC2",
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.05
       },
@@ -869,7 +869,7 @@
   "metadata": {
     "engine": "maplibre-metal-offline",
     "network": "deny-all",
-    "attribution": "© OpenStreetMap contributors",
+    "attribution": "\u00a9 OpenStreetMap contributors",
     "walkingZoom": true,
     "palette": "blackout-void-red-silver",
     "tokens": {

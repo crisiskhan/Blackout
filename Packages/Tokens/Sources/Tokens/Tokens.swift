@@ -55,11 +55,13 @@ public enum BlackoutTokens: Sendable {
         /// Every control but the live one.
         public static let chromeDimOpacity: Double = 0.28
 
-        public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
+        public static func sosFAB(tab: Tab, lockOn _: Bool, arranging: Bool = false) -> Bool {
             switch tab {
             case .comms:
                 return true
-            case .map, .field, .expedition:
+            case .map:
+                return arranging
+            case .field, .expedition:
                 return false
             }
         }

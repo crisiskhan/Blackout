@@ -99,6 +99,9 @@ OSM_CREDIT = "© OpenStreetMap contributors"
 VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
+WATER_INK = "#6E747A"
+WATER_FILL = "#1A1C1E"
+WATER_EPHEMERAL = "#54595E"
 TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
 # Ground cover ink. All of it is within a few points of black on purpose: the
 # job is to tell desert from bosque at a glance without ever competing with a
@@ -1147,7 +1150,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "fill",
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["body", "reservoir"]]],
-                "paint": {"fill-color": "#142430", "fill-opacity": 0.82},
+                "paint": {"fill-color": WATER_FILL, "fill-opacity": 0.82},
             },
             {
                 # Rivers and canals: the shape of the country, drawn from the
@@ -1157,7 +1160,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["river", "canal", "creek", "acequia", "dam"]]],
                 "paint": {
-                    "line-color": "#3d6478",
+                    "line-color": WATER_INK,
                     "line-width": zoom_stops(10, 0.8, 15, 2.6),
                 },
             },
@@ -1170,7 +1173,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["wash", "drain", "channel"]]],
                 "paint": {
-                    "line-color": "#2f4a59",
+                    "line-color": WATER_EPHEMERAL,
                     "line-width": zoom_stops(12, 0.7, 15, 2.0),
                     "line-dasharray": [2.5, 2.0],
                 },
@@ -1190,12 +1193,12 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
                 ],
                 "paint": {
-                    "circle-color": "#142430",
+                    "circle-color": WATER_INK,
                     "circle-radius": zoom_stops(12, 2.2, 15, 5.0),
                     "circle-stroke-color": [
                         "match", ["get", "class"],
                         "tank_other", "#5a5f66",
-                        "#6f97a8",
+                        SILVER_INK,
                     ],
                     "circle-stroke-width": 1.4,
                 },
@@ -1215,7 +1218,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
                 ],
                 "paint": {
-                    "circle-color": "#142430",
+                    "circle-color": WATER_FILL,
                     # Zero opacity is treated as not drawn, so visibleFeatures
                     # skips it. One percent is enough for the query and not
                     # enough for a thumb to see a second ring.
@@ -1396,8 +1399,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "symbol-sort-key": 0,
                 },
                 "paint": {
-                    "text-color": ACCENT_INK,
-                    "text-halo-color": SILVER_INK,
+                    "text-color": SILVER_INK,
+                    "text-halo-color": VOID_INK,
                     "text-halo-width": 2.0,
                     "text-halo-blur": 0.05,
                 },

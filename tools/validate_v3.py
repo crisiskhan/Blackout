@@ -988,7 +988,9 @@ def tip60_map_chrome() -> None:
         and "runtime.lockOn || runtime.tab == .comms" not in root
         and "SOSHold(" not in comms
         and "SOSHold(" in root
-        and "case .map, .field, .expedition" in tokens
+        and "case .map:" in tokens
+        and "return arranging" in tokens
+        and "case .field, .expedition" in tokens
         and "func offerSOS()" in app
         and "Chip.sos" in app
         and "hudCrisis" in app
@@ -1251,7 +1253,7 @@ def tip65_speak() -> None:
         bad("tip-65 Speak still truncated stub")
         return
     if "GraphPlan.line" not in app or "RouteLine.sourceID" not in offline:
-        bad("tip-65 Walk cyan line hooks missing")
+        bad("tip-65 Walk line hooks missing")
         return
     if "CURRENT_PROJECT_VERSION = 1;" not in pbx:
         bad("CPV bumped — tree must stay 1")
@@ -1311,7 +1313,7 @@ def tip68_speak_field() -> None:
         ("1 Speak is voice + route + short status", speak_ok, "tip-68 Speak FAIL — truncated chrome or a walk-script text wall"),
         ("2 field clean of DEST/TRUE spray", field_ok, "tip-68 field FAIL — chrome rows still spray"),
         ("3 walking-zoom names", names_ok, "tip-68 names FAIL — glyph template still escaped"),
-        ("Walk cyan + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
+        ("Walk line + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
     ]
     for label, passed, fail_msg in checks:
         if passed:

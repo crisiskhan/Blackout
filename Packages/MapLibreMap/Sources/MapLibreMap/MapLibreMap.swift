@@ -367,7 +367,7 @@ public enum PackStyle {
     public static let waterDetailSourceID = "water-detail"
     public static let waterDetailPointsLayerID = "water-detail-points"
     public static let waterDetailLabelsLayerID = "water-detail-labels"
-    public static let waterInk = "#3d6478"
+    public static let waterInk = "#6E747A"
 
     /// Streets arrive as vector tiles, which are addressed by layer. A layer on
     /// the `osm` source that does not name one draws nothing at all, silently,
@@ -380,7 +380,7 @@ public enum PackStyle {
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
     /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`.
-    public static let resolverVersion = 3
+    public static let resolverVersion = 4
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -565,8 +565,8 @@ public enum PackStyle {
                     "symbol-sort-key": 0,
                 ],
                 "paint": [
-                    "text-color": accentInk,
-                    "text-halo-color": silverInk,
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
                     "text-halo-width": 2.0,
                 ],
             ])
@@ -612,6 +612,7 @@ public enum PackStyle {
                 layers[index]["minzoom"] = WaterZoom.lineMinZoom
             }
         }
+        layers.removeAll { $0["id"] as? String == waterDetailLabelsLayerID }
 
         let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
         guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
@@ -637,27 +638,6 @@ public enum PackStyle {
                     "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
                     "circle-stroke-color": silverInk,
                     "circle-stroke-width": 1.1,
-                ],
-            ])
-        }
-        if !layers.contains(where: { $0["id"] as? String == waterDetailLabelsLayerID }) {
-            layers.append([
-                "id": waterDetailLabelsLayerID,
-                "type": "symbol",
-                "source": waterDetailSourceID,
-                "minzoom": WaterZoom.labelMinZoom,
-                "layout": [
-                    "text-field": ["coalesce", ["get", "name"], ["get", "class"]],
-                    "text-size": ["interpolate", ["linear"], ["zoom"], 15, 11, 18, 15],
-                    "text-font": ["Open Sans Regular"],
-                    "text-anchor": "left",
-                    "text-offset": [0.6, 0],
-                    "text-optional": true,
-                ],
-                "paint": [
-                    "text-color": silverInk,
-                    "text-halo-color": voidInk,
-                    "text-halo-width": 2.0,
                 ],
             ])
         }

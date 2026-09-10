@@ -201,8 +201,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(roadLayout?["text-max-angle"] as? Int ?? 0, 40)
         let refs = layers.first { $0["id"] as? String == PackStyle.roadRefsLayerID }
         let refPaint = refs?["paint"] as? [String: Any]
-        XCTAssertEqual(refPaint?["text-color"] as? String, PackStyle.accentInk)
-        XCTAssertEqual(refPaint?["text-halo-color"] as? String, PackStyle.silverInk)
+        XCTAssertEqual(refPaint?["text-color"] as? String, PackStyle.silverInk)
+        XCTAssertEqual(refPaint?["text-halo-color"] as? String, PackStyle.voidInk)
         XCTAssertEqual(OSMCredit.line, "© OpenStreetMap contributors")
     }
 

@@ -62,6 +62,7 @@ public final class LoopbackRadio: MeshRadio {
     public private(set) var sent: [MeshEnvelope] = []
     private let livePath: RadioPath
     private var onPeer: ((String) -> Void)?
+    private var onLost: ((String) -> Void)?
     private var onEnvelope: ((MeshEnvelope) -> Void)?
 
     public init(path: RadioPath = .ble) { livePath = path }
@@ -74,9 +75,9 @@ public final class LoopbackRadio: MeshRadio {
     ) {
         startedCode = partyCode
         self.onPeer = onPeer
+        self.onLost = onLost
         self.onEnvelope = onEnvelope
         path = .none
-        _ = onLost
     }
 
     public func stop() { path = .none }
@@ -86,6 +87,10 @@ public final class LoopbackRadio: MeshRadio {
     public func appearPeer(_ name: String = "loop") {
         path = livePath
         onPeer?(name)
+    }
+
+    public func losePeer(_ name: String) {
+        onLost?(name)
     }
 
     public func deliver(_ env: MeshEnvelope) { onEnvelope?(env) }
@@ -222,6 +227,7 @@ public final class MeshNet: @unchecked Sendable {
     public func stopLocal() {
         radio?.stop()
         nearby = []
+        pips.removeAll()
         joined = false
         listening = false
         refreshChrome()
@@ -247,7 +253,9 @@ public final class MeshNet: @unchecked Sendable {
 
     public func sendPOS(from: String, lat: Double, lon: Double) {
         enqueue(make(from: from, kind: "pos", body: Data("\(lat),\(lon)".utf8)))
-        upsertPip(MeshPip(from: from, lat: lat, lon: lon))
+        if from != localID {
+            upsertPip(MeshPip(from: from, lat: lat, lon: lon))
+        }
     }
 
     public func sendChip(from: String, chip: String, to: String = "*") {
@@ -296,6 +304,7 @@ public final class MeshNet: @unchecked Sendable {
 
     private func lostPeer(_ peer: String) {
         nearby.removeAll { $0 == peer }
+        pips.removeAll { $0.from == peer }
         refreshChrome()
         box.log("mesh", "lost \(peer) \(chromeNet)")
         onPeersChanged?()

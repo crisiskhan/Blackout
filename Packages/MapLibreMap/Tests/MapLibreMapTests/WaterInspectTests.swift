@@ -100,7 +100,7 @@ final class WaterInspectTests: XCTestCase {
 
     // MARK: - What the style ends up holding
 
-    func testAPackWithAWaterLayerGetsTheClassMarksAndTheirNames() throws {
+    func testAPackWithAWaterLayerGetsTheClassMarksWithoutPrintingClass() throws {
         let pack = try packRoot(named: "water-detail", water: true)
         var sources: [String: Any] = ["osm": ["type": "vector", "url": "pmtiles://osm.pmtiles"]]
         var layers: [[String: Any]] = [["id": "roads", "type": "line", "source": "osm"]]
@@ -117,11 +117,7 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertEqual(points["type"] as? String, "circle")
         XCTAssertEqual(points["minzoom"] as? Double, WaterZoom.detailMinZoom)
 
-        let labels = try XCTUnwrap(layers.first { $0["id"] as? String == PackStyle.waterDetailLabelsLayerID })
-        XCTAssertEqual(labels["type"] as? String, "symbol")
-        XCTAssertEqual(labels["minzoom"] as? Double, WaterZoom.labelMinZoom)
-        let layout = try XCTUnwrap(labels["layout"] as? [String: Any])
-        XCTAssertEqual(layout["text-font"] as? [String], ["Open Sans Regular"])
+        XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.waterDetailLabelsLayerID })
     }
 
     func testAPackWithoutTheFileGetsNoMarksRatherThanAnEmptySource() throws {

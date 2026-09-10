@@ -407,13 +407,13 @@ def main() -> None:
 
     refs = next((item for item in style.get("layers") or [] if item.get("id") == "road-refs"), None)
     if not refs:
-        fail("tx-west needs a road-refs layer so highway numbers read in #E10600")
+        fail("tx-west needs a road-refs layer so highway numbers read at walking zoom")
     if float(refs.get("minzoom") or 99) > 12:
         fail("road-refs must appear by walking approach zoom")
-    if (refs.get("paint") or {}).get("text-color") != ACCENT:
-        fail(f"road-refs must be {ACCENT}")
-    if (refs.get("paint") or {}).get("text-halo-color") != SILVER:
-        fail("road-refs need a silver halo so #E10600 reads on void")
+    if (refs.get("paint") or {}).get("text-color") != SILVER:
+        fail(f"road-refs must be {SILVER}, not leftover accent")
+    if (refs.get("paint") or {}).get("text-halo-color") != VOID:
+        fail("road-refs need a void halo so silver reads on the pack")
     if interpolate_at((refs.get("layout") or {}).get("text-size"), 16) < 18:
         fail("road-refs too small at walking zoom")
     ref_key = (refs.get("layout") or {}).get("symbol-sort-key")

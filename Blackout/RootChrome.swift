@@ -22,7 +22,7 @@ struct RootChrome: View {
                 Theme.nightRed.opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
             }
         }
-        .tint(Theme.accent)
+        .tint(Theme.silver)
         .preferredColorScheme(.dark)
         .sheet(isPresented: $runtime.showInstruments) {
             InstrumentsView(runtime: runtime)
@@ -164,7 +164,11 @@ struct RootChrome: View {
 
     @ViewBuilder
     private var contextualSOS: some View {
-        if BlackoutTokens.Chrome.sosFAB(tab: tokenTab, lockOn: runtime.lockOn) {
+        if BlackoutTokens.Chrome.sosFAB(
+            tab: tokenTab,
+            lockOn: runtime.lockOn,
+            arranging: runtime.hudLayoutMode
+        ) {
             VStack {
                 Spacer()
                 HStack {

@@ -66,7 +66,9 @@ struct MapTab: View {
                 onMapHold: { lat, lon, tags, zoom in
                     runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
                 },
-                pips: runtime.mesh.pips.map { (lat: $0.lat, lon: $0.lon) },
+                pips: runtime.mesh.pips
+                    .filter { $0.from != runtime.mesh.localID }
+                    .map { (lat: $0.lat, lon: $0.lon) },
                 onPulse: { runtime.pulse() }
             )
             .ignoresSafeArea()
@@ -135,8 +137,14 @@ struct MapTab: View {
             ) {
                 overlayRail
             }
-            if !hits.isEmpty { hitList }
-            if hits.isEmpty { markList }
+            if !hits.isEmpty {
+                hitList
+                    .opacity(runtime.chromeVeil * runtime.alive(.search))
+            }
+            if hits.isEmpty {
+                markList
+                    .opacity(runtime.chromeVeil * runtime.alive(.search))
+            }
             Spacer(minLength: 0)
             fieldChrome
                 .opacity(runtime.chromeVeil)
@@ -235,8 +243,8 @@ struct MapTab: View {
                         }
                         .font(.system(size: 13, weight: .heavy))
                         .foregroundStyle(Theme.silver)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                        .lineLimit(2)
+                        .minimumScaleFactor(1)
                         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                         .padding(.horizontal, 12)
                     }

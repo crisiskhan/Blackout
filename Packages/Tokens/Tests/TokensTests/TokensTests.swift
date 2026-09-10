@@ -90,9 +90,12 @@ final class TokensTests: XCTestCase {
     func testSOSFABIsCommsOnlyNotBrowseMap() {
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: true))
+        XCTAssertTrue(BlackoutTokens.Chrome.sosFAB(tab: .map, lockOn: false, arranging: true))
         XCTAssertTrue(BlackoutTokens.Chrome.sosFAB(tab: .comms, lockOn: false))
         XCTAssertTrue(BlackoutTokens.Chrome.sosFAB(tab: .comms, lockOn: true))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .field, lockOn: false))
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .field, lockOn: false, arranging: true))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .expedition, lockOn: false))
+        XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .expedition, lockOn: false, arranging: true))
     }
 }

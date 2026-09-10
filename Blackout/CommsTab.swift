@@ -184,8 +184,8 @@ struct CommsTab: View {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())
-            .foregroundStyle(runtime.ptt.live ? Color.white : Theme.silver)
-            .background(runtime.ptt.live ? Theme.accent : Theme.raised.opacity(pttDown ? 0.55 : 1))
+            .foregroundStyle(runtime.ptt.live ? Theme.void : Theme.silver)
+            .background(runtime.ptt.live ? Theme.silver : Theme.raised.opacity(pttDown ? 0.55 : 1))
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

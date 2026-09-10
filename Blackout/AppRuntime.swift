@@ -382,12 +382,13 @@ final class AppRuntime {
     }
 
     func touch(_ piece: HUDFocus) {
-        hudFocus = piece
         pulse()
+        hudFocus = piece
     }
 
     func pulse() {
         chromeAwake = true
+        hudFocus = .none
         pulseTask?.cancel()
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
@@ -448,7 +449,7 @@ final class AppRuntime {
             locale: locale
         )
         // The whole turn-by-turn script goes to the voice. The field only gets one short
-        // status line — the route itself is already drawn in cyan.
+        // status line — the route itself is already drawn in silver.
         let spoke = speech.speak(text, locale: locale)
         speechChrome = SpeakStatus.chrome(
             spoke: spoke,

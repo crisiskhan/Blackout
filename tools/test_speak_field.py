@@ -4,7 +4,7 @@
 Device tip 67 came back PARTIAL, then the stills showed a second failure: the Speak row
 read `INSTRUME… LOCK-ON`, the field stacked `OFF GRAPH` twice plus a bare `TRUE`, street
 names never drew, and SPEAK painted the whole walk script over the canvas as an orange
-text wall. Speak is voice plus the cyan route line plus one short status line — the
+text wall. Speak is voice plus the silver route line plus one short status line — the
 script never reaches the field. These contracts hold that without touching Walk or PERF.
 """
 from __future__ import annotations
@@ -288,12 +288,13 @@ class FieldChromeSourceContracts(unittest.TestCase):
         clear = app.split("private func clearRoute(")[1].split("\n    }")[0]
         self.assertIn('speechChrome = ""', clear)
 
-    def test_walk_cyan_route_hooks_are_untouched(self):
+    def test_walk_silver_route_hooks_are_untouched(self):
         offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("RouteLine.sourceID", offline)
         self.assertIn("RouteLine.layerID", offline)
-        self.assertIn("red: 0.12, green: 0.82, blue: 0.94", offline)
+        self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
+        self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("GraphPlan.line", app)
         self.assertIn("warmupActiveGraph", app)
         self.assertIn("graphWarmup", app)
@@ -372,7 +373,7 @@ class WalkingZoomNameContracts(unittest.TestCase):
         washed = {"#e8eef4", "#f0f4f8", "#0c0e10"}
         for pack_id in WALKABLE_PACKS:
             style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
-            for layer_id in ("road-labels", "place-labels"):
+            for layer_id in ("road-labels", "place-labels", "road-refs"):
                 item = layer(style, layer_id)
                 if item is None:
                     continue
