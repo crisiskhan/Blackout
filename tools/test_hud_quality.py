@@ -201,6 +201,9 @@ class OffGridNoDisclaimerTests(unittest.TestCase):
         self.assertNotIn("Does not replace 911", qa)
         self.assertIn("ACTIVATE", qa)
         self.assertIn("NO VISION MODEL", qa)
+        self.assertIn("compass mark", qa.lower())
+        self.assertIn("No BLACKOUT wordmark", qa)
+
 
 
 class WaterClassifyOnHoldTests(unittest.TestCase):
@@ -245,6 +248,69 @@ class WaterClassifyOnHoldTests(unittest.TestCase):
         self.assertIn("TINAJA", qa)
         self.assertIn("nearest water", qa.lower())
         self.assertIn("FIELD · WATER", qa)
+
+
+def png_ihdr(path: Path) -> tuple[int, int, int]:
+    """Return width, height, color type (2 = RGB, 6 = RGBA)."""
+    with path.open("rb") as fh:
+        if fh.read(8) != b"\x89PNG\r\n\x1a\n":
+            raise AssertionError(f"{path} is not a PNG")
+        length = int.from_bytes(fh.read(4), "big")
+        if fh.read(4) != b"IHDR" or length != 13:
+            raise AssertionError(f"{path} missing IHDR")
+        data = fh.read(13)
+    width = int.from_bytes(data[0:4], "big")
+    height = int.from_bytes(data[4:8], "big")
+    color = data[9]
+    return width, height, color
+
+
+def jpeg_size(path: Path) -> tuple[int, int]:
+    data = path.read_bytes()
+    if data[:2] != b"\xff\xd8":
+        raise AssertionError(f"{path} is not a JPEG")
+    i = 2
+    while i + 4 <= len(data):
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        while i < len(data) and data[i] == 0xFF:
+            i += 1
+        marker = data[i]
+        i += 1
+        if marker in (0xD8, 0xD9, 0x01) or 0xD0 <= marker <= 0xD7:
+            continue
+        length = int.from_bytes(data[i : i + 2], "big")
+        if marker in (0xC0, 0xC1, 0xC2):
+            return int.from_bytes(data[i + 5 : i + 7], "big"), int.from_bytes(
+                data[i + 3 : i + 5], "big"
+            )
+        i += length
+    raise AssertionError(f"{path} has no SOF")
+
+
+class CompassMarkTests(unittest.TestCase):
+    """Home screen and boot share the square compass. No wordmark poster."""
+
+    def test_app_icon_is_opaque_1024(self):
+        icon = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon.png"
+        width, height, color = png_ihdr(icon)
+        self.assertEqual((width, height), (1024, 1024))
+        self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
+
+    def test_boot_logo_is_the_square_mark(self):
+        logo = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset" / "Logo.jpg"
+        width, height = jpeg_size(logo)
+        self.assertEqual(width, height)
+        self.assertGreaterEqual(width, 1024)
+        arming = read("Blackout", "ARMINGView.swift")
+        self.assertIn("Image(\"Logo\")", arming)
+        self.assertNotIn("1712.0 / 1152.0", arming)
+        self.assertNotIn('Text("BLACKOUT")', arming)
+        self.assertIn(
+            "height: BlackoutTokens.Chrome.bootLogoPoints",
+            arming,
+        )
 
 
 if __name__ == "__main__":

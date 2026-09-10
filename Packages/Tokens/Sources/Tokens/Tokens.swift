@@ -13,7 +13,7 @@ public enum BlackoutTokens: Sendable {
         /// Overlay left-hand tab column on MAP.
         public static let hudSideReservePoints: Double = 72
         public static let mapChipHitPoints: Double = 44
-        /// Title-screen mark. Large enough to read as the product, not a chip.
+        /// Title-screen mark. Square compass, same as the App Icon. Not a chip.
         public static let bootLogoPoints: Double = 196
         public static let bootActivateHeight: Double = 56
         /// Even a warm launch holds the logo long enough to land, then ACTIVATE.

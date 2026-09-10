@@ -672,6 +672,8 @@ def tip55_chrome() -> None:
         ok("ARMING primary is ACTIVATE")
     if "Logo" not in arming and "AppIcon" not in arming:
         bad("ARMING missing bundled logo")
+    elif "1712.0 / 1152.0" in arming or "Text(\"BLACKOUT\")" in arming:
+        bad("ARMING still uses the wordmark poster")
     else:
         ok("ARMING shows bundled logo")
     if "ForEach(packs.catalog.packs" in arming:

@@ -97,8 +97,7 @@ struct ARMINGView: View {
                 .scaledToFit()
                 .frame(
                     width: BlackoutTokens.Chrome.bootLogoPoints,
-                    // Poster is 1152×1712. Keep the wordmark; do not letterbox a square.
-                    height: BlackoutTokens.Chrome.bootLogoPoints * (1712.0 / 1152.0)
+                    height: BlackoutTokens.Chrome.bootLogoPoints
                 )
                 .shadow(color: Theme.accent.opacity(0.25 + 0.45 * pulse), radius: 18 + 14 * pulse)
                 .scaleEffect(markIn ? 1 : 0.86)

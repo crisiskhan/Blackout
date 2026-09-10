@@ -6,7 +6,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## BOOT
 
-- [ ] PASS / FAIL / N/A — Cold launch is the logo on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — Cold launch is the compass mark on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No BLACKOUT wordmark. No account prompt. No network/login gate.
 - [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP. No lawyer sheet. Tabs are live.
 - [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
