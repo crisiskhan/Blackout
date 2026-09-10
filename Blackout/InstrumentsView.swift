@@ -34,14 +34,14 @@ struct InstrumentsView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                     } else {
-                        Text("Packs missing from bundle — honest empty.")
-                            .font(.caption)
-                            .foregroundStyle(Color(white: 0.5))
+                        Text("PACKS · NONE")
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
                     }
 
                     sectionLabel("HUD")
-                    hudToggle("Left-hand column", $runtime.leftHand)
-                    hudToggle("Night-red", Binding(
+                    hudToggle("LEFT HAND", $runtime.leftHand)
+                    hudToggle("NIGHT RED", Binding(
                         get: { runtime.night.enabled },
                         set: { runtime.night.enabled = $0 }
                     ))
@@ -66,7 +66,7 @@ struct InstrumentsView: View {
                     sunPlate
 
                     sectionLabel("BODY")
-                    Button("Torch 3×") { runtime.tapTorch() }
+                    Button("TORCH 3×") { runtime.tapTorch() }
                         .font(.system(size: 13, weight: .heavy))
                         .foregroundStyle(Theme.silver)
                         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
@@ -76,13 +76,13 @@ struct InstrumentsView: View {
                     Text(torchWord)
                         .font(.caption.weight(.bold))
                         .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Color(white: 0.45) : Theme.accent)
-                    hudButton("Compass cal") { runtime.instruments.calibrateCompass() }
-                    hudButton("True north") { runtime.instruments.setTrueNorth() }
-                    hudToggle("USB-C PTT present", Binding(
+                    hudButton("COMPASS CAL") { runtime.instruments.calibrateCompass() }
+                    hudButton("TRUE NORTH") { runtime.instruments.setTrueNorth() }
+                    hudToggle("USB-C PTT", Binding(
                         get: { runtime.instruments.state.usbCPTT },
                         set: { runtime.instruments.attachUSB_C_PTT($0) }
                     ))
-                    hudToggle("External GNSS puck", Binding(
+                    hudToggle("GNSS PUCK", Binding(
                         get: { runtime.instruments.state.externalGNSS },
                         set: { runtime.instruments.attachGNSSPuck($0) }
                     ))
@@ -95,12 +95,12 @@ struct InstrumentsView: View {
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    hudToggle("Pocket", Binding(
+                    hudToggle("POCKET", Binding(
                         get: { runtime.power.state.pocket },
                         set: { runtime.power.setPocket($0) }
                     ))
-                    Text("Hot-spare \(runtime.power.hotSparePayload())")
-                        .font(.caption)
+                    Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(Color(white: 0.55))
 
                     hudButton("ES / EN") {
@@ -156,9 +156,9 @@ struct InstrumentsView: View {
                 }
             }
         } else {
-            Text("Packs missing from bundle — honest empty.")
-                .font(.caption)
-                .foregroundStyle(Color(white: 0.5))
+            Text("PACKS · NONE")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.warn)
         }
     }
 

@@ -696,8 +696,8 @@ def tip55_chrome() -> None:
 
     exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
     vitals = (ROOT / "Packages" / "Vitals" / "Sources" / "Vitals" / "Vitals.swift").read_text()
-    for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
-        if f'slider("{label}"' not in exp and f'slider("{label.lower()}"' not in exp:
+    for label in ("HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"):
+        if f'slider("{label}"' not in exp:
             bad(f"Expedition missing {label} rail")
             break
     else:

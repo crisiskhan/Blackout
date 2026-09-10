@@ -22,7 +22,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## MAP
 
-- [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INSTRUMENTS + LOCK-ON overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
+- [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INSTRUMENTS + LOCK-ON overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No MapLibre compass, scale bar, or attribution i. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
 - [ ] PASS / FAIL / N/A — MAP thumb dock: MARK / WALK / DRIVE / SPEAK are equal-width 44pt cells (never disabled). INSTRUMENTS and LOCK-ON sit under search as whole words (they wrap; they never become `INST` or `INSTRUME…`). RULER / USNG / MAG/TRUE live in INSTRUMENTS, not on the canvas. Other MapTool leftovers are not on MAP.
 - [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit). Hits cap at five — no scroll on MAP.
 - [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Marks sit as 44pt glass rows on MAP (tap one to set DEST). Kill app and relaunch: the same mark is still listed.
@@ -42,11 +42,12 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — JOIN LOCAL NET starts the radio. Button becomes `LEAVE NET`. Still `NET · NONE` until a real peer. LEAVE NET returns to `NET · NONE`. No `NET JOINED` dead control.
 - [ ] PASS / FAIL / N/A — RALLY or DOWN: write stays local; chrome `NO PEERS · LOGGED`. No TX / sent claim.
 - [ ] PASS / FAIL / N/A — FORM UP / LOST KID / WAIT / WATER chips log locally the same way. Whole words on the rail.
-- [ ] PASS / FAIL / N/A — HOLD PTT is a hold, not a tap. Press: `PTT` (RELEASE PTT). Release ends. Chrome `NO PEERS · LOGGED`. Mic deny: `MIC DENIED`. Does not claim sent. 15s CLIP records the mic or `MIC DENIED` — not silence zeros.
+- [ ] PASS / FAIL / N/A — HOLD PTT is a hold, not a tap. Live chrome `PTT` (RELEASE PTT) only after the mic arms. Release ends. Chrome `NO PEERS · LOGGED`. Mic deny: `MIC DENIED` and the header does not read `PTT`. Does not claim sent. 15s CLIP reads `RECORDING` while armed (tap ends it) and records the mic, or `MIC DENIED` / `CLIP EMPTY` — not silence zeros.
+- [ ] PASS / FAIL / N/A — 1:1 with nobody nearby is `NO PEERS` (not a private channel). Distinct from chip-write chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — RADIO CHECK writes a radio chip. Solo chrome `NO PEERS · LOGGED`. Does not light as heard without a peer.
 - [ ] PASS / FAIL / N/A — SOS is hold, not tap. A tap/release before hold ms does nothing. Disk is on COMMS only (64pt, pulsing while held, visible SOS). Browse MAP (lock-on on or off) has no SOS FAB. After hold: mesh chip + RED + POS (`SOS · MESH` plate), not a caption. I AM OK clears it.
 - [ ] PASS / FAIL / N/A — I AM OK is hidden while not in SOS/RED and while not joined (`NET · NONE`). No always-on IAMOK bar. COMMS chip rail does not show I AM OK just because the radio is up.
-- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS. SCAN QR has CLOSE.
+- [ ] PASS / FAIL / N/A — COMMS / FIELD / EXPEDITION are glass HUD pages over the still-mounted map (not form dumps). Each title carries the compass mark. Tab strip reads EXPEDITION, not EXPED. Selected tab is the reticle tick. No `Whisper <10 m` dump on COMMS. SCAN QR has CLOSE. Camera deny is `CAMERA DENIED`, not a black void.
 - [ ] PASS / FAIL / N/A — Hold a water/ground feature → FIELD. Card names the class (STOCK TANK / TINAJA / ACEQUIA / RIVER), not a generic water. DO is the class field line. Empty ground names nearest water within 2 km. FIELD · WATER jumps. The hold card must not crash. Returning to MAP still has the canvas (MapLibre was not torn down).
 
 ## FIELD
@@ -55,21 +56,21 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.
-- [ ] PASS / FAIL / N/A — VISION captures one still. Result is `UNKNOWN` or a pack-book name. Fungi is `LEAVE IT`. Never edible. No percent. Camera deny or no classifier: `NO VISION MODEL`. No CoreML lecture.
+- [ ] PASS / FAIL / N/A — Empty book is `FIELD BOOK · NONE`, not a blank list. VISION captures one still. A new capture clears the last guess. Result is `UNKNOWN` or a pack-book name. Fungi is `LEAVE IT`. Never edible. No percent. Camera deny or no classifier: `NO VISION MODEL`. No CoreML lecture.
 
 ## EXPEDITION
 
-- [ ] PASS / FAIL / N/A — Hunger / Thirst / Pain / Water / Fatigue / Exposure condition rails change CONDITION. Ticks are GREEN / YELLOW / RED (not iOS sliders). Header CONDITION uses warn ink on YELLOW and the HUD RED plate ink on RED.
+- [ ] PASS / FAIL / N/A — `HUNGER` / `THIRST` / `PAIN` / `WATER` / `FATIGUE` / `EXPOSURE` condition rails change CONDITION. Ticks are GREEN / YELLOW / RED (not iOS sliders). Header CONDITION uses warn ink on YELLOW and the HUD RED plate ink on RED.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows the HUD RED plate (`RED`, not a system title). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
-- [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. Solo set/done chrome `NO PEERS · LOGGED`.
+- [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. A second JOIN NAV is `NAV · SEATED`, not a dead tap. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
 - [ ] PASS / FAIL / N/A — KIT plates toggle OK / FAILED and show the hazard. TRIP brief is on the glass. EXPORT PAPER shows the paper on the glass (still logs).
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.
 
 ## INSTRUMENTS
 
-- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). Torch 3× cycles OFF / 1 / 2 / 3 and drives the lamp. SUN shows RISE / SET for the open pack (offline almanac, not weather). Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
-- [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. Left-hand and night-red live here, not on boot.
+- [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). `TORCH 3×` cycles OFF / 1 / 2 / 3 and drives the lamp. SUN shows RISE / SET for the open pack (offline almanac, not weather). Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
+- [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. `LEFT HAND` and `NIGHT RED` live here, not on boot.
 
 ## Kill-and-relaunch
 

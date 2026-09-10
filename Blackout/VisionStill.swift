@@ -156,6 +156,7 @@ struct VisionStill: UIViewControllerRepresentable {
                 close.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
                 close.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
                 close.heightAnchor.constraint(equalToConstant: 44),
+                close.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
                 capture.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
                 capture.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
                 capture.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),

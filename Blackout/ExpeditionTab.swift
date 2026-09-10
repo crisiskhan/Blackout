@@ -7,6 +7,7 @@ import Tokens
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
     @State private var paperText = ""
+    @State private var navChrome: String?
 
     var body: some View {
         HUDPage(
@@ -19,12 +20,12 @@ struct ExpeditionTab: View {
                     sectionLabel("CONDITION")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            slider("Hunger", Binding(get: { runtime.vitals.hunger }, set: { runtime.vitals.hunger = $0 }))
-                            slider("Thirst", Binding(get: { runtime.vitals.thirst }, set: { runtime.vitals.thirst = $0 }))
-                            slider("Pain", Binding(get: { runtime.vitals.pain }, set: { runtime.vitals.pain = $0 }))
-                            slider("Water", Binding(get: { runtime.vitals.water }, set: { runtime.vitals.water = $0 }))
-                            slider("Fatigue", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
-                            slider("Exposure", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
+                            slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.vitals.hunger = $0 }))
+                            slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.vitals.thirst = $0 }))
+                            slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.vitals.pain = $0 }))
+                            slider("WATER", Binding(get: { runtime.vitals.water }, set: { runtime.vitals.water = $0 }))
+                            slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
+                            slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
                         }
                     }
 
@@ -56,7 +57,19 @@ struct ExpeditionTab: View {
                                     .font(.system(size: 13, weight: .heavy))
                                     .foregroundStyle(Theme.silver)
                             }
-                            Button("JOIN NAV") { runtime.roster = runtime.roster.joining("Nav", role: .nav) }
+                            if let navChrome {
+                                Text(navChrome)
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.warn)
+                            }
+                            Button("JOIN NAV") {
+                                if runtime.roster.members.contains(where: { $0.role == .nav }) {
+                                    navChrome = "NAV · SEATED"
+                                } else {
+                                    navChrome = nil
+                                    runtime.roster = runtime.roster.joining("Nav", role: .nav)
+                                }
+                            }
                                 .buttonStyle(HUDActionStyle(filled: false))
                         }
                     }

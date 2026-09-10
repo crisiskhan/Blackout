@@ -64,9 +64,8 @@ struct HUDDockStyle: ButtonStyle {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
         return configuration.label
             .font(.system(size: 12, weight: .heavy))
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .allowsTightening(true)
+            .lineLimit(2)
+            .minimumScaleFactor(1)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())

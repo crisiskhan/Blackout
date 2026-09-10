@@ -27,6 +27,12 @@ struct FieldTab: View {
                         ScrollView {
                             open(s)
                         }
+                    } else if cards.isEmpty {
+                        HUDGlassCard {
+                            Text("FIELD BOOK · NONE")
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.warn)
+                        }
                     } else {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 1) {
@@ -99,6 +105,7 @@ struct FieldTab: View {
     private var visionHUD: some View {
         sectionLabel("VISION")
         Button("VISION") {
+            guess = nil
             #if canImport(AVFoundation) && canImport(UIKit)
             showVision = true
             #else

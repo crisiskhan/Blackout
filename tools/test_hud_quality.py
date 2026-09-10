@@ -423,7 +423,7 @@ class ExpeditionHUDTests(unittest.TestCase):
     def test_condition_rails_not_system_sliders(self):
         exped = read("Blackout", "ExpeditionTab.swift")
         vitals = read("Packages", "Vitals", "Sources", "Vitals", "Vitals.swift")
-        for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
+        for label in ("HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"):
             self.assertIn(f'slider("{label}"', exped, label)
         self.assertNotIn("Slider(", exped)
         self.assertIn("PartyVitals.snap", exped)
@@ -559,7 +559,7 @@ class InstrumentsSunTorchTests(unittest.TestCase):
         self.assertIn("Almanac.sun", inst)
         self.assertIn("RISE", inst)
         self.assertIn("SET", inst)
-        self.assertIn('Button("Torch 3×")', inst)
+        self.assertIn('Button("TORCH 3×")', inst)
         self.assertIn("tapTorch()", inst)
         self.assertIn("func tapTorch()", runtime)
         self.assertIn("setTorchModeOn", runtime)
@@ -569,7 +569,7 @@ class InstrumentsSunTorchTests(unittest.TestCase):
     def test_solo_qa_scores_sun_and_torch(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("RISE", qa)
-        self.assertIn("Torch 3×", qa)
+        self.assertIn("TORCH 3×", qa)
 
 
 class MapMarksGlassTests(unittest.TestCase):
@@ -650,6 +650,62 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("LEAVE IT", qa)
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("No percent", qa)
+
+
+class HonestyOnTheGlassTests(unittest.TestCase):
+    """A tap draws, or it says why not. Vendor chrome stays off the canvas."""
+
+    def test_call_fail_closed_clip_armed_and_one_to_one_needs_a_peer(self):
+        comms = read("Blackout", "CommsTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        scan = read("Blackout", "PartyJoin.swift")
+        start = app.index("func beginPTTSolo()")
+        body = app[start : app.index("func endPTTSolo()")]
+        self.assertGreater(body.index("ptt.beginLive()"), body.index("PTTMic.shared.arm"))
+        self.assertIn('chip: "ptt"', body)
+        self.assertIn("var clipLive", app)
+        self.assertIn("RECORDING", comms)
+        self.assertIn("CAMERA DENIED", comms)
+        self.assertIn("onFail", scan)
+        self.assertIn("failClosed", scan)
+        self.assertIn("NO PEERS", comms)
+        self.assertNotIn(".prefix(6)", comms)
+
+    def test_field_empty_and_join_nav_say_why(self):
+        field = read("Blackout", "FieldTab.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        still = read("Blackout", "VisionStill.swift")
+        self.assertIn("FIELD BOOK · NONE", field)
+        self.assertIn("guess = nil", field)
+        self.assertIn("NAV · SEATED", exped)
+        self.assertIn("func clearInboundChip", mesh)
+        self.assertIn("greaterThanOrEqualToConstant: 44", still)
+
+    def test_instruments_and_rails_are_stamps(self):
+        inst = read("Blackout", "InstrumentsView.swift")
+        exped = read("Blackout", "ExpeditionTab.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        for stamp in ("LEFT HAND", "NIGHT RED", "TORCH 3×", "COMPASS CAL", "TRUE NORTH", "USB-C PTT", "GNSS PUCK"):
+            self.assertIn(stamp, inst, stamp)
+        self.assertNotIn("blackout-hotspare:", inst)
+        for label in ("HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"):
+            self.assertIn(f'slider("{label}"', exped, label)
+        self.assertIn("attributionButton.isHidden = true", offline)
+        self.assertIn("compassView.isHidden = true", offline)
+        self.assertIn("scaleBar.isHidden = true", offline)
+        self.assertIn("OSMCredit.line", read("Blackout", "MapTab.swift"))
+
+    def test_solo_qa_scores_the_honest_taps(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("CAMERA DENIED", qa)
+        self.assertIn("RECORDING", qa)
+        self.assertIn("NO PEERS", qa)
+        self.assertIn("NAV · SEATED", qa)
+        self.assertIn("TORCH 3×", qa)
+        self.assertIn("HUNGER", qa)
 
 
 if __name__ == "__main__":

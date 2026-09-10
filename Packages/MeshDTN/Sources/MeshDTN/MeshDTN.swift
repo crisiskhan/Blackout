@@ -254,6 +254,10 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "chip", body: Data(chip.utf8), to: to))
     }
 
+    public func clearInboundChip(_ name: String) {
+        inboundChips.removeAll { $0 == name }
+    }
+
     public func sendVoice(from: String, opus: Data, to: String = "*") {
         enqueue(make(from: from, kind: "voice", body: opus, to: to))
     }

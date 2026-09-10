@@ -34,7 +34,13 @@ struct CommsTab: View {
                     HStack(spacing: 1) {
                         Button("ALL") { runtime.comms.setChannel("ALL") }
                             .buttonStyle(HUDDockStyle())
-                        Button("1:1") { runtime.comms.setChannel("1:1") }
+                        Button("1:1") {
+                            if runtime.mesh.nearby.isEmpty {
+                                runtime.commsChrome = "NO PEERS"
+                                return
+                            }
+                            runtime.comms.setChannel("1:1")
+                        }
                             .buttonStyle(HUDDockStyle())
                     }
                     .background(Theme.raised)
@@ -57,7 +63,7 @@ struct CommsTab: View {
                     sectionLabel("CALL")
                     HStack(spacing: 1) {
                         pttPad
-                        Button("15s CLIP") { runtime.captureClip() }
+                        Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
                             .buttonStyle(HUDDockStyle())
                     }
                     .background(Theme.raised)
@@ -113,6 +119,10 @@ struct CommsTab: View {
                     scanQR = false
                     runtime.joinNet()
                 },
+                onFail: {
+                    scanQR = false
+                    runtime.commsChrome = "CAMERA DENIED"
+                },
                 onCancel: { scanQR = false }
             )
             .ignoresSafeArea()
@@ -123,7 +133,8 @@ struct CommsTab: View {
 
     private var pageStatus: String {
         if runtime.ptt.live { return "PTT" }
-        if runtime.comms.channel == "1:1" {
+        if runtime.clipLive { return "CLIP" }
+        if runtime.comms.channel == "1:1" && !runtime.mesh.nearby.isEmpty {
             return "1:1 · \(runtime.mesh.chromeNet)"
         }
         return runtime.mesh.chromeNet
@@ -167,9 +178,9 @@ struct CommsTab: View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
         return Text(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT")
             .font(.system(size: 12, weight: .heavy))
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .allowsTightening(true)
+            .lineLimit(2)
+            .minimumScaleFactor(1)
+            .fixedSize(horizontal: false, vertical: true)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())
@@ -244,8 +255,7 @@ struct CommsTab: View {
     }
 
     private func peerWord(_ name: String) -> String {
-        let clean = name.replacingOccurrences(of: "-", with: "")
-        return String(clean.prefix(6)).uppercased()
+        name.uppercased()
     }
 
     private func inboundWord(_ raw: String) -> String {

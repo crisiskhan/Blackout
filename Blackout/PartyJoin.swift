@@ -49,22 +49,26 @@ struct PartyQRImage: View {
 #if canImport(AVFoundation) && canImport(UIKit)
 struct PartyQRScanner: UIViewControllerRepresentable {
     var onCode: (String) -> Void
+    var onFail: () -> Void
     var onCancel: () -> Void
 
     func makeUIViewController(context: Context) -> ScannerVC {
         let vc = ScannerVC()
         vc.onCode = onCode
+        vc.onFail = onFail
         vc.onCancel = onCancel
         return vc
     }
 
     func updateUIViewController(_ uiViewController: ScannerVC, context: Context) {
         uiViewController.onCode = onCode
+        uiViewController.onFail = onFail
         uiViewController.onCancel = onCancel
     }
 
     final class ScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         var onCode: ((String) -> Void)?
+        var onFail: (() -> Void)?
         var onCancel: (() -> Void)?
         private let session = AVCaptureSession()
         private var started = false
@@ -101,22 +105,29 @@ struct PartyQRScanner: UIViewControllerRepresentable {
             case .notDetermined:
                 AVCaptureDevice.requestAccess(for: .video) { granted in
                     DispatchQueue.main.async {
-                        if granted { self.startSession() }
+                        if granted {
+                            self.startSession()
+                        } else {
+                            self.failClosed()
+                        }
                     }
                 }
             case .denied, .restricted:
-                break
+                failClosed()
             @unknown default:
-                break
+                failClosed()
             }
         }
 
         private func startSession() {
             guard !started else { return }
-            started = true
             guard let device = AVCaptureDevice.default(for: .video),
                   let input = try? AVCaptureDeviceInput(device: device),
-                  session.canAddInput(input) else { return }
+                  session.canAddInput(input) else {
+                failClosed()
+                return
+            }
+            started = true
             session.addInput(input)
             let output = AVCaptureMetadataOutput()
             if session.canAddOutput(output) {
@@ -139,23 +150,37 @@ struct PartyQRScanner: UIViewControllerRepresentable {
                 close.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
                 close.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
                 close.heightAnchor.constraint(equalToConstant: 44),
+                close.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
             ])
         }
 
         @objc private func cancel() {
+            finish {
+                self.session.stopRunning()
+                self.onCancel?()
+            }
+        }
+
+        private func failClosed() {
+            finish {
+                self.session.stopRunning()
+                self.onFail?()
+            }
+        }
+
+        private func finish(_ work: () -> Void) {
             guard !finished else { return }
             finished = true
-            session.stopRunning()
-            onCancel?()
+            work()
         }
 
         func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-            guard !finished,
-                  let obj = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+            guard let obj = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
                   let raw = obj.stringValue else { return }
-            finished = true
-            session.stopRunning()
-            onCode?(PartyQR.parse(raw))
+            finish {
+                self.session.stopRunning()
+                self.onCode?(PartyQR.parse(raw))
+            }
         }
     }
 }

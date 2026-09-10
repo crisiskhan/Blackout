@@ -82,7 +82,6 @@ public struct OfflineMapView: UIViewRepresentable {
             _ = size
         }
         applyInteraction(view)
-        view.logoView.isHidden = true
         view.prefetchesTiles = false
         view.allowsRotating = true
         view.shouldRequestAuthorizationToUseLocationServices = trackUser
@@ -135,6 +134,10 @@ public struct OfflineMapView: UIViewRepresentable {
     private func applyInteraction(_ view: MLNMapView) {
         view.isUserInteractionEnabled = interactive
         view.accessibilityElementsHidden = !interactive
+        view.logoView.isHidden = true
+        view.attributionButton.isHidden = true
+        view.compassView.isHidden = true
+        view.scaleBar.isHidden = true
     }
 
     private var overlaySpec: Coordinator.OverlaySpec {

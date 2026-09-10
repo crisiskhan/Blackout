@@ -133,6 +133,8 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.inboundTimers.count, 1)
         XCTAssertEqual(net.inboundChips, ["down"])
         XCTAssertEqual(net.inbox.count, 4)
+        net.clearInboundChip("down")
+        XCTAssertTrue(net.inboundChips.isEmpty)
     }
 
     func testInboundTimerDoneIsOneRowPerTask() {

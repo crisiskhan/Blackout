@@ -67,6 +67,8 @@ final class AppRuntime {
     var speechChrome = ""
     /// Mic deny on CALL. Empty unless the last arm failed.
     var commsChrome = ""
+    /// 15s CLIP is armed. The pad reads RECORDING until the clip ends.
+    var clipLive = false
     /// Machine plan state for VoiceNav: "" on graph, `GraphPlan.offGraph` otherwise.
     var navChrome = ""
     /// What the map says after a WALK/DRIVE tap: the route, or why there isn't one.
@@ -87,6 +89,10 @@ final class AppRuntime {
     private var waterWarmup: Task<WaterIndex?, Never>?
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
+    /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
+    private var pttHold = false
+    /// CLIP tap is waiting on the mic. Not live yet.
+    private var clipArming = false
     private let fix = MeshFix()
 
     init() {
@@ -160,6 +166,9 @@ final class AppRuntime {
     func leaveNet() {
         clipTask?.cancel()
         clipTask = nil
+        clipLive = false
+        clipArming = false
+        pttHold = false
         if ptt.live { endPTTSolo() }
         _ = PTTMic.shared.stop()
         mesh.stopLocal()
@@ -369,6 +378,7 @@ final class AppRuntime {
     /// and a RED plate we lit goes dark.
     func iamOK() {
         comms.chips.removeAll { $0 == .sos }
+        mesh.clearInboundChip(Chip.sos.rawValue)
         if !comms.chips.contains(.ok) {
             comms.push(.ok)
         }
@@ -404,17 +414,31 @@ final class AppRuntime {
 
     func beginPTTSolo() {
         if clipTask != nil { finishClip() }
-        guard !ptt.live else { return }
-        ptt.beginLive()
+        guard !ptt.live, !pttHold else { return }
+        pttHold = true
         commsChrome = ""
-        mesh.sendChip(from: mesh.localID, chip: "ptt", to: meshDest)
         PTTMic.shared.arm { [weak self] ok in
             guard let self else { return }
-            if !ok { self.commsChrome = "MIC DENIED" }
+            guard self.pttHold else {
+                _ = PTTMic.shared.stop()
+                return
+            }
+            guard ok else {
+                self.commsChrome = "MIC DENIED"
+                self.pttHold = false
+                return
+            }
+            self.ptt.beginLive()
+            self.mesh.sendChip(from: self.mesh.localID, chip: "ptt", to: self.meshDest)
         }
     }
 
     func endPTTSolo() {
+        pttHold = false
+        guard ptt.live else {
+            _ = PTTMic.shared.stop()
+            return
+        }
         let pcm = PTTMic.shared.stop()
         ptt.endLive()
         _ = ptt.recordClip(pcm: pcm, sampleRate: 16_000)
@@ -424,21 +448,32 @@ final class AppRuntime {
     }
 
     func captureClip() {
-        if clipTask != nil {
+        if clipTask != nil || clipLive {
             finishClip()
             return
         }
+        if clipArming { return }
         if ptt.live { endPTTSolo() }
         commsChrome = ""
+        clipArming = true
         PTTMic.shared.arm { [weak self] ok in
             guard let self else { return }
+            guard self.clipArming else {
+                _ = PTTMic.shared.stop()
+                return
+            }
             if !ok {
                 self.commsChrome = "MIC DENIED"
+                self.clipLive = false
+                self.clipArming = false
                 _ = self.ptt.recordClip(pcm: Data(), sampleRate: 16_000)
                 return
             }
+            self.clipLive = true
+            self.clipArming = false
             self.clipTask = Task { @MainActor in
                 try? await Task.sleep(for: .seconds(15))
+                if Task.isCancelled { return }
                 self.finishClip()
             }
         }
@@ -496,9 +531,15 @@ final class AppRuntime {
     private func finishClip() {
         clipTask?.cancel()
         clipTask = nil
+        clipLive = false
+        clipArming = false
         let pcm = PTTMic.shared.stop()
         _ = ptt.recordClip(pcm: pcm, sampleRate: 16_000)
-        if !pcm.isEmpty, let opus = ptt.last?.opus {
+        if pcm.isEmpty {
+            commsChrome = "CLIP EMPTY"
+            return
+        }
+        if let opus = ptt.last?.opus {
             mesh.sendVoice(from: mesh.localID, opus: opus, to: meshDest)
         }
     }
