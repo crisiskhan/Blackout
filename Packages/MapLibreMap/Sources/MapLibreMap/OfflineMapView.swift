@@ -602,12 +602,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 src.shape = MLNPolyline(coordinates: &empty, count: 0)
             }
 
-            let partyShapes = spec.pips.map { pip -> MLNPointFeature in
-                let mark = MLNPointFeature()
-                mark.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
-                return mark
-            }
-            let party = MLNShapeCollectionFeature.shapeCollection(withShapes: partyShapes)
+            let party = partyShape(spec.pips)
             if let src = style.source(withIdentifier: PartyPips.sourceID) as? MLNShapeSource {
                 src.shape = party
             } else {
@@ -628,6 +623,33 @@ public struct OfflineMapView: UIViewRepresentable {
                 core.circleStrokeWidth = NSExpression(forConstantValue: 2)
                 style.addLayer(core)
             }
+        }
+
+        /// Silver bodies. MapLibre's Swift overlay does not import the ObjC
+        /// collection factory. A FeatureCollection is the documented many-point source.
+        func partyShape(_ pips: [(lat: Double, lon: Double)]) -> MLNShape {
+            let features: [[String: Any]] = pips.map { pip in
+                [
+                    "type": "Feature",
+                    "properties": [:] as [String: Any],
+                    "geometry": [
+                        "type": "Point",
+                        "coordinates": [pip.lon, pip.lat],
+                    ] as [String: Any],
+                ]
+            }
+            let geo: [String: Any] = [
+                "type": "FeatureCollection",
+                "features": features,
+            ]
+            guard
+                let data = try? JSONSerialization.data(withJSONObject: geo),
+                let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+            else {
+                var empty = [CLLocationCoordinate2D]()
+                return MLNPolyline(coordinates: &empty, count: 0)
+            }
+            return shape
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {

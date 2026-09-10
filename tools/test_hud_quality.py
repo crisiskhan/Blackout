@@ -790,6 +790,8 @@ class HUDSeductionTests(unittest.TestCase):
         self.assertIn("PartyPips.haloLayerID", inspect)
         self.assertIn("regionIsChangingWith reason:", offline)
         self.assertNotIn("regionIsChangingWithReason", offline)
+        self.assertNotIn("shapeCollection(withShapes:", offline)
+        self.assertIn("MLNShape(data:", offline)
         self.assertIn("onPulse", offline)
         self.assertIn("arranging:", tab)
         self.assertNotIn("149.0 / 255.0", tokens)
