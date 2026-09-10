@@ -24,7 +24,12 @@ class FakeAPI:
         return st, payload
 
 
-def _build(bid: str, version: str, state: str = "VALID") -> dict:
+def _build(
+    bid: str,
+    version: str,
+    state: str = "VALID",
+    enc: bool | None = False,
+) -> dict:
     return {
         "data": [
             {
@@ -32,7 +37,7 @@ def _build(bid: str, version: str, state: str = "VALID") -> dict:
                 "attributes": {
                     "version": version,
                     "processingState": state,
-                    "usesNonExemptEncryption": False,
+                    "usesNonExemptEncryption": enc,
                 },
             }
         ]
@@ -92,6 +97,63 @@ class TestAssignInternalRetries404(unittest.TestCase):
             deadline=1e18,
         )
         self.assertEqual(rc, 2)
+
+    def test_patch_401_retries_before_assign(self) -> None:
+        """34426480725: encryption null + PATCH 401. Do not POST assign yet."""
+        api = FakeAPI(
+            [
+                ("GET", 200, _build("b75", "75", enc=None)),
+                ("PATCH", 401, {"errors": [{"status": "401"}]}),
+                ("GET", 200, _build("b75", "75", enc=None)),
+                ("PATCH", 200, {}),
+                ("POST", 204, {}),
+            ]
+        )
+        sleeps: list[float] = []
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="75",
+            sleep=sleeps.append,
+            deadline=1e18,
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(sleeps, [15.0])
+        self.assertEqual([c[0] for c in api.calls], ["GET", "PATCH", "GET", "PATCH", "POST"])
+
+    def test_422_not_testable_then_204(self) -> None:
+        """34426480725: ASSIGN 422 internally testable, then 204."""
+        err = {
+            "errors": [
+                {
+                    "status": "422",
+                    "code": "ENTITY_UNPROCESSABLE",
+                    "title": "Build is not assignable.",
+                    "detail": "Build is not in an internally testable state.",
+                }
+            ]
+        }
+        api = FakeAPI(
+            [
+                ("GET", 200, _build("b75", "75")),
+                ("POST", 422, err),
+                ("GET", 200, _build("b75", "75")),
+                ("POST", 204, {}),
+            ]
+        )
+        sleeps: list[float] = []
+        rc = assign.assign_internal(
+            api=api,
+            app="6806388963",
+            group="28035586-fce6-474f-9bc2-ef0f1f65306e",
+            want="75",
+            sleep=sleeps.append,
+            deadline=1e18,
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(sleeps, [15.0])
+        self.assertEqual(len([c for c in api.calls if c[0] == "POST"]), 2)
 
     def test_404_exhausts_retries(self) -> None:
         api = FakeAPI(

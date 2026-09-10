@@ -4,6 +4,12 @@
 33986112949: altool uploaded CPV 56, processingState VALID, PATCH 200,
 then POST betaGroups/.../relationships/builds 404 NOT_FOUND on that
 build id. Treat 409 as already assigned. Retry 404 with backoff.
+
+34426480725: CPV 75 VALID, encryption still null, PATCH 401, then
+ASSIGN 422 ENTITY_UNPROCESSABLE "Build is not in an internally
+testable state." Dedicated assign job 34427487845 PATCH 200 /
+ASSIGN 204 two minutes later. Retry PATCH 4xx/5xx and that 422
+with the same backoff. Do not POST assign after a failed PATCH.
 No App Review. No External. No network unless main() is invoked.
 """
 from __future__ import annotations
@@ -25,6 +31,15 @@ except ImportError:  # unit tests never call _http
 ASSIGN_BACKOFF = (15.0, 30.0, 60.0, 90.0, 120.0)
 INTERNAL_GROUP = "28035586-fce6-474f-9bc2-ef0f1f65306e"
 ASC_APP = "6806388963"
+
+
+def _retryable_assign(st: int, data: dict[str, Any]) -> bool:
+    if st == 404:
+        return True
+    if st != 422:
+        return False
+    blob = json.dumps(data).lower()
+    return "not assignable" in blob or "internally testable" in blob
 
 
 def _match_build(payload: dict[str, Any], want: str) -> dict[str, Any] | None:
@@ -89,6 +104,15 @@ def assign_internal(
                 },
             )
             print("PATCH", target["version"], st)
+            if st >= 400:
+                print(json.dumps(data)[:500])
+                if assign_tries < len(ASSIGN_BACKOFF):
+                    wait = ASSIGN_BACKOFF[assign_tries]
+                    assign_tries += 1
+                    print("RETRY patch", st, "in", int(wait), "s")
+                    sleep(wait)
+                    continue
+                return 1
         st, data = api(
             "POST",
             f"https://api.appstoreconnect.apple.com/v1/betaGroups/{group}/relationships/builds",
@@ -97,11 +121,14 @@ def assign_internal(
         print("ASSIGN Internal", target["version"], st)
         if st < 400 or st == 409:
             return 0
-        if st == 404 and assign_tries < len(ASSIGN_BACKOFF):
+        if _retryable_assign(st, data) and assign_tries < len(ASSIGN_BACKOFF):
             wait = ASSIGN_BACKOFF[assign_tries]
             assign_tries += 1
             print(json.dumps(data)[:500])
-            print("RETRY assign 404 in", int(wait), "s")
+            if st == 404:
+                print("RETRY assign 404 in", int(wait), "s")
+            else:
+                print("RETRY assign", st, "in", int(wait), "s")
             sleep(wait)
             continue
         print(json.dumps(data)[:500])

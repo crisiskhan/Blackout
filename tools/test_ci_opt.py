@@ -175,6 +175,8 @@ def test_altool_binds_primary_app() -> None:
         fail("33986112949: assign must retry betaGroups 404 after VALID")
     if "st == 409" not in helper:
         fail("assign must treat 409 as already assigned")
+    if "RETRY patch" not in helper or "internally testable" not in helper:
+        fail("34426480725: assign must retry PATCH 401 and 422 not-testable")
     test_tf_asc_assign.main()
     test_tf_asc_cpv.main()
     ok("altool binds primary app via --apple-id + --bundle-id")
