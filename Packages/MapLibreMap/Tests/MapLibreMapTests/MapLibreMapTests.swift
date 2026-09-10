@@ -646,6 +646,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(FixPublish.headingDelta(359, 1), 2)
         XCTAssertTrue(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true))
         XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: false))
+        XCTAssertTrue(MapCanvasHit.enabled(onMap: true, holding: false))
+        XCTAssertFalse(MapCanvasHit.enabled(onMap: false, holding: false))
+        XCTAssertFalse(MapCanvasHit.enabled(onMap: true, holding: true))
     }
 
     func testPackCameraRefitsWhenCanvasGrowsPastStrip() {

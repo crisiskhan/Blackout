@@ -570,6 +570,14 @@ public enum MapKeepAwake: Sendable {
     }
 }
 
+/// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. The Metal view has
+/// to take this itself, and a hold card owns the canvas while it is up.
+public enum MapCanvasHit: Sendable {
+    public static func enabled(onMap: Bool, holding: Bool) -> Bool {
+        onMap && !holding
+    }
+}
+
 public enum FixPublish: Sendable {
     public static let minInterval: TimeInterval = 0.25
     public static let minHeadingDelta = 2.0

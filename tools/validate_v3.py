@@ -1054,7 +1054,7 @@ def tip62_nav() -> None:
         and 'Button("WALK")' in map_tab
         and 'Button("DRIVE")' in map_tab
         and 'Button("SPEAK")' in map_tab
-        and 'Button("INSTRUMENTS")' in map_tab
+        and "BlackoutTokens.MapOverlay.instrumentsTitle" in map_tab
         and 'Button("RULER")' in inst
         and 'Button("USNG")' in inst
         and 'Button("MAG/TRUE")' in inst

@@ -21,6 +21,9 @@ public struct OfflineMapView: UIViewRepresentable {
     public var held: (lat: Double, lon: Double)?
     /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
+    /// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. This is the
+    /// value that has to live on the Metal view.
+    public var interactive: Bool
     public var onMapTap: ((Double, Double) -> Void)?
     /// A thumb held still on a place, with whatever the pack has drawn there.
     public var onMapHold: ((Double, Double, [String: String]) -> Void)?
@@ -42,6 +45,7 @@ public struct OfflineMapView: UIViewRepresentable {
         held: (lat: Double, lon: Double)? = nil,
         fitToken: Int = 0,
         trackUser: Bool = true,
+        interactive: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
         onMapHold: ((Double, Double, [String: String]) -> Void)? = nil
     ) {
@@ -59,6 +63,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.held = held
         self.fitToken = fitToken
         self.trackUser = trackUser
+        self.interactive = interactive
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
     }
@@ -75,6 +80,7 @@ public struct OfflineMapView: UIViewRepresentable {
             context.coordinator.applyCamera(spec, on: view, force: false)
             _ = size
         }
+        applyInteraction(view)
         view.logoView.isHidden = false
         view.prefetchesTiles = false
         view.allowsRotating = true
@@ -106,6 +112,7 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
         context.coordinator.trackUser = trackUser
+        context.coordinator.interactive = interactive
         context.coordinator.apply(overlaySpec, on: view, force: true)
         return view
     }
@@ -116,10 +123,17 @@ public struct OfflineMapView: UIViewRepresentable {
         }
         uiView.shouldRequestAuthorizationToUseLocationServices = trackUser
         uiView.showsUserLocation = trackUser
+        applyInteraction(uiView)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
         context.coordinator.trackUser = trackUser
+        context.coordinator.interactive = interactive
         context.coordinator.apply(overlaySpec, on: uiView, force: false)
+    }
+
+    private func applyInteraction(_ view: MLNMapView) {
+        view.isUserInteractionEnabled = interactive
+        view.accessibilityElementsHidden = !interactive
     }
 
     private var overlaySpec: Coordinator.OverlaySpec {
@@ -155,6 +169,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String]) -> Void)?
         var trackUser = true
+        var interactive = true
         private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
@@ -170,14 +185,14 @@ public struct OfflineMapView: UIViewRepresentable {
         var fittedFitToken = 0
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            guard gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
+            guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             onMapTap?(coord.latitude, coord.longitude)
         }
 
         @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
-            guard gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
+            guard interactive, gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             holdTick.impactOccurred()

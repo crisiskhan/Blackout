@@ -41,8 +41,6 @@ struct RootChrome: View {
     private var tabChrome: some View {
         ZStack(alignment: runtime.leftHand ? .leading : .bottom) {
             tabBody
-                .padding(.bottom, overlayBottomPad)
-                .padding(.leading, overlayLeadingPad)
             if runtime.leftHand {
                 tabColumn.frame(width: BlackoutTokens.Chrome.hudSideReservePoints)
             } else {
@@ -52,15 +50,20 @@ struct RootChrome: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// MAP draws under the strip. Other tabs keep their content off it.
+    /// Overlay pages sit above the tab strip. MapTab stays full-bleed so a
+    /// tab change cannot resize MapLibre and snap the camera back to YOU.
     private var overlayBottomPad: CGFloat {
-        if runtime.leftHand || runtime.tab == .map { return 0 }
-        return CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+        runtime.leftHand ? 0 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
     }
 
     private var overlayLeadingPad: CGFloat {
-        if !runtime.leftHand || runtime.tab == .map { return 0 }
-        return CGFloat(BlackoutTokens.Chrome.hudSideReservePoints)
+        runtime.leftHand ? CGFloat(BlackoutTokens.Chrome.hudSideReservePoints) : 0
+    }
+
+    private func overlayPage<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .padding(.bottom, overlayBottomPad)
+            .padding(.leading, overlayLeadingPad)
     }
 
     private var tabBody: some View {
@@ -75,11 +78,11 @@ struct RootChrome: View {
             case .map:
                 EmptyView()
             case .comms:
-                CommsTab(runtime: runtime)
+                overlayPage { CommsTab(runtime: runtime) }
             case .field:
-                FieldTab(runtime: runtime)
+                overlayPage { FieldTab(runtime: runtime) }
             case .expedition:
-                ExpeditionTab(runtime: runtime)
+                overlayPage { ExpeditionTab(runtime: runtime) }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,7 +131,7 @@ struct RootChrome: View {
                 Text(t.title)
                     .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .heavy))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.55)
+                    .minimumScaleFactor(1)
                     .allowsTightening(true)
                     .multilineTextAlignment(.center)
                 Rectangle()

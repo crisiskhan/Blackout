@@ -51,7 +51,8 @@ struct ARMINGView: View {
                 packWest: pack.bbox.west,
                 packNorth: pack.bbox.north,
                 packEast: pack.bbox.east,
-                trackUser: false
+                trackUser: false,
+                interactive: false
             )
             .allowsHitTesting(false)
             .ignoresSafeArea()

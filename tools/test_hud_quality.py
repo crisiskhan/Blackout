@@ -54,6 +54,17 @@ class KeepMapMountedTests(unittest.TestCase):
         self.assertIn("allowsHitTesting(runtime.tab == .map)", root)
         self.assertNotIn("case .map: MapTab(runtime: runtime)", root)
         self.assertIn("runtime.tab == .map", tab)
+        # Padding the ZStack that holds MapTab resized MapLibre and snapped
+        # the camera back to YOU. Overlay pages take the tab-strip inset.
+        self.assertIn("private func overlayPage", root)
+        self.assertNotIn(
+            "tabBody\n                .padding(.bottom, overlayBottomPad)",
+            root,
+        )
+        self.assertIn("MapCanvasHit.enabled(", tab)
+        self.assertIn("isUserInteractionEnabled = interactive", read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        ))
         self.assertIn("HUDPage", read("Blackout", "CommsTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "FieldTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "ExpeditionTab.swift"))
@@ -78,14 +89,16 @@ class WholeWordHUDTests(unittest.TestCase):
         tab = read("Blackout", "MapTab.swift")
         theme = read("Blackout", "Theme.swift")
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
-        self.assertIn('Button("INSTRUMENTS")', tab)
-        self.assertIn('"LOCKED" : "LOCK-ON"', tab)
+        self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
         self.assertNotIn('Button("INST")', tab)
         self.assertNotIn('"LOCKED" : "LOCK"', tab)
         self.assertIn("HUDWrapRail", tab)
         self.assertIn("struct HUDWrapRail", theme)
         self.assertIn('instrumentsTitle = "INSTRUMENTS"', tokens)
         self.assertIn('lockOnTitle = "LOCK-ON"', tokens)
+        self.assertIn(".minimumScaleFactor(1)", read("Blackout", "RootChrome.swift"))
+        self.assertNotIn(".minimumScaleFactor(0.55)", read("Blackout", "RootChrome.swift"))
 
     def test_tab_strip_says_expedition(self):
         runtime = read("Blackout", "AppRuntime.swift")
@@ -119,6 +132,12 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         self.assertNotIn("best in class", agents.lower())
         self.assertIn("tf:", agents)
         self.assertIn("CURRENT_PROJECT_VERSION", agents)
+
+    def test_device_script_scores_bearing_not_dest_coords(self):
+        device = read("docs", "DEVICE.md")
+        self.assertNotIn("DEST … · BEARING", device)
+        self.assertNotIn("DEST ... · BEARING", device)
+        self.assertIn("BEARING", device)
 
 
 if __name__ == "__main__":

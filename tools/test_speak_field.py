@@ -196,8 +196,8 @@ class FieldChromeTests(unittest.TestCase):
     def test_header_controls_are_the_whole_words(self):
         # INSTRUME… was the failure. INST was a workaround. Wrap the full word.
         tab = read("Blackout", "MapTab.swift")
-        self.assertIn('Button("INSTRUMENTS")', tab)
-        self.assertIn('"LOCKED" : "LOCK-ON"', tab)
+        self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
 
     def test_off_graph_is_a_routing_failure_not_a_missing_dest(self):
         self.assertEqual(route_chrome(has_graph=True, has_dest=False, plan_chrome=""), "")
@@ -224,8 +224,8 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertIn("fixedSize(horizontal: true, vertical: false)", self.theme)
         self.assertNotIn("truncationMode", self.map_tab)
         self.assertNotIn("truncationMode", self.theme)
-        self.assertIn('Button("INSTRUMENTS")', self.map_tab)
-        self.assertIn('"LOCKED" : "LOCK-ON"', self.map_tab)
+        self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", self.map_tab)
+        self.assertIn("BlackoutTokens.MapOverlay.lockTitle", self.map_tab)
         self.assertIn("HUDWrapRail", self.map_tab)
 
     def test_no_walk_script_text_wall_is_painted_on_the_field(self):

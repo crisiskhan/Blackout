@@ -54,6 +54,10 @@ struct MapTab: View {
                 destination: runtime.routeTarget,
                 held: runtime.held.map { (lat: $0.lat, lon: $0.lon) },
                 fitToken: runtime.fitPackToken,
+                interactive: MapCanvasHit.enabled(
+                    onMap: runtime.tab == .map,
+                    holding: runtime.held != nil
+                ),
                 onMapTap: { lat, lon in
                     runtime.pickDestination(lat: lat, lon: lon)
                     hits = []
@@ -139,9 +143,9 @@ struct MapTab: View {
                 )
                 .onSubmit { search() }
             HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                Button("INSTRUMENTS") { runtime.showInstruments = true }
+                Button(BlackoutTokens.MapOverlay.instrumentsTitle) { runtime.showInstruments = true }
                     .buttonStyle(HUDOverlayChipStyle())
-                Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") {
+                Button(BlackoutTokens.MapOverlay.lockTitle(locked: runtime.lockOn)) {
                     runtime.toggleLockOn()
                 }
                 .buttonStyle(HUDOverlayChipStyle())
