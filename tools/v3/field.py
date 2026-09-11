@@ -1072,12 +1072,20 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "Give space. Do not corner it. Do not feed it. Food away from camp. If you already have meat, the food-game card. Do not hunt from this map.",
+                        (
+                            "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map."
+                            if cid.startswith("tx-")
+                            else "Black bear: do not run, stand large, food sealed and away from camp. Elk in rut: give way. A maul is trauma. If you already have meat, the food-game card. Do not hunt from this map."
+                        ),
                         "Range is the Field book of the open pack. A coordinate is not an animal.",
                         "A child stays behind the adult. No chasing for a photo.",
                         "Stop if it charges or if anyone is down — trauma card, then this one.",
                         f"{cid}.png",
-                        "Da espacio. No lo acorrales. No lo alimentes. Comida lejos del campamento. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa.",
+                        (
+                            "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
+                            if cid.startswith("tx-")
+                            else "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. Wapití en celo: cede el paso. Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+                        ),
                         "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal.",
                         "El niño detrás del adulto. Sin perseguir para una foto.",
                         "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta.",

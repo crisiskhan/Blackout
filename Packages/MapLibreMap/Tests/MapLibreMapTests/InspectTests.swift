@@ -281,8 +281,11 @@ final class InspectTests: XCTestCase {
         let txWoodDo = txWood.doLine.lowercased()
         XCTAssertTrue(txWoodDo.contains("mesquite"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("cedar elm"), txWood.doLine)
+        XCTAssertTrue(txWoodDo.contains("javelina"), txWood.doLine)
+        XCTAssertTrue(txWoodDo.contains("coyote"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("not a meal"), txWood.doLine)
         XCTAssertFalse(txWoodDo.contains("edible"), txWood.doLine)
+        XCTAssertFalse(txWoodDo.contains("lives here"), txWood.doLine)
 
         let nmWood = Inspect.read(tags: ["natural": "wood"], state: "NM")
         let nmWoodDo = nmWood.doLine.lowercased()
@@ -290,6 +293,7 @@ final class InspectTests: XCTestCase {
             nmWoodDo.contains("cottonwood") || nmWoodDo.contains("piñon") || nmWoodDo.contains("juniper"),
             nmWood.doLine
         )
+        XCTAssertTrue(nmWoodDo.contains("bear") || nmWoodDo.contains("elk"), nmWood.doLine)
 
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
         let txScrubDo = txScrub.doLine.lowercased()
@@ -302,6 +306,23 @@ final class InspectTests: XCTestCase {
         let nmPeak = Inspect.read(tags: ["natural": "peak", "name": "Wheeler"], state: "NM")
         XCTAssertTrue(nmPeak.doLine.lowercased().contains("bear"), nmPeak.doLine)
         XCTAssertEqual(InspectField.label(for: Inspect.mammalNMCard), "FIELD · ANIMAL")
+
+        let txPeak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"], state: "TX")
+        let txPeakDo = txPeak.doLine.lowercased()
+        XCTAssertTrue(txPeakDo.contains("coyote") || txPeakDo.contains("deer"), txPeak.doLine)
+        XCTAssertFalse(txPeakDo.contains("ice"), txPeak.doLine)
+        XCTAssertFalse(txPeakDo.contains("lives here"), txPeak.doLine)
+
+        let txRock = Inspect.read(tags: ["natural": "bare_rock"], state: "TX")
+        XCTAssertFalse(txRock.doLine.lowercased().contains("ice"), txRock.doLine)
+        XCTAssertTrue(
+            txRock.doLine.lowercased().contains("coyote") || txRock.doLine.lowercased().contains("deer"),
+            txRock.doLine
+        )
+
+        let grass = Inspect.read(tags: ["natural": "grass"])
+        XCTAssertEqual(grass.klass, "Grassland")
+        XCTAssertEqual(grass.fieldRoute.first, Inspect.snakeTXCard)
     }
 
     func testAVisionGuessOpensTheKindOfFieldCardsThatKindUses() {
@@ -442,7 +463,7 @@ final class InspectTests: XCTestCase {
         XCTAssertNil(InspectField.bookLine(for: Inspect.read(tags: ["natural": "spring"]).fieldRoute))
         XCTAssertFalse(Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("edible"))
         XCTAssertTrue(
-            Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("animal"),
+            Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("javelina"),
             Inspect.read(tags: ["natural": "wood"], state: "TX").doLine
         )
     }
@@ -625,6 +646,7 @@ final class InspectTests: XCTestCase {
         ["natural": "scree"],
         ["natural": "cliff"],
         ["natural": "grassland"],
+        ["natural": "grass"],
         ["boundary": "protected_area"],
         ["boundary": "national_park"],
         ["leisure": "nature_reserve"],

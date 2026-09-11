@@ -404,8 +404,8 @@
       "steps": [
         {
           "do": {
-            "en": "Give space. Do not corner it. Do not feed it. Food away from camp. If you already have meat, the food-game card. Do not hunt from this map.",
-            "es": "Da espacio. No lo acorrales. No lo alimentes. Comida lejos del campamento. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk in rut: give way. A maul is trauma. If you already have meat, the food-game card. Do not hunt from this map.",
+            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. Wapití en celo: cede el paso. Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",

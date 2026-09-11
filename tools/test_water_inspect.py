@@ -471,6 +471,12 @@ class GroundFieldSync(unittest.TestCase):
         )[0]
         self.assertIn("caveCard", hole)
         self.assertIn("coldCard", hole)
+        self.assertIn('case "grassland", "grass":', inspect)
+        do = SWIFT.read_text()
+        self.assertIn("Javelina and coyote range", do)
+        self.assertIn("coyote and deer range", do)
+        self.assertIn("black bear range", do)
+        self.assertNotIn("ice and cold cards", do)
 
     def test_ground_marks_are_circles_without_class_labels_or_animals(self):
         swift = MAP_SWIFT.read_text()
@@ -525,6 +531,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("NEXT · COLD", qa)
         self.assertIn("CAVE · COLD", qa)
+        self.assertIn("coyote and deer range", qa)
+        self.assertIn("javelina / coyote", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
@@ -583,6 +591,16 @@ class GroundFieldSync(unittest.TestCase):
                     name.split()[0] in snake_blob or name in snake_blob,
                     f"{state}-snake missing vision snake {name}",
                 )
+            mammal = json.dumps(
+                next(c for c in book["cards"] if c["id"] == f"{state}-mammal")
+            ).lower()
+            self.assertNotIn("edible", mammal)
+            if state == "tx":
+                self.assertIn("javelina charges", mammal)
+                self.assertIn("bite card", mammal)
+            else:
+                self.assertIn("do not run", mammal)
+                self.assertIn("elk", mammal)
 
         tx_tree = json.dumps(
             next(

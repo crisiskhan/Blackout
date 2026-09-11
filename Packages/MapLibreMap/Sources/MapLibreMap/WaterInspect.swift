@@ -856,9 +856,9 @@ extension Inspect {
     private static func treeRangeLine(_ state: String?) -> String {
         switch packState(state) {
         case "TX":
-            return "Live oak, pecan, mesquite, cedar elm. Shade and thorns, not a meal. Field has this pack's tree and animal cards."
+            return "Live oak, pecan, mesquite, cedar elm. Javelina and coyote range. Shade and thorns, not a meal."
         case "NM":
-            return "Cottonwood, juniper, piñon. Shade and wind, not a meal. Field has this pack's tree and animal cards."
+            return "Cottonwood, juniper, piñon. Black bear and elk range. Shade and wind, not a meal."
         default:
             return "Shade, wind, deadfall. Not a meal. Field has the plant and animal cards."
         }
@@ -882,9 +882,9 @@ extension Inspect {
         case "Bosque or wetland":
             switch packState(state) {
             case "TX":
-                return "Cottonwoods and pecan along the water. Shade, not a meal. Field has this pack's tree and animal cards."
+                return "Cottonwoods and pecan along the water. Javelina and coyote range. Shade, not a meal."
             case "NM":
-                return "Rio Grande cottonwood. Shade, not a meal. Field has this pack's tree and animal cards."
+                return "Rio Grande cottonwood. Black bear range. Shade, not a meal."
             default:
                 return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant and animal cards."
             }
@@ -896,11 +896,20 @@ extension Inspect {
             switch packState(state) {
             case "NM":
                 return "High ground. Wind, cold, black bear range. Field has ice and cold."
+            case "TX":
+                return "High ground. Wind, coyote and deer range. Field has animal and cold."
             default:
-                return "High ground. Wind and cold. Field has the ice and cold cards."
+                return "High ground. Wind and cold. Field has animal and cold."
             }
         case "Rock":
-            return "Bare rock. No shade. Ice films over. Field has the cold card."
+            switch packState(state) {
+            case "NM":
+                return "Bare rock. Ice films over. Black bear range. Field has ice and cold."
+            case "TX":
+                return "Bare rock. Coyote and deer range. Field has animal and cold."
+            default:
+                return "Bare rock. No shade. Field has the cold card."
+            }
         case "Built-up ground":
             return "Pavement and little shade. Field has the heat island card."
         default:

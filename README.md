@@ -288,7 +288,8 @@ opens the cave card, then cold. A named tree is tree-use, not the woodland dump.
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
 woodland) and the button names the first card this pack's Field book ships —
 a Texas peak is `FIELD · ANIMAL` then `NEXT · COLD`, not a COLD button for
-an ice-on-rock card Texas does not have. FIELD then walks the rest of the
+an ice-on-rock card Texas does not have, and the DO line names coyote and deer
+range, not ice. FIELD then walks the rest of the
 route — tree-use,
 cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the

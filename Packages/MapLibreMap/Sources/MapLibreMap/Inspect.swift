@@ -616,7 +616,7 @@ public enum Inspect {
                     advice: .field, field: coldCard,
                     local: [iceRockCard, mammalNMCard, mammalTXCard], unnamedPenalty: 2
                 )
-            case "grassland":
+            case "grassland", "grass":
                 return snakeCountry(
                     klass: "Grassland",
                     sure: 70,
