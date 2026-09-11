@@ -182,6 +182,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// botanic not Open reserve, not a wildflower park. 194 m from water.
     private static let wildflowerPreserve = CLLocationCoordinate2D(latitude: 30.242251, longitude: -97.828949)
 
+    /// Interior of Sandia Mountain Natural History Center. Phrase
+    /// `natural history`, not Open reserve. Far from water.
+    private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -977,6 +981,13 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(hawk.card?.klass, "Open reserve", "\(hawk)")
         XCTAssertEqual(hawk.card?.fieldRoute.first, Inspect.mammalTXCard, "\(hawk)")
         XCTAssertFalse((hawk.card?.doLine.lowercased() ?? "").contains("edible"), hawk.card?.doLine ?? "")
+
+        let history = try hold(at: Self.sandiaHistory, zoom: 16, packId: "nm")
+        XCTAssertEqual(history.card?.klass, "Wildlife range", "\(history)")
+        XCTAssertEqual(history.card?.title, "Sandia Mountain Natural History Center", "\(history)")
+        XCTAssertNotEqual(history.card?.klass, "Open reserve", "\(history)")
+        XCTAssertEqual(history.card?.fieldRoute.first, Inspect.mammalTXCard, "\(history)")
+        XCTAssertFalse((history.card?.doLine.lowercased() ?? "").contains("edible"), history.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {

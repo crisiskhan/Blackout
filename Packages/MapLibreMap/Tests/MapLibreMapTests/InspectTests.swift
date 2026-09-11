@@ -958,6 +958,19 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(jornada.doLine.lowercased().contains("javelina"), jornada.doLine)
         XCTAssertFalse(jornada.doLine.lowercased().contains("edible"), jornada.doLine)
 
+        let history = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Sandia Mountain Natural History Center",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(history.klass, "Wildlife range")
+        XCTAssertNotEqual(history.klass, "Open reserve")
+        XCTAssertEqual(history.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(history.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(history.doLine.lowercased().contains("edible"), history.doLine)
+
         let baker = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"

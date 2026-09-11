@@ -360,7 +360,9 @@ public enum Inspect {
     /// range; Waste Management Wildlife Park stays Open reserve. Phrase
     /// `ecological research`, not the word `research`. Phrase `hawk
     /// watch`, not the word `hawk` — Hawk Watch Trail stays a trail.
-    /// Phrase `experimental range`, not the word `experimental`.
+    /// Phrase `experimental range`, not the word `experimental`. Phrase
+    /// `natural history`, not the word `history` — Sandia Mountain
+    /// Natural History Center is range, like a nature center.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -392,6 +394,7 @@ public enum Inspect {
         if n.contains("ecological research") { return true }
         if n.contains("hawk watch") { return true }
         if n.contains("experimental range") { return true }
+        if n.contains("natural history") { return true }
         return false
     }
 

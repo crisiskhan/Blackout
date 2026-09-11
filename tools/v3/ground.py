@@ -84,7 +84,8 @@ CAVE_PRESERVE_KEYS = {
 # Management Wildlife Park stays Open reserve. Phrase `ecological
 # research`, not the word `research`. Phrase `hawk watch`, not the
 # word `hawk`. Hawk Watch Trail stays a trail. Phrase `experimental
-# range`, not the word `experimental`.
+# range`, not the word `experimental`. Phrase `natural history`, not
+# the word `history`. Sandia Mountain Natural History Center is range.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -110,6 +111,7 @@ WILDLIFE_RANGE_PHRASES = (
     "ecological research",
     "hawk watch",
     "experimental range",
+    "natural history",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical
