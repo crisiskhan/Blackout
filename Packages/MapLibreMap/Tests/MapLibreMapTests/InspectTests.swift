@@ -1703,6 +1703,22 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(cactusPark.klass, "Park")
         XCTAssertEqual(cactusPark.fieldRoute.first, Inspect.treeUseTXCard)
 
+        let sted = Inspect.read(
+            tags: ["leisure": "park", "natural": "scrub", "name": "St. Edwards Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sted.klass, "Park", "a city park tagged as scrub fill is kept ground")
+        XCTAssertNotEqual(sted.klass, "Desert scrub")
+        XCTAssertEqual(sted.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(
+            sted.fieldRoute.contains(Inspect.snakeEastCard),
+            "a city park is not cottonmouth country"
+        )
+        XCTAssertTrue(sted.doLine.lowercased().contains("hog"), sted.doLine)
+        XCTAssertTrue(sted.doLine.lowercased().contains("give it the road"), sted.doLine)
+        XCTAssertFalse(sted.doLine.lowercased().contains("cottonmouth"), sted.doLine)
+        XCTAssertFalse(sted.doLine.lowercased().contains("edible"), sted.doLine)
+
         let desertGarden = Inspect.read(
             tags: ["leisure": "park", "name": "Desert Garden Park"],
             pack: "tx-west"

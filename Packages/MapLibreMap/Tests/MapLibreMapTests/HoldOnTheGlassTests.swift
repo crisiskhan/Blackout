@@ -30,6 +30,8 @@ import XCTest
 /// Picnic woodland, irrigated ground, and a rose garden are the rest of
 /// the plant book on west; east names hog on woodland and cottonmouth on
 /// bosque; NM names cottonwood on woodland and bosque, and elk on a peak.
+/// Painted heath and scrub are viper country on every pack, not only ACEC
+/// overlays. A city park tagged as scrub fill is still a park.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
@@ -145,6 +147,14 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
+
+    /// Interior of unnamed east scrub. Ordinary cover: cottonmouth and hog,
+    /// not west diamondback, not an overlay prairie.
+    private static let eastScrub = CLLocationCoordinate2D(latitude: 30.048502, longitude: -97.745559)
+
+    /// Interior of Cerro Pelado Burn Scar. Named NM scrub, not Jones Canyon
+    /// overlay: rattler and sotol on painted cover.
+    private static let nmScrub = CLLocationCoordinate2D(latitude: 35.785371, longitude: -106.573932)
 
     // MARK: - The two holds the build is gated on
 
@@ -951,6 +961,102 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.bookLine(for: InspectField.presentRoute(
                 held.card?.fieldRoute ?? [],
                 in: eastBook
+            )),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
+        )
+    }
+
+    func testHoldingEastScrubOpensBiteNotPicnicWoodland() throws {
+        let held = try hold(at: Self.eastScrub, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Desert scrub", "ordinary east cover is viper country: \(held)")
+        XCTAssertEqual(held.card?.title, "Unnamed", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeEastCard, "\(held)")
+        XCTAssertNotEqual(
+            held.card?.fieldRoute.first,
+            Inspect.treeUseEastCard,
+            "east scrub opened picnic woodland: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("sotol"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let eastBook: Set<String> = [
+            Inspect.snakeEastCard, Inspect.mammalEastCard, Inspect.cactusTXCard,
+            Inspect.treeUseEastCard, Inspect.plantTXCard, Inspect.gameEastCard,
+            Inspect.biteCard, Inspect.plantUseCard, Inspect.gameCard, Inspect.heatCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(held.card?.fieldRoute ?? [], in: eastBook).first,
+            Inspect.snakeEastCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: eastBook
+            ).first ?? ""),
+            "FIELD · BITE"
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: eastBook
+            )),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
+        )
+    }
+
+    func testHoldingNewMexicoScrubOpensRattlerNotPicnicWoodland() throws {
+        let held = try hold(at: Self.nmScrub, zoom: 16, packId: "nm")
+        XCTAssertEqual(held.card?.klass, "Desert scrub", "ordinary NM cover is viper country: \(held)")
+        XCTAssertEqual(held.card?.title, "Cerro Pelado Burn Scar", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
+        XCTAssertTrue(
+            held.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "NM scrub dropped the NM snake card: \(held)"
+        )
+        XCTAssertNotEqual(
+            held.card?.fieldRoute.first,
+            Inspect.treeUseNMCard,
+            "NM scrub opened picnic woodland: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("rattler") || doLine.contains("diamondback"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("sotol") || doLine.contains("cholla"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let nmBook: Set<String> = [
+            Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.cactusNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.gameNMCard,
+            Inspect.biteCard, Inspect.plantUseCard, Inspect.gameCard, Inspect.heatCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(held.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.snakeNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: nmBook
+            ).first ?? ""),
+            "FIELD · BITE"
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: nmBook
             )),
             "BITE · ANIMAL · PLANT · FOOD · HEAT"
         )

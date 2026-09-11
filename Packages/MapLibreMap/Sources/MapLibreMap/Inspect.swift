@@ -798,6 +798,17 @@ public enum Inspect {
                 pack: pack
             )
         }
+        // A city park tagged with scrub or wood fill is still kept ground.
+        // Tiles may paint the landcover colour first; the hold reads leisure.
+        if t["leisure"] == "park" {
+            return plantCover(
+                klass: "Park",
+                sure: 80,
+                why: "a drawn boundary around kept ground",
+                unnamedPenalty: 6,
+                pack: pack
+            )
+        }
         if let natural = t["natural"] {
             switch natural {
             case "wood":
@@ -867,15 +878,6 @@ public enum Inspect {
                 sure: 84,
                 why: "a drawn boundary, so the line is exact even where the ground is not",
                 unnamedPenalty: 4,
-                pack: pack
-            )
-        }
-        if t["leisure"] == "park" {
-            return plantCover(
-                klass: "Park",
-                sure: 80,
-                why: "a drawn boundary around kept ground",
-                unnamedPenalty: 6,
                 pack: pack
             )
         }

@@ -933,6 +933,11 @@ class GroundFieldSync(unittest.TestCase):
             "a mountain ACEC must open vipers, not picnic tree-use",
         )
         self.assertLess(
+            land.index('if t["leisure"] == "park"'),
+            land.index('case "scrub", "heath":'),
+            "a city park tagged as scrub fill is kept ground, not viper country",
+        )
+        self.assertLess(
             land.index("isBotanicGarden"),
             land.index("isOpenReserve"),
             "a botanic garden is worked ground; an ACEC is snake country",
@@ -1271,6 +1276,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-105.915768", glass)
         self.assertIn("34.392837", glass)
         self.assertIn("-107.420040", glass)
+        self.assertIn("30.048502", glass)
+        self.assertIn("-97.745559", glass)
+        self.assertIn("Cerro Pelado Burn Scar", glass)
+        self.assertIn("35.785371", glass)
+        self.assertIn("-106.573932", glass)
         self.assertIn("Mount Franklin", glass)
         self.assertIn("31.832051", glass)
         self.assertIn("-106.492210", glass)
@@ -1426,6 +1436,7 @@ class GroundFieldSync(unittest.TestCase):
         woods = False
         east_bosque = False
         east_peak = False
+        east_scrub = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1437,6 +1448,10 @@ class GroundFieldSync(unittest.TestCase):
                 for ring in rings_of(geom):
                     if pip(-97.688346, 30.194954, ring):
                         east_bosque = True
+            if props.get("natural") == "scrub" and not props.get("name"):
+                for ring in rings_of(geom):
+                    if pip(-97.745559, 30.048502, ring):
+                        east_scrub = True
             if props.get("natural") == "peak" and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -1448,6 +1463,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
+        self.assertTrue(east_scrub, "glass east scrub hold is not inside unnamed east scrub")
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -1509,6 +1525,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_wood = False
         nm_bosque = False
         nm_peak = False
+        nm_scrub = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1520,6 +1537,13 @@ class GroundFieldSync(unittest.TestCase):
                 for ring in rings_of(geom):
                     if pip(-105.915768, 34.628816, ring):
                         nm_bosque = True
+            if (
+                props.get("natural") == "scrub"
+                and props.get("name") == "Cerro Pelado Burn Scar"
+            ):
+                for ring in rings_of(geom):
+                    if pip(-106.573932, 35.785371, ring):
+                        nm_scrub = True
             if props.get("natural") == "peak" and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -1531,6 +1555,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
+        self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
@@ -1578,6 +1603,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("wind break", qa.lower())
         self.assertIn("Give it room", qa)
         self.assertIn("Sierra de Ciudad Juárez", qa)
+        self.assertIn("Cerro Pelado Burn Scar", qa)
         self.assertIn("SPEAK names that pack", qa)
         self.assertIn("SPEAK names oleander", qa)
         self.assertIn("dark, still air, cold", qa)
