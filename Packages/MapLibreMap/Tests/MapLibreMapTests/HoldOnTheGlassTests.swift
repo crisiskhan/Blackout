@@ -107,9 +107,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let eastWoodland = CLLocationCoordinate2D(latitude: 30.423083, longitude: -97.227224)
 
     /// Interior of an unnamed east wetland. Cottonmouth on bosque, not a park.
-    /// The listed centroid sits on meadow fill after the notable cut; this
-    /// pip is unnamed wetland, 106 m from a drain.
-    private static let eastBosque = CLLocationCoordinate2D(latitude: 30.394256, longitude: -97.563561)
+    /// Chosen from `osm.pmtiles` land `class=bosque` / `natural=wetland`, not
+    /// a geojson ring whose centroid tiles as meadow.
+    private static let eastBosque = CLLocationCoordinate2D(latitude: 30.346188, longitude: -97.795410)
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)

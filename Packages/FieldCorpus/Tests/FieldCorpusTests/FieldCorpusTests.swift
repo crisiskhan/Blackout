@@ -20,30 +20,33 @@ final class FieldCorpusTests: XCTestCase {
     }
 
     func testAskEmptyQueryReturnsTheChapterUnchanged() {
-        let cards = [card("water-disinfect", title: "Make water less bad"), card("fire-stove", title: "Stove and small fire")]
+        let cards = [
+            card("water-disinfect", category: "water", title: "Make water less bad"),
+            card("fire-stove", category: "fire", title: "Stove and small fire"),
+        ]
         XCTAssertEqual(FieldCorpus.ask(cards, query: "", locale: "en").map(\.id), cards.map(\.id))
         XCTAssertEqual(FieldCorpus.ask(cards, query: "   ", locale: "en").map(\.id), cards.map(\.id))
         XCTAssertEqual(FieldCorpus.ask(cards, query: "how do I", locale: "en").map(\.id), cards.map(\.id))
     }
 
     func testAskRanksATitleHitAndDropsGibberish() {
-        let water = card("water-disinfect", title: "Make water less bad", situation: "creek or tank")
-        let fire = card("fire-stove", title: "Stove and small fire", situation: "heat for water")
+        let water = card("water-disinfect", category: "water", title: "Make water less bad", situation: "creek or tank")
+        let fire = card("fire-stove", category: "fire", title: "Stove and small fire", situation: "heat for water")
         let cards = [water, fire]
         XCTAssertEqual(FieldCorpus.ask(cards, query: "stove", locale: "en").map(\.id), ["fire-stove"])
         XCTAssertTrue(FieldCorpus.ask(cards, query: "xyzzy plugh", locale: "en").isEmpty)
     }
 
     func testAskThirstFindsWaterEvenWhenTheTitleOmitsTheWord() {
-        let water = card("water-disinfect", title: "Make water less bad")
-        let fire = card("fire-stove", title: "Stove and small fire")
+        let water = card("water-disinfect", category: "water", title: "Make water less bad")
+        let fire = card("fire-stove", category: "fire", title: "Stove and small fire")
         let hit = FieldCorpus.ask([water, fire], query: "I am thirsty", locale: "en")
         XCTAssertEqual(hit.map(\.id), ["water-disinfect"])
     }
 
     func testAskSnakeFindsBiteWithoutInventingACardOutsideTheList() {
         let bite = card("animal-bite", title: "Bite or envenomation")
-        let cook = card("food-cook", title: "Cook what you already trust")
+        let cook = card("food-cook", category: "food", title: "Cook what you already trust")
         XCTAssertEqual(FieldCorpus.ask([bite, cook], query: "snake", locale: "en").map(\.id), ["animal-bite"])
         XCTAssertTrue(FieldCorpus.ask([cook], query: "snake", locale: "en").isEmpty)
     }
@@ -62,7 +65,7 @@ final class FieldCorpusTests: XCTestCase {
     func testAskDoesNotUnlockAMeal() {
         let unknown = card("plant-unknown", title: "Unknown plant", situation: "do not eat it")
         let fungi = card("fungi-leave", title: "Fungi — leave it")
-        let cook = card("food-cook", title: "Cook what you already trust")
+        let cook = card("food-cook", category: "food", title: "Cook what you already trust")
         let hit = FieldCorpus.ask([unknown, fungi, cook], query: "forage berries mushroom", locale: "en").map(\.id)
         XCTAssertTrue(hit.contains("plant-unknown"))
         XCTAssertTrue(hit.contains("fungi-leave"))
@@ -78,7 +81,7 @@ final class FieldCorpusTests: XCTestCase {
 
     func testAskWildfireFindsAlreadyBurnedGround() {
         let wild = card("env-wildfire", title: "Already-burned ground, not uphill")
-        let cook = card("food-cook", title: "Cook what you already trust")
+        let cook = card("food-cook", category: "food", title: "Cook what you already trust")
         XCTAssertEqual(
             FieldCorpus.ask([wild, cook], query: "wildfire", locale: "en").map(\.id),
             ["env-wildfire"]
@@ -87,7 +90,7 @@ final class FieldCorpusTests: XCTestCase {
 
     func testAskWoolFindsTheLayerCard() {
         let layers = card("camp-layers", title: "Clothing is a system")
-        let cook = card("food-cook", title: "Cook what you already trust")
+        let cook = card("food-cook", category: "food", title: "Cook what you already trust")
         XCTAssertEqual(
             FieldCorpus.ask([layers, cook], query: "wet wool", locale: "en").map(\.id),
             ["camp-layers"]
