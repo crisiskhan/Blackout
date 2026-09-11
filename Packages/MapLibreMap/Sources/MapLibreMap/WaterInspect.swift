@@ -944,7 +944,14 @@ extension Inspect {
         case "Glasshouse", "Botanic garden":
             return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
         case "Cactus garden":
-            return "Cactus and yucca. Spines, not a meal. Pretty is not food."
+            switch PackRange.of(state: state, pack: pack) {
+            case .txWest, .txEast:
+                return "Prickly pear and yucca. Spines, not a meal. Pretty is not food."
+            case .nm:
+                return "Cholla, yucca, sotol. Spines, not a meal. Pretty is not food."
+            case .unknown:
+                return "Cactus and yucca. Spines, not a meal. Pretty is not food."
+            }
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:

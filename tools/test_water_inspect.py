@@ -731,6 +731,32 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Botanic garden", do)
         self.assertIn("Cactus garden", do)
         self.assertIn("Spines, not a meal", do)
+        cactus_hold = do.split('case "Cactus garden":', 1)[1].split(
+            'case "Wildlife range":', 1
+        )[0].lower()
+        self.assertIn("prickly pear", cactus_hold)
+        self.assertIn("cholla", cactus_hold)
+        self.assertIn("sotol", cactus_hold)
+        self.assertNotIn("edible", cactus_hold)
+        self.assertNotIn("lives here", cactus_hold)
+        tx_cactus = json.dumps(
+            next(
+                c
+                for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+                if c["id"] == "tx-cactus"
+            )
+        ).lower()
+        self.assertIn("prickly pear", tx_cactus)
+        self.assertIn("yucca", tx_cactus)
+        nm_cactus = json.dumps(
+            next(
+                c
+                for c in json.loads((ROOT / "Resources/Field/field.nm.json").read_text())["cards"]
+                if c["id"] == "nm-cactus"
+            )
+        ).lower()
+        self.assertIn("cholla", nm_cactus)
+        self.assertIn("sotol", nm_cactus)
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
