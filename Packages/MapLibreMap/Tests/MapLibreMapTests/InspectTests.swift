@@ -323,6 +323,29 @@ final class InspectTests: XCTestCase {
         let grass = Inspect.read(tags: ["natural": "grass"])
         XCTAssertEqual(grass.klass, "Grassland")
         XCTAssertEqual(grass.fieldRoute.first, Inspect.snakeTXCard)
+
+        let westWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-west")
+        XCTAssertTrue(westWood.doLine.lowercased().contains("javelina"), westWood.doLine)
+        XCTAssertTrue(westWood.doLine.lowercased().contains("mesquite"), westWood.doLine)
+
+        let eastWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-east")
+        let eastWoodDo = eastWood.doLine.lowercased()
+        XCTAssertTrue(eastWoodDo.contains("cedar elm") || eastWoodDo.contains("live oak"), eastWood.doLine)
+        XCTAssertTrue(eastWoodDo.contains("coyote") || eastWoodDo.contains("deer"), eastWood.doLine)
+        XCTAssertFalse(eastWoodDo.contains("javelina"), eastWood.doLine)
+        XCTAssertFalse(eastWoodDo.contains("mesquite"), eastWood.doLine)
+        XCTAssertFalse(eastWoodDo.contains("edible"), eastWood.doLine)
+        XCTAssertFalse(eastWoodDo.contains("lives here"), eastWood.doLine)
+
+        let eastScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX", pack: "tx-east")
+        let eastScrubDo = eastScrub.doLine.lowercased()
+        XCTAssertTrue(eastScrubDo.contains("cottonmouth") || eastScrubDo.contains("copperhead"), eastScrub.doLine)
+        XCTAssertFalse(eastScrubDo.contains("javelina"), eastScrub.doLine)
+        XCTAssertFalse(eastScrubDo.contains("lives here"), eastScrub.doLine)
+
+        let eastWet = Inspect.read(tags: ["natural": "wetland"], state: "TX", pack: "tx-east")
+        XCTAssertTrue(eastWet.doLine.lowercased().contains("cottonmouth"), eastWet.doLine)
+        XCTAssertFalse(eastWet.doLine.lowercased().contains("javelina"), eastWet.doLine)
     }
 
     func testAVisionGuessOpensTheKindOfFieldCardsThatKindUses() {

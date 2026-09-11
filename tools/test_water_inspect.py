@@ -476,6 +476,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
         self.assertIn("black bear range", do)
+        self.assertIn("Copperhead and cottonmouth country", do)
+        self.assertIn("Cottonmouth country", do)
+        self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
 
     def test_ground_marks_are_circles_without_class_labels_or_animals(self):
@@ -533,6 +536,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("CAVE · COLD", qa)
         self.assertIn("coyote and deer range", qa)
         self.assertIn("javelina / coyote", qa)
+        self.assertIn("cottonmouth", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
@@ -614,6 +618,7 @@ class GroundFieldSync(unittest.TestCase):
         app = (ROOT / "Blackout/AppRuntime.swift").read_text()
         hold = app.split("func holdInspect", 1)[1].split("func closeHold", 1)[0]
         self.assertIn("state: packs?.active?.state", hold)
+        self.assertIn("pack: packs?.active?.id", hold)
         self.assertNotIn("animal-icon", INSPECT.read_text().lower())
         field = SWIFT.read_text()
         self.assertIn('case .animal: return "NEXT · ANIMAL"', field)

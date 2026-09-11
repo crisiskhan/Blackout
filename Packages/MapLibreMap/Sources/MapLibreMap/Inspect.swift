@@ -251,7 +251,8 @@ public enum Inspect {
     public static func read(
         tags: [String: String],
         packDate: String? = nil,
-        state: String? = nil
+        state: String? = nil,
+        pack: String? = nil
     ) -> Card {
         let name = (tags["name"] ?? tags["ref"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let named = !name.isEmpty
@@ -274,7 +275,8 @@ public enum Inspect {
                 klass: klass,
                 kind: reading.kind,
                 advice: reading.advice,
-                state: state
+                state: state,
+                pack: pack
             )
         )
     }

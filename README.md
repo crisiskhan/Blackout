@@ -284,7 +284,7 @@ read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, cactus, animals, shelter, bite, meat you
 already have. Holding scrub opens that pack's bite and mammal cards; holding a hole
-opens the cave card, then cold. A named tree is tree-use, not the woodland dump. The hold prints `BOOK` as the unique procedures that
+opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range; TX EAST names copperhead and cottonmouth, not javelina. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
 woodland) and the button names the first card this pack's Field book ships —
 a Texas peak is `FIELD · ANIMAL` then `NEXT · COLD`, not a COLD button for
