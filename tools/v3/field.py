@@ -978,6 +978,115 @@ def thickness_state() -> list[dict]:
                 speak=True,
             )
         )
+    trees = [
+        (
+            "tx-tree-use",
+            ["TX"],
+            "Texas trees — shade, not a meal",
+            "Árboles de Texas — sombra, no comida",
+            "You are in Texas woodland, park, or bosque. Live oak, pecan, mesquite. Shade, thorns, deadfall.",
+            "Estás en arbolado, parque o bosque de Texas. Encino, pecán, mezquite. Sombra, espinas, madera muerta.",
+            "If they chewed seed or sap is in both eyes, this is care now, not a use card.",
+            "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora, no una tarjeta de uso.",
+        ),
+        (
+            "nm-tree-use",
+            ["NM"],
+            "New Mexico trees — shade, not a meal",
+            "Árboles de Nuevo México — sombra, no comida",
+            "You are in bosque, juniper, piñon, or aspen. Shade and wind. Piñon is not a Field meal ticket.",
+            "Estás en bosque, enebro, piñón o álamo temblón. Sombra y viento. El piñón no es un ticket de comida de Field.",
+            "If they chewed seed or sap is in both eyes, this is care now.",
+            "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora.",
+        ),
+    ]
+    for cid, states, title, title_es, sit, sit_es, care, care_es in trees:
+        out.append(
+            card(
+                cid,
+                "plants",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("You already have shade and known food.", "Ya tienes sombra y comida conocida."),
+                    ("Lips, tongue, or skin are already burning — that is a medical card, not a use card.", "Labios, lengua o piel ya arden: eso es médico, no uso."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "Use them: south-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+                        "A named tree is calories only after a name you already trust. Shade is the honest use today.",
+                        "Take the leaf or pod out of a child's hand. No tiny taste.",
+                        "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+                        f"{cid}.png",
+                        "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores.",
+                        "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto.",
+                        "Saca la hoja o vaina de la mano del niño. Sin probadita.",
+                        "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",
+                        party={"1": "Shade and sit.", "2": "One makes shade, one fetches deadfall.", "4": "Shade / fire / water / watch the rest."},
+                    )
+                ],
+                states=states,
+                speak=True,
+            )
+        )
+    mammals = [
+        (
+            "tx-mammal",
+            ["TX"],
+            "Texas mammals — give space",
+            "Mamíferos de Texas — da espacio",
+            "Javelina, coyote, white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",
+            "País de pecarí, coyote y venado cola blanca. Esto es rango, no un pin. El mapa no sabe dónde está uno.",
+            "A puncture or a maul is trauma. Gut illness is care if they cannot keep fluids down. This card does not unlock a hunt.",
+            "Una herida o un golpe es trauma. El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
+        ),
+        (
+            "nm-mammal",
+            ["NM"],
+            "New Mexico mammals — give space",
+            "Mamíferos de Nuevo México — da espacio",
+            "Black bear, elk, mule deer country. This is range, not a pin. Food storage, not photos.",
+            "País de oso negro, wapití y venado bura. Esto es rango, no un pin. Guarda comida, no fotos.",
+            "A maul is trauma. Don't run from a black bear. This card does not unlock a hunt.",
+            "Un golpe es trauma. No corras de un oso negro. Esta tarjeta no desbloquea una caza.",
+        ),
+    ]
+    for cid, states, title, title_es, sit, sit_es, care, care_es in mammals:
+        out.append(
+            card(
+                cid,
+                "animals",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("The animal is gone and no one is hurt.", "El animal se fue y nadie está herido."),
+                    ("They are bleeding or cannot breathe — that is trauma / airway, then this card is secondary.", "Hay sangrado o no respiran: trauma / vía aérea, esta tarjeta es secundaria."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "Give space. Do not corner it. Do not feed it. Food away from camp. If you already have meat, the food-game card. Do not hunt from this map.",
+                        "Range is the Field book of the open pack. A coordinate is not an animal.",
+                        "A child stays behind the adult. No chasing for a photo.",
+                        "Stop if it charges or if anyone is down — trauma card, then this one.",
+                        f"{cid}.png",
+                        "Da espacio. No lo acorrales. No lo alimentes. Comida lejos del campamento. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa.",
+                        "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal.",
+                        "El niño detrás del adulto. Sin perseguir para una foto.",
+                        "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta.",
+                        party={"1": "Give space. Sit.", "2": "One watches the animal, one moves the party.", "4": "Watch / move kids / food / rear guard."},
+                    )
+                ],
+                states=states,
+            )
+        )
     return out
 
 

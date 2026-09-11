@@ -311,6 +311,122 @@
           "image": "nm-plant-danger.png"
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-tree-use",
+      "category": "plants",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico trees — shade, not a meal",
+        "es": "Árboles de Nuevo México — sombra, no comida"
+      },
+      "situation": {
+        "en": "You are in bosque, juniper, piñon, or aspen. Shade and wind. Piñon is not a Field meal ticket.",
+        "es": "Estás en bosque, enebro, piñón o álamo temblón. Sombra y viento. El piñón no es un ticket de comida de Field."
+      },
+      "stop_if": [
+        {
+          "en": "You already have shade and known food.",
+          "es": "Ya tienes sombra y comida conocida."
+        },
+        {
+          "en": "Lips, tongue, or skin are already burning — that is a medical card, not a use card.",
+          "es": "Labios, lengua o piel ya arden: eso es médico, no uso."
+        }
+      ],
+      "get_to_care": {
+        "en": "If they chewed seed or sap is in both eyes, this is care now.",
+        "es": "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Use them: south-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+            "es": "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
+          },
+          "why": {
+            "en": "A named tree is calories only after a name you already trust. Shade is the honest use today.",
+            "es": "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto."
+          },
+          "child": {
+            "en": "Take the leaf or pod out of a child's hand. No tiny taste.",
+            "es": "Saca la hoja o vaina de la mano del niño. Sin probadita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "nm-tree-use.png",
+          "party": {
+            "1": "Shade and sit.",
+            "2": "One makes shade, one fetches deadfall.",
+            "4": "Shade / fire / water / watch the rest."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-mammal",
+      "category": "animals",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico mammals — give space",
+        "es": "Mamíferos de Nuevo México — da espacio"
+      },
+      "situation": {
+        "en": "Black bear, elk, mule deer country. This is range, not a pin. Food storage, not photos.",
+        "es": "País de oso negro, wapití y venado bura. Esto es rango, no un pin. Guarda comida, no fotos."
+      },
+      "stop_if": [
+        {
+          "en": "The animal is gone and no one is hurt.",
+          "es": "El animal se fue y nadie está herido."
+        },
+        {
+          "en": "They are bleeding or cannot breathe — that is trauma / airway, then this card is secondary.",
+          "es": "Hay sangrado o no respiran: trauma / vía aérea, esta tarjeta es secundaria."
+        }
+      ],
+      "get_to_care": {
+        "en": "A maul is trauma. Don't run from a black bear. This card does not unlock a hunt.",
+        "es": "Un golpe es trauma. No corras de un oso negro. Esta tarjeta no desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Give space. Do not corner it. Do not feed it. Food away from camp. If you already have meat, the food-game card. Do not hunt from this map.",
+            "es": "Da espacio. No lo acorrales. No lo alimentes. Comida lejos del campamento. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+          },
+          "why": {
+            "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
+            "es": "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal."
+          },
+          "child": {
+            "en": "A child stays behind the adult. No chasing for a photo.",
+            "es": "El niño detrás del adulto. Sin perseguir para una foto."
+          },
+          "stop": {
+            "en": "Stop if it charges or if anyone is down — trauma card, then this one.",
+            "es": "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta."
+          },
+          "image": "nm-mammal.png",
+          "party": {
+            "1": "Give space. Sit.",
+            "2": "One watches the animal, one moves the party.",
+            "4": "Watch / move kids / food / rear guard."
+          }
+        }
+      ]
     }
   ]
 }

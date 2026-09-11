@@ -231,7 +231,8 @@ final class AppRuntime {
                 lon: lon,
                 zoom: zoom,
                 index: index,
-                packDate: packs?.active?.osmFetched
+                packDate: packs?.active?.osmFetched,
+                state: packs?.active?.state
             ),
             // Holding a spring marked last week has to open reading MARKED.
             // Marks merge by coordinate, so pressing MARK there does nothing,

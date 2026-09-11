@@ -449,6 +449,7 @@ public enum InspectField {
         case cold
         case fungi
         case food
+        case animal
         case field
     }
 
@@ -463,10 +464,13 @@ public enum InspectField {
         switch cardID {
         case water:
             return .water
-        case Inspect.plantCard, Inspect.plantTXCard, Inspect.plantNMCard, Inspect.plantUseCard:
+        case Inspect.plantCard, Inspect.plantTXCard, Inspect.plantNMCard, Inspect.plantUseCard,
+             Inspect.treeUseTXCard, Inspect.treeUseNMCard:
             return .plant
         case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.biteCard:
             return .bite
+        case Inspect.mammalTXCard, Inspect.mammalNMCard:
+            return .animal
         case Inspect.caveCard:
             return .cave
         case Inspect.shelterCard:
@@ -500,6 +504,7 @@ public enum InspectField {
         case .cold: return "FIELD · COLD"
         case .fungi: return "FIELD · FUNGI"
         case .food: return "FIELD · FOOD"
+        case .animal: return "FIELD · ANIMAL"
         case .field: return "FIELD"
         }
     }
@@ -519,6 +524,7 @@ public enum InspectField {
         case .cold: return "NEXT · COLD"
         case .fungi: return "NEXT · FUNGI"
         case .food: return "NEXT · FOOD"
+        case .animal: return "NEXT · ANIMAL"
         case .field: return "NEXT"
         }
     }
@@ -685,7 +691,12 @@ extension Inspect {
     /// A wash under a road is the question. A canal 40 m off downtown is not.
     public static let streetWaterOverrideMeters = 15.0
 
-    public static func fieldDoLine(klass: String, kind: Kind, advice: Advice) -> String? {
+    public static func fieldDoLine(
+        klass: String,
+        kind: Kind,
+        advice: Advice,
+        state: String? = nil
+    ) -> String? {
         switch kind {
         case .water:
             if advice == .leave { return nil }
@@ -705,7 +716,7 @@ extension Inspect {
                 return WaterClass.water.doLine
             }
         case .land:
-            return landDoLine(klass)
+            return landDoLine(klass, state: state)
         case .street:
             if klass == "Track" {
                 return "A ranch road is where the grate takes an ankle. Field has the card."
@@ -718,28 +729,58 @@ extension Inspect {
         }
     }
 
-    private static func landDoLine(_ klass: String) -> String {
-        switch klass {
-        case "Woodland":
+    private static func packState(_ state: String?) -> String {
+        (state ?? "").uppercased()
+    }
+
+    private static func treeRangeLine(_ state: String?) -> String {
+        switch packState(state) {
+        case "TX":
+            return "Live oak, pecan, mesquite. Shade and thorns, not a meal. Field has this pack's tree cards."
+        case "NM":
+            return "Cottonwood, juniper, piñon. Shade and wind, not a meal. Field has this pack's tree cards."
+        default:
             return "Shade, wind, deadfall. Not a meal. Field has the plant cards."
-        case "Bosque or wetland":
-            return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant cards."
-        case "Desert scrub", "Grassland", "Sand or playa floor":
+        }
+    }
+
+    private static func animalRangeLine(_ state: String?) -> String {
+        switch packState(state) {
+        case "TX":
+            return "Diamondback and javelina country. Give space. Field has snake, charge, and bite."
+        case "NM":
+            return "Prairie rattler country. Elk and mule deer at the edges. Field has bite."
+        default:
             return "Open country. Vipers use this cover. Field has the bite card."
+        }
+    }
+
+    private static func landDoLine(_ klass: String, state: String?) -> String {
+        switch klass {
+        case "Woodland", "Named tree", "Tree", "Park", "Protected land", "Irrigated ground":
+            return treeRangeLine(state)
+        case "Bosque or wetland":
+            switch packState(state) {
+            case "TX":
+                return "Cottonwoods and pecan along the water. Shade, not a meal. Field has this pack's tree cards."
+            case "NM":
+                return "Rio Grande cottonwood. Shade, not a meal. Field has this pack's tree cards."
+            default:
+                return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant cards."
+            }
+        case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat":
+            return animalRangeLine(state)
         case "Cave or hole":
             return "A hole in the record. Dark, still air, cold. Do not go in alone."
         case "Peak":
-            return "High ground. Wind and cold. Field has the ice and cold cards."
+            switch packState(state) {
+            case "NM":
+                return "High ground. Wind, cold, black bear range. Field has ice and cold."
+            default:
+                return "High ground. Wind and cold. Field has the ice and cold cards."
+            }
         case "Rock":
             return "Bare rock. No shade. Ice films over. Field has the cold card."
-        case "Named tree", "Tree":
-            return "A surveyed tree. Shade and wood, not a meal. Field has the plant cards."
-        case "Park", "Protected land":
-            return "Kept or protected ground. Field has the plant cards."
-        case "Irrigated ground":
-            return "Worked ground. A ditch reaches it. Field has the plant cards."
-        case "Salt flat":
-            return "Open, hot, and empty. Vipers use the edge. Field has the bite card."
         case "Built-up ground":
             return "Pavement and little shade. Field has the heat island card."
         default:
@@ -755,9 +796,10 @@ extension Inspect {
         lon: Double,
         zoom: Double,
         index: WaterIndex?,
-        packDate: String? = nil
+        packDate: String? = nil,
+        state: String? = nil
     ) -> Card {
-        let painted = read(tags: tags, packDate: packDate)
+        let painted = read(tags: tags, packDate: packDate, state: state)
         let radius = WaterZoom.pressRadiusMeters(zoom: zoom, latitude: lat)
         let under = index?.nearest(lat: lat, lon: lon, withinMeters: radius)
 

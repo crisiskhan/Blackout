@@ -417,6 +417,7 @@ class GroundFieldSync(unittest.TestCase):
     def test_the_button_names_the_procedure_from_the_route(self):
         field = SWIFT.read_text()
         self.assertIn('case .water: return "FIELD · WATER"', field)
+        self.assertIn('case .animal: return "FIELD · ANIMAL"', field)
         self.assertIn('case .plant: return "FIELD · PLANT"', field)
         self.assertIn('case .bite: return "FIELD · BITE"', field)
         self.assertIn('case .cave: return "FIELD · CAVE"', field)
@@ -430,6 +431,8 @@ class GroundFieldSync(unittest.TestCase):
         inspect = INSPECT.read_text()
         self.assertIn("plantTXCard, plantNMCard", inspect)
         self.assertIn("snakeTXCard, snakeNMCard", inspect)
+        self.assertIn("treeUseTXCard, treeUseNMCard", inspect)
+        self.assertIn("mammalTXCard, mammalNMCard", inspect)
         self.assertIn("extra: [plantUseCard", inspect)
         self.assertIn("extra: [biteCard", inspect)
         self.assertIn('plantUseCard = "plant-use"', inspect)
@@ -481,9 +484,44 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("NEXT · BITE", qa)
         self.assertIn("No animal icon", qa)
         self.assertIn("Never edible", qa)
+        self.assertIn("NEXT · ANIMAL", qa)
 
-    def test_done_walks_the_rest_of_the_pack_route(self):
+    def test_the_state_book_names_the_vision_species_as_range(self):
+        """Hold and Field must speak the same animals and trees the Vision book has.
+
+        Species names live in the book, not as GPS pins. The map still must
+        not draw an animal icon.
+        """
+        for state in ("tx", "nm"):
+            vision = json.loads((ROOT / f"Resources/Vision/labels.{state}.json").read_text())
+            book = json.loads((ROOT / f"Resources/Field/field.{state}.json").read_text())
+            ids = {card["id"] for card in book["cards"]}
+            self.assertIn(f"{state}-tree-use", ids)
+            self.assertIn(f"{state}-mammal", ids)
+            blob = json.dumps([c for c in book["cards"] if c["id"] in {f"{state}-tree-use", f"{state}-mammal"}]).lower()
+            self.assertNotIn("edible", blob)
+            self.assertNotIn("wildlife-icon", blob)
+            kinds = {}
+            for lab in vision["labels"]:
+                kinds.setdefault(lab["kind"], []).append(lab["name"]["en"].lower())
+            tree_card = next(c for c in book["cards"] if c["id"] == f"{state}-tree-use")
+            tree_blob = json.dumps(tree_card).lower()
+            tree_hits = [n for n in kinds.get("tree", []) if n.split()[0] in tree_blob or n in tree_blob]
+            self.assertGreaterEqual(len(tree_hits), 2, f"{state} tree-use missing vision trees: {kinds.get('tree')}")
+            mammal_card = next(c for c in book["cards"] if c["id"] == f"{state}-mammal")
+            mammal_blob = json.dumps(mammal_card).lower()
+            mammal_hits = [
+                n for n in kinds.get("mammal", [])
+                if n.split()[0] in mammal_blob or n in mammal_blob
+            ]
+            self.assertGreaterEqual(len(mammal_hits), 2, f"{state} mammal missing vision mammals: {kinds.get('mammal')}")
+
+        app = (ROOT / "Blackout/AppRuntime.swift").read_text()
+        hold = app.split("func holdInspect", 1)[1].split("func closeHold", 1)[0]
+        self.assertIn("state: packs?.active?.state", hold)
+        self.assertNotIn("animal-icon", INSPECT.read_text().lower())
         field = SWIFT.read_text()
+        self.assertIn('case .animal: return "NEXT · ANIMAL"', field)
         self.assertIn('case .plant: return "NEXT · PLANT"', field)
         self.assertIn('case .bite: return "NEXT · BITE"', field)
         self.assertIn('case .shelter: return "NEXT · SHELTER"', field)

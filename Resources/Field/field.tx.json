@@ -312,6 +312,122 @@
           "image": "tx-plant-danger.png"
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "tx-tree-use",
+      "category": "plants",
+      "states": [
+        "TX"
+      ],
+      "title": {
+        "en": "Texas trees — shade, not a meal",
+        "es": "Árboles de Texas — sombra, no comida"
+      },
+      "situation": {
+        "en": "You are in Texas woodland, park, or bosque. Live oak, pecan, mesquite. Shade, thorns, deadfall.",
+        "es": "Estás en arbolado, parque o bosque de Texas. Encino, pecán, mezquite. Sombra, espinas, madera muerta."
+      },
+      "stop_if": [
+        {
+          "en": "You already have shade and known food.",
+          "es": "Ya tienes sombra y comida conocida."
+        },
+        {
+          "en": "Lips, tongue, or skin are already burning — that is a medical card, not a use card.",
+          "es": "Labios, lengua o piel ya arden: eso es médico, no uso."
+        }
+      ],
+      "get_to_care": {
+        "en": "If they chewed seed or sap is in both eyes, this is care now, not a use card.",
+        "es": "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora, no una tarjeta de uso."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Use them: south-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+            "es": "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
+          },
+          "why": {
+            "en": "A named tree is calories only after a name you already trust. Shade is the honest use today.",
+            "es": "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto."
+          },
+          "child": {
+            "en": "Take the leaf or pod out of a child's hand. No tiny taste.",
+            "es": "Saca la hoja o vaina de la mano del niño. Sin probadita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "tx-tree-use.png",
+          "party": {
+            "1": "Shade and sit.",
+            "2": "One makes shade, one fetches deadfall.",
+            "4": "Shade / fire / water / watch the rest."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "tx-mammal",
+      "category": "animals",
+      "states": [
+        "TX"
+      ],
+      "title": {
+        "en": "Texas mammals — give space",
+        "es": "Mamíferos de Texas — da espacio"
+      },
+      "situation": {
+        "en": "Javelina, coyote, white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",
+        "es": "País de pecarí, coyote y venado cola blanca. Esto es rango, no un pin. El mapa no sabe dónde está uno."
+      },
+      "stop_if": [
+        {
+          "en": "The animal is gone and no one is hurt.",
+          "es": "El animal se fue y nadie está herido."
+        },
+        {
+          "en": "They are bleeding or cannot breathe — that is trauma / airway, then this card is secondary.",
+          "es": "Hay sangrado o no respiran: trauma / vía aérea, esta tarjeta es secundaria."
+        }
+      ],
+      "get_to_care": {
+        "en": "A puncture or a maul is trauma. Gut illness is care if they cannot keep fluids down. This card does not unlock a hunt.",
+        "es": "Una herida o un golpe es trauma. El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Give space. Do not corner it. Do not feed it. Food away from camp. If you already have meat, the food-game card. Do not hunt from this map.",
+            "es": "Da espacio. No lo acorrales. No lo alimentes. Comida lejos del campamento. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+          },
+          "why": {
+            "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
+            "es": "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal."
+          },
+          "child": {
+            "en": "A child stays behind the adult. No chasing for a photo.",
+            "es": "El niño detrás del adulto. Sin perseguir para una foto."
+          },
+          "stop": {
+            "en": "Stop if it charges or if anyone is down — trauma card, then this one.",
+            "es": "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta."
+          },
+          "image": "tx-mammal.png",
+          "party": {
+            "1": "Give space. Sit.",
+            "2": "One watches the animal, one moves the party.",
+            "4": "Watch / move kids / food / rear guard."
+          }
+        }
+      ]
     }
   ]
 }

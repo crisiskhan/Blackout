@@ -221,6 +221,10 @@ public enum Inspect {
     public static let snakeNMCard = "nm-snake"
     public static let plantTXCard = "tx-plant-danger"
     public static let plantNMCard = "nm-plant-danger"
+    public static let treeUseTXCard = "tx-tree-use"
+    public static let treeUseNMCard = "nm-tree-use"
+    public static let mammalTXCard = "tx-mammal"
+    public static let mammalNMCard = "nm-mammal"
 
     /// One row of the reading table: how a feature is recognised, and what the
     /// card says once it has been.
@@ -240,7 +244,11 @@ public enum Inspect {
         var unnamedWhy: String?
     }
 
-    public static func read(tags: [String: String], packDate: String? = nil) -> Card {
+    public static func read(
+        tags: [String: String],
+        packDate: String? = nil,
+        state: String? = nil
+    ) -> Card {
         let name = (tags["name"] ?? tags["ref"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let named = !name.isEmpty
         let reading = match(tags)
@@ -258,7 +266,12 @@ public enum Inspect {
             localCardIDs: reading.local,
             extraCoreIDs: reading.extra,
             packDate: packDate,
-            doDetail: fieldDoLine(klass: klass, kind: reading.kind, advice: reading.advice)
+            doDetail: fieldDoLine(
+                klass: klass,
+                kind: reading.kind,
+                advice: reading.advice,
+                state: state
+            )
         )
     }
 
@@ -532,7 +545,7 @@ public enum Inspect {
                 why: "a surveyed point, so the position is firm",
                 advice: .field,
                 field: coldCard,
-                local: [iceRockCard],
+                local: [iceRockCard, mammalNMCard, mammalTXCard],
                 unnamedPenalty: 10
             )
         }
@@ -590,7 +603,8 @@ public enum Inspect {
                 return Reading(
                     klass: "Rock", kind: .land, sure: 74,
                     why: "mapped as bare rock, which holds no shade and no water",
-                    advice: .field, field: coldCard, local: [iceRockCard], unnamedPenalty: 2
+                    advice: .field, field: coldCard,
+                    local: [iceRockCard, mammalNMCard, mammalTXCard], unnamedPenalty: 2
                 )
             case "grassland":
                 return snakeCountry(
@@ -671,7 +685,11 @@ public enum Inspect {
             why: why,
             advice: .field,
             field: plantCard,
-            local: [plantTXCard, plantNMCard],
+            local: [
+                plantTXCard, plantNMCard,
+                treeUseTXCard, treeUseNMCard,
+                mammalTXCard, mammalNMCard,
+            ],
             extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
             unnamedPenalty: unnamedPenalty,
             unnamedKlass: unnamedKlass,
@@ -693,7 +711,12 @@ public enum Inspect {
             why: why,
             advice: .field,
             field: heatCard,
-            local: [snakeTXCard, snakeNMCard, plantTXCard, plantNMCard],
+            local: [
+                snakeTXCard, snakeNMCard,
+                mammalTXCard, mammalNMCard,
+                treeUseTXCard, treeUseNMCard,
+                plantTXCard, plantNMCard,
+            ],
             extra: [biteCard, plantUseCard, gameCard],
             unnamedPenalty: unnamedPenalty
         )
