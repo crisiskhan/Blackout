@@ -21,9 +21,9 @@ import XCTest
 /// test because they are evidence: each one is a real record in
 /// `Resources/Packs/tx-west`, `tx-east`, or `nm` `osm.geojson` /
 /// `layers/ground.geojson`. Texas West has no wildlife overlay in this fetch;
-/// animals as range are held on an east sanctuary, not invented on the west
-/// pack. New Mexico botanic, wildlife, and cave-preserve sheets are held on
-/// the NM archive.
+/// animals as range are held on an east sanctuary and on a west peak, not
+/// invented as pins on the west pack. New Mexico botanic, wildlife,
+/// cave-preserve, and open-reserve sheets are held on the NM archive.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
@@ -77,6 +77,15 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Pronoun Cave ACEC in NM `layers/ground.geojson`. A cave
     /// phrase, not open reserve, even though the name also says ACEC.
     private static let nmCavePreserve = CLLocationCoordinate2D(latitude: 34.750796, longitude: -107.344750)
+
+    /// `Mount Franklin` on the west place slice. Texas West has no wildlife
+    /// overlay; animals as range on this pack are this silver circle, not a pin.
+    /// Farther from a named way than North Franklin Mountain.
+    private static let westPeak = CLLocationCoordinate2D(latitude: 31.832051, longitude: -106.492210)
+
+    /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
+    /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
+    private static let nmOpenReserve = CLLocationCoordinate2D(latitude: 35.846906, longitude: -107.025703)
 
     // MARK: - The two holds the build is gated on
 
@@ -371,6 +380,76 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · CAVE"
+        )
+    }
+
+    func testHoldingAWestPeakOpensAnimalsNotIce() throws {
+        let held = try hold(at: Self.westPeak, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Peak", "\(held)")
+        XCTAssertEqual(held.card?.title, "Mount Franklin", "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("coyote and deer range"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeTXCard,
+        ]
+        let present = InspectField.presentRoute(held.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(present.first, Inspect.mammalTXCard, "\(held)")
+        XCTAssertEqual(InspectField.label(for: present.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: present), "ANIMAL · BITE · COLD")
+    }
+
+    func testHoldingANewMexicoOpenReserveOpensBiteNotPicnicWoodland() throws {
+        let held = try hold(at: Self.nmOpenReserve, zoom: 16, packId: "nm")
+        XCTAssertEqual(held.card?.klass, "Open reserve", "\(held)")
+        XCTAssertEqual(
+            held.card?.title,
+            "Jones Canyon Area of Critical Environmental Concern",
+            "\(held)"
+        )
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
+        XCTAssertTrue(
+            held.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "an NM ACEC dropped the NM snake card: \(held)"
+        )
+        XCTAssertNotEqual(
+            held.card?.fieldRoute.first,
+            Inspect.treeUseNMCard,
+            "an ACEC opened picnic woodland: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("rattler") || doLine.contains("diamondback"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("sotol") || doLine.contains("cholla"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let nmBook: Set<String> = [
+            Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.cactusNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.gameNMCard,
+            Inspect.biteCard, Inspect.plantUseCard, Inspect.gameCard, Inspect.heatCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(held.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.snakeNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: nmBook
+            ).first ?? ""),
+            "FIELD · BITE"
         )
     }
 

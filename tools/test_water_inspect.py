@@ -1232,6 +1232,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-107.319389", glass)
         self.assertIn("34.750796", glass)
         self.assertIn("-107.344750", glass)
+        self.assertIn("Mount Franklin", glass)
+        self.assertIn("31.832051", glass)
+        self.assertIn("-106.492210", glass)
+        self.assertIn("Jones Canyon Area of Critical Environmental Concern", glass)
+        self.assertIn("35.846906", glass)
+        self.assertIn("-107.025703", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("datura", glass)
@@ -1341,6 +1347,35 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             nm_cave_hit, "glass NM cave hold is not inside Pronoun Cave"
+        )
+
+        peak = False
+        for feat in osm["features"]:
+            props = feat.get("properties") or {}
+            geom = feat.get("geometry") or {}
+            if props.get("natural") != "peak" or geom.get("type") != "Point":
+                continue
+            lon, lat = geom["coordinates"][:2]
+            if (
+                props.get("name") == "Mount Franklin"
+                and abs(lat - 31.832051) < 1e-6
+                and abs(lon - (-106.492210)) < 1e-6
+            ):
+                peak = True
+        self.assertTrue(peak, "glass west peak hold is not Mount Franklin")
+
+        nm_reserve_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-107.025703, 35.846906, ring):
+                    nm_reserve_hit = (
+                        props.get("name")
+                        == "Jones Canyon Area of Critical Environmental Concern"
+                    )
+        self.assertTrue(
+            nm_reserve_hit, "glass NM open-reserve hold is not inside Jones Canyon"
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
