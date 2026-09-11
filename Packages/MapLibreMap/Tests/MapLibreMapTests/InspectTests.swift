@@ -346,6 +346,50 @@ final class InspectTests: XCTestCase {
         let eastWet = Inspect.read(tags: ["natural": "wetland"], state: "TX", pack: "tx-east")
         XCTAssertTrue(eastWet.doLine.lowercased().contains("cottonmouth"), eastWet.doLine)
         XCTAssertFalse(eastWet.doLine.lowercased().contains("javelina"), eastWet.doLine)
+
+        // East Texas shares field.tx.json with the west pack. The hold still
+        // walks this pack's chapter — not mesquite, not javelina.
+        XCTAssertEqual(eastWood.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertEqual(InspectField.label(for: eastWood.fieldRoute[0]), "FIELD · PLANT")
+        XCTAssertTrue(eastWood.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertTrue(eastWood.fieldRoute.contains(Inspect.gameEastCard))
+        XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.gameTXCard))
+
+        XCTAssertEqual(eastScrub.fieldRoute.first, Inspect.snakeEastCard)
+        XCTAssertEqual(InspectField.label(for: eastScrub.fieldRoute[0]), "FIELD · BITE")
+        XCTAssertFalse(eastScrub.fieldRoute.contains(Inspect.snakeTXCard))
+        XCTAssertFalse(eastScrub.fieldRoute.contains(Inspect.mammalTXCard))
+
+        let eastPeak = Inspect.read(
+            tags: ["natural": "peak", "name": "McKinney Falls"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertTrue(eastPeak.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertFalse(eastPeak.fieldRoute.contains(Inspect.mammalTXCard))
+
+        let eastTree = Inspect.read(
+            tags: ["natural": "tree", "name": "Treaty Oak"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(eastTree.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(eastTree.fieldRoute.contains(Inspect.treeUseTXCard))
+
+        let bothTexasChapters: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.treeUseEastCard,
+            Inspect.cactusTXCard, Inspect.mammalTXCard, Inspect.mammalEastCard,
+            Inspect.gameTXCard, Inspect.gameEastCard, Inspect.snakeTXCard,
+            Inspect.snakeEastCard, Inspect.plantUseCard, Inspect.biteCard,
+            Inspect.shelterCard, Inspect.fungiCard, Inspect.gameCard,
+            Inspect.plantCard, Inspect.heatCard,
+        ]
+        let eastPresent = InspectField.presentRoute(eastWood.fieldRoute, in: bothTexasChapters)
+        XCTAssertEqual(eastPresent.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(eastPresent.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(eastPresent.contains(Inspect.mammalTXCard))
     }
 
     func testAVisionGuessOpensTheKindOfFieldCardsThatKindUses() {
@@ -388,6 +432,61 @@ final class InspectTests: XCTestCase {
 
         let yucca = InspectField.fieldRoute(forVision: "kind:cacti_yucca", state: "NM")
         XCTAssertEqual(yucca.first, Inspect.cactusNMCard)
+
+        XCTAssertEqual(InspectField.label(for: Inspect.treeUseEastCard), "FIELD · PLANT")
+        XCTAssertEqual(InspectField.label(for: Inspect.mammalEastCard), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.label(for: Inspect.gameEastCard), "FIELD · FOOD")
+        XCTAssertEqual(InspectField.label(for: Inspect.snakeEastCard), "FIELD · BITE")
+
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:snake", state: "TX", pack: "tx-east"),
+            [Inspect.snakeEastCard, Inspect.biteCard]
+        )
+        let mammalKindEast = InspectField.fieldRoute(
+            forVision: "kind:mammal",
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(mammalKindEast.first, Inspect.mammalEastCard)
+        XCTAssertTrue(mammalKindEast.contains(Inspect.gameEastCard))
+        XCTAssertFalse(mammalKindEast.contains(Inspect.mammalTXCard))
+
+        let oakEast = InspectField.fieldRoute(
+            forVision: "tx-live-oak",
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(oakEast.first, Inspect.treeUseEastCard)
+
+        // Species wins: you photographed a javelina, even in East Texas.
+        let javelinaEast = InspectField.fieldRoute(
+            forVision: "tx-javelina",
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(javelinaEast.first, Inspect.mammalTXCard)
+        XCTAssertFalse(javelinaEast.contains(Inspect.mammalEastCard))
+
+        let mesquiteEast = InspectField.fieldRoute(
+            forVision: "tx-mesquite",
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(mesquiteEast.first, Inspect.treeUseTXCard)
+
+        let copperheadWest = InspectField.fieldRoute(
+            forVision: "tx-copperhead",
+            state: "TX",
+            pack: "tx-west"
+        )
+        XCTAssertEqual(copperheadWest.first, Inspect.snakeEastCard)
+
+        let diamondbackEast = InspectField.fieldRoute(
+            forVision: "tx-western-diamondback",
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(diamondbackEast.first, Inspect.snakeTXCard)
     }
 
     func testTheLoadedBookDropsTheOtherStatesCardAndKeepsTheCoreTrail() {

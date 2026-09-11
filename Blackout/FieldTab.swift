@@ -170,7 +170,11 @@ struct FieldTab: View {
     @ViewBuilder
     private func visionFieldButton(_ g: VisionGuess) -> some View {
         let route = InspectField.presentRoute(
-            InspectField.fieldRoute(forVision: g.labelId, state: runtime.packs?.active?.state),
+            InspectField.fieldRoute(
+                forVision: g.labelId,
+                state: runtime.packs?.active?.state,
+                pack: runtime.packs?.active?.id
+            ),
             in: Set(cards.map(\.id))
         )
         if let first = route.first {
@@ -178,7 +182,8 @@ struct FieldTab: View {
                 openRoute(
                     InspectField.fieldRoute(
                         forVision: g.labelId,
-                        state: runtime.packs?.active?.state
+                        state: runtime.packs?.active?.state,
+                        pack: runtime.packs?.active?.id
                     )
                 )
             }

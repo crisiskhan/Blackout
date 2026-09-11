@@ -153,6 +153,12 @@ def field_schema() -> None:
             bad(f"field.{st} missing game")
         else:
             ok(f"field.{st} snake+plant-danger+tree-use+mammal+cactus+game")
+        if st == "tx":
+            for east_id in ("tx-east-tree-use", "tx-east-mammal", "tx-east-game", "tx-east-snake"):
+                if east_id not in ids:
+                    bad(f"field.tx missing {east_id}")
+                else:
+                    ok(f"field.tx has {east_id}")
     books = {p.stem.split(".")[-1] for p in root.glob("field.*.json")} - {"core"}
     if books != set(SHIPPED_STATES):
         bad(f"field books {sorted(books)} — only {list(SHIPPED_STATES)} ship")

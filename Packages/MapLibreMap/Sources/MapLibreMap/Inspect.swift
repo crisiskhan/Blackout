@@ -223,12 +223,16 @@ public enum Inspect {
     public static let plantNMCard = "nm-plant-danger"
     public static let treeUseTXCard = "tx-tree-use"
     public static let treeUseNMCard = "nm-tree-use"
+    public static let treeUseEastCard = "tx-east-tree-use"
     public static let mammalTXCard = "tx-mammal"
     public static let mammalNMCard = "nm-mammal"
+    public static let mammalEastCard = "tx-east-mammal"
     public static let cactusTXCard = "tx-cactus"
     public static let cactusNMCard = "nm-cactus"
     public static let gameTXCard = "tx-game"
     public static let gameNMCard = "nm-game"
+    public static let gameEastCard = "tx-east-game"
+    public static let snakeEastCard = "tx-east-snake"
 
     /// One row of the reading table: how a feature is recognised, and what the
     /// card says once it has been.
@@ -256,7 +260,7 @@ public enum Inspect {
     ) -> Card {
         let name = (tags["name"] ?? tags["ref"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let named = !name.isEmpty
-        let reading = match(tags)
+        let reading = match(tags, pack: pack)
         let klass = named ? reading.klass : (reading.unnamedKlass ?? reading.klass)
         let why = named ? reading.why : (reading.unnamedWhy ?? reading.why)
         let sure = max(5, min(97, named ? reading.sure : reading.sure - reading.unnamedPenalty))
@@ -283,9 +287,13 @@ public enum Inspect {
 
     // MARK: - The table
 
-    private static func match(_ t: [String: String]) -> Reading {
+    static func isEastPack(_ pack: String?) -> Bool {
+        (pack ?? "").lowercased() == "tx-east"
+    }
+
+    private static func match(_ t: [String: String], pack: String? = nil) -> Reading {
         if let r = water(t) { return r }
-        if let r = land(t) { return r }
+        if let r = land(t, pack: pack) { return r }
         if let r = builtUp(t) { return r }
         return Reading(
             klass: "Open ground",
@@ -542,8 +550,20 @@ public enum Inspect {
         }
     }
 
-    private static func land(_ t: [String: String]) -> Reading? {
+    private static func land(_ t: [String: String], pack: String? = nil) -> Reading? {
         if t["natural"] == "peak" {
+            if isEastPack(pack) {
+                return Reading(
+                    klass: "Peak",
+                    kind: .land,
+                    sure: 86,
+                    why: "a surveyed point, so the position is firm",
+                    advice: .field,
+                    field: coldCard,
+                    local: [iceRockCard, mammalNMCard, mammalEastCard],
+                    unnamedPenalty: 10
+                )
+            }
             return Reading(
                 klass: "Peak",
                 kind: .land,
@@ -570,6 +590,21 @@ public enum Inspect {
                     unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
                 )
             case "tree":
+                if isEastPack(pack) {
+                    return Reading(
+                        klass: "Named tree",
+                        kind: .land,
+                        sure: 78,
+                        why: "a surveyed tree; shade and wood, not a meal",
+                        advice: .field,
+                        field: plantCard,
+                        local: [treeUseEastCard, treeUseNMCard],
+                        extra: [plantUseCard],
+                        unnamedPenalty: 8,
+                        unnamedKlass: "Tree",
+                        unnamedWhy: "a tree is mapped here with no name"
+                    )
+                }
                 return Reading(
                     klass: "Named tree",
                     kind: .land,
@@ -588,30 +623,42 @@ public enum Inspect {
                     klass: "Woodland",
                     sure: 76,
                     why: "mapped as tree cover; the edge moves with the years",
-                    unnamedPenalty: 4
+                    unnamedPenalty: 4,
+                    pack: pack
                 )
             case "scrub", "heath":
                 return snakeCountry(
                     klass: "Desert scrub",
                     sure: 72,
                     why: "mapped as low brush, which is the open ground of this country",
-                    unnamedPenalty: 2
+                    unnamedPenalty: 2,
+                    pack: pack
                 )
             case "sand", "dune":
                 return snakeCountry(
                     klass: "Sand or playa floor",
                     sure: 70,
                     why: "mapped as bare sand; a playa floor reads the same way and floods after rain",
-                    unnamedPenalty: 2
+                    unnamedPenalty: 2,
+                    pack: pack
                 )
             case "wetland":
                 return plantCover(
                     klass: "Bosque or wetland",
                     sure: 74,
                     why: "mapped as wet ground, which is where the cottonwoods stand along the river",
-                    unnamedPenalty: 4
+                    unnamedPenalty: 4,
+                    pack: pack
                 )
             case "bare_rock", "scree", "ridge", "cliff":
+                if isEastPack(pack) {
+                    return Reading(
+                        klass: "Rock", kind: .land, sure: 74,
+                        why: "mapped as bare rock, which holds no shade and no water",
+                        advice: .field, field: coldCard,
+                        local: [iceRockCard, mammalNMCard, mammalEastCard], unnamedPenalty: 2
+                    )
+                }
                 return Reading(
                     klass: "Rock", kind: .land, sure: 74,
                     why: "mapped as bare rock, which holds no shade and no water",
@@ -623,7 +670,8 @@ public enum Inspect {
                     klass: "Grassland",
                     sure: 70,
                     why: "mapped as open grass",
-                    unnamedPenalty: 2
+                    unnamedPenalty: 2,
+                    pack: pack
                 )
             default:
                 break
@@ -634,7 +682,8 @@ public enum Inspect {
                 klass: "Protected land",
                 sure: 84,
                 why: "a drawn boundary, so the line is exact even where the ground is not",
-                unnamedPenalty: 4
+                unnamedPenalty: 4,
+                pack: pack
             )
         }
         if t["leisure"] == "park" {
@@ -642,7 +691,8 @@ public enum Inspect {
                 klass: "Park",
                 sure: 80,
                 why: "a drawn boundary around kept ground",
-                unnamedPenalty: 6
+                unnamedPenalty: 6,
+                pack: pack
             )
         }
         if let use = t["landuse"] {
@@ -652,21 +702,24 @@ public enum Inspect {
                     klass: "Woodland",
                     sure: 76,
                     why: "mapped as worked timber, so there is tree cover and usually a track in",
-                    unnamedPenalty: 4
+                    unnamedPenalty: 4,
+                    pack: pack
                 )
             case "farmland", "orchard", "meadow", "vineyard", "recreation_ground":
                 return plantCover(
                     klass: "Irrigated ground",
                     sure: 74,
                     why: "mapped as worked ground, which in this country means a ditch reaches it",
-                    unnamedPenalty: 4
+                    unnamedPenalty: 4,
+                    pack: pack
                 )
             case "salt_pond":
                 return snakeCountry(
                     klass: "Salt flat",
                     sure: 78,
                     why: "a drawn boundary around worked salt ground, so the outline is exact",
-                    unnamedPenalty: 4
+                    unnamedPenalty: 4,
+                    pack: pack
                 )
             case "residential":
                 return Reading(
@@ -684,15 +737,41 @@ public enum Inspect {
     /// Tree cover, parks, bosque: the trees this cover is, then don't chew,
     /// then cactus, animals, game. Unknown last so FIELD still lands with
     /// only the core book.
+    ///
+    /// West `local:` is written first so the source contract can see
+    /// `treeUseTXCard` before the first `plantTXCard`. East is the same
+    /// shape with this pack's ids.
     private static func plantCover(
         klass: String,
         sure: Int,
         why: String,
         unnamedPenalty: Int,
         unnamedKlass: String? = nil,
-        unnamedWhy: String? = nil
+        unnamedWhy: String? = nil,
+        pack: String? = nil
     ) -> Reading {
-        Reading(
+        if !isEastPack(pack) {
+            return Reading(
+                klass: klass,
+                kind: .land,
+                sure: sure,
+                why: why,
+                advice: .field,
+                field: plantCard,
+                local: [
+                    treeUseTXCard, treeUseNMCard,
+                    plantTXCard, plantNMCard,
+                    cactusTXCard, cactusNMCard,
+                    mammalTXCard, mammalNMCard,
+                    gameTXCard, gameNMCard,
+                ],
+                extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
+                unnamedPenalty: unnamedPenalty,
+                unnamedKlass: unnamedKlass,
+                unnamedWhy: unnamedWhy
+            )
+        }
+        return Reading(
             klass: klass,
             kind: .land,
             sure: sure,
@@ -700,11 +779,11 @@ public enum Inspect {
             advice: .field,
             field: plantCard,
             local: [
-                treeUseTXCard, treeUseNMCard,
+                treeUseEastCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
                 cactusTXCard, cactusNMCard,
-                mammalTXCard, mammalNMCard,
-                gameTXCard, gameNMCard,
+                mammalEastCard, mammalNMCard,
+                gameEastCard, gameNMCard,
             ],
             extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
             unnamedPenalty: unnamedPenalty,
@@ -718,9 +797,30 @@ public enum Inspect {
         klass: String,
         sure: Int,
         why: String,
-        unnamedPenalty: Int
+        unnamedPenalty: Int,
+        pack: String? = nil
     ) -> Reading {
-        Reading(
+        if !isEastPack(pack) {
+            return Reading(
+                klass: klass,
+                kind: .land,
+                sure: sure,
+                why: why,
+                advice: .field,
+                field: heatCard,
+                local: [
+                    snakeTXCard, snakeNMCard,
+                    mammalTXCard, mammalNMCard,
+                    cactusTXCard, cactusNMCard,
+                    treeUseTXCard, treeUseNMCard,
+                    plantTXCard, plantNMCard,
+                    gameTXCard, gameNMCard,
+                ],
+                extra: [biteCard, plantUseCard, gameCard],
+                unnamedPenalty: unnamedPenalty
+            )
+        }
+        return Reading(
             klass: klass,
             kind: .land,
             sure: sure,
@@ -728,12 +828,12 @@ public enum Inspect {
             advice: .field,
             field: heatCard,
             local: [
-                snakeTXCard, snakeNMCard,
-                mammalTXCard, mammalNMCard,
+                snakeEastCard, snakeNMCard,
+                mammalEastCard, mammalNMCard,
                 cactusTXCard, cactusNMCard,
-                treeUseTXCard, treeUseNMCard,
+                treeUseEastCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
-                gameTXCard, gameNMCard,
+                gameEastCard, gameNMCard,
             ],
             extra: [biteCard, plantUseCard, gameCard],
             unnamedPenalty: unnamedPenalty

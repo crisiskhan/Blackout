@@ -449,6 +449,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("gameTXCard, gameNMCard", inspect)
         self.assertIn("treeUseTXCard, treeUseNMCard", inspect)
         self.assertIn("mammalTXCard, mammalNMCard", inspect)
+        self.assertIn('treeUseEastCard = "tx-east-tree-use"', inspect)
+        self.assertIn('mammalEastCard = "tx-east-mammal"', inspect)
+        self.assertIn('gameEastCard = "tx-east-game"', inspect)
+        self.assertIn('snakeEastCard = "tx-east-snake"', inspect)
         self.assertIn("extra: [plantUseCard", inspect)
         self.assertIn("extra: [biteCard", inspect)
         self.assertIn('plantUseCard = "plant-use"', inspect)
@@ -636,12 +640,81 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("CARD \\(at) OF", tab)
         field = SWIFT.read_text()
         self.assertIn("func fieldRoute(forVision", field)
+        vision_fn = field.split("func fieldRoute(forVision", 1)[1].split(
+            "public struct InspectFinding", 1
+        )[0]
+        self.assertIn("pack: String? = nil", vision_fn)
+        self.assertIn("Inspect.treeUseEastCard", vision_fn)
+        self.assertIn("Inspect.mammalEastCard", vision_fn)
+        self.assertIn("Inspect.snakeEastCard", vision_fn)
         self.assertIn("g.labelId", tab)
-        self.assertIn("InspectField.fieldRoute(forVision:", tab)
+        self.assertIn("InspectField.fieldRoute(", tab)
+        self.assertIn("forVision:", tab)
         self.assertIn("InspectField.label(for:", tab)
+        self.assertIn("pack: runtime.packs?.active?.id", tab)
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("VISION still opens", qa)
         self.assertIn("FIELD · ANIMAL", qa)
+        self.assertIn("tx-east-tree-use", qa)
+        self.assertIn("tx-javelina", qa)
+
+    def test_east_texas_ships_its_own_field_chapter(self):
+        """East woodland must not open west mesquite / javelina cards.
+
+        Both packs load field.tx.json. Range is the open pack's chapter.
+        A photographed javelina still opens the west mammal card.
+        """
+        inspect = INSPECT.read_text()
+        cover = inspect.split("private static func plantCover", 1)[1].split(
+            "private static func snakeCountry", 1
+        )[0]
+        self.assertLess(
+            cover.index("treeUseTXCard"),
+            cover.index("plantTXCard"),
+            "west woodland local: must be written before east, or oleander sorts first",
+        )
+        self.assertIn("treeUseEastCard", cover)
+        self.assertIn("mammalEastCard", cover)
+        self.assertIn("gameEastCard", cover)
+        snake = inspect.split("private static func snakeCountry", 1)[1]
+        self.assertIn("snakeEastCard", snake)
+        field = SWIFT.read_text()
+        procedure = field.split("func procedure(for cardID", 1)[1].split(
+            "public static func label", 1
+        )[0]
+        self.assertIn("Inspect.treeUseEastCard", procedure)
+        self.assertIn("Inspect.mammalEastCard", procedure)
+        self.assertIn("Inspect.gameEastCard", procedure)
+        self.assertIn("Inspect.snakeEastCard", procedure)
+        book = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
+        by_id = {c["id"]: c for c in book["cards"]}
+        for cid in ("tx-east-tree-use", "tx-east-mammal", "tx-east-game", "tx-east-snake"):
+            self.assertIn(cid, by_id, cid)
+            blob = json.dumps(by_id[cid]).lower()
+            self.assertNotIn("edible", blob, cid)
+            self.assertNotIn("wildlife-icon", blob, cid)
+            self.assertTrue(
+                (ROOT / "Resources/Field/images" / f"{cid}.png").is_file(),
+                cid,
+            )
+        east_tree = json.dumps(by_id["tx-east-tree-use"]).lower()
+        self.assertIn("live oak", east_tree)
+        self.assertIn("cedar elm", east_tree)
+        self.assertNotIn("mesquite", east_tree)
+        east_mammal = json.dumps(by_id["tx-east-mammal"]).lower()
+        self.assertIn("coyote", east_mammal)
+        self.assertIn("deer", east_mammal)
+        self.assertNotIn("javelina", east_mammal)
+        east_game = json.dumps(by_id["tx-east-game"]).lower()
+        self.assertIn("deer", east_game)
+        self.assertNotIn("javelina", east_game)
+        east_snake = json.dumps(by_id["tx-east-snake"]).lower()
+        self.assertIn("copperhead", east_snake)
+        self.assertIn("cottonmouth", east_snake)
+        west_mammal = json.dumps(by_id["tx-mammal"]).lower()
+        self.assertIn("javelina", west_mammal)
+        west_tree = json.dumps(by_id["tx-tree-use"]).lower()
+        self.assertIn("mesquite", west_tree)
 
 
 if __name__ == "__main__":

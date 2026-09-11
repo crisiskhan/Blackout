@@ -867,6 +867,46 @@ def thickness_core() -> list[dict]:
     ]
 
 
+def mammal_do_en(cid: str) -> str:
+    if cid == "tx-east-mammal":
+        return (
+            "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
+            "Food away from camp. If bitten, the bite card. If you already have meat, "
+            "the food-game card. Do not hunt from this map."
+        )
+    if cid.startswith("tx-"):
+        return (
+            "Javelina charges when cornered — give it the brush, do not get between it and cover. "
+            "Coyote: do not feed. Food away from camp. If bitten, the bite card. "
+            "If you already have meat, the food-game card. Do not hunt from this map."
+        )
+    return (
+        "Black bear: do not run, stand large, food sealed and away from camp. "
+        "Elk in rut: give way. A maul is trauma. If you already have meat, the food-game card. "
+        "Do not hunt from this map."
+    )
+
+
+def mammal_do_es(cid: str) -> str:
+    if cid == "tx-east-mammal":
+        return (
+            "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. "
+            "Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
+            "Si ya tienes carne, la de comida. No caces desde este mapa."
+        )
+    if cid.startswith("tx-"):
+        return (
+            "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. "
+            "Coyote: no alimentes. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
+            "Si ya tienes carne, la de comida. No caces desde este mapa."
+        )
+    return (
+        "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. "
+        "Wapití en celo: cede el paso. Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. "
+        "No caces desde este mapa."
+    )
+
+
 def thickness_state() -> list[dict]:
     """Snake and plant-danger of that state. No cross-coast leak. No edible unlock."""
     snakes = [
@@ -879,6 +919,16 @@ def thickness_state() -> list[dict]:
             "Matorral de Texas. Cascabel del oeste, cabeza de cobre o boca de algodón. No la atrapes para identificarla.",
             "Western diamondback / copperhead: keep the bitten limb still at heart level. No ice, no cut, no suck, no tourniquet.",
             "Cascabel / cabeza de cobre: extremidad quieta a la altura del corazón. Sin hielo, sin cortar, sin chupar, sin torniquete.",
+        ),
+        (
+            "tx-east-snake",
+            ["TX"],
+            "East Texas pit viper",
+            "Víbora del este de Texas",
+            "East Texas brush. Copperhead or cottonmouth country. Do not catch it for a photo ID.",
+            "Matorral del este de Texas. Cabeza de cobre o boca de algodón. No la atrapes para identificarla.",
+            "Copperhead or cottonmouth: keep the bitten limb still at heart level. No ice, no cut, no suck, no tourniquet.",
+            "Cabeza de cobre o boca de algodón: extremidad quieta a la altura del corazón. Sin hielo, sin cortar, sin chupar, sin torniquete.",
         ),
         (
             "nm-snake",
@@ -999,6 +1049,16 @@ def thickness_state() -> list[dict]:
             "If they chewed seed or sap is in both eyes, this is care now.",
             "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora.",
         ),
+        (
+            "tx-east-tree-use",
+            ["TX"],
+            "East Texas trees — shade, not a meal",
+            "Árboles del este de Texas — sombra, no comida",
+            "You are in East Texas woodland, park, or bosque. Live oak, pecan, cedar elm. Shade and deadfall.",
+            "Estás en arbolado, parque o bosque del este de Texas. Encino, pecán, olmo cedro. Sombra y madera muerta.",
+            "If they chewed seed or sap is in both eyes, this is care now, not a use card.",
+            "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora, no una tarjeta de uso.",
+        ),
     ]
     for cid, states, title, title_es, sit, sit_es, care, care_es in trees:
         out.append(
@@ -1045,6 +1105,16 @@ def thickness_state() -> list[dict]:
             "Una herida o un golpe es trauma. El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
         ),
         (
+            "tx-east-mammal",
+            ["TX"],
+            "East Texas mammals — give space",
+            "Mamíferos del este de Texas — da espacio",
+            "Coyote and white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",
+            "País de coyote y venado cola blanca. Esto es rango, no un pin. El mapa no sabe dónde está uno.",
+            "A puncture or a maul is trauma. Gut illness is care if they cannot keep fluids down. This card does not unlock a hunt.",
+            "Una herida o un golpe es trauma. El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
+        ),
+        (
             "nm-mammal",
             ["NM"],
             "New Mexico mammals — give space",
@@ -1072,20 +1142,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        (
-                            "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map."
-                            if cid.startswith("tx-")
-                            else "Black bear: do not run, stand large, food sealed and away from camp. Elk in rut: give way. A maul is trauma. If you already have meat, the food-game card. Do not hunt from this map."
-                        ),
+                        mammal_do_en(cid),
                         "Range is the Field book of the open pack. A coordinate is not an animal.",
                         "A child stays behind the adult. No chasing for a photo.",
                         "Stop if it charges or if anyone is down — trauma card, then this one.",
                         f"{cid}.png",
-                        (
-                            "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
-                            if cid.startswith("tx-")
-                            else "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. Wapití en celo: cede el paso. Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
-                        ),
+                        mammal_do_es(cid),
                         "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal.",
                         "El niño detrás del adulto. Sin perseguir para una foto.",
                         "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta.",
@@ -1157,6 +1219,16 @@ def thickness_state() -> list[dict]:
             "Pecarí o venado que ya tienes",
             "You have a javelina or white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
             "Tienes pecarí o venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
+            "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
+            "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
+        ),
+        (
+            "tx-east-game",
+            ["TX"],
+            "Deer you already have",
+            "Venado que ya tienes",
+            "You have a white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
+            "Tienes venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
             "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
             "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
         ),

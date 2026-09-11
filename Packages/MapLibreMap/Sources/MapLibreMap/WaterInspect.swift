@@ -465,11 +465,12 @@ public enum InspectField {
         case water:
             return .water
         case Inspect.plantCard, Inspect.plantTXCard, Inspect.plantNMCard, Inspect.plantUseCard,
-             Inspect.treeUseTXCard, Inspect.treeUseNMCard, Inspect.cactusTXCard, Inspect.cactusNMCard:
+             Inspect.treeUseTXCard, Inspect.treeUseNMCard, Inspect.treeUseEastCard,
+             Inspect.cactusTXCard, Inspect.cactusNMCard:
             return .plant
-        case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.biteCard:
+        case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.snakeEastCard, Inspect.biteCard:
             return .bite
-        case Inspect.mammalTXCard, Inspect.mammalNMCard:
+        case Inspect.mammalTXCard, Inspect.mammalNMCard, Inspect.mammalEastCard:
             return .animal
         case Inspect.caveCard:
             return .cave
@@ -483,7 +484,7 @@ public enum InspectField {
             return .cold
         case Inspect.fungiCard:
             return .fungi
-        case Inspect.gameCard, Inspect.gameTXCard, Inspect.gameNMCard, "food-cook":
+        case Inspect.gameCard, Inspect.gameTXCard, Inspect.gameNMCard, Inspect.gameEastCard, "food-cook":
             return .food
         default:
             return .field
@@ -635,24 +636,47 @@ public enum InspectField {
     }
 
     /// The still named a kind. Open that kind's cards — not the whole biome.
-    /// A javelina is the mammal trail, not woodland plant-danger.
-    public static func fieldRoute(forVision labelId: String, state: String?) -> [String] {
+    /// A javelina is the mammal trail, not woodland plant-danger. East Texas
+    /// opens this pack's chapter unless the still named a west-only species.
+    public static func fieldRoute(forVision labelId: String, state: String?, pack: String? = nil) -> [String] {
         guard let ground = visionGround(labelId: labelId) else { return [] }
+        let id = labelId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let nm = (state ?? "").uppercased() == "NM"
+        let east = Inspect.isEastPack(pack)
         switch ground {
         case .fungi:
             return [Inspect.fungiCard]
         case .snake:
-            return [nm ? Inspect.snakeNMCard : Inspect.snakeTXCard, Inspect.biteCard]
+            if nm {
+                return [Inspect.snakeNMCard, Inspect.biteCard]
+            }
+            if id.contains("diamondback") {
+                return [Inspect.snakeTXCard, Inspect.biteCard]
+            }
+            if east || id.contains("copperhead") || id.contains("cottonmouth") {
+                return [Inspect.snakeEastCard, Inspect.biteCard]
+            }
+            return [Inspect.snakeTXCard, Inspect.biteCard]
         case .mammal:
-            return [
-                nm ? Inspect.mammalNMCard : Inspect.mammalTXCard,
-                nm ? Inspect.gameNMCard : Inspect.gameTXCard,
-                Inspect.gameCard,
-            ]
+            if id.contains("javelina") {
+                return [Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.gameCard]
+            }
+            if nm {
+                return [Inspect.mammalNMCard, Inspect.gameNMCard, Inspect.gameCard]
+            }
+            if east {
+                return [Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.gameCard]
+            }
+            return [Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.gameCard]
         case .tree:
+            if id.contains("mesquite") {
+                return [Inspect.treeUseTXCard, Inspect.plantUseCard]
+            }
+            if nm {
+                return [Inspect.treeUseNMCard, Inspect.plantUseCard]
+            }
             return [
-                nm ? Inspect.treeUseNMCard : Inspect.treeUseTXCard,
+                east ? Inspect.treeUseEastCard : Inspect.treeUseTXCard,
                 Inspect.plantUseCard,
             ]
         case .cactus:
