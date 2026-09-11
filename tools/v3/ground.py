@@ -70,7 +70,9 @@ CAVE_PRESERVE_KEYS = {
 # preserve`, not the word `wildlife`. Wildlife Drive stays a park.
 # Phrase `audubon`, not a street — overlay still needs park keys.
 # Phrase `habitat preserve`, not the word `habitat`. Baker Sanctuary
-# stays Open reserve.
+# stays Open reserve. Phrase `flora y fauna`, not a street. Phrase
+# `national preserve`, not the word `preserve`. Phrase `wilderness
+# park`, not the word `wilderness`. Wilderness Gate stays apartments.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -86,6 +88,9 @@ WILDLIFE_RANGE_PHRASES = (
     "wildlife preserve",
     "audubon",
     "habitat preserve",
+    "flora y fauna",
+    "national preserve",
+    "wilderness park",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

@@ -138,6 +138,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `habitat preserve`. Barton Creek is kilometres off this pip.
     private static let bartonHabitat = CLLocationCoordinate2D(latitude: 30.269882, longitude: -97.916386)
 
+    /// Interior of Área de Protección de Flora y Fauna Médanos de
+    /// Samalayuca. Phrase `flora y fauna`, not Open reserve.
+    private static let floraFauna = CLLocationCoordinate2D(latitude: 31.247021, longitude: -106.450970)
+
+    /// Interior of Barton Creek Wilderness Park. Phrase `wilderness park`,
+    /// not picnic woodland. 442 m from water.
+    private static let bartonWilderness = CLLocationCoordinate2D(latitude: 30.243962, longitude: -97.815694)
+
+    /// Interior of Valles Caldera National Preserve. Phrase `national
+    /// preserve`. Elk country, not Open reserve.
+    private static let vallesCaldera = CLLocationCoordinate2D(latitude: 36.000815, longitude: -106.455062)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -613,6 +625,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(habitat.card?.klass, "Open reserve", "\(habitat)")
         XCTAssertEqual(habitat.card?.fieldRoute.first, Inspect.mammalEastCard, "\(habitat)")
         XCTAssertFalse((habitat.card?.doLine.lowercased() ?? "").contains("edible"), habitat.card?.doLine ?? "")
+
+        let flora = try hold(at: Self.floraFauna, zoom: 16)
+        XCTAssertEqual(flora.card?.klass, "Wildlife range", "\(flora)")
+        XCTAssertEqual(
+            flora.card?.title,
+            "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+            "\(flora)"
+        )
+        XCTAssertNotEqual(flora.card?.klass, "Open reserve", "\(flora)")
+        XCTAssertEqual(flora.card?.fieldRoute.first, Inspect.mammalTXCard, "\(flora)")
+        XCTAssertFalse((flora.card?.doLine.lowercased() ?? "").contains("edible"), flora.card?.doLine ?? "")
+
+        let wildernessPark = try hold(at: Self.bartonWilderness, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(wildernessPark.card?.klass, "Wildlife range", "\(wildernessPark)")
+        XCTAssertEqual(wildernessPark.card?.title, "Barton Creek Wilderness Park", "\(wildernessPark)")
+        XCTAssertNotEqual(wildernessPark.card?.klass, "Open reserve", "\(wildernessPark)")
+        XCTAssertEqual(wildernessPark.card?.fieldRoute.first, Inspect.mammalEastCard, "\(wildernessPark)")
+        XCTAssertFalse((wildernessPark.card?.doLine.lowercased() ?? "").contains("edible"), wildernessPark.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -833,6 +863,17 @@ final class HoldOnTheGlassTests: XCTestCase {
             audubon.card?.doLine ?? ""
         )
         XCTAssertFalse((audubon.card?.doLine.lowercased() ?? "").contains("edible"), audubon.card?.doLine ?? "")
+
+        let caldera = try hold(at: Self.vallesCaldera, zoom: 16, packId: "nm")
+        XCTAssertEqual(caldera.card?.klass, "Wildlife range", "\(caldera)")
+        XCTAssertEqual(caldera.card?.title, "Valles Caldera National Preserve", "\(caldera)")
+        XCTAssertNotEqual(caldera.card?.klass, "Open reserve", "\(caldera)")
+        XCTAssertEqual(caldera.card?.fieldRoute.first, Inspect.mammalTXCard, "\(caldera)")
+        XCTAssertTrue(
+            (caldera.card?.doLine.lowercased() ?? "").contains("elk is high country"),
+            caldera.card?.doLine ?? ""
+        )
+        XCTAssertFalse((caldera.card?.doLine.lowercased() ?? "").contains("edible"), caldera.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {

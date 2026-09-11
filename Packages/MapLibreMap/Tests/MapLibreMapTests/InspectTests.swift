@@ -788,6 +788,41 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(habitat.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(habitat.doLine.lowercased().contains("edible"), habitat.doLine)
 
+        let flora = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(flora.klass, "Wildlife range")
+        XCTAssertNotEqual(flora.klass, "Open reserve")
+        XCTAssertEqual(flora.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertFalse(flora.doLine.lowercased().contains("edible"), flora.doLine)
+
+        let caldera = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Valles Caldera National Preserve",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(caldera.klass, "Wildlife range")
+        XCTAssertNotEqual(caldera.klass, "Open reserve")
+        XCTAssertEqual(caldera.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(caldera.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(caldera.doLine.lowercased().contains("elk is high country"), caldera.doLine)
+        XCTAssertFalse(caldera.doLine.lowercased().contains("edible"), caldera.doLine)
+
+        let wildernessPark = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Barton Creek Wilderness Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(wildernessPark.klass, "Wildlife range")
+        XCTAssertNotEqual(wildernessPark.klass, "Open reserve")
+        XCTAssertEqual(wildernessPark.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(wildernessPark.doLine.lowercased().contains("edible"), wildernessPark.doLine)
+
         let baker = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"
