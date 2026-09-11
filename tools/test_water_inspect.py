@@ -2448,11 +2448,13 @@ class GroundFieldSync(unittest.TestCase):
         east_snake = json.dumps(by_id["tx-east-snake"]).lower()
         self.assertIn("copperhead", east_snake)
         self.assertIn("cottonmouth", east_snake)
+        self.assertIn("brush, bosque, or wetland", east_snake)
         east_snake_do = by_id["tx-east-snake"]["steps"][0]["do"]["en"].lower()
         self.assertIn("copperhead", east_snake_do)
         self.assertIn("cottonmouth", east_snake_do)
         west_snake = json.dumps(by_id["tx-snake"]).lower()
         self.assertIn("diamondback", west_snake)
+        self.assertIn("brush, desert, or open reserve", west_snake)
         self.assertNotIn("cottonmouth", west_snake)
         self.assertNotIn("copperhead", west_snake)
         west_snake_do = by_id["tx-snake"]["steps"][0]["do"]["en"].lower()
@@ -2494,6 +2496,8 @@ class GroundFieldSync(unittest.TestCase):
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("ALL CARDS", qa)
         self.assertIn("tx-mammal", qa)
+        self.assertIn("brush, bosque, or wetland", qa)
+        self.assertIn("brush, desert, or open reserve", qa)
 
 
 if __name__ == "__main__":

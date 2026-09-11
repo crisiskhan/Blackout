@@ -214,8 +214,8 @@
         "es": "Víbora del oeste de Texas"
       },
       "situation": {
-        "en": "West Texas brush. Western diamondback country. Do not catch it for a photo ID.",
-        "es": "Matorral del oeste de Texas. Cascabel del oeste. No la atrapes para identificarla."
+        "en": "West Texas brush, desert, or open reserve. Western diamondback country. Do not catch it for a photo ID.",
+        "es": "Matorral, desierto o reserva abierta del oeste de Texas. Cascabel del oeste. No la atrapes para identificarla."
       },
       "stop_if": [
         {
@@ -275,8 +275,8 @@
         "es": "Víbora del este de Texas"
       },
       "situation": {
-        "en": "East Texas brush. Copperhead or cottonmouth country. Do not catch it for a photo ID.",
-        "es": "Matorral del este de Texas. Cabeza de cobre o boca de algodón. No la atrapes para identificarla."
+        "en": "East Texas brush, bosque, or wetland. Copperhead or cottonmouth country. Do not catch it for a photo ID.",
+        "es": "Matorral, bosque o humedal del este de Texas. Cabeza de cobre o boca de algodón. No la atrapes para identificarla."
       },
       "stop_if": [
         {
