@@ -128,6 +128,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not Open reserve.
     private static let nalleWildlife = CLLocationCoordinate2D(latitude: 30.349686, longitude: -97.803982)
 
+    /// Interior of Sunset Valley Nature Area. Phrase `nature area`, not
+    /// only `natural area`. Williamson Creek is 102 m off this pip.
+    private static let sunsetNatureArea = CLLocationCoordinate2D(latitude: 30.222831, longitude: -97.822707)
+
+    /// Interior of Barton Creek Habitat Preserve (west sheet). Phrase
+    /// `habitat preserve`. Barton Creek is kilometres off this pip.
+    private static let bartonHabitat = CLLocationCoordinate2D(latitude: 30.269882, longitude: -97.916386)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -589,6 +597,20 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(nalle.card?.title, "Nalle Bunny Run Wildlife Preserve", "\(nalle)")
         XCTAssertEqual(nalle.card?.fieldRoute.first, Inspect.mammalEastCard, "\(nalle)")
         XCTAssertFalse((nalle.card?.doLine.lowercased() ?? "").contains("edible"), nalle.card?.doLine ?? "")
+
+        let natureArea = try hold(at: Self.sunsetNatureArea, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(natureArea.card?.klass, "Wildlife range", "\(natureArea)")
+        XCTAssertEqual(natureArea.card?.title, "Sunset Valley Nature Area", "\(natureArea)")
+        XCTAssertNotEqual(natureArea.card?.klass, "Open reserve", "\(natureArea)")
+        XCTAssertEqual(natureArea.card?.fieldRoute.first, Inspect.mammalEastCard, "\(natureArea)")
+        XCTAssertFalse((natureArea.card?.doLine.lowercased() ?? "").contains("edible"), natureArea.card?.doLine ?? "")
+
+        let habitat = try hold(at: Self.bartonHabitat, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(habitat.card?.klass, "Wildlife range", "\(habitat)")
+        XCTAssertEqual(habitat.card?.title, "Barton Creek Habitat Preserve", "\(habitat)")
+        XCTAssertNotEqual(habitat.card?.klass, "Open reserve", "\(habitat)")
+        XCTAssertEqual(habitat.card?.fieldRoute.first, Inspect.mammalEastCard, "\(habitat)")
+        XCTAssertFalse((habitat.card?.doLine.lowercased() ?? "").contains("edible"), habitat.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {

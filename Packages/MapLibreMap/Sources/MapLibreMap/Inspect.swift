@@ -342,9 +342,11 @@ public enum Inspect {
     /// word `game` — Department of Game & Fish is an office. Phrase
     /// `wilderness preserve`, not the word `wilderness` — Wilderness
     /// Gate is apartments. Phrase `nature preserve` / `nature center` /
-    /// `natural area`, not the word `preserve` — Godzilla Preserve is
-    /// a park. Phrase `wildlife preserve`, not the word `wildlife` —
-    /// Wildlife Drive stays a park. Phrase `audubon`, not a street.
+    /// `natural area` / `nature area`, not the word `preserve` — Godzilla
+    /// Preserve is a park. Phrase `wildlife preserve`, not the word
+    /// `wildlife` — Wildlife Drive stays a park. Phrase `audubon`, not
+    /// a street. Phrase `habitat preserve`, not the word `habitat` —
+    /// Baker Sanctuary stays Open reserve.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -362,8 +364,10 @@ public enum Inspect {
         if n.contains("nature preserve") { return true }
         if n.contains("nature center") { return true }
         if n.contains("natural area") { return true }
+        if n.contains("nature area") { return true }
         if n.contains("wildlife preserve") { return true }
         if n.contains("audubon") { return true }
+        if n.contains("habitat preserve") { return true }
         return false
     }
 

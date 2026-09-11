@@ -96,7 +96,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 4, 4, 36), "tx-east": (14, 8, 14, 1, 39), "nm": (10, 1, 15, 2, 58)}
+        expected = {"tx-west": (2, 0, 4, 4, 36), "tx-east": (14, 8, 16, 1, 37), "nm": (10, 1, 15, 2, 58)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -179,6 +179,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("whirlpool cave", east_blob)
         self.assertIn("goat cave karst nature preserve", east_blob)
         self.assertIn("nalle bunny run wildlife preserve", east_blob)
+        self.assertIn("sunset valley nature area", east_blob)
+        self.assertIn("barton creek habitat preserve", east_blob)
         self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
@@ -410,6 +412,30 @@ class ShippedWaterLayers(unittest.TestCase):
                 }
             ),
             "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Sunset Valley Nature Area"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Barton Creek Habitat Preserve"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Baker Sanctuary"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Waste Management Wildlife Park"}
+            ),
+            "reserve",
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Open Space Visitor Center"})
@@ -1217,8 +1243,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("nature preserve", inspect)
         self.assertIn("nature center", inspect)
         self.assertIn("natural area", inspect)
+        self.assertIn("nature area", inspect)
         self.assertIn("wildlife preserve", inspect)
         self.assertIn("audubon", inspect)
+        self.assertIn("habitat preserve", inspect)
         land = inspect.split("private static func land(", 1)[1]
         self.assertLess(
             land.index("isWildlifeRange"),
@@ -1837,6 +1865,8 @@ class GroundFieldSync(unittest.TestCase):
         whirl_hit = False
         goat_hit = False
         nalle_hit = False
+        sunset_hit = False
+        habitat_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1858,6 +1888,10 @@ class GroundFieldSync(unittest.TestCase):
                     goat_hit = True
                 if kind == "wildlife" and name == "Nalle Bunny Run Wildlife Preserve" and pip(-97.803982, 30.349686, ring):
                     nalle_hit = True
+                if kind == "wildlife" and name == "Sunset Valley Nature Area" and pip(-97.822707, 30.222831, ring):
+                    sunset_hit = True
+                if kind == "wildlife" and name == "Barton Creek Habitat Preserve" and pip(-97.916386, 30.269882, ring):
+                    habitat_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -1883,6 +1917,12 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             nalle_hit, "Nalle Bunny Run Wildlife Preserve is not wildlife range"
+        )
+        self.assertTrue(
+            sunset_hit, "Sunset Valley Nature Area is not wildlife range"
+        )
+        self.assertTrue(
+            habitat_hit, "Barton Creek Habitat Preserve is not wildlife range"
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
