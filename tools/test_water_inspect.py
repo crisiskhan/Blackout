@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4), "tx-east": (14, 2, 2, 1), "nm": (10, 1, 2, 2)}
+        expected = {"tx-west": (2, 0, 0, 4), "tx-east": (14, 2, 2, 1), "nm": (10, 1, 6, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -115,6 +115,9 @@ class ShippedWaterLayers(unittest.TestCase):
         nm_blob = (PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("marquez wildlife management area", nm_blob)
         self.assertIn("whitfield wildlife conservation area", nm_blob)
+        self.assertIn("state game commission land", nm_blob)
+        self.assertNotIn("department of game", nm_blob)
+        self.assertNotIn("game on", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
         east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
@@ -204,6 +207,34 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Garden Park"})
+        )
+
+    def test_game_commission_land_is_range_not_an_office(self):
+        """NMDGF parcels are range. The Game & Fish office is a park.
+
+        Phrase `game commission`, not the word `game`. Game On and Calle
+        Puerto Game stay streets. Wildlife Drive still stays a park.
+        """
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "State Game Commission Land",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "New Mexico Department of Game & Fish"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Game On"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Wildlife Drive Park"})
         )
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
@@ -653,6 +684,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("national wildlife", inspect)
         self.assertIn("wildlife sanctuary", inspect)
         self.assertIn("wildlife conservation area", inspect)
+        self.assertIn("game commission", inspect)
         land = inspect.split("private static func land(", 1)[1]
         self.assertLess(
             land.index("isWildlifeRange"),
@@ -770,6 +802,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bee Cave Central Park", qa)
         self.assertIn("Marquez Wildlife Management Area", qa)
         self.assertIn("Wildlife Drive", qa)
+        self.assertIn("State Game Commission Land", qa)
         self.assertIn("loblolly", qa)
         self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
         self.assertIn("Botanic garden", qa)

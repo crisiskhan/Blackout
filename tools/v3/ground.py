@@ -49,12 +49,15 @@ CAVE_PRESERVE_KEYS = {
 
 # Phrase match, not the word "wildlife". Must stay in step with
 # `Inspect.isWildlifeRange`. Wildlife Drive and Wildlife Trail stay out.
+# Phrase `game commission`, not the word `game`. The Game & Fish office
+# stays a park.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
     "national wildlife",
     "wildlife sanctuary",
     "wildlife conservation area",
+    "game commission",
 )
 
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step

@@ -387,6 +387,38 @@ final class InspectTests: XCTestCase {
         XCTAssertNotEqual(whitfield.klass, "Bosque or wetland")
         XCTAssertTrue(whitfield.fieldRoute.contains(Inspect.mammalNMCard))
 
+        let commission = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "State Game Commission Land",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(commission.klass, "Wildlife range")
+        XCTAssertEqual(commission.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(commission.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertEqual(
+            InspectField.presentRoute(commission.fieldRoute, in: nmBook).first,
+            Inspect.mammalNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(commission.fieldRoute, in: nmBook)[0]),
+            "FIELD · ANIMAL"
+        )
+        XCTAssertTrue(commission.doLine.lowercased().contains("bear") || commission.doLine.lowercased().contains("elk"), commission.doLine)
+        XCTAssertFalse(commission.doLine.lowercased().contains("lives here"), commission.doLine)
+        XCTAssertFalse(commission.doLine.lowercased().contains("edible"), commission.doLine)
+
+        let office = Inspect.read(
+            tags: ["leisure": "park", "name": "New Mexico Department of Game & Fish"],
+            pack: "nm"
+        )
+        XCTAssertEqual(office.klass, "Park")
+        XCTAssertEqual(office.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertFalse(office.doLine.lowercased().contains("not a pin"), office.doLine)
+
         let drive = Inspect.read(
             tags: ["leisure": "park", "name": "Wildlife Drive Park"],
             pack: "nm"
