@@ -659,7 +659,9 @@ public enum PackStyle {
     /// Peaks, holes and named trees the extract already put on the place slice,
     /// plus glasshouses the land tiles currently drop, cave preserves that
     /// otherwise read as picnic parks, wildlife range the Field book
-    /// already has, and botanic gardens that otherwise read as picnic parks.
+    /// already has, botanic gardens that otherwise read as picnic parks,
+    /// and open reserves (ACECs, prairie preserves) that otherwise read as
+    /// picnic woodland.
     /// Silver marks, no labels, no animals.
     /// A hold reads the record; the mark only says something is here.
     public static func attachGroundLayers(
@@ -694,8 +696,9 @@ public enum PackStyle {
 
     /// Glasshouses the tiler has not yet classed as farm, cave preserves
     /// that otherwise read as picnic parks, wildlife management areas
-    /// that otherwise read as picnic woodland, and botanic gardens that
-    /// otherwise read as picnic parks. Quiet fill under the streets
+    /// that otherwise read as picnic woodland, botanic gardens that
+    /// otherwise read as picnic parks, and open reserves that otherwise
+    /// read as picnic woodland. Quiet fill under the streets
     /// so a hold can name them; silver outline at walking zoom so the record is
     /// visible. No class label, not a meal, not an animal pin.
     private static func attachWorkedGround(

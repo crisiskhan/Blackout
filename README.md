@@ -282,16 +282,17 @@ not a badge — the ring says the record puts water here, not that it is good.
 There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Glasshouses, cave preserves, wildlife
-management areas, and botanic gardens get a silver outline at walking zoom; Bee
-Cave, Wildlife Drive, Conservatory At North Austin, and a beer garden stay parks
-or apartments. A
+management areas, botanic gardens, and open reserves get a silver outline at
+walking zoom; Bee Cave, Wildlife Drive, Conservatory At North Austin, Wilderness
+Gate, Prairie Hills, and a beer garden stay parks or apartments. A
 wildlife sanctuary tagged as woodland still opens the animal book, not picnic
 tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, animals, shelter, bite, meat you
-already have. Cactus lives on scrub and cactus gardens, not picnic woodland.
-Holding a glasshouse or botanic garden opens plant-danger, not
+already have. Cactus lives on scrub, cactus gardens, and open
+reserves (a mountain ACEC, a prairie preserve), not picnic woodland.
+A wilderness preserve is range, not a cactus garden. Holding a glasshouse or botanic garden opens plant-danger, not
 woodland. Holding a wildlife management area opens that pack's animal cards;
-this is range, not a pin. Holding scrub opens that pack's bite and mammal cards;
+this is range, not a pin. Holding an open reserve opens that pack's bite and cactus cards, not picnic tree-use. Holding scrub opens that pack's bite and mammal cards;
 holding a hole
 opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range and opens `tx-tree-use` / `tx-mammal`; TX EAST names copperhead, cottonmouth, loblolly pine, and hog, not javelina, and opens `tx-east-tree-use`. A javelina still still opens the west mammal card. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on

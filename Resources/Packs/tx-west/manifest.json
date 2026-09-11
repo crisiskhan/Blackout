@@ -74,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 34828921,
+  "bytes": 34832164,
   "files": [
     "border.geojson",
     "contours.geojson",

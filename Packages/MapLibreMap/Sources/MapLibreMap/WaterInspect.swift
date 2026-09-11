@@ -990,7 +990,7 @@ extension Inspect {
             case .unknown:
                 return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant and animal cards."
             }
-        case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat":
+        case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat", "Open reserve":
             return animalRangeLine(state: state, pack: pack)
         case "Cave or hole":
             return "A hole in the record. Dark, still air, cold. Do not go in alone."

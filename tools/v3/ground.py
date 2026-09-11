@@ -8,7 +8,8 @@ wetland. Those already paint as park or bosque fill; without a silver outline
 they look like picnic ground or cottonwoods. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
 open picnic tree-use without this file. A botanic garden tagged as a park
-would open woodland tree-use without this file. This is the water-detail
+would open woodland tree-use without this file. A mountain ACEC or a prairie
+preserve would open picnic tree-use without this file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
 source, tags intact so a hold names the record rather than a colour.
 
@@ -52,7 +53,8 @@ CAVE_PRESERVE_KEYS = {
 # Phrase match, not the word "wildlife". Must stay in step with
 # `Inspect.isWildlifeRange`. Wildlife Drive and Wildlife Trail stay out.
 # Phrase `game commission`, not the word `game`. The Game & Fish office
-# stays a park.
+# stays a park. Phrase `wilderness preserve`, not the word `wilderness`.
+# Wilderness Gate is apartments and stays out.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -60,6 +62,17 @@ WILDLIFE_RANGE_PHRASES = (
     "wildlife sanctuary",
     "wildlife conservation area",
     "game commission",
+    "wilderness preserve",
+)
+
+# A mountain ACEC is not picnic woodland. Phrase `area of critical
+# environmental concern`, not the word `critical`. Pronoun Cave is a
+# hole and is matched first. Phrase `prairie preserve`, not `prairie`.
+# Prairie Hills is apartments. Must stay in step with
+# `Inspect.isOpenReserve`.
+OPEN_RESERVE_PHRASES = (
+    "area of critical environmental concern",
+    "prairie preserve",
 )
 
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step
@@ -111,6 +124,14 @@ def is_botanic_garden(props: dict) -> bool:
     return any(phrase in name for phrase in BOTANIC_GARDEN_PHRASES)
 
 
+def is_open_reserve(props: dict) -> bool:
+    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
+    if not park:
+        return False
+    name = (props.get("name") or "").lower()
+    return any(phrase in name for phrase in OPEN_RESERVE_PHRASES)
+
+
 def overlay_kind(props: dict) -> str | None:
     if props.get("landuse") in WORKED_LANDUSE:
         return "glasshouse"
@@ -118,13 +139,15 @@ def overlay_kind(props: dict) -> str | None:
         return "cave"
     if is_wildlife_range(props):
         return "wildlife"
+    if is_open_reserve(props):
+        return "reserve"
     if is_botanic_garden(props):
         return "botanic"
     return None
 
 
 def records(fc: dict) -> list[dict]:
-    """Glasshouse, cave-preserve, wildlife-range, and botanic-garden polygons, tags slimmed, order stable."""
+    """Glasshouse, cave-preserve, wildlife-range, open-reserve, and botanic-garden polygons, tags slimmed, order stable."""
     out: list[dict] = []
     for feat in fc.get("features") or []:
         props = feat.get("properties") or {}
@@ -163,8 +186,9 @@ def build(dest: Path) -> dict:
     caves = kinds.count("cave")
     wildlife = kinds.count("wildlife")
     botanic = kinds.count("botanic")
+    reserve = kinds.count("reserve")
     print(
-        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves {wildlife} wildlife-range {botanic} botanic draw {drawn} bytes",
+        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves {wildlife} wildlife-range {botanic} botanic {reserve} open-reserve draw {drawn} bytes",
         flush=True,
     )
     return {"records": len(feats), "drawBytes": drawn}

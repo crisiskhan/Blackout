@@ -126,9 +126,10 @@ public enum Inspect {
     /// a sheet you cannot miss. `landuse=residential` is drawn under every
     /// street in Las Cruces, so without that a hold downtown answers with the
     /// subdivision instead of the road under the thumb. A cave preserve, a
-    /// wildlife sanctuary, a botanic garden, or a glasshouse is a named (or
-    /// tagged) sheet that is the question — it beats woodland and farm fill,
-    /// and still loses to a named street. Between two unnamed records take the
+    /// wildlife sanctuary, a botanic garden, an open reserve, or a glasshouse
+    /// is a named (or tagged) sheet that is the question — it beats woodland
+    /// and farm fill, and still loses to a named street. Between two unnamed
+    /// records take the
     /// ground, because out there the biome is the answer and an unnamed ranch
     /// track is not.
     ///
@@ -141,6 +142,7 @@ public enum Inspect {
             let notablePoint = packGroundPointNaturals.contains(tags["natural"] ?? "")
             let notableGround = isCavePreserve(tags) || isWildlifeRange(tags)
                 || isBotanicGarden(tags)
+                || isOpenReserve(tags)
                 || tags["landuse"] == "greenhouse_horticulture"
             switch read(tags: tags).kind {
             case .water:
@@ -322,7 +324,9 @@ public enum Inspect {
     /// A park named Wildlife Drive is a street park. A wildlife
     /// management area is range. Phrase match, not the word `wildlife`.
     /// Game Commission land is range. Phrase `game commission`, not the
-    /// word `game` — Department of Game & Fish is an office.
+    /// word `game` — Department of Game & Fish is an office. Phrase
+    /// `wilderness preserve`, not the word `wilderness` — Wilderness
+    /// Gate is apartments.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -336,6 +340,7 @@ public enum Inspect {
         if n.contains("wildlife sanctuary") { return true }
         if n.contains("wildlife conservation area") { return true }
         if n.contains("game commission") { return true }
+        if n.contains("wilderness preserve") { return true }
         return false
     }
 
@@ -375,6 +380,24 @@ public enum Inspect {
         if n.contains("desert garden") { return true }
         if n.contains("rose garden") { return true }
         if n.contains("community garden") { return true }
+        return false
+    }
+
+    /// A mountain ACEC is not picnic woodland. Phrase `area of critical
+    /// environmental concern`, not the word `critical` — Gracecus Way
+    /// is a street. Phrase `prairie preserve`, not the word `prairie`
+    /// — Prairie Hills is apartments. Pronoun Cave is a hole and is
+    /// matched first. A wilderness preserve is range (animals first,
+    /// trees), not this walk — cactus does not live on Wild Basin.
+    static func isOpenReserve(_ t: [String: String]) -> Bool {
+        let park = t["leisure"] == "park"
+            || t["leisure"] == "nature_reserve"
+            || t["boundary"] == "protected_area"
+            || t["boundary"] == "national_park"
+        guard park else { return false }
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("area of critical environmental concern") { return true }
+        if n.contains("prairie preserve") { return true }
         return false
     }
 
@@ -751,6 +774,15 @@ public enum Inspect {
                 sure: 82,
                 why: "mapped as a botanic garden; pretty is not food, not wild cover",
                 unnamedPenalty: 4
+            )
+        }
+        if isOpenReserve(t) {
+            return snakeCountry(
+                klass: "Open reserve",
+                sure: 84,
+                why: "mapped as open reserve; vipers use this cover, not picnic woodland",
+                unnamedPenalty: 4,
+                pack: pack
             )
         }
         if let natural = t["natural"] {

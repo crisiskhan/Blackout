@@ -82,7 +82,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 34828921,
+      "bytes": 34832164,
       "files": [
         "border.geojson",
         "contours.geojson",
@@ -233,7 +233,7 @@
         "cattle-guard",
         "hurricane"
       ],
-      "bytes": 30673643,
+      "bytes": 30679274,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -384,7 +384,7 @@
         "cattle-guard",
         "border-hospitals"
       ],
-      "bytes": 35047491,
+      "bytes": 35047808,
       "files": [
         "contours.geojson",
         "dem.json",

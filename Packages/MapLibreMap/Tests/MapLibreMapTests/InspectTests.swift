@@ -516,6 +516,134 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(drive.klass, "Park")
         XCTAssertEqual(drive.fieldRoute.first, Inspect.treeUseTXCard)
         XCTAssertFalse(drive.doLine.lowercased().contains("not a pin"), drive.doLine)
+
+        let basin = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Wild Basin Wilderness Preserve",
+            ],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(basin.klass, "Wildlife range")
+        XCTAssertEqual(basin.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(basin.fieldRoute.contains(Inspect.cactusTXCard), "Wild Basin is not a cactus garden")
+        XCTAssertTrue(basin.doLine.lowercased().contains("hog"), basin.doLine)
+        XCTAssertFalse(basin.doLine.lowercased().contains("javelina"), basin.doLine)
+
+        let gate = Inspect.read(
+            tags: ["landuse": "residential", "name": "Wilderness Gate"],
+            pack: "nm"
+        )
+        XCTAssertEqual(gate.klass, "Built-up ground")
+        XCTAssertNotEqual(gate.klass, "Wildlife range")
+    }
+
+    func testAnOpenReserveIsSnakeCountryNotPicnicWoodland() {
+        let alamo = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Alamo Mountain Area of Critical Environmental Concern",
+            ],
+            state: "TX",
+            pack: "tx-west"
+        )
+        XCTAssertEqual(alamo.klass, "Open reserve")
+        XCTAssertEqual(alamo.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(alamo.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertTrue(alamo.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertEqual(InspectField.label(for: alamo.fieldRoute[0]), "FIELD · BITE")
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                alamo.fieldRoute,
+                in: [
+                    Inspect.snakeTXCard, Inspect.mammalTXCard, Inspect.cactusTXCard,
+                    Inspect.treeUseTXCard, Inspect.plantTXCard, Inspect.gameTXCard,
+                    Inspect.biteCard, Inspect.plantUseCard, Inspect.gameCard,
+                    Inspect.heatCard,
+                ]
+            )),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
+        )
+        XCTAssertTrue(alamo.doLine.lowercased().contains("diamondback"), alamo.doLine)
+        XCTAssertFalse(alamo.doLine.lowercased().contains("live oak"), alamo.doLine)
+        XCTAssertFalse(alamo.doLine.lowercased().contains("edible"), alamo.doLine)
+        XCTAssertFalse(alamo.doLine.lowercased().contains("lives here"), alamo.doLine)
+
+        let jones = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Jones Canyon Area of Critical Environmental Concern",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(jones.klass, "Open reserve")
+        XCTAssertEqual(jones.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(jones.fieldRoute.contains(Inspect.snakeNMCard))
+        let nmBook: Set<String> = [
+            Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.cactusNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.gameNMCard,
+            Inspect.biteCard, Inspect.plantUseCard, Inspect.gameCard, Inspect.heatCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(jones.fieldRoute, in: nmBook).first,
+            Inspect.snakeNMCard
+        )
+        XCTAssertTrue(jones.doLine.lowercased().contains("rattler") || jones.doLine.lowercased().contains("diamondback"), jones.doLine)
+        XCTAssertFalse(jones.doLine.lowercased().contains("cottonwood"), jones.doLine)
+
+        let prairie = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "natural": "scrub",
+                "name": "Decker Tallgrass Prairie Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(prairie.klass, "Open reserve")
+        XCTAssertNotEqual(prairie.klass, "Desert scrub")
+        XCTAssertEqual(prairie.fieldRoute.first, Inspect.snakeEastCard)
+        XCTAssertTrue(prairie.doLine.lowercased().contains("cottonmouth"), prairie.doLine)
+
+        let overlayPrairie = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Decker Tallgrass Prairie Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(overlayPrairie.klass, "Open reserve")
+        XCTAssertEqual(overlayPrairie.fieldRoute.first, Inspect.snakeEastCard)
+
+        let cave = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Pronoun Cave Area of Critical Environmental Concern",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(cave.klass, "Cave or hole")
+        XCTAssertEqual(cave.fieldRoute, [Inspect.caveCard, Inspect.coldCard])
+        XCTAssertNotEqual(cave.klass, "Open reserve")
+
+        let hills = Inspect.read(
+            tags: ["landuse": "residential", "name": "Prairie Hills Apartments"],
+            pack: "nm"
+        )
+        XCTAssertEqual(hills.klass, "Built-up ground")
+        XCTAssertNotEqual(hills.klass, "Open reserve")
+
+        let street = Inspect.read(
+            tags: ["highway": "residential", "name": "Gracecus Way"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(street.klass, "Road")
+        XCTAssertFalse(street.fieldRoute.contains(Inspect.snakeTXCard))
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {
@@ -1152,6 +1280,27 @@ final class InspectTests: XCTestCase {
 
         let road: [String: String] = ["highway": "residential", "name": "Grove Boulevard"]
         XCTAssertEqual(Inspect.pick([wood, sanctuary, road])["highway"], "residential")
+    }
+
+    func testAnOpenReserveBeatsWoodlandAndLosesToANamedStreet() {
+        let wood: [String: String] = [
+            "natural": "wood",
+            "name": "Alamo Mountain Area of Critical Environmental Concern",
+            "class": "woodland",
+        ]
+        let reserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "boundary": "protected_area",
+            "name": "Alamo Mountain Area of Critical Environmental Concern",
+        ]
+        XCTAssertEqual(Inspect.pick([wood, reserve])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([wood, reserve]), pack: "tx-west").klass,
+            "Open reserve"
+        )
+
+        let road: [String: String] = ["highway": "track", "name": "Alamo Mountain Road"]
+        XCTAssertEqual(Inspect.pick([wood, reserve, road])["highway"], "track")
     }
 
     func testAGlasshouseBeatsFarmFillAndLosesToANamedStreet() {
