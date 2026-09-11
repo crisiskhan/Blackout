@@ -358,9 +358,21 @@ NOTABLE_WILDLIFE_NAME = (
     "baker sanctuary|blair woods sanctuary|beck preserve"
 )
 
+# Phrase match, not a dump of every backyard garden. Must stay in step with
+# `Inspect.isBotanicGarden` / `ground.BOTANIC_GARDEN_PHRASES`. Wildflower
+# Park is not a match. Memorial Garden is not a match. Unnamed garden
+# plots stay out. Ladybird Johnson Wildflower Center is a garden
+# relation; Zilker and Santa Fe are botanical gardens. Do not fake a ring
+# from paths. Not a meal.
+NOTABLE_BOTANIC_NAME = (
+    "botanic garden|botanical garden|conservatory|cactus garden|"
+    "desert garden|rose garden|community garden|wildflower preserve|"
+    "wildflower center|lush n lean|orchard garden|harvey cornell"
+)
+
 
 def overpass_notable(south: float, west: float, north: float, east: float) -> dict:
-    """Named nature-reserve polygons, cave mouths, and named trees.
+    """Named nature-reserve polygons, cave mouths, named trees, botanic gardens.
 
     The tiled street query never asked for relations, and `osm_to_geojson`
     used to drop them even when Overpass returned them. This is a separate
@@ -368,7 +380,9 @@ def overpass_notable(south: float, west: float, north: float, east: float) -> di
     ask for every `boundary=protected_area` forest — Lincoln National Forest
     is not a picnic dump. A wildlife-named protected-area relation is range,
     not timber. Cave *areas* come in as ways so the tiler can put a mouth
-    on the place slice. Size is not a reason to skip a record the Hold
+    on the place slice. Named botanic gardens tagged `leisure=garden` are
+    worked plant ground the street pass never asked for; unnamed garden
+    plots stay out. Size is not a reason to skip a record the Hold
     can name. Animals are range, never a GPS pin. Nothing here is a meal.
     """
     box = f"{south},{west},{north},{east}"
@@ -379,6 +393,10 @@ def overpass_notable(south: float, west: float, north: float, east: float) -> di
   way["leisure"="nature_reserve"]({box});
   relation["boundary"="protected_area"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
   way["leisure"="park"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
+  way["leisure"="garden"]["name"~"{NOTABLE_BOTANIC_NAME}",i]({box});
+  relation["leisure"="garden"]["name"~"{NOTABLE_BOTANIC_NAME}",i]({box});
+  way["amenity"="community_garden"]["name"]({box});
+  relation["amenity"="community_garden"]["name"]({box});
   node["natural"="cave"]({box});
   node["natural"="cave_entrance"]({box});
   node["natural"="sinkhole"]({box});
@@ -2017,12 +2035,13 @@ def grow_resources(dest: Path, pack: dict, span: float = 0.5) -> dict:
 
 
 def grow_notable(dest: Path, pack: dict, span: float = 5.0) -> dict:
-    """Add named nature-reserve relations, cave mouths, and named trees.
+    """Add named nature-reserve relations, cave mouths, named trees, botanic gardens.
 
     Additive. Streets and the router graph stay where they are. Relations
     that the tiled street pass never asked for land here, assembled into
     polygons so a hold can name Franklin Mountains State Park instead of
-    picnic woodland. Size is not a reason to skip a record.
+    picnic woodland, or Ladybird Johnson Wildflower Center instead of open
+    ground. Size is not a reason to skip a record.
     """
     fc = json.loads((dest / "osm.geojson").read_text())
     before = len(fc["features"])

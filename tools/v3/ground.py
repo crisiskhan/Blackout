@@ -8,8 +8,7 @@ wetland. Those already paint as park or bosque fill; without a silver outline
 they look like picnic ground or cottonwoods. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
 open picnic tree-use without this file. A nature preserve tagged as woodland
-would open picnic tree-use without this file. A botanic garden tagged as a park
-would open woodland tree-use without this file. A mountain ACEC, a prairie
+would open picnic tree-use without this file. A botanic garden tagged as a park or as a garden would open woodland tree-use without this file. A mountain ACEC, a prairie
 preserve, a named nature reserve, Hueco Tanks, named open-space cover, a
 scenic easement, La Tierra Trails, or Sun Mountain would open picnic tree-use without this file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
@@ -156,11 +155,16 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # and stays out. The Arboretum mall stays out. Cactus Point Park stays a park.
 # A beer garden is a bar patio and stays a park. Phrase `wildflower
 # preserve`, not the word `wildflower`. Wildflower Park stays a park.
-# Phrase `lush n lean`, not the word `lush`. Phrase `orchard garden`,
-# not the word `orchard`. Orchard Gardens Road stays a road. Fiesta
-# Gardens is an event park and stays a park. Phrase `harvey cornell`,
-# not `rose park`. Wildrose Park stays a park. Rose Park Avenue stays
-# a road.
+# Phrase `wildflower center`, not the word `wildflower`. Ladybird
+# Johnson Wildflower Center is a garden relation in OSM, not a ring
+# faked from foot paths. Those paths stay paths. Phrase `lush n lean`,
+# not the word `lush`. Phrase `orchard garden`, not the word `orchard`.
+# Orchard Gardens Road stays a road. Fiesta Gardens is an event park
+# and stays a park. Phrase `harvey cornell`, not `rose park`. Wildrose
+# Park stays a park. Rose Park Avenue stays a road. A named garden
+# without a botanic phrase is not this overlay. Memorial Garden stays
+# out. `leisure=garden` is botanic-eligible with a phrase; it is not a
+# cave, wildlife, or open-reserve key.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
@@ -170,6 +174,7 @@ BOTANIC_GARDEN_PHRASES = (
     "rose garden",
     "community garden",
     "wildflower preserve",
+    "wildflower center",
     "lush n lean",
     "orchard garden",
     "harvey cornell",
@@ -207,11 +212,13 @@ def is_botanic_garden(props: dict) -> bool:
     amenity = (props.get("amenity") or "").lower()
     if amenity in ("community_garden", "community garden"):
         return True
-    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
-    if not park:
-        return False
     name = (props.get("name") or "").lower()
-    return any(phrase in name for phrase in BOTANIC_GARDEN_PHRASES)
+    if not any(phrase in name for phrase in BOTANIC_GARDEN_PHRASES):
+        return False
+    if props.get("leisure") == "garden":
+        return True
+    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
+    return park
 
 
 def is_named_open_space(name: str) -> bool:

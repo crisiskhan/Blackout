@@ -2428,6 +2428,17 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(desertGarden.doLine.lowercased().contains("prickly pear"), desertGarden.doLine)
         XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.treeUseTXCard))
 
+        let desertGardens = Inspect.read(
+            tags: ["leisure": "garden", "name": "Chihuahuan Desert Gardens"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(desertGardens.klass, "Cactus garden")
+        XCTAssertNotEqual(desertGardens.klass, "Botanic garden")
+        XCTAssertEqual(desertGardens.fieldRoute.first, Inspect.cactusTXCard)
+        XCTAssertFalse(desertGardens.fieldRoute.contains(Inspect.plantTXCard), "desert gardens are not oleander")
+        XCTAssertTrue(desertGardens.doLine.lowercased().contains("prickly pear"), desertGardens.doLine)
+        XCTAssertFalse(desertGardens.doLine.lowercased().contains("edible"), desertGardens.doLine)
+
         let rose = Inspect.read(
             tags: ["leisure": "park", "name": "Rose Garden"],
             pack: "tx-west"
@@ -2538,6 +2549,58 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(beer.klass, "Park")
         XCTAssertEqual(beer.fieldRoute.first, Inspect.treeUseEastCard)
+
+        let ladybird = Inspect.read(
+            tags: [
+                "leisure": "garden",
+                "name": "Ladybird Johnson Wildflower Center",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(ladybird.klass, "Botanic garden")
+        XCTAssertNotEqual(ladybird.klass, "Park")
+        XCTAssertNotEqual(ladybird.klass, "Open reserve")
+        XCTAssertEqual(ladybird.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(ladybird.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(ladybird.fieldRoute.contains(Inspect.cactusTXCard), "a wildflower center is not spines")
+        XCTAssertFalse(ladybird.fieldRoute.contains(Inspect.plantUseCard), "a wildflower center is not woodland tree-use")
+        XCTAssertFalse(ladybird.doLine.lowercased().contains("edible"), ladybird.doLine)
+
+        let zilker = Inspect.read(
+            tags: ["leisure": "garden", "name": "Zilker Botanical Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(zilker.klass, "Botanic garden")
+        XCTAssertEqual(zilker.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(zilker.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(zilker.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(zilker.doLine.lowercased().contains("edible"), zilker.doLine)
+
+        let santaFeGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "Santa Fe Botanical Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(santaFeGarden.klass, "Botanic garden")
+        XCTAssertEqual(santaFeGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(santaFeGarden.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(santaFeGarden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(santaFeGarden.doLine.lowercased().contains("edible"), santaFeGarden.doLine)
+
+        let memorial = Inspect.read(
+            tags: ["leisure": "garden", "name": "Memorial Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertNotEqual(memorial.klass, "Botanic garden")
+
+        let wildflowerPath = Inspect.read(
+            tags: [
+                "highway": "footway",
+                "name": "Ladybird Johnson Wildflower Center Foot Paths",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertNotEqual(wildflowerPath.klass, "Botanic garden")
+        XCTAssertEqual(wildflowerPath.klass, "Trail")
     }
 
     func testABotanicGardenBeatsParkFillAndANamedStreet() {

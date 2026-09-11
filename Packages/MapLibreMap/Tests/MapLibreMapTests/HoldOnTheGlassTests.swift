@@ -187,6 +187,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// range`, not Open reserve. Far from water.
     private static let jornadaRange = CLLocationCoordinate2D(latitude: 32.594082, longitude: -106.823441)
 
+    /// Interior of Chihuahuan Desert Gardens. Phrase `desert garden` on a
+    /// garden sheet; spines, not oleander. 314 m from water.
+    private static let desertGardens = CLLocationCoordinate2D(latitude: 31.769382, longitude: -106.506453)
+
     /// Interior of Wildflower Preserve. Phrase `wildflower preserve`,
     /// botanic not Open reserve, not a wildflower park. 194 m from water.
     private static let wildflowerPreserve = CLLocationCoordinate2D(latitude: 30.242251, longitude: -97.828949)
@@ -194,6 +198,21 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Orchard Garden. Phrase `orchard garden`, botanic
     /// not a meal, not Orchard Gardens Road. Far from water.
     private static let orchardGarden = CLLocationCoordinate2D(latitude: 30.290271, longitude: -97.696468)
+
+    /// Interior of Ladybird Johnson Wildflower Center. OSM garden
+    /// relation, not a ring faked from foot paths. Phrase `wildflower
+    /// center`. 1067 m from water.
+    private static let ladybirdCenter = CLLocationCoordinate2D(latitude: 30.178036, longitude: -97.867541)
+
+    /// Interior of Zilker Botanical Garden. Phrase `botanical garden`.
+    /// 780 m from Barton Creek.
+    private static let zilkerBotanic = CLLocationCoordinate2D(latitude: 30.269689, longitude: -97.774680)
+
+    /// Interior of Santa Fe Botanical Garden. Phrase `botanical garden`.
+    /// Far from water.
+    private static let santaFeBotanic = CLLocationCoordinate2D(latitude: 35.666135, longitude: -105.925544)
+
+    /// Interior of Sandia Mountain Natural History Center. Phrase
 
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
@@ -416,6 +435,20 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · PLANT"
         )
+
+        let gardens = try hold(at: Self.desertGardens, zoom: 16)
+        XCTAssertEqual(gardens.card?.klass, "Cactus garden", "\(gardens)")
+        XCTAssertNotEqual(gardens.card?.klass, "Botanic garden", "\(gardens)")
+        XCTAssertEqual(gardens.card?.title, "Chihuahuan Desert Gardens", "\(gardens)")
+        XCTAssertEqual(gardens.card?.fieldRoute.first, Inspect.cactusTXCard, "\(gardens)")
+        XCTAssertFalse(
+            gardens.card?.fieldRoute.contains(Inspect.plantTXCard) ?? true,
+            "desert gardens opened oleander: \(gardens)"
+        )
+        let gardensDo = gardens.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(gardensDo.contains("prickly pear"), gardens.card?.doLine ?? "")
+        XCTAssertFalse(gardensDo.contains("oleander"), gardens.card?.doLine ?? "")
+        XCTAssertFalse(gardensDo.contains("edible"), gardens.card?.doLine ?? "")
     }
 
     func testHoldingARoseGardenOpensPlantDangerNotCactus() throws {
@@ -953,6 +986,45 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((orchard.card?.doLine.lowercased() ?? "").contains("edible"), orchard.card?.doLine ?? "")
 
+        let ladybird = try hold(at: Self.ladybirdCenter, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(ladybird.card?.klass, "Botanic garden", "\(ladybird)")
+        XCTAssertEqual(ladybird.card?.title, "Ladybird Johnson Wildflower Center", "\(ladybird)")
+        XCTAssertNotEqual(ladybird.card?.klass, "Park", "\(ladybird)")
+        XCTAssertEqual(ladybird.card?.fieldRoute.first, Inspect.plantTXCard, "\(ladybird)")
+        XCTAssertFalse(
+            ladybird.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "a wildflower center opened woodland tree-use: \(ladybird)"
+        )
+        XCTAssertFalse(
+            ladybird.card?.fieldRoute.contains(Inspect.cactusTXCard) ?? true,
+            "a wildflower center opened cactus: \(ladybird)"
+        )
+        XCTAssertFalse((ladybird.card?.doLine.lowercased() ?? "").contains("edible"), ladybird.card?.doLine ?? "")
+
+        let zilker = try hold(at: Self.zilkerBotanic, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(zilker.card?.klass, "Botanic garden", "\(zilker)")
+        XCTAssertEqual(zilker.card?.title, "Zilker Botanical Garden", "\(zilker)")
+        XCTAssertEqual(zilker.card?.fieldRoute.first, Inspect.plantTXCard, "\(zilker)")
+        XCTAssertFalse(
+            zilker.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Zilker Botanical Garden opened woodland tree-use: \(zilker)"
+        )
+        XCTAssertFalse((zilker.card?.doLine.lowercased() ?? "").contains("edible"), zilker.card?.doLine ?? "")
+
+        let santaFe = try hold(at: Self.santaFeBotanic, zoom: 16, packId: "nm")
+        XCTAssertEqual(santaFe.card?.klass, "Botanic garden", "\(santaFe)")
+        XCTAssertEqual(santaFe.card?.title, "Santa Fe Botanical Garden", "\(santaFe)")
+        XCTAssertEqual(santaFe.card?.fieldRoute.first, Inspect.plantTXCard, "\(santaFe)")
+        XCTAssertTrue(
+            santaFe.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Santa Fe Botanical Garden dropped the NM plant-danger card: \(santaFe)"
+        )
+        XCTAssertFalse(
+            santaFe.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "Santa Fe Botanical Garden opened woodland tree-use: \(santaFe)"
+        )
+        XCTAssertFalse((santaFe.card?.doLine.lowercased() ?? "").contains("edible"), santaFe.card?.doLine ?? "")
+
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
         XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
@@ -1449,6 +1521,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("west woodland", Self.westWoodland, 16.0),
             ("rose garden", Self.roseGarden, 16.0),
             ("lush n lean garden", Self.lushNLean, 16.0),
+            ("desert gardens", Self.desertGardens, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),

@@ -414,17 +414,20 @@ public enum Inspect {
     /// Phrase `cactus garden`, `desert garden`, or `desert conservatory`,
     /// not the word `cactus`. Cactus Point Park and Parque Cactus del
     /// Desierto stay parks. A rose garden is botanic, not spines.
+    /// `leisure=garden` is cactus-eligible with a desert/cactus phrase;
+    /// Chihuahuan Desert Gardens is spines, not oleander.
     static func isCactusGarden(_ t: [String: String]) -> Bool {
+        let n = (t["name"] ?? "").lowercased()
+        let phrase = n.contains("cactus garden")
+            || n.contains("desert garden")
+            || n.contains("desert conservatory")
+        guard phrase else { return false }
+        if t["leisure"] == "garden" { return true }
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
-        guard park else { return false }
-        let n = (t["name"] ?? "").lowercased()
-        if n.contains("cactus garden") { return true }
-        if n.contains("desert garden") { return true }
-        if n.contains("desert conservatory") { return true }
-        return false
+        return park
     }
 
     /// A park named Conservatory At North Austin is apartments. A botanic
@@ -432,31 +435,38 @@ public enum Inspect {
     /// and not `arboretum`. A cactus garden opens the cactus card; Cactus
     /// Point Park is not. A beer garden is a patio. Phrase `wildflower
     /// preserve`, not the word `wildflower` — Wildflower Park stays a park.
-    /// Phrase `lush n lean`, not the word `lush`. Phrase `orchard
-    /// garden`, not the word `orchard` — Orchard Gardens Road stays a
-    /// road. Fiesta Gardens is an event park and stays a park. Phrase
-    /// `harvey cornell`, not `rose park` — Wildrose Park stays a park.
+    /// Phrase `wildflower center`, not the word `wildflower` — Ladybird
+    /// Johnson Wildflower Center is a garden relation, not a ring faked
+    /// from foot paths. Those paths stay paths. Phrase `lush n lean`,
+    /// not the word `lush`. Phrase `orchard garden`, not the word
+    /// `orchard` — Orchard Gardens Road stays a road. Fiesta Gardens is
+    /// an event park and stays a park. Phrase `harvey cornell`, not
+    /// `rose park` — Wildrose Park stays a park. `leisure=garden` is
+    /// botanic-eligible with a phrase; it is not a cave, wildlife, or
+    /// open-reserve key. Memorial Garden stays out.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
         let amenity = (t["amenity"] ?? "").lowercased()
         if amenity == "community_garden" || amenity == "community garden" { return true }
+        let n = (t["name"] ?? "").lowercased()
+        let phrase = n.contains("botanic garden")
+            || n.contains("botanical garden")
+            || n.contains("conservatory")
+            || n.contains("cactus garden")
+            || n.contains("desert garden")
+            || n.contains("rose garden")
+            || n.contains("community garden")
+            || n.contains("wildflower preserve")
+            || n.contains("wildflower center")
+            || n.contains("lush n lean")
+            || n.contains("orchard garden")
+            || n.contains("harvey cornell")
+        guard phrase else { return false }
+        if t["leisure"] == "garden" { return true }
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
-        guard park else { return false }
-        let n = (t["name"] ?? "").lowercased()
-        if n.contains("botanic garden") { return true }
-        if n.contains("botanical garden") { return true }
-        if n.contains("conservatory") { return true }
-        if n.contains("cactus garden") { return true }
-        if n.contains("desert garden") { return true }
-        if n.contains("rose garden") { return true }
-        if n.contains("community garden") { return true }
-        if n.contains("wildflower preserve") { return true }
-        if n.contains("lush n lean") { return true }
-        if n.contains("orchard garden") { return true }
-        if n.contains("harvey cornell") { return true }
-        return false
+        return park
     }
 
     /// A mountain ACEC is not picnic woodland. Phrase `area of critical
