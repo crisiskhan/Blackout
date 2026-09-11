@@ -529,6 +529,39 @@ public enum InspectField {
         }
     }
 
+    public static func bookWord(for procedure: Procedure) -> String {
+        switch procedure {
+        case .water: return "WATER"
+        case .plant: return "PLANT"
+        case .bite: return "BITE"
+        case .cave: return "CAVE"
+        case .shelter: return "SHELTER"
+        case .lost: return "LOST"
+        case .heat: return "HEAT"
+        case .cold: return "COLD"
+        case .fungi: return "FUNGI"
+        case .food: return "FOOD"
+        case .animal: return "ANIMAL"
+        case .field: return "FIELD"
+        }
+    }
+
+    /// Unique procedures on the route, in order. One card is not a book —
+    /// a spring is WATER, a hole is CAVE, and the hold should not pretend
+    /// there is a trail behind them.
+    public static func bookLine(for route: [String]) -> String? {
+        var seen = Set<Procedure>()
+        var words: [String] = []
+        for id in route {
+            let next = procedure(for: id)
+            if seen.insert(next).inserted {
+                words.append(bookWord(for: next))
+            }
+        }
+        guard words.count > 1 else { return nil }
+        return words.joined(separator: " · ")
+    }
+
     /// The hold's route, minus cards this book's load does not have.
     /// Texas has no ice-on-rock card; New Mexico has no heat-island. The
     /// state's own card is first when it is present, and the core cards
@@ -823,11 +856,11 @@ extension Inspect {
     private static func treeRangeLine(_ state: String?) -> String {
         switch packState(state) {
         case "TX":
-            return "Live oak, pecan, mesquite, cedar elm. Shade and thorns, not a meal. Field has this pack's tree cards."
+            return "Live oak, pecan, mesquite, cedar elm. Shade and thorns, not a meal. Field has this pack's tree and animal cards."
         case "NM":
-            return "Cottonwood, juniper, piñon. Shade and wind, not a meal. Field has this pack's tree cards."
+            return "Cottonwood, juniper, piñon. Shade and wind, not a meal. Field has this pack's tree and animal cards."
         default:
-            return "Shade, wind, deadfall. Not a meal. Field has the plant cards."
+            return "Shade, wind, deadfall. Not a meal. Field has the plant and animal cards."
         }
     }
 
@@ -849,11 +882,11 @@ extension Inspect {
         case "Bosque or wetland":
             switch packState(state) {
             case "TX":
-                return "Cottonwoods and pecan along the water. Shade, not a meal. Field has this pack's tree cards."
+                return "Cottonwoods and pecan along the water. Shade, not a meal. Field has this pack's tree and animal cards."
             case "NM":
-                return "Rio Grande cottonwood. Shade, not a meal. Field has this pack's tree cards."
+                return "Rio Grande cottonwood. Shade, not a meal. Field has this pack's tree and animal cards."
             default:
-                return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant cards."
+                return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant and animal cards."
             }
         case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat":
             return animalRangeLine(state)

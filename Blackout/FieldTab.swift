@@ -12,6 +12,7 @@ struct FieldTab: View {
     @State private var stepper: StepperState?
     @State private var fieldTrail: [String] = []
     @State private var fieldTrailTotal: Int = 0
+    @State private var fieldTrailBook: String = ""
     @State private var guess: VisionGuess?
     @State private var showVision = false
 
@@ -51,6 +52,7 @@ struct FieldTab: View {
                                         Button(loc(c.title)) {
                                             fieldTrail = []
                                             fieldTrailTotal = 0
+                                            fieldTrailBook = ""
                                             stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
                                         }
                                         .font(.system(size: 15, weight: .semibold))
@@ -181,6 +183,12 @@ struct FieldTab: View {
                 )
             }
             .buttonStyle(HUDActionStyle(filled: false))
+            if let book = InspectField.bookLine(for: route) {
+                Text(book)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -233,6 +241,12 @@ struct FieldTab: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.silver.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
+            if !fieldTrailBook.isEmpty {
+                Text(fieldTrailBook)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             sectionLabel(L10n.t("stop.if", runtime.locale))
             ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
@@ -373,12 +387,14 @@ struct FieldTab: View {
         else { return }
         fieldTrail = Array(present.dropFirst())
         fieldTrailTotal = present.count
+        fieldTrailBook = InspectField.bookLine(for: present) ?? ""
         stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 
     private func leaveCard() {
         fieldTrail = []
         fieldTrailTotal = 0
+        fieldTrailBook = ""
         stepper = nil
     }
 
@@ -391,6 +407,7 @@ struct FieldTab: View {
             }
         }
         fieldTrailTotal = 0
+        fieldTrailBook = ""
         stepper = nil
     }
 

@@ -387,6 +387,58 @@ final class InspectTests: XCTestCase {
         )
     }
 
+    func testTheHoldBookNamesTheProceduresThisPackShips() {
+        // The button has to name the first card the loaded book actually has.
+        // Texas has no ice-on-rock card, so a Franklin peak is ANIMAL then COLD,
+        // not a COLD button that opens javelina. One procedure is not a book.
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeTXCard,
+        ]
+        let wood = InspectField.presentRoute(
+            Inspect.read(tags: ["natural": "wood"]).fieldRoute,
+            in: texas
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: wood),
+            "PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI"
+        )
+        XCTAssertEqual(InspectField.label(for: wood[0]), "FIELD · PLANT")
+
+        let scrub = InspectField.presentRoute(
+            Inspect.read(tags: ["natural": "scrub"]).fieldRoute,
+            in: texas
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: scrub),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
+        )
+
+        let peak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"]).fieldRoute
+        let txPeak = InspectField.presentRoute(peak, in: texas)
+        XCTAssertEqual(InspectField.label(for: txPeak[0]), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: txPeak), "ANIMAL · COLD")
+        XCTAssertNotEqual(InspectField.label(for: peak[0]), "FIELD · ANIMAL")
+
+        let nm: Set<String> = [
+            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.coldCard,
+        ]
+        let nmPeak = InspectField.presentRoute(peak, in: nm)
+        XCTAssertEqual(InspectField.label(for: nmPeak[0]), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: nmPeak), "COLD · ANIMAL")
+
+        XCTAssertNil(InspectField.bookLine(for: Inspect.read(tags: ["natural": "sinkhole"]).fieldRoute))
+        XCTAssertNil(InspectField.bookLine(for: Inspect.read(tags: ["natural": "spring"]).fieldRoute))
+        XCTAssertFalse(Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("edible"))
+        XCTAssertTrue(
+            Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("animal"),
+            Inspect.read(tags: ["natural": "wood"], state: "TX").doLine
+        )
+    }
+
     func testWaterOutranksEverythingElseUnderTheThumb() {
         // Holding where a wash crosses a named road is a question about the
         // wash. The road already has its name written along it, and finding

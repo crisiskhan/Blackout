@@ -341,6 +341,7 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("held.card.title", card)
         self.assertIn('key: "SURE"', card)
         self.assertIn('key: "DO"', card)
+        self.assertIn('key: "BOOK"', card)
         self.assertIn("InspectField.label", card)
         self.assertIn("held.card.fieldRoute", card)
         self.assertIn("MARKED", card)
@@ -424,8 +425,21 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn('case .lost: return "FIELD · LOST"', field)
         hold = CARD.read_text()
         self.assertIn("InspectField.label(for:", hold)
-        self.assertIn("fieldRoute.first", hold)
+        self.assertIn("InspectField.presentRoute", hold)
+        self.assertIn("InspectField.bookLine", hold)
+        self.assertIn('key: "BOOK"', hold)
+        self.assertNotIn("held.card.fieldRoute.first", hold)
         self.assertNotIn("held.card.kind == .water", hold)
+        app = (ROOT / "Blackout/AppRuntime.swift").read_text()
+        self.assertIn("import FieldCorpus", app)
+        self.assertIn("fieldBookIDs", app)
+        self.assertIn("loadFieldBookIDs", app)
+        field = SWIFT.read_text()
+        self.assertIn("func bookLine(for", field)
+        self.assertIn("func bookWord(for", field)
+        tab = FIELD_TAB.read_text()
+        self.assertIn("fieldTrailBook", tab)
+        self.assertIn("InspectField.bookLine", tab)
 
     def test_woodland_and_scrub_ask_for_the_state_books(self):
         inspect = INSPECT.read_text()
@@ -488,6 +502,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Never edible", qa)
         self.assertIn("NEXT · ANIMAL", qa)
         self.assertIn("CARD 1 OF", qa)
+        self.assertIn("BOOK", qa)
+        self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", qa)
+        self.assertIn("FIELD · ANIMAL", qa)
+        self.assertIn("NEXT · COLD", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.

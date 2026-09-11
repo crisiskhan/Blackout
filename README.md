@@ -283,7 +283,12 @@ There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Holding woodland opens that pack's plant
 cards; holding scrub opens that pack's bite and mammal cards; holding a hole
-opens the cave card. FIELD then walks the rest of the route — tree-use,
+opens the cave card. The hold prints `BOOK` as the unique procedures that
+ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
+woodland) and the button names the first card this pack's Field book ships —
+a Texas peak is `FIELD · ANIMAL` then `NEXT · COLD`, not a COLD button for
+an ice-on-rock card Texas does not have. FIELD then walks the rest of the
+route — tree-use,
 cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
 first card. A FIELD still of this pack's mammal, tree, cactus or snake offers

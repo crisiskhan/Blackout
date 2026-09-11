@@ -23,6 +23,7 @@ import RegionalPacks
 import Router
 import Tokens
 import VisionCoreML
+import FieldCorpus
 
 @MainActor
 @Observable
@@ -66,6 +67,10 @@ final class AppRuntime {
     /// first, set by the hold card's FIELD button. The last one is always core,
     /// so the walk down the list cannot come up empty.
     var fieldJump: [String]?
+    /// Card ids the open pack's Field book actually ships. The hold button
+    /// names the first of these on the route, so a Texas peak is not COLD
+    /// for an ice-on-rock card that is not in the book.
+    var fieldBookIDs: Set<String> = []
     var headingDeg: Double?
     var lockChrome = ""
     var speechChrome = ""
@@ -131,6 +136,7 @@ final class AppRuntime {
         }
         marks = MarkStore.load()
         relabelMarksForActivePack()
+        loadFieldBookIDs()
         bootVessel()
         applyMapKeepAwake()
     }
@@ -666,6 +672,7 @@ final class AppRuntime {
             waterWarmup = nil
             warmupActiveWater()
         }
+        loadFieldBookIDs()
     }
 
     func applyMapKeepAwake() {
@@ -759,6 +766,26 @@ final class AppRuntime {
         guard let root = Self.resourceRoot()?.appendingPathComponent("Field") else { return }
         for name in ["field.core.json", "field.tx.json", "field.nm.json"] {
             _ = try? Data(contentsOf: root.appendingPathComponent(name), options: .mappedIfSafe)
+        }
+        loadFieldBookIDs()
+    }
+
+    /// Core plus this state's book, minus the other state's cards. Hold reads
+    /// this so FIELD · COLD is only offered when ice-on-rock is actually
+    /// in the loaded book.
+    private func loadFieldBookIDs() {
+        guard let root = Self.resourceRoot()?.appendingPathComponent("Field") else {
+            fieldBookIDs = []
+            return
+        }
+        let core = (try? Data(contentsOf: root.appendingPathComponent("field.core.json"))) ?? Data()
+        let st = packs?.active?.state.lowercased() ?? "tx"
+        let extra = (try? Data(contentsOf: root.appendingPathComponent("field.\(st).json"))) ?? Data()
+        let cards = (try? FieldCorpus.load(core: core, state: extra)) ?? []
+        if let state = packs?.active?.state {
+            fieldBookIDs = Set(FieldCorpus.visible(cards, state: state).map(\.id))
+        } else {
+            fieldBookIDs = Set(cards.map(\.id))
         }
     }
 

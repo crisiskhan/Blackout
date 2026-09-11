@@ -17,9 +17,17 @@ struct HeldPoint: Equatable {
 /// Comms button, and a thumb resting on a map is not a call for help.
 struct HoldCardView: View {
     let held: HeldPoint
+    /// Cards the open pack actually ships. The button names the first of
+    /// these, not a New Mexico ice card on a Texas peak.
+    let fieldBook: Set<String>
     let onField: () -> Void
     let onMark: () -> Void
     let onClose: () -> Void
+
+    private var fieldRoute: [String] {
+        if fieldBook.isEmpty { return held.card.fieldRoute }
+        return InspectField.presentRoute(held.card.fieldRoute, in: fieldBook)
+    }
 
     @State private var drag: CGFloat = 0
 
@@ -167,6 +175,9 @@ struct HoldCardView: View {
                 hint: nil
             )
             row(key: "DO", value: nil, note: held.card.doLine, hint: nil)
+            if let book = InspectField.bookLine(for: fieldRoute) {
+                row(key: "BOOK", value: nil, note: book, hint: nil)
+            }
             if let date = held.card.packDate {
                 row(key: "PACK", value: date, note: nil, hint: nil)
             }
@@ -202,7 +213,7 @@ struct HoldCardView: View {
     private var actions: some View {
         HStack(spacing: 8) {
             Button(action: onField) {
-                Text(InspectField.label(for: held.card.fieldRoute.first ?? held.card.fieldCardID))
+                Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(HoldActionStyle(filled: false))

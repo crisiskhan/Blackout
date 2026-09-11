@@ -83,6 +83,7 @@ struct MapTab: View {
             if runtime.tab == .map, let held = runtime.held {
                 HoldCardView(
                     held: held,
+                    fieldBook: runtime.fieldBookIDs,
                     onField: { runtime.openFieldFromHold() },
                     onMark: { runtime.markHeld() },
                     onClose: { runtime.closeHold() }
