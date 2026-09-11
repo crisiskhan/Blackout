@@ -273,20 +273,26 @@ final class InspectTests: XCTestCase {
         // The hold names the Field book of the open pack. It does not pin a
         // javelina to a coordinate.
         let txWood = Inspect.read(tags: ["natural": "wood"], state: "TX")
-        XCTAssertTrue(txWood.doLine.contains("Mesquite"), txWood.doLine)
-        XCTAssertTrue(txWood.doLine.contains("cedar elm"), txWood.doLine)
-        XCTAssertTrue(txWood.doLine.contains("not a meal"), txWood.doLine)
-        XCTAssertFalse(txWood.doLine.lowercased().contains("edible"), txWood.doLine)
+        let txWoodDo = txWood.doLine.lowercased()
+        XCTAssertTrue(txWoodDo.contains("mesquite"), txWood.doLine)
+        XCTAssertTrue(txWoodDo.contains("cedar elm"), txWood.doLine)
+        XCTAssertTrue(txWoodDo.contains("not a meal"), txWood.doLine)
+        XCTAssertFalse(txWoodDo.contains("edible"), txWood.doLine)
 
         let nmWood = Inspect.read(tags: ["natural": "wood"], state: "NM")
-        XCTAssertTrue(nmWood.doLine.contains("Cottonwood") || nmWood.doLine.contains("piñon") || nmWood.doLine.contains("Piñon") || nmWood.doLine.contains("juniper") || nmWood.doLine.contains("Juniper"), nmWood.doLine)
+        let nmWoodDo = nmWood.doLine.lowercased()
+        XCTAssertTrue(
+            nmWoodDo.contains("cottonwood") || nmWoodDo.contains("piñon") || nmWoodDo.contains("juniper"),
+            nmWood.doLine
+        )
 
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
-        XCTAssertTrue(txScrub.doLine.contains("Javelina") || txScrub.doLine.contains("Diamondback"), txScrub.doLine)
-        XCTAssertFalse(txScrub.doLine.lowercased().contains("edible"), txScrub.doLine)
-        XCTAssertFalse(txScrub.doLine.lowercased().contains("lives here"), txScrub.doLine)
-        XCTAssertFalse(txScrub.doLine.lowercased().contains("standing here"), txScrub.doLine)
-        XCTAssertTrue(txScrub.doLine.contains("Yucca") || txScrub.doLine.contains("prickly"), txScrub.doLine)
+        let txScrubDo = txScrub.doLine.lowercased()
+        XCTAssertTrue(txScrubDo.contains("javelina") || txScrubDo.contains("diamondback"), txScrub.doLine)
+        XCTAssertFalse(txScrubDo.contains("edible"), txScrub.doLine)
+        XCTAssertFalse(txScrubDo.contains("lives here"), txScrub.doLine)
+        XCTAssertFalse(txScrubDo.contains("standing here"), txScrub.doLine)
+        XCTAssertTrue(txScrubDo.contains("yucca") || txScrubDo.contains("prickly"), txScrub.doLine)
 
         let nmPeak = Inspect.read(tags: ["natural": "peak", "name": "Wheeler"], state: "NM")
         XCTAssertTrue(nmPeak.doLine.lowercased().contains("bear"), nmPeak.doLine)
