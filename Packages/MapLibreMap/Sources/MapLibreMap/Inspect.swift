@@ -126,14 +126,17 @@ public enum Inspect {
     /// name means somebody stood at that exact thing. A cave preserve, a
     /// wildlife sanctuary, a botanic garden, an open reserve, or a glasshouse
     /// is a named (or tagged) sheet that is the question — it beats woodland
-    /// and farm fill, and it beats a named street. The silver outline is the
-    /// hold; the trail that runs through the preserve is not. A street still
-    /// beats generic park and town fill: `landuse=residential` is drawn under
-    /// every street in Las Cruces, so without that a hold downtown answers
-    /// with the subdivision instead of the road under the thumb. Between two
-    /// unnamed records take the
-    /// ground, because out there the biome is the answer and an unnamed ranch
-    /// track is not.
+    /// and farm fill, and it beats a named street. Among those sheets the card
+    /// order holds: a hole, then wildlife, then botanic or glasshouse, then
+    /// open reserve. A raptor site or natural-history center inside a
+    /// wilderness is range, not the mountain — more tags on the wilderness
+    /// sheet must not swallow it. The silver outline is the hold; the trail
+    /// that runs through the preserve is not. A street still beats generic
+    /// park and town fill: `landuse=residential` is drawn under every street
+    /// in Las Cruces, so without that a hold downtown answers with the
+    /// subdivision instead of the road under the thumb. Between two unnamed
+    /// records take the ground, because out there the biome is the answer
+    /// and an unnamed ranch track is not.
     ///
     /// Sampling 4,000 points across the tx-west pack, a street and a piece of
     /// ground are both under the thumb 1.5% of the time, and that split is
@@ -142,10 +145,7 @@ public enum Inspect {
         func rank(_ tags: [String: String]) -> Int {
             let named = !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
             let notablePoint = packGroundPointNaturals.contains(tags["natural"] ?? "")
-            let notableGround = isCavePreserve(tags) || isWildlifeRange(tags)
-                || isBotanicGarden(tags)
-                || isOpenReserve(tags)
-                || tags["landuse"] == "greenhouse_horticulture"
+            let glasshouse = tags["landuse"] == "greenhouse_horticulture"
             let pointWater = packPointClasses.contains(tags["class"] ?? "")
                 || ["storage_tank", "water_tank", "water_well", "cistern", "reservoir_covered"]
                     .contains(tags["man_made"] ?? "")
@@ -157,22 +157,28 @@ public enum Inspect {
                 return 1
             case .water:
                 return 2
-            case .land where notableGround:
+            case .land where isCavePreserve(tags):
                 return 3
-            case .street where named:
+            case .land where isWildlifeRange(tags):
                 return 4
-            case .land where named:
+            case .land where isBotanicGarden(tags) || glasshouse:
                 return 5
-            case .place where named:
+            case .land where isOpenReserve(tags):
                 return 6
-            case .land:
+            case .street where named:
                 return 7
-            case .street:
+            case .land where named:
                 return 8
-            case .place:
+            case .place where named:
                 return 9
-            case .nothing:
+            case .land:
                 return 10
+            case .street:
+                return 11
+            case .place:
+                return 12
+            case .nothing:
+                return 13
             }
         }
         return found

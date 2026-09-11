@@ -1752,6 +1752,21 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isWildlifeRange", pick)
         self.assertIn("isBotanicGarden", pick)
         self.assertIn("isOpenReserve", pick)
+        self.assertLess(
+            pick.index("case .land where isWildlifeRange"),
+            pick.index("case .land where isOpenReserve"),
+            "a wildlife sheet inside a wilderness is range, not the mountain",
+        )
+        self.assertLess(
+            pick.index("case .land where isOpenReserve"),
+            pick.index("case .street where named"),
+            "open reserve still beats a named street",
+        )
+        self.assertLess(
+            pick.index("case .water:"),
+            pick.index("case .land where isWildlifeRange"),
+            "water still outranks wildlife overlay",
+        )
         self.assertNotIn(
             "isNamedBosqueCover",
             pick,

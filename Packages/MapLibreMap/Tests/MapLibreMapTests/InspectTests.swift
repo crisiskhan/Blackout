@@ -2060,6 +2060,43 @@ final class InspectTests: XCTestCase {
             Inspect.read(tags: Inspect.pick([wood, sanctuary, road]), pack: "tx-east").klass,
             "Wildlife range"
         )
+
+        let hawk: [String: String] = [
+            "leisure": "park",
+            "name": "Hawk Watch Open Space",
+        ]
+        let wilderness: [String: String] = [
+            "leisure": "nature_reserve",
+            "boundary": "protected_area",
+            "name": "Sandia Mountain Wilderness",
+        ]
+        XCTAssertEqual(Inspect.pick([hawk, wilderness])["name"], "Hawk Watch Open Space")
+        XCTAssertEqual(Inspect.pick([wilderness, hawk])["name"], "Hawk Watch Open Space")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([hawk, wilderness]), pack: "nm").klass,
+            "Wildlife range"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([hawk, wilderness]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let history: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Sandia Mountain Natural History Center",
+        ]
+        XCTAssertEqual(
+            Inspect.pick([history, wilderness])["name"],
+            "Sandia Mountain Natural History Center"
+        )
+        XCTAssertEqual(
+            Inspect.pick([wilderness, history])["name"],
+            "Sandia Mountain Natural History Center"
+        )
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([history, wilderness]), pack: "nm").klass,
+            "Wildlife range"
+        )
     }
 
     func testAnOpenReserveBeatsWoodlandAndANamedStreet() {
