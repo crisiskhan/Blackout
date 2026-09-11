@@ -975,8 +975,26 @@ final class InspectTests: XCTestCase {
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"
         )
-        XCTAssertEqual(baker.klass, "Open reserve")
-        XCTAssertNotEqual(baker.klass, "Wildlife range")
+        XCTAssertEqual(baker.klass, "Wildlife range")
+        XCTAssertNotEqual(baker.klass, "Open reserve")
+        XCTAssertEqual(baker.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(baker.doLine.lowercased().contains("edible"), baker.doLine)
+
+        let blair = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Blair Woods Sanctuary"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(blair.klass, "Wildlife range")
+        XCTAssertNotEqual(blair.klass, "Open reserve")
+        XCTAssertEqual(blair.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(blair.doLine.lowercased().contains("edible"), blair.doLine)
+
+        let waste = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Waste Management Wildlife Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(waste.klass, "Open reserve")
+        XCTAssertNotEqual(waste.klass, "Wildlife range")
     }
 
     func testAnOpenReserveIsSnakeCountryNotPicnicWoodland() {

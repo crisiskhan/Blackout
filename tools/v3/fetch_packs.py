@@ -354,7 +354,8 @@ NOTABLE_WILDLIFE_NAME = (
     "wilderness park|audubon|flora y fauna|"
     "canyonlands preserve|wetland preserve|"
     "canyon preserve|management unit|ecological research|"
-    "hawk watch|experimental range|natural history"
+    "hawk watch|experimental range|natural history|"
+    "baker sanctuary|blair woods sanctuary"
 )
 
 

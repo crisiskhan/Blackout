@@ -351,24 +351,26 @@ public enum Inspect {
     /// `natural area` / `nature area`, not the word `preserve` — Godzilla
     /// Preserve is a park. Phrase `wildlife preserve`, not the word
     /// `wildlife` — Wildlife Drive stays a park. Phrase `audubon`, not
-    /// a street. Phrase `habitat preserve`, not the word `habitat` —
-    /// Baker Sanctuary stays Open reserve. Phrase `flora y fauna`, not
-    /// a street. Phrase `national preserve`, not the word `preserve`.
-    /// Phrase `wilderness park`, not the word `wilderness`. Phrase
-    /// `canyonlands preserve`, not the word `canyonlands` — Canyonlands
-    /// Trail Park stays a park. Phrase `wetland preserve`, not the
-    /// word `wetland` — Rio Bosque Wetlands Park stays bosque. Phrase
-    /// `canyon preserve`, not the word `canyon` — Santa Fe Canyon
-    /// Preserve is range; Canyon Preserve Interpretive Loop Trail stays
-    /// a path; El Cerro de Los Lunas Preserve and Galisteo Basin
-    /// Preserve stay Open reserve. Phrase `management unit`, not
-    /// `wildlife management area` — a Balcones management unit is
-    /// range; Waste Management Wildlife Park stays Open reserve. Phrase
-    /// `ecological research`, not the word `research`. Phrase `hawk
-    /// watch`, not the word `hawk` — Hawk Watch Trail stays a trail.
-    /// Phrase `experimental range`, not the word `experimental`. Phrase
-    /// `natural history`, not the word `history` — Sandia Mountain
-    /// Natural History Center is range, like a nature center.
+    /// a street. Phrase `habitat preserve`, not the word `habitat`.
+    /// Phrase `flora y fauna`, not a street. Phrase `national
+    /// preserve`, not the word `preserve`. Phrase `wilderness park`,
+    /// not the word `wilderness`. Phrase `canyonlands preserve`, not
+    /// the word `canyonlands` — Canyonlands Trail Park stays a park.
+    /// Phrase `wetland preserve`, not the word `wetland` — Rio Bosque
+    /// Wetlands Park stays bosque. Phrase `canyon preserve`, not the
+    /// word `canyon` — Santa Fe Canyon Preserve is range; Canyon
+    /// Preserve Interpretive Loop Trail stays a path; El Cerro de Los
+    /// Lunas Preserve and Galisteo Basin Preserve stay Open reserve.
+    /// Phrase `management unit`, not `wildlife management area` — a
+    /// Balcones management unit is range; Waste Management Wildlife
+    /// Park stays Open reserve. Phrase `ecological research`, not the
+    /// word `research`. Phrase `hawk watch`, not the word `hawk` —
+    /// Hawk Watch Trail stays a trail. Phrase `experimental range`, not
+    /// the word `experimental`. Phrase `natural history`, not the word
+    /// `history` — Sandia Mountain Natural History Center is range, like
+    /// a nature center. Phrase `baker sanctuary`, not the word
+    /// `baker`. Phrase `blair woods sanctuary`, not the word `blair` or
+    /// `woods`.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -401,6 +403,8 @@ public enum Inspect {
         if n.contains("hawk watch") { return true }
         if n.contains("experimental range") { return true }
         if n.contains("natural history") { return true }
+        if n.contains("baker sanctuary") { return true }
+        if n.contains("blair woods sanctuary") { return true }
         return false
     }
 

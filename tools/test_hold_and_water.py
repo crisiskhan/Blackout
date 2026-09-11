@@ -566,8 +566,8 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     The tab used to draw the whole card list and hang the open card's steps
     underneath it, so arriving from a hold on the ground put you in front of
     seventeen titles with the answer pushed off the bottom of a phone. One
-    card open, or the list, never both — and an open card has to carry the way
-    back to the list, or a hold is a one-way door into it.
+    card open, or SEARCH, never both — and an open card has to carry the way
+    back to SEARCH, or a hold is a one-way door into it.
     """
     tab = (APP / "FieldTab.swift").read_text()
     opened = re.search(r"if let (\w+) = stepper \{", tab)

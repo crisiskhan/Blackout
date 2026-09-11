@@ -173,6 +173,8 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Hornsby Bend Ecological Research Area. Phrase
     /// `ecological research`, not Open reserve. 516 m from water.
     private static let hornsbyBend = CLLocationCoordinate2D(latitude: 30.231564, longitude: -97.646392)
+    private static let bakerSanctuary = CLLocationCoordinate2D(latitude: 30.483183, longitude: -97.865747)
+    private static let blairWoods = CLLocationCoordinate2D(latitude: 30.286405, longitude: -97.675658)
 
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
@@ -741,6 +743,23 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(hornsby.card?.klass, "Open reserve", "\(hornsby)")
         XCTAssertEqual(hornsby.card?.fieldRoute.first, Inspect.mammalEastCard, "\(hornsby)")
         XCTAssertFalse((hornsby.card?.doLine.lowercased() ?? "").contains("edible"), hornsby.card?.doLine ?? "")
+
+        let baker = try hold(at: Self.bakerSanctuary, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(baker.card?.klass, "Wildlife range", "\(baker)")
+        XCTAssertEqual(baker.card?.title, "Baker Sanctuary", "\(baker)")
+        XCTAssertNotEqual(baker.card?.klass, "Open reserve", "\(baker)")
+        XCTAssertEqual(baker.card?.fieldRoute.first, Inspect.mammalEastCard, "\(baker)")
+        XCTAssertTrue((baker.card?.doLine.lowercased() ?? "").contains("hog"), baker.card?.doLine ?? "")
+        XCTAssertFalse((baker.card?.doLine.lowercased() ?? "").contains("javelina"), baker.card?.doLine ?? "")
+        XCTAssertFalse((baker.card?.doLine.lowercased() ?? "").contains("edible"), baker.card?.doLine ?? "")
+
+        let blair = try hold(at: Self.blairWoods, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(blair.card?.klass, "Wildlife range", "\(blair)")
+        XCTAssertEqual(blair.card?.title, "Blair Woods Sanctuary", "\(blair)")
+        XCTAssertNotEqual(blair.card?.klass, "Open reserve", "\(blair)")
+        XCTAssertEqual(blair.card?.fieldRoute.first, Inspect.mammalEastCard, "\(blair)")
+        XCTAssertTrue((blair.card?.doLine.lowercased() ?? "").contains("hog"), blair.card?.doLine ?? "")
+        XCTAssertFalse((blair.card?.doLine.lowercased() ?? "").contains("edible"), blair.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {

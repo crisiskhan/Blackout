@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 6, 5, 34), "tx-east": (14, 8, 34, 3, 18), "nm": (10, 1, 20, 3, 53)}
+        expected = {"tx-west": (2, 0, 6, 5, 34), "tx-east": (14, 8, 36, 3, 16), "nm": (10, 1, 20, 3, 53)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -212,6 +212,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
+        self.assertIn("baker sanctuary", east_blob)
+        self.assertIn("blair woods sanctuary", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
         self.assertIn("barrow nature preserve", east_blob)
         self.assertIn("stillhouse hollow nature preserve", east_blob)
@@ -647,7 +649,13 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Baker Sanctuary"}
             ),
-            "reserve",
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Blair Woods Sanctuary"}
+            ),
+            "wildlife",
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -934,6 +942,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("orchard")', inspect)
         self.assertNotIn('contains("cornell")', inspect)
         self.assertNotIn('contains("harvey")', inspect)
+        self.assertNotIn('contains("baker")', inspect)
+        self.assertNotIn('contains("blair")', inspect)
+        self.assertNotIn('contains("sanctuary")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1497,6 +1508,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("hawk watch", inspect)
         self.assertIn("experimental range", inspect)
         self.assertIn("natural history", inspect)
+        self.assertIn("baker sanctuary", inspect)
+        self.assertIn("blair woods sanctuary", inspect)
         self.assertIn("wildflower preserve", inspect)
         self.assertIn("lush n lean", inspect)
         self.assertIn("orchard garden", inspect)
@@ -2218,6 +2231,8 @@ class GroundFieldSync(unittest.TestCase):
         hornsby_hit = False
         wildflower_hit = False
         orchard_hit = False
+        baker_hit = False
+        blair_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2255,6 +2270,10 @@ class GroundFieldSync(unittest.TestCase):
                     wildflower_hit = True
                 if kind == "botanic" and name == "Orchard Garden" and pip(-97.696468, 30.290271, ring):
                     orchard_hit = True
+                if kind == "wildlife" and name == "Baker Sanctuary" and pip(-97.865747, 30.483183, ring):
+                    baker_hit = True
+                if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
+                    blair_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2307,6 +2326,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             orchard_hit,
             "Orchard Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            baker_hit,
+            "Baker Sanctuary is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            blair_hit,
+            "Blair Woods Sanctuary is not wildlife range on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -2631,6 +2658,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("hawk watch", fetch)
         self.assertIn("experimental range", fetch)
         self.assertIn("natural history", fetch)
+        self.assertIn("baker sanctuary", fetch)
+        self.assertIn("blair woods sanctuary", fetch)
         wildlife_name = fetch.split("NOTABLE_WILDLIFE_NAME", 1)[1].split(
             "def overpass_notable", 1
         )[0]
@@ -2958,6 +2987,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Sandia Mountain Natural History Center", qa)
         self.assertIn("35.126801", qa)
         self.assertIn("natural history", qa)
+        self.assertIn("Baker Sanctuary", qa)
+        self.assertIn("30.483183", qa)
+        self.assertIn("baker sanctuary", qa)
+        self.assertIn("Blair Woods Sanctuary", qa)
+        self.assertIn("30.286405", qa)
+        self.assertIn("blair woods sanctuary", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)
@@ -3458,8 +3493,8 @@ class GroundFieldSync(unittest.TestCase):
     def test_all_cards_lists_this_pack_chapter_not_the_other(self):
         """Hold and VISION keep the whole Texas book so a javelina still opens.
 
-        ALL CARDS is the menu of this pack. East must not list mesquite and
-        javelina as if they were the local chapter.
+        SEARCH ranks this pack's chapter. East must not list mesquite and
+        javelina as if they were the local chapter. Empty SEARCH is not a dump.
         """
         corpus = (
             ROOT / "Packages/FieldCorpus/Sources/FieldCorpus/FieldCorpus.swift"

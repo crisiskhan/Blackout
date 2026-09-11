@@ -19,14 +19,17 @@ final class FieldCorpusTests: XCTestCase {
         XCTAssertEqual(FieldCorpus.chapter(cards, pack: nil).count, 3)
     }
 
-    func testAskEmptyQueryReturnsTheChapterUnchanged() {
+    func testAskEmptyQueryDoesNotDumpTheChapter() {
         let cards = [
             card("water-disinfect", category: "water", title: "Make water less bad"),
             card("fire-stove", category: "fire", title: "Stove and small fire"),
         ]
-        XCTAssertEqual(FieldCorpus.ask(cards, query: "", locale: "en").map(\.id), cards.map(\.id))
-        XCTAssertEqual(FieldCorpus.ask(cards, query: "   ", locale: "en").map(\.id), cards.map(\.id))
-        XCTAssertEqual(FieldCorpus.ask(cards, query: "how do I", locale: "en").map(\.id), cards.map(\.id))
+        XCTAssertTrue(FieldCorpus.ask(cards, query: "", locale: "en").isEmpty)
+        XCTAssertTrue(FieldCorpus.ask(cards, query: "   ", locale: "en").isEmpty)
+        XCTAssertTrue(FieldCorpus.ask(cards, query: "how do I", locale: "en").isEmpty)
+        XCTAssertFalse(FieldCorpus.asking(""))
+        XCTAssertFalse(FieldCorpus.asking("how do I"))
+        XCTAssertTrue(FieldCorpus.asking("snake"))
     }
 
     func testAskRanksATitleHitAndDropsGibberish() {

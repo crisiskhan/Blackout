@@ -135,12 +135,18 @@ public enum FieldCorpus {
         }
     }
 
+    /// True when the query still has a situation word after stopwords.
+    /// Empty and "how do I" are waiting, not a dump of the book.
+    public static func asking(_ query: String) -> Bool {
+        !tokens(query).isEmpty
+    }
+
     /// Rank the open chapter for a situation. Empty or stopword-only query
-    /// returns the chapter as-is. Unknown words return nothing — the catalog
-    /// does not invent a card.
+    /// returns nothing — SEARCH is waiting, not a dump of the book.
+    /// Unknown words return nothing — the catalog does not invent a card.
     public static func ask(_ cards: [FieldCard], query: String, locale: String) -> [FieldCard] {
         let qTokens = tokens(query)
-        if qTokens.isEmpty { return cards }
+        if qTokens.isEmpty { return [] }
         var expanded = Set(qTokens)
         for word in qTokens {
             if let extra = expand[word] {

@@ -69,23 +69,25 @@ CAVE_PRESERVE_KEYS = {
 # `preserve`. Godzilla Preserve stays a park. Phrase `wildlife
 # preserve`, not the word `wildlife`. Wildlife Drive stays a park.
 # Phrase `audubon`, not a street — overlay still needs park keys.
-# Phrase `habitat preserve`, not the word `habitat`. Baker Sanctuary
-# stays Open reserve. Phrase `flora y fauna`, not a street. Phrase
-# `national preserve`, not the word `preserve`. Phrase `wilderness
-# park`, not the word `wilderness`. Wilderness Gate stays apartments.
-# Phrase `canyonlands preserve`, not the word `canyonlands`.
-# Canyonlands Trail Park stays a park. Phrase `wetland preserve`,
-# not the word `wetland`. Rio Bosque Wetlands Park stays bosque.
-# Phrase `canyon preserve`, not the word `canyon`. Santa Fe Canyon
-# Preserve is range. Canyon Preserve Interpretive Loop Trail stays a
-# path. El Cerro de Los Lunas Preserve and Galisteo Basin Preserve
-# stay Open reserve. Phrase `management unit`, not `wildlife
-# management area`. A Balcones management unit is range. Waste
-# Management Wildlife Park stays Open reserve. Phrase `ecological
-# research`, not the word `research`. Phrase `hawk watch`, not the
-# word `hawk`. Hawk Watch Trail stays a trail. Phrase `experimental
-# range`, not the word `experimental`. Phrase `natural history`, not
-# the word `history`. Sandia Mountain Natural History Center is range.
+# Phrase `habitat preserve`, not the word `habitat`. Phrase `flora y
+# fauna`, not a street. Phrase `national preserve`, not the word
+# `preserve`. Phrase `wilderness park`, not the word `wilderness`.
+# Wilderness Gate stays apartments. Phrase `canyonlands preserve`,
+# not the word `canyonlands`. Canyonlands Trail Park stays a park.
+# Phrase `wetland preserve`, not the word `wetland`. Rio Bosque
+# Wetlands Park stays bosque. Phrase `canyon preserve`, not the word
+# `canyon`. Santa Fe Canyon Preserve is range. Canyon Preserve
+# Interpretive Loop Trail stays a path. El Cerro de Los Lunas
+# Preserve and Galisteo Basin Preserve stay Open reserve. Phrase
+# `management unit`, not `wildlife management area`. A Balcones
+# management unit is range. Waste Management Wildlife Park stays Open
+# reserve. Phrase `ecological research`, not the word `research`.
+# Phrase `hawk watch`, not the word `hawk`. Hawk Watch Trail stays a
+# trail. Phrase `experimental range`, not the word `experimental`.
+# Phrase `natural history`, not the word `history`. Sandia Mountain
+# Natural History Center is range. Phrase `baker sanctuary`, not the
+# word `baker`. Phrase `blair woods sanctuary`, not the word `blair`
+# or `woods`.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -112,6 +114,8 @@ WILDLIFE_RANGE_PHRASES = (
     "hawk watch",
     "experimental range",
     "natural history",
+    "baker sanctuary",
+    "blair woods sanctuary",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

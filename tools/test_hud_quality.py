@@ -499,6 +499,7 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("step: Int", speech)
         self.assertIn("ForEach(listCards)", field)
         self.assertIn("FieldCorpus.ask(", field)
+        self.assertIn("FieldCorpus.asking(", field)
         self.assertIn('TextField("SEARCH"', field)
         self.assertIn("NO MATCH", field)
         self.assertNotIn("mapSearchHitCap", field)

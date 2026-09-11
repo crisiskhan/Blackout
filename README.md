@@ -178,10 +178,11 @@ books, because both sides are hand-written strings in two different languages.
 Arriving there used to land on a menu. The tab drew all seventeen card titles
 in a `List` and hung the open card's steps underneath them, which is fine when
 you came to browse and useless when the map already chose: on a phone the list
-ate the height and the answer was below the fold. It shows one card or the
-list, never both, with `ALL CARDS` on the open card so a hold is not a one-way
-door into it. The catalog SEARCH ranks this pack's chapter for a situation
-typed in; no hit is `NO MATCH`, not an invented card, and FIELD hits scroll.
+ate the height and the answer was below the fold. It shows one card or SEARCH,
+never both, with `ALL CARDS` on the open card so a hold is not a one-way
+door into it. Empty SEARCH does not dump the book. The catalog SEARCH ranks
+this pack's chapter for a situation typed in; no hit is `NO MATCH`, not an
+invented card, and FIELD hits scroll.
 Two things surfaced while moving it. Every card ships both
 languages and the list read the locale while the steps did not, so a Spanish
 reader picked a card by its Spanish title and got the instructions in English.
@@ -312,8 +313,8 @@ cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · 
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
 first card. A FIELD still of this pack's mammal, tree, cactus or snake offers
 the same procedure (`FIELD · ANIMAL` / `PLANT` / `BITE`). UNKNOWN and no
-model do not invent a card. ALL CARDS lists this pack's chapter, not the
-other pack's javelina or mesquite. A javelina still still opens the west mammal card.
+model do not invent a card. ALL CARDS returns to SEARCH, not a dump of
+the other pack's javelina or mesquite. A javelina still still opens the west mammal card.
 Animals of this country live in the Field book, not
 as GPS pins.
 

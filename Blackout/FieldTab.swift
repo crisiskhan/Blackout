@@ -24,9 +24,10 @@ struct FieldTab: View {
             statusTone: fieldTone
         ) {
             VStack(alignment: .leading, spacing: 10) {
-                // One card open, or the list. Never both. The map's FIELD button
-                // has already chosen a card, and landing on the list with the
-                // steps pushed under it makes you hunt for the thing you picked.
+                // One card open, or SEARCH. Never both. The map's FIELD button
+                // has already chosen a card, and landing on a dump of the book
+                // with the steps pushed under it makes you hunt for the thing
+                // you picked.
                 Group {
                     if let s = stepper {
                         ScrollView {
@@ -47,18 +48,10 @@ struct FieldTab: View {
                                         .font(.system(size: 13, weight: .heavy))
                                         .foregroundStyle(Theme.warn)
                                 }
-                            } else {
+                            } else if FieldCorpus.asking(catalogQuery) {
                                 ScrollView {
                                     VStack(alignment: .leading, spacing: 1) {
                                         ForEach(listCards) { c in
-                                            if catalogQuery.isEmpty,
-                                               listCards.first(where: { $0.category == c.category })?.id == c.id {
-                                                Text(c.category.uppercased())
-                                                    .font(.system(size: 11, weight: .heavy))
-                                                    .foregroundStyle(Theme.silver.opacity(0.5))
-                                                    .padding(.top, 10)
-                                                    .padding(.bottom, 4)
-                                            }
                                             Button(loc(c.title)) {
                                                 fieldTrail = []
                                                 fieldTrailTotal = 0
@@ -244,16 +237,11 @@ struct FieldTab: View {
         runtime.locale == "es" ? text.es : text.en
     }
 
-    /// One card, open at one step, with the way back to the list on it. The
+    /// One card, open at one step, with the way back to SEARCH on it. The
     /// map comes straight in here, so without that way back a hold on the
     /// ground would be a one-way door into a single card.
     private func open(_ s: StepperState) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(loc(s.card.title))
-                    .font(.system(size: 18, weight: .heavy))
-                    .foregroundStyle(Color.white)
-                Spacer(minLength: 8)
                 Button("ALL CARDS") { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
@@ -330,7 +318,8 @@ struct FieldTab: View {
                 // broken button rather than the end of the card. A hold that
                 // named a trail of plant / bite / use cards still has work
                 // after this one — name that procedure the same way the hold
-                // button did, then open it. ALL CARDS dumps the rest.
+                // button did, then open it. ALL CARDS dumps the rest and
+                // returns to SEARCH.
                 Button(stepTitle(s)) {
                     if s.isLast {
                         advanceTrail()
@@ -372,15 +361,17 @@ struct FieldTab: View {
             .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
-    /// ALL CARDS is this pack's chapter. The loaded `cards` book stays the
-    /// whole state so a javelina still still opens the west mammal card.
-    /// SEARCH ranks that chapter. It does not invent a card the book lacks.
+    /// SEARCH is the menu. Empty is waiting, not a dump of the book. The
+    /// loaded `cards` book stays the whole state so a javelina still still
+    /// opens the west mammal card. SEARCH ranks this pack's chapter. It
+    /// does not invent a card the book lacks. ALL CARDS on an open card
+    /// returns here.
     private var catalogQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var catalogMiss: Bool {
-        !catalogQuery.isEmpty && listCards.isEmpty
+        FieldCorpus.asking(catalogQuery) && listCards.isEmpty
     }
 
     private var listCards: [FieldCard] {
@@ -428,7 +419,7 @@ struct FieldTab: View {
     /// heat island card only ships in Texas, the ice-on-rock card only in New
     /// Mexico — and keep the rest of the route as a trail so DONE can open
     /// plant-use after plant-danger, bite after the state's snake, shelter
-    /// after the trees. ALL CARDS dumps the trail.
+    /// after the trees. ALL CARDS dumps the trail and returns to SEARCH.
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil

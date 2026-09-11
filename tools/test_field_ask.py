@@ -85,12 +85,14 @@ class FieldAskGlassTests(unittest.TestCase):
         corpus = read("Packages", "FieldCorpus", "Sources", "FieldCorpus", "FieldCorpus.swift")
         tab = read("Blackout", "FieldTab.swift")
         self.assertIn("static func ask(", corpus)
+        self.assertIn("static func asking(", corpus)
         self.assertIn("thirst", corpus)
         self.assertIn("starting", corpus)
         self.assertIn("víbora", corpus)
         self.assertIn("vibora", corpus)
         self.assertIn("forage", corpus)
         self.assertIn("FieldCorpus.ask(", tab)
+        self.assertIn("FieldCorpus.asking(", tab)
         self.assertIn('TextField("SEARCH"', tab)
         self.assertIn("textInputAutocapitalization(.never)", tab)
         self.assertIn("NO MATCH", tab)
@@ -196,6 +198,10 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("starting from nothing", qa.lower())
         self.assertIn("wool", qa.lower())
         self.assertIn("FIELD hits scroll", qa)
+        self.assertIn("Empty query is SEARCH", qa)
+        self.assertIn("not a dump of the book", qa)
+        self.assertNotIn("Empty query is ALL CARDS", qa)
+        self.assertNotIn("best in class", qa.lower())
 
 
 if __name__ == "__main__":
