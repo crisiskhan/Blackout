@@ -716,6 +716,38 @@ class GroundFieldSync(unittest.TestCase):
         west_tree = json.dumps(by_id["tx-tree-use"]).lower()
         self.assertIn("mesquite", west_tree)
 
+    def test_all_cards_lists_this_pack_chapter_not_the_other(self):
+        """Hold and VISION keep the whole Texas book so a javelina still opens.
+
+        ALL CARDS is the menu of this pack. East must not list mesquite and
+        javelina as if they were the local chapter.
+        """
+        corpus = (
+            ROOT / "Packages/FieldCorpus/Sources/FieldCorpus/FieldCorpus.swift"
+        ).read_text()
+        self.assertIn("func chapter(", corpus)
+        self.assertIn("var packs: [String]?", corpus)
+        tab = FIELD_TAB.read_text()
+        self.assertIn("listCards", tab)
+        self.assertIn("FieldCorpus.chapter(", tab)
+        self.assertIn("ForEach(listCards)", tab)
+        self.assertIn("runtime.packs?.active?.id", tab)
+        book = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
+        by_id = {c["id"]: c for c in book["cards"]}
+        self.assertEqual(by_id["tx-mammal"].get("packs"), ["tx-west"])
+        self.assertEqual(by_id["tx-tree-use"].get("packs"), ["tx-west"])
+        self.assertEqual(by_id["tx-game"].get("packs"), ["tx-west"])
+        self.assertEqual(by_id["tx-snake"].get("packs"), ["tx-west"])
+        self.assertEqual(by_id["tx-east-mammal"].get("packs"), ["tx-east"])
+        self.assertEqual(by_id["tx-east-tree-use"].get("packs"), ["tx-east"])
+        self.assertEqual(by_id["tx-east-game"].get("packs"), ["tx-east"])
+        self.assertEqual(by_id["tx-east-snake"].get("packs"), ["tx-east"])
+        self.assertNotIn("packs", by_id["tx-plant-danger"])
+        self.assertNotIn("packs", by_id["tx-cactus"])
+        qa = (ROOT / "docs/SOLO_QA.md").read_text()
+        self.assertIn("ALL CARDS", qa)
+        self.assertIn("tx-mammal", qa)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

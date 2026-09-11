@@ -159,6 +159,17 @@ def field_schema() -> None:
                     bad(f"field.tx missing {east_id}")
                 else:
                     ok(f"field.tx has {east_id}")
+            allowed_packs = {"tx-west", "tx-east", "nm"}
+            for c in book["cards"]:
+                packs = c.get("packs")
+                if not packs:
+                    continue
+                if set(packs) - allowed_packs:
+                    bad(f"{c['id']} packs {packs} not in {sorted(allowed_packs)}")
+                if c["id"].startswith("tx-east-") and packs != ["tx-east"]:
+                    bad(f"{c['id']} must be tx-east only")
+                if c["id"] in {"tx-tree-use", "tx-mammal", "tx-game", "tx-snake"} and packs != ["tx-west"]:
+                    bad(f"{c['id']} must be tx-west only")
     books = {p.stem.split(".")[-1] for p in root.glob("field.*.json")} - {"core"}
     if books != set(SHIPPED_STATES):
         bad(f"field books {sorted(books)} — only {list(SHIPPED_STATES)} ship")

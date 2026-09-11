@@ -1068,6 +1068,7 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
     public var speak: Bool
     public var sendToParty: Bool
     public var steps: [FieldStep]
+    public var packs: [String]?
 }
 
 public struct FieldBook: Codable, Equatable, Sendable {
@@ -1094,6 +1095,15 @@ public enum FieldCorpus {
     public static func visible(_ cards: [FieldCard], state: String) -> [FieldCard] {
         cards.filter { $0.states.contains(state) }
     }
+
+    public static func chapter(_ cards: [FieldCard], pack: String?) -> [FieldCard] {
+        guard let pack, !pack.isEmpty else { return cards }
+        let id = pack.lowercased()
+        return cards.filter { card in
+            guard let packs = card.packs, !packs.isEmpty else { return true }
+            return packs.contains { $0.lowercased() == id }
+        }
+    }
 }
 
 public enum FieldError: Error { case schema, emptySteps, incompleteStep }
@@ -1108,6 +1118,29 @@ final class FieldCorpusTests: XCTestCase {
     func testRejectsBadSchema() {
         let bad = Data(#"{"schema":"1.0","id":"x","cards":[]}"#.utf8)
         XCTAssertTrue(((try? FieldCorpus.load(core: bad, state: bad)) ?? []).isEmpty)
+    }
+
+    func testChapterHidesTheOtherPacksRangeCards() {
+        let loc = FieldLoc(en: "a", es: "a")
+        let step = FieldStep(
+            do: loc, why: loc, child: loc, stop: loc, image: "x.png"
+        )
+        func card(_ id: String, packs: [String]?) -> FieldCard {
+            FieldCard(
+                schema: "1.4", id: id, category: "animals", states: ["TX"],
+                title: loc, situation: loc, stop_if: [], get_to_care: loc,
+                speak: true, sendToParty: true, steps: [step], packs: packs
+            )
+        }
+        let west = card("tx-mammal", packs: ["tx-west"])
+        let east = card("tx-east-mammal", packs: ["tx-east"])
+        let shared = card("tx-plant-danger", packs: nil)
+        let cards = [west, east, shared]
+        let eastList = FieldCorpus.chapter(cards, pack: "tx-east")
+        XCTAssertEqual(eastList.map(\.id), ["tx-east-mammal", "tx-plant-danger"])
+        let westList = FieldCorpus.chapter(cards, pack: "tx-west")
+        XCTAssertEqual(westList.map(\.id), ["tx-mammal", "tx-plant-danger"])
+        XCTAssertEqual(FieldCorpus.chapter(cards, pack: nil).count, 3)
     }
 }
 ''',

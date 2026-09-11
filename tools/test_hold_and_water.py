@@ -573,7 +573,7 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     fallback = re.match(r"\}\s*else \{", rest)
     if not fallback:
         fail("FieldTab has no list to fall back to when no card is open")
-    if "ForEach(cards)" not in brace_body(rest, fallback.end() - 1):
+    if "ForEach(listCards)" not in brace_body(rest, fallback.end() - 1):
         fail("FieldTab never shows the card list at all")
     print("OK   a land hold opens one card's steps, with the list behind ALL CARDS")
 

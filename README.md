@@ -295,7 +295,9 @@ cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · 
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
 first card. A FIELD still of this pack's mammal, tree, cactus or snake offers
 the same procedure (`FIELD · ANIMAL` / `PLANT` / `BITE`). UNKNOWN and no
-model do not invent a card. Animals of this country live in the Field book, not
+model do not invent a card. ALL CARDS lists this pack's chapter, not the
+other pack's javelina or mesquite. A javelina still still opens the west mammal card.
+Animals of this country live in the Field book, not
 as GPS pins.
 
 Repairing geometry is part of tiling now. OSM has plenty of areas whose ring

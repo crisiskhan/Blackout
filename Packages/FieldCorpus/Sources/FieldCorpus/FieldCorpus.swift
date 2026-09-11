@@ -58,6 +58,10 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
     public var speak: Bool
     public var sendToParty: Bool
     public var steps: [FieldStep]
+    /// Pack ids this card belongs to. Absent means every pack of `states`.
+    /// East Texas woodland is not the west javelina chapter; a photographed
+    /// javelina still opens the west card because the loaded book stays whole.
+    public var packs: [String]?
 
     public init(
         schema: String,
@@ -70,7 +74,8 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
         get_to_care: FieldLoc,
         speak: Bool,
         sendToParty: Bool,
-        steps: [FieldStep]
+        steps: [FieldStep],
+        packs: [String]? = nil
     ) {
         self.schema = schema
         self.id = id
@@ -83,6 +88,7 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
         self.speak = speak
         self.sendToParty = sendToParty
         self.steps = steps
+        self.packs = packs
     }
 }
 
@@ -115,6 +121,18 @@ public enum FieldCorpus {
 
     public static func visible(_ cards: [FieldCard], state: String) -> [FieldCard] {
         cards.filter { $0.states.contains(state) }
+    }
+
+    /// ALL CARDS of the open pack. Cards with no `packs` stay on every pack
+    /// of their state. The loaded book is still the whole state, so VISION
+    /// can open a west mammal card from a javelina still on East Texas.
+    public static func chapter(_ cards: [FieldCard], pack: String?) -> [FieldCard] {
+        guard let pack, !pack.isEmpty else { return cards }
+        let id = pack.lowercased()
+        return cards.filter { card in
+            guard let packs = card.packs, !packs.isEmpty else { return true }
+            return packs.contains { $0.lowercased() == id }
+        }
     }
 }
 

@@ -57,7 +57,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## FIELD
 
-- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list and dumps any remaining biome trail.
+- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to the list and dumps any remaining biome trail. TX EAST ALL CARDS does not list `tx-mammal` / javelina; TX WEST ALL CARDS does not list `tx-east-tree-use`. A `tx-javelina` still still opens `tx-mammal`.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.

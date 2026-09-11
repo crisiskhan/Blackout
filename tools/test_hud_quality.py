@@ -490,7 +490,7 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn('L10n.t("vision.none"', field)
         self.assertIn("step: s.index", field)
         self.assertIn("step: Int", speech)
-        self.assertIn("ForEach(cards)", field)
+        self.assertIn("ForEach(listCards)", field)
 
     def test_solo_qa_scores_stop_if_and_step_speak(self):
         qa = read("docs", "SOLO_QA.md")

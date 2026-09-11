@@ -41,8 +41,8 @@ struct FieldTab: View {
                         } else {
                             ScrollView {
                                 VStack(alignment: .leading, spacing: 1) {
-                                    ForEach(cards) { c in
-                                        if cards.first(where: { $0.category == c.category })?.id == c.id {
+                                    ForEach(listCards) { c in
+                                        if listCards.first(where: { $0.category == c.category })?.id == c.id {
                                             Text(c.category.uppercased())
                                                 .font(.system(size: 11, weight: .heavy))
                                                 .foregroundStyle(Theme.silver.opacity(0.5))
@@ -90,6 +90,7 @@ struct FieldTab: View {
         }
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
+        .onChange(of: runtime.packs?.active?.id) { _, _ in load() }
     }
 
     private var fieldStatus: String {
@@ -355,6 +356,12 @@ struct FieldTab: View {
         Text(title)
             .font(.system(size: 11, weight: .heavy))
             .foregroundStyle(Theme.silver.opacity(0.5))
+    }
+
+    /// ALL CARDS is this pack's chapter. The loaded `cards` book stays the
+    /// whole state so a javelina still still opens the west mammal card.
+    private var listCards: [FieldCard] {
+        FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
     }
 
     private func load() {

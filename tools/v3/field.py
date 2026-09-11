@@ -55,8 +55,9 @@ def card(
     steps: list[dict],
     states: list[str] | None = None,
     speak: bool = True,
+    packs: list[str] | None = None,
 ) -> dict:
-    return {
+    out = {
         "schema": "1.4",
         "id": cid,
         "category": category,
@@ -69,6 +70,18 @@ def card(
         "sendToParty": True,
         "steps": steps,
     }
+    if packs:
+        out["packs"] = packs
+    return out
+
+
+def packs_for(cid: str) -> list[str] | None:
+    """East and west Texas share a state book. Range cards name the pack."""
+    if cid.startswith("tx-east-"):
+        return ["tx-east"]
+    if cid in {"tx-tree-use", "tx-mammal", "tx-game", "tx-snake"}:
+        return ["tx-west"]
+    return None
 
 
 def core_cards() -> list[dict]:
@@ -994,6 +1007,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
             )
         )
     for cid, states, title, title_es, sit, sit_es, care, care_es in plants:
@@ -1025,6 +1039,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
                 speak=True,
             )
         )
@@ -1090,6 +1105,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
                 speak=True,
             )
         )
@@ -1155,6 +1171,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
             )
         )
     cactus = [
@@ -1208,6 +1225,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
                 speak=True,
             )
         )
@@ -1273,6 +1291,7 @@ def thickness_state() -> list[dict]:
                     )
                 ],
                 states=states,
+                packs=packs_for(cid),
             )
         )
     return out

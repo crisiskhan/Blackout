@@ -258,6 +258,9 @@
             "4": "Patient / still limb / navigation / SOS offer if a net exists."
           }
         }
+      ],
+      "packs": [
+        "tx-west"
       ]
     },
     {
@@ -316,6 +319,9 @@
             "4": "Patient / still limb / navigation / SOS offer if a net exists."
           }
         }
+      ],
+      "packs": [
+        "tx-east"
       ]
     },
     {
@@ -427,6 +433,9 @@
             "4": "Shade / fire / water / watch the rest."
           }
         }
+      ],
+      "packs": [
+        "tx-west"
       ]
     },
     {
@@ -485,6 +494,9 @@
             "4": "Shade / fire / water / watch the rest."
           }
         }
+      ],
+      "packs": [
+        "tx-east"
       ]
     },
     {
@@ -543,6 +555,9 @@
             "4": "Watch / move kids / food / rear guard."
           }
         }
+      ],
+      "packs": [
+        "tx-west"
       ]
     },
     {
@@ -601,6 +616,9 @@
             "4": "Watch / move kids / food / rear guard."
           }
         }
+      ],
+      "packs": [
+        "tx-east"
       ]
     },
     {
@@ -712,6 +730,9 @@
             "4": "Gut / cook / water / keep animals and kids off the pile."
           }
         }
+      ],
+      "packs": [
+        "tx-west"
       ]
     },
     {
@@ -770,6 +791,9 @@
             "4": "Gut / cook / water / keep animals and kids off the pile."
           }
         }
+      ],
+      "packs": [
+        "tx-east"
       ]
     }
   ]
