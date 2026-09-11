@@ -974,6 +974,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("coyote and deer range", do)
         self.assertIn("black bear range", do)
         self.assertIn("Copperhead and cottonmouth country", do)
+        self.assertIn("Hog range", do)
         self.assertIn("Cottonmouth country", do)
         self.assertIn("loblolly pine", do)
         self.assertIn("Hog country", do)
@@ -1011,6 +1012,12 @@ class GroundFieldSync(unittest.TestCase):
         )[0].lower()
         self.assertIn("javelina", woodland_hold)
         self.assertIn("hog country", woodland_hold)
+        self.assertIn("cottonwood", woodland_hold)
+        self.assertIn("rio grande cottonwood", woodland_hold)
+        self.assertIn("mesquite", woodland_hold)
+        self.assertIn("loblolly pine", woodland_hold)
+        self.assertNotIn("aspen", woodland_hold)
+        self.assertNotIn("edible", woodland_hold)
         tx_plant_do = next(
             c
             for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
@@ -1379,8 +1386,7 @@ class GroundFieldSync(unittest.TestCase):
         cottonwood. West titles stay pack-true, like the west snake card.
         """
         hold = SWIFT.read_text()
-        self.assertIn("Cottonwood, juniper, piñon", hold)
-        self.assertIn("Rio Grande cottonwood", hold)
+        self.assertIn("Rio Grande cottonwood, juniper, piñon", hold)
         self.assertIn("Cottonwoods and pecan along the water", hold)
 
         def blob(state: str, cid: str) -> str:
@@ -1445,6 +1451,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("diamondback", nm_scrub)
         self.assertIn("cholla", nm_scrub)
         self.assertNotIn("lives here", nm_scrub)
+        east_scrub = animal.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()
+        self.assertIn("cottonmouth", east_scrub)
+        self.assertIn("hog", east_scrub)
+        self.assertNotIn("javelina", east_scrub)
         wildlife = do.split('case "Wildlife range":', 1)[1].split(
             'case "Bosque or wetland":', 1
         )[0]

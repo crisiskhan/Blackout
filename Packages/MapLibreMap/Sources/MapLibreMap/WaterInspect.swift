@@ -910,14 +910,17 @@ extension Inspect {
         }
     }
 
+    /// Woodland and park range: the same trees tree-use SPEAK names,
+    /// plus this pack's animals as range, not a pin. Aspen stays off
+    /// the hold — Field says it is high country.
     private static func treeRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Live oak, pecan, mesquite, cedar elm. Javelina and coyote range. Shade and thorns, not a meal."
+            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Javelina and coyote range. Shade and thorns, not a meal."
         case .txEast:
-            return "Live oak, pecan, cedar elm, loblolly pine. Coyote and deer range. Hog country. Shade, not a meal."
+            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. Coyote and deer range. Hog country. Shade, not a meal."
         case .nm:
-            return "Cottonwood, juniper, piñon. Black bear and elk range. Shade and wind, not a meal."
+            return "Rio Grande cottonwood, juniper, piñon. Black bear and elk range. Shade and wind, not a meal."
         case .unknown:
             return "Shade, wind, deadfall. Not a meal. Field has the plant and animal cards."
         }
@@ -943,7 +946,7 @@ extension Inspect {
         case .txWest:
             return "Diamondback and javelina country. Yucca and prickly pear. Spines, not a meal."
         case .txEast:
-            return "Copperhead and cottonmouth country. Yucca and prickly pear. Spines, not a meal."
+            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. Spines, not a meal."
         case .nm:
             return "Prairie rattler or diamondback country. Cholla and yucca. Spines, not a meal."
         case .unknown:

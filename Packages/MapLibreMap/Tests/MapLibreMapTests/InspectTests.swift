@@ -796,6 +796,8 @@ final class InspectTests: XCTestCase {
             nmWoodDo.contains("cottonwood") || nmWoodDo.contains("piñon") || nmWoodDo.contains("juniper"),
             nmWood.doLine
         )
+        XCTAssertTrue(nmWoodDo.contains("rio grande"), nmWood.doLine)
+        XCTAssertFalse(nmWoodDo.contains("aspen"), nmWood.doLine)
         XCTAssertTrue(nmWoodDo.contains("bear") || nmWoodDo.contains("elk"), nmWood.doLine)
 
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
@@ -830,11 +832,13 @@ final class InspectTests: XCTestCase {
         let westWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-west")
         XCTAssertTrue(westWood.doLine.lowercased().contains("javelina"), westWood.doLine)
         XCTAssertTrue(westWood.doLine.lowercased().contains("mesquite"), westWood.doLine)
+        XCTAssertTrue(westWood.doLine.lowercased().contains("cottonwood"), westWood.doLine)
 
         let eastWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-east")
         let eastWoodDo = eastWood.doLine.lowercased()
         XCTAssertTrue(eastWoodDo.contains("cedar elm") || eastWoodDo.contains("live oak"), eastWood.doLine)
         XCTAssertTrue(eastWoodDo.contains("pine"), eastWood.doLine)
+        XCTAssertTrue(eastWoodDo.contains("cottonwood"), eastWood.doLine)
         XCTAssertTrue(eastWoodDo.contains("coyote") || eastWoodDo.contains("deer"), eastWood.doLine)
         XCTAssertTrue(eastWoodDo.contains("hog"), eastWood.doLine)
         XCTAssertFalse(eastWoodDo.contains("javelina"), eastWood.doLine)
@@ -869,6 +873,7 @@ final class InspectTests: XCTestCase {
         let eastScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX", pack: "tx-east")
         let eastScrubDo = eastScrub.doLine.lowercased()
         XCTAssertTrue(eastScrubDo.contains("cottonmouth") || eastScrubDo.contains("copperhead"), eastScrub.doLine)
+        XCTAssertTrue(eastScrubDo.contains("hog"), eastScrub.doLine)
         XCTAssertFalse(eastScrubDo.contains("javelina"), eastScrub.doLine)
         XCTAssertFalse(eastScrubDo.contains("lives here"), eastScrub.doLine)
 
