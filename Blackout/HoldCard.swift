@@ -197,10 +197,12 @@ struct HoldCardView: View {
                         .foregroundStyle(Color.white)
                 }
                 if let note {
+                    // Woodland deadfall and wildlife cook-through are the
+                    // Field SPEAK. Four lines clips them on a phone.
                     Text(note)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Theme.silver)
-                        .lineLimit(4)
+                        .lineLimit(6)
                 }
             }
             Spacer(minLength: 0)

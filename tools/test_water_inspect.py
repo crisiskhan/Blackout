@@ -1846,6 +1846,12 @@ class GroundFieldSync(unittest.TestCase):
         hold = SWIFT.read_text()
         self.assertIn("Rio Grande cottonwood, juniper, piñon", hold)
         self.assertIn("Cottonwoods and pecan along the water", hold)
+        notes = CARD.read_text().split("if let note")[1].split("Spacer")[0]
+        self.assertIn(
+            ".lineLimit(6)",
+            notes,
+            "four lines clips woodland deadfall and wildlife cook-through on a phone",
+        )
 
         def blob(state: str, cid: str) -> str:
             book = json.loads((ROOT / f"Resources/Field/field.{state}.json").read_text())

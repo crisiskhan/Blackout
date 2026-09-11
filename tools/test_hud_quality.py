@@ -238,6 +238,13 @@ class WaterClassifyOnHoldTests(unittest.TestCase):
         self.assertIn("zoom: Double", runtime)
         self.assertIn("attachWaterLayers", style)
         self.assertIn("InspectField.label", hold)
+        notes = hold.split("if let note")[1].split("Spacer")[0]
+        self.assertIn(".lineLimit(6)", notes)
+        self.assertNotIn(
+            ".lineLimit(4)",
+            notes,
+            "four lines clips woodland deadfall and wildlife cook-through",
+        )
         self.assertIn("FIELD · WATER", water)
         self.assertNotIn("WaterSure.disclaimer", hold)
         self.assertIn("zoom", tab.lower())
