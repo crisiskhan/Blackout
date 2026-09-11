@@ -701,6 +701,24 @@ class GroundFieldSync(unittest.TestCase):
             land.index('case "wood":'),
             "a botanic garden tagged as a park must still be worked ground, not picnic woodland",
         )
+        self.assertIn("isCactusGarden", inspect)
+        self.assertIn("cactusGardenCover", inspect)
+        self.assertIn("Cactus garden", inspect)
+        self.assertLess(
+            land.index("isCactusGarden"),
+            land.index("isBotanicGarden"),
+            "a cactus garden must open spines, not oleander",
+        )
+        cactus = inspect.split("private static func cactusGardenCover", 1)[1].split(
+            "private static func workedCover", 1
+        )[0]
+        self.assertLess(
+            cactus.index("cactusTXCard"),
+            cactus.index("plantTXCard"),
+            "a cactus garden must open the cactus card, not plant-danger",
+        )
+        self.assertNotIn("treeUseTXCard", cactus)
+        self.assertNotIn("mammalTXCard", cactus)
         do = SWIFT.read_text()
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
@@ -711,6 +729,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hog country", do)
         self.assertIn("Pretty is not food", do)
         self.assertIn("Botanic garden", do)
+        self.assertIn("Cactus garden", do)
+        self.assertIn("Spines, not a meal", do)
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
@@ -822,6 +842,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("ANIMAL · BITE · FOOD · PLANT", qa)
         self.assertIn("give it the road", qa)
         self.assertIn("Botanic garden", qa)
+        self.assertIn("Cactus garden", qa)
+        self.assertIn("tx-cactus", qa)
         self.assertIn("Albuquerque BioPark Botanic Garden", qa)
         self.assertIn("Chihuahuan Desert Conservatory", qa)
         self.assertIn("Conservatory At North Austin", qa)

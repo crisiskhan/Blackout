@@ -1105,10 +1105,15 @@ final class InspectTests: XCTestCase {
             tags: ["leisure": "park", "name": "Three Crosses Cactus Garden"],
             pack: "tx-west"
         )
-        XCTAssertEqual(cactusGarden.klass, "Botanic garden")
-        XCTAssertEqual(cactusGarden.fieldRoute.first, Inspect.plantTXCard)
-        XCTAssertTrue(cactusGarden.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertEqual(cactusGarden.klass, "Cactus garden")
+        XCTAssertEqual(cactusGarden.fieldRoute.first, Inspect.cactusTXCard)
+        XCTAssertTrue(cactusGarden.fieldRoute.contains(Inspect.plantTXCard))
         XCTAssertFalse(cactusGarden.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertEqual(InspectField.label(for: cactusGarden.fieldRoute[0]), "FIELD · PLANT")
+        XCTAssertTrue(cactusGarden.doLine.lowercased().contains("spines"), cactusGarden.doLine)
+        XCTAssertTrue(cactusGarden.doLine.lowercased().contains("not a meal"), cactusGarden.doLine)
+        XCTAssertFalse(cactusGarden.doLine.lowercased().contains("edible"), cactusGarden.doLine)
+        XCTAssertFalse(cactusGarden.why.lowercased().contains("edible"), cactusGarden.why)
 
         let cactusPark = Inspect.read(
             tags: ["leisure": "park", "name": "Cactus Point Park"],

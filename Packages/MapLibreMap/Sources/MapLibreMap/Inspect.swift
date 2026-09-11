@@ -334,10 +334,21 @@ public enum Inspect {
         return false
     }
 
+    /// Phrase `cactus garden`, not the word `cactus`. Cactus Point Park
+    /// and Parque Cactus del Desierto stay parks.
+    static func isCactusGarden(_ t: [String: String]) -> Bool {
+        let park = t["leisure"] == "park"
+            || t["leisure"] == "nature_reserve"
+            || t["boundary"] == "protected_area"
+            || t["boundary"] == "national_park"
+        guard park else { return false }
+        return (t["name"] ?? "").lowercased().contains("cactus garden")
+    }
+
     /// A park named Conservatory At North Austin is apartments. A botanic
     /// garden is worked plant ground. Phrase match, not the word `garden`
-    /// and not `arboretum`. A cactus garden is the same; Cactus Point Park
-    /// is not. A beer garden is a patio.
+    /// and not `arboretum`. A cactus garden opens the cactus card; Cactus
+    /// Point Park is not. A beer garden is a patio.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
         let amenity = (t["amenity"] ?? "").lowercased()
         if amenity == "community_garden" || amenity == "community garden" { return true }
@@ -710,6 +721,13 @@ public enum Inspect {
                 pack: pack
             )
         }
+        if isCactusGarden(t) {
+            return cactusGardenCover(
+                klass: "Cactus garden",
+                sure: 82,
+                why: "mapped as a cactus garden; spines, not a meal, not wild cover"
+            )
+        }
         if isBotanicGarden(t) {
             return workedCover(
                 klass: "Botanic garden",
@@ -955,6 +973,29 @@ public enum Inspect {
                 gameEastCard, gameNMCard,
             ],
             extra: [biteCard, plantUseCard, gameCard],
+            unnamedPenalty: unnamedPenalty
+        )
+    }
+
+    /// A cactus garden: spines first, then don't chew. Not woodland tree-use.
+    private static func cactusGardenCover(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int = 4
+    ) -> Reading {
+        return Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [
+                cactusTXCard, cactusNMCard,
+                plantTXCard, plantNMCard,
+            ],
+            extra: [plantUseCard],
             unnamedPenalty: unnamedPenalty
         )
     }

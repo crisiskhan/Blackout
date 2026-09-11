@@ -943,6 +943,8 @@ extension Inspect {
             return treeRangeLine(state: state, pack: pack)
         case "Glasshouse", "Botanic garden":
             return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
+        case "Cactus garden":
+            return "Cactus and yucca. Spines, not a meal. Pretty is not food."
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
