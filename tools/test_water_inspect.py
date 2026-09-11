@@ -2287,10 +2287,12 @@ class GroundFieldSync(unittest.TestCase):
         mammal = json.dumps(mammal_card).lower()
         self.assertIn("mule deer", mammal)
         self.assertIn("black bear", mammal)
+        self.assertIn("elk is high country", mammal)
         self.assertNotIn("edible", mammal)
         nm_do = mammal_card["steps"][0]["do"]["en"].lower()
         self.assertIn("mule deer", nm_do)
         self.assertIn("give it the road", nm_do)
+        self.assertIn("elk is high country", nm_do)
         self.assertIn(
             "the bite card",
             nm_do,
@@ -2303,6 +2305,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Prairie rattler", qa)
         self.assertIn("diamondback", qa)
         self.assertIn("NM mammal SPEAK names the bite card", qa)
+        self.assertIn("elk as high country", qa.lower())
         self.assertIn("Hold DO on wildlife range names the bite card", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)
         self.assertIn("Hold DO on wildlife range names give it the road", qa)

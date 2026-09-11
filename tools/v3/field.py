@@ -1044,7 +1044,7 @@ def mammal_do_en(cid: str) -> str:
         )
     return (
         "Black bear: do not run, stand large, food sealed and away from camp. "
-        "Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. "
+        "Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. "
         "If bitten, the bite card. If you already have meat, the food card. "
         "Do not hunt from this map."
     )
@@ -1067,7 +1067,7 @@ def mammal_do_es(cid: str) -> str:
         )
     return (
         "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. "
-        "Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. "
+        "El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. "
         "Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. "
         "Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
     )
@@ -1288,8 +1288,8 @@ def thickness_state() -> list[dict]:
             ["NM"],
             "New Mexico mammals — give space",
             "Mamíferos de Nuevo México — da espacio",
-            "Black bear, elk, mule deer country. This is range, not a pin. Food storage, not photos.",
-            "País de oso negro, wapití y venado bura. Esto es rango, no un pin. Guarda comida, no fotos.",
+            "Black bear and mule deer country. Elk is high country. This is range, not a pin. Food storage, not photos.",
+            "País de oso negro y venado bura. El wapití es de alta montaña. Esto es rango, no un pin. Guarda comida, no fotos.",
             "A maul is trauma. Don't run from a black bear. This card does not unlock a hunt.",
             "Un golpe es trauma. No corras de un oso negro. Esta tarjeta no desbloquea una caza.",
         ),
