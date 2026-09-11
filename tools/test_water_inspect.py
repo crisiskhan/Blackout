@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 6, 5, 34), "tx-east": (14, 8, 36, 3, 16), "nm": (10, 1, 20, 3, 53)}
+        expected = {"tx-west": (2, 0, 6, 5, 34), "tx-east": (14, 8, 37, 3, 15), "nm": (10, 1, 20, 3, 53)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -214,6 +214,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
         self.assertIn("baker sanctuary", east_blob)
         self.assertIn("blair woods sanctuary", east_blob)
+        self.assertIn("beck preserve", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
         self.assertIn("barrow nature preserve", east_blob)
         self.assertIn("stillhouse hollow nature preserve", east_blob)
@@ -659,6 +660,12 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertEqual(
             ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Beck Preserve"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Waste Management Wildlife Park"}
             ),
             "reserve",
@@ -945,6 +952,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("baker")', inspect)
         self.assertNotIn('contains("blair")', inspect)
         self.assertNotIn('contains("sanctuary")', inspect)
+        self.assertNotIn('contains("beck")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1510,6 +1518,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("natural history", inspect)
         self.assertIn("baker sanctuary", inspect)
         self.assertIn("blair woods sanctuary", inspect)
+        self.assertIn("beck preserve", inspect)
         self.assertIn("wildflower preserve", inspect)
         self.assertIn("lush n lean", inspect)
         self.assertIn("orchard garden", inspect)
@@ -2233,6 +2242,7 @@ class GroundFieldSync(unittest.TestCase):
         orchard_hit = False
         baker_hit = False
         blair_hit = False
+        beck_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2274,6 +2284,8 @@ class GroundFieldSync(unittest.TestCase):
                     baker_hit = True
                 if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
                     blair_hit = True
+                if kind == "wildlife" and name == "Beck Preserve" and pip(-97.730214, 30.493184, ring):
+                    beck_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2334,6 +2346,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             blair_hit,
             "Blair Woods Sanctuary is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            beck_hit,
+            "Beck Preserve is not wildlife range on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -2660,6 +2676,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("natural history", fetch)
         self.assertIn("baker sanctuary", fetch)
         self.assertIn("blair woods sanctuary", fetch)
+        self.assertIn("beck preserve", fetch)
         wildlife_name = fetch.split("NOTABLE_WILDLIFE_NAME", 1)[1].split(
             "def overpass_notable", 1
         )[0]
@@ -2993,6 +3010,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Blair Woods Sanctuary", qa)
         self.assertIn("30.286405", qa)
         self.assertIn("blair woods sanctuary", qa)
+        self.assertIn("Beck Preserve", qa)
+        self.assertIn("30.493184", qa)
+        self.assertIn("beck preserve", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)

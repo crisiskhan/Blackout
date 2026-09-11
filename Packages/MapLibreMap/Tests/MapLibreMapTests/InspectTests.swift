@@ -989,6 +989,15 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(blair.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(blair.doLine.lowercased().contains("edible"), blair.doLine)
 
+        let beck = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Beck Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(beck.klass, "Wildlife range")
+        XCTAssertNotEqual(beck.klass, "Open reserve")
+        XCTAssertEqual(beck.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(beck.doLine.lowercased().contains("edible"), beck.doLine)
+
         let waste = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Waste Management Wildlife Park"],
             pack: "tx-east"

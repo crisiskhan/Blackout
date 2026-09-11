@@ -87,7 +87,9 @@ CAVE_PRESERVE_KEYS = {
 # Phrase `natural history`, not the word `history`. Sandia Mountain
 # Natural History Center is range. Phrase `baker sanctuary`, not the
 # word `baker`. Phrase `blair woods sanctuary`, not the word `blair`
-# or `woods`.
+# or `woods`. Phrase `beck preserve`, not the word `beck`. Beck
+# Preserve is Travis Audubon bird sanctuary. `preserve` alone is
+# still forbidden.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -116,6 +118,7 @@ WILDLIFE_RANGE_PHRASES = (
     "natural history",
     "baker sanctuary",
     "blair woods sanctuary",
+    "beck preserve",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

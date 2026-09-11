@@ -175,6 +175,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let hornsbyBend = CLLocationCoordinate2D(latitude: 30.231564, longitude: -97.646392)
     private static let bakerSanctuary = CLLocationCoordinate2D(latitude: 30.483183, longitude: -97.865747)
     private static let blairWoods = CLLocationCoordinate2D(latitude: 30.286405, longitude: -97.675658)
+    /// Interior of Beck Preserve (Travis Audubon). Phrase `beck preserve`,
+    /// not the word `beck`. Vertex-avg, 488 m from water.
+    private static let beckPreserve = CLLocationCoordinate2D(latitude: 30.493184, longitude: -97.730214)
 
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
@@ -760,6 +763,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(blair.card?.fieldRoute.first, Inspect.mammalEastCard, "\(blair)")
         XCTAssertTrue((blair.card?.doLine.lowercased() ?? "").contains("hog"), blair.card?.doLine ?? "")
         XCTAssertFalse((blair.card?.doLine.lowercased() ?? "").contains("edible"), blair.card?.doLine ?? "")
+
+        let beck = try hold(at: Self.beckPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(beck.card?.klass, "Wildlife range", "\(beck)")
+        XCTAssertEqual(beck.card?.title, "Beck Preserve", "\(beck)")
+        XCTAssertNotEqual(beck.card?.klass, "Open reserve", "\(beck)")
+        XCTAssertEqual(beck.card?.fieldRoute.first, Inspect.mammalEastCard, "\(beck)")
+        XCTAssertTrue((beck.card?.doLine.lowercased() ?? "").contains("hog"), beck.card?.doLine ?? "")
+        XCTAssertFalse((beck.card?.doLine.lowercased() ?? "").contains("edible"), beck.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {

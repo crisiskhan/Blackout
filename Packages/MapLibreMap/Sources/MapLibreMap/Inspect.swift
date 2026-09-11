@@ -370,7 +370,9 @@ public enum Inspect {
     /// `history` — Sandia Mountain Natural History Center is range, like
     /// a nature center. Phrase `baker sanctuary`, not the word
     /// `baker`. Phrase `blair woods sanctuary`, not the word `blair` or
-    /// `woods`.
+    /// `woods`. Phrase `beck preserve`, not the word `beck`. Beck
+    /// Preserve is Travis Audubon bird sanctuary. `preserve` alone is
+    /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -405,6 +407,7 @@ public enum Inspect {
         if n.contains("natural history") { return true }
         if n.contains("baker sanctuary") { return true }
         if n.contains("blair woods sanctuary") { return true }
+        if n.contains("beck preserve") { return true }
         return false
     }
 
