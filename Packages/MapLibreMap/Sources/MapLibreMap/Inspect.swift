@@ -406,7 +406,7 @@ public enum Inspect {
     /// range, or garden is this walk — vipers use that cover. An
     /// unnamed reserve falls through to the landcover. Phrase `open
     /// space` is not a bare `contains` — Open Space Visitor Center, a
-    /// farm open space, bosque along the Rio Grande, and a trailhead
+    /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
     /// stay parks. Named open-space cover is this walk. Phrase `hueco
     /// tanks`, not the word `hueco` — Hueco Mountain Park is a town
     /// park, and Hueco Tanks Road is a road. Phrase `scenic easement`,
@@ -442,6 +442,21 @@ public enum Inspect {
             }
         }
         return false
+    }
+
+    /// Named bosque tagged wood or forest is cottonwoods along the
+    /// river, not picnic timber. Phrase `bosque`, not a park name and
+    /// not apartments. Unnamed wood stays woodland. Isleta Rectangle
+    /// is forest without the word and stays woodland. Valle del
+    /// Bosque Park stays a park. Bosque Encantado stays built-up.
+    /// A named tree still reads as a tree. Streets through the
+    /// bosque still win — this is cover, not a silver sheet.
+    static func isNamedBosqueCover(_ t: [String: String]) -> Bool {
+        let n = (t["name"] ?? "").lowercased()
+        if !n.contains("bosque") { return false }
+        if t["landuse"] == "residential" { return false }
+        if t["leisure"] == "park" { return false }
+        return t["natural"] == "wood" || t["landuse"] == "forest"
     }
 
     private static func match(_ t: [String: String], pack: String? = nil) -> Reading {
@@ -828,12 +843,23 @@ public enum Inspect {
                 pack: pack
             )
         }
-        // Named bosque is cottonwoods, even when OSM also tags leisure=park.
+        // Named wetland is cottonwoods, even when OSM also tags leisure=park.
         if t["natural"] == "wetland" {
             return wetlandCover(
                 klass: "Bosque or wetland",
                 sure: 74,
                 why: "mapped as wet ground, which is where the cottonwoods stand along the river",
+                unnamedPenalty: 4,
+                pack: pack
+            )
+        }
+        // Named bosque tagged wood or forest is the same walk. A park
+        // named bosque stays a park. Apartments named bosque stay built-up.
+        if isNamedBosqueCover(t) {
+            return wetlandCover(
+                klass: "Bosque or wetland",
+                sure: 74,
+                why: "mapped as bosque; cottonwoods along the river, not picnic timber",
                 unnamedPenalty: 4,
                 pack: pack
             )

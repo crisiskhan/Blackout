@@ -255,6 +255,43 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(nmWet.doLine.lowercased().contains("give it the road"), nmWet.doLine)
         XCTAssertFalse(nmWet.doLine.lowercased().contains("food card"), nmWet.doLine)
         XCTAssertFalse(nmWet.doLine.lowercased().contains("no ice"), nmWet.doLine)
+        XCTAssertFalse(nmWet.doLine.lowercased().contains("elk"), nmWet.doLine)
+
+        let rioBosqueForest = Inspect.read(
+            tags: ["landuse": "forest", "name": "Rio Grande Bosque"],
+            pack: "nm"
+        )
+        XCTAssertEqual(
+            rioBosqueForest.klass,
+            "Bosque or wetland",
+            "named bosque tagged forest is cottonwoods, not picnic timber"
+        )
+        XCTAssertNotEqual(rioBosqueForest.klass, "Woodland")
+        XCTAssertTrue(rioBosqueForest.doLine.lowercased().contains("cottonwood"), rioBosqueForest.doLine)
+        XCTAssertTrue(rioBosqueForest.doLine.lowercased().contains("mule deer"), rioBosqueForest.doLine)
+        XCTAssertTrue(rioBosqueForest.doLine.lowercased().contains("bear"), rioBosqueForest.doLine)
+        XCTAssertFalse(rioBosqueForest.doLine.lowercased().contains("elk"), rioBosqueForest.doLine)
+        XCTAssertFalse(rioBosqueForest.doLine.lowercased().contains("edible"), rioBosqueForest.doLine)
+        XCTAssertEqual(rioBosqueForest.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertFalse(rioBosqueForest.fieldRoute.contains(Inspect.snakeNMCard))
+
+        let corrales = Inspect.read(
+            tags: ["natural": "wood", "name": "Corrales Bosque"],
+            pack: "nm"
+        )
+        XCTAssertEqual(corrales.klass, "Bosque or wetland")
+        XCTAssertFalse(corrales.doLine.lowercased().contains("elk"), corrales.doLine)
+        XCTAssertTrue(corrales.doLine.lowercased().contains("cottonwood"), corrales.doLine)
+
+        let isletaForest = Inspect.read(
+            tags: ["landuse": "forest", "name": "Isleta Rectangle"],
+            pack: "nm"
+        )
+        XCTAssertEqual(isletaForest.klass, "Woodland")
+        XCTAssertTrue(isletaForest.doLine.lowercased().contains("elk"), isletaForest.doLine)
+
+        let unnamedWood = Inspect.read(tags: ["natural": "wood"], pack: "nm")
+        XCTAssertEqual(unnamedWood.klass, "Woodland")
 
         let farm = Inspect.read(tags: ["landuse": "farmland"])
         XCTAssertEqual(farm.klass, "Irrigated ground")
@@ -1644,6 +1681,20 @@ final class InspectTests: XCTestCase {
             "Mesilla Bosque"
         )
 
+        // Named bosque tagged forest is cottonwoods, not a silver sheet.
+        // A named street through it still wins.
+        XCTAssertEqual(
+            Inspect.pick([
+                ["landuse": "forest", "name": "Rio Grande Bosque"],
+                ["highway": "residential", "name": "Bosque Road"],
+            ])["highway"],
+            "residential"
+        )
+        XCTAssertEqual(
+            Inspect.pick([["landuse": "forest", "name": "Rio Grande Bosque"], ["highway": "track"]])["name"],
+            "Rio Grande Bosque"
+        )
+
         // Water outranks all of it, named or not.
         XCTAssertEqual(Inspect.pick(named + [["waterway": "ditch"]])["waterway"], "ditch")
     }
@@ -1987,6 +2038,26 @@ final class InspectTests: XCTestCase {
         XCTAssertNotEqual(rio.klass, "Park")
         XCTAssertTrue(rio.doLine.lowercased().contains("cottonwood"), rio.doLine)
         XCTAssertFalse(rio.doLine.lowercased().contains("edible"), rio.doLine)
+
+        let valle = Inspect.read(
+            tags: ["leisure": "park", "name": "Valle del Bosque Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(valle.klass, "Park")
+        XCTAssertNotEqual(valle.klass, "Bosque or wetland")
+
+        let andalucia = Inspect.read(
+            tags: ["leisure": "park", "name": "Bosque de Andalucía"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(andalucia.klass, "Park")
+
+        let encantado = Inspect.read(
+            tags: ["landuse": "residential", "name": "Bosque Encantado"],
+            pack: "nm"
+        )
+        XCTAssertEqual(encantado.klass, "Built-up ground")
+        XCTAssertNotEqual(encantado.klass, "Bosque or wetland")
 
         let desertGarden = Inspect.read(
             tags: ["leisure": "park", "name": "Desert Garden Park"],

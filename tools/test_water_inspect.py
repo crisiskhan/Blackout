@@ -140,6 +140,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("sun mountain estates", nm_blob)
         self.assertNotIn("hyde memorial", nm_blob)
         self.assertNotIn("manzano mountains", nm_blob)
+        self.assertNotIn("rio grande bosque", nm_blob)
+        self.assertNotIn("corrales bosque", nm_blob)
+        self.assertNotIn("alameda bosque", nm_blob)
         self.assertIn("pronoun cave area of critical environmental concern", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
@@ -440,6 +443,22 @@ class ShippedWaterLayers(unittest.TestCase):
                     "place": "neighbourhood",
                     "name": "Sun Mountain Estates",
                 }
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"landuse": "forest", "name": "Rio Grande Bosque"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"natural": "wood", "name": "Corrales Bosque"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Valle del Bosque Park"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"landuse": "residential", "name": "Bosque Encantado"}
             )
         )
         self.assertIsNone(
@@ -1112,6 +1131,35 @@ class GroundFieldSync(unittest.TestCase):
             land.index('if t["leisure"] == "park"'),
             "a named bosque tagged as a park is still bosque, not picnic",
         )
+        self.assertIn("isNamedBosqueCover", inspect)
+        self.assertLess(
+            land.index('if t["natural"] == "wetland"'),
+            land.index("isNamedBosqueCover"),
+            "wetland bosque is still cottonwoods before named wood or forest",
+        )
+        self.assertLess(
+            land.index("isNamedBosqueCover"),
+            land.index('if t["leisure"] == "park"'),
+            "named bosque tagged wood or forest is cottonwoods before picnic park",
+        )
+        self.assertLess(
+            land.index("isNamedBosqueCover"),
+            land.index('case "wood":'),
+            "named bosque tagged wood is cottonwoods, not picnic timber",
+        )
+        self.assertLess(
+            land.index("isNamedBosqueCover"),
+            land.index('case "forest":'),
+            "named bosque tagged forest is cottonwoods, not picnic timber",
+        )
+        bosque_fn = inspect.split("static func isNamedBosqueCover", 1)[1].split(
+            "private static func match", 1
+        )[0]
+        self.assertIn('contains("bosque")', bosque_fn)
+        self.assertIn('landuse"] == "residential"', bosque_fn)
+        self.assertIn('leisure"] == "park"', bosque_fn)
+        self.assertIn('natural"] == "wood"', bosque_fn)
+        self.assertIn('landuse"] == "forest"', bosque_fn)
         self.assertLess(
             land.index('if t["leisure"] == "park"'),
             land.index('case "scrub", "heath":'),
@@ -1227,6 +1275,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("wind break", bosque)
         self.assertIn("give it the road", bosque)
         self.assertIn("no ice, no cut, no suck", bosque)
+        self.assertIn("cottonwood", bosque)
+        self.assertIn("mule deer", bosque)
+        self.assertNotIn("elk", bosque)
         self.assertNotIn("the food card", bosque)
         tx_plant_do = next(
             c
@@ -1343,6 +1394,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isWildlifeRange", pick)
         self.assertIn("isBotanicGarden", pick)
         self.assertIn("isOpenReserve", pick)
+        self.assertNotIn(
+            "isNamedBosqueCover",
+            pick,
+            "named bosque is cover, not a silver sheet; a named street still wins",
+        )
         self.assertIn("greenhouse_horticulture", pick)
         self.assertIn("pointWater", pick)
         self.assertIn("it beats a named street", inspect.split("public static func pick", 1)[0])
@@ -1936,6 +1992,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bright Leaf Natural Area", qa)
         self.assertIn("Beaukiss Woods", qa)
         self.assertIn("Isleta Rectangle", qa)
+        self.assertIn("Rio Grande Bosque", qa)
+        self.assertIn("Alameda Bosque", qa)
+        self.assertIn("Corrales Bosque", qa)
+        self.assertIn("Valle del Bosque Park", qa)
+        self.assertIn("Bosque Encantado", qa)
         self.assertIn("Rio Bosque Wetlands Park", qa)
         self.assertIn("Rose Garden", qa)
         self.assertIn("Mount Franklin", qa)

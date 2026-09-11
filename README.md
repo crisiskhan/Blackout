@@ -288,13 +288,15 @@ Gate, Prairie Hills, Godzilla Preserve, Open Space Visitor Center, and a beer ga
 wildlife sanctuary tagged as woodland still opens the animal book, not picnic
 tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, animals, shelter, bite, meat you
-already have. Cactus lives on scrub, cactus gardens, and open
+already have. A named bosque tagged wood or forest is cottonwoods along the
+river, not picnic timber. Valle del Bosque Park stays a park. Bosque Encantado
+stays built-up. Cactus lives on scrub, cactus gardens, and open
 reserves (a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain), not picnic woodland.
 A wilderness preserve or a nature preserve is range, not a cactus garden.
 Holding a glasshouse or botanic garden opens plant-danger, not
 woodland. Holding a wildlife management area, nature preserve, or nature
 center opens that pack's animal cards;
-this is range, not a pin. Godzilla Preserve and Open Space Visitor Center stay parks. Holding an open reserve — a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain — opens that pack's bite and cactus cards, not picnic tree-use. Open Space Visitor Center, a farm open space, and bosque along the Rio Grande stay parks. A riverside hike-and-bike easement stays a park. Tierra Blanca and a trails neighborhood park stay parks. Hyde Memorial and Manzano stay picnic. The Sun Mountain peak pin stays a peak. Holding scrub opens that pack's bite and mammal cards;
+this is range, not a pin. Godzilla Preserve and Open Space Visitor Center stay parks. Holding an open reserve — a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain — opens that pack's bite and cactus cards, not picnic tree-use. Open Space Visitor Center, a farm open space, and Alameda/Rio Grande Open Space stay parks. A riverside hike-and-bike easement stays a park. Tierra Blanca and a trails neighborhood park stay parks. Hyde Memorial and Manzano stay picnic. The Sun Mountain peak pin stays a peak. Holding scrub opens that pack's bite and mammal cards;
 holding a hole
 opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range and opens `tx-tree-use` / `tx-mammal`; TX EAST names copperhead, cottonmouth, loblolly pine, and hog, not javelina, and opens `tx-east-tree-use`. A javelina still still opens the west mammal card. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on

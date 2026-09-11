@@ -78,8 +78,8 @@ WILDLIFE_RANGE_PHRASES = (
 # Prairie Hills is apartments. A named nature reserve that is not
 # already a hole, wildlife range, or garden is this walk. An unnamed
 # reserve is not. Phrase `open space` is not a bare contains —
-# Open Space Visitor Center, a farm open space, bosque along the
-# Rio Grande, and a trailhead stay parks. Named open-space cover is
+# Open Space Visitor Center, a farm open space, Alameda/Rio Grande
+# Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
 # Mountain Park stays a park. Hueco Tanks Road stays a road. Phrase
 # `scenic easement`, not the word `easement`. A riverside hike-and-
