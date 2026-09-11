@@ -133,12 +133,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
     private static let nmOpenReserve = CLLocationCoordinate2D(latitude: 35.846906, longitude: -107.025703)
 
-    /// Interior of Isleta Rectangle. Named NM forest: cottonwood and elk
-    /// as range, not west javelina, not a wetland bosque.
+    /// Interior of Isleta Rectangle. Named NM forest: cottonwood;
+    /// elk is high country, not west javelina, not a wetland bosque.
     private static let nmWoodland = CLLocationCoordinate2D(latitude: 34.939900, longitude: -106.320316)
 
     /// Interior of an unnamed NM wetland. Cottonwood and mule deer, not elk
-    /// (that is woodland), not cottonmouth (that is east).
+    /// (elk is high country), not cottonmouth (that is east).
     private static let nmBosque = CLLocationCoordinate2D(latitude: 34.628816, longitude: -105.915768)
 
     /// `La Cruz Peak` on the NM place slice. Bear and elk as range, not
@@ -837,7 +837,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("cottonwood"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("juniper") || doLine.contains("piñon") || doLine.contains("pinon"), held.card?.doLine ?? "")
-        XCTAssertTrue(doLine.contains("elk"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("elk is high country"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")

@@ -288,7 +288,7 @@ final class InspectTests: XCTestCase {
             pack: "nm"
         )
         XCTAssertEqual(isletaForest.klass, "Woodland")
-        XCTAssertTrue(isletaForest.doLine.lowercased().contains("elk"), isletaForest.doLine)
+        XCTAssertTrue(isletaForest.doLine.lowercased().contains("elk is high country"), isletaForest.doLine)
 
         let unnamedWood = Inspect.read(tags: ["natural": "wood"], pack: "nm")
         XCTAssertEqual(unnamedWood.klass, "Woodland")
@@ -1117,7 +1117,7 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertTrue(nmWoodDo.contains("rio grande"), nmWood.doLine)
         XCTAssertFalse(nmWoodDo.contains("aspen"), nmWood.doLine)
-        XCTAssertTrue(nmWoodDo.contains("bear") || nmWoodDo.contains("elk"), nmWood.doLine)
+        XCTAssertTrue(nmWoodDo.contains("elk is high country"), nmWood.doLine)
         XCTAssertTrue(nmWoodDo.contains("mule deer"), nmWood.doLine)
         XCTAssertTrue(nmWoodDo.contains("bite card"), nmWood.doLine)
         XCTAssertTrue(nmWoodDo.contains("give it the road"), nmWood.doLine)
