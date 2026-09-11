@@ -952,9 +952,9 @@ extension Inspect {
 
     private static func landDoLine(_ klass: String, state: String?, pack: String?) -> String {
         switch klass {
-        case "Named tree", "Tree":
+        case "Named tree", "Tree", "Irrigated ground":
             return treeUseLine(state: state, pack: pack)
-        case "Woodland", "Park", "Protected land", "Irrigated ground":
+        case "Woodland", "Park", "Protected land":
             return treeRangeLine(state: state, pack: pack)
         case "Glasshouse", "Botanic garden":
             return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."

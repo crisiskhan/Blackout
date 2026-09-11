@@ -839,7 +839,7 @@ public enum Inspect {
                     pack: pack
                 )
             case "farmland", "orchard", "meadow", "vineyard", "recreation_ground":
-                return plantCover(
+                return irrigatedCover(
                     klass: "Irrigated ground",
                     sure: 74,
                     why: "mapped as worked ground, which in this country means a ditch reaches it",
@@ -975,6 +975,47 @@ public enum Inspect {
             unnamedPenalty: unnamedPenalty,
             unnamedKlass: unnamedKlass,
             unnamedWhy: unnamedWhy
+        )
+    }
+
+    /// A ditch reaches it. Pack trees and don't chew. Not a hunt, not
+    /// javelina country, not a cactus garden. Parks stay `plantCover`.
+    private static func irrigatedCover(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int,
+        pack: String? = nil
+    ) -> Reading {
+        if !isEastPack(pack) {
+            return Reading(
+                klass: klass,
+                kind: .land,
+                sure: sure,
+                why: why,
+                advice: .field,
+                field: plantCard,
+                local: [
+                    treeUseTXCard, treeUseNMCard,
+                    plantTXCard, plantNMCard,
+                ],
+                extra: [plantUseCard],
+                unnamedPenalty: unnamedPenalty
+            )
+        }
+        return Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [
+                treeUseEastCard, treeUseNMCard,
+                plantTXCard, plantNMCard,
+            ],
+            extra: [plantUseCard],
+            unnamedPenalty: unnamedPenalty
         )
     }
 

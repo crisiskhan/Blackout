@@ -232,6 +232,24 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(nmWet.fieldRoute.first, Inspect.treeUseTXCard)
         XCTAssertFalse(nmWet.fieldRoute.contains(Inspect.snakeNMCard))
         XCTAssertFalse(nmWet.doLine.lowercased().contains("cottonmouth"), nmWet.doLine)
+
+        let farm = Inspect.read(tags: ["landuse": "farmland"])
+        XCTAssertEqual(farm.klass, "Irrigated ground")
+        XCTAssertEqual(farm.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertTrue(farm.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertTrue(farm.fieldRoute.contains(Inspect.plantUseCard))
+        XCTAssertFalse(farm.fieldRoute.contains(Inspect.mammalTXCard), "a field is not javelina country")
+        XCTAssertFalse(farm.fieldRoute.contains(Inspect.gameTXCard))
+        XCTAssertFalse(farm.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(farm.doLine.lowercased().contains("javelina"), farm.doLine)
+        XCTAssertFalse(farm.doLine.lowercased().contains("edible"), farm.doLine)
+        XCTAssertEqual(InspectField.label(for: farm.fieldRoute[0]), "FIELD · PLANT")
+
+        let eastFarm = Inspect.read(tags: ["landuse": "orchard"], pack: "tx-east")
+        XCTAssertEqual(eastFarm.klass, "Irrigated ground")
+        XCTAssertEqual(eastFarm.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(eastFarm.fieldRoute.contains(Inspect.mammalEastCard), "an orchard is not hog country")
+        XCTAssertFalse(eastFarm.fieldRoute.contains(Inspect.treeUseTXCard))
     }
 
     func testDesertScrubOpensThePacksBiteCardsBeforeHeat() {

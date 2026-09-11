@@ -713,6 +713,27 @@ class GroundFieldSync(unittest.TestCase):
         )[0]
         self.assertIn("wetlandCover", wet_case)
         self.assertNotIn("plantCover(", wet_case)
+        self.assertIn("irrigatedCover", inspect)
+        farm_case = inspect.split('case "farmland"', 1)[1].split(
+            'case "greenhouse_horticulture"', 1
+        )[0]
+        self.assertIn("irrigatedCover", farm_case)
+        self.assertNotIn("plantCover(", farm_case)
+        irr = inspect.split("private static func irrigatedCover", 1)[1].split(
+            "private static func snakeCountry", 1
+        )[0]
+        self.assertLess(
+            irr.index("treeUseTXCard"),
+            irr.index("plantTXCard"),
+            "a field opens this pack's trees, not oleander first",
+        )
+        self.assertNotIn(
+            "mammalTXCard",
+            irr,
+            "a field is not javelina country; wildlife range carries the animals",
+        )
+        self.assertNotIn("cactusTXCard", irr)
+        self.assertNotIn("gameTXCard", irr)
         tree = inspect.split('case "tree":', 1)[1].split('case "wood":', 1)[0]
         self.assertIn("treeUseTXCard", tree)
         self.assertNotIn("mammalTXCard", tree)
@@ -787,7 +808,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hog country", do)
         self.assertIn("Pretty is not food", do)
         self.assertIn("Botanic garden", do)
-        self.assertIn('case "Named tree", "Tree":', do)
+        self.assertIn('case "Named tree", "Tree", "Irrigated ground":', do)
         self.assertIn("treeUseLine", do)
         named_tree = do.split("private static func treeUseLine", 1)[1].split(
             "private static func animalRangeLine", 1
@@ -980,6 +1001,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("javelina / coyote", qa)
         self.assertIn("cottonmouth", qa)
         self.assertIn("Irrigated ground", qa)
+        self.assertIn("Not javelina country", qa)
         self.assertIn("Glasshouse", qa)
         self.assertIn("not plant-use", qa)
         self.assertIn("Vickery Wholesale Greenhouse", qa)
