@@ -27,6 +27,9 @@ import XCTest
 /// East also holds a named sink tagged wetland (not bosque) and a prairie
 /// preserve (east vipers, not west diamondback). A west desert conservatory
 /// is cactus, not oleander. A named bosque holds tree use, not a pin.
+/// Picnic woodland, irrigated ground, and a rose garden are the rest of
+/// the plant book on west; east names hog on woodland and cottonmouth on
+/// bosque; NM names cottonwood on woodland and bosque, and elk on a peak.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
@@ -60,6 +63,17 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not an overlay sheet. Tree use and animals as range, not a pin.
     private static let westBosque = CLLocationCoordinate2D(latitude: 31.638834, longitude: -106.308840)
 
+    /// Interior of a west farmland sheet, far from a named way or a ditch.
+    /// Irrigated tree-use, not javelina country.
+    private static let irrigatedField = CLLocationCoordinate2D(latitude: 31.513892, longitude: -106.593002)
+
+    /// Interior of unnamed west woodland, far from a named way or a tank.
+    /// Picnic tree-use and javelina as range, not a bosque and not a hunt.
+    private static let westWoodland = CLLocationCoordinate2D(latitude: 33.100215, longitude: -105.802406)
+
+    /// Interior of Rose Garden. TX botanic oleander, not cactus, not datura.
+    private static let roseGarden = CLLocationCoordinate2D(latitude: 32.911739, longitude: -105.959273)
+
     /// Unnamed `landuse=greenhouse_horticulture` sheet. SOLO_QA point,
     /// verified inside the overlay polygon.
     private static let glasshouse = CLLocationCoordinate2D(latitude: 32.502967, longitude: -106.933833)
@@ -73,6 +87,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Indiangrass Wildlife Sanctuary in east `layers/ground.geojson`.
     /// Scrub fill does not win. Range, not a pin.
     private static let wildlifeRange = CLLocationCoordinate2D(latitude: 30.315667, longitude: -97.591821)
+
+    /// Interior of Beaukiss Woods. East woodland tree-use: loblolly and hog,
+    /// not west javelina, not cottonmouth (that is bosque).
+    private static let eastWoodland = CLLocationCoordinate2D(latitude: 30.423083, longitude: -97.227224)
+
+    /// Interior of an unnamed east wetland. Cottonmouth on bosque, not a park.
+    /// Water sits just outside the 44pt box at walking zoom.
+    private static let eastBosque = CLLocationCoordinate2D(latitude: 30.194954, longitude: -97.688346)
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)
@@ -108,6 +130,21 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
     private static let nmOpenReserve = CLLocationCoordinate2D(latitude: 35.846906, longitude: -107.025703)
+
+    /// Interior of Isleta Rectangle. Named NM forest: cottonwood and elk
+    /// as range, not west javelina, not a wetland bosque.
+    private static let nmWoodland = CLLocationCoordinate2D(latitude: 34.939900, longitude: -106.320316)
+
+    /// Interior of an unnamed NM wetland. Cottonwood and mule deer, not elk
+    /// (that is woodland), not cottonmouth (that is east).
+    private static let nmBosque = CLLocationCoordinate2D(latitude: 34.628816, longitude: -105.915768)
+
+    /// `La Cruz Peak` on the NM place slice. Bear and elk as range, not
+    /// west javelina. Ice-on-rock is in this book, so FIELD names cold first.
+    private static let nmPeak = CLLocationCoordinate2D(latitude: 34.392837, longitude: -107.420040)
+
+    /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
+    private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
 
     // MARK: - The two holds the build is gated on
 
@@ -204,6 +241,30 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
     }
 
+    func testHoldingARoseGardenOpensPlantDangerNotCactus() throws {
+        let held = try hold(at: Self.roseGarden, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Botanic garden", "\(held)")
+        XCTAssertNotEqual(held.card?.klass, "Cactus garden", "\(held)")
+        XCTAssertEqual(held.card?.title, "Rose Garden", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.plantTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.cactusTXCard) ?? true,
+            "a rose garden opened cactus: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("oleander"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("brush off"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("datura"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cholla"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("glochids"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
     func testHoldingANamedBosqueOpensTreeUseNotAPin() throws {
         let held = try hold(at: Self.westBosque, zoom: 16)
         XCTAssertEqual(held.card?.klass, "Bosque or wetland", "\(held)")
@@ -225,6 +286,69 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertFalse(doLine.contains("no ice"), held.card?.doLine ?? "")
         XCTAssertFalse(doLine.contains("give it room"), held.card?.doLine ?? "")
         XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: texas
+            )),
+            "PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI"
+        )
+    }
+
+    func testHoldingIrrigatedGroundOpensTreeUseNotJavelina() throws {
+        let held = try hold(at: Self.irrigatedField, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Irrigated ground", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.mammalTXCard) ?? true,
+            "a field opened javelina country: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("mesquite") || doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("deadfall"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
+    func testHoldingWestWoodlandOpensTreeUseNotAHunt() throws {
+        let held = try hold(at: Self.westWoodland, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Woodland", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.snakeTXCard) ?? true,
+            "picnic woodland opened diamondback: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("mesquite") || doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("deadfall"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("hog"), held.card?.doLine ?? "")
         XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
         XCTAssertEqual(
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
@@ -336,6 +460,59 @@ final class HoldOnTheGlassTests: XCTestCase {
                 ]
             )),
             "ANIMAL · BITE · FOOD · PLANT"
+        )
+    }
+
+    func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
+        let held = try hold(at: Self.eastWoodland, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Woodland", "\(held)")
+        XCTAssertEqual(held.card?.title, "Beaukiss Woods", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.snakeEastCard) ?? true,
+            "picnic woodland opened cottonmouth: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("loblolly"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
+    func testHoldingAnEastBosqueNamesCottonmouthNotAPark() throws {
+        let held = try hold(at: Self.eastBosque, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Bosque or wetland", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(held)")
+        XCTAssertTrue(
+            held.card?.fieldRoute.contains(Inspect.snakeEastCard) ?? false,
+            "east bosque dropped cottonmouth treatment: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
         )
     }
 
@@ -515,6 +692,31 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(InspectField.bookLine(for: present), "ANIMAL · BITE · COLD")
     }
 
+    func testHoldingAnEastPeakOpensHogNotJavelina() throws {
+        let held = try hold(at: Self.eastPeak, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Peak", "\(held)")
+        XCTAssertEqual(held.card?.title, "Barton Hill", "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("elk"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let east: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseEastCard, Inspect.cactusTXCard,
+            Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeEastCard,
+        ]
+        let present = InspectField.presentRoute(held.card?.fieldRoute ?? [], in: east)
+        XCTAssertEqual(present.first, Inspect.mammalEastCard, "\(held)")
+        XCTAssertEqual(InspectField.label(for: present.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: present), "ANIMAL · BITE · COLD")
+    }
+
     func testHoldingANewMexicoOpenReserveOpensBiteNotPicnicWoodland() throws {
         let held = try hold(at: Self.nmOpenReserve, zoom: 16, packId: "nm")
         XCTAssertEqual(held.card?.klass, "Open reserve", "\(held)")
@@ -558,6 +760,100 @@ final class HoldOnTheGlassTests: XCTestCase {
             ).first ?? ""),
             "FIELD · BITE"
         )
+    }
+
+    func testHoldingNewMexicoWoodlandOpensCottonwoodNotJavelina() throws {
+        let held = try hold(at: Self.nmWoodland, zoom: 16, packId: "nm")
+        XCTAssertEqual(held.card?.klass, "Woodland", "\(held)")
+        XCTAssertEqual(held.card?.title, "Isleta Rectangle", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(held)")
+        XCTAssertTrue(
+            held.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? false,
+            "NM woodland dropped the NM tree-use card: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("juniper") || doLine.contains("piñon") || doLine.contains("pinon"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("elk"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let nmBook: Set<String> = [
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.mammalNMCard,
+            Inspect.gameNMCard, Inspect.plantUseCard, Inspect.biteCard,
+            Inspect.shelterCard, Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(held.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.treeUseNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: nmBook
+            ).first ?? ""),
+            "FIELD · PLANT"
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: nmBook
+            )),
+            "PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI"
+        )
+    }
+
+    func testHoldingANewMexicoBosqueOpensCottonwoodNotElkCountry() throws {
+        let held = try hold(at: Self.nmBosque, zoom: 16, packId: "nm")
+        XCTAssertEqual(held.card?.klass, "Bosque or wetland", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? true,
+            "NM bosque opened rattler country: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("mule deer"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bear"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("south-side"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("wind break"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("elk"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
+    func testHoldingANewMexicoPeakOpensColdThenAnimals() throws {
+        let held = try hold(at: Self.nmPeak, zoom: 16, packId: "nm")
+        XCTAssertEqual(held.card?.klass, "Peak", "\(held)")
+        XCTAssertEqual(held.card?.title, "La Cruz Peak", "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("black bear and elk range"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        let nmBook: Set<String> = [
+            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.biteCard, Inspect.coldCard,
+        ]
+        let present = InspectField.presentRoute(held.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(present.first, Inspect.iceRockCard, "\(held)")
+        XCTAssertEqual(InspectField.label(for: present.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: present), "COLD · ANIMAL · BITE")
     }
 
     func testHoldingAnEastPrairiePreserveOpensBiteNotPicnicWoodland() throws {
@@ -620,6 +916,9 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("cactus garden", Self.cactusGarden, 16.0),
             ("desert conservatory", Self.desertConservatory, 16.0),
             ("named bosque", Self.westBosque, 16.0),
+            ("irrigated field", Self.irrigatedField, 16.0),
+            ("west woodland", Self.westWoodland, 16.0),
+            ("rose garden", Self.roseGarden, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("sinkhole", Self.sinkhole, 16.0),

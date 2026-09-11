@@ -1204,6 +1204,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Three Crosses Cactus Garden", glass)
         self.assertIn("Chihuahuan Desert Conservatory", glass)
         self.assertIn("Rio Bosque Wetlands Park", glass)
+        self.assertIn("Rose Garden", glass)
+        self.assertIn("Beaukiss Woods", glass)
+        self.assertIn("Isleta Rectangle", glass)
+        self.assertIn("La Cruz Peak", glass)
+        self.assertIn("Barton Hill", glass)
         self.assertIn("Alamo Mountain Area of Critical Environmental Concern", glass)
         self.assertIn("32.332036", glass)
         self.assertIn("-106.782070", glass)
@@ -1211,6 +1216,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-107.242346", glass)
         self.assertIn("31.638834", glass)
         self.assertIn("-106.308840", glass)
+        self.assertIn("31.513892", glass)
+        self.assertIn("-106.593002", glass)
+        self.assertIn("33.100215", glass)
+        self.assertIn("-105.802406", glass)
+        self.assertIn("32.911739", glass)
+        self.assertIn("-105.959273", glass)
         self.assertIn("32.502967", glass)
         self.assertIn("-106.933833", glass)
         self.assertIn("32.032331", glass)
@@ -1234,6 +1245,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-97.850443", glass)
         self.assertIn("30.294331", glass)
         self.assertIn("-97.603942", glass)
+        self.assertIn("30.423083", glass)
+        self.assertIn("-97.227224", glass)
+        self.assertIn("30.194954", glass)
+        self.assertIn("-97.688346", glass)
+        self.assertIn("30.065769", glass)
+        self.assertIn("-97.882228", glass)
         self.assertIn('packId: "tx-east"', glass)
         self.assertIn("Albuquerque BioPark Botanic Garden", glass)
         self.assertIn("Marquez Wildlife Management Area", glass)
@@ -1244,6 +1261,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-107.319389", glass)
         self.assertIn("34.750796", glass)
         self.assertIn("-107.344750", glass)
+        self.assertIn("34.939900", glass)
+        self.assertIn("-106.320316", glass)
+        self.assertIn("34.628816", glass)
+        self.assertIn("-105.915768", glass)
+        self.assertIn("34.392837", glass)
+        self.assertIn("-107.420040", glass)
         self.assertIn("Mount Franklin", glass)
         self.assertIn("31.832051", glass)
         self.assertIn("-106.492210", glass)
@@ -1252,6 +1275,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-107.025703", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
+        self.assertIn("Irrigated ground", glass)
+        self.assertIn("Woodland", glass)
+        self.assertIn("loblolly", glass)
         self.assertIn("datura", glass)
         self.assertIn("mule deer", glass)
         self.assertIn("FIELD · ANIMAL", glass)
@@ -1290,6 +1316,7 @@ class GroundFieldSync(unittest.TestCase):
         west = json.loads((PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text())
         cactus_hit = False
         conservatory_hit = False
+        rose_hit = False
         glass_hit = False
         reserve_hit = False
         for feat in west["features"]:
@@ -1300,6 +1327,8 @@ class GroundFieldSync(unittest.TestCase):
                     cactus_hit = props.get("name") == "Three Crosses Cactus Garden"
                 if kind == "botanic" and pip(-107.242346, 33.157743, ring):
                     conservatory_hit = props.get("name") == "Chihuahuan Desert Conservatory"
+                if kind == "botanic" and pip(-105.959273, 32.911739, ring):
+                    rose_hit = props.get("name") == "Rose Garden"
                 if kind == "glasshouse" and pip(-106.933833, 32.502967, ring):
                     glass_hit = True
                 if kind == "reserve" and pip(-105.633755, 32.032331, ring):
@@ -1311,12 +1340,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
         )
+        self.assertTrue(rose_hit, "glass rose-garden hold is not inside Rose Garden")
         self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
         self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
         sink = False
         bosque = False
+        farm = False
+        west_wood = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1331,8 +1363,18 @@ class GroundFieldSync(unittest.TestCase):
                 for ring in rings_of(geom):
                     if pip(-106.308840, 31.638834, ring):
                         bosque = True
+            if props.get("landuse") == "farmland":
+                for ring in rings_of(geom):
+                    if pip(-106.593002, 31.513892, ring):
+                        farm = True
+            if props.get("natural") == "wood" and not props.get("name"):
+                for ring in rings_of(geom):
+                    if pip(-105.802406, 33.100215, ring):
+                        west_wood = True
         self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
+        self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
+        self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
 
         east = json.loads((PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text())
         wildlife_hit = False
@@ -1363,6 +1405,33 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
         )
+
+        east_osm = json.loads((PACK_ROOT / "tx-east" / "osm.geojson").read_text())
+        woods = False
+        east_bosque = False
+        east_peak = False
+        for feat in east_osm["features"]:
+            props = feat.get("properties") or {}
+            geom = feat.get("geometry") or {}
+            if props.get("name") == "Beaukiss Woods":
+                for ring in rings_of(geom):
+                    if pip(-97.227224, 30.423083, ring):
+                        woods = True
+            if props.get("natural") == "wetland" and not props.get("name"):
+                for ring in rings_of(geom):
+                    if pip(-97.688346, 30.194954, ring):
+                        east_bosque = True
+            if props.get("natural") == "peak" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Barton Hill"
+                    and abs(lat - 30.065769) < 1e-6
+                    and abs(lon - (-97.882228)) < 1e-6
+                ):
+                    east_peak = True
+        self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
+        self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
+        self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -1419,6 +1488,33 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             nm_reserve_hit, "glass NM open-reserve hold is not inside Jones Canyon"
         )
+
+        nm_osm = json.loads((PACK_ROOT / "nm" / "osm.geojson").read_text())
+        nm_wood = False
+        nm_bosque = False
+        nm_peak = False
+        for feat in nm_osm["features"]:
+            props = feat.get("properties") or {}
+            geom = feat.get("geometry") or {}
+            if props.get("name") == "Isleta Rectangle":
+                for ring in rings_of(geom):
+                    if pip(-106.320316, 34.939900, ring):
+                        nm_wood = True
+            if props.get("natural") == "wetland" and not props.get("name"):
+                for ring in rings_of(geom):
+                    if pip(-105.915768, 34.628816, ring):
+                        nm_bosque = True
+            if props.get("natural") == "peak" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "La Cruz Peak"
+                    and abs(lat - 34.392837) < 1e-6
+                    and abs(lon - (-107.420040)) < 1e-6
+                ):
+                    nm_peak = True
+        self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
+        self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
+        self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
@@ -1521,6 +1617,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Stillhouse Hollow Nature Preserve", qa)
         self.assertIn("Big Walnut Creek Nature Preserve", qa)
         self.assertIn("Bright Leaf Natural Area", qa)
+        self.assertIn("Beaukiss Woods", qa)
+        self.assertIn("Isleta Rectangle", qa)
+        self.assertIn("Rio Bosque Wetlands Park", qa)
+        self.assertIn("Rose Garden", qa)
+        self.assertIn("Mount Franklin", qa)
+        self.assertIn("Barton Hill", qa)
+        self.assertIn("La Cruz Peak", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
         self.assertIn("Open Space Visitor Center", qa)
         self.assertIn("Godzilla Preserve", qa)

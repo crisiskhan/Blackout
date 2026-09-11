@@ -1853,6 +1853,35 @@ final class InspectTests: XCTestCase {
         XCTAssertNil(Inspect.pick([park, sheet, road])["highway"])
     }
 
+    func testARoseGardenBeatsParkFillAndANamedStreet() {
+        let park: [String: String] = [
+            "class": "park",
+        ]
+        let sheet: [String: String] = [
+            "leisure": "park",
+            "name": "Rose Garden",
+        ]
+        XCTAssertEqual(Inspect.pick([park, sheet])["name"], "Rose Garden")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet]), pack: "tx-west").klass,
+            "Botanic garden"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet]), pack: "tx-west").klass,
+            "Cactus garden"
+        )
+
+        let road: [String: String] = [
+            "highway": "footway",
+            "name": "Garden Walk",
+        ]
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet, road]), pack: "tx-west").klass,
+            "Botanic garden"
+        )
+        XCTAssertNil(Inspect.pick([park, sheet, road])["highway"])
+    }
+
     func testANamedStreetBeatsGenericParkFill() {
         let park: [String: String] = [
             "leisure": "park",
