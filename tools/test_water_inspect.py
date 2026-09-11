@@ -972,7 +972,7 @@ class GroundFieldSync(unittest.TestCase):
         do = SWIFT.read_text()
         self.assertIn("Javelina, coyote, and deer range", do)
         self.assertIn("coyote and deer range", do)
-        self.assertIn("black bear range", do)
+        self.assertIn("black bear and elk range", do)
         self.assertIn("Copperhead and cottonmouth country", do)
         self.assertIn("Hog range", do)
         self.assertIn("Cottonmouth country", do)
@@ -1095,9 +1095,13 @@ class GroundFieldSync(unittest.TestCase):
             "peak DO names animals and cold; bite treatment is on the walk",
         )
         self.assertNotIn("food card", peak_hold)
+        self.assertIn("javelina", peak_hold)
+        self.assertIn("elk", peak_hold)
         rock_hold = do.split('case "Rock":', 1)[1].split('case "Built-up ground":', 1)[0].lower()
         self.assertNotIn("bite card", rock_hold)
         self.assertNotIn("food card", rock_hold)
+        self.assertIn("do not go in alone", do.lower())
+        self.assertIn("stay in daylight", do.lower())
         self.assertIn(
             'case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat", "Open reserve":',
             do,
@@ -1224,6 +1228,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("ANIMAL · BITE · COLD", qa)
         self.assertIn("CAVE · COLD", qa)
         self.assertIn("coyote and deer range", qa)
+        self.assertIn("Stay in daylight", qa)
+        self.assertIn("black bear and elk", qa)
         self.assertIn("javelina / coyote", qa)
         self.assertIn("cottonmouth", qa)
         self.assertIn("Irrigated ground", qa)
@@ -1488,6 +1494,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("prairie rattler", nm_scrub)
         self.assertIn("diamondback", nm_scrub)
         self.assertIn("cholla", nm_scrub)
+        self.assertIn("sotol", nm_scrub)
         self.assertIn("the bite card", nm_scrub)
         self.assertNotIn("lives here", nm_scrub)
         east_scrub = animal.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()

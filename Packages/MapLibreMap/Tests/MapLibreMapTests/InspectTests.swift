@@ -321,6 +321,9 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(preserve.why.contains("cave preserve"), preserve.why)
         XCTAssertFalse(preserve.why.lowercased().contains("edible"), preserve.why)
         XCTAssertFalse(preserve.doLine.lowercased().contains("edible"), preserve.doLine)
+        XCTAssertTrue(preserve.doLine.lowercased().contains("do not go in alone"), preserve.doLine)
+        XCTAssertTrue(preserve.doLine.lowercased().contains("stay in daylight"), preserve.doLine)
+        XCTAssertTrue(preserve.doLine.lowercased().contains("dark"), preserve.doLine)
 
         let pronoun = Inspect.read(
             tags: [
@@ -843,10 +846,12 @@ final class InspectTests: XCTestCase {
 
         let nmPeak = Inspect.read(tags: ["natural": "peak", "name": "Wheeler"], state: "NM")
         XCTAssertTrue(nmPeak.doLine.lowercased().contains("bear"), nmPeak.doLine)
-        XCTAssertEqual(InspectField.label(for: Inspect.mammalNMCard), "FIELD · ANIMAL")
+        XCTAssertTrue(nmPeak.doLine.lowercased().contains("elk"), nmPeak.doLine)
+        XCTAssertFalse(nmPeak.doLine.lowercased().contains("bite card"), nmPeak.doLine)
 
         let txPeak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"], state: "TX")
         let txPeakDo = txPeak.doLine.lowercased()
+        XCTAssertTrue(txPeakDo.contains("javelina"), txPeak.doLine)
         XCTAssertTrue(txPeakDo.contains("coyote") || txPeakDo.contains("deer"), txPeak.doLine)
         XCTAssertFalse(txPeakDo.contains("ice"), txPeak.doLine)
         XCTAssertFalse(txPeakDo.contains("bite card"), txPeak.doLine)
@@ -855,10 +860,12 @@ final class InspectTests: XCTestCase {
 
         let txRock = Inspect.read(tags: ["natural": "bare_rock"], state: "TX")
         XCTAssertFalse(txRock.doLine.lowercased().contains("ice"), txRock.doLine)
+        XCTAssertTrue(txRock.doLine.lowercased().contains("javelina"), txRock.doLine)
         XCTAssertTrue(
             txRock.doLine.lowercased().contains("coyote") || txRock.doLine.lowercased().contains("deer"),
             txRock.doLine
         )
+        XCTAssertFalse(txRock.doLine.lowercased().contains("bite card"), txRock.doLine)
 
         let grass = Inspect.read(tags: ["natural": "grass"])
         XCTAssertEqual(grass.klass, "Grassland")
@@ -890,6 +897,7 @@ final class InspectTests: XCTestCase {
         let nmScrubDo = nmScrub.doLine.lowercased()
         XCTAssertTrue(nmScrubDo.contains("prairie") || nmScrubDo.contains("rattler"), nmScrub.doLine)
         XCTAssertTrue(nmScrubDo.contains("diamondback"), nmScrub.doLine)
+        XCTAssertTrue(nmScrubDo.contains("sotol"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("cottonmouth"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("lives here"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("edible"), nmScrub.doLine)

@@ -950,7 +950,7 @@ extension Inspect {
         case .txEast:
             return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. If bitten, the bite card. Spines, not a meal."
         case .nm:
-            return "Prairie rattler or diamondback country. Cholla and yucca. If bitten, the bite card. Spines, not a meal."
+            return "Prairie rattler or diamondback country. Cholla, yucca, and sotol. If bitten, the bite card. Spines, not a meal."
         case .unknown:
             return "Open country. Vipers use this cover. If bitten, the bite card."
         }
@@ -1011,13 +1011,13 @@ extension Inspect {
         case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat", "Open reserve":
             return animalRangeLine(state: state, pack: pack)
         case "Cave or hole":
-            return "A hole in the record. Dark, still air, cold. Do not go in alone."
+            return "A hole in the record. Dark, still air, cold. Do not go in alone. Stay in daylight."
         case "Peak":
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
-                return "High ground. Wind, cold, black bear range. Field has ice and cold."
+                return "High ground. Wind, cold, black bear and elk range. Field has ice and cold."
             case .txWest:
-                return "High ground. Wind, coyote and deer range. Field has animal and cold."
+                return "High ground. Wind, javelina, coyote and deer range. Field has animal and cold."
             case .txEast:
                 return "High ground. Wind, coyote, deer, and hog range. Field has animal and cold."
             case .unknown:
@@ -1026,9 +1026,9 @@ extension Inspect {
         case "Rock":
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
-                return "Bare rock. Ice films over. Black bear range. Field has ice and cold."
+                return "Bare rock. Ice films over. Black bear and elk range. Field has ice and cold."
             case .txWest:
-                return "Bare rock. Coyote and deer range. Field has animal and cold."
+                return "Bare rock. Javelina, coyote and deer range. Field has animal and cold."
             case .txEast:
                 return "Bare rock. Coyote, deer, and hog range. Field has animal and cold."
             case .unknown:
