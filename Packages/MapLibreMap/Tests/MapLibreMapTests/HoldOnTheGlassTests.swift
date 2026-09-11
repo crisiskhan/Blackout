@@ -112,8 +112,8 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let eastOpenReserve = CLLocationCoordinate2D(latitude: 30.294331, longitude: -97.603942)
 
     /// Interior of Albuquerque BioPark Botanic Garden in NM `layers/ground.geojson`.
-    /// SOLO_QA 35.094694, −106.682101 sits next to a pond; water outranks the
-    /// sheet. This point is on the botanic polygon, away from water and named ways.
+    /// The listed centroid sits next to a pond; water outranks the sheet.
+    /// This point is on the botanic polygon, away from water and named ways.
     private static let botanicGarden = CLLocationCoordinate2D(latitude: 35.093625, longitude: -106.680958)
 
     /// Interior of Marquez Wildlife Management Area in NM `layers/ground.geojson`.

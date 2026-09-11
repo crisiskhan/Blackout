@@ -1407,6 +1407,7 @@ class GroundFieldSync(unittest.TestCase):
         cave_hit = False
         blowing_hit = False
         decker_hit = False
+        buttercup_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1417,6 +1418,8 @@ class GroundFieldSync(unittest.TestCase):
                     cave_hit = props.get("name") == "Discovery Well Cave Preserve"
                 if kind == "cave" and pip(-97.850443, 30.193035, ring):
                     blowing_hit = props.get("name") == "Blowing Sink"
+                if kind == "cave" and pip(-97.839459, 30.494626, ring):
+                    buttercup_hit = props.get("name") == "Buttercup Creek Cave Preserve"
                 if kind == "reserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = props.get("name") == "Decker Tallgrass Prairie Preserve"
         self.assertTrue(
@@ -1427,6 +1430,9 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             blowing_hit, "glass named-sink hold is not inside Blowing Sink"
+        )
+        self.assertTrue(
+            buttercup_hit, "SOLO_QA Buttercup hold is not inside Buttercup Creek Cave Preserve"
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -1628,6 +1634,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("glasshouse", qa)
         self.assertIn("Discovery Well Cave Preserve", qa)
         self.assertIn("Buttercup Creek Cave Preserve", qa)
+        self.assertIn("30.494626", qa)
+        self.assertIn("35.093625", qa)
+        self.assertIn("33.157743", qa)
+        self.assertIn("30.490391", qa)
+        self.assertIn("vertex-avg sits off the sheet", qa)
         self.assertIn("Blowing Sink", qa)
         self.assertIn("Indiangrass Wildlife Sanctuary", qa)
         self.assertIn("Bee Cave Central Park", qa)
