@@ -245,12 +245,14 @@ final class InspectTests: XCTestCase {
     func testACaveRecordOpensTheCaveCardAndAPeakStaysCold() {
         let cave = Inspect.read(tags: ["natural": "cave", "name": "Hueco Tanks Cave"])
         XCTAssertEqual(cave.klass, "Cave or hole")
-        XCTAssertEqual(cave.fieldRoute, [Inspect.caveCard])
+        XCTAssertEqual(cave.fieldRoute, [Inspect.caveCard, Inspect.coldCard])
         XCTAssertEqual(InspectField.label(for: cave.fieldRoute[0]), "FIELD · CAVE")
+        XCTAssertEqual(InspectField.bookLine(for: cave.fieldRoute), "CAVE · COLD")
 
         let hole = Inspect.read(tags: ["natural": "sinkhole"])
         XCTAssertEqual(hole.klass, "Cave or hole")
-        XCTAssertEqual(hole.fieldRoute.last, Inspect.caveCard)
+        XCTAssertEqual(hole.fieldRoute.first, Inspect.caveCard)
+        XCTAssertEqual(hole.fieldRoute.last, Inspect.coldCard)
 
         let peak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"])
         XCTAssertEqual(peak.klass, "Peak")
@@ -266,7 +268,9 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(tree.klass, "Named tree")
         XCTAssertEqual(tree.fieldRoute.last, Inspect.plantCard)
         XCTAssertEqual(tree.fieldRoute.first, Inspect.treeUseTXCard)
-        XCTAssertTrue(tree.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertTrue(tree.fieldRoute.contains(Inspect.plantUseCard))
+        XCTAssertFalse(tree.fieldRoute.contains(Inspect.mammalTXCard), "a named tree is not javelina country")
+        XCTAssertFalse(tree.fieldRoute.contains(Inspect.gameTXCard))
         XCTAssertFalse(tree.doLine.lowercased().contains("edible"), tree.doLine)
     }
 
@@ -431,7 +435,10 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: nmPeak[0]), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: nmPeak), "COLD · ANIMAL")
 
-        XCTAssertNil(InspectField.bookLine(for: Inspect.read(tags: ["natural": "sinkhole"]).fieldRoute))
+        XCTAssertEqual(
+            InspectField.bookLine(for: Inspect.read(tags: ["natural": "sinkhole"]).fieldRoute),
+            "CAVE · COLD"
+        )
         XCTAssertNil(InspectField.bookLine(for: Inspect.read(tags: ["natural": "spring"]).fieldRoute))
         XCTAssertFalse(Inspect.read(tags: ["natural": "wood"], state: "TX").doLine.lowercased().contains("edible"))
         XCTAssertTrue(

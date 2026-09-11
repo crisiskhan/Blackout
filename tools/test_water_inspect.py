@@ -463,6 +463,14 @@ class GroundFieldSync(unittest.TestCase):
             cover.index("plantTXCard"),
             "woodland must open this pack's tree-use card, not oleander, first",
         )
+        tree = inspect.split('case "tree":', 1)[1].split('case "wood":', 1)[0]
+        self.assertIn("treeUseTXCard", tree)
+        self.assertNotIn("mammalTXCard", tree)
+        hole = inspect.split('case "cave", "cave_entrance", "sinkhole":', 1)[1].split(
+            'case "tree":', 1
+        )[0]
+        self.assertIn("caveCard", hole)
+        self.assertIn("coldCard", hole)
 
     def test_ground_marks_are_circles_without_class_labels_or_animals(self):
         swift = MAP_SWIFT.read_text()
@@ -516,6 +524,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("NEXT · COLD", qa)
+        self.assertIn("CAVE · COLD", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.

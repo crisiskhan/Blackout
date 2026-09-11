@@ -562,15 +562,21 @@ public enum Inspect {
                     sure: 80,
                     why: "a hole in the record; air, dark and cold are the facts, not a tourist guide",
                     advice: .field,
-                    field: caveCard,
+                    field: coldCard,
+                    extra: [caveCard],
                     unnamedPenalty: 6,
                     unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
                 )
             case "tree":
-                return plantCover(
+                return Reading(
                     klass: "Named tree",
+                    kind: .land,
                     sure: 78,
                     why: "a surveyed tree; shade and wood, not a meal",
+                    advice: .field,
+                    field: plantCard,
+                    local: [treeUseTXCard, treeUseNMCard],
+                    extra: [plantUseCard],
                     unnamedPenalty: 8,
                     unnamedKlass: "Tree",
                     unnamedWhy: "a tree is mapped here with no name"
