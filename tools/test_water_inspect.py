@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 2), "tx-east": (14, 2, 2, 0), "nm": (10, 1, 2, 1)}
+        expected = {"tx-west": (2, 0, 0, 4), "tx-east": (14, 2, 2, 1), "nm": (10, 1, 2, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -116,12 +116,17 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("marquez wildlife management area", nm_blob)
         self.assertIn("whitfield wildlife conservation area", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
+        self.assertIn("barelas community garden", nm_blob)
         east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
+        self.assertIn("crestview commons neighborhood park", east_blob)
+        self.assertNotIn("moontower saloon beer garden", east_blob)
         west_blob = (PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("chihuahuan desert conservatory", west_blob)
         self.assertIn("three crosses cactus garden", west_blob)
+        self.assertIn("desert garden park", west_blob)
+        self.assertIn("rose garden", west_blob)
         self.assertNotIn("cactus point park", west_blob)
         self.assertNotIn("parque cactus del desierto", west_blob)
 
@@ -167,6 +172,38 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {"leisure": "park", "name": "Parque Cactus del Desierto"}
             )
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Desert Garden Park"}),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Rose Garden"}),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Barelas Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "park",
+                    "amenity": "community garden",
+                    "name": "Crestview Commons Neighborhood Park",
+                }
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Moontower Saloon Beer Garden"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Garden Park"})
         )
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
@@ -740,6 +777,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Chihuahuan Desert Conservatory", qa)
         self.assertIn("Conservatory At North Austin", qa)
         self.assertIn("Three Crosses Cactus Garden", qa)
+        self.assertIn("Barelas Community Garden", qa)
+        self.assertIn("Beer Garden", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.

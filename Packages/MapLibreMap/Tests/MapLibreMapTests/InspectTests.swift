@@ -963,6 +963,39 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(cactusPark.klass, "Park")
         XCTAssertEqual(cactusPark.fieldRoute.first, Inspect.treeUseTXCard)
+
+        let desertGarden = Inspect.read(
+            tags: ["leisure": "park", "name": "Desert Garden Park"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(desertGarden.klass, "Botanic garden")
+        XCTAssertEqual(desertGarden.fieldRoute.first, Inspect.plantTXCard)
+
+        let rose = Inspect.read(
+            tags: ["leisure": "park", "name": "Rose Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(rose.klass, "Botanic garden")
+        XCTAssertFalse(rose.fieldRoute.contains(Inspect.treeUseTXCard))
+
+        let community = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "amenity": "community garden",
+                "name": "Crestview Commons Neighborhood Park",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(community.klass, "Botanic garden")
+        XCTAssertEqual(community.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(community.fieldRoute.contains(Inspect.treeUseEastCard))
+
+        let beer = Inspect.read(
+            tags: ["leisure": "park", "name": "Moontower Saloon Beer Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(beer.klass, "Park")
+        XCTAssertEqual(beer.fieldRoute.first, Inspect.treeUseEastCard)
     }
 
     func testABotanicGardenBeatsParkFillAndLosesToANamedStreet() {

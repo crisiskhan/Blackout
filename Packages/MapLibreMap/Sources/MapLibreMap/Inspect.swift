@@ -334,8 +334,10 @@ public enum Inspect {
     /// A park named Conservatory At North Austin is apartments. A botanic
     /// garden is worked plant ground. Phrase match, not the word `garden`
     /// and not `arboretum`. A cactus garden is the same; Cactus Point Park
-    /// is not.
+    /// is not. A beer garden is a patio.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
+        let amenity = (t["amenity"] ?? "").lowercased()
+        if amenity == "community_garden" || amenity == "community garden" { return true }
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"
@@ -346,6 +348,9 @@ public enum Inspect {
         if n.contains("botanical garden") { return true }
         if n.contains("conservatory") { return true }
         if n.contains("cactus garden") { return true }
+        if n.contains("desert garden") { return true }
+        if n.contains("rose garden") { return true }
+        if n.contains("community garden") { return true }
         return false
     }
 

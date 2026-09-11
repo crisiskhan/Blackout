@@ -283,7 +283,8 @@ There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Glasshouses, cave preserves, wildlife
 management areas, and botanic gardens get a silver outline at walking zoom; Bee
-Cave, Wildlife Drive, and Conservatory At North Austin stay parks or apartments. A
+Cave, Wildlife Drive, Conservatory At North Austin, and a beer garden stay parks
+or apartments. A
 wildlife sanctuary tagged as woodland still opens the animal book, not picnic
 tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, cactus, animals, shelter, bite, meat you

@@ -29,7 +29,7 @@ OSM_CREDIT = "© OpenStreetMap contributors"
 
 # Tags the hold card reads off the overlay. The card describes the record, so
 # the record has to survive this extract rather than being flattened into ink.
-KEEP_TAGS = ("name", "landuse", "leisure", "boundary")
+KEEP_TAGS = ("name", "landuse", "leisure", "boundary", "amenity")
 
 # Worked plant ground the current land tiles miss. Orchard and farmland already
 # paint as farm; these glasshouses do not. Recreation ground is named by the
@@ -60,11 +60,15 @@ WILDLIFE_RANGE_PHRASES = (
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step
 # with `Inspect.isBotanicGarden`. Conservatory At North Austin is apartments
 # and stays out. The Arboretum mall stays out. Cactus Point Park stays a park.
+# A beer garden is a bar patio and stays a park.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
     "conservatory",
     "cactus garden",
+    "desert garden",
+    "rose garden",
+    "community garden",
 )
 
 
@@ -90,6 +94,9 @@ def is_wildlife_range(props: dict) -> bool:
 
 
 def is_botanic_garden(props: dict) -> bool:
+    amenity = (props.get("amenity") or "").lower()
+    if amenity in ("community_garden", "community garden"):
+        return True
     park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
     if not park:
         return False
