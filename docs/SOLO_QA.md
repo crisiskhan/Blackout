@@ -55,6 +55,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Hold a silver glasshouse outline (walking zoom; no class label). Klass Irrigated ground. `FIELD · PLANT` opens this pack's tree-use card. Never edible. No animal icon. TX EAST named `Vickery Wholesale Greenhouse` 30.313936, −97.617562. TX WEST unnamed 32.502967, −106.933833.
 - [ ] PASS / FAIL / N/A — Hold desert scrub → Desert scrub. DO names this pack's snakes, mammals, yucca and prickly pear as range, not a pin. `BOOK` reads `BITE · ANIMAL · PLANT · FOOD · HEAT`. `FIELD · BITE` opens that state's snake card. Last step becomes `NEXT · ANIMAL`, then cactus / tree-use / `NEXT · BITE` / `NEXT · FOOD`. No animal icon on the canvas.
 - [ ] PASS / FAIL / N/A — Hold a silver peak or sinkhole mark (circle, no class label) → Peak or Cave or hole. TX WEST peak is `FIELD · ANIMAL` then `NEXT · COLD` (Texas has no ice-on-rock card). DO names coyote and deer range, not ice. Hole is `FIELD · CAVE` then `NEXT · COLD`. `BOOK` on the hole is `CAVE · COLD`. TX WEST sinkhole is 31.694905, −106.441133. Do not go in alone. No tourist cave guide.
+- [ ] PASS / FAIL / N/A — Hold a cave preserve (not Bee Cave). Klass Cave or hole. `FIELD · CAVE` then `NEXT · COLD`. TX EAST `Discovery Well Cave Preserve` 30.490167, −97.856308. `Bee Cave Central Park` stays Park / `FIELD · PLANT`. Never edible. No tourist cave guide.
 
 ## FIELD
 

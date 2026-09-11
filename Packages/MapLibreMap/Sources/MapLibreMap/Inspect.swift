@@ -291,6 +291,21 @@ public enum Inspect {
         (pack ?? "").lowercased() == "tx-east"
     }
 
+    /// A park named Bee Cave is a town park. A park named Cave Preserve is
+    /// the hole. Phrase match, not the word `cave` — Cave Drive and Bee Cave
+    /// stay parks.
+    static func isCavePreserve(_ t: [String: String]) -> Bool {
+        let park = t["leisure"] == "park"
+            || t["leisure"] == "nature_reserve"
+            || t["boundary"] == "protected_area"
+            || t["boundary"] == "national_park"
+        guard park else { return false }
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("cave preserve") { return true }
+        if n.contains("cave area of critical") { return true }
+        return false
+    }
+
     private static func match(_ t: [String: String], pack: String? = nil) -> Reading {
         if let r = water(t) { return r }
         if let r = land(t, pack: pack) { return r }
@@ -676,6 +691,19 @@ public enum Inspect {
             default:
                 break
             }
+        }
+        if isCavePreserve(t) {
+            return Reading(
+                klass: "Cave or hole",
+                kind: .land,
+                sure: 80,
+                why: "mapped as a cave preserve; air, dark and cold are the facts, not a tourist guide",
+                advice: .field,
+                field: coldCard,
+                extra: [caveCard],
+                unnamedPenalty: 6,
+                unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
+            )
         }
         if t["boundary"] == "protected_area" || t["boundary"] == "national_park" || t["leisure"] == "nature_reserve" {
             return plantCover(

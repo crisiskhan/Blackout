@@ -262,6 +262,42 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: peak.fieldRoute[0]), "FIELD · COLD")
     }
 
+    func testACavePreserveIsAHoleAndBeeCaveIsAPark() {
+        let preserve = Inspect.read(
+            tags: ["leisure": "park", "name": "Discovery Well Cave Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(preserve.klass, "Cave or hole")
+        XCTAssertEqual(preserve.fieldRoute, [Inspect.caveCard, Inspect.coldCard])
+        XCTAssertEqual(InspectField.label(for: preserve.fieldRoute[0]), "FIELD · CAVE")
+        XCTAssertTrue(preserve.why.contains("cave preserve"), preserve.why)
+        XCTAssertFalse(preserve.why.lowercased().contains("edible"), preserve.why)
+        XCTAssertFalse(preserve.doLine.lowercased().contains("edible"), preserve.doLine)
+
+        let pronoun = Inspect.read(
+            tags: [
+                "boundary": "protected_area",
+                "leisure": "nature_reserve",
+                "name": "Pronoun Cave Area of Critical Environmental Concern",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(pronoun.klass, "Cave or hole")
+        XCTAssertEqual(pronoun.fieldRoute.first, Inspect.caveCard)
+
+        let bee = Inspect.read(
+            tags: ["leisure": "park", "name": "Bee Cave Central Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(bee.klass, "Park")
+        XCTAssertEqual(bee.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(bee.fieldRoute.contains(Inspect.caveCard))
+
+        let coyote = Inspect.read(tags: ["leisure": "park", "name": "Coyote Cave Park"])
+        XCTAssertEqual(coyote.klass, "Park")
+        XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
+    }
+
     func testANamedTreeIsPlantGroundNotAMeal() {
         let tree = Inspect.read(tags: ["natural": "tree", "name": "El Paso Cottonwood"])
         XCTAssertEqual(tree.title, "El Paso Cottonwood")

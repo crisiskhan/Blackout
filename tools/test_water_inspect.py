@@ -503,9 +503,12 @@ class GroundFieldSync(unittest.TestCase):
         hole = inspect.split('case "cave", "cave_entrance", "sinkhole":', 1)[1].split(
             'case "tree":', 1
         )[0]
-        self.assertIn("caveCard", hole)
-        self.assertIn("coldCard", hole)
+        self.assertIn('caveCard', hole)
+        self.assertIn('coldCard', hole)
         self.assertIn('case "grassland", "grass":', inspect)
+        self.assertIn("isCavePreserve", inspect)
+        self.assertIn("cave preserve", inspect)
+        self.assertIn("cave area of critical", inspect)
         do = SWIFT.read_text()
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
@@ -589,6 +592,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Irrigated ground", qa)
         self.assertIn("Vickery Wholesale Greenhouse", qa)
         self.assertIn("glasshouse", qa)
+        self.assertIn("Discovery Well Cave Preserve", qa)
+        self.assertIn("Bee Cave Central Park", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
