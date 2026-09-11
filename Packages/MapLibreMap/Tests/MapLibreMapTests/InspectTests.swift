@@ -225,6 +225,7 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(wood.doLine.lowercased().contains("edible"), wood.doLine)
         XCTAssertTrue(wood.doLine.lowercased().contains("bite card"), wood.doLine)
         XCTAssertTrue(wood.doLine.lowercased().contains("south-side"), wood.doLine)
+        XCTAssertTrue(wood.doLine.lowercased().contains("wind break"), wood.doLine)
         XCTAssertTrue(wood.doLine.lowercased().contains("give it the road"), wood.doLine)
         XCTAssertFalse(wood.doLine.lowercased().contains("food card"), wood.doLine)
         XCTAssertFalse(wood.doLine.lowercased().contains("no ice"), wood.doLine)
@@ -852,6 +853,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(txWoodDo.contains("bite card"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("deadfall"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("south-side"), txWood.doLine)
+        XCTAssertTrue(txWoodDo.contains("wind break"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("not a meal"), txWood.doLine)
         XCTAssertTrue(txWoodDo.contains("give it the road"), txWood.doLine)
         XCTAssertFalse(txWoodDo.contains("food card"), txWood.doLine)
@@ -1614,6 +1616,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("spines"), cactusGarden.doLine)
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("prickly pear"), cactusGarden.doLine)
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("glochids"), cactusGarden.doLine)
+        XCTAssertTrue(cactusGarden.doLine.lowercased().contains("give it room"), cactusGarden.doLine)
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("not a meal"), cactusGarden.doLine)
         XCTAssertFalse(cactusGarden.doLine.lowercased().contains("edible"), cactusGarden.doLine)
         XCTAssertFalse(cactusGarden.why.lowercased().contains("edible"), cactusGarden.why)
@@ -1634,6 +1637,7 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("cholla"), nmCactusGarden.doLine)
         XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("glochids"), nmCactusGarden.doLine)
+        XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("give it room"), nmCactusGarden.doLine)
         XCTAssertFalse(nmCactusGarden.doLine.lowercased().contains("prickly pear"), nmCactusGarden.doLine)
 
         let cactusPark = Inspect.read(

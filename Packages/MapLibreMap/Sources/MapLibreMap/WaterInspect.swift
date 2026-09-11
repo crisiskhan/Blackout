@@ -918,29 +918,29 @@ extension Inspect {
     private static func treeRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Javelina, coyote, and deer range. Give it the road. If bitten, the bite card. South-side shade, wind, deadfall. Not a meal."
+            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Javelina, coyote, and deer range. Give it the road. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
         case .txEast:
-            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. Coyote and deer range. Hog country. Give it the road. If bitten, the bite card. South-side shade, wind, deadfall. Not a meal."
+            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. Coyote and deer range. Hog country. Give it the road. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
         case .nm:
-            return "Rio Grande cottonwood, juniper, piñon. Black bear, elk, and mule deer range. Give it the road. If bitten, the bite card. South-side shade, wind, deadfall. Not a meal."
+            return "Rio Grande cottonwood, juniper, piñon. Black bear, elk, and mule deer range. Give it the road. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
         case .unknown:
-            return "Give it the road. South-side shade, wind, deadfall. Not a meal. Field has the plant, animal, and bite cards."
+            return "Give it the road. South-side shade, wind break, deadfall. Not a meal. Field has the plant, animal, and bite cards."
         }
     }
 
-    /// A surveyed tree is shade, wind, and deadfall — the same uses
-    /// tree-use SPEAK names. Animals are woodland range, not a pin on
-    /// this trunk.
+    /// A surveyed tree is shade, wind break, and deadfall — the same
+    /// uses tree-use SPEAK names. Animals are woodland range, not a pin
+    /// on this trunk.
     private static func treeUseLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Live oak, pecan, mesquite, cedar elm, cottonwood. South-side shade, wind, deadfall. Not a meal."
+            return "Live oak, pecan, mesquite, cedar elm, cottonwood. South-side shade, wind break, deadfall. Not a meal."
         case .txEast:
-            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. South-side shade, wind, deadfall. Not a meal."
+            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. South-side shade, wind break, deadfall. Not a meal."
         case .nm:
-            return "Rio Grande cottonwood, juniper, piñon. South-side shade, wind, deadfall. Not a meal."
+            return "Rio Grande cottonwood, juniper, piñon. South-side shade, wind break, deadfall. Not a meal."
         case .unknown:
-            return "Shade, wind, deadfall. Not a meal. Field has the plant cards."
+            return "Shade, wind break, deadfall. Not a meal. Field has the plant cards."
         }
     }
 
@@ -983,11 +983,11 @@ extension Inspect {
         case "Cactus garden":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest, .txEast:
-                return "Prickly pear and yucca. Comb glochids out. Spines, not a meal. Pretty is not food."
+                return "Prickly pear and yucca. Give it room. Comb glochids out. Spines, not a meal. Pretty is not food."
             case .nm:
-                return "Cholla, yucca, sotol. Comb glochids out. Spines, not a meal. Pretty is not food."
+                return "Cholla, yucca, sotol. Give it room. Comb glochids out. Spines, not a meal. Pretty is not food."
             case .unknown:
-                return "Cactus and yucca. Comb glochids out. Spines, not a meal. Pretty is not food."
+                return "Cactus and yucca. Give it room. Comb glochids out. Spines, not a meal. Pretty is not food."
             }
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
@@ -1003,13 +1003,13 @@ extension Inspect {
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Cottonwoods and pecan along the water. Javelina, coyote, and deer range. Give it the road. If bitten, the bite card. South-side shade, deadfall. Not a meal."
+                return "Cottonwoods and pecan along the water. Javelina, coyote, and deer range. Give it the road. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
             case .txEast:
-                return "Cottonwoods and pecan along the water. Cottonmouth country. Hog range. Give it the road. No ice, no cut, no suck. If bitten, the bite card. South-side shade, deadfall. Not a meal."
+                return "Cottonwoods and pecan along the water. Cottonmouth country. Hog range. Give it the road. No ice, no cut, no suck. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
             case .nm:
-                return "Rio Grande cottonwood. Black bear and mule deer range. Give it the road. If bitten, the bite card. South-side shade, deadfall. Not a meal."
+                return "Rio Grande cottonwood. Black bear and mule deer range. Give it the road. If bitten, the bite card. South-side shade, wind break, deadfall. Not a meal."
             case .unknown:
-                return "Cottonwoods and wet ground. Give it the road. South-side shade, deadfall. Not a meal. Field has the plant, animal, and bite cards."
+                return "Cottonwoods and wet ground. Give it the road. South-side shade, wind break, deadfall. Not a meal. Field has the plant, animal, and bite cards."
             }
         case "Desert scrub", "Grassland", "Sand or playa floor", "Salt flat", "Open reserve":
             return animalRangeLine(state: state, pack: pack)

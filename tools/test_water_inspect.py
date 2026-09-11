@@ -1005,6 +1005,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("rio grande cottonwood", named_tree)
         self.assertIn("not a meal", named_tree)
         self.assertIn("deadfall", named_tree)
+        self.assertIn("wind break", named_tree)
         self.assertNotIn("the bite card", named_tree)
         self.assertNotIn("javelina", named_tree)
         self.assertNotIn("hog", named_tree)
@@ -1025,6 +1026,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the bite card", woodland_hold)
         self.assertIn("deadfall", woodland_hold)
         self.assertIn("south-side shade", woodland_hold)
+        self.assertIn("wind break", woodland_hold)
         self.assertIn("give it the road", woodland_hold)
         self.assertNotIn("the food card", woodland_hold)
         self.assertNotIn("no ice", woodland_hold)
@@ -1036,6 +1038,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cottonmouth", bosque)
         self.assertIn("the bite card", bosque)
         self.assertIn("south-side shade", bosque)
+        self.assertIn("wind break", bosque)
         self.assertIn("give it the road", bosque)
         self.assertIn("no ice, no cut, no suck", bosque)
         self.assertNotIn("the food card", bosque)
@@ -1067,6 +1070,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cholla", cactus_hold)
         self.assertIn("sotol", cactus_hold)
         self.assertIn("comb glochids out", cactus_hold)
+        self.assertIn("give it room", cactus_hold)
         self.assertNotIn("edible", cactus_hold)
         self.assertNotIn("lives here", cactus_hold)
         tx_cactus_card = next(
@@ -1225,6 +1229,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("aspen is high country", qa.lower())
         self.assertIn("food stays on wildlife range", qa)
         self.assertIn("south-side shade", qa.lower())
+        self.assertIn("wind break", qa.lower())
+        self.assertIn("Give it room", qa)
         self.assertIn("SPEAK names that pack", qa)
         self.assertIn("SPEAK names oleander", qa)
         self.assertIn("dark, still air, cold", qa)
@@ -1295,6 +1301,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
+        self.assertIn("Give it room", qa)
+        self.assertIn("wind break", qa.lower())
         self.assertIn("Peak DO does not name the bite card", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
@@ -1575,6 +1583,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
+        self.assertIn("Give it room", qa)
+        self.assertIn("wind break", qa.lower())
         self.assertIn("Peak DO does not name the bite card", qa)
 
     def test_wildlife_range_names_the_pack_mammal_book(self):
