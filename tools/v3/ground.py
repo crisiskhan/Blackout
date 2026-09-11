@@ -6,14 +6,16 @@ never reached a fill, and holding the glasshouse answered open ground. It also
 carries three cave preserves tagged as parks. Those already paint as park
 fill; without a silver outline they look like picnic ground. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
-open picnic tree-use without this file. This is the water-detail pattern for
-those records: small enough to sit in the style as a geojson source, tags
-intact so a hold names the record rather than a colour.
+open picnic tree-use without this file. A botanic garden tagged as a park
+would open woodland tree-use without this file. This is the water-detail
+pattern for those records: small enough to sit in the style as a geojson
+source, tags intact so a hold names the record rather than a colour.
 
 No network. The input is `osm.geojson` already in the tree. A reviewer can
 regenerate every shipped byte and diff it. Animals are not drawn. Nothing
 here is a meal. Bee Cave is a town park and is not in this file. Wildlife
-Drive is a street and is not in this file.
+Drive is a street and is not in this file. Conservatory At North Austin is
+apartments and is not in this file.
 """
 from __future__ import annotations
 
@@ -55,6 +57,16 @@ WILDLIFE_RANGE_PHRASES = (
     "wildlife conservation area",
 )
 
+# Phrase match, not the word "garden" and not "arboretum". Must stay in step
+# with `Inspect.isBotanicGarden`. Conservatory At North Austin is apartments
+# and stays out. The Arboretum mall stays out. Cactus Point Park stays a park.
+BOTANIC_GARDEN_PHRASES = (
+    "botanic garden",
+    "botanical garden",
+    "conservatory",
+    "cactus garden",
+)
+
 
 def write_compact(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,6 +89,14 @@ def is_wildlife_range(props: dict) -> bool:
     return any(phrase in name for phrase in WILDLIFE_RANGE_PHRASES)
 
 
+def is_botanic_garden(props: dict) -> bool:
+    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
+    if not park:
+        return False
+    name = (props.get("name") or "").lower()
+    return any(phrase in name for phrase in BOTANIC_GARDEN_PHRASES)
+
+
 def overlay_kind(props: dict) -> str | None:
     if props.get("landuse") in WORKED_LANDUSE:
         return "glasshouse"
@@ -84,11 +104,13 @@ def overlay_kind(props: dict) -> str | None:
         return "cave"
     if is_wildlife_range(props):
         return "wildlife"
+    if is_botanic_garden(props):
+        return "botanic"
     return None
 
 
 def records(fc: dict) -> list[dict]:
-    """Glasshouse, cave-preserve, and wildlife-range polygons, tags slimmed, order stable."""
+    """Glasshouse, cave-preserve, wildlife-range, and botanic-garden polygons, tags slimmed, order stable."""
     out: list[dict] = []
     for feat in fc.get("features") or []:
         props = feat.get("properties") or {}
@@ -126,8 +148,9 @@ def build(dest: Path) -> dict:
     glass = kinds.count("glasshouse")
     caves = kinds.count("cave")
     wildlife = kinds.count("wildlife")
+    botanic = kinds.count("botanic")
     print(
-        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves {wildlife} wildlife-range draw {drawn} bytes",
+        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves {wildlife} wildlife-range {botanic} botanic draw {drawn} bytes",
         flush=True,
     )
     return {"records": len(feats), "drawBytes": drawn}

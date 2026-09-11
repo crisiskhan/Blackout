@@ -941,7 +941,7 @@ extension Inspect {
         switch klass {
         case "Woodland", "Named tree", "Tree", "Park", "Protected land", "Irrigated ground":
             return treeRangeLine(state: state, pack: pack)
-        case "Glasshouse":
+        case "Glasshouse", "Botanic garden":
             return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {

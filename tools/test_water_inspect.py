@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0), "tx-east": (14, 2, 2), "nm": (10, 1, 2)}
+        expected = {"tx-west": (2, 0, 0, 2), "tx-east": (14, 2, 2, 0), "nm": (10, 1, 2, 1)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -86,30 +86,88 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertNotIn("bee cave", blob, pid)
             self.assertNotIn("wildlife drive", blob, pid)
             self.assertNotIn("wildlife trail", blob, pid)
+            self.assertNotIn("conservatory at north austin", blob, pid)
+            self.assertNotIn("madison at the arboretum", blob, pid)
             glass = 0
             caves = 0
             wildlife = 0
+            botanic = 0
             for feat in fc["features"]:
                 props = feat.get("properties") or {}
                 self.assertIn(feat.get("geometry", {}).get("type"), ("Polygon", "MultiPolygon"))
                 name = (props.get("name") or "").lower()
                 kind = ground.overlay_kind(props)
-                self.assertIsNotNone(kind, f"{pid} overlay feature is not glasshouse, cave, or wildlife: {props}")
+                self.assertIsNotNone(
+                    kind,
+                    f"{pid} overlay feature is not glasshouse, cave, wildlife, or botanic: {props}",
+                )
                 self.assertNotIn("bee cave", name)
                 if kind == "glasshouse":
                     glass += 1
                 elif kind == "cave":
                     caves += 1
-                else:
-                    self.assertEqual(kind, "wildlife", kind)
+                elif kind == "wildlife":
                     wildlife += 1
-            self.assertEqual((glass, caves, wildlife), expected[pid], pid)
+                else:
+                    self.assertEqual(kind, "botanic", kind)
+                    botanic += 1
+            self.assertEqual((glass, caves, wildlife, botanic), expected[pid], pid)
         nm_blob = (PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("marquez wildlife management area", nm_blob)
         self.assertIn("whitfield wildlife conservation area", nm_blob)
+        self.assertIn("albuquerque biopark botanic garden", nm_blob)
         east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
+        west_blob = (PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text().lower()
+        self.assertIn("chihuahuan desert conservatory", west_blob)
+        self.assertIn("three crosses cactus garden", west_blob)
+        self.assertNotIn("cactus point park", west_blob)
+        self.assertNotIn("parque cactus del desierto", west_blob)
+
+    def test_a_botanic_garden_is_worked_ground_not_a_meal(self):
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Albuquerque BioPark Botanic Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "boundary": "protected_area",
+                    "name": "Chihuahuan Desert Conservatory",
+                }
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"landuse": "residential", "name": "Conservatory At North Austin"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"landuse": "residential", "name": "Madison at the Arboretum"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Bee Cave Central Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Three Crosses Cactus Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Cactus Point Park"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Parque Cactus del Desierto"}
+            )
+        )
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
         inspect = INSPECT.read_text()
@@ -123,6 +181,12 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("wildlife")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
+        for phrase in ground.BOTANIC_GARDEN_PHRASES:
+            self.assertIn(f'"{phrase}"', inspect)
+            self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertNotIn('contains("arboretum")', inspect)
+        self.assertIn("isBotanicGarden", inspect)
+        self.assertIn("Botanic garden", inspect)
 
     def test_the_manifest_counts_the_ground_it_ships(self):
         for pid in PACKS:
@@ -558,6 +622,16 @@ class GroundFieldSync(unittest.TestCase):
             land.index('case "wood":'),
             "a wildlife sanctuary tagged as wood must still be range, not picnic woodland",
         )
+        self.assertIn("isBotanicGarden", inspect)
+        self.assertIn("botanic garden", inspect)
+        self.assertIn("botanical garden", inspect)
+        self.assertIn("conservatory", inspect)
+        self.assertIn("cactus garden", inspect)
+        self.assertLess(
+            land.index("isBotanicGarden"),
+            land.index('case "wood":'),
+            "a botanic garden tagged as a park must still be worked ground, not picnic woodland",
+        )
         do = SWIFT.read_text()
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
@@ -567,6 +641,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("loblolly pine", do)
         self.assertIn("Hog country", do)
         self.assertIn("Pretty is not food", do)
+        self.assertIn("Botanic garden", do)
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
@@ -593,6 +668,7 @@ class GroundFieldSync(unittest.TestCase):
         pick = inspect.split("public static func pick", 1)[1].split("packSourceID", 1)[0]
         self.assertIn("isCavePreserve", pick)
         self.assertIn("isWildlifeRange", pick)
+        self.assertIn("isBotanicGarden", pick)
         self.assertIn("greenhouse_horticulture", pick)
 
     def test_glasshouses_are_worked_ground_not_a_meal(self):
@@ -659,6 +735,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Wildlife Drive", qa)
         self.assertIn("loblolly", qa)
         self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
+        self.assertIn("Botanic garden", qa)
+        self.assertIn("Albuquerque BioPark Botanic Garden", qa)
+        self.assertIn("Chihuahuan Desert Conservatory", qa)
+        self.assertIn("Conservatory At North Austin", qa)
+        self.assertIn("Three Crosses Cactus Garden", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.

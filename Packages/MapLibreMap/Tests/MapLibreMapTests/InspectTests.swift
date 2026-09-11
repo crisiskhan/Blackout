@@ -891,6 +891,99 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([farm, glass, road])["highway"], "residential")
     }
 
+    func testABotanicGardenIsWorkedGroundNotAMeal() {
+        let garden = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "name": "Albuquerque BioPark Botanic Garden",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(garden.klass, "Botanic garden")
+        XCTAssertEqual(garden.title, "Albuquerque BioPark Botanic Garden")
+        XCTAssertEqual(garden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(garden.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(garden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(garden.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(garden.fieldRoute.contains(Inspect.gameNMCard))
+        XCTAssertTrue(garden.doLine.lowercased().contains("not food"), garden.doLine)
+        XCTAssertFalse(garden.doLine.lowercased().contains("live oak"), garden.doLine)
+        XCTAssertFalse(garden.doLine.lowercased().contains("edible"), garden.doLine)
+        XCTAssertFalse(garden.doLine.lowercased().contains("lives here"), garden.doLine)
+        XCTAssertFalse(garden.why.lowercased().contains("edible"), garden.why)
+        XCTAssertEqual(InspectField.label(for: garden.fieldRoute[0]), "FIELD · PLANT")
+        let nmBook: Set<String> = [
+            Inspect.plantNMCard, Inspect.treeUseNMCard, Inspect.mammalNMCard,
+            Inspect.plantUseCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(garden.fieldRoute, in: nmBook).first,
+            Inspect.plantNMCard
+        )
+
+        let conservatory = Inspect.read(
+            tags: [
+                "boundary": "protected_area",
+                "name": "Chihuahuan Desert Conservatory",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(conservatory.klass, "Botanic garden")
+        XCTAssertEqual(conservatory.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(conservatory.doLine.lowercased().contains("not food"), conservatory.doLine)
+
+        let apartments = Inspect.read(
+            tags: ["landuse": "residential", "name": "Conservatory At North Austin"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(apartments.klass, "Built-up ground")
+        XCTAssertFalse(apartments.doLine.lowercased().contains("not food"), apartments.doLine)
+
+        let arboretum = Inspect.read(
+            tags: ["landuse": "residential", "name": "Madison at the Arboretum"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(arboretum.klass, "Built-up ground")
+
+        let cactusGarden = Inspect.read(
+            tags: ["leisure": "park", "name": "Three Crosses Cactus Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(cactusGarden.klass, "Botanic garden")
+        XCTAssertEqual(cactusGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(cactusGarden.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(cactusGarden.fieldRoute.contains(Inspect.treeUseTXCard))
+
+        let cactusPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Cactus Point Park"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(cactusPark.klass, "Park")
+        XCTAssertEqual(cactusPark.fieldRoute.first, Inspect.treeUseTXCard)
+    }
+
+    func testABotanicGardenBeatsParkFillAndLosesToANamedStreet() {
+        let park: [String: String] = [
+            "class": "park",
+            "name": "Albuquerque BioPark Botanic Garden",
+        ]
+        let botanic: [String: String] = [
+            "leisure": "park",
+            "name": "Albuquerque BioPark Botanic Garden",
+        ]
+        XCTAssertEqual(Inspect.pick([park, botanic])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, botanic]), pack: "nm").klass,
+            "Botanic garden"
+        )
+
+        let road: [String: String] = ["highway": "residential", "name": "Central Avenue"]
+        XCTAssertEqual(Inspect.pick([park, botanic, road])["highway"], "residential")
+    }
+
     func testACavePreserveBeatsParkFillAndLosesToANamedStreet() {
         let park: [String: String] = [
             "class": "park",

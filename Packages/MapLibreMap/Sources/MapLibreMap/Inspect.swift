@@ -126,10 +126,11 @@ public enum Inspect {
     /// a sheet you cannot miss. `landuse=residential` is drawn under every
     /// street in Las Cruces, so without that a hold downtown answers with the
     /// subdivision instead of the road under the thumb. A cave preserve, a
-    /// wildlife sanctuary, or a glasshouse is a named (or tagged) sheet that
-    /// is the question — it beats woodland and farm fill, and still loses to a
-    /// named street. Between two unnamed records take the ground, because out
-    /// there the biome is the answer and an unnamed ranch track is not.
+    /// wildlife sanctuary, a botanic garden, or a glasshouse is a named (or
+    /// tagged) sheet that is the question — it beats woodland and farm fill,
+    /// and still loses to a named street. Between two unnamed records take the
+    /// ground, because out there the biome is the answer and an unnamed ranch
+    /// track is not.
     ///
     /// Sampling 4,000 points across the tx-west pack, a street and a piece of
     /// ground are both under the thumb 1.5% of the time, and that split is
@@ -139,6 +140,7 @@ public enum Inspect {
             let named = !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
             let notablePoint = packGroundPointNaturals.contains(tags["natural"] ?? "")
             let notableGround = isCavePreserve(tags) || isWildlifeRange(tags)
+                || isBotanicGarden(tags)
                 || tags["landuse"] == "greenhouse_horticulture"
             switch read(tags: tags).kind {
             case .water:
@@ -326,6 +328,24 @@ public enum Inspect {
         if n.contains("national wildlife") { return true }
         if n.contains("wildlife sanctuary") { return true }
         if n.contains("wildlife conservation area") { return true }
+        return false
+    }
+
+    /// A park named Conservatory At North Austin is apartments. A botanic
+    /// garden is worked plant ground. Phrase match, not the word `garden`
+    /// and not `arboretum`. A cactus garden is the same; Cactus Point Park
+    /// is not.
+    static func isBotanicGarden(_ t: [String: String]) -> Bool {
+        let park = t["leisure"] == "park"
+            || t["leisure"] == "nature_reserve"
+            || t["boundary"] == "protected_area"
+            || t["boundary"] == "national_park"
+        guard park else { return false }
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("botanic garden") { return true }
+        if n.contains("botanical garden") { return true }
+        if n.contains("conservatory") { return true }
+        if n.contains("cactus garden") { return true }
         return false
     }
 
@@ -682,6 +702,15 @@ public enum Inspect {
                 pack: pack
             )
         }
+        if isBotanicGarden(t) {
+            return workedCover(
+                klass: "Botanic garden",
+                sure: 82,
+                why: "mapped as a botanic garden; pretty is not food, not wild cover",
+                unnamedPenalty: 4,
+                pack: pack
+            )
+        }
         if let natural = t["natural"] {
             switch natural {
             case "wood":
@@ -922,7 +951,7 @@ public enum Inspect {
         )
     }
 
-    /// Glasshouses: don't chew, then plant-use. Not woodland tree-use, not a hunt.
+    /// Glasshouses and botanic gardens: don't chew, then plant-use. Not woodland tree-use, not a hunt.
     private static func workedCover(
         klass: String,
         sure: Int,

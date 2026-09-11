@@ -281,14 +281,16 @@ that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
 not a badge — the ring says the record puts water here, not that it is good.
 There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
-records the extract actually has. Glasshouses, cave preserves, and wildlife
-management areas get a silver outline at walking zoom; Bee Cave and Wildlife
-Drive stay parks. A wildlife sanctuary tagged as woodland still opens the animal
-book, not picnic tree-use. Holding woodland opens that pack's tree-use card first (the trees this
+records the extract actually has. Glasshouses, cave preserves, wildlife
+management areas, and botanic gardens get a silver outline at walking zoom; Bee
+Cave, Wildlife Drive, and Conservatory At North Austin stay parks or apartments. A
+wildlife sanctuary tagged as woodland still opens the animal book, not picnic
+tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, cactus, animals, shelter, bite, meat you
-already have. Holding a glasshouse opens plant-danger, not woodland. Holding a
-wildlife management area opens that pack's animal cards; this is range, not a
-pin. Holding scrub opens that pack's bite and mammal cards; holding a hole
+already have. Holding a glasshouse or botanic garden opens plant-danger, not
+woodland. Holding a wildlife management area opens that pack's animal cards;
+this is range, not a pin. Holding scrub opens that pack's bite and mammal cards;
+holding a hole
 opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range and opens `tx-tree-use` / `tx-mammal`; TX EAST names copperhead, cottonmouth, loblolly pine, and hog, not javelina, and opens `tx-east-tree-use`. A javelina still still opens the west mammal card. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
 woodland) and the button names the first card this pack's Field book ships —
