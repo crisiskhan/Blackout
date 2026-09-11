@@ -2211,7 +2211,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("woodland, park, or bosque", west)
         self.assertNotIn("edible", west)
         west_tree_do = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
-        west_do = next(c for c in west_tree_do["cards"] if c["id"] == "tx-tree-use")["steps"][0]["do"]["en"].lower()
+        west_tree = next(c for c in west_tree_do["cards"] if c["id"] == "tx-tree-use")
+        west_sit = west_tree["situation"]["en"].lower()
+        self.assertIn("mesquite is woodland", west_sit)
+        west_do = west_tree["steps"][0]["do"]["en"].lower()
         self.assertIn("mesquite", west_do)
         self.assertIn("live oak", west_do)
         self.assertIn("mesquite is woodland", west_do)
@@ -2241,6 +2244,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("juniper and piñon are woodland", qa.lower())
         self.assertIn("loblolly pine is Lost Pines", qa)
         self.assertIn("situation names aspen as high country", qa.lower())
+        self.assertIn("situation names mesquite as woodland", qa.lower())
 
     def test_nm_hold_names_the_field_rattlesnakes_and_mammals(self):
         """NM Field and Vision name prairie rattler, diamondback, and mule deer.
