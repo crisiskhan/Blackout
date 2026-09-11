@@ -85,6 +85,15 @@ final class FieldCorpusTests: XCTestCase {
         )
     }
 
+    func testAskWoolFindsTheLayerCard() {
+        let layers = card("camp-layers", title: "Clothing is a system")
+        let cook = card("food-cook", title: "Cook what you already trust")
+        XCTAssertEqual(
+            FieldCorpus.ask([layers, cook], query: "wet wool", locale: "en").map(\.id),
+            ["camp-layers"]
+        )
+    }
+
     private func card(
         _ id: String,
         category: String = "water",

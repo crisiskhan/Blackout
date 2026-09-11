@@ -57,6 +57,22 @@ FROM_NOTHING = (
     "med-glare",
     "animal-gator",
     "water-urban",
+    "camp-layers",
+    "camp-tape",
+    "shelter-knots",
+    "nav-pace",
+    "camp-pack",
+    "env-sky",
+    "tact-breathe",
+    "camp-sleep",
+    "camp-light",
+    "med-booze",
+    "camp-rest-step",
+    "food-pantry",
+    "nav-compass",
+    "fire-bow",
+    "water-salt",
+    "tact-staygo",
 )
 
 
@@ -92,10 +108,19 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("plant-unknown", corpus)
         self.assertIn("camp-start", corpus)
         self.assertNotIn("edible", corpus.lower())
+        self.assertIn("wool", corpus)
+        self.assertIn("camp-layers", corpus)
+        self.assertIn("tact-breathe", corpus)
+        self.assertIn("food-pantry", corpus)
         book = json.loads((ROOT / "Resources/Field/field.core.json").read_text())
         blob = json.dumps(book).lower()
         self.assertNotIn("safe to eat", blob)
         self.assertNotIn("dual survival", blob)
+        self.assertNotIn("lundin", blob)
+        self.assertNotIn("canterbury", blob)
+        self.assertNotIn("graham", blob)
+        self.assertNotIn("bushcraft 101", blob)
+        self.assertNotIn("98.6", json.dumps(book))
         by_id = {card["id"]: card for card in book["cards"]}
         for cid in FROM_NOTHING:
             self.assertNotIn("edible", json.dumps(by_id[cid]).lower(), cid)
@@ -137,21 +162,39 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("give it the water", gator)
         urban = json.dumps(by_id["water-urban"]).lower()
         self.assertIn("tank, not the bowl", urban)
+        layers = json.dumps(by_id["camp-layers"]).lower()
+        self.assertIn("wet cotton next to skin", layers)
+        knots = json.dumps(by_id["shelter-knots"]).lower()
+        self.assertIn("taut line", knots)
+        rest = json.dumps(by_id["camp-rest-step"]).lower()
+        self.assertIn("rest-step", rest)
+        breathe = json.dumps(by_id["tact-breathe"]).lower()
+        self.assertIn("slow the heart", breathe)
+        booze = json.dumps(by_id["med-booze"]).lower()
+        self.assertIn("does not warm you", booze)
+        pantry = json.dumps(by_id["food-pantry"]).lower()
+        self.assertIn("already in the kit or the house you already occupy", pantry)
+        self.assertNotIn("raid the", pantry)
         field_py = read("tools", "v3", "field.py")
         self.assertIn("def from_nothing_core", field_py)
         self.assertIn("from_nothing_core()", field_py)
         self.assertIn("def craft_core", field_py)
         self.assertIn("craft_core()", field_py)
+        self.assertIn("def manual_core", field_py)
+        self.assertIn("manual_core()", field_py)
         self.assertNotIn("dual survival", field_py.lower())
         self.assertNotIn("lundin", field_py.lower())
         self.assertNotIn("canterbury", field_py.lower())
         self.assertNotIn("graham", field_py.lower())
+        self.assertNotIn("bushcraft 101", field_py.lower())
+        self.assertNotIn("98.6", field_py)
 
     def test_solo_qa_scores_field_search(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("SEARCH", qa)
         self.assertIn("NO MATCH", qa)
         self.assertIn("starting from nothing", qa.lower())
+        self.assertIn("wool", qa.lower())
         self.assertIn("FIELD hits scroll", qa)
 
 
