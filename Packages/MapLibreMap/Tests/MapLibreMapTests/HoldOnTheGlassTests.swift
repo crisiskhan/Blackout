@@ -19,7 +19,9 @@ import XCTest
 /// straight out of the extract, and call the app's own probe — the same
 /// `record(under:on:)` the long-press handler calls. The coordinates are in the
 /// test because they are evidence: each one is a real record in
-/// `Resources/Packs/tx-west/osm.geojson` or `layers/ground.geojson`.
+/// `Resources/Packs/tx-west` or `tx-east` `osm.geojson` / `layers/ground.geojson`.
+/// Texas West has no wildlife overlay in this fetch; animals as range are held
+/// on an east sanctuary, not invented on the west pack.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
@@ -53,6 +55,13 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Unnamed `natural=sinkhole` on the place slice. SOLO_QA 31.694905, −106.441133.
     private static let sinkhole = CLLocationCoordinate2D(latitude: 31.694905, longitude: -106.441133)
+
+    /// Interior of Indiangrass Wildlife Sanctuary in east `layers/ground.geojson`.
+    /// Scrub fill does not win. Range, not a pin.
+    private static let wildlifeRange = CLLocationCoordinate2D(latitude: 30.315667, longitude: -97.591821)
+
+    /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
+    private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)
 
     // MARK: - The two holds the build is gated on
 
@@ -182,6 +191,60 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
     }
 
+    func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {
+        let held = try hold(at: Self.wildlifeRange, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Wildlife range", "\(held)")
+        XCTAssertEqual(held.card?.title, "Indiangrass Wildlife Sanctuary", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.mammalEastCard, "\(held)")
+        XCTAssertNotEqual(
+            held.card?.fieldRoute.first,
+            Inspect.treeUseEastCard,
+            "a wildlife sanctuary opened picnic woodland: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("hog"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("cook through"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("javelina"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · ANIMAL"
+        )
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: [
+                    Inspect.mammalEastCard, Inspect.snakeEastCard, Inspect.gameEastCard,
+                    Inspect.treeUseEastCard, Inspect.plantTXCard, Inspect.biteCard,
+                    Inspect.plantUseCard, Inspect.gameCard, Inspect.plantCard,
+                ]
+            )),
+            "ANIMAL · BITE · FOOD · PLANT"
+        )
+    }
+
+    func testHoldingACavePreserveOpensTheCaveCardNotBosque() throws {
+        let held = try hold(at: Self.cavePreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(held.card?.klass, "Cave or hole", "\(held)")
+        XCTAssertEqual(held.card?.title, "Discovery Well Cave Preserve", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.caveCard, "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("stay in daylight"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonwood"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · CAVE"
+        )
+    }
+
     /// Whatever came back, it has to carry the four lines the card shows and a
     /// Field card to open. A reading with an empty `why` renders as `SURE 68% —`
     /// and looks broken.
@@ -215,9 +278,9 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// When the pack's OSM was pulled, as the manifest recorded it — the same
     /// string `AppRuntime` hands the card.
-    private static func packDate() throws -> String {
+    private static func packDate(packId: String = "tx-west") throws -> String {
         let manifest = try JSONSerialization.jsonObject(
-            with: Data(contentsOf: RenderHarness.txWest.appendingPathComponent("manifest.json"))
+            with: Data(contentsOf: RenderHarness.packRoot(packId).appendingPathComponent("manifest.json"))
         ) as? [String: Any]
         return try XCTUnwrap(manifest?["osmFetched"] as? String, "the pack does not say when it was pulled")
     }
@@ -225,8 +288,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Hold in the middle of the viewport, through the app's own probe. The
     /// tags come back alongside the card so a red assertion can say whether
     /// the tile was wrong or the reading of it was.
-    private func hold(at centre: CLLocationCoordinate2D, zoom: Double) throws -> Held {
-        let pack = RenderHarness.txWest
+    private func hold(
+        at centre: CLLocationCoordinate2D,
+        zoom: Double,
+        packId: String = "tx-west"
+    ) throws -> Held {
+        let pack = RenderHarness.packRoot(packId)
         _ = try RenderHarness.requireArchive(in: pack)
         let style = try RenderHarness.shippedStyle(pack: pack)
         // `fallback: [:]` on its own is `[AnyHashable: Any]`, and that type
@@ -253,13 +320,14 @@ final class HoldOnTheGlassTests: XCTestCase {
             fallback: [:]
         )
         guard !tags.isEmpty else { return Held(tags: [:], card: nil) }
+        let state = packId == "nm" ? "NM" : "TX"
         return Held(
             tags: tags,
             card: Inspect.read(
                 tags: tags,
-                packDate: try Self.packDate(),
-                state: "TX",
-                pack: "tx-west"
+                packDate: try Self.packDate(packId: packId),
+                state: state,
+                pack: packId
             )
         )
     }

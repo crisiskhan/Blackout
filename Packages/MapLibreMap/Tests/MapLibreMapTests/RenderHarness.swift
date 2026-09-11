@@ -30,6 +30,7 @@ enum RenderHarness {
     }
 
     static var txWest: URL { packRoot("tx-west") }
+    static var txEast: URL { packRoot("tx-east") }
 
     /// Skip rather than fail when the archive is not in the checkout, so the
     /// suite still runs somewhere the packs have not been fetched.

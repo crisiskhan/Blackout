@@ -1212,6 +1212,16 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Open reserve", glass)
         self.assertIn("Glasshouse", glass)
         self.assertIn("Cave or hole", glass)
+        self.assertIn("Wildlife range", glass)
+        self.assertIn("Indiangrass Wildlife Sanctuary", glass)
+        self.assertIn("Discovery Well Cave Preserve", glass)
+        self.assertIn("30.315667", glass)
+        self.assertIn("-97.591821", glass)
+        self.assertIn("30.490391", glass)
+        self.assertIn("-97.855063", glass)
+        self.assertIn('packId: "tx-east"', glass)
+        self.assertIn("FIELD · ANIMAL", glass)
+        self.assertIn("ANIMAL · BITE · FOOD · PLANT", glass)
         self.assertIn('contains("edible")', glass)
         self.assertNotIn("safe to eat", glass.lower())
         self.assertNotIn("edible unlock", glass.lower())
@@ -1271,6 +1281,24 @@ class GroundFieldSync(unittest.TestCase):
             if abs(lat - 31.694905) < 1e-6 and abs(lon - (-106.441133)) < 1e-6:
                 sink = True
         self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
+
+        east = json.loads((PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text())
+        wildlife_hit = False
+        cave_hit = False
+        for feat in east["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "wildlife" and pip(-97.591821, 30.315667, ring):
+                    wildlife_hit = props.get("name") == "Indiangrass Wildlife Sanctuary"
+                if kind == "cave" and pip(-97.855063, 30.490391, ring):
+                    cave_hit = props.get("name") == "Discovery Well Cave Preserve"
+        self.assertTrue(
+            wildlife_hit, "glass wildlife hold is not inside Indiangrass"
+        )
+        self.assertTrue(
+            cave_hit, "glass cave hold is not inside Discovery Well"
+        )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
