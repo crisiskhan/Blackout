@@ -1138,6 +1138,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Inspect.treeUseEastCard", vision_fn)
         self.assertIn("Inspect.mammalEastCard", vision_fn)
         self.assertIn("Inspect.snakeEastCard", vision_fn)
+        mammal_still = vision_fn.split("case .mammal:", 1)[1].split("case .tree:", 1)[0]
+        self.assertIn(
+            "biteCard",
+            mammal_still,
+            "a mammal still includes bite treatment, like a snake still",
+        )
+        self.assertNotIn("plantTXCard", mammal_still)
         cactus_still = vision_fn.split("case .cactus:", 1)[1]
         self.assertNotIn(
             "plantTXCard",
@@ -1155,6 +1162,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("tx-east-tree-use", qa)
         self.assertIn("tx-javelina", qa)
+        self.assertIn("bite treatment", qa)
         self.assertIn("tx-plant-danger", qa)
 
     def test_the_field_tree_card_names_the_hold_trees(self):

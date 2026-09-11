@@ -765,9 +765,14 @@ final class InspectTests: XCTestCase {
 
         let javelina = InspectField.fieldRoute(forVision: "tx-javelina", state: "TX")
         XCTAssertEqual(javelina.first, Inspect.mammalTXCard)
+        XCTAssertTrue(javelina.contains(Inspect.biteCard), "a mammal still includes bite treatment")
         XCTAssertTrue(javelina.contains(Inspect.gameTXCard))
         XCTAssertTrue(javelina.contains(Inspect.gameCard))
         XCTAssertEqual(InspectField.label(for: javelina[0]), "FIELD · ANIMAL")
+        XCTAssertEqual(
+            InspectField.bookLine(for: javelina),
+            "ANIMAL · BITE · FOOD"
+        )
         XCTAssertFalse(javelina.contains(Inspect.plantTXCard), "a mammal still is not woodland")
 
         let oak = InspectField.fieldRoute(forVision: "tx-live-oak", state: "TX")
@@ -781,6 +786,7 @@ final class InspectTests: XCTestCase {
 
         let bear = InspectField.fieldRoute(forVision: "nm-black-bear", state: "NM")
         XCTAssertEqual(bear.first, Inspect.mammalNMCard)
+        XCTAssertTrue(bear.contains(Inspect.biteCard), "a bear still includes bite treatment")
         XCTAssertEqual(InspectField.label(for: bear[0]), "FIELD · ANIMAL")
 
         let yucca = InspectField.fieldRoute(forVision: "kind:cacti_yucca", state: "NM")
@@ -802,6 +808,7 @@ final class InspectTests: XCTestCase {
             pack: "tx-east"
         )
         XCTAssertEqual(mammalKindEast.first, Inspect.mammalEastCard)
+        XCTAssertTrue(mammalKindEast.contains(Inspect.biteCard), "an east mammal still includes bite treatment")
         XCTAssertTrue(mammalKindEast.contains(Inspect.gameEastCard))
         XCTAssertFalse(mammalKindEast.contains(Inspect.mammalTXCard))
 
@@ -848,6 +855,7 @@ final class InspectTests: XCTestCase {
             pack: "tx-west"
         )
         XCTAssertEqual(hogWest.first, Inspect.mammalEastCard)
+        XCTAssertTrue(hogWest.contains(Inspect.biteCard), "a hog still includes bite treatment")
         XCTAssertFalse(hogWest.contains(Inspect.mammalTXCard))
 
         let pineWest = InspectField.fieldRoute(

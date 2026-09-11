@@ -67,7 +67,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.
 - [ ] PASS / FAIL / N/A — Empty book is `FIELD BOOK · NONE`, not a blank list. VISION captures one still. A new capture clears the last guess. Result is `UNKNOWN` or a pack-book name. Fungi is `LEAVE IT`. Never edible. No percent. Camera deny or no classifier: `NO VISION MODEL`. No CoreML lecture.
-- [ ] PASS / FAIL / N/A — VISION still opens this pack's cards: mammal → `FIELD · ANIMAL`, tree → `FIELD · PLANT`, cactus → `FIELD · PLANT`, snake → `FIELD · BITE`, fungi → `FIELD · FUNGI`. TX EAST `kind:mammal` opens `tx-east-mammal` (coyote / deer / hog, not javelina). A `tx-javelina` still still opens `tx-mammal`. A pear still is `tx-cactus`, not oleander. UNKNOWN and `NO VISION MODEL` do not invent a card. Same Field book the hold uses. Never edible.
+- [ ] PASS / FAIL / N/A — VISION still opens this pack's cards: mammal → `FIELD · ANIMAL`, tree → `FIELD · PLANT`, cactus → `FIELD · PLANT`, snake → `FIELD · BITE`, fungi → `FIELD · FUNGI`. TX EAST `kind:mammal` opens `tx-east-mammal` (coyote / deer / hog, not javelina). A `tx-javelina` still still opens `tx-mammal`. Mammal walk includes bite treatment, then food — already have, not a hunt. A pear still is `tx-cactus`, not oleander. UNKNOWN and `NO VISION MODEL` do not invent a card. Same Field book the hold uses. Never edible.
 
 ## EXPEDITION
 

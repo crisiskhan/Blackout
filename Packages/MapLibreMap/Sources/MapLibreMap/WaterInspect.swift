@@ -637,8 +637,9 @@ public enum InspectField {
     }
 
     /// The still named a kind. Open that kind's cards — not the whole biome.
-    /// A javelina is the mammal trail, not woodland plant-danger. A prickly
-    /// pear is the cactus card, not oleander. East Texas opens this pack's
+    /// A javelina is the mammal trail, not woodland plant-danger. Bite
+    /// treatment follows, as it does for a snake still. A prickly pear is
+    /// the cactus card, not oleander. East Texas opens this pack's
     /// chapter unless the still named a west-only species.
     public static func fieldRoute(forVision labelId: String, state: String?, pack: String? = nil) -> [String] {
         guard let ground = visionGround(labelId: labelId) else { return [] }
@@ -661,18 +662,18 @@ public enum InspectField {
             return [Inspect.snakeTXCard, Inspect.biteCard]
         case .mammal:
             if id.contains("javelina") {
-                return [Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.gameCard]
+                return [Inspect.mammalTXCard, Inspect.biteCard, Inspect.gameTXCard, Inspect.gameCard]
             }
             if id.contains("hog") {
-                return [Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.gameCard]
+                return [Inspect.mammalEastCard, Inspect.biteCard, Inspect.gameEastCard, Inspect.gameCard]
             }
             if nm {
-                return [Inspect.mammalNMCard, Inspect.gameNMCard, Inspect.gameCard]
+                return [Inspect.mammalNMCard, Inspect.biteCard, Inspect.gameNMCard, Inspect.gameCard]
             }
             if east {
-                return [Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.gameCard]
+                return [Inspect.mammalEastCard, Inspect.biteCard, Inspect.gameEastCard, Inspect.gameCard]
             }
-            return [Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.gameCard]
+            return [Inspect.mammalTXCard, Inspect.biteCard, Inspect.gameTXCard, Inspect.gameCard]
         case .tree:
             if id.contains("mesquite") {
                 return [Inspect.treeUseTXCard, Inspect.plantUseCard]
