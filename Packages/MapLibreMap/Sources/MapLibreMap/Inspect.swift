@@ -405,9 +405,11 @@ public enum Inspect {
     /// A named nature reserve that is not already a hole, wildlife
     /// range, or garden is this walk — vipers use that cover. An
     /// unnamed reserve falls through to the landcover. Phrase `open
-    /// space` is not a match — Open Space Visitor Center is a park.
-    /// Phrase `hueco tanks`, not the word `hueco` — Hueco Mountain
-    /// Park is a town park, and Hueco Tanks Road is a road.
+    /// space` is not a bare `contains` — Open Space Visitor Center, a
+    /// farm open space, bosque along the Rio Grande, and a trailhead
+    /// stay parks. Named open-space cover is this walk. Phrase `hueco
+    /// tanks`, not the word `hueco` — Hueco Mountain Park is a town
+    /// park, and Hueco Tanks Road is a road.
     static func isOpenReserve(_ t: [String: String]) -> Bool {
         let named = !(t["name"] ?? "").isEmpty
         if t["leisure"] == "nature_reserve", named { return true }
@@ -420,6 +422,15 @@ public enum Inspect {
         if n.contains("area of critical environmental concern") { return true }
         if n.contains("prairie preserve") { return true }
         if n.contains("hueco tanks") { return true }
+        if n.range(of: "open space") != nil {
+            if !n.contains("visitor"),
+               !n.contains("farm"),
+               !n.contains("rio grande"),
+               !n.contains("bachechi"),
+               !n.contains("trail") {
+                return true
+            }
+        }
         return false
     }
 

@@ -868,6 +868,47 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(huecoRoad.klass, "Road")
         XCTAssertNotEqual(huecoRoad.klass, "Open reserve")
+
+        let golden = Inspect.read(
+            tags: ["leisure": "park", "name": "Golden Open Space"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(golden.klass, "Open reserve")
+        XCTAssertNotEqual(golden.klass, "Park")
+        XCTAssertEqual(golden.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(golden.doLine.lowercased().contains("rattler") || golden.doLine.lowercased().contains("diamondback"), golden.doLine)
+        XCTAssertTrue(golden.doLine.lowercased().contains("sotol") || golden.doLine.lowercased().contains("cholla"), golden.doLine)
+        XCTAssertFalse(golden.doLine.lowercased().contains("cottonwood"), golden.doLine)
+        XCTAssertFalse(golden.doLine.lowercased().contains("edible"), golden.doLine)
+
+        let bearCanyon = Inspect.read(
+            tags: ["leisure": "park", "name": "Bear Canyon Open Space West"],
+            pack: "nm"
+        )
+        XCTAssertEqual(bearCanyon.klass, "Open reserve")
+        XCTAssertNotEqual(bearCanyon.klass, "Park")
+
+        let rioBosqueOpen = Inspect.read(
+            tags: ["leisure": "park", "name": "Alameda/Rio Grande Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(rioBosqueOpen.klass, "Park")
+        XCTAssertNotEqual(rioBosqueOpen.klass, "Open reserve")
+
+        let bachechi = Inspect.read(
+            tags: ["leisure": "park", "name": "Bachechi Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(bachechi.klass, "Park")
+        XCTAssertNotEqual(bachechi.klass, "Open reserve")
+
+        let trailhead = Inspect.read(
+            tags: ["leisure": "park", "name": "Embudito Trailhead Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(trailhead.klass, "Park")
+        XCTAssertNotEqual(trailhead.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {

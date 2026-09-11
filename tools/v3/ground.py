@@ -77,15 +77,18 @@ WILDLIFE_RANGE_PHRASES = (
 # hole and is matched first. Phrase `prairie preserve`, not `prairie`.
 # Prairie Hills is apartments. A named nature reserve that is not
 # already a hole, wildlife range, or garden is this walk. An unnamed
-# reserve is not. Phrase `open space` is not a match — Open Space
-# Visitor Center is a park. Phrase `hueco tanks`, not the word
-# `hueco`. Hueco Mountain Park stays a park. Hueco Tanks Road stays
-# a road. Must stay in step with `Inspect.isOpenReserve`.
+# reserve is not. Phrase `open space` is not a bare contains —
+# Open Space Visitor Center, a farm open space, bosque along the
+# Rio Grande, and a trailhead stay parks. Named open-space cover is
+# this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
+# Mountain Park stays a park. Hueco Tanks Road stays a road. Must
+# stay in step with `Inspect.isOpenReserve`.
 OPEN_RESERVE_PHRASES = (
     "area of critical environmental concern",
     "prairie preserve",
     "hueco tanks",
 )
+OPEN_SPACE_KEEP_OUT = ("visitor", "farm", "rio grande", "bachechi", "trail")
 
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step
 # with `Inspect.isBotanicGarden`. Conservatory At North Austin is apartments
@@ -136,6 +139,13 @@ def is_botanic_garden(props: dict) -> bool:
     return any(phrase in name for phrase in BOTANIC_GARDEN_PHRASES)
 
 
+def is_named_open_space(name: str) -> bool:
+    lowered = name.lower()
+    if "open space" not in lowered:
+        return False
+    return not any(keep in lowered for keep in OPEN_SPACE_KEEP_OUT)
+
+
 def is_open_reserve(props: dict) -> bool:
     name = (props.get("name") or "").strip()
     if props.get("leisure") == "nature_reserve" and name:
@@ -144,7 +154,9 @@ def is_open_reserve(props: dict) -> bool:
     if not park:
         return False
     lowered = name.lower()
-    return any(phrase in lowered for phrase in OPEN_RESERVE_PHRASES)
+    if any(phrase in lowered for phrase in OPEN_RESERVE_PHRASES):
+        return True
+    return is_named_open_space(name)
 
 
 def overlay_kind(props: dict) -> str | None:
