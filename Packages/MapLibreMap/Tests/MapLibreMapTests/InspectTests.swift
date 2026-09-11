@@ -348,6 +348,23 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(refuge.doLine.lowercased().contains("javelina"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("lives here"), refuge.doLine)
 
+        let westRange = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Franklin Mountains Wildlife Management Area",
+            ],
+            state: "TX",
+            pack: "tx-west"
+        )
+        XCTAssertEqual(westRange.klass, "Wildlife range")
+        XCTAssertEqual(westRange.fieldRoute.first, Inspect.mammalTXCard)
+        let westDo = westRange.doLine.lowercased()
+        XCTAssertTrue(westDo.contains("javelina"), westRange.doLine)
+        XCTAssertTrue(westDo.contains("deer"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("hog"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("lives here"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("edible"), westRange.doLine)
+
         let sanctuary = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",

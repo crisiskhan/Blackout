@@ -946,7 +946,7 @@ extension Inspect {
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Javelina and coyote range. This is range, not a pin."
+                return "Javelina, coyote, and deer range. This is range, not a pin."
             case .txEast:
                 return "Coyote and deer range. Hog country. Not a pin."
             case .nm:

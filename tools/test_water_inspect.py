@@ -1022,6 +1022,39 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Prairie rattler", qa)
         self.assertIn("diamondback", qa)
 
+    def test_wildlife_range_names_the_pack_mammal_book(self):
+        """Wildlife range opens FIELD · ANIMAL. Hold names that pack's mammals.
+
+        Range, not a pin. Neighborhood parks named after trees stay parks.
+        """
+        do = SWIFT.read_text()
+        wildlife = do.split('case "Wildlife range":', 1)[1].split(
+            'case "Bosque or wetland":', 1
+        )[0]
+        west = wildlife.split("case .txWest:", 1)[1].split("case .txEast:", 1)[0].lower()
+        self.assertIn("javelina", west)
+        self.assertIn("coyote", west)
+        self.assertIn("deer", west)
+        self.assertNotIn("lives here", west)
+        east = wildlife.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()
+        self.assertIn("hog", east)
+        self.assertIn("deer", east)
+        self.assertNotIn("javelina", east)
+        nm = wildlife.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
+        self.assertIn("mule deer", nm)
+        self.assertIn("black bear", nm)
+
+        west_mammal = json.dumps(
+            next(
+                c
+                for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+                if c["id"] == "tx-mammal"
+            )
+        ).lower()
+        self.assertIn("javelina", west_mammal)
+        self.assertIn("white-tailed deer", west_mammal)
+        self.assertNotIn("edible", west_mammal)
+
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
 
