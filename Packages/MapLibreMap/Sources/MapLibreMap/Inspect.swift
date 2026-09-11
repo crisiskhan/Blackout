@@ -306,6 +306,21 @@ public enum Inspect {
         return false
     }
 
+    /// A park named Wildlife Drive is a street park. A wildlife
+    /// management area is range. Phrase match, not the word `wildlife`.
+    static func isWildlifeRange(_ t: [String: String]) -> Bool {
+        let park = t["leisure"] == "park"
+            || t["leisure"] == "nature_reserve"
+            || t["boundary"] == "protected_area"
+            || t["boundary"] == "national_park"
+        guard park else { return false }
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("wildlife refuge") { return true }
+        if n.contains("wildlife management area") { return true }
+        if n.contains("national wildlife") { return true }
+        return false
+    }
+
     private static func match(_ t: [String: String], pack: String? = nil) -> Reading {
         if let r = water(t) { return r }
         if let r = land(t, pack: pack) { return r }
@@ -705,6 +720,15 @@ public enum Inspect {
                 unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
             )
         }
+        if isWildlifeRange(t) {
+            return wildlifeRange(
+                klass: "Wildlife range",
+                sure: 84,
+                why: "mapped as wildlife range; this is the Field book, not a pin",
+                unnamedPenalty: 4,
+                pack: pack
+            )
+        }
         if t["boundary"] == "protected_area" || t["boundary"] == "national_park" || t["leisure"] == "nature_reserve" {
             return plantCover(
                 klass: "Protected land",
@@ -742,8 +766,8 @@ public enum Inspect {
                     pack: pack
                 )
             case "greenhouse_horticulture":
-                return plantCover(
-                    klass: "Irrigated ground",
+                return workedCover(
+                    klass: "Glasshouse",
                     sure: 78,
                     why: "mapped as glasshouses; worked ground a ditch reaches, not wild cover",
                     unnamedPenalty: 4,
@@ -878,6 +902,92 @@ public enum Inspect {
                 treeUseEastCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
                 gameEastCard, gameNMCard,
+            ],
+            extra: [biteCard, plantUseCard, gameCard],
+            unnamedPenalty: unnamedPenalty
+        )
+    }
+
+    /// Glasshouses: don't chew, then plant-use. Not woodland tree-use, not a hunt.
+    private static func workedCover(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int,
+        pack: String? = nil
+    ) -> Reading {
+        if !isEastPack(pack) {
+            return Reading(
+                klass: klass,
+                kind: .land,
+                sure: sure,
+                why: why,
+                advice: .field,
+                field: plantCard,
+                local: [
+                    plantTXCard, plantNMCard,
+                    cactusTXCard, cactusNMCard,
+                ],
+                extra: [plantUseCard],
+                unnamedPenalty: unnamedPenalty
+            )
+        }
+        return Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [
+                plantTXCard, plantNMCard,
+                cactusTXCard, cactusNMCard,
+            ],
+            extra: [plantUseCard],
+            unnamedPenalty: unnamedPenalty
+        )
+    }
+
+    /// A wildlife refuge or WMA: this pack's animals first. Range, not a pin.
+    private static func wildlifeRange(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int,
+        pack: String? = nil
+    ) -> Reading {
+        if !isEastPack(pack) {
+            return Reading(
+                klass: klass,
+                kind: .land,
+                sure: sure,
+                why: why,
+                advice: .field,
+                field: plantCard,
+                local: [
+                    mammalTXCard, mammalNMCard,
+                    snakeTXCard, snakeNMCard,
+                    gameTXCard, gameNMCard,
+                    treeUseTXCard, treeUseNMCard,
+                    plantTXCard, plantNMCard,
+                ],
+                extra: [biteCard, plantUseCard, gameCard],
+                unnamedPenalty: unnamedPenalty
+            )
+        }
+        return Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [
+                mammalEastCard, mammalNMCard,
+                snakeEastCard, snakeNMCard,
+                gameEastCard, gameNMCard,
+                treeUseEastCard, treeUseNMCard,
+                plantTXCard, plantNMCard,
             ],
             extra: [biteCard, plantUseCard, gameCard],
             unnamedPenalty: unnamedPenalty

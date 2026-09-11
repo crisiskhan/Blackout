@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0), "tx-east": (14, 2), "nm": (10, 1)}
+        expected = {"tx-west": (2, 0, 0), "tx-east": (14, 2, 0), "nm": (10, 1, 1)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -84,22 +84,28 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertNotIn("edible", blob, pid)
             self.assertNotIn("animal-icon", blob, pid)
             self.assertNotIn("bee cave", blob, pid)
+            self.assertNotIn("wildlife drive", blob, pid)
+            self.assertNotIn("wildlife trail", blob, pid)
             glass = 0
             caves = 0
+            wildlife = 0
             for feat in fc["features"]:
                 props = feat.get("properties") or {}
                 self.assertIn(feat.get("geometry", {}).get("type"), ("Polygon", "MultiPolygon"))
                 name = (props.get("name") or "").lower()
-                if props.get("landuse") == "greenhouse_horticulture":
-                    glass += 1
-                    continue
-                self.assertTrue(
-                    ground.is_cave_preserve(props),
-                    f"{pid} overlay feature is neither glasshouse nor cave preserve: {props}",
-                )
+                kind = ground.overlay_kind(props)
+                self.assertIsNotNone(kind, f"{pid} overlay feature is not glasshouse, cave, or wildlife: {props}")
                 self.assertNotIn("bee cave", name)
-                caves += 1
-            self.assertEqual((glass, caves), expected[pid], pid)
+                if kind == "glasshouse":
+                    glass += 1
+                elif kind == "cave":
+                    caves += 1
+                else:
+                    self.assertEqual(kind, "wildlife", kind)
+                    wildlife += 1
+            self.assertEqual((glass, caves, wildlife), expected[pid], pid)
+        nm_blob = (PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text().lower()
+        self.assertIn("marquez wildlife management area", nm_blob)
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
         inspect = INSPECT.read_text()
@@ -107,6 +113,12 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', inspect)
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("cave")', inspect)
+        for phrase in ground.WILDLIFE_RANGE_PHRASES:
+            self.assertIn(f'"{phrase}"', inspect)
+            self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertNotIn('contains("wildlife")', inspect)
+        self.assertIn("isWildlifeRange", inspect)
+        self.assertIn("Wildlife range", inspect)
 
     def test_the_manifest_counts_the_ground_it_ships(self):
         for pid in PACKS:
@@ -530,12 +542,20 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isCavePreserve", inspect)
         self.assertIn("cave preserve", inspect)
         self.assertIn("cave area of critical", inspect)
+        self.assertIn("isWildlifeRange", inspect)
+        self.assertIn("wildlife refuge", inspect)
+        self.assertIn("wildlife management area", inspect)
+        self.assertIn("national wildlife", inspect)
         do = SWIFT.read_text()
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
         self.assertIn("black bear range", do)
         self.assertIn("Copperhead and cottonmouth country", do)
         self.assertIn("Cottonmouth country", do)
+        self.assertIn("loblolly pine", do)
+        self.assertIn("Hog country", do)
+        self.assertIn("Pretty is not food", do)
+        self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
 
@@ -563,6 +583,9 @@ class GroundFieldSync(unittest.TestCase):
         inspect = INSPECT.read_text()
         self.assertIn('case "greenhouse_horticulture":', inspect)
         self.assertIn("mapped as glasshouses", inspect)
+        self.assertIn('klass: "Glasshouse"', inspect)
+        self.assertIn("workedCover", inspect)
+        self.assertNotIn("mammalEastCard", inspect.split("private static func workedCover", 1)[1].split("private static func wildlifeRange", 1)[0])
         tiles = (ROOT / "tools/v3/tiles.py").read_text()
         self.assertIn('("landuse", "greenhouse_horticulture"): "farm"', tiles)
         swift = MAP_SWIFT.read_text()
@@ -611,10 +634,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("javelina / coyote", qa)
         self.assertIn("cottonmouth", qa)
         self.assertIn("Irrigated ground", qa)
+        self.assertIn("Glasshouse", qa)
         self.assertIn("Vickery Wholesale Greenhouse", qa)
         self.assertIn("glasshouse", qa)
         self.assertIn("Discovery Well Cave Preserve", qa)
         self.assertIn("Bee Cave Central Park", qa)
+        self.assertIn("Marquez Wildlife Management Area", qa)
+        self.assertIn("Wildlife Drive", qa)
+        self.assertIn("loblolly", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
@@ -731,6 +758,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("tx-east-tree-use", qa)
         self.assertIn("tx-javelina", qa)
+        self.assertIn("tx-plant-danger", qa)
 
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
@@ -774,13 +802,16 @@ class GroundFieldSync(unittest.TestCase):
         east_tree = json.dumps(by_id["tx-east-tree-use"]).lower()
         self.assertIn("live oak", east_tree)
         self.assertIn("cedar elm", east_tree)
+        self.assertIn("loblolly", east_tree)
         self.assertNotIn("mesquite", east_tree)
         east_mammal = json.dumps(by_id["tx-east-mammal"]).lower()
         self.assertIn("coyote", east_mammal)
         self.assertIn("deer", east_mammal)
+        self.assertIn("hog", east_mammal)
         self.assertNotIn("javelina", east_mammal)
         east_game = json.dumps(by_id["tx-east-game"]).lower()
         self.assertIn("deer", east_game)
+        self.assertIn("hog", east_game)
         self.assertNotIn("javelina", east_game)
         east_snake = json.dumps(by_id["tx-east-snake"]).lower()
         self.assertIn("copperhead", east_snake)

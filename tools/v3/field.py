@@ -883,6 +883,7 @@ def thickness_core() -> list[dict]:
 def mammal_do_en(cid: str) -> str:
     if cid == "tx-east-mammal":
         return (
+            "Feral hog charges when cornered — give it the brush, do not get between it and cover. "
             "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
             "Food away from camp. If bitten, the bite card. If you already have meat, "
             "the food-game card. Do not hunt from this map."
@@ -903,6 +904,7 @@ def mammal_do_en(cid: str) -> str:
 def mammal_do_es(cid: str) -> str:
     if cid == "tx-east-mammal":
         return (
+            "El cerdo asilvestrado embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. "
             "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. "
             "Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
             "Si ya tienes carne, la de comida. No caces desde este mapa."
@@ -1069,8 +1071,8 @@ def thickness_state() -> list[dict]:
             ["TX"],
             "East Texas trees — shade, not a meal",
             "Árboles del este de Texas — sombra, no comida",
-            "You are in East Texas woodland, park, or bosque. Live oak, pecan, cedar elm. Shade and deadfall.",
-            "Estás en arbolado, parque o bosque del este de Texas. Encino, pecán, olmo cedro. Sombra y madera muerta.",
+            "You are in East Texas woodland, park, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine. Shade and deadfall.",
+            "Estás en arbolado, parque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda. Sombra y madera muerta.",
             "If they chewed seed or sap is in both eyes, this is care now, not a use card.",
             "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora, no una tarjeta de uso.",
         ),
@@ -1125,8 +1127,8 @@ def thickness_state() -> list[dict]:
             ["TX"],
             "East Texas mammals — give space",
             "Mamíferos del este de Texas — da espacio",
-            "Coyote and white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",
-            "País de coyote y venado cola blanca. Esto es rango, no un pin. El mapa no sabe dónde está uno.",
+            "Coyote, white-tailed deer, and feral hog country. This is range, not a pin. The map does not know where one is standing.",
+            "País de coyote, venado cola blanca y cerdo asilvestrado. Esto es rango, no un pin. El mapa no sabe dónde está uno.",
             "A puncture or a maul is trauma. Gut illness is care if they cannot keep fluids down. This card does not unlock a hunt.",
             "Una herida o un golpe es trauma. El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
         ),
@@ -1243,10 +1245,10 @@ def thickness_state() -> list[dict]:
         (
             "tx-east-game",
             ["TX"],
-            "Deer you already have",
-            "Venado que ya tienes",
-            "You have a white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
-            "Tienes venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
+            "Hog or deer you already have",
+            "Cerdo o venado que ya tienes",
+            "You have a feral hog or white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
+            "Tienes cerdo asilvestrado o venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
             "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
             "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
         ),

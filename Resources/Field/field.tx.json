@@ -450,8 +450,8 @@
         "es": "Árboles del este de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in East Texas woodland, park, or bosque. Live oak, pecan, cedar elm. Shade and deadfall.",
-        "es": "Estás en arbolado, parque o bosque del este de Texas. Encino, pecán, olmo cedro. Sombra y madera muerta."
+        "en": "You are in East Texas woodland, park, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine. Shade and deadfall.",
+        "es": "Estás en arbolado, parque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda. Sombra y madera muerta."
       },
       "stop_if": [
         {
@@ -572,8 +572,8 @@
         "es": "Mamíferos del este de Texas — da espacio"
       },
       "situation": {
-        "en": "Coyote and white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",
-        "es": "País de coyote y venado cola blanca. Esto es rango, no un pin. El mapa no sabe dónde está uno."
+        "en": "Coyote, white-tailed deer, and feral hog country. This is range, not a pin. The map does not know where one is standing.",
+        "es": "País de coyote, venado cola blanca y cerdo asilvestrado. Esto es rango, no un pin. El mapa no sabe dónde está uno."
       },
       "stop_if": [
         {
@@ -594,8 +594,8 @@
       "steps": [
         {
           "do": {
-            "en": "Coyote: do not feed. White-tailed deer at dusk — give it the road. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map.",
-            "es": "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
+            "en": "Feral hog charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map.",
+            "es": "El cerdo asilvestrado embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
@@ -743,12 +743,12 @@
         "TX"
       ],
       "title": {
-        "en": "Deer you already have",
-        "es": "Venado que ya tienes"
+        "en": "Hog or deer you already have",
+        "es": "Cerdo o venado que ya tienes"
       },
       "situation": {
-        "en": "You have a white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
-        "es": "Tienes venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza."
+        "en": "You have a feral hog or white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
+        "es": "Tienes cerdo asilvestrado o venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza."
       },
       "stop_if": [
         {

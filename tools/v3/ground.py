@@ -1,17 +1,19 @@
-"""Notable plant and cave ground the tiles flatten, derived from the pack's OSM.
+"""Notable plant, cave, and wildlife-range ground the tiles flatten, derived from the pack's OSM.
 
 The extract already carries `landuse=greenhouse_horticulture` — 2 in TX WEST,
 14 in TX EAST, 10 in NM. The tiler's land table did not class them, so they
 never reached a fill, and holding the glasshouse answered open ground. It also
 carries three cave preserves tagged as parks. Those already paint as park
 fill; without a silver outline they look like picnic ground. FIELD still has
-the plant book and the cave card. This file is the water-detail pattern for
+the plant book and the cave card. One wildlife management area in NM would
+open picnic tree-use without this file. This is the water-detail pattern for
 those records: small enough to sit in the style as a geojson source, tags
 intact so a hold names the record rather than a colour.
 
 No network. The input is `osm.geojson` already in the tree. A reviewer can
 regenerate every shipped byte and diff it. Animals are not drawn. Nothing
-here is a meal. Bee Cave is a town park and is not in this file.
+here is a meal. Bee Cave is a town park and is not in this file. Wildlife
+Drive is a street and is not in this file.
 """
 from __future__ import annotations
 
@@ -43,6 +45,14 @@ CAVE_PRESERVE_KEYS = {
     ("boundary", "national_park"),
 }
 
+# Phrase match, not the word "wildlife". Must stay in step with
+# `Inspect.isWildlifeRange`. Wildlife Drive and Wildlife Trail stay out.
+WILDLIFE_RANGE_PHRASES = (
+    "wildlife refuge",
+    "wildlife management area",
+    "national wildlife",
+)
+
 
 def write_compact(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,15 +67,33 @@ def is_cave_preserve(props: dict) -> bool:
     return any(phrase in name for phrase in CAVE_PRESERVE_PHRASES)
 
 
+def is_wildlife_range(props: dict) -> bool:
+    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
+    if not park:
+        return False
+    name = (props.get("name") or "").lower()
+    return any(phrase in name for phrase in WILDLIFE_RANGE_PHRASES)
+
+
+def overlay_kind(props: dict) -> str | None:
+    if props.get("landuse") in WORKED_LANDUSE:
+        return "glasshouse"
+    if is_cave_preserve(props):
+        return "cave"
+    if is_wildlife_range(props):
+        return "wildlife"
+    return None
+
+
 def records(fc: dict) -> list[dict]:
-    """Glasshouse and cave-preserve polygons in one pack, tags slimmed, order stable."""
+    """Glasshouse, cave-preserve, and wildlife-range polygons, tags slimmed, order stable."""
     out: list[dict] = []
     for feat in fc.get("features") or []:
         props = feat.get("properties") or {}
         geom = feat.get("geometry") or {}
         if geom.get("type") not in ("Polygon", "MultiPolygon"):
             continue
-        if props.get("landuse") not in WORKED_LANDUSE and not is_cave_preserve(props):
+        if overlay_kind(props) is None:
             continue
         keep = {k: props[k] for k in KEEP_TAGS if props.get(k)}
         out.append({"type": "Feature", "properties": keep, "geometry": geom})
@@ -92,10 +120,12 @@ def build(dest: Path) -> dict:
     feats = records(fc)
     write_compact(dest / "layers" / "ground.geojson", render_layer(feats))
     drawn = (dest / "layers" / "ground.geojson").stat().st_size
-    glass = sum(1 for f in feats if (f["properties"].get("landuse") == "greenhouse_horticulture"))
-    caves = len(feats) - glass
+    kinds = [overlay_kind(f["properties"]) for f in feats]
+    glass = kinds.count("glasshouse")
+    caves = kinds.count("cave")
+    wildlife = kinds.count("wildlife")
     print(
-        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves draw {drawn} bytes",
+        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves {wildlife} wildlife-range draw {drawn} bytes",
         flush=True,
     )
     return {"records": len(feats), "drawBytes": drawn}

@@ -298,6 +298,65 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
     }
 
+    func testAWildlifeManagementAreaIsRangeNotAPin() {
+        let marquez = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Marquez Wildlife Management Area",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(marquez.klass, "Wildlife range")
+        XCTAssertEqual(marquez.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(marquez.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertEqual(InspectField.label(for: Inspect.mammalNMCard), "FIELD · ANIMAL")
+        let nmBook: Set<String> = [
+            Inspect.mammalNMCard, Inspect.snakeNMCard, Inspect.gameNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.biteCard,
+            Inspect.plantUseCard, Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(marquez.fieldRoute, in: nmBook).first,
+            Inspect.mammalNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(marquez.fieldRoute, in: nmBook)[0]),
+            "FIELD · ANIMAL"
+        )
+        let doLine = marquez.doLine.lowercased()
+        XCTAssertTrue(doLine.contains("bear") || doLine.contains("elk"), marquez.doLine)
+        XCTAssertTrue(doLine.contains("range") || doLine.contains("not a pin"), marquez.doLine)
+        XCTAssertFalse(doLine.contains("lives here"), marquez.doLine)
+        XCTAssertFalse(doLine.contains("edible"), marquez.doLine)
+        XCTAssertFalse(marquez.why.lowercased().contains("edible"), marquez.why)
+
+        let refuge = Inspect.read(
+            tags: [
+                "boundary": "protected_area",
+                "name": "Balcones Canyonlands National Wildlife Refuge",
+            ],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(refuge.klass, "Wildlife range")
+        XCTAssertEqual(refuge.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(refuge.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertEqual(InspectField.label(for: refuge.fieldRoute[0]), "FIELD · ANIMAL")
+        XCTAssertTrue(refuge.doLine.lowercased().contains("hog"), refuge.doLine)
+        XCTAssertFalse(refuge.doLine.lowercased().contains("javelina"), refuge.doLine)
+        XCTAssertFalse(refuge.doLine.lowercased().contains("lives here"), refuge.doLine)
+
+        let drive = Inspect.read(
+            tags: ["leisure": "park", "name": "Wildlife Drive Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(drive.klass, "Park")
+        XCTAssertEqual(drive.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertFalse(drive.doLine.lowercased().contains("not a pin"), drive.doLine)
+    }
+
     func testANamedTreeIsPlantGroundNotAMeal() {
         let tree = Inspect.read(tags: ["natural": "tree", "name": "El Paso Cottonwood"])
         XCTAssertEqual(tree.title, "El Paso Cottonwood")
@@ -367,7 +426,9 @@ final class InspectTests: XCTestCase {
         let eastWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-east")
         let eastWoodDo = eastWood.doLine.lowercased()
         XCTAssertTrue(eastWoodDo.contains("cedar elm") || eastWoodDo.contains("live oak"), eastWood.doLine)
+        XCTAssertTrue(eastWoodDo.contains("pine"), eastWood.doLine)
         XCTAssertTrue(eastWoodDo.contains("coyote") || eastWoodDo.contains("deer"), eastWood.doLine)
+        XCTAssertTrue(eastWoodDo.contains("hog"), eastWood.doLine)
         XCTAssertFalse(eastWoodDo.contains("javelina"), eastWood.doLine)
         XCTAssertFalse(eastWoodDo.contains("mesquite"), eastWood.doLine)
         XCTAssertFalse(eastWoodDo.contains("edible"), eastWood.doLine)
@@ -419,10 +480,15 @@ final class InspectTests: XCTestCase {
             state: "TX",
             pack: "tx-east"
         )
-        XCTAssertEqual(glass.klass, "Irrigated ground")
+        XCTAssertEqual(glass.klass, "Glasshouse")
         XCTAssertEqual(glass.title, "Vickery Wholesale Greenhouse")
-        XCTAssertEqual(glass.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertEqual(glass.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(glass.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(glass.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertFalse(glass.fieldRoute.contains(Inspect.gameEastCard))
         XCTAssertTrue(glass.why.contains("glasshouses"), glass.why)
+        XCTAssertTrue(glass.doLine.lowercased().contains("not food"), glass.doLine)
+        XCTAssertFalse(glass.doLine.lowercased().contains("live oak"), glass.doLine)
         XCTAssertFalse(glass.why.lowercased().contains("edible"), glass.why)
         XCTAssertFalse(glass.doLine.lowercased().contains("edible"), glass.doLine)
         XCTAssertFalse(glass.doLine.lowercased().contains("javelina"), glass.doLine)

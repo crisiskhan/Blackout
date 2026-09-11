@@ -909,7 +909,7 @@ extension Inspect {
         case .txWest:
             return "Live oak, pecan, mesquite, cedar elm. Javelina and coyote range. Shade and thorns, not a meal."
         case .txEast:
-            return "Live oak, pecan, cedar elm. Coyote and deer range. Shade, not a meal."
+            return "Live oak, pecan, cedar elm, loblolly pine. Coyote and deer range. Hog country. Shade, not a meal."
         case .nm:
             return "Cottonwood, juniper, piñon. Black bear and elk range. Shade and wind, not a meal."
         case .unknown:
@@ -934,6 +934,19 @@ extension Inspect {
         switch klass {
         case "Woodland", "Named tree", "Tree", "Park", "Protected land", "Irrigated ground":
             return treeRangeLine(state: state, pack: pack)
+        case "Glasshouse":
+            return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
+        case "Wildlife range":
+            switch PackRange.of(state: state, pack: pack) {
+            case .txWest:
+                return "Javelina and coyote range. This is range, not a pin."
+            case .txEast:
+                return "Coyote and deer range. Hog country. Not a pin."
+            case .nm:
+                return "Black bear and elk range. This is range, not a pin."
+            case .unknown:
+                return "This is range, not a pin. Field has the animal cards."
+            }
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
