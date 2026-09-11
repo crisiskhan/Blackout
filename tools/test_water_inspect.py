@@ -1024,7 +1024,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the bite card", woodland_hold)
         self.assertIn("deadfall", woodland_hold)
         self.assertIn("south-side shade", woodland_hold)
+        self.assertIn("give it the road", woodland_hold)
         self.assertNotIn("the food card", woodland_hold)
+        self.assertNotIn("no ice", woodland_hold)
         self.assertNotIn("aspen", woodland_hold)
         self.assertNotIn("edible", woodland_hold)
         bosque = do.split('case "Bosque or wetland":', 1)[1].split(
@@ -1033,6 +1035,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cottonmouth", bosque)
         self.assertIn("the bite card", bosque)
         self.assertIn("south-side shade", bosque)
+        self.assertIn("give it the road", bosque)
+        self.assertIn("no ice, no cut, no suck", bosque)
         self.assertNotIn("the food card", bosque)
         tx_plant_do = next(
             c
@@ -1283,6 +1287,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hold DO on wildlife range names the food card", qa)
         self.assertIn("Hold DO on wildlife range names give it the road", qa)
         self.assertIn("Hold DO on wildlife range names cook through or leave it", qa)
+        self.assertIn("Hold DO on wildlife range names no ice, no cut, no suck", qa)
+        self.assertIn("Hold DO names give it the road", qa)
         self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
@@ -1524,6 +1530,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the food card", nm_range)
         self.assertIn("give it the road", nm_range)
         self.assertIn("cook through or leave it", nm_range)
+        self.assertIn("no ice, no cut, no suck", nm_range)
         self.assertNotIn("cottonwood", nm_range)
         self.assertNotIn("lives here", nm_range)
 
@@ -1560,6 +1567,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hold DO on wildlife range names the food card", qa)
         self.assertIn("Hold DO on wildlife range names give it the road", qa)
         self.assertIn("Hold DO on wildlife range names cook through or leave it", qa)
+        self.assertIn("Hold DO on wildlife range names no ice, no cut, no suck", qa)
+        self.assertIn("Hold DO names give it the road", qa)
         self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
@@ -1583,6 +1592,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the food card", west)
         self.assertIn("give it the road", west)
         self.assertIn("cook through or leave it", west)
+        self.assertIn("no ice, no cut, no suck", west)
         self.assertNotIn("cottonwood", west)
         self.assertNotIn("mesquite", west)
         self.assertNotIn("oleander", west)
@@ -1597,6 +1607,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the food card", east)
         self.assertIn("give it the road", east)
         self.assertIn("cook through or leave it", east)
+        self.assertIn("no ice, no cut, no suck", east)
         self.assertNotIn("javelina", east)
         self.assertNotIn("diamondback", east)
         self.assertNotIn("cottonwood", east)
@@ -1609,6 +1620,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("the food card", nm)
         self.assertIn("give it the road", nm)
         self.assertIn("cook through or leave it", nm)
+        self.assertIn("no ice, no cut, no suck", nm)
         self.assertNotIn("cottonwood", nm)
 
         west_mammal_card = next(
