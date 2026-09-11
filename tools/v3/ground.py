@@ -161,10 +161,15 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # not the word `lush`. Phrase `orchard garden`, not the word `orchard`.
 # Orchard Gardens Road stays a road. Fiesta Gardens is an event park
 # and stays a park. Phrase `harvey cornell`, not `rose park`. Wildrose
-# Park stays a park. Rose Park Avenue stays a road. A named garden
-# without a botanic phrase is not this overlay. Memorial Garden stays
-# out. `leisure=garden` is botanic-eligible with a phrase; it is not a
-# cave, wildlife, or open-reserve key.
+# Park stays a park. Rose Park Avenue stays a road. Phrase `japaneese
+# garden` is OSM's spelling in El Paso; phrase `japanese garden` is
+# the correctly spelled sheet. Phrase `japanese memorial`, not
+# Memorial Garden. Phrase `capitol flower`, not `flower gardens`.
+# Mayfield Gardens stays out. Phrase `demonstration garden`, not the
+# word `demonstration`. A named garden without a botanic phrase is not
+# this overlay. Memorial Garden stays out. `leisure=garden` is
+# botanic-eligible with a phrase; it is not a cave, wildlife, or
+# open-reserve key.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
@@ -178,6 +183,11 @@ BOTANIC_GARDEN_PHRASES = (
     "lush n lean",
     "orchard garden",
     "harvey cornell",
+    "japaneese garden",
+    "japanese garden",
+    "capitol flower",
+    "japanese memorial",
+    "demonstration garden",
 )
 
 

@@ -441,7 +441,12 @@ public enum Inspect {
     /// not the word `lush`. Phrase `orchard garden`, not the word
     /// `orchard` — Orchard Gardens Road stays a road. Fiesta Gardens is
     /// an event park and stays a park. Phrase `harvey cornell`, not
-    /// `rose park` — Wildrose Park stays a park. `leisure=garden` is
+    /// `rose park` — Wildrose Park stays a park. Phrase `japaneese
+    /// garden` is OSM's El Paso spelling; phrase `japanese garden` is
+    /// the correctly spelled sheet. Phrase `japanese memorial`, not
+    /// Memorial Garden. Phrase `capitol flower`, not `flower
+    /// gardens`. Mayfield Gardens stays out. Phrase `demonstration
+    /// garden`, not the word `demonstration`. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife, or
     /// open-reserve key. Memorial Garden stays out.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
@@ -460,6 +465,11 @@ public enum Inspect {
             || n.contains("lush n lean")
             || n.contains("orchard garden")
             || n.contains("harvey cornell")
+            || n.contains("japaneese garden")
+            || n.contains("japanese garden")
+            || n.contains("capitol flower")
+            || n.contains("japanese memorial")
+            || n.contains("demonstration garden")
         guard phrase else { return false }
         if t["leisure"] == "garden" { return true }
         let park = t["leisure"] == "park"

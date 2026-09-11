@@ -2586,6 +2586,55 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(santaFeGarden.fieldRoute.contains(Inspect.treeUseNMCard))
         XCTAssertFalse(santaFeGarden.doLine.lowercased().contains("edible"), santaFeGarden.doLine)
 
+        let japaneese = Inspect.read(
+            tags: ["leisure": "garden", "name": "Japaneese Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(japaneese.klass, "Botanic garden")
+        XCTAssertEqual(japaneese.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(japaneese.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(japaneese.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(japaneese.doLine.lowercased().contains("edible"), japaneese.doLine)
+
+        let japaneseSpelled = Inspect.read(
+            tags: ["leisure": "garden", "name": "Japanese Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(japaneseSpelled.klass, "Botanic garden")
+
+        let capitolFlower = Inspect.read(
+            tags: [
+                "leisure": "garden",
+                "name": "Lady Bird Johnson Texas Capitol Flower Gardens",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(capitolFlower.klass, "Botanic garden")
+        XCTAssertEqual(capitolFlower.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(capitolFlower.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(capitolFlower.doLine.lowercased().contains("edible"), capitolFlower.doLine)
+
+        let japaneseMemorial = Inspect.read(
+            tags: ["leisure": "garden", "name": "Japanese Memorial Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(japaneseMemorial.klass, "Botanic garden")
+        XCTAssertTrue(japaneseMemorial.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(japaneseMemorial.fieldRoute.contains(Inspect.treeUseNMCard))
+
+        let demonstration = Inspect.read(
+            tags: ["leisure": "garden", "name": "Water Wise Demonstration Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(demonstration.klass, "Botanic garden")
+        XCTAssertTrue(demonstration.fieldRoute.contains(Inspect.plantNMCard))
+
+        let astronautMemorial = Inspect.read(
+            tags: ["leisure": "garden", "name": "Astronaut Memorial Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertNotEqual(astronautMemorial.klass, "Botanic garden")
+
         let memorial = Inspect.read(
             tags: ["leisure": "garden", "name": "Memorial Garden"],
             pack: "tx-east"

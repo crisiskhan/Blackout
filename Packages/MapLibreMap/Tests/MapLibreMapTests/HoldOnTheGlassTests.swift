@@ -212,6 +212,26 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Far from water.
     private static let santaFeBotanic = CLLocationCoordinate2D(latitude: 35.666135, longitude: -105.925544)
 
+    /// Interior of Japaneese Garden. OSM spelling, phrase `japaneese
+    /// garden`. 344 m from water.
+    private static let japaneeseGarden = CLLocationCoordinate2D(latitude: 31.803975, longitude: -106.436233)
+
+    /// Interior of Lady Bird Johnson Texas Capitol Flower Gardens.
+    /// Phrase `capitol flower`, not `flower gardens`. 537 m from water.
+    private static let capitolFlower = CLLocationCoordinate2D(latitude: 30.275837, longitude: -97.739917)
+
+    /// Interior of Japanese Memorial Garden. Phrase `japanese memorial`,
+    /// not Memorial Garden. 151 m from water.
+    private static let japaneseMemorial = CLLocationCoordinate2D(latitude: 35.153338, longitude: -106.555074)
+
+    /// Interior of Water Wise Demonstration Garden. Phrase
+    /// `demonstration garden`. Far from water.
+    private static let waterWiseGarden = CLLocationCoordinate2D(latitude: 35.243410, longitude: -106.665821)
+
+    /// Interior of Los Alamos Demonstration Garden. Phrase
+    /// `demonstration garden`. 125 m from water.
+    private static let losAlamosDemo = CLLocationCoordinate2D(latitude: 35.881885, longitude: -106.304329)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
 
     /// Interior of Sandia Mountain Natural History Center. Phrase
@@ -1025,6 +1045,58 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((santaFe.card?.doLine.lowercased() ?? "").contains("edible"), santaFe.card?.doLine ?? "")
 
+        let japaneese = try hold(at: Self.japaneeseGarden, zoom: 16)
+        XCTAssertEqual(japaneese.card?.klass, "Botanic garden", "\(japaneese)")
+        XCTAssertEqual(japaneese.card?.title, "Japaneese Garden", "\(japaneese)")
+        XCTAssertEqual(japaneese.card?.fieldRoute.first, Inspect.plantTXCard, "\(japaneese)")
+        XCTAssertFalse(
+            japaneese.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "Japaneese Garden opened woodland tree-use: \(japaneese)"
+        )
+        XCTAssertFalse((japaneese.card?.doLine.lowercased() ?? "").contains("edible"), japaneese.card?.doLine ?? "")
+
+        let capitol = try hold(at: Self.capitolFlower, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(capitol.card?.klass, "Botanic garden", "\(capitol)")
+        XCTAssertEqual(capitol.card?.title, "Lady Bird Johnson Texas Capitol Flower Gardens", "\(capitol)")
+        XCTAssertEqual(capitol.card?.fieldRoute.first, Inspect.plantTXCard, "\(capitol)")
+        XCTAssertFalse(
+            capitol.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Capitol Flower Gardens opened woodland tree-use: \(capitol)"
+        )
+        XCTAssertFalse((capitol.card?.doLine.lowercased() ?? "").contains("edible"), capitol.card?.doLine ?? "")
+
+        let japaneseMemorial = try hold(at: Self.japaneseMemorial, zoom: 16, packId: "nm")
+        XCTAssertEqual(japaneseMemorial.card?.klass, "Botanic garden", "\(japaneseMemorial)")
+        XCTAssertEqual(japaneseMemorial.card?.title, "Japanese Memorial Garden", "\(japaneseMemorial)")
+        XCTAssertEqual(japaneseMemorial.card?.fieldRoute.first, Inspect.plantTXCard, "\(japaneseMemorial)")
+        XCTAssertTrue(
+            japaneseMemorial.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Japanese Memorial Garden dropped the NM plant-danger card: \(japaneseMemorial)"
+        )
+        XCTAssertFalse(
+            japaneseMemorial.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "Japanese Memorial Garden opened woodland tree-use: \(japaneseMemorial)"
+        )
+        XCTAssertFalse((japaneseMemorial.card?.doLine.lowercased() ?? "").contains("edible"), japaneseMemorial.card?.doLine ?? "")
+
+        let waterWise = try hold(at: Self.waterWiseGarden, zoom: 16, packId: "nm")
+        XCTAssertEqual(waterWise.card?.klass, "Botanic garden", "\(waterWise)")
+        XCTAssertEqual(waterWise.card?.title, "Water Wise Demonstration Garden", "\(waterWise)")
+        XCTAssertTrue(
+            waterWise.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Water Wise Demonstration Garden dropped the NM plant-danger card: \(waterWise)"
+        )
+        XCTAssertFalse((waterWise.card?.doLine.lowercased() ?? "").contains("edible"), waterWise.card?.doLine ?? "")
+
+        let losAlamos = try hold(at: Self.losAlamosDemo, zoom: 16, packId: "nm")
+        XCTAssertEqual(losAlamos.card?.klass, "Botanic garden", "\(losAlamos)")
+        XCTAssertEqual(losAlamos.card?.title, "Los Alamos Demonstration Garden", "\(losAlamos)")
+        XCTAssertTrue(
+            losAlamos.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Los Alamos Demonstration Garden dropped the NM plant-danger card: \(losAlamos)"
+        )
+        XCTAssertFalse((losAlamos.card?.doLine.lowercased() ?? "").contains("edible"), losAlamos.card?.doLine ?? "")
+
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
         XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
@@ -1522,6 +1594,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("rose garden", Self.roseGarden, 16.0),
             ("lush n lean garden", Self.lushNLean, 16.0),
             ("desert gardens", Self.desertGardens, 16.0),
+            ("japaneese garden", Self.japaneeseGarden, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),

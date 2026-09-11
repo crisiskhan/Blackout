@@ -363,11 +363,16 @@ NOTABLE_WILDLIFE_NAME = (
 # Park is not a match. Memorial Garden is not a match. Unnamed garden
 # plots stay out. Ladybird Johnson Wildflower Center is a garden
 # relation; Zilker and Santa Fe are botanical gardens. Do not fake a ring
-# from paths. Not a meal.
+# from paths. El Paso's Japanese garden is OSM-spelled Japaneese.
+# Capitol flower gardens are the Texas Capitol beds, not Mayfield.
+# Japanese Memorial Garden is not Memorial Garden. Demonstration
+# gardens are worked plant ground. Not a meal.
 NOTABLE_BOTANIC_NAME = (
     "botanic garden|botanical garden|conservatory|cactus garden|"
     "desert garden|rose garden|community garden|wildflower preserve|"
-    "wildflower center|lush n lean|orchard garden|harvey cornell"
+    "wildflower center|lush n lean|orchard garden|harvey cornell|"
+    "japaneese garden|japanese garden|capitol flower|japanese memorial|"
+    "demonstration garden"
 )
 
 
