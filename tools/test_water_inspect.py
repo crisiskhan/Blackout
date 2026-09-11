@@ -2188,10 +2188,20 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("woodland, park, or bosque", nm)
         self.assertNotIn("edible", nm)
         nm_do = json.loads((ROOT / "Resources/Field/field.nm.json").read_text())
-        nm_tree_do = next(c for c in nm_do["cards"] if c["id"] == "nm-tree-use")["steps"][0]["do"]["en"].lower()
+        nm_tree = next(c for c in nm_do["cards"] if c["id"] == "nm-tree-use")
+        nm_sit = nm_tree["situation"]["en"].lower()
+        self.assertIn("aspen is high country", nm_sit)
+        self.assertNotIn(
+            "or aspen",
+            nm_sit,
+            "Isleta woodland is not aspen country; SPEAK already says high country",
+        )
+        nm_tree_do = nm_tree["steps"][0]["do"]["en"].lower()
         self.assertIn("rio grande cottonwood", nm_tree_do)
         self.assertIn("high country", nm_tree_do)
         self.assertIn("juniper and piñon are woodland", nm_tree_do)
+        field_py = (ROOT / "tools/v3/field.py").read_text()
+        self.assertIn("Aspen is high country", field_py)
 
         west = blob("tx", "tx-tree-use")
         self.assertIn("mesquite", west)
@@ -2229,6 +2239,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mesquite is woodland", qa.lower())
         self.assertIn("juniper and piñon are woodland", qa.lower())
         self.assertIn("loblolly pine is Lost Pines", qa)
+        self.assertIn("situation names aspen as high country", qa.lower())
 
     def test_nm_hold_names_the_field_rattlesnakes_and_mammals(self):
         """NM Field and Vision name prairie rattler, diamondback, and mule deer.
