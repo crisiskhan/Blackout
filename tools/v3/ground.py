@@ -3,8 +3,9 @@
 The extract already carries `landuse=greenhouse_horticulture` — 2 in TX WEST,
 14 in TX EAST, 10 in NM. The tiler's land table did not class them, so they
 never reached a fill, and holding the glasshouse answered open ground. It also
-carries three cave preserves tagged as parks. Those already paint as park
-fill; without a silver outline they look like picnic ground. FIELD still has
+carries three cave preserves tagged as parks, and Blowing Sink tagged as
+wetland. Those already paint as park or bosque fill; without a silver outline
+they look like picnic ground or cottonwoods. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
 open picnic tree-use without this file. A botanic garden tagged as a park
 would open woodland tree-use without this file. This is the water-detail
@@ -37,9 +38,10 @@ KEEP_TAGS = ("name", "landuse", "leisure", "boundary", "amenity")
 # overlay — sports fields are not glasshouses.
 WORKED_LANDUSE = {"greenhouse_horticulture"}
 
-# Phrase match, not the word "cave". Must stay in step with
-# `Inspect.isCavePreserve`. Bee Cave and Cave Drive stay out.
-CAVE_PRESERVE_PHRASES = ("cave preserve", "cave area of critical")
+# Phrase match, not the word "cave" and not the word "sink". Must stay in
+# step with `Inspect.isCavePreserve`. Bee Cave and Cave Drive stay out.
+# Blowing Sink is a wetland in the extract; the word sink is not a match.
+CAVE_PRESERVE_PHRASES = ("cave preserve", "cave area of critical", "blowing sink")
 CAVE_PRESERVE_KEYS = {
     ("leisure", "park"),
     ("leisure", "nature_reserve"),
@@ -81,10 +83,12 @@ def write_compact(path: Path, data: object) -> None:
 
 
 def is_cave_preserve(props: dict) -> bool:
+    name = (props.get("name") or "").lower()
+    if "blowing sink" in name and not props.get("highway"):
+        return True
     park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
     if not park:
         return False
-    name = (props.get("name") or "").lower()
     return any(phrase in name for phrase in CAVE_PRESERVE_PHRASES)
 
 

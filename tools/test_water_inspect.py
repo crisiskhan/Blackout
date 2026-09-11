@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4), "tx-east": (14, 2, 2, 1), "nm": (10, 1, 6, 2)}
+        expected = {"tx-west": (2, 0, 0, 4), "tx-east": (14, 3, 2, 1), "nm": (10, 1, 6, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -121,6 +121,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
         east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
+        self.assertIn("discovery well cave preserve", east_blob)
+        self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
@@ -161,6 +163,20 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Bee Cave Central Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind({"natural": "wetland", "name": "Blowing Sink"}),
+            "cave",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Blowing Sink Road"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"natural": "wetland", "name": "Great Northern Reservoir"}
+            )
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -243,6 +259,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', inspect)
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("cave")', inspect)
+        self.assertNotIn('contains("sink")', inspect)
         for phrase in ground.WILDLIFE_RANGE_PHRASES:
             self.assertIn(f'"{phrase}"', inspect)
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
@@ -702,6 +719,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isCavePreserve", inspect)
         self.assertIn("cave preserve", inspect)
         self.assertIn("cave area of critical", inspect)
+        self.assertIn("blowing sink", inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("wildlife refuge", inspect)
         self.assertIn("wildlife management area", inspect)
@@ -884,6 +902,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Vickery Wholesale Greenhouse", qa)
         self.assertIn("glasshouse", qa)
         self.assertIn("Discovery Well Cave Preserve", qa)
+        self.assertIn("Blowing Sink", qa)
         self.assertIn("Bee Cave Central Park", qa)
         self.assertIn("Marquez Wildlife Management Area", qa)
         self.assertIn("Wildlife Drive", qa)

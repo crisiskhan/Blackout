@@ -301,14 +301,19 @@ public enum Inspect {
 
     /// A park named Bee Cave is a town park. A park named Cave Preserve is
     /// the hole. Phrase match, not the word `cave` — Cave Drive and Bee Cave
-    /// stay parks.
+    /// stay parks. Phrase `blowing sink`, not the word `sink` — a highway
+    /// named Blowing Sink Road is a road, and Kitchen Sink is not a hole.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("blowing sink") {
+            let highway = t["highway"] ?? ""
+            return highway.isEmpty
+        }
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
         guard park else { return false }
-        let n = (t["name"] ?? "").lowercased()
         if n.contains("cave preserve") { return true }
         if n.contains("cave area of critical") { return true }
         return false
@@ -700,11 +705,14 @@ public enum Inspect {
             }
         }
         if isCavePreserve(t) {
+            let namedSink = (t["name"] ?? "").lowercased().contains("blowing sink")
             return Reading(
                 klass: "Cave or hole",
                 kind: .land,
                 sure: 80,
-                why: "mapped as a cave preserve; air, dark and cold are the facts, not a tourist guide",
+                why: namedSink
+                    ? "mapped as a named sink; air, dark and cold are the facts, not a tourist guide"
+                    : "mapped as a cave preserve; air, dark and cold are the facts, not a tourist guide",
                 advice: .field,
                 field: coldCard,
                 extra: [caveCard],

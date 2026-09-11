@@ -309,6 +309,31 @@ final class InspectTests: XCTestCase {
         let coyote = Inspect.read(tags: ["leisure": "park", "name": "Coyote Cave Park"])
         XCTAssertEqual(coyote.klass, "Park")
         XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
+
+        let blowing = Inspect.read(
+            tags: ["natural": "wetland", "name": "Blowing Sink"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(blowing.klass, "Cave or hole")
+        XCTAssertEqual(blowing.fieldRoute, [Inspect.caveCard, Inspect.coldCard])
+        XCTAssertEqual(InspectField.label(for: blowing.fieldRoute[0]), "FIELD · CAVE")
+        XCTAssertTrue(blowing.why.contains("named sink"), blowing.why)
+        XCTAssertFalse(blowing.doLine.lowercased().contains("cottonmouth"), blowing.doLine)
+        XCTAssertFalse(blowing.doLine.lowercased().contains("edible"), blowing.doLine)
+
+        let reservoir = Inspect.read(
+            tags: ["natural": "wetland", "name": "Great Northern Reservoir"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(reservoir.klass, "Bosque or wetland")
+        XCTAssertFalse(reservoir.fieldRoute.contains(Inspect.caveCard))
+
+        let sinkRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Blowing Sink Road"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sinkRoad.klass, "Road")
+        XCTAssertFalse(sinkRoad.fieldRoute.contains(Inspect.caveCard))
     }
 
     func testAWildlifeManagementAreaIsRangeNotAPin() {
