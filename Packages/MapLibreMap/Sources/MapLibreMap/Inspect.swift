@@ -411,7 +411,9 @@ public enum Inspect {
     /// tanks`, not the word `hueco` — Hueco Mountain Park is a town
     /// park, and Hueco Tanks Road is a road. Phrase `scenic easement`,
     /// not the word `easement` — a riverside hike-and-bike easement
-    /// stays a park.
+    /// stays a park. Phrase `la tierra trails`, not the word `tierra`
+    /// or `trails` — Tierra Blanca and a trails neighborhood park stay
+    /// parks.
     static func isOpenReserve(_ t: [String: String]) -> Bool {
         let named = !(t["name"] ?? "").isEmpty
         if t["leisure"] == "nature_reserve", named { return true }
@@ -425,6 +427,7 @@ public enum Inspect {
         if n.contains("prairie preserve") { return true }
         if n.contains("hueco tanks") { return true }
         if n.contains("scenic easement") { return true }
+        if n.contains("la tierra trails") { return true }
         if n.range(of: "open space") != nil {
             if !n.contains("visitor"),
                !n.contains("farm"),

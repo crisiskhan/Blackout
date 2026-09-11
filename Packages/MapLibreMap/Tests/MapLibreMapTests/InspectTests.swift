@@ -932,6 +932,38 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(riverside.klass, "Park")
         XCTAssertNotEqual(riverside.klass, "Open reserve")
+
+        let tierra = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "landuse": "recreation_ground",
+                "name": "La Tierra Trails",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(tierra.klass, "Open reserve")
+        XCTAssertNotEqual(tierra.klass, "Park")
+        XCTAssertNotEqual(tierra.klass, "Irrigated ground")
+        XCTAssertEqual(tierra.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(tierra.doLine.lowercased().contains("rattler") || tierra.doLine.lowercased().contains("diamondback"), tierra.doLine)
+        XCTAssertTrue(tierra.doLine.lowercased().contains("sotol") || tierra.doLine.lowercased().contains("cholla"), tierra.doLine)
+        XCTAssertFalse(tierra.doLine.lowercased().contains("cottonwood"), tierra.doLine)
+        XCTAssertFalse(tierra.doLine.lowercased().contains("edible"), tierra.doLine)
+
+        let blanca = Inspect.read(
+            tags: ["leisure": "park", "name": "Tierra Blanca"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(blanca.klass, "Park")
+        XCTAssertNotEqual(blanca.klass, "Open reserve")
+
+        let desertTrails = Inspect.read(
+            tags: ["leisure": "park", "name": "Desert Trails Community Park"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(desertTrails.klass, "Park")
+        XCTAssertNotEqual(desertTrails.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {
