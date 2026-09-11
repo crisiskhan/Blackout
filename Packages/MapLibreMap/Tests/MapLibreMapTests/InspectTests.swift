@@ -334,6 +334,16 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(preserve.doLine.lowercased().contains("stay in daylight"), preserve.doLine)
         XCTAssertTrue(preserve.doLine.lowercased().contains("dark"), preserve.doLine)
 
+        let buttercup = Inspect.read(
+            tags: ["leisure": "park", "name": "Buttercup Creek Cave Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(buttercup.klass, "Cave or hole")
+        XCTAssertEqual(buttercup.fieldRoute, [Inspect.caveCard, Inspect.coldCard])
+        XCTAssertEqual(InspectField.label(for: buttercup.fieldRoute[0]), "FIELD · CAVE")
+        XCTAssertTrue(buttercup.doLine.lowercased().contains("stay in daylight"), buttercup.doLine)
+        XCTAssertFalse(buttercup.doLine.lowercased().contains("edible"), buttercup.doLine)
+
         let pronoun = Inspect.read(
             tags: [
                 "boundary": "protected_area",
@@ -506,6 +516,10 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(grass.klass, "Wildlife range")
         XCTAssertEqual(grass.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertTrue(grass.doLine.lowercased().contains("hog"), grass.doLine)
+        XCTAssertTrue(grass.doLine.lowercased().contains("cook through"), grass.doLine)
+        XCTAssertTrue(grass.doLine.lowercased().contains("no ice"), grass.doLine)
+        XCTAssertFalse(grass.doLine.lowercased().contains("cottonwood"), grass.doLine)
 
         let whitfield = Inspect.read(
             tags: [
