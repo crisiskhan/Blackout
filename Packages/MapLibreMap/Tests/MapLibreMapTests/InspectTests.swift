@@ -909,6 +909,29 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(trailhead.klass, "Park")
         XCTAssertNotEqual(trailhead.klass, "Open reserve")
+
+        let scenic = Inspect.read(
+            tags: ["leisure": "park", "name": "Bear Canyon Scenic Easement"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(scenic.klass, "Open reserve")
+        XCTAssertNotEqual(scenic.klass, "Park")
+        XCTAssertEqual(scenic.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(scenic.doLine.lowercased().contains("rattler") || scenic.doLine.lowercased().contains("diamondback"), scenic.doLine)
+        XCTAssertTrue(scenic.doLine.lowercased().contains("sotol") || scenic.doLine.lowercased().contains("cholla"), scenic.doLine)
+        XCTAssertFalse(scenic.doLine.lowercased().contains("cottonwood"), scenic.doLine)
+        XCTAssertFalse(scenic.doLine.lowercased().contains("edible"), scenic.doLine)
+
+        let riverside = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "name": "Ann and Roy Butler Hike and Bike 222 Riverside Easement",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(riverside.klass, "Park")
+        XCTAssertNotEqual(riverside.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {

@@ -10,8 +10,8 @@ the plant book and the cave card. One wildlife management area in NM would
 open picnic tree-use without this file. A nature preserve tagged as woodland
 would open picnic tree-use without this file. A botanic garden tagged as a park
 would open woodland tree-use without this file. A mountain ACEC, a prairie
-preserve, a named nature reserve, or Hueco Tanks would open picnic tree-use
-without this file. This is the water-detail
+preserve, a named nature reserve, Hueco Tanks, named open-space cover, or a
+scenic easement would open picnic tree-use without this file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
 source, tags intact so a hold names the record rather than a colour.
 
@@ -81,12 +81,15 @@ WILDLIFE_RANGE_PHRASES = (
 # Open Space Visitor Center, a farm open space, bosque along the
 # Rio Grande, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
-# Mountain Park stays a park. Hueco Tanks Road stays a road. Must
-# stay in step with `Inspect.isOpenReserve`.
+# Mountain Park stays a park. Hueco Tanks Road stays a road. Phrase
+# `scenic easement`, not the word `easement`. A riverside hike-and-
+# bike easement stays a park. Must stay in step with
+# `Inspect.isOpenReserve`.
 OPEN_RESERVE_PHRASES = (
     "area of critical environmental concern",
     "prairie preserve",
     "hueco tanks",
+    "scenic easement",
 )
 OPEN_SPACE_KEEP_OUT = ("visitor", "farm", "rio grande", "bachechi", "trail")
 
