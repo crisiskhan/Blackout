@@ -288,7 +288,8 @@ Gate, Prairie Hills, Godzilla Preserve, Open Space Visitor Center, and a beer ga
 wildlife sanctuary tagged as woodland still opens the animal book, not picnic
 tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, animals, shelter, bite, meat you
-already have. A named bosque tagged wood or forest is cottonwoods along the
+already have. Field tree-use situation names woodland, park, or bosque,
+not bosque-only, so Isleta woodland is not a bosque lie. A named bosque tagged wood or forest is cottonwoods along the
 river, not picnic timber. Valle del Bosque Park stays a park. Bosque Encantado
 stays built-up. Cactus lives on scrub, cactus gardens, and open
 reserves (a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain), not picnic woodland.

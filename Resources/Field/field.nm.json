@@ -324,8 +324,8 @@
         "es": "Árboles de Nuevo México — sombra, no comida"
       },
       "situation": {
-        "en": "You are in bosque. Rio Grande cottonwood, juniper, piñon, or aspen. Shade and wind. Piñon is not a Field meal ticket.",
-        "es": "Estás en bosque. Álamo del Río Grande, enebro, piñón o álamo temblón. Sombra y viento. El piñón no es un ticket de comida de Field."
+        "en": "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon, or aspen. Shade and wind. Piñon is not a Field meal ticket.",
+        "es": "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón o álamo temblón. Sombra y viento. El piñón no es un ticket de comida de Field."
       },
       "stop_if": [
         {

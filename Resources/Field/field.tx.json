@@ -450,8 +450,8 @@
         "es": "Árboles del este de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in East Texas woodland, park, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine, cottonwood. Shade and deadfall.",
-        "es": "Estás en arbolado, parque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda, álamo. Sombra y madera muerta."
+        "en": "You are in East Texas woodland, park, bosque, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine, cottonwood. Shade and deadfall.",
+        "es": "Estás en arbolado, parque, bosque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda, álamo. Sombra y madera muerta."
       },
       "stop_if": [
         {
