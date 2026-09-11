@@ -1003,6 +1003,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mesquite", named_tree)
         self.assertIn("rio grande cottonwood", named_tree)
         self.assertIn("not a meal", named_tree)
+        self.assertIn("deadfall", named_tree)
+        self.assertNotIn("the bite card", named_tree)
         self.assertNotIn("javelina", named_tree)
         self.assertNotIn("hog", named_tree)
         self.assertNotIn("coyote", named_tree)
@@ -1019,8 +1021,17 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("rio grande cottonwood", woodland_hold)
         self.assertIn("mesquite", woodland_hold)
         self.assertIn("loblolly pine", woodland_hold)
+        self.assertIn("the bite card", woodland_hold)
+        self.assertIn("deadfall", woodland_hold)
+        self.assertNotIn("the food card", woodland_hold)
         self.assertNotIn("aspen", woodland_hold)
         self.assertNotIn("edible", woodland_hold)
+        bosque = do.split('case "Bosque or wetland":', 1)[1].split(
+            'case "Desert scrub"', 1
+        )[0].lower()
+        self.assertIn("cottonmouth", bosque)
+        self.assertIn("the bite card", bosque)
+        self.assertNotIn("the food card", bosque)
         tx_plant_do = next(
             c
             for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
@@ -1200,6 +1211,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", qa)
         self.assertIn("tx-east-snake", qa)
         self.assertIn("aspen is high country", qa.lower())
+        self.assertIn("food stays on wildlife range", qa)
+        self.assertIn("south-side shade", qa.lower())
         self.assertIn("SPEAK names that pack", qa)
         self.assertIn("SPEAK names oleander", qa)
         self.assertIn("dark, still air, cold", qa)
