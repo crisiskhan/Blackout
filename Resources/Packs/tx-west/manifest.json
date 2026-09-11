@@ -74,7 +74,7 @@
     "cattle-guard",
     "border-hospitals"
   ],
-  "bytes": 34826712,
+  "bytes": 34827507,
   "files": [
     "border.geojson",
     "contours.geojson",
@@ -88,6 +88,7 @@
     "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
+    "layers/ground.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
     "layers/water.bin",
@@ -109,7 +110,7 @@
     "lon": -106.46000000000001
   },
   "osmFetched": "2026-09-09",
-  "attribution": "\u00a9 OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+  "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
     "file": "hillshade.png",
@@ -139,8 +140,8 @@
     "highwayLines": 173901,
     "namedStreets": 60153,
     "sampleStreetNames": [
-      "Carretera Ciudad Ju\u00e1rez-Miguel Ahumada",
-      "Carretera Miguel Ahumada-Ciudad Ju\u00e1rez",
+      "Carretera Ciudad Juárez-Miguel Ahumada",
+      "Carretera Miguel Ahumada-Ciudad Juárez",
       "Ranch Road 192",
       "Quitman Pass Road",
       "Indian Hot Spring Road",

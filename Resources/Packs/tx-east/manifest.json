@@ -63,7 +63,7 @@
     "cattle-guard",
     "hurricane"
   ],
-  "bytes": 30665653,
+  "bytes": 30669280,
   "files": [
     "contours.geojson",
     "dem.json",
@@ -75,6 +75,7 @@
     "graph.bin",
     "hillshade.png",
     "layers/flood.geojson",
+    "layers/ground.geojson",
     "layers/hazards.geojson",
     "layers/public_land.geojson",
     "layers/water.bin",
@@ -97,7 +98,7 @@
     "lon": -97.73
   },
   "osmFetched": "2026-09-09",
-  "attribution": "\u00a9 OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
+  "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
   "terrain": {
     "present": true,
     "file": "hillshade.png",

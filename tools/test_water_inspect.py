@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from v3 import water
+from v3 import ground, water
 from v3.fetch_packs import PACKS
 
 PACK_ROOT = ROOT / "Resources" / "Packs"
@@ -72,6 +72,36 @@ class ShippedWaterLayers(unittest.TestCase):
         for pid in PACKS:
             manifest = json.loads((PACK_ROOT / pid / "manifest.json").read_text())
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
+
+    def test_every_pack_ships_the_glasshouse_overlay(self):
+        for pid in PACKS:
+            path = PACK_ROOT / pid / "layers" / "ground.geojson"
+            self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
+            fc = json.loads(path.read_text())
+            self.assertGreater(len(fc.get("features") or []), 0, f"{pid} ground overlay is empty")
+            blob = path.read_text().lower()
+            self.assertNotIn("edible", blob, pid)
+            self.assertNotIn("animal-icon", blob, pid)
+            for feat in fc["features"]:
+                props = feat.get("properties") or {}
+                self.assertEqual(props.get("landuse"), "greenhouse_horticulture", pid)
+                self.assertIn(feat.get("geometry", {}).get("type"), ("Polygon", "MultiPolygon"))
+
+    def test_the_manifest_counts_the_ground_it_ships(self):
+        for pid in PACKS:
+            manifest = json.loads((PACK_ROOT / pid / "manifest.json").read_text())
+            self.assertIn("layers/ground.geojson", manifest["files"], pid)
+
+    def test_regenerating_ground_from_the_shipped_osm_reproduces_the_shipped_bytes(self):
+        for pid in PACKS:
+            dest = PACK_ROOT / pid
+            fc = json.loads((dest / "osm.geojson").read_text())
+            drawn = json.dumps(ground.render_layer(ground.records(fc)), separators=(",", ":"), ensure_ascii=False)
+            self.assertEqual(
+                drawn,
+                (dest / "layers" / "ground.geojson").read_text(),
+                f"{pid} ground.geojson is not what the tool produces",
+            )
 
     def test_regenerating_from_the_shipped_osm_reproduces_the_shipped_bytes(self):
         # No network, no hidden input: the extract in the tree is the whole
@@ -502,6 +532,21 @@ class GroundFieldSync(unittest.TestCase):
         overlay = inspect.split("overlayLayerIDs", 1)[1].split("waterCard", 1)[0]
         self.assertNotIn("groundPointsLayerID", overlay)
         self.assertNotIn("groundLabelsLayerID", overlay)
+        self.assertNotIn("groundWorkedFillLayerID", overlay)
+        self.assertNotIn("groundWorkedLineLayerID", overlay)
+
+    def test_glasshouses_are_worked_ground_not_a_meal(self):
+        inspect = INSPECT.read_text()
+        self.assertIn('case "greenhouse_horticulture":', inspect)
+        self.assertIn("mapped as glasshouses", inspect)
+        tiles = (ROOT / "tools/v3/tiles.py").read_text()
+        self.assertIn('("landuse", "greenhouse_horticulture"): "farm"', tiles)
+        swift = MAP_SWIFT.read_text()
+        self.assertIn("layers/ground.geojson", swift)
+        self.assertIn("groundWorkedFillLayerID", swift)
+        self.assertIn("groundWorkedLineLayerID", swift)
+        self.assertNotIn("edible", swift.lower())
+        self.assertIn("resolverVersion = 6", swift)
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
@@ -541,6 +586,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("coyote and deer range", qa)
         self.assertIn("javelina / coyote", qa)
         self.assertIn("cottonmouth", qa)
+        self.assertIn("Irrigated ground", qa)
+        self.assertIn("Vickery Wholesale Greenhouse", qa)
+        self.assertIn("glasshouse", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.

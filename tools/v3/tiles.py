@@ -90,7 +90,10 @@ LAND_CLASS = {
     ("landuse", "orchard"): "farm",
     ("landuse", "meadow"): "farm",
     ("landuse", "vineyard"): "farm",
+    ("landuse", "greenhouse_horticulture"): "farm",
     ("landuse", "residential"): "town",
+    ("landuse", "recreation_ground"): "park",
+    ("landuse", "grass"): "desert",
     ("leisure", "park"): "park",
 }
 

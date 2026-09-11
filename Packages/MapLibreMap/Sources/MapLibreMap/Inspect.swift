@@ -713,6 +713,22 @@ public enum Inspect {
                     unnamedPenalty: 4,
                     pack: pack
                 )
+            case "greenhouse_horticulture":
+                return plantCover(
+                    klass: "Irrigated ground",
+                    sure: 78,
+                    why: "mapped as glasshouses; worked ground a ditch reaches, not wild cover",
+                    unnamedPenalty: 4,
+                    pack: pack
+                )
+            case "grass":
+                return snakeCountry(
+                    klass: "Grassland",
+                    sure: 70,
+                    why: "mapped as open grass",
+                    unnamedPenalty: 2,
+                    pack: pack
+                )
             case "salt_pond":
                 return snakeCountry(
                     klass: "Salt flat",

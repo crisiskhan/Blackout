@@ -22,7 +22,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-from . import graphbin, tiles
+from . import graphbin, ground, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -1075,6 +1075,29 @@ def shipped_files(dest: Path) -> list[Path]:
     return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
 
 
+def write_manifest(dest: Path, manifest: dict | None = None) -> dict:
+    """Recount shipped files and bytes after a derived layer is added.
+
+    Used when glasshouses or water marks land on disk without recutting tiles.
+    The phone's copy step ships whatever the manifest lists, so the list and
+    the byte count have to agree with what is actually there. The manifest is
+    itself a shipped file, so the count is written, measured, and written
+    again if listing the new file changed the manifest's own size.
+    """
+    if manifest is None:
+        manifest = json.loads((dest / "manifest.json").read_text())
+    files = shipped_files(dest)
+    manifest["files"] = sorted(str(p.relative_to(dest)) for p in files)
+    write_json(dest / "manifest.json", manifest)
+    for _ in range(3):
+        actual = sum(p.stat().st_size for p in shipped_files(dest))
+        if manifest.get("bytes") == actual:
+            return manifest
+        manifest["bytes"] = actual
+        write_json(dest / "manifest.json", manifest)
+    return manifest
+
+
 def build_tiles(dest: Path, pack: dict) -> dict:
     """Cut the pack's streets into the vector tiles the canvas reads."""
     info = tiles.build(dest, union_bbox(pack["slices"]), pack["name"])
@@ -1657,6 +1680,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         dest / "layers" / "hazards.geojson",
         {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT},
     )
+    ground.build(dest)
 
     hillshade_meta: dict = {"present": False, "reason": "not requested"}
     if walkable:
@@ -1684,36 +1708,34 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
 
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
         else f"3DEP omitted ({hillshade_meta.get('reason')}); contours from build-time Open-Meteo DEM (real elevations, not fake)."
     )
-    manifest = {
-        "id": pack["id"],
-        "name": pack["name"],
-        "state": pack["state"],
-        "kind": "osm-contour-extract",
-        "engine": "maplibre",
-        "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
-        "walkable": walkable,
-        "bbox": bb,
-        "slices": slice_summaries,
-        "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
-        "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
-        "home": home_point(pack["slices"], bb),
-        "osmFetched": osm_fetched(dest),
-        "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
-        "terrain": hillshade_meta,
-        "stats": stats,
-    }
-    write_json(dest / "manifest.json", manifest)
+    manifest = write_manifest(
+        dest,
+        {
+            "id": pack["id"],
+            "name": pack["name"],
+            "state": pack["state"],
+            "kind": "osm-contour-extract",
+            "engine": "maplibre",
+            "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
+            "walkable": walkable,
+            "bbox": bb,
+            "slices": slice_summaries,
+            "banners": pack["banners"],
+            "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+            "home": home_point(pack["slices"], bb),
+            "osmFetched": osm_fetched(dest),
+            "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
+            "terrain": hillshade_meta,
+            "stats": stats,
+        },
+    )
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,
@@ -1820,6 +1842,7 @@ def finalize_existing(dest: Path) -> dict:
         },
     )
     write_compact(dest / "layers" / "hazards.geojson", {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT})
+    ground.build(dest)
 
     hill = dest / "hillshade.png"
     hillshade_meta: dict = {"present": False, "reason": "no hillshade.png"}
@@ -1842,36 +1865,34 @@ def finalize_existing(dest: Path) -> dict:
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
         else f"3DEP omitted ({hillshade_meta.get('reason')}); contours from build-time Open-Meteo DEM."
     )
-    manifest = {
-        "id": pack["id"],
-        "name": pack["name"],
-        "state": pack["state"],
-        "kind": "osm-contour-extract",
-        "engine": "maplibre",
-        "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
-        "walkable": True,
-        "bbox": bb,
-        "slices": slice_summaries,
-        "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
-        "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
-        "home": home_point(pack["slices"], bb),
-        "osmFetched": osm_fetched(dest),
-        "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
-        "terrain": hillshade_meta,
-        "stats": stats,
-    }
-    write_json(dest / "manifest.json", manifest)
+    manifest = write_manifest(
+        dest,
+        {
+            "id": pack["id"],
+            "name": pack["name"],
+            "state": pack["state"],
+            "kind": "osm-contour-extract",
+            "engine": "maplibre",
+            "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
+            "walkable": True,
+            "bbox": bb,
+            "slices": slice_summaries,
+            "banners": pack["banners"],
+            "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+            "home": home_point(pack["slices"], bb),
+            "osmFetched": osm_fetched(dest),
+            "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
+            "terrain": hillshade_meta,
+            "stats": stats,
+        },
+    )
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,

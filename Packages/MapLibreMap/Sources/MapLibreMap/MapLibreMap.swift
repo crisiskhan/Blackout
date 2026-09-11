@@ -369,6 +369,10 @@ public enum PackStyle {
     public static let waterDetailLabelsLayerID = "water-detail-labels"
     public static let groundPointsLayerID = "ground-points"
     public static let groundLabelsLayerID = "ground-labels"
+    public static let groundWorkedSourceID = "ground-worked"
+    public static let groundWorkedFillLayerID = "ground-worked-fill"
+    public static let groundWorkedLineLayerID = "ground-worked-line"
+    public static let landFillLayerID = "land-fill"
     public static let waterInk = "#6E747A"
     /// Peaks and holes live on the pack's place slice from this zoom, same as
     /// the tiler's POI floor. Closer than that they are noise; farther they
@@ -385,9 +389,10 @@ public enum PackStyle {
     public static let accentInk = "#E10600"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`
-    /// and silver ground marks for peaks, holes and named trees.
-    public static let resolverVersion = 5
+    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
+    /// silver ground marks for peaks, holes and named trees, and the glasshouse
+    /// overlay from `layers/ground.geojson`.
+    public static let resolverVersion = 6
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -651,15 +656,17 @@ public enum PackStyle {
         }
     }
 
-    /// Peaks, holes and named trees the extract already put on the place slice.
-    /// Silver circles, no labels, no animals. A hold reads the record; the
-    /// mark only says something is here.
+    /// Peaks, holes and named trees the extract already put on the place slice,
+    /// plus glasshouses the land tiles currently drop. Silver marks, no
+    /// labels, no animals. A hold reads the record; the mark only says something
+    /// is here.
     public static func attachGroundLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
-        packRoot _: URL
+        packRoot: URL
     ) {
         layers.removeAll { $0["id"] as? String == groundLabelsLayerID }
+        attachWorkedGround(&sources, &layers, packRoot: packRoot)
         guard sources["osm"] != nil else { return }
         if !layers.contains(where: { $0["id"] as? String == groundPointsLayerID }) {
             layers.append([
@@ -680,6 +687,62 @@ public enum PackStyle {
                     "circle-stroke-width": 0.9,
                 ],
             ])
+        }
+    }
+
+    /// Glasshouses the tiler has not yet classed as farm. Quiet fill under
+    /// the streets so a hold can name them; silver outline at walking zoom so
+    /// the record is visible. No class label, not a meal.
+    private static func attachWorkedGround(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let groundFile = packRoot.appendingPathComponent("layers/ground.geojson")
+        guard FileManager.default.fileExists(atPath: groundFile.path) else { return }
+        if var existing = sources[groundWorkedSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[groundWorkedSourceID] = existing
+            }
+        } else {
+            sources[groundWorkedSourceID] = [
+                "type": "geojson",
+                "data": groundFile.absoluteString,
+            ]
+        }
+        let fill: [String: Any] = [
+            "id": groundWorkedFillLayerID,
+            "type": "fill",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "paint": [
+                "fill-color": silverInk,
+                // One percent is enough for visibleFeatures and not enough
+                // to grey the streets that sit on top of the sheet.
+                "fill-opacity": 0.01,
+            ],
+        ]
+        let line: [String: Any] = [
+            "id": groundWorkedLineLayerID,
+            "type": "line",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "paint": [
+                "line-color": silverInk,
+                "line-opacity": 0.72,
+                "line-width": 1.4,
+            ],
+        ]
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
+            if let idx = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+                layers.insert(fill, at: idx + 1)
+            } else {
+                layers.append(fill)
+            }
+        }
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedLineLayerID }) {
+            layers.append(line)
         }
     }
 }

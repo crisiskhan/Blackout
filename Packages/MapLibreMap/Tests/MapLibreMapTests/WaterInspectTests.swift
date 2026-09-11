@@ -135,6 +135,39 @@ final class WaterInspectTests: XCTestCase {
         let compact = String(describing: layers)
         XCTAssertFalse(compact.contains("animal"), compact)
         XCTAssertFalse(compact.contains("edible"), compact)
+        XCTAssertNil(sources[PackStyle.groundWorkedSourceID])
+    }
+
+    func testAPackWithGlasshousesGetsASilverOutlineWithoutClassLabels() throws {
+        let pack = try packRoot(named: "ground-worked", water: false, ground: true)
+        var sources: [String: Any] = ["osm": ["type": "vector", "url": "pmtiles://osm.pmtiles"]]
+        var layers: [[String: Any]] = [
+            ["id": PackStyle.landFillLayerID, "type": "fill", "source": "osm"],
+            ["id": "roads", "type": "line", "source": "osm"],
+        ]
+        PackStyle.attachGroundLayers(&sources, &layers, packRoot: pack)
+
+        let worked = try XCTUnwrap(sources[PackStyle.groundWorkedSourceID] as? [String: Any])
+        XCTAssertEqual(worked["type"] as? String, "geojson")
+        XCTAssertEqual(
+            worked["data"] as? String,
+            pack.appendingPathComponent("layers/ground.geojson").absoluteString
+        )
+
+        let fill = try XCTUnwrap(layers.first { $0["id"] as? String == PackStyle.groundWorkedFillLayerID })
+        XCTAssertEqual(fill["type"] as? String, "fill")
+        XCTAssertEqual(fill["minzoom"] as? Double, PackStyle.groundMinZoom)
+        let fillAt = try XCTUnwrap(layers.firstIndex { $0["id"] as? String == PackStyle.landFillLayerID })
+        let workedAt = try XCTUnwrap(layers.firstIndex { $0["id"] as? String == PackStyle.groundWorkedFillLayerID })
+        XCTAssertEqual(workedAt, fillAt + 1)
+
+        let line = try XCTUnwrap(layers.first { $0["id"] as? String == PackStyle.groundWorkedLineLayerID })
+        XCTAssertEqual(line["type"] as? String, "line")
+        XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.groundLabelsLayerID })
+        let compact = String(describing: layers)
+        XCTAssertFalse(compact.contains("animal"), compact)
+        XCTAssertFalse(compact.contains("edible"), compact)
+        XCTAssertFalse(compact.contains("text-field"), compact)
     }
 
     func testAPackWithoutTheFileGetsNoMarksRatherThanAnEmptySource() throws {
@@ -200,13 +233,17 @@ final class WaterInspectTests: XCTestCase {
         XCTAssertEqual(OSMCredit.line, "© OpenStreetMap contributors")
     }
 
-    private func packRoot(named: String, water: Bool) throws -> URL {
+    private func packRoot(named: String, water: Bool, ground: Bool = false) throws -> URL {
         let fm = FileManager.default
         let pack = fm.temporaryDirectory.appendingPathComponent("pack-\(named)-\(UUID().uuidString)")
         try fm.createDirectory(at: pack.appendingPathComponent("layers"), withIntermediateDirectories: true)
         if water {
             let fc = #"{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"class":"tank","via":"named","name":"Fivemile Tank"},"geometry":{"type":"Point","coordinates":[-105.375,31.116]}}]}"#
             try Data(fc.utf8).write(to: pack.appendingPathComponent("layers/water.geojson"))
+        }
+        if ground {
+            let fc = #"{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"landuse":"greenhouse_horticulture","name":"Vickery Wholesale Greenhouse"},"geometry":{"type":"Polygon","coordinates":[[[-97.62,30.31],[-97.61,30.31],[-97.61,30.32],[-97.62,30.32],[-97.62,30.31]]]}}]}"#
+            try Data(fc.utf8).write(to: pack.appendingPathComponent("layers/ground.geojson"))
         }
         return pack
     }

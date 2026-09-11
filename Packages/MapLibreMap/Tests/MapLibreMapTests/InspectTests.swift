@@ -378,6 +378,21 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(eastTree.fieldRoute.first, Inspect.treeUseEastCard)
         XCTAssertFalse(eastTree.fieldRoute.contains(Inspect.treeUseTXCard))
 
+        let glass = Inspect.read(
+            tags: ["landuse": "greenhouse_horticulture", "name": "Vickery Wholesale Greenhouse"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(glass.klass, "Irrigated ground")
+        XCTAssertEqual(glass.title, "Vickery Wholesale Greenhouse")
+        XCTAssertEqual(glass.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertTrue(glass.why.contains("glasshouses"), glass.why)
+        XCTAssertFalse(glass.why.lowercased().contains("edible"), glass.why)
+        XCTAssertFalse(glass.doLine.lowercased().contains("edible"), glass.doLine)
+        XCTAssertFalse(glass.doLine.lowercased().contains("javelina"), glass.doLine)
+        XCTAssertFalse(glass.doLine.lowercased().contains("lives here"), glass.doLine)
+        XCTAssertEqual(InspectField.label(for: glass.fieldRoute[0]), "FIELD · PLANT")
+
         let bothTexasChapters: Set<String> = [
             Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.treeUseEastCard,
             Inspect.cactusTXCard, Inspect.mammalTXCard, Inspect.mammalEastCard,
@@ -778,6 +793,9 @@ final class InspectTests: XCTestCase {
         ["landuse": "orchard"],
         ["landuse": "meadow"],
         ["landuse": "vineyard"],
+        ["landuse": "greenhouse_horticulture"],
+        ["landuse": "recreation_ground"],
+        ["landuse": "grass"],
         ["landuse": "basin"],
         ["landuse": "salt_pond"],
         ["landuse": "residential"],
