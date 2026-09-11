@@ -310,9 +310,11 @@ public enum Inspect {
     }
 
     /// A park named Bee Cave is a town park. A park named Cave Preserve is
-    /// the hole. Phrase match, not the word `cave` — Cave Drive and Bee Cave
-    /// stay parks. Phrase `blowing sink`, not the word `sink` — a highway
-    /// named Blowing Sink Road is a road, and Kitchen Sink is not a hole.
+    /// the hole. Phrase `karst preserve`. A nature reserve named for a
+    /// cave is the hole. Not the word cave as a bare contains — Bee Cave,
+    /// Coyote Cave Park, and Cave Drive stay parks. Phrase `blowing sink`,
+    /// not the word `sink` — a highway named Blowing Sink Road is a road,
+    /// and Kitchen Sink is not a hole.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {
@@ -324,8 +326,13 @@ public enum Inspect {
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
         guard park else { return false }
+        if n.contains("bee cave") { return false }
+        if n.contains("cave park") { return false }
+        if n.contains("cave drive") { return false }
         if n.contains("cave preserve") { return true }
         if n.contains("cave area of critical") { return true }
+        if n.contains("karst preserve") { return true }
+        if n.range(of: "cave") != nil { return true }
         return false
     }
 
@@ -336,7 +343,8 @@ public enum Inspect {
     /// `wilderness preserve`, not the word `wilderness` — Wilderness
     /// Gate is apartments. Phrase `nature preserve` / `nature center` /
     /// `natural area`, not the word `preserve` — Godzilla Preserve is
-    /// a park.
+    /// a park. Phrase `wildlife preserve`, not the word `wildlife` —
+    /// Wildlife Drive stays a park. Phrase `audubon`, not a street.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -354,6 +362,8 @@ public enum Inspect {
         if n.contains("nature preserve") { return true }
         if n.contains("nature center") { return true }
         if n.contains("natural area") { return true }
+        if n.contains("wildlife preserve") { return true }
+        if n.contains("audubon") { return true }
         return false
     }
 

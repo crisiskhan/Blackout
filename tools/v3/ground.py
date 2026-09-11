@@ -41,10 +41,18 @@ KEEP_TAGS = ("name", "landuse", "leisure", "boundary", "amenity")
 # overlay — sports fields are not glasshouses.
 WORKED_LANDUSE = {"greenhouse_horticulture"}
 
-# Phrase match, not the word "cave" and not the word "sink". Must stay in
-# step with `Inspect.isCavePreserve`. Bee Cave and Cave Drive stay out.
-# Blowing Sink is a wetland in the extract; the word sink is not a match.
-CAVE_PRESERVE_PHRASES = ("cave preserve", "cave area of critical", "blowing sink")
+# Phrase match, not a bare contains of the word cave. Must stay in step with
+# `Inspect.isCavePreserve`. Bee Cave, Coyote Cave Park, and Cave Drive
+# stay out. Karst preserve is a hole. A nature reserve named for a
+# cave is a hole. Blowing Sink is a wetland in the extract; the word
+# sink is not a match.
+CAVE_PRESERVE_PHRASES = (
+    "cave preserve",
+    "cave area of critical",
+    "blowing sink",
+    "karst preserve",
+)
+CAVE_PRESERVE_KEEP_OUT = ("bee cave", "cave park", "cave drive")
 CAVE_PRESERVE_KEYS = {
     ("leisure", "park"),
     ("leisure", "nature_reserve"),
@@ -58,7 +66,9 @@ CAVE_PRESERVE_KEYS = {
 # stays a park. Phrase `wilderness preserve`, not the word `wilderness`.
 # Wilderness Gate is apartments and stays out. Phrase `nature preserve`
 # / `nature center` / `natural area`, not the word `preserve`. Godzilla
-# Preserve stays a park.
+# Preserve stays a park. Phrase `wildlife preserve`, not the word
+# `wildlife`. Wildlife Drive stays a park. Phrase `audubon`, not a
+# street — overlay still needs park keys.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -70,6 +80,8 @@ WILDLIFE_RANGE_PHRASES = (
     "nature preserve",
     "nature center",
     "natural area",
+    "wildlife preserve",
+    "audubon",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical
@@ -129,7 +141,11 @@ def is_cave_preserve(props: dict) -> bool:
     park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
     if not park:
         return False
-    return any(phrase in name for phrase in CAVE_PRESERVE_PHRASES)
+    if any(keep in name for keep in CAVE_PRESERVE_KEEP_OUT):
+        return False
+    if any(phrase in name for phrase in CAVE_PRESERVE_PHRASES):
+        return True
+    return "cave" in name
 
 
 def is_wildlife_range(props: dict) -> bool:

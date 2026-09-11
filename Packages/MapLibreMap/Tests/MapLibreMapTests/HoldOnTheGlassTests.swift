@@ -116,6 +116,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// phrase, not a picnic park.
     private static let lostOasisCave = CLLocationCoordinate2D(latitude: 30.163187, longitude: -97.873678)
 
+    /// Interior of Whirlpool Cave nature reserve. A hole, not picnic
+    /// woodland. The cave mouth sits 125 m off this pip.
+    private static let whirlpoolCave = CLLocationCoordinate2D(latitude: 30.215509, longitude: -97.845277)
+
+    /// Interior of Goat Cave Karst Nature Preserve. A hole, not wildlife
+    /// range. Phrase `karst preserve`.
+    private static let goatCaveKarst = CLLocationCoordinate2D(latitude: 30.199538, longitude: -97.846758)
+
+    /// Interior of Nalle Bunny Run Wildlife Preserve. East wildlife range,
+    /// not Open reserve.
+    private static let nalleWildlife = CLLocationCoordinate2D(latitude: 30.349686, longitude: -97.803982)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -146,6 +158,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Sandia Man Cave` on the NM place slice. A cave mouth, not a pin
     /// and not picnic woodland.
     private static let sandiaManCave = CLLocationCoordinate2D(latitude: 35.254746, longitude: -106.405585)
+
+    /// Interior of Randall Davey Audubon Center. NM wildlife range, not
+    /// Open reserve.
+    private static let randallDavey = CLLocationCoordinate2D(latitude: 35.688876, longitude: -105.884927)
 
     /// `Mount Franklin` on the west place slice. Peak pin still wins inside
     /// Franklin Mountains State Park. Animals as range are also Lost Dog.
@@ -567,6 +583,12 @@ final class HoldOnTheGlassTests: XCTestCase {
         let westDo = west.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(westDo.contains("javelina"), west.card?.doLine ?? "")
         XCTAssertFalse(westDo.contains("edible"), west.card?.doLine ?? "")
+
+        let nalle = try hold(at: Self.nalleWildlife, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(nalle.card?.klass, "Wildlife range", "\(nalle)")
+        XCTAssertEqual(nalle.card?.title, "Nalle Bunny Run Wildlife Preserve", "\(nalle)")
+        XCTAssertEqual(nalle.card?.fieldRoute.first, Inspect.mammalEastCard, "\(nalle)")
+        XCTAssertFalse((nalle.card?.doLine.lowercased() ?? "").contains("edible"), nalle.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -651,6 +673,18 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(oasis.card?.title, "Lost Oasis Cave Preserve", "\(oasis)")
         XCTAssertEqual(oasis.card?.fieldRoute.first, Inspect.caveCard, "\(oasis)")
         XCTAssertFalse((oasis.card?.doLine.lowercased() ?? "").contains("edible"), oasis.card?.doLine ?? "")
+
+        let whirl = try hold(at: Self.whirlpoolCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(whirl.card?.klass, "Cave or hole", "\(whirl)")
+        XCTAssertEqual(whirl.card?.title, "Whirlpool Cave", "\(whirl)")
+        XCTAssertEqual(whirl.card?.fieldRoute.first, Inspect.caveCard, "\(whirl)")
+        XCTAssertFalse((whirl.card?.doLine.lowercased() ?? "").contains("edible"), whirl.card?.doLine ?? "")
+
+        let goat = try hold(at: Self.goatCaveKarst, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(goat.card?.klass, "Cave or hole", "\(goat)")
+        XCTAssertNotEqual(goat.card?.klass, "Wildlife range", "\(goat)")
+        XCTAssertEqual(goat.card?.title, "Goat Cave Karst Nature Preserve", "\(goat)")
+        XCTAssertEqual(goat.card?.fieldRoute.first, Inspect.caveCard, "\(goat)")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {
@@ -765,6 +799,16 @@ final class HoldOnTheGlassTests: XCTestCase {
             )),
             "ANIMAL · BITE · FOOD · PLANT"
         )
+
+        let audubon = try hold(at: Self.randallDavey, zoom: 16, packId: "nm")
+        XCTAssertEqual(audubon.card?.klass, "Wildlife range", "\(audubon)")
+        XCTAssertEqual(audubon.card?.title, "Randall Davey Audubon Center & Sanctuary", "\(audubon)")
+        XCTAssertEqual(audubon.card?.fieldRoute.first, Inspect.mammalTXCard, "\(audubon)")
+        XCTAssertTrue(
+            (audubon.card?.doLine.lowercased() ?? "").contains("elk is high country"),
+            audubon.card?.doLine ?? ""
+        )
+        XCTAssertFalse((audubon.card?.doLine.lowercased() ?? "").contains("edible"), audubon.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {

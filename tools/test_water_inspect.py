@@ -96,7 +96,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 4, 4, 36), "tx-east": (14, 4, 14, 1, 43), "nm": (10, 1, 14, 2, 59)}
+        expected = {"tx-west": (2, 0, 4, 4, 36), "tx-east": (14, 8, 14, 1, 39), "nm": (10, 1, 15, 2, 58)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -165,6 +165,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("cibola national forest", nm_blob)
         self.assertNotIn("santa fe national forest", nm_blob)
         self.assertNotIn("lincoln national forest", nm_blob)
+        self.assertIn("randall davey audubon", nm_blob)
         self.assertNotIn("rio grande bosque", nm_blob)
         self.assertNotIn("corrales bosque", nm_blob)
         self.assertNotIn("alameda bosque", nm_blob)
@@ -175,6 +176,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("discovery well cave preserve", east_blob)
         self.assertIn("buttercup creek cave preserve", east_blob)
         self.assertIn("lost oasis cave preserve", east_blob)
+        self.assertIn("whirlpool cave", east_blob)
+        self.assertIn("goat cave karst nature preserve", east_blob)
+        self.assertIn("nalle bunny run wildlife preserve", east_blob)
         self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
@@ -361,6 +365,51 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Godzilla Preserve"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Coyote Cave Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Whirlpool Cave"}
+            ),
+            "cave",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Goat Cave Karst Nature Preserve",
+                }
+            ),
+            "cave",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Village of Western Oaks Karst Preserve and Watershed Management Area",
+                }
+            ),
+            "cave",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Nalle Bunny Run Wildlife Preserve",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Randall Davey Audubon Center & Sanctuary",
+                }
+            ),
+            "wildlife",
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Open Space Visitor Center"})
@@ -616,6 +665,10 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', inspect)
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("cave")', inspect)
+        self.assertIn('range(of: "cave")', inspect)
+        self.assertIn('contains("bee cave")', inspect)
+        self.assertIn('contains("cave park")', inspect)
+        self.assertIn('contains("cave drive")', inspect)
         self.assertNotIn('contains("sink")', inspect)
         for phrase in ground.WILDLIFE_RANGE_PHRASES:
             self.assertIn(f'"{phrase}"', inspect)
@@ -1152,6 +1205,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cave preserve", inspect)
         self.assertIn("cave area of critical", inspect)
         self.assertIn("blowing sink", inspect)
+        self.assertIn("karst preserve", inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("wildlife refuge", inspect)
         self.assertIn("wildlife management area", inspect)
@@ -1163,6 +1217,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("nature preserve", inspect)
         self.assertIn("nature center", inspect)
         self.assertIn("natural area", inspect)
+        self.assertIn("wildlife preserve", inspect)
+        self.assertIn("audubon", inspect)
         land = inspect.split("private static func land(", 1)[1]
         self.assertLess(
             land.index("isWildlifeRange"),
@@ -1607,6 +1663,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Sandia Man Cave", glass)
         self.assertIn("35.254746", glass)
         self.assertIn("-106.405585", glass)
+        self.assertIn("Whirlpool Cave", glass)
+        self.assertIn("30.215509", glass)
+        self.assertIn("-97.845277", glass)
+        self.assertIn("Goat Cave Karst Nature Preserve", glass)
+        self.assertIn("30.199538", glass)
+        self.assertIn("-97.846758", glass)
+        self.assertIn("Nalle Bunny Run Wildlife Preserve", glass)
+        self.assertIn("30.349686", glass)
+        self.assertIn("-97.803982", glass)
+        self.assertIn("Randall Davey Audubon Center", glass)
+        self.assertIn("35.688876", glass)
+        self.assertIn("-105.884927", glass)
         self.assertIn("Named tree", glass)
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", glass)
         self.assertIn("35.846906", glass)
@@ -1766,22 +1834,32 @@ class GroundFieldSync(unittest.TestCase):
         decker_hit = False
         buttercup_hit = False
         oasis_hit = False
+        whirl_hit = False
+        goat_hit = False
+        nalle_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
+            name = props.get("name")
             for ring in rings_of(feat.get("geometry") or {}):
-                if kind == "wildlife" and pip(-97.591821, 30.315667, ring):
-                    wildlife_hit = props.get("name") == "Indiangrass Wildlife Sanctuary"
-                if kind == "cave" and pip(-97.855063, 30.490391, ring):
-                    cave_hit = props.get("name") == "Discovery Well Cave Preserve"
-                if kind == "cave" and pip(-97.850443, 30.193035, ring):
-                    blowing_hit = props.get("name") == "Blowing Sink"
-                if kind == "cave" and pip(-97.839459, 30.494626, ring):
-                    buttercup_hit = props.get("name") == "Buttercup Creek Cave Preserve"
-                if kind == "cave" and pip(-97.873678, 30.163187, ring):
-                    oasis_hit = props.get("name") == "Lost Oasis Cave Preserve"
-                if kind == "reserve" and pip(-97.603942, 30.294331, ring):
-                    decker_hit = props.get("name") == "Decker Tallgrass Prairie Preserve"
+                if kind == "wildlife" and name == "Indiangrass Wildlife Sanctuary" and pip(-97.591821, 30.315667, ring):
+                    wildlife_hit = True
+                if kind == "cave" and name == "Discovery Well Cave Preserve" and pip(-97.855063, 30.490391, ring):
+                    cave_hit = True
+                if kind == "cave" and name == "Blowing Sink" and pip(-97.850443, 30.193035, ring):
+                    blowing_hit = True
+                if kind == "cave" and name == "Buttercup Creek Cave Preserve" and pip(-97.839459, 30.494626, ring):
+                    buttercup_hit = True
+                if kind == "cave" and name == "Lost Oasis Cave Preserve" and pip(-97.873678, 30.163187, ring):
+                    oasis_hit = True
+                if kind == "cave" and name == "Whirlpool Cave" and pip(-97.845277, 30.215509, ring):
+                    whirl_hit = True
+                if kind == "cave" and name == "Goat Cave Karst Nature Preserve" and pip(-97.846758, 30.199538, ring):
+                    goat_hit = True
+                if kind == "wildlife" and name == "Nalle Bunny Run Wildlife Preserve" and pip(-97.803982, 30.349686, ring):
+                    nalle_hit = True
+                if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
+                    decker_hit = True
         self.assertTrue(
             wildlife_hit, "glass wildlife hold is not inside Indiangrass"
         )
@@ -1796,6 +1874,15 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             oasis_hit, "Lost Oasis Cave Preserve is not a cave overlay on the east pack"
+        )
+        self.assertTrue(
+            whirl_hit, "Whirlpool Cave is not a cave overlay on the east pack"
+        )
+        self.assertTrue(
+            goat_hit, "Goat Cave Karst Nature Preserve is not a cave overlay"
+        )
+        self.assertTrue(
+            nalle_hit, "Nalle Bunny Run Wildlife Preserve is not wildlife range"
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -1858,6 +1945,7 @@ class GroundFieldSync(unittest.TestCase):
         botanic_hit = False
         nm_wildlife_hit = False
         nm_cave_hit = False
+        audubon_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1866,6 +1954,10 @@ class GroundFieldSync(unittest.TestCase):
                     botanic_hit = props.get("name") == "Albuquerque BioPark Botanic Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
+                if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
+                    audubon_hit = (
+                        props.get("name") == "Randall Davey Audubon Center & Sanctuary"
+                    )
                 if kind == "cave" and pip(-107.344750, 34.750796, ring):
                     nm_cave_hit = (
                         props.get("name")
@@ -1876,6 +1968,9 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
+        )
+        self.assertTrue(
+            audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
         )
         self.assertTrue(
             nm_cave_hit, "glass NM cave hold is not inside Pronoun Cave"
@@ -2245,6 +2340,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Godzilla Preserve", qa)
         self.assertIn("Wilderness Gate", qa)
         self.assertIn("Prairie Hills", qa)
+        self.assertIn("Jemez National Recreation Area", qa)
+        self.assertIn("Franklin Mountains State Park", qa)
+        self.assertIn("Lost Dog Nature Preserve", qa)
+        self.assertIn("Anthony Gap Cave", qa)
+        self.assertIn("Treaty Oak", qa)
+        self.assertIn("Lost Oasis Cave Preserve", qa)
+        self.assertIn("Sandia Man Cave", qa)
+        self.assertIn("Whirlpool Cave", qa)
+        self.assertIn("Goat Cave Karst Nature Preserve", qa)
+        self.assertIn("Nalle Bunny Run Wildlife Preserve", qa)
+        self.assertIn("Randall Davey Audubon Center", qa)
+        self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)
         self.assertIn("Hold DO on wildlife range names give it the road", qa)

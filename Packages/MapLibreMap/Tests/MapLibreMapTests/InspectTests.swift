@@ -429,6 +429,32 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(sinkRoad.klass, "Road")
         XCTAssertFalse(sinkRoad.fieldRoute.contains(Inspect.caveCard))
+
+        let whirlpool = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Whirlpool Cave"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(whirlpool.klass, "Cave or hole")
+        XCTAssertEqual(whirlpool.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(whirlpool.doLine.lowercased().contains("edible"), whirlpool.doLine)
+
+        let goat = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Goat Cave Karst Nature Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(goat.klass, "Cave or hole")
+        XCTAssertNotEqual(goat.klass, "Wildlife range")
+        XCTAssertEqual(goat.fieldRoute.first, Inspect.caveCard)
+
+        let karst = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Village of Western Oaks Karst Preserve and Watershed Management Area",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(karst.klass, "Cave or hole")
+        XCTAssertEqual(karst.fieldRoute.first, Inspect.caveCard)
     }
 
     func testAWildlifeManagementAreaIsRangeNotAPin() {
@@ -726,6 +752,23 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(whitestone.klass, "Park")
         XCTAssertEqual(whitestone.fieldRoute.first, Inspect.treeUseEastCard)
+
+        let nalle = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Nalle Bunny Run Wildlife Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(nalle.klass, "Wildlife range")
+        XCTAssertEqual(nalle.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(nalle.doLine.lowercased().contains("edible"), nalle.doLine)
+
+        let audubon = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Randall Davey Audubon Center & Sanctuary"],
+            pack: "nm"
+        )
+        XCTAssertEqual(audubon.klass, "Wildlife range")
+        XCTAssertNotEqual(audubon.klass, "Open reserve")
+        XCTAssertEqual(audubon.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(audubon.doLine.lowercased().contains("elk is high country"), audubon.doLine)
     }
 
     func testAnOpenReserveIsSnakeCountryNotPicnicWoodland() {
