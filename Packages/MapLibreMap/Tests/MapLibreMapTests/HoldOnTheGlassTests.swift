@@ -673,7 +673,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("bear"), held.card?.doLine ?? "")
-        XCTAssertTrue(doLine.contains("elk"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("elk is high country"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("mule deer"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("rattler") || doLine.contains("diamondback"), held.card?.doLine ?? "")
         XCTAssertTrue(doLine.contains("give it the road"), held.card?.doLine ?? "")

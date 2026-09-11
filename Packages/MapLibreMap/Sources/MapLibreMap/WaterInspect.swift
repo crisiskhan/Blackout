@@ -997,7 +997,7 @@ extension Inspect {
             case .txEast:
                 return "Coyote, deer, and hog range. Give it the road. Copperhead and cottonmouth country. No ice, no cut, no suck. If bitten, the bite card. Cook through or leave it — the food card. Not a pin."
             case .nm:
-                return "Black bear, elk, and mule deer range. Give it the road. Prairie rattler or diamondback. No ice, no cut, no suck. If bitten, the bite card. Cook through or leave it — the food card. Not a pin."
+                return "Black bear and mule deer range. Elk is high country. Give it the road. Prairie rattler or diamondback. No ice, no cut, no suck. If bitten, the bite card. Cook through or leave it — the food card. Not a pin."
             case .unknown:
                 return "This is range, not a pin. Give it the road. No ice, no cut, no suck. Cook through or leave it. Field has the animal, bite, and food cards."
             }

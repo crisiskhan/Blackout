@@ -680,7 +680,7 @@ final class InspectTests: XCTestCase {
             InspectField.label(for: InspectField.presentRoute(center.fieldRoute, in: nmWildlifeBook)[0]),
             "FIELD · ANIMAL"
         )
-        XCTAssertTrue(center.doLine.lowercased().contains("bear") || center.doLine.lowercased().contains("elk"), center.doLine)
+        XCTAssertTrue(center.doLine.lowercased().contains("elk is high country"), center.doLine)
 
         let leaf = Inspect.read(
             tags: [
@@ -1207,6 +1207,7 @@ final class InspectTests: XCTestCase {
         )
         let nmRangeDo = nmRange.doLine.lowercased()
         XCTAssertTrue(nmRangeDo.contains("mule deer"), nmRange.doLine)
+        XCTAssertTrue(nmRangeDo.contains("elk is high country"), nmRange.doLine)
         XCTAssertTrue(nmRangeDo.contains("bear") || nmRangeDo.contains("elk"), nmRange.doLine)
         XCTAssertTrue(nmRangeDo.contains("bite card"), nmRange.doLine)
         XCTAssertTrue(nmRangeDo.contains("food card"), nmRange.doLine)
