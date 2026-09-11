@@ -398,7 +398,9 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(doLine.contains("bear") || doLine.contains("elk"), marquez.doLine)
         XCTAssertTrue(doLine.contains("diamondback") || doLine.contains("rattler"), marquez.doLine)
         XCTAssertTrue(doLine.contains("bite card"), marquez.doLine)
+        XCTAssertTrue(doLine.contains("food card"), marquez.doLine)
         XCTAssertTrue(doLine.contains("range") || doLine.contains("not a pin"), marquez.doLine)
+        XCTAssertFalse(doLine.contains("cottonwood"), marquez.doLine)
         XCTAssertFalse(doLine.contains("lives here"), marquez.doLine)
         XCTAssertFalse(doLine.contains("edible"), marquez.doLine)
         XCTAssertFalse(marquez.why.lowercased().contains("edible"), marquez.why)
@@ -417,7 +419,10 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: refuge.fieldRoute[0]), "FIELD · ANIMAL")
         XCTAssertTrue(refuge.doLine.lowercased().contains("hog"), refuge.doLine)
         XCTAssertTrue(refuge.doLine.lowercased().contains("cottonmouth"), refuge.doLine)
+        XCTAssertTrue(refuge.doLine.lowercased().contains("bite card"), refuge.doLine)
+        XCTAssertTrue(refuge.doLine.lowercased().contains("food card"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("javelina"), refuge.doLine)
+        XCTAssertFalse(refuge.doLine.lowercased().contains("cottonwood"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("lives here"), refuge.doLine)
 
         let westRange = Inspect.read(
@@ -434,8 +439,12 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(westDo.contains("javelina"), westRange.doLine)
         XCTAssertTrue(westDo.contains("deer"), westRange.doLine)
         XCTAssertTrue(westDo.contains("diamondback"), westRange.doLine)
+        XCTAssertTrue(westDo.contains("bite card"), westRange.doLine)
+        XCTAssertTrue(westDo.contains("food card"), westRange.doLine)
         XCTAssertFalse(westDo.contains("hog"), westRange.doLine)
         XCTAssertFalse(westDo.contains("cottonmouth"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("cottonwood"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("mesquite"), westRange.doLine)
         XCTAssertFalse(westDo.contains("lives here"), westRange.doLine)
         XCTAssertFalse(westDo.contains("edible"), westRange.doLine)
 
@@ -665,6 +674,7 @@ final class InspectTests: XCTestCase {
             "BITE · ANIMAL · PLANT · FOOD · HEAT"
         )
         XCTAssertTrue(alamo.doLine.lowercased().contains("diamondback"), alamo.doLine)
+        XCTAssertTrue(alamo.doLine.lowercased().contains("bite card"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("live oak"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("edible"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("lives here"), alamo.doLine)
@@ -691,6 +701,7 @@ final class InspectTests: XCTestCase {
             Inspect.snakeNMCard
         )
         XCTAssertTrue(jones.doLine.lowercased().contains("rattler") || jones.doLine.lowercased().contains("diamondback"), jones.doLine)
+        XCTAssertTrue(jones.doLine.lowercased().contains("bite card"), jones.doLine)
         XCTAssertFalse(jones.doLine.lowercased().contains("cottonwood"), jones.doLine)
 
         let prairie = Inspect.read(
@@ -809,6 +820,7 @@ final class InspectTests: XCTestCase {
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
         let txScrubDo = txScrub.doLine.lowercased()
         XCTAssertTrue(txScrubDo.contains("javelina") || txScrubDo.contains("diamondback"), txScrub.doLine)
+        XCTAssertTrue(txScrubDo.contains("bite card"), txScrub.doLine)
         XCTAssertFalse(txScrubDo.contains("edible"), txScrub.doLine)
         XCTAssertFalse(txScrubDo.contains("lives here"), txScrub.doLine)
         XCTAssertFalse(txScrubDo.contains("standing here"), txScrub.doLine)
@@ -822,6 +834,8 @@ final class InspectTests: XCTestCase {
         let txPeakDo = txPeak.doLine.lowercased()
         XCTAssertTrue(txPeakDo.contains("coyote") || txPeakDo.contains("deer"), txPeak.doLine)
         XCTAssertFalse(txPeakDo.contains("ice"), txPeak.doLine)
+        XCTAssertFalse(txPeakDo.contains("bite card"), txPeak.doLine)
+        XCTAssertFalse(txPeakDo.contains("food card"), txPeak.doLine)
         XCTAssertFalse(txPeakDo.contains("lives here"), txPeak.doLine)
 
         let txRock = Inspect.read(tags: ["natural": "bare_rock"], state: "TX")
@@ -873,7 +887,10 @@ final class InspectTests: XCTestCase {
         let nmRangeDo = nmRange.doLine.lowercased()
         XCTAssertTrue(nmRangeDo.contains("mule deer"), nmRange.doLine)
         XCTAssertTrue(nmRangeDo.contains("bear") || nmRangeDo.contains("elk"), nmRange.doLine)
+        XCTAssertTrue(nmRangeDo.contains("bite card"), nmRange.doLine)
+        XCTAssertTrue(nmRangeDo.contains("food card"), nmRange.doLine)
         XCTAssertTrue(nmRangeDo.contains("range") || nmRangeDo.contains("not a pin"), nmRange.doLine)
+        XCTAssertFalse(nmRangeDo.contains("cottonwood"), nmRange.doLine)
         XCTAssertFalse(nmRangeDo.contains("lives here"), nmRange.doLine)
         XCTAssertFalse(nmRangeDo.contains("edible"), nmRange.doLine)
 
@@ -932,6 +949,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(eastPeak.doLine.lowercased().contains("hog"), eastPeak.doLine)
         XCTAssertFalse(eastPeak.doLine.lowercased().contains("javelina"), eastPeak.doLine)
         XCTAssertFalse(eastPeak.doLine.lowercased().contains("ice"), eastPeak.doLine)
+        XCTAssertFalse(eastPeak.doLine.lowercased().contains("bite card"), eastPeak.doLine)
 
         let eastTree = Inspect.read(
             tags: ["natural": "tree", "name": "Treaty Oak"],
@@ -963,6 +981,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(glass.why.contains("glasshouses"), glass.why)
         XCTAssertTrue(glass.doLine.lowercased().contains("oleander"), glass.doLine)
         XCTAssertTrue(glass.doLine.lowercased().contains("not food"), glass.doLine)
+        XCTAssertTrue(glass.doLine.lowercased().contains("brush off"), glass.doLine)
         XCTAssertFalse(glass.doLine.lowercased().contains("datura"), glass.doLine)
         XCTAssertFalse(glass.doLine.lowercased().contains("live oak"), glass.doLine)
         XCTAssertFalse(glass.why.lowercased().contains("edible"), glass.why)
@@ -1453,6 +1472,7 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.gameNMCard))
         XCTAssertTrue(garden.doLine.lowercased().contains("datura"), garden.doLine)
         XCTAssertTrue(garden.doLine.lowercased().contains("not food"), garden.doLine)
+        XCTAssertTrue(garden.doLine.lowercased().contains("brush off"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("oleander"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("cholla"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("live oak"), garden.doLine)
@@ -1485,6 +1505,7 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertTrue(conservatory.doLine.lowercased().contains("prickly pear"), conservatory.doLine)
         XCTAssertTrue(conservatory.doLine.lowercased().contains("spines"), conservatory.doLine)
+        XCTAssertTrue(conservatory.doLine.lowercased().contains("glochids"), conservatory.doLine)
         XCTAssertFalse(conservatory.doLine.lowercased().contains("oleander"), conservatory.doLine)
 
         let apartments = Inspect.read(
@@ -1513,6 +1534,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: cactusGarden.fieldRoute[0]), "FIELD · PLANT")
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("spines"), cactusGarden.doLine)
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("prickly pear"), cactusGarden.doLine)
+        XCTAssertTrue(cactusGarden.doLine.lowercased().contains("glochids"), cactusGarden.doLine)
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("not a meal"), cactusGarden.doLine)
         XCTAssertFalse(cactusGarden.doLine.lowercased().contains("edible"), cactusGarden.doLine)
         XCTAssertFalse(cactusGarden.why.lowercased().contains("edible"), cactusGarden.why)
@@ -1532,6 +1554,7 @@ final class InspectTests: XCTestCase {
             Inspect.cactusNMCard
         )
         XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("cholla"), nmCactusGarden.doLine)
+        XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("glochids"), nmCactusGarden.doLine)
         XCTAssertFalse(nmCactusGarden.doLine.lowercased().contains("prickly pear"), nmCactusGarden.doLine)
 
         let cactusPark = Inspect.read(

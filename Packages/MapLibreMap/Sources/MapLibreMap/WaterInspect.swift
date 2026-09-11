@@ -944,26 +944,26 @@ extension Inspect {
     private static func animalRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Diamondback and javelina country. Yucca and prickly pear. Spines, not a meal."
+            return "Diamondback and javelina country. Yucca and prickly pear. If bitten, the bite card. Spines, not a meal."
         case .txEast:
-            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. Spines, not a meal."
+            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. If bitten, the bite card. Spines, not a meal."
         case .nm:
-            return "Prairie rattler or diamondback country. Cholla and yucca. Spines, not a meal."
+            return "Prairie rattler or diamondback country. Cholla and yucca. If bitten, the bite card. Spines, not a meal."
         case .unknown:
-            return "Open country. Vipers use this cover. Field has the bite card."
+            return "Open country. Vipers use this cover. If bitten, the bite card."
         }
     }
 
-    /// Same poison the plant-danger SPEAK names. Not woodland tree-use,
-    /// not a cactus garden, not a meal.
+    /// Same poison and wash the plant-danger SPEAK names. Not woodland
+    /// tree-use, not a cactus garden, not a meal.
     private static func plantDangerLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest, .txEast:
-            return "Oleander or Texas mountain laurel. Pretty is not food."
+            return "Oleander or Texas mountain laurel. Pretty is not food. Brush off, then water."
         case .nm:
-            return "Datura. Pretty is not food."
+            return "Datura. Pretty is not food. Brush off, then water."
         case .unknown:
-            return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
+            return "Worked ground a ditch reaches. Pretty is not food. Brush off, then water. Field has the plant cards."
         }
     }
 
@@ -978,22 +978,22 @@ extension Inspect {
         case "Cactus garden":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest, .txEast:
-                return "Prickly pear and yucca. Spines, not a meal. Pretty is not food."
+                return "Prickly pear and yucca. Comb glochids out. Spines, not a meal. Pretty is not food."
             case .nm:
-                return "Cholla, yucca, sotol. Spines, not a meal. Pretty is not food."
+                return "Cholla, yucca, sotol. Comb glochids out. Spines, not a meal. Pretty is not food."
             case .unknown:
-                return "Cactus and yucca. Spines, not a meal. Pretty is not food."
+                return "Cactus and yucca. Comb glochids out. Spines, not a meal. Pretty is not food."
             }
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Javelina, coyote, and deer range. Diamondback country. If bitten, the bite card. This is range, not a pin."
+                return "Javelina, coyote, and deer range. Diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
             case .txEast:
-                return "Coyote, deer, and hog range. Copperhead and cottonmouth country. If bitten, the bite card. Not a pin."
+                return "Coyote, deer, and hog range. Copperhead and cottonmouth country. If bitten, the bite card. If you already have meat, the food card. Not a pin."
             case .nm:
-                return "Black bear, elk, and mule deer range. Prairie rattler or diamondback country. If bitten, the bite card. This is range, not a pin."
+                return "Black bear, elk, and mule deer range. Prairie rattler or diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
             case .unknown:
-                return "This is range, not a pin. Field has the animal and bite cards."
+                return "This is range, not a pin. Field has the animal, bite, and food cards."
             }
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
