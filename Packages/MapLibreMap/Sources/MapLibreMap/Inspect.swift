@@ -318,6 +318,8 @@ public enum Inspect {
         if n.contains("wildlife refuge") { return true }
         if n.contains("wildlife management area") { return true }
         if n.contains("national wildlife") { return true }
+        if n.contains("wildlife sanctuary") { return true }
+        if n.contains("wildlife conservation area") { return true }
         return false
     }
 
@@ -648,6 +650,34 @@ public enum Inspect {
                     unnamedKlass: "Tree",
                     unnamedWhy: "a tree is mapped here with no name"
                 )
+            default:
+                break
+            }
+        }
+        if isCavePreserve(t) {
+            return Reading(
+                klass: "Cave or hole",
+                kind: .land,
+                sure: 80,
+                why: "mapped as a cave preserve; air, dark and cold are the facts, not a tourist guide",
+                advice: .field,
+                field: coldCard,
+                extra: [caveCard],
+                unnamedPenalty: 6,
+                unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
+            )
+        }
+        if isWildlifeRange(t) {
+            return wildlifeRange(
+                klass: "Wildlife range",
+                sure: 84,
+                why: "mapped as wildlife range; this is the Field book, not a pin",
+                unnamedPenalty: 4,
+                pack: pack
+            )
+        }
+        if let natural = t["natural"] {
+            switch natural {
             case "wood":
                 return plantCover(
                     klass: "Woodland",
@@ -706,28 +736,6 @@ public enum Inspect {
             default:
                 break
             }
-        }
-        if isCavePreserve(t) {
-            return Reading(
-                klass: "Cave or hole",
-                kind: .land,
-                sure: 80,
-                why: "mapped as a cave preserve; air, dark and cold are the facts, not a tourist guide",
-                advice: .field,
-                field: coldCard,
-                extra: [caveCard],
-                unnamedPenalty: 6,
-                unnamedWhy: "a hole is mapped here with no name; whether it goes anywhere is not in the record"
-            )
-        }
-        if isWildlifeRange(t) {
-            return wildlifeRange(
-                klass: "Wildlife range",
-                sure: 84,
-                why: "mapped as wildlife range; this is the Field book, not a pin",
-                unnamedPenalty: 4,
-                pack: pack
-            )
         }
         if t["boundary"] == "protected_area" || t["boundary"] == "national_park" || t["leisure"] == "nature_reserve" {
             return plantCover(

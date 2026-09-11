@@ -620,6 +620,7 @@ public enum InspectField {
         }
         if id.contains("coyote") || id.contains("javelina") || id.contains("whitetail")
             || id.contains("elk") || id.contains("deer") || id.contains("bear")
+            || id.contains("hog")
         {
             return .mammal
         }
@@ -628,7 +629,7 @@ public enum InspectField {
         }
         if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
             || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
-            || id.contains("cottonwood")
+            || id.contains("cottonwood") || id.contains("pine") || id.contains("loblolly")
         {
             return .tree
         }
@@ -661,6 +662,9 @@ public enum InspectField {
             if id.contains("javelina") {
                 return [Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.gameCard]
             }
+            if id.contains("hog") {
+                return [Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.gameCard]
+            }
             if nm {
                 return [Inspect.mammalNMCard, Inspect.gameNMCard, Inspect.gameCard]
             }
@@ -671,6 +675,9 @@ public enum InspectField {
         case .tree:
             if id.contains("mesquite") {
                 return [Inspect.treeUseTXCard, Inspect.plantUseCard]
+            }
+            if id.contains("pine") || id.contains("loblolly") {
+                return [Inspect.treeUseEastCard, Inspect.plantUseCard]
             }
             if nm {
                 return [Inspect.treeUseNMCard, Inspect.plantUseCard]
@@ -966,8 +973,10 @@ extension Inspect {
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
                 return "High ground. Wind, cold, black bear range. Field has ice and cold."
-            case .txWest, .txEast:
+            case .txWest:
                 return "High ground. Wind, coyote and deer range. Field has animal and cold."
+            case .txEast:
+                return "High ground. Wind, coyote, deer, and hog range. Field has animal and cold."
             case .unknown:
                 return "High ground. Wind and cold. Field has animal and cold."
             }
@@ -975,8 +984,10 @@ extension Inspect {
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
                 return "Bare rock. Ice films over. Black bear range. Field has ice and cold."
-            case .txWest, .txEast:
+            case .txWest:
                 return "Bare rock. Coyote and deer range. Field has animal and cold."
+            case .txEast:
+                return "Bare rock. Coyote, deer, and hog range. Field has animal and cold."
             case .unknown:
                 return "Bare rock. No shade. Field has the cold card."
             }

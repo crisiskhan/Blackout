@@ -283,7 +283,8 @@ There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Glasshouses, cave preserves, and wildlife
 management areas get a silver outline at walking zoom; Bee Cave and Wildlife
-Drive stay parks. Holding woodland opens that pack's tree-use card first (the trees this
+Drive stay parks. A wildlife sanctuary tagged as woodland still opens the animal
+book, not picnic tree-use. Holding woodland opens that pack's tree-use card first (the trees this
 cover is), then plant-danger, cactus, animals, shelter, bite, meat you
 already have. Holding a glasshouse opens plant-danger, not woodland. Holding a
 wildlife management area opens that pack's animal cards; this is range, not a

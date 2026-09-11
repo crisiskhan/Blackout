@@ -348,6 +348,45 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(refuge.doLine.lowercased().contains("javelina"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("lives here"), refuge.doLine)
 
+        let sanctuary = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "natural": "wood",
+                "name": "Colorado River Park Wildlife Sanctuary",
+            ],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sanctuary.klass, "Wildlife range")
+        XCTAssertEqual(sanctuary.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertNotEqual(sanctuary.klass, "Woodland")
+        XCTAssertEqual(InspectField.label(for: sanctuary.fieldRoute[0]), "FIELD · ANIMAL")
+        XCTAssertFalse(sanctuary.doLine.lowercased().contains("lives here"), sanctuary.doLine)
+
+        let grass = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "natural": "scrub",
+                "name": "Indiangrass Wildlife Sanctuary",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(grass.klass, "Wildlife range")
+        XCTAssertEqual(grass.fieldRoute.first, Inspect.mammalEastCard)
+
+        let whitfield = Inspect.read(
+            tags: [
+                "boundary": "protected_area",
+                "natural": "wetland",
+                "name": "Whitfield Wildlife Conservation Area",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(whitfield.klass, "Wildlife range")
+        XCTAssertNotEqual(whitfield.klass, "Bosque or wetland")
+        XCTAssertTrue(whitfield.fieldRoute.contains(Inspect.mammalNMCard))
+
         let drive = Inspect.read(
             tags: ["leisure": "park", "name": "Wildlife Drive Park"],
             pack: "nm"
@@ -466,6 +505,9 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertTrue(eastPeak.fieldRoute.contains(Inspect.mammalEastCard))
         XCTAssertFalse(eastPeak.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(eastPeak.doLine.lowercased().contains("hog"), eastPeak.doLine)
+        XCTAssertFalse(eastPeak.doLine.lowercased().contains("javelina"), eastPeak.doLine)
+        XCTAssertFalse(eastPeak.doLine.lowercased().contains("ice"), eastPeak.doLine)
 
         let eastTree = Inspect.read(
             tags: ["natural": "tree", "name": "Treaty Oak"],
@@ -604,6 +646,22 @@ final class InspectTests: XCTestCase {
             pack: "tx-east"
         )
         XCTAssertEqual(diamondbackEast.first, Inspect.snakeTXCard)
+
+        let hogWest = InspectField.fieldRoute(
+            forVision: "tx-feral-hog",
+            state: "TX",
+            pack: "tx-west"
+        )
+        XCTAssertEqual(hogWest.first, Inspect.mammalEastCard)
+        XCTAssertFalse(hogWest.contains(Inspect.mammalTXCard))
+
+        let pineWest = InspectField.fieldRoute(
+            forVision: "tx-loblolly-pine",
+            state: "TX",
+            pack: "tx-west"
+        )
+        XCTAssertEqual(pineWest.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(pineWest.contains(Inspect.treeUseTXCard))
     }
 
     func testTheLoadedBookDropsTheOtherStatesCardAndKeepsTheCoreTrail() {

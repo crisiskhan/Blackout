@@ -51,6 +51,8 @@ WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
     "national wildlife",
+    "wildlife sanctuary",
+    "wildlife conservation area",
 )
 
 

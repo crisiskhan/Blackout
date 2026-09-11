@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0), "tx-east": (14, 2, 0), "nm": (10, 1, 1)}
+        expected = {"tx-west": (2, 0, 0), "tx-east": (14, 2, 2), "nm": (10, 1, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -106,6 +106,10 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual((glass, caves, wildlife), expected[pid], pid)
         nm_blob = (PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("marquez wildlife management area", nm_blob)
+        self.assertIn("whitfield wildlife conservation area", nm_blob)
+        east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
+        self.assertIn("colorado river park wildlife sanctuary", east_blob)
+        self.assertIn("indiangrass wildlife sanctuary", east_blob)
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
         inspect = INSPECT.read_text()
@@ -546,6 +550,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("wildlife refuge", inspect)
         self.assertIn("wildlife management area", inspect)
         self.assertIn("national wildlife", inspect)
+        self.assertIn("wildlife sanctuary", inspect)
+        self.assertIn("wildlife conservation area", inspect)
+        land = inspect.split("private static func land(", 1)[1]
+        self.assertLess(
+            land.index("isWildlifeRange"),
+            land.index('case "wood":'),
+            "a wildlife sanctuary tagged as wood must still be range, not picnic woodland",
+        )
         do = SWIFT.read_text()
         self.assertIn("Javelina and coyote range", do)
         self.assertIn("coyote and deer range", do)
@@ -642,6 +654,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Marquez Wildlife Management Area", qa)
         self.assertIn("Wildlife Drive", qa)
         self.assertIn("loblolly", qa)
+        self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
