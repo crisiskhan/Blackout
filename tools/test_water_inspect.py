@@ -1159,6 +1159,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isBotanicGarden", pick)
         self.assertIn("isOpenReserve", pick)
         self.assertIn("greenhouse_horticulture", pick)
+        self.assertIn("pointWater", pick)
+        self.assertIn("it beats a named street", inspect.split("public static func pick", 1)[0])
+        self.assertIn("A drain in the thumb box is not", inspect.split("public static func pick", 1)[0])
 
     def test_glasshouses_are_worked_ground_not_a_meal(self):
         inspect = INSPECT.read_text()
@@ -1220,6 +1223,19 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.490391", glass)
         self.assertIn("-97.855063", glass)
         self.assertIn('packId: "tx-east"', glass)
+        self.assertIn("Albuquerque BioPark Botanic Garden", glass)
+        self.assertIn("Marquez Wildlife Management Area", glass)
+        self.assertIn("Pronoun Cave Area of Critical Environmental Concern", glass)
+        self.assertIn("35.093625", glass)
+        self.assertIn("-106.680958", glass)
+        self.assertIn("35.327562", glass)
+        self.assertIn("-107.319389", glass)
+        self.assertIn("34.750796", glass)
+        self.assertIn("-107.344750", glass)
+        self.assertIn('packId: "nm"', glass)
+        self.assertIn("Botanic garden", glass)
+        self.assertIn("datura", glass)
+        self.assertIn("mule deer", glass)
         self.assertIn("FIELD · ANIMAL", glass)
         self.assertIn("ANIMAL · BITE · FOOD · PLANT", glass)
         self.assertIn('contains("edible")', glass)
@@ -1298,6 +1314,33 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             cave_hit, "glass cave hold is not inside Discovery Well"
+        )
+
+        nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
+        botanic_hit = False
+        nm_wildlife_hit = False
+        nm_cave_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "botanic" and pip(-106.680958, 35.093625, ring):
+                    botanic_hit = props.get("name") == "Albuquerque BioPark Botanic Garden"
+                if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
+                    nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
+                if kind == "cave" and pip(-107.344750, 34.750796, ring):
+                    nm_cave_hit = (
+                        props.get("name")
+                        == "Pronoun Cave Area of Critical Environmental Concern"
+                    )
+        self.assertTrue(
+            botanic_hit, "glass botanic hold is not inside BioPark"
+        )
+        self.assertTrue(
+            nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
+        )
+        self.assertTrue(
+            nm_cave_hit, "glass NM cave hold is not inside Pronoun Cave"
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):

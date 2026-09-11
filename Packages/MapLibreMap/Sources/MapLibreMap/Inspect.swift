@@ -117,19 +117,21 @@ public enum Inspect {
     /// Everything the map drew under the thumb, and which of it the card is
     /// about.
     ///
-    /// Water first: finding water is what holding a place is for, so holding
-    /// where a wash crosses a road is a question about the wash.
+    /// A spring, well, tank or tap is what holding a place is for, so those
+    /// point records beat everything else. A wash that crosses a road is still
+    /// the wash. A drain in the thumb box is not: a silver hole, peak or tree
+    /// is the thing aimed at, and the Field book of that mark is the question.
     ///
     /// After that, a record the survey named beats one it did not, because a
-    /// name means somebody stood at that exact thing. Between two named
-    /// records take the smaller: a street is a line you aimed at, landcover is
-    /// a sheet you cannot miss. `landuse=residential` is drawn under every
-    /// street in Las Cruces, so without that a hold downtown answers with the
-    /// subdivision instead of the road under the thumb. A cave preserve, a
+    /// name means somebody stood at that exact thing. A cave preserve, a
     /// wildlife sanctuary, a botanic garden, an open reserve, or a glasshouse
     /// is a named (or tagged) sheet that is the question — it beats woodland
-    /// and farm fill, and still loses to a named street. Between two unnamed
-    /// records take the
+    /// and farm fill, and it beats a named street. The silver outline is the
+    /// hold; the trail that runs through the preserve is not. A street still
+    /// beats generic park and town fill: `landuse=residential` is drawn under
+    /// every street in Las Cruces, so without that a hold downtown answers
+    /// with the subdivision instead of the road under the thumb. Between two
+    /// unnamed records take the
     /// ground, because out there the biome is the answer and an unnamed ranch
     /// track is not.
     ///
@@ -144,27 +146,33 @@ public enum Inspect {
                 || isBotanicGarden(tags)
                 || isOpenReserve(tags)
                 || tags["landuse"] == "greenhouse_horticulture"
+            let pointWater = packPointClasses.contains(tags["class"] ?? "")
+                || ["storage_tank", "water_tank", "water_well", "cistern", "reservoir_covered"]
+                    .contains(tags["man_made"] ?? "")
+                || ["spring", "hot_spring", "geyser"].contains(tags["natural"] ?? "")
             switch read(tags: tags).kind {
-            case .water:
+            case .water where pointWater:
                 return 0
             case .land where notablePoint:
                 return 1
-            case .street where named:
+            case .water:
                 return 2
             case .land where notableGround:
                 return 3
-            case .land where named:
+            case .street where named:
                 return 4
-            case .place where named:
+            case .land where named:
                 return 5
-            case .land:
+            case .place where named:
                 return 6
-            case .street:
+            case .land:
                 return 7
-            case .place:
+            case .street:
                 return 8
-            case .nothing:
+            case .place:
                 return 9
+            case .nothing:
+                return 10
             }
         }
         return found
