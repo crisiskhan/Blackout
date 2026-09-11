@@ -425,6 +425,10 @@ public enum Inspect {
     /// and not `arboretum`. A cactus garden opens the cactus card; Cactus
     /// Point Park is not. A beer garden is a patio. Phrase `wildflower
     /// preserve`, not the word `wildflower` — Wildflower Park stays a park.
+    /// Phrase `lush n lean`, not the word `lush`. Phrase `orchard
+    /// garden`, not the word `orchard` — Orchard Gardens Road stays a
+    /// road. Fiesta Gardens is an event park and stays a park. Phrase
+    /// `harvey cornell`, not `rose park` — Wildrose Park stays a park.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
         let amenity = (t["amenity"] ?? "").lowercased()
         if amenity == "community_garden" || amenity == "community garden" { return true }
@@ -442,6 +446,9 @@ public enum Inspect {
         if n.contains("rose garden") { return true }
         if n.contains("community garden") { return true }
         if n.contains("wildflower preserve") { return true }
+        if n.contains("lush n lean") { return true }
+        if n.contains("orchard garden") { return true }
+        if n.contains("harvey cornell") { return true }
         return false
     }
 

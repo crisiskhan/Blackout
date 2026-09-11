@@ -149,6 +149,11 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # and stays out. The Arboretum mall stays out. Cactus Point Park stays a park.
 # A beer garden is a bar patio and stays a park. Phrase `wildflower
 # preserve`, not the word `wildflower`. Wildflower Park stays a park.
+# Phrase `lush n lean`, not the word `lush`. Phrase `orchard garden`,
+# not the word `orchard`. Orchard Gardens Road stays a road. Fiesta
+# Gardens is an event park and stays a park. Phrase `harvey cornell`,
+# not `rose park`. Wildrose Park stays a park. Rose Park Avenue stays
+# a road.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
@@ -158,6 +163,9 @@ BOTANIC_GARDEN_PHRASES = (
     "rose garden",
     "community garden",
     "wildflower preserve",
+    "lush n lean",
+    "orchard garden",
+    "harvey cornell",
 )
 
 

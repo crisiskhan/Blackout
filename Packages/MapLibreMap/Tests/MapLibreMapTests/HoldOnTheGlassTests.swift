@@ -76,6 +76,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Rose Garden. TX botanic oleander, not cactus, not datura.
     private static let roseGarden = CLLocationCoordinate2D(latitude: 32.911739, longitude: -105.959273)
 
+    /// Interior of Lush n Lean Garden. Phrase `lush n lean`, botanic
+    /// not picnic woodland. 259 m from water.
+    private static let lushNLean = CLLocationCoordinate2D(latitude: 32.316751, longitude: -106.777347)
+
     /// Unnamed `landuse=greenhouse_horticulture` sheet. SOLO_QA point,
     /// verified inside the overlay polygon.
     private static let glasshouse = CLLocationCoordinate2D(latitude: 32.502967, longitude: -106.933833)
@@ -182,6 +186,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// botanic not Open reserve, not a wildflower park. 194 m from water.
     private static let wildflowerPreserve = CLLocationCoordinate2D(latitude: 30.242251, longitude: -97.828949)
 
+    /// Interior of Orchard Garden. Phrase `orchard garden`, botanic
+    /// not a meal, not Orchard Gardens Road. Far from water.
+    private static let orchardGarden = CLLocationCoordinate2D(latitude: 30.290271, longitude: -97.696468)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -204,6 +212,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// The listed centroid sits next to a pond; water outranks the sheet.
     /// This point is on the botanic polygon, away from water and named ways.
     private static let botanicGarden = CLLocationCoordinate2D(latitude: 35.093625, longitude: -106.680958)
+
+    /// Interior of Harvey Cornell Rose Park. Phrase `harvey cornell`,
+    /// botanic not picnic woodland, not Wildrose Park. Far from water.
+    private static let cornellRose = CLLocationCoordinate2D(latitude: 35.670293, longitude: -105.946141)
 
     /// Interior of Marquez Wildlife Management Area in NM `layers/ground.geojson`.
     /// SOLO_QA 35.327562, −107.319389 is on the sheet and far from water or a way.
@@ -423,6 +435,20 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · PLANT"
         )
+
+        let lush = try hold(at: Self.lushNLean, zoom: 16)
+        XCTAssertEqual(lush.card?.klass, "Botanic garden", "\(lush)")
+        XCTAssertEqual(lush.card?.title, "Lush n Lean Garden", "\(lush)")
+        XCTAssertEqual(lush.card?.fieldRoute.first, Inspect.plantTXCard, "\(lush)")
+        XCTAssertFalse(
+            lush.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "a lush n lean garden opened woodland tree-use: \(lush)"
+        )
+        XCTAssertFalse(
+            lush.card?.fieldRoute.contains(Inspect.cactusTXCard) ?? true,
+            "a lush n lean garden opened cactus: \(lush)"
+        )
+        XCTAssertFalse((lush.card?.doLine.lowercased() ?? "").contains("edible"), lush.card?.doLine ?? "")
     }
 
     func testHoldingANamedBosqueOpensTreeUseNotAPin() throws {
@@ -885,6 +911,33 @@ final class HoldOnTheGlassTests: XCTestCase {
             "a wildflower preserve opened woodland tree-use: \(wildflower)"
         )
         XCTAssertFalse((wildflower.card?.doLine.lowercased() ?? "").contains("edible"), wildflower.card?.doLine ?? "")
+
+        let orchard = try hold(at: Self.orchardGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(orchard.card?.klass, "Botanic garden", "\(orchard)")
+        XCTAssertEqual(orchard.card?.title, "Orchard Garden", "\(orchard)")
+        XCTAssertNotEqual(orchard.card?.klass, "Park", "\(orchard)")
+        XCTAssertEqual(orchard.card?.fieldRoute.first, Inspect.plantTXCard, "\(orchard)")
+        XCTAssertFalse(
+            orchard.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "an orchard garden opened woodland tree-use: \(orchard)"
+        )
+        XCTAssertFalse((orchard.card?.doLine.lowercased() ?? "").contains("edible"), orchard.card?.doLine ?? "")
+
+        let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
+        XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
+        XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
+        XCTAssertEqual(cornell.card?.fieldRoute.first, Inspect.plantTXCard, "\(cornell)")
+        XCTAssertTrue(
+            cornell.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "a harvey cornell rose park dropped the NM plant-danger card: \(cornell)"
+        )
+        XCTAssertFalse(
+            cornell.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "a harvey cornell rose park opened woodland tree-use: \(cornell)"
+        )
+        let cornellDo = cornell.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(cornellDo.contains("datura"), cornell.card?.doLine ?? "")
+        XCTAssertFalse(cornellDo.contains("edible"), cornell.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeManagementAreaOpensAnimalsNotPicnicWoodland() throws {
@@ -1365,6 +1418,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("irrigated field", Self.irrigatedField, 16.0),
             ("west woodland", Self.westWoodland, 16.0),
             ("rose garden", Self.roseGarden, 16.0),
+            ("lush n lean garden", Self.lushNLean, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),

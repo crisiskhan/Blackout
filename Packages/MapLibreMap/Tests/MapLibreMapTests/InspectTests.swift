@@ -2447,6 +2447,64 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(wildflowerPark.klass, "Park")
         XCTAssertNotEqual(wildflowerPark.klass, "Botanic garden")
 
+        let lush = Inspect.read(
+            tags: ["leisure": "park", "name": "Lush n Lean Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(lush.klass, "Botanic garden")
+        XCTAssertEqual(lush.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(lush.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(lush.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(lush.doLine.lowercased().contains("edible"), lush.doLine)
+
+        let orchard = Inspect.read(
+            tags: ["leisure": "park", "name": "Orchard Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(orchard.klass, "Botanic garden")
+        XCTAssertNotEqual(orchard.klass, "Park")
+        XCTAssertEqual(orchard.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(orchard.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(orchard.doLine.lowercased().contains("edible"), orchard.doLine)
+
+        let orchardRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Orchard Gardens Road Southwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(orchardRoad.klass, "Road")
+        XCTAssertNotEqual(orchardRoad.klass, "Botanic garden")
+
+        let fiesta = Inspect.read(
+            tags: ["leisure": "park", "name": "Fiesta Gardens"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(fiesta.klass, "Park")
+        XCTAssertNotEqual(fiesta.klass, "Botanic garden")
+
+        let cornell = Inspect.read(
+            tags: ["leisure": "park", "name": "Harvey Cornell Rose Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(cornell.klass, "Botanic garden")
+        XCTAssertEqual(cornell.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(cornell.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(cornell.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(cornell.doLine.lowercased().contains("edible"), cornell.doLine)
+
+        let roseParkRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Rose Park Avenue Northwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(roseParkRoad.klass, "Road")
+        XCTAssertNotEqual(roseParkRoad.klass, "Botanic garden")
+
+        let wildrose = Inspect.read(
+            tags: ["leisure": "park", "name": "Wildrose Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(wildrose.klass, "Park")
+        XCTAssertNotEqual(wildrose.klass, "Botanic garden")
+
         let beer = Inspect.read(
             tags: ["leisure": "park", "name": "Moontower Saloon Beer Garden"],
             pack: "tx-east"
