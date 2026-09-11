@@ -931,7 +931,7 @@ extension Inspect {
         case .txEast:
             return "Copperhead and cottonmouth country. Yucca and prickly pear. Spines, not a meal."
         case .nm:
-            return "Prairie rattler country. Cholla and yucca. Spines, not a meal."
+            return "Prairie rattler or diamondback country. Cholla and yucca. Spines, not a meal."
         case .unknown:
             return "Open country. Vipers use this cover. Field has the bite card."
         }
@@ -950,7 +950,7 @@ extension Inspect {
             case .txEast:
                 return "Coyote and deer range. Hog country. Not a pin."
             case .nm:
-                return "Black bear and elk range. This is range, not a pin."
+                return "Black bear, elk, and mule deer range. This is range, not a pin."
             case .unknown:
                 return "This is range, not a pin. Field has the animal cards."
             }

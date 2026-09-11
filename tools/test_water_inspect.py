@@ -981,6 +981,47 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Rio Grande cottonwood", qa)
         self.assertIn("West Texas trees", qa)
 
+    def test_nm_hold_names_the_field_rattlesnakes_and_mammals(self):
+        """NM Field and Vision name prairie rattler, diamondback, and mule deer.
+
+        Hold scrub opens the bite card. Wildlife range opens the mammal card.
+        Range speech, not a GPS pin, not an edible unlock.
+        """
+        do = SWIFT.read_text()
+        animal = do.split("private static func animalRangeLine", 1)[1].split(
+            "private static func landDoLine", 1
+        )[0]
+        nm_scrub = animal.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
+        self.assertIn("prairie rattler", nm_scrub)
+        self.assertIn("diamondback", nm_scrub)
+        self.assertIn("cholla", nm_scrub)
+        self.assertNotIn("lives here", nm_scrub)
+        wildlife = do.split('case "Wildlife range":', 1)[1].split(
+            'case "Bosque or wetland":', 1
+        )[0]
+        nm_range = wildlife.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
+        self.assertIn("mule deer", nm_range)
+        self.assertIn("black bear", nm_range)
+        self.assertIn("elk", nm_range)
+        self.assertNotIn("lives here", nm_range)
+
+        book = json.loads((ROOT / "Resources/Field/field.nm.json").read_text())
+        snake = json.dumps(
+            next(c for c in book["cards"] if c["id"] == "nm-snake")
+        ).lower()
+        self.assertIn("diamondback", snake)
+        self.assertIn("prairie", snake)
+        mammal = json.dumps(
+            next(c for c in book["cards"] if c["id"] == "nm-mammal")
+        ).lower()
+        self.assertIn("mule deer", mammal)
+        self.assertIn("black bear", mammal)
+        self.assertNotIn("edible", mammal)
+
+        qa = (ROOT / "docs/SOLO_QA.md").read_text()
+        self.assertIn("Prairie rattler", qa)
+        self.assertIn("diamondback", qa)
+
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
 

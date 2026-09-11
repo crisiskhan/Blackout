@@ -505,6 +505,30 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(eastWoodDo.contains("edible"), eastWood.doLine)
         XCTAssertFalse(eastWoodDo.contains("lives here"), eastWood.doLine)
 
+        let nmScrub = Inspect.read(tags: ["natural": "scrub"], state: "NM", pack: "nm")
+        let nmScrubDo = nmScrub.doLine.lowercased()
+        XCTAssertTrue(nmScrubDo.contains("prairie") || nmScrubDo.contains("rattler"), nmScrub.doLine)
+        XCTAssertTrue(nmScrubDo.contains("diamondback"), nmScrub.doLine)
+        XCTAssertFalse(nmScrubDo.contains("cottonmouth"), nmScrub.doLine)
+        XCTAssertFalse(nmScrubDo.contains("lives here"), nmScrub.doLine)
+        XCTAssertFalse(nmScrubDo.contains("edible"), nmScrub.doLine)
+
+        let nmRange = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "State Game Commission Land",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        let nmRangeDo = nmRange.doLine.lowercased()
+        XCTAssertTrue(nmRangeDo.contains("mule deer"), nmRange.doLine)
+        XCTAssertTrue(nmRangeDo.contains("bear") || nmRangeDo.contains("elk"), nmRange.doLine)
+        XCTAssertTrue(nmRangeDo.contains("range") || nmRangeDo.contains("not a pin"), nmRange.doLine)
+        XCTAssertFalse(nmRangeDo.contains("lives here"), nmRange.doLine)
+        XCTAssertFalse(nmRangeDo.contains("edible"), nmRange.doLine)
+
         let eastScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX", pack: "tx-east")
         let eastScrubDo = eastScrub.doLine.lowercased()
         XCTAssertTrue(eastScrubDo.contains("cottonmouth") || eastScrubDo.contains("copperhead"), eastScrub.doLine)
