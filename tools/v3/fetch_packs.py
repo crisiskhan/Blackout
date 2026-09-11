@@ -351,7 +351,8 @@ NOTABLE_WILDLIFE_NAME = (
     "wildlife sanctuary|wildlife conservation area|game commission|"
     "wilderness preserve|nature preserve|nature center|natural area|"
     "nature area|wildlife preserve|habitat preserve|national preserve|"
-    "wilderness park|audubon|flora y fauna"
+    "wilderness park|audubon|flora y fauna|"
+    "canyonlands preserve|wetland preserve"
 )
 
 

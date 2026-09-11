@@ -73,6 +73,9 @@ CAVE_PRESERVE_KEYS = {
 # stays Open reserve. Phrase `flora y fauna`, not a street. Phrase
 # `national preserve`, not the word `preserve`. Phrase `wilderness
 # park`, not the word `wilderness`. Wilderness Gate stays apartments.
+# Phrase `canyonlands preserve`, not the word `canyonlands`.
+# Canyonlands Trail Park stays a park. Phrase `wetland preserve`,
+# not the word `wetland`. Rio Bosque Wetlands Park stays bosque.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -91,6 +94,8 @@ WILDLIFE_RANGE_PHRASES = (
     "flora y fauna",
     "national preserve",
     "wilderness park",
+    "canyonlands preserve",
+    "wetland preserve",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

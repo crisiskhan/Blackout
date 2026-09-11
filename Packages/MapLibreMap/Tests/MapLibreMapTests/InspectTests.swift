@@ -823,6 +823,54 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(wildernessPark.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(wildernessPark.doLine.lowercased().contains("edible"), wildernessPark.doLine)
 
+        let canyonlands = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Balcones Canyonlands Preserve - Grandview Hills",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(canyonlands.klass, "Wildlife range")
+        XCTAssertNotEqual(canyonlands.klass, "Open reserve")
+        XCTAssertEqual(canyonlands.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertTrue(canyonlands.doLine.lowercased().contains("hog"), canyonlands.doLine)
+        XCTAssertFalse(canyonlands.doLine.lowercased().contains("cottonwood"), canyonlands.doLine)
+        XCTAssertFalse(canyonlands.doLine.lowercased().contains("edible"), canyonlands.doLine)
+
+        let canyonTrailPark = Inspect.read(
+            tags: ["leisure": "park", "natural": "wood", "name": "Canyonlands Trail Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(canyonTrailPark.klass, "Park")
+        XCTAssertNotEqual(canyonTrailPark.klass, "Wildlife range")
+
+        let curtin = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "natural": "wetland",
+                "name": "Leonora Curtin Wetland Preserve",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(curtin.klass, "Wildlife range")
+        XCTAssertNotEqual(curtin.klass, "Bosque or wetland")
+        XCTAssertNotEqual(curtin.klass, "Open reserve")
+        XCTAssertEqual(curtin.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(curtin.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(curtin.doLine.lowercased().contains("cottonwood"), curtin.doLine)
+        XCTAssertFalse(curtin.doLine.lowercased().contains("edible"), curtin.doLine)
+
+        let wetlandsPark = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "natural": "wetland",
+                "name": "Rio Bosque Wetlands Park",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(wetlandsPark.klass, "Bosque or wetland")
+        XCTAssertNotEqual(wetlandsPark.klass, "Wildlife range")
+
         let baker = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"
