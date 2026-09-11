@@ -673,7 +673,9 @@ public enum Inspect {
         return nil
     }
 
-    /// Tree cover, parks, bosque: danger first, then use, then unknown.
+    /// Tree cover, parks, bosque: the trees this cover is, then don't chew,
+    /// then cactus, animals, game. Unknown last so FIELD still lands with
+    /// only the core book.
     private static func plantCover(
         klass: String,
         sure: Int,
@@ -690,8 +692,8 @@ public enum Inspect {
             advice: .field,
             field: plantCard,
             local: [
-                plantTXCard, plantNMCard,
                 treeUseTXCard, treeUseNMCard,
+                plantTXCard, plantNMCard,
                 cactusTXCard, cactusNMCard,
                 mammalTXCard, mammalNMCard,
                 gameTXCard, gameNMCard,

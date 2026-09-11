@@ -200,15 +200,15 @@ final class InspectTests: XCTestCase {
     }
 
     func testWoodlandOpensThePacksPlantCardsBeforeUnknown() {
-        // Tree cover is not a meal. The state's plant-danger card is the one
-        // that names oleander or datura; plant-use is shade and deadfall; the
-        // unknown-plant card is last so FIELD still lands with only the core book.
+        // The trees this cover is, then don't chew. Oleander is not a
+        // woodland. Unknown last so FIELD still lands with only the core book.
         let wood = Inspect.read(tags: ["natural": "wood"])
         XCTAssertEqual(wood.klass, "Woodland")
         XCTAssertEqual(
             Array(wood.fieldRoute.prefix(2)),
-            [Inspect.plantTXCard, Inspect.plantNMCard]
+            [Inspect.treeUseTXCard, Inspect.treeUseNMCard]
         )
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.plantTXCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.plantUseCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.shelterCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.biteCard))
@@ -265,6 +265,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(tree.title, "El Paso Cottonwood")
         XCTAssertEqual(tree.klass, "Named tree")
         XCTAssertEqual(tree.fieldRoute.last, Inspect.plantCard)
+        XCTAssertEqual(tree.fieldRoute.first, Inspect.treeUseTXCard)
         XCTAssertTrue(tree.fieldRoute.contains(Inspect.plantTXCard))
         XCTAssertFalse(tree.doLine.lowercased().contains("edible"), tree.doLine)
     }
@@ -355,7 +356,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             InspectField.presentRoute(wood, in: texas),
             [
-                Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+                Inspect.treeUseTXCard, Inspect.plantTXCard, Inspect.cactusTXCard,
                 Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
                 Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
                 Inspect.gameCard, Inspect.plantCard,

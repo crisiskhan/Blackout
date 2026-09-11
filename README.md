@@ -281,8 +281,9 @@ that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
 not a badge — the ring says the record puts water here, not that it is good.
 There are no animal icons, no edible dots, and no number anywhere that could be
 read as safe to drink. Peaks, sinkholes and named trees are silver circles on
-records the extract actually has. Holding woodland opens that pack's plant
-cards; holding scrub opens that pack's bite and mammal cards; holding a hole
+records the extract actually has. Holding woodland opens that pack's tree-use card first (the trees this
+cover is), then plant-danger, cactus, animals, shelter, bite, meat you
+already have. Holding scrub opens that pack's bite and mammal cards; holding a hole
 opens the cave card. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
 woodland) and the button names the first card this pack's Field book ships —

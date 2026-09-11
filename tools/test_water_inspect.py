@@ -455,6 +455,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn('caveCard = "cave-dark"', inspect)
         self.assertIn("packGroundPointNaturals", inspect)
         self.assertIn('"place"', inspect)
+        cover = inspect.split("private static func plantCover", 1)[1].split(
+            "private static func snakeCountry", 1
+        )[0]
+        self.assertLess(
+            cover.index("treeUseTXCard"),
+            cover.index("plantTXCard"),
+            "woodland must open this pack's tree-use card, not oleander, first",
+        )
 
     def test_ground_marks_are_circles_without_class_labels_or_animals(self):
         swift = MAP_SWIFT.read_text()
@@ -504,6 +512,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("CARD 1 OF", qa)
         self.assertIn("BOOK", qa)
         self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", qa)
+        self.assertIn("tree-use card", qa)
+        self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("NEXT · COLD", qa)
 
