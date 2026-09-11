@@ -287,17 +287,18 @@ Cave, Wildlife Drive, Conservatory At North Austin, and a beer garden stay parks
 or apartments. A
 wildlife sanctuary tagged as woodland still opens the animal book, not picnic
 tree-use. Holding woodland opens that pack's tree-use card first (the trees this
-cover is), then plant-danger, cactus, animals, shelter, bite, meat you
-already have. Holding a glasshouse or botanic garden opens plant-danger, not
+cover is), then plant-danger, animals, shelter, bite, meat you
+already have. Cactus lives on scrub and cactus gardens, not picnic woodland.
+Holding a glasshouse or botanic garden opens plant-danger, not
 woodland. Holding a wildlife management area opens that pack's animal cards;
 this is range, not a pin. Holding scrub opens that pack's bite and mammal cards;
 holding a hole
 opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range and opens `tx-tree-use` / `tx-mammal`; TX EAST names copperhead, cottonmouth, loblolly pine, and hog, not javelina, and opens `tx-east-tree-use`. A javelina still still opens the west mammal card. The hold prints `BOOK` as the unique procedures that
 ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
 woodland) and the button names the first card this pack's Field book ships —
-a Texas peak is `FIELD · ANIMAL` then `NEXT · COLD`, not a COLD button for
+a Texas peak is `FIELD · ANIMAL` then `NEXT · BITE` then `NEXT · COLD`, not a COLD button for
 an ice-on-rock card Texas does not have, and the DO line names coyote and deer
-range, not ice. FIELD then walks the rest of the
+range, not ice. A mammal still and a peak walk both include bite treatment. FIELD then walks the rest of the
 route — tree-use,
 cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the

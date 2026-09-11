@@ -639,6 +639,8 @@ public enum Inspect {
 
     private static func land(_ t: [String: String], pack: String? = nil) -> Reading? {
         if t["natural"] == "peak" {
+            // Hold names animals as range. Mammal SPEAK names the bite
+            // card. Not a hunt, not snake country — cold stays last.
             if isEastPack(pack) {
                 return Reading(
                     klass: "Peak",
@@ -648,6 +650,7 @@ public enum Inspect {
                     advice: .field,
                     field: coldCard,
                     local: [iceRockCard, mammalNMCard, mammalEastCard],
+                    extra: [biteCard],
                     unnamedPenalty: 10
                 )
             }
@@ -659,6 +662,7 @@ public enum Inspect {
                 advice: .field,
                 field: coldCard,
                 local: [iceRockCard, mammalNMCard, mammalTXCard],
+                extra: [biteCard],
                 unnamedPenalty: 10
             )
         }
@@ -789,14 +793,16 @@ public enum Inspect {
                         klass: "Rock", kind: .land, sure: 74,
                         why: "mapped as bare rock, which holds no shade and no water",
                         advice: .field, field: coldCard,
-                        local: [iceRockCard, mammalNMCard, mammalEastCard], unnamedPenalty: 2
+                        local: [iceRockCard, mammalNMCard, mammalEastCard],
+                        extra: [biteCard], unnamedPenalty: 2
                     )
                 }
                 return Reading(
                     klass: "Rock", kind: .land, sure: 74,
                     why: "mapped as bare rock, which holds no shade and no water",
                     advice: .field, field: coldCard,
-                    local: [iceRockCard, mammalNMCard, mammalTXCard], unnamedPenalty: 2
+                    local: [iceRockCard, mammalNMCard, mammalTXCard],
+                    extra: [biteCard], unnamedPenalty: 2
                 )
             case "grassland", "grass":
                 return snakeCountry(

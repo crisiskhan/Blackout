@@ -186,7 +186,10 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(
             Inspect.read(tags: ["natural": "bare_rock"]).fieldRoute,
-            [Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.mammalTXCard, Inspect.coldCard]
+            [
+                Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.mammalTXCard,
+                Inspect.biteCard, Inspect.coldCard,
+            ]
         )
         // Water is the one thing that never diverts. Holding a spring asks the
         // treat tree and nothing else, because that is what the DO line just
@@ -288,8 +291,10 @@ final class InspectTests: XCTestCase {
         let peak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"])
         XCTAssertEqual(peak.klass, "Peak")
         XCTAssertEqual(peak.fieldRoute, [
-            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.mammalTXCard, Inspect.coldCard,
+            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.mammalTXCard,
+            Inspect.biteCard, Inspect.coldCard,
         ])
+        XCTAssertTrue(peak.fieldRoute.contains(Inspect.biteCard), "a peak walk includes bite treatment")
         XCTAssertEqual(InspectField.label(for: peak.fieldRoute[0]), "FIELD · COLD")
     }
 
@@ -689,6 +694,7 @@ final class InspectTests: XCTestCase {
             pack: "tx-east"
         )
         XCTAssertTrue(eastPeak.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertTrue(eastPeak.fieldRoute.contains(Inspect.biteCard), "an east peak walk includes bite treatment")
         XCTAssertFalse(eastPeak.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertTrue(eastPeak.doLine.lowercased().contains("hog"), eastPeak.doLine)
         XCTAssertFalse(eastPeak.doLine.lowercased().contains("javelina"), eastPeak.doLine)
@@ -915,8 +921,9 @@ final class InspectTests: XCTestCase {
 
     func testTheHoldBookNamesTheProceduresThisPackShips() {
         // The button has to name the first card the loaded book actually has.
-        // Texas has no ice-on-rock card, so a Franklin peak is ANIMAL then COLD,
-        // not a COLD button that opens javelina. One procedure is not a book.
+        // Texas has no ice-on-rock card, so a Franklin peak is ANIMAL then
+        // BITE then COLD, not a COLD button that opens javelina. One
+        // procedure is not a book.
         let texas: Set<String> = [
             Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
             Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
@@ -1022,15 +1029,15 @@ final class InspectTests: XCTestCase {
         let peak = Inspect.read(tags: ["natural": "peak", "name": "North Franklin"]).fieldRoute
         let txPeak = InspectField.presentRoute(peak, in: texas)
         XCTAssertEqual(InspectField.label(for: txPeak[0]), "FIELD · ANIMAL")
-        XCTAssertEqual(InspectField.bookLine(for: txPeak), "ANIMAL · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: txPeak), "ANIMAL · BITE · COLD")
         XCTAssertNotEqual(InspectField.label(for: peak[0]), "FIELD · ANIMAL")
 
         let nm: Set<String> = [
-            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.coldCard,
+            Inspect.iceRockCard, Inspect.mammalNMCard, Inspect.biteCard, Inspect.coldCard,
         ]
         let nmPeak = InspectField.presentRoute(peak, in: nm)
         XCTAssertEqual(InspectField.label(for: nmPeak[0]), "FIELD · COLD")
-        XCTAssertEqual(InspectField.bookLine(for: nmPeak), "COLD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: nmPeak), "COLD · ANIMAL · BITE")
 
         XCTAssertEqual(
             InspectField.bookLine(for: Inspect.read(tags: ["natural": "sinkhole"]).fieldRoute),

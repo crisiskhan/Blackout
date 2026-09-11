@@ -742,6 +742,25 @@ class GroundFieldSync(unittest.TestCase):
         )[0]
         self.assertIn('caveCard', hole)
         self.assertIn('coldCard', hole)
+        peak = inspect.split('if t["natural"] == "peak"', 1)[1].split(
+            'if let natural = t["natural"]', 1
+        )[0]
+        self.assertIn(
+            "extra: [biteCard]",
+            peak,
+            "a peak walk includes bite treatment, like a mammal still",
+        )
+        self.assertNotIn("plantTXCard", peak)
+        self.assertNotIn("snakeTXCard", peak)
+        rock = inspect.split('case "bare_rock"', 1)[1].split(
+            'case "grassland"', 1
+        )[0]
+        self.assertIn(
+            "extra: [biteCard]",
+            rock,
+            "bare rock names animals on the hold; Field must open bite",
+        )
+        self.assertNotIn("plantTXCard", rock)
         self.assertIn('case "grassland", "grass":', inspect)
         self.assertIn("isCavePreserve", inspect)
         self.assertIn("cave preserve", inspect)
@@ -996,6 +1015,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("NEXT · COLD", qa)
+        self.assertIn("Peak walk includes bite treatment", qa)
+        self.assertIn("ANIMAL · BITE · COLD", qa)
         self.assertIn("CAVE · COLD", qa)
         self.assertIn("coyote and deer range", qa)
         self.assertIn("javelina / coyote", qa)
