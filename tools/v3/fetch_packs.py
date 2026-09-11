@@ -366,13 +366,18 @@ NOTABLE_WILDLIFE_NAME = (
 # from paths. El Paso's Japanese garden is OSM-spelled Japaneese.
 # Capitol flower gardens are the Texas Capitol beds, not Mayfield.
 # Japanese Memorial Garden is not Memorial Garden. Demonstration
-# gardens are worked plant ground. Not a meal.
+# gardens are worked plant ground. Preston Foster is a native
+# garden; `native garden` would steal a nested Santa Fe bed.
+# Xeriscape Garden is not Xeriscape Park. Teaching gardens are
+# worked plant ground. Experimental Gardens overlap glasshouses
+# and stay out. Not a meal.
 NOTABLE_BOTANIC_NAME = (
     "botanic garden|botanical garden|conservatory|cactus garden|"
     "desert garden|rose garden|community garden|wildflower preserve|"
     "wildflower center|lush n lean|orchard garden|harvey cornell|"
     "japaneese garden|japanese garden|capitol flower|japanese memorial|"
-    "demonstration garden"
+    "demonstration garden|preston foster|xeriscape garden|"
+    "teaching garden"
 )
 
 

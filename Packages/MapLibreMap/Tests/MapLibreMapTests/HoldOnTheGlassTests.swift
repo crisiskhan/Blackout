@@ -232,6 +232,22 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `demonstration garden`. 125 m from water.
     private static let losAlamosDemo = CLLocationCoordinate2D(latitude: 35.881885, longitude: -106.304329)
 
+    /// Interior of Preston Foster Native Garden. Phrase `preston
+    /// foster`, not `native garden`. 195 m from water.
+    private static let prestonFoster = CLLocationCoordinate2D(latitude: 31.759280, longitude: -106.490443)
+
+    /// Interior of Xeriscape Garden. Phrase `xeriscape garden`, not
+    /// Xeriscape Park. Far from water.
+    private static let xeriscapeGarden = CLLocationCoordinate2D(latitude: 30.496225, longitude: -97.734943)
+
+    /// Interior of SFC Teaching Garden. Phrase `teaching garden`.
+    /// 934 m from water.
+    private static let sfcTeaching = CLLocationCoordinate2D(latitude: 30.278584, longitude: -97.709046)
+
+    /// Interior of Desert Oasis Teaching Garden. Phrase `teaching
+    /// garden`. 121 m from water.
+    private static let desertOasisTeaching = CLLocationCoordinate2D(latitude: 35.151445, longitude: -106.556576)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
 
     /// Interior of Sandia Mountain Natural History Center. Phrase
@@ -1097,6 +1113,41 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((losAlamos.card?.doLine.lowercased() ?? "").contains("edible"), losAlamos.card?.doLine ?? "")
 
+        let preston = try hold(at: Self.prestonFoster, zoom: 16)
+        XCTAssertEqual(preston.card?.klass, "Botanic garden", "\(preston)")
+        XCTAssertEqual(preston.card?.title, "Preston Foster Native Garden", "\(preston)")
+        XCTAssertEqual(preston.card?.fieldRoute.first, Inspect.plantTXCard, "\(preston)")
+        XCTAssertFalse(
+            preston.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "Preston Foster Native Garden opened woodland tree-use: \(preston)"
+        )
+        XCTAssertFalse((preston.card?.doLine.lowercased() ?? "").contains("edible"), preston.card?.doLine ?? "")
+
+        let xeriscape = try hold(at: Self.xeriscapeGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(xeriscape.card?.klass, "Botanic garden", "\(xeriscape)")
+        XCTAssertEqual(xeriscape.card?.title, "Xeriscape Garden", "\(xeriscape)")
+        XCTAssertEqual(xeriscape.card?.fieldRoute.first, Inspect.plantTXCard, "\(xeriscape)")
+        XCTAssertFalse(
+            xeriscape.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Xeriscape Garden opened woodland tree-use: \(xeriscape)"
+        )
+        XCTAssertFalse((xeriscape.card?.doLine.lowercased() ?? "").contains("edible"), xeriscape.card?.doLine ?? "")
+
+        let sfc = try hold(at: Self.sfcTeaching, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(sfc.card?.klass, "Botanic garden", "\(sfc)")
+        XCTAssertEqual(sfc.card?.title, "SFC Teaching Garden", "\(sfc)")
+        XCTAssertEqual(sfc.card?.fieldRoute.first, Inspect.plantTXCard, "\(sfc)")
+        XCTAssertFalse((sfc.card?.doLine.lowercased() ?? "").contains("edible"), sfc.card?.doLine ?? "")
+
+        let desertOasis = try hold(at: Self.desertOasisTeaching, zoom: 16, packId: "nm")
+        XCTAssertEqual(desertOasis.card?.klass, "Botanic garden", "\(desertOasis)")
+        XCTAssertEqual(desertOasis.card?.title, "Desert Oasis Teaching Garden", "\(desertOasis)")
+        XCTAssertTrue(
+            desertOasis.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Desert Oasis Teaching Garden dropped the NM plant-danger card: \(desertOasis)"
+        )
+        XCTAssertFalse((desertOasis.card?.doLine.lowercased() ?? "").contains("edible"), desertOasis.card?.doLine ?? "")
+
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
         XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
@@ -1595,6 +1646,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("lush n lean garden", Self.lushNLean, 16.0),
             ("desert gardens", Self.desertGardens, 16.0),
             ("japaneese garden", Self.japaneeseGarden, 16.0),
+            ("preston foster", Self.prestonFoster, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),

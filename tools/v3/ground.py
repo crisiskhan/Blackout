@@ -166,9 +166,14 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # the correctly spelled sheet. Phrase `japanese memorial`, not
 # Memorial Garden. Phrase `capitol flower`, not `flower gardens`.
 # Mayfield Gardens stays out. Phrase `demonstration garden`, not the
-# word `demonstration`. A named garden without a botanic phrase is not
-# this overlay. Memorial Garden stays out. `leisure=garden` is
-# botanic-eligible with a phrase; it is not a cave, wildlife, or
+# word `demonstration`. Phrase `preston foster`, not `native garden`
+# — Native American Garden inside Santa Fe Botanical Garden stays
+# nested, not a second sheet. Phrase `xeriscape garden`, not the
+# word `xeriscape` — Xeriscape Park stays a park. Phrase `teaching
+# garden`, not the word `teaching`. Experimental Gardens overlap
+# glasshouses and stay out. A named garden without a botanic phrase
+# is not this overlay. Memorial Garden stays out. `leisure=garden`
+# is botanic-eligible with a phrase; it is not a cave, wildlife, or
 # open-reserve key.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
@@ -188,6 +193,9 @@ BOTANIC_GARDEN_PHRASES = (
     "capitol flower",
     "japanese memorial",
     "demonstration garden",
+    "preston foster",
+    "xeriscape garden",
+    "teaching garden",
 )
 
 

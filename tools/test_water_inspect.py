@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 6, 8, 34), "tx-east": (14, 8, 37, 17, 15), "nm": (10, 1, 20, 16, 53)}
+        expected = {"tx-west": (2, 0, 6, 9, 34), "tx-east": (14, 8, 37, 19, 15), "nm": (10, 1, 20, 17, 53)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -185,6 +185,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("japanese memorial garden", nm_blob)
         self.assertIn("water wise demonstration garden", nm_blob)
         self.assertIn("los alamos demonstration garden", nm_blob)
+        self.assertIn("desert oasis teaching garden", nm_blob)
         self.assertIn("albuquerque rose garden", nm_blob)
         self.assertNotIn("orchard gardens road", nm_blob)
         self.assertNotIn("rose park avenue", nm_blob)
@@ -230,6 +231,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("ladybird johnson wildflower center", east_blob)
         self.assertIn("zilker botanical garden", east_blob)
         self.assertIn("lady bird johnson texas capitol flower gardens", east_blob)
+        self.assertIn("sfc teaching garden", east_blob)
+        self.assertIn("xeriscape garden", east_blob)
         self.assertIn("north austin community garden", east_blob)
         self.assertNotIn("ladybird johnson wildflower center foot paths", east_blob)
         self.assertNotIn("moontower saloon beer garden", east_blob)
@@ -241,6 +244,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("chihuahuan desert conservatory", west_blob)
         self.assertIn("chihuahuan desert gardens", west_blob)
         self.assertIn("japaneese garden", west_blob)
+        self.assertIn("preston foster native garden", west_blob)
         self.assertIn("alamogordo community garden", west_blob)
         self.assertIn("three crosses cactus garden", west_blob)
         self.assertIn("desert garden park", west_blob)
@@ -466,6 +470,37 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"leisure": "garden", "name": "Los Alamos Demonstration Garden"}
             ),
             "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Preston Foster Native Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "garden", "name": "Xeriscape Garden"}),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Xeriscape Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "garden", "name": "SFC Teaching Garden"}),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Desert Oasis Teaching Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "garden", "name": "Experimental Gardens"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Native American Garden"}
+            )
         )
         self.assertIsNone(
             ground.overlay_kind(
@@ -2180,6 +2215,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Los Alamos Demonstration Garden", glass)
         self.assertIn("35.881885", glass)
         self.assertIn("-106.304329", glass)
+        self.assertIn("Preston Foster Native Garden", glass)
+        self.assertIn("31.759280", glass)
+        self.assertIn("-106.490443", glass)
+        self.assertIn("Xeriscape Garden", glass)
+        self.assertIn("30.496225", glass)
+        self.assertIn("-97.734943", glass)
+        self.assertIn("SFC Teaching Garden", glass)
+        self.assertIn("30.278584", glass)
+        self.assertIn("-97.709046", glass)
+        self.assertIn("Desert Oasis Teaching Garden", glass)
+        self.assertIn("35.151445", glass)
+        self.assertIn("-106.556576", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2244,6 +2291,7 @@ class GroundFieldSync(unittest.TestCase):
         jornada_hit = False
         desert_gardens_hit = False
         japaneese_hit = False
+        preston_foster_hit = False
         for feat in west["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2260,6 +2308,8 @@ class GroundFieldSync(unittest.TestCase):
                     desert_gardens_hit = props.get("name") == "Chihuahuan Desert Gardens"
                 if kind == "botanic" and pip(-106.436233, 31.803975, ring):
                     japaneese_hit = props.get("name") == "Japaneese Garden"
+                if kind == "botanic" and pip(-106.490443, 31.759280, ring):
+                    preston_foster_hit = props.get("name") == "Preston Foster Native Garden"
                 if kind == "glasshouse" and pip(-106.933833, 32.502967, ring):
                     glass_hit = True
                 if kind == "reserve" and pip(-105.633755, 32.032331, ring):
@@ -2295,6 +2345,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             japaneese_hit,
             "Japaneese Garden is not botanic on the west overlay",
+        )
+        self.assertTrue(
+            preston_foster_hit,
+            "Preston Foster Native Garden is not botanic on the west overlay",
         )
         self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
         self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
@@ -2397,6 +2451,8 @@ class GroundFieldSync(unittest.TestCase):
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
+        xeriscape_garden_hit = False
+        sfc_teaching_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2440,6 +2496,10 @@ class GroundFieldSync(unittest.TestCase):
                     zilker_hit = True
                 if kind == "botanic" and name == "Lady Bird Johnson Texas Capitol Flower Gardens" and pip(-97.739917, 30.275837, ring):
                     capitol_flower_hit = True
+                if kind == "botanic" and name == "Xeriscape Garden" and pip(-97.734943, 30.496225, ring):
+                    xeriscape_garden_hit = True
+                if kind == "botanic" and name == "SFC Teaching Garden" and pip(-97.709046, 30.278584, ring):
+                    sfc_teaching_hit = True
                 if kind == "wildlife" and name == "Baker Sanctuary" and pip(-97.865747, 30.483183, ring):
                     baker_hit = True
                 if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
@@ -2510,6 +2570,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             capitol_flower_hit,
             "Capitol Flower Gardens is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            xeriscape_garden_hit,
+            "Xeriscape Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            sfc_teaching_hit,
+            "SFC Teaching Garden is not botanic on the east overlay",
         )
         self.assertTrue(
             baker_hit,
@@ -2614,6 +2682,7 @@ class GroundFieldSync(unittest.TestCase):
         japanese_memorial_hit = False
         water_wise_hit = False
         los_alamos_demo_hit = False
+        desert_oasis_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2630,6 +2699,8 @@ class GroundFieldSync(unittest.TestCase):
                     water_wise_hit = props.get("name") == "Water Wise Demonstration Garden"
                 if kind == "botanic" and pip(-106.304329, 35.881885, ring):
                     los_alamos_demo_hit = props.get("name") == "Los Alamos Demonstration Garden"
+                if kind == "botanic" and pip(-106.556576, 35.151445, ring):
+                    desert_oasis_hit = props.get("name") == "Desert Oasis Teaching Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
@@ -2681,6 +2752,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             los_alamos_demo_hit,
             "Los Alamos Demonstration Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            desert_oasis_hit,
+            "Desert Oasis Teaching Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -2896,9 +2971,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("capitol flower", botanic_name)
         self.assertIn("japanese memorial", botanic_name)
         self.assertIn("demonstration garden", botanic_name)
+        self.assertIn("preston foster", botanic_name)
+        self.assertIn("xeriscape garden", botanic_name)
+        self.assertIn("teaching garden", botanic_name)
         self.assertNotIn("japaneese", wildlife_name)
         self.assertNotIn("capitol", wildlife_name)
         self.assertNotIn("demonstration", wildlife_name)
+        self.assertNotIn("preston", wildlife_name)
+        self.assertNotIn("xeriscape", wildlife_name)
+        self.assertNotIn("teaching", wildlife_name)
         self.assertIn('way["leisure"="garden"]["name"~"', fetch)
         self.assertIn('relation["leisure"="garden"]["name"~"', fetch)
         self.assertIn('way["amenity"="community_garden"]["name"]', fetch)
@@ -3226,6 +3307,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.243410", qa)
         self.assertIn("Los Alamos Demonstration Garden", qa)
         self.assertIn("35.881885", qa)
+        self.assertIn("preston foster", qa)
+        self.assertIn("31.759280", qa)
+        self.assertIn("xeriscape garden", qa)
+        self.assertIn("30.496225", qa)
+        self.assertIn("teaching garden", qa)
+        self.assertIn("30.278584", qa)
+        self.assertIn("Desert Oasis Teaching Garden", qa)
+        self.assertIn("35.151445", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

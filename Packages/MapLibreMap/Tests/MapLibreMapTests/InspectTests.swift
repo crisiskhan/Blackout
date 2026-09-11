@@ -2629,6 +2629,48 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(demonstration.klass, "Botanic garden")
         XCTAssertTrue(demonstration.fieldRoute.contains(Inspect.plantNMCard))
 
+        let prestonFoster = Inspect.read(
+            tags: ["leisure": "garden", "name": "Preston Foster Native Garden"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(prestonFoster.klass, "Botanic garden")
+        XCTAssertEqual(prestonFoster.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(prestonFoster.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(prestonFoster.doLine.lowercased().contains("edible"), prestonFoster.doLine)
+
+        let xeriscapeGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "Xeriscape Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(xeriscapeGarden.klass, "Botanic garden")
+        XCTAssertEqual(xeriscapeGarden.fieldRoute.first, Inspect.plantTXCard)
+
+        let xeriscapePark = Inspect.read(
+            tags: ["leisure": "park", "name": "Xeriscape Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(xeriscapePark.klass, "Park")
+        XCTAssertNotEqual(xeriscapePark.klass, "Botanic garden")
+
+        let teaching = Inspect.read(
+            tags: ["leisure": "garden", "name": "SFC Teaching Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(teaching.klass, "Botanic garden")
+        XCTAssertFalse(teaching.fieldRoute.contains(Inspect.treeUseEastCard))
+
+        let nestedNative = Inspect.read(
+            tags: ["leisure": "garden", "name": "Native American Garden"],
+            pack: "nm"
+        )
+        XCTAssertNotEqual(nestedNative.klass, "Botanic garden")
+
+        let experimental = Inspect.read(
+            tags: ["leisure": "garden", "name": "Experimental Gardens"],
+            pack: "tx-east"
+        )
+        XCTAssertNotEqual(experimental.klass, "Botanic garden")
+
         let astronautMemorial = Inspect.read(
             tags: ["leisure": "garden", "name": "Astronaut Memorial Garden"],
             pack: "tx-west"

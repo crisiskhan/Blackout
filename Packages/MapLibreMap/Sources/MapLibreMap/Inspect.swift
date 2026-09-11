@@ -446,9 +446,14 @@ public enum Inspect {
     /// the correctly spelled sheet. Phrase `japanese memorial`, not
     /// Memorial Garden. Phrase `capitol flower`, not `flower
     /// gardens`. Mayfield Gardens stays out. Phrase `demonstration
-    /// garden`, not the word `demonstration`. `leisure=garden` is
-    /// botanic-eligible with a phrase; it is not a cave, wildlife, or
-    /// open-reserve key. Memorial Garden stays out.
+    /// garden`, not the word `demonstration`. Phrase `preston
+    /// foster`, not `native garden` — Native American Garden inside
+    /// Santa Fe Botanical Garden stays nested. Phrase `xeriscape
+    /// garden`, not the word `xeriscape` — Xeriscape Park stays a
+    /// park. Phrase `teaching garden`, not the word `teaching`.
+    /// Experimental Gardens overlap glasshouses and stay out.
+    /// `leisure=garden` is botanic-eligible with a phrase; it is not
+    /// a cave, wildlife, or open-reserve key. Memorial Garden stays out.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
         let amenity = (t["amenity"] ?? "").lowercased()
         if amenity == "community_garden" || amenity == "community garden" { return true }
@@ -470,6 +475,9 @@ public enum Inspect {
             || n.contains("capitol flower")
             || n.contains("japanese memorial")
             || n.contains("demonstration garden")
+            || n.contains("preston foster")
+            || n.contains("xeriscape garden")
+            || n.contains("teaching garden")
         guard phrase else { return false }
         if t["leisure"] == "garden" { return true }
         let park = t["leisure"] == "park"
