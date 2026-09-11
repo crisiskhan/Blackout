@@ -2191,6 +2191,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_tree_do = next(c for c in nm_do["cards"] if c["id"] == "nm-tree-use")["steps"][0]["do"]["en"].lower()
         self.assertIn("rio grande cottonwood", nm_tree_do)
         self.assertIn("high country", nm_tree_do)
+        self.assertIn("juniper and piñon are woodland", nm_tree_do)
 
         west = blob("tx", "tx-tree-use")
         self.assertIn("mesquite", west)
@@ -2202,6 +2203,7 @@ class GroundFieldSync(unittest.TestCase):
         west_do = next(c for c in west_tree_do["cards"] if c["id"] == "tx-tree-use")["steps"][0]["do"]["en"].lower()
         self.assertIn("mesquite", west_do)
         self.assertIn("live oak", west_do)
+        self.assertIn("mesquite is woodland", west_do)
 
         east = blob("tx", "tx-east-tree-use")
         self.assertIn("loblolly", east)
@@ -2211,6 +2213,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("edible", east)
         east_do = next(c for c in west_tree_do["cards"] if c["id"] == "tx-east-tree-use")["steps"][0]["do"]["en"].lower()
         self.assertIn("loblolly", east_do)
+        self.assertIn("loblolly pine is lost pines", east_do)
         self.assertNotIn("mesquite", east_do)
 
         west_mammal = blob("tx", "tx-mammal")
@@ -2223,6 +2226,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("West Texas trees", qa)
         self.assertIn("woodland, park, or bosque", qa.lower())
         self.assertIn("NM not bosque-only", qa)
+        self.assertIn("mesquite is woodland", qa.lower())
+        self.assertIn("juniper and piñon are woodland", qa.lower())
+        self.assertIn("loblolly pine is Lost Pines", qa)
 
     def test_nm_hold_names_the_field_rattlesnakes_and_mammals(self):
         """NM Field and Vision name prairie rattler, diamondback, and mule deer.

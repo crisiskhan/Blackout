@@ -911,17 +911,19 @@ def tree_do_en(cid: str) -> str:
     if cid == "tx-east-tree-use":
         return (
             "Live oak, pecan, cedar elm, loblolly pine, cottonwood. "
+            "Loblolly pine is Lost Pines. "
             "South-side shade, wind break, deadfall only for fire. "
             "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
         )
     if cid.startswith("tx-"):
         return (
             "Live oak, pecan, mesquite, cedar elm, cottonwood. "
+            "Mesquite is woodland. "
             "South-side shade, wind break, deadfall only for fire. "
             "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
         )
     return (
-        "Rio Grande cottonwood, juniper, piñon. Aspen is high country. "
+        "Rio Grande cottonwood, juniper, piñon. Juniper and piñon are woodland. Aspen is high country. "
         "South-side shade, wind break, deadfall only for fire. "
         "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
     )
@@ -931,17 +933,19 @@ def tree_do_es(cid: str) -> str:
     if cid == "tx-east-tree-use":
         return (
             "Encino, pecán, olmo cedro, pino taeda, álamo. "
+            "El pino taeda es de Lost Pines. "
             "Sombra al sur, cortaviento, madera muerta para fuego. "
             "No descortezces vivo. No mastiques semillas ni flores."
         )
     if cid.startswith("tx-"):
         return (
             "Encino, pecán, mezquite, olmo cedro, álamo. "
+            "El mezquite es de arbolado. "
             "Sombra al sur, cortaviento, madera muerta para fuego. "
             "No descortezces vivo. No mastiques semillas ni flores."
         )
     return (
-        "Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. "
+        "Álamo del Río Grande, enebro, piñón. El enebro y el piñón son de arbolado. El álamo temblón es de alta montaña. "
         "Sombra al sur, cortaviento, madera muerta para fuego. "
         "No descortezces vivo. No mastiques semillas ni flores."
     )
