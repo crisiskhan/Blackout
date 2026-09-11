@@ -955,13 +955,13 @@ extension Inspect {
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Javelina, coyote, and deer range. This is range, not a pin."
+                return "Javelina, coyote, and deer range. Diamondback country. This is range, not a pin."
             case .txEast:
-                return "Coyote and deer range. Hog country. Not a pin."
+                return "Coyote, deer, and hog range. Copperhead and cottonmouth country. Not a pin."
             case .nm:
-                return "Black bear, elk, and mule deer range. This is range, not a pin."
+                return "Black bear, elk, and mule deer range. Prairie rattler or diamondback country. This is range, not a pin."
             case .unknown:
-                return "This is range, not a pin. Field has the animal cards."
+                return "This is range, not a pin. Field has the animal and bite cards."
             }
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {

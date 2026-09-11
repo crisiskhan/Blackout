@@ -331,6 +331,7 @@ final class InspectTests: XCTestCase {
         )
         let doLine = marquez.doLine.lowercased()
         XCTAssertTrue(doLine.contains("bear") || doLine.contains("elk"), marquez.doLine)
+        XCTAssertTrue(doLine.contains("diamondback") || doLine.contains("rattler"), marquez.doLine)
         XCTAssertTrue(doLine.contains("range") || doLine.contains("not a pin"), marquez.doLine)
         XCTAssertFalse(doLine.contains("lives here"), marquez.doLine)
         XCTAssertFalse(doLine.contains("edible"), marquez.doLine)
@@ -349,6 +350,7 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(refuge.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertEqual(InspectField.label(for: refuge.fieldRoute[0]), "FIELD · ANIMAL")
         XCTAssertTrue(refuge.doLine.lowercased().contains("hog"), refuge.doLine)
+        XCTAssertTrue(refuge.doLine.lowercased().contains("cottonmouth"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("javelina"), refuge.doLine)
         XCTAssertFalse(refuge.doLine.lowercased().contains("lives here"), refuge.doLine)
 
@@ -365,7 +367,9 @@ final class InspectTests: XCTestCase {
         let westDo = westRange.doLine.lowercased()
         XCTAssertTrue(westDo.contains("javelina"), westRange.doLine)
         XCTAssertTrue(westDo.contains("deer"), westRange.doLine)
+        XCTAssertTrue(westDo.contains("diamondback"), westRange.doLine)
         XCTAssertFalse(westDo.contains("hog"), westRange.doLine)
+        XCTAssertFalse(westDo.contains("cottonmouth"), westRange.doLine)
         XCTAssertFalse(westDo.contains("lives here"), westRange.doLine)
         XCTAssertFalse(westDo.contains("edible"), westRange.doLine)
 
@@ -382,6 +386,10 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(sanctuary.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertNotEqual(sanctuary.klass, "Woodland")
         XCTAssertEqual(InspectField.label(for: sanctuary.fieldRoute[0]), "FIELD · ANIMAL")
+        XCTAssertTrue(sanctuary.doLine.lowercased().contains("hog"), sanctuary.doLine)
+        XCTAssertTrue(sanctuary.doLine.lowercased().contains("cottonmouth"), sanctuary.doLine)
+        XCTAssertFalse(sanctuary.doLine.lowercased().contains("javelina"), sanctuary.doLine)
+        XCTAssertFalse(sanctuary.doLine.lowercased().contains("diamondback"), sanctuary.doLine)
         XCTAssertFalse(sanctuary.doLine.lowercased().contains("lives here"), sanctuary.doLine)
 
         let grass = Inspect.read(

@@ -1067,6 +1067,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mule deer", nm_range)
         self.assertIn("black bear", nm_range)
         self.assertIn("elk", nm_range)
+        self.assertIn("prairie rattler", nm_range)
+        self.assertIn("diamondback", nm_range)
         self.assertNotIn("lives here", nm_range)
 
         book = json.loads((ROOT / "Resources/Field/field.nm.json").read_text())
@@ -1101,14 +1103,21 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("javelina", west)
         self.assertIn("coyote", west)
         self.assertIn("deer", west)
+        self.assertIn("diamondback", west)
+        self.assertNotIn("cottonmouth", west)
         self.assertNotIn("lives here", west)
         east = wildlife.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()
         self.assertIn("hog", east)
         self.assertIn("deer", east)
+        self.assertIn("copperhead", east)
+        self.assertIn("cottonmouth", east)
         self.assertNotIn("javelina", east)
+        self.assertNotIn("diamondback", east)
         nm = wildlife.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
         self.assertIn("mule deer", nm)
         self.assertIn("black bear", nm)
+        self.assertIn("prairie rattler", nm)
+        self.assertIn("diamondback", nm)
 
         west_mammal_card = next(
             c
