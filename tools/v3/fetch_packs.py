@@ -369,15 +369,20 @@ NOTABLE_WILDLIFE_NAME = (
 # gardens are worked plant ground. Preston Foster is a native
 # garden; `native garden` would steal a nested Santa Fe bed.
 # Xeriscape Garden is not Xeriscape Park. Teaching gardens are
-# worked plant ground. Experimental Gardens overlap glasshouses
-# and stay out. Not a meal.
+# worked plant ground. Fincher III is a community garden without
+# the amenity tag. Brazos Bluff and Explorers Garden are
+# educational gardens, not Brazos Street. Haozous Garden is not
+# Haozous Road. Winrock Garden is a mall bed and stays out.
+# Experimental Gardens overlap glasshouses and stay out. Not a
+# meal.
 NOTABLE_BOTANIC_NAME = (
     "botanic garden|botanical garden|conservatory|cactus garden|"
     "desert garden|rose garden|community garden|wildflower preserve|"
     "wildflower center|lush n lean|orchard garden|harvey cornell|"
     "japaneese garden|japanese garden|capitol flower|japanese memorial|"
     "demonstration garden|preston foster|xeriscape garden|"
-    "teaching garden"
+    "teaching garden|fincher iii garden|brazos bluff|"
+    "explorers garden|haozous garden"
 )
 
 

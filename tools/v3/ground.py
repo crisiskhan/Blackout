@@ -170,11 +170,18 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # — Native American Garden inside Santa Fe Botanical Garden stays
 # nested, not a second sheet. Phrase `xeriscape garden`, not the
 # word `xeriscape` — Xeriscape Park stays a park. Phrase `teaching
-# garden`, not the word `teaching`. Experimental Gardens overlap
-# glasshouses and stay out. A named garden without a botanic phrase
-# is not this overlay. Memorial Garden stays out. `leisure=garden`
-# is botanic-eligible with a phrase; it is not a cave, wildlife, or
-# open-reserve key.
+# garden`, not the word `teaching`. Phrase `fincher iii garden`,
+# not the word `fincher`. E.R. Fincher III Garden is a community
+# garden without the amenity tag. Phrase `brazos bluff`, not the
+# word `brazos` — Brazos Street stays a road. Phrase `explorers
+# garden`. Both are Trail Conservancy educational gardens, not a
+# meal. Phrase `haozous garden`, not the word `haozous` —
+# Haozous Road stays a road. Winrock Garden is a mall bed and
+# stays out. Schepps' Garden stays out. Experimental Gardens
+# overlap glasshouses and stay out. A named garden without a
+# botanic phrase is not this overlay. Memorial Garden stays out.
+# `leisure=garden` is botanic-eligible with a phrase; it is not a
+# cave, wildlife, or open-reserve key.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
@@ -196,6 +203,10 @@ BOTANIC_GARDEN_PHRASES = (
     "preston foster",
     "xeriscape garden",
     "teaching garden",
+    "fincher iii garden",
+    "brazos bluff",
+    "explorers garden",
+    "haozous garden",
 )
 
 

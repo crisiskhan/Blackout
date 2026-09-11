@@ -248,7 +248,21 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// garden`. 121 m from water.
     private static let desertOasisTeaching = CLLocationCoordinate2D(latitude: 35.151445, longitude: -106.556576)
 
-    /// Interior of Sandia Mountain Natural History Center. Phrase
+    /// Interior of E.R. Fincher III Garden. Phrase `fincher iii garden`.
+    /// Community garden without the amenity tag. 1208 m from water.
+    private static let fincherGarden = CLLocationCoordinate2D(latitude: 30.260460, longitude: -97.699293)
+
+    /// Interior of Brazos Bluff. Phrase `brazos bluff`, not the word
+    /// `brazos`. Educational garden. 290 m from water.
+    private static let brazosBluff = CLLocationCoordinate2D(latitude: 30.261206, longitude: -97.742801)
+
+    /// Interior of Explorers Garden. Phrase `explorers garden`.
+    /// Educational garden. 299 m from water.
+    private static let explorersGarden = CLLocationCoordinate2D(latitude: 30.260564, longitude: -97.740969)
+
+    /// Interior of The Haozous Garden. Phrase `haozous garden`, not
+    /// Haozous Road. 1064 m from water.
+    private static let haozousGarden = CLLocationCoordinate2D(latitude: 35.586438, longitude: -106.010271)
 
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
@@ -1147,6 +1161,46 @@ final class HoldOnTheGlassTests: XCTestCase {
             "Desert Oasis Teaching Garden dropped the NM plant-danger card: \(desertOasis)"
         )
         XCTAssertFalse((desertOasis.card?.doLine.lowercased() ?? "").contains("edible"), desertOasis.card?.doLine ?? "")
+
+        let fincher = try hold(at: Self.fincherGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(fincher.card?.klass, "Botanic garden", "\(fincher)")
+        XCTAssertEqual(fincher.card?.title, "E.R. Fincher III Garden", "\(fincher)")
+        XCTAssertEqual(fincher.card?.fieldRoute.first, Inspect.plantTXCard, "\(fincher)")
+        XCTAssertFalse(
+            fincher.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "E.R. Fincher III Garden opened woodland tree-use: \(fincher)"
+        )
+        XCTAssertFalse((fincher.card?.doLine.lowercased() ?? "").contains("edible"), fincher.card?.doLine ?? "")
+
+        let brazosBluff = try hold(at: Self.brazosBluff, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(brazosBluff.card?.klass, "Botanic garden", "\(brazosBluff)")
+        XCTAssertEqual(brazosBluff.card?.title, "Brazos Bluff", "\(brazosBluff)")
+        XCTAssertEqual(brazosBluff.card?.fieldRoute.first, Inspect.plantTXCard, "\(brazosBluff)")
+        XCTAssertFalse(
+            brazosBluff.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Brazos Bluff opened woodland tree-use: \(brazosBluff)"
+        )
+        XCTAssertFalse((brazosBluff.card?.doLine.lowercased() ?? "").contains("edible"), brazosBluff.card?.doLine ?? "")
+
+        let explorers = try hold(at: Self.explorersGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(explorers.card?.klass, "Botanic garden", "\(explorers)")
+        XCTAssertEqual(explorers.card?.title, "Explorers Garden", "\(explorers)")
+        XCTAssertEqual(explorers.card?.fieldRoute.first, Inspect.plantTXCard, "\(explorers)")
+        XCTAssertFalse((explorers.card?.doLine.lowercased() ?? "").contains("edible"), explorers.card?.doLine ?? "")
+
+        let haozous = try hold(at: Self.haozousGarden, zoom: 16, packId: "nm")
+        XCTAssertEqual(haozous.card?.klass, "Botanic garden", "\(haozous)")
+        XCTAssertEqual(haozous.card?.title, "The Haozous Garden", "\(haozous)")
+        XCTAssertEqual(haozous.card?.fieldRoute.first, Inspect.plantTXCard, "\(haozous)")
+        XCTAssertTrue(
+            haozous.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "The Haozous Garden dropped the NM plant-danger card: \(haozous)"
+        )
+        XCTAssertFalse(
+            haozous.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "The Haozous Garden opened woodland tree-use: \(haozous)"
+        )
+        XCTAssertFalse((haozous.card?.doLine.lowercased() ?? "").contains("edible"), haozous.card?.doLine ?? "")
 
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")

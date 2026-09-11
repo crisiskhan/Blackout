@@ -2659,6 +2659,57 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(teaching.klass, "Botanic garden")
         XCTAssertFalse(teaching.fieldRoute.contains(Inspect.treeUseEastCard))
 
+        let fincher = Inspect.read(
+            tags: ["leisure": "garden", "name": "E.R. Fincher III Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(fincher.klass, "Botanic garden")
+        XCTAssertEqual(fincher.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(fincher.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(fincher.doLine.lowercased().contains("edible"), fincher.doLine)
+
+        let brazosBluff = Inspect.read(
+            tags: ["leisure": "garden", "name": "Brazos Bluff"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(brazosBluff.klass, "Botanic garden")
+        XCTAssertFalse(brazosBluff.fieldRoute.contains(Inspect.treeUseEastCard))
+
+        let brazosStreet = Inspect.read(
+            tags: ["highway": "residential", "name": "Brazos Street"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(brazosStreet.klass, "Road")
+        XCTAssertNotEqual(brazosStreet.klass, "Botanic garden")
+
+        let explorers = Inspect.read(
+            tags: ["leisure": "garden", "name": "Explorers Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(explorers.klass, "Botanic garden")
+        XCTAssertFalse(explorers.doLine.lowercased().contains("edible"), explorers.doLine)
+
+        let haozous = Inspect.read(
+            tags: ["leisure": "garden", "name": "The Haozous Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(haozous.klass, "Botanic garden")
+        XCTAssertTrue(haozous.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(haozous.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(haozous.doLine.lowercased().contains("edible"), haozous.doLine)
+
+        let haozousRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Haozous Road"],
+            pack: "nm"
+        )
+        XCTAssertNotEqual(haozousRoad.klass, "Botanic garden")
+
+        let winrock = Inspect.read(
+            tags: ["leisure": "garden", "name": "Winrock Garden"],
+            pack: "nm"
+        )
+        XCTAssertNotEqual(winrock.klass, "Botanic garden")
+
         let nestedNative = Inspect.read(
             tags: ["leisure": "garden", "name": "Native American Garden"],
             pack: "nm"
