@@ -226,6 +226,8 @@ final class InspectTests: XCTestCase {
 
         let westWet = Inspect.read(tags: ["natural": "wetland"], pack: "tx-west")
         XCTAssertEqual(westWet.klass, "Bosque or wetland")
+        XCTAssertTrue(westWet.doLine.lowercased().contains("javelina"), westWet.doLine)
+        XCTAssertTrue(westWet.doLine.lowercased().contains("deer"), westWet.doLine)
         XCTAssertEqual(westWet.fieldRoute.first, Inspect.treeUseTXCard)
         XCTAssertFalse(westWet.fieldRoute.contains(Inspect.snakeTXCard))
         XCTAssertFalse(westWet.fieldRoute.contains(Inspect.snakeEastCard))
@@ -235,6 +237,8 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(nmWet.fieldRoute.first, Inspect.treeUseTXCard)
         XCTAssertFalse(nmWet.fieldRoute.contains(Inspect.snakeNMCard))
         XCTAssertFalse(nmWet.doLine.lowercased().contains("cottonmouth"), nmWet.doLine)
+        XCTAssertTrue(nmWet.doLine.lowercased().contains("mule deer"), nmWet.doLine)
+        XCTAssertTrue(nmWet.doLine.lowercased().contains("bear"), nmWet.doLine)
 
         let farm = Inspect.read(tags: ["landuse": "farmland"])
         XCTAssertEqual(farm.klass, "Irrigated ground")
@@ -799,6 +803,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(nmWoodDo.contains("rio grande"), nmWood.doLine)
         XCTAssertFalse(nmWoodDo.contains("aspen"), nmWood.doLine)
         XCTAssertTrue(nmWoodDo.contains("bear") || nmWoodDo.contains("elk"), nmWood.doLine)
+        XCTAssertTrue(nmWoodDo.contains("mule deer"), nmWood.doLine)
 
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
         let txScrubDo = txScrub.doLine.lowercased()
@@ -831,6 +836,7 @@ final class InspectTests: XCTestCase {
 
         let westWood = Inspect.read(tags: ["natural": "wood"], state: "TX", pack: "tx-west")
         XCTAssertTrue(westWood.doLine.lowercased().contains("javelina"), westWood.doLine)
+        XCTAssertTrue(westWood.doLine.lowercased().contains("deer"), westWood.doLine)
         XCTAssertTrue(westWood.doLine.lowercased().contains("mesquite"), westWood.doLine)
         XCTAssertTrue(westWood.doLine.lowercased().contains("cottonwood"), westWood.doLine)
 
@@ -879,6 +885,7 @@ final class InspectTests: XCTestCase {
 
         let eastWet = Inspect.read(tags: ["natural": "wetland"], state: "TX", pack: "tx-east")
         XCTAssertTrue(eastWet.doLine.lowercased().contains("cottonmouth"), eastWet.doLine)
+        XCTAssertTrue(eastWet.doLine.lowercased().contains("hog"), eastWet.doLine)
         XCTAssertFalse(eastWet.doLine.lowercased().contains("javelina"), eastWet.doLine)
         XCTAssertEqual(eastWet.fieldRoute.first, Inspect.treeUseEastCard)
         XCTAssertEqual(InspectField.label(for: eastWet.fieldRoute[0]), "FIELD · PLANT")

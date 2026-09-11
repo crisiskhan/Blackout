@@ -916,11 +916,11 @@ extension Inspect {
     private static func treeRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Javelina and coyote range. Shade and thorns, not a meal."
+            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Javelina, coyote, and deer range. Shade and thorns, not a meal."
         case .txEast:
             return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. Coyote and deer range. Hog country. Shade, not a meal."
         case .nm:
-            return "Rio Grande cottonwood, juniper, piñon. Black bear and elk range. Shade and wind, not a meal."
+            return "Rio Grande cottonwood, juniper, piñon. Black bear, elk, and mule deer range. Shade and wind, not a meal."
         case .unknown:
             return "Shade, wind, deadfall. Not a meal. Field has the plant and animal cards."
         }
@@ -998,11 +998,11 @@ extension Inspect {
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Cottonwoods and pecan along the water. Javelina and coyote range. Shade, not a meal."
+                return "Cottonwoods and pecan along the water. Javelina, coyote, and deer range. Shade, not a meal."
             case .txEast:
-                return "Cottonwoods and pecan along the water. Cottonmouth country. Shade, not a meal."
+                return "Cottonwoods and pecan along the water. Cottonmouth country. Hog range. Shade, not a meal."
             case .nm:
-                return "Rio Grande cottonwood. Black bear range. Shade, not a meal."
+                return "Rio Grande cottonwood. Black bear and mule deer range. Shade, not a meal."
             case .unknown:
                 return "Cottonwoods and wet ground. Shade, not a meal. Field has the plant and animal cards."
             }
