@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from v3 import ground, water
-from v3.fetch_packs import PACKS
+from v3.fetch_packs import PACKS, clip_features, osm_to_geojson
 
 PACK_ROOT = ROOT / "Resources" / "Packs"
 SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/WaterInspect.swift"
@@ -1874,6 +1874,85 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("sinkhole|cave|cave_entrance|tree", fetch)
         self.assertIn('node["natural"="cave"]', fetch)
         self.assertIn('node["natural"="tree"]', fetch)
+        self.assertIn('node["natural"="tree"]["name"]', fetch)
+        self.assertIn('relation["leisure"="nature_reserve"]', fetch)
+        self.assertIn('way["leisure"="nature_reserve"]', fetch)
+        self.assertIn("def relation_geometry", fetch)
+        self.assertIn("def grow_notable", fetch)
+        self.assertIn('--notable', fetch)
+        self.assertNotIn("best in class", fetch)
+        self.assertNotIn('relation["boundary"="protected_area"]', fetch)
+
+    def test_osm_assembles_a_nature_reserve_relation_and_named_tree(self):
+        """A reserve mapped as a relation is a polygon, not dropped.
+
+        Overpass returns member ways without tags. Joining those ways by
+        node id is what puts Franklin Mountains State Park on the overlay
+        instead of leaving it as picnic woodland. A named tree node stays
+        a point. Size is not a reason to skip either.
+        """
+        osm = {
+            "elements": [
+                {"type": "node", "id": 1, "lon": -106.50, "lat": 31.90},
+                {"type": "node", "id": 2, "lon": -106.40, "lat": 31.90},
+                {"type": "node", "id": 3, "lon": -106.40, "lat": 32.00},
+                {"type": "node", "id": 4, "lon": -106.50, "lat": 32.00},
+                {"type": "way", "id": 10, "nodes": [1, 2, 3]},
+                {"type": "way", "id": 11, "nodes": [3, 4, 1]},
+                {
+                    "type": "relation",
+                    "id": 20,
+                    "tags": {
+                        "leisure": "nature_reserve",
+                        "name": "Franklin Mountains State Park",
+                    },
+                    "members": [
+                        {"type": "way", "ref": 10, "role": "outer"},
+                        {"type": "way", "ref": 11, "role": "outer"},
+                    ],
+                },
+                {
+                    "type": "node",
+                    "id": 30,
+                    "lon": -97.7574,
+                    "lat": 30.2711,
+                    "tags": {"natural": "tree", "name": "Treaty Oak"},
+                },
+                {
+                    "type": "node",
+                    "id": 31,
+                    "lon": -106.51,
+                    "lat": 31.99,
+                    "tags": {"natural": "cave", "name": "Anthony Gap Cave"},
+                },
+            ]
+        }
+        fc = osm_to_geojson(osm)
+        names = {
+            (f.get("properties") or {}).get("name"): f
+            for f in fc["features"]
+        }
+        park = names.get("Franklin Mountains State Park")
+        self.assertIsNotNone(park, fc["features"])
+        self.assertEqual((park.get("properties") or {}).get("leisure"), "nature_reserve")
+        self.assertIn((park.get("geometry") or {}).get("type"), ("Polygon", "MultiPolygon"))
+        self.assertEqual(ground.overlay_kind(park["properties"]), "reserve")
+        tree = names.get("Treaty Oak")
+        self.assertIsNotNone(tree)
+        self.assertEqual(tree["geometry"]["type"], "Point")
+        self.assertEqual((tree.get("properties") or {}).get("natural"), "tree")
+        cave = names.get("Anthony Gap Cave")
+        self.assertIsNotNone(cave)
+        self.assertEqual(cave["geometry"]["type"], "Point")
+        self.assertEqual((cave.get("properties") or {}).get("natural"), "cave")
+        clipped = clip_features(
+            fc,
+            {"south": 31.88, "west": -106.52, "north": 32.00, "east": -106.40},
+        )
+        clipped_names = {(f.get("properties") or {}).get("name") for f in clipped["features"]}
+        self.assertIn("Franklin Mountains State Park", clipped_names)
+        self.assertIn("Anthony Gap Cave", clipped_names)
+        self.assertNotIn("Treaty Oak", clipped_names)
 
     def test_the_core_book_ships_the_biome_cards(self):
         book = json.loads((ROOT / "Resources/Field/field.core.json").read_text())

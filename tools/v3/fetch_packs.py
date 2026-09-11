@@ -22,6 +22,10 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
+from shapely.geometry import Polygon, mapping
+from shapely.ops import unary_union
+from shapely.validation import make_valid
+
 from . import graphbin, ground, tiles
 from .common import ROOT, haversine_m, write_json
 
@@ -338,6 +342,34 @@ out skel qt;
     return _overpass(q, f"res:{box}")
 
 
+def overpass_notable(south: float, west: float, north: float, east: float) -> dict:
+    """Named nature-reserve polygons, cave mouths, and named trees.
+
+    The tiled street query never asked for relations, and `osm_to_geojson`
+    used to drop them even when Overpass returned them. This is a separate
+    pass so a huge reserve does not ride the 0.12° street tiles. It does not
+    ask for every `boundary=protected_area` forest — Lincoln National Forest
+    is not a picnic dump. Size is not a reason to skip a record the Hold
+    can name.
+    """
+    box = f"{south},{west},{north},{east}"
+    q = f"""
+[out:json][timeout:300];
+(
+  relation["leisure"="nature_reserve"]({box});
+  way["leisure"="nature_reserve"]({box});
+  node["natural"="cave"]({box});
+  node["natural"="cave_entrance"]({box});
+  node["natural"="sinkhole"]({box});
+  node["natural"="tree"]["name"]({box});
+);
+out body;
+>;
+out skel qt;
+"""
+    return _overpass(q, f"notable:{box}", timeout=330)
+
+
 def overpass_bbox(south: float, west: float, north: float, east: float) -> dict:
     q = f"""
 [out:json][timeout:180];
@@ -364,7 +396,7 @@ out skel qt;
     return _overpass(q, f"{south},{west},{north},{east}")
 
 
-def _overpass(q: str, cache_key: str) -> dict:
+def _overpass(q: str, cache_key: str, timeout: int = 210) -> dict:
     body = urllib.parse.urlencode({"data": q}).encode()
     # A pack is well over a hundred tiles now, so one refused slot must not
     # throw away the tiles already paid for. Cache each answer on disk and back
@@ -384,7 +416,7 @@ def _overpass(q: str, cache_key: str) -> dict:
     for attempt in range(OVERPASS_TRIES):
         for url in OVERPASS_ENDPOINTS:
             try:
-                out = _http_json(url, data=body, timeout=210)
+                out = _http_json(url, data=body, timeout=timeout)
                 OVERPASS_CACHE.mkdir(parents=True, exist_ok=True)
                 cached.write_text(json.dumps(out, separators=(",", ":")))
                 return out
@@ -414,6 +446,7 @@ def tile_bbox(bb: dict, max_span: float = 0.12) -> list[dict]:
 def merge_osm(parts: list[dict]) -> dict:
     seen_n: set[int] = set()
     seen_w: set[int] = set()
+    seen_r: set[int] = set()
     elements: list[dict] = []
     for osm in parts:
         for el in osm.get("elements") or []:
@@ -427,6 +460,10 @@ def merge_osm(parts: list[dict]) -> dict:
                 if eid in seen_w:
                     continue
                 seen_w.add(eid)
+            elif kind == "relation":
+                if eid in seen_r:
+                    continue
+                seen_r.add(eid)
             elements.append(el)
     return {"elements": elements}
 
@@ -467,6 +504,143 @@ def simplify(coords: list[list[float]], eps: float) -> list[list[float]]:
     return [c for c, k in zip(coords, keep) if k]
 
 
+def _way_chain(
+    el: dict, nodes: dict[int, tuple[float, float]]
+) -> list[tuple[float, float]] | None:
+    nids = el.get("nodes") or []
+    if nids:
+        coords = [nodes[n] for n in nids if n in nodes]
+        if len(coords) >= 2:
+            return coords
+    geom = el.get("geometry") or []
+    if len(geom) < 2:
+        return None
+    out = [
+        (round(p["lon"], RENDER_DP), round(p["lat"], RENDER_DP))
+        for p in geom
+        if "lon" in p and "lat" in p
+    ]
+    return out if len(out) >= 2 else None
+
+
+def _join_rings(chains: list[list[tuple[float, float]]]) -> list[list[list[float]]]:
+    """Join member ways that share endpoints into closed rings.
+
+    OSM multipolygons are often several open ways, not one closed way. Treating
+    each way as its own polygon dropped Franklin Mountains State Park.
+    Incomplete rings are skipped rather than closed across the pack.
+    """
+    remaining = [list(chain) for chain in chains if len(chain) >= 2]
+    rings: list[list[list[float]]] = []
+    while remaining:
+        ring = remaining.pop(0)
+        progressed = True
+        while progressed:
+            progressed = False
+            if len(ring) >= 4 and ring[0] == ring[-1]:
+                break
+            for i, other in enumerate(remaining):
+                if ring[-1] == other[0]:
+                    ring.extend(other[1:])
+                elif ring[-1] == other[-1]:
+                    ring.extend(reversed(other[:-1]))
+                elif ring[0] == other[-1]:
+                    ring = other[:-1] + ring
+                elif ring[0] == other[0]:
+                    ring = list(reversed(other[1:])) + ring
+                else:
+                    continue
+                remaining.pop(i)
+                progressed = True
+                break
+        if len(ring) < 4 or ring[0] != ring[-1]:
+            continue
+        closed = [list(pt) for pt in ring]
+        simplified = simplify(closed, RENDER_EPS)
+        if not simplified:
+            continue
+        if simplified[0] != simplified[-1]:
+            simplified.append(simplified[0])
+        if len(simplified) >= 4:
+            rings.append(simplified)
+    return rings
+
+
+def relation_geometry(
+    el: dict, nodes: dict[int, tuple[float, float]], ways: dict[int, dict]
+) -> dict | None:
+    """Assemble a relation into Polygon / MultiPolygon from member ways.
+
+    Overpass ``out body; >; out skel qt`` inlines member ways and nodes.
+    Size is not a reason to skip a named nature reserve.
+    """
+    outers: list[list[tuple[float, float]]] = []
+    inners: list[list[tuple[float, float]]] = []
+    for mem in el.get("members") or []:
+        if mem.get("type") != "way":
+            continue
+        way = ways.get(mem.get("ref"))
+        if not way:
+            continue
+        chain = _way_chain(way, nodes)
+        if not chain:
+            continue
+        role = mem.get("role") or "outer"
+        if role == "inner":
+            inners.append(chain)
+        else:
+            outers.append(chain)
+    outer_rings = _join_rings(outers)
+    inner_rings = _join_rings(inners)
+    if not outer_rings:
+        return None
+    inner_polys: list[tuple[list[list[float]], object]] = []
+    for inner in inner_rings:
+        try:
+            hole = make_valid(Polygon(inner))
+        except (ValueError, TypeError):
+            continue
+        if hole.is_empty:
+            continue
+        inner_polys.append((inner, hole))
+    polys: list = []
+    for outer in outer_rings:
+        try:
+            poly = make_valid(Polygon(outer))
+        except (ValueError, TypeError):
+            continue
+        if poly.is_empty:
+            continue
+        holes = []
+        for inner, hole in inner_polys:
+            try:
+                if poly.contains(hole.representative_point()):
+                    holes.append(inner)
+            except (ValueError, TypeError):
+                continue
+        try:
+            poly = make_valid(Polygon(outer, holes))
+        except (ValueError, TypeError):
+            continue
+        if not poly.is_empty:
+            polys.append(poly)
+    if not polys:
+        return None
+    geom = unary_union(polys)
+    if geom.is_empty:
+        return None
+    if geom.geom_type == "GeometryCollection":
+        geom = unary_union(
+            [g for g in geom.geoms if g.geom_type in ("Polygon", "MultiPolygon")]
+        )
+        if geom.is_empty:
+            return None
+    mapped = mapping(geom)
+    if mapped.get("type") not in ("Polygon", "MultiPolygon"):
+        return None
+    return mapped
+
+
 def osm_to_geojson(osm: dict) -> dict:
     """OSM elements to the GeoJSON the canvas draws.
 
@@ -474,11 +648,18 @@ def osm_to_geojson(osm: dict) -> dict:
     can put on a phone — instead of Overpass's 7. The OSM element id and the
     old constant `kind` property are dropped: no style layer filters on them
     and no Swift reads them, so they were 2 MB of dead weight per pack.
+    Relations are assembled from member ways: a nature reserve mapped as a
+    multipolygon is a polygon here, not silence.
     """
     nodes = {
         el["id"]: (round(el["lon"], RENDER_DP), round(el["lat"], RENDER_DP))
         for el in osm.get("elements", [])
         if el.get("type") == "node" and "lat" in el
+    }
+    ways = {
+        el["id"]: el
+        for el in osm.get("elements", [])
+        if el.get("type") == "way"
     }
     features = []
     for el in osm.get("elements", []):
@@ -493,6 +674,13 @@ def osm_to_geojson(osm: dict) -> dict:
                     "geometry": {"type": "Point", "coordinates": list(nodes[el["id"]])},
                 }
             )
+        elif el.get("type") == "relation":
+            if not tags:
+                continue
+            geom = relation_geometry(el, nodes, ways)
+            if not geom:
+                continue
+            features.append({"type": "Feature", "properties": tags, "geometry": geom})
         elif el.get("type") == "way" and el.get("nodes"):
             if not tags:
                 continue
@@ -508,20 +696,27 @@ def osm_to_geojson(osm: dict) -> dict:
     return {"type": "FeatureCollection", "features": features, "attribution": OSM_CREDIT}
 
 
+def _clip_anchor(geom: dict) -> tuple[float, float] | None:
+    coords = geom.get("coordinates")
+    kind = geom.get("type")
+    if kind == "Point" and isinstance(coords, list) and len(coords) >= 2:
+        return (coords[1], coords[0])
+    if kind == "LineString" and coords:
+        lon, lat = coords[0]
+        return (lat, lon)
+    if kind == "Polygon" and coords and coords[0]:
+        lon, lat = coords[0][0]
+        return (lat, lon)
+    if kind == "MultiPolygon" and coords and coords[0] and coords[0][0]:
+        lon, lat = coords[0][0][0]
+        return (lat, lon)
+    return None
+
+
 def clip_features(fc: dict, sl: dict) -> dict:
     feats = []
     for f in fc.get("features") or []:
-        g = f.get("geometry") or {}
-        coords = g.get("coordinates")
-        pt = None
-        if g.get("type") == "Point" and isinstance(coords, list) and len(coords) >= 2:
-            pt = (coords[1], coords[0])
-        elif g.get("type") == "LineString" and coords:
-            lon, lat = coords[0]
-            pt = (lat, lon)
-        elif g.get("type") == "Polygon" and coords and coords[0]:
-            lon, lat = coords[0][0]
-            pt = (lat, lon)
+        pt = _clip_anchor(f.get("geometry") or {})
         if pt is None:
             continue
         lat, lon = pt
@@ -1795,6 +1990,47 @@ def grow_resources(dest: Path, pack: dict, span: float = 0.5) -> dict:
     return {"before": before, "added": len(added), "after": len(fc["features"])}
 
 
+def grow_notable(dest: Path, pack: dict, span: float = 1.0) -> dict:
+    """Add named nature-reserve relations, cave mouths, and named trees.
+
+    Additive. Streets and the router graph stay where they are. Relations
+    that the tiled street pass never asked for land here, assembled into
+    polygons so a hold can name Franklin Mountains State Park instead of
+    picnic woodland. Size is not a reason to skip a record.
+    """
+    fc = json.loads((dest / "osm.geojson").read_text())
+    before = len(fc["features"])
+    have = {feature_key(f) for f in fc["features"]}
+
+    bb = union_bbox(pack["slices"])
+    tiles = tile_bbox(bb, max_span=span)
+    print(f"  notable {pack['id']} tiles={len(tiles)}", flush=True)
+    parts = []
+    for i, tile in enumerate(tiles, 1):
+        print(f"  tile {i}/{len(tiles)} {tile}", flush=True)
+        parts.append(
+            overpass_notable(tile["south"], tile["west"], tile["north"], tile["east"])
+        )
+        time.sleep(1.0)
+
+    grown = osm_to_geojson(merge_osm(parts))
+    added = []
+    for f in grown["features"]:
+        key = feature_key(f)
+        if key in have:
+            continue
+        have.add(key)
+        added.append(f)
+    fc["features"].extend(added)
+    stamp_fetch(dest)
+    write_compact(dest / "osm.geojson", fc)
+    print(
+        f"  notable {pack['id']} {before} -> {len(fc['features'])} features (+{len(added)})",
+        flush=True,
+    )
+    return {"before": before, "added": len(added), "after": len(fc["features"])}
+
+
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
@@ -1941,11 +2177,28 @@ def resources(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def notable(ids: list[str] | None = None) -> None:
+    """Add named reserves, cave mouths, and named trees, then rebuild tiles.
+
+    Additive only. The router's graph is re-encoded from the bytes already
+    there rather than rebuilt from the extract, so growing a pack this way
+    cannot move a street.
+    """
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("NOTABLE", pid, flush=True)
+        grow_notable(root / pid, PACKS[pid])
+        finalize_existing(root / pid)
+    write_catalog(root)
+
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
     elif argv and argv[0] == "--resources":
         resources(argv[1:] or None)
+    elif argv and argv[0] == "--notable":
+        notable(argv[1:] or None)
     else:
         main(argv or None)
