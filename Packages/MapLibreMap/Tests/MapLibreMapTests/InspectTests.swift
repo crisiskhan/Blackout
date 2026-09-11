@@ -848,6 +848,68 @@ final class InspectTests: XCTestCase {
         )
     }
 
+    func testAWildlifeSanctuaryBeatsWoodlandAndLosesToANamedStreet() {
+        let wood: [String: String] = [
+            "natural": "wood",
+            "name": "Colorado River Park Wildlife Sanctuary",
+            "class": "woodland",
+        ]
+        let sanctuary: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Colorado River Park Wildlife Sanctuary",
+        ]
+        XCTAssertEqual(Inspect.pick([wood, sanctuary])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([wood, sanctuary]), pack: "tx-east").klass,
+            "Wildlife range"
+        )
+
+        let road: [String: String] = ["highway": "residential", "name": "Grove Boulevard"]
+        XCTAssertEqual(Inspect.pick([wood, sanctuary, road])["highway"], "residential")
+    }
+
+    func testAGlasshouseBeatsFarmFillAndLosesToANamedStreet() {
+        let farm: [String: String] = [
+            "landuse": "farmland",
+            "name": "Manor fields",
+            "class": "farm",
+        ]
+        let glass: [String: String] = [
+            "landuse": "greenhouse_horticulture",
+            "name": "Vickery Wholesale Greenhouse",
+        ]
+        XCTAssertEqual(Inspect.pick([farm, glass])["landuse"], "greenhouse_horticulture")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([farm, glass]), pack: "tx-east").klass,
+            "Glasshouse"
+        )
+
+        let unnamed: [String: String] = ["landuse": "greenhouse_horticulture"]
+        XCTAssertEqual(Inspect.pick([farm, unnamed])["landuse"], "greenhouse_horticulture")
+
+        let road: [String: String] = ["highway": "residential", "name": "Johnny Morris Road"]
+        XCTAssertEqual(Inspect.pick([farm, glass, road])["highway"], "residential")
+    }
+
+    func testACavePreserveBeatsParkFillAndLosesToANamedStreet() {
+        let park: [String: String] = [
+            "class": "park",
+            "name": "Discovery Well Cave Preserve",
+        ]
+        let preserve: [String: String] = [
+            "leisure": "park",
+            "name": "Discovery Well Cave Preserve",
+        ]
+        XCTAssertEqual(Inspect.pick([park, preserve])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, preserve]), pack: "tx-east").klass,
+            "Cave or hole"
+        )
+
+        let road: [String: String] = ["highway": "residential", "name": "Great Oaks Drive"]
+        XCTAssertEqual(Inspect.pick([park, preserve, road])["highway"], "residential")
+    }
+
     func testTheHoldNamesThePointClassesTheTilerEmits() {
         XCTAssertEqual(Inspect.packSourceID, "osm")
         XCTAssertEqual(Inspect.packPointSourceLayers, ["water", "place"])

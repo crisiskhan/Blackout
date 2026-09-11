@@ -125,9 +125,11 @@ public enum Inspect {
     /// records take the smaller: a street is a line you aimed at, landcover is
     /// a sheet you cannot miss. `landuse=residential` is drawn under every
     /// street in Las Cruces, so without that a hold downtown answers with the
-    /// subdivision instead of the road under the thumb. Between two unnamed
-    /// records take the ground, because out there the biome is the answer and
-    /// an unnamed ranch track is not.
+    /// subdivision instead of the road under the thumb. A cave preserve, a
+    /// wildlife sanctuary, or a glasshouse is a named (or tagged) sheet that
+    /// is the question — it beats woodland and farm fill, and still loses to a
+    /// named street. Between two unnamed records take the ground, because out
+    /// there the biome is the answer and an unnamed ranch track is not.
     ///
     /// Sampling 4,000 points across the tx-west pack, a street and a piece of
     /// ground are both under the thumb 1.5% of the time, and that split is
@@ -135,26 +137,30 @@ public enum Inspect {
     public static func pick(_ found: [[String: String]]) -> [String: String] {
         func rank(_ tags: [String: String]) -> Int {
             let named = !((tags["name"] ?? tags["ref"] ?? "").isEmpty)
-            let notable = packGroundPointNaturals.contains(tags["natural"] ?? "")
+            let notablePoint = packGroundPointNaturals.contains(tags["natural"] ?? "")
+            let notableGround = isCavePreserve(tags) || isWildlifeRange(tags)
+                || tags["landuse"] == "greenhouse_horticulture"
             switch read(tags: tags).kind {
             case .water:
                 return 0
-            case .land where notable:
+            case .land where notablePoint:
                 return 1
             case .street where named:
                 return 2
-            case .land where named:
+            case .land where notableGround:
                 return 3
-            case .place where named:
+            case .land where named:
                 return 4
-            case .land:
+            case .place where named:
                 return 5
-            case .street:
+            case .land:
                 return 6
-            case .place:
+            case .street:
                 return 7
-            case .nothing:
+            case .place:
                 return 8
+            case .nothing:
+                return 9
             }
         }
         return found

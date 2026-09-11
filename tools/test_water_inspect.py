@@ -590,6 +590,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("groundLabelsLayerID", overlay)
         self.assertNotIn("groundWorkedFillLayerID", overlay)
         self.assertNotIn("groundWorkedLineLayerID", overlay)
+        pick = inspect.split("public static func pick", 1)[1].split("packSourceID", 1)[0]
+        self.assertIn("isCavePreserve", pick)
+        self.assertIn("isWildlifeRange", pick)
+        self.assertIn("greenhouse_horticulture", pick)
 
     def test_glasshouses_are_worked_ground_not_a_meal(self):
         inspect = INSPECT.read_text()
