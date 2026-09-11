@@ -992,13 +992,13 @@ extension Inspect {
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Javelina, coyote, and deer range. Give it the road. Diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
+                return "Javelina, coyote, and deer range. Give it the road. Diamondback country. If bitten, the bite card. If you already have meat, cook through or leave it — the food card. Range, not a pin."
             case .txEast:
-                return "Coyote, deer, and hog range. Give it the road. Copperhead and cottonmouth country. If bitten, the bite card. If you already have meat, the food card. Not a pin."
+                return "Coyote, deer, and hog range. Give it the road. Copperhead and cottonmouth country. If bitten, the bite card. If you already have meat, cook through or leave it — the food card. Not a pin."
             case .nm:
-                return "Black bear, elk, and mule deer range. Give it the road. Prairie rattler or diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
+                return "Black bear, elk, and mule deer range. Give it the road. Prairie rattler or diamondback country. If bitten, the bite card. If you already have meat, cook through or leave it — the food card. Range, not a pin."
             case .unknown:
-                return "This is range, not a pin. Give it the road. Field has the animal, bite, and food cards."
+                return "This is range, not a pin. Give it the road. If you already have meat, cook through or leave it. Field has the animal, bite, and food cards."
             }
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
