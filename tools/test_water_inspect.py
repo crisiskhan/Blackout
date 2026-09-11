@@ -838,8 +838,8 @@ class GroundFieldSync(unittest.TestCase):
             "snake after game keeps woodland BOOK order",
         )
         self.assertNotIn("cactusTXCard", wet)
-        wet_case = inspect.split('case "wetland":', 1)[1].split(
-            'case "bare_rock"', 1
+        wet_case = inspect.split('if t["natural"] == "wetland"', 1)[1].split(
+            'if t["leisure"] == "park"', 1
         )[0]
         self.assertIn("wetlandCover", wet_case)
         self.assertNotIn("plantCover(", wet_case)
@@ -931,6 +931,11 @@ class GroundFieldSync(unittest.TestCase):
             land.index("isOpenReserve"),
             land.index('case "wood":'),
             "a mountain ACEC must open vipers, not picnic tree-use",
+        )
+        self.assertLess(
+            land.index('if t["natural"] == "wetland"'),
+            land.index('if t["leisure"] == "park"'),
+            "a named bosque tagged as a park is still bosque, not picnic",
         )
         self.assertLess(
             land.index('if t["leisure"] == "park"'),

@@ -1719,6 +1719,19 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(sted.doLine.lowercased().contains("cottonmouth"), sted.doLine)
         XCTAssertFalse(sted.doLine.lowercased().contains("edible"), sted.doLine)
 
+        let rio = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "natural": "wetland",
+                "name": "Rio Bosque Wetlands Park",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(rio.klass, "Bosque or wetland", "a named bosque tagged as a park is still bosque")
+        XCTAssertNotEqual(rio.klass, "Park")
+        XCTAssertTrue(rio.doLine.lowercased().contains("cottonwood"), rio.doLine)
+        XCTAssertFalse(rio.doLine.lowercased().contains("edible"), rio.doLine)
+
         let desertGarden = Inspect.read(
             tags: ["leisure": "park", "name": "Desert Garden Park"],
             pack: "tx-west"

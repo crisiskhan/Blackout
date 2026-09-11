@@ -798,6 +798,16 @@ public enum Inspect {
                 pack: pack
             )
         }
+        // Named bosque is cottonwoods, even when OSM also tags leisure=park.
+        if t["natural"] == "wetland" {
+            return wetlandCover(
+                klass: "Bosque or wetland",
+                sure: 74,
+                why: "mapped as wet ground, which is where the cottonwoods stand along the river",
+                unnamedPenalty: 4,
+                pack: pack
+            )
+        }
         // A city park tagged with scrub or wood fill is still kept ground.
         // Tiles may paint the landcover colour first; the hold reads leisure.
         if t["leisure"] == "park" {
@@ -833,14 +843,6 @@ public enum Inspect {
                     sure: 70,
                     why: "mapped as bare sand; a playa floor reads the same way and floods after rain",
                     unnamedPenalty: 2,
-                    pack: pack
-                )
-            case "wetland":
-                return wetlandCover(
-                    klass: "Bosque or wetland",
-                    sure: 74,
-                    why: "mapped as wet ground, which is where the cottonwoods stand along the river",
-                    unnamedPenalty: 4,
                     pack: pack
                 )
             case "bare_rock", "scree", "ridge", "cliff":
