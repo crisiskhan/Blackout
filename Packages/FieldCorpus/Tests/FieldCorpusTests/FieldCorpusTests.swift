@@ -76,6 +76,15 @@ final class FieldCorpusTests: XCTestCase {
         XCTAssertEqual(hit.first?.id, "camp-start")
     }
 
+    func testAskWildfireFindsAlreadyBurnedGround() {
+        let wild = card("env-wildfire", title: "Already-burned ground, not uphill")
+        let cook = card("food-cook", title: "Cook what you already trust")
+        XCTAssertEqual(
+            FieldCorpus.ask([wild, cook], query: "wildfire", locale: "en").map(\.id),
+            ["env-wildfire"]
+        )
+    }
+
     private func card(
         _ id: String,
         category: String = "water",

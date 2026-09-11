@@ -38,6 +38,25 @@ FROM_NOTHING = (
     "water-vessel",
     "shelter-insulate",
     "nav-sun",
+    "water-seep",
+    "fire-wet",
+    "fire-char",
+    "fire-reflector",
+    "shelter-platform",
+    "env-wildfire",
+    "env-smoke",
+    "env-altitude",
+    "env-coast",
+    "env-frostbite",
+    "env-scree",
+    "env-wind",
+    "env-night-move",
+    "trauma-carry",
+    "water-rockboil",
+    "camp-sweat",
+    "med-glare",
+    "animal-gator",
+    "water-urban",
 )
 
 
@@ -107,9 +126,26 @@ class FieldAskGlassTests(unittest.TestCase):
         trunk = json.dumps(by_id["env-core-temp"]).lower()
         self.assertIn("cotton", trunk)
         self.assertIn("trunk", trunk)
+        seep = json.dumps(by_id["water-seep"]).lower()
+        self.assertIn("seep", seep)
+        self.assertNotIn("first muddy scoop is the drink", seep)
+        wild = json.dumps(by_id["env-wildfire"]).lower()
+        self.assertIn("already-burned", wild)
+        rock = json.dumps(by_id["water-rockboil"]).lower()
+        self.assertIn("wet rock", rock)
+        gator = json.dumps(by_id["animal-gator"]).lower()
+        self.assertIn("give it the water", gator)
+        urban = json.dumps(by_id["water-urban"]).lower()
+        self.assertIn("tank, not the bowl", urban)
         field_py = read("tools", "v3", "field.py")
         self.assertIn("def from_nothing_core", field_py)
         self.assertIn("from_nothing_core()", field_py)
+        self.assertIn("def craft_core", field_py)
+        self.assertIn("craft_core()", field_py)
+        self.assertNotIn("dual survival", field_py.lower())
+        self.assertNotIn("lundin", field_py.lower())
+        self.assertNotIn("canterbury", field_py.lower())
+        self.assertNotIn("graham", field_py.lower())
 
     def test_solo_qa_scores_field_search(self):
         qa = read("docs", "SOLO_QA.md")
