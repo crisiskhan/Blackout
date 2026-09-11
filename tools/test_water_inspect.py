@@ -1202,9 +1202,15 @@ class GroundFieldSync(unittest.TestCase):
             ROOT / "Packages/MapLibreMap/Tests/MapLibreMapTests/HoldOnTheGlassTests.swift"
         ).read_text()
         self.assertIn("Three Crosses Cactus Garden", glass)
+        self.assertIn("Chihuahuan Desert Conservatory", glass)
+        self.assertIn("Rio Bosque Wetlands Park", glass)
         self.assertIn("Alamo Mountain Area of Critical Environmental Concern", glass)
         self.assertIn("32.332036", glass)
         self.assertIn("-106.782070", glass)
+        self.assertIn("33.157743", glass)
+        self.assertIn("-107.242346", glass)
+        self.assertIn("31.638834", glass)
+        self.assertIn("-106.308840", glass)
         self.assertIn("32.502967", glass)
         self.assertIn("-106.933833", glass)
         self.assertIn("32.032331", glass)
@@ -1251,6 +1257,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FIELD · ANIMAL", glass)
         self.assertIn("ANIMAL · BITE · FOOD · PLANT", glass)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", glass)
+        self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", glass)
         self.assertIn("named sink", glass)
         self.assertIn("Bosque or wetland", glass)
         self.assertIn('contains("edible")', glass)
@@ -1282,6 +1289,7 @@ class GroundFieldSync(unittest.TestCase):
 
         west = json.loads((PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text())
         cactus_hit = False
+        conservatory_hit = False
         glass_hit = False
         reserve_hit = False
         for feat in west["features"]:
@@ -1290,6 +1298,8 @@ class GroundFieldSync(unittest.TestCase):
             for ring in rings_of(feat.get("geometry") or {}):
                 if kind == "botanic" and pip(-106.782070, 32.332036, ring):
                     cactus_hit = props.get("name") == "Three Crosses Cactus Garden"
+                if kind == "botanic" and pip(-107.242346, 33.157743, ring):
+                    conservatory_hit = props.get("name") == "Chihuahuan Desert Conservatory"
                 if kind == "glasshouse" and pip(-106.933833, 32.502967, ring):
                     glass_hit = True
                 if kind == "reserve" and pip(-105.633755, 32.032331, ring):
@@ -1298,20 +1308,31 @@ class GroundFieldSync(unittest.TestCase):
                         == "Alamo Mountain Area of Critical Environmental Concern"
                     )
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
+        self.assertTrue(
+            conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
+        )
         self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
         self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
         sink = False
+        bosque = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
-            if props.get("natural") != "sinkhole" or geom.get("type") != "Point":
-                continue
-            lon, lat = geom["coordinates"][:2]
-            if abs(lat - 31.694905) < 1e-6 and abs(lon - (-106.441133)) < 1e-6:
-                sink = True
+            if props.get("natural") == "sinkhole" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if abs(lat - 31.694905) < 1e-6 and abs(lon - (-106.441133)) < 1e-6:
+                    sink = True
+            if (
+                props.get("natural") == "wetland"
+                and props.get("name") == "Rio Bosque Wetlands Park"
+            ):
+                for ring in rings_of(geom):
+                    if pip(-106.308840, 31.638834, ring):
+                        bosque = True
         self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
+        self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
 
         east = json.loads((PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text())
         wildlife_hit = False

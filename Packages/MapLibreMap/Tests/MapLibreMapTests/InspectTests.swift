@@ -1822,6 +1822,37 @@ final class InspectTests: XCTestCase {
         XCTAssertNil(Inspect.pick([bosque, sink, road])["highway"])
     }
 
+    func testADesertConservatoryBeatsParkFillAndANamedStreet() {
+        // Overlay kind is botanic. Phrase `desert conservatory` still has
+        // to open cactus, not oleander, and still beat the street beside it.
+        let park: [String: String] = [
+            "class": "park",
+        ]
+        let sheet: [String: String] = [
+            "boundary": "protected_area",
+            "name": "Chihuahuan Desert Conservatory",
+        ]
+        XCTAssertEqual(Inspect.pick([park, sheet])["name"], "Chihuahuan Desert Conservatory")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet]), pack: "tx-west").klass,
+            "Cactus garden"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet]), pack: "tx-west").klass,
+            "Botanic garden"
+        )
+
+        let road: [String: String] = [
+            "highway": "tertiary",
+            "name": "Smith Street",
+        ]
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([park, sheet, road]), pack: "tx-west").klass,
+            "Cactus garden"
+        )
+        XCTAssertNil(Inspect.pick([park, sheet, road])["highway"])
+    }
+
     func testANamedStreetBeatsGenericParkFill() {
         let park: [String: String] = [
             "leisure": "park",
