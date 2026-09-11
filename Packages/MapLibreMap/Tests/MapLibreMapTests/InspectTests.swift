@@ -1531,6 +1531,37 @@ final class InspectTests: XCTestCase {
         )
     }
 
+    func testAnEastPrairiePreserveBeatsScrubFillAndANamedStreet() {
+        let scrub: [String: String] = [
+            "natural": "scrub",
+            "name": "Decker Tallgrass Prairie Preserve",
+            "class": "desert",
+        ]
+        let reserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Decker Tallgrass Prairie Preserve",
+        ]
+        XCTAssertEqual(Inspect.pick([scrub, reserve])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([scrub, reserve]), pack: "tx-east").klass,
+            "Open reserve"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([scrub, reserve]), pack: "tx-east").klass,
+            "Desert scrub"
+        )
+
+        let road: [String: String] = [
+            "highway": "residential",
+            "name": "Decker Lake Road",
+        ]
+        XCTAssertEqual(Inspect.pick([scrub, reserve, road])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([scrub, reserve, road]), pack: "tx-east").klass,
+            "Open reserve"
+        )
+    }
+
     func testAGlasshouseBeatsFarmFillAndANamedStreet() {
         let farm: [String: String] = [
             "landuse": "farmland",
@@ -1758,6 +1789,37 @@ final class InspectTests: XCTestCase {
             "Cave or hole"
         )
         XCTAssertNil(Inspect.pick([park, preserve, road])["highway"])
+    }
+
+    func testANamedSinkBeatsBosqueFillAndANamedStreet() {
+        // Blowing Sink is tagged wetland, so the land tiles paint bosque.
+        // Phrase `blowing sink` on the overlay still has to name the hole.
+        let bosque: [String: String] = [
+            "natural": "wetland",
+            "class": "bosque",
+        ]
+        let sink: [String: String] = [
+            "name": "Blowing Sink",
+        ]
+        XCTAssertEqual(Inspect.pick([bosque, sink])["name"], "Blowing Sink")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([bosque, sink]), pack: "tx-east").klass,
+            "Cave or hole"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([bosque, sink]), pack: "tx-east").klass,
+            "Bosque or wetland"
+        )
+
+        let road: [String: String] = [
+            "highway": "residential",
+            "name": "Blowing Sink Road",
+        ]
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([bosque, sink, road]), pack: "tx-east").klass,
+            "Cave or hole"
+        )
+        XCTAssertNil(Inspect.pick([bosque, sink, road])["highway"])
     }
 
     func testANamedStreetBeatsGenericParkFill() {

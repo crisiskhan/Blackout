@@ -1218,10 +1218,16 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Wildlife range", glass)
         self.assertIn("Indiangrass Wildlife Sanctuary", glass)
         self.assertIn("Discovery Well Cave Preserve", glass)
+        self.assertIn("Blowing Sink", glass)
+        self.assertIn("Decker Tallgrass Prairie Preserve", glass)
         self.assertIn("30.315667", glass)
         self.assertIn("-97.591821", glass)
         self.assertIn("30.490391", glass)
         self.assertIn("-97.855063", glass)
+        self.assertIn("30.193035", glass)
+        self.assertIn("-97.850443", glass)
+        self.assertIn("30.294331", glass)
+        self.assertIn("-97.603942", glass)
         self.assertIn('packId: "tx-east"', glass)
         self.assertIn("Albuquerque BioPark Botanic Garden", glass)
         self.assertIn("Marquez Wildlife Management Area", glass)
@@ -1244,6 +1250,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mule deer", glass)
         self.assertIn("FIELD · ANIMAL", glass)
         self.assertIn("ANIMAL · BITE · FOOD · PLANT", glass)
+        self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", glass)
+        self.assertIn("named sink", glass)
+        self.assertIn("Bosque or wetland", glass)
         self.assertIn('contains("edible")', glass)
         self.assertNotIn("safe to eat", glass.lower())
         self.assertNotIn("edible unlock", glass.lower())
@@ -1307,6 +1316,8 @@ class GroundFieldSync(unittest.TestCase):
         east = json.loads((PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text())
         wildlife_hit = False
         cave_hit = False
+        blowing_hit = False
+        decker_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1315,11 +1326,21 @@ class GroundFieldSync(unittest.TestCase):
                     wildlife_hit = props.get("name") == "Indiangrass Wildlife Sanctuary"
                 if kind == "cave" and pip(-97.855063, 30.490391, ring):
                     cave_hit = props.get("name") == "Discovery Well Cave Preserve"
+                if kind == "cave" and pip(-97.850443, 30.193035, ring):
+                    blowing_hit = props.get("name") == "Blowing Sink"
+                if kind == "reserve" and pip(-97.603942, 30.294331, ring):
+                    decker_hit = props.get("name") == "Decker Tallgrass Prairie Preserve"
         self.assertTrue(
             wildlife_hit, "glass wildlife hold is not inside Indiangrass"
         )
         self.assertTrue(
             cave_hit, "glass cave hold is not inside Discovery Well"
+        )
+        self.assertTrue(
+            blowing_hit, "glass named-sink hold is not inside Blowing Sink"
+        )
+        self.assertTrue(
+            decker_hit, "glass east open-reserve hold is not inside Decker"
         )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
