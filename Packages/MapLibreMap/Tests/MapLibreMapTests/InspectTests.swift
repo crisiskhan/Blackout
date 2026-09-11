@@ -397,6 +397,7 @@ final class InspectTests: XCTestCase {
         let doLine = marquez.doLine.lowercased()
         XCTAssertTrue(doLine.contains("bear") || doLine.contains("elk"), marquez.doLine)
         XCTAssertTrue(doLine.contains("diamondback") || doLine.contains("rattler"), marquez.doLine)
+        XCTAssertTrue(doLine.contains("bite card"), marquez.doLine)
         XCTAssertTrue(doLine.contains("range") || doLine.contains("not a pin"), marquez.doLine)
         XCTAssertFalse(doLine.contains("lives here"), marquez.doLine)
         XCTAssertFalse(doLine.contains("edible"), marquez.doLine)
