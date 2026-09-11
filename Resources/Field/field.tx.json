@@ -385,12 +385,12 @@
         "TX"
       ],
       "title": {
-        "en": "Texas trees — shade, not a meal",
-        "es": "Árboles de Texas — sombra, no comida"
+        "en": "West Texas trees — shade, not a meal",
+        "es": "Árboles del oeste de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in Texas woodland, park, or bosque. Live oak, pecan, mesquite, cedar elm. Shade, thorns, deadfall.",
-        "es": "Estás en arbolado, parque o bosque de Texas. Encino, pecán, mezquite, olmo cedro. Sombra, espinas, madera muerta."
+        "en": "You are in West Texas woodland, park, or bosque. Live oak, pecan, mesquite, cedar elm, cottonwood. Shade, thorns, deadfall.",
+        "es": "Estás en arbolado, parque o bosque del oeste de Texas. Encino, pecán, mezquite, olmo cedro, álamo. Sombra, espinas, madera muerta."
       },
       "stop_if": [
         {
@@ -450,8 +450,8 @@
         "es": "Árboles del este de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in East Texas woodland, park, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine. Shade and deadfall.",
-        "es": "Estás en arbolado, parque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda. Sombra y madera muerta."
+        "en": "You are in East Texas woodland, park, or Lost Pines. Live oak, pecan, cedar elm, loblolly pine, cottonwood. Shade and deadfall.",
+        "es": "Estás en arbolado, parque o Lost Pines del este de Texas. Encino, pecán, olmo cedro, pino taeda, álamo. Sombra y madera muerta."
       },
       "stop_if": [
         {
@@ -507,8 +507,8 @@
         "TX"
       ],
       "title": {
-        "en": "Texas mammals — give space",
-        "es": "Mamíferos de Texas — da espacio"
+        "en": "West Texas mammals — give space",
+        "es": "Mamíferos del oeste de Texas — da espacio"
       },
       "situation": {
         "en": "Javelina, coyote, white-tailed deer country. This is range, not a pin. The map does not know where one is standing.",

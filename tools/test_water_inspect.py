@@ -900,6 +900,54 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("tx-javelina", qa)
         self.assertIn("tx-plant-danger", qa)
 
+    def test_the_field_tree_card_names_the_hold_trees(self):
+        """Hold woodland and bosque name trees. FIELD · PLANT must name the same ones.
+
+        Cottonwood is bosque range the hold already speaks. It is not a GPS pin
+        and not an edible unlock. NM Field must name the Vision Rio Grande
+        cottonwood. West titles stay pack-true, like the west snake card.
+        """
+        hold = SWIFT.read_text()
+        self.assertIn("Cottonwood, juniper, piñon", hold)
+        self.assertIn("Rio Grande cottonwood", hold)
+        self.assertIn("Cottonwoods and pecan along the water", hold)
+
+        def blob(state: str, cid: str) -> str:
+            book = json.loads((ROOT / f"Resources/Field/field.{state}.json").read_text())
+            return json.dumps(
+                next(c for c in book["cards"] if c["id"] == cid),
+                ensure_ascii=False,
+            ).lower()
+
+        nm = blob("nm", "nm-tree-use")
+        self.assertIn("cottonwood", nm)
+        self.assertIn("rio grande cottonwood", nm)
+        self.assertIn("juniper", nm)
+        self.assertIn("piñon", nm)
+        self.assertIn("aspen", nm)
+        self.assertNotIn("edible", nm)
+
+        west = blob("tx", "tx-tree-use")
+        self.assertIn("mesquite", west)
+        self.assertIn("cottonwood", west)
+        self.assertIn("west texas trees", west)
+        self.assertNotIn("edible", west)
+
+        east = blob("tx", "tx-east-tree-use")
+        self.assertIn("loblolly", east)
+        self.assertIn("cottonwood", east)
+        self.assertNotIn("mesquite", east)
+        self.assertNotIn("edible", east)
+
+        west_mammal = blob("tx", "tx-mammal")
+        self.assertIn("west texas mammals", west_mammal)
+        self.assertIn("javelina", west_mammal)
+
+        qa = (ROOT / "docs/SOLO_QA.md").read_text()
+        self.assertIn("nm-tree-use", qa)
+        self.assertIn("Rio Grande cottonwood", qa)
+        self.assertIn("West Texas trees", qa)
+
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
 
