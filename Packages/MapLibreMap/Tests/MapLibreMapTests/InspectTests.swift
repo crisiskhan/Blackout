@@ -572,6 +572,19 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(center.klass, "Wildlife range")
         XCTAssertNotEqual(center.klass, "Park")
         XCTAssertTrue(center.fieldRoute.contains(Inspect.mammalNMCard))
+        let nmWildlifeBook: Set<String> = [
+            Inspect.mammalNMCard, Inspect.snakeNMCard, Inspect.gameNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.biteCard,
+            Inspect.plantUseCard, Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(center.fieldRoute, in: nmWildlifeBook).first,
+            Inspect.mammalNMCard
+        )
+        XCTAssertEqual(
+            InspectField.label(for: InspectField.presentRoute(center.fieldRoute, in: nmWildlifeBook)[0]),
+            "FIELD · ANIMAL"
+        )
         XCTAssertTrue(center.doLine.lowercased().contains("bear") || center.doLine.lowercased().contains("elk"), center.doLine)
 
         let leaf = Inspect.read(
@@ -935,7 +948,9 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.mammalEastCard))
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.gameEastCard))
         XCTAssertTrue(glass.why.contains("glasshouses"), glass.why)
+        XCTAssertTrue(glass.doLine.lowercased().contains("oleander"), glass.doLine)
         XCTAssertTrue(glass.doLine.lowercased().contains("not food"), glass.doLine)
+        XCTAssertFalse(glass.doLine.lowercased().contains("datura"), glass.doLine)
         XCTAssertFalse(glass.doLine.lowercased().contains("live oak"), glass.doLine)
         XCTAssertFalse(glass.why.lowercased().contains("edible"), glass.why)
         XCTAssertFalse(glass.doLine.lowercased().contains("edible"), glass.doLine)
@@ -1423,7 +1438,10 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.cactusNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.mammalNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.gameNMCard))
+        XCTAssertTrue(garden.doLine.lowercased().contains("datura"), garden.doLine)
         XCTAssertTrue(garden.doLine.lowercased().contains("not food"), garden.doLine)
+        XCTAssertFalse(garden.doLine.lowercased().contains("oleander"), garden.doLine)
+        XCTAssertFalse(garden.doLine.lowercased().contains("cholla"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("live oak"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("edible"), garden.doLine)
         XCTAssertFalse(garden.doLine.lowercased().contains("lives here"), garden.doLine)

@@ -979,6 +979,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hog country", do)
         self.assertIn("Pretty is not food", do)
         self.assertIn("Botanic garden", do)
+        self.assertIn("plantDangerLine", do)
+        poison = do.split("private static func plantDangerLine", 1)[1].split(
+            "private static func landDoLine", 1
+        )[0].lower()
+        self.assertIn("oleander", poison)
+        self.assertIn("texas mountain laurel", poison)
+        self.assertIn("datura", poison)
+        self.assertIn("pretty is not food", poison)
+        self.assertNotIn("cholla", poison)
+        self.assertNotIn("prickly pear", poison)
+        self.assertNotIn("edible", poison)
+        self.assertNotIn("lives here", poison)
         self.assertIn('case "Named tree", "Tree", "Irrigated ground":', do)
         self.assertIn("treeUseLine", do)
         named_tree = do.split("private static func treeUseLine", 1)[1].split(
@@ -1181,6 +1193,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Irrigated ground", qa)
         self.assertIn("Not javelina country", qa)
         self.assertIn("Glasshouse", qa)
+        self.assertIn("Hold DO names oleander", qa)
         self.assertIn("not plant-use", qa)
         self.assertIn("Vickery Wholesale Greenhouse", qa)
         self.assertIn("glasshouse", qa)
@@ -1425,7 +1438,7 @@ class GroundFieldSync(unittest.TestCase):
         """
         do = SWIFT.read_text()
         animal = do.split("private static func animalRangeLine", 1)[1].split(
-            "private static func landDoLine", 1
+            "private static func plantDangerLine", 1
         )[0]
         nm_scrub = animal.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
         self.assertIn("prairie rattler", nm_scrub)

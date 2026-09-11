@@ -951,6 +951,19 @@ extension Inspect {
         }
     }
 
+    /// Same poison the plant-danger SPEAK names. Not woodland tree-use,
+    /// not a cactus garden, not a meal.
+    private static func plantDangerLine(state: String?, pack: String?) -> String {
+        switch PackRange.of(state: state, pack: pack) {
+        case .txWest, .txEast:
+            return "Oleander or Texas mountain laurel. Pretty is not food."
+        case .nm:
+            return "Datura. Pretty is not food."
+        case .unknown:
+            return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
+        }
+    }
+
     private static func landDoLine(_ klass: String, state: String?, pack: String?) -> String {
         switch klass {
         case "Named tree", "Tree", "Irrigated ground":
@@ -958,7 +971,7 @@ extension Inspect {
         case "Woodland", "Park", "Protected land":
             return treeRangeLine(state: state, pack: pack)
         case "Glasshouse", "Botanic garden":
-            return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."
+            return plantDangerLine(state: state, pack: pack)
         case "Cactus garden":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest, .txEast:
