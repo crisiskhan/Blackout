@@ -406,6 +406,8 @@ public enum Inspect {
     /// range, or garden is this walk — vipers use that cover. An
     /// unnamed reserve falls through to the landcover. Phrase `open
     /// space` is not a match — Open Space Visitor Center is a park.
+    /// Phrase `hueco tanks`, not the word `hueco` — Hueco Mountain
+    /// Park is a town park, and Hueco Tanks Road is a road.
     static func isOpenReserve(_ t: [String: String]) -> Bool {
         let named = !(t["name"] ?? "").isEmpty
         if t["leisure"] == "nature_reserve", named { return true }
@@ -417,6 +419,7 @@ public enum Inspect {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("area of critical environmental concern") { return true }
         if n.contains("prairie preserve") { return true }
+        if n.contains("hueco tanks") { return true }
         return false
     }
 

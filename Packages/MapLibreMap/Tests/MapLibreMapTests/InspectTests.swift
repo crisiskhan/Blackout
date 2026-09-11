@@ -835,6 +835,39 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(farmPreserve.klass, "Park")
         XCTAssertNotEqual(farmPreserve.klass, "Open reserve")
+
+        let hueco = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "boundary": "protected_area",
+                "name": "Hueco Tanks State Park and Historic Site",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(hueco.klass, "Open reserve")
+        XCTAssertNotEqual(hueco.klass, "Park")
+        XCTAssertEqual(hueco.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(hueco.doLine.lowercased().contains("diamondback"), hueco.doLine)
+        XCTAssertTrue(hueco.doLine.lowercased().contains("javelina"), hueco.doLine)
+        XCTAssertTrue(hueco.doLine.lowercased().contains("give it room"), hueco.doLine)
+        XCTAssertTrue(hueco.doLine.lowercased().contains("no ice"), hueco.doLine)
+        XCTAssertFalse(hueco.doLine.lowercased().contains("cottonwood"), hueco.doLine)
+        XCTAssertFalse(hueco.doLine.lowercased().contains("mesquite"), hueco.doLine)
+        XCTAssertFalse(hueco.doLine.lowercased().contains("edible"), hueco.doLine)
+
+        let huecoTown = Inspect.read(
+            tags: ["leisure": "park", "name": "Hueco Mountain Park"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(huecoTown.klass, "Park")
+        XCTAssertNotEqual(huecoTown.klass, "Open reserve")
+
+        let huecoRoad = Inspect.read(
+            tags: ["highway": "tertiary", "name": "Hueco Tanks Road"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(huecoRoad.klass, "Road")
+        XCTAssertNotEqual(huecoRoad.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {
@@ -1563,6 +1596,25 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([wood, reserve, road]), pack: "tx-west").klass,
             "Open reserve"
+        )
+
+        let hueco: [String: String] = [
+            "leisure": "park",
+            "boundary": "protected_area",
+            "name": "Hueco Tanks State Park and Historic Site",
+        ]
+        let huecoRoad: [String: String] = [
+            "highway": "tertiary",
+            "name": "Hueco Tanks Road",
+        ]
+        XCTAssertEqual(Inspect.pick([hueco, huecoRoad])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([hueco, huecoRoad]), pack: "tx-west").klass,
+            "Open reserve"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([hueco, huecoRoad]), pack: "tx-west").klass,
+            "Park"
         )
     }
 

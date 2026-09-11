@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4, 6), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 2)}
+        expected = {"tx-west": (2, 0, 0, 4, 7), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -154,8 +154,11 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("desert garden park", west_blob)
         self.assertIn("rose garden", west_blob)
         self.assertIn("alamo mountain area of critical environmental concern", west_blob)
+        self.assertIn("hueco tanks state park and historic site", west_blob)
         self.assertNotIn("cactus point park", west_blob)
         self.assertNotIn("parque cactus del desierto", west_blob)
+        self.assertNotIn("hueco mountain park", west_blob)
+        self.assertNotIn("hueco tanks road", west_blob)
 
     def test_a_botanic_garden_is_worked_ground_not_a_meal(self):
         self.assertEqual(
@@ -387,6 +390,27 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"landuse": "residential", "name": "Prairie Hills Apartments"}
             )
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "park",
+                    "boundary": "protected_area",
+                    "name": "Hueco Tanks State Park and Historic Site",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Hueco Mountain Park"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "tertiary", "name": "Hueco Tanks Road"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"name": "Hueco Tanks State Park Dam", "waterway": "dam"}
+            )
+        )
 
     def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
         inspect = INSPECT.read_text()
@@ -409,6 +433,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("critical")', inspect)
         self.assertNotIn('contains("prairie")', inspect)
+        self.assertNotIn('contains("hueco")', inspect)
         self.assertIn("isOpenReserve", inspect)
         self.assertIn("Open reserve", inspect)
         self.assertIn('t["leisure"] == "nature_reserve"', inspect)
@@ -944,6 +969,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("isOpenReserve", inspect)
         self.assertIn("area of critical environmental concern", inspect)
         self.assertIn("prairie preserve", inspect)
+        self.assertIn("hueco tanks", inspect)
         self.assertIn("Open reserve", inspect)
         self.assertLess(
             land.index("isOpenReserve"),
@@ -1356,6 +1382,7 @@ class GroundFieldSync(unittest.TestCase):
         rose_hit = False
         glass_hit = False
         reserve_hit = False
+        hueco_hit = False
         for feat in west["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1373,6 +1400,10 @@ class GroundFieldSync(unittest.TestCase):
                         props.get("name")
                         == "Alamo Mountain Area of Critical Environmental Concern"
                     )
+                if kind == "reserve" and pip(-106.042815, 31.911873, ring):
+                    hueco_hit = (
+                        props.get("name") == "Hueco Tanks State Park and Historic Site"
+                    )
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
@@ -1380,6 +1411,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(rose_hit, "glass rose-garden hold is not inside Rose Garden")
         self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
         self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
+        self.assertTrue(
+            hueco_hit,
+            "SOLO_QA Hueco Tanks hold is not inside the named desert park",
+        )
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
         sink = False
@@ -1702,6 +1737,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", qa)
         self.assertIn("Paseo de la Mesa Open Space", qa)
         self.assertIn("35.149083", qa)
+        self.assertIn("Hueco Tanks State Park and Historic Site", qa)
+        self.assertIn("31.911873", qa)
+        self.assertIn("Hueco Mountain Park", qa)
         self.assertIn("Decker Tallgrass Prairie Preserve", qa)
         self.assertIn("Wild Basin Wilderness Preserve", qa)
         self.assertIn("Barrow Nature Preserve", qa)
