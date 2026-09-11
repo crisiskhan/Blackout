@@ -1,15 +1,17 @@
-"""Worked plant ground the tiles currently drop, derived from the pack's OSM.
+"""Notable plant and cave ground the tiles flatten, derived from the pack's OSM.
 
 The extract already carries `landuse=greenhouse_horticulture` — 2 in TX WEST,
 14 in TX EAST, 10 in NM. The tiler's land table did not class them, so they
-never reached a fill, and holding the glasshouse answered open ground. FIELD
-still has the plant book for this pack. This file is the water-detail pattern
-for those records: small enough to sit in the style as a geojson source, tags
+never reached a fill, and holding the glasshouse answered open ground. It also
+carries three cave preserves tagged as parks. Those already paint as park
+fill; without a silver outline they look like picnic ground. FIELD still has
+the plant book and the cave card. This file is the water-detail pattern for
+those records: small enough to sit in the style as a geojson source, tags
 intact so a hold names the record rather than a colour.
 
 No network. The input is `osm.geojson` already in the tree. A reviewer can
 regenerate every shipped byte and diff it. Animals are not drawn. Nothing
-here is a meal.
+here is a meal. Bee Cave is a town park and is not in this file.
 """
 from __future__ import annotations
 
@@ -23,7 +25,7 @@ OSM_CREDIT = "© OpenStreetMap contributors"
 
 # Tags the hold card reads off the overlay. The card describes the record, so
 # the record has to survive this extract rather than being flattened into ink.
-KEEP_TAGS = ("name", "landuse")
+KEEP_TAGS = ("name", "landuse", "leisure", "boundary")
 
 # Worked plant ground the current land tiles miss. Orchard and farmland already
 # paint as farm; these glasshouses do not. Recreation ground is named by the
@@ -31,21 +33,39 @@ KEEP_TAGS = ("name", "landuse")
 # overlay — sports fields are not glasshouses.
 WORKED_LANDUSE = {"greenhouse_horticulture"}
 
+# Phrase match, not the word "cave". Must stay in step with
+# `Inspect.isCavePreserve`. Bee Cave and Cave Drive stay out.
+CAVE_PRESERVE_PHRASES = ("cave preserve", "cave area of critical")
+CAVE_PRESERVE_KEYS = {
+    ("leisure", "park"),
+    ("leisure", "nature_reserve"),
+    ("boundary", "protected_area"),
+    ("boundary", "national_park"),
+}
+
 
 def write_compact(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
 
 
+def is_cave_preserve(props: dict) -> bool:
+    park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
+    if not park:
+        return False
+    name = (props.get("name") or "").lower()
+    return any(phrase in name for phrase in CAVE_PRESERVE_PHRASES)
+
+
 def records(fc: dict) -> list[dict]:
-    """The glasshouse polygons in one pack, tags slimmed, order stable."""
+    """Glasshouse and cave-preserve polygons in one pack, tags slimmed, order stable."""
     out: list[dict] = []
     for feat in fc.get("features") or []:
         props = feat.get("properties") or {}
-        if props.get("landuse") not in WORKED_LANDUSE:
-            continue
         geom = feat.get("geometry") or {}
         if geom.get("type") not in ("Polygon", "MultiPolygon"):
+            continue
+        if props.get("landuse") not in WORKED_LANDUSE and not is_cave_preserve(props):
             continue
         keep = {k: props[k] for k in KEEP_TAGS if props.get(k)}
         out.append({"type": "Feature", "properties": keep, "geometry": geom})
@@ -72,8 +92,10 @@ def build(dest: Path) -> dict:
     feats = records(fc)
     write_compact(dest / "layers" / "ground.geojson", render_layer(feats))
     drawn = (dest / "layers" / "ground.geojson").stat().st_size
+    glass = sum(1 for f in feats if (f["properties"].get("landuse") == "greenhouse_horticulture"))
+    caves = len(feats) - glass
     print(
-        f"  ground {dest.name} {len(feats)} glasshouses draw {drawn} bytes",
+        f"  ground {dest.name} {glass} glasshouses {caves} cave-preserves draw {drawn} bytes",
         flush=True,
     )
     return {"records": len(feats), "drawBytes": drawn}

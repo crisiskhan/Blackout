@@ -391,7 +391,7 @@ public enum PackStyle {
     /// Bump when the resolver changes: a phone that already cached a resolved style must
     /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
     /// silver ground marks for peaks, holes and named trees, and the glasshouse
-    /// overlay from `layers/ground.geojson`.
+    /// and cave-preserve overlay from `layers/ground.geojson`.
     public static let resolverVersion = 6
 
     private static var resolvedMemory: [String: URL] = [:]
@@ -657,9 +657,9 @@ public enum PackStyle {
     }
 
     /// Peaks, holes and named trees the extract already put on the place slice,
-    /// plus glasshouses the land tiles currently drop. Silver marks, no
-    /// labels, no animals. A hold reads the record; the mark only says something
-    /// is here.
+    /// plus glasshouses the land tiles currently drop and cave preserves that
+    /// otherwise read as picnic parks. Silver marks, no labels, no animals.
+    /// A hold reads the record; the mark only says something is here.
     public static func attachGroundLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
@@ -690,9 +690,10 @@ public enum PackStyle {
         }
     }
 
-    /// Glasshouses the tiler has not yet classed as farm. Quiet fill under
-    /// the streets so a hold can name them; silver outline at walking zoom so
-    /// the record is visible. No class label, not a meal.
+    /// Glasshouses the tiler has not yet classed as farm, and cave preserves
+    /// that otherwise read as picnic parks. Quiet fill under the streets so a
+    /// hold can name them; silver outline at walking zoom so the record is
+    /// visible. No class label, not a meal.
     private static func attachWorkedGround(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],

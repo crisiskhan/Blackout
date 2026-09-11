@@ -74,6 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
+        expected = {"tx-west": (2, 0), "tx-east": (14, 2), "nm": (10, 1)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -82,10 +83,30 @@ class ShippedWaterLayers(unittest.TestCase):
             blob = path.read_text().lower()
             self.assertNotIn("edible", blob, pid)
             self.assertNotIn("animal-icon", blob, pid)
+            self.assertNotIn("bee cave", blob, pid)
+            glass = 0
+            caves = 0
             for feat in fc["features"]:
                 props = feat.get("properties") or {}
-                self.assertEqual(props.get("landuse"), "greenhouse_horticulture", pid)
                 self.assertIn(feat.get("geometry", {}).get("type"), ("Polygon", "MultiPolygon"))
+                name = (props.get("name") or "").lower()
+                if props.get("landuse") == "greenhouse_horticulture":
+                    glass += 1
+                    continue
+                self.assertTrue(
+                    ground.is_cave_preserve(props),
+                    f"{pid} overlay feature is neither glasshouse nor cave preserve: {props}",
+                )
+                self.assertNotIn("bee cave", name)
+                caves += 1
+            self.assertEqual((glass, caves), expected[pid], pid)
+
+    def test_the_overlay_and_the_card_use_the_same_cave_preserve_phrases(self):
+        inspect = INSPECT.read_text()
+        for phrase in ground.CAVE_PRESERVE_PHRASES:
+            self.assertIn(f'"{phrase}"', inspect)
+            self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertNotIn('contains("cave")', inspect)
 
     def test_the_manifest_counts_the_ground_it_ships(self):
         for pid in PACKS:
