@@ -9,8 +9,9 @@ they look like picnic ground or cottonwoods. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
 open picnic tree-use without this file. A nature preserve tagged as woodland
 would open picnic tree-use without this file. A botanic garden tagged as a park
-would open woodland tree-use without this file. A mountain ACEC or a prairie
-preserve would open picnic tree-use without this file. This is the water-detail
+would open woodland tree-use without this file. A mountain ACEC, a prairie
+preserve, or a named nature reserve would open picnic tree-use without this
+file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
 source, tags intact so a hold names the record rather than a colour.
 
@@ -74,7 +75,10 @@ WILDLIFE_RANGE_PHRASES = (
 # A mountain ACEC is not picnic woodland. Phrase `area of critical
 # environmental concern`, not the word `critical`. Pronoun Cave is a
 # hole and is matched first. Phrase `prairie preserve`, not `prairie`.
-# Prairie Hills is apartments. Must stay in step with
+# Prairie Hills is apartments. A named nature reserve that is not
+# already a hole, wildlife range, or garden is this walk. An unnamed
+# reserve is not. Phrase `open space` is not a match — Open Space
+# Visitor Center is a park. Must stay in step with
 # `Inspect.isOpenReserve`.
 OPEN_RESERVE_PHRASES = (
     "area of critical environmental concern",
@@ -131,11 +135,14 @@ def is_botanic_garden(props: dict) -> bool:
 
 
 def is_open_reserve(props: dict) -> bool:
+    name = (props.get("name") or "").strip()
+    if props.get("leisure") == "nature_reserve" and name:
+        return True
     park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
     if not park:
         return False
-    name = (props.get("name") or "").lower()
-    return any(phrase in name for phrase in OPEN_RESERVE_PHRASES)
+    lowered = name.lower()
+    return any(phrase in lowered for phrase in OPEN_RESERVE_PHRASES)
 
 
 def overlay_kind(props: dict) -> str | None:

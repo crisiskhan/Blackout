@@ -660,8 +660,8 @@ public enum PackStyle {
     /// plus glasshouses the land tiles currently drop, cave preserves that
     /// otherwise read as picnic parks, wildlife range the Field book
     /// already has, botanic gardens that otherwise read as picnic parks,
-    /// and open reserves (ACECs, prairie preserves) that otherwise read as
-    /// picnic woodland.
+    /// and open reserves (named nature reserves, ACECs, prairie preserves)
+    /// that otherwise read as picnic woodland.
     /// Silver marks, no labels, no animals.
     /// A hold reads the record; the mark only says something is here.
     public static func attachGroundLayers(
@@ -697,7 +697,8 @@ public enum PackStyle {
     /// Glasshouses the tiler has not yet classed as farm, cave preserves
     /// that otherwise read as picnic parks, wildlife management areas
     /// and nature preserves that otherwise read as picnic woodland, botanic gardens that
-    /// otherwise read as picnic parks, and open reserves that otherwise
+    /// otherwise read as picnic parks, and open reserves (named nature
+    /// reserves, ACECs, prairie preserves) that otherwise
     /// read as picnic woodland. Quiet fill under the streets
     /// so a hold can name them — and the hold also asks this geojson source,
     /// not only the faint fill, the same way a tank is asked of the pack

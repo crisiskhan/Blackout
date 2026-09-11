@@ -402,7 +402,13 @@ public enum Inspect {
     /// — Prairie Hills is apartments. Pronoun Cave is a hole and is
     /// matched first. A wilderness preserve is range (animals first,
     /// trees), not this walk — cactus does not live on Wild Basin.
+    /// A named nature reserve that is not already a hole, wildlife
+    /// range, or garden is this walk — vipers use that cover. An
+    /// unnamed reserve falls through to the landcover. Phrase `open
+    /// space` is not a match — Open Space Visitor Center is a park.
     static func isOpenReserve(_ t: [String: String]) -> Bool {
+        let named = !(t["name"] ?? "").isEmpty
+        if t["leisure"] == "nature_reserve", named { return true }
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"

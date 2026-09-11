@@ -669,6 +669,7 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(visitor.klass, "Park")
         XCTAssertNotEqual(visitor.klass, "Wildlife range")
+        XCTAssertNotEqual(visitor.klass, "Open reserve")
         XCTAssertEqual(visitor.fieldRoute.first, Inspect.treeUseTXCard)
 
         let overlayCenter = Inspect.read(
@@ -800,6 +801,40 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(street.klass, "Road")
         XCTAssertFalse(street.fieldRoute.contains(Inspect.snakeTXCard))
+
+        let mesa = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Paseo de la Mesa Open Space",
+            ],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(mesa.klass, "Open reserve")
+        XCTAssertNotEqual(mesa.klass, "Protected land")
+        XCTAssertEqual(mesa.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(mesa.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertTrue(mesa.doLine.lowercased().contains("rattler") || mesa.doLine.lowercased().contains("diamondback"), mesa.doLine)
+        XCTAssertTrue(mesa.doLine.lowercased().contains("sotol") || mesa.doLine.lowercased().contains("cholla"), mesa.doLine)
+        XCTAssertTrue(mesa.doLine.lowercased().contains("give it room"), mesa.doLine)
+        XCTAssertTrue(mesa.doLine.lowercased().contains("no ice"), mesa.doLine)
+        XCTAssertFalse(mesa.doLine.lowercased().contains("cottonwood"), mesa.doLine)
+        XCTAssertFalse(mesa.doLine.lowercased().contains("edible"), mesa.doLine)
+
+        let unnamedReserve = Inspect.read(
+            tags: ["leisure": "nature_reserve"],
+            pack: "nm"
+        )
+        XCTAssertEqual(unnamedReserve.klass, "Protected land")
+        XCTAssertNotEqual(unnamedReserve.klass, "Open reserve")
+
+        let farmPreserve = Inspect.read(
+            tags: ["leisure": "park", "name": "Candelaria Farm Preserve Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(farmPreserve.klass, "Park")
+        XCTAssertNotEqual(farmPreserve.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {

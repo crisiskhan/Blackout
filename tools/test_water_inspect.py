@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4, 6), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 1)}
+        expected = {"tx-west": (2, 0, 0, 4, 6), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 2)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -127,6 +127,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("game on", nm_blob)
         self.assertNotIn("open space visitor center", nm_blob)
         self.assertIn("jones canyon area of critical environmental concern", nm_blob)
+        self.assertIn("paseo de la mesa open space", nm_blob)
         self.assertIn("pronoun cave area of critical environmental concern", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
@@ -327,6 +328,20 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"leisure": "park", "name": "Candelaria Farm Preserve Open Space"}
             )
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Paseo de la Mesa Open Space",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"leisure": "nature_reserve"}))
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "nature_reserve", "name": ""})
+        )
 
     def test_an_open_reserve_is_not_picnic_woodland(self):
         """A mountain ACEC opens vipers, not mesquite tree-use.
@@ -396,6 +411,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("prairie")', inspect)
         self.assertIn("isOpenReserve", inspect)
         self.assertIn("Open reserve", inspect)
+        self.assertIn('t["leisure"] == "nature_reserve"', inspect)
+        self.assertIn('props.get("leisure") == "nature_reserve"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertNotIn('contains("open space")', inspect)
         for phrase in ground.BOTANIC_GARDEN_PHRASES:
             self.assertIn(f'"{phrase}"', inspect)
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
@@ -1532,6 +1550,18 @@ class GroundFieldSync(unittest.TestCase):
             nm_reserve_hit, "glass NM open-reserve hold is not inside Jones Canyon"
         )
 
+        nm_mesa_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-106.774776, 35.149083, ring):
+                    nm_mesa_hit = props.get("name") == "Paseo de la Mesa Open Space"
+        self.assertTrue(
+            nm_mesa_hit,
+            "SOLO_QA Paseo de la Mesa hold is not inside the named nature reserve",
+        )
+
         nm_osm = json.loads((PACK_ROOT / "nm" / "osm.geojson").read_text())
         nm_wood = False
         nm_bosque = False
@@ -1670,6 +1700,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Open reserve", qa)
         self.assertIn("Alamo Mountain Area of Critical Environmental Concern", qa)
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", qa)
+        self.assertIn("Paseo de la Mesa Open Space", qa)
+        self.assertIn("35.149083", qa)
         self.assertIn("Decker Tallgrass Prairie Preserve", qa)
         self.assertIn("Wild Basin Wilderness Preserve", qa)
         self.assertIn("Barrow Nature Preserve", qa)
