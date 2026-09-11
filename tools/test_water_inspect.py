@@ -1030,6 +1030,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("give it the road", woodland_hold)
         self.assertNotIn("the food card", woodland_hold)
         self.assertNotIn("no ice", woodland_hold)
+        self.assertNotIn("give it room", woodland_hold)
         self.assertNotIn("aspen", woodland_hold)
         self.assertNotIn("edible", woodland_hold)
         bosque = do.split('case "Bosque or wetland":', 1)[1].split(
@@ -1513,6 +1514,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("javelina", west_scrub)
         self.assertIn("the bite card", west_scrub)
         self.assertIn("no ice, no cut, no suck", west_scrub)
+        self.assertIn("give it room", west_scrub)
         self.assertNotIn("cottonmouth", west_scrub)
         nm_scrub = animal.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
         self.assertIn("prairie rattler", nm_scrub)
@@ -1521,12 +1523,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("sotol", nm_scrub)
         self.assertIn("the bite card", nm_scrub)
         self.assertIn("no ice, no cut, no suck", nm_scrub)
+        self.assertIn("give it room", nm_scrub)
         self.assertNotIn("lives here", nm_scrub)
         east_scrub = animal.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()
         self.assertIn("cottonmouth", east_scrub)
         self.assertIn("hog", east_scrub)
         self.assertIn("the bite card", east_scrub)
         self.assertIn("no ice, no cut, no suck", east_scrub)
+        self.assertIn("give it room", east_scrub)
         self.assertNotIn("javelina", east_scrub)
         wildlife = do.split('case "Wildlife range":', 1)[1].split(
             'case "Bosque or wetland":', 1

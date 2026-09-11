@@ -720,6 +720,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(alamo.doLine.lowercased().contains("diamondback"), alamo.doLine)
         XCTAssertTrue(alamo.doLine.lowercased().contains("bite card"), alamo.doLine)
         XCTAssertTrue(alamo.doLine.lowercased().contains("no ice"), alamo.doLine)
+        XCTAssertTrue(alamo.doLine.lowercased().contains("give it room"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("live oak"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("edible"), alamo.doLine)
         XCTAssertFalse(alamo.doLine.lowercased().contains("lives here"), alamo.doLine)
@@ -748,6 +749,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(jones.doLine.lowercased().contains("rattler") || jones.doLine.lowercased().contains("diamondback"), jones.doLine)
         XCTAssertTrue(jones.doLine.lowercased().contains("bite card"), jones.doLine)
         XCTAssertTrue(jones.doLine.lowercased().contains("no ice"), jones.doLine)
+        XCTAssertTrue(jones.doLine.lowercased().contains("give it room"), jones.doLine)
         XCTAssertFalse(jones.doLine.lowercased().contains("cottonwood"), jones.doLine)
 
         let prairie = Inspect.read(
@@ -942,6 +944,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(nmScrubDo.contains("diamondback"), nmScrub.doLine)
         XCTAssertTrue(nmScrubDo.contains("sotol"), nmScrub.doLine)
         XCTAssertTrue(nmScrubDo.contains("no ice"), nmScrub.doLine)
+        XCTAssertTrue(nmScrubDo.contains("give it room"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("cottonmouth"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("lives here"), nmScrub.doLine)
         XCTAssertFalse(nmScrubDo.contains("edible"), nmScrub.doLine)
@@ -972,6 +975,7 @@ final class InspectTests: XCTestCase {
         let eastScrubDo = eastScrub.doLine.lowercased()
         XCTAssertTrue(eastScrubDo.contains("cottonmouth") || eastScrubDo.contains("copperhead"), eastScrub.doLine)
         XCTAssertTrue(eastScrubDo.contains("hog"), eastScrub.doLine)
+        XCTAssertTrue(eastScrubDo.contains("give it room"), eastScrub.doLine)
         XCTAssertFalse(eastScrubDo.contains("javelina"), eastScrub.doLine)
         XCTAssertFalse(eastScrubDo.contains("lives here"), eastScrub.doLine)
 

@@ -944,18 +944,19 @@ extension Inspect {
         }
     }
 
-    /// Open country: the same viper and treat snake SPEAK names. No ice,
-    /// no cut, no suck. Bite is the card the hold already opens.
+    /// Open country: the same viper and treat snake SPEAK names, and
+    /// the same cactus SPEAK. No ice, no cut, no suck. Bite is the
+    /// card the hold already opens.
     private static func animalRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Diamondback and javelina country. Yucca and prickly pear. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
+            return "Diamondback and javelina country. Yucca and prickly pear. Give it room. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .txEast:
-            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
+            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. Give it room. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .nm:
-            return "Prairie rattler or diamondback country. Cholla, yucca, and sotol. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
+            return "Prairie rattler or diamondback country. Cholla, yucca, and sotol. Give it room. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .unknown:
-            return "Open country. Vipers use this cover. No ice, no cut, no suck. If bitten, the bite card."
+            return "Open country. Vipers use this cover. Give it room. No ice, no cut, no suck. If bitten, the bite card."
         }
     }
 
