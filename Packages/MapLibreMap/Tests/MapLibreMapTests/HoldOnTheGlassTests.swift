@@ -43,8 +43,8 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// out here are this one, and the card has to say so.
     private static let silentTank = CLLocationCoordinate2D(latitude: 31.775803, longitude: -106.462400)
 
-    /// Unnamed desert on the north-west edge of the pack, with nothing else
-    /// mapped within twice the probe box. This is the empty-ground hold.
+    /// Unnamed heath on the north-west edge of the pack. Nothing else is
+    /// mapped within twice the probe box. This is ordinary cover, not a blank.
     private static let emptyDesert = CLLocationCoordinate2D(latitude: 31.94284, longitude: -106.75415)
 
     /// `Sierra de Ciudad Juárez` — ground the record does put a name to.
@@ -167,8 +167,32 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotNil(held.card, "holding empty desert put nothing on the glass")
         XCTAssertEqual(held.card?.kind, .land, "empty desert did not read as ground: \(held)")
         XCTAssertEqual(held.card?.title, "Unnamed", "the record has no name for it and the card invented one: \(held)")
-        XCTAssertFalse(held.card?.klass.isEmpty ?? true, "ground came back with no class at all: \(held)")
+        XCTAssertEqual(held.card?.klass, "Desert scrub", "ordinary cover is viper country, not a blank: \(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
         XCTAssertEqual(held.card?.advice, .field, "empty ground sends you to Field: \(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("diamondback"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · BITE"
+        )
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeTXCard,
+        ]
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: texas
+            )),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
+        )
     }
 
     // MARK: - The ones that keep it honest
@@ -191,6 +215,35 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(
             held.card?.title.contains("Sierra de Ciudad Juárez") ?? false,
             "the ground is named in the record and the card dropped it: \(held)"
+        )
+        // Painted heath, not an overlay sheet. Vipers use this cover.
+        XCTAssertEqual(held.card?.klass, "Desert scrub", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("diamondback"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("food card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · BITE"
+        )
+        let texas: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeTXCard,
+        ]
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(
+                held.card?.fieldRoute ?? [],
+                in: texas
+            )),
+            "BITE · ANIMAL · PLANT · FOOD · HEAT"
         )
     }
 

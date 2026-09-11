@@ -1201,6 +1201,10 @@ class GroundFieldSync(unittest.TestCase):
         glass = (
             ROOT / "Packages/MapLibreMap/Tests/MapLibreMapTests/HoldOnTheGlassTests.swift"
         ).read_text()
+        self.assertIn("Sierra de Ciudad Juárez", glass)
+        self.assertIn("Desert scrub", glass)
+        self.assertIn("31.71809", glass)
+        self.assertIn("31.94284", glass)
         self.assertIn("Three Crosses Cactus Garden", glass)
         self.assertIn("Chihuahuan Desert Conservatory", glass)
         self.assertIn("Rio Bosque Wetlands Park", glass)
@@ -1349,6 +1353,8 @@ class GroundFieldSync(unittest.TestCase):
         bosque = False
         farm = False
         west_wood = False
+        sierra = False
+        unnamed_heath = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1363,6 +1369,14 @@ class GroundFieldSync(unittest.TestCase):
                 for ring in rings_of(geom):
                     if pip(-106.308840, 31.638834, ring):
                         bosque = True
+            if props.get("natural") == "heath" and props.get("name") == "Sierra de Ciudad Juárez":
+                for ring in rings_of(geom):
+                    if pip(-106.61330, 31.71809, ring):
+                        sierra = True
+            if props.get("natural") == "heath" and not props.get("name"):
+                for ring in rings_of(geom):
+                    if pip(-106.75415, 31.94284, ring):
+                        unnamed_heath = True
             if props.get("landuse") == "farmland":
                 for ring in rings_of(geom):
                     if pip(-106.593002, 31.513892, ring):
@@ -1375,6 +1389,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
         self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
         self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
+        self.assertTrue(sierra, "glass named-ground hold is not inside Sierra de Ciudad Juárez heath")
+        self.assertTrue(unnamed_heath, "glass empty-desert hold is not inside unnamed west heath")
 
         east = json.loads((PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text())
         wildlife_hit = False
@@ -1561,6 +1577,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("south-side shade", qa.lower())
         self.assertIn("wind break", qa.lower())
         self.assertIn("Give it room", qa)
+        self.assertIn("Sierra de Ciudad Juárez", qa)
         self.assertIn("SPEAK names that pack", qa)
         self.assertIn("SPEAK names oleander", qa)
         self.assertIn("dark, still air, cold", qa)
