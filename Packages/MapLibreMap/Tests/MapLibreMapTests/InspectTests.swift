@@ -964,6 +964,52 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(desertTrails.klass, "Park")
         XCTAssertNotEqual(desertTrails.klass, "Open reserve")
+
+        let sun = Inspect.read(
+            tags: ["boundary": "protected_area", "name": "Sun Mountain"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(sun.klass, "Open reserve")
+        XCTAssertNotEqual(sun.klass, "Protected land")
+        XCTAssertEqual(sun.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(sun.doLine.lowercased().contains("rattler") || sun.doLine.lowercased().contains("diamondback"), sun.doLine)
+        XCTAssertTrue(sun.doLine.lowercased().contains("sotol") || sun.doLine.lowercased().contains("cholla"), sun.doLine)
+        XCTAssertFalse(sun.doLine.lowercased().contains("cottonwood"), sun.doLine)
+        XCTAssertFalse(sun.doLine.lowercased().contains("edible"), sun.doLine)
+
+        let sunPeak = Inspect.read(
+            tags: ["natural": "peak", "name": "Sun Mountain"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(sunPeak.klass, "Peak")
+        XCTAssertNotEqual(sunPeak.klass, "Open reserve")
+
+        let sunEstates = Inspect.read(
+            tags: [
+                "landuse": "residential",
+                "place": "neighbourhood",
+                "name": "Sun Mountain Estates",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(sunEstates.klass, "Built-up ground")
+        XCTAssertNotEqual(sunEstates.klass, "Open reserve")
+
+        let sunRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Sun Mountain Road"],
+            pack: "nm"
+        )
+        XCTAssertEqual(sunRoad.klass, "Road")
+        XCTAssertNotEqual(sunRoad.klass, "Open reserve")
+
+        let hyde = Inspect.read(
+            tags: ["boundary": "protected_area", "name": "Hyde Memorial State Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(hyde.klass, "Protected land")
+        XCTAssertNotEqual(hyde.klass, "Open reserve")
     }
 
     func testANamedTreeIsPlantGroundNotAMeal() {
@@ -1711,6 +1757,33 @@ final class InspectTests: XCTestCase {
         XCTAssertNotEqual(
             Inspect.read(tags: Inspect.pick([hueco, huecoRoad]), pack: "tx-west").klass,
             "Park"
+        )
+
+        let sunPeak: [String: String] = [
+            "natural": "peak",
+            "name": "Sun Mountain",
+        ]
+        let sunSlope: [String: String] = [
+            "boundary": "protected_area",
+            "name": "Sun Mountain",
+        ]
+        XCTAssertEqual(Inspect.pick([sunPeak, sunSlope])["natural"], "peak")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([sunPeak, sunSlope]), pack: "nm").klass,
+            "Peak"
+        )
+        XCTAssertEqual(
+            Inspect.read(tags: sunSlope, state: "NM", pack: "nm").klass,
+            "Open reserve"
+        )
+        let sunRoad: [String: String] = [
+            "highway": "residential",
+            "name": "Sun Mountain Road",
+        ]
+        XCTAssertEqual(Inspect.pick([sunSlope, sunRoad])["boundary"], "protected_area")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([sunSlope, sunRoad]), pack: "nm").klass,
+            "Open reserve"
         )
     }
 

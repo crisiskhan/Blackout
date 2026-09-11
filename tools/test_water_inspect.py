@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4, 7), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 25)}
+        expected = {"tx-west": (2, 0, 0, 4, 7), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 26)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -136,6 +136,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("placitas open space", nm_blob)
         self.assertIn("bear canyon scenic easement", nm_blob)
         self.assertIn("la tierra trails", nm_blob)
+        self.assertIn("sun mountain", nm_blob)
+        self.assertNotIn("sun mountain estates", nm_blob)
+        self.assertNotIn("hyde memorial", nm_blob)
+        self.assertNotIn("manzano mountains", nm_blob)
         self.assertIn("pronoun cave area of critical environmental concern", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
@@ -410,6 +414,48 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"leisure": "park", "name": "Desert Trails Community Park"}
             )
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"boundary": "protected_area", "name": "Sun Mountain"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"natural": "peak", "name": "Sun Mountain"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Sun Mountain Road"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Sun Mountain Street"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "landuse": "residential",
+                    "place": "neighbourhood",
+                    "name": "Sun Mountain Estates",
+                }
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"boundary": "protected_area", "name": "Hyde Memorial State Park"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "boundary": "protected_area",
+                    "landuse": "recreation_ground",
+                    "name": "Manzano Mountains State Park",
+                }
+            )
+        )
         self.assertIsNone(ground.overlay_kind({"leisure": "nature_reserve"}))
         self.assertIsNone(
             ground.overlay_kind({"leisure": "nature_reserve", "name": ""})
@@ -506,6 +552,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("easement")', inspect)
         self.assertNotIn('contains("tierra")', inspect)
         self.assertNotIn('contains("trails")', inspect)
+        self.assertNotIn('contains("sun")', inspect)
+        self.assertNotIn('contains("mountain")', inspect)
         self.assertIn("isOpenReserve", inspect)
         self.assertIn("Open reserve", inspect)
         self.assertIn('t["leisure"] == "nature_reserve"', inspect)
@@ -1051,6 +1099,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("hueco tanks", inspect)
         self.assertIn("scenic easement", inspect)
         self.assertIn("la tierra trails", inspect)
+        self.assertIn("sun mountain", inspect)
         self.assertIn("Open reserve", inspect)
         self.assertIn('range(of: "open space")', inspect)
         self.assertLess(
@@ -1715,6 +1764,18 @@ class GroundFieldSync(unittest.TestCase):
             "SOLO_QA La Tierra Trails hold is not inside the trail system",
         )
 
+        nm_sun_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-105.912801, 35.662198, ring):
+                    nm_sun_hit = props.get("name") == "Sun Mountain"
+        self.assertTrue(
+            nm_sun_hit,
+            "SOLO_QA Sun Mountain hold is not inside the slope sheet",
+        )
+
         nm_osm = json.loads((PACK_ROOT / "nm" / "osm.geojson").read_text())
         nm_wood = False
         nm_bosque = False
@@ -1862,6 +1923,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.155131", qa)
         self.assertIn("La Tierra Trails", qa)
         self.assertIn("35.722229", qa)
+        self.assertIn("Sun Mountain", qa)
+        self.assertIn("35.662198", qa)
         self.assertIn("Hueco Tanks State Park and Historic Site", qa)
         self.assertIn("31.911873", qa)
         self.assertIn("Hueco Mountain Park", qa)

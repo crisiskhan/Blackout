@@ -11,7 +11,7 @@ open picnic tree-use without this file. A nature preserve tagged as woodland
 would open picnic tree-use without this file. A botanic garden tagged as a park
 would open woodland tree-use without this file. A mountain ACEC, a prairie
 preserve, a named nature reserve, Hueco Tanks, named open-space cover, a
-scenic easement, or La Tierra Trails would open picnic tree-use without this file. This is the water-detail
+scenic easement, La Tierra Trails, or Sun Mountain would open picnic tree-use without this file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
 source, tags intact so a hold names the record rather than a colour.
 
@@ -85,14 +85,17 @@ WILDLIFE_RANGE_PHRASES = (
 # `scenic easement`, not the word `easement`. A riverside hike-and-
 # bike easement stays a park. Phrase `la tierra trails`, not the
 # word `tierra` or `trails`. Tierra Blanca and a trails neighborhood
-# park stay parks. Must stay in step with
-# `Inspect.isOpenReserve`.
+# park stay parks. Phrase `sun mountain`, not the word `sun` or
+# `mountain`. Hyde Memorial and Manzano stay picnic. The peak pin
+# stays a peak. Sun Mountain Estates is built-up. Must stay in step
+# with `Inspect.isOpenReserve`.
 OPEN_RESERVE_PHRASES = (
     "area of critical environmental concern",
     "prairie preserve",
     "hueco tanks",
     "scenic easement",
     "la tierra trails",
+    "sun mountain",
 )
 OPEN_SPACE_KEEP_OUT = ("visitor", "farm", "rio grande", "bachechi", "trail")
 
