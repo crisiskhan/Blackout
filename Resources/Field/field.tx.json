@@ -533,8 +533,8 @@
       "steps": [
         {
           "do": {
-            "en": "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map.",
-            "es": "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
+            "en": "Javelina charges when cornered — give it the brush, do not get between it and cover. Coyote: do not feed. White-tailed deer at dusk — give it the road. Food away from camp. If bitten, the bite card. If you already have meat, the food-game card. Do not hunt from this map.",
+            "es": "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la de comida. No caces desde este mapa."
           },
           "why": {
             "en": "Range is the Field book of the open pack. A coordinate is not an animal.",

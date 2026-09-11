@@ -891,13 +891,14 @@ def mammal_do_en(cid: str) -> str:
     if cid.startswith("tx-"):
         return (
             "Javelina charges when cornered — give it the brush, do not get between it and cover. "
-            "Coyote: do not feed. Food away from camp. If bitten, the bite card. "
+            "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
+            "Food away from camp. If bitten, the bite card. "
             "If you already have meat, the food-game card. Do not hunt from this map."
         )
     return (
         "Black bear: do not run, stand large, food sealed and away from camp. "
-        "Elk in rut: give way. A maul is trauma. If you already have meat, the food-game card. "
-        "Do not hunt from this map."
+        "Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. "
+        "If you already have meat, the food-game card. Do not hunt from this map."
     )
 
 
@@ -912,12 +913,14 @@ def mammal_do_es(cid: str) -> str:
     if cid.startswith("tx-"):
         return (
             "El pecarí embiste si lo acorralas: déjale el matorral, no te pongas entre él y la cubierta. "
-            "Coyote: no alimentes. Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
+            "Coyote: no alimentes. Venado cola blanca al anochecer — cede el camino. "
+            "Comida lejos del campamento. Si hay mordida, la tarjeta de mordedura. "
             "Si ya tienes carne, la de comida. No caces desde este mapa."
         )
     return (
         "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. "
-        "Wapití en celo: cede el paso. Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. "
+        "Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. "
+        "Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. "
         "No caces desde este mapa."
     )
 

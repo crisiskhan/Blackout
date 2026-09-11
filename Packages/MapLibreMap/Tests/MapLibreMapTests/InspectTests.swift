@@ -325,6 +325,10 @@ final class InspectTests: XCTestCase {
             InspectField.label(for: InspectField.presentRoute(marquez.fieldRoute, in: nmBook)[0]),
             "FIELD · ANIMAL"
         )
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.presentRoute(marquez.fieldRoute, in: nmBook)),
+            "ANIMAL · BITE · FOOD · PLANT"
+        )
         let doLine = marquez.doLine.lowercased()
         XCTAssertTrue(doLine.contains("bear") || doLine.contains("elk"), marquez.doLine)
         XCTAssertTrue(doLine.contains("range") || doLine.contains("not a pin"), marquez.doLine)
@@ -803,6 +807,82 @@ final class InspectTests: XCTestCase {
             "PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI"
         )
         XCTAssertEqual(InspectField.label(for: wood[0]), "FIELD · PLANT")
+
+        let wildlife = InspectField.presentRoute(
+            Inspect.read(
+                tags: [
+                    "leisure": "nature_reserve",
+                    "name": "Marquez Wildlife Management Area",
+                ],
+                pack: "tx-west"
+            ).fieldRoute,
+            in: texas
+        )
+        XCTAssertEqual(InspectField.label(for: wildlife[0]), "FIELD · ANIMAL")
+        XCTAssertEqual(
+            InspectField.bookLine(for: wildlife),
+            "ANIMAL · BITE · FOOD · PLANT"
+        )
+        XCTAssertNotEqual(
+            InspectField.bookLine(for: wildlife),
+            InspectField.bookLine(for: wood),
+            "range is not picnic woodland"
+        )
+
+        let east: Set<String> = [
+            Inspect.plantTXCard, Inspect.treeUseEastCard, Inspect.cactusTXCard,
+            Inspect.mammalEastCard, Inspect.gameEastCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard, Inspect.coldCard,
+            Inspect.heatCard, Inspect.snakeEastCard,
+        ]
+        let eastWildlife = InspectField.presentRoute(
+            Inspect.read(
+                tags: [
+                    "leisure": "nature_reserve",
+                    "name": "Colorado River Park Wildlife Sanctuary",
+                ],
+                pack: "tx-east"
+            ).fieldRoute,
+            in: east
+        )
+        XCTAssertEqual(InspectField.label(for: eastWildlife[0]), "FIELD · ANIMAL")
+        XCTAssertEqual(
+            InspectField.bookLine(for: eastWildlife),
+            "ANIMAL · BITE · FOOD · PLANT"
+        )
+
+        let nmWildlifeBook: Set<String> = [
+            Inspect.mammalNMCard, Inspect.snakeNMCard, Inspect.gameNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.biteCard,
+            Inspect.plantUseCard, Inspect.gameCard, Inspect.plantCard,
+            Inspect.shelterCard, Inspect.fungiCard,
+        ]
+        let nmWildlife = InspectField.presentRoute(
+            Inspect.read(
+                tags: [
+                    "leisure": "nature_reserve",
+                    "name": "Marquez Wildlife Management Area",
+                ],
+                pack: "nm"
+            ).fieldRoute,
+            in: nmWildlifeBook
+        )
+        XCTAssertEqual(InspectField.label(for: nmWildlife[0]), "FIELD · ANIMAL")
+        XCTAssertEqual(
+            InspectField.bookLine(for: nmWildlife),
+            "ANIMAL · BITE · FOOD · PLANT"
+        )
+        XCTAssertNotEqual(
+            InspectField.bookLine(for: nmWildlife),
+            InspectField.bookLine(
+                for: InspectField.presentRoute(
+                    Inspect.read(tags: ["natural": "wood"], pack: "nm").fieldRoute,
+                    in: nmWildlifeBook
+                )
+            ),
+            "range is not picnic woodland"
+        )
 
         let scrub = InspectField.presentRoute(
             Inspect.read(tags: ["natural": "scrub"]).fieldRoute,

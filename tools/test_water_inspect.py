@@ -714,6 +714,20 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
+        rng = inspect.split("private static func wildlifeRange", 1)[1].split(
+            "private static func builtUp", 1
+        )[0]
+        self.assertLess(
+            rng.index("mammalTXCard"),
+            rng.index("snakeTXCard"),
+            "wildlife range must open this pack's mammal card, not picnic tree-use",
+        )
+        self.assertLess(rng.index("snakeTXCard"), rng.index("gameTXCard"))
+        self.assertLess(rng.index("gameTXCard"), rng.index("treeUseTXCard"))
+        self.assertLess(rng.index("mammalEastCard"), rng.index("snakeEastCard"))
+        self.assertIn("extra: [biteCard, plantUseCard, gameCard]", rng)
+        self.assertNotIn("shelterCard", rng)
+        self.assertNotIn("fungiCard", rng)
 
     def test_ground_marks_are_circles_without_class_labels_or_animals(self):
         swift = MAP_SWIFT.read_text()
@@ -805,6 +819,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("State Game Commission Land", qa)
         self.assertIn("loblolly", qa)
         self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
+        self.assertIn("ANIMAL · BITE · FOOD · PLANT", qa)
+        self.assertIn("give it the road", qa)
         self.assertIn("Botanic garden", qa)
         self.assertIn("Albuquerque BioPark Botanic Garden", qa)
         self.assertIn("Chihuahuan Desert Conservatory", qa)
@@ -1011,12 +1027,14 @@ class GroundFieldSync(unittest.TestCase):
         ).lower()
         self.assertIn("diamondback", snake)
         self.assertIn("prairie", snake)
-        mammal = json.dumps(
-            next(c for c in book["cards"] if c["id"] == "nm-mammal")
-        ).lower()
+        mammal_card = next(c for c in book["cards"] if c["id"] == "nm-mammal")
+        mammal = json.dumps(mammal_card).lower()
         self.assertIn("mule deer", mammal)
         self.assertIn("black bear", mammal)
         self.assertNotIn("edible", mammal)
+        nm_do = mammal_card["steps"][0]["do"]["en"].lower()
+        self.assertIn("mule deer", nm_do)
+        self.assertIn("give it the road", nm_do)
 
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("Prairie rattler", qa)
@@ -1044,16 +1062,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mule deer", nm)
         self.assertIn("black bear", nm)
 
-        west_mammal = json.dumps(
-            next(
-                c
-                for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
-                if c["id"] == "tx-mammal"
-            )
-        ).lower()
+        west_mammal_card = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+            if c["id"] == "tx-mammal"
+        )
+        west_mammal = json.dumps(west_mammal_card).lower()
         self.assertIn("javelina", west_mammal)
         self.assertIn("white-tailed deer", west_mammal)
         self.assertNotIn("edible", west_mammal)
+        west_do = west_mammal_card["steps"][0]["do"]["en"].lower()
+        self.assertIn("white-tailed deer", west_do)
+        self.assertIn("give it the road", west_do)
 
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
