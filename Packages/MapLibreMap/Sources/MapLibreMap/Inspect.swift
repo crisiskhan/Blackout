@@ -339,15 +339,20 @@ public enum Inspect {
         return false
     }
 
-    /// Phrase `cactus garden`, not the word `cactus`. Cactus Point Park
-    /// and Parque Cactus del Desierto stay parks.
+    /// Phrase `cactus garden`, `desert garden`, or `desert conservatory`,
+    /// not the word `cactus`. Cactus Point Park and Parque Cactus del
+    /// Desierto stay parks. A rose garden is botanic, not spines.
     static func isCactusGarden(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
         guard park else { return false }
-        return (t["name"] ?? "").lowercased().contains("cactus garden")
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("cactus garden") { return true }
+        if n.contains("desert garden") { return true }
+        if n.contains("desert conservatory") { return true }
+        return false
     }
 
     /// A park named Conservatory At North Austin is apartments. A botanic
@@ -733,7 +738,7 @@ public enum Inspect {
             return cactusGardenCover(
                 klass: "Cactus garden",
                 sure: 82,
-                why: "mapped as a cactus garden; spines, not a meal, not wild cover"
+                why: "mapped as a cactus or desert garden; spines, not a meal, not wild cover"
             )
         }
         if isBotanicGarden(t) {
@@ -741,8 +746,7 @@ public enum Inspect {
                 klass: "Botanic garden",
                 sure: 82,
                 why: "mapped as a botanic garden; pretty is not food, not wild cover",
-                unnamedPenalty: 4,
-                pack: pack
+                unnamedPenalty: 4
             )
         }
         if let natural = t["natural"] {
@@ -847,8 +851,7 @@ public enum Inspect {
                     klass: "Glasshouse",
                     sure: 78,
                     why: "mapped as glasshouses; worked ground a ditch reaches, not wild cover",
-                    unnamedPenalty: 4,
-                    pack: pack
+                    unnamedPenalty: 4
                 )
             case "grass":
                 return snakeCountry(
@@ -1048,30 +1051,14 @@ public enum Inspect {
         )
     }
 
-    /// Glasshouses and botanic gardens: don't chew, then plant-use. Not woodland tree-use, not a hunt.
+    /// Glasshouses and botanic gardens: don't chew, then plant-use.
+    /// Not woodland tree-use, not a hunt, not a cactus garden.
     private static func workedCover(
         klass: String,
         sure: Int,
         why: String,
-        unnamedPenalty: Int,
-        pack: String? = nil
+        unnamedPenalty: Int
     ) -> Reading {
-        if !isEastPack(pack) {
-            return Reading(
-                klass: klass,
-                kind: .land,
-                sure: sure,
-                why: why,
-                advice: .field,
-                field: plantCard,
-                local: [
-                    plantTXCard, plantNMCard,
-                    cactusTXCard, cactusNMCard,
-                ],
-                extra: [plantUseCard],
-                unnamedPenalty: unnamedPenalty
-            )
-        }
         return Reading(
             klass: klass,
             kind: .land,
@@ -1081,7 +1068,6 @@ public enum Inspect {
             field: plantCard,
             local: [
                 plantTXCard, plantNMCard,
-                cactusTXCard, cactusNMCard,
             ],
             extra: [plantUseCard],
             unnamedPenalty: unnamedPenalty

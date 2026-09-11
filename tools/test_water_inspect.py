@@ -743,6 +743,13 @@ class GroundFieldSync(unittest.TestCase):
             land.index('case "wood":'),
             "a botanic garden tagged as a park must still be worked ground, not picnic woodland",
         )
+        cactus_fn = inspect.split("static func isCactusGarden", 1)[1].split(
+            "static func isBotanicGarden", 1
+        )[0]
+        self.assertIn("cactus garden", cactus_fn)
+        self.assertIn("desert garden", cactus_fn)
+        self.assertIn("desert conservatory", cactus_fn)
+        self.assertNotIn("oleander", cactus_fn)
         self.assertIn("isCactusGarden", inspect)
         self.assertIn("cactusGardenCover", inspect)
         self.assertIn("Cactus garden", inspect)
@@ -886,7 +893,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("mapped as glasshouses", inspect)
         self.assertIn('klass: "Glasshouse"', inspect)
         self.assertIn("workedCover", inspect)
-        self.assertNotIn("mammalEastCard", inspect.split("private static func workedCover", 1)[1].split("private static func wildlifeRange", 1)[0])
+        worked = inspect.split("private static func workedCover", 1)[1].split(
+            "private static func wildlifeRange", 1
+        )[0]
+        self.assertNotIn("mammalEastCard", worked)
+        self.assertNotIn("cactusTXCard", worked)
+        self.assertNotIn("cactusNMCard", worked)
+        self.assertIn("plantTXCard", worked)
         tiles = (ROOT / "tools/v3/tiles.py").read_text()
         self.assertIn('("landuse", "greenhouse_horticulture"): "farm"', tiles)
         swift = MAP_SWIFT.read_text()
@@ -969,6 +982,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Chihuahuan Desert Conservatory", qa)
         self.assertIn("Conservatory At North Austin", qa)
         self.assertIn("Three Crosses Cactus Garden", qa)
+        self.assertIn("Desert Garden Park", qa)
         self.assertIn("Barelas Community Garden", qa)
         self.assertIn("Beer Garden", qa)
 

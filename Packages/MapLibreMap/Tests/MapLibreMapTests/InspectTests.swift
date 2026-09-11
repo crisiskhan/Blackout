@@ -697,6 +697,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(glass.title, "Vickery Wholesale Greenhouse")
         XCTAssertEqual(glass.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(glass.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.mammalEastCard))
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.gameEastCard))
         XCTAssertTrue(glass.why.contains("glasshouses"), glass.why)
@@ -1152,6 +1153,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(garden.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertTrue(garden.fieldRoute.contains(Inspect.plantNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(garden.fieldRoute.contains(Inspect.cactusNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.mammalNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.gameNMCard))
         XCTAssertTrue(garden.doLine.lowercased().contains("not food"), garden.doLine)
@@ -1176,11 +1178,14 @@ final class InspectTests: XCTestCase {
             ],
             pack: "tx-west"
         )
-        XCTAssertEqual(conservatory.klass, "Botanic garden")
-        XCTAssertEqual(conservatory.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertEqual(conservatory.klass, "Cactus garden")
+        XCTAssertEqual(conservatory.fieldRoute.first, Inspect.cactusTXCard)
+        XCTAssertTrue(conservatory.fieldRoute.contains(Inspect.plantTXCard))
         XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.treeUseTXCard))
         XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.mammalTXCard))
-        XCTAssertTrue(conservatory.doLine.lowercased().contains("not food"), conservatory.doLine)
+        XCTAssertTrue(conservatory.doLine.lowercased().contains("prickly pear"), conservatory.doLine)
+        XCTAssertTrue(conservatory.doLine.lowercased().contains("spines"), conservatory.doLine)
+        XCTAssertFalse(conservatory.doLine.lowercased().contains("oleander"), conservatory.doLine)
 
         let apartments = Inspect.read(
             tags: ["landuse": "residential", "name": "Conservatory At North Austin"],
@@ -1229,14 +1234,18 @@ final class InspectTests: XCTestCase {
             tags: ["leisure": "park", "name": "Desert Garden Park"],
             pack: "tx-west"
         )
-        XCTAssertEqual(desertGarden.klass, "Botanic garden")
-        XCTAssertEqual(desertGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertEqual(desertGarden.klass, "Cactus garden")
+        XCTAssertEqual(desertGarden.fieldRoute.first, Inspect.cactusTXCard)
+        XCTAssertTrue(desertGarden.doLine.lowercased().contains("prickly pear"), desertGarden.doLine)
+        XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.treeUseTXCard))
 
         let rose = Inspect.read(
             tags: ["leisure": "park", "name": "Rose Garden"],
             pack: "tx-west"
         )
         XCTAssertEqual(rose.klass, "Botanic garden")
+        XCTAssertEqual(rose.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(rose.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(rose.fieldRoute.contains(Inspect.treeUseTXCard))
 
         let community = Inspect.read(
@@ -1249,6 +1258,7 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(community.klass, "Botanic garden")
         XCTAssertEqual(community.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(community.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(community.fieldRoute.contains(Inspect.treeUseEastCard))
 
         let beer = Inspect.read(
