@@ -2037,6 +2037,25 @@ class GroundFieldSync(unittest.TestCase):
             place_names_in_tile("tx-west", -106.51017, 31.998167),
             "Anthony Gap Cave did not survive tiling",
         )
+        pepper = False
+        for feat in east_osm["features"]:
+            props = feat.get("properties") or {}
+            geom = feat.get("geometry") or {}
+            if (
+                props.get("name") == "Pepper Rock Cave"
+                and props.get("natural") == "cave_entrance"
+                and geom.get("type") == "Polygon"
+            ):
+                pepper = True
+        self.assertTrue(
+            pepper,
+            "Pepper Rock Cave area was stripped from the east extract",
+        )
+        self.assertIn(
+            "Pepper Rock Cave",
+            place_names_in_tile("tx-east", -97.740832, 30.496964),
+            "Pepper Rock Cave area did not survive tiling as a mouth",
+        )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False

@@ -98,7 +98,7 @@
     ]
   },
   "stats": {
-    "features": 281220,
+    "features": 281221,
     "highwayLines": 251209,
     "namedStreets": 45194,
     "sampleStreetNames": [
@@ -146,5 +146,5 @@
     "union.geojson",
     "wild.geojson"
   ],
-  "bytes": 30795622
+  "bytes": 30795693
 }
