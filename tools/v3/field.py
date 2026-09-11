@@ -1045,7 +1045,8 @@ def mammal_do_en(cid: str) -> str:
     return (
         "Black bear: do not run, stand large, food sealed and away from camp. "
         "Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. "
-        "If you already have meat, the food-game card. Do not hunt from this map."
+        "If bitten, the bite card. If you already have meat, the food-game card. "
+        "Do not hunt from this map."
     )
 
 
@@ -1067,8 +1068,8 @@ def mammal_do_es(cid: str) -> str:
     return (
         "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. "
         "Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. "
-        "Un golpe es trauma. Si ya tienes carne, la tarjeta de comida. "
-        "No caces desde este mapa."
+        "Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. "
+        "Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
     )
 
 

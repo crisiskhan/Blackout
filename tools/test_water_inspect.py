@@ -1288,10 +1288,16 @@ class GroundFieldSync(unittest.TestCase):
         nm_do = mammal_card["steps"][0]["do"]["en"].lower()
         self.assertIn("mule deer", nm_do)
         self.assertIn("give it the road", nm_do)
+        self.assertIn(
+            "the bite card",
+            nm_do,
+            "NM mammal SPEAK names the bite card, like Texas",
+        )
 
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("Prairie rattler", qa)
         self.assertIn("diamondback", qa)
+        self.assertIn("NM mammal SPEAK names the bite card", qa)
 
     def test_wildlife_range_names_the_pack_mammal_book(self):
         """Wildlife range opens FIELD · ANIMAL. Hold names that pack's mammals.
