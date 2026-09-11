@@ -928,12 +928,12 @@ def thickness_state() -> list[dict]:
         (
             "tx-snake",
             ["TX"],
-            "Texas pit viper",
-            "Víbora de Texas",
-            "West Texas or East Texas brush. Western diamondback, copperhead, or cottonmouth country. Do not catch it for a photo ID.",
-            "Matorral de Texas. Cascabel del oeste, cabeza de cobre o boca de algodón. No la atrapes para identificarla.",
-            "Western diamondback / copperhead: keep the bitten limb still at heart level. No ice, no cut, no suck, no tourniquet.",
-            "Cascabel / cabeza de cobre: extremidad quieta a la altura del corazón. Sin hielo, sin cortar, sin chupar, sin torniquete.",
+            "West Texas pit viper",
+            "Víbora del oeste de Texas",
+            "West Texas brush. Western diamondback country. Do not catch it for a photo ID.",
+            "Matorral del oeste de Texas. Cascabel del oeste. No la atrapes para identificarla.",
+            "Western diamondback: keep the bitten limb still at heart level. No ice, no cut, no suck, no tourniquet.",
+            "Cascabel del oeste: extremidad quieta a la altura del corazón. Sin hielo, sin cortar, sin chupar, sin torniquete.",
         ),
         (
             "tx-east-snake",

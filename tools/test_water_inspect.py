@@ -829,13 +829,16 @@ class GroundFieldSync(unittest.TestCase):
                 1,
                 f"{state} game missing vision mammals: {kinds.get('mammal')}",
             )
-            snake_blob = json.dumps(
-                next(c for c in book["cards"] if c["id"] == f"{state}-snake")
-            ).lower()
+            snake_cards = [
+                c
+                for c in book["cards"]
+                if c["id"] in {f"{state}-snake", f"{state}-east-snake"}
+            ]
+            snake_blob = json.dumps(snake_cards).lower()
             for name in kinds.get("snake", []):
                 self.assertTrue(
                     name.split()[0] in snake_blob or name in snake_blob,
-                    f"{state}-snake missing vision snake {name}",
+                    f"{state} snake cards missing vision snake {name}",
                 )
             mammal = json.dumps(
                 next(c for c in book["cards"] if c["id"] == f"{state}-mammal")
@@ -953,6 +956,10 @@ class GroundFieldSync(unittest.TestCase):
         east_snake = json.dumps(by_id["tx-east-snake"]).lower()
         self.assertIn("copperhead", east_snake)
         self.assertIn("cottonmouth", east_snake)
+        west_snake = json.dumps(by_id["tx-snake"]).lower()
+        self.assertIn("diamondback", west_snake)
+        self.assertNotIn("cottonmouth", west_snake)
+        self.assertNotIn("copperhead", west_snake)
         west_mammal = json.dumps(by_id["tx-mammal"]).lower()
         self.assertIn("javelina", west_mammal)
         west_tree = json.dumps(by_id["tx-tree-use"]).lower()
