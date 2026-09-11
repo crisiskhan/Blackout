@@ -214,8 +214,8 @@
         "es": "Víbora de Texas"
       },
       "situation": {
-        "en": "West Texas or East Texas brush. Western diamondback or copperhead country. Do not catch it for a photo ID.",
-        "es": "Matorral de Texas. Cascabel del oeste o cabeza de cobre. No la atrapes para identificarla."
+        "en": "West Texas or East Texas brush. Western diamondback, copperhead, or cottonmouth country. Do not catch it for a photo ID.",
+        "es": "Matorral de Texas. Cascabel del oeste, cabeza de cobre o boca de algodón. No la atrapes para identificarla."
       },
       "stop_if": [
         {
@@ -325,8 +325,8 @@
         "es": "Árboles de Texas — sombra, no comida"
       },
       "situation": {
-        "en": "You are in Texas woodland, park, or bosque. Live oak, pecan, mesquite. Shade, thorns, deadfall.",
-        "es": "Estás en arbolado, parque o bosque de Texas. Encino, pecán, mezquite. Sombra, espinas, madera muerta."
+        "en": "You are in Texas woodland, park, or bosque. Live oak, pecan, mesquite, cedar elm. Shade, thorns, deadfall.",
+        "es": "Estás en arbolado, parque o bosque de Texas. Encino, pecán, mezquite, olmo cedro. Sombra, espinas, madera muerta."
       },
       "stop_if": [
         {

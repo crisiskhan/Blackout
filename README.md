@@ -284,9 +284,12 @@ read as safe to drink. Peaks, sinkholes and named trees are silver circles on
 records the extract actually has. Holding woodland opens that pack's plant
 cards; holding scrub opens that pack's bite and mammal cards; holding a hole
 opens the cave card. FIELD then walks the rest of the route — tree-use,
-charge, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
+cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
 `NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
-first card. Animals of this country live in the Field book, not as GPS pins.
+first card. A FIELD still of this pack's mammal, tree, cactus or snake offers
+the same procedure (`FIELD · ANIMAL` / `PLANT` / `BITE`). UNKNOWN and no
+model do not invent a card. Animals of this country live in the Field book, not
+as GPS pins.
 
 Repairing geometry is part of tiling now. OSM has plenty of areas whose ring
 crosses itself, and Shapely indexes them happily then throws on the first tile

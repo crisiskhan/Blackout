@@ -274,6 +274,7 @@ final class InspectTests: XCTestCase {
         // javelina to a coordinate.
         let txWood = Inspect.read(tags: ["natural": "wood"], state: "TX")
         XCTAssertTrue(txWood.doLine.contains("Mesquite"), txWood.doLine)
+        XCTAssertTrue(txWood.doLine.contains("cedar elm"), txWood.doLine)
         XCTAssertTrue(txWood.doLine.contains("not a meal"), txWood.doLine)
         XCTAssertFalse(txWood.doLine.lowercased().contains("edible"), txWood.doLine)
 
@@ -290,6 +291,48 @@ final class InspectTests: XCTestCase {
         let nmPeak = Inspect.read(tags: ["natural": "peak", "name": "Wheeler"], state: "NM")
         XCTAssertTrue(nmPeak.doLine.lowercased().contains("bear"), nmPeak.doLine)
         XCTAssertEqual(InspectField.label(for: Inspect.mammalNMCard), "FIELD · ANIMAL")
+    }
+
+    func testAVisionGuessOpensTheKindOfFieldCardsThatKindUses() {
+        // A still is a guess, not a pin. UNKNOWN and no model do not invent a
+        // card. A javelina still opens the mammal trail, not the woodland dump.
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "no-model", state: "TX"), [])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "unknown", state: "TX"), [])
+
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:fungi", state: "TX"),
+            [Inspect.fungiCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:snake", state: "TX"),
+            [Inspect.snakeTXCard, Inspect.biteCard]
+        )
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:snake", state: "NM"),
+            [Inspect.snakeNMCard, Inspect.biteCard]
+        )
+
+        let javelina = InspectField.fieldRoute(forVision: "tx-javelina", state: "TX")
+        XCTAssertEqual(javelina.first, Inspect.mammalTXCard)
+        XCTAssertTrue(javelina.contains(Inspect.gameTXCard))
+        XCTAssertTrue(javelina.contains(Inspect.gameCard))
+        XCTAssertEqual(InspectField.label(for: javelina[0]), "FIELD · ANIMAL")
+        XCTAssertFalse(javelina.contains(Inspect.plantTXCard), "a mammal still is not woodland")
+
+        let oak = InspectField.fieldRoute(forVision: "tx-live-oak", state: "TX")
+        XCTAssertEqual(oak.first, Inspect.treeUseTXCard)
+        XCTAssertEqual(InspectField.label(for: oak[0]), "FIELD · PLANT")
+
+        let pear = InspectField.fieldRoute(forVision: "tx-prickly-pear", state: "TX")
+        XCTAssertEqual(pear.first, Inspect.cactusTXCard)
+        XCTAssertTrue(pear.contains(Inspect.plantTXCard))
+
+        let bear = InspectField.fieldRoute(forVision: "nm-black-bear", state: "NM")
+        XCTAssertEqual(bear.first, Inspect.mammalNMCard)
+        XCTAssertEqual(InspectField.label(for: bear[0]), "FIELD · ANIMAL")
+
+        let yucca = InspectField.fieldRoute(forVision: "kind:cacti_yucca", state: "NM")
+        XCTAssertEqual(yucca.first, Inspect.cactusNMCard)
     }
 
     func testTheLoadedBookDropsTheOtherStatesCardAndKeepsTheCoreTrail() {

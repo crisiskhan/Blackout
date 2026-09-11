@@ -537,6 +537,23 @@ class GroundFieldSync(unittest.TestCase):
                 1,
                 f"{state} game missing vision mammals: {kinds.get('mammal')}",
             )
+            snake_blob = json.dumps(
+                next(c for c in book["cards"] if c["id"] == f"{state}-snake")
+            ).lower()
+            for name in kinds.get("snake", []):
+                self.assertTrue(
+                    name.split()[0] in snake_blob or name in snake_blob,
+                    f"{state}-snake missing vision snake {name}",
+                )
+
+        tx_tree = json.dumps(
+            next(
+                c
+                for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+                if c["id"] == "tx-tree-use"
+            )
+        ).lower()
+        self.assertIn("cedar elm", tx_tree)
 
         app = (ROOT / "Blackout/AppRuntime.swift").read_text()
         hold = app.split("func holdInspect", 1)[1].split("func closeHold", 1)[0]
@@ -554,6 +571,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("leaveCard()", tab)
         self.assertIn("advanceTrail()", tab)
         self.assertNotIn('Button(s.isLast ? "DONE" : "NEXT")', tab)
+        field = SWIFT.read_text()
+        self.assertIn("func fieldRoute(forVision", field)
+        self.assertIn("g.labelId", tab)
+        self.assertIn("InspectField.fieldRoute(forVision:", tab)
+        self.assertIn("InspectField.label(for:", tab)
+        qa = (ROOT / "docs/SOLO_QA.md").read_text()
+        self.assertIn("VISION still opens", qa)
+        self.assertIn("FIELD · ANIMAL", qa)
 
 
 if __name__ == "__main__":

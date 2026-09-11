@@ -150,6 +150,29 @@ struct FieldTab: View {
                     }
                 }
             }
+            visionFieldButton(g)
+        }
+    }
+
+    /// The still named a kind. Offer the same procedure the hold would —
+    /// mammal cards for a javelina, not a woodland dump. UNKNOWN and no
+    /// model stay a name, not an invented card.
+    @ViewBuilder
+    private func visionFieldButton(_ g: VisionGuess) -> some View {
+        let route = InspectField.presentRoute(
+            InspectField.fieldRoute(forVision: g.labelId, state: runtime.packs?.active?.state),
+            in: Set(cards.map(\.id))
+        )
+        if let first = route.first {
+            Button(InspectField.label(for: first)) {
+                openRoute(
+                    InspectField.fieldRoute(
+                        forVision: g.labelId,
+                        state: runtime.packs?.active?.state
+                    )
+                )
+            }
+            .buttonStyle(HUDActionStyle(filled: false))
         }
     }
 
@@ -332,6 +355,10 @@ struct FieldTab: View {
     private func jump() {
         guard let route = runtime.fieldJump else { return }
         runtime.fieldJump = nil
+        openRoute(route)
+    }
+
+    private func openRoute(_ route: [String]) {
         let present = InspectField.presentRoute(route, in: Set(cards.map(\.id)))
         guard let first = present.first,
               let card = cards.first(where: { $0.id == first })

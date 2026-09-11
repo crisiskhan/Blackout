@@ -542,6 +542,93 @@ public enum InspectField {
         }
         return out
     }
+
+    /// What a FIELD still is, when the matcher named a kind. Not a species ID.
+    public enum VisionGround: Sendable, Equatable {
+        case tree
+        case cactus
+        case snake
+        case mammal
+        case fungi
+    }
+
+    /// UNKNOWN and no model stay empty — a missing guess is not a card.
+    public static func visionGround(labelId: String) -> VisionGround? {
+        let id = labelId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        switch id {
+        case "", "no-model", "unknown":
+            return nil
+        case "kind:fungi":
+            return .fungi
+        case "kind:snake":
+            return .snake
+        case "kind:mammal":
+            return .mammal
+        case "kind:tree":
+            return .tree
+        case "kind:cactus", "kind:cacti_yucca":
+            return .cactus
+        default:
+            return visionGroundFromSpecies(id)
+        }
+    }
+
+    private static func visionGroundFromSpecies(_ id: String) -> VisionGround? {
+        if id.contains("fungi") || id.contains("amanita") || id.contains("galerina")
+            || id.contains("morel") || id.hasSuffix("jack")
+        {
+            return .fungi
+        }
+        if id.contains("snake") || id.contains("diamondback") || id.contains("copperhead")
+            || id.contains("cottonmouth") || id.contains("rattler")
+        {
+            return .snake
+        }
+        if id.contains("coyote") || id.contains("javelina") || id.contains("whitetail")
+            || id.contains("elk") || id.contains("deer") || id.contains("bear")
+        {
+            return .mammal
+        }
+        if id.contains("prickly") || id.contains("cholla") || id.contains("yucca") || id.contains("sotol") {
+            return .cactus
+        }
+        if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
+            || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
+            || id.contains("cottonwood")
+        {
+            return .tree
+        }
+        return nil
+    }
+
+    /// The still named a kind. Open that kind's cards — not the whole biome.
+    /// A javelina is the mammal trail, not woodland plant-danger.
+    public static func fieldRoute(forVision labelId: String, state: String?) -> [String] {
+        guard let ground = visionGround(labelId: labelId) else { return [] }
+        let nm = (state ?? "").uppercased() == "NM"
+        switch ground {
+        case .fungi:
+            return [Inspect.fungiCard]
+        case .snake:
+            return [nm ? Inspect.snakeNMCard : Inspect.snakeTXCard, Inspect.biteCard]
+        case .mammal:
+            return [
+                nm ? Inspect.mammalNMCard : Inspect.mammalTXCard,
+                nm ? Inspect.gameNMCard : Inspect.gameTXCard,
+                Inspect.gameCard,
+            ]
+        case .tree:
+            return [
+                nm ? Inspect.treeUseNMCard : Inspect.treeUseTXCard,
+                Inspect.plantUseCard,
+            ]
+        case .cactus:
+            return [
+                nm ? Inspect.cactusNMCard : Inspect.cactusTXCard,
+                nm ? Inspect.plantNMCard : Inspect.plantTXCard,
+            ]
+        }
+    }
 }
 
 public struct InspectFinding: Equatable, Sendable {
@@ -736,7 +823,7 @@ extension Inspect {
     private static func treeRangeLine(_ state: String?) -> String {
         switch packState(state) {
         case "TX":
-            return "Live oak, pecan, mesquite. Shade and thorns, not a meal. Field has this pack's tree cards."
+            return "Live oak, pecan, mesquite, cedar elm. Shade and thorns, not a meal. Field has this pack's tree cards."
         case "NM":
             return "Cottonwood, juniper, piñon. Shade and wind, not a meal. Field has this pack's tree cards."
         default:

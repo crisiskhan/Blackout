@@ -543,7 +543,10 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     jump = brace_body(tab, tab.index("private func jump()"))
     if "runtime.fieldJump" not in jump:
         fail("FieldTab never reads the hold card's request")
-    if "InspectField.presentRoute" not in jump and not re.search(r"for \w+ in route\b", jump):
+    walk = jump
+    if "private func openRoute(" in tab:
+        walk += brace_body(tab, tab.index("private func openRoute("))
+    if "InspectField.presentRoute" not in walk and not re.search(r"for \w+ in route\b", walk):
         fail("FieldTab does not walk the route, so a state card that is not loaded opens nothing")
     print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
 
