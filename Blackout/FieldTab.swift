@@ -9,6 +9,7 @@ import VisionCoreML
 struct FieldTab: View {
     @Bindable var runtime: AppRuntime
     @State private var cards: [FieldCard] = []
+    @State private var query = ""
     @State private var stepper: StepperState?
     @State private var fieldTrail: [String] = []
     @State private var fieldTrailTotal: Int = 0
@@ -39,30 +40,40 @@ struct FieldTab: View {
                                     .foregroundStyle(Theme.warn)
                             }
                         } else {
-                            ScrollView {
-                                VStack(alignment: .leading, spacing: 1) {
-                                    ForEach(listCards) { c in
-                                        if listCards.first(where: { $0.category == c.category })?.id == c.id {
-                                            Text(c.category.uppercased())
-                                                .font(.system(size: 11, weight: .heavy))
-                                                .foregroundStyle(Theme.silver.opacity(0.5))
-                                                .padding(.top, 10)
-                                                .padding(.bottom, 4)
-                                        }
-                                        Button(loc(c.title)) {
-                                            fieldTrail = []
-                                            fieldTrailTotal = 0
-                                            fieldTrailBook = ""
-                                            stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
-                                        }
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundStyle(Theme.silver)
-                                        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                                        .padding(.horizontal, 12)
-                                        .background(Theme.raised)
-                                    }
+                            searchField
+                            if catalogMiss {
+                                HUDGlassCard {
+                                    Text("NO MATCH")
+                                        .font(.system(size: 13, weight: .heavy))
+                                        .foregroundStyle(Theme.warn)
                                 }
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            } else {
+                                ScrollView {
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        ForEach(listCards) { c in
+                                            if catalogQuery.isEmpty,
+                                               listCards.first(where: { $0.category == c.category })?.id == c.id {
+                                                Text(c.category.uppercased())
+                                                    .font(.system(size: 11, weight: .heavy))
+                                                    .foregroundStyle(Theme.silver.opacity(0.5))
+                                                    .padding(.top, 10)
+                                                    .padding(.bottom, 4)
+                                            }
+                                            Button(loc(c.title)) {
+                                                fieldTrail = []
+                                                fieldTrailTotal = 0
+                                                fieldTrailBook = ""
+                                                stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
+                                            }
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundStyle(Theme.silver)
+                                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
+                                            .padding(.horizontal, 12)
+                                            .background(Theme.raised)
+                                        }
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
                             }
                         }
                     }
@@ -90,7 +101,10 @@ struct FieldTab: View {
         }
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
-        .onChange(of: runtime.packs?.active?.id) { _, _ in load() }
+        .onChange(of: runtime.packs?.active?.id) { _, _ in
+            query = ""
+            load()
+        }
     }
 
     private var fieldStatus: String {
@@ -360,8 +374,37 @@ struct FieldTab: View {
 
     /// ALL CARDS is this pack's chapter. The loaded `cards` book stays the
     /// whole state so a javelina still still opens the west mammal card.
+    /// SEARCH ranks that chapter. It does not invent a card the book lacks.
+    private var catalogQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var catalogMiss: Bool {
+        !catalogQuery.isEmpty && listCards.isEmpty
+    }
+
     private var listCards: [FieldCard] {
-        FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
+        FieldCorpus.ask(
+            FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id),
+            query: catalogQuery,
+            locale: runtime.locale
+        )
+    }
+
+    private var searchField: some View {
+        TextField("SEARCH", text: $query)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(Theme.silver)
+            .padding(.horizontal, 12)
+            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            .background(Theme.glass())
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+            )
     }
 
     private func load() {
@@ -393,6 +436,7 @@ struct FieldTab: View {
     }
 
     private func openRoute(_ route: [String]) {
+        query = ""
         let present = InspectField.presentRoute(route, in: Set(cards.map(\.id)))
         guard let first = present.first,
               let card = cards.first(where: { $0.id == first })

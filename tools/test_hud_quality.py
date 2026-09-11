@@ -498,12 +498,18 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("step: s.index", field)
         self.assertIn("step: Int", speech)
         self.assertIn("ForEach(listCards)", field)
+        self.assertIn("FieldCorpus.ask(", field)
+        self.assertIn('TextField("SEARCH"', field)
+        self.assertIn("NO MATCH", field)
+        self.assertNotIn("mapSearchHitCap", field)
 
     def test_solo_qa_scores_stop_if_and_step_speak(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("STOP-IF", qa)
         self.assertIn("open step", qa.lower())
         self.assertIn("VISION captures one still", qa)
+        self.assertIn("NO MATCH", qa)
+        self.assertIn("FIELD SEARCH", qa)
 
 
 class CommsInstrumentTests(unittest.TestCase):

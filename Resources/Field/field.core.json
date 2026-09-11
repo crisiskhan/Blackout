@@ -1218,6 +1218,1242 @@
           }
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "camp-start",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Starting from nothing",
+        "es": "Empezar desde nada"
+      },
+      "situation": {
+        "en": "Clothes, this pack, and the party. No kit is promised. Night, heat, or thirst is already working.",
+        "es": "Ropa, este pack y el grupo. No hay kit prometido. Ya trabajan la noche, el calor o la sed."
+      },
+      "stop_if": [
+        {
+          "en": "Someone is already dying — open the medical card that names it, not this order.",
+          "es": "Alguien ya se está muriendo: abre la tarjeta médica, no este orden."
+        },
+        {
+          "en": "Water is rising in the cut — get out. This card is not a flood card.",
+          "es": "El agua sube en la quebrada: sal. Esta no es la tarjeta de creciente."
+        }
+      ],
+      "get_to_care": {
+        "en": "This is order of work, not a rescue. Confusion, no urine, or a person who will not wake is care.",
+        "es": "Esto es orden de trabajo, no un rescate. Confusión, no orinar o alguien que no despierta es cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "STOP. Count the party. Shade or a windbreak before a walk. Do not eat a plant you cannot name. Do not split past voice.",
+            "es": "PARA. Cuenta al grupo. Sombra o cortaviento antes de caminar. No comas una planta que no puedes nombrar. No se separen más allá de la voz."
+          },
+          "why": {
+            "en": "Motion feels like a plan. Shade and a headcount are the plan.",
+            "es": "Moverse parece un plan. La sombra y el recuento son el plan."
+          },
+          "child": {
+            "en": "Give the child a sit-job: count people, hold the whistle, stay on the pack.",
+            "es": "El niño se sienta: cuenta gente, sostiene el silbato, se queda en la mochila."
+          },
+          "stop": {
+            "en": "Stop walking if two people have two different 'I'm sure' directions.",
+            "es": "No caminen si dos personas tienen dos 'estoy seguro' distintos."
+          },
+          "image": "form-up.png",
+          "tickSeconds": 180,
+          "party": {
+            "1": "Shade, sit, think.",
+            "2": "One makes shade, one counts kit.",
+            "4": "Shade / water scout / fire / watch."
+          }
+        },
+        {
+          "do": {
+            "en": "Water next, then fire, then a roof, then a signal a passer can see. Food is last, and only what you already trust.",
+            "es": "Agua después, luego fuego, luego techo, luego una señal que un transeúnte vea. La comida es lo último, y solo lo que ya confías."
+          },
+          "why": {
+            "en": "Calories keep. Thirst, cold, and being invisible kill first.",
+            "es": "La caloría espera. La sed, el frío y no ser visto matan primero."
+          },
+          "child": {
+            "en": "Child drinks treated water and sits in the shade. They do not taste plants 'to help'.",
+            "es": "El niño bebe agua tratada y se sienta a la sombra. No prueba plantas 'para ayudar'."
+          },
+          "stop": {
+            "en": "Stop the forage if anyone's mouth tingles. Open the unknown-plant card.",
+            "es": "Para el forrajeo si hormiguea la boca. Abre la tarjeta de planta desconocida."
+          },
+          "image": "form-up.png",
+          "party": {
+            "1": "Water, then spark, then roof.",
+            "2": "One water, one fire.",
+            "4": "Water / fire / roof / signal."
+          }
+        },
+        {
+          "do": {
+            "en": "Stay put if anyone is looking. Walk only a handrail you can name — a road, a river you can see, a ridge. Not a wash at night.",
+            "es": "Quédate si alguien te busca. Camina solo una baranda que puedas nombrar: camino, río que ves, filo. No un arroyo de noche."
+          },
+          "why": {
+            "en": "Lost people loop. A named line is how you meet a road without dying in a cut.",
+            "es": "Los perdidos dan vueltas. Una línea con nombre es cómo llegas a un camino sin morir en una quebrada."
+          },
+          "child": {
+            "en": "Child stays on the rope or the adult's belt, not as scout.",
+            "es": "El niño va del cordón o del cinturón, no de explorador."
+          },
+          "stop": {
+            "en": "Stop and get high if you hear water in the cut or the sky goes black-green.",
+            "es": "Para y sube si oyes agua en la quebrada o el cielo se pone negro-verde."
+          },
+          "image": "nav-stop.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "water-find",
+      "category": "water",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Find water before you treat it",
+        "es": "Encuentra agua antes de tratarla"
+      },
+      "situation": {
+        "en": "Mouth is dry. You need a source. No lab, no live spring map.",
+        "es": "La boca está seca. Necesitas una fuente. Sin laboratorio ni mapa de manantiales en vivo."
+      },
+      "stop_if": [
+        {
+          "en": "You have sealed commercial water.",
+          "es": "Tienes agua comercial sellada."
+        },
+        {
+          "en": "The only pool has a chemical sheen, a carcass, or a sewage smell — walk farther.",
+          "es": "El único charco tiene irisado, un cadáver o olor a cloaca: camina más."
+        }
+      ],
+      "get_to_care": {
+        "en": "Finding water is not disinfection. Open Make water less bad next. Care for no urine, bloody stool, or confusion.",
+        "es": "Encontrar agua no es desinfectar. Abre Hacer el agua menos mala después. Cuidado si no orinas, hay sangre en heces o hay confusión."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Shade first. Walk dawn and dusk. Follow drainage downhill in daylight — green, bird noise at water hours, rock tinajas after rain. Do not drink urine, seawater, radiator fluid, or a cactus as your plan.",
+            "es": "Sombra primero. Camina al alba y al anochecer. Sigue el drenaje cuesta abajo de día: verde, aves a hora de agua, tinajas en roca después de lluvia. No bebas orina, agua de mar, radiador ni un cactus como plan."
+          },
+          "why": {
+            "en": "Sweat is water you already had. A cactus is spines. Urine and seawater concentrate the problem.",
+            "es": "El sudor es agua que ya tenías. Un cactus son espinas. La orina y el mar concentran el problema."
+          },
+          "child": {
+            "en": "Child stays in the shade with an adult. They do not sip the scoop 'to try'.",
+            "es": "El niño a la sombra con un adulto. No prueba el scoop."
+          },
+          "stop": {
+            "en": "Stop if the only water smells like fuel or shines like oil — boiling will not fix chemicals.",
+            "es": "Para si el único agua huele a combustible o brilla como aceite: el hervor no quita químicos."
+          },
+          "image": "water-boil.png",
+          "party": {
+            "1": "Shade, then a named drain.",
+            "2": "One stays with kit, one scouts downhill in voice range.",
+            "4": "Shade / scout / watch / treat."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "water-catch",
+      "category": "water",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Catch rain and dew",
+        "es": "Atrapa lluvia y rocío"
+      },
+      "situation": {
+        "en": "Sky is working or dawn is wet on metal. You need a bottle more than a walk.",
+        "es": "El cielo trabaja o el alba moja el metal. Necesitas una botella más que una caminata."
+      },
+      "stop_if": [
+        {
+          "en": "You already have sealed water.",
+          "es": "Ya tienes agua sellada."
+        },
+        {
+          "en": "Lightning is on top of you — catch later, get off the high point now.",
+          "es": "El rayo está encima: atrapa después, baja del alto ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Caught water still needs the boil card unless it fell into a clean closed bottle. Care for gut illness the same as any other field water.",
+        "es": "El agua atrapada aún necesita el hervor salvo que cayó en una botella limpia cerrada. El mal de estómago es el mismo."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Tarp, poncho, bag, or a clean rock hollow into a bottle. Divert the first dirty minute off the cloth, then catch. At dawn wipe dew off metal or plastic into the same bottle. A pit still often returns less than you sweat — do not count on it.",
+            "es": "Lona, poncho, bolsa o hueco limpio de roca a una botella. Desvía el primer minuto sucio, luego atrapa. Al alba pasa rocío de metal o plástico a la misma botella. Un alambique en pozo suele devolver menos de lo que sudas: no cuentes con él."
+          },
+          "why": {
+            "en": "Rain is the honest field catch. A still that costs a day's digging is usually a loss.",
+            "es": "La lluvia es la captura honesta. Un alambique que cuesta un día de cavar suele ser pérdida."
+          },
+          "child": {
+            "en": "Child holds the bottle, not the ridgeline in a storm.",
+            "es": "El niño sostiene la botella, no la cumbrera en la tormenta."
+          },
+          "stop": {
+            "en": "Stop catching if the cloth was a chemical tarp or a fuel bag — that catch is not water.",
+            "es": "Para si la lona era química o de combustible: eso no es agua."
+          },
+          "image": "water-boil.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "fire-spark",
+      "category": "fire",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Fire from what you have",
+        "es": "Fuego con lo que tienes"
+      },
+      "situation": {
+        "en": "You need heat for water or to not die of wet cold. You may have a spark, a battery, a lens, or only sticks.",
+        "es": "Necesitas calor para agua o para no morir de frío mojado. Puede que tengas chispa, batería, lupa o solo palos."
+      },
+      "stop_if": [
+        {
+          "en": "You have a working stove on mineral soil.",
+          "es": "Tienes estufa funcionando sobre suelo mineral."
+        },
+        {
+          "en": "Red-flag wind or a fire you cannot kill — do not start another.",
+          "es": "Viento extremo o un fuego que no puedes matar: no inicies otro."
+        }
+      ],
+      "get_to_care": {
+        "en": "Burns go to care. This is a cook and rewarm fire, not a wildfire. If friction is all you have and daylight is going, stop and build the roof first.",
+        "es": "Las quemaduras van a cuidado. Esto es fuego de cocina y recalentar, no un incendio. Si solo tienes fricción y se acaba el día, para y haz el techo primero."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Mineral soil, ring or pit, water or dirt in hand. Shred tinder you can (inner bark, dry grass, cotton, tape fuzz). Spark in this order: match or ferro, then lens on black char, then battery on steel wool if you have both. Friction last — bow or hand drill fails when wet or rushed. Do not spend the last daylight on it unless you already can.",
+            "es": "Suelo mineral, aro o pozo, agua o tierra en la mano. Desmenuza yesca (corteza interna, pasto seco, algodón). Chispa en este orden: fósforo o ferro, luego lupa sobre carbón negro, luego batería en lana de acero si tienes ambas. Fricción al último: el taladro falla mojado o con prisa. No gastes la última luz del día en eso salvo que ya sepas."
+          },
+          "why": {
+            "en": "Tinder and a kill method beat a pretty spark. Friction is a skill, not a feeling.",
+            "es": "La yesca y cómo matarlo ganan a una chispa bonita. La fricción es oficio, no un sentimiento."
+          },
+          "child": {
+            "en": "Child fetches dead twigs outside the ring. They do not blow the coal or hold the battery.",
+            "es": "El niño trae ramitas fuera del aro. No sopla la brasa ni sostiene la batería."
+          },
+          "stop": {
+            "en": "Stop if embers run into grass you cannot stamp. Lid or dirt, not panic water on grease.",
+            "es": "Para si las brasas se van al pasto y no puedes pisarlas. Tapa o tierra, no agua de pánico en grasa."
+          },
+          "image": "fire-ring.png",
+          "party": {
+            "1": "Tinder, spark, kill pile.",
+            "2": "One sparks, one fetches deadfall.",
+            "4": "Tinder / spark / fuel / watch the grass."
+          }
+        },
+        {
+          "do": {
+            "en": "Feed pencil sticks then wrist-thick. Bank coals in ash if you must keep heat overnight. Kill it dead before you walk — stir, water or dirt, hand over the ash.",
+            "es": "Alimenta palitos, luego muñeca. Guarda brasas en ceniza si debes guardar calor de noche. Mátelo del todo antes de caminar: remueve, agua o tierra, mano sobre la ceniza."
+          },
+          "why": {
+            "en": "A fire you did not kill is how a camp becomes a country problem.",
+            "es": "Un fuego que no mataste es cómo un campamento se vuelve problema del país."
+          },
+          "child": {
+            "en": "Child stays outside the ring while you kill it.",
+            "es": "El niño fuera del aro mientras lo matas."
+          },
+          "stop": {
+            "en": "Stop and stay if you cannot put a hand on the ash. Do not walk away from heat you cannot check.",
+            "es": "Quédate si no puedes poner la mano en la ceniza. No te vayas de un calor que no puedes revisar."
+          },
+          "image": "fire-ring.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "shelter-site",
+      "category": "shelter",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Pick the camp before you build",
+        "es": "Elige el campamento antes de construir"
+      },
+      "situation": {
+        "en": "Night or weather is coming. The roof is the next card. The ground you pick is this one.",
+        "es": "Viene noche o clima. El techo es la siguiente tarjeta. El suelo que eliges es esta."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a closed tent on high drained ground.",
+          "es": "Ya tienes tienda cerrada en alto drenado."
+        },
+        {
+          "en": "The cut is talking or the sky is a storm on a ridge — move first.",
+          "es": "La quebrada habla o el cielo es tormenta en un filo: muévete primero."
+        }
+      ],
+      "get_to_care": {
+        "en": "A bad site makes hypothermia and flood. Get to care for shivering that stops and speech that slurs.",
+        "es": "Un mal sitio hace hipotermia y creciente. Busca cuidado si deja de temblar y habla raro."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "High, drained ground. Not in a wash. Not under a widowmaker. Not on a ridge in a storm. Wind at the back wall. Water downhill of camp, not through it. Escape route you can walk in the dark. Then build the tarp or debris lean-to.",
+            "es": "Suelo alto y drenado. No en un arroyo. No bajo un árbol viudo. No en un filo con tormenta. Viento a la pared de atrás. Agua cuesta abajo del campamento, no a través. Ruta de escape que puedas caminar de noche. Luego la lona o el refugio de restos."
+          },
+          "why": {
+            "en": "The roof cannot fix a river bed. Widowmakers kill in wind you have not felt yet.",
+            "es": "El techo no arregla un cauce. Los viudos matan con un viento que aún no sientes."
+          },
+          "child": {
+            "en": "Child sits on the pack off the dirt while you pick. They do not climb the dead tree.",
+            "es": "El niño se sienta en la mochila, no en la tierra, mientras eliges. No sube al árbol muerto."
+          },
+          "stop": {
+            "en": "Stop and move if water is already running where you wanted the floor, or if a trunk is cracked overhead.",
+            "es": "Muévete si ya corre agua donde querías el piso, o si hay un tronco rajado arriba."
+          },
+          "image": "shelter-tarp.png",
+          "party": {
+            "1": "Pick, then build.",
+            "2": "One picks, one gathers debris off the floor line.",
+            "4": "Site / roof / floor / watch."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "sig-ground",
+      "category": "signaling",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Smoke, three, and open ground",
+        "es": "Humo, tres y suelo abierto"
+      },
+      "situation": {
+        "en": "You need a plane, a ridge party, or a road to notice you. Mirror is the other card. This is the mark they can see without a flash.",
+        "es": "Necesitas que un avión, un grupo en el filo o un camino te vean. El espejo es la otra tarjeta. Esta es la marca que se ve sin destello."
+      },
+      "stop_if": [
+        {
+          "en": "You already have voice with the party that is looking.",
+          "es": "Ya tienes voz con el grupo que te busca."
+        },
+        {
+          "en": "A fire for smoke would take the grass — move to mineral soil first.",
+          "es": "Un fuego para humo se llevaría el pasto: primero suelo mineral."
+        }
+      ],
+      "get_to_care": {
+        "en": "Signaling is not a phone. If someone is dying, offer Emergency SOS when a net exists, then keep the mark working.",
+        "es": "Señalar no es un teléfono. Si alguien se muere, ofrece Emergency SOS si hay red, y sigue con la marca."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Open ground. Contrast. Three of anything — fires, rocks, panels, whistle blasts. Smoke by day on mineral soil, fire by night. Save the battery for a window someone can actually see. Do not burn the country.",
+            "es": "Suelo abierto. Contraste. Tres de cualquier cosa: fuegos, piedras, paneles, silbatazos. Humo de día en suelo mineral, fuego de noche. Guarda la batería para una ventana que alguien pueda ver. No quemes el país."
+          },
+          "why": {
+            "en": "One smudge in timber is a camp. Three on a bald is a request.",
+            "es": "Una humareda en el monte es un campamento. Tres en un calvo es un pedido."
+          },
+          "child": {
+            "en": "Child can hold a panel still. They do not tend the signal fire.",
+            "es": "El niño puede sostener un panel. No cuida el fuego de señal."
+          },
+          "stop": {
+            "en": "Stop the smoke if wind takes embers into grass you cannot stamp.",
+            "es": "Para el humo si el viento lleva brasas al pasto y no puedes pisarlas."
+          },
+          "image": "signal-three.png",
+          "party": {
+            "1": "Pick a bald and make three.",
+            "2": "One marks, one watches the grass.",
+            "4": "Mark / smoke / watch / stay put."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "camp-latrine",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Latrine downhill of camp",
+        "es": "Letrina cuesta abajo del campamento"
+      },
+      "situation": {
+        "en": "The camp will last more than a night. Gut bugs are how a party folds.",
+        "es": "El campamento durará más de una noche. Los bichos del intestino doblan al grupo."
+      },
+      "stop_if": [
+        {
+          "en": "You are moving in an hour and can walk it well away from water.",
+          "es": "Te mueves en una hora y puedes irlo lejos del agua."
+        },
+        {
+          "en": "Someone already has bloody stool or no urine — that is the gut card and care, not a hole.",
+          "es": "Alguien ya tiene sangre en heces o no orina: eso es la tarjeta de intestino y cuidado, no un hoyo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Hands and distance keep the water you just treated. Care for gut illness that will not keep fluids down.",
+        "es": "Manos y distancia guardan el agua que acabas de tratar. Cuidado si el mal de estómago no retiene líquidos."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Walk ~60 paces downslope and away from the water you drink. Hole, then cover. Pack out paper if you can. Wash hands with treated water before you cook. This is how camps last.",
+            "es": "Camina unos 60 pasos cuesta abajo y lejos del agua que bebes. Hoyo, luego tapa. Lleva el papel si puedes. Lávate con agua tratada antes de cocinar. Así duran los campamentos."
+          },
+          "why": {
+            "en": "A latrine uphill of the bottle is a slow poison.",
+            "es": "Una letrina río arriba de la botella es un veneno lento."
+          },
+          "child": {
+            "en": "Child uses the same hole with an adult, not a private bush next to the creek.",
+            "es": "El niño usa el mismo hoyo con un adulto, no un matorral junto al arroyo."
+          },
+          "stop": {
+            "en": "Stop and move camp if you already dug through into the water table or a smell is in the kitchen.",
+            "es": "Mueve el campamento si ya cavaste hasta el agua o el olor está en la cocina."
+          },
+          "image": "form-up.png",
+          "party": {
+            "1": "Downhill, cover, wash.",
+            "2": "One cooks, one does not share that hand until washed.",
+            "4": "Kitchen / water / latrine / wash are four jobs."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-gut",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Gut illness — keep fluids",
+        "es": "Mal de estómago — retén líquidos"
+      },
+      "situation": {
+        "en": "Vomiting, diarrhea, or both. The danger is the water leaving, not the hours of misery.",
+        "es": "Vómito, diarrea o ambos. El peligro es el agua que se va, no las horas de miseria."
+      },
+      "stop_if": [
+        {
+          "en": "They can drink, make urine, and the stool is not bloody.",
+          "es": "Pueden beber, orinar y la hez no tiene sangre."
+        },
+        {
+          "en": "They cannot sit, there is blood, no urine, or they are confused — this is care, not a sip plan.",
+          "es": "No se sientan, hay sangre, no orinan o están confundidos: es cuidado, no un plan de sorbos."
+        }
+      ],
+      "get_to_care": {
+        "en": "Get to care for bloody stool, no urine, a stiff belly, or confusion. Do not plug it with a mystery plant.",
+        "es": "Busca cuidado si hay sangre en heces, no orinas, vientre duro o confusión. No lo tapes con una planta misteriosa."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Sit in shade. Sips of treated water. A pinch of salt and a pinch of sugar in a bottle if you have them. Small and often. Cool cloth. No mystery tea. No anti-diarrhea plant.",
+            "es": "Sombra. Sorbos de agua tratada. Una pizca de sal y una de azúcar en la botella si las tienes. Poco y seguido. Paño fresco. Sin té misterioso. Sin planta antidiarrea."
+          },
+          "why": {
+            "en": "The body is emptying. Replace water and salt. A plug keeps the toxin in.",
+            "es": "El cuerpo se vacía. Repón agua y sal. Un tapón deja adentro la toxina."
+          },
+          "child": {
+            "en": "Child sips sitting up. Do not force a bottle into a vomiting mouth.",
+            "es": "El niño sorbe sentado. No fuerces un botella en una boca que vomita."
+          },
+          "stop": {
+            "en": "Stop oral fluids if they cannot sit or keep choking. Roll, clear, get to care.",
+            "es": "Nada por boca si no se sientan o se ahogan. Gira, limpia, busca cuidado."
+          },
+          "image": "food-boil.png",
+          "tickSeconds": 600,
+          "party": {
+            "1": "Shade and sips.",
+            "2": "One sips them, one treats the next bottle.",
+            "4": "Sips / shade / water treat / watch urine."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-burn",
+      "category": "trauma",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Burn — cool then cover",
+        "es": "Quemadura — enfría luego cubre"
+      },
+      "situation": {
+        "en": "Heat, steam, grease, or coals got skin. The next hour sets the depth.",
+        "es": "Calor, vapor, grasa o brasas en la piel. La próxima hora fija la profundidad."
+      },
+      "stop_if": [
+        {
+          "en": "It is a small reddened patch, they are talking, and you can keep it clean.",
+          "es": "Es un parche rojo chico, hablan y puedes mantenerlo limpio."
+        },
+        {
+          "en": "Face, hands, genitals, blistered sheets, white or charred skin, or they are fading — this is care now.",
+          "es": "Cara, manos, genitales, sábanas de ampollas, piel blanca o carbonizada, o se apagan: es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Cool, cover, get to care for anything that is not a small red patch. Offer Emergency SOS if a net exists.",
+        "es": "Enfría, cubre, busca cuidado si no es un parche rojo chico. Ofrece Emergency SOS si hay red."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Cool with water — treated if you can, cleanest you have — for several minutes. Then a loose clean cover. No butter, no toothpaste, no ice packed onto a deep burn, no peeling the skin. Rings come off before swell.",
+            "es": "Enfría con agua — tratada si puedes, la más limpia — varios minutos. Luego cobertura suelta y limpia. Sin mantequilla, sin pasta, sin hielo apretado en una quemadura honda, sin pelar. Anillos fuera antes de que hinche."
+          },
+          "why": {
+            "en": "Heat keeps cooking after the flame is gone. Grease and ice both make it worse.",
+            "es": "El calor sigue cocinando cuando ya no hay llama. La grasa y el hielo empeoran."
+          },
+          "child": {
+            "en": "A child holds the water bottle. They do not pick blisters.",
+            "es": "El niño sostiene la botella. No pincha ampollas."
+          },
+          "stop": {
+            "en": "Stop cooling if they start to shiver hard — you made a hypothermia problem. Cover and move to care.",
+            "es": "Para de enfriar si tiemblan recio: ya hiciste hipotermia. Cubre y mueve a cuidado."
+          },
+          "image": "heat-cool.png",
+          "tickSeconds": 180,
+          "party": {
+            "1": "Cool, cover, walk.",
+            "2": "One cools, one fetches clean cloth.",
+            "4": "Cool / cover / kit / watch airway."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-feet",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Hot spot on a foot",
+        "es": "Punto caliente en un pie"
+      },
+      "situation": {
+        "en": "A rub that will be a hole by tomorrow. Infection is how a walk ends.",
+        "es": "Un roce que mañana será un hueco. La infección es cómo termina una caminata."
+      },
+      "stop_if": [
+        {
+          "en": "Skin is intact and you can pad it.",
+          "es": "La piel está intacta y puedes almohadillarla."
+        },
+        {
+          "en": "Red streak, pus, fever, or they cannot take weight — that is infection and care.",
+          "es": "Raya roja, pus, fiebre o no carga peso: es infección y cuidado."
+        }
+      ],
+      "get_to_care": {
+        "en": "A hole in the foot is not toughness. Care for spreading red, pus, or a foot they will not stand on.",
+        "es": "Un hueco en el pie no es aguante. Cuidado si el rojo se extiende, hay pus o no se paran."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Stop. Dry the foot. Tape or pad the hot spot before it opens. Sock dry, grit out of the shoe. Do not pop what you can still pad. Next rest, look at the other foot too.",
+            "es": "Para. Seca el pie. Cinta o almohadilla en el punto caliente antes de que abra. Calceta seca, tierra fuera del zapato. No pinches lo que aún puedes tapar. En el siguiente descanso, mira el otro pie."
+          },
+          "why": {
+            "en": "Ten minutes now is a day of walking later.",
+            "es": "Diez minutos ahora son un día de caminar después."
+          },
+          "child": {
+            "en": "Child's shoes come off at the first complaint. No 'walk it off'.",
+            "es": "Los zapatos del niño salen a la primera queja. Sin 'aguántalo'."
+          },
+          "stop": {
+            "en": "Stop the miles if the skin is already a wet hole you cannot keep clean — pad, rest, care.",
+            "es": "Para las millas si ya es un hueco húmedo que no puedes limpiar: almohadilla, descanso, cuidado."
+          },
+          "image": "fracture-splint.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-flood",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Get out of the wash",
+        "es": "Sal del arroyo"
+      },
+      "situation": {
+        "en": "A cut, arroyo, or canyon floor. Rain you cannot see is enough. Night in a wash is how desert parties drown.",
+        "es": "Una quebrada, arroyo o piso de cañón. Basta la lluvia que no ves. De noche en un arroyo es cómo se ahogan los grupos del desierto."
+      },
+      "stop_if": [
+        {
+          "en": "You are already on high ground and the water is not rising toward you.",
+          "es": "Ya estás en alto y el agua no sube hacia ti."
+        },
+        {
+          "en": "Someone is in moving water you cannot stand in — that is a crossing emergency, not a camp move.",
+          "es": "Alguien está en agua que no puedes pisar: es emergencia de cruce, no un mudanza de campamento."
+        }
+      ],
+      "get_to_care": {
+        "en": "High ground is the treatment. Get to care for anyone who went under or swallowed muddy water and now cannot breathe right.",
+        "es": "El alto es el tratamiento. Busca cuidado si alguien se sumergió o tragó lodo y ahora no respira bien."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "If you hear it, see it rise, or the sky up-canyon is a wall — out of the cut now. Leave the pack if the pack is the delay. Night: do not camp in a wash even if it is dry. High ground, count the party, stay off the next cut.",
+            "es": "Si lo oyes, lo ves subir o el cielo río arriba es una pared: sal de la quebrada ahora. Deja la mochila si la mochila es la demora. De noche: no campees en un arroyo aunque esté seco. Alto, cuenta al grupo, no la siguiente quebrada."
+          },
+          "why": {
+            "en": "A desert flood moves faster than a tired walk. Dry sand is not a promise.",
+            "es": "Una creciente del desierto corre más que un caminar cansado. La arena seca no es promesa."
+          },
+          "child": {
+            "en": "Pick the child up. Do not let them 'run back for the bottle'.",
+            "es": "Carga al niño. No lo dejes 'volver por la botella'."
+          },
+          "stop": {
+            "en": "Stop going back for gear once water has a voice. People, then gear.",
+            "es": "No vuelvas por equipo cuando el agua ya tiene voz. Gente, luego equipo."
+          },
+          "image": "monsoon.png",
+          "party": {
+            "1": "Uphill now.",
+            "2": "One carries the child, one counts.",
+            "4": "Uphill / count / light / stay."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-lightning",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Off the high point",
+        "es": "Baja del punto alto"
+      },
+      "situation": {
+        "en": "Thunder you can hear, hair that lifts, or a ridge in a build-up. Poles and lone trees are part of the problem.",
+        "es": "Trueno que oyes, pelo que se levanta o un filo en un cumulonimbo. Postes y árboles solos son parte del problema."
+      },
+      "stop_if": [
+        {
+          "en": "The storm is gone and you are off the ridge.",
+          "es": "La tormenta se fue y ya bajaste del filo."
+        },
+        {
+          "en": "Someone is down after a strike — airway and CPR cards, not a weather lesson.",
+          "es": "Alguien cayó tras un rayo: tarjetas de vía aérea y RCP, no una lección de clima."
+        }
+      ],
+      "get_to_care": {
+        "en": "A strike is trauma and heart. Offer Emergency SOS if a net exists. Get to care even if they 'woke up'.",
+        "es": "Un rayo es trauma y corazón. Ofrece Emergency SOS si hay red. Busca cuidado aunque 'haya despertado'."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Off peaks, towers, fence lines, and lone trees. Drop poles and long conductors. If it is on you, crouch on a pad or pack, feet together, not lying flat. Wait for the storm to move. The tarp card is not a lightning rod.",
+            "es": "Baja de picos, torres, alambradas y árboles solos. Suelta postes y cables largos. Si está encima, cuclillas sobre un pad o mochila, pies juntos, no tendido. Espera a que se mueva. La lona no es un pararrayos."
+          },
+          "why": {
+            "en": "Height and metal collect the hit. A cave mouth and a ridge both want you off them.",
+            "es": "La altura y el metal recogen el golpe. Una boca de cueva y un filo te quieren fuera."
+          },
+          "child": {
+            "en": "Child in the middle of the group, off the ridgeline, not under the pretty lone tree.",
+            "es": "El niño al centro del grupo, fuera del filo, no bajo el árbol solo bonito."
+          },
+          "stop": {
+            "en": "Stop holding the ridgeline 'for the view for one more minute'. Move.",
+            "es": "No te quedes en el filo 'un minuto más por la vista'. Muévete."
+          },
+          "image": "heat-island.png",
+          "party": {
+            "1": "Down and small.",
+            "2": "Move together, no stragglers on the wire.",
+            "4": "Off the high / count / kit / wait."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-desert-day",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Shade before miles",
+        "es": "Sombra antes que millas"
+      },
+      "situation": {
+        "en": "Desert or pavement heat. The party still wants to 'make the next tank' in the white hours.",
+        "es": "Calor de desierto o pavimento. El grupo aún quiere 'llegar al siguiente tanque' en las horas blancas."
+      },
+      "stop_if": [
+        {
+          "en": "It is dawn or dusk, they are drinking, and shade is in reach.",
+          "es": "Es alba o anochecer, beben y hay sombra a mano."
+        },
+        {
+          "en": "They stopped sweating or are confused — that is heat collapse, not this card.",
+          "es": "Dejaron de sudar o están confundidos: es colapso por calor, no esta tarjeta."
+        }
+      ],
+      "get_to_care": {
+        "en": "Heat stroke is the other card. Cool first if they are already wrong. Care for confusion that does not clear.",
+        "es": "El golpe de calor es la otra tarjeta. Enfría primero si ya están mal. Cuidado si la confusión no pasa."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not march the midday. Cover skin. Sit the south-side shade. Sip treated water. Work dawn and dusk. A wet cloth on the neck is work; a hero mile at 15:00 is how heat collapse starts.",
+            "es": "No marches el mediodía. Cubre la piel. Siéntate a la sombra del sur. Sorbe agua tratada. Trabaja alba y anochecer. Un paño mojado en el cuello es trabajo; una milla de héroe a las 15:00 es cómo empieza el colapso."
+          },
+          "why": {
+            "en": "Sweat you cannot replace is a debt. Shade is the payment plan.",
+            "es": "El sudor que no repones es deuda. La sombra es el plan de pago."
+          },
+          "child": {
+            "en": "Child gets the shade and the sip first. No races.",
+            "es": "El niño recibe la sombra y el sorbo primero. Sin carreras."
+          },
+          "stop": {
+            "en": "Stop the walk if urine goes dark or someone stops sweating — open heat collapse.",
+            "es": "Para la caminata si la orina se oscurece o alguien deja de sudar: abre colapso por calor."
+          },
+          "image": "heat-cool.png",
+          "party": {
+            "1": "Shade and sip.",
+            "2": "One walks the cool hours, one stays with the weak.",
+            "4": "Shade / water / watch / no midday miles."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-crossing",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Moving water",
+        "es": "Agua en movimiento"
+      },
+      "situation": {
+        "en": "A creek, river, or acequia you want to be on the other side of. You can still walk around.",
+        "es": "Un arroyo, río o acequia al otro lado. Aún puedes rodear."
+      },
+      "stop_if": [
+        {
+          "en": "You found a bridge, a road, or a place you can step without a push.",
+          "es": "Hay puente, camino o un paso sin empujón."
+        },
+        {
+          "en": "It is above the knee and pushing, or you cannot see the bottom — do not.",
+          "es": "Está sobre la rodilla y empuja, o no ves el fondo: no."
+        }
+      ],
+      "get_to_care": {
+        "en": "Drowning is care you will not give in the middle. Get to care for anyone who went under.",
+        "es": "Ahogarse es un cuidado que no das en medio. Busca cuidado si alguien se sumergió."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Walk around if you can. Unbuckle the pack. Face slightly upstream, shuffle, three points. Weak swimmer upstream of the strong one so they are not the battering ram. Child does not free swim. If it is above the knee and pushing, it is a different river — don't.",
+            "es": "Rodea si puedes. Destacha la mochila. Cara un poco aguas arriba, pasos cortos, tres puntos. El nadador débil aguas arriba del fuerte para no ser ariete. El niño no nada suelto. Si pasa la rodilla y empuja, es otro río: no."
+          },
+          "why": {
+            "en": "A pack that stays buckled is an anchor. Pride at a ford is how parties lose people.",
+            "es": "La mochila abrochada es ancla. El orgullo en un vado es cómo se pierde gente."
+          },
+          "child": {
+            "en": "Carry the child. They are not a float test.",
+            "es": "Carga al niño. No es una prueba de flotación."
+          },
+          "stop": {
+            "en": "Stop at the first slip you cannot plant. Back out the way you came.",
+            "es": "Para en el primer resbalón que no puedes plantar. Sal por donde entraste."
+          },
+          "image": "water-boil.png",
+          "party": {
+            "1": "Walk around.",
+            "2": "Rope if you have it; no one belays from a tree you would not trust with a fall.",
+            "4": "Scout / cross / catch / child last in arms."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "plant-cordage",
+      "category": "plants",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Fiber is cordage, not food",
+        "es": "La fibra es cuerda, no comida"
+      },
+      "situation": {
+        "en": "You need string: tarp, splint, pack repair. Yucca, agave, dead inner bark, a shoelace. This is not a meal.",
+        "es": "Necesitas cuerda: lona, férula, compostura. Yucca, agave, corteza interna muerta, un cordón. Esto no es una comida."
+      },
+      "stop_if": [
+        {
+          "en": "You already have cord or tape that will hold.",
+          "es": "Ya tienes cuerda o cinta que aguanta."
+        },
+        {
+          "en": "Lips or tongue are already burning — that is a medical card, not fiber.",
+          "es": "Labios o lengua ya arden: es médico, no fibra."
+        }
+      ],
+      "get_to_care": {
+        "en": "Vision is a guess. Nothing here unlocks a meal. If they chewed the fiber, get to care for vomiting, trouble breathing, or collapse.",
+        "es": "Vision es una conjetura. Nada aquí desbloquea una comida. Si masticaron la fibra, busca cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Dead or dropped leaves, not a live strip that kills the plant you may need tomorrow. Scrape, twist, join with a square knot you can undo. Use. Do not chew. Do not make a tea. Wash sap off skin.",
+            "es": "Hojas muertas o caídas, no una tira viva que mata la planta que tal vez necesitas mañana. Raspa, tuerce, une con un nudo cuadrado que puedas deshacer. Úsala. No mastiques. No hagas té. Lava la savia."
+          },
+          "why": {
+            "en": "Cordage is a tool. The unknown-plant card is still the rule for anything in a mouth.",
+            "es": "La cuerda es herramienta. La tarjeta de planta desconocida sigue siendo la regla para cualquier cosa en la boca."
+          },
+          "child": {
+            "en": "Take the leaf out of a child's mouth. They can hold the finished twist.",
+            "es": "Saca la hoja de la boca del niño. Puede sostener el torcido listo."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or a rash starts — sit, watch airway.",
+            "es": "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea."
+          },
+          "image": "plant-use.png",
+          "party": {
+            "1": "Twist what you already trust as fiber.",
+            "2": "One twists, one builds.",
+            "4": "Cordage / tarp / splint / watch mouths."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "camp-blade",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Keep the blade",
+        "es": "Guarda el filo"
+      },
+      "situation": {
+        "en": "You have a knife, saw, or you are about to improvise one. A lost or buried blade is a bad week.",
+        "es": "Tienes cuchillo, sierra o vas a improvisar uno. Un filo perdido o enterrado es una semana mala."
+      },
+      "stop_if": [
+        {
+          "en": "The blade is in the sheath and nobody is cut.",
+          "es": "El filo está en la vaina y nadie está cortado."
+        },
+        {
+          "en": "Blood is pulsing — that is pack-a-bleed, not a lecture.",
+          "es": "La sangre pulsa: es taponar, no una lección."
+        }
+      ],
+      "get_to_care": {
+        "en": "Cuts go to the bleed card. Get to care for a deep cut, a cut across a palm you need, or bleeding you cannot pack.",
+        "es": "Los cortes van a la tarjeta de sangrado. Busca cuidado si es hondo, cruza la palma que necesitas o no puedes taponar."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Cut away from the body. Sheath when you walk. Batoning deadfall, not live hardwood you cannot finish. Mark the place you set it down. A rock flake is a last tool — same rules, easier to lose.",
+            "es": "Corta lejos del cuerpo. Vaina al caminar. Hende madera muerta, no dura viva que no puedes terminar. Marca dónde lo dejaste. Una lasca de piedra es la última herramienta: mismas reglas, más fácil de perder."
+          },
+          "why": {
+            "en": "The blade is calories of work. Most field cuts happen on the recover, not the chop.",
+            "es": "El filo son calorías de trabajo. La mayoría de cortes de campo son al recoger, no al tajar."
+          },
+          "child": {
+            "en": "Child does not get the blade. They can sit well clear with the wood pile.",
+            "es": "El niño no lleva el filo. Puede sentarse lejos con la pila de leña."
+          },
+          "stop": {
+            "en": "Stop if you are shaking, wet-handed, or working in the dark. Sheath and wait.",
+            "es": "Para si tiemblas, tienes la mano mojada o trabajas a oscuras. Vaina y espera."
+          },
+          "image": "bleed-pack.png",
+          "party": {
+            "1": "One blade, sheathed between cuts.",
+            "2": "One cuts, one is not in the arc.",
+            "4": "Cut / carry / sheath / first aid."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-bog",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Mud and standing water",
+        "es": "Lodo y agua quieta"
+      },
+      "situation": {
+        "en": "A swamp edge, a stock-tank margin, or a bosque that will not let a boot go. Cottonmouth country is the bite card.",
+        "es": "Orilla de ciénaga, margen de tanque o un bosque que no suelta la bota. País de mocasín de agua es la tarjeta de mordedura."
+      },
+      "stop_if": [
+        {
+          "en": "You are on firm ground and the water is a treat-it problem, not a trap.",
+          "es": "Estás en firme y el agua es para tratarla, no una trampa."
+        },
+        {
+          "en": "A boot is already gone past the knee and the mud is climbing — this is now, not a later walk.",
+          "es": "La bota ya pasó la rodilla y el lodo sube: es ahora, no un caminar después."
+        }
+      ],
+      "get_to_care": {
+        "en": "Standing water is the disinfect card, not a drink. Bite treatment if a snake is in it. Care for anyone who went under.",
+        "es": "El agua quieta es la tarjeta de desinfectar, no un trago. Tratamiento de mordedura si hay víbora. Cuidado si alguien se sumergió."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Do not yank a buried foot straight up. Unlace, float the body back, crawl to roots or grass. Probe with a stick. Do not drink the standing water untreated. Give snakes the road — still, then the bite card.",
+            "es": "No tires del pie enterrado hacia arriba. Destacha, flota el cuerpo atrás, gatea a raíces o pasto. Sonda con un palo. No bebas el agua quieta sin tratar. Cede el paso a las víboras: quieto, luego la tarjeta de mordedura."
+          },
+          "why": {
+            "en": "Suction plus panic is how a boot becomes a body. Lean back, not harder in.",
+            "es": "Succión más pánico es cómo una bota se vuelve un cuerpo. Inclínate atrás, no más adentro."
+          },
+          "child": {
+            "en": "Child does not test the mud. Carry them on firm ground.",
+            "es": "El niño no prueba el lodo. Cárgalo en firme."
+          },
+          "stop": {
+            "en": "Stop fighting a hole that climbs. Yell, spread weight, wait for a branch, do not dive after a pack.",
+            "es": "Para de pelear un hueco que sube. Grita, abre peso, espera una rama, no bucees por una mochila."
+          },
+          "image": "monsoon.png",
+          "party": {
+            "1": "Back out, then treat water.",
+            "2": "One on firm ground with a stick, one does not yank.",
+            "4": "Probe / pull from firm / bite watch / water."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "med-infection",
+      "category": "medical",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Red streak, heat, pus",
+        "es": "Raya roja, calor, pus"
+      },
+      "situation": {
+        "en": "A cut, bite, or blister that is getting worse instead of closing. The clock is now in days, not minutes.",
+        "es": "Un corte, mordedura o ampolla que empeora en vez de cerrar. El reloj ahora es de días, no de minutos."
+      },
+      "stop_if": [
+        {
+          "en": "It is a small clean scab and they have no fever.",
+          "es": "Es una costra chica y limpia y no tienen fiebre."
+        },
+        {
+          "en": "Red streak toward the trunk, fever, pus under pressure, or they are fading — this is care.",
+          "es": "Raya roja hacia el tronco, fiebre, pus a presión o se apagan: es cuidado."
+        }
+      ],
+      "get_to_care": {
+        "en": "Field cleaning is not an antibiotic. Get to care for a streak, fever, or a wound that smells like death. Offer Emergency SOS if a net exists.",
+        "es": "Limpiar en el campo no es un antibiótico. Busca cuidado si hay raya, fiebre o una herida que huele a muerte. Ofrece Emergency SOS si hay red."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Wash with treated water. Cover clean and loose. Watch the edge and the time. Do not pack mud, dung, or a mystery poultice on it. Rest the limb. If a streak runs toward the heart or fever starts, you are walking to care, not waiting on a plant.",
+            "es": "Lava con agua tratada. Cubre limpio y suelto. Mira el borde y la hora. No pongas lodo, estiércol ni emplasto misterioso. Reposa la extremidad. Si una raya corre al corazón o empieza fiebre, caminas a cuidado, no esperas una planta."
+          },
+          "why": {
+            "en": "Dirt is not a seal. Time and redness are the honest field test.",
+            "es": "La tierra no es un sello. Tiempo y rojo son el test honesto de campo."
+          },
+          "child": {
+            "en": "Child's wound gets the clean cloth, not a creek dunk 'because it is cold'.",
+            "es": "La herida del niño lleva tela limpia, no un chapuzón en el arroyo 'porque está frío'."
+          },
+          "stop": {
+            "en": "Stop the poultice experiment if it burns or the red grows — wash off, cover, go.",
+            "es": "Para el emplasto si quema o el rojo crece: lava, cubre, vete."
+          },
+          "image": "bleed-pack.png",
+          "tickSeconds": 3600,
+          "party": {
+            "1": "Clean, cover, watch.",
+            "2": "One treats, one prepares the walk to care.",
+            "4": "Clean / cover / fever watch / carry kit."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "camp-watch",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Night watch and food off the ground",
+        "es": "Vigilia de noche y comida fuera del suelo"
+      },
+      "situation": {
+        "en": "Animals are working the camp, or you are in country that will. Sleep is a shift, not a collapse.",
+        "es": "Los animales trabajan el campamento, o estás en país que lo hará. Dormir es un turno, no un desplome."
+      },
+      "stop_if": [
+        {
+          "en": "You are moving at first light and the food is sealed on you.",
+          "es": "Te mueves al primer luz y la comida va sellada encima."
+        },
+        {
+          "en": "A person is missing at night — that is form-up and lost, not a food hang.",
+          "es": "Falta una persona de noche: es formar y perdido, no un colgado de comida."
+        }
+      ],
+      "get_to_care": {
+        "en": "Give mammals the road. A bite is the bite card. Do not turn a night noise into a hunt.",
+        "es": "Cede el paso a los mamíferos. Una mordedura es la tarjeta de mordedura. No conviertas un ruido de noche en una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Food sealed and off the ground, away from where you sleep. Cook downwind of the bags. One person awake if animals are already working the camp. Light and voice, not a chase. Do not sleep on the trail. Give it the road.",
+            "es": "Comida sellada y fuera del suelo, lejos de donde duermes. Cocina aguas abajo de las bolsas. Una persona despierta si los animales ya trabajan el campamento. Luz y voz, no una persecución. No duermas en el sendero. Cede el paso."
+          },
+          "why": {
+            "en": "A camp is an invitation. Distance and a watch beat a pile next to your head.",
+            "es": "Un campamento es una invitación. Distancia y vigilia ganan a un montón junto a la cabeza."
+          },
+          "child": {
+            "en": "Child sleeps in the middle, not at the edge with the snacks.",
+            "es": "El niño duerme al centro, no al borde con los dulces."
+          },
+          "stop": {
+            "en": "Stop shouting into the dark and walking after glowing eyes. Stand your ground or leave together.",
+            "es": "Para de gritar a la oscuridad y caminar tras ojos que brillan. Afirma o váyanse juntos."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Hang or bag the food, then sleep light.",
+            "2": "Shifts.",
+            "4": "Food / fire / watch / sleep in pairs."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-insect",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Ticks, mites, and mosquitoes",
+        "es": "Garrapatas, ácaros y mosquitos"
+      },
+      "situation": {
+        "en": "Warm country, bosque, or standing water. The bite you do not see is the one that costs a week.",
+        "es": "País cálido, bosque o agua quieta. La picadura que no ves es la que cuesta una semana."
+      },
+      "stop_if": [
+        {
+          "en": "You checked, nothing is buried, and the itch is a welt you can leave alone.",
+          "es": "Revisaste, no hay nada enterrado y el comezón es un ronchón que puedes dejar."
+        },
+        {
+          "en": "A tick's head is in, a bullseye rash, fever, or they cannot breathe after a sting — that is care, not a tweeze.",
+          "es": "Hay cabeza de garrapata, un ojo de buey, fiebre o no respiran tras un aguijón: es cuidado, no una pinza."
+        }
+      ],
+      "get_to_care": {
+        "en": "A fever after a tick or a spreading rash is care. Airway if a sting swells the face. Do not burn a tick out.",
+        "es": "Fiebre después de una garrapata o un sarpullido que crece es cuidado. Vía aérea si un aguijón hincha la cara. No quemes la garrapata."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Camp off stagnant water if you can. Sleeves at dusk. End of day: look at warm folds, hairline, socks. Tweeze a tick close to the skin, pull steady, do not twist and do not fire. Watch the spot. Leave chigger welts alone except clean and not scratching into a hole.",
+            "es": "Campamento lejos del agua estancada si puedes. Mangas al anochecer. Al fin del día: pliegues, raya del pelo, calcetas. Pinza la garrapata junto a la piel, tira firme, no gires ni uses fuego. Mira el sitio. Los ácaros: limpio y sin rascar hasta hacer hueco."
+          },
+          "why": {
+            "en": "Most of this is prevention and a look. Fire and kerosene on skin make a burn card.",
+            "es": "Casi todo esto es prevención y una mirada. Fuego y keroseno en la piel hacen una tarjeta de quemadura."
+          },
+          "child": {
+            "en": "Check the child first. They do not pull ticks with fingernails in the dark.",
+            "es": "Revisa al niño primero. No sacan garrapatas con uñas a oscuras."
+          },
+          "stop": {
+            "en": "Stop burning, smothering with oil, or digging. If the mouth is in and you cannot tweeze, get to care.",
+            "es": "Nada de quemar, ahogar con aceite o cavar. Si la boca quedó y no puedes pinzar, busca cuidado."
+          },
+          "image": "animal-bite.png",
+          "party": {
+            "1": "Check at dark.",
+            "2": "Check each other.",
+            "4": "Sleeves / site / check / watch fever."
+          }
+        }
+      ]
     }
   ]
 }
