@@ -353,7 +353,8 @@ NOTABLE_WILDLIFE_NAME = (
     "nature area|wildlife preserve|habitat preserve|national preserve|"
     "wilderness park|audubon|flora y fauna|"
     "canyonlands preserve|wetland preserve|"
-    "canyon preserve|management unit|ecological research"
+    "canyon preserve|management unit|ecological research|"
+    "hawk watch|experimental range"
 )
 
 

@@ -82,7 +82,9 @@ CAVE_PRESERVE_KEYS = {
 # stay Open reserve. Phrase `management unit`, not `wildlife
 # management area`. A Balcones management unit is range. Waste
 # Management Wildlife Park stays Open reserve. Phrase `ecological
-# research`, not the word `research`.
+# research`, not the word `research`. Phrase `hawk watch`, not the
+# word `hawk`. Hawk Watch Trail stays a trail. Phrase `experimental
+# range`, not the word `experimental`.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -106,6 +108,8 @@ WILDLIFE_RANGE_PHRASES = (
     "canyon preserve",
     "management unit",
     "ecological research",
+    "hawk watch",
+    "experimental range",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical
@@ -141,7 +145,8 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step
 # with `Inspect.isBotanicGarden`. Conservatory At North Austin is apartments
 # and stays out. The Arboretum mall stays out. Cactus Point Park stays a park.
-# A beer garden is a bar patio and stays a park.
+# A beer garden is a bar patio and stays a park. Phrase `wildflower
+# preserve`, not the word `wildflower`. Wildflower Park stays a park.
 BOTANIC_GARDEN_PHRASES = (
     "botanic garden",
     "botanical garden",
@@ -150,6 +155,7 @@ BOTANIC_GARDEN_PHRASES = (
     "desert garden",
     "rose garden",
     "community garden",
+    "wildflower preserve",
 )
 
 
@@ -220,10 +226,10 @@ def overlay_kind(props: dict) -> str | None:
         return "cave"
     if is_wildlife_range(props):
         return "wildlife"
-    if is_open_reserve(props):
-        return "reserve"
     if is_botanic_garden(props):
         return "botanic"
+    if is_open_reserve(props):
+        return "reserve"
     return None
 
 

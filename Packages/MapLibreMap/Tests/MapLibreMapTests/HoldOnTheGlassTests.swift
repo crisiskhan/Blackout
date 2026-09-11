@@ -170,6 +170,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `ecological research`, not Open reserve. 516 m from water.
     private static let hornsbyBend = CLLocationCoordinate2D(latitude: 30.231564, longitude: -97.646392)
 
+    /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
+    /// picnic open space. 449 m from water.
+    private static let hawkWatch = CLLocationCoordinate2D(latitude: 35.069828, longitude: -106.424820)
+
+    /// Interior of Jornada Experimental Range. Phrase `experimental
+    /// range`, not Open reserve. Far from water.
+    private static let jornadaRange = CLLocationCoordinate2D(latitude: 32.594082, longitude: -106.823441)
+
+    /// Interior of Wildflower Preserve. Phrase `wildflower preserve`,
+    /// botanic not Open reserve, not a wildflower park. 194 m from water.
+    private static let wildflowerPreserve = CLLocationCoordinate2D(latitude: 30.242251, longitude: -97.828949)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -626,6 +638,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(westDo.contains("javelina"), west.card?.doLine ?? "")
         XCTAssertFalse(westDo.contains("edible"), west.card?.doLine ?? "")
 
+        let jornada = try hold(at: Self.jornadaRange, zoom: 16)
+        XCTAssertEqual(jornada.card?.klass, "Wildlife range", "\(jornada)")
+        XCTAssertEqual(jornada.card?.title, "Jornada Experimental Range", "\(jornada)")
+        XCTAssertNotEqual(jornada.card?.klass, "Open reserve", "\(jornada)")
+        XCTAssertEqual(jornada.card?.fieldRoute.first, Inspect.mammalTXCard, "\(jornada)")
+        XCTAssertTrue((jornada.card?.doLine.lowercased() ?? "").contains("javelina"), jornada.card?.doLine ?? "")
+        XCTAssertFalse((jornada.card?.doLine.lowercased() ?? "").contains("edible"), jornada.card?.doLine ?? "")
+
         let nalle = try hold(at: Self.nalleWildlife, zoom: 16, packId: "tx-east")
         XCTAssertEqual(nalle.card?.klass, "Wildlife range", "\(nalle)")
         XCTAssertEqual(nalle.card?.title, "Nalle Bunny Run Wildlife Preserve", "\(nalle)")
@@ -849,6 +869,18 @@ final class HoldOnTheGlassTests: XCTestCase {
             ).first ?? ""),
             "FIELD · PLANT"
         )
+
+        let wildflower = try hold(at: Self.wildflowerPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(wildflower.card?.klass, "Botanic garden", "\(wildflower)")
+        XCTAssertEqual(wildflower.card?.title, "Wildflower Preserve", "\(wildflower)")
+        XCTAssertNotEqual(wildflower.card?.klass, "Open reserve", "\(wildflower)")
+        XCTAssertNotEqual(wildflower.card?.klass, "Wildlife range", "\(wildflower)")
+        XCTAssertEqual(wildflower.card?.fieldRoute.first, Inspect.plantTXCard, "\(wildflower)")
+        XCTAssertFalse(
+            wildflower.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "a wildflower preserve opened woodland tree-use: \(wildflower)"
+        )
+        XCTAssertFalse((wildflower.card?.doLine.lowercased() ?? "").contains("edible"), wildflower.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeManagementAreaOpensAnimalsNotPicnicWoodland() throws {
@@ -938,6 +970,13 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(canyon.card?.klass, "Open reserve", "\(canyon)")
         XCTAssertEqual(canyon.card?.fieldRoute.first, Inspect.mammalTXCard, "\(canyon)")
         XCTAssertFalse((canyon.card?.doLine.lowercased() ?? "").contains("edible"), canyon.card?.doLine ?? "")
+
+        let hawk = try hold(at: Self.hawkWatch, zoom: 16, packId: "nm")
+        XCTAssertEqual(hawk.card?.klass, "Wildlife range", "\(hawk)")
+        XCTAssertEqual(hawk.card?.title, "Hawk Watch Open Space", "\(hawk)")
+        XCTAssertNotEqual(hawk.card?.klass, "Open reserve", "\(hawk)")
+        XCTAssertEqual(hawk.card?.fieldRoute.first, Inspect.mammalTXCard, "\(hawk)")
+        XCTAssertFalse((hawk.card?.doLine.lowercased() ?? "").contains("edible"), hawk.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {
@@ -1319,6 +1358,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),
             ("west wildlife", Self.westWildlife, 16.0),
+            ("jornada range", Self.jornadaRange, 16.0),
             ("sinkhole", Self.sinkhole, 16.0),
             ("anthony gap cave", Self.anthonyGapCave, 16.0),
         ] {

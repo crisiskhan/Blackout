@@ -358,7 +358,9 @@ public enum Inspect {
     /// Preserve stay Open reserve. Phrase `management unit`, not
     /// `wildlife management area` — a Balcones management unit is
     /// range; Waste Management Wildlife Park stays Open reserve. Phrase
-    /// `ecological research`, not the word `research`.
+    /// `ecological research`, not the word `research`. Phrase `hawk
+    /// watch`, not the word `hawk` — Hawk Watch Trail stays a trail.
+    /// Phrase `experimental range`, not the word `experimental`.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -388,6 +390,8 @@ public enum Inspect {
         if n.contains("canyon preserve") { return true }
         if n.contains("management unit") { return true }
         if n.contains("ecological research") { return true }
+        if n.contains("hawk watch") { return true }
+        if n.contains("experimental range") { return true }
         return false
     }
 
@@ -410,7 +414,8 @@ public enum Inspect {
     /// A park named Conservatory At North Austin is apartments. A botanic
     /// garden is worked plant ground. Phrase match, not the word `garden`
     /// and not `arboretum`. A cactus garden opens the cactus card; Cactus
-    /// Point Park is not. A beer garden is a patio.
+    /// Point Park is not. A beer garden is a patio. Phrase `wildflower
+    /// preserve`, not the word `wildflower` — Wildflower Park stays a park.
     static func isBotanicGarden(_ t: [String: String]) -> Bool {
         let amenity = (t["amenity"] ?? "").lowercased()
         if amenity == "community_garden" || amenity == "community garden" { return true }
@@ -427,6 +432,7 @@ public enum Inspect {
         if n.contains("desert garden") { return true }
         if n.contains("rose garden") { return true }
         if n.contains("community garden") { return true }
+        if n.contains("wildflower preserve") { return true }
         return false
     }
 

@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 5, 4, 35), "tx-east": (14, 8, 34, 1, 19), "nm": (10, 1, 18, 2, 55)}
+        expected = {"tx-west": (2, 0, 6, 4, 34), "tx-east": (14, 8, 34, 2, 18), "nm": (10, 1, 19, 2, 54)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -171,6 +171,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("leonora curtin wetland preserve", nm_blob)
         self.assertIn("santa fe canyon preserve", nm_blob)
         self.assertNotIn("canyon preserve interpretive", nm_blob)
+        self.assertIn("hawk watch open space", nm_blob)
+        self.assertNotIn("hawk watch trail", nm_blob)
         self.assertNotIn("rio grande bosque", nm_blob)
         self.assertNotIn("corrales bosque", nm_blob)
         self.assertNotIn("alameda bosque", nm_blob)
@@ -196,6 +198,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("mary gay maxwell management unit", east_blob)
         self.assertIn("onion creek management unit", east_blob)
         self.assertIn("hornsby bend ecological research area", east_blob)
+        self.assertIn("wildflower preserve", east_blob)
+        self.assertNotIn("wildflower park", east_blob)
         self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
@@ -223,6 +227,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("médanos de samalayuca", west_blob)
         self.assertIn("flora y fauna", west_blob)
         self.assertIn("san andres national wildlife refuge", west_blob)
+        self.assertIn("jornada experimental range", west_blob)
         self.assertNotIn("cactus point park", west_blob)
         self.assertNotIn("parque cactus del desierto", west_blob)
         self.assertNotIn("hueco mountain park", west_blob)
@@ -296,6 +301,24 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertEqual(
             ground.overlay_kind(
                 {"leisure": "park", "name": "Barelas Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Wildflower Preserve"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Wildflower Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Albuquerque BioPark Botanic Garden",
+                }
             ),
             "botanic",
         )
@@ -537,6 +560,24 @@ class ShippedWaterLayers(unittest.TestCase):
                 {
                     "leisure": "nature_reserve",
                     "name": "Hornsby Bend Ecological Research Area",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Hawk Watch Open Space"}
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "path", "name": "Hawk Watch Trail"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Jornada Experimental Range",
                 }
             ),
             "wildlife",
@@ -824,6 +865,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("canyon")', inspect)
         self.assertNotIn('contains("management")', inspect)
         self.assertNotIn('contains("ecological")', inspect)
+        self.assertNotIn('contains("hawk")', inspect)
+        self.assertNotIn('contains("experimental")', inspect)
+        self.assertNotIn('contains("wildflower")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -858,6 +902,14 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("arboretum")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
+        kind_fn = (ROOT / "tools/v3/ground.py").read_text().split(
+            "def overlay_kind", 1
+        )[1].split("def records", 1)[0]
+        self.assertLess(
+            kind_fn.index("is_botanic_garden"),
+            kind_fn.index("is_open_reserve"),
+            "a named nature_reserve botanic sheet is botanic, not Open reserve",
+        )
 
     def test_the_manifest_counts_the_ground_it_ships(self):
         for pid in PACKS:
@@ -1376,6 +1428,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("canyon preserve", inspect)
         self.assertIn("management unit", inspect)
         self.assertIn("ecological research", inspect)
+        self.assertIn("hawk watch", inspect)
+        self.assertIn("experimental range", inspect)
+        self.assertIn("wildflower preserve", inspect)
         land = inspect.split("private static func land(", 1)[1]
         self.assertLess(
             land.index("isWildlifeRange"),
@@ -1866,6 +1921,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hornsby Bend Ecological Research Area", glass)
         self.assertIn("30.231564", glass)
         self.assertIn("-97.646392", glass)
+        self.assertIn("Hawk Watch Open Space", glass)
+        self.assertIn("35.069828", glass)
+        self.assertIn("-106.424820", glass)
+        self.assertIn("Jornada Experimental Range", glass)
+        self.assertIn("32.594082", glass)
+        self.assertIn("-106.823441", glass)
+        self.assertIn("Wildflower Preserve", glass)
+        self.assertIn("30.242251", glass)
+        self.assertIn("-97.828949", glass)
         self.assertIn("Named tree", glass)
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", glass)
         self.assertIn("35.846906", glass)
@@ -1920,6 +1984,7 @@ class GroundFieldSync(unittest.TestCase):
         franklin_hit = False
         lost_dog_hit = False
         flora_hit = False
+        jornada_hit = False
         for feat in west["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1950,6 +2015,8 @@ class GroundFieldSync(unittest.TestCase):
                         props.get("name")
                         == "Área de Protección de Flora y Fauna Médanos de Samalayuca"
                     )
+                if kind == "wildlife" and pip(-106.823441, 32.594082, ring):
+                    jornada_hit = props.get("name") == "Jornada Experimental Range"
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
@@ -1972,6 +2039,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             flora_hit,
             "Médanos de Samalayuca is not wildlife range on the west overlay",
+        )
+        self.assertTrue(
+            jornada_hit,
+            "Jornada Experimental Range is not wildlife range on the west overlay",
         )
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
@@ -2044,6 +2115,7 @@ class GroundFieldSync(unittest.TestCase):
         canyonlands_hit = False
         management_hit = False
         hornsby_hit = False
+        wildflower_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2077,6 +2149,8 @@ class GroundFieldSync(unittest.TestCase):
                     management_hit = True
                 if kind == "wildlife" and name == "Hornsby Bend Ecological Research Area" and pip(-97.646392, 30.231564, ring):
                     hornsby_hit = True
+                if kind == "botanic" and name == "Wildflower Preserve" and pip(-97.828949, 30.242251, ring):
+                    wildflower_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2121,6 +2195,10 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             hornsby_hit, "Hornsby Bend Ecological Research Area is not wildlife range"
+        )
+        self.assertTrue(
+            wildflower_hit,
+            "Wildflower Preserve is not botanic on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -2206,6 +2284,7 @@ class GroundFieldSync(unittest.TestCase):
         caldera_hit = False
         curtin_hit = False
         canyon_preserve_hit = False
+        hawk_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2230,6 +2309,8 @@ class GroundFieldSync(unittest.TestCase):
                     canyon_preserve_hit = (
                         props.get("name") == "Santa Fe Canyon Preserve"
                     )
+                if kind == "wildlife" and pip(-106.424820, 35.069828, ring):
+                    hawk_hit = props.get("name") == "Hawk Watch Open Space"
                 if kind == "cave" and pip(-107.344750, 34.750796, ring):
                     nm_cave_hit = (
                         props.get("name")
@@ -2252,6 +2333,9 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             canyon_preserve_hit, "Santa Fe Canyon Preserve is not wildlife range"
+        )
+        self.assertTrue(
+            hawk_hit, "Hawk Watch Open Space is not wildlife range on the NM overlay"
         )
         self.assertTrue(
             nm_cave_hit, "glass NM cave hold is not inside Pronoun Cave"
@@ -2420,6 +2504,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("canyon preserve", fetch)
         self.assertIn("management unit", fetch)
         self.assertIn("ecological research", fetch)
+        self.assertIn("hawk watch", fetch)
+        self.assertIn("experimental range", fetch)
+        wildlife_name = fetch.split("NOTABLE_WILDLIFE_NAME", 1)[1].split(
+            "def overpass_notable", 1
+        )[0]
+        self.assertNotIn("wildflower", wildlife_name)
         self.assertIn("def relation_geometry", fetch)
         self.assertIn("def grow_notable", fetch)
         self.assertIn('--notable', fetch)
@@ -2713,6 +2803,16 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.231564", qa)
         self.assertIn("management unit", qa)
         self.assertIn("ecological research", qa)
+        self.assertIn("Hawk Watch Open Space", qa)
+        self.assertIn("35.069828", qa)
+        self.assertIn("hawk watch", qa)
+        self.assertIn("Jornada Experimental Range", qa)
+        self.assertIn("32.594082", qa)
+        self.assertIn("experimental range", qa)
+        self.assertIn("Wildflower Preserve", qa)
+        self.assertIn("30.242251", qa)
+        self.assertIn("wildflower preserve", qa)
+        self.assertIn("Wildflower Park", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)

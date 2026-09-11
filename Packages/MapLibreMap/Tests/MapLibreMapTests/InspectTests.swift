@@ -929,6 +929,35 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(hornsby.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(hornsby.doLine.lowercased().contains("edible"), hornsby.doLine)
 
+        let hawk = Inspect.read(
+            tags: ["leisure": "park", "name": "Hawk Watch Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(hawk.klass, "Wildlife range")
+        XCTAssertNotEqual(hawk.klass, "Open reserve")
+        XCTAssertEqual(hawk.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(hawk.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(hawk.doLine.lowercased().contains("edible"), hawk.doLine)
+
+        let hawkTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Hawk Watch Trail"],
+            pack: "nm"
+        )
+        XCTAssertNotEqual(hawkTrail.klass, "Wildlife range")
+
+        let jornada = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Jornada Experimental Range",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(jornada.klass, "Wildlife range")
+        XCTAssertNotEqual(jornada.klass, "Open reserve")
+        XCTAssertEqual(jornada.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(jornada.doLine.lowercased().contains("javelina"), jornada.doLine)
+        XCTAssertFalse(jornada.doLine.lowercased().contains("edible"), jornada.doLine)
+
         let baker = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"
@@ -2345,6 +2374,28 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(community.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(community.fieldRoute.contains(Inspect.treeUseEastCard))
         XCTAssertFalse(community.fieldRoute.contains(Inspect.plantUseCard), "a community garden is not woodland tree-use")
+
+        let wildflower = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Wildflower Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(wildflower.klass, "Botanic garden")
+        XCTAssertNotEqual(wildflower.klass, "Open reserve")
+        XCTAssertNotEqual(wildflower.klass, "Wildlife range")
+        XCTAssertEqual(wildflower.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(wildflower.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(wildflower.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertFalse(wildflower.doLine.lowercased().contains("edible"), wildflower.doLine)
+
+        let wildflowerPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Wildflower Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(wildflowerPark.klass, "Park")
+        XCTAssertNotEqual(wildflowerPark.klass, "Botanic garden")
 
         let beer = Inspect.read(
             tags: ["leisure": "park", "name": "Moontower Saloon Beer Garden"],
