@@ -771,6 +771,40 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Hog country", do)
         self.assertIn("Pretty is not food", do)
         self.assertIn("Botanic garden", do)
+        self.assertIn('case "Named tree", "Tree":', do)
+        self.assertIn("treeUseLine", do)
+        named_tree = do.split("private static func treeUseLine", 1)[1].split(
+            "private static func animalRangeLine", 1
+        )[0].lower()
+        self.assertIn("cottonwood", named_tree)
+        self.assertIn("loblolly pine", named_tree)
+        self.assertIn("mesquite", named_tree)
+        self.assertIn("rio grande cottonwood", named_tree)
+        self.assertIn("not a meal", named_tree)
+        self.assertNotIn("javelina", named_tree)
+        self.assertNotIn("hog", named_tree)
+        self.assertNotIn("coyote", named_tree)
+        self.assertNotIn("bear", named_tree)
+        self.assertNotIn("aspen", named_tree)
+        woodland_hold = do.split("private static func treeRangeLine", 1)[1].split(
+            "private static func treeUseLine", 1
+        )[0].lower()
+        self.assertIn("javelina", woodland_hold)
+        self.assertIn("hog country", woodland_hold)
+        tx_plant_do = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+            if c["id"] == "tx-plant-danger"
+        )["steps"][0]["do"]["en"].lower()
+        self.assertIn("oleander", tx_plant_do)
+        self.assertIn("pretty is not food", tx_plant_do)
+        nm_plant_do = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.nm.json").read_text())["cards"]
+            if c["id"] == "nm-plant-danger"
+        )["steps"][0]["do"]["en"].lower()
+        self.assertIn("datura", nm_plant_do)
+        self.assertIn("cholla", nm_plant_do)
         self.assertIn("Cactus garden", do)
         self.assertIn("Spines, not a meal", do)
         cactus_hold = do.split('case "Cactus garden":', 1)[1].split(
@@ -878,6 +912,15 @@ class GroundFieldSync(unittest.TestCase):
             blob = json.dumps(by_id[cid]).lower()
             self.assertNotIn("edible", blob, cid)
             self.assertNotIn("safe to eat", blob, cid)
+        cave_do = by_id["cave-dark"]["steps"][0]["do"]["en"].lower()
+        self.assertIn("hole", cave_do)
+        self.assertIn("cold", cave_do)
+        self.assertIn("do not go in alone", cave_do)
+        field_py = (ROOT / "tools/v3/field.py").read_text()
+        self.assertIn("def plant_danger_do_en", field_py)
+        self.assertIn("plant_danger_do_en(cid)", field_py)
+        self.assertIn("Oleander or Texas mountain laurel", field_py)
+        self.assertIn("A hole, sink, or cave mouth", field_py)
 
     def test_solo_qa_scores_the_biome_handoff(self):
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
@@ -895,6 +938,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("tx-east-snake", qa)
         self.assertIn("aspen is high country", qa.lower())
         self.assertIn("SPEAK names that pack", qa)
+        self.assertIn("SPEAK names oleander", qa)
+        self.assertIn("dark, still air, cold", qa)
         self.assertIn("tree-use card", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)

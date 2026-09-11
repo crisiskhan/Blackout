@@ -924,6 +924,21 @@ extension Inspect {
         }
     }
 
+    /// A surveyed tree is shade and wood. Animals are woodland range, not
+    /// a pin on this trunk. The names match the open pack's tree-use SPEAK.
+    private static func treeUseLine(state: String?, pack: String?) -> String {
+        switch PackRange.of(state: state, pack: pack) {
+        case .txWest:
+            return "Live oak, pecan, mesquite, cedar elm, cottonwood. Shade and thorns, not a meal."
+        case .txEast:
+            return "Live oak, pecan, cedar elm, loblolly pine, cottonwood. Shade, not a meal."
+        case .nm:
+            return "Rio Grande cottonwood, juniper, piñon. Shade and wind, not a meal."
+        case .unknown:
+            return "Shade and wood, not a meal. Field has the plant cards."
+        }
+    }
+
     private static func animalRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
@@ -939,7 +954,9 @@ extension Inspect {
 
     private static func landDoLine(_ klass: String, state: String?, pack: String?) -> String {
         switch klass {
-        case "Woodland", "Named tree", "Tree", "Park", "Protected land", "Irrigated ground":
+        case "Named tree", "Tree":
+            return treeUseLine(state: state, pack: pack)
+        case "Woodland", "Park", "Protected land", "Irrigated ground":
             return treeRangeLine(state: state, pack: pack)
         case "Glasshouse", "Botanic garden":
             return "Worked ground a ditch reaches. Pretty is not food. Field has the plant cards."

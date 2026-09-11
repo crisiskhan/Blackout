@@ -836,12 +836,12 @@ def thickness_core() -> list[dict]:
             "Hipotermia y mal aire son los hechos. Una caída en la oscuridad es trauma. Busca cuidado si hay confusión, una caída o alguien que no despierta.",
             [
                 step(
-                    "Stay in daylight unless the party knows you are going in and one person stays out. Light in hand before the mouth. Feel the air — if a flame dies or you get a headache, back out. Do not chimney a sinkhole.",
+                    "A hole, sink, or cave mouth. Dark, still air, cold. Do not go in alone. Stay in daylight unless the party knows you are going in and one person stays out. Light in hand before the mouth. Feel the air — if a flame dies or you get a headache, back out. Do not chimney a sinkhole.",
                     "Caves kill by cold, air, and a step you cannot see. A phone light is not a plan.",
                     "A child does not go in. They sit with the person who stays out.",
                     "Stop at the mouth if you cannot see the floor, if water is running, or if anyone is already cold.",
                     "cave-dark.png",
-                    "Quédate a la luz salvo que el grupo sepa que entras y uno se quede fuera. Luz en la mano. Si una llama muere o duele la cabeza, sal. No te metas a una dolina.",
+                    "Un hueco, dolina o boca de cueva. Oscuridad, aire quieto, frío. No entres solo. Quédate a la luz salvo que el grupo sepa que entras y uno se quede fuera. Luz en la mano. Si una llama muere o duele la cabeza, sal. No te metas a una dolina.",
                     "Las cuevas matan por frío, aire y un paso que no ves. La linterna del teléfono no es un plan.",
                     "El niño no entra. Se sienta con quien se queda fuera.",
                     "Para en la boca si no ves el piso, si corre agua o si alguien ya tiene frío.",
@@ -878,6 +878,33 @@ def thickness_core() -> list[dict]:
             ],
         ),
     ]
+
+
+def plant_danger_do_en(cid: str) -> str:
+    if cid.startswith("nm-"):
+        return (
+            "Datura or jumping cholla. Pretty is not food. Do not taste it to 'check'. "
+            "Brush off, then water on skin and eyes. Cholla: comb it out, do not squeeze with bare hands. "
+            "Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap."
+        )
+    return (
+        "Oleander or Texas mountain laurel. Pretty is not food. Do not taste it to 'check'. "
+        "Brush off, then water on skin and eyes. Do not make a tea or a poultice. "
+        "Photograph the plant only if you are already clear of sap."
+    )
+
+
+def plant_danger_do_es(cid: str) -> str:
+    if cid.startswith("nm-"):
+        return (
+            "Datura o cholla saltarina. Lo bonito no es comida. No lo pruebes para 'ver'. "
+            "Sacude, luego agua en piel y ojos. Cholla: peine, no aprietes con la mano desnuda. "
+            "No hagas té ni emplasto."
+        )
+    return (
+        "Adelfa o Texas mountain laurel. Lo bonito no es comida. No lo pruebes para 'ver'. "
+        "Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
+    )
 
 
 def tree_do_en(cid: str) -> str:
@@ -1152,12 +1179,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
+                        plant_danger_do_en(cid),
                         "A pretty flower is not a calorie.",
                         "Child does not carry the pretty seed as a toy.",
                         "Stop if they start vomiting or see halos — sit, watch airway, offer Emergency SOS if a net exists.",
                         f"{cid}.png",
-                        "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto.",
+                        plant_danger_do_es(cid),
                         "Una flor bonita no es una caloría.",
                         "El niño no lleva la semilla bonita de juguete.",
                         "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",

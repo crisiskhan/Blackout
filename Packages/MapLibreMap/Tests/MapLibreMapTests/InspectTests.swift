@@ -505,6 +505,33 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(tree.fieldRoute.contains(Inspect.mammalTXCard), "a named tree is not javelina country")
         XCTAssertFalse(tree.fieldRoute.contains(Inspect.gameTXCard))
         XCTAssertFalse(tree.doLine.lowercased().contains("edible"), tree.doLine)
+        XCTAssertFalse(tree.doLine.lowercased().contains("javelina"), tree.doLine)
+        XCTAssertFalse(tree.doLine.lowercased().contains("hog"), tree.doLine)
+        XCTAssertFalse(tree.doLine.lowercased().contains("coyote"), tree.doLine)
+        XCTAssertTrue(tree.doLine.lowercased().contains("not a meal"), tree.doLine)
+
+        let westTree = Inspect.read(
+            tags: ["natural": "tree", "name": "El Paso Cottonwood"],
+            state: "TX",
+            pack: "tx-west"
+        )
+        let westTreeDo = westTree.doLine.lowercased()
+        XCTAssertTrue(westTreeDo.contains("mesquite"), westTree.doLine)
+        XCTAssertTrue(westTreeDo.contains("cottonwood"), westTree.doLine)
+        XCTAssertFalse(westTreeDo.contains("javelina"), westTree.doLine)
+        XCTAssertFalse(westTreeDo.contains("hog"), westTree.doLine)
+
+        let nmTree = Inspect.read(
+            tags: ["natural": "tree", "name": "Bosque Cottonwood"],
+            state: "NM",
+            pack: "nm"
+        )
+        let nmTreeDo = nmTree.doLine.lowercased()
+        XCTAssertTrue(nmTreeDo.contains("cottonwood"), nmTree.doLine)
+        XCTAssertFalse(nmTreeDo.contains("aspen"), nmTree.doLine)
+        XCTAssertFalse(nmTreeDo.contains("bear"), nmTree.doLine)
+        XCTAssertFalse(nmTreeDo.contains("elk"), nmTree.doLine)
+        XCTAssertFalse(nmTreeDo.contains("javelina"), nmTree.doLine)
     }
 
     func testTheOpenPackNamesItsTreesAndAnimalsAsRangeNotPins() {
@@ -654,6 +681,12 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(eastTree.fieldRoute.first, Inspect.treeUseEastCard)
         XCTAssertFalse(eastTree.fieldRoute.contains(Inspect.treeUseTXCard))
+        let eastTreeDo = eastTree.doLine.lowercased()
+        XCTAssertTrue(eastTreeDo.contains("loblolly") || eastTreeDo.contains("live oak"), eastTree.doLine)
+        XCTAssertFalse(eastTreeDo.contains("mesquite"), eastTree.doLine)
+        XCTAssertFalse(eastTreeDo.contains("hog"), eastTree.doLine)
+        XCTAssertFalse(eastTreeDo.contains("javelina"), eastTree.doLine)
+        XCTAssertFalse(eastTreeDo.contains("cottonmouth"), eastTree.doLine)
 
         let glass = Inspect.read(
             tags: ["landuse": "greenhouse_horticulture", "name": "Vickery Wholesale Greenhouse"],
