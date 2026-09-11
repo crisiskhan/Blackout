@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """FIELD catalog is an offline ask over the shipped book.
 
-Type a situation. Rank the cards that answer it. Invent nothing. Never edible.
-FIELD hits scroll — MAP's five-hit cap is a canvas rule, not a book rule.
+Type a situation. Rank the cards that answer it. Submit opens the first
+answering card's steps. Invent nothing. Never edible. MAP's five-hit cap
+is a canvas rule, not a book rule.
 """
 from __future__ import annotations
 
@@ -96,7 +97,10 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn('TextField("SEARCH"', tab)
         self.assertIn("textInputAutocapitalization(.never)", tab)
         self.assertIn("NO MATCH", tab)
-        self.assertIn("ForEach(listCards)", tab)
+        self.assertNotIn("ForEach(listCards)", tab)
+        self.assertIn("openAnswer()", tab)
+        self.assertIn("onSubmit(openAnswer)", tab)
+        self.assertIn(".submitLabel(.search)", tab)
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertNotIn("mapSearchHitCap", tab)
         self.assertNotIn("best in class", tab.lower())
@@ -197,10 +201,11 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("NO MATCH", qa)
         self.assertIn("starting from nothing", qa.lower())
         self.assertIn("wool", qa.lower())
-        self.assertIn("FIELD hits scroll", qa)
         self.assertIn("Empty query is SEARCH", qa)
         self.assertIn("not a dump of the book", qa)
+        self.assertIn("first answering card", qa)
         self.assertNotIn("Empty query is ALL CARDS", qa)
+        self.assertNotIn("FIELD hits scroll", qa)
         self.assertNotIn("best in class", qa.lower())
 
 

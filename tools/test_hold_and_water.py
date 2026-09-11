@@ -577,14 +577,21 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     if "List(cards)" in held:
         fail("FieldTab draws the card list over the card the hold already picked")
     if "ALL CARDS" not in tab:
-        fail("an open card has no way back to the list, so a hold is a one-way door into it")
+        fail("an open card has no way back to SEARCH, so a hold is a one-way door into it")
     rest = tab[opened.end() + len(held):]
     fallback = re.match(r"\}\s*else \{", rest)
     if not fallback:
-        fail("FieldTab has no list to fall back to when no card is open")
-    if "ForEach(listCards)" not in brace_body(rest, fallback.end() - 1):
-        fail("FieldTab never shows the card list at all")
-    print("OK   a land hold opens one card's steps, with the list behind ALL CARDS")
+        fail("FieldTab has no SEARCH to fall back to when no card is open")
+    body = brace_body(rest, fallback.end() - 1)
+    if "searchField" not in body:
+        fail("FieldTab has no SEARCH when no card is open")
+    if "ForEach(listCards)" in body:
+        fail("SEARCH still dumps card titles instead of opening the answer")
+    if 'TextField("SEARCH"' not in tab:
+        fail("FieldTab has no SEARCH field")
+    if "onSubmit(openAnswer)" not in tab:
+        fail("SEARCH does not open the answering card's steps")
+    print("OK   a land hold opens one card's steps, with SEARCH behind ALL CARDS")
 
 
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:

@@ -3504,7 +3504,8 @@ class GroundFieldSync(unittest.TestCase):
         tab = FIELD_TAB.read_text()
         self.assertIn("listCards", tab)
         self.assertIn("FieldCorpus.chapter(", tab)
-        self.assertIn("ForEach(listCards)", tab)
+        self.assertNotIn("ForEach(listCards)", tab)
+        self.assertIn("onSubmit(openAnswer)", tab)
         self.assertIn("runtime.packs?.active?.id", tab)
         book = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
         by_id = {c["id"]: c for c in book["cards"]}

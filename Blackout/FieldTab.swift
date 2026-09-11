@@ -24,10 +24,8 @@ struct FieldTab: View {
             statusTone: fieldTone
         ) {
             VStack(alignment: .leading, spacing: 10) {
-                // One card open, or SEARCH. Never both. The map's FIELD button
-                // has already chosen a card, and landing on a dump of the book
-                // with the steps pushed under it makes you hunt for the thing
-                // you picked.
+                // One card open, or SEARCH. Never both. SEARCH submits the
+                // answering card's steps. A title dump is not an answer.
                 Group {
                     if let s = stepper {
                         ScrollView {
@@ -47,25 +45,6 @@ struct FieldTab: View {
                                     Text("NO MATCH")
                                         .font(.system(size: 13, weight: .heavy))
                                         .foregroundStyle(Theme.warn)
-                                }
-                            } else if FieldCorpus.asking(catalogQuery) {
-                                ScrollView {
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        ForEach(listCards) { c in
-                                            Button(loc(c.title)) {
-                                                fieldTrail = []
-                                                fieldTrailTotal = 0
-                                                fieldTrailBook = ""
-                                                stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
-                                            }
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(Theme.silver)
-                                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                                            .padding(.horizontal, 12)
-                                            .background(Theme.raised)
-                                        }
-                                    }
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 }
                             }
                         }
@@ -386,6 +365,8 @@ struct FieldTab: View {
         TextField("SEARCH", text: $query)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
+            .submitLabel(.search)
+            .onSubmit(openAnswer)
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(Theme.silver)
             .padding(.horizontal, 12)
@@ -412,6 +393,15 @@ struct FieldTab: View {
             return $0.title.en < $1.title.en
         }
         jump()
+    }
+
+    /// SEARCH ranked a situation. Open the first answering card's steps.
+    /// Remaining hits stay out — a title list is a menu of cards, not an
+    /// answer. Unknown words already showed NO MATCH. Invent nothing.
+    private func openAnswer() {
+        guard FieldCorpus.asking(catalogQuery) else { return }
+        guard let first = listCards.first else { return }
+        openRoute([first.id])
     }
 
     /// The map's hold card named the cards that answer the ground it held,

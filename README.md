@@ -181,8 +181,8 @@ you came to browse and useless when the map already chose: on a phone the list
 ate the height and the answer was below the fold. It shows one card or SEARCH,
 never both, with `ALL CARDS` on the open card so a hold is not a one-way
 door into it. Empty SEARCH does not dump the book. The catalog SEARCH ranks
-this pack's chapter for a situation typed in; no hit is `NO MATCH`, not an
-invented card, and FIELD hits scroll.
+this pack's chapter for a situation typed in and opens the first answering
+card's steps; no hit is `NO MATCH`, not an invented card.
 Two things surfaced while moving it. Every card ships both
 languages and the list read the locale while the steps did not, so a Spanish
 reader picked a card by its Spanish title and got the instructions in English.

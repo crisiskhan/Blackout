@@ -64,7 +64,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 ## FIELD
 
 - [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to SEARCH and dumps any remaining biome trail. TX EAST SEARCH does not list `tx-mammal` / javelina; TX WEST SEARCH does not list `tx-east-tree-use`. A `tx-javelina` still still opens `tx-mammal`.
-- [ ] PASS / FAIL / N/A — FIELD SEARCH ranks this pack's book (type `thirst`, `snake`, `starting from nothing`, `wildfire`, `seep`, `wool`). Empty query is SEARCH, not a dump of the book. Type a situation. No hit is `NO MATCH`, not an invented card. FIELD hits scroll (not MAP's five). Never edible.
+- [ ] PASS / FAIL / N/A — FIELD SEARCH ranks this pack's book (type `thirst`, `snake`, `starting from nothing`, `wildfire`, `seep`, `wool`). Empty query is SEARCH, not a dump of the book. Type a situation and search. The first answering card's steps open. No hit is `NO MATCH`, not an invented card. No title list. Never edible.
 - [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.
