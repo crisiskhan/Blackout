@@ -880,6 +880,126 @@ def thickness_core() -> list[dict]:
     ]
 
 
+def tree_do_en(cid: str) -> str:
+    if cid == "tx-east-tree-use":
+        return (
+            "Live oak, pecan, cedar elm, loblolly pine, cottonwood. "
+            "South-side shade, wind break, deadfall only for fire. "
+            "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
+        )
+    if cid.startswith("tx-"):
+        return (
+            "Live oak, pecan, mesquite, cedar elm, cottonwood. "
+            "South-side shade, wind break, deadfall only for fire. "
+            "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
+        )
+    return (
+        "Rio Grande cottonwood, juniper, piñon. Aspen is high country. "
+        "South-side shade, wind break, deadfall only for fire. "
+        "Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin."
+    )
+
+
+def tree_do_es(cid: str) -> str:
+    if cid == "tx-east-tree-use":
+        return (
+            "Encino, pecán, olmo cedro, pino taeda, álamo. "
+            "Sombra al sur, cortaviento, madera muerta para fuego. "
+            "No descortezces vivo. No mastiques semillas ni flores."
+        )
+    if cid.startswith("tx-"):
+        return (
+            "Encino, pecán, mezquite, olmo cedro, álamo. "
+            "Sombra al sur, cortaviento, madera muerta para fuego. "
+            "No descortezces vivo. No mastiques semillas ni flores."
+        )
+    return (
+        "Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. "
+        "Sombra al sur, cortaviento, madera muerta para fuego. "
+        "No descortezces vivo. No mastiques semillas ni flores."
+    )
+
+
+def cactus_do_en(cid: str) -> str:
+    if cid.startswith("nm-"):
+        return (
+            "Cholla, yucca, sotol. Give it room. Comb joints and glochids out with a comb or tape, not fingers. "
+            "Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water."
+        )
+    return (
+        "Prickly pear and yucca. Give it room. Comb glochids out with a comb or tape, not fingers. "
+        "Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water."
+    )
+
+
+def cactus_do_es(cid: str) -> str:
+    if cid.startswith("nm-"):
+        return (
+            "Cholla, yuca, sotol. Da espacio. Peina segmentos y globidios con peine o cinta, no con los dedos. "
+            "No mastiques nopales, fruto ni flor. Lava savia con agua."
+        )
+    return (
+        "Nopal y yuca. Da espacio. Peina globidios con peine o cinta, no con los dedos. "
+        "No mastiques nopales, fruto ni flor. Lava savia con agua."
+    )
+
+
+def game_do_en(cid: str) -> str:
+    if cid == "tx-east-game":
+        lead = "Feral hog or white-tailed deer you already have. "
+    elif cid.startswith("tx-"):
+        lead = "Javelina or white-tailed deer you already have. "
+    else:
+        lead = "Elk or mule deer you already have. "
+    return (
+        lead
+        + "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, "
+        "cook until the juice runs clear. No raw. Hands and knives washed after. Do not hunt from this map."
+    )
+
+
+def game_do_es(cid: str) -> str:
+    if cid == "tx-east-game":
+        lead = "Cerdo asilvestrado o venado cola blanca que ya tienes. "
+    elif cid.startswith("tx-"):
+        lead = "Pecarí o venado cola blanca que ya tienes. "
+    else:
+        lead = "Wapití o venado bura que ya tienes. "
+    return (
+        lead
+        + "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, "
+        "cocina hasta que el jugo salga claro. Nada crudo. No caces desde este mapa."
+    )
+
+
+def snake_do_en(cid: str) -> str:
+    if cid == "tx-east-snake":
+        lead = "Copperhead or cottonmouth. "
+    elif cid.startswith("tx-"):
+        lead = "Western diamondback. "
+    else:
+        lead = "Prairie rattler or diamondback. "
+    return (
+        lead
+        + "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, "
+        "walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet."
+    )
+
+
+def snake_do_es(cid: str) -> str:
+    if cid == "tx-east-snake":
+        lead = "Cabeza de cobre o boca de algodón. "
+    elif cid.startswith("tx-"):
+        lead = "Cascabel del oeste. "
+    else:
+        lead = "Cascabel de pradera o del oeste. "
+    return (
+        lead
+        + "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, "
+        "extremidad quieta al corazón, camina a un camino si puedes. Anota la hora."
+    )
+
+
 def mammal_do_en(cid: str) -> str:
     if cid == "tx-east-mammal":
         return (
@@ -999,12 +1119,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
+                        snake_do_en(cid),
                         "US pit vipers are not treated with jungle-movie first aid. Time to a hospital is the treatment.",
                         "Child stays behind the adult. No stick-poking.",
                         "Stop chasing the snake for 'ID'. A phone photo from far is enough if it is safe.",
                         f"{cid}.png",
-                        "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora.",
+                        snake_do_es(cid),
                         "Las víboras de foseta de EE. UU. no se tratan como en las películas. El tiempo al hospital es el tratamiento.",
                         "El niño detrás del adulto. Sin pinchar con palo.",
                         "No persigas la culebra para 'identificarla'. Una foto de lejos basta si es seguro.",
@@ -1097,12 +1217,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "Use them: south-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+                        tree_do_en(cid),
                         "A named tree is calories only after a name you already trust. Shade is the honest use today.",
                         "Take the leaf or pod out of a child's hand. No tiny taste.",
                         "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
                         f"{cid}.png",
-                        "Úsalos: sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores.",
+                        tree_do_es(cid),
                         "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto.",
                         "Saca la hoja o vaina de la mano del niño. Sin probadita.",
                         "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red.",
@@ -1218,12 +1338,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "Give it room. Comb cholla and glochids out with a comb or tape, not fingers. Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water.",
+                        cactus_do_en(cid),
                         "Spines are the honest use of this plant today: stay clear. A pad is not a Field meal.",
                         "A child does not carry a joint or a pretty flower.",
                         "Stop if anyone's mouth tingles or an eye swells — sit, water on the eye, offer Emergency SOS if a net exists.",
                         f"{cid}.png",
-                        "Da espacio. Peina cholla y globidios con peine o cinta, no con los dedos. No mastiques nopales, fruto ni flor. Lava savia con agua.",
+                        cactus_do_es(cid),
                         "Hoy las espinas son el uso honesto: apártate. Un nopal no es una comida de Field.",
                         "El niño no lleva un segmento ni una flor bonita.",
                         "Para si hormiguea la boca o hincha un ojo: sienta, agua en el ojo, ofrece Emergency SOS si hay red.",
@@ -1283,12 +1403,12 @@ def thickness_state() -> list[dict]:
                 care_es,
                 [
                     step(
-                        "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+                        game_do_en(cid),
                         "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
                         "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
                         "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
                         f"{cid}.png",
-                        "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo.",
+                        game_do_es(cid),
                         "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas.",
                         "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar.",
                         "Si prende la grasa: tapa, no agua. Para si huele a muerte.",

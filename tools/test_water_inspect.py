@@ -781,24 +781,28 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("sotol", cactus_hold)
         self.assertNotIn("edible", cactus_hold)
         self.assertNotIn("lives here", cactus_hold)
-        tx_cactus = json.dumps(
-            next(
-                c
-                for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
-                if c["id"] == "tx-cactus"
-            )
-        ).lower()
+        tx_cactus_card = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+            if c["id"] == "tx-cactus"
+        )
+        tx_cactus = json.dumps(tx_cactus_card).lower()
         self.assertIn("prickly pear", tx_cactus)
         self.assertIn("yucca", tx_cactus)
-        nm_cactus = json.dumps(
-            next(
-                c
-                for c in json.loads((ROOT / "Resources/Field/field.nm.json").read_text())["cards"]
-                if c["id"] == "nm-cactus"
-            )
-        ).lower()
+        tx_cactus_do = tx_cactus_card["steps"][0]["do"]["en"].lower()
+        self.assertIn("prickly pear", tx_cactus_do)
+        self.assertIn("yucca", tx_cactus_do)
+        nm_cactus_card = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.nm.json").read_text())["cards"]
+            if c["id"] == "nm-cactus"
+        )
+        nm_cactus = json.dumps(nm_cactus_card).lower()
         self.assertIn("cholla", nm_cactus)
         self.assertIn("sotol", nm_cactus)
+        nm_cactus_do = nm_cactus_card["steps"][0]["do"]["en"].lower()
+        self.assertIn("cholla", nm_cactus_do)
+        self.assertIn("sotol", nm_cactus_do)
         self.assertIn("This is range, not a pin", do)
         self.assertIn("tx-east", do)
         self.assertNotIn("ice and cold cards", do)
@@ -889,6 +893,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("BOOK", qa)
         self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", qa)
         self.assertIn("tx-east-snake", qa)
+        self.assertIn("aspen is high country", qa.lower())
+        self.assertIn("SPEAK names that pack", qa)
         self.assertIn("tree-use card", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)
@@ -1067,18 +1073,29 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("piñon", nm)
         self.assertIn("aspen", nm)
         self.assertNotIn("edible", nm)
+        nm_do = json.loads((ROOT / "Resources/Field/field.nm.json").read_text())
+        nm_tree_do = next(c for c in nm_do["cards"] if c["id"] == "nm-tree-use")["steps"][0]["do"]["en"].lower()
+        self.assertIn("rio grande cottonwood", nm_tree_do)
+        self.assertIn("high country", nm_tree_do)
 
         west = blob("tx", "tx-tree-use")
         self.assertIn("mesquite", west)
         self.assertIn("cottonwood", west)
         self.assertIn("west texas trees", west)
         self.assertNotIn("edible", west)
+        west_tree_do = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
+        west_do = next(c for c in west_tree_do["cards"] if c["id"] == "tx-tree-use")["steps"][0]["do"]["en"].lower()
+        self.assertIn("mesquite", west_do)
+        self.assertIn("live oak", west_do)
 
         east = blob("tx", "tx-east-tree-use")
         self.assertIn("loblolly", east)
         self.assertIn("cottonwood", east)
         self.assertNotIn("mesquite", east)
         self.assertNotIn("edible", east)
+        east_do = next(c for c in west_tree_do["cards"] if c["id"] == "tx-east-tree-use")["steps"][0]["do"]["en"].lower()
+        self.assertIn("loblolly", east_do)
+        self.assertNotIn("mesquite", east_do)
 
         west_mammal = blob("tx", "tx-mammal")
         self.assertIn("west texas mammals", west_mammal)
@@ -1121,6 +1138,9 @@ class GroundFieldSync(unittest.TestCase):
         ).lower()
         self.assertIn("diamondback", snake)
         self.assertIn("prairie", snake)
+        snake_do = next(c for c in book["cards"] if c["id"] == "nm-snake")["steps"][0]["do"]["en"].lower()
+        self.assertIn("prairie rattler", snake_do)
+        self.assertIn("diamondback", snake_do)
         mammal_card = next(c for c in book["cards"] if c["id"] == "nm-mammal")
         mammal = json.dumps(mammal_card).lower()
         self.assertIn("mule deer", mammal)
@@ -1175,6 +1195,16 @@ class GroundFieldSync(unittest.TestCase):
         west_do = west_mammal_card["steps"][0]["do"]["en"].lower()
         self.assertIn("white-tailed deer", west_do)
         self.assertIn("give it the road", west_do)
+        west_game = next(
+            c
+            for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]
+            if c["id"] == "tx-game"
+        )
+        west_game_do = west_game["steps"][0]["do"]["en"].lower()
+        self.assertIn("javelina", west_game_do)
+        self.assertIn("white-tailed deer", west_game_do)
+        self.assertIn("do not hunt", west_game_do)
+        self.assertNotIn("edible", west_game_do)
 
     def test_east_texas_ships_its_own_field_chapter(self):
         """East woodland must not open west mesquite / javelina cards.
@@ -1229,13 +1259,20 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("deer", east_game)
         self.assertIn("hog", east_game)
         self.assertNotIn("javelina", east_game)
+        self.assertIn("feral hog", by_id["tx-east-game"]["steps"][0]["do"]["en"].lower())
         east_snake = json.dumps(by_id["tx-east-snake"]).lower()
         self.assertIn("copperhead", east_snake)
         self.assertIn("cottonmouth", east_snake)
+        east_snake_do = by_id["tx-east-snake"]["steps"][0]["do"]["en"].lower()
+        self.assertIn("copperhead", east_snake_do)
+        self.assertIn("cottonmouth", east_snake_do)
         west_snake = json.dumps(by_id["tx-snake"]).lower()
         self.assertIn("diamondback", west_snake)
         self.assertNotIn("cottonmouth", west_snake)
         self.assertNotIn("copperhead", west_snake)
+        west_snake_do = by_id["tx-snake"]["steps"][0]["do"]["en"].lower()
+        self.assertIn("diamondback", west_snake_do)
+        self.assertNotIn("cottonmouth", west_snake_do)
         west_mammal = json.dumps(by_id["tx-mammal"]).lower()
         self.assertIn("javelina", west_mammal)
         west_tree = json.dumps(by_id["tx-tree-use"]).lower()
