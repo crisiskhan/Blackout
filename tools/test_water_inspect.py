@@ -912,6 +912,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("mammalEastCard", worked)
         self.assertNotIn("cactusTXCard", worked)
         self.assertNotIn("cactusNMCard", worked)
+        self.assertNotIn(
+            "plantUseCard",
+            worked,
+            "a glasshouse is not woodland tree-use; don't chew, then unknown",
+        )
         self.assertIn("plantTXCard", worked)
         tiles = (ROOT / "tools/v3/tiles.py").read_text()
         self.assertIn('("landuse", "greenhouse_horticulture"): "farm"', tiles)
@@ -976,6 +981,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cottonmouth", qa)
         self.assertIn("Irrigated ground", qa)
         self.assertIn("Glasshouse", qa)
+        self.assertIn("not plant-use", qa)
         self.assertIn("Vickery Wholesale Greenhouse", qa)
         self.assertIn("glasshouse", qa)
         self.assertIn("Discovery Well Cave Preserve", qa)

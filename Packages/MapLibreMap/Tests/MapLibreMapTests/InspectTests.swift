@@ -699,6 +699,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(glass.title, "Vickery Wholesale Greenhouse")
         XCTAssertEqual(glass.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(glass.fieldRoute.contains(Inspect.plantUseCard), "a glasshouse is not woodland tree-use")
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.mammalEastCard))
         XCTAssertFalse(glass.fieldRoute.contains(Inspect.gameEastCard))
@@ -1157,6 +1158,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(garden.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertTrue(garden.fieldRoute.contains(Inspect.plantNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(garden.fieldRoute.contains(Inspect.plantUseCard), "a botanic garden is not woodland tree-use")
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.cactusNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.mammalNMCard))
         XCTAssertFalse(garden.fieldRoute.contains(Inspect.gameNMCard))
@@ -1265,6 +1267,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(rose.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertFalse(rose.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(rose.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertFalse(rose.fieldRoute.contains(Inspect.plantUseCard), "a rose garden is not woodland tree-use")
 
         let community = Inspect.read(
             tags: [
@@ -1278,6 +1281,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(community.fieldRoute.first, Inspect.plantTXCard)
         XCTAssertFalse(community.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(community.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(community.fieldRoute.contains(Inspect.plantUseCard), "a community garden is not woodland tree-use")
 
         let beer = Inspect.read(
             tags: ["leisure": "park", "name": "Moontower Saloon Beer Garden"],

@@ -1047,8 +1047,8 @@ public enum Inspect {
         )
     }
 
-    /// Glasshouses and botanic gardens: don't chew, then plant-use.
-    /// Not woodland tree-use, not a hunt, not a cactus garden.
+    /// Glasshouses and botanic gardens: don't chew. Not woodland
+    /// tree-use, not plant-use, not a hunt, not a cactus garden.
     private static func workedCover(
         klass: String,
         sure: Int,
@@ -1065,7 +1065,6 @@ public enum Inspect {
             local: [
                 plantTXCard, plantNMCard,
             ],
-            extra: [plantUseCard],
             unnamedPenalty: unnamedPenalty
         )
     }
