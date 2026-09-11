@@ -7,7 +7,8 @@ carries three cave preserves tagged as parks, and Blowing Sink tagged as
 wetland. Those already paint as park or bosque fill; without a silver outline
 they look like picnic ground or cottonwoods. FIELD still has
 the plant book and the cave card. One wildlife management area in NM would
-open picnic tree-use without this file. A botanic garden tagged as a park
+open picnic tree-use without this file. A nature preserve tagged as woodland
+would open picnic tree-use without this file. A botanic garden tagged as a park
 would open woodland tree-use without this file. A mountain ACEC or a prairie
 preserve would open picnic tree-use without this file. This is the water-detail
 pattern for those records: small enough to sit in the style as a geojson
@@ -54,7 +55,9 @@ CAVE_PRESERVE_KEYS = {
 # `Inspect.isWildlifeRange`. Wildlife Drive and Wildlife Trail stay out.
 # Phrase `game commission`, not the word `game`. The Game & Fish office
 # stays a park. Phrase `wilderness preserve`, not the word `wilderness`.
-# Wilderness Gate is apartments and stays out.
+# Wilderness Gate is apartments and stays out. Phrase `nature preserve`
+# / `nature center` / `natural area`, not the word `preserve`. Godzilla
+# Preserve stays a park.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -63,6 +66,9 @@ WILDLIFE_RANGE_PHRASES = (
     "wildlife conservation area",
     "game commission",
     "wilderness preserve",
+    "nature preserve",
+    "nature center",
+    "natural area",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

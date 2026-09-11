@@ -538,6 +538,85 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(gate.klass, "Built-up ground")
         XCTAssertNotEqual(gate.klass, "Wildlife range")
+
+        let barrow = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "natural": "wood",
+                "name": "Barrow Nature Preserve",
+            ],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(barrow.klass, "Wildlife range")
+        XCTAssertNotEqual(barrow.klass, "Woodland")
+        XCTAssertEqual(barrow.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(barrow.fieldRoute.contains(Inspect.cactusTXCard), "a nature preserve is not a cactus garden")
+        XCTAssertTrue(barrow.doLine.lowercased().contains("hog"), barrow.doLine)
+        XCTAssertFalse(barrow.doLine.lowercased().contains("javelina"), barrow.doLine)
+
+        let overlayBarrow = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Barrow Nature Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(overlayBarrow.klass, "Wildlife range")
+
+        let center = Inspect.read(
+            tags: ["leisure": "park", "name": "Rio Grande Nature Center State Park"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(center.klass, "Wildlife range")
+        XCTAssertNotEqual(center.klass, "Park")
+        XCTAssertTrue(center.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(center.doLine.lowercased().contains("bear") || center.doLine.lowercased().contains("elk"), center.doLine)
+
+        let leaf = Inspect.read(
+            tags: [
+                "leisure": "park",
+                "natural": "wood",
+                "name": "Bright Leaf Natural Area",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(leaf.klass, "Wildlife range")
+        XCTAssertEqual(leaf.fieldRoute.first, Inspect.mammalEastCard)
+
+        let godzilla = Inspect.read(
+            tags: ["leisure": "park", "name": "Godzilla Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(godzilla.klass, "Park")
+        XCTAssertEqual(godzilla.fieldRoute.first, Inspect.treeUseEastCard)
+
+        let visitor = Inspect.read(
+            tags: ["leisure": "park", "name": "Open Space Visitor Center"],
+            pack: "nm"
+        )
+        XCTAssertEqual(visitor.klass, "Park")
+        XCTAssertNotEqual(visitor.klass, "Wildlife range")
+        XCTAssertEqual(visitor.fieldRoute.first, Inspect.treeUseTXCard)
+
+        let overlayCenter = Inspect.read(
+            tags: [
+                "boundary": "protected_area",
+                "landuse": "recreation_ground",
+                "name": "Rio Grande Nature Center State Park",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(overlayCenter.klass, "Wildlife range")
+        XCTAssertNotEqual(overlayCenter.klass, "Irrigated ground")
+
+        let whitestone = Inspect.read(
+            tags: ["leisure": "park", "name": "Whitestone Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(whitestone.klass, "Park")
+        XCTAssertEqual(whitestone.fieldRoute.first, Inspect.treeUseEastCard)
     }
 
     func testAnOpenReserveIsSnakeCountryNotPicnicWoodland() {

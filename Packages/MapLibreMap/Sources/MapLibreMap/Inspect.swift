@@ -326,7 +326,9 @@ public enum Inspect {
     /// Game Commission land is range. Phrase `game commission`, not the
     /// word `game` — Department of Game & Fish is an office. Phrase
     /// `wilderness preserve`, not the word `wilderness` — Wilderness
-    /// Gate is apartments.
+    /// Gate is apartments. Phrase `nature preserve` / `nature center` /
+    /// `natural area`, not the word `preserve` — Godzilla Preserve is
+    /// a park.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -341,6 +343,9 @@ public enum Inspect {
         if n.contains("wildlife conservation area") { return true }
         if n.contains("game commission") { return true }
         if n.contains("wilderness preserve") { return true }
+        if n.contains("nature preserve") { return true }
+        if n.contains("nature center") { return true }
+        if n.contains("natural area") { return true }
         return false
     }
 

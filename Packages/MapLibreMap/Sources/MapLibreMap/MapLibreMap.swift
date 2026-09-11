@@ -696,7 +696,7 @@ public enum PackStyle {
 
     /// Glasshouses the tiler has not yet classed as farm, cave preserves
     /// that otherwise read as picnic parks, wildlife management areas
-    /// that otherwise read as picnic woodland, botanic gardens that
+    /// and nature preserves that otherwise read as picnic woodland, botanic gardens that
     /// otherwise read as picnic parks, and open reserves that otherwise
     /// read as picnic woodland. Quiet fill under the streets
     /// so a hold can name them; silver outline at walking zoom so the record is

@@ -74,7 +74,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4, 6), "tx-east": (14, 3, 3, 1, 1), "nm": (10, 1, 6, 2, 1)}
+        expected = {"tx-west": (2, 0, 0, 4, 6), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 1)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -122,8 +122,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("marquez wildlife management area", nm_blob)
         self.assertIn("whitfield wildlife conservation area", nm_blob)
         self.assertIn("state game commission land", nm_blob)
+        self.assertIn("rio grande nature center", nm_blob)
         self.assertNotIn("department of game", nm_blob)
         self.assertNotIn("game on", nm_blob)
+        self.assertNotIn("open space visitor center", nm_blob)
         self.assertIn("jones canyon area of critical environmental concern", nm_blob)
         self.assertIn("pronoun cave area of critical environmental concern", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
@@ -134,9 +136,16 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
+        self.assertIn("barrow nature preserve", east_blob)
+        self.assertIn("stillhouse hollow nature preserve", east_blob)
+        self.assertIn("big walnut creek nature preserve", east_blob)
+        self.assertIn("bright leaf natural area", east_blob)
         self.assertIn("decker tallgrass prairie preserve", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertNotIn("moontower saloon beer garden", east_blob)
+        self.assertNotIn("godzilla preserve", east_blob)
+        self.assertNotIn("whitestone preserve", east_blob)
+        self.assertNotIn("westside preserve", east_blob)
         west_blob = (PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("chihuahuan desert conservatory", west_blob)
         self.assertIn("three crosses cactus garden", west_blob)
@@ -278,6 +287,45 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"landuse": "residential", "name": "Wilderness Gate"}
             )
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "natural": "wood",
+                    "name": "Barrow Nature Preserve",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Rio Grande Nature Center State Park"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "natural": "wood", "name": "Bright Leaf Natural Area"}
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Godzilla Preserve"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Open Space Visitor Center"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Whitestone Preserve"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Westside Preserve"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Candelaria Farm Preserve Open Space"}
+            )
+        )
 
     def test_an_open_reserve_is_not_picnic_woodland(self):
         """A mountain ACEC opens vipers, not mesquite tree-use.
@@ -336,6 +384,8 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("wildlife")', inspect)
         self.assertNotIn('contains("wilderness")', inspect)
+        self.assertNotIn('contains("preserve")', inspect)
+        self.assertNotIn('contains("nature")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -853,6 +903,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("wildlife conservation area", inspect)
         self.assertIn("game commission", inspect)
         self.assertIn("wilderness preserve", inspect)
+        self.assertIn("nature preserve", inspect)
+        self.assertIn("nature center", inspect)
+        self.assertIn("natural area", inspect)
         land = inspect.split("private static func land(", 1)[1]
         self.assertLess(
             land.index("isWildlifeRange"),
@@ -1159,6 +1212,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", qa)
         self.assertIn("Decker Tallgrass Prairie Preserve", qa)
         self.assertIn("Wild Basin Wilderness Preserve", qa)
+        self.assertIn("Barrow Nature Preserve", qa)
+        self.assertIn("Stillhouse Hollow Nature Preserve", qa)
+        self.assertIn("Big Walnut Creek Nature Preserve", qa)
+        self.assertIn("Bright Leaf Natural Area", qa)
+        self.assertIn("Rio Grande Nature Center State Park", qa)
+        self.assertIn("Open Space Visitor Center", qa)
+        self.assertIn("Godzilla Preserve", qa)
         self.assertIn("Wilderness Gate", qa)
         self.assertIn("Prairie Hills", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
