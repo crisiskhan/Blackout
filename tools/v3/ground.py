@@ -76,6 +76,13 @@ CAVE_PRESERVE_KEYS = {
 # Phrase `canyonlands preserve`, not the word `canyonlands`.
 # Canyonlands Trail Park stays a park. Phrase `wetland preserve`,
 # not the word `wetland`. Rio Bosque Wetlands Park stays bosque.
+# Phrase `canyon preserve`, not the word `canyon`. Santa Fe Canyon
+# Preserve is range. Canyon Preserve Interpretive Loop Trail stays a
+# path. El Cerro de Los Lunas Preserve and Galisteo Basin Preserve
+# stay Open reserve. Phrase `management unit`, not `wildlife
+# management area`. A Balcones management unit is range. Waste
+# Management Wildlife Park stays Open reserve. Phrase `ecological
+# research`, not the word `research`.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -96,6 +103,9 @@ WILDLIFE_RANGE_PHRASES = (
     "wilderness park",
     "canyonlands preserve",
     "wetland preserve",
+    "canyon preserve",
+    "management unit",
+    "ecological research",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

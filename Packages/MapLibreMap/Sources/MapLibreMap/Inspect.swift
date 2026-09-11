@@ -351,7 +351,14 @@ public enum Inspect {
     /// Phrase `wilderness park`, not the word `wilderness`. Phrase
     /// `canyonlands preserve`, not the word `canyonlands` — Canyonlands
     /// Trail Park stays a park. Phrase `wetland preserve`, not the
-    /// word `wetland` — Rio Bosque Wetlands Park stays bosque.
+    /// word `wetland` — Rio Bosque Wetlands Park stays bosque. Phrase
+    /// `canyon preserve`, not the word `canyon` — Santa Fe Canyon
+    /// Preserve is range; Canyon Preserve Interpretive Loop Trail stays
+    /// a path; El Cerro de Los Lunas Preserve and Galisteo Basin
+    /// Preserve stay Open reserve. Phrase `management unit`, not
+    /// `wildlife management area` — a Balcones management unit is
+    /// range; Waste Management Wildlife Park stays Open reserve. Phrase
+    /// `ecological research`, not the word `research`.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
             || t["leisure"] == "nature_reserve"
@@ -378,6 +385,9 @@ public enum Inspect {
         if n.contains("wilderness park") { return true }
         if n.contains("canyonlands preserve") { return true }
         if n.contains("wetland preserve") { return true }
+        if n.contains("canyon preserve") { return true }
+        if n.contains("management unit") { return true }
+        if n.contains("ecological research") { return true }
         return false
     }
 

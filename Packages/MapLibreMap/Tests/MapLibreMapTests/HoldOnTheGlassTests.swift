@@ -158,6 +158,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// preserve`, animals first, not bosque overlay. 417 m from water.
     private static let curtinWetland = CLLocationCoordinate2D(latitude: 35.569230, longitude: -106.101626)
 
+    /// Interior of Santa Fe Canyon Preserve. Phrase `canyon preserve`,
+    /// not Open reserve, not the interpretive loop. 678 m from water.
+    private static let santaFeCanyon = CLLocationCoordinate2D(latitude: 35.680636, longitude: -105.887799)
+
+    /// Interior of Bear Creek Management Unit. Phrase `management unit`,
+    /// not Open reserve. 777 m from water.
+    private static let bearCreekUnit = CLLocationCoordinate2D(latitude: 30.160921, longitude: -97.877106)
+
+    /// Interior of Hornsby Bend Ecological Research Area. Phrase
+    /// `ecological research`, not Open reserve. 516 m from water.
+    private static let hornsbyBend = CLLocationCoordinate2D(latitude: 30.231564, longitude: -97.646392)
+
     /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
@@ -664,6 +676,21 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((canyonlands.card?.doLine.lowercased() ?? "").contains("hog"), canyonlands.card?.doLine ?? "")
         XCTAssertFalse((canyonlands.card?.doLine.lowercased() ?? "").contains("cottonwood"), canyonlands.card?.doLine ?? "")
         XCTAssertFalse((canyonlands.card?.doLine.lowercased() ?? "").contains("edible"), canyonlands.card?.doLine ?? "")
+
+        let management = try hold(at: Self.bearCreekUnit, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(management.card?.klass, "Wildlife range", "\(management)")
+        XCTAssertEqual(management.card?.title, "Bear Creek Management Unit", "\(management)")
+        XCTAssertNotEqual(management.card?.klass, "Open reserve", "\(management)")
+        XCTAssertEqual(management.card?.fieldRoute.first, Inspect.mammalEastCard, "\(management)")
+        XCTAssertTrue((management.card?.doLine.lowercased() ?? "").contains("hog"), management.card?.doLine ?? "")
+        XCTAssertFalse((management.card?.doLine.lowercased() ?? "").contains("edible"), management.card?.doLine ?? "")
+
+        let hornsby = try hold(at: Self.hornsbyBend, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(hornsby.card?.klass, "Wildlife range", "\(hornsby)")
+        XCTAssertEqual(hornsby.card?.title, "Hornsby Bend Ecological Research Area", "\(hornsby)")
+        XCTAssertNotEqual(hornsby.card?.klass, "Open reserve", "\(hornsby)")
+        XCTAssertEqual(hornsby.card?.fieldRoute.first, Inspect.mammalEastCard, "\(hornsby)")
+        XCTAssertFalse((hornsby.card?.doLine.lowercased() ?? "").contains("edible"), hornsby.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -904,6 +931,13 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(curtin.card?.fieldRoute.first, Inspect.mammalTXCard, "\(curtin)")
         XCTAssertFalse((curtin.card?.doLine.lowercased() ?? "").contains("cottonwood"), curtin.card?.doLine ?? "")
         XCTAssertFalse((curtin.card?.doLine.lowercased() ?? "").contains("edible"), curtin.card?.doLine ?? "")
+
+        let canyon = try hold(at: Self.santaFeCanyon, zoom: 16, packId: "nm")
+        XCTAssertEqual(canyon.card?.klass, "Wildlife range", "\(canyon)")
+        XCTAssertEqual(canyon.card?.title, "Santa Fe Canyon Preserve", "\(canyon)")
+        XCTAssertNotEqual(canyon.card?.klass, "Open reserve", "\(canyon)")
+        XCTAssertEqual(canyon.card?.fieldRoute.first, Inspect.mammalTXCard, "\(canyon)")
+        XCTAssertFalse((canyon.card?.doLine.lowercased() ?? "").contains("edible"), canyon.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {

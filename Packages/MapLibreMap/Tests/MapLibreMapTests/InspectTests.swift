@@ -871,6 +871,64 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(wetlandsPark.klass, "Bosque or wetland")
         XCTAssertNotEqual(wetlandsPark.klass, "Wildlife range")
 
+        let canyonPreserve = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Santa Fe Canyon Preserve",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(canyonPreserve.klass, "Wildlife range")
+        XCTAssertNotEqual(canyonPreserve.klass, "Open reserve")
+        XCTAssertEqual(canyonPreserve.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(canyonPreserve.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(canyonPreserve.doLine.lowercased().contains("edible"), canyonPreserve.doLine)
+
+        let canyonLoop = Inspect.read(
+            tags: ["highway": "path", "name": "Canyon Preserve Interpretive Loop Trail"],
+            pack: "nm"
+        )
+        XCTAssertNotEqual(canyonLoop.klass, "Wildlife range")
+
+        let losLunas = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "El Cerro de Los Lunas Preserve"],
+            pack: "nm"
+        )
+        XCTAssertEqual(losLunas.klass, "Open reserve")
+        XCTAssertNotEqual(losLunas.klass, "Wildlife range")
+
+        let galisteo = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Galisteo Basin Preserve"],
+            pack: "nm"
+        )
+        XCTAssertEqual(galisteo.klass, "Open reserve")
+        XCTAssertNotEqual(galisteo.klass, "Wildlife range")
+
+        let management = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Bear Creek Management Unit",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(management.klass, "Wildlife range")
+        XCTAssertNotEqual(management.klass, "Open reserve")
+        XCTAssertEqual(management.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertTrue(management.doLine.lowercased().contains("hog"), management.doLine)
+        XCTAssertFalse(management.doLine.lowercased().contains("edible"), management.doLine)
+
+        let hornsby = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Hornsby Bend Ecological Research Area",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(hornsby.klass, "Wildlife range")
+        XCTAssertNotEqual(hornsby.klass, "Open reserve")
+        XCTAssertEqual(hornsby.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(hornsby.doLine.lowercased().contains("edible"), hornsby.doLine)
+
         let baker = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Baker Sanctuary"],
             pack: "tx-east"
