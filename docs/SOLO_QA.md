@@ -53,7 +53,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Hold a water/ground feature → FIELD. Card names the class (STOCK TANK / TINAJA / ACEQUIA / RIVER), not a generic water. DO is the class field line. Empty ground names nearest water within 2 km. FIELD · WATER jumps. The hold card must not crash. Returning to MAP still has the canvas (MapLibre was not torn down).
 - [ ] PASS / FAIL / N/A — Hold woodland / bosque / park → Woodland, Bosque or Park. DO names this pack's trees (mesquite / cottonwood), not a meal. Button `FIELD · PLANT` opens that state's plant-danger card. Last step becomes `NEXT · PLANT` (tree-use), then `NEXT · ANIMAL`, `NEXT · SHELTER`, `NEXT · FUNGI`, `NEXT · FOOD`. Never edible.
 - [ ] PASS / FAIL / N/A — Hold desert scrub → Desert scrub. DO names this pack's snakes, mammals, yucca and prickly pear as range, not a pin. `FIELD · BITE` opens that state's snake card. Last step becomes `NEXT · ANIMAL`, then cactus / tree-use / `NEXT · BITE` / `NEXT · FOOD`. No animal icon on the canvas.
-- [ ] PASS / FAIL / N/A — Hold a silver peak or sinkhole mark (circle, no class label) → Peak or Cave or hole. `FIELD · COLD` on a peak, `FIELD · CAVE` on a hole. Do not go in alone. No tourist cave guide.
+- [ ] PASS / FAIL / N/A — Hold a silver peak or sinkhole mark (circle, no class label) → Peak or Cave or hole. `FIELD · COLD` on a peak, `FIELD · CAVE` on a hole. TX WEST sinkhole is 31.694905, −106.441133. Do not go in alone. No tourist cave guide.
 
 ## FIELD
 
