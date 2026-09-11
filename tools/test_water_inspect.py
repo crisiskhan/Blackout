@@ -666,6 +666,30 @@ class GroundFieldSync(unittest.TestCase):
             cover.index("plantTXCard"),
             "woodland must open this pack's tree-use card, not oleander, first",
         )
+        self.assertNotIn(
+            "snakeEastCard",
+            cover,
+            "a city park is not cottonmouth country; bosque carries the east snake card",
+        )
+        self.assertIn("wetlandCover", inspect)
+        wet = inspect.split("private static func wetlandCover", 1)[1].split(
+            "private static func plantCover", 1
+        )[0]
+        self.assertLess(
+            wet.index("treeUseEastCard"),
+            wet.index("snakeEastCard"),
+            "east bosque still opens tree-use, then cottonmouth treatment",
+        )
+        self.assertLess(
+            wet.index("gameEastCard"),
+            wet.index("snakeEastCard"),
+            "snake after game keeps woodland BOOK order",
+        )
+        wet_case = inspect.split('case "wetland":', 1)[1].split(
+            'case "bare_rock"', 1
+        )[0]
+        self.assertIn("wetlandCover", wet_case)
+        self.assertNotIn("plantCover(", wet_case)
         tree = inspect.split('case "tree":', 1)[1].split('case "wood":', 1)[0]
         self.assertIn("treeUseTXCard", tree)
         self.assertNotIn("mammalTXCard", tree)
@@ -846,6 +870,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("CARD 1 OF", qa)
         self.assertIn("BOOK", qa)
         self.assertIn("PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI", qa)
+        self.assertIn("tx-east-snake", qa)
         self.assertIn("tree-use card", qa)
         self.assertIn("FIELD · ANIMAL", qa)
         self.assertIn("FIELD · ANIMAL", qa)

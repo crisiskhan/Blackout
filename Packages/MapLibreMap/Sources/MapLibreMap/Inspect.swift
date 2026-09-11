@@ -764,7 +764,7 @@ public enum Inspect {
                     pack: pack
                 )
             case "wetland":
-                return plantCover(
+                return wetlandCover(
                     klass: "Bosque or wetland",
                     sure: 74,
                     why: "mapped as wet ground, which is where the cottonwoods stand along the river",
@@ -871,9 +871,49 @@ public enum Inspect {
         return nil
     }
 
-    /// Tree cover, parks, bosque: the trees this cover is, then don't chew,
+    /// East bosque names cottonmouth on the hold. The Field walk has to
+    /// open that pack's snake card so treatment matches the speech. Parks
+    /// stay picnic woodland — Barton Hills is not cottonmouth country.
+    /// Snake sits after game so BOOK stays `PLANT · ANIMAL · FOOD · BITE`.
+    private static func wetlandCover(
+        klass: String,
+        sure: Int,
+        why: String,
+        unnamedPenalty: Int,
+        pack: String? = nil
+    ) -> Reading {
+        if !isEastPack(pack) {
+            return plantCover(
+                klass: klass,
+                sure: sure,
+                why: why,
+                unnamedPenalty: unnamedPenalty,
+                pack: pack
+            )
+        }
+        return Reading(
+            klass: klass,
+            kind: .land,
+            sure: sure,
+            why: why,
+            advice: .field,
+            field: plantCard,
+            local: [
+                treeUseEastCard, treeUseNMCard,
+                plantTXCard, plantNMCard,
+                cactusTXCard, cactusNMCard,
+                mammalEastCard, mammalNMCard,
+                gameEastCard, gameNMCard,
+                snakeEastCard, snakeNMCard,
+            ],
+            extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
+            unnamedPenalty: unnamedPenalty
+        )
+    }
+
+    /// Tree cover, parks: the trees this cover is, then don't chew,
     /// then cactus, animals, game. Unknown last so FIELD still lands with
-    /// only the core book.
+    /// only the core book. East bosque is `wetlandCover`, not this.
     ///
     /// West `local:` is written first so the source contract can see
     /// `treeUseTXCard` before the first `plantTXCard`. East is the same
