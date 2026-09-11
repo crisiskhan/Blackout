@@ -213,7 +213,7 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.shelterCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.biteCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.treeUseTXCard))
-        XCTAssertTrue(wood.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertFalse(wood.fieldRoute.contains(Inspect.cactusTXCard), "picnic woodland is not a cactus garden")
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.gameTXCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertFalse(wood.fieldRoute.contains(Inspect.snakeTXCard))
@@ -636,6 +636,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: eastWet.fieldRoute[0]), "FIELD · PLANT")
         XCTAssertTrue(eastWet.fieldRoute.contains(Inspect.snakeEastCard))
         XCTAssertFalse(eastWet.fieldRoute.contains(Inspect.snakeTXCard))
+        XCTAssertFalse(eastWet.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.snakeEastCard))
         let eastBook: Set<String> = [
             Inspect.treeUseEastCard, Inspect.plantTXCard, Inspect.cactusTXCard,
@@ -654,6 +655,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: eastWood.fieldRoute[0]), "FIELD · PLANT")
         XCTAssertTrue(eastWood.fieldRoute.contains(Inspect.mammalEastCard))
         XCTAssertTrue(eastWood.fieldRoute.contains(Inspect.gameEastCard))
+        XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.cactusTXCard))
         XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.treeUseTXCard))
         XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertFalse(eastWood.fieldRoute.contains(Inspect.gameTXCard))
@@ -850,7 +852,7 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             InspectField.presentRoute(wood, in: texas),
             [
-                Inspect.treeUseTXCard, Inspect.plantTXCard, Inspect.cactusTXCard,
+                Inspect.treeUseTXCard, Inspect.plantTXCard,
                 Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
                 Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
                 Inspect.gameCard, Inspect.plantCard,

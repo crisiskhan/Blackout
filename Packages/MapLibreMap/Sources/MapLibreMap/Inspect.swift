@@ -912,7 +912,6 @@ public enum Inspect {
             local: [
                 treeUseEastCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
-                cactusTXCard, cactusNMCard,
                 mammalEastCard, mammalNMCard,
                 gameEastCard, gameNMCard,
                 snakeEastCard, snakeNMCard,
@@ -923,8 +922,9 @@ public enum Inspect {
     }
 
     /// Tree cover, parks: the trees this cover is, then don't chew,
-    /// then cactus, animals, game. Unknown last so FIELD still lands with
+    /// then animals, game. Unknown last so FIELD still lands with
     /// only the core book. East bosque is `wetlandCover`, not this.
+    /// Cactus lives on scrub and cactus gardens, not picnic woodland.
     ///
     /// West `local:` is written first so the source contract can see
     /// `treeUseTXCard` before the first `plantTXCard`. East is the same
@@ -949,7 +949,6 @@ public enum Inspect {
                 local: [
                     treeUseTXCard, treeUseNMCard,
                     plantTXCard, plantNMCard,
-                    cactusTXCard, cactusNMCard,
                     mammalTXCard, mammalNMCard,
                     gameTXCard, gameNMCard,
                 ],
@@ -969,7 +968,6 @@ public enum Inspect {
             local: [
                 treeUseEastCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
-                cactusTXCard, cactusNMCard,
                 mammalEastCard, mammalNMCard,
                 gameEastCard, gameNMCard,
             ],

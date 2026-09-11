@@ -684,6 +684,11 @@ class GroundFieldSync(unittest.TestCase):
             "woodland must open this pack's tree-use card, not oleander, first",
         )
         self.assertNotIn(
+            "cactusTXCard",
+            cover,
+            "picnic woodland is not a cactus garden; scrub and cactus gardens carry spines",
+        )
+        self.assertNotIn(
             "snakeEastCard",
             cover,
             "a city park is not cottonmouth country; bosque carries the east snake card",
@@ -702,6 +707,7 @@ class GroundFieldSync(unittest.TestCase):
             wet.index("snakeEastCard"),
             "snake after game keeps woodland BOOK order",
         )
+        self.assertNotIn("cactusTXCard", wet)
         wet_case = inspect.split('case "wetland":', 1)[1].split(
             'case "bare_rock"', 1
         )[0]
