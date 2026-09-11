@@ -1097,6 +1097,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("food card", peak_hold)
         self.assertIn("javelina", peak_hold)
         self.assertIn("elk", peak_hold)
+        self.assertIn("give it the road", peak_hold)
         rock_hold = do.split('case "Rock":', 1)[1].split('case "Built-up ground":', 1)[0].lower()
         self.assertNotIn("bite card", rock_hold)
         self.assertNotIn("food card", rock_hold)
@@ -1278,6 +1279,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Prairie Hills", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)
+        self.assertIn("Hold DO on wildlife range names give it the road", qa)
+        self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
         self.assertIn("Peak DO does not name the bite card", qa)
@@ -1489,6 +1492,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("diamondback", west_scrub)
         self.assertIn("javelina", west_scrub)
         self.assertIn("the bite card", west_scrub)
+        self.assertIn("no ice, no cut, no suck", west_scrub)
         self.assertNotIn("cottonmouth", west_scrub)
         nm_scrub = animal.split("case .nm:", 1)[1].split("case .unknown:", 1)[0].lower()
         self.assertIn("prairie rattler", nm_scrub)
@@ -1496,11 +1500,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cholla", nm_scrub)
         self.assertIn("sotol", nm_scrub)
         self.assertIn("the bite card", nm_scrub)
+        self.assertIn("no ice, no cut, no suck", nm_scrub)
         self.assertNotIn("lives here", nm_scrub)
         east_scrub = animal.split("case .txEast:", 1)[1].split("case .nm:", 1)[0].lower()
         self.assertIn("cottonmouth", east_scrub)
         self.assertIn("hog", east_scrub)
         self.assertIn("the bite card", east_scrub)
+        self.assertIn("no ice, no cut, no suck", east_scrub)
         self.assertNotIn("javelina", east_scrub)
         wildlife = do.split('case "Wildlife range":', 1)[1].split(
             'case "Bosque or wetland":', 1
@@ -1513,6 +1519,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("diamondback", nm_range)
         self.assertIn("the bite card", nm_range)
         self.assertIn("the food card", nm_range)
+        self.assertIn("give it the road", nm_range)
         self.assertNotIn("cottonwood", nm_range)
         self.assertNotIn("lives here", nm_range)
 
@@ -1538,7 +1545,8 @@ class GroundFieldSync(unittest.TestCase):
             nm_do,
             "NM mammal SPEAK names the bite card, like Texas",
         )
-        self.assertIn("the food-game card", nm_do)
+        self.assertIn("the food card", nm_do)
+        self.assertNotIn("food-game card", nm_do)
 
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("Prairie rattler", qa)
@@ -1546,6 +1554,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("NM mammal SPEAK names the bite card", qa)
         self.assertIn("Hold DO on wildlife range names the bite card", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)
+        self.assertIn("Hold DO on wildlife range names give it the road", qa)
+        self.assertIn("no ice, no cut, no suck", qa)
         self.assertIn("Brush off, then water", qa)
         self.assertIn("Comb glochids out", qa)
         self.assertIn("Peak DO does not name the bite card", qa)
@@ -1566,6 +1576,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("diamondback", west)
         self.assertIn("the bite card", west)
         self.assertIn("the food card", west)
+        self.assertIn("give it the road", west)
         self.assertNotIn("cottonwood", west)
         self.assertNotIn("mesquite", west)
         self.assertNotIn("oleander", west)
@@ -1578,6 +1589,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("cottonmouth", east)
         self.assertIn("the bite card", east)
         self.assertIn("the food card", east)
+        self.assertIn("give it the road", east)
         self.assertNotIn("javelina", east)
         self.assertNotIn("diamondback", east)
         self.assertNotIn("cottonwood", east)
@@ -1588,6 +1600,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("diamondback", nm)
         self.assertIn("the bite card", nm)
         self.assertIn("the food card", nm)
+        self.assertIn("give it the road", nm)
         self.assertNotIn("cottonwood", nm)
 
         west_mammal_card = next(
@@ -1603,7 +1616,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("white-tailed deer", west_do)
         self.assertIn("give it the road", west_do)
         self.assertIn("the bite card", west_do)
-        self.assertIn("the food-game card", west_do)
+        self.assertIn("the food card", west_do)
+        self.assertNotIn("food-game card", west_do)
         west_game = next(
             c
             for c in json.loads((ROOT / "Resources/Field/field.tx.json").read_text())["cards"]

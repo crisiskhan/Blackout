@@ -943,16 +943,18 @@ extension Inspect {
         }
     }
 
+    /// Open country: the same viper and treat snake SPEAK names. No ice,
+    /// no cut, no suck. Bite is the card the hold already opens.
     private static func animalRangeLine(state: String?, pack: String?) -> String {
         switch PackRange.of(state: state, pack: pack) {
         case .txWest:
-            return "Diamondback and javelina country. Yucca and prickly pear. If bitten, the bite card. Spines, not a meal."
+            return "Diamondback and javelina country. Yucca and prickly pear. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .txEast:
-            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. If bitten, the bite card. Spines, not a meal."
+            return "Copperhead and cottonmouth country. Hog range. Yucca and prickly pear. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .nm:
-            return "Prairie rattler or diamondback country. Cholla, yucca, and sotol. If bitten, the bite card. Spines, not a meal."
+            return "Prairie rattler or diamondback country. Cholla, yucca, and sotol. No ice, no cut, no suck. If bitten, the bite card. Spines, not a meal."
         case .unknown:
-            return "Open country. Vipers use this cover. If bitten, the bite card."
+            return "Open country. Vipers use this cover. No ice, no cut, no suck. If bitten, the bite card."
         }
     }
 
@@ -989,13 +991,13 @@ extension Inspect {
         case "Wildlife range":
             switch PackRange.of(state: state, pack: pack) {
             case .txWest:
-                return "Javelina, coyote, and deer range. Diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
+                return "Javelina, coyote, and deer range. Give it the road. Diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
             case .txEast:
-                return "Coyote, deer, and hog range. Copperhead and cottonmouth country. If bitten, the bite card. If you already have meat, the food card. Not a pin."
+                return "Coyote, deer, and hog range. Give it the road. Copperhead and cottonmouth country. If bitten, the bite card. If you already have meat, the food card. Not a pin."
             case .nm:
-                return "Black bear, elk, and mule deer range. Prairie rattler or diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
+                return "Black bear, elk, and mule deer range. Give it the road. Prairie rattler or diamondback country. If bitten, the bite card. If you already have meat, the food card. Range, not a pin."
             case .unknown:
-                return "This is range, not a pin. Field has the animal, bite, and food cards."
+                return "This is range, not a pin. Give it the road. Field has the animal, bite, and food cards."
             }
         case "Bosque or wetland":
             switch PackRange.of(state: state, pack: pack) {
@@ -1015,24 +1017,24 @@ extension Inspect {
         case "Peak":
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
-                return "High ground. Wind, cold, black bear and elk range. Field has ice and cold."
+                return "High ground. Wind, cold, black bear and elk range. Give it the road. Field has ice and cold."
             case .txWest:
-                return "High ground. Wind, javelina, coyote and deer range. Field has animal and cold."
+                return "High ground. Wind, javelina, coyote and deer range. Give it the road. Field has animal and cold."
             case .txEast:
-                return "High ground. Wind, coyote, deer, and hog range. Field has animal and cold."
+                return "High ground. Wind, coyote, deer, and hog range. Give it the road. Field has animal and cold."
             case .unknown:
-                return "High ground. Wind and cold. Field has animal and cold."
+                return "High ground. Wind and cold. Give it the road. Field has animal and cold."
             }
         case "Rock":
             switch PackRange.of(state: state, pack: pack) {
             case .nm:
-                return "Bare rock. Ice films over. Black bear and elk range. Field has ice and cold."
+                return "Bare rock. Ice films over. Black bear and elk range. Give it the road. Field has ice and cold."
             case .txWest:
-                return "Bare rock. Javelina, coyote and deer range. Field has animal and cold."
+                return "Bare rock. Javelina, coyote and deer range. Give it the road. Field has animal and cold."
             case .txEast:
-                return "Bare rock. Coyote, deer, and hog range. Field has animal and cold."
+                return "Bare rock. Coyote, deer, and hog range. Give it the road. Field has animal and cold."
             case .unknown:
-                return "Bare rock. No shade. Field has the cold card."
+                return "Bare rock. No shade. Give it the road. Field has the cold card."
             }
         case "Built-up ground":
             return "Pavement and little shade. Field has the heat island card."

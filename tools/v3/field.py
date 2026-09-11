@@ -1033,19 +1033,19 @@ def mammal_do_en(cid: str) -> str:
             "Feral hog charges when cornered — give it the brush, do not get between it and cover. "
             "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
             "Food away from camp. If bitten, the bite card. If you already have meat, "
-            "the food-game card. Do not hunt from this map."
+            "the food card. Do not hunt from this map."
         )
     if cid.startswith("tx-"):
         return (
             "Javelina charges when cornered — give it the brush, do not get between it and cover. "
             "Coyote: do not feed. White-tailed deer at dusk — give it the road. "
             "Food away from camp. If bitten, the bite card. "
-            "If you already have meat, the food-game card. Do not hunt from this map."
+            "If you already have meat, the food card. Do not hunt from this map."
         )
     return (
         "Black bear: do not run, stand large, food sealed and away from camp. "
         "Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. "
-        "If bitten, the bite card. If you already have meat, the food-game card. "
+        "If bitten, the bite card. If you already have meat, the food card. "
         "Do not hunt from this map."
     )
 
