@@ -87,7 +87,9 @@ WILDLIFE_RANGE_PHRASES = (
 # word `tierra` or `trails`. Tierra Blanca and a trails neighborhood
 # park stay parks. Phrase `sun mountain`, not the word `sun` or
 # `mountain`. Hyde Memorial and Manzano stay picnic. The peak pin
-# stays a peak. Sun Mountain Estates is built-up. Must stay in step
+# stays a peak. Sun Mountain Estates is built-up. Phrase `national
+# forest`, not the word `forest`. Cibola and Santa Fe National Forest
+# are timber. Lincoln National Forest stays picnic. Must stay in step
 # with `Inspect.isOpenReserve`.
 OPEN_RESERVE_PHRASES = (
     "area of critical environmental concern",
@@ -98,6 +100,7 @@ OPEN_RESERVE_PHRASES = (
     "sun mountain",
 )
 OPEN_SPACE_KEEP_OUT = ("visitor", "farm", "rio grande", "bachechi", "trail")
+OPEN_RESERVE_KEEP_OUT = ("national forest",)
 
 # Phrase match, not the word "garden" and not "arboretum". Must stay in step
 # with `Inspect.isBotanicGarden`. Conservatory At North Austin is apartments
@@ -157,12 +160,14 @@ def is_named_open_space(name: str) -> bool:
 
 def is_open_reserve(props: dict) -> bool:
     name = (props.get("name") or "").strip()
+    lowered = name.lower()
+    if any(keep in lowered for keep in OPEN_RESERVE_KEEP_OUT):
+        return False
     if props.get("leisure") == "nature_reserve" and name:
         return True
     park = any(props.get(key) == value for key, value in CAVE_PRESERVE_KEYS)
     if not park:
         return False
-    lowered = name.lower()
     if any(phrase in lowered for phrase in OPEN_RESERVE_PHRASES):
         return True
     return is_named_open_space(name)

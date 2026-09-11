@@ -9,17 +9,22 @@ merely appeared in a commit.
 """
 from __future__ import annotations
 
+import gzip
 import json
 import re
 import sys
 import unittest
 from pathlib import Path
 
+import mapbox_vector_tile
+from pmtiles.reader import MmapSource, Reader
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from v3 import ground, water
 from v3.fetch_packs import PACKS, clip_features, osm_to_geojson
+from v3.tiles import lonlat_to_tile
 
 PACK_ROOT = ROOT / "Resources" / "Packs"
 SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/WaterInspect.swift"
@@ -42,6 +47,23 @@ def layer(style: dict, layer_id: str) -> dict | None:
         if entry.get("id") == layer_id:
             return entry
     return None
+
+
+def place_names_in_tile(pack_id: str, lon: float, lat: float, z: int = 13) -> set[str]:
+    """Names on the place slice of the tile that holds this coordinate."""
+    path = PACK_ROOT / pack_id / "osm.pmtiles"
+    x, y = lonlat_to_tile(lon, lat, z)
+    with open(path, "rb") as fh:
+        blob = Reader(MmapSource(fh)).get(z, int(x), int(y))
+    if not blob:
+        return set()
+    data = gzip.decompress(blob) if blob[:2] == b"\x1f\x8b" else blob
+    names: set[str] = set()
+    for feat in mapbox_vector_tile.decode(data).get("place", {}).get("features", []):
+        name = (feat.get("properties") or {}).get("name")
+        if name:
+            names.add(name)
+    return names
 
 
 class ShippedWaterLayers(unittest.TestCase):
@@ -74,7 +96,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 0, 4, 7), "tx-east": (14, 3, 7, 1, 1), "nm": (10, 1, 8, 2, 26)}
+        expected = {"tx-west": (2, 0, 4, 4, 36), "tx-east": (14, 4, 14, 1, 43), "nm": (10, 1, 14, 2, 59)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -140,6 +162,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("sun mountain estates", nm_blob)
         self.assertNotIn("hyde memorial", nm_blob)
         self.assertNotIn("manzano mountains", nm_blob)
+        self.assertNotIn("cibola national forest", nm_blob)
+        self.assertNotIn("santa fe national forest", nm_blob)
+        self.assertNotIn("lincoln national forest", nm_blob)
         self.assertNotIn("rio grande bosque", nm_blob)
         self.assertNotIn("corrales bosque", nm_blob)
         self.assertNotIn("alameda bosque", nm_blob)
@@ -149,6 +174,7 @@ class ShippedWaterLayers(unittest.TestCase):
         east_blob = (PACK_ROOT / "tx-east" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("discovery well cave preserve", east_blob)
         self.assertIn("buttercup creek cave preserve", east_blob)
+        self.assertIn("lost oasis cave preserve", east_blob)
         self.assertIn("blowing sink", east_blob)
         self.assertIn("colorado river park wildlife sanctuary", east_blob)
         self.assertIn("indiangrass wildlife sanctuary", east_blob)
@@ -162,7 +188,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("moontower saloon beer garden", east_blob)
         self.assertNotIn("godzilla preserve", east_blob)
         self.assertNotIn("whitestone preserve", east_blob)
-        self.assertNotIn("westside preserve", east_blob)
+        self.assertIn("westside preserve", east_blob)
         self.assertNotIn("37 lone oak trail open space", east_blob)
         west_blob = (PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text().lower()
         self.assertIn("chihuahuan desert conservatory", west_blob)
@@ -171,6 +197,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("rose garden", west_blob)
         self.assertIn("alamo mountain area of critical environmental concern", west_blob)
         self.assertIn("hueco tanks state park and historic site", west_blob)
+        self.assertIn("franklin mountains state park", west_blob)
+        self.assertIn("lost dog nature preserve", west_blob)
+        self.assertIn("san andres national wildlife refuge", west_blob)
         self.assertNotIn("cactus point park", west_blob)
         self.assertNotIn("parque cactus del desierto", west_blob)
         self.assertNotIn("hueco mountain park", west_blob)
@@ -479,6 +508,41 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(
             ground.overlay_kind({"leisure": "nature_reserve", "name": ""})
         )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Cibola National Forest",
+                }
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Lincoln National Forest",
+                }
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Santa Fe National Forest",
+                }
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Franklin Mountains State Park",
+                }
+            ),
+            "reserve",
+        )
 
     def test_an_open_reserve_is_not_picnic_woodland(self):
         """A mountain ACEC opens vipers, not mesquite tree-use.
@@ -577,6 +641,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("Open reserve", inspect)
         self.assertIn('t["leisure"] == "nature_reserve"', inspect)
         self.assertIn('props.get("leisure") == "nature_reserve"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertIn('contains("national forest")', inspect)
+        self.assertIn('"national forest"', (ROOT / "tools/v3/ground.py").read_text())
+        self.assertNotIn('contains("forest")', inspect)
         self.assertNotIn('contains("open space")', inspect)
         self.assertIn('range(of: "open space")', inspect)
         self.assertIn('"open space" not in lowered', (ROOT / "tools/v3/ground.py").read_text())
@@ -1516,11 +1583,31 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.048502", glass)
         self.assertIn("-97.745559", glass)
         self.assertIn("Cerro Pelado Burn Scar", glass)
+        self.assertIn("Jemez National Recreation Area", glass)
         self.assertIn("35.785371", glass)
         self.assertIn("-106.573932", glass)
         self.assertIn("Mount Franklin", glass)
         self.assertIn("31.832051", glass)
         self.assertIn("-106.492210", glass)
+        self.assertIn("Franklin Mountains State Park", glass)
+        self.assertIn("31.97", glass)
+        self.assertIn("-106.50", glass)
+        self.assertIn("Lost Dog Nature Preserve", glass)
+        self.assertIn("31.896528", glass)
+        self.assertIn("-106.545207", glass)
+        self.assertIn("Anthony Gap Cave", glass)
+        self.assertIn("31.998167", glass)
+        self.assertIn("-106.51017", glass)
+        self.assertIn("Treaty Oak", glass)
+        self.assertIn("30.271466", glass)
+        self.assertIn("-97.755462", glass)
+        self.assertIn("Lost Oasis Cave Preserve", glass)
+        self.assertIn("30.163187", glass)
+        self.assertIn("-97.873678", glass)
+        self.assertIn("Sandia Man Cave", glass)
+        self.assertIn("35.254746", glass)
+        self.assertIn("-106.405585", glass)
+        self.assertIn("Named tree", glass)
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", glass)
         self.assertIn("35.846906", glass)
         self.assertIn("-107.025703", glass)
@@ -1571,6 +1658,8 @@ class GroundFieldSync(unittest.TestCase):
         glass_hit = False
         reserve_hit = False
         hueco_hit = False
+        franklin_hit = False
+        lost_dog_hit = False
         for feat in west["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1592,6 +1681,10 @@ class GroundFieldSync(unittest.TestCase):
                     hueco_hit = (
                         props.get("name") == "Hueco Tanks State Park and Historic Site"
                     )
+                if kind == "reserve" and pip(-106.50, 31.97, ring):
+                    franklin_hit = props.get("name") == "Franklin Mountains State Park"
+                if kind == "wildlife" and pip(-106.545207, 31.896528, ring):
+                    lost_dog_hit = props.get("name") == "Lost Dog Nature Preserve"
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
@@ -1603,9 +1696,18 @@ class GroundFieldSync(unittest.TestCase):
             hueco_hit,
             "SOLO_QA Hueco Tanks hold is not inside the named desert park",
         )
+        self.assertTrue(
+            franklin_hit,
+            "Franklin Mountains State Park is not Open reserve on the west overlay",
+        )
+        self.assertTrue(
+            lost_dog_hit,
+            "Lost Dog Nature Preserve is not wildlife range on the west overlay",
+        )
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
         sink = False
+        anthony_cave = False
         bosque = False
         farm = False
         west_wood = False
@@ -1618,6 +1720,14 @@ class GroundFieldSync(unittest.TestCase):
                 lon, lat = geom["coordinates"][:2]
                 if abs(lat - 31.694905) < 1e-6 and abs(lon - (-106.441133)) < 1e-6:
                     sink = True
+            if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Anthony Gap Cave"
+                    and abs(lat - 31.998167) < 1e-6
+                    and abs(lon - (-106.51017)) < 1e-6
+                ):
+                    anthony_cave = True
             if (
                 props.get("natural") == "wetland"
                 and props.get("name") == "Rio Bosque Wetlands Park"
@@ -1642,6 +1752,7 @@ class GroundFieldSync(unittest.TestCase):
                     if pip(-105.802406, 33.100215, ring):
                         west_wood = True
         self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
+        self.assertTrue(anthony_cave, "Anthony Gap Cave is not a west cave mouth in the extract")
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
         self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
         self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
@@ -1654,6 +1765,7 @@ class GroundFieldSync(unittest.TestCase):
         blowing_hit = False
         decker_hit = False
         buttercup_hit = False
+        oasis_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -1666,6 +1778,8 @@ class GroundFieldSync(unittest.TestCase):
                     blowing_hit = props.get("name") == "Blowing Sink"
                 if kind == "cave" and pip(-97.839459, 30.494626, ring):
                     buttercup_hit = props.get("name") == "Buttercup Creek Cave Preserve"
+                if kind == "cave" and pip(-97.873678, 30.163187, ring):
+                    oasis_hit = props.get("name") == "Lost Oasis Cave Preserve"
                 if kind == "reserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = props.get("name") == "Decker Tallgrass Prairie Preserve"
         self.assertTrue(
@@ -1681,6 +1795,9 @@ class GroundFieldSync(unittest.TestCase):
             buttercup_hit, "SOLO_QA Buttercup hold is not inside Buttercup Creek Cave Preserve"
         )
         self.assertTrue(
+            oasis_hit, "Lost Oasis Cave Preserve is not a cave overlay on the east pack"
+        )
+        self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
         )
 
@@ -1689,6 +1806,7 @@ class GroundFieldSync(unittest.TestCase):
         east_bosque = False
         east_peak = False
         east_scrub = False
+        treaty_oak = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1712,10 +1830,29 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.882228)) < 1e-6
                 ):
                     east_peak = True
+            if props.get("natural") == "tree" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Treaty Oak"
+                    and abs(lat - 30.271466) < 1e-6
+                    and abs(lon - (-97.755462)) < 1e-6
+                ):
+                    treaty_oak = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
         self.assertTrue(east_scrub, "glass east scrub hold is not inside unnamed east scrub")
+        self.assertTrue(treaty_oak, "Treaty Oak is not a named tree in the east extract")
+        self.assertIn(
+            "Treaty Oak",
+            place_names_in_tile("tx-east", -97.755462, 30.271466),
+            "Treaty Oak did not survive tiling",
+        )
+        self.assertIn(
+            "Anthony Gap Cave",
+            place_names_in_tile("tx-west", -106.51017, 31.998167),
+            "Anthony Gap Cave did not survive tiling",
+        )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -1776,10 +1913,13 @@ class GroundFieldSync(unittest.TestCase):
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
-            kind = ground.overlay_kind(props)
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Paseo de la Mesa Open Space":
+                continue
             for ring in rings_of(feat.get("geometry") or {}):
-                if kind == "reserve" and pip(-106.774776, 35.149083, ring):
-                    nm_mesa_hit = props.get("name") == "Paseo de la Mesa Open Space"
+                if pip(-106.774776, 35.149083, ring):
+                    nm_mesa_hit = True
         self.assertTrue(
             nm_mesa_hit,
             "SOLO_QA Paseo de la Mesa hold is not inside the named nature reserve",
@@ -1800,10 +1940,13 @@ class GroundFieldSync(unittest.TestCase):
         nm_scenic_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
-            kind = ground.overlay_kind(props)
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Bear Canyon Scenic Easement":
+                continue
             for ring in rings_of(feat.get("geometry") or {}):
-                if kind == "reserve" and pip(-106.444016, 35.155131, ring):
-                    nm_scenic_hit = props.get("name") == "Bear Canyon Scenic Easement"
+                if pip(-106.444016, 35.155131, ring):
+                    nm_scenic_hit = True
         self.assertTrue(
             nm_scenic_hit,
             "SOLO_QA Bear Canyon Scenic Easement hold is not inside the scenic easement",
@@ -1838,6 +1981,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_bosque = False
         nm_peak = False
         nm_scrub = False
+        sandia_cave = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -1864,10 +2008,24 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-107.420040)) < 1e-6
                 ):
                     nm_peak = True
+            if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Sandia Man Cave"
+                    and abs(lat - 35.254746) < 1e-6
+                    and abs(lon - (-106.405585)) < 1e-6
+                ):
+                    sandia_cave = True
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
+        self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
+        self.assertIn(
+            "Sandia Man Cave",
+            place_names_in_tile("nm", -106.405585, 35.254746),
+            "Sandia Man Cave did not survive tiling",
+        )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()

@@ -30,7 +30,7 @@
             "north": 31.82,
             "east": -106.4
           },
-          "featureCount": 22169
+          "featureCount": 22171
         },
         "wild": {
           "name": "Franklin Mountains wild",
@@ -41,7 +41,7 @@
             "north": 32.0,
             "east": -106.4
           },
-          "featureCount": 3591
+          "featureCount": 3593
         },
         "border": {
           "name": "El Paso TX+NM border union",
@@ -52,7 +52,7 @@
             "north": 31.9,
             "east": -106.35
           },
-          "featureCount": 62261
+          "featureCount": 62273
         },
         "corridor": {
           "name": "El Paso / Las Cruces corridor",
@@ -63,7 +63,7 @@
             "north": 32.4,
             "east": -106.2
           },
-          "featureCount": 133488
+          "featureCount": 133521
         },
         "region": {
           "name": "El Paso / Las Cruces / Organ Mountains region",
@@ -74,40 +74,13 @@
             "north": 33.15,
             "east": -105.35
           },
-          "featureCount": 203231
+          "featureCount": 203289
         }
       },
       "banners": [
         "heat-island",
         "cattle-guard",
         "border-hospitals"
-      ],
-      "bytes": 34832652,
-      "files": [
-        "border.geojson",
-        "contours.geojson",
-        "corridor.geojson",
-        "dem.json",
-        "glyphs/Open Sans Regular/0-255.pbf",
-        "glyphs/Open Sans Regular/256-511.pbf",
-        "glyphs/Open Sans Regular/512-767.pbf",
-        "glyphs/Open Sans Regular/768-1023.pbf",
-        "glyphs/Open Sans Regular/8192-8447.pbf",
-        "graph.bin",
-        "hillshade.png",
-        "layers/flood.geojson",
-        "layers/ground.geojson",
-        "layers/hazards.geojson",
-        "layers/public_land.geojson",
-        "layers/water.bin",
-        "layers/water.geojson",
-        "manifest.json",
-        "metro.geojson",
-        "osm.pmtiles",
-        "pois.geojson",
-        "region.geojson",
-        "style.json",
-        "wild.geojson"
       ],
       "center": {
         "lat": 32.05,
@@ -117,7 +90,7 @@
         "lat": 31.78,
         "lon": -106.46000000000001
       },
-      "osmFetched": "2026-09-09",
+      "osmFetched": "2026-09-11",
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
@@ -144,7 +117,7 @@
         ]
       },
       "stats": {
-        "features": 203622,
+        "features": 203682,
         "highwayLines": 173901,
         "namedStreets": 60153,
         "sampleStreetNames": [
@@ -166,7 +139,34 @@
         "graphEdges": 742351,
         "graphNodes": 263512,
         "streetsVisibleAtWalkingZoom": true
-      }
+      },
+      "files": [
+        "border.geojson",
+        "contours.geojson",
+        "corridor.geojson",
+        "dem.json",
+        "glyphs/Open Sans Regular/0-255.pbf",
+        "glyphs/Open Sans Regular/256-511.pbf",
+        "glyphs/Open Sans Regular/512-767.pbf",
+        "glyphs/Open Sans Regular/768-1023.pbf",
+        "glyphs/Open Sans Regular/8192-8447.pbf",
+        "graph.bin",
+        "hillshade.png",
+        "layers/flood.geojson",
+        "layers/ground.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "layers/water.bin",
+        "layers/water.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.pmtiles",
+        "pois.geojson",
+        "region.geojson",
+        "style.json",
+        "wild.geojson"
+      ],
+      "bytes": 35602138
     },
     {
       "id": "tx-east",
@@ -192,7 +192,7 @@
             "north": 30.32,
             "east": -97.68
           },
-          "featureCount": 41274
+          "featureCount": 41277
         },
         "wild": {
           "name": "Lost Pines / Bastrop wild",
@@ -214,7 +214,7 @@
             "north": 30.42,
             "east": -97.2
           },
-          "featureCount": 210348
+          "featureCount": 210394
         },
         "region": {
           "name": "Austin / Bastrop / Buda region",
@@ -225,39 +225,13 @@
             "north": 30.5,
             "east": -97.2
           },
-          "featureCount": 280644
+          "featureCount": 280756
         }
       },
       "banners": [
         "heat-island",
         "cattle-guard",
         "hurricane"
-      ],
-      "bytes": 30682867,
-      "files": [
-        "contours.geojson",
-        "dem.json",
-        "glyphs/Open Sans Regular/0-255.pbf",
-        "glyphs/Open Sans Regular/256-511.pbf",
-        "glyphs/Open Sans Regular/512-767.pbf",
-        "glyphs/Open Sans Regular/768-1023.pbf",
-        "glyphs/Open Sans Regular/8192-8447.pbf",
-        "graph.bin",
-        "hillshade.png",
-        "layers/flood.geojson",
-        "layers/ground.geojson",
-        "layers/hazards.geojson",
-        "layers/public_land.geojson",
-        "layers/water.bin",
-        "layers/water.geojson",
-        "manifest.json",
-        "metro.geojson",
-        "osm.pmtiles",
-        "pois.geojson",
-        "region.geojson",
-        "style.json",
-        "union.geojson",
-        "wild.geojson"
       ],
       "center": {
         "lat": 30.275,
@@ -267,7 +241,7 @@
         "lat": 30.28,
         "lon": -97.73
       },
-      "osmFetched": "2026-09-09",
+      "osmFetched": "2026-09-11",
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
@@ -294,7 +268,7 @@
         ]
       },
       "stats": {
-        "features": 281108,
+        "features": 281220,
         "highwayLines": 251209,
         "namedStreets": 45194,
         "sampleStreetNames": [
@@ -316,75 +290,7 @@
         "graphEdges": 848575,
         "graphNodes": 296343,
         "streetsVisibleAtWalkingZoom": true
-      }
-    },
-    {
-      "id": "nm",
-      "name": "NM",
-      "state": "NM",
-      "kind": "osm-contour-extract",
-      "engine": "maplibre",
-      "defaultOpen": false,
-      "walkable": true,
-      "bbox": {
-        "south": 34.35,
-        "west": -107.45,
-        "north": 35.95,
-        "east": -105.65
       },
-      "slices": {
-        "metro": {
-          "name": "Albuquerque metro",
-          "bbox": {
-            "name": "Albuquerque metro",
-            "south": 35.06,
-            "west": -106.68,
-            "north": 35.14,
-            "east": -106.55
-          },
-          "featureCount": 36173
-        },
-        "wild": {
-          "name": "Sandia foothills wild",
-          "bbox": {
-            "name": "Sandia foothills wild",
-            "south": 35.15,
-            "west": -106.5,
-            "north": 35.25,
-            "east": -106.38
-          },
-          "featureCount": 2676
-        },
-        "union": {
-          "name": "Albuquerque / Rio Rancho / Sandia union",
-          "bbox": {
-            "name": "Albuquerque / Rio Rancho / Sandia union",
-            "south": 34.95,
-            "west": -106.85,
-            "north": 35.35,
-            "east": -106.35
-          },
-          "featureCount": 136418
-        },
-        "region": {
-          "name": "Albuquerque / Bernalillo / Isleta region",
-          "bbox": {
-            "name": "Albuquerque / Bernalillo / Isleta region",
-            "south": 34.35,
-            "west": -107.45,
-            "north": 35.95,
-            "east": -105.65
-          },
-          "featureCount": 235914
-        }
-      },
-      "banners": [
-        "monsoon",
-        "ice-rock",
-        "cattle-guard",
-        "border-hospitals"
-      ],
-      "bytes": 35066361,
       "files": [
         "contours.geojson",
         "dem.json",
@@ -410,6 +316,74 @@
         "union.geojson",
         "wild.geojson"
       ],
+      "bytes": 30795622
+    },
+    {
+      "id": "nm",
+      "name": "NM",
+      "state": "NM",
+      "kind": "osm-contour-extract",
+      "engine": "maplibre",
+      "defaultOpen": false,
+      "walkable": true,
+      "bbox": {
+        "south": 34.35,
+        "west": -107.45,
+        "north": 35.95,
+        "east": -105.65
+      },
+      "slices": {
+        "metro": {
+          "name": "Albuquerque metro",
+          "bbox": {
+            "name": "Albuquerque metro",
+            "south": 35.06,
+            "west": -106.68,
+            "north": 35.14,
+            "east": -106.55
+          },
+          "featureCount": 36175
+        },
+        "wild": {
+          "name": "Sandia foothills wild",
+          "bbox": {
+            "name": "Sandia foothills wild",
+            "south": 35.15,
+            "west": -106.5,
+            "north": 35.25,
+            "east": -106.38
+          },
+          "featureCount": 2678
+        },
+        "union": {
+          "name": "Albuquerque / Rio Rancho / Sandia union",
+          "bbox": {
+            "name": "Albuquerque / Rio Rancho / Sandia union",
+            "south": 34.95,
+            "west": -106.85,
+            "north": 35.35,
+            "east": -106.35
+          },
+          "featureCount": 136433
+        },
+        "region": {
+          "name": "Albuquerque / Bernalillo / Isleta region",
+          "bbox": {
+            "name": "Albuquerque / Bernalillo / Isleta region",
+            "south": 34.35,
+            "west": -107.45,
+            "north": 35.95,
+            "east": -105.65
+          },
+          "featureCount": 235975
+        }
+      },
+      "banners": [
+        "monsoon",
+        "ice-rock",
+        "cattle-guard",
+        "border-hospitals"
+      ],
       "center": {
         "lat": 35.150000000000006,
         "lon": -106.55000000000001
@@ -418,7 +392,7 @@
         "lat": 35.1,
         "lon": -106.61500000000001
       },
-      "osmFetched": "2026-09-09",
+      "osmFetched": "2026-09-11",
       "attribution": "© OpenStreetMap contributors. USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM. No runtime uplink.",
       "terrain": {
         "present": true,
@@ -445,7 +419,7 @@
         ]
       },
       "stats": {
-        "features": 236140,
+        "features": 236205,
         "highwayLines": 210634,
         "namedStreets": 52195,
         "sampleStreetNames": [
@@ -467,7 +441,33 @@
         "graphEdges": 880638,
         "graphNodes": 312157,
         "streetsVisibleAtWalkingZoom": true
-      }
+      },
+      "files": [
+        "contours.geojson",
+        "dem.json",
+        "glyphs/Open Sans Regular/0-255.pbf",
+        "glyphs/Open Sans Regular/256-511.pbf",
+        "glyphs/Open Sans Regular/512-767.pbf",
+        "glyphs/Open Sans Regular/768-1023.pbf",
+        "glyphs/Open Sans Regular/8192-8447.pbf",
+        "graph.bin",
+        "hillshade.png",
+        "layers/flood.geojson",
+        "layers/ground.geojson",
+        "layers/hazards.geojson",
+        "layers/public_land.geojson",
+        "layers/water.bin",
+        "layers/water.geojson",
+        "manifest.json",
+        "metro.geojson",
+        "osm.pmtiles",
+        "pois.geojson",
+        "region.geojson",
+        "style.json",
+        "union.geojson",
+        "wild.geojson"
+      ],
+      "bytes": 35984065
     }
   ]
 }

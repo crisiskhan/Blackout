@@ -416,8 +416,12 @@ public enum Inspect {
     /// parks. Phrase `sun mountain`, not the word `sun` or `mountain`
     /// — Hyde Memorial and Manzano stay protected picnic land. The
     /// peak pin stays a peak. Sun Mountain Estates is built-up. Sun
-    /// Mountain Road is a road.
+    /// Mountain Road is a road. Phrase `national forest`, not the
+    /// word `forest`. Cibola and Santa Fe National Forest are timber.
+    /// Lincoln National Forest stays picnic.
     static func isOpenReserve(_ t: [String: String]) -> Bool {
+        let n = (t["name"] ?? "").lowercased()
+        if n.contains("national forest") { return false }
         let named = !(t["name"] ?? "").isEmpty
         if t["leisure"] == "nature_reserve", named { return true }
         let park = t["leisure"] == "park"
@@ -425,7 +429,6 @@ public enum Inspect {
             || t["boundary"] == "protected_area"
             || t["boundary"] == "national_park"
         guard park else { return false }
-        let n = (t["name"] ?? "").lowercased()
         if n.contains("area of critical environmental concern") { return true }
         if n.contains("prairie preserve") { return true }
         if n.contains("hueco tanks") { return true }

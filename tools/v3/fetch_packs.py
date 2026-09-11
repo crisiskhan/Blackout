@@ -1990,7 +1990,7 @@ def grow_resources(dest: Path, pack: dict, span: float = 0.5) -> dict:
     return {"before": before, "added": len(added), "after": len(fc["features"])}
 
 
-def grow_notable(dest: Path, pack: dict, span: float = 1.0) -> dict:
+def grow_notable(dest: Path, pack: dict, span: float = 5.0) -> dict:
     """Add named nature-reserve relations, cave mouths, and named trees.
 
     Additive. Streets and the router graph stay where they are. Relations

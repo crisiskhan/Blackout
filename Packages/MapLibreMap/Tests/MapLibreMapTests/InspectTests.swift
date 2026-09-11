@@ -892,6 +892,39 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(hueco.doLine.lowercased().contains("mesquite"), hueco.doLine)
         XCTAssertFalse(hueco.doLine.lowercased().contains("edible"), hueco.doLine)
 
+        let forest = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Cibola National Forest",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(forest.klass, "Protected land")
+        XCTAssertNotEqual(forest.klass, "Open reserve")
+        XCTAssertEqual(forest.fieldRoute.first, Inspect.treeUseNMCard)
+
+        let lincoln = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Lincoln National Forest",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(lincoln.klass, "Protected land")
+        XCTAssertNotEqual(lincoln.klass, "Open reserve")
+
+        let franklin = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Franklin Mountains State Park",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(franklin.klass, "Open reserve")
+        XCTAssertEqual(franklin.fieldRoute.first, Inspect.snakeTXCard)
+
         let huecoTown = Inspect.read(
             tags: ["leisure": "park", "name": "Hueco Mountain Park"],
             pack: "tx-west"

@@ -6,7 +6,7 @@
     "osm": {
       "type": "vector",
       "url": "pmtiles://osm.pmtiles",
-      "attribution": "\u00a9 OpenStreetMap contributors"
+      "attribution": "© OpenStreetMap contributors"
     },
     "contours": {
       "type": "geojson",
@@ -869,7 +869,7 @@
   "metadata": {
     "engine": "maplibre-metal-offline",
     "network": "deny-all",
-    "attribution": "\u00a9 OpenStreetMap contributors",
+    "attribution": "© OpenStreetMap contributors",
     "walkingZoom": true,
     "palette": "blackout-void-red-silver",
     "tokens": {

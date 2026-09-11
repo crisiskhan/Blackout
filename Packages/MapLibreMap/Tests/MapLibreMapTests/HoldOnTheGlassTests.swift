@@ -20,9 +20,9 @@ import XCTest
 /// `record(under:on:)` the long-press handler calls. The coordinates are in the
 /// test because they are evidence: each one is a real record in
 /// `Resources/Packs/tx-west`, `tx-east`, or `nm` `osm.geojson` /
-/// `layers/ground.geojson`. Texas West has no wildlife overlay in this fetch;
-/// animals as range are held on an east sanctuary and on a west peak, not
-/// invented as pins on the west pack. New Mexico botanic, wildlife,
+/// `layers/ground.geojson`. West wildlife range is Lost Dog and San Andres,
+/// not invented pins. Animals as range are also held on an east sanctuary
+/// and on a west peak. New Mexico botanic, wildlife,
 /// cave-preserve, and open-reserve sheets are held on the NM archive.
 /// East also holds a named sink tagged wetland (not bosque) and a prairie
 /// preserve (east vipers, not west diamondback). A west desert conservatory
@@ -83,8 +83,19 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Alamo Mountain ACEC in `layers/ground.geojson`.
     private static let openReserve = CLLocationCoordinate2D(latitude: 32.032331, longitude: -105.633755)
 
+    /// Interior of Franklin Mountains State Park. Named nature reserve, not
+    /// picnic woodland. Peak pin still wins on Mount Franklin itself.
+    private static let franklinReserve = CLLocationCoordinate2D(latitude: 31.97, longitude: -106.50)
+
+    /// Interior of Lost Dog Nature Preserve. West wildlife range, not a pin.
+    private static let westWildlife = CLLocationCoordinate2D(latitude: 31.896528, longitude: -106.545207)
+
     /// Unnamed `natural=sinkhole` on the place slice. SOLO_QA 31.694905, −106.441133.
     private static let sinkhole = CLLocationCoordinate2D(latitude: 31.694905, longitude: -106.441133)
+
+    /// `Anthony Gap Cave` on the west place slice. A cave mouth, not the
+    /// Franklin Mountains overlay that contains it.
+    private static let anthonyGapCave = CLLocationCoordinate2D(latitude: 31.998167, longitude: -106.51017)
 
     /// Interior of Indiangrass Wildlife Sanctuary in east `layers/ground.geojson`.
     /// Scrub fill does not win. Range, not a pin.
@@ -100,6 +111,14 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)
+
+    /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
+    /// phrase, not a picnic park.
+    private static let lostOasisCave = CLLocationCoordinate2D(latitude: 30.163187, longitude: -97.873678)
+
+    /// `Treaty Oak` on the east place slice. A surveyed tree, shade and
+    /// wood, not a meal.
+    private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
 
     /// Interior of Blowing Sink in east `layers/ground.geojson`. A wetland
     /// in the extract; phrase `blowing sink`, not a cave-preserve park.
@@ -124,9 +143,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// phrase, not open reserve, even though the name also says ACEC.
     private static let nmCavePreserve = CLLocationCoordinate2D(latitude: 34.750796, longitude: -107.344750)
 
-    /// `Mount Franklin` on the west place slice. Texas West has no wildlife
-    /// overlay; animals as range on this pack are this silver circle, not a pin.
-    /// Farther from a named way than North Franklin Mountain.
+    /// `Sandia Man Cave` on the NM place slice. A cave mouth, not a pin
+    /// and not picnic woodland.
+    private static let sandiaManCave = CLLocationCoordinate2D(latitude: 35.254746, longitude: -106.405585)
+
+    /// `Mount Franklin` on the west place slice. Peak pin still wins inside
+    /// Franklin Mountains State Park. Animals as range are also Lost Dog.
     private static let westPeak = CLLocationCoordinate2D(latitude: 31.832051, longitude: -106.492210)
 
     /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
@@ -152,8 +174,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not west diamondback, not an overlay prairie.
     private static let eastScrub = CLLocationCoordinate2D(latitude: 30.048502, longitude: -97.745559)
 
-    /// Interior of Cerro Pelado Burn Scar. Named NM scrub, not Jones Canyon
-    /// overlay: rattler and sotol on painted cover.
+    /// Interior of Cerro Pelado Burn Scar, inside Jemez National Recreation
+    /// Area. The burn scar is still painted scrub; the hold names the
+    /// recreation area. Not Jones Canyon. Not picnic woodland.
     private static let nmScrub = CLLocationCoordinate2D(latitude: 35.785371, longitude: -106.573932)
 
     // MARK: - The two holds the build is gated on
@@ -472,6 +495,12 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · BITE"
         )
+
+        let franklin = try hold(at: Self.franklinReserve, zoom: 16)
+        XCTAssertEqual(franklin.card?.klass, "Open reserve", "\(franklin)")
+        XCTAssertEqual(franklin.card?.title, "Franklin Mountains State Park", "\(franklin)")
+        XCTAssertEqual(franklin.card?.fieldRoute.first, Inspect.snakeTXCard, "\(franklin)")
+        XCTAssertFalse((franklin.card?.doLine.lowercased() ?? "").contains("edible"), franklin.card?.doLine ?? "")
     }
 
     func testHoldingASinkholeOpensTheCaveCard() throws {
@@ -486,6 +515,12 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · CAVE"
         )
+
+        let cave = try hold(at: Self.anthonyGapCave, zoom: 16)
+        XCTAssertEqual(cave.card?.klass, "Cave or hole", "\(cave)")
+        XCTAssertEqual(cave.card?.title, "Anthony Gap Cave", "\(cave)")
+        XCTAssertEqual(cave.card?.fieldRoute.first, Inspect.caveCard, "\(cave)")
+        XCTAssertFalse((cave.card?.doLine.lowercased() ?? "").contains("edible"), cave.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {
@@ -524,6 +559,14 @@ final class HoldOnTheGlassTests: XCTestCase {
             )),
             "ANIMAL · BITE · FOOD · PLANT"
         )
+
+        let west = try hold(at: Self.westWildlife, zoom: 16)
+        XCTAssertEqual(west.card?.klass, "Wildlife range", "\(west)")
+        XCTAssertEqual(west.card?.title, "Lost Dog Nature Preserve", "\(west)")
+        XCTAssertEqual(west.card?.fieldRoute.first, Inspect.mammalTXCard, "\(west)")
+        let westDo = west.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(westDo.contains("javelina"), west.card?.doLine ?? "")
+        XCTAssertFalse(westDo.contains("edible"), west.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -551,6 +594,15 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · PLANT"
         )
+
+        let oak = try hold(at: Self.treatyOak, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(oak.card?.klass, "Named tree", "\(oak)")
+        XCTAssertEqual(oak.card?.title, "Treaty Oak", "\(oak)")
+        XCTAssertEqual(oak.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(oak)")
+        let oakDo = oak.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(oakDo.contains("not a meal"), oak.card?.doLine ?? "")
+        XCTAssertFalse(oakDo.contains("edible"), oak.card?.doLine ?? "")
+        XCTAssertFalse(oakDo.contains("hog"), oak.card?.doLine ?? "")
     }
 
     func testHoldingAnEastBosqueNamesCottonmouthNotAPark() throws {
@@ -593,6 +645,12 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · CAVE"
         )
+
+        let oasis = try hold(at: Self.lostOasisCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(oasis.card?.klass, "Cave or hole", "\(oasis)")
+        XCTAssertEqual(oasis.card?.title, "Lost Oasis Cave Preserve", "\(oasis)")
+        XCTAssertEqual(oasis.card?.fieldRoute.first, Inspect.caveCard, "\(oasis)")
+        XCTAssertFalse((oasis.card?.doLine.lowercased() ?? "").contains("edible"), oasis.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {
@@ -728,6 +786,12 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · CAVE"
         )
+
+        let mouth = try hold(at: Self.sandiaManCave, zoom: 16, packId: "nm")
+        XCTAssertEqual(mouth.card?.klass, "Cave or hole", "\(mouth)")
+        XCTAssertEqual(mouth.card?.title, "Sandia Man Cave", "\(mouth)")
+        XCTAssertEqual(mouth.card?.fieldRoute.first, Inspect.caveCard, "\(mouth)")
+        XCTAssertFalse((mouth.card?.doLine.lowercased() ?? "").contains("edible"), mouth.card?.doLine ?? "")
     }
 
     func testHoldingAWestPeakOpensAnimalsNotIce() throws {
@@ -1014,8 +1078,8 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     func testHoldingNewMexicoScrubOpensRattlerNotPicnicWoodland() throws {
         let held = try hold(at: Self.nmScrub, zoom: 16, packId: "nm")
-        XCTAssertEqual(held.card?.klass, "Desert scrub", "ordinary NM cover is viper country: \(held)")
-        XCTAssertEqual(held.card?.title, "Cerro Pelado Burn Scar", "\(held)")
+        XCTAssertEqual(held.card?.klass, "Open reserve", "ordinary NM cover is viper country: \(held)")
+        XCTAssertEqual(held.card?.title, "Jemez National Recreation Area", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
         XCTAssertTrue(
             held.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
@@ -1080,7 +1144,10 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("rose garden", Self.roseGarden, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
+            ("franklin reserve", Self.franklinReserve, 16.0),
+            ("west wildlife", Self.westWildlife, 16.0),
             ("sinkhole", Self.sinkhole, 16.0),
+            ("anthony gap cave", Self.anthonyGapCave, 16.0),
         ] {
             let held = try hold(at: coordinate, zoom: zoom)
             guard let card = held.card else {
