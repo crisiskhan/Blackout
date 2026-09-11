@@ -342,6 +342,19 @@ out skel qt;
     return _overpass(q, f"res:{box}")
 
 
+# Phrase match, not a dump of every protected forest. Must stay in step with
+# `Inspect.isWildlifeRange` / `ground.WILDLIFE_RANGE_PHRASES`. Lincoln National
+# Forest does not match. Wildlife Drive is a street and is not a relation
+# with these phrases.
+NOTABLE_WILDLIFE_NAME = (
+    "wildlife refuge|wildlife management area|national wildlife|"
+    "wildlife sanctuary|wildlife conservation area|game commission|"
+    "wilderness preserve|nature preserve|nature center|natural area|"
+    "nature area|wildlife preserve|habitat preserve|national preserve|"
+    "wilderness park|audubon|flora y fauna"
+)
+
+
 def overpass_notable(south: float, west: float, north: float, east: float) -> dict:
     """Named nature-reserve polygons, cave mouths, and named trees.
 
@@ -349,8 +362,10 @@ def overpass_notable(south: float, west: float, north: float, east: float) -> di
     used to drop them even when Overpass returned them. This is a separate
     pass so a huge reserve does not ride the 0.12° street tiles. It does not
     ask for every `boundary=protected_area` forest — Lincoln National Forest
-    is not a picnic dump. Size is not a reason to skip a record the Hold
-    can name.
+    is not a picnic dump. A wildlife-named protected-area relation is range,
+    not timber. Cave *areas* come in as ways so the tiler can put a mouth
+    on the place slice. Size is not a reason to skip a record the Hold
+    can name. Animals are range, never a GPS pin. Nothing here is a meal.
     """
     box = f"{south},{west},{north},{east}"
     q = f"""
@@ -358,10 +373,17 @@ def overpass_notable(south: float, west: float, north: float, east: float) -> di
 (
   relation["leisure"="nature_reserve"]({box});
   way["leisure"="nature_reserve"]({box});
+  relation["boundary"="protected_area"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
+  way["leisure"="park"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
   node["natural"="cave"]({box});
   node["natural"="cave_entrance"]({box});
   node["natural"="sinkhole"]({box});
+  way["natural"="cave"]({box});
+  way["natural"="cave_entrance"]({box});
+  way["natural"="sinkhole"]({box});
+  relation["natural"="cave"]({box});
   node["natural"="tree"]["name"]({box});
+  way["natural"="tree"]["name"]({box});
 );
 out body;
 >;

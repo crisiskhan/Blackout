@@ -13,6 +13,7 @@ import gzip
 import json
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,7 +25,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from v3 import ground, water
 from v3.fetch_packs import PACKS, clip_features, osm_to_geojson
-from v3.tiles import lonlat_to_tile
+from v3.tiles import lonlat_to_tile, read_layers
 
 PACK_ROOT = ROOT / "Resources" / "Packs"
 SWIFT = ROOT / "Packages/MapLibreMap/Sources/MapLibreMap/WaterInspect.swift"
@@ -2232,13 +2233,65 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn('node["natural"="cave"]', fetch)
         self.assertIn('node["natural"="tree"]', fetch)
         self.assertIn('node["natural"="tree"]["name"]', fetch)
+        self.assertIn('way["natural"="cave"]', fetch)
+        self.assertIn('way["natural"="tree"]["name"]', fetch)
         self.assertIn('relation["leisure"="nature_reserve"]', fetch)
         self.assertIn('way["leisure"="nature_reserve"]', fetch)
+        self.assertIn("wildlife management area", fetch)
+        self.assertIn("flora y fauna", fetch)
         self.assertIn("def relation_geometry", fetch)
         self.assertIn("def grow_notable", fetch)
         self.assertIn('--notable', fetch)
         self.assertNotIn("best in class", fetch)
-        self.assertNotIn('relation["boundary"="protected_area"]', fetch)
+        self.assertNotIn("edible", fetch.lower())
+        # Unfiltered forest dump is forbidden. A wildlife-named protected
+        # area still has to come in, so the next token after the key is the
+        # name regex, not the bbox.
+        self.assertNotIn('relation["boundary"="protected_area"](', fetch)
+        self.assertIn(
+            'relation["boundary"="protected_area"]["name"~"',
+            fetch,
+        )
+
+    def test_a_cave_area_and_named_tree_area_are_place_points_not_dropped(self):
+        """A hole or canopy mapped as a ring still has to be holdable.
+
+        The land table has no cave class, so an area would vanish from the
+        tile. The tiler centres it on the place slice, same as a tank
+        outline, so FIELD still opens cave or tree-use. Not a meal.
+        Not an animal pin.
+        """
+        ring = [
+            [-106.51, 31.99],
+            [-106.50, 31.99],
+            [-106.50, 32.00],
+            [-106.51, 32.00],
+            [-106.51, 31.99],
+        ]
+        fc = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"natural": "cave", "name": "Hueco Tanks Cave"},
+                    "geometry": {"type": "Polygon", "coordinates": [ring]},
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"natural": "tree", "name": "Treaty Oak"},
+                    "geometry": {"type": "Polygon", "coordinates": [ring]},
+                },
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            (dest / "osm.geojson").write_text(json.dumps(fc))
+            layers = read_layers(dest)
+        names = {(p.get("natural"), p.get("name")) for p in layers["place"].props}
+        self.assertIn(("cave", "Hueco Tanks Cave"), names, layers["place"].props)
+        self.assertIn(("tree", "Treaty Oak"), names, layers["place"].props)
+        self.assertTrue(all(g.geom_type == "Point" for g in layers["place"].geoms))
+        self.assertEqual(len(layers["land"].geoms), 0)
 
     def test_osm_assembles_a_nature_reserve_relation_and_named_tree(self):
         """A reserve mapped as a relation is a polygon, not dropped.

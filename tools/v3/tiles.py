@@ -357,6 +357,22 @@ def read_layers(pack: Path) -> dict[str, Layer]:
                 geom = geom.representative_point()
             water.add(geom, keep, WATER_CLASS_ZOOM.get(kind, WATERWAY_ZOOM))
             continue
+        # A cave, sink, or named tree mapped as an area is still a point the
+        # hold has to name. The land table has no class for a hole, and a
+        # canopy ring is not woodland fill — FIELD opens cave or tree-use,
+        # never a meal, never an animal pin.
+        natural = props.get("natural")
+        if natural in ("cave", "cave_entrance", "sinkhole", "tree"):
+            if geom.geom_type != "Point":
+                geom = geom.representative_point()
+            keep = {
+                k: v
+                for k, v in props.items()
+                if k in ("place", "name", "amenity", "emergency", "natural")
+            }
+            if keep:
+                place.add(geom, keep, place_min_zoom(props))
+            continue
         ground = land_class(props)
         if ground and geom.geom_type in ("Polygon", "MultiPolygon"):
             keep = {k: v for k, v in props.items() if k in RECORD_TAGS}
