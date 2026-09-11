@@ -221,6 +221,11 @@ struct FieldTab: View {
     /// ground would be a one-way door into a single card.
     private func open(_ s: StepperState) -> some View {
         VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(loc(s.card.title))
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(Color.white)
+                Spacer(minLength: 8)
                 Button("ALL CARDS") { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }

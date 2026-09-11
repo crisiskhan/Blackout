@@ -489,6 +489,13 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("tickSeconds", field)
         self.assertIn('L10n.t("stop.if"', field)
         self.assertIn('Button("ALL CARDS")', field)
+        open_fn = field.split("private func open(")[1].split("private func sectionLabel")[0]
+        self.assertIn("loc(s.card.title)", open_fn)
+        self.assertIn("HStack(alignment: .firstTextBaseline)", open_fn)
+        self.assertLess(
+            open_fn.find("loc(s.card.title)"),
+            open_fn.find('Button("ALL CARDS")'),
+        )
         self.assertIn("leaveCard()", field)
         self.assertIn("fieldTrail", field)
         self.assertIn("InspectField.nextAction", field)
