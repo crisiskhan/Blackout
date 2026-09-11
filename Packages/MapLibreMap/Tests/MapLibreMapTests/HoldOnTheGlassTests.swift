@@ -87,8 +87,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// picnic woodland. Peak pin still wins on Mount Franklin itself.
     private static let franklinReserve = CLLocationCoordinate2D(latitude: 31.97, longitude: -106.50)
 
-    /// Interior of Lost Dog Nature Preserve. West wildlife range, not a pin.
-    private static let westWildlife = CLLocationCoordinate2D(latitude: 31.896528, longitude: -106.545207)
+    /// Interior of Lost Dog Nature Preserve. The listed centroid sits on a
+    /// wash; this pip is on the wildlife sheet, 441 m from a path.
+    private static let westWildlife = CLLocationCoordinate2D(latitude: 31.913286, longitude: -106.547160)
 
     /// Unnamed `natural=sinkhole` on the place slice. SOLO_QA 31.694905, −106.441133.
     private static let sinkhole = CLLocationCoordinate2D(latitude: 31.694905, longitude: -106.441133)
@@ -106,8 +107,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let eastWoodland = CLLocationCoordinate2D(latitude: 30.423083, longitude: -97.227224)
 
     /// Interior of an unnamed east wetland. Cottonmouth on bosque, not a park.
-    /// Water sits just outside the 44pt box at walking zoom.
-    private static let eastBosque = CLLocationCoordinate2D(latitude: 30.194954, longitude: -97.688346)
+    /// The listed centroid sits on meadow fill after the notable cut; this
+    /// pip is unnamed wetland, 106 m from a drain.
+    private static let eastBosque = CLLocationCoordinate2D(latitude: 30.394256, longitude: -97.563561)
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)

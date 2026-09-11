@@ -1644,8 +1644,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-97.603942", glass)
         self.assertIn("30.423083", glass)
         self.assertIn("-97.227224", glass)
-        self.assertIn("30.194954", glass)
-        self.assertIn("-97.688346", glass)
+        self.assertIn("30.394256", glass)
+        self.assertIn("-97.563561", glass)
         self.assertIn("30.065769", glass)
         self.assertIn("-97.882228", glass)
         self.assertIn('packId: "tx-east"', glass)
@@ -1677,8 +1677,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("31.97", glass)
         self.assertIn("-106.50", glass)
         self.assertIn("Lost Dog Nature Preserve", glass)
-        self.assertIn("31.896528", glass)
-        self.assertIn("-106.545207", glass)
+        self.assertIn("31.913286", glass)
+        self.assertIn("-106.547160", glass)
         self.assertIn("Anthony Gap Cave", glass)
         self.assertIn("31.998167", glass)
         self.assertIn("-106.51017", glass)
@@ -1943,7 +1943,7 @@ class GroundFieldSync(unittest.TestCase):
                         woods = True
             if props.get("natural") == "wetland" and not props.get("name"):
                 for ring in rings_of(geom):
-                    if pip(-97.688346, 30.194954, ring):
+                    if pip(-97.563561, 30.394256, ring):
                         east_bosque = True
             if props.get("natural") == "scrub" and not props.get("name"):
                 for ring in rings_of(geom):
@@ -2383,6 +2383,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jemez National Recreation Area", qa)
         self.assertIn("Franklin Mountains State Park", qa)
         self.assertIn("Lost Dog Nature Preserve", qa)
+        self.assertIn("31.913286", qa)
+        self.assertIn("30.394256", qa)
         self.assertIn("Anthony Gap Cave", qa)
         self.assertIn("Treaty Oak", qa)
         self.assertIn("Lost Oasis Cave Preserve", qa)

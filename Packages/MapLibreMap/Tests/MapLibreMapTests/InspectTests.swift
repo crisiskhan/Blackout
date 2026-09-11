@@ -970,7 +970,17 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(forest.klass, "Protected land")
         XCTAssertNotEqual(forest.klass, "Open reserve")
-        XCTAssertEqual(forest.fieldRoute.first, Inspect.treeUseNMCard)
+        XCTAssertEqual(forest.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertTrue(forest.fieldRoute.contains(Inspect.treeUseNMCard))
+        let nmTimber: Set<String> = [
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.mammalNMCard,
+            Inspect.gameNMCard, Inspect.plantUseCard, Inspect.biteCard,
+            Inspect.shelterCard, Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(forest.fieldRoute, in: nmTimber).first,
+            Inspect.treeUseNMCard
+        )
 
         let lincoln = Inspect.read(
             tags: [
