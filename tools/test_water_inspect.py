@@ -2286,9 +2286,17 @@ class GroundFieldSync(unittest.TestCase):
         ).lower()
         self.assertIn("diamondback", snake)
         self.assertIn("prairie", snake)
+        self.assertIn("brush, desert, or open reserve", snake)
+        self.assertNotIn(
+            "rock or arroyo",
+            snake,
+            "Jones / Paseo / La Tierra open nm-snake as open reserve, not rock shade",
+        )
         snake_do = next(c for c in book["cards"] if c["id"] == "nm-snake")["steps"][0]["do"]["en"].lower()
         self.assertIn("prairie rattler", snake_do)
         self.assertIn("diamondback", snake_do)
+        field_py = (ROOT / "tools/v3/field.py").read_text()
+        self.assertIn("New Mexico brush, desert, or open reserve", field_py)
         mammal_card = next(c for c in book["cards"] if c["id"] == "nm-mammal")
         mammal = json.dumps(mammal_card).lower()
         self.assertIn("mule deer", mammal)
@@ -2310,6 +2318,7 @@ class GroundFieldSync(unittest.TestCase):
         qa = (ROOT / "docs/SOLO_QA.md").read_text()
         self.assertIn("Prairie rattler", qa)
         self.assertIn("diamondback", qa)
+        self.assertIn("not rock or arroyo", qa)
         self.assertIn("NM mammal SPEAK names the bite card", qa)
         self.assertIn("elk as high country", qa.lower())
         self.assertIn("Hold DO on wildlife range names elk as high country", qa)
@@ -2509,6 +2518,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("tx-mammal", qa)
         self.assertIn("brush, bosque, or wetland", qa)
         self.assertIn("brush, desert, or open reserve", qa)
+        self.assertIn("not rock or arroyo", qa)
 
 
 if __name__ == "__main__":
