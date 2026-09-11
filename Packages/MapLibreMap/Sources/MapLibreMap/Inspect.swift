@@ -225,6 +225,10 @@ public enum Inspect {
     public static let treeUseNMCard = "nm-tree-use"
     public static let mammalTXCard = "tx-mammal"
     public static let mammalNMCard = "nm-mammal"
+    public static let cactusTXCard = "tx-cactus"
+    public static let cactusNMCard = "nm-cactus"
+    public static let gameTXCard = "tx-game"
+    public static let gameNMCard = "nm-game"
 
     /// One row of the reading table: how a feature is recognised, and what the
     /// card says once it has been.
@@ -688,7 +692,9 @@ public enum Inspect {
             local: [
                 plantTXCard, plantNMCard,
                 treeUseTXCard, treeUseNMCard,
+                cactusTXCard, cactusNMCard,
                 mammalTXCard, mammalNMCard,
+                gameTXCard, gameNMCard,
             ],
             extra: [plantUseCard, biteCard, shelterCard, fungiCard, gameCard],
             unnamedPenalty: unnamedPenalty,
@@ -714,8 +720,10 @@ public enum Inspect {
             local: [
                 snakeTXCard, snakeNMCard,
                 mammalTXCard, mammalNMCard,
+                cactusTXCard, cactusNMCard,
                 treeUseTXCard, treeUseNMCard,
                 plantTXCard, plantNMCard,
+                gameTXCard, gameNMCard,
             ],
             extra: [biteCard, plantUseCard, gameCard],
             unnamedPenalty: unnamedPenalty

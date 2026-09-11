@@ -427,6 +427,117 @@
           }
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-cactus",
+      "category": "plants",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico cactus and yucca — spines, not a meal",
+        "es": "Cactus y yuca de Nuevo México — espinas, no comida"
+      },
+      "situation": {
+        "en": "Cholla, yucca, sotol. Joints hitchhike on skin. Do not chew the flower.",
+        "es": "Cholla, yuca, sotol. Los segmentos se pegan a la piel. No comas la flor."
+      },
+      "stop_if": [
+        {
+          "en": "Spines are off skin and nobody put a pad in a mouth.",
+          "es": "Las espinas están fuera de la piel y nadie se metió un nopal a la boca."
+        },
+        {
+          "en": "Sap is in both eyes or they chewed it — this is care now.",
+          "es": "Hay savia en los dos ojos o lo masticaron: esto es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "A joint in the skin is comb, not squeeze. Sap in the eye is care.",
+        "es": "Un segmento en la piel se peina, no se aprieta. Savia en el ojo es cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Give it room. Comb cholla and glochids out with a comb or tape, not fingers. Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water.",
+            "es": "Da espacio. Peina cholla y globidios con peine o cinta, no con los dedos. No mastiques nopales, fruto ni flor. Lava savia con agua."
+          },
+          "why": {
+            "en": "Spines are the honest use of this plant today: stay clear. A pad is not a Field meal.",
+            "es": "Hoy las espinas son el uso honesto: apártate. Un nopal no es una comida de Field."
+          },
+          "child": {
+            "en": "A child does not carry a joint or a pretty flower.",
+            "es": "El niño no lleva un segmento ni una flor bonita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or an eye swells — sit, water on the eye, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o hincha un ojo: sienta, agua en el ojo, ofrece Emergency SOS si hay red."
+          },
+          "image": "nm-cactus.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-game",
+      "category": "food",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "Elk or mule deer you already have",
+        "es": "Wapití o venado bura que ya tienes"
+      },
+      "situation": {
+        "en": "You have elk or mule deer you already took, or someone handed you the meat. This is not a hunting map.",
+        "es": "Tienes wapití o venado bura que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza."
+      },
+      "stop_if": [
+        {
+          "en": "The meat is commercially sealed and undamaged.",
+          "es": "La carne es comercial, sellada e intacta."
+        },
+        {
+          "en": "You did not see it die, it smells like death, or flies have had it — leave it.",
+          "es": "No lo viste morir, huele a muerte o ya lo tuvieron las moscas: déjalo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
+        "es": "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+            "es": "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo."
+          },
+          "why": {
+            "en": "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
+            "es": "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas."
+          },
+          "child": {
+            "en": "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
+            "es": "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
+            "es": "Si prende la grasa: tapa, no agua. Para si huele a muerte."
+          },
+          "image": "nm-game.png",
+          "party": {
+            "1": "Cook through or leave it.",
+            "2": "One guts away from camp, one watches the pot.",
+            "4": "Gut / cook / water / keep animals and kids off the pile."
+          }
+        }
+      ]
     }
   ]
 }

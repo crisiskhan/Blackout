@@ -1087,6 +1087,114 @@ def thickness_state() -> list[dict]:
                 states=states,
             )
         )
+    cactus = [
+        (
+            "tx-cactus",
+            ["TX"],
+            "Texas cactus and yucca — spines, not a meal",
+            "Cactus y yuca de Texas — espinas, no comida",
+            "Prickly pear and yucca country. Glochids and sharp tips. Vision does not unlock pads.",
+            "País de nopal y yuca. Globidios y puntas. Vision no desbloquea nopales.",
+            "Glochids and sap in the eye are care. This card does not unlock a meal.",
+            "Globidios y savia en el ojo son cuidado. Esta tarjeta no desbloquea una comida.",
+        ),
+        (
+            "nm-cactus",
+            ["NM"],
+            "New Mexico cactus and yucca — spines, not a meal",
+            "Cactus y yuca de Nuevo México — espinas, no comida",
+            "Cholla, yucca, sotol. Joints hitchhike on skin. Do not chew the flower.",
+            "Cholla, yuca, sotol. Los segmentos se pegan a la piel. No comas la flor.",
+            "A joint in the skin is comb, not squeeze. Sap in the eye is care.",
+            "Un segmento en la piel se peina, no se aprieta. Savia en el ojo es cuidado.",
+        ),
+    ]
+    for cid, states, title, title_es, sit, sit_es, care, care_es in cactus:
+        out.append(
+            card(
+                cid,
+                "plants",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("Spines are off skin and nobody put a pad in a mouth.", "Las espinas están fuera de la piel y nadie se metió un nopal a la boca."),
+                    ("Sap is in both eyes or they chewed it — this is care now.", "Hay savia en los dos ojos o lo masticaron: esto es cuidado ahora."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "Give it room. Comb cholla and glochids out with a comb or tape, not fingers. Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water.",
+                        "Spines are the honest use of this plant today: stay clear. A pad is not a Field meal.",
+                        "A child does not carry a joint or a pretty flower.",
+                        "Stop if anyone's mouth tingles or an eye swells — sit, water on the eye, offer Emergency SOS if a net exists.",
+                        f"{cid}.png",
+                        "Da espacio. Peina cholla y globidios con peine o cinta, no con los dedos. No mastiques nopales, fruto ni flor. Lava savia con agua.",
+                        "Hoy las espinas son el uso honesto: apártate. Un nopal no es una comida de Field.",
+                        "El niño no lleva un segmento ni una flor bonita.",
+                        "Para si hormiguea la boca o hincha un ojo: sienta, agua en el ojo, ofrece Emergency SOS si hay red.",
+                    )
+                ],
+                states=states,
+                speak=True,
+            )
+        )
+    game = [
+        (
+            "tx-game",
+            ["TX"],
+            "Javelina or deer you already have",
+            "Pecarí o venado que ya tienes",
+            "You have a javelina or white-tailed deer you already took, or someone handed you the meat. This is not a hunting map.",
+            "Tienes pecarí o venado cola blanca que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
+            "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
+            "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
+        ),
+        (
+            "nm-game",
+            ["NM"],
+            "Elk or mule deer you already have",
+            "Wapití o venado bura que ya tienes",
+            "You have elk or mule deer you already took, or someone handed you the meat. This is not a hunting map.",
+            "Tienes wapití o venado bura que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza.",
+            "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
+            "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza.",
+        ),
+    ]
+    for cid, states, title, title_es, sit, sit_es, care, care_es in game:
+        out.append(
+            card(
+                cid,
+                "food",
+                title,
+                title_es,
+                sit,
+                sit_es,
+                [
+                    ("The meat is commercially sealed and undamaged.", "La carne es comercial, sellada e intacta."),
+                    ("You did not see it die, it smells like death, or flies have had it — leave it.", "No lo viste morir, huele a muerte o ya lo tuvieron las moscas: déjalo."),
+                ],
+                care,
+                care_es,
+                [
+                    step(
+                        "If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after.",
+                        "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
+                        "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
+                        "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
+                        f"{cid}.png",
+                        "Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo.",
+                        "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas.",
+                        "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar.",
+                        "Si prende la grasa: tapa, no agua. Para si huele a muerte.",
+                        party={"1": "Cook through or leave it.", "2": "One guts away from camp, one watches the pot.", "4": "Gut / cook / water / keep animals and kids off the pile."},
+                    )
+                ],
+                states=states,
+            )
+        )
     return out
 
 

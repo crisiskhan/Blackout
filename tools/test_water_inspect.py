@@ -431,6 +431,8 @@ class GroundFieldSync(unittest.TestCase):
         inspect = INSPECT.read_text()
         self.assertIn("plantTXCard, plantNMCard", inspect)
         self.assertIn("snakeTXCard, snakeNMCard", inspect)
+        self.assertIn("cactusTXCard, cactusNMCard", inspect)
+        self.assertIn("gameTXCard, gameNMCard", inspect)
         self.assertIn("treeUseTXCard, treeUseNMCard", inspect)
         self.assertIn("mammalTXCard, mammalNMCard", inspect)
         self.assertIn("extra: [plantUseCard", inspect)
@@ -498,23 +500,43 @@ class GroundFieldSync(unittest.TestCase):
             ids = {card["id"] for card in book["cards"]}
             self.assertIn(f"{state}-tree-use", ids)
             self.assertIn(f"{state}-mammal", ids)
-            blob = json.dumps([c for c in book["cards"] if c["id"] in {f"{state}-tree-use", f"{state}-mammal"}]).lower()
+            self.assertIn(f"{state}-cactus", ids)
+            self.assertIn(f"{state}-game", ids)
+            blob = json.dumps(
+                [c for c in book["cards"] if c["id"].startswith(f"{state}-")]
+            ).lower()
             self.assertNotIn("edible", blob)
             self.assertNotIn("wildlife-icon", blob)
-            kinds = {}
+            kinds: dict[str, list[str]] = {}
             for lab in vision["labels"]:
                 kinds.setdefault(lab["kind"], []).append(lab["name"]["en"].lower())
-            tree_card = next(c for c in book["cards"] if c["id"] == f"{state}-tree-use")
-            tree_blob = json.dumps(tree_card).lower()
-            tree_hits = [n for n in kinds.get("tree", []) if n.split()[0] in tree_blob or n in tree_blob]
-            self.assertGreaterEqual(len(tree_hits), 2, f"{state} tree-use missing vision trees: {kinds.get('tree')}")
-            mammal_card = next(c for c in book["cards"] if c["id"] == f"{state}-mammal")
-            mammal_blob = json.dumps(mammal_card).lower()
-            mammal_hits = [
-                n for n in kinds.get("mammal", [])
-                if n.split()[0] in mammal_blob or n in mammal_blob
-            ]
-            self.assertGreaterEqual(len(mammal_hits), 2, f"{state} mammal missing vision mammals: {kinds.get('mammal')}")
+
+            def hits(card_id: str, names: list[str]) -> list[str]:
+                card = next(c for c in book["cards"] if c["id"] == card_id)
+                text = json.dumps(card).lower()
+                return [n for n in names if n.split()[0] in text or n in text]
+
+            self.assertGreaterEqual(
+                len(hits(f"{state}-tree-use", kinds.get("tree", []))),
+                2,
+                f"{state} tree-use missing vision trees: {kinds.get('tree')}",
+            )
+            self.assertGreaterEqual(
+                len(hits(f"{state}-mammal", kinds.get("mammal", []))),
+                2,
+                f"{state} mammal missing vision mammals: {kinds.get('mammal')}",
+            )
+            cactus_names = kinds.get("cactus", []) + kinds.get("cacti_yucca", [])
+            self.assertGreaterEqual(
+                len(hits(f"{state}-cactus", cactus_names)),
+                2,
+                f"{state} cactus missing vision cactus/yucca: {cactus_names}",
+            )
+            self.assertGreaterEqual(
+                len(hits(f"{state}-game", kinds.get("mammal", []))),
+                1,
+                f"{state} game missing vision mammals: {kinds.get('mammal')}",
+            )
 
         app = (ROOT / "Blackout/AppRuntime.swift").read_text()
         hold = app.split("func holdInspect", 1)[1].split("func closeHold", 1)[0]

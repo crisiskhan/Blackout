@@ -213,6 +213,8 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.shelterCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.biteCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertTrue(wood.fieldRoute.contains(Inspect.gameTXCard))
         XCTAssertTrue(wood.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertEqual(wood.fieldRoute.last, Inspect.plantCard)
         XCTAssertEqual(InspectField.label(for: wood.fieldRoute[0]), "FIELD · PLANT")
@@ -233,6 +235,8 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(scrub.fieldRoute.contains(Inspect.plantUseCard))
         XCTAssertTrue(scrub.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertTrue(scrub.fieldRoute.contains(Inspect.treeUseTXCard))
+        XCTAssertTrue(scrub.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertTrue(scrub.fieldRoute.contains(Inspect.gameTXCard))
         XCTAssertEqual(scrub.fieldRoute.last, Inspect.heatCard)
         XCTAssertEqual(InspectField.label(for: scrub.fieldRoute[0]), "FIELD · BITE")
         XCTAssertFalse(scrub.why.lowercased().contains("edible"), scrub.why)
@@ -278,7 +282,10 @@ final class InspectTests: XCTestCase {
 
         let txScrub = Inspect.read(tags: ["natural": "scrub"], state: "TX")
         XCTAssertTrue(txScrub.doLine.contains("Javelina") || txScrub.doLine.contains("Diamondback"), txScrub.doLine)
-        XCTAssertFalse(txScrub.why.lowercased().contains("here"), "range is the book, not a pin: \(txScrub.why)")
+        XCTAssertFalse(txScrub.doLine.lowercased().contains("edible"), txScrub.doLine)
+        XCTAssertFalse(txScrub.doLine.lowercased().contains("lives here"), txScrub.doLine)
+        XCTAssertFalse(txScrub.doLine.lowercased().contains("standing here"), txScrub.doLine)
+        XCTAssertTrue(txScrub.doLine.contains("Yucca") || txScrub.doLine.contains("prickly"), txScrub.doLine)
 
         let nmPeak = Inspect.read(tags: ["natural": "peak", "name": "Wheeler"], state: "NM")
         XCTAssertTrue(nmPeak.doLine.lowercased().contains("bear"), nmPeak.doLine)
@@ -291,16 +298,18 @@ final class InspectTests: XCTestCase {
         // shelter, fungi and game so DONE can walk the rest of the ground.
         let wood = Inspect.read(tags: ["natural": "wood"]).fieldRoute
         let texas: Set<String> = [
-            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.mammalTXCard,
-            Inspect.plantUseCard, Inspect.biteCard, Inspect.shelterCard,
-            Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+            Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+            Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+            Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+            Inspect.gameCard, Inspect.plantCard,
         ]
         XCTAssertEqual(
             InspectField.presentRoute(wood, in: texas),
             [
-                Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.mammalTXCard,
-                Inspect.plantUseCard, Inspect.biteCard, Inspect.shelterCard,
-                Inspect.fungiCard, Inspect.gameCard, Inspect.plantCard,
+                Inspect.plantTXCard, Inspect.treeUseTXCard, Inspect.cactusTXCard,
+                Inspect.mammalTXCard, Inspect.gameTXCard, Inspect.plantUseCard,
+                Inspect.biteCard, Inspect.shelterCard, Inspect.fungiCard,
+                Inspect.gameCard, Inspect.plantCard,
             ]
         )
         XCTAssertEqual(InspectField.nextAction(for: Inspect.plantUseCard), "NEXT · PLANT")
@@ -311,12 +320,13 @@ final class InspectTests: XCTestCase {
 
         let scrub = Inspect.read(tags: ["natural": "scrub"]).fieldRoute
         let nm: Set<String> = [
-            Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.treeUseNMCard,
-            Inspect.plantNMCard, Inspect.biteCard, Inspect.gameCard, Inspect.heatCard,
+            Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.cactusNMCard,
+            Inspect.treeUseNMCard, Inspect.plantNMCard, Inspect.biteCard,
+            Inspect.gameCard, Inspect.heatCard,
         ]
         XCTAssertEqual(
             InspectField.presentRoute(scrub, in: nm).prefix(3).map { $0 },
-            [Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.treeUseNMCard]
+            [Inspect.snakeNMCard, Inspect.mammalNMCard, Inspect.cactusNMCard]
         )
         XCTAssertEqual(InspectField.nextAction(for: Inspect.biteCard), "NEXT · BITE")
         XCTAssertEqual(InspectField.nextAction(for: Inspect.heatCard), "NEXT · HEAT")

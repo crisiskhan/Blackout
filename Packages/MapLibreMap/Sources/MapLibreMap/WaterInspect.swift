@@ -465,7 +465,7 @@ public enum InspectField {
         case water:
             return .water
         case Inspect.plantCard, Inspect.plantTXCard, Inspect.plantNMCard, Inspect.plantUseCard,
-             Inspect.treeUseTXCard, Inspect.treeUseNMCard:
+             Inspect.treeUseTXCard, Inspect.treeUseNMCard, Inspect.cactusTXCard, Inspect.cactusNMCard:
             return .plant
         case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.biteCard:
             return .bite
@@ -483,7 +483,7 @@ public enum InspectField {
             return .cold
         case Inspect.fungiCard:
             return .fungi
-        case Inspect.gameCard, "food-cook":
+        case Inspect.gameCard, Inspect.gameTXCard, Inspect.gameNMCard, "food-cook":
             return .food
         default:
             return .field
@@ -747,9 +747,9 @@ extension Inspect {
     private static func animalRangeLine(_ state: String?) -> String {
         switch packState(state) {
         case "TX":
-            return "Diamondback and javelina country. Give space. Field has snake, charge, and bite."
+            return "Diamondback and javelina country. Yucca and prickly pear. Spines, not a meal."
         case "NM":
-            return "Prairie rattler country. Elk and mule deer at the edges. Field has bite."
+            return "Prairie rattler country. Cholla and yucca. Spines, not a meal."
         default:
             return "Open country. Vipers use this cover. Field has the bite card."
         }
