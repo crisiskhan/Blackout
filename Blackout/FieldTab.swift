@@ -11,6 +11,7 @@ struct FieldTab: View {
     @State private var cards: [FieldCard] = []
     @State private var stepper: StepperState?
     @State private var fieldTrail: [String] = []
+    @State private var fieldTrailTotal: Int = 0
     @State private var guess: VisionGuess?
     @State private var showVision = false
 
@@ -49,6 +50,7 @@ struct FieldTab: View {
                                         }
                                         Button(loc(c.title)) {
                                             fieldTrail = []
+                                            fieldTrailTotal = 0
                                             stepper = StepperState(card: c, index: 0, speaking: false, sentToParty: false)
                                         }
                                         .font(.system(size: 15, weight: .semibold))
@@ -90,6 +92,12 @@ struct FieldTab: View {
 
     private var fieldStatus: String {
         if let s = stepper {
+            // A hold named a trail of plant / bite / use cards. STEP 1 OF 1
+            // on every one of them hides that you are walking the biome book.
+            if fieldTrailTotal > 1 {
+                let at = fieldTrailTotal - fieldTrail.count
+                return "CARD \(at) OF \(fieldTrailTotal)"
+            }
             return "STEP \(s.index + 1) OF \(s.card.steps.count)"
         }
         guard let g = guess else { return "" }
@@ -364,11 +372,13 @@ struct FieldTab: View {
               let card = cards.first(where: { $0.id == first })
         else { return }
         fieldTrail = Array(present.dropFirst())
+        fieldTrailTotal = present.count
         stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 
     private func leaveCard() {
         fieldTrail = []
+        fieldTrailTotal = 0
         stepper = nil
     }
 
@@ -380,6 +390,7 @@ struct FieldTab: View {
                 return
             }
         }
+        fieldTrailTotal = 0
         stepper = nil
     }
 

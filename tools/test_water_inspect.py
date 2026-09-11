@@ -487,6 +487,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("No animal icon", qa)
         self.assertIn("Never edible", qa)
         self.assertIn("NEXT · ANIMAL", qa)
+        self.assertIn("CARD 1 OF", qa)
 
     def test_the_state_book_names_the_vision_species_as_range(self):
         """Hold and Field must speak the same animals and trees the Vision book has.
@@ -571,6 +572,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("leaveCard()", tab)
         self.assertIn("advanceTrail()", tab)
         self.assertNotIn('Button(s.isLast ? "DONE" : "NEXT")', tab)
+        self.assertIn("fieldTrailTotal", tab)
+        self.assertIn("CARD \\(at) OF", tab)
         field = SWIFT.read_text()
         self.assertIn("func fieldRoute(forVision", field)
         self.assertIn("g.labelId", tab)
