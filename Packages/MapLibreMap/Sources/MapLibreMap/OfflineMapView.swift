@@ -240,8 +240,14 @@ public struct OfflineMapView: UIViewRepresentable {
         /// docs say `visibleFeatures` only returns what the style drew large
         /// enough to hit. So the same 44pt box is then asked of the pack's
         /// vector source, and any spring, well, tank or tap whose coordinate
-        /// falls inside it is added to the ranking. The puck, the route and
-        /// the pin are still skipped: they are the app talking to itself.
+        /// falls inside it is added to the ranking. Overlay sheets are the
+        /// same problem as a faint fill: one percent opacity and walking-zoom
+        /// minzoom are for the eye, not the record. The hold asks the
+        /// geojson source whether the press sits in a glasshouse, cave
+        /// preserve, wildlife range, botanic garden, or open reserve, so
+        /// FIELD still names the book when the silver outline has not
+        /// painted. The puck, the route and the pin are still skipped: they
+        /// are the app talking to itself.
         func record(under point: CGPoint, on view: MLNMapView) -> [String: String] {
             guard let style = view.style else { return [:] }
             let readable = Set(
@@ -260,7 +266,80 @@ public struct OfflineMapView: UIViewRepresentable {
                 ? []
                 : view.visibleFeatures(in: box, styleLayerIdentifiers: readable)
             let points = packPoints(in: box, on: view, style: style)
-            return Inspect.pick((painted + points).map(Self.tags(from:)))
+            let pressed = view.convert(
+                CGPoint(x: box.midX, y: box.midY),
+                toCoordinateFrom: view
+            )
+            let worked = packWorkedGround(at: pressed, style: style)
+            return Inspect.pick((painted + points + worked).map(Self.tags(from:)))
+        }
+
+        /// Overlay sheets `visibleFeatures` will miss when the fill is too
+        /// faint or the camera is below walking zoom. Restricted to the
+        /// pack's ground geojson so a hold cannot read a pin.
+        private func packWorkedGround(
+            at coordinate: CLLocationCoordinate2D,
+            style: MLNStyle
+        ) -> [MLNFeature] {
+            guard CLLocationCoordinate2DIsValid(coordinate) else { return [] }
+            guard let source = style.source(withIdentifier: PackStyle.groundWorkedSourceID)
+                    as? MLNShapeSource
+            else { return [] }
+            return source.features(matching: nil).filter { Self.covers($0, coordinate) }
+        }
+
+        /// Whether the press sits in an overlay polygon. Holes are not the
+        /// record. A point or a line is not a sheet.
+        private static func covers(_ feature: MLNFeature, _ coordinate: CLLocationCoordinate2D) -> Bool {
+            if let polygon = feature as? MLNPolygon {
+                return covers(polygon, coordinate)
+            }
+            if let multi = feature as? MLNMultiPolygon {
+                return multi.polygons.contains { covers($0, coordinate) }
+            }
+            return false
+        }
+
+        private static func covers(_ polygon: MLNPolygon, _ coordinate: CLLocationCoordinate2D) -> Bool {
+            guard ringContains(polygon, coordinate) else { return false }
+            if let holes = polygon.interiorPolygons {
+                for hole in holes where ringContains(hole, coordinate) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        private static func ringContains(
+            _ polygon: MLNPolygon,
+            _ coordinate: CLLocationCoordinate2D
+        ) -> Bool {
+            let count = Int(polygon.pointCount)
+            guard count >= 3 else { return false }
+            var ring = Array(
+                repeating: kCLLocationCoordinate2DInvalid,
+                count: count
+            )
+            polygon.getCoordinates(&ring, range: NSRange(location: 0, length: count))
+            var inside = false
+            var j = count - 1
+            for i in 0..<count {
+                let pi = ring[i]
+                let pj = ring[j]
+                let straddles = (pi.latitude > coordinate.latitude)
+                    != (pj.latitude > coordinate.latitude)
+                if straddles {
+                    let at = (pj.longitude - pi.longitude)
+                        * (coordinate.latitude - pi.latitude)
+                        / (pj.latitude - pi.latitude)
+                        + pi.longitude
+                    if coordinate.longitude < at {
+                        inside.toggle()
+                    }
+                }
+                j = i
+            }
+            return inside
         }
 
         /// Points the style drew too small for `visibleFeatures` to admit.

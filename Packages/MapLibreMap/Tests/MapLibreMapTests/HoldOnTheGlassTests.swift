@@ -19,7 +19,7 @@ import XCTest
 /// straight out of the extract, and call the app's own probe — the same
 /// `record(under:on:)` the long-press handler calls. The coordinates are in the
 /// test because they are evidence: each one is a real record in
-/// `Resources/Packs/tx-west/osm.geojson`.
+/// `Resources/Packs/tx-west/osm.geojson` or `layers/ground.geojson`.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
@@ -39,6 +39,20 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// `Sierra de Ciudad Juárez` — ground the record does put a name to.
     private static let namedGround = CLLocationCoordinate2D(latitude: 31.71809, longitude: -106.61330)
+
+    /// Interior of `Three Crosses Cactus Garden` in `layers/ground.geojson`.
+    /// SOLO_QA 32.332056, −106.782048 is on the sheet; this point is inside it.
+    private static let cactusGarden = CLLocationCoordinate2D(latitude: 32.332036, longitude: -106.782070)
+
+    /// Unnamed `landuse=greenhouse_horticulture` sheet. SOLO_QA point,
+    /// verified inside the overlay polygon.
+    private static let glasshouse = CLLocationCoordinate2D(latitude: 32.502967, longitude: -106.933833)
+
+    /// Interior of Alamo Mountain ACEC in `layers/ground.geojson`.
+    private static let openReserve = CLLocationCoordinate2D(latitude: 32.032331, longitude: -105.633755)
+
+    /// Unnamed `natural=sinkhole` on the place slice. SOLO_QA 31.694905, −106.441133.
+    private static let sinkhole = CLLocationCoordinate2D(latitude: 31.694905, longitude: -106.441133)
 
     // MARK: - The two holds the build is gated on
 
@@ -88,6 +102,86 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
     }
 
+    /// Overlay fill is one percent and walking-zoom. The hold still has to
+    /// name the record and open the Field book of that sheet — cactus, not
+    /// oleander; bite, not picnic woodland; cave, not bosque.
+    func testHoldingACactusGardenOpensTheCactusCardNotOleander() throws {
+        let held = try hold(at: Self.cactusGarden, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Cactus garden", "\(held)")
+        XCTAssertEqual(held.card?.title, "Three Crosses Cactus Garden", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.cactusTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.plantTXCard) ?? true,
+            "a cactus garden opened oleander: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("prickly pear"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("glochids"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("oleander"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
+    func testHoldingAGlasshouseOpensPlantDangerNotTreeUse() throws {
+        let held = try hold(at: Self.glasshouse, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Glasshouse", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.plantTXCard, "\(held)")
+        XCTAssertFalse(
+            held.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "a glasshouse opened woodland tree-use: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("oleander"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("brush off"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · PLANT"
+        )
+    }
+
+    func testHoldingAnOpenReserveOpensBiteNotPicnicWoodland() throws {
+        let held = try hold(at: Self.openReserve, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Open reserve", "\(held)")
+        XCTAssertEqual(held.card?.title, "Alamo Mountain Area of Critical Environmental Concern", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.snakeTXCard, "\(held)")
+        XCTAssertNotEqual(
+            held.card?.fieldRoute.first,
+            Inspect.treeUseTXCard,
+            "an ACEC opened picnic woodland: \(held)"
+        )
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("diamondback"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("give it room"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("no ice"), held.card?.doLine ?? "")
+        XCTAssertTrue(doLine.contains("bite card"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("live oak"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · BITE"
+        )
+    }
+
+    func testHoldingASinkholeOpensTheCaveCard() throws {
+        let held = try hold(at: Self.sinkhole, zoom: 16)
+        XCTAssertEqual(held.card?.klass, "Cave or hole", "\(held)")
+        XCTAssertEqual(held.card?.fieldRoute.first, Inspect.caveCard, "\(held)")
+        let doLine = held.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(doLine.contains("stay in daylight"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("cottonmouth"), held.card?.doLine ?? "")
+        XCTAssertFalse(doLine.contains("edible"), held.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.label(for: held.card?.fieldRoute.first ?? ""),
+            "FIELD · CAVE"
+        )
+    }
+
     /// Whatever came back, it has to carry the four lines the card shows and a
     /// Field card to open. A reading with an empty `why` renders as `SURE 68% —`
     /// and looks broken.
@@ -98,6 +192,10 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("silent tank", Self.silentTank, 16.0),
             ("empty desert", Self.emptyDesert, 15.0),
             ("named ground", Self.namedGround, 15.0),
+            ("cactus garden", Self.cactusGarden, 16.0),
+            ("glasshouse", Self.glasshouse, 16.0),
+            ("open reserve", Self.openReserve, 16.0),
+            ("sinkhole", Self.sinkhole, 16.0),
         ] {
             let held = try hold(at: coordinate, zoom: zoom)
             guard let card = held.card else {
@@ -155,7 +253,15 @@ final class HoldOnTheGlassTests: XCTestCase {
             fallback: [:]
         )
         guard !tags.isEmpty else { return Held(tags: [:], card: nil) }
-        return Held(tags: tags, card: Inspect.read(tags: tags, packDate: try Self.packDate()))
+        return Held(
+            tags: tags,
+            card: Inspect.read(
+                tags: tags,
+                packDate: try Self.packDate(),
+                state: "TX",
+                pack: "tx-west"
+            )
+        )
     }
 
     private struct Held: CustomStringConvertible {

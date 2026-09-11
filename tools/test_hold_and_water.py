@@ -481,6 +481,15 @@ def assert_a_hold_asks_the_pack_not_just_the_paint() -> None:
         fail("the pack source id drifted off the source the style actually uses")
     if "packPointClasses" not in inspect:
         fail("the hold no longer names the point classes the tiler emits")
+    if "PackStyle.groundWorkedSourceID" not in view:
+        fail(
+            "a hold never asks the overlay source, so a cave preserve the "
+            "fill is too faint to hit cannot be held"
+        )
+    if "features(matching:" not in view:
+        fail("a hold never asks the geojson overlay source for the sheet under the thumb")
+    if "packWorkedGround" not in view:
+        fail("the overlay source query drifted off the name the glass tests call")
     print("OK   a hold asks the pack for the points the paint is too small to admit")
 
 

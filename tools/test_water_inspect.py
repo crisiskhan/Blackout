@@ -1187,6 +1187,91 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("edible", swift.lower())
         self.assertIn("resolverVersion = 6", swift)
 
+    def test_a_hold_asks_the_overlay_source_and_the_glass_holds_real_sheets(self):
+        """Faint fill and walking-zoom are for the eye. The hold still has to
+        name the sheet. Glass tests press interiors taken from the extract.
+        """
+        offline = OFFLINE_SWIFT.read_text()
+        self.assertIn("packWorkedGround", offline)
+        self.assertIn("features(matching:", offline)
+        self.assertIn("PackStyle.groundWorkedSourceID", offline)
+        glass = (
+            ROOT / "Packages/MapLibreMap/Tests/MapLibreMapTests/HoldOnTheGlassTests.swift"
+        ).read_text()
+        self.assertIn("Three Crosses Cactus Garden", glass)
+        self.assertIn("Alamo Mountain Area of Critical Environmental Concern", glass)
+        self.assertIn("32.332036", glass)
+        self.assertIn("-106.782070", glass)
+        self.assertIn("32.502967", glass)
+        self.assertIn("-106.933833", glass)
+        self.assertIn("32.032331", glass)
+        self.assertIn("-105.633755", glass)
+        self.assertIn("31.694905", glass)
+        self.assertIn("-106.441133", glass)
+        self.assertIn("Cactus garden", glass)
+        self.assertIn("Open reserve", glass)
+        self.assertIn("Glasshouse", glass)
+        self.assertIn("Cave or hole", glass)
+        self.assertIn('contains("edible")', glass)
+        self.assertNotIn("safe to eat", glass.lower())
+        self.assertNotIn("edible unlock", glass.lower())
+
+        def pip(lon: float, lat: float, ring: list) -> bool:
+            inside = False
+            n = len(ring)
+            j = n - 1
+            for i in range(n):
+                xi, yi = ring[i][0], ring[i][1]
+                xj, yj = ring[j][0], ring[j][1]
+                if ((yi > lat) != (yj > lat)) and (
+                    lon < (xj - xi) * (lat - yi) / (yj - yi) + xi
+                ):
+                    inside = not inside
+                j = i
+            return inside
+
+        def rings_of(geom: dict) -> list:
+            kind = geom.get("type")
+            coords = geom.get("coordinates") or []
+            if kind == "Polygon":
+                return [coords[0]] if coords else []
+            if kind == "MultiPolygon":
+                return [poly[0] for poly in coords]
+            return []
+
+        west = json.loads((PACK_ROOT / "tx-west" / "layers" / "ground.geojson").read_text())
+        cactus_hit = False
+        glass_hit = False
+        reserve_hit = False
+        for feat in west["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "botanic" and pip(-106.782070, 32.332036, ring):
+                    cactus_hit = props.get("name") == "Three Crosses Cactus Garden"
+                if kind == "glasshouse" and pip(-106.933833, 32.502967, ring):
+                    glass_hit = True
+                if kind == "reserve" and pip(-105.633755, 32.032331, ring):
+                    reserve_hit = (
+                        props.get("name")
+                        == "Alamo Mountain Area of Critical Environmental Concern"
+                    )
+        self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
+        self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
+        self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
+
+        osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
+        sink = False
+        for feat in osm["features"]:
+            props = feat.get("properties") or {}
+            geom = feat.get("geometry") or {}
+            if props.get("natural") != "sinkhole" or geom.get("type") != "Point":
+                continue
+            lon, lat = geom["coordinates"][:2]
+            if abs(lat - 31.694905) < 1e-6 and abs(lon - (-106.441133)) < 1e-6:
+                sink = True
+        self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
+
     def test_the_next_fetch_asks_for_caves_and_trees(self):
         fetch = (ROOT / "tools/v3/fetch_packs.py").read_text()
         self.assertIn("sinkhole|cave|cave_entrance|tree", fetch)

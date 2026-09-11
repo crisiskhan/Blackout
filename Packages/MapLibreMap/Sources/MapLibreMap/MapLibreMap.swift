@@ -699,8 +699,10 @@ public enum PackStyle {
     /// and nature preserves that otherwise read as picnic woodland, botanic gardens that
     /// otherwise read as picnic parks, and open reserves that otherwise
     /// read as picnic woodland. Quiet fill under the streets
-    /// so a hold can name them; silver outline at walking zoom so the record is
-    /// visible. No class label, not a meal, not an animal pin.
+    /// so a hold can name them — and the hold also asks this geojson source,
+    /// not only the faint fill, the same way a tank is asked of the pack
+    /// source. Silver outline at walking zoom so the record is visible. No
+    /// class label, not a meal, not an animal pin.
     private static func attachWorkedGround(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
