@@ -1023,6 +1023,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("loblolly pine", woodland_hold)
         self.assertIn("the bite card", woodland_hold)
         self.assertIn("deadfall", woodland_hold)
+        self.assertIn("south-side shade", woodland_hold)
         self.assertNotIn("the food card", woodland_hold)
         self.assertNotIn("aspen", woodland_hold)
         self.assertNotIn("edible", woodland_hold)
@@ -1031,6 +1032,7 @@ class GroundFieldSync(unittest.TestCase):
         )[0].lower()
         self.assertIn("cottonmouth", bosque)
         self.assertIn("the bite card", bosque)
+        self.assertIn("south-side shade", bosque)
         self.assertNotIn("the food card", bosque)
         tx_plant_do = next(
             c
