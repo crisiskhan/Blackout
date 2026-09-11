@@ -33,6 +33,11 @@ FROM_NOTHING = (
     "med-infection",
     "camp-watch",
     "env-insect",
+    "camp-five",
+    "env-core-temp",
+    "water-vessel",
+    "shelter-insulate",
+    "nav-sun",
 )
 
 
@@ -93,6 +98,15 @@ class FieldAskGlassTests(unittest.TestCase):
         fire = json.dumps(by_id["fire-spark"]).lower()
         self.assertIn("friction", fire)
         self.assertIn("daylight", fire)
+        five = json.dumps(by_id["camp-five"]).lower()
+        self.assertIn("cutting", five)
+        self.assertIn("container", five)
+        self.assertIn("cordage", five)
+        self.assertNotIn("lundin", five)
+        self.assertNotIn("canterbury", five)
+        trunk = json.dumps(by_id["env-core-temp"]).lower()
+        self.assertIn("cotton", trunk)
+        self.assertIn("trunk", trunk)
         field_py = read("tools", "v3", "field.py")
         self.assertIn("def from_nothing_core", field_py)
         self.assertIn("from_nothing_core()", field_py)

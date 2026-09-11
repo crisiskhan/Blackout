@@ -2454,6 +2454,303 @@
           }
         }
       ]
+    },
+    {
+      "schema": "1.4",
+      "id": "camp-five",
+      "category": "tactics",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Five tools you actually have",
+        "es": "Cinco herramientas que sí tienes"
+      },
+      "situation": {
+        "en": "Inventory before a walk. Cutting, combustion, cover, container, cordage — what is in the hand, not a catalog.",
+        "es": "Inventario antes de caminar. Corte, combustión, techo, recipiente, cuerda: lo que hay en la mano, no un catálogo."
+      },
+      "stop_if": [
+        {
+          "en": "You already know the five and they are on you.",
+          "es": "Ya conoces las cinco y van encima."
+        },
+        {
+          "en": "Someone is already dying — the medical card that names it, not an inventory.",
+          "es": "Alguien ya se muere: la tarjeta médica, no un inventario."
+        }
+      ],
+      "get_to_care": {
+        "en": "Missing a vessel or a spark is a plan change, not a feeling. Care is still the medical cards.",
+        "es": "Faltar un recipiente o una chispa cambia el plan, no es un sentimiento. El cuidado sigue siendo las tarjetas médicas."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Name what you have: a blade, a spark, a roof, a pot or bottle, and string. If a pot is missing, catch and boil wait on a vessel — do not drink the scoop. If spark is missing, roof and water still come first; friction is last daylight. Cordage is the tarp and the splint. Cover is site then lean-to. Do not trade the last blade for a maybe.",
+            "es": "Nombra lo que tienes: filo, chispa, techo, olla o botella, y cuerda. Si falta olla, atrapar y hervir esperan al recipiente: no bebas el scoop. Si falta chispa, techo y agua primero; fricción es la última luz. La cuerda es la lona y la férula. El techo es sitio y luego el refugio. No cambies el último filo por un quizás."
+          },
+          "why": {
+            "en": "The walk is the five you can touch. Imaginary kit is how people walk into a bad night.",
+            "es": "La caminata son las cinco que puedes tocar. El kit imaginario es cómo se entra a una mala noche."
+          },
+          "child": {
+            "en": "Child can hold the bottle and the whistle. They do not hold the blade.",
+            "es": "El niño sostiene la botella y el silbato. No el filo."
+          },
+          "stop": {
+            "en": "Stop the walk if you have no water vessel and no known source in daylight — shade and catch, do not hope.",
+            "es": "Para la caminata si no hay recipiente ni fuente conocida de día: sombra y captura, no esperanza."
+          },
+          "image": "form-up.png",
+          "party": {
+            "1": "Name the five. Fix the hole.",
+            "2": "Split: vessel / spark.",
+            "4": "Cut / spark / cover / vessel / cord."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "env-core-temp",
+      "category": "environment",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Keep the trunk working",
+        "es": "Mantén el tronco funcionando"
+      },
+      "situation": {
+        "en": "A few degrees off in either direction is the emergency. Wet cotton, wind, or a white midday. Not a weather app.",
+        "es": "Unos grados de más o de menos son la emergencia. Algodón mojado, viento o un mediodía blanco. No es una app del clima."
+      },
+      "stop_if": [
+        {
+          "en": "They are dry, shaded or wind-broke, talking sense, and making urine.",
+          "es": "Están secos, a la sombra o abrigados, hablan con sentido y orinan."
+        },
+        {
+          "en": "Stopped shivering in obvious cold, or stopped sweating and gone confused in heat — those are the cold and heat-collapse cards now.",
+          "es": "Dejaron de temblar con frío obvio, o de sudar y se confundieron con calor: esas tarjetas ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "Rewarm or cool the trunk first. Get to care for confusion that does not clear. Shelter is not treatment.",
+        "es": "Recalienta o enfría el tronco primero. Busca cuidado si la confusión no pasa. El refugio no es tratamiento."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Protect the trunk, neck, and head before the hands. Wet cotton next to skin is a dump — change it. Wind off. Heat: shade, sip, stop the hero mile. Cold: still, dry layer, warm body in the bag, sweet drink only if they sit and swallow. Do not put them in a creek to 'wake up' or march them to 'warm up'.",
+            "es": "Protege tronco, cuello y cabeza antes que las manos. El algodón mojado pegado a la piel tira calor: cámbialo. Viento afuera. Calor: sombra, sorbo, no la milla de héroe. Frío: quieto, capa seca, cuerpo caliente en la bolsa, bebida dulce solo si se sientan y tragan. No los metas a un arroyo para 'despertar' ni los marches para 'calentar'."
+          },
+          "why": {
+            "en": "The engine is the middle. Hands and pride lie about how far it has already slid.",
+            "es": "El motor es el medio. Las manos y el orgullo mienten sobre cuánto ya resbaló."
+          },
+          "child": {
+            "en": "Child gets the dry layer and the shade first. No toughness races.",
+            "es": "El niño recibe la capa seca y la sombra primero. Sin carreras de aguante."
+          },
+          "stop": {
+            "en": "Stop oral fluids if they cannot sit. Stop the walk if speech slurs or sweat stops.",
+            "es": "Nada por boca si no se sientan. Para la caminata si hablan raro o deja de sudar."
+          },
+          "image": "cold-rewarm.png",
+          "tickSeconds": 600,
+          "party": {
+            "1": "Dry or shade the trunk.",
+            "2": "One shelters, one fetches dry or water.",
+            "4": "Trunk / layers / stove or shade / watch speech."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "water-vessel",
+      "category": "water",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "You need a vessel",
+        "es": "Necesitas un recipiente"
+      },
+      "situation": {
+        "en": "Boil and carry both need a pot or a bottle. Hands and a creek are not a kit.",
+        "es": "Hervir y cargar necesitan olla o botella. Manos y un arroyo no son un kit."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a pot or a sealed bottle.",
+          "es": "Ya tienes olla o botella sellada."
+        },
+        {
+          "en": "The only container is a fuel can or a chemical drum — that is not a vessel.",
+          "es": "El único envase es de combustible o químico: eso no es recipiente."
+        }
+      ],
+      "get_to_care": {
+        "en": "No vessel means no honest boil. Care for gut illness the same. Do not drink the scoop because the pot is missing.",
+        "es": "Sin recipiente no hay hervor honesto. El mal de estómago es el mismo. No bebas el scoop porque falta la olla."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Find a metal can, bottle, or foil that never held fuel. Fill, then the boil card. A rock hollow catches rain; it does not boil. A plastic bottle can catch and carry, not sit in the coals. If you have nothing, shade and a cloth catch until you do. Do not drink urine, seawater, or a cactus as the backup plan.",
+            "es": "Busca lata, botella o papel que nunca tuvo combustible. Llena, luego la tarjeta de hervor. Un hueco de roca atrapa lluvia; no hierve. Una botella de plástico carga, no va a las brasas. Si no hay nada, sombra y tela hasta que haya. No bebas orina, mar ni cactus como plan B."
+          },
+          "why": {
+            "en": "Heat needs a wall. A depression in rock is a catcher. A fuel can is a poison.",
+            "es": "El calor necesita pared. Un hueco en roca es captura. Una lata de combustible es veneno."
+          },
+          "child": {
+            "en": "Child holds the clean bottle, not the mystery can.",
+            "es": "El niño sostiene la botella limpia, no la lata misteriosa."
+          },
+          "stop": {
+            "en": "Stop if the only can smells like gas — that water is not water.",
+            "es": "Para si la única lata huele a gasolina: eso no es agua."
+          },
+          "image": "water-boil.png",
+          "party": {
+            "1": "One clean vessel.",
+            "2": "One boils, one guards the only pot.",
+            "4": "Vessel / boil / carry / no mystery cans."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "shelter-insulate",
+      "category": "shelter",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Debris is the sleeping bag",
+        "es": "Los restos son el saco"
+      },
+      "situation": {
+        "en": "The roof is up or the tarp is tight. The ground is still stealing the night.",
+        "es": "El techo está o la lona tensa. El suelo aún se roba la noche."
+      },
+      "stop_if": [
+        {
+          "en": "You already have a pad, bag, and dry layers on high ground.",
+          "es": "Ya tienes colchoneta, saco y capas secas en alto."
+        },
+        {
+          "en": "Water is running under the floor — move, then insulate.",
+          "es": "Corre agua bajo el piso: muévete, luego aísla."
+        }
+      ],
+      "get_to_care": {
+        "en": "Insulation is dead air, not a pretty lean-to. Hypothermia care if shivering stops and speech slurs.",
+        "es": "El aislamiento es aire muerto, no un refugio bonito. Cuidado por hipotermia si deja de temblar y habla raro."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Pile dry debris under the body thicker than the roof. Sit pad, pack, or a wad of leaves — the floor first. Walls that trap dead air. Wet cotton off the skin. One warm body in the bag beats two people 'toughing' the dirt. Do not lie on bare ground because the tarp looks finished.",
+            "es": "Apila restos secos bajo el cuerpo más gruesos que el techo. Colchoneta, mochila o un montón de hojas: el piso primero. Paredes que atrapan aire. Algodón mojado fuera de la piel. Un cuerpo caliente en la bolsa gana a dos 'aguantando' la tierra. No te acuestes en suelo desnudo porque la lona se ve lista."
+          },
+          "why": {
+            "en": "Ground conducts. Air does not, if you trap it. A roof without a floor is a wind tunnel.",
+            "es": "El suelo conduce. El aire no, si lo atrapas. Un techo sin piso es un túnel de viento."
+          },
+          "child": {
+            "en": "Child in the middle, off the dirt, not at the dripping edge.",
+            "es": "El niño al centro, fuera de la tierra, no en el borde que gotea."
+          },
+          "stop": {
+            "en": "Stop stuffing live green that soaks the bag. Dry deadfall only.",
+            "es": "Nada de verde vivo que empapa. Solo muerto y seco."
+          },
+          "image": "shelter-tarp.png",
+          "party": {
+            "1": "Floor thicker than roof.",
+            "2": "One roofs, one piles the floor.",
+            "4": "Floor / walls / dry layers / watch shivering."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nav-sun",
+      "category": "nav",
+      "states": [
+        "TX",
+        "NM"
+      ],
+      "title": {
+        "en": "Sun and drain as handrails",
+        "es": "Sol y drenaje como barandas"
+      },
+      "situation": {
+        "en": "The trail is gone and the last pip is old. You still have a sun, a slope, and this pack's map if you sit.",
+        "es": "Se acabó el sendero y el último pip es viejo. Aún tienes sol, pendiente y el mapa de este pack si te sientas."
+      },
+      "stop_if": [
+        {
+          "en": "You can see a named road, river, or ridge and the party is together.",
+          "es": "Ves un camino, río o filo con nombre y el grupo está junto."
+        },
+        {
+          "en": "Someone is hurt — treat first. This card is not a stretcher.",
+          "es": "Alguien está herido: trata primero. Esta tarjeta no es una camilla."
+        }
+      ],
+      "get_to_care": {
+        "en": "Walking farther while lost is how parties split. Care is the last known road, not a guess bearing.",
+        "es": "Caminar más estando perdido es cómo se parte el grupo. El cuidado está en el último camino conocido."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "STOP like the locate card. Then: sun east in the morning, west in the evening, south of shadows in this country at midday. Drain downhill can be people — and a wash at night is a grave, so only in daylight you can see. Walk a line you can name. Do not send scouts past voice. Do not follow a feeling.",
+            "es": "PARA como la tarjeta de localizar. Luego: sol al este en la mañana, al oeste en la tarde, al sur de las sombras en este país al mediodía. El drenaje cuesta abajo puede ser gente — y un arroyo de noche es tumba, así que solo de día que veas. Camina una línea que puedas nombrar. Sin exploradores más allá de la voz. Sin un presentimiento."
+          },
+          "why": {
+            "en": "A bearing you did not write is a story. A slope and a sun you can point at are not.",
+            "es": "Un rumbo que no escribiste es un cuento. Una pendiente y un sol que puedes señalar no lo son."
+          },
+          "child": {
+            "en": "Child holds the whistle and sits on the pack. Not a scout.",
+            "es": "El niño sostiene el silbato y se sienta en la mochila. No explora."
+          },
+          "stop": {
+            "en": "Stop if two people have two suns. Sit until you share one line.",
+            "es": "Para si dos personas tienen dos soles. Siéntense hasta compartir una línea."
+          },
+          "image": "nav-stop.png",
+          "tickSeconds": 300,
+          "party": {
+            "1": "Sit, sun, one line.",
+            "2": "One watches the child, one reads slope.",
+            "4": "Sit / sun / slope / no split."
+          }
+        }
+      ]
     }
   ]
 }
