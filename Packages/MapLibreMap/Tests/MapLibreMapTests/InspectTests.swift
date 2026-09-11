@@ -756,15 +756,17 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.label(for: oak[0]), "FIELD · PLANT")
 
         let pear = InspectField.fieldRoute(forVision: "tx-prickly-pear", state: "TX")
-        XCTAssertEqual(pear.first, Inspect.cactusTXCard)
-        XCTAssertTrue(pear.contains(Inspect.plantTXCard))
+        XCTAssertEqual(pear, [Inspect.cactusTXCard])
+        XCTAssertFalse(pear.contains(Inspect.plantTXCard), "a cactus still is not oleander")
+        XCTAssertEqual(InspectField.label(for: pear[0]), "FIELD · PLANT")
 
         let bear = InspectField.fieldRoute(forVision: "nm-black-bear", state: "NM")
         XCTAssertEqual(bear.first, Inspect.mammalNMCard)
         XCTAssertEqual(InspectField.label(for: bear[0]), "FIELD · ANIMAL")
 
         let yucca = InspectField.fieldRoute(forVision: "kind:cacti_yucca", state: "NM")
-        XCTAssertEqual(yucca.first, Inspect.cactusNMCard)
+        XCTAssertEqual(yucca, [Inspect.cactusNMCard])
+        XCTAssertFalse(yucca.contains(Inspect.plantNMCard), "a yucca still is not datura")
 
         XCTAssertEqual(InspectField.label(for: Inspect.treeUseEastCard), "FIELD · PLANT")
         XCTAssertEqual(InspectField.label(for: Inspect.mammalEastCard), "FIELD · ANIMAL")
@@ -1182,7 +1184,9 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(conservatory.klass, "Cactus garden")
         XCTAssertEqual(conservatory.fieldRoute.first, Inspect.cactusTXCard)
-        XCTAssertTrue(conservatory.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertEqual(conservatory.fieldRoute.last, Inspect.plantCard)
+        XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.plantTXCard), "a desert conservatory is not oleander")
+        XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.plantUseCard), "a desert conservatory is not woodland tree-use")
         XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.treeUseTXCard))
         XCTAssertFalse(conservatory.fieldRoute.contains(Inspect.mammalTXCard))
         XCTAssertTrue(conservatory.doLine.lowercased().contains("prickly pear"), conservatory.doLine)
@@ -1208,7 +1212,9 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(cactusGarden.klass, "Cactus garden")
         XCTAssertEqual(cactusGarden.fieldRoute.first, Inspect.cactusTXCard)
-        XCTAssertTrue(cactusGarden.fieldRoute.contains(Inspect.plantTXCard))
+        XCTAssertEqual(cactusGarden.fieldRoute.last, Inspect.plantCard)
+        XCTAssertFalse(cactusGarden.fieldRoute.contains(Inspect.plantTXCard), "a cactus garden is not oleander")
+        XCTAssertFalse(cactusGarden.fieldRoute.contains(Inspect.plantUseCard), "a cactus garden is not woodland tree-use")
         XCTAssertFalse(cactusGarden.fieldRoute.contains(Inspect.treeUseTXCard))
         XCTAssertEqual(InspectField.label(for: cactusGarden.fieldRoute[0]), "FIELD · PLANT")
         XCTAssertTrue(cactusGarden.doLine.lowercased().contains("spines"), cactusGarden.doLine)
@@ -1222,6 +1228,15 @@ final class InspectTests: XCTestCase {
             pack: "nm"
         )
         XCTAssertEqual(nmCactusGarden.klass, "Cactus garden")
+        XCTAssertTrue(nmCactusGarden.fieldRoute.contains(Inspect.cactusNMCard))
+        XCTAssertFalse(nmCactusGarden.fieldRoute.contains(Inspect.plantNMCard), "a cactus garden is not datura")
+        let nmCactusBook: Set<String> = [
+            Inspect.cactusNMCard, Inspect.plantNMCard, Inspect.plantCard, Inspect.plantUseCard,
+        ]
+        XCTAssertEqual(
+            InspectField.presentRoute(nmCactusGarden.fieldRoute, in: nmCactusBook).first,
+            Inspect.cactusNMCard
+        )
         XCTAssertTrue(nmCactusGarden.doLine.lowercased().contains("cholla"), nmCactusGarden.doLine)
         XCTAssertFalse(nmCactusGarden.doLine.lowercased().contains("prickly pear"), nmCactusGarden.doLine)
 
@@ -1238,6 +1253,7 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(desertGarden.klass, "Cactus garden")
         XCTAssertEqual(desertGarden.fieldRoute.first, Inspect.cactusTXCard)
+        XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.plantTXCard), "a desert garden is not oleander")
         XCTAssertTrue(desertGarden.doLine.lowercased().contains("prickly pear"), desertGarden.doLine)
         XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.treeUseTXCard))
 

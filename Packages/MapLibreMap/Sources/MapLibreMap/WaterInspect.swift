@@ -637,8 +637,9 @@ public enum InspectField {
     }
 
     /// The still named a kind. Open that kind's cards — not the whole biome.
-    /// A javelina is the mammal trail, not woodland plant-danger. East Texas
-    /// opens this pack's chapter unless the still named a west-only species.
+    /// A javelina is the mammal trail, not woodland plant-danger. A prickly
+    /// pear is the cactus card, not oleander. East Texas opens this pack's
+    /// chapter unless the still named a west-only species.
     public static func fieldRoute(forVision labelId: String, state: String?, pack: String? = nil) -> [String] {
         guard let ground = visionGround(labelId: labelId) else { return [] }
         let id = labelId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -687,10 +688,7 @@ public enum InspectField {
                 Inspect.plantUseCard,
             ]
         case .cactus:
-            return [
-                nm ? Inspect.cactusNMCard : Inspect.cactusTXCard,
-                nm ? Inspect.plantNMCard : Inspect.plantTXCard,
-            ]
+            return [nm ? Inspect.cactusNMCard : Inspect.cactusTXCard]
         }
     }
 }

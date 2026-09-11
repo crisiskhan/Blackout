@@ -883,8 +883,8 @@ def thickness_core() -> list[dict]:
 def plant_danger_do_en(cid: str) -> str:
     if cid.startswith("nm-"):
         return (
-            "Datura or jumping cholla. Pretty is not food. Do not taste it to 'check'. "
-            "Brush off, then water on skin and eyes. Cholla: comb it out, do not squeeze with bare hands. "
+            "Datura. Pretty is not food. Do not taste it to 'check'. "
+            "Brush off, then water on skin and eyes. "
             "Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap."
         )
     return (
@@ -897,8 +897,8 @@ def plant_danger_do_en(cid: str) -> str:
 def plant_danger_do_es(cid: str) -> str:
     if cid.startswith("nm-"):
         return (
-            "Datura o cholla saltarina. Lo bonito no es comida. No lo pruebes para 'ver'. "
-            "Sacude, luego agua en piel y ojos. Cholla: peine, no aprietes con la mano desnuda. "
+            "Datura. Lo bonito no es comida. No lo pruebes para 'ver'. "
+            "Sacude, luego agua en piel y ojos. "
             "No hagas té ni emplasto."
         )
     return (
@@ -1120,12 +1120,12 @@ def thickness_state() -> list[dict]:
         (
             "nm-plant-danger",
             ["NM"],
-            "Datura and jumping cholla",
-            "Datura y cholla saltarina",
-            "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower.",
-            "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor.",
-            "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
-            "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda.",
+            "New Mexico plant danger — do not chew",
+            "Planta peligrosa de Nuevo México — no mastiques",
+            "Sacred datura trumpet. Pretty is not food.",
+            "Trompeta de datura. Lo bonito no es comida.",
+            "Datura is a poison, not a medicine card. Do not make tea. Wash sap off skin and eyes with water.",
+            "La datura es veneno, no una tarjeta de medicina. No hagas té. Lava savia de piel y ojos con agua.",
         ),
     ]
     out = []

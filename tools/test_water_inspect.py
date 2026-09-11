@@ -767,11 +767,14 @@ class GroundFieldSync(unittest.TestCase):
         cactus = inspect.split("private static func cactusGardenCover", 1)[1].split(
             "private static func workedCover", 1
         )[0]
-        self.assertLess(
-            cactus.index("cactusTXCard"),
-            cactus.index("plantTXCard"),
-            "a cactus garden must open the cactus card, not plant-danger",
+        self.assertIn("cactusTXCard", cactus)
+        self.assertNotIn(
+            "plantTXCard",
+            cactus,
+            "a cactus garden must not open oleander; spines are the cactus card",
         )
+        self.assertNotIn("plantNMCard", cactus)
+        self.assertNotIn("plantUseCard", cactus)
         self.assertNotIn("treeUseTXCard", cactus)
         self.assertNotIn("mammalTXCard", cactus)
         do = SWIFT.read_text()
@@ -817,7 +820,11 @@ class GroundFieldSync(unittest.TestCase):
             if c["id"] == "nm-plant-danger"
         )["steps"][0]["do"]["en"].lower()
         self.assertIn("datura", nm_plant_do)
-        self.assertIn("cholla", nm_plant_do)
+        self.assertNotIn(
+            "cholla",
+            nm_plant_do,
+            "botanic SPEAK is datura; jumping cholla lives on the cactus card",
+        )
         self.assertIn("Cactus garden", do)
         self.assertIn("Spines, not a meal", do)
         cactus_hold = do.split('case "Cactus garden":', 1)[1].split(
@@ -984,7 +991,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Botanic garden", qa)
         self.assertIn("Cactus garden", qa)
         self.assertIn("tx-cactus", qa)
+        self.assertIn("Walk does not open plant-danger", qa)
+        self.assertIn("pear still", qa.lower())
         self.assertIn("Albuquerque BioPark Botanic Garden", qa)
+        self.assertIn("not jumping cholla", qa)
         self.assertIn("Chihuahuan Desert Conservatory", qa)
         self.assertIn("Conservatory At North Austin", qa)
         self.assertIn("Three Crosses Cactus Garden", qa)
@@ -1100,6 +1110,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Inspect.treeUseEastCard", vision_fn)
         self.assertIn("Inspect.mammalEastCard", vision_fn)
         self.assertIn("Inspect.snakeEastCard", vision_fn)
+        cactus_still = vision_fn.split("case .cactus:", 1)[1]
+        self.assertNotIn(
+            "plantTXCard",
+            cactus_still,
+            "a prickly-pear still is the cactus card, not oleander",
+        )
+        self.assertNotIn("plantNMCard", cactus_still)
         self.assertIn("g.labelId", tab)
         self.assertIn("InspectField.fieldRoute(", tab)
         self.assertIn("forVision:", tab)

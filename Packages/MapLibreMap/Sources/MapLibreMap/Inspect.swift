@@ -1026,7 +1026,7 @@ public enum Inspect {
         )
     }
 
-    /// A cactus garden: spines first, then don't chew. Not woodland tree-use.
+    /// A cactus garden: spines, not oleander, not woodland tree-use.
     private static func cactusGardenCover(
         klass: String,
         sure: Int,
@@ -1042,9 +1042,7 @@ public enum Inspect {
             field: plantCard,
             local: [
                 cactusTXCard, cactusNMCard,
-                plantTXCard, plantNMCard,
             ],
-            extra: [plantUseCard],
             unnamedPenalty: unnamedPenalty
         )
     }
