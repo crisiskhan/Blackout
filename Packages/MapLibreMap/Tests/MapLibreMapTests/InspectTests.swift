@@ -1753,6 +1753,34 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(mcgregor.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(mcgregor.doLine.lowercased().contains("edible"), mcgregor.doLine)
 
+        let cuevasEast = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Balcones Canyonlands Preserve - Cuevas East",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(cuevasEast.klass, "Wildlife range")
+        XCTAssertNotEqual(cuevasEast.klass, "Open reserve")
+        XCTAssertEqual(cuevasEast.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertTrue(cuevasEast.doLine.lowercased().contains("hog"), cuevasEast.doLine)
+        XCTAssertFalse(cuevasEast.doLine.lowercased().contains("javelina"), cuevasEast.doLine)
+        XCTAssertFalse(cuevasEast.doLine.lowercased().contains("edible"), cuevasEast.doLine)
+
+        let ranchRoad620 = Inspect.read(
+            tags: ["highway": "primary", "name": "Ranch Road 620 North"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(ranchRoad620.klass, "Road")
+        XCTAssertNotEqual(ranchRoad620.klass, "Wildlife range")
+
+        let fourPoints = Inspect.read(
+            tags: ["highway": "tertiary", "name": "Four Points Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(fourPoints.klass, "Road")
+        XCTAssertNotEqual(fourPoints.klass, "Wildlife range")
+
         let comancheTrail = Inspect.read(
             tags: ["highway": "unclassified", "name": "Comanche Trail"],
             pack: "tx-east"
@@ -3380,6 +3408,34 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([sevilletaSheet, oldHighway])["leisure"], "nature_reserve")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([sevilletaSheet, oldHighway]), pack: "nm").klass,
+            "Wildlife range"
+        )
+
+        let cuevasEastSheet: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Balcones Canyonlands Preserve - Cuevas East",
+        ]
+        let ranch620: [String: String] = [
+            "highway": "primary",
+            "name": "Ranch Road 620 North",
+        ]
+        let fourPointsDrive: [String: String] = [
+            "highway": "tertiary",
+            "name": "Four Points Drive",
+        ]
+        XCTAssertEqual(
+            Inspect.pick([cuevasEastSheet, ranch620, fourPointsDrive])["leisure"],
+            "nature_reserve"
+        )
+        XCTAssertEqual(
+            Inspect.pick([cuevasEastSheet, ranch620, fourPointsDrive])["name"],
+            "Balcones Canyonlands Preserve - Cuevas East"
+        )
+        XCTAssertEqual(
+            Inspect.read(
+                tags: Inspect.pick([cuevasEastSheet, ranch620, fourPointsDrive]),
+                pack: "tx-east"
+            ).klass,
             "Wildlife range"
         )
     }

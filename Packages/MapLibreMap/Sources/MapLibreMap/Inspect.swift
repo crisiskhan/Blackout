@@ -411,8 +411,9 @@ public enum Inspect {
     /// wildlife`, not the word `joya`. The `wildlife management
     /// area` phrase already matches that sheet. Phrase `canyonlands
     /// preserve` already matches Grandview Hills, Blackmore, Lake
-    /// Perspectives, Austin Simon, and Lime Creek as unique titles.
-    /// Cuevas East sits next to Cuevas and stays unheld. Barrow
+    /// Perspectives, Austin Simon, Lime Creek, Romberg, McGregor,
+    /// and Cuevas East as unique titles. Cuevas interiors sit on
+    /// water. TSNL stays unheld — Grandview is in that probe. Barrow
     /// Nature Preserve vertex-avg sits off the sheet; the listed
     /// interior is on it. The `nature preserve` phrase already
     /// matches that sheet. Rio Rancho Bosque Nature Preserve is

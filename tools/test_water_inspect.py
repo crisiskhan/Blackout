@@ -250,6 +250,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("red bluff neighborhood park", east_blob)
         self.assertIn("balcones canyonlands preserve - romberg", east_blob)
         self.assertIn("balcones canyonlands preserve - mcgregor", east_blob)
+        self.assertIn("balcones canyonlands preserve - cuevas east", east_blob)
         self.assertIn("decker tallgrass prairie preserve", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertIn("ladybird johnson wildflower center", east_blob)
@@ -963,6 +964,15 @@ class ShippedWaterLayers(unittest.TestCase):
                 {
                     "leisure": "nature_reserve",
                     "name": "Balcones Canyonlands Preserve - Lime Creek",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Cuevas East",
                 }
             ),
             "wildlife",
@@ -2894,6 +2904,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - McGregor", glass)
         self.assertIn("30.421875", glass)
         self.assertIn("-97.894955", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Cuevas East", glass)
+        self.assertIn("30.405959", glass)
+        self.assertIn("-97.853307", glass)
+        self.assertIn("Ranch Road 620 North", glass)
+        self.assertIn("Four Points Drive", glass)
         self.assertIn("Vickery Wholesale Greenhouse", glass)
         self.assertIn("30.313804", glass)
         self.assertIn("-97.617624", glass)
@@ -3326,6 +3341,7 @@ class GroundFieldSync(unittest.TestCase):
         blunn_hit = False
         romberg_hit = False
         mcgregor_hit = False
+        cuevas_east_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -3469,6 +3485,8 @@ class GroundFieldSync(unittest.TestCase):
                     romberg_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - McGregor" and pip(-97.894955, 30.421875, ring):
                     mcgregor_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas East" and pip(-97.853307, 30.405959, ring):
+                    cuevas_east_hit = True
                 if kind == "glasshouse" and name == "Vickery Wholesale Greenhouse" and pip(-97.617624, 30.313804, ring):
                     vickery_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
@@ -3702,6 +3720,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             mcgregor_hit,
             "Balcones Canyonlands Preserve McGregor is not wildlife range",
+        )
+        self.assertTrue(
+            cuevas_east_hit,
+            "Balcones Canyonlands Preserve Cuevas East is not wildlife range",
         )
         self.assertTrue(
             vickery_hit,
@@ -4818,6 +4840,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.420315", qa)
         self.assertIn("Balcones Canyonlands Preserve - McGregor", qa)
         self.assertIn("30.421875", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Cuevas East", qa)
+        self.assertIn("30.405959", qa)
+        self.assertIn("Ranch Road 620 North", qa)
+        self.assertIn("Four Points Drive", qa)
         self.assertIn("Beaukiss Woods", qa)
         self.assertIn("Isleta Rectangle", qa)
         self.assertIn("Rio Grande Bosque", qa)

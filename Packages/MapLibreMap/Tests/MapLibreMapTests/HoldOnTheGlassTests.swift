@@ -307,8 +307,8 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Balcones Canyonlands Preserve - Lake Perspectives.
     /// Phrase `canyonlands preserve`. Unique title. 137 m from
-    /// Bullick Hollow. Cuevas East stays unheld — Cuevas is 36 m
-    /// from that sheet.
+    /// Bullick Hollow. Cuevas East is a separate sheet, 1.9 km
+    /// off this pip.
     private static let lakePerspectives = CLLocationCoordinate2D(latitude: 30.420633, longitude: -97.872138)
 
     /// Interior of Valles Caldera National Preserve. Phrase `national
@@ -473,6 +473,16 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Romberg is 135 m off this pip, outside the z16 probe.
     /// Comanche Trail 81 m is rank 7; wildlife 4 still wins.
     private static let mcgregorPreserve = CLLocationCoordinate2D(latitude: 30.421875, longitude: -97.894955)
+
+    /// Interior of Balcones Canyonlands Preserve - Cuevas East.
+    /// Phrase `canyonlands preserve`. Unique title, not Cuevas,
+    /// not Blackmore. SE interior is 200 m from the Cuevas sheet
+    /// and 308 m from Blackmore, outside the z16 probe. 215 m from
+    /// OSM water. Ranch Road 620 North 40 m is rank 7; wildlife
+    /// 4 still wins. Four Points Drive 100 m is rank 7. Cuevas
+    /// interiors sit on water. TSNL stays unheld — Grandview is
+    /// in that probe.
+    private static let cuevasEastPreserve = CLLocationCoordinate2D(latitude: 30.405959, longitude: -97.853307)
 
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
@@ -1421,6 +1431,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(blackmore.card?.klass, "Wildlife range", "\(blackmore)")
         XCTAssertEqual(blackmore.card?.title, "Balcones Canyonlands Preserve - Blackmore", "\(blackmore)")
         XCTAssertNotEqual(blackmore.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(blackmore)")
+        XCTAssertNotEqual(blackmore.card?.title, "Balcones Canyonlands Preserve - Cuevas East", "\(blackmore)")
         XCTAssertNotEqual(blackmore.card?.title, "Bullick Hollow Road", "\(blackmore)")
         XCTAssertEqual(blackmore.card?.fieldRoute.first, Inspect.mammalEastCard, "\(blackmore)")
         XCTAssertTrue((blackmore.card?.doLine.lowercased() ?? "").contains("hog"), blackmore.card?.doLine ?? "")
@@ -1481,6 +1492,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((mcgregor.card?.doLine.lowercased() ?? "").contains("hog"), mcgregor.card?.doLine ?? "")
         XCTAssertFalse((mcgregor.card?.doLine.lowercased() ?? "").contains("javelina"), mcgregor.card?.doLine ?? "")
         XCTAssertFalse((mcgregor.card?.doLine.lowercased() ?? "").contains("edible"), mcgregor.card?.doLine ?? "")
+
+        let cuevasEast = try hold(at: Self.cuevasEastPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(cuevasEast.card?.klass, "Wildlife range", "\(cuevasEast)")
+        XCTAssertEqual(cuevasEast.card?.title, "Balcones Canyonlands Preserve - Cuevas East", "\(cuevasEast)")
+        XCTAssertNotEqual(cuevasEast.card?.title, "Balcones Canyonlands Preserve - Cuevas", "\(cuevasEast)")
+        XCTAssertNotEqual(cuevasEast.card?.title, "Balcones Canyonlands Preserve - Blackmore", "\(cuevasEast)")
+        XCTAssertNotEqual(cuevasEast.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(cuevasEast)")
+        XCTAssertNotEqual(cuevasEast.card?.title, "Ranch Road 620 North", "\(cuevasEast)")
+        XCTAssertNotEqual(cuevasEast.card?.title, "Four Points Drive", "\(cuevasEast)")
+        XCTAssertEqual(cuevasEast.card?.fieldRoute.first, Inspect.mammalEastCard, "\(cuevasEast)")
+        XCTAssertTrue((cuevasEast.card?.doLine.lowercased() ?? "").contains("hog"), cuevasEast.card?.doLine ?? "")
+        XCTAssertFalse((cuevasEast.card?.doLine.lowercased() ?? "").contains("javelina"), cuevasEast.card?.doLine ?? "")
+        XCTAssertFalse((cuevasEast.card?.doLine.lowercased() ?? "").contains("edible"), cuevasEast.card?.doLine ?? "")
 
         let management = try hold(at: Self.bearCreekUnit, zoom: 16, packId: "tx-east")
         XCTAssertEqual(management.card?.klass, "Wildlife range", "\(management)")
