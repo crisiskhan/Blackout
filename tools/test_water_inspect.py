@@ -559,6 +559,12 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "botanic",
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Patterson Park Community Garden"}
+            ),
+            "botanic",
+        )
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "Alamo Street"})
         )
@@ -985,6 +991,15 @@ class ShippedWaterLayers(unittest.TestCase):
                 {
                     "leisure": "nature_reserve",
                     "name": "Balcones Canyonlands Preserve - Cuevas East",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Cuevas",
                 }
             ),
             "wildlife",
@@ -2040,6 +2055,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("bluff")', inspect)
         self.assertNotIn('contains("romberg")', inspect)
         self.assertNotIn('contains("mcgregor")', inspect)
+        self.assertNotIn('contains("cuevas")', inspect)
+        self.assertNotIn('contains("patterson")', inspect)
         self.assertNotIn('contains("stables")', inspect)
         self.assertNotIn('contains("candelaria")', inspect)
         self.assertNotIn('contains("vickery")', inspect)
@@ -3423,6 +3440,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Alamo Community Garden", glass)
         self.assertIn("30.282202", glass)
         self.assertIn("-97.719697", glass)
+        self.assertIn("Patterson Park Community Garden", glass)
+        self.assertIn("30.295635", glass)
+        self.assertIn("-97.708798", glass)
+        self.assertIn("Brookview Road", glass)
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
@@ -3474,6 +3495,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Cuevas East", glass)
         self.assertIn("30.405959", glass)
         self.assertIn("-97.853307", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Cuevas", glass)
+        self.assertIn("30.407861", glass)
+        self.assertIn("-97.855934", glass)
         self.assertIn("Ranch Road 620 North", glass)
         self.assertIn("Four Points Drive", glass)
         self.assertIn("Vickery Wholesale Greenhouse", glass)
@@ -4114,6 +4138,7 @@ class GroundFieldSync(unittest.TestCase):
         lime_creek_hit = False
         colorado_hit = False
         alamo_hit = False
+        patterson_hit = False
         wild_basin_hit = False
         stillhouse_hit = False
         big_walnut_hit = False
@@ -4125,6 +4150,7 @@ class GroundFieldSync(unittest.TestCase):
         romberg_hit = False
         mcgregor_hit = False
         cuevas_east_hit = False
+        cuevas_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -4250,6 +4276,8 @@ class GroundFieldSync(unittest.TestCase):
                     colorado_hit = True
                 if kind == "botanic" and name == "Alamo Community Garden" and pip(-97.719697, 30.282202, ring):
                     alamo_hit = True
+                if kind == "botanic" and name == "Patterson Park Community Garden" and pip(-97.708798, 30.295635, ring):
+                    patterson_hit = True
                 if kind == "wildlife" and name == "Wild Basin Wilderness Preserve" and pip(-97.820597, 30.318096, ring):
                     wild_basin_hit = True
                 if kind == "wildlife" and name == "Stillhouse Hollow Nature Preserve" and pip(-97.761957, 30.369023, ring):
@@ -4272,6 +4300,8 @@ class GroundFieldSync(unittest.TestCase):
                     mcgregor_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas East" and pip(-97.853307, 30.405959, ring):
                     cuevas_east_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas" and pip(-97.855934, 30.407861, ring):
+                    cuevas_hit = True
                 if kind == "glasshouse" and name == "Vickery Wholesale Greenhouse" and pip(-97.617624, 30.313804, ring):
                     vickery_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
@@ -4475,6 +4505,10 @@ class GroundFieldSync(unittest.TestCase):
             "Alamo Community Garden is not botanic on the east overlay",
         )
         self.assertTrue(
+            patterson_hit,
+            "Patterson Park Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
             wild_basin_hit,
             "Wild Basin Wilderness Preserve is not wildlife range on the east overlay",
         )
@@ -4517,6 +4551,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             cuevas_east_hit,
             "Balcones Canyonlands Preserve Cuevas East is not wildlife range",
+        )
+        self.assertTrue(
+            cuevas_hit,
+            "Balcones Canyonlands Preserve Cuevas is not wildlife range",
         )
         self.assertTrue(
             vickery_hit,
@@ -6397,6 +6435,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.421875", qa)
         self.assertIn("Balcones Canyonlands Preserve - Cuevas East", qa)
         self.assertIn("30.405959", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Cuevas", qa)
+        self.assertIn("30.407861", qa)
         self.assertIn("Ranch Road 620 North", qa)
         self.assertIn("Four Points Drive", qa)
         self.assertIn("Beaukiss Woods", qa)
@@ -6676,6 +6716,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("alamo community", qa)
         self.assertIn("Alamo Street", qa)
         self.assertIn("Alamo Pocket Park", qa)
+        self.assertIn("Patterson Park Community Garden", qa)
+        self.assertIn("30.295635", qa)
+        self.assertIn("Brookview Road", qa)
         self.assertIn("wild basin wilderness", qa)
         self.assertIn("30.318096", qa)
         self.assertIn("Stillhouse Hollow Nature Preserve", qa)

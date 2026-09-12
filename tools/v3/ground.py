@@ -141,8 +141,8 @@ CAVE_PRESERVE_KEYS = {
 # `wildlife management area` phrase already matches that
 # sheet. Phrase `canyonlands preserve` already matches
 # Grandview Hills, Blackmore, Lake Perspectives, Austin
-# Simon, Lime Creek, Romberg, McGregor, and Cuevas East
-# as unique titles. Cuevas interiors sit on water. TSNL
+# Simon, Lime Creek, Romberg, McGregor, Cuevas East, and
+# Cuevas as unique titles. Do not add matcher `cuevas`. TSNL
 # stays unheld — Grandview is in that probe. Hippie
 # Hollow Park sits on another McGregor interior. Barrow Nature Preserve
 # vertex-avg sits off the sheet; the listed interior is on
@@ -355,7 +355,11 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # `community garden` phrase already matches those sheets
 # and Colonia Prisma Community Garden. Camino Rojo and
 # Vuelta Colorada stay roads. Do not add matcher `prisma`
-# or `colonia`. Desert Garden Park stays unheld.
+# or `colonia`. Phrase `community garden` already matches
+# Patterson Park Community Garden. Brookview Road stays a
+# road. Do not add matcher `patterson`. Cherry Creek
+# Community Garden stays unheld (water too close). Desert
+# Garden Park stays unheld.
 # Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap

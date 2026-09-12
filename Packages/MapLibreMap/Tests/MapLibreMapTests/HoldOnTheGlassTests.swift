@@ -590,9 +590,17 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// and 308 m from Blackmore, outside the z16 probe. 215 m from
     /// OSM water. Ranch Road 620 North 40 m is rank 7; wildlife
     /// 4 still wins. Four Points Drive 100 m is rank 7. Cuevas
-    /// interiors sit on water. TSNL stays unheld — Grandview is
+    /// is held 329 m off this pip. TSNL stays unheld — Grandview is
     /// in that probe.
     private static let cuevasEastPreserve = CLLocationCoordinate2D(latitude: 30.405959, longitude: -97.853307)
+
+    /// Dry interior of Balcones Canyonlands Preserve - Cuevas.
+    /// Phrase `canyonlands preserve`. Unique overlay at the pip.
+    /// Unique versus Cuevas East (329 m) and Blackmore (458 m).
+    /// 348 m from OSM stream. No nearby name in 250 m. TSNL
+    /// stays unheld — Grandview is in that probe. Do not add
+    /// matcher `cuevas`.
+    private static let cuevasPreserve = CLLocationCoordinate2D(latitude: 30.407861, longitude: -97.855934)
 
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
@@ -766,6 +774,15 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// so the probe does not mix them. Alamo Street 5 m is rank 7;
     /// botanic 5 still wins.
     private static let alamoGarden = CLLocationCoordinate2D(latitude: 30.282202, longitude: -97.719697)
+
+    /// Dry interior of Patterson Park Community Garden. Phrase
+    /// `community garden`, not the word `patterson`. Unique
+    /// overlay at the pip. Unique versus Orchard Garden (1326 m).
+    /// Brookview Road 38 m is rank 7; botanic 5 still wins. 178 m
+    /// from OSM drain. Cherry Creek Community Garden stays unheld
+    /// (water too close). Desert Garden Park stays unheld. Do not
+    /// add matcher `patterson`.
+    private static let pattersonGarden = CLLocationCoordinate2D(latitude: 30.295635, longitude: -97.708798)
 
     /// Interior of 4th Street Garden. Phrase `4th street garden`,
     /// not the word `4th`. West 4th Avenue stays a road. 91 m from
@@ -3625,6 +3642,18 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(lucasPresent.first, Inspect.mammalEastCard, "\(lucas)")
         XCTAssertEqual(InspectField.label(for: lucasPresent.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: lucasPresent), "ANIMAL · BITE · COLD")
+
+        let cuevas = try hold(at: Self.cuevasPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(cuevas.card?.klass, "Wildlife range", "\(cuevas)")
+        XCTAssertEqual(cuevas.card?.title, "Balcones Canyonlands Preserve - Cuevas", "\(cuevas)")
+        XCTAssertNotEqual(cuevas.card?.klass, "Open reserve", "\(cuevas)")
+        XCTAssertNotEqual(cuevas.card?.title, "Balcones Canyonlands Preserve - Cuevas East", "\(cuevas)")
+        XCTAssertNotEqual(cuevas.card?.title, "Balcones Canyonlands Preserve - Blackmore", "\(cuevas)")
+        XCTAssertNotEqual(cuevas.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(cuevas)")
+        XCTAssertEqual(cuevas.card?.fieldRoute.first, Inspect.mammalEastCard, "\(cuevas)")
+        XCTAssertTrue((cuevas.card?.doLine.lowercased() ?? "").contains("hog"), cuevas.card?.doLine ?? "")
+        XCTAssertFalse((cuevas.card?.doLine.lowercased() ?? "").contains("javelina"), cuevas.card?.doLine ?? "")
+        XCTAssertFalse((cuevas.card?.doLine.lowercased() ?? "").contains("edible"), cuevas.card?.doLine ?? "")
     }
 
     func testHoldingANewMexicoOpenReserveOpensBiteNotPicnicWoodland() throws {
@@ -4506,6 +4535,19 @@ final class HoldOnTheGlassTests: XCTestCase {
             )),
             "BITE · ANIMAL · PLANT · FOOD · HEAT"
         )
+
+        let patterson = try hold(at: Self.pattersonGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(patterson.card?.klass, "Botanic garden", "\(patterson)")
+        XCTAssertEqual(patterson.card?.title, "Patterson Park Community Garden", "\(patterson)")
+        XCTAssertNotEqual(patterson.card?.klass, "Park", "\(patterson)")
+        XCTAssertNotEqual(patterson.card?.title, "Orchard Garden", "\(patterson)")
+        XCTAssertNotEqual(patterson.card?.title, "Brookview Road", "\(patterson)")
+        XCTAssertEqual(patterson.card?.fieldRoute.first, Inspect.plantTXCard, "\(patterson)")
+        XCTAssertFalse(
+            patterson.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Patterson Park Community Garden opened woodland tree-use: \(patterson)"
+        )
+        XCTAssertFalse((patterson.card?.doLine.lowercased() ?? "").contains("edible"), patterson.card?.doLine ?? "")
     }
 
     func testHoldingNewMexicoScrubOpensRattlerNotPicnicWoodland() throws {

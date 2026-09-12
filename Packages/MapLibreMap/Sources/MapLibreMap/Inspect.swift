@@ -430,8 +430,8 @@ public enum Inspect {
     /// area` phrase already matches that sheet. Phrase `canyonlands
     /// preserve` already matches Grandview Hills, Blackmore, Lake
     /// Perspectives, Austin Simon, Lime Creek, Romberg, McGregor,
-    /// and Cuevas East as unique titles. Cuevas interiors sit on
-    /// water. TSNL stays unheld — Grandview is in that probe. Barrow
+    /// Cuevas East, and Cuevas as unique titles. Do not add matcher
+    /// `cuevas`. TSNL stays unheld — Grandview is in that probe. Barrow
     /// Nature Preserve vertex-avg sits off the sheet; the listed
     /// interior is on it. The `nature preserve` phrase already
     /// matches that sheet. Rio Rancho Bosque Nature Preserve is
@@ -601,8 +601,11 @@ public enum Inspect {
     /// Southwest stays a road. The `community garden` phrase
     /// already matches those sheets and Colonia Prisma Community
     /// Garden. Camino Rojo and Vuelta Colorada stay roads. Do not
-    /// add matcher `prisma` or `colonia`. Desert Garden Park stays
-    /// unheld. Winrock Garden is a mall bed and stays out.
+    /// add matcher `prisma` or `colonia`. Phrase `community garden`
+    /// already matches Patterson Park Community Garden. Brookview
+    /// Road stays a road. Do not add matcher `patterson`. Cherry
+    /// Creek Community Garden stays unheld (water too close).
+    /// Desert Garden Park stays unheld. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,
