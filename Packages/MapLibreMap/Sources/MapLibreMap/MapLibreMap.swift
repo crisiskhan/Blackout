@@ -306,13 +306,15 @@ public enum UserPuck {
 
     public static func needsReapply(
         storedPack: (south: Double, west: Double, north: Double, east: Double)?,
-        storedPuck: (lat: Double, lon: Double)?,
+        storedPuck _: (lat: Double, lon: Double)?,
         pack: (south: Double, west: Double, north: Double, east: Double),
-        puck: (lat: Double, lon: Double),
+        puck _: (lat: Double, lon: Double),
         mapHasPuck: Bool
     ) -> Bool {
-        guard mapHasPuck, let storedPack, let storedPuck else { return true }
-        return storedPack != pack || storedPuck != puck
+        // Position-only is an in-place move. Rebuilding YOU (and the pack
+        // outline) on every GPS tick is what tore the canvas down in WALK.
+        guard mapHasPuck, let storedPack else { return true }
+        return storedPack != pack
     }
 }
 

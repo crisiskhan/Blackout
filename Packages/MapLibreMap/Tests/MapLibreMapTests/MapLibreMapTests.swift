@@ -97,6 +97,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PersonCompass.normalized(-45), 315, accuracy: 1e-9)
         XCTAssertEqual(PersonCompass.shortestDelta(from: 350, to: 10), 20, accuracy: 1e-9)
         XCTAssertGreaterThan(PersonCompass.puckPoints, PersonCompass.wellPoints)
+        XCTAssertLessThanOrEqual(PersonCompass.puckPoints, 48)
+        XCTAssertGreaterThanOrEqual(
+            PersonCompass.wellPoints / PersonCompass.puckPoints,
+            0.70
+        )
         XCTAssertNil(
             PersonCompass.liveHeading(trueHeading: -1, magneticHeading: -1, accuracy: -1)
         )
@@ -137,6 +142,25 @@ final class MapLibreMapTests: XCTestCase {
                 storedPack: pack,
                 storedPuck: puck,
                 pack: pack,
+                puck: puck,
+                mapHasPuck: true
+            )
+        )
+        let moved = (lat: puck.lat + 0.01, lon: puck.lon + 0.01)
+        XCTAssertFalse(
+            UserPuck.needsReapply(
+                storedPack: pack,
+                storedPuck: puck,
+                pack: pack,
+                puck: moved,
+                mapHasPuck: true
+            )
+        )
+        XCTAssertTrue(
+            UserPuck.needsReapply(
+                storedPack: pack,
+                storedPuck: puck,
+                pack: (south: 28.0, west: -82.0, north: 31.0, east: -80.0),
                 puck: puck,
                 mapHasPuck: true
             )
@@ -659,6 +683,22 @@ final class MapLibreMapTests: XCTestCase {
                 puckNeedsReapply: false,
                 routeNeedsReapply: false,
                 partyNeedsReapply: true
+            )
+        )
+        let pack = (south: 29.0, west: -82.0, north: 31.0, east: -80.0)
+        let puck = (lat: 29.95, lon: -81.34)
+        let moved = (lat: 29.96, lon: -81.34)
+        XCTAssertFalse(
+            OverlaySync.needsStyleMutation(
+                force: false,
+                puckNeedsReapply: UserPuck.needsReapply(
+                    storedPack: pack,
+                    storedPuck: puck,
+                    pack: pack,
+                    puck: moved,
+                    mapHasPuck: true
+                ),
+                routeNeedsReapply: false
             )
         )
         let wolf = PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 12, emblem: "wolf")

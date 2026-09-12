@@ -102,8 +102,8 @@ public enum PersonEmblem: String, CaseIterable, Sendable, Equatable {
 /// North-up rose. The map does not rotate, so N stays screen-up and the
 /// heading tick is the live instrument.
 public enum PersonCompass: Sendable {
-    public static let puckPoints: Double = 80
-    public static let wellPoints: Double = 46
+    public static let puckPoints: Double = 44
+    public static let wellPoints: Double = 34
     public static let minorTickEvery = 5
     public static let majorTickEvery = 15
 

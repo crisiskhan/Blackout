@@ -220,7 +220,6 @@ public struct OfflineMapView: UIViewRepresentable {
         private let holdTick = UIImpactFeedbackGenerator(style: .rigid)
         var packOutline: MLNPolyline?
         var routeLine: MLNPolyline?
-        var puckHalo: MLNPolygon?
         var puck: MLNPointAnnotation?
         var partyMarks: [PersonMarkAnnotation] = []
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
@@ -453,8 +452,6 @@ public struct OfflineMapView: UIViewRepresentable {
             applyCamera(spec, on: view, force: force)
             let mapHasPuck = (view.annotations ?? []).contains { ann in
                 ann.title == UserPuck.title
-                    && abs(ann.coordinate.latitude - spec.puckLat) < 1e-9
-                    && abs(ann.coordinate.longitude - spec.puckLon) < 1e-9
             }
             let puckNeeds = force || UserPuck.needsReapply(
                 storedPack: storedPack,
@@ -495,9 +492,6 @@ public struct OfflineMapView: UIViewRepresentable {
                     if let old = packOutline {
                         view.remove(old)
                     }
-                    if let old = puckHalo {
-                        view.remove(old)
-                    }
                     if let old = puck {
                         view.removeAnnotation(old)
                     }
@@ -511,12 +505,6 @@ public struct OfflineMapView: UIViewRepresentable {
                     let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
                     view.add(outline)
                     packOutline = outline
-
-                    var halo = UserPuck.haloRing(lat: spec.puckLat, lon: spec.puckLon)
-                        .map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-                    let haloPoly = MLNPolygon(coordinates: &halo, count: UInt(halo.count))
-                    view.add(haloPoly)
-                    puckHalo = haloPoly
 
                     let you = PersonMarkAnnotation()
                     you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
@@ -544,6 +532,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 you.emblemID = spec.youEmblem
                 you.headingDeg = spec.youHeading
+                storedPuck = (spec.puckLat, spec.puckLon)
                 if let mark = view.view(for: you) as? YouPuckAnnotationView {
                     mark.apply(emblemID: spec.youEmblem, headingDeg: spec.youHeading)
                 }
@@ -552,7 +541,11 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func syncPartyMarks(on view: MLNMapView, spec: OverlaySpec) {
-            let existing = Dictionary(uniqueKeysWithValues: partyMarks.map { ($0.memberID, $0) })
+            var existing: [String: PersonMarkAnnotation] = [:]
+            existing.reserveCapacity(partyMarks.count)
+            for mark in partyMarks {
+                existing[mark.memberID] = mark
+            }
             var next: [PersonMarkAnnotation] = []
             var seen = Set<String>()
             for pip in spec.pips {
@@ -761,12 +754,17 @@ public struct OfflineMapView: UIViewRepresentable {
                 halo.circleStrokeColor = NSExpression(
                     forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
                 )
-                halo.circleStrokeWidth = NSExpression(forConstantValue: 3)
+                halo.circleStrokeWidth = NSExpression(forConstantValue: 0)
+                halo.circleStrokeOpacity = NSExpression(forConstantValue: 0)
                 halo.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(halo)
                 let core = MLNCircleStyleLayer(identifier: "you-puck-core", source: src)
-                core.circleColor = NSExpression(forConstantValue: UIColor.white)
+                core.circleColor = NSExpression(
+                    forConstantValue: UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+                )
                 core.circleRadius = NSExpression(forConstantValue: 8)
+                core.circleStrokeWidth = NSExpression(forConstantValue: 0)
+                core.circleStrokeOpacity = NSExpression(forConstantValue: 0)
                 core.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(core)
             }
@@ -860,6 +858,8 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28)
                 )
                 halo.circleRadius = NSExpression(forConstantValue: PartyPips.haloRadius)
+                halo.circleStrokeWidth = NSExpression(forConstantValue: 0)
+                halo.circleStrokeOpacity = NSExpression(forConstantValue: 0)
                 halo.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(halo)
                 let core = MLNCircleStyleLayer(identifier: PartyPips.coreLayerID, source: src)
@@ -868,7 +868,8 @@ public struct OfflineMapView: UIViewRepresentable {
                 )
                 core.circleRadius = NSExpression(forConstantValue: PartyPips.coreRadius)
                 core.circleStrokeColor = NSExpression(forConstantValue: UIColor.black)
-                core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                core.circleStrokeWidth = NSExpression(forConstantValue: 0)
+                core.circleStrokeOpacity = NSExpression(forConstantValue: 0)
                 core.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(core)
             }
@@ -995,7 +996,15 @@ public struct OfflineMapView: UIViewRepresentable {
 
         public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
             if annotation is MLNUserLocation {
-                return nil
+                let reuse = "hidden-user-location"
+                let hidden = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? HiddenUserLocationView)
+                    ?? HiddenUserLocationView(reuseIdentifier: reuse)
+                hidden.isHidden = true
+                hidden.alpha = 0
+                hidden.isEnabled = false
+                hidden.isUserInteractionEnabled = false
+                hidden.bounds = CGRect(x: 0, y: 0, width: 1, height: 1)
+                return hidden
             }
             let you = annotation.title == UserPuck.title
             let reuse = you ? "you-puck" : "party-puck"
@@ -1028,18 +1037,14 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         public func mapView(_ mapView: MLNMapView, fillColorForPolygonAnnotation annotation: MLNPolygon) -> UIColor {
-            if annotation === puckHalo {
-                return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.38)
-            }
-            return .clear
+            _ = mapView
+            _ = annotation
+            return UIColor(red: 0, green: 0, blue: 0, alpha: 0)
         }
 
         public func mapView(_ mapView: MLNMapView, strokeColorForShapeAnnotation annotation: MLNShape) -> UIColor {
-            if annotation === puckHalo {
-                return UIColor.white
-            }
             if annotation === routeLine {
-                return UIColor.clear
+                return UIColor(red: 0, green: 0, blue: 0, alpha: 0)
             }
             return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
         }
@@ -1061,6 +1066,32 @@ final class FillingMapView: MLNMapView {
     override func layoutSubviews() {
         super.layoutSubviews()
         onBoundsChange?(bounds.size)
+    }
+}
+
+final class HiddenUserLocationView: MLNUserLocationAnnotationView {
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        hidePuck()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        hidePuck()
+    }
+
+    override func update() {
+        super.update()
+        hidePuck()
+    }
+
+    private func hidePuck() {
+        isHidden = true
+        alpha = 0
+        isEnabled = false
+        isUserInteractionEnabled = false
+        scalesWithViewingDistance = false
+        bounds = CGRect(x: 0, y: 0, width: 1, height: 1)
     }
 }
 
@@ -1168,12 +1199,15 @@ enum PersonCompassArt {
 
     static func chevronPath(in bounds: CGRect) -> UIBezierPath {
         let cx = bounds.midX
-        let top = bounds.minY + 1.6
+        let top = bounds.minY + max(0.6, bounds.height * 0.02)
+        let wing = max(2.4, bounds.width * 0.07)
+        let height = max(3.6, bounds.height * 0.11)
+        let notch = max(2.8, bounds.height * 0.085)
         let path = UIBezierPath()
         path.move(to: CGPoint(x: cx, y: top))
-        path.addLine(to: CGPoint(x: cx + 5.4, y: top + 9.2))
-        path.addLine(to: CGPoint(x: cx, y: top + 7.1))
-        path.addLine(to: CGPoint(x: cx - 5.4, y: top + 9.2))
+        path.addLine(to: CGPoint(x: cx + wing, y: top + height))
+        path.addLine(to: CGPoint(x: cx, y: top + notch))
+        path.addLine(to: CGPoint(x: cx - wing, y: top + height))
         path.close()
         return path
     }
@@ -1186,36 +1220,37 @@ enum PersonCompassArt {
             let silver = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
             let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
             let center = CGPoint(x: size / 2, y: size / 2)
-            let outer = size / 2 - 1.1
+            let outer = size / 2 - 0.8
             let well = CGFloat(PersonCompass.wellPoints) / 2
+            let band = max(2.2, outer - well - 1.4)
 
             cg.setFillColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.72).cgColor)
-            cg.fillEllipse(in: CGRect(x: 1, y: 1, width: size - 2, height: size - 2))
+            cg.fillEllipse(in: CGRect(x: 0.6, y: 0.6, width: size - 1.2, height: size - 1.2))
 
             cg.setStrokeColor(silver.cgColor)
-            cg.setLineWidth(2.3)
-            cg.strokeEllipse(in: CGRect(x: 1.15, y: 1.15, width: size - 2.3, height: size - 2.3))
+            cg.setLineWidth(1.4)
+            cg.strokeEllipse(in: CGRect(x: 0.7, y: 0.7, width: size - 1.4, height: size - 1.4))
 
-            cg.setStrokeColor(UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.22).cgColor)
-            cg.setLineWidth(1)
+            cg.setStrokeColor(UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28).cgColor)
+            cg.setLineWidth(0.8)
             cg.strokeEllipse(
                 in: CGRect(
-                    x: center.x - well - 0.6,
-                    y: center.y - well - 0.6,
-                    width: (well + 0.6) * 2,
-                    height: (well + 0.6) * 2
+                    x: center.x - well - 0.4,
+                    y: center.y - well - 0.4,
+                    width: (well + 0.4) * 2,
+                    height: (well + 0.4) * 2
                 )
             )
 
             for deg in stride(from: 0, to: 360, by: PersonCompass.minorTickEvery) {
                 let major = deg % PersonCompass.majorTickEvery == 0
                 let cardinal = deg % 90 == 0
-                let length: CGFloat = cardinal ? 6.6 : (major ? 5.0 : 3.0)
-                let width: CGFloat = cardinal ? 1.45 : (major ? 1.0 : 0.55)
+                let length: CGFloat = cardinal ? band : (major ? band * 0.72 : band * 0.42)
+                let width: CGFloat = cardinal ? 1.15 : (major ? 0.8 : 0.45)
                 let alpha: CGFloat = cardinal ? 1 : (major ? 0.88 : 0.42)
                 let color = deg == 0 ? accent : silver.withAlphaComponent(alpha)
                 let rad = CGFloat(PersonCompass.tickRadians(headingDeg: Double(deg)))
-                let outerR = outer - 1.2
+                let outerR = outer - 0.6
                 let innerR = outerR - length
                 cg.setStrokeColor(color.cgColor)
                 cg.setLineWidth(width)
@@ -1223,29 +1258,6 @@ enum PersonCompassArt {
                 cg.move(to: CGPoint(x: center.x + sin(rad) * innerR, y: center.y - cos(rad) * innerR))
                 cg.addLine(to: CGPoint(x: center.x + sin(rad) * outerR, y: center.y - cos(rad) * outerR))
                 cg.strokePath()
-            }
-
-            let font = UIFont.systemFont(ofSize: 8, weight: .heavy)
-            let labels: [(String, Int, UIColor)] = [
-                ("N", 0, accent),
-                ("E", 90, silver),
-                ("S", 180, silver),
-                ("W", 270, silver),
-            ]
-            for (text, deg, color) in labels {
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: font,
-                    .foregroundColor: color,
-                ]
-                let draw = NSString(string: text)
-                let textSize = draw.size(withAttributes: attrs)
-                let rad = CGFloat(PersonCompass.tickRadians(headingDeg: Double(deg)))
-                let r = well + 8.4
-                let p = CGPoint(
-                    x: center.x + sin(rad) * r - textSize.width / 2,
-                    y: center.y - cos(rad) * r - textSize.height / 2
-                )
-                draw.draw(at: p, withAttributes: attrs)
             }
         }
     }

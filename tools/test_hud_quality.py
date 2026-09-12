@@ -8,6 +8,7 @@ COMMS dumped Whisper meters. Those are not the best way — these contracts are.
 """
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 
@@ -16,6 +17,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def read(*parts: str) -> str:
     return ROOT.joinpath(*parts).read_text()
+
+
+def person_compass_const(name: str) -> float:
+    src = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift")
+    match = re.search(
+        rf"static let {re.escape(name)}: Double = ([0-9.]+)",
+        src,
+    )
+    if match is None:
+        raise AssertionError(f"PersonCompass.{name} missing")
+    return float(match.group(1))
 
 
 def active_bearing(
@@ -959,6 +971,25 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         self.assertIn("headingView", offline)
         self.assertIn("YouPuckAnnotationView", offline)
         self.assertIn("you-puck-core", offline)
+        puck = person_compass_const("puckPoints")
+        well = person_compass_const("wellPoints")
+        self.assertLessEqual(puck, 48)
+        self.assertGreater(puck, well)
+        self.assertGreaterEqual(well / puck, 0.70)
+        self.assertNotIn("view.add(haloPoly)", offline)
+        self.assertNotIn("abs(ann.coordinate.latitude - spec.puckLat) < 1e-9", offline)
+        self.assertNotIn(
+            "Dictionary(uniqueKeysWithValues: partyMarks.map",
+            offline,
+        )
+        self.assertIn("HiddenUserLocationView", offline)
+        self.assertIn("circleStrokeOpacity", offline)
+        self.assertGreaterEqual(offline.count("circleStrokeOpacity"), 2)
+        self.assertNotIn('("N", 0, accent)', offline)
+        self.assertNotIn(
+            "storedPack != pack || storedPuck != puck",
+            read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"),
+        )
         self.assertIn("enum MeshPOS", mesh)
         self.assertIn("headingDeg", mesh)
         self.assertIn("struct PartyBody", route)
