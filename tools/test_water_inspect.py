@@ -1540,6 +1540,91 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(
             ground.overlay_kind({"natural": "peak", "name": "Castner Range"})
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "national_park",
+                    "name": "Prehistoric Trackways National Monument",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "track", "name": "Robledo Loop"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "White Sands National Park",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {
+                    "highway": "residential",
+                    "name": "White Sands Missile Range S Route 287",
+                }
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Placitas Open Space"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "national_park",
+                    "name": "Petroglyph National Monument",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Cerrillos Hills State Park",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Ojito Wilderness",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Cabezon Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "national_park",
+                    "name": "Kasha-Katuwe Tent Rocks National Monument",
+                }
+            ),
+            "reserve",
+        )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Hueco Mountain Park"})
         )
@@ -2647,6 +2732,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Castner Range National Monument", glass)
         self.assertIn("31.899542", glass)
         self.assertIn("-106.466848", glass)
+        self.assertIn("Prehistoric Trackways National Monument", glass)
+        self.assertIn("32.370257", glass)
+        self.assertIn("-106.899018", glass)
+        self.assertIn("White Sands National Park", glass)
+        self.assertIn("32.764181", glass)
+        self.assertIn("-106.331193", glass)
         self.assertIn("31.694905", glass)
         self.assertIn("-106.441133", glass)
         self.assertIn("Cactus garden", glass)
@@ -3133,6 +3224,24 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Galisteo Basin Preserve", glass)
         self.assertIn("35.451490", glass)
         self.assertIn("-105.962032", glass)
+        self.assertIn("Placitas Open Space", glass)
+        self.assertIn("35.331544", glass)
+        self.assertIn("-106.469276", glass)
+        self.assertIn("Petroglyph National Monument", glass)
+        self.assertIn("35.134837", glass)
+        self.assertIn("-106.747963", glass)
+        self.assertIn("Cerrillos Hills State Park", glass)
+        self.assertIn("35.454612", glass)
+        self.assertIn("-106.131284", glass)
+        self.assertIn("Ojito Wilderness", glass)
+        self.assertIn("35.517369", glass)
+        self.assertIn("-106.915496", glass)
+        self.assertIn("Cabezon Wilderness Study Area", glass)
+        self.assertIn("35.590075", glass)
+        self.assertIn("-107.078225", glass)
+        self.assertIn("Kasha-Katuwe Tent Rocks National Monument", glass)
+        self.assertIn("35.655997", glass)
+        self.assertIn("-106.419292", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -3182,6 +3291,8 @@ class GroundFieldSync(unittest.TestCase):
         reserve_hit = False
         hueco_hit = False
         castner_hit = False
+        trackways_hit = False
+        white_sands_hit = False
         franklin_hit = False
         lost_dog_hit = False
         flora_hit = False
@@ -3230,6 +3341,12 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "reserve" and pip(-106.466848, 31.899542, ring):
                     if props.get("name") == "Castner Range National Monument":
                         castner_hit = True
+                if kind == "reserve" and pip(-106.899018, 32.370257, ring):
+                    if props.get("name") == "Prehistoric Trackways National Monument":
+                        trackways_hit = True
+                if kind == "reserve" and pip(-106.331193, 32.764181, ring):
+                    if props.get("name") == "White Sands National Park":
+                        white_sands_hit = True
                 if kind == "reserve" and pip(-106.50, 31.97, ring):
                     franklin_hit = props.get("name") == "Franklin Mountains State Park"
                 if kind == "wildlife" and pip(-106.545207, 31.896528, ring):
@@ -3289,6 +3406,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             castner_hit,
             "Castner Range National Monument is not Open reserve on the west overlay",
+        )
+        self.assertTrue(
+            trackways_hit,
+            "Prehistoric Trackways National Monument is not Open reserve on the west overlay",
+        )
+        self.assertTrue(
+            white_sands_hit,
+            "White Sands National Park is not Open reserve on the west overlay",
         )
         self.assertTrue(
             franklin_hit,
@@ -4631,6 +4756,96 @@ class GroundFieldSync(unittest.TestCase):
             "Galisteo Basin Preserve hold is not inside the named nature reserve",
         )
 
+        nm_placitas_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Placitas Open Space":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.469276, 35.331544, ring):
+                    nm_placitas_hit = True
+        self.assertTrue(
+            nm_placitas_hit,
+            "Placitas Open Space hold is not inside the named open space",
+        )
+
+        nm_petroglyph_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Petroglyph National Monument":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.747963, 35.134837, ring):
+                    nm_petroglyph_hit = True
+        self.assertTrue(
+            nm_petroglyph_hit,
+            "Petroglyph National Monument hold is not inside the named nature reserve",
+        )
+
+        nm_cerrillos_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Cerrillos Hills State Park":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.131284, 35.454612, ring):
+                    nm_cerrillos_hit = True
+        self.assertTrue(
+            nm_cerrillos_hit,
+            "Cerrillos Hills State Park hold is not inside the named nature reserve",
+        )
+
+        nm_ojito_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Ojito Wilderness":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.915496, 35.517369, ring):
+                    nm_ojito_hit = True
+        self.assertTrue(
+            nm_ojito_hit,
+            "Ojito Wilderness hold is not inside the named nature reserve",
+        )
+
+        nm_cabezon_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Cabezon Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.078225, 35.590075, ring):
+                    nm_cabezon_hit = True
+        self.assertTrue(
+            nm_cabezon_hit,
+            "Cabezon Wilderness Study Area hold is not inside the named nature reserve",
+        )
+
+        nm_tent_rocks_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Kasha-Katuwe Tent Rocks National Monument":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.419292, 35.655997, ring):
+                    nm_tent_rocks_hit = True
+        self.assertTrue(
+            nm_tent_rocks_hit,
+            "Kasha-Katuwe Tent Rocks National Monument hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -5188,6 +5403,22 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.803148", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("35.451490", qa)
+        self.assertIn("Placitas Open Space", qa)
+        self.assertIn("35.331544", qa)
+        self.assertIn("Petroglyph National Monument", qa)
+        self.assertIn("35.134837", qa)
+        self.assertIn("Cerrillos Hills State Park", qa)
+        self.assertIn("35.454612", qa)
+        self.assertIn("Ojito Wilderness", qa)
+        self.assertIn("35.517369", qa)
+        self.assertIn("Cabezon Wilderness Study Area", qa)
+        self.assertIn("35.590075", qa)
+        self.assertIn("Kasha-Katuwe Tent Rocks National Monument", qa)
+        self.assertIn("35.655997", qa)
+        self.assertIn("Prehistoric Trackways National Monument", qa)
+        self.assertIn("32.370257", qa)
+        self.assertIn("White Sands National Park", qa)
+        self.assertIn("32.764181", qa)
         self.assertIn("Paseo de la Mesa Open Space", qa)
         self.assertIn("35.149083", qa)
         self.assertIn("Golden Open Space", qa)
@@ -5605,6 +5836,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.803148", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("35.451490", qa)
+        self.assertIn("Placitas Open Space", qa)
+        self.assertIn("Petroglyph National Monument", qa)
+        self.assertIn("Cerrillos Hills State Park", qa)
+        self.assertIn("Ojito Wilderness", qa)
+        self.assertIn("Cabezon Wilderness Study Area", qa)
+        self.assertIn("Kasha-Katuwe Tent Rocks National Monument", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

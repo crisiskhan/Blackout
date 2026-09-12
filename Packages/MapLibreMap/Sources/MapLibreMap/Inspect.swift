@@ -654,10 +654,17 @@ public enum Inspect {
     /// trees), not this walk — cactus does not live on Wild Basin.
     /// A named nature reserve that is not already a hole, wildlife
     /// range, or garden is this walk — vipers use that cover. El Cerro
-    /// de Los Lunas Preserve, Galisteo Basin Preserve, and Castner
-    /// Range National Monument are those Holds. An unnamed reserve falls through to
-    /// the landcover. Do not add matcher `los lunas`, `galisteo`, or
-    /// `castner`. Phrase `open space` is not a bare `contains` —
+    /// de Los Lunas Preserve, Galisteo Basin Preserve, Castner
+    /// Range National Monument, Prehistoric Trackways National
+    /// Monument, White Sands National Park, Ojito Wilderness,
+    /// Cabezon Wilderness Study Area, Kasha-Katuwe Tent Rocks
+    /// National Monument, Petroglyph National Monument, Placitas
+    /// Open Space, and Cerrillos Hills State Park are those Holds.
+    /// An unnamed reserve falls through to
+    /// the landcover. Do not add matcher `los lunas`, `galisteo`,
+    /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
+    /// `tent rocks`, `petroglyph`, `placitas`, or `cerrillos`. Phrase
+    /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
     /// stay parks. Named open-space cover is this walk. Phrase `hueco

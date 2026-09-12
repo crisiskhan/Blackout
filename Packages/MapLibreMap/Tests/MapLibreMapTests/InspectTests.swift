@@ -1491,6 +1491,88 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(galisteo.fieldRoute.contains(Inspect.snakeNMCard))
         XCTAssertFalse(galisteo.doLine.lowercased().contains("edible"), galisteo.doLine)
 
+        let placitas = Inspect.read(
+            tags: ["leisure": "park", "name": "Placitas Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(placitas.klass, "Open reserve")
+        XCTAssertNotEqual(placitas.klass, "Park")
+        XCTAssertNotEqual(placitas.klass, "Wildlife range")
+        XCTAssertEqual(placitas.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(placitas.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(placitas.doLine.lowercased().contains("javelina"), placitas.doLine)
+        XCTAssertFalse(placitas.doLine.lowercased().contains("edible"), placitas.doLine)
+
+        let petroglyph = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "national_park",
+                "name": "Petroglyph National Monument",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(petroglyph.klass, "Open reserve")
+        XCTAssertNotEqual(petroglyph.klass, "Wildlife range")
+        XCTAssertEqual(petroglyph.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(petroglyph.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(petroglyph.doLine.lowercased().contains("edible"), petroglyph.doLine)
+
+        let cerrillos = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Cerrillos Hills State Park",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(cerrillos.klass, "Open reserve")
+        XCTAssertNotEqual(cerrillos.klass, "Park")
+        XCTAssertEqual(cerrillos.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(cerrillos.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(cerrillos.doLine.lowercased().contains("edible"), cerrillos.doLine)
+
+        let ojito = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Ojito Wilderness",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(ojito.klass, "Open reserve")
+        XCTAssertNotEqual(ojito.klass, "Wildlife range")
+        XCTAssertEqual(ojito.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(ojito.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(ojito.doLine.lowercased().contains("javelina"), ojito.doLine)
+        XCTAssertFalse(ojito.doLine.lowercased().contains("edible"), ojito.doLine)
+
+        let cabezon = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Cabezon Wilderness Study Area",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(cabezon.klass, "Open reserve")
+        XCTAssertNotEqual(cabezon.klass, "Wildlife range")
+        XCTAssertEqual(cabezon.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(cabezon.doLine.lowercased().contains("edible"), cabezon.doLine)
+
+        let tentRocks = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "national_park",
+                "name": "Kasha-Katuwe Tent Rocks National Monument",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(tentRocks.klass, "Open reserve")
+        XCTAssertNotEqual(tentRocks.klass, "Wildlife range")
+        XCTAssertEqual(tentRocks.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(tentRocks.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(tentRocks.doLine.lowercased().contains("edible"), tentRocks.doLine)
+
         let management = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -2385,6 +2467,48 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(castnerPeak.klass, "Peak")
         XCTAssertNotEqual(castnerPeak.klass, "Open reserve")
+
+        let trackways = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "national_park",
+                "name": "Prehistoric Trackways National Monument",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(trackways.klass, "Open reserve")
+        XCTAssertNotEqual(trackways.klass, "Wildlife range")
+        XCTAssertEqual(trackways.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(trackways.doLine.lowercased().contains("diamondback"), trackways.doLine)
+        XCTAssertTrue(trackways.doLine.lowercased().contains("javelina"), trackways.doLine)
+        XCTAssertFalse(trackways.doLine.lowercased().contains("edible"), trackways.doLine)
+
+        let track = Inspect.read(
+            tags: ["highway": "track", "name": "Robledo Loop"],
+            pack: "tx-west"
+        )
+        XCTAssertNotEqual(track.klass, "Open reserve")
+
+        let whiteSands = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "White Sands National Park",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(whiteSands.klass, "Open reserve")
+        XCTAssertNotEqual(whiteSands.klass, "Wildlife range")
+        XCTAssertEqual(whiteSands.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(whiteSands.doLine.lowercased().contains("diamondback"), whiteSands.doLine)
+        XCTAssertTrue(whiteSands.doLine.lowercased().contains("javelina"), whiteSands.doLine)
+        XCTAssertFalse(whiteSands.doLine.lowercased().contains("edible"), whiteSands.doLine)
+
+        let missileRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "White Sands Missile Range S Route 287"],
+            pack: "tx-west"
+        )
+        XCTAssertNotEqual(missileRoad.klass, "Open reserve")
 
         let huecoTown = Inspect.read(
             tags: ["leisure": "park", "name": "Hueco Mountain Park"],
