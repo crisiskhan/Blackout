@@ -308,6 +308,26 @@ class WaterClassifyOnHoldTests(unittest.TestCase):
         self.assertIn("FIELD · BITE", qa)
         self.assertIn("FIELD · CAVE", qa)
 
+    def test_hold_overlay_bbox_rejects_before_copying_rings(self):
+        """Far sheets must not copy 13k overlay verts onto the HUD per hold."""
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        worked = offline.split("func packWorkedGround(")[1].split(
+            "private static func covers(_ feature"
+        )[0]
+        self.assertIn("groundWorkedSourceID", worked)
+        self.assertIn("features(matching: nil)", worked)
+        self.assertIn("overlayBounds", worked)
+        self.assertIn("MLNCoordinateInCoordinateBounds", worked)
+        self.assertNotIn("holdProbePoints", worked)
+        covers = offline.split("private static func covers(_ feature")[1].split(
+            "func packPoints"
+        )[0]
+        self.assertIn("getCoordinates", covers)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("bbox-rejects", qa.lower())
+
 
 def png_ihdr(path: Path) -> tuple[int, int, int]:
     """Return width, height, color type (2 = RGB, 6 = RGBA)."""
@@ -699,6 +719,9 @@ class CommsInstrumentTests(unittest.TestCase):
         self.assertIn("AVAudioRecorder", mic)
         self.assertIn("CLOSE", scan)
         self.assertNotIn("NET JOINED", comms)
+        pcm = mic.split("private func pcm(")[1].split("private static func wav")[0]
+        self.assertIn("channelCount >= 1", pcm)
+        self.assertIn("int16ChannelData", pcm)
 
     def test_solo_qa_scores_form_up_and_lost_kid(self):
         qa = read("docs", "SOLO_QA.md")

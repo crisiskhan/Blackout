@@ -119,6 +119,7 @@ final class PTTMic {
         let format = file.processingFormat
         let frames = AVAudioFrameCount(file.length)
         guard frames > 0,
+              format.channelCount >= 1,
               let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames),
               (try? file.read(into: buf)) != nil else { return Data() }
         if let ints = buf.int16ChannelData {

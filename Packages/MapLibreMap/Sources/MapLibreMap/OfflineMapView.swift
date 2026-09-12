@@ -311,7 +311,10 @@ public struct OfflineMapView: UIViewRepresentable {
 
         /// Overlay sheets `visibleFeatures` will miss when the fill is too
         /// faint or the camera is below walking zoom. Restricted to the
-        /// pack's ground geojson so a hold cannot read a pin.
+        /// pack's ground geojson so a hold cannot read a pin. Exact press,
+        /// not the 44pt box. Bbox-reject via overlayBounds before copying
+        /// rings: NM is ~102 sheets / ~13k verts, and walking every ring on
+        /// the HUD is the same stall class as ranking 34k packed names.
         private func packWorkedGround(
             at coordinate: CLLocationCoordinate2D,
             style: MLNStyle
@@ -320,7 +323,13 @@ public struct OfflineMapView: UIViewRepresentable {
             guard let source = style.source(withIdentifier: PackStyle.groundWorkedSourceID)
                     as? MLNShapeSource
             else { return [] }
-            return source.features(matching: nil).filter { Self.covers($0, coordinate) }
+            return source.features(matching: nil).filter { feature in
+                if let overlay = feature as? MLNOverlay,
+                   !MLNCoordinateInCoordinateBounds(coordinate, overlay.overlayBounds) {
+                    return false
+                }
+                return Self.covers(feature, coordinate)
+            }
         }
 
         /// Whether the press sits in an overlay polygon. Holes are not the
