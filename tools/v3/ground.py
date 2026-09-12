@@ -94,7 +94,10 @@ CAVE_PRESERVE_KEYS = {
 # Brodie and Oakdale Properties stay Open reserve. Phrase
 # `dahlstrom nature`, not the word `dahlstrom`. Dahlstrom
 # Road stays a road. The `nature preserve` phrase already
-# matches that sheet. `preserve`
+# matches that sheet. Phrase `bernardo wildlife`, not the
+# word `bernardo`. Bernardo Trails Park stays a park. Don
+# Bernardo Road stays a road. The `wildlife management area`
+# phrase already matches that sheet. `preserve`
 # alone is still forbidden.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
@@ -193,7 +196,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # matches that sheet. Phrase `albuquerque rose garden`,
 # not the word `albuquerque`. Memorial Rose Garden is a
 # separate sheet. The `rose garden` phrase already matches
-# both. Winrock Garden is a mall
+# both. Phrase `la mesa neighborhood`, not `la mesa`.
+# Paseo de la Mesa Open Space stays Open reserve. La Mesa
+# Court stays a road. The `community garden` phrase already
+# matches that sheet. Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap
 # glasshouses and stay out. A named garden without a botanic

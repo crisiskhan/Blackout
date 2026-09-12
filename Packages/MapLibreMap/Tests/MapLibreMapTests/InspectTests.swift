@@ -414,6 +414,15 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(bat.doLine.lowercased().contains("edible"), bat.doLine)
         XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
 
+        let manilla = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Manilla Thrilla Cave"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(manilla.klass, "Cave or hole")
+        XCTAssertNotEqual(manilla.klass, "Park")
+        XCTAssertEqual(manilla.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(manilla.doLine.lowercased().contains("edible"), manilla.doLine)
+
         let apache = Inspect.read(
             tags: ["natural": "cave_entrance", "name": "Cueva del Apache"],
             pack: "tx-west"
@@ -1115,6 +1124,34 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(dahlstromWay.klass, "Service road")
         XCTAssertNotEqual(dahlstromWay.klass, "Wildlife range")
+
+        let bernardo = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Bernardo Wildlife Management Area",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(bernardo.klass, "Wildlife range")
+        XCTAssertNotEqual(bernardo.klass, "Park")
+        XCTAssertEqual(bernardo.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(bernardo.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(bernardo.doLine.lowercased().contains("edible"), bernardo.doLine)
+
+        let bernardoPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Bernardo Trails Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(bernardoPark.klass, "Park")
+        XCTAssertNotEqual(bernardoPark.klass, "Wildlife range")
+
+        let donBernardo = Inspect.read(
+            tags: ["highway": "residential", "name": "Don Bernardo Road"],
+            pack: "nm"
+        )
+        XCTAssertEqual(donBernardo.klass, "Road")
+        XCTAssertNotEqual(donBernardo.klass, "Wildlife range")
 
         let oakdale = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Brodie and Oakdale Properties"],
@@ -2946,6 +2983,35 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(albuquerqueRose.fieldRoute.contains(Inspect.plantNMCard))
         XCTAssertFalse(albuquerqueRose.fieldRoute.contains(Inspect.treeUseNMCard))
         XCTAssertFalse(albuquerqueRose.doLine.lowercased().contains("edible"), albuquerqueRose.doLine)
+
+        let laMesaGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "La Mesa Neighborhood Community Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(laMesaGarden.klass, "Botanic garden")
+        XCTAssertNotEqual(laMesaGarden.klass, "Open reserve")
+        XCTAssertEqual(laMesaGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(laMesaGarden.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(laMesaGarden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(laMesaGarden.doLine.lowercased().contains("edible"), laMesaGarden.doLine)
+
+        let laMesaCourt = Inspect.read(
+            tags: ["highway": "residential", "name": "La Mesa Court Northwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(laMesaCourt.klass, "Road")
+        XCTAssertNotEqual(laMesaCourt.klass, "Botanic garden")
+
+        let paseoMesa = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Paseo de la Mesa Open Space",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(paseoMesa.klass, "Open reserve")
+        XCTAssertNotEqual(paseoMesa.klass, "Botanic garden")
 
         let memorialRose = Inspect.read(
             tags: ["leisure": "garden", "name": "Memorial Rose Garden"],

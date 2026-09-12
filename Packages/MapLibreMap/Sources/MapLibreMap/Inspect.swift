@@ -379,7 +379,10 @@ public enum Inspect {
     /// Brodie and Oakdale Properties stay Open reserve. Phrase
     /// `dahlstrom nature`, not the word `dahlstrom`. Dahlstrom
     /// Road stays a road. The `nature preserve` phrase already
-    /// matches that sheet. Austin
+    /// matches that sheet. Phrase `bernardo wildlife`, not the
+    /// word `bernardo`. Bernardo Trails Park stays a park. Don
+    /// Bernardo Road stays a road. The `wildlife management area`
+    /// phrase already matches that sheet. Austin
     /// wildland, animals as range, not a pin. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
@@ -475,7 +478,10 @@ public enum Inspect {
     /// `community garden` phrase already matches that sheet. Phrase
     /// `albuquerque rose garden`, not the word `albuquerque`.
     /// Memorial Rose Garden is a separate sheet. The `rose garden`
-    /// phrase already matches both. Winrock Garden is a mall bed and stays out.
+    /// phrase already matches both. Phrase `la mesa neighborhood`,
+    /// not `la mesa`. Paseo de la Mesa Open Space stays Open reserve.
+    /// La Mesa Court stays a road. The `community garden` phrase
+    /// already matches that sheet. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,

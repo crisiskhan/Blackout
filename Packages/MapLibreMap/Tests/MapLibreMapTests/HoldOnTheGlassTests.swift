@@ -106,6 +106,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not Coyote Cave Park. 2.5 km from OSM water.
     private static let batCave = CLLocationCoordinate2D(latitude: 32.932316, longitude: -107.234781)
 
+    /// `Manilla Thrilla Cave` on the west place slice. A cave mouth,
+    /// 232 m from Bat Cave so the probe does not mix them. 2.3 km
+    /// from OSM water.
+    private static let manillaThrilla = CLLocationCoordinate2D(latitude: 32.930831, longitude: -107.233037)
+
     /// `Cueva del Apache` on the west place slice. A cave mouth, not the
     /// path `Cueva del Apache - La Ventana`. 126 m from OSM stream.
     private static let cuevaDelApache = CLLocationCoordinate2D(latitude: 31.702715, longitude: -106.583114)
@@ -313,6 +318,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// separate sheet. 975 m from Embudo Arroyo.
     private static let albuquerqueRose = CLLocationCoordinate2D(latitude: 35.107927, longitude: -106.552812)
 
+    /// Interior of La Mesa Neighborhood Community Garden. Phrase
+    /// `la mesa neighborhood`, not `la mesa`. Paseo de la Mesa Open
+    /// Space stays Open reserve. La Mesa Court stays a road. 512 m
+    /// from OSM ditch.
+    private static let laMesaGarden = CLLocationCoordinate2D(latitude: 35.080221, longitude: -106.563856)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -347,6 +358,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Marquez Wildlife Management Area in NM `layers/ground.geojson`.
     /// SOLO_QA 35.327562, −107.319389 is on the sheet and far from water or a way.
     private static let nmWildlifeRange = CLLocationCoordinate2D(latitude: 35.327562, longitude: -107.319389)
+
+    /// Interior of Bernardo Wildlife Management Area. Phrase `bernardo
+    /// wildlife`, not the word `bernardo`. Bernardo Trails Park stays
+    /// a park. Don Bernardo Road stays a road. 2316 m from OSM drain.
+    private static let bernardoWMA = CLLocationCoordinate2D(latitude: 34.423426, longitude: -106.829413)
 
     /// Interior of Pronoun Cave ACEC in NM `layers/ground.geojson`. A cave
     /// phrase, not open reserve, even though the name also says ACEC.
@@ -778,6 +794,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(bat.card?.fieldRoute.first, Inspect.caveCard, "\(bat)")
         XCTAssertTrue((bat.card?.doLine.lowercased() ?? "").contains("stay in daylight"), bat.card?.doLine ?? "")
         XCTAssertFalse((bat.card?.doLine.lowercased() ?? "").contains("edible"), bat.card?.doLine ?? "")
+
+        let manilla = try hold(at: Self.manillaThrilla, zoom: 16)
+        XCTAssertEqual(manilla.card?.klass, "Cave or hole", "\(manilla)")
+        XCTAssertEqual(manilla.card?.title, "Manilla Thrilla Cave", "\(manilla)")
+        XCTAssertNotEqual(manilla.card?.title, "Bat Cave", "\(manilla)")
+        XCTAssertEqual(manilla.card?.fieldRoute.first, Inspect.caveCard, "\(manilla)")
+        XCTAssertTrue((manilla.card?.doLine.lowercased() ?? "").contains("stay in daylight"), manilla.card?.doLine ?? "")
+        XCTAssertFalse((manilla.card?.doLine.lowercased() ?? "").contains("edible"), manilla.card?.doLine ?? "")
 
         let apache = try hold(at: Self.cuevaDelApache, zoom: 16)
         XCTAssertEqual(apache.card?.klass, "Cave or hole", "\(apache)")
@@ -1381,6 +1405,22 @@ final class HoldOnTheGlassTests: XCTestCase {
             "Albuquerque Rose Garden opened woodland tree-use: \(albuquerqueRose)"
         )
         XCTAssertFalse((albuquerqueRose.card?.doLine.lowercased() ?? "").contains("edible"), albuquerqueRose.card?.doLine ?? "")
+
+        let laMesa = try hold(at: Self.laMesaGarden, zoom: 16, packId: "nm")
+        XCTAssertEqual(laMesa.card?.klass, "Botanic garden", "\(laMesa)")
+        XCTAssertEqual(laMesa.card?.title, "La Mesa Neighborhood Community Garden", "\(laMesa)")
+        XCTAssertNotEqual(laMesa.card?.klass, "Open reserve", "\(laMesa)")
+        XCTAssertNotEqual(laMesa.card?.title, "Paseo de la Mesa Open Space", "\(laMesa)")
+        XCTAssertEqual(laMesa.card?.fieldRoute.first, Inspect.plantTXCard, "\(laMesa)")
+        XCTAssertTrue(
+            laMesa.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "La Mesa Neighborhood Community Garden dropped the NM plant-danger card: \(laMesa)"
+        )
+        XCTAssertFalse(
+            laMesa.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "La Mesa Neighborhood Community Garden opened woodland tree-use: \(laMesa)"
+        )
+        XCTAssertFalse((laMesa.card?.doLine.lowercased() ?? "").contains("edible"), laMesa.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeManagementAreaOpensAnimalsNotPicnicWoodland() throws {
@@ -1484,6 +1524,20 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(history.card?.klass, "Open reserve", "\(history)")
         XCTAssertEqual(history.card?.fieldRoute.first, Inspect.mammalTXCard, "\(history)")
         XCTAssertFalse((history.card?.doLine.lowercased() ?? "").contains("edible"), history.card?.doLine ?? "")
+
+        let bernardo = try hold(at: Self.bernardoWMA, zoom: 16, packId: "nm")
+        XCTAssertEqual(bernardo.card?.klass, "Wildlife range", "\(bernardo)")
+        XCTAssertEqual(bernardo.card?.title, "Bernardo Wildlife Management Area", "\(bernardo)")
+        XCTAssertNotEqual(bernardo.card?.klass, "Park", "\(bernardo)")
+        XCTAssertNotEqual(bernardo.card?.title, "Bernardo Trails Park", "\(bernardo)")
+        XCTAssertEqual(bernardo.card?.fieldRoute.first, Inspect.mammalTXCard, "\(bernardo)")
+        XCTAssertTrue(
+            bernardo.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "Bernardo WMA dropped the NM mammal card: \(bernardo)"
+        )
+        XCTAssertTrue((bernardo.card?.doLine.lowercased() ?? "").contains("elk is high country"), bernardo.card?.doLine ?? "")
+        XCTAssertFalse((bernardo.card?.doLine.lowercased() ?? "").contains("javelina"), bernardo.card?.doLine ?? "")
+        XCTAssertFalse((bernardo.card?.doLine.lowercased() ?? "").contains("edible"), bernardo.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {
