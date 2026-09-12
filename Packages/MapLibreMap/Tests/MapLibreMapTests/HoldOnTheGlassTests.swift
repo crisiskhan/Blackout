@@ -541,7 +541,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Missile Range S Route 287 stays a road. San Andres Peak is
     /// held 5032 m off this pip — rank 1 still beats the overlay.
     /// Bennett Mountain is held 14199 m off this pip — rank 1
-    /// still beats the overlay. Unique overlay.
+    /// still beats the overlay. Big Brushy Mountain is held
+    /// 10496 m off this pip — rank 1 still beats the overlay.
+    /// Unique overlay.
     private static let sanAndres = CLLocationCoordinate2D(latitude: 32.688003, longitude: -106.484294)
 
     /// Interior of Chihuahuan Desert Gardens. Phrase `desert garden` on a
@@ -886,6 +888,16 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// name. Javelina as range, not hog. Goat Mountain stays unheld
     /// (two OSM peaks).
     private static let bennettMountain = CLLocationCoordinate2D(latitude: 32.560366, longitude: -106.479718)
+
+    /// `Big Brushy Mountain` on the west place slice. A named
+    /// peak on the San Andres overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus the San Andres overlay Hold
+    /// (10496 m), Bennett Mountain (5561 m), and San Andres Peak
+    /// (8802 m). Overlay containment is the nearby name. Unique
+    /// title (one OSM peak). Nearest water ~1797 m. Javelina as
+    /// range, not hog. Goat Mountain stays unheld (two OSM
+    /// peaks). Do not add matcher `brushy` or `big brushy`.
+    private static let bigBrushyMountain = CLLocationCoordinate2D(latitude: 32.598142, longitude: -106.518609)
 
     /// `Loma El Gato` on the west place slice. A named peak on the
     /// Samalayuca overlay sheet — rank 1 still beats the overlay.
@@ -1476,6 +1488,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(sanAndres.card?.title, "White Sands Missile Range S Route 287", "\(sanAndres)")
         XCTAssertNotEqual(sanAndres.card?.title, "San Andres Peak", "\(sanAndres)")
         XCTAssertNotEqual(sanAndres.card?.title, "Bennett Mountain", "\(sanAndres)")
+        XCTAssertNotEqual(sanAndres.card?.title, "Big Brushy Mountain", "\(sanAndres)")
         XCTAssertEqual(sanAndres.card?.fieldRoute.first, Inspect.mammalTXCard, "\(sanAndres)")
         XCTAssertTrue((sanAndres.card?.doLine.lowercased() ?? "").contains("javelina"), sanAndres.card?.doLine ?? "")
         XCTAssertFalse((sanAndres.card?.doLine.lowercased() ?? "").contains("edible"), sanAndres.card?.doLine ?? "")
@@ -3017,6 +3030,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(andres.card?.klass, "Wildlife range", "\(andres)")
         XCTAssertNotEqual(andres.card?.title, "San Andres National Wildlife Refuge", "\(andres)")
         XCTAssertNotEqual(andres.card?.title, "Mount Franklin", "\(andres)")
+        XCTAssertNotEqual(andres.card?.title, "Big Brushy Mountain", "\(andres)")
         let andresDo = andres.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(andresDo.contains("javelina"), andres.card?.doLine ?? "")
         XCTAssertTrue(andresDo.contains("give it the road"), andres.card?.doLine ?? "")
@@ -3056,6 +3070,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(bennett.card?.title, "San Andres Peak", "\(bennett)")
         XCTAssertNotEqual(bennett.card?.title, "Mount Franklin", "\(bennett)")
         XCTAssertNotEqual(bennett.card?.title, "Goat Mountain", "\(bennett)")
+        XCTAssertNotEqual(bennett.card?.title, "Big Brushy Mountain", "\(bennett)")
         let bennettDo = bennett.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(bennettDo.contains("javelina"), bennett.card?.doLine ?? "")
         XCTAssertTrue(bennettDo.contains("give it the road"), bennett.card?.doLine ?? "")
@@ -3065,6 +3080,25 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(bennettPresent.first, Inspect.mammalTXCard, "\(bennett)")
         XCTAssertEqual(InspectField.label(for: bennettPresent.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: bennettPresent), "ANIMAL · BITE · COLD")
+
+        let brushy = try hold(at: Self.bigBrushyMountain, zoom: 16)
+        XCTAssertEqual(brushy.card?.klass, "Peak", "\(brushy)")
+        XCTAssertEqual(brushy.card?.title, "Big Brushy Mountain", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.klass, "Wildlife range", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.title, "San Andres National Wildlife Refuge", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.title, "San Andres Peak", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.title, "Bennett Mountain", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.title, "Mount Franklin", "\(brushy)")
+        XCTAssertNotEqual(brushy.card?.title, "Goat Mountain", "\(brushy)")
+        let brushyDo = brushy.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(brushyDo.contains("javelina"), brushy.card?.doLine ?? "")
+        XCTAssertTrue(brushyDo.contains("give it the road"), brushy.card?.doLine ?? "")
+        XCTAssertFalse(brushyDo.contains("hog"), brushy.card?.doLine ?? "")
+        XCTAssertFalse(brushyDo.contains("edible"), brushy.card?.doLine ?? "")
+        let brushyPresent = InspectField.presentRoute(brushy.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(brushyPresent.first, Inspect.mammalTXCard, "\(brushy)")
+        XCTAssertEqual(InspectField.label(for: brushyPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: brushyPresent), "ANIMAL · BITE · COLD")
     }
 
     func testHoldingAnEastPeakOpensHogNotJavelina() throws {

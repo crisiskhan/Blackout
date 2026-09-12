@@ -178,7 +178,9 @@ CAVE_PRESERVE_KEYS = {
 # National Wildlife Refuge. San Andres Peak is a named peak
 # on that sheet — rank 1 still beats the overlay. Bennett
 # Mountain is a named peak on that sheet — rank 1 still
-# beats the overlay. Do not add matcher `bennett`. Goat
+# beats the overlay. Big Brushy Mountain is a named peak
+# on that sheet — rank 1 still beats the overlay. Do not
+# add matcher `bennett`, `brushy`, or `big brushy`. Goat
 # Mountain stays unheld (two OSM peaks). Do not add
 # matcher `san andres` or `sevilleta`. Phrase `wildlife
 # management area` already matches Marquez Wildlife
