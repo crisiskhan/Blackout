@@ -372,9 +372,10 @@ NOTABLE_WILDLIFE_NAME = (
 # worked plant ground. Fincher III is a community garden without
 # the amenity tag. Brazos Bluff and Explorers Garden are
 # educational gardens, not Brazos Street. Haozous Garden is not
-# Haozous Road. Winrock Garden is a mall bed and stays out.
-# Experimental Gardens overlap glasshouses and stay out. Not a
-# meal.
+# Haozous Road. Este Garden is not Celeste Drive. Alamo Community
+# Garden is a separate sheet. Winrock Garden is a mall bed and
+# stays out. Experimental Gardens overlap glasshouses and stay
+# out. Not a meal.
 NOTABLE_BOTANIC_NAME = (
     "botanic garden|botanical garden|conservatory|cactus garden|"
     "desert garden|rose garden|community garden|wildflower preserve|"
@@ -382,7 +383,7 @@ NOTABLE_BOTANIC_NAME = (
     "japaneese garden|japanese garden|capitol flower|japanese memorial|"
     "demonstration garden|preston foster|xeriscape garden|"
     "teaching garden|fincher iii garden|brazos bluff|"
-    "explorers garden|haozous garden"
+    "explorers garden|haozous garden|este garden"
 )
 
 

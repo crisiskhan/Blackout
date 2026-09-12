@@ -456,7 +456,9 @@ public enum Inspect {
     /// tag. Phrase `brazos bluff`, not the word `brazos` — Brazos
     /// Street stays a road. Phrase `explorers garden`. Both are
     /// educational gardens, not a meal. Phrase `haozous garden`,
-    /// not the word `haozous` — Haozous Road stays a road. Winrock
+    /// not the word `haozous` — Haozous Road stays a road. Phrase
+    /// `este garden`, not the word `este`. Celeste Drive stays a
+    /// road. Alamo Community Garden is a separate sheet. Winrock
     /// Garden is a mall bed and stays out. Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,
@@ -489,6 +491,7 @@ public enum Inspect {
             || n.contains("brazos bluff")
             || n.contains("explorers garden")
             || n.contains("haozous garden")
+            || n.contains("este garden")
         guard phrase else { return false }
         if t["leisure"] == "garden" { return true }
         let park = t["leisure"] == "park"

@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 6, 9, 34), "tx-east": (14, 8, 37, 22, 15), "nm": (10, 1, 20, 18, 53)}
+        expected = {"tx-west": (2, 0, 6, 9, 34), "tx-east": (14, 8, 37, 23, 15), "nm": (10, 1, 20, 18, 53)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -238,7 +238,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("e.r. fincher iii garden", east_blob)
         self.assertIn("brazos bluff", east_blob)
         self.assertIn("explorers garden", east_blob)
+        self.assertIn("este garden", east_blob)
         self.assertNotIn("brazos street", east_blob)
+        self.assertNotIn("celeste drive", east_blob)
         self.assertIn("north austin community garden", east_blob)
         self.assertNotIn("ladybird johnson wildflower center foot paths", east_blob)
         self.assertNotIn("moontower saloon beer garden", east_blob)
@@ -525,6 +527,13 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "Haozous Road"})
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "garden", "name": "Este Garden"}),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Celeste Drive"})
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "garden", "name": "Winrock Garden"})
@@ -2274,6 +2283,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("The Haozous Garden", glass)
         self.assertIn("35.586438", glass)
         self.assertIn("-106.010271", glass)
+        self.assertIn("Este Garden", glass)
+        self.assertIn("30.283704", glass)
+        self.assertIn("-97.719118", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2503,6 +2515,7 @@ class GroundFieldSync(unittest.TestCase):
         fincher_hit = False
         brazos_bluff_hit = False
         explorers_hit = False
+        este_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2556,6 +2569,8 @@ class GroundFieldSync(unittest.TestCase):
                     brazos_bluff_hit = True
                 if kind == "botanic" and name == "Explorers Garden" and pip(-97.740969, 30.260564, ring):
                     explorers_hit = True
+                if kind == "botanic" and name == "Este Garden" and pip(-97.719118, 30.283704, ring):
+                    este_hit = True
                 if kind == "wildlife" and name == "Baker Sanctuary" and pip(-97.865747, 30.483183, ring):
                     baker_hit = True
                 if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
@@ -2646,6 +2661,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             explorers_hit,
             "Explorers Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            este_hit,
+            "Este Garden is not botanic on the east overlay",
         )
         self.assertTrue(
             baker_hit,
@@ -3053,6 +3072,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("brazos bluff", botanic_name)
         self.assertIn("explorers garden", botanic_name)
         self.assertIn("haozous garden", botanic_name)
+        self.assertIn("este garden", botanic_name)
         self.assertNotIn("japaneese", wildlife_name)
         self.assertNotIn("capitol", wildlife_name)
         self.assertNotIn("demonstration", wildlife_name)
@@ -3063,6 +3083,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("brazos", wildlife_name)
         self.assertNotIn("explorers", wildlife_name)
         self.assertNotIn("haozous", wildlife_name)
+        self.assertNotIn("este garden", wildlife_name)
         self.assertIn('way["leisure"="garden"]["name"~"', fetch)
         self.assertIn('relation["leisure"="garden"]["name"~"', fetch)
         self.assertIn('way["amenity"="community_garden"]["name"]', fetch)
@@ -3406,6 +3427,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.260564", qa)
         self.assertIn("haozous garden", qa)
         self.assertIn("35.586438", qa)
+        self.assertIn("este garden", qa)
+        self.assertIn("30.283704", qa)
+        self.assertIn("Este Garden", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

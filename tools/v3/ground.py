@@ -176,10 +176,12 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # word `brazos` — Brazos Street stays a road. Phrase `explorers
 # garden`. Both are Trail Conservancy educational gardens, not a
 # meal. Phrase `haozous garden`, not the word `haozous` —
-# Haozous Road stays a road. Winrock Garden is a mall bed and
-# stays out. Schepps' Garden stays out. Experimental Gardens
-# overlap glasshouses and stay out. A named garden without a
-# botanic phrase is not this overlay. Memorial Garden stays out.
+# Haozous Road stays a road. Phrase `este garden`, not the word
+# `este`. Celeste Drive stays a road. Alamo Community Garden is
+# a separate sheet. Winrock Garden is a mall bed and stays out.
+# Schepps' Garden stays out. Experimental Gardens overlap
+# glasshouses and stay out. A named garden without a botanic
+# phrase is not this overlay. Memorial Garden stays out.
 # `leisure=garden` is botanic-eligible with a phrase; it is not a
 # cave, wildlife, or open-reserve key.
 BOTANIC_GARDEN_PHRASES = (
@@ -207,6 +209,7 @@ BOTANIC_GARDEN_PHRASES = (
     "brazos bluff",
     "explorers garden",
     "haozous garden",
+    "este garden",
 )
 
 

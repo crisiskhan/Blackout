@@ -192,7 +192,7 @@
             "north": 30.32,
             "east": -97.68
           },
-          "featureCount": 41277
+          "featureCount": 41288
         },
         "wild": {
           "name": "Lost Pines / Bastrop wild",
@@ -203,7 +203,7 @@
             "north": 30.18,
             "east": -97.2
           },
-          "featureCount": 3636
+          "featureCount": 3637
         },
         "union": {
           "name": "Austin / Lost Pines walkable union",
@@ -214,7 +214,7 @@
             "north": 30.42,
             "east": -97.2
           },
-          "featureCount": 210394
+          "featureCount": 210412
         },
         "region": {
           "name": "Austin / Bastrop / Buda region",
@@ -225,7 +225,7 @@
             "north": 30.5,
             "east": -97.2
           },
-          "featureCount": 280756
+          "featureCount": 280777
         }
       },
       "banners": [
@@ -268,7 +268,7 @@
         ]
       },
       "stats": {
-        "features": 281221,
+        "features": 281241,
         "highwayLines": 251209,
         "namedStreets": 45194,
         "sampleStreetNames": [
@@ -316,7 +316,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 30803786
+      "bytes": 30804272
     },
     {
       "id": "nm",

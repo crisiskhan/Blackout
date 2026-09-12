@@ -266,6 +266,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Haozous Road. 1064 m from water.
     private static let haozousGarden = CLLocationCoordinate2D(latitude: 35.586438, longitude: -106.010271)
 
+    /// Interior of Este Garden. Phrase `este garden`, not the word
+    /// `este`. Celeste Drive stays a road. 203 m from OSM water.
+    private static let esteGarden = CLLocationCoordinate2D(latitude: 30.283704, longitude: -97.719118)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -1197,6 +1201,16 @@ final class HoldOnTheGlassTests: XCTestCase {
             "The Haozous Garden opened woodland tree-use: \(haozous)"
         )
         XCTAssertFalse((haozous.card?.doLine.lowercased() ?? "").contains("edible"), haozous.card?.doLine ?? "")
+
+        let este = try hold(at: Self.esteGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(este.card?.klass, "Botanic garden", "\(este)")
+        XCTAssertEqual(este.card?.title, "Este Garden", "\(este)")
+        XCTAssertEqual(este.card?.fieldRoute.first, Inspect.plantTXCard, "\(este)")
+        XCTAssertFalse(
+            este.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Este Garden opened woodland tree-use: \(este)"
+        )
+        XCTAssertFalse((este.card?.doLine.lowercased() ?? "").contains("edible"), este.card?.doLine ?? "")
 
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")

@@ -2704,6 +2704,22 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertNotEqual(haozousRoad.klass, "Botanic garden")
 
+        let esteGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "Este Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(esteGarden.klass, "Botanic garden")
+        XCTAssertEqual(esteGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(esteGarden.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(esteGarden.doLine.lowercased().contains("edible"), esteGarden.doLine)
+
+        let celesteDrive = Inspect.read(
+            tags: ["highway": "residential", "name": "Celeste Drive"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(celesteDrive.klass, "Road")
+        XCTAssertNotEqual(celesteDrive.klass, "Botanic garden")
+
         let winrock = Inspect.read(
             tags: ["leisure": "garden", "name": "Winrock Garden"],
             pack: "nm"
