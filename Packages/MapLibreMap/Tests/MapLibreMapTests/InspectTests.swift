@@ -3024,6 +3024,61 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(bearCanyon.klass, "Open reserve")
         XCTAssertNotEqual(bearCanyon.klass, "Park")
+        XCTAssertFalse(bearCanyon.doLine.lowercased().contains("edible"), bearCanyon.doLine)
+
+        let bearCanyonEast = Inspect.read(
+            tags: ["leisure": "park", "name": "Bear Canyon Open Space East"],
+            pack: "nm"
+        )
+        XCTAssertEqual(bearCanyonEast.klass, "Open reserve")
+        XCTAssertNotEqual(bearCanyonEast.klass, "Park")
+        XCTAssertFalse(bearCanyonEast.doLine.lowercased().contains("edible"), bearCanyonEast.doLine)
+
+        let keyWestDrive = Inspect.read(
+            tags: ["highway": "residential", "name": "Key West Drive Northeast"],
+            pack: "nm"
+        )
+        XCTAssertEqual(keyWestDrive.klass, "Road")
+        XCTAssertNotEqual(keyWestDrive.klass, "Open reserve")
+
+        let michaelEmery = Inspect.read(
+            tags: ["highway": "path", "name": "Michael Emery Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(michaelEmery.klass, "Trail")
+        XCTAssertNotEqual(michaelEmery.klass, "Open reserve")
+
+        let conservationTrust = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Santa Fe Conservation Trust"],
+            pack: "nm"
+        )
+        XCTAssertEqual(conservationTrust.klass, "Open reserve")
+        XCTAssertNotEqual(conservationTrust.klass, "Park")
+        XCTAssertEqual(conservationTrust.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(conservationTrust.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(conservationTrust.doLine.lowercased().contains("edible"), conservationTrust.doLine)
+
+        let southTrail = Inspect.read(
+            tags: ["highway": "path", "name": "South Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(southTrail.klass, "Trail")
+        XCTAssertNotEqual(southTrail.klass, "Open reserve")
+
+        let landConservancy = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "New Mexico Land Conservancy"],
+            pack: "nm"
+        )
+        XCTAssertEqual(landConservancy.klass, "Open reserve")
+        XCTAssertNotEqual(landConservancy.klass, "Park")
+        XCTAssertFalse(landConservancy.doLine.lowercased().contains("edible"), landConservancy.doLine)
+
+        let lcLoop = Inspect.read(
+            tags: ["highway": "footway", "name": "LC Loop"],
+            pack: "nm"
+        )
+        XCTAssertEqual(lcLoop.klass, "Trail")
+        XCTAssertNotEqual(lcLoop.klass, "Open reserve")
 
         let rioBosqueOpen = Inspect.read(
             tags: ["leisure": "park", "name": "Alameda/Rio Grande Open Space"],
@@ -4591,6 +4646,62 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([ojitoSanPark, ojoRoad])["leisure"], "park")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([ojitoSanPark, ojoRoad]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let bearWestPark: [String: String] = [
+            "leisure": "park",
+            "name": "Bear Canyon Open Space West",
+        ]
+        let keyWestRoad: [String: String] = [
+            "highway": "residential",
+            "name": "Key West Drive Northeast",
+        ]
+        XCTAssertEqual(Inspect.pick([bearWestPark, keyWestRoad])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([bearWestPark, keyWestRoad]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let bearEastPark: [String: String] = [
+            "leisure": "park",
+            "name": "Bear Canyon Open Space East",
+        ]
+        let emeryPath: [String: String] = [
+            "highway": "path",
+            "name": "Michael Emery Trail",
+        ]
+        XCTAssertEqual(Inspect.pick([bearEastPark, emeryPath])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([bearEastPark, emeryPath]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let trustReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Santa Fe Conservation Trust",
+        ]
+        let southPath: [String: String] = [
+            "highway": "path",
+            "name": "South Trail",
+        ]
+        XCTAssertEqual(Inspect.pick([trustReserve, southPath])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([trustReserve, southPath]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let conservancyReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "New Mexico Land Conservancy",
+        ]
+        let lcPath: [String: String] = [
+            "highway": "footway",
+            "name": "LC Loop",
+        ]
+        XCTAssertEqual(Inspect.pick([conservancyReserve, lcPath])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([conservancyReserve, lcPath]), pack: "nm").klass,
             "Open reserve"
         )
         XCTAssertEqual(

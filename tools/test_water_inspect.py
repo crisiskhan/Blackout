@@ -1325,6 +1325,34 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "reserve",
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Bear Canyon Open Space East"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Key West Drive Northeast"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "path", "name": "Michael Emery Trail"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Santa Fe Conservation Trust"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "path", "name": "South Trail"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "New Mexico Land Conservancy"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "footway", "name": "LC Loop"}))
         self.assertIsNone(
             ground.overlay_kind(
                 {"leisure": "park", "name": "Alameda/Rio Grande Open Space"}
@@ -1905,6 +1933,34 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "Ojo Grande Drive"})
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Bear Canyon Open Space East"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Key West Drive Northeast"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "path", "name": "Michael Emery Trail"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Santa Fe Conservation Trust"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "path", "name": "South Trail"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "New Mexico Land Conservancy"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "footway", "name": "LC Loop"}))
         self.assertEqual(
             ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Indian Grass Prarie Preserve"}
@@ -3621,6 +3677,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Ojito de San Antonio Open Space", glass)
         self.assertIn("35.106397", glass)
         self.assertIn("-106.386934", glass)
+        self.assertIn("Bear Canyon Open Space West", glass)
+        self.assertIn("35.139330", glass)
+        self.assertIn("-106.501664", glass)
+        self.assertIn("Bear Canyon Open Space East", glass)
+        self.assertIn("35.141819", glass)
+        self.assertIn("-106.494797", glass)
+        self.assertIn("Santa Fe Conservation Trust", glass)
+        self.assertIn("35.438722", glass)
+        self.assertIn("-105.937968", glass)
+        self.assertIn("New Mexico Land Conservancy", glass)
+        self.assertIn("35.616355", glass)
+        self.assertIn("-106.005767", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -5595,6 +5663,66 @@ class GroundFieldSync(unittest.TestCase):
             "Ojito de San Antonio Open Space hold is not inside the named open space",
         )
 
+        nm_bear_west_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Bear Canyon Open Space West":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.501664, 35.139330, ring):
+                    nm_bear_west_hit = True
+        self.assertTrue(
+            nm_bear_west_hit,
+            "Bear Canyon Open Space West hold is not inside the named open space",
+        )
+
+        nm_bear_east_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Bear Canyon Open Space East":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.494797, 35.141819, ring):
+                    nm_bear_east_hit = True
+        self.assertTrue(
+            nm_bear_east_hit,
+            "Bear Canyon Open Space East hold is not inside the named open space",
+        )
+
+        nm_trust_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Santa Fe Conservation Trust":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-105.937968, 35.438722, ring):
+                    nm_trust_hit = True
+        self.assertTrue(
+            nm_trust_hit,
+            "Santa Fe Conservation Trust hold is not inside the named nature reserve",
+        )
+
+        nm_conservancy_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "New Mexico Land Conservancy":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.005767, 35.616355, ring):
+                    nm_conservancy_hit = True
+        self.assertTrue(
+            nm_conservancy_hit,
+            "New Mexico Land Conservancy hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -6224,6 +6352,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.075040", qa)
         self.assertIn("Ojito de San Antonio Open Space", qa)
         self.assertIn("35.106397", qa)
+        self.assertIn("Bear Canyon Open Space West", qa)
+        self.assertIn("35.139330", qa)
+        self.assertIn("Bear Canyon Open Space East", qa)
+        self.assertIn("35.141819", qa)
+        self.assertIn("Santa Fe Conservation Trust", qa)
+        self.assertIn("35.438722", qa)
+        self.assertIn("New Mexico Land Conservancy", qa)
+        self.assertIn("35.616355", qa)
         self.assertIn("Prehistoric Trackways National Monument", qa)
         self.assertIn("32.370257", qa)
         self.assertIn("White Sands National Park", qa)
@@ -6681,6 +6817,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Gutierrez Canyon-Milne Open Space", qa)
         self.assertIn("Tres Pistolas Open Space", qa)
         self.assertIn("Ojito de San Antonio Open Space", qa)
+        self.assertIn("Bear Canyon Open Space West", qa)
+        self.assertIn("Bear Canyon Open Space East", qa)
+        self.assertIn("Santa Fe Conservation Trust", qa)
+        self.assertIn("New Mexico Land Conservancy", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

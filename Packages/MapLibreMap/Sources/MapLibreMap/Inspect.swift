@@ -672,7 +672,9 @@ public enum Inspect {
     /// Bandelier National Monument, Carlito Springs Open Space,
     /// Sedillo Ridge Open Space, Loma Ponderosa Open Space, Sabino
     /// Canyon Open Space, Gutierrez Canyon-Milne Open Space, Tres
-    /// Pistolas Open Space, and Ojito de San Antonio Open Space are those
+    /// Pistolas Open Space, Ojito de San Antonio Open Space, Bear
+    /// Canyon Open Space West, Bear Canyon Open Space East, Santa Fe
+    /// Conservation Trust, and New Mexico Land Conservancy are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
@@ -684,7 +686,8 @@ public enum Inspect {
     /// `ladron`, `indian grass`, `indian`, `dome`, `manzano`,
     /// `sandia`, `organ`, `desert peaks`, `bandelier`, `carlito`,
     /// `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
-    /// `tres pistolas`, or `pistolas`. Phrase
+    /// `tres pistolas`, `pistolas`, `bear canyon`, `conservation
+    /// trust`, `land conservancy`, or `conservancy`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
