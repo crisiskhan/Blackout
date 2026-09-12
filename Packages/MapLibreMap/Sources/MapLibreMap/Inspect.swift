@@ -450,7 +450,10 @@ public enum Inspect {
     /// Wildlife Refuge and Sevilleta National Wildlife Refuge.
     /// San Andres Peak is a named peak on that sheet — rank 1
     /// still beats the overlay. Do not add matcher `san andres`
-    /// or `sevilleta`. White
+    /// or `sevilleta`. Phrase `wildlife management area` already
+    /// matches Marquez Wildlife Management Area. Mesa Blanca is a
+    /// named peak on that sheet — rank 1 still beats the overlay.
+    /// Do not add matcher `mesa blanca` or `marquez`. White
     /// Sands Missile Range S Route 287 and Old Highway 85 stay
     /// roads. Phrase `wildlife refuge` already matches Feather
     /// Lake Wildlife Refuge. Ditches sit on most of that sheet;

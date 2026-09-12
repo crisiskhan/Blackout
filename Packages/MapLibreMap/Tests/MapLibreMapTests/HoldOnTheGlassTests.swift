@@ -767,6 +767,8 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Marquez Wildlife Management Area in NM `layers/ground.geojson`.
     /// SOLO_QA 35.327562, −107.319389 is on the sheet and far from water or a way.
+    /// Mesa Blanca is held 5246 m off this pip — rank 1 still
+    /// beats the overlay.
     private static let nmWildlifeRange = CLLocationCoordinate2D(latitude: 35.327562, longitude: -107.319389)
 
     /// Interior of Bernardo Wildlife Management Area. Phrase `bernardo
@@ -886,6 +888,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `La Cruz Peak` on the NM place slice. Bear and elk as range, not
     /// west javelina. Ice-on-rock is in this book, so FIELD names cold first.
     private static let nmPeak = CLLocationCoordinate2D(latitude: 34.392837, longitude: -107.420040)
+
+    /// `Mesa Blanca` on the NM place slice. A named peak on the
+    /// Marquez overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus the Marquez overlay Hold (5246 m). Bear
+    /// and elk as range, not javelina. Ice-on-rock is in this
+    /// book, so FIELD names cold first.
+    private static let mesaBlanca = CLLocationCoordinate2D(latitude: 35.338369, longitude: -107.263101)
 
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
@@ -2648,6 +2657,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         let held = try hold(at: Self.nmWildlifeRange, zoom: 16, packId: "nm")
         XCTAssertEqual(held.card?.klass, "Wildlife range", "\(held)")
         XCTAssertEqual(held.card?.title, "Marquez Wildlife Management Area", "\(held)")
+        XCTAssertNotEqual(held.card?.title, "Mesa Blanca", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.mammalTXCard, "\(held)")
         XCTAssertTrue(
             held.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
@@ -3170,6 +3180,23 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(present.first, Inspect.iceRockCard, "\(held)")
         XCTAssertEqual(InspectField.label(for: present.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: present), "COLD · ANIMAL · BITE")
+
+        let blanca = try hold(at: Self.mesaBlanca, zoom: 16, packId: "nm")
+        XCTAssertEqual(blanca.card?.klass, "Peak", "\(blanca)")
+        XCTAssertEqual(blanca.card?.title, "Mesa Blanca", "\(blanca)")
+        XCTAssertNotEqual(blanca.card?.klass, "Wildlife range", "\(blanca)")
+        XCTAssertNotEqual(blanca.card?.title, "Marquez Wildlife Management Area", "\(blanca)")
+        XCTAssertNotEqual(blanca.card?.title, "La Cruz Peak", "\(blanca)")
+        let blancaDo = blanca.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(blancaDo.contains("black bear and elk range"), blanca.card?.doLine ?? "")
+        XCTAssertTrue(blancaDo.contains("give it the road"), blanca.card?.doLine ?? "")
+        XCTAssertFalse(blancaDo.contains("javelina"), blanca.card?.doLine ?? "")
+        XCTAssertFalse(blancaDo.contains("hog"), blanca.card?.doLine ?? "")
+        XCTAssertFalse(blancaDo.contains("edible"), blanca.card?.doLine ?? "")
+        let blancaPresent = InspectField.presentRoute(blanca.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(blancaPresent.first, Inspect.iceRockCard, "\(blanca)")
+        XCTAssertEqual(InspectField.label(for: blancaPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: blancaPresent), "COLD · ANIMAL · BITE")
     }
 
     func testHoldingAnEastPrairiePreserveOpensBiteNotPicnicWoodland() throws {

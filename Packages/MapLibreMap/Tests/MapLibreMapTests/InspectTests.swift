@@ -978,6 +978,19 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(doLine.contains("edible"), marquez.doLine)
         XCTAssertFalse(marquez.why.lowercased().contains("edible"), marquez.why)
 
+        let mesaBlanca = Inspect.read(
+            tags: ["natural": "peak", "name": "Mesa Blanca"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(mesaBlanca.klass, "Peak")
+        XCTAssertNotEqual(mesaBlanca.klass, "Wildlife range")
+        XCTAssertTrue(mesaBlanca.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(mesaBlanca.doLine.lowercased().contains("black bear and elk range"), mesaBlanca.doLine)
+        XCTAssertFalse(mesaBlanca.doLine.lowercased().contains("javelina"), mesaBlanca.doLine)
+        XCTAssertFalse(mesaBlanca.doLine.lowercased().contains("hog"), mesaBlanca.doLine)
+        XCTAssertFalse(mesaBlanca.doLine.lowercased().contains("edible"), mesaBlanca.doLine)
+
         let refuge = Inspect.read(
             tags: [
                 "boundary": "protected_area",
@@ -3207,6 +3220,17 @@ final class InspectTests: XCTestCase {
                     "leisure": "nature_reserve",
                     "boundary": "protected_area",
                     "name": "San Andres National Wildlife Refuge",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Mesa Blanca"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Marquez Wildlife Management Area",
                 ],
             ])["natural"],
             "peak"

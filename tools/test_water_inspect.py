@@ -1625,6 +1625,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("andres")', inspect)
         self.assertNotIn('contains("sevilleta")', inspect)
         self.assertNotIn('contains("whitfield")', inspect)
+        self.assertNotIn('contains("marquez")', inspect)
+        self.assertNotIn('contains("mesa blanca")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2649,6 +2651,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn('packId: "tx-east"', glass)
         self.assertIn("Albuquerque BioPark Botanic Garden", glass)
         self.assertIn("Marquez Wildlife Management Area", glass)
+        self.assertIn("Mesa Blanca", glass)
+        self.assertIn("35.338369", glass)
+        self.assertIn("-107.263101", glass)
         self.assertIn("Pronoun Cave Area of Critical Environmental Concern", glass)
         self.assertIn("35.093625", glass)
         self.assertIn("-106.680958", glass)
@@ -4176,6 +4181,11 @@ class GroundFieldSync(unittest.TestCase):
             place_names_in_tile("tx-west", -106.536111, 32.675918),
             "San Andres Peak did not survive tiling as a peak",
         )
+        self.assertIn(
+            "Mesa Blanca",
+            place_names_in_tile("nm", -107.263101, 35.338369),
+            "Mesa Blanca did not survive tiling as a peak",
+        )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -4522,6 +4532,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_wood = False
         nm_bosque = False
         nm_peak = False
+        mesa_blanca_peak = False
         nm_scrub = False
         sandia_cave = False
         embudo_cave = False
@@ -4556,6 +4567,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-107.420040)) < 1e-6
                 ):
                     nm_peak = True
+                if (
+                    props.get("name") == "Mesa Blanca"
+                    and abs(lat - 35.338369) < 1e-6
+                    and abs(lon - (-107.263101)) < 1e-6
+                ):
+                    mesa_blanca_peak = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -4605,6 +4622,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
+        self.assertTrue(
+            mesa_blanca_peak, "Mesa Blanca is not a named peak in the NM extract"
+        )
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
         self.assertTrue(embudo_cave, "Embudo Cave is not a cave mouth in the NM extract")
@@ -5002,6 +5022,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Mount Franklin", qa)
         self.assertIn("Barton Hill", qa)
         self.assertIn("La Cruz Peak", qa)
+        self.assertIn("Mesa Blanca", qa)
+        self.assertIn("35.338369", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
         self.assertIn("35.124701", qa)
         self.assertIn("Open Space Visitor Center", qa)
