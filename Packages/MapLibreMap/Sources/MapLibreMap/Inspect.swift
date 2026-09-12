@@ -329,16 +329,16 @@ public enum Inspect {
     /// Elm Sink, Lime Creek Road Sink, and Under Three Oaks. Isolated
     /// mouths off those sheets: Buttercup Drain Cave and Warton
     /// Whirlpool. Overlay-sheet mouths also Holdable: Pat's Pit,
-    /// Persimmon Well, and Good Friday. Unique versus the Buttercup
+    /// Persimmon Well, Good Friday, and Jumbled Rocks. Unique versus the Buttercup
     /// overlay Hold (141 m). Cedar Elm Preserve Trail stays a trail.
     /// Brook Meadow Trail is a road. Village of Western Oaks Karst
     /// Preserve is a hole — phrase `karst preserve`. Listed hunt sat
     /// on water. This interior is 140 m from Tiombe Branch. La
     /// Cresada Drive stays a road. Godzilla Cave stays unheld —
-    /// Link's sits 84 m off that mouth. Hot Springs Cave is a named
+    /// Link's sits 84 m off that mouth. Zig Zag stays unheld. Hot Springs Cave is a named
     /// mouth inside Jemez NRA — rank 1 still beats the overlay. Soda
     /// Dam is rock, not the hole. Generic Cave and the two La Cueva
-    /// stay unheld. Do not add matcher `good friday` or `hot springs`.
+    /// stay unheld. Do not add matcher `good friday`, `hot springs`, or `jumbled`.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {

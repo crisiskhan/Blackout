@@ -52,14 +52,15 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 # mouth sits in the probe. Buttercup Blowhole, Cedar Elm Sink, Lime
 # Creek Road Sink, and Under Three Oaks. Isolated mouths off those
 # sheets: Buttercup Drain Cave and Warton Whirlpool. Overlay-sheet
-# mouths also Holdable: Pat's Pit, Persimmon Well, and Good Friday.
-# Unique versus the Buttercup overlay Hold (141 m). Cedar Elm
-# Preserve Trail stays a trail. Brook Meadow Trail is a road.
-# Godzilla Cave stays unheld — Link's sits 84 m off that mouth.
-# Hot Springs Cave is a named mouth inside Jemez NRA — rank 1
-# still beats the overlay. Soda Dam is rock, not the hole.
-# Generic Cave and the two La Cueva stay unheld. Do not add
-# matcher `good friday` or `hot springs`.
+# mouths also Holdable: Pat's Pit, Persimmon Well, Good Friday,
+# and Jumbled Rocks. Unique versus the Buttercup overlay Hold
+# (141 m). Cedar Elm Preserve Trail stays a trail. Brook Meadow
+# Trail is a road. Godzilla Cave stays unheld — Link's sits 84 m
+# off that mouth. Zig Zag stays unheld. Hot Springs Cave is a
+# named mouth inside Jemez NRA — rank 1 still beats the overlay.
+# Soda Dam is rock, not the hole. Generic Cave and the two La
+# Cueva stay unheld. Do not add matcher `good friday`, `hot
+# springs`, or `jumbled`.
 CAVE_PRESERVE_PHRASES = (
     "cave preserve",
     "cave area of critical",

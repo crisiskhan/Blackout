@@ -822,6 +822,14 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(goodFriday.fieldRoute.first, Inspect.caveCard)
         XCTAssertFalse(goodFriday.doLine.lowercased().contains("edible"), goodFriday.doLine)
 
+        let jumbledRocks = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Jumbled Rocks"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(jumbledRocks.klass, "Cave or hole")
+        XCTAssertEqual(jumbledRocks.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(jumbledRocks.doLine.lowercased().contains("edible"), jumbledRocks.doLine)
+
         let redLoop = Inspect.read(
             tags: ["highway": "footway", "name": "Red Loop"],
             pack: "tx-east"
@@ -3355,6 +3363,15 @@ final class InspectTests: XCTestCase {
                 ["highway": "residential", "name": "Brook Meadow Trail"],
                 ["highway": "residential", "name": "Anna Court"],
                 ["highway": "footway", "name": "Cedar Elm Preserve Trail"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Jumbled Rocks"],
+                ["leisure": "park", "name": "Discovery Well Cave Preserve"],
+                ["highway": "footway", "name": "Red Loop"],
+                ["highway": "footway", "name": "Blue Loop"],
             ])["natural"],
             "cave_entrance"
         )

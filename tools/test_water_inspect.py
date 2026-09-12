@@ -2996,6 +2996,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.490903", glass)
         self.assertIn("-97.859084", glass)
         self.assertIn("Red Loop", glass)
+        self.assertIn("Jumbled Rocks", glass)
+        self.assertIn("30.490379", glass)
+        self.assertIn("-97.857723", glass)
         self.assertIn("Anderson Mill Road", glass)
         self.assertIn("Buttercup Creek Boulevard", glass)
         self.assertIn("Painted Cave", glass)
@@ -3816,6 +3819,7 @@ class GroundFieldSync(unittest.TestCase):
         pats_pit_cave = False
         good_friday_cave = False
         persimmon_cave = False
+        jumbled_rocks_cave = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -3945,6 +3949,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.859084)) < 1e-6
                 ):
                     persimmon_cave = True
+                if (
+                    props.get("name") == "Jumbled Rocks"
+                    and abs(lat - 30.490379) < 1e-6
+                    and abs(lon - (-97.857723)) < 1e-6
+                ):
+                    jumbled_rocks_cave = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
@@ -3988,6 +3998,9 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             persimmon_cave, "Persimmon Well is not a cave mouth in the east extract"
+        )
+        self.assertTrue(
+            jumbled_rocks_cave, "Jumbled Rocks is not a cave mouth in the east extract"
         )
         self.assertIn(
             "Treaty Oak",
@@ -4132,6 +4145,11 @@ class GroundFieldSync(unittest.TestCase):
             "Persimmon Well",
             place_names_in_tile("tx-east", -97.859084, 30.490903),
             "Persimmon Well did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Jumbled Rocks",
+            place_names_in_tile("tx-east", -97.857723, 30.490379),
+            "Jumbled Rocks did not survive tiling as a mouth",
         )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
@@ -5034,6 +5052,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Persimmon Well", qa)
         self.assertIn("30.490903", qa)
         self.assertIn("Red Loop", qa)
+        self.assertIn("Jumbled Rocks", qa)
+        self.assertIn("30.490379", qa)
         self.assertIn("Painted Cave", qa)
         self.assertIn("35.722425", qa)
         self.assertIn("Hot Springs Cave", qa)

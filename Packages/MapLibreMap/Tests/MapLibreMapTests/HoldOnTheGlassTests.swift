@@ -156,7 +156,8 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
     /// Lime Creek Road Sink is 443 m off this pip. Under Three Oaks
-    /// is 385 m off this pip.
+    /// is 385 m off this pip. Jumbled Rocks is held 255 m off this
+    /// pip — rank 1 still beats the overlay.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)
 
     /// Interior of Buttercup Creek Cave Preserve. Phrase `cave
@@ -263,9 +264,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Persimmon Well` on the east place slice. A cave mouth on
     /// the Discovery Well overlay sheet — rank 1 still beats the
     /// overlay. Unique versus Lime Creek Road Sink (277 m) and
-    /// Jumbled Rocks (143 m). Red Loop stays a trail. No named
-    /// street in 110 m; overlay containment counts.
+    /// Jumbled Rocks (143 m) — Jumbled Rocks is held. Red Loop
+    /// stays a trail. No named street in 110 m; overlay
+    /// containment counts.
     private static let persimmonWell = CLLocationCoordinate2D(latitude: 30.490903, longitude: -97.859084)
+
+    /// `Jumbled Rocks` on the east place slice. A cave mouth on the
+    /// Discovery Well overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus Persimmon Well (143 m) and the Discovery Well
+    /// overlay Hold (255 m). Mix Unmarked Cave 126 m is outside the
+    /// probe. Red Loop stays a trail. Blue Loop stays a trail.
+    /// Zig Zag stays unheld. 278 m from OSM water.
+    private static let jumbledRocks = CLLocationCoordinate2D(latitude: 30.490379, longitude: -97.857723)
 
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
@@ -1883,6 +1893,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(held.card?.title, "Lime Creek Road Sink", "\(held)")
         XCTAssertNotEqual(held.card?.title, "Under Three Oaks", "\(held)")
         XCTAssertNotEqual(held.card?.title, "Persimmon Well", "\(held)")
+        XCTAssertNotEqual(held.card?.title, "Jumbled Rocks", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.caveCard, "\(held)")
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("stay in daylight"), held.card?.doLine ?? "")
@@ -2118,6 +2129,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(persimmon.card?.fieldRoute.first, Inspect.caveCard, "\(persimmon)")
         XCTAssertTrue((persimmon.card?.doLine.lowercased() ?? "").contains("stay in daylight"), persimmon.card?.doLine ?? "")
         XCTAssertFalse((persimmon.card?.doLine.lowercased() ?? "").contains("edible"), persimmon.card?.doLine ?? "")
+
+        let jumbled = try hold(at: Self.jumbledRocks, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(jumbled.card?.klass, "Cave or hole", "\(jumbled)")
+        XCTAssertEqual(jumbled.card?.title, "Jumbled Rocks", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Discovery Well Cave Preserve", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Persimmon Well", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Red Loop", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Blue Loop", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Unmarked Cave", "\(jumbled)")
+        XCTAssertNotEqual(jumbled.card?.title, "Zig Zag", "\(jumbled)")
+        XCTAssertEqual(jumbled.card?.fieldRoute.first, Inspect.caveCard, "\(jumbled)")
+        XCTAssertTrue((jumbled.card?.doLine.lowercased() ?? "").contains("stay in daylight"), jumbled.card?.doLine ?? "")
+        XCTAssertFalse((jumbled.card?.doLine.lowercased() ?? "").contains("edible"), jumbled.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {
