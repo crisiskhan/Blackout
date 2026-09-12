@@ -196,6 +196,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("la mesa court", nm_blob)
         self.assertIn("international district community garden", nm_blob)
         self.assertIn("memorial rose garden", nm_blob)
+        self.assertIn("la joya wildlife management area", nm_blob)
+        self.assertIn("rio rancho bosque nature preserve", nm_blob)
         self.assertNotIn("orchard gardens road", nm_blob)
         self.assertNotIn("rose park avenue", nm_blob)
         self.assertNotIn("wildrose park", nm_blob)
@@ -217,6 +219,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("lower barton creek management unit", east_blob)
         self.assertIn("mary gay maxwell management unit", east_blob)
         self.assertIn("onion creek management unit", east_blob)
+        self.assertIn("onion creek wildlife sanctuary", east_blob)
+        self.assertNotIn("onion creek drive", east_blob)
         self.assertIn("hornsby bend ecological research area", east_blob)
         self.assertIn("wildflower preserve", east_blob)
         self.assertNotIn("wildflower park", east_blob)
@@ -257,6 +261,16 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("bastrop community garden", east_blob)
         self.assertNotIn("bastrop street", east_blob)
         self.assertNotIn("longview neighborhood park", east_blob)
+        self.assertIn("fort dessau community garden", east_blob)
+        self.assertNotIn("fort dessau road", east_blob)
+        self.assertIn("windsor park community garden", east_blob)
+        self.assertIn("lamplight community garden", east_blob)
+        self.assertIn("juan navarro high school community garden", east_blob)
+        self.assertIn("unity park community garden", east_blob)
+        self.assertIn("colorado community garden", east_blob)
+        self.assertIn("alamo community garden", east_blob)
+        self.assertNotIn("alamo street", east_blob)
+        self.assertNotIn("lamplight village avenue", east_blob)
         self.assertIn("north austin community garden", east_blob)
         self.assertNotIn("ladybird johnson wildflower center foot paths", east_blob)
         self.assertNotIn("moontower saloon beer garden", east_blob)
@@ -457,6 +471,84 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Bastrop State Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Fort Dessau Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Fort Dessau Road"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Fort Dessau Amenity Center"}
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Windsor Park Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"place": "neighbourhood", "name": "Windsor Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Lamplight Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "tertiary", "name": "Lamplight Village Avenue"}
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "garden",
+                    "name": "Juan Navarro High School Community Garden",
+                }
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Unity Park Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Colorado Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Colorado River Park Wildlife Sanctuary",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Alamo Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Alamo Street"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Alamo Pocket Park"})
         )
         self.assertIsNone(
             ground.overlay_kind(
@@ -831,6 +923,42 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "wildlife",
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Blackmore",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Lake Perspectives",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Austin Simon",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Balcones Canyonlands Preserve - Lime Creek",
+                }
+            ),
+            "wildlife",
+        )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Canyonlands Trail Park"})
         )
@@ -986,6 +1114,74 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {
                     "leisure": "nature_reserve",
+                    "name": "Onion Creek Wildlife Sanctuary",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Onion Creek Drive"}
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Onion Creek Management Unit",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Mary Gay Maxwell Management Unit",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Bull Creek Management Unit",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "path", "name": "Bull Creek West Loop"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Lower Barton Creek Management Unit",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Little Bear Creek Management Unit",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Barrow Nature Preserve"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
                     "boundary": "protected_area",
                     "name": "Bernardo Wildlife Management Area",
                 }
@@ -1012,6 +1208,25 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Valle del Bosque Park"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "La Joya Wildlife Management Area",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Rio Rancho Bosque Nature Preserve",
+                }
+            ),
+            "wildlife",
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -1320,6 +1535,13 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("bernardo")', inspect)
         self.assertNotIn('contains("valle")', inspect)
         self.assertNotIn('contains("stephenson")', inspect)
+        self.assertNotIn('contains("onion")', inspect)
+        self.assertNotIn('contains("mary")', inspect)
+        self.assertNotIn('contains("blackmore")', inspect)
+        self.assertNotIn('contains("bull")', inspect)
+        self.assertNotIn('contains("barton")', inspect)
+        self.assertNotIn('contains("joya")', inspect)
+        self.assertNotIn('contains("barrow")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1356,6 +1578,13 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("international")', inspect)
         self.assertNotIn('contains("memorial")', inspect)
         self.assertNotIn('contains("bastrop")', inspect)
+        self.assertNotIn('contains("dessau")', inspect)
+        self.assertNotIn('contains("windsor")', inspect)
+        self.assertNotIn('contains("lamplight")', inspect)
+        self.assertNotIn('contains("navarro")', inspect)
+        self.assertNotIn('contains("unity")', inspect)
+        self.assertNotIn('contains("colorado")', inspect)
+        self.assertNotIn('contains("alamo")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
         self.assertIn('t["leisure"] == "garden"', inspect)
@@ -2425,6 +2654,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Grandview Hills", glass)
         self.assertIn("30.416444", glass)
         self.assertIn("-97.864868", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Blackmore", glass)
+        self.assertIn("30.408712", glass)
+        self.assertIn("-97.860602", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Lake Perspectives", glass)
+        self.assertIn("30.420633", glass)
+        self.assertIn("-97.872138", glass)
         self.assertIn("Valles Caldera National Preserve", glass)
         self.assertIn("36.000815", glass)
         self.assertIn("-106.455062", glass)
@@ -2512,6 +2747,27 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bastrop Community Garden", glass)
         self.assertIn("30.112298", glass)
         self.assertIn("-97.319724", glass)
+        self.assertIn("Fort Dessau Community Garden", glass)
+        self.assertIn("30.410049", glass)
+        self.assertIn("-97.639508", glass)
+        self.assertIn("Windsor Park Community Garden", glass)
+        self.assertIn("30.312078", glass)
+        self.assertIn("-97.689633", glass)
+        self.assertIn("Lamplight Community Garden", glass)
+        self.assertIn("30.415015", glass)
+        self.assertIn("-97.697356", glass)
+        self.assertIn("Juan Navarro High School Community Garden", glass)
+        self.assertIn("30.358187", glass)
+        self.assertIn("-97.706305", glass)
+        self.assertIn("Unity Park Community Garden", glass)
+        self.assertIn("30.496824", glass)
+        self.assertIn("-97.644199", glass)
+        self.assertIn("Colorado Community Garden", glass)
+        self.assertIn("30.278396", glass)
+        self.assertIn("-97.775309", glass)
+        self.assertIn("Alamo Community Garden", glass)
+        self.assertIn("30.282202", glass)
+        self.assertIn("-97.719697", glass)
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
@@ -2527,6 +2783,33 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Stephenson Nature Preserve And Outdoor Education Center", glass)
         self.assertIn("30.205991", glass)
         self.assertIn("-97.827853", glass)
+        self.assertIn("Onion Creek Wildlife Sanctuary", glass)
+        self.assertIn("30.200680", glass)
+        self.assertIn("-97.615670", glass)
+        self.assertIn("Mary Gay Maxwell Management Unit", glass)
+        self.assertIn("30.204777", glass)
+        self.assertIn("-97.900751", glass)
+        self.assertIn("Onion Creek Management Unit", glass)
+        self.assertIn("30.065560", glass)
+        self.assertIn("-97.944464", glass)
+        self.assertIn("Bull Creek Management Unit", glass)
+        self.assertIn("30.387998", glass)
+        self.assertIn("-97.772249", glass)
+        self.assertIn("Lower Barton Creek Management Unit", glass)
+        self.assertIn("30.257910", glass)
+        self.assertIn("-97.942892", glass)
+        self.assertIn("Little Bear Creek Management Unit", glass)
+        self.assertIn("30.098137", glass)
+        self.assertIn("-97.928628", glass)
+        self.assertIn("Barrow Nature Preserve", glass)
+        self.assertIn("30.371582", glass)
+        self.assertIn("-97.767601", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Austin Simon", glass)
+        self.assertIn("30.495907", glass)
+        self.assertIn("-97.877569", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Lime Creek", glass)
+        self.assertIn("30.490657", glass)
+        self.assertIn("-97.871229", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2548,6 +2831,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Valle de Oro National Wildlife Refuge", glass)
         self.assertIn("34.977244", glass)
         self.assertIn("-106.679397", glass)
+        self.assertIn("La Joya Wildlife Management Area", glass)
+        self.assertIn("34.334717", glass)
+        self.assertIn("-106.861360", glass)
+        self.assertIn("Rio Rancho Bosque Nature Preserve", glass)
+        self.assertIn("35.289327", glass)
+        self.assertIn("-106.592122", glass)
         self.assertIn("Sandia Mountain Natural History Center", glass)
         self.assertIn("35.126801", glass)
         self.assertIn("-106.379801", glass)
@@ -2814,6 +3103,8 @@ class GroundFieldSync(unittest.TestCase):
         habitat_hit = False
         wilderness_park_hit = False
         canyonlands_hit = False
+        blackmore_hit = False
+        lake_perspectives_hit = False
         management_hit = False
         hornsby_hit = False
         wildflower_hit = False
@@ -2824,6 +3115,17 @@ class GroundFieldSync(unittest.TestCase):
         brodie_hit = False
         dahlstrom_hit = False
         stephenson_hit = False
+        onion_sanctuary_hit = False
+        mary_gay_hit = False
+        onion_unit_hit = False
+        bull_creek_hit = False
+        lower_barton_hit = False
+        little_bear_hit = False
+        barrow_hit = False
+        austin_simon_hit = False
+        lime_creek_hit = False
+        colorado_hit = False
+        alamo_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -2834,6 +3136,11 @@ class GroundFieldSync(unittest.TestCase):
         explorers_hit = False
         este_hit = False
         bastrop_hit = False
+        fort_dessau_hit = False
+        windsor_hit = False
+        lamplight_hit = False
+        juan_navarro_hit = False
+        unity_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2865,6 +3172,10 @@ class GroundFieldSync(unittest.TestCase):
                     wilderness_park_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Grandview Hills" and pip(-97.864868, 30.416444, ring):
                     canyonlands_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Blackmore" and pip(-97.860602, 30.408712, ring):
+                    blackmore_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Lake Perspectives" and pip(-97.872138, 30.420633, ring):
+                    lake_perspectives_hit = True
                 if kind == "wildlife" and name == "Bear Creek Management Unit" and pip(-97.877106, 30.160921, ring):
                     management_hit = True
                 if kind == "wildlife" and name == "Hornsby Bend Ecological Research Area" and pip(-97.646392, 30.231564, ring):
@@ -2893,6 +3204,16 @@ class GroundFieldSync(unittest.TestCase):
                     este_hit = True
                 if kind == "botanic" and name == "Bastrop Community Garden" and pip(-97.319724, 30.112298, ring):
                     bastrop_hit = True
+                if kind == "botanic" and name == "Fort Dessau Community Garden" and pip(-97.639508, 30.410049, ring):
+                    fort_dessau_hit = True
+                if kind == "botanic" and name == "Windsor Park Community Garden" and pip(-97.689633, 30.312078, ring):
+                    windsor_hit = True
+                if kind == "botanic" and name == "Lamplight Community Garden" and pip(-97.697356, 30.415015, ring):
+                    lamplight_hit = True
+                if kind == "botanic" and name == "Juan Navarro High School Community Garden" and pip(-97.706305, 30.358187, ring):
+                    juan_navarro_hit = True
+                if kind == "botanic" and name == "Unity Park Community Garden" and pip(-97.644199, 30.496824, ring):
+                    unity_hit = True
                 if kind == "wildlife" and name == "Baker Sanctuary" and pip(-97.865747, 30.483183, ring):
                     baker_hit = True
                 if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
@@ -2905,6 +3226,28 @@ class GroundFieldSync(unittest.TestCase):
                     dahlstrom_hit = True
                 if kind == "wildlife" and name == "Stephenson Nature Preserve And Outdoor Education Center" and pip(-97.827853, 30.205991, ring):
                     stephenson_hit = True
+                if kind == "wildlife" and name == "Onion Creek Wildlife Sanctuary" and pip(-97.615670, 30.200680, ring):
+                    onion_sanctuary_hit = True
+                if kind == "wildlife" and name == "Mary Gay Maxwell Management Unit" and pip(-97.900751, 30.204777, ring):
+                    mary_gay_hit = True
+                if kind == "wildlife" and name == "Onion Creek Management Unit" and pip(-97.944464, 30.065560, ring):
+                    onion_unit_hit = True
+                if kind == "wildlife" and name == "Bull Creek Management Unit" and pip(-97.772249, 30.387998, ring):
+                    bull_creek_hit = True
+                if kind == "wildlife" and name == "Lower Barton Creek Management Unit" and pip(-97.942892, 30.257910, ring):
+                    lower_barton_hit = True
+                if kind == "wildlife" and name == "Little Bear Creek Management Unit" and pip(-97.928628, 30.098137, ring):
+                    little_bear_hit = True
+                if kind == "wildlife" and name == "Barrow Nature Preserve" and pip(-97.767601, 30.371582, ring):
+                    barrow_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Austin Simon" and pip(-97.877569, 30.495907, ring):
+                    austin_simon_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Lime Creek" and pip(-97.871229, 30.490657, ring):
+                    lime_creek_hit = True
+                if kind == "botanic" and name == "Colorado Community Garden" and pip(-97.775309, 30.278396, ring):
+                    colorado_hit = True
+                if kind == "botanic" and name == "Alamo Community Garden" and pip(-97.719697, 30.282202, ring):
+                    alamo_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2946,6 +3289,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             canyonlands_hit,
             "Balcones Canyonlands Preserve Grandview Hills is not wildlife range",
+        )
+        self.assertTrue(
+            blackmore_hit,
+            "Balcones Canyonlands Preserve Blackmore is not wildlife range",
+        )
+        self.assertTrue(
+            lake_perspectives_hit,
+            "Balcones Canyonlands Preserve Lake Perspectives is not wildlife range",
         )
         self.assertTrue(
             management_hit, "Bear Creek Management Unit is not wildlife range"
@@ -3002,6 +3353,26 @@ class GroundFieldSync(unittest.TestCase):
             "Bastrop Community Garden is not botanic on the east overlay",
         )
         self.assertTrue(
+            fort_dessau_hit,
+            "Fort Dessau Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            windsor_hit,
+            "Windsor Park Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            lamplight_hit,
+            "Lamplight Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            juan_navarro_hit,
+            "Juan Navarro High School Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            unity_hit,
+            "Unity Park Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
             baker_hit,
             "Baker Sanctuary is not wildlife range on the east overlay",
         )
@@ -3024,6 +3395,50 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             stephenson_hit,
             "Stephenson Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            onion_sanctuary_hit,
+            "Onion Creek Wildlife Sanctuary is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            mary_gay_hit,
+            "Mary Gay Maxwell Management Unit is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            onion_unit_hit,
+            "Onion Creek Management Unit is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            bull_creek_hit,
+            "Bull Creek Management Unit is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            lower_barton_hit,
+            "Lower Barton Creek Management Unit is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            little_bear_hit,
+            "Little Bear Creek Management Unit is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            barrow_hit,
+            "Barrow Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            austin_simon_hit,
+            "Balcones Canyonlands Preserve Austin Simon is not wildlife range",
+        )
+        self.assertTrue(
+            lime_creek_hit,
+            "Balcones Canyonlands Preserve Lime Creek is not wildlife range",
+        )
+        self.assertTrue(
+            colorado_hit,
+            "Colorado Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
+            alamo_hit,
+            "Alamo Community Garden is not botanic on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -3162,6 +3577,8 @@ class GroundFieldSync(unittest.TestCase):
         international_hit = False
         memorial_rose_hit = False
         valle_hit = False
+        la_joya_hit = False
+        rio_rancho_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -3197,6 +3614,14 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "wildlife" and pip(-106.679397, 34.977244, ring):
                     valle_hit = (
                         props.get("name") == "Valle de Oro National Wildlife Refuge"
+                    )
+                if kind == "wildlife" and pip(-106.861360, 34.334717, ring):
+                    la_joya_hit = (
+                        props.get("name") == "La Joya Wildlife Management Area"
+                    )
+                if kind == "wildlife" and pip(-106.592122, 35.289327, ring):
+                    rio_rancho_hit = (
+                        props.get("name") == "Rio Rancho Bosque Nature Preserve"
                     )
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
                     audubon_hit = (
@@ -3282,6 +3707,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             valle_hit,
             "Valle de Oro National Wildlife Refuge is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            la_joya_hit,
+            "La Joya Wildlife Management Area is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            rio_rancho_hit,
+            "Rio Rancho Bosque Nature Preserve is not wildlife range on the NM overlay",
         )
         self.assertTrue(
             audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
@@ -3953,6 +4386,32 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("bastrop community", qa)
         self.assertIn("Bastrop Street", qa)
         self.assertIn("Bastrop State Park", qa)
+        self.assertIn("Fort Dessau Community Garden", qa)
+        self.assertIn("30.410049", qa)
+        self.assertIn("fort dessau", qa)
+        self.assertIn("Fort Dessau Road", qa)
+        self.assertIn("Fort Dessau Amenity Center", qa)
+        self.assertIn("Windsor Park Community Garden", qa)
+        self.assertIn("30.312078", qa)
+        self.assertIn("windsor park community", qa)
+        self.assertIn("Lamplight Community Garden", qa)
+        self.assertIn("30.415015", qa)
+        self.assertIn("lamplight community", qa)
+        self.assertIn("Lamplight Village Avenue", qa)
+        self.assertIn("Juan Navarro High School Community Garden", qa)
+        self.assertIn("30.358187", qa)
+        self.assertIn("juan navarro", qa)
+        self.assertIn("Unity Park Community Garden", qa)
+        self.assertIn("30.496824", qa)
+        self.assertIn("unity park community", qa)
+        self.assertIn("Colorado Community Garden", qa)
+        self.assertIn("30.278396", qa)
+        self.assertIn("colorado community", qa)
+        self.assertIn("Alamo Community Garden", qa)
+        self.assertIn("30.282202", qa)
+        self.assertIn("alamo community", qa)
+        self.assertIn("Alamo Street", qa)
+        self.assertIn("Alamo Pocket Park", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)
@@ -3997,6 +4456,40 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Stephenson Nature Preserve And Outdoor Education Center", qa)
         self.assertIn("30.205991", qa)
         self.assertIn("stephenson nature", qa)
+        self.assertIn("Onion Creek Wildlife Sanctuary", qa)
+        self.assertIn("30.200680", qa)
+        self.assertIn("onion creek wildlife", qa)
+        self.assertIn("Onion Creek Drive", qa)
+        self.assertIn("Mary Gay Maxwell Management Unit", qa)
+        self.assertIn("30.204777", qa)
+        self.assertIn("mary gay maxwell", qa)
+        self.assertIn("Onion Creek Management Unit", qa)
+        self.assertIn("30.065560", qa)
+        self.assertIn("onion creek management", qa)
+        self.assertIn("Bull Creek Management Unit", qa)
+        self.assertIn("30.387998", qa)
+        self.assertIn("bull creek management", qa)
+        self.assertIn("Lower Barton Creek Management Unit", qa)
+        self.assertIn("30.257910", qa)
+        self.assertIn("lower barton creek", qa)
+        self.assertIn("Little Bear Creek Management Unit", qa)
+        self.assertIn("30.098137", qa)
+        self.assertIn("little bear creek", qa)
+        self.assertIn("Barrow Nature Preserve", qa)
+        self.assertIn("30.371582", qa)
+        self.assertIn("La Joya Wildlife Management Area", qa)
+        self.assertIn("34.334717", qa)
+        self.assertIn("la joya wildlife", qa)
+        self.assertIn("Rio Rancho Bosque Nature Preserve", qa)
+        self.assertIn("35.289327", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Austin Simon", qa)
+        self.assertIn("30.495907", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Lime Creek", qa)
+        self.assertIn("30.490657", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Blackmore", qa)
+        self.assertIn("30.408712", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Lake Perspectives", qa)
+        self.assertIn("30.420633", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)

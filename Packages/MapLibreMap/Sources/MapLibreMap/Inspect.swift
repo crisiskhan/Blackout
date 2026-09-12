@@ -387,7 +387,29 @@ public enum Inspect {
     /// Wildlife Refuge is range. Valle del Bosque Park stays a
     /// park. Phrase `stephenson nature`, not the word
     /// `stephenson`. The `nature preserve` phrase already
-    /// matches that sheet. Austin
+    /// matches that sheet. Phrase `onion creek wildlife`, not the
+    /// word `onion`. Onion Creek Drive stays a road. Onion Creek
+    /// Management Unit is a separate sheet. Phrase `onion creek
+    /// management`, not the word `onion`. The `wildlife sanctuary`
+    /// and `management unit` phrases already match those sheets.
+    /// Phrase `mary gay maxwell`. The `management unit` phrase
+    /// already matches that sheet. Phrase `bull creek management`,
+    /// not the word `bull`. Bull Creek West Loop stays a trail. The
+    /// `management unit` phrase already matches that sheet. Phrase
+    /// `lower barton creek`, not the word `barton`. Barton Creek
+    /// Habitat Preserve and Barton Creek Wilderness Park stay their
+    /// own sheets. Phrase `little bear creek`. The `management
+    /// unit` phrase already matches that sheet. Phrase `la joya
+    /// wildlife`, not the word `joya`. The `wildlife management
+    /// area` phrase already matches that sheet. Phrase `canyonlands
+    /// preserve` already matches Grandview Hills, Blackmore, Lake
+    /// Perspectives, Austin Simon, and Lime Creek as unique titles.
+    /// Cuevas East sits next to Cuevas and stays unheld. Barrow
+    /// Nature Preserve vertex-avg sits off the sheet; the listed
+    /// interior is on it. The `nature preserve` phrase already
+    /// matches that sheet. Rio Rancho Bosque Nature Preserve is
+    /// range, not bosque overlay. The `nature preserve` phrase
+    /// already matches that sheet. Austin
     /// wildland, animals as range, not a pin. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
@@ -491,7 +513,20 @@ public enum Inspect {
     /// already matches that sheet. Phrase `bastrop community`,
     /// not the word `bastrop`. Bastrop Street stays a road.
     /// Bastrop State Park stays a park. The `community garden`
-    /// phrase already matches that sheet. Winrock Garden is a mall bed and stays out.
+    /// phrase already matches that sheet. Phrase `fort dessau`,
+    /// not the word `dessau`. Fort Dessau Road stays a road. Fort
+    /// Dessau Amenity Center stays a park. The `community garden`
+    /// phrase already matches that sheet. Phrase `windsor park
+    /// community`, not the word `windsor`. Phrase `lamplight
+    /// community`, not the word `lamplight`. Lamplight Village
+    /// Avenue stays a road. Phrase `juan navarro`, not the word
+    /// `navarro`. Phrase `unity park community`, not the word
+    /// `unity`. Phrase `colorado community`, not the word
+    /// `colorado`. Colorado River Park Wildlife Sanctuary stays
+    /// wildlife. Phrase `alamo community`, not the word `alamo`.
+    /// Alamo Street stays a road. Alamo Pocket Park stays a park. The
+    /// `community garden` phrase already matches those
+    /// sheets. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,

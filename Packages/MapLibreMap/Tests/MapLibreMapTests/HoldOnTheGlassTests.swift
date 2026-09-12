@@ -182,6 +182,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Phrase `canyonlands preserve`, not Open reserve, not a trail park.
     private static let canyonlandsPreserve = CLLocationCoordinate2D(latitude: 30.416444, longitude: -97.864868)
 
+    /// Interior of Balcones Canyonlands Preserve - Blackmore. Phrase
+    /// `canyonlands preserve`. Unique title, not Grandview Hills.
+    /// 193 m from OSM stream. Bullick Hollow Road 120 m is rank 7;
+    /// wildlife 4 still wins.
+    private static let blackmorePreserve = CLLocationCoordinate2D(latitude: 30.408712, longitude: -97.860602)
+
+    /// Interior of Balcones Canyonlands Preserve - Lake Perspectives.
+    /// Phrase `canyonlands preserve`. Unique title. 137 m from
+    /// Bullick Hollow. Cuevas East stays unheld — Cuevas is 36 m
+    /// from that sheet.
+    private static let lakePerspectives = CLLocationCoordinate2D(latitude: 30.420633, longitude: -97.872138)
+
     /// Interior of Valles Caldera National Preserve. Phrase `national
     /// preserve`. Elk country, not Open reserve.
     private static let vallesCaldera = CLLocationCoordinate2D(latitude: 36.000815, longitude: -106.455062)
@@ -224,6 +236,55 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// win. This interior is 328 m from wetland. Bloomfield Drive
     /// 70 m is rank 7; wildlife 4 still wins.
     private static let stephensonPreserve = CLLocationCoordinate2D(latitude: 30.205991, longitude: -97.827853)
+
+    /// Interior of Onion Creek Wildlife Sanctuary. Phrase `onion
+    /// creek wildlife`, not the word `onion`. Onion Creek Drive
+    /// stays a road. Onion Creek Management Unit is a separate
+    /// sheet. 121 m from OSM water.
+    private static let onionCreekSanctuary = CLLocationCoordinate2D(latitude: 30.200680, longitude: -97.615670)
+
+    /// Interior of Mary Gay Maxwell Management Unit. Phrase `mary
+    /// gay maxwell`. The `management unit` phrase already matches
+    /// that sheet. 256 m from Slaughter Creek. Slaughter Creek Trail
+    /// 133 m is rank 7; wildlife 4 still wins.
+    private static let maryGayMaxwell = CLLocationCoordinate2D(latitude: 30.204777, longitude: -97.900751)
+
+    /// Interior of Onion Creek Management Unit. Phrase `onion
+    /// creek management`, not the word `onion`. 243 m from OSM
+    /// stream.
+    private static let onionCreekUnit = CLLocationCoordinate2D(latitude: 30.065560, longitude: -97.944464)
+
+    /// Interior of Bull Creek Management Unit. Phrase `bull creek
+    /// management`, not the word `bull`. Bull Creek West Loop 76 m
+    /// is rank 7; wildlife 4 still wins. 192 m from Bull Creek.
+    private static let bullCreekUnit = CLLocationCoordinate2D(latitude: 30.387998, longitude: -97.772249)
+
+    /// Interior of Lower Barton Creek Management Unit. Phrase
+    /// `lower barton creek`, not the word `barton`. Habitat
+    /// Preserve and Wilderness Park stay their own. D Morgan Road
+    /// 64 m is rank 7; wildlife 4 still wins. 112 m from OSM stream.
+    private static let lowerBartonUnit = CLLocationCoordinate2D(latitude: 30.257910, longitude: -97.942892)
+
+    /// Interior of Little Bear Creek Management Unit. Vertex-avg
+    /// sits off the sheet. This interior is unique wildlife overlay,
+    /// 844 m from OSM water. Phrase `little bear creek`. The
+    /// `management unit` phrase already matches that sheet.
+    private static let littleBearUnit = CLLocationCoordinate2D(latitude: 30.098137, longitude: -97.928628)
+
+    /// Interior of Barrow Nature Preserve. Vertex-avg sits off the
+    /// sheet. This interior is unique. West Rim Cove 76 m is rank
+    /// 7; wildlife 4 still wins. Phrase `nature preserve`.
+    private static let barrowPreserve = CLLocationCoordinate2D(latitude: 30.371582, longitude: -97.767601)
+
+    /// Interior of Balcones Canyonlands Preserve - Austin Simon.
+    /// Phrase `canyonlands preserve`. Unique title, not Grandview
+    /// Hills, not Lime Creek.
+    private static let austinSimonPreserve = CLLocationCoordinate2D(latitude: 30.495907, longitude: -97.877569)
+
+    /// Interior of Balcones Canyonlands Preserve - Lime Creek.
+    /// Phrase `canyonlands preserve`. Unique title. Austin Simon
+    /// is 141 m off this pip, outside the z16 probe.
+    private static let limeCreekPreserve = CLLocationCoordinate2D(latitude: 30.490657, longitude: -97.871229)
 
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
@@ -323,6 +384,48 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// rank 7; botanic 5 still wins. 168 m from OSM tap.
     private static let bastropGarden = CLLocationCoordinate2D(latitude: 30.112298, longitude: -97.319724)
 
+    /// Interior of Fort Dessau Community Garden. Phrase `fort
+    /// dessau`, not the word `dessau`. Fort Dessau Road stays a
+    /// road. Fort Dessau Amenity Center stays Park. 216 m from
+    /// OSM water. Fort Dessau Road 61 m is rank 7; botanic 5 still
+    /// wins.
+    private static let fortDessauGarden = CLLocationCoordinate2D(latitude: 30.410049, longitude: -97.639508)
+
+    /// Interior of Windsor Park Community Garden. Phrase `windsor
+    /// park community`, not the word `windsor`. 228 m from OSM
+    /// stream. Belmoor Drive 75 m is rank 7; botanic 5 still wins.
+    private static let windsorParkGarden = CLLocationCoordinate2D(latitude: 30.312078, longitude: -97.689633)
+
+    /// Interior of Lamplight Community Garden. Phrase `lamplight
+    /// community`, not the word `lamplight`. Lamplight Village
+    /// Avenue stays a road. 217 m from OSM water. Alderbrook Drive
+    /// 22 m is rank 7; botanic 5 still wins.
+    private static let lamplightGarden = CLLocationCoordinate2D(latitude: 30.415015, longitude: -97.697356)
+
+    /// Interior of Juan Navarro High School Community Garden. Phrase
+    /// `juan navarro`, not the word `navarro`. 211 m from OSM
+    /// water. Fairfield Drive 36 m is rank 7; botanic 5 still wins.
+    private static let juanNavarroGarden = CLLocationCoordinate2D(latitude: 30.358187, longitude: -97.706305)
+
+    /// Interior of Unity Park Community Garden. Phrase `unity park
+    /// community`, not the word `unity`. 126 m from OSM stream.
+    /// Gattis School Road 62 m is rank 7; botanic 5 still wins.
+    private static let unityParkGarden = CLLocationCoordinate2D(latitude: 30.496824, longitude: -97.644199)
+
+    /// Interior of Colorado Community Garden. Phrase `colorado
+    /// community`, not the word `colorado`. Colorado River Park
+    /// Wildlife Sanctuary stays wildlife. Borger Street 15 m is
+    /// rank 7; botanic 5 still wins. 217 m from OSM stream. 970 m
+    /// from Zilker.
+    private static let coloradoGarden = CLLocationCoordinate2D(latitude: 30.278396, longitude: -97.775309)
+
+    /// Interior of Alamo Community Garden. Phrase `alamo
+    /// community`, not the word `alamo`. Alamo Street stays a
+    /// road. Alamo Pocket Park stays Park. 176 m from Este Garden
+    /// so the probe does not mix them. Alamo Street 5 m is rank 7;
+    /// botanic 5 still wins.
+    private static let alamoGarden = CLLocationCoordinate2D(latitude: 30.282202, longitude: -97.719697)
+
     /// Interior of 4th Street Garden. Phrase `4th street garden`,
     /// not the word `4th`. West 4th Avenue stays a road. 91 m from
     /// OSM drain.
@@ -398,6 +501,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `national wildlife`, not the word `valle`. Valle del Bosque
     /// Park stays Park. 159 m from OSM ditch.
     private static let valleDeOro = CLLocationCoordinate2D(latitude: 34.977244, longitude: -106.679397)
+
+    /// Interior of La Joya Wildlife Management Area. Phrase `la
+    /// joya wildlife`, not the word `joya`. Listed OSM centroid
+    /// sits 26 m from a drain — water would win. This vertex-avg
+    /// interior is unique overlay, 138 m from OSM ditch.
+    private static let laJoyaWMA = CLLocationCoordinate2D(latitude: 34.334717, longitude: -106.861360)
+
+    /// Interior of Rio Rancho Bosque Nature Preserve. Vertex-avg
+    /// sits off the sheet. This interior is unique wildlife overlay,
+    /// not bosque. Rio Rancho Bosque South Trail 42 m is rank 7;
+    /// wildlife 4 still wins. Phrase `nature preserve`.
+    private static let rioRanchoBosque = CLLocationCoordinate2D(latitude: 35.289327, longitude: -106.592122)
 
     /// Interior of Pronoun Cave ACEC in NM `layers/ground.geojson`. A cave
     /// phrase, not open reserve, even though the name also says ACEC.
@@ -974,6 +1089,46 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertFalse((canyonlands.card?.doLine.lowercased() ?? "").contains("cottonwood"), canyonlands.card?.doLine ?? "")
         XCTAssertFalse((canyonlands.card?.doLine.lowercased() ?? "").contains("edible"), canyonlands.card?.doLine ?? "")
 
+        let blackmore = try hold(at: Self.blackmorePreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(blackmore.card?.klass, "Wildlife range", "\(blackmore)")
+        XCTAssertEqual(blackmore.card?.title, "Balcones Canyonlands Preserve - Blackmore", "\(blackmore)")
+        XCTAssertNotEqual(blackmore.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(blackmore)")
+        XCTAssertNotEqual(blackmore.card?.title, "Bullick Hollow Road", "\(blackmore)")
+        XCTAssertEqual(blackmore.card?.fieldRoute.first, Inspect.mammalEastCard, "\(blackmore)")
+        XCTAssertTrue((blackmore.card?.doLine.lowercased() ?? "").contains("hog"), blackmore.card?.doLine ?? "")
+        XCTAssertFalse((blackmore.card?.doLine.lowercased() ?? "").contains("javelina"), blackmore.card?.doLine ?? "")
+        XCTAssertFalse((blackmore.card?.doLine.lowercased() ?? "").contains("edible"), blackmore.card?.doLine ?? "")
+
+        let lakePerspectives = try hold(at: Self.lakePerspectives, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(lakePerspectives.card?.klass, "Wildlife range", "\(lakePerspectives)")
+        XCTAssertEqual(lakePerspectives.card?.title, "Balcones Canyonlands Preserve - Lake Perspectives", "\(lakePerspectives)")
+        XCTAssertNotEqual(lakePerspectives.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(lakePerspectives)")
+        XCTAssertNotEqual(lakePerspectives.card?.title, "Balcones Canyonlands Preserve - Cuevas East", "\(lakePerspectives)")
+        XCTAssertEqual(lakePerspectives.card?.fieldRoute.first, Inspect.mammalEastCard, "\(lakePerspectives)")
+        XCTAssertTrue((lakePerspectives.card?.doLine.lowercased() ?? "").contains("hog"), lakePerspectives.card?.doLine ?? "")
+        XCTAssertFalse((lakePerspectives.card?.doLine.lowercased() ?? "").contains("javelina"), lakePerspectives.card?.doLine ?? "")
+        XCTAssertFalse((lakePerspectives.card?.doLine.lowercased() ?? "").contains("edible"), lakePerspectives.card?.doLine ?? "")
+
+        let austinSimon = try hold(at: Self.austinSimonPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(austinSimon.card?.klass, "Wildlife range", "\(austinSimon)")
+        XCTAssertEqual(austinSimon.card?.title, "Balcones Canyonlands Preserve - Austin Simon", "\(austinSimon)")
+        XCTAssertNotEqual(austinSimon.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(austinSimon)")
+        XCTAssertNotEqual(austinSimon.card?.title, "Balcones Canyonlands Preserve - Lime Creek", "\(austinSimon)")
+        XCTAssertEqual(austinSimon.card?.fieldRoute.first, Inspect.mammalEastCard, "\(austinSimon)")
+        XCTAssertTrue((austinSimon.card?.doLine.lowercased() ?? "").contains("hog"), austinSimon.card?.doLine ?? "")
+        XCTAssertFalse((austinSimon.card?.doLine.lowercased() ?? "").contains("javelina"), austinSimon.card?.doLine ?? "")
+        XCTAssertFalse((austinSimon.card?.doLine.lowercased() ?? "").contains("edible"), austinSimon.card?.doLine ?? "")
+
+        let limeCreek = try hold(at: Self.limeCreekPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(limeCreek.card?.klass, "Wildlife range", "\(limeCreek)")
+        XCTAssertEqual(limeCreek.card?.title, "Balcones Canyonlands Preserve - Lime Creek", "\(limeCreek)")
+        XCTAssertNotEqual(limeCreek.card?.title, "Balcones Canyonlands Preserve - Austin Simon", "\(limeCreek)")
+        XCTAssertNotEqual(limeCreek.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(limeCreek)")
+        XCTAssertEqual(limeCreek.card?.fieldRoute.first, Inspect.mammalEastCard, "\(limeCreek)")
+        XCTAssertTrue((limeCreek.card?.doLine.lowercased() ?? "").contains("hog"), limeCreek.card?.doLine ?? "")
+        XCTAssertFalse((limeCreek.card?.doLine.lowercased() ?? "").contains("javelina"), limeCreek.card?.doLine ?? "")
+        XCTAssertFalse((limeCreek.card?.doLine.lowercased() ?? "").contains("edible"), limeCreek.card?.doLine ?? "")
+
         let management = try hold(at: Self.bearCreekUnit, zoom: 16, packId: "tx-east")
         XCTAssertEqual(management.card?.klass, "Wildlife range", "\(management)")
         XCTAssertEqual(management.card?.title, "Bear Creek Management Unit", "\(management)")
@@ -1043,6 +1198,75 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((stephenson.card?.doLine.lowercased() ?? "").contains("hog"), stephenson.card?.doLine ?? "")
         XCTAssertFalse((stephenson.card?.doLine.lowercased() ?? "").contains("javelina"), stephenson.card?.doLine ?? "")
         XCTAssertFalse((stephenson.card?.doLine.lowercased() ?? "").contains("edible"), stephenson.card?.doLine ?? "")
+
+        let onionSanctuary = try hold(at: Self.onionCreekSanctuary, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(onionSanctuary.card?.klass, "Wildlife range", "\(onionSanctuary)")
+        XCTAssertEqual(onionSanctuary.card?.title, "Onion Creek Wildlife Sanctuary", "\(onionSanctuary)")
+        XCTAssertNotEqual(onionSanctuary.card?.title, "Onion Creek Management Unit", "\(onionSanctuary)")
+        XCTAssertNotEqual(onionSanctuary.card?.title, "Onion Creek Drive", "\(onionSanctuary)")
+        XCTAssertEqual(onionSanctuary.card?.fieldRoute.first, Inspect.mammalEastCard, "\(onionSanctuary)")
+        XCTAssertTrue((onionSanctuary.card?.doLine.lowercased() ?? "").contains("hog"), onionSanctuary.card?.doLine ?? "")
+        XCTAssertFalse((onionSanctuary.card?.doLine.lowercased() ?? "").contains("javelina"), onionSanctuary.card?.doLine ?? "")
+        XCTAssertFalse((onionSanctuary.card?.doLine.lowercased() ?? "").contains("edible"), onionSanctuary.card?.doLine ?? "")
+
+        let maryGay = try hold(at: Self.maryGayMaxwell, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(maryGay.card?.klass, "Wildlife range", "\(maryGay)")
+        XCTAssertEqual(maryGay.card?.title, "Mary Gay Maxwell Management Unit", "\(maryGay)")
+        XCTAssertNotEqual(maryGay.card?.klass, "Open reserve", "\(maryGay)")
+        XCTAssertNotEqual(maryGay.card?.title, "Slaughter Creek Trail Main Loop", "\(maryGay)")
+        XCTAssertEqual(maryGay.card?.fieldRoute.first, Inspect.mammalEastCard, "\(maryGay)")
+        XCTAssertTrue((maryGay.card?.doLine.lowercased() ?? "").contains("hog"), maryGay.card?.doLine ?? "")
+        XCTAssertFalse((maryGay.card?.doLine.lowercased() ?? "").contains("javelina"), maryGay.card?.doLine ?? "")
+        XCTAssertFalse((maryGay.card?.doLine.lowercased() ?? "").contains("edible"), maryGay.card?.doLine ?? "")
+
+        let onionUnit = try hold(at: Self.onionCreekUnit, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(onionUnit.card?.klass, "Wildlife range", "\(onionUnit)")
+        XCTAssertEqual(onionUnit.card?.title, "Onion Creek Management Unit", "\(onionUnit)")
+        XCTAssertNotEqual(onionUnit.card?.title, "Onion Creek Wildlife Sanctuary", "\(onionUnit)")
+        XCTAssertEqual(onionUnit.card?.fieldRoute.first, Inspect.mammalEastCard, "\(onionUnit)")
+        XCTAssertTrue((onionUnit.card?.doLine.lowercased() ?? "").contains("hog"), onionUnit.card?.doLine ?? "")
+        XCTAssertFalse((onionUnit.card?.doLine.lowercased() ?? "").contains("javelina"), onionUnit.card?.doLine ?? "")
+        XCTAssertFalse((onionUnit.card?.doLine.lowercased() ?? "").contains("edible"), onionUnit.card?.doLine ?? "")
+
+        let bullCreek = try hold(at: Self.bullCreekUnit, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(bullCreek.card?.klass, "Wildlife range", "\(bullCreek)")
+        XCTAssertEqual(bullCreek.card?.title, "Bull Creek Management Unit", "\(bullCreek)")
+        XCTAssertNotEqual(bullCreek.card?.klass, "Open reserve", "\(bullCreek)")
+        XCTAssertNotEqual(bullCreek.card?.title, "Bull Creek West Loop", "\(bullCreek)")
+        XCTAssertEqual(bullCreek.card?.fieldRoute.first, Inspect.mammalEastCard, "\(bullCreek)")
+        XCTAssertTrue((bullCreek.card?.doLine.lowercased() ?? "").contains("hog"), bullCreek.card?.doLine ?? "")
+        XCTAssertFalse((bullCreek.card?.doLine.lowercased() ?? "").contains("javelina"), bullCreek.card?.doLine ?? "")
+        XCTAssertFalse((bullCreek.card?.doLine.lowercased() ?? "").contains("edible"), bullCreek.card?.doLine ?? "")
+
+        let lowerBarton = try hold(at: Self.lowerBartonUnit, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(lowerBarton.card?.klass, "Wildlife range", "\(lowerBarton)")
+        XCTAssertEqual(lowerBarton.card?.title, "Lower Barton Creek Management Unit", "\(lowerBarton)")
+        XCTAssertNotEqual(lowerBarton.card?.title, "Barton Creek Habitat Preserve", "\(lowerBarton)")
+        XCTAssertNotEqual(lowerBarton.card?.title, "Barton Creek Wilderness Park", "\(lowerBarton)")
+        XCTAssertNotEqual(lowerBarton.card?.title, "D Morgan Road", "\(lowerBarton)")
+        XCTAssertEqual(lowerBarton.card?.fieldRoute.first, Inspect.mammalEastCard, "\(lowerBarton)")
+        XCTAssertTrue((lowerBarton.card?.doLine.lowercased() ?? "").contains("hog"), lowerBarton.card?.doLine ?? "")
+        XCTAssertFalse((lowerBarton.card?.doLine.lowercased() ?? "").contains("javelina"), lowerBarton.card?.doLine ?? "")
+        XCTAssertFalse((lowerBarton.card?.doLine.lowercased() ?? "").contains("edible"), lowerBarton.card?.doLine ?? "")
+
+        let littleBear = try hold(at: Self.littleBearUnit, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(littleBear.card?.klass, "Wildlife range", "\(littleBear)")
+        XCTAssertEqual(littleBear.card?.title, "Little Bear Creek Management Unit", "\(littleBear)")
+        XCTAssertNotEqual(littleBear.card?.klass, "Open reserve", "\(littleBear)")
+        XCTAssertEqual(littleBear.card?.fieldRoute.first, Inspect.mammalEastCard, "\(littleBear)")
+        XCTAssertTrue((littleBear.card?.doLine.lowercased() ?? "").contains("hog"), littleBear.card?.doLine ?? "")
+        XCTAssertFalse((littleBear.card?.doLine.lowercased() ?? "").contains("javelina"), littleBear.card?.doLine ?? "")
+        XCTAssertFalse((littleBear.card?.doLine.lowercased() ?? "").contains("edible"), littleBear.card?.doLine ?? "")
+
+        let barrow = try hold(at: Self.barrowPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(barrow.card?.klass, "Wildlife range", "\(barrow)")
+        XCTAssertEqual(barrow.card?.title, "Barrow Nature Preserve", "\(barrow)")
+        XCTAssertNotEqual(barrow.card?.klass, "Open reserve", "\(barrow)")
+        XCTAssertNotEqual(barrow.card?.title, "West Rim Cove", "\(barrow)")
+        XCTAssertEqual(barrow.card?.fieldRoute.first, Inspect.mammalEastCard, "\(barrow)")
+        XCTAssertTrue((barrow.card?.doLine.lowercased() ?? "").contains("hog"), barrow.card?.doLine ?? "")
+        XCTAssertFalse((barrow.card?.doLine.lowercased() ?? "").contains("javelina"), barrow.card?.doLine ?? "")
+        XCTAssertFalse((barrow.card?.doLine.lowercased() ?? "").contains("edible"), barrow.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -1426,6 +1650,90 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((bastrop.card?.doLine.lowercased() ?? "").contains("edible"), bastrop.card?.doLine ?? "")
 
+        let fortDessau = try hold(at: Self.fortDessauGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(fortDessau.card?.klass, "Botanic garden", "\(fortDessau)")
+        XCTAssertEqual(fortDessau.card?.title, "Fort Dessau Community Garden", "\(fortDessau)")
+        XCTAssertNotEqual(fortDessau.card?.klass, "Park", "\(fortDessau)")
+        XCTAssertNotEqual(fortDessau.card?.title, "Fort Dessau Road", "\(fortDessau)")
+        XCTAssertNotEqual(fortDessau.card?.title, "Fort Dessau Amenity Center", "\(fortDessau)")
+        XCTAssertEqual(fortDessau.card?.fieldRoute.first, Inspect.plantTXCard, "\(fortDessau)")
+        XCTAssertFalse(
+            fortDessau.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Fort Dessau Community Garden opened woodland tree-use: \(fortDessau)"
+        )
+        XCTAssertFalse((fortDessau.card?.doLine.lowercased() ?? "").contains("edible"), fortDessau.card?.doLine ?? "")
+
+        let windsor = try hold(at: Self.windsorParkGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(windsor.card?.klass, "Botanic garden", "\(windsor)")
+        XCTAssertEqual(windsor.card?.title, "Windsor Park Community Garden", "\(windsor)")
+        XCTAssertNotEqual(windsor.card?.klass, "Park", "\(windsor)")
+        XCTAssertNotEqual(windsor.card?.title, "Belmoor Drive", "\(windsor)")
+        XCTAssertEqual(windsor.card?.fieldRoute.first, Inspect.plantTXCard, "\(windsor)")
+        XCTAssertFalse(
+            windsor.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Windsor Park Community Garden opened woodland tree-use: \(windsor)"
+        )
+        XCTAssertFalse((windsor.card?.doLine.lowercased() ?? "").contains("edible"), windsor.card?.doLine ?? "")
+
+        let lamplight = try hold(at: Self.lamplightGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(lamplight.card?.klass, "Botanic garden", "\(lamplight)")
+        XCTAssertEqual(lamplight.card?.title, "Lamplight Community Garden", "\(lamplight)")
+        XCTAssertNotEqual(lamplight.card?.title, "Lamplight Village Avenue", "\(lamplight)")
+        XCTAssertEqual(lamplight.card?.fieldRoute.first, Inspect.plantTXCard, "\(lamplight)")
+        XCTAssertFalse(
+            lamplight.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Lamplight Community Garden opened woodland tree-use: \(lamplight)"
+        )
+        XCTAssertFalse((lamplight.card?.doLine.lowercased() ?? "").contains("edible"), lamplight.card?.doLine ?? "")
+
+        let juanNavarro = try hold(at: Self.juanNavarroGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(juanNavarro.card?.klass, "Botanic garden", "\(juanNavarro)")
+        XCTAssertEqual(juanNavarro.card?.title, "Juan Navarro High School Community Garden", "\(juanNavarro)")
+        XCTAssertNotEqual(juanNavarro.card?.title, "Fairfield Drive", "\(juanNavarro)")
+        XCTAssertEqual(juanNavarro.card?.fieldRoute.first, Inspect.plantTXCard, "\(juanNavarro)")
+        XCTAssertFalse(
+            juanNavarro.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Juan Navarro High School Community Garden opened woodland tree-use: \(juanNavarro)"
+        )
+        XCTAssertFalse((juanNavarro.card?.doLine.lowercased() ?? "").contains("edible"), juanNavarro.card?.doLine ?? "")
+
+        let unityPark = try hold(at: Self.unityParkGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(unityPark.card?.klass, "Botanic garden", "\(unityPark)")
+        XCTAssertEqual(unityPark.card?.title, "Unity Park Community Garden", "\(unityPark)")
+        XCTAssertNotEqual(unityPark.card?.title, "Gattis School Road", "\(unityPark)")
+        XCTAssertEqual(unityPark.card?.fieldRoute.first, Inspect.plantTXCard, "\(unityPark)")
+        XCTAssertFalse(
+            unityPark.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Unity Park Community Garden opened woodland tree-use: \(unityPark)"
+        )
+        XCTAssertFalse((unityPark.card?.doLine.lowercased() ?? "").contains("edible"), unityPark.card?.doLine ?? "")
+
+        let colorado = try hold(at: Self.coloradoGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(colorado.card?.klass, "Botanic garden", "\(colorado)")
+        XCTAssertEqual(colorado.card?.title, "Colorado Community Garden", "\(colorado)")
+        XCTAssertNotEqual(colorado.card?.klass, "Wildlife range", "\(colorado)")
+        XCTAssertNotEqual(colorado.card?.title, "Colorado River Park Wildlife Sanctuary", "\(colorado)")
+        XCTAssertNotEqual(colorado.card?.title, "Borger Street", "\(colorado)")
+        XCTAssertEqual(colorado.card?.fieldRoute.first, Inspect.plantTXCard, "\(colorado)")
+        XCTAssertFalse(
+            colorado.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Colorado Community Garden opened woodland tree-use: \(colorado)"
+        )
+        XCTAssertFalse((colorado.card?.doLine.lowercased() ?? "").contains("edible"), colorado.card?.doLine ?? "")
+
+        let alamo = try hold(at: Self.alamoGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(alamo.card?.klass, "Botanic garden", "\(alamo)")
+        XCTAssertEqual(alamo.card?.title, "Alamo Community Garden", "\(alamo)")
+        XCTAssertNotEqual(alamo.card?.title, "Este Garden", "\(alamo)")
+        XCTAssertNotEqual(alamo.card?.title, "Alamo Street", "\(alamo)")
+        XCTAssertNotEqual(alamo.card?.title, "Alamo Pocket Park", "\(alamo)")
+        XCTAssertEqual(alamo.card?.fieldRoute.first, Inspect.plantTXCard, "\(alamo)")
+        XCTAssertFalse(
+            alamo.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Alamo Community Garden opened woodland tree-use: \(alamo)"
+        )
+        XCTAssertFalse((alamo.card?.doLine.lowercased() ?? "").contains("edible"), alamo.card?.doLine ?? "")
+
         let fourthStreet = try hold(at: Self.fourthStreetGarden, zoom: 16)
         XCTAssertEqual(fourthStreet.card?.klass, "Botanic garden", "\(fourthStreet)")
         XCTAssertEqual(fourthStreet.card?.title, "4th Street Garden", "\(fourthStreet)")
@@ -1653,6 +1961,33 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((valle.card?.doLine.lowercased() ?? "").contains("elk is high country"), valle.card?.doLine ?? "")
         XCTAssertFalse((valle.card?.doLine.lowercased() ?? "").contains("javelina"), valle.card?.doLine ?? "")
         XCTAssertFalse((valle.card?.doLine.lowercased() ?? "").contains("edible"), valle.card?.doLine ?? "")
+
+        let laJoya = try hold(at: Self.laJoyaWMA, zoom: 16, packId: "nm")
+        XCTAssertEqual(laJoya.card?.klass, "Wildlife range", "\(laJoya)")
+        XCTAssertEqual(laJoya.card?.title, "La Joya Wildlife Management Area", "\(laJoya)")
+        XCTAssertNotEqual(laJoya.card?.klass, "Park", "\(laJoya)")
+        XCTAssertEqual(laJoya.card?.fieldRoute.first, Inspect.mammalTXCard, "\(laJoya)")
+        XCTAssertTrue(
+            laJoya.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "La Joya WMA dropped the NM mammal card: \(laJoya)"
+        )
+        XCTAssertTrue((laJoya.card?.doLine.lowercased() ?? "").contains("elk is high country"), laJoya.card?.doLine ?? "")
+        XCTAssertFalse((laJoya.card?.doLine.lowercased() ?? "").contains("javelina"), laJoya.card?.doLine ?? "")
+        XCTAssertFalse((laJoya.card?.doLine.lowercased() ?? "").contains("edible"), laJoya.card?.doLine ?? "")
+
+        let rioRancho = try hold(at: Self.rioRanchoBosque, zoom: 16, packId: "nm")
+        XCTAssertEqual(rioRancho.card?.klass, "Wildlife range", "\(rioRancho)")
+        XCTAssertEqual(rioRancho.card?.title, "Rio Rancho Bosque Nature Preserve", "\(rioRancho)")
+        XCTAssertNotEqual(rioRancho.card?.klass, "Bosque or wetland", "\(rioRancho)")
+        XCTAssertNotEqual(rioRancho.card?.klass, "Open reserve", "\(rioRancho)")
+        XCTAssertNotEqual(rioRancho.card?.title, "Rio Rancho Bosque South Trail", "\(rioRancho)")
+        XCTAssertEqual(rioRancho.card?.fieldRoute.first, Inspect.mammalTXCard, "\(rioRancho)")
+        XCTAssertTrue(
+            rioRancho.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "Rio Rancho Bosque dropped the NM mammal card: \(rioRancho)"
+        )
+        XCTAssertFalse((rioRancho.card?.doLine.lowercased() ?? "").contains("cottonwood"), rioRancho.card?.doLine ?? "")
+        XCTAssertFalse((rioRancho.card?.doLine.lowercased() ?? "").contains("edible"), rioRancho.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {
