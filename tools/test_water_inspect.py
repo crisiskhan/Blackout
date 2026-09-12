@@ -1802,6 +1802,37 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(ground.overlay_kind({"natural": "peak", "name": "Cerro Colorado"}))
         self.assertEqual(
             ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Dome Wilderness",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"natural": "peak", "name": "Saint Peter's Dome"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Manzano Mountain Wilderness",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Sandia Mountain Wilderness",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Indian Grass Prarie Preserve"}
             ),
             "reserve",
@@ -3480,6 +3511,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Sierra Ladrones Wilderness Study Area", glass)
         self.assertIn("34.421613", glass)
         self.assertIn("-107.139863", glass)
+        self.assertIn("Dome Wilderness", glass)
+        self.assertIn("35.746173", glass)
+        self.assertIn("-106.360843", glass)
+        self.assertIn("Manzano Mountain Wilderness", glass)
+        self.assertIn("34.663796", glass)
+        self.assertIn("-106.419519", glass)
+        self.assertIn("Sandia Mountain Wilderness", glass)
+        self.assertIn("35.088383", glass)
+        self.assertIn("-106.416369", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -5281,6 +5321,51 @@ class GroundFieldSync(unittest.TestCase):
             "Sierra Ladrones WSA hold is not inside the named nature reserve",
         )
 
+        nm_dome_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Dome Wilderness":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.360843, 35.746173, ring):
+                    nm_dome_hit = True
+        self.assertTrue(
+            nm_dome_hit,
+            "Dome Wilderness hold is not inside the named nature reserve",
+        )
+
+        nm_manzano_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Manzano Mountain Wilderness":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.419519, 34.663796, ring):
+                    nm_manzano_hit = True
+        self.assertTrue(
+            nm_manzano_hit,
+            "Manzano Mountain Wilderness hold is not inside the named nature reserve",
+        )
+
+        nm_sandia_wild_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Sandia Mountain Wilderness":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.416369, 35.088383, ring):
+                    nm_sandia_wild_hit = True
+        self.assertTrue(
+            nm_sandia_wild_hit,
+            "Sandia Mountain Wilderness hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -5886,6 +5971,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.421613", qa)
         self.assertIn("Indian Grass Prarie Preserve", qa)
         self.assertIn("30.225834", qa)
+        self.assertIn("Dome Wilderness", qa)
+        self.assertIn("35.746173", qa)
+        self.assertIn("Manzano Mountain Wilderness", qa)
+        self.assertIn("34.663796", qa)
+        self.assertIn("Sandia Mountain Wilderness", qa)
+        self.assertIn("35.088383", qa)
         self.assertIn("Prehistoric Trackways National Monument", qa)
         self.assertIn("32.370257", qa)
         self.assertIn("White Sands National Park", qa)
@@ -6331,6 +6422,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("La Leña Wilderness Study Area", qa)
         self.assertIn("Sierra Ladrones Wilderness Study Area", qa)
         self.assertIn("Indian Grass Prarie Preserve", qa)
+        self.assertIn("Dome Wilderness", qa)
+        self.assertIn("Manzano Mountain Wilderness", qa)
+        self.assertIn("Sandia Mountain Wilderness", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

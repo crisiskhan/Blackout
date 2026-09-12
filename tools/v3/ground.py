@@ -250,15 +250,17 @@ WILDLIFE_RANGE_PHRASES = (
 # National Historical Park, Elk Springs ACEC, Carrington's
 # Prairie, Cornundas Mountain ACEC, Florida Mountains WSA,
 # Chamisa WSA, Tapia Canyon ACEC, Empedrado WSA, Ignacio
-# Chavez WSA, La Leña WSA, Sierra Ladrones WSA, and Indian
-# Grass Prarie Preserve are those Holds. Do not add
+# Chavez WSA, La Leña WSA, Sierra Ladrones WSA, Indian
+# Grass Prarie Preserve, Dome Wilderness, Manzano Mountain
+# Wilderness, and Sandia Mountain Wilderness are those Holds. Do not add
 # matcher `los lunas`, `galisteo`, `castner`, `trackways`,
 # `white sands`, `ojito`, `cabezon`, `tent rocks`, `petroglyph`,
 # `placitas`, `cerrillos`, `knapp`, `wind`, `rincon`,
 # `sacramento`, `uvas`, `thunder`, `pecos`, `elk springs`, `elk`,
 # `carrington`, `cornundas`, `cornudas`, `florida`, `chamisa`,
 # `tapia`, `empedrado`, `ignacio`, `chavez`, `la leña`, `lena`,
-# `ladrones`, `ladron`, `indian grass`, or `indian`. Phrase `open space` is not a bare contains —
+# `ladrones`, `ladron`, `indian grass`, `indian`, `dome`,
+# `manzano`, or `sandia`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco

@@ -1694,6 +1694,57 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(cerroColorado.klass, "Peak")
         XCTAssertNotEqual(cerroColorado.klass, "Open reserve")
 
+        let dome = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Dome Wilderness",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(dome.klass, "Open reserve")
+        XCTAssertNotEqual(dome.klass, "Wildlife range")
+        XCTAssertNotEqual(dome.klass, "Peak")
+        XCTAssertEqual(dome.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(dome.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(dome.doLine.lowercased().contains("edible"), dome.doLine)
+
+        let saintPeters = Inspect.read(
+            tags: ["natural": "peak", "name": "Saint Peter's Dome"],
+            pack: "nm"
+        )
+        XCTAssertEqual(saintPeters.klass, "Peak")
+        XCTAssertNotEqual(saintPeters.klass, "Open reserve")
+
+        let manzanoWild = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Manzano Mountain Wilderness",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(manzanoWild.klass, "Open reserve")
+        XCTAssertNotEqual(manzanoWild.klass, "Wildlife range")
+        XCTAssertNotEqual(manzanoWild.klass, "Peak")
+        XCTAssertEqual(manzanoWild.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(manzanoWild.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(manzanoWild.doLine.lowercased().contains("edible"), manzanoWild.doLine)
+
+        let sandiaWild = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Sandia Mountain Wilderness",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(sandiaWild.klass, "Open reserve")
+        XCTAssertNotEqual(sandiaWild.klass, "Wildlife range")
+        XCTAssertEqual(sandiaWild.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(sandiaWild.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(sandiaWild.doLine.lowercased().contains("edible"), sandiaWild.doLine)
+
         let management = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -4337,6 +4388,21 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([cornudasPeakTags, cornundasReserve])["natural"], "peak")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([cornudasPeakTags, cornundasReserve]), pack: "tx-west").klass,
+            "Peak"
+        )
+
+        let domePeakTags: [String: String] = [
+            "natural": "peak",
+            "name": "Saint Peter's Dome",
+        ]
+        let domeReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "boundary": "protected_area",
+            "name": "Dome Wilderness",
+        ]
+        XCTAssertEqual(Inspect.pick([domePeakTags, domeReserve])["natural"], "peak")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([domePeakTags, domeReserve]), pack: "nm").klass,
             "Peak"
         )
         XCTAssertEqual(

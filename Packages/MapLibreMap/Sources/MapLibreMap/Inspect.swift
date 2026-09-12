@@ -666,7 +666,9 @@ public enum Inspect {
     /// Park, Elk Springs ACEC, Carrington's Prairie, Cornundas
     /// Mountain ACEC, Florida Mountains WSA, Chamisa WSA, Tapia
     /// Canyon ACEC, Empedrado WSA, Ignacio Chavez WSA, La Leña WSA,
-    /// Sierra Ladrones WSA, and Indian Grass Prarie Preserve are those
+    /// Sierra Ladrones WSA, Indian Grass Prarie Preserve, Dome
+    /// Wilderness, Manzano Mountain Wilderness, and Sandia Mountain
+    /// Wilderness are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
@@ -675,7 +677,8 @@ public enum Inspect {
     /// `pecos`, `elk springs`, `elk`, `carrington`, `cornundas`,
     /// `cornudas`, `florida`, `chamisa`, `tapia`, `empedrado`,
     /// `ignacio`, `chavez`, `la leña`, `lena`, `ladrones`,
-    /// `ladron`, `indian grass`, or `indian`. Phrase
+    /// `ladron`, `indian grass`, `indian`, `dome`, `manzano`,
+    /// or `sandia`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead

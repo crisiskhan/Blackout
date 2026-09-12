@@ -1120,6 +1120,28 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Cerro Colorado. Do not add matcher `ladrones` or `ladron`.
     private static let sierraLadronesWSA = CLLocationCoordinate2D(latitude: 34.421613, longitude: -107.139863)
 
+    /// Dry interior of Dome Wilderness. Named nature reserve, not
+    /// wildlife range — phrase `wilderness preserve`, not the word
+    /// `wilderness`. Unique overlay at the pip (not Jemez NRA, not
+    /// Bandelier). Unique versus Painted Cave (4539 m) and Tent
+    /// Rocks (11331 m). Saint Peter's Dome 1535 m stays a peak. No
+    /// nearby name in 250 m. Do not add matcher `dome`.
+    private static let domeWilderness = CLLocationCoordinate2D(latitude: 35.746173, longitude: -106.360843)
+
+    /// Dry interior of Manzano Mountain Wilderness. Named nature
+    /// reserve, not wildlife range. Unique overlay at the pip.
+    /// Unique versus El Cerro de Los Lunas (37586 m). Osha Peak
+    /// 1130 m stays a peak. Nested Manzano WSA stays unheld. No
+    /// nearby name in 250 m. Do not add matcher `manzano`.
+    private static let manzanoMountainWilderness = CLLocationCoordinate2D(latitude: 34.663796, longitude: -106.419519)
+
+    /// Dry interior of Sandia Mountain Wilderness. Named nature
+    /// reserve, not wildlife range, not Sandia Mountain Natural
+    /// History Center. Unique overlay at the pip. Unique versus Hawk
+    /// Watch Open Space (2202 m). Unnamed peaks 1309 m stay peaks.
+    /// No nearby name in 250 m. Do not add matcher `sandia`.
+    private static let sandiaMountainWilderness = CLLocationCoordinate2D(latitude: 35.088383, longitude: -106.416369)
+
     /// Interior of Isleta Rectangle. Named NM forest: cottonwood;
     /// elk is high country, not west javelina, not a wetland bosque.
     private static let nmWoodland = CLLocationCoordinate2D(latitude: 34.939900, longitude: -106.320316)
@@ -3804,6 +3826,63 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(ladronesDo.contains("sotol") || ladronesDo.contains("cholla"), ladrones.card?.doLine ?? "")
         XCTAssertFalse(ladronesDo.contains("javelina"), ladrones.card?.doLine ?? "")
         XCTAssertFalse(ladronesDo.contains("edible"), ladrones.card?.doLine ?? "")
+
+        let dome = try hold(at: Self.domeWilderness, zoom: 16, packId: "nm")
+        XCTAssertEqual(dome.card?.klass, "Open reserve", "\(dome)")
+        XCTAssertEqual(dome.card?.title, "Dome Wilderness", "\(dome)")
+        XCTAssertNotEqual(dome.card?.klass, "Wildlife range", "\(dome)")
+        XCTAssertNotEqual(dome.card?.klass, "Peak", "\(dome)")
+        XCTAssertNotEqual(dome.card?.title, "Saint Peter's Dome", "\(dome)")
+        XCTAssertNotEqual(dome.card?.title, "Jemez National Recreation Area", "\(dome)")
+        XCTAssertNotEqual(dome.card?.title, "Bandelier National Monument", "\(dome)")
+        XCTAssertNotEqual(dome.card?.title, "Kasha-Katuwe Tent Rocks National Monument", "\(dome)")
+        XCTAssertEqual(dome.card?.fieldRoute.first, Inspect.snakeTXCard, "\(dome)")
+        XCTAssertTrue(
+            dome.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Dome Wilderness dropped the NM snake card: \(dome)"
+        )
+        let domeDo = dome.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(domeDo.contains("rattler") || domeDo.contains("diamondback"), dome.card?.doLine ?? "")
+        XCTAssertTrue(domeDo.contains("sotol") || domeDo.contains("cholla"), dome.card?.doLine ?? "")
+        XCTAssertFalse(domeDo.contains("javelina"), dome.card?.doLine ?? "")
+        XCTAssertFalse(domeDo.contains("edible"), dome.card?.doLine ?? "")
+
+        let manzano = try hold(at: Self.manzanoMountainWilderness, zoom: 16, packId: "nm")
+        XCTAssertEqual(manzano.card?.klass, "Open reserve", "\(manzano)")
+        XCTAssertEqual(manzano.card?.title, "Manzano Mountain Wilderness", "\(manzano)")
+        XCTAssertNotEqual(manzano.card?.klass, "Wildlife range", "\(manzano)")
+        XCTAssertNotEqual(manzano.card?.klass, "Peak", "\(manzano)")
+        XCTAssertNotEqual(manzano.card?.title, "Osha Peak", "\(manzano)")
+        XCTAssertNotEqual(manzano.card?.title, "Manzano Wilderness Study Area", "\(manzano)")
+        XCTAssertNotEqual(manzano.card?.title, "El Cerro de Los Lunas Preserve", "\(manzano)")
+        XCTAssertEqual(manzano.card?.fieldRoute.first, Inspect.snakeTXCard, "\(manzano)")
+        XCTAssertTrue(
+            manzano.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Manzano Mountain Wilderness dropped the NM snake card: \(manzano)"
+        )
+        let manzanoDo = manzano.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(manzanoDo.contains("rattler") || manzanoDo.contains("diamondback"), manzano.card?.doLine ?? "")
+        XCTAssertTrue(manzanoDo.contains("sotol") || manzanoDo.contains("cholla"), manzano.card?.doLine ?? "")
+        XCTAssertFalse(manzanoDo.contains("javelina"), manzano.card?.doLine ?? "")
+        XCTAssertFalse(manzanoDo.contains("edible"), manzano.card?.doLine ?? "")
+
+        let sandia = try hold(at: Self.sandiaMountainWilderness, zoom: 16, packId: "nm")
+        XCTAssertEqual(sandia.card?.klass, "Open reserve", "\(sandia)")
+        XCTAssertEqual(sandia.card?.title, "Sandia Mountain Wilderness", "\(sandia)")
+        XCTAssertNotEqual(sandia.card?.klass, "Wildlife range", "\(sandia)")
+        XCTAssertNotEqual(sandia.card?.title, "Hawk Watch Open Space", "\(sandia)")
+        XCTAssertNotEqual(sandia.card?.title, "Sandia Mountain Natural History Center", "\(sandia)")
+        XCTAssertNotEqual(sandia.card?.title, "Sandia Foothills Open Space", "\(sandia)")
+        XCTAssertEqual(sandia.card?.fieldRoute.first, Inspect.snakeTXCard, "\(sandia)")
+        XCTAssertTrue(
+            sandia.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Sandia Mountain Wilderness dropped the NM snake card: \(sandia)"
+        )
+        let sandiaDo = sandia.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sandiaDo.contains("rattler") || sandiaDo.contains("diamondback"), sandia.card?.doLine ?? "")
+        XCTAssertTrue(sandiaDo.contains("sotol") || sandiaDo.contains("cholla"), sandia.card?.doLine ?? "")
+        XCTAssertFalse(sandiaDo.contains("javelina"), sandia.card?.doLine ?? "")
+        XCTAssertFalse(sandiaDo.contains("edible"), sandia.card?.doLine ?? "")
     }
 
     func testHoldingNewMexicoWoodlandOpensCottonwoodNotJavelina() throws {
