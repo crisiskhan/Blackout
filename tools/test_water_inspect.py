@@ -2811,6 +2811,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("San Andres Peak", glass)
         self.assertIn("32.675918", glass)
         self.assertIn("-106.536111", glass)
+        self.assertIn("Bennett Mountain", glass)
+        self.assertIn("32.560366", glass)
+        self.assertIn("-106.479718", glass)
         self.assertIn("Feather Lake Wildlife Refuge", glass)
         self.assertIn("31.690659", glass)
         self.assertIn("-106.305767", glass)
@@ -4192,6 +4195,11 @@ class GroundFieldSync(unittest.TestCase):
             "San Andres Peak did not survive tiling as a peak",
         )
         self.assertIn(
+            "Bennett Mountain",
+            place_names_in_tile("tx-west", -106.479718, 32.560366),
+            "Bennett Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Mesa Blanca",
             place_names_in_tile("nm", -107.263101, 35.338369),
             "Mesa Blanca did not survive tiling as a peak",
@@ -4445,6 +4453,7 @@ class GroundFieldSync(unittest.TestCase):
 
         peak = False
         san_andres_peak = False
+        bennett_mountain = False
         loma_el_gato = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
@@ -4465,6 +4474,12 @@ class GroundFieldSync(unittest.TestCase):
             ):
                 san_andres_peak = True
             if (
+                props.get("name") == "Bennett Mountain"
+                and abs(lat - 32.560366) < 1e-6
+                and abs(lon - (-106.479718)) < 1e-6
+            ):
+                bennett_mountain = True
+            if (
                 props.get("name") == "Loma El Gato"
                 and abs(lat - 31.235777) < 1e-6
                 and abs(lon - (-106.573797)) < 1e-6
@@ -4473,6 +4488,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(peak, "glass west peak hold is not Mount Franklin")
         self.assertTrue(
             san_andres_peak, "San Andres Peak is not a named peak in the west extract"
+        )
+        self.assertTrue(
+            bennett_mountain, "Bennett Mountain is not a named peak in the west extract"
         )
         self.assertTrue(
             loma_el_gato, "Loma El Gato is not a named peak in the west extract"
@@ -5209,6 +5227,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("White Sands Missile Range S Route 287", qa)
         self.assertIn("San Andres Peak", qa)
         self.assertIn("32.675918", qa)
+        self.assertIn("Bennett Mountain", qa)
+        self.assertIn("32.560366", qa)
         self.assertIn("Feather Lake Wildlife Refuge", qa)
         self.assertIn("31.690659", qa)
         self.assertIn("Nottingham Drive", qa)

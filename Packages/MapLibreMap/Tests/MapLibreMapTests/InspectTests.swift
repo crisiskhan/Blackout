@@ -1571,6 +1571,17 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(sanAndresPeak.doLine.lowercased().contains("hog"), sanAndresPeak.doLine)
         XCTAssertFalse(sanAndresPeak.doLine.lowercased().contains("edible"), sanAndresPeak.doLine)
 
+        let bennettMountain = Inspect.read(
+            tags: ["natural": "peak", "name": "Bennett Mountain"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(bennettMountain.klass, "Peak")
+        XCTAssertNotEqual(bennettMountain.klass, "Wildlife range")
+        XCTAssertTrue(bennettMountain.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(bennettMountain.doLine.lowercased().contains("javelina"), bennettMountain.doLine)
+        XCTAssertFalse(bennettMountain.doLine.lowercased().contains("hog"), bennettMountain.doLine)
+        XCTAssertFalse(bennettMountain.doLine.lowercased().contains("edible"), bennettMountain.doLine)
+
         let featherLake = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -3243,6 +3254,17 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             Inspect.pick([
                 ["natural": "peak", "name": "San Andres Peak"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "San Andres National Wildlife Refuge",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Bennett Mountain"],
                 [
                     "leisure": "nature_reserve",
                     "boundary": "protected_area",
