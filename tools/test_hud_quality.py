@@ -416,6 +416,7 @@ class HUDSyncTests(unittest.TestCase):
 
 YELLOW_AT = 0.45
 RED_AT = 0.8
+STACK_YELLOW_TO_RED = 3
 RAIL_STEPS = (0.0, 0.2, 0.45, 0.8, 1.0)
 
 
@@ -429,11 +430,29 @@ def snap_rail(raw: float) -> float:
     return RAIL_STEPS[-1]
 
 
-def band_from_worst(worst: float, flags: tuple[str, ...] = ()) -> str:
-    """Mirror of PartyVitals.band."""
-    if "RED" in flags or worst >= RED_AT:
+def band_of(value: float) -> str:
+    """Mirror of PartyVitals.band(of:)."""
+    if value >= RED_AT:
         return "red"
-    if worst >= YELLOW_AT:
+    if value >= YELLOW_AT:
+        return "yellow"
+    return "green"
+
+
+def band_from_rails(rails: tuple[float, ...], flags: tuple[str, ...] = ()) -> str:
+    """Mirror of PartyVitals.band(rails:flags:). Worst-of plus stacked YELLOW."""
+    if "RED" in flags:
+        return "red"
+    yellows = 0
+    for value in rails:
+        band = band_of(value)
+        if band == "red":
+            return "red"
+        if band == "yellow":
+            yellows += 1
+    if yellows >= STACK_YELLOW_TO_RED:
+        return "red"
+    if yellows:
         return "yellow"
     return "green"
 
@@ -451,10 +470,16 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertEqual(snap_rail(0.89), 0.8)
         self.assertEqual(snap_rail(0.9), 1.0)
         self.assertEqual(snap_rail(1.2), 1.0)
-        self.assertEqual(band_from_worst(0.2), "green")
-        self.assertEqual(band_from_worst(0.45), "yellow")
-        self.assertEqual(band_from_worst(0.8), "red")
-        self.assertEqual(band_from_worst(0.2, ("RED",)), "red")
+        self.assertEqual(band_of(0.2), "green")
+        self.assertEqual(band_of(0.45), "yellow")
+        self.assertEqual(band_of(0.8), "red")
+        self.assertEqual(band_from_rails((0.2,) * 6), "green")
+        self.assertEqual(band_from_rails((0.45, 0.2, 0.2, 0.2, 0.2, 0.2)), "yellow")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.2, 0.2, 0.2, 0.2)), "yellow")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.45, 0.2, 0.2, 0.2)), "red")
+        self.assertEqual(band_from_rails((0.45,) * 6), "red")
+        self.assertEqual(band_from_rails((0.2, 0.2, 0.2, 0.2, 0.2, 0.8)), "red")
+        self.assertEqual(band_from_rails((0.2,) * 6, ("RED",)), "red")
 
     def test_condition_rails_not_system_sliders(self):
         exped = read("Blackout", "ExpeditionTab.swift")
@@ -470,6 +495,38 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("0.45", vitals)
         self.assertIn("0.8", vitals)
         self.assertIn("[0,0.2,0.45,0.8,1.0]", vitals.replace(" ", ""))
+        self.assertIn("stackYellowToRed", vitals)
+        self.assertIn("= 3", vitals)
+        self.assertIn("band(rails:", vitals)
+        self.assertIn("band(of:", vitals)
+        self.assertNotIn("band(worst:", vitals)
+
+    def test_condition_yellow_is_caution_ink_not_silver(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        theme = read("Blackout", "Theme.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        emit_vitals = read("tools", "v3", "emit_swift.py")
+        self.assertIn("case caution", theme)
+        self.assertIn("Theme.caution", theme)
+        self.assertIn("Theme.caution", exped)
+        self.assertIn("PartyVitals.band(of:", exped)
+        self.assertIn("case.yellow:return.caution", exped.replace(" ", ""))
+        self.assertNotIn("value >= PartyVitals.yellowAt { return Theme.warn }", exped)
+        self.assertIn("static let caution", tokens)
+        self.assertIn("warn=silver", tokens.replace(" ", ""))
+        caution = _rgba(tokens, "caution")
+        silver = (0.77, 0.80, 0.84)
+        accent = (225.0 / 255.0, 6.0 / 255.0, 0.0)
+        self.assertGreater(caution[1], 0.45)
+        self.assertGreater(caution[1] - accent[1], 0.4)
+        self.assertLess(caution[2], silver[2] / 2)
+        self.assertNotEqual(caution[:3], silver)
+        self.assertNotIn("Color.orange", exped)
+        self.assertNotIn("best in class", exped.lower())
+        vitalsSrc = read("Packages", "Vitals", "Sources", "Vitals", "Vitals.swift")
+        self.assertNotIn("best in class", vitalsSrc.lower())
+        self.assertIn("stackYellowToRed", emit_vitals)
+        self.assertIn("band(rails:", emit_vitals)
 
     def test_page_sections_and_red_plate(self):
         exped = read("Blackout", "ExpeditionTab.swift")
@@ -477,6 +534,7 @@ class ExpeditionHUDTests(unittest.TestCase):
         comms = read("Blackout", "CommsTab.swift")
         self.assertIn("enum HUDStatusTone", theme)
         self.assertIn("case crisis", theme)
+        self.assertIn("case caution", theme)
         self.assertIn("statusTone:", exped)
         self.assertIn("statusTone:", comms)
         self.assertIn("redPlate", exped)
@@ -497,7 +555,11 @@ class ExpeditionHUDTests(unittest.TestCase):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("condition rails", qa.lower())
         self.assertIn("HUD RED plate", qa)
+        self.assertIn("stacked", qa.lower())
+        self.assertIn("CONDITION RED", qa)
+        self.assertIn("caution ink", qa.lower())
         self.assertNotIn("Exposure sliders change CONDITION", qa)
+        self.assertNotIn("best in class", qa.lower())
 
 
 class FieldInstrumentTests(unittest.TestCase):
@@ -1079,6 +1141,10 @@ class NightRedLampTests(unittest.TestCase):
         self.assertGreater(lit_silver[0], 0.7)
         self.assertLess(lit_silver[1], 0.1)
         self.assertGreater(lit_accent[0], lit_silver[0])
+        caution = _rgba(tokens, "caution")[:3]
+        lit_caution = _multiply(caution, lamp[:3])
+        self.assertGreater(lit_caution[0], lit_silver[0])
+        self.assertGreater(lit_accent[0], lit_caution[0])
         washed = _wash(void, (0.55, 0.05, 0.05))
         self.assertGreater(washed[0], 0.1)
         self.assertIn("static let identity", night)

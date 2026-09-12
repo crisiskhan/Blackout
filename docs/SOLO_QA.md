@@ -73,7 +73,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## EXPEDITION
 
-- [ ] PASS / FAIL / N/A — `HUNGER` / `THIRST` / `PAIN` / `WATER` / `FATIGUE` / `EXPOSURE` condition rails change CONDITION. Ticks are GREEN / YELLOW / RED (not iOS sliders). Header CONDITION uses warn ink on YELLOW and the HUD RED plate ink on RED.
+- [ ] PASS / FAIL / N/A — `HUNGER` / `THIRST` / `PAIN` / `WATER` / `FATIGUE` / `EXPOSURE` condition rails change CONDITION. Ticks are GREEN / YELLOW / RED (not iOS sliders). Each rail paints its own band. Header CONDITION uses caution ink on YELLOW and the HUD RED plate ink on RED. Three or more YELLOW rails stacked is CONDITION RED — a compounding body, not a yellow average. Every rail YELLOW is CONDITION RED.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows the HUD RED plate (`RED`, not a system title). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — `1 MIN TIMER SET` creates a 1-minute timer. After 1 minute chrome includes `OVERDUE` plus the task. DONE is one row per timer id (`1min ALL DONE` once). JOIN NAV is one `nav Nav` row. A second JOIN NAV is `NAV · SEATED`, not a dead tap. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.

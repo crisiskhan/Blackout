@@ -8,6 +8,7 @@ enum Theme {
     static var silver: Color { Color(rgba: BlackoutTokens.Color.silver) }
     static var raised: Color { Color(rgba: BlackoutTokens.Color.raised) }
     static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
+    static var caution: Color { Color(rgba: BlackoutTokens.Color.caution) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
 
     enum Motion {
@@ -128,16 +129,19 @@ struct HUDOverlayChipStyle: ButtonStyle {
     }
 }
 
-/// Status ink on a HUD page. Silver is idle, warn is overdue / off-net, crisis is RED.
+/// Status ink on a HUD page. Silver is idle, warn is honesty chrome, caution is
+/// CONDITION YELLOW, crisis is RED.
 enum HUDStatusTone: Sendable {
     case silver
     case warn
+    case caution
     case crisis
 
     var ink: Color {
         switch self {
         case .silver: return Theme.silver
         case .warn: return Theme.warn
+        case .caution: return Theme.caution
         case .crisis: return Theme.accent
         }
     }

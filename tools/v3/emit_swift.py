@@ -60,6 +60,7 @@ public enum BlackoutTokens: Sendable {
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
         public static let sos = RGBA(r: 0.86, g: 0.14, b: 0.14, a: 1)
+        public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
     }
 
@@ -665,19 +666,89 @@ final class CryptoPartyTests: XCTestCase {
 public enum ConditionBand: String, Sendable { case green, yellow, red }
 
 public struct PartyVitals: Equatable, Sendable {
+    /// Band edges and the ticks on the EXPEDITION rails. One source.
+    public static let yellowAt: Double = 0.45
+    public static let redAt: Double = 0.8
+    /// Three YELLOW rails is a compounding body, not a yellow average.
+    public static let stackYellowToRed: Int = 3
+    public static let railSteps: [Double] = [0, 0.2, 0.45, 0.8, 1.0]
+
+    public var hunger: Double
+    public var thirst: Double
+    public var pain: Double
     public var water: Double
     public var fatigue: Double
     public var weatherExposure: Double
     public var flags: [String]
-    public init(water: Double, fatigue: Double, weatherExposure: Double, flags: [String] = []) {
-        self.water = water; self.fatigue = fatigue; self.weatherExposure = weatherExposure; self.flags = flags
+    public init(
+        hunger: Double = 0.2,
+        thirst: Double = 0.2,
+        pain: Double = 0.2,
+        water: Double,
+        fatigue: Double,
+        weatherExposure: Double,
+        flags: [String] = []
+    ) {
+        self.hunger = hunger
+        self.thirst = thirst
+        self.pain = pain
+        self.water = water
+        self.fatigue = fatigue
+        self.weatherExposure = weatherExposure
+        self.flags = flags
+    }
+
+    public var rails: [Double] {
+        [hunger, thirst, pain, water, fatigue, weatherExposure]
     }
 
     public var band: ConditionBand {
-        let worst = max(water, max(fatigue, weatherExposure))
-        if flags.contains("RED") || worst >= 0.8 { return .red }
-        if worst >= 0.45 { return .yellow }
+        Self.band(rails: rails, flags: flags)
+    }
+
+    public static func band(of value: Double) -> ConditionBand {
+        if value >= redAt { return .red }
+        if value >= yellowAt { return .yellow }
         return .green
+    }
+
+    public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
+        if flags.contains("RED") { return .red }
+        var yellows = 0
+        for value in rails {
+            switch band(of: value) {
+            case .red:
+                return .red
+            case .yellow:
+                yellows += 1
+            case .green:
+                break
+            }
+        }
+        if yellows >= stackYellowToRed { return .red }
+        if yellows > 0 { return .yellow }
+        return .green
+    }
+
+    /// Midpoint and above belongs to the worse tick, so CONDITION never sits between bands.
+    public static func snap(_ raw: Double) -> Double {
+        let clamped = min(1, max(0, raw))
+        let steps = railSteps
+        for i in 0..<(steps.count - 1) {
+            let mid = (steps[i] + steps[i + 1]) / 2
+            if clamped < mid {
+                return steps[i]
+            }
+        }
+        return steps[steps.count - 1]
+    }
+
+    public static func step(_ current: Double, _ delta: Int) -> Double {
+        let steps = railSteps
+        let snapped = snap(current)
+        guard let i = steps.firstIndex(of: snapped) else { return snapped }
+        let j = min(steps.count - 1, max(0, i + delta))
+        return steps[j]
     }
 }
 ''',
@@ -692,6 +763,57 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals(water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .green)
         XCTAssertEqual(PartyVitals(water: 0.5, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
+    }
+
+    func testSixAxesDriveBand() {
+        let axes = PartyVitals(hunger: 0.1, thirst: 0.1, pain: 0.9, water: 0.1, fatigue: 0.1, weatherExposure: 0.1)
+        XCTAssertEqual(axes.band, .red)
+        XCTAssertEqual(PartyVitals(hunger: 0.5, thirst: 0.1, pain: 0.1, water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .yellow)
+    }
+
+    func testRailSnapsToBandTicks() {
+        XCTAssertEqual(PartyVitals.yellowAt, 0.45)
+        XCTAssertEqual(PartyVitals.redAt, 0.8)
+        XCTAssertEqual(PartyVitals.stackYellowToRed, 3)
+        XCTAssertEqual(PartyVitals.railSteps, [0, 0.2, 0.45, 0.8, 1.0])
+        XCTAssertEqual(PartyVitals.snap(0.1), 0.2)
+        XCTAssertEqual(PartyVitals.snap(0.625), 0.8)
+        XCTAssertEqual(PartyVitals.step(0.2, 1), 0.45)
+        XCTAssertEqual(PartyVitals.step(0.2, -1), 0.0)
+        XCTAssertEqual(PartyVitals.step(1.0, 1), 1.0)
+        XCTAssertEqual(PartyVitals.band(of: 0.2), .green)
+        XCTAssertEqual(PartyVitals.band(of: 0.45), .yellow)
+        XCTAssertEqual(PartyVitals.band(of: 0.8), .red)
+    }
+
+    func testStackedYellowIsARedBody() {
+        let twoYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(twoYellow.band, .yellow)
+        let threeYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(threeYellow.band, .red)
+        let everyYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.45,
+            fatigue: 0.45,
+            weatherExposure: 0.45
+        )
+        XCTAssertEqual(everyYellow.band, .red)
     }
 }
 ''',

@@ -6,6 +6,8 @@ public struct PartyVitals: Equatable, Sendable {
     /// Band edges and the ticks on the EXPEDITION rails. One source.
     public static let yellowAt: Double = 0.45
     public static let redAt: Double = 0.8
+    /// Three YELLOW rails is a compounding body, not a yellow average.
+    public static let stackYellowToRed: Int = 3
     public static let railSteps: [Double] = [0, 0.2, 0.45, 0.8, 1.0]
 
     public var hunger: Double
@@ -33,13 +35,35 @@ public struct PartyVitals: Equatable, Sendable {
         self.flags = flags
     }
 
-    public var band: ConditionBand {
-        Self.band(worst: [hunger, thirst, pain, water, fatigue, weatherExposure].max() ?? 0, flags: flags)
+    public var rails: [Double] {
+        [hunger, thirst, pain, water, fatigue, weatherExposure]
     }
 
-    public static func band(worst: Double, flags: [String]) -> ConditionBand {
-        if flags.contains("RED") || worst >= redAt { return .red }
-        if worst >= yellowAt { return .yellow }
+    public var band: ConditionBand {
+        Self.band(rails: rails, flags: flags)
+    }
+
+    public static func band(of value: Double) -> ConditionBand {
+        if value >= redAt { return .red }
+        if value >= yellowAt { return .yellow }
+        return .green
+    }
+
+    public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
+        if flags.contains("RED") { return .red }
+        var yellows = 0
+        for value in rails {
+            switch band(of: value) {
+            case .red:
+                return .red
+            case .yellow:
+                yellows += 1
+            case .green:
+                break
+            }
+        }
+        if yellows >= stackYellowToRed { return .red }
+        if yellows > 0 { return .yellow }
         return .green
     }
 

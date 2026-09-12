@@ -207,7 +207,7 @@ struct ExpeditionTab: View {
         }
         switch runtime.vitals.band {
         case .green: return .silver
-        case .yellow: return .warn
+        case .yellow: return .caution
         case .red: return .crisis
         }
     }
@@ -275,7 +275,7 @@ struct HUDVitalsRail: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(Theme.silver)
+                .foregroundStyle(ink)
             GeometryReader { geo in
                 let width = geo.size.width
                 ZStack(alignment: .leading) {
@@ -325,8 +325,10 @@ struct HUDVitalsRail: View {
     }
 
     private var ink: Color {
-        if value >= PartyVitals.redAt { return Theme.accent }
-        if value >= PartyVitals.yellowAt { return Theme.warn }
-        return Theme.silver
+        switch PartyVitals.band(of: value) {
+        case .green: return Theme.silver
+        case .yellow: return Theme.caution
+        case .red: return Theme.accent
+        }
     }
 }

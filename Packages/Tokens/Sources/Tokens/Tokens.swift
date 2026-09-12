@@ -77,6 +77,8 @@ public enum BlackoutTokens: Sendable {
         public static let sos = accent
         /// Honesty ink. Crisis (SOS / RED / OVERDUE) uses accent. No leftover orange.
         public static let warn = silver
+        /// CONDITION YELLOW. Brass lamp, not iOS orange, not SOS. Honesty chrome stays silver.
+        public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
         /// Long-wavelength lamp. Multiply, not a wash: void stays void.
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
     }
