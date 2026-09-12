@@ -998,6 +998,29 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(beck.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(beck.doLine.lowercased().contains("edible"), beck.doLine)
 
+        let brodie = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Brodie Wild"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(brodie.klass, "Wildlife range")
+        XCTAssertNotEqual(brodie.klass, "Open reserve")
+        XCTAssertEqual(brodie.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(brodie.doLine.lowercased().contains("edible"), brodie.doLine)
+
+        let brodieLane = Inspect.read(
+            tags: ["highway": "secondary", "name": "Brodie Lane"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(brodieLane.klass, "Road")
+        XCTAssertNotEqual(brodieLane.klass, "Wildlife range")
+
+        let oakdale = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Brodie and Oakdale Properties"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(oakdale.klass, "Open reserve")
+        XCTAssertNotEqual(oakdale.klass, "Wildlife range")
+
         let waste = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Waste Management Wildlife Park"],
             pack: "tx-east"

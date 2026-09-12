@@ -97,7 +97,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertEqual(by_id[pid]["bytes"], manifest["bytes"], pid)
 
     def test_every_pack_ships_the_glasshouse_overlay(self):
-        expected = {"tx-west": (2, 0, 6, 10, 34), "tx-east": (14, 8, 37, 23, 15), "nm": (10, 1, 20, 18, 53)}
+        expected = {"tx-west": (2, 0, 6, 10, 34), "tx-east": (14, 8, 38, 23, 14), "nm": (10, 1, 20, 18, 53)}
         for pid in PACKS:
             path = PACK_ROOT / pid / "layers" / "ground.geojson"
             self.assertTrue(path.is_file(), f"{pid} is missing layers/ground.geojson")
@@ -223,6 +223,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("baker sanctuary", east_blob)
         self.assertIn("blair woods sanctuary", east_blob)
         self.assertIn("beck preserve", east_blob)
+        self.assertIn("brodie wild", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
         self.assertIn("barrow nature preserve", east_blob)
         self.assertIn("stillhouse hollow nature preserve", east_blob)
@@ -857,6 +858,24 @@ class ShippedWaterLayers(unittest.TestCase):
         )
         self.assertEqual(
             ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Brodie Wild"}
+            ),
+            "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Brodie and Oakdale Properties",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "secondary", "name": "Brodie Lane"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Waste Management Wildlife Park"}
             ),
             "reserve",
@@ -1144,6 +1163,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("blair")', inspect)
         self.assertNotIn('contains("sanctuary")', inspect)
         self.assertNotIn('contains("beck")', inspect)
+        self.assertNotIn('contains("brodie")', inspect)
+        self.assertNotIn('contains("wild")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1715,6 +1736,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("baker sanctuary", inspect)
         self.assertIn("blair woods sanctuary", inspect)
         self.assertIn("beck preserve", inspect)
+        self.assertIn("brodie wild", inspect)
         self.assertIn("wildflower preserve", inspect)
         self.assertIn("wildflower center", inspect)
         self.assertIn("lush n lean", inspect)
@@ -2298,6 +2320,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
+        self.assertIn("Brodie Wild", glass)
+        self.assertIn("30.183433", glass)
+        self.assertIn("-97.850150", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2526,6 +2551,7 @@ class GroundFieldSync(unittest.TestCase):
         baker_hit = False
         blair_hit = False
         beck_hit = False
+        brodie_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -2596,6 +2622,8 @@ class GroundFieldSync(unittest.TestCase):
                     blair_hit = True
                 if kind == "wildlife" and name == "Beck Preserve" and pip(-97.730214, 30.493184, ring):
                     beck_hit = True
+                if kind == "wildlife" and name == "Brodie Wild" and pip(-97.850150, 30.183433, ring):
+                    brodie_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2696,6 +2724,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             beck_hit,
             "Beck Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            brodie_hit,
+            "Brodie Wild is not wildlife range on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -3065,6 +3097,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("baker sanctuary", fetch)
         self.assertIn("blair woods sanctuary", fetch)
         self.assertIn("beck preserve", fetch)
+        self.assertIn("brodie wild", fetch)
         wildlife_name = fetch.split("NOTABLE_WILDLIFE_NAME", 1)[1].split(
             "NOTABLE_BOTANIC_NAME", 1
         )[0]
@@ -3105,6 +3138,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertNotIn("haozous", wildlife_name)
         self.assertNotIn("este garden", wildlife_name)
         self.assertNotIn("4th street garden", wildlife_name)
+        self.assertIn("brodie wild", wildlife_name)
+        self.assertNotIn("brodie wild", botanic_name)
         self.assertIn('way["leisure"="garden"]["name"~"', fetch)
         self.assertIn('relation["leisure"="garden"]["name"~"', fetch)
         self.assertIn('way["amenity"="community_garden"]["name"]', fetch)
@@ -3479,6 +3514,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Beck Preserve", qa)
         self.assertIn("30.493184", qa)
         self.assertIn("beck preserve", qa)
+        self.assertIn("brodie wild", qa)
+        self.assertIn("Brodie Wild", qa)
+        self.assertIn("30.183433", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)

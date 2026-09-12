@@ -179,6 +179,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not the word `beck`. Vertex-avg, 488 m from water.
     private static let beckPreserve = CLLocationCoordinate2D(latitude: 30.493184, longitude: -97.730214)
 
+    /// Interior of Brodie Wild. Phrase `brodie wild`, not the word
+    /// `brodie`. Brodie Lane stays a road. Brodie and Oakdale
+    /// Properties stay Open reserve. 128 m from OSM water.
+    private static let brodieWild = CLLocationCoordinate2D(latitude: 30.183433, longitude: -97.850150)
+
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
     private static let hawkWatch = CLLocationCoordinate2D(latitude: 35.069828, longitude: -106.424820)
@@ -865,6 +870,15 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(beck.card?.fieldRoute.first, Inspect.mammalEastCard, "\(beck)")
         XCTAssertTrue((beck.card?.doLine.lowercased() ?? "").contains("hog"), beck.card?.doLine ?? "")
         XCTAssertFalse((beck.card?.doLine.lowercased() ?? "").contains("edible"), beck.card?.doLine ?? "")
+
+        let brodie = try hold(at: Self.brodieWild, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(brodie.card?.klass, "Wildlife range", "\(brodie)")
+        XCTAssertEqual(brodie.card?.title, "Brodie Wild", "\(brodie)")
+        XCTAssertNotEqual(brodie.card?.klass, "Open reserve", "\(brodie)")
+        XCTAssertEqual(brodie.card?.fieldRoute.first, Inspect.mammalEastCard, "\(brodie)")
+        XCTAssertTrue((brodie.card?.doLine.lowercased() ?? "").contains("hog"), brodie.card?.doLine ?? "")
+        XCTAssertFalse((brodie.card?.doLine.lowercased() ?? "").contains("javelina"), brodie.card?.doLine ?? "")
+        XCTAssertFalse((brodie.card?.doLine.lowercased() ?? "").contains("edible"), brodie.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {

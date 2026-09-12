@@ -371,7 +371,10 @@ public enum Inspect {
     /// a nature center. Phrase `baker sanctuary`, not the word
     /// `baker`. Phrase `blair woods sanctuary`, not the word `blair` or
     /// `woods`. Phrase `beck preserve`, not the word `beck`. Beck
-    /// Preserve is Travis Audubon bird sanctuary. `preserve` alone is
+    /// Preserve is Travis Audubon bird sanctuary. Phrase `brodie
+    /// wild`, not the word `brodie`. Brodie Lane stays a road.
+    /// Brodie and Oakdale Properties stay Open reserve. Austin
+    /// wildland, animals as range, not a pin. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
@@ -408,6 +411,7 @@ public enum Inspect {
         if n.contains("baker sanctuary") { return true }
         if n.contains("blair woods sanctuary") { return true }
         if n.contains("beck preserve") { return true }
+        if n.contains("brodie wild") { return true }
         return false
     }
 

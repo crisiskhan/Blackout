@@ -87,8 +87,10 @@ CAVE_PRESERVE_KEYS = {
 # Natural History Center is range. Phrase `baker sanctuary`, not the
 # word `baker`. Phrase `blair woods sanctuary`, not the word `blair`
 # or `woods`. Phrase `beck preserve`, not the word `beck`. Beck
-# Preserve is Travis Audubon bird sanctuary. `preserve` alone is
-# still forbidden.
+# Preserve is Travis Audubon bird sanctuary. Phrase `brodie
+# wild`, not the word `brodie`. Brodie Lane stays a road.
+# Brodie and Oakdale Properties stay Open reserve. `preserve`
+# alone is still forbidden.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
@@ -118,6 +120,7 @@ WILDLIFE_RANGE_PHRASES = (
     "baker sanctuary",
     "blair woods sanctuary",
     "beck preserve",
+    "brodie wild",
 )
 
 # A mountain ACEC is not picnic woodland. Phrase `area of critical

@@ -355,7 +355,8 @@ NOTABLE_WILDLIFE_NAME = (
     "canyonlands preserve|wetland preserve|"
     "canyon preserve|management unit|ecological research|"
     "hawk watch|experimental range|natural history|"
-    "baker sanctuary|blair woods sanctuary|beck preserve"
+    "baker sanctuary|blair woods sanctuary|beck preserve|"
+    "brodie wild"
 )
 
 # Phrase match, not a dump of every backyard garden. Must stay in step with
