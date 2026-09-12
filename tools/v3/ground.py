@@ -90,7 +90,9 @@ CAVE_PRESERVE_KEYS = {
 # fauna`, not a street. Loma El Gato is a named peak on that
 # sheet — rank 1 still beats the overlay. Do not add matcher
 # `gato` or `loma el gato`. Phrase `national preserve`, not the word
-# `preserve`. Phrase `wilderness park`, not the word `wilderness`.
+# `preserve`. San Antonio Mountain is a named peak on
+# Valles Caldera — rank 1 still beats the overlay. Do not
+# add matcher `san antonio` or `valles`. Phrase `wilderness park`, not the word `wilderness`.
 # Wilderness Gate stays apartments. Phrase `canyonlands preserve`,
 # not the word `canyonlands`. Canyonlands Trail Park stays a park.
 # Phrase `wetland preserve`, not the word `wetland`. Rio Bosque
@@ -184,7 +186,11 @@ CAVE_PRESERVE_KEYS = {
 # sheet — rank 1 still beats the overlay. Cerritos de la
 # Jolla de Santa Rosa is a named peak on that sheet — rank 1
 # still beats the overlay. Do not add matcher `mesa blanca`,
-# `marquez`, `cerritos`, or `cerritos de la jolla`. White Sands Missile
+# `marquez`, `cerritos`, or `cerritos de la jolla`. Phrase
+# `national preserve` already matches Valles Caldera
+# National Preserve. San Antonio Mountain is a named peak
+# on that sheet — rank 1 still beats the overlay. Do not add
+# matcher `san antonio`. White Sands Missile
 # Range S Route 287 and Old Highway 85 stay roads. Phrase
 # `wildlife refuge` already
 # matches Feather Lake Wildlife Refuge. Ditches sit on most

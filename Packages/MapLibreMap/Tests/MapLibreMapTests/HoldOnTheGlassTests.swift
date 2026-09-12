@@ -340,7 +340,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let lakePerspectives = CLLocationCoordinate2D(latitude: 30.420633, longitude: -97.872138)
 
     /// Interior of Valles Caldera National Preserve. Phrase `national
-    /// preserve`. Elk country, not Open reserve.
+    /// preserve`. Elk country, not Open reserve. San Antonio
+    /// Mountain is held 16092 m off this pip — rank 1 still
+    /// beats the overlay.
     private static let vallesCaldera = CLLocationCoordinate2D(latitude: 36.000815, longitude: -106.455062)
 
     /// Interior of Leonora Curtin Wetland Preserve. Phrase `wetland
@@ -921,6 +923,17 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// elk as range, not javelina. Ice-on-rock is in this book,
     /// so FIELD names cold first.
     private static let cerritosDeLaJolla = CLLocationCoordinate2D(latitude: 35.409477, longitude: -107.316992)
+
+    /// `San Antonio Mountain` on the NM place slice. A named
+    /// peak on the Valles Caldera overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus the Valles Caldera
+    /// overlay Hold (16092 m) and Cerritos de la Jolla de Santa
+    /// Rosa (86362 m). San Antonio Mountain Trail is 358 m
+    /// (rank 7). Overlay containment is the nearby name. Bear
+    /// and elk as range, not javelina. Ice-on-rock is in this
+    /// book, so FIELD names cold first. Do not add matcher
+    /// `san antonio`.
+    private static let sanAntonioMountain = CLLocationCoordinate2D(latitude: 35.937521, longitude: -106.615869)
 
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
@@ -2747,6 +2760,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         let caldera = try hold(at: Self.vallesCaldera, zoom: 16, packId: "nm")
         XCTAssertEqual(caldera.card?.klass, "Wildlife range", "\(caldera)")
         XCTAssertEqual(caldera.card?.title, "Valles Caldera National Preserve", "\(caldera)")
+        XCTAssertNotEqual(caldera.card?.title, "San Antonio Mountain", "\(caldera)")
         XCTAssertNotEqual(caldera.card?.klass, "Open reserve", "\(caldera)")
         XCTAssertEqual(caldera.card?.fieldRoute.first, Inspect.mammalTXCard, "\(caldera)")
         XCTAssertTrue(
@@ -3273,6 +3287,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(cerritos.card?.title, "Marquez Wildlife Management Area", "\(cerritos)")
         XCTAssertNotEqual(cerritos.card?.title, "Mesa Blanca", "\(cerritos)")
         XCTAssertNotEqual(cerritos.card?.title, "La Cruz Peak", "\(cerritos)")
+        XCTAssertNotEqual(cerritos.card?.title, "San Antonio Mountain", "\(cerritos)")
         let cerritosDo = cerritos.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(cerritosDo.contains("black bear and elk range"), cerritos.card?.doLine ?? "")
         XCTAssertTrue(cerritosDo.contains("give it the road"), cerritos.card?.doLine ?? "")
@@ -3283,6 +3298,26 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(cerritosPresent.first, Inspect.iceRockCard, "\(cerritos)")
         XCTAssertEqual(InspectField.label(for: cerritosPresent.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: cerritosPresent), "COLD · ANIMAL · BITE")
+
+        let antonio = try hold(at: Self.sanAntonioMountain, zoom: 16, packId: "nm")
+        XCTAssertEqual(antonio.card?.klass, "Peak", "\(antonio)")
+        XCTAssertEqual(antonio.card?.title, "San Antonio Mountain", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.klass, "Wildlife range", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.title, "Valles Caldera National Preserve", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.title, "San Antonio Mountain Trail", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.title, "Cerritos de la Jolla de Santa Rosa", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.title, "Mesa Blanca", "\(antonio)")
+        XCTAssertNotEqual(antonio.card?.title, "La Cruz Peak", "\(antonio)")
+        let antonioDo = antonio.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(antonioDo.contains("black bear and elk range"), antonio.card?.doLine ?? "")
+        XCTAssertTrue(antonioDo.contains("give it the road"), antonio.card?.doLine ?? "")
+        XCTAssertFalse(antonioDo.contains("javelina"), antonio.card?.doLine ?? "")
+        XCTAssertFalse(antonioDo.contains("hog"), antonio.card?.doLine ?? "")
+        XCTAssertFalse(antonioDo.contains("edible"), antonio.card?.doLine ?? "")
+        let antonioPresent = InspectField.presentRoute(antonio.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(antonioPresent.first, Inspect.iceRockCard, "\(antonio)")
+        XCTAssertEqual(InspectField.label(for: antonioPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: antonioPresent), "COLD · ANIMAL · BITE")
     }
 
     func testHoldingAnEastPrairiePreserveOpensBiteNotPicnicWoodland() throws {

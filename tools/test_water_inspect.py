@@ -2661,6 +2661,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Cerritos de la Jolla de Santa Rosa", glass)
         self.assertIn("35.409477", glass)
         self.assertIn("-107.316992", glass)
+        self.assertIn("San Antonio Mountain", glass)
+        self.assertIn("35.937521", glass)
+        self.assertIn("-106.615869", glass)
         self.assertIn("Pronoun Cave Area of Critical Environmental Concern", glass)
         self.assertIn("35.093625", glass)
         self.assertIn("-106.680958", glass)
@@ -2781,6 +2784,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Valles Caldera National Preserve", glass)
         self.assertIn("36.000815", glass)
         self.assertIn("-106.455062", glass)
+        self.assertIn("San Antonio Mountain", glass)
+        self.assertIn("35.937521", glass)
+        self.assertIn("-106.615869", glass)
         self.assertIn("Leonora Curtin Wetland Preserve", glass)
         self.assertIn("35.569230", glass)
         self.assertIn("-106.101626", glass)
@@ -4210,6 +4216,11 @@ class GroundFieldSync(unittest.TestCase):
             "Cerritos de la Jolla de Santa Rosa did not survive tiling as a peak",
         )
         self.assertIn(
+            "San Antonio Mountain",
+            place_names_in_tile("nm", -106.615869, 35.937521),
+            "San Antonio Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Loma El Gato",
             place_names_in_tile("tx-west", -106.573797, 31.235777),
             "Loma El Gato did not survive tiling as a peak",
@@ -4582,6 +4593,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_peak = False
         mesa_blanca_peak = False
         cerritos_de_la_jolla_peak = False
+        san_antonio_mountain_peak = False
         nm_scrub = False
         sandia_cave = False
         embudo_cave = False
@@ -4628,6 +4640,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-107.316992)) < 1e-6
                 ):
                     cerritos_de_la_jolla_peak = True
+                if (
+                    props.get("name") == "San Antonio Mountain"
+                    and abs(lat - 35.937521) < 1e-6
+                    and abs(lon - (-106.615869)) < 1e-6
+                ):
+                    san_antonio_mountain_peak = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -4683,6 +4701,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             cerritos_de_la_jolla_peak,
             "Cerritos de la Jolla de Santa Rosa is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            san_antonio_mountain_peak,
+            "San Antonio Mountain is not a named peak in the NM extract",
         )
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
@@ -5085,6 +5107,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.338369", qa)
         self.assertIn("Cerritos de la Jolla de Santa Rosa", qa)
         self.assertIn("35.409477", qa)
+        self.assertIn("San Antonio Mountain", qa)
+        self.assertIn("35.937521", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
         self.assertIn("35.124701", qa)
         self.assertIn("Open Space Visitor Center", qa)
@@ -5192,6 +5216,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Nalle Bunny Run Wildlife Preserve", qa)
         self.assertIn("Randall Davey Audubon Center", qa)
         self.assertIn("Valles Caldera National Preserve", qa)
+        self.assertIn("San Antonio Mountain", qa)
+        self.assertIn("35.937521", qa)
         self.assertIn("Barton Creek Wilderness Park", qa)
         self.assertIn("Área de Protección de Flora y Fauna", qa)
         self.assertIn("Loma El Gato", qa)

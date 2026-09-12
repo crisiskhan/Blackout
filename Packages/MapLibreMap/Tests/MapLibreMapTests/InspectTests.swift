@@ -1353,6 +1353,22 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(caldera.doLine.lowercased().contains("elk is high country"), caldera.doLine)
         XCTAssertFalse(caldera.doLine.lowercased().contains("edible"), caldera.doLine)
 
+        let sanAntonioMountain = Inspect.read(
+            tags: ["natural": "peak", "name": "San Antonio Mountain"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(sanAntonioMountain.klass, "Peak")
+        XCTAssertNotEqual(sanAntonioMountain.klass, "Wildlife range")
+        XCTAssertTrue(sanAntonioMountain.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(
+            sanAntonioMountain.doLine.lowercased().contains("black bear and elk range"),
+            sanAntonioMountain.doLine
+        )
+        XCTAssertFalse(sanAntonioMountain.doLine.lowercased().contains("javelina"), sanAntonioMountain.doLine)
+        XCTAssertFalse(sanAntonioMountain.doLine.lowercased().contains("hog"), sanAntonioMountain.doLine)
+        XCTAssertFalse(sanAntonioMountain.doLine.lowercased().contains("edible"), sanAntonioMountain.doLine)
+
         let wildernessPark = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Barton Creek Wilderness Park"],
             pack: "tx-east"
@@ -3302,6 +3318,18 @@ final class InspectTests: XCTestCase {
                     "boundary": "protected_area",
                     "name": "Marquez Wildlife Management Area",
                 ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "San Antonio Mountain"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Valles Caldera National Preserve",
+                ],
+                ["highway": "path", "name": "San Antonio Mountain Trail"],
             ])["natural"],
             "peak"
         )
