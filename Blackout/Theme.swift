@@ -9,6 +9,7 @@ enum Theme {
     static var raised: Color { Color(rgba: BlackoutTokens.Color.raised) }
     static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
     static var caution: Color { Color(rgba: BlackoutTokens.Color.caution) }
+    static var heat: Color { Color(rgba: BlackoutTokens.Color.heat) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
     static var fix: Color { Color(rgba: BlackoutTokens.Color.fix) }
 
@@ -174,19 +175,24 @@ struct MapFieldDestChipStyle: ButtonStyle {
     }
 }
 
-/// Status ink on a HUD page. Silver is idle, warn is honesty chrome, caution is
-/// CONDITION YELLOW, crisis is RED.
+/// Status ink on a HUD page. Silver is idle, warn is honesty chrome, go is
+/// CONDITION GREEN, caution is CONDITION YELLOW, heat is CONDITION ORANGE,
+/// crisis is RED.
 enum HUDStatusTone: Sendable {
     case silver
     case warn
+    case go
     case caution
+    case heat
     case crisis
 
     var ink: Color {
         switch self {
         case .silver: return Theme.silver
         case .warn: return Theme.warn
+        case .go: return Theme.fix
         case .caution: return Theme.caution
+        case .heat: return Theme.heat
         case .crisis: return Theme.accent
         }
     }

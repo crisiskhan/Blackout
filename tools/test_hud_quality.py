@@ -502,9 +502,15 @@ class HUDSyncTests(unittest.TestCase):
 
 
 YELLOW_AT = 0.45
+ORANGE_AT = 0.65
 RED_AT = 0.8
+STACK_YELLOW_TO_ORANGE = 2
 STACK_YELLOW_TO_RED = 3
-RAIL_STEPS = (0.0, 0.2, 0.45, 0.8, 1.0)
+STACK_ORANGE_TO_RED = 2
+YELLOW_LOAD = 1
+ORANGE_LOAD = 2
+RED_LOAD = 3
+RAIL_STEPS = (0.0, 0.2, 0.45, 0.65, 0.8, 1.0)
 
 
 def snap_rail(raw: float) -> float:
@@ -521,25 +527,40 @@ def band_of(value: float) -> str:
     """Mirror of PartyVitals.band(of:)."""
     if value >= RED_AT:
         return "red"
+    if value >= ORANGE_AT:
+        return "orange"
     if value >= YELLOW_AT:
         return "yellow"
     return "green"
 
 
+def load_of(value: float) -> int:
+    """Mirror of PartyVitals.load(of:)."""
+    band = band_of(value)
+    if band == "red":
+        return RED_LOAD
+    if band == "orange":
+        return ORANGE_LOAD
+    if band == "yellow":
+        return YELLOW_LOAD
+    return 0
+
+
 def band_from_rails(rails: tuple[float, ...], flags: tuple[str, ...] = ()) -> str:
-    """Mirror of PartyVitals.band(rails:flags:). Worst-of plus stacked YELLOW."""
+    """Mirror of PartyVitals.band(rails:flags:). Load 2 is ORANGE. Load 3 is RED."""
     if "RED" in flags:
         return "red"
-    yellows = 0
+    total = 0
     for value in rails:
-        band = band_of(value)
-        if band == "red":
+        piece = load_of(value)
+        if piece >= RED_LOAD:
             return "red"
-        if band == "yellow":
-            yellows += 1
-    if yellows >= STACK_YELLOW_TO_RED:
+        total += piece
+    if total >= STACK_YELLOW_TO_RED:
         return "red"
-    if yellows:
+    if total >= STACK_YELLOW_TO_ORANGE:
+        return "orange"
+    if total:
         return "yellow"
     return "green"
 
@@ -553,18 +574,28 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertEqual(snap_rail(0.32), 0.2)
         self.assertEqual(snap_rail(0.325), 0.45)
         self.assertEqual(snap_rail(0.5), 0.45)
-        self.assertEqual(snap_rail(0.625), 0.8)
+        self.assertEqual(snap_rail(0.625), 0.65)
+        self.assertEqual(snap_rail(0.73), 0.8)
         self.assertEqual(snap_rail(0.89), 0.8)
         self.assertEqual(snap_rail(0.9), 1.0)
         self.assertEqual(snap_rail(1.2), 1.0)
         self.assertEqual(band_of(0.2), "green")
+        self.assertEqual(band_of(0.449), "green")
         self.assertEqual(band_of(0.45), "yellow")
+        self.assertEqual(band_of(0.649), "yellow")
+        self.assertEqual(band_of(0.65), "orange")
+        self.assertEqual(band_of(0.799), "orange")
         self.assertEqual(band_of(0.8), "red")
+        self.assertEqual(load_of(0.45), 1)
+        self.assertEqual(load_of(0.65), 2)
         self.assertEqual(band_from_rails((0.2,) * 6), "green")
         self.assertEqual(band_from_rails((0.45, 0.2, 0.2, 0.2, 0.2, 0.2)), "yellow")
-        self.assertEqual(band_from_rails((0.45, 0.45, 0.2, 0.2, 0.2, 0.2)), "yellow")
+        self.assertEqual(band_from_rails((0.45, 0.45, 0.2, 0.2, 0.2, 0.2)), "orange")
         self.assertEqual(band_from_rails((0.45, 0.45, 0.45, 0.2, 0.2, 0.2)), "red")
         self.assertEqual(band_from_rails((0.45,) * 6), "red")
+        self.assertEqual(band_from_rails((0.65, 0.2, 0.2, 0.2, 0.2, 0.2)), "orange")
+        self.assertEqual(band_from_rails((0.65, 0.65, 0.2, 0.2, 0.2, 0.2)), "red")
+        self.assertEqual(band_from_rails((0.65, 0.45, 0.2, 0.2, 0.2, 0.2)), "red")
         self.assertEqual(band_from_rails((0.2, 0.2, 0.2, 0.2, 0.2, 0.8)), "red")
         self.assertEqual(band_from_rails((0.2,) * 6, ("RED",)), "red")
 
@@ -577,13 +608,18 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("PartyVitals.snap", exped)
         self.assertIn("struct HUDVitalsRail", exped)
         self.assertIn("static let yellowAt", vitals)
+        self.assertIn("static let orangeAt", vitals)
         self.assertIn("static let redAt", vitals)
         self.assertIn("static let railSteps", vitals)
         self.assertIn("0.45", vitals)
+        self.assertIn("0.65", vitals)
         self.assertIn("0.8", vitals)
-        self.assertIn("[0,0.2,0.45,0.8,1.0]", vitals.replace(" ", ""))
+        self.assertIn("[0,0.2,0.45,0.65,0.8,1.0]", vitals.replace(" ", ""))
+        self.assertIn("stackYellowToOrange", vitals)
         self.assertIn("stackYellowToRed", vitals)
+        self.assertIn("stackOrangeToRed", vitals)
         self.assertIn("= 3", vitals)
+        self.assertIn("func load(of", vitals)
         self.assertIn("band(rails:", vitals)
         self.assertIn("band(of:", vitals)
         self.assertNotIn("band(worst:", vitals)
@@ -594,26 +630,52 @@ class ExpeditionHUDTests(unittest.TestCase):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         emit_vitals = read("tools", "v3", "emit_swift.py")
         self.assertIn("case caution", theme)
+        self.assertIn("case heat", theme)
+        self.assertIn("case go", theme)
         self.assertIn("Theme.caution", theme)
+        self.assertIn("Theme.heat", theme)
         self.assertIn("Theme.caution", exped)
+        self.assertIn("Theme.heat", exped)
+        self.assertIn("Theme.fix", exped)
+        self.assertIn("case.go:returnTheme.fix", theme.replace(" ", ""))
+        self.assertIn("case.heat:returnTheme.heat", theme.replace(" ", ""))
         self.assertIn("PartyVitals.band(of:", exped)
+        self.assertIn("case.green:return.go", exped.replace(" ", ""))
         self.assertIn("case.yellow:return.caution", exped.replace(" ", ""))
+        self.assertIn("case.orange:return.heat", exped.replace(" ", ""))
         self.assertNotIn("value >= PartyVitals.yellowAt { return Theme.warn }", exped)
         self.assertIn("static let caution", tokens)
+        self.assertIn("static let heat", tokens)
+        self.assertIn("heatHex", tokens)
+        self.assertIn("#ED510A", tokens)
         self.assertIn("warn=silver", tokens.replace(" ", ""))
         caution = _rgba(tokens, "caution")
+        heat = _rgba(tokens, "heat")
         silver = (0.77, 0.80, 0.84)
         accent = (225.0 / 255.0, 6.0 / 255.0, 0.0)
         self.assertGreater(caution[1], 0.45)
         self.assertGreater(caution[1] - accent[1], 0.4)
         self.assertLess(caution[2], silver[2] / 2)
         self.assertNotEqual(caution[:3], silver)
+        self.assertGreater(heat[0], 0.85)
+        self.assertLess(heat[1], caution[1])
+        self.assertGreater(heat[1], accent[1])
+        self.assertNotEqual(heat[:3], caution[:3])
+        self.assertNotEqual(heat[:3], accent)
         self.assertNotIn("Color.orange", exped)
+        self.assertNotIn("Color.green", exped)
         self.assertNotIn("best in class", exped.lower())
         vitalsSrc = read("Packages", "Vitals", "Sources", "Vitals", "Vitals.swift")
         self.assertNotIn("best in class", vitalsSrc.lower())
+        self.assertIn("case .orange", vitalsSrc)
+        self.assertIn("yellow, orange, red", vitalsSrc)
         self.assertIn("stackYellowToRed", emit_vitals)
+        self.assertIn("stackYellowToOrange", emit_vitals)
+        self.assertIn("orangeAt", emit_vitals)
         self.assertIn("band(rails:", emit_vitals)
+        self.assertIn("func load(of", emit_vitals)
+        self.assertIn("twoYellow.band, .orange", emit_vitals)
+        self.assertNotIn("twoYellow.band, .yellow", emit_vitals)
 
     def test_page_sections_and_red_plate(self):
         exped = read("Blackout", "ExpeditionTab.swift")
@@ -644,7 +706,10 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("HUD RED plate", qa)
         self.assertIn("stacked", qa.lower())
         self.assertIn("CONDITION RED", qa)
+        self.assertIn("CONDITION ORANGE", qa)
         self.assertIn("caution ink", qa.lower())
+        self.assertIn("heat ink", qa.lower())
+        self.assertIn("ORANGE", qa)
         self.assertNotIn("Exposure sliders change CONDITION", qa)
         self.assertNotIn("best in class", qa.lower())
 
@@ -1235,6 +1300,11 @@ class NightRedLampTests(unittest.TestCase):
         lit_caution = _multiply(caution, lamp[:3])
         self.assertGreater(lit_caution[0], lit_silver[0])
         self.assertGreater(lit_accent[0], lit_caution[0])
+        heat = _rgba(tokens, "heat")[:3]
+        lit_heat = _multiply(heat, lamp[:3])
+        self.assertGreater(lit_heat[0], lit_silver[0])
+        self.assertLess(lit_heat[1], lit_caution[1])
+        self.assertNotEqual(lit_heat, lit_caution)
         washed = _wash(void, (0.55, 0.05, 0.05))
         self.assertGreater(washed[0], 0.1)
         self.assertIn("static let identity", night)

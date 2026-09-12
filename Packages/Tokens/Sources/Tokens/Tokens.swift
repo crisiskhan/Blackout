@@ -81,6 +81,8 @@ public enum BlackoutTokens: Sendable {
         public static let warn = silver
         /// CONDITION YELLOW. Brass lamp, not iOS orange, not SOS. Honesty chrome stays silver.
         public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
+        /// CONDITION ORANGE. Heat lamp, not iOS orange, not SOS, not caution brass.
+        public static let heat = RGBA(r: 0.93, g: 0.32, b: 0.04, a: 1)
         /// Long-wavelength lamp. Multiply, not a wash: void stays void.
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
         /// Live GNSS lamp. COORDINATES chip. Not SOS, not caution brass.
@@ -93,6 +95,7 @@ public enum BlackoutTokens: Sendable {
         public static let silverHex = "#B8BDC2"
         public static let accentHex = "#E10600"
         public static let fixHex = "#2EE67A"
+        public static let heatHex = "#ED510A"
         public static let roadLabelMinZoom: Double = 12
         public static let roadLabelWalkingSize: Double = 19
         public static let roadLabelCloseWalkSize: Double = 22

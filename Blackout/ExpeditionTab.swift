@@ -206,8 +206,9 @@ struct ExpeditionTab: View {
             return .crisis
         }
         switch runtime.vitals.band {
-        case .green: return .silver
+        case .green: return .go
         case .yellow: return .caution
+        case .orange: return .heat
         case .red: return .crisis
         }
     }
@@ -265,7 +266,7 @@ struct ExpeditionTab: View {
     }
 }
 
-/// 44pt metal rail. Five ticks aligned to PartyVitals band math. Not a system Slider.
+/// 44pt metal rail. Ticks aligned to PartyVitals band math. Not a system Slider.
 struct HUDVitalsRail: View {
     let title: String
     @Binding var value: Double
@@ -326,8 +327,9 @@ struct HUDVitalsRail: View {
 
     private var ink: Color {
         switch PartyVitals.band(of: value) {
-        case .green: return Theme.silver
+        case .green: return Theme.fix
         case .yellow: return Theme.caution
+        case .orange: return Theme.heat
         case .red: return Theme.accent
         }
     }

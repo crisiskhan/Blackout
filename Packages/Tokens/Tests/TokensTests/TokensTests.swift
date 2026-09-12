@@ -17,6 +17,12 @@ final class TokensTests: XCTestCase {
         XCTAssertNotEqual(BlackoutTokens.Color.caution, BlackoutTokens.Color.accent)
         XCTAssertGreaterThan(BlackoutTokens.Color.caution.g, 0.45)
         XCTAssertLessThan(BlackoutTokens.Color.caution.b, 0.25)
+        XCTAssertEqual(BlackoutTokens.Color.heat, BlackoutTokens.RGBA(r: 0.93, g: 0.32, b: 0.04, a: 1))
+        XCTAssertNotEqual(BlackoutTokens.Color.heat, BlackoutTokens.Color.caution)
+        XCTAssertNotEqual(BlackoutTokens.Color.heat, BlackoutTokens.Color.accent)
+        XCTAssertGreaterThan(BlackoutTokens.Color.heat.r, 0.85)
+        XCTAssertLessThan(BlackoutTokens.Color.heat.g, BlackoutTokens.Color.caution.g)
+        XCTAssertGreaterThan(BlackoutTokens.Color.heat.g, BlackoutTokens.Color.accent.g)
         XCTAssertEqual(BlackoutTokens.Color.silver.r, BlackoutTokens.Color.metal.r)
         XCTAssertEqual(BlackoutTokens.Color.nightRed.r, 1.0, accuracy: 0.01)
         XCTAssertEqual(BlackoutTokens.Color.nightRed.g, 0.07, accuracy: 0.01)
@@ -75,6 +81,7 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapInk.silverHex, "#B8BDC2")
         XCTAssertEqual(BlackoutTokens.MapInk.accentHex, "#E10600")
         XCTAssertEqual(BlackoutTokens.MapInk.fixHex, "#2EE67A")
+        XCTAssertEqual(BlackoutTokens.MapInk.heatHex, "#ED510A")
         XCTAssertEqual(
             BlackoutTokens.Color.fix,
             BlackoutTokens.RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)

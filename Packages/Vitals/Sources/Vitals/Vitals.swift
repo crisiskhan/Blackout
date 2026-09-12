@@ -1,14 +1,24 @@
 import Foundation
 
-public enum ConditionBand: String, Sendable { case green, yellow, red }
+public enum ConditionBand: String, CaseIterable, Sendable {
+    case green, yellow, orange, red
+}
 
 public struct PartyVitals: Equatable, Sendable {
     /// Band edges and the ticks on the EXPEDITION rails. One source.
     public static let yellowAt: Double = 0.45
+    public static let orangeAt: Double = 0.65
     public static let redAt: Double = 0.8
-    /// Three YELLOW rails is a compounding body, not a yellow average.
+    /// Two YELLOW rails is CONDITION ORANGE, not a yellow average.
+    public static let stackYellowToOrange: Int = 2
+    /// Three YELLOW rails is a compounding body.
     public static let stackYellowToRed: Int = 3
-    public static let railSteps: [Double] = [0, 0.2, 0.45, 0.8, 1.0]
+    /// Two ORANGE rails is CONDITION RED.
+    public static let stackOrangeToRed: Int = 2
+    public static let yellowLoad: Int = 1
+    public static let orangeLoad: Int = 2
+    public static let redLoad: Int = 3
+    public static let railSteps: [Double] = [0, 0.2, 0.45, 0.65, 0.8, 1.0]
 
     public var hunger: Double
     public var thirst: Double
@@ -45,25 +55,36 @@ public struct PartyVitals: Equatable, Sendable {
 
     public static func band(of value: Double) -> ConditionBand {
         if value >= redAt { return .red }
+        if value >= orangeAt { return .orange }
         if value >= yellowAt { return .yellow }
         return .green
     }
 
+    /// YELLOW is 1, ORANGE is 2, RED is 3. Load 2 is ORANGE. Load 3 is RED.
+    public static func load(of value: Double) -> Int {
+        switch band(of: value) {
+        case .green:
+            return 0
+        case .yellow:
+            return yellowLoad
+        case .orange:
+            return orangeLoad
+        case .red:
+            return redLoad
+        }
+    }
+
     public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
         if flags.contains("RED") { return .red }
-        var yellows = 0
+        var total = 0
         for value in rails {
-            switch band(of: value) {
-            case .red:
-                return .red
-            case .yellow:
-                yellows += 1
-            case .green:
-                break
-            }
+            let piece = load(of: value)
+            if piece >= redLoad { return .red }
+            total += piece
         }
-        if yellows >= stackYellowToRed { return .red }
-        if yellows > 0 { return .yellow }
+        if total >= stackYellowToRed { return .red }
+        if total >= stackYellowToOrange { return .orange }
+        if total > 0 { return .yellow }
         return .green
     }
 
