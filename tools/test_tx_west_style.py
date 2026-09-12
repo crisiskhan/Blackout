@@ -174,6 +174,9 @@ def assert_readable_style(style: dict, label: str) -> None:
         fail(f"{label} desert and bosque use the same ink {desert}")
     if desert == playa:
         fail(f"{label} desert and playa use the same ink {desert}")
+    woodland = pairs.get("woodland")
+    if woodland and bosque and woodland == bosque:
+        fail(f"{label} woodland and bosque use the same ink {woodland}")
     opacity = interpolate_at((land.get("paint") or {}).get("fill-opacity"), 15)
     if opacity < 0.15:
         fail(f"{label} land fill {opacity} at z15 — desert and bosque vanish")
@@ -186,6 +189,15 @@ def assert_readable_style(style: dict, label: str) -> None:
         fail(f"{label} water fill is void — lakes vanish")
     if str(water_color).lower() == "#1a1c1e":
         fail(f"{label} water fill {water_color} is too close to void to read")
+    if str(water_color).lower() == "#1e2a32":
+        fail(f"{label} water fill {water_color} is still the old near-void lake")
+
+    park = layer(style, "public-land-fill")
+    park_op = float((park.get("paint") or {}).get("fill-opacity") or 1)
+    if park_op > 0.18:
+        fail(f"{label} public-land fill {park_op} buries biomes")
+    if not any(item.get("id") == "public-land-line" for item in layers):
+        fail(f"{label} public land has no outline, so parks vanish when the fill is quiet")
 
     meta = style.get("metadata") or {}
     if meta.get("attribution") != OSM_CREDIT:

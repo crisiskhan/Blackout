@@ -104,26 +104,28 @@ VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
 WATER_INK = "#6E747A"
-WATER_FILL = "#1E2A32"
+WATER_FILL = "#243844"
 WATER_EPHEMERAL = "#54595E"
 TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
 # Ground cover ink. Near black so silver streets and a red route still own the
 # walk, but far enough apart that desert (warm), playa (cool), and bosque
 # (deep green) read as different empty at a glance. Anything the tiler classes
 # and this does not name falls through to the default and draws as plain ground.
+# Values are the raw ink; the layer is only ~0.18 at walking zoom, so chroma
+# has to be loud in the source colour or every class collapses to the same void.
 LAND_INK = [
     "match",
     ["get", "class"],
-    "desert", "#2C1608",
-    "playa", "#1C1E28",
-    "mountain", "#10141C",
-    "bosque", "#05160C",
-    "woodland", "#0A1A0E",
-    "farm", "#14180A",
-    "town", "#1A1A1E",
-    "park", "#0C1A0C",
-    "protected", "#0C1812",
-    "#121212",
+    "desert", "#4A2410",
+    "playa", "#243048",
+    "mountain", "#182030",
+    "bosque", "#042818",
+    "woodland", "#0E3018",
+    "farm", "#28280C",
+    "town", "#282830",
+    "park", "#14301C",
+    "protected", "#102820",
+    "#141414",
 ]
 MAJOR_HIGHWAYS = [
     "motorway",
@@ -1422,13 +1424,23 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "id": "public-land-fill",
                 "type": "fill",
                 "source": "public-land",
-                "paint": {"fill-color": "#0a140a", "fill-opacity": 0.34},
+                "paint": {"fill-color": "#0C1810", "fill-opacity": 0.12},
+            },
+            {
+                "id": "public-land-line",
+                "type": "line",
+                "source": "public-land",
+                "paint": {
+                    "line-color": "#2A3A28",
+                    "line-width": 1.2,
+                    "line-opacity": 0.55,
+                },
             },
             {
                 "id": "flood-fill",
                 "type": "fill",
                 "source": "flood",
-                "paint": {"fill-color": "#0a1822", "fill-opacity": 0.34},
+                "paint": {"fill-color": "#0A2030", "fill-opacity": 0.22},
             },
             {
                 "id": "water-fill",
@@ -1516,7 +1528,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "id": "contours",
                 "type": "line",
                 "source": "contours",
-                "paint": {"line-color": "#2a2e28", "line-width": 0.45, "line-opacity": 0.4},
+                "paint": {"line-color": "#3C4438", "line-width": 0.7, "line-opacity": 0.55},
             },
             {
                 "id": "roads-casing",
@@ -1570,6 +1582,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "minzoom": 12,
                 "filter": highway_in(TRACK_HIGHWAYS),
+                "layout": {"line-cap": "round", "line-join": "round"},
                 "paint": {
                     "line-color": SILVER_INK,
                     "line-opacity": 0.72,
@@ -1624,7 +1637,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "text-keep-upright": True,
                 },
                 "paint": {
-                    "text-color": "#7fa6b8",
+                    "text-color": "#8A9AA4",
                     "text-halo-color": VOID_INK,
                     "text-halo-width": 2.0,
                     "text-halo-blur": 0.15,

@@ -82,24 +82,24 @@
             "class"
           ],
           "desert",
-          "#2C1608",
+          "#4A2410",
           "playa",
-          "#1C1E28",
+          "#243048",
           "mountain",
-          "#10141C",
+          "#182030",
           "bosque",
-          "#05160C",
+          "#042818",
           "woodland",
-          "#0A1A0E",
+          "#0E3018",
           "farm",
-          "#14180A",
+          "#28280C",
           "town",
-          "#1A1A1E",
+          "#282830",
           "park",
-          "#0C1A0C",
+          "#14301C",
           "protected",
-          "#0C1812",
-          "#121212"
+          "#102820",
+          "#141414"
         ],
         "fill-opacity": [
           "interpolate",
@@ -126,8 +126,18 @@
       "type": "fill",
       "source": "public-land",
       "paint": {
-        "fill-color": "#0a140a",
-        "fill-opacity": 0.34
+        "fill-color": "#0C1810",
+        "fill-opacity": 0.12
+      }
+    },
+    {
+      "id": "public-land-line",
+      "type": "line",
+      "source": "public-land",
+      "paint": {
+        "line-color": "#2A3A28",
+        "line-width": 1.2,
+        "line-opacity": 0.55
       }
     },
     {
@@ -135,8 +145,8 @@
       "type": "fill",
       "source": "flood",
       "paint": {
-        "fill-color": "#0a1822",
-        "fill-opacity": 0.34
+        "fill-color": "#0A2030",
+        "fill-opacity": 0.22
       }
     },
     {
@@ -158,7 +168,7 @@
         ]
       ],
       "paint": {
-        "fill-color": "#1E2A32",
+        "fill-color": "#243844",
         "fill-opacity": 0.82
       },
       "source-layer": "water"
@@ -315,7 +325,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#1E2A32",
+        "circle-color": "#243844",
         "circle-opacity": 0.01,
         "circle-radius": 22,
         "circle-stroke-width": 0
@@ -327,9 +337,9 @@
       "type": "line",
       "source": "contours",
       "paint": {
-        "line-color": "#2a2e28",
-        "line-width": 0.45,
-        "line-opacity": 0.4
+        "line-color": "#3C4438",
+        "line-width": 0.7,
+        "line-opacity": 0.55
       }
     },
     {
@@ -568,6 +578,10 @@
           ]
         ]
       ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
       "paint": {
         "line-color": "#B8BDC2",
         "line-opacity": 0.72,
@@ -682,7 +696,7 @@
         "text-keep-upright": true
       },
       "paint": {
-        "text-color": "#7fa6b8",
+        "text-color": "#8A9AA4",
         "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.15

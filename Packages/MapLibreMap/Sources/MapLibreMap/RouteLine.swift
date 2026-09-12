@@ -16,6 +16,16 @@ public enum RouteLine {
     /// The annotation is a hook. Style layers carry the paint, so this stays
     /// thin enough not to cover the void casing or the accent core.
     public static let annotationWidth: Double = 0.01
+    /// Multiples of the accent core width. WALK is a broken thread so it
+    /// never reads as another arterial; DRIVE stays continuous.
+    public static let walkDash: [Double] = [2.2, 1.6]
+
+    public static func dashPattern(_ mode: TravelMode) -> [Double]? {
+        switch mode {
+        case .walk: return walkDash
+        case .drive: return nil
+        }
+    }
 
     public static func shouldDraw(_ coords: [(lat: Double, lon: Double)]) -> Bool {
         coords.count >= 2
@@ -23,8 +33,11 @@ public enum RouteLine {
 
     public static func needsReapply(
         stored: [(lat: Double, lon: Double)]?,
-        route: [(lat: Double, lon: Double)]
+        route: [(lat: Double, lon: Double)],
+        storedMode: TravelMode? = nil,
+        mode: TravelMode = .walk
     ) -> Bool {
+        if let storedMode, storedMode != mode { return true }
         guard let stored else { return true }
         if stored.count != route.count { return true }
         for (a, b) in zip(stored, route) {

@@ -85,6 +85,8 @@ final class AppRuntime {
     var toolChrome = ""
     var routeCoords: [(lat: Double, lon: Double)] = []
     var routeTarget: (lat: Double, lon: Double)?
+    /// Last WALK or DRIVE tap. The canvas dashes the core for a walk.
+    var travelMode: TravelMode = .walk
     /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
@@ -306,6 +308,7 @@ final class AppRuntime {
     func navigate(mode: TravelMode) {
         touch(.dock)
         speechChrome = ""
+        travelMode = mode
         let pack = packs?.active
         let packName = pack?.name ?? ""
         let dest = destination()

@@ -303,6 +303,10 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertGreaterThan(RouteLine.fillWidth, RouteLine.coreWidth)
         XCTAssertGreaterThan(RouteLine.fillWidth, 6.6)
         XCTAssertLessThan(RouteLine.annotationWidth, 0.1)
+        XCTAssertEqual(RouteLine.dashPattern(.walk), RouteLine.walkDash)
+        XCTAssertNil(RouteLine.dashPattern(.drive))
+        XCTAssertFalse(RouteLine.walkDash.isEmpty)
+        XCTAssertGreaterThan(PackCamera.routePaddingPoints, PackCamera.edgePaddingPoints)
         XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
         XCTAssertFalse(RouteLine.shouldDraw([]))
@@ -318,6 +322,13 @@ final class MapLibreMapTests: XCTestCase {
                 stored: [(lat: 31.76, lon: -106.49)],
                 route: [(lat: 31.76, lon: -106.49)]
             )
+        )
+        let same = [(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]
+        XCTAssertTrue(
+            RouteLine.needsReapply(stored: same, route: same, storedMode: .walk, mode: .drive)
+        )
+        XCTAssertFalse(
+            RouteLine.needsReapply(stored: same, route: same, storedMode: .walk, mode: .walk)
         )
         let pack = PackManifest(
             id: "tx-west",
@@ -723,6 +734,19 @@ final class MapLibreMapTests: XCTestCase {
                 lastFollow: (lat: 31.76, lon: -106.49),
                 puck: (lat: 31.77, lon: -106.49)
             )
+        )
+        let line = [(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]
+        XCTAssertFalse(
+            PackCamera.shouldFitRoute(lockOn: true, stored: nil, route: line)
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFitRoute(lockOn: false, stored: nil, route: line)
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFitRoute(lockOn: false, stored: line, route: line)
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFitRoute(lockOn: false, stored: nil, route: [])
         )
     }
 }

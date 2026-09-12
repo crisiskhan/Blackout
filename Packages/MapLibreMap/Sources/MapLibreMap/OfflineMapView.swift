@@ -1,6 +1,7 @@
 import CoreLocation
 import Foundation
 import MapLibre
+import Router
 import SwiftUI
 import UIKit
 
@@ -34,6 +35,9 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
+    /// WALK dashes the accent core. DRIVE keeps it solid. Chrome already
+    /// says which; the line has to match.
+    public var travelMode: TravelMode
 
     public init(
         styleURL: URL,
@@ -55,7 +59,8 @@ public struct OfflineMapView: UIViewRepresentable {
         onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil,
         pips: [(lat: Double, lon: Double)] = [],
         onPulse: (() -> Void)? = nil,
-        lockOn: Bool = false
+        lockOn: Bool = false,
+        travelMode: TravelMode = .walk
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -77,6 +82,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.pips = pips
         self.onPulse = onPulse
         self.lockOn = lockOn
+        self.travelMode = travelMode
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -93,7 +99,6 @@ public struct OfflineMapView: UIViewRepresentable {
         }
         applyInteraction(view)
         view.prefetchesTiles = false
-        view.allowsRotating = true
         view.shouldRequestAuthorizationToUseLocationServices = trackUser
         view.showsUserLocation = trackUser
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
@@ -150,6 +155,13 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
+        // Paper map. Two-finger rotate with the compass hidden loses north;
+        // pitch turns a field sheet into a toy globe.
+        view.allowsRotating = false
+        view.allowsTilting = false
+        if abs(view.direction) > 0.5 {
+            view.setDirection(0, animated: false)
+        }
     }
 
     private var overlaySpec: Coordinator.OverlaySpec {
@@ -165,7 +177,8 @@ public struct OfflineMapView: UIViewRepresentable {
             held: held,
             fitToken: fitToken,
             pips: pips,
-            lockOn: lockOn
+            lockOn: lockOn,
+            travelMode: travelMode
         )
     }
 
@@ -183,6 +196,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var fitToken: Int
             var pips: [(lat: Double, lon: Double)]
             var lockOn: Bool
+            var travelMode: TravelMode
         }
 
         var spec: OverlaySpec?
@@ -207,6 +221,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var fittedFitToken = 0
         var storedLockOn = false
         var followedPuck: (lat: Double, lon: Double)?
+        var storedMode: TravelMode?
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -435,7 +450,12 @@ public struct OfflineMapView: UIViewRepresentable {
                 puck: (spec.puckLat, spec.puckLon),
                 mapHasPuck: mapHasPuck
             )
-            let routeNeeds = force || RouteLine.needsReapply(stored: storedRoute, route: spec.route)
+            let routeNeeds = force || RouteLine.needsReapply(
+                stored: storedRoute,
+                route: spec.route,
+                storedMode: storedMode,
+                mode: spec.travelMode
+            )
             let destNeeds = force || DestinationPin.needsReapply(
                 stored: storedDestination,
                 destination: spec.destination
@@ -459,6 +479,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 storedDestination = spec.destination
                 storedHeld = spec.held
                 storedPips = spec.pips
+                storedMode = spec.travelMode
                 return
             }
 
@@ -500,6 +521,7 @@ public struct OfflineMapView: UIViewRepresentable {
             storedDestination = spec.destination
             storedHeld = spec.held
             storedPips = spec.pips
+            storedMode = spec.travelMode
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -538,6 +560,18 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
                 return
             }
+            if PackCamera.shouldFitRoute(
+                lockOn: spec.lockOn,
+                stored: storedRoute,
+                route: spec.route
+            ) {
+                fitRoute(spec, on: view)
+                fittedPack = pack
+                fittedSize = size
+                storedLockOn = spec.lockOn
+                followedPuck = spec.lockOn ? (spec.puckLat, spec.puckLon) : nil
+                return
+            }
             if PackCamera.shouldFollow(
                 lockOn: spec.lockOn,
                 wasLocked: storedLockOn,
@@ -553,6 +587,22 @@ public struct OfflineMapView: UIViewRepresentable {
             storedLockOn = spec.lockOn
             if !spec.lockOn {
                 followedPuck = nil
+            }
+            if spec.lockOn {
+                if force || PackCamera.shouldRefit(
+                    fittedPack: fittedPack,
+                    pack: pack,
+                    fittedSize: fittedSize,
+                    size: size
+                ) {
+                    view.setCenter(
+                        CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon),
+                        animated: false
+                    )
+                    fittedPack = pack
+                    fittedSize = size
+                }
+                return
             }
             if !force, !PackCamera.shouldRefit(
                 fittedPack: fittedPack,
@@ -585,6 +635,33 @@ public struct OfflineMapView: UIViewRepresentable {
                 bounds,
                 edgePadding: UIEdgeInsets(top: pad, left: 16, bottom: pad, right: 16),
                 animated: false,
+                completionHandler: nil
+            )
+        }
+
+        func fitRoute(_ spec: OverlaySpec, on view: MLNMapView) {
+            let lats = spec.route.map(\.lat)
+            let lons = spec.route.map(\.lon)
+            guard var south = lats.min(), var north = lats.max(),
+                  var west = lons.min(), var east = lons.max() else { return }
+            if abs(north - south) < 1e-5 {
+                south -= 0.0004
+                north += 0.0004
+            }
+            if abs(east - west) < 1e-5 {
+                west -= 0.0004
+                east += 0.0004
+            }
+            let box = PackCamera.bounds(south: south, west: west, north: north, east: east)
+            let bounds = MLNCoordinateBoundsMake(
+                CLLocationCoordinate2D(latitude: box.south, longitude: box.west),
+                CLLocationCoordinate2D(latitude: box.north, longitude: box.east)
+            )
+            let pad = CGFloat(PackCamera.routePaddingPoints)
+            view.setVisibleCoordinateBounds(
+                bounds,
+                edgePadding: UIEdgeInsets(top: pad, left: 24, bottom: pad, right: 16),
+                animated: true,
                 completionHandler: nil
             )
         }
@@ -701,11 +778,11 @@ public struct OfflineMapView: UIViewRepresentable {
                 let line = MLNPolyline(coordinates: &coords, count: UInt(coords.count))
                 if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
                     src.shape = line
-                    paintRoute(on: style, source: src)
+                    paintRoute(on: style, source: src, mode: spec.travelMode)
                 } else {
                     let src = MLNShapeSource(identifier: RouteLine.sourceID, shape: line, options: nil)
                     style.addSource(src)
-                    paintRoute(on: style, source: src)
+                    paintRoute(on: style, source: src, mode: spec.travelMode)
                 }
             } else if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
                 var empty = [CLLocationCoordinate2D]()
@@ -737,36 +814,63 @@ public struct OfflineMapView: UIViewRepresentable {
 
         /// Void casing, silver fill, scarce accent core. Streets at walking zoom
         /// are silver with a void or red casing; a single silver stroke of the
-        /// same width disappears into them.
-        func paintRoute(on style: MLNStyle, source: MLNSource) {
+        /// same width disappears into them. WALK dashes only the core so the
+        /// path never reads as another arterial; DRIVE stays a solid thread.
+        func paintRoute(on style: MLNStyle, source: MLNSource, mode: TravelMode) {
             let silver = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
             let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+            let round = NSExpression(forConstantValue: "round")
 
-            if style.layer(withIdentifier: RouteLine.casingLayerID) == nil {
-                let casing = MLNLineStyleLayer(identifier: RouteLine.casingLayerID, source: source)
-                casing.lineColor = NSExpression(forConstantValue: UIColor.black)
-                casing.lineWidth = NSExpression(forConstantValue: RouteLine.casingWidth)
-                if let fill = style.layer(withIdentifier: RouteLine.layerID) {
-                    style.insertLayer(casing, belowLayer: fill)
+            func stroke(
+                _ layer: MLNLineStyleLayer,
+                color: UIColor,
+                width: Double,
+                dashed: Bool
+            ) {
+                layer.lineColor = NSExpression(forConstantValue: color)
+                layer.lineWidth = NSExpression(forConstantValue: width)
+                layer.lineCap = round
+                layer.lineJoin = round
+                if dashed, let dash = RouteLine.dashPattern(mode) {
+                    layer.lineDashPattern = NSExpression(forConstantValue: dash)
                 } else {
-                    style.addLayer(casing)
+                    layer.lineDashPattern = nil
                 }
             }
-            if style.layer(withIdentifier: RouteLine.layerID) == nil {
-                let fill = MLNLineStyleLayer(identifier: RouteLine.layerID, source: source)
-                fill.lineColor = NSExpression(forConstantValue: silver)
-                fill.lineWidth = NSExpression(forConstantValue: RouteLine.fillWidth)
-                style.addLayer(fill)
-            } else if let fill = style.layer(withIdentifier: RouteLine.layerID) as? MLNLineStyleLayer {
-                fill.lineColor = NSExpression(forConstantValue: silver)
-                fill.lineWidth = NSExpression(forConstantValue: RouteLine.fillWidth)
+
+            let casing: MLNLineStyleLayer
+            if let existing = style.layer(withIdentifier: RouteLine.casingLayerID) as? MLNLineStyleLayer {
+                casing = existing
+            } else {
+                let layer = MLNLineStyleLayer(identifier: RouteLine.casingLayerID, source: source)
+                if let fill = style.layer(withIdentifier: RouteLine.layerID) {
+                    style.insertLayer(layer, belowLayer: fill)
+                } else {
+                    style.addLayer(layer)
+                }
+                casing = layer
             }
-            if style.layer(withIdentifier: RouteLine.coreLayerID) == nil {
-                let core = MLNLineStyleLayer(identifier: RouteLine.coreLayerID, source: source)
-                core.lineColor = NSExpression(forConstantValue: accent)
-                core.lineWidth = NSExpression(forConstantValue: RouteLine.coreWidth)
-                style.addLayer(core)
+            stroke(casing, color: UIColor.black, width: RouteLine.casingWidth, dashed: false)
+
+            let fill: MLNLineStyleLayer
+            if let existing = style.layer(withIdentifier: RouteLine.layerID) as? MLNLineStyleLayer {
+                fill = existing
+            } else {
+                let layer = MLNLineStyleLayer(identifier: RouteLine.layerID, source: source)
+                style.addLayer(layer)
+                fill = layer
             }
+            stroke(fill, color: silver, width: RouteLine.fillWidth, dashed: false)
+
+            let core: MLNLineStyleLayer
+            if let existing = style.layer(withIdentifier: RouteLine.coreLayerID) as? MLNLineStyleLayer {
+                core = existing
+            } else {
+                let layer = MLNLineStyleLayer(identifier: RouteLine.coreLayerID, source: source)
+                style.addLayer(layer)
+                core = layer
+            }
+            stroke(core, color: accent, width: RouteLine.coreWidth, dashed: true)
         }
 
         /// Silver bodies. MapLibre's Swift overlay does not import the ObjC

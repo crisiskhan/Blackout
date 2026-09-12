@@ -285,6 +285,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn('speechChrome = ""', pick)
         navigate = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
         self.assertIn('speechChrome = ""', navigate)
+        self.assertIn("travelMode = mode", navigate)
         clear = app.split("private func clearRoute(")[1].split("\n    }")[0]
         self.assertIn('speechChrome = ""', clear)
 
@@ -299,7 +300,15 @@ class FieldChromeSourceContracts(unittest.TestCase):
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
         ))
         self.assertIn("PackCamera.shouldFollow", offline)
+        self.assertIn("PackCamera.shouldFitRoute", offline)
+        self.assertIn("func fitRoute(", offline)
+        self.assertIn("allowsRotating = false", offline)
+        self.assertIn("allowsTilting = false", offline)
+        self.assertNotIn("allowsRotating = true", offline)
         self.assertIn("lockOn: runtime.lockOn", read("Blackout", "MapTab.swift"))
+        self.assertIn("travelMode: runtime.travelMode", read("Blackout", "MapTab.swift"))
+        self.assertIn("walkDash", self.route_line)
+        self.assertIn("func dashPattern", self.route_line)
         self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
         self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("GraphPlan.line", app)

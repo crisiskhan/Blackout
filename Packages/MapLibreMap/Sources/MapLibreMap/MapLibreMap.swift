@@ -317,6 +317,9 @@ public enum UserPuck {
 
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
+    /// HUD chrome around a plotted line. Bigger than FIT PACK so DEST is
+    /// not under the dock.
+    public static let routePaddingPoints: Double = 72
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
@@ -369,6 +372,17 @@ public enum PackCamera {
         guard let lastFollow else { return true }
         return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
     }
+
+    /// A new drawable line, and LOCK-ON is off, so show the whole walk.
+    public static func shouldFitRoute(
+        lockOn: Bool,
+        stored: [(lat: Double, lon: Double)]?,
+        route: [(lat: Double, lon: Double)]
+    ) -> Bool {
+        guard !lockOn else { return false }
+        guard RouteLine.shouldDraw(route) else { return false }
+        return RouteLine.needsReapply(stored: stored, route: route)
+    }
 }
 
 public enum PackStyle {
@@ -408,7 +422,7 @@ public enum PackStyle {
     /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
     /// silver ground marks for peaks, holes and named trees, and the glasshouse
     /// and cave-preserve overlay from `layers/ground.geojson`.
-    public static let resolverVersion = 7
+    public static let resolverVersion = 8
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -702,9 +716,9 @@ public enum PackStyle {
                 ],
                 "paint": [
                     "circle-color": silverInk,
-                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.6],
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.0, 16, 5.4],
                     "circle-stroke-color": voidInk,
-                    "circle-stroke-width": 0.9,
+                    "circle-stroke-width": 1.1,
                 ],
             ])
         }
@@ -756,6 +770,10 @@ public enum PackStyle {
             "type": "line",
             "source": groundWorkedSourceID,
             "minzoom": groundMinZoom,
+            "layout": [
+                "line-cap": "round",
+                "line-join": "round",
+            ],
             "paint": [
                 "line-color": silverInk,
                 "line-opacity": 0.88,

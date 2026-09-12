@@ -166,7 +166,7 @@
         "style.json",
         "wild.geojson"
       ],
-      "bytes": 35604672
+      "bytes": 35604969
     },
     {
       "id": "tx-east",
@@ -316,7 +316,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 30804269
+      "bytes": 30804566
     },
     {
       "id": "nm",
@@ -467,7 +467,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 35989631
+      "bytes": 35989928
     }
   ]
 }
