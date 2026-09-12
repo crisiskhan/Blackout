@@ -769,6 +769,29 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(janetPark.klass, "Park")
         XCTAssertFalse(janetPark.fieldRoute.contains(Inspect.caveCard))
 
+        let patsPit = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Pat's Pit"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(patsPit.klass, "Cave or hole")
+        XCTAssertEqual(patsPit.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(patsPit.doLine.lowercased().contains("edible"), patsPit.doLine)
+
+        let persimmon = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Persimmon Well"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(persimmon.klass, "Cave or hole")
+        XCTAssertEqual(persimmon.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(persimmon.doLine.lowercased().contains("edible"), persimmon.doLine)
+
+        let redLoop = Inspect.read(
+            tags: ["highway": "footway", "name": "Red Loop"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(redLoop.klass, "Trail")
+        XCTAssertFalse(redLoop.fieldRoute.contains(Inspect.caveCard))
+
         let daffan = Inspect.read(
             tags: ["highway": "tertiary", "name": "Daffan Lane"],
             pack: "tx-east"
@@ -3184,6 +3207,24 @@ final class InspectTests: XCTestCase {
                 ["leisure": "park", "name": "Janet Bartles Park"],
                 ["highway": "tertiary", "name": "Buttercup Creek Boulevard"],
                 ["waterway": "stream"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Pat's Pit"],
+                ["leisure": "park", "name": "Buttercup Creek Cave Preserve"],
+                ["highway": "residential", "name": "Anna Court"],
+                ["highway": "residential", "name": "Andrew Cove"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Persimmon Well"],
+                ["leisure": "park", "name": "Discovery Well Cave Preserve"],
+                ["highway": "footway", "name": "Red Loop"],
+                ["highway": "footway", "name": "Blue Loop"],
             ])["natural"],
             "cave_entrance"
         )

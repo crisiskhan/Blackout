@@ -244,6 +244,20 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// the mouth still wins.
     private static let wartonWhirlpool = CLLocationCoordinate2D(latitude: 30.498651, longitude: -97.833984)
 
+    /// `Pat's Pit` on the east place slice. A cave mouth on the
+    /// Buttercup overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus Buttercup Blowhole (169 m) and Cedar Elm
+    /// Sink (131 m). Anna Court 89 m is rank 7. Andrew Cove stays
+    /// a road.
+    private static let patsPitCave = CLLocationCoordinate2D(latitude: 30.497611, longitude: -97.839661)
+
+    /// `Persimmon Well` on the east place slice. A cave mouth on
+    /// the Discovery Well overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus Lime Creek Road Sink (277 m) and
+    /// Jumbled Rocks (143 m). Red Loop stays a trail. No named
+    /// street in 110 m; overlay containment counts.
+    private static let persimmonWell = CLLocationCoordinate2D(latitude: 30.490903, longitude: -97.859084)
+
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
     private static let lostOasisCave = CLLocationCoordinate2D(latitude: 30.163187, longitude: -97.873678)
@@ -1800,6 +1814,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(held.card?.title, "Discovery Well Cave Preserve", "\(held)")
         XCTAssertNotEqual(held.card?.title, "Lime Creek Road Sink", "\(held)")
         XCTAssertNotEqual(held.card?.title, "Under Three Oaks", "\(held)")
+        XCTAssertNotEqual(held.card?.title, "Persimmon Well", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.caveCard, "\(held)")
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("stay in daylight"), held.card?.doLine ?? "")
@@ -1846,6 +1861,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(buttercup.card?.title, "Good Friday", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Buttercup Blowhole", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Cedar Elm Sink", "\(buttercup)")
+        XCTAssertNotEqual(buttercup.card?.title, "Pat's Pit", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Nelson Ranch Road", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Discovery Well Cave Preserve", "\(buttercup)")
         XCTAssertEqual(buttercup.card?.fieldRoute.first, Inspect.caveCard, "\(buttercup)")
@@ -1913,6 +1929,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(blowhole.card?.title, "Stone Well #2", "\(blowhole)")
         XCTAssertNotEqual(blowhole.card?.title, "Tree House Cave", "\(blowhole)")
         XCTAssertNotEqual(blowhole.card?.title, "Cedar Elm Sink", "\(blowhole)")
+        XCTAssertNotEqual(blowhole.card?.title, "Pat's Pit", "\(blowhole)")
         XCTAssertEqual(blowhole.card?.fieldRoute.first, Inspect.caveCard, "\(blowhole)")
         XCTAssertTrue((blowhole.card?.doLine.lowercased() ?? "").contains("stay in daylight"), blowhole.card?.doLine ?? "")
         XCTAssertFalse((blowhole.card?.doLine.lowercased() ?? "").contains("edible"), blowhole.card?.doLine ?? "")
@@ -1926,6 +1943,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(limeSink.card?.title, "Lime Creek Road", "\(limeSink)")
         XCTAssertNotEqual(limeSink.card?.title, "Balcones Canyonlands Preserve - Lime Creek", "\(limeSink)")
         XCTAssertNotEqual(limeSink.card?.title, "Under Three Oaks", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Persimmon Well", "\(limeSink)")
         XCTAssertEqual(limeSink.card?.fieldRoute.first, Inspect.caveCard, "\(limeSink)")
         XCTAssertTrue((limeSink.card?.doLine.lowercased() ?? "").contains("stay in daylight"), limeSink.card?.doLine ?? "")
         XCTAssertFalse((limeSink.card?.doLine.lowercased() ?? "").contains("edible"), limeSink.card?.doLine ?? "")
@@ -1938,6 +1956,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(cedarElm.card?.title, "Anna Court", "\(cedarElm)")
         XCTAssertNotEqual(cedarElm.card?.title, "Cedar Elm Preserve Trail", "\(cedarElm)")
         XCTAssertNotEqual(cedarElm.card?.title, "Brook Meadow Trail", "\(cedarElm)")
+        XCTAssertNotEqual(cedarElm.card?.title, "Pat's Pit", "\(cedarElm)")
         XCTAssertEqual(cedarElm.card?.fieldRoute.first, Inspect.caveCard, "\(cedarElm)")
         XCTAssertTrue((cedarElm.card?.doLine.lowercased() ?? "").contains("stay in daylight"), cedarElm.card?.doLine ?? "")
         XCTAssertFalse((cedarElm.card?.doLine.lowercased() ?? "").contains("edible"), cedarElm.card?.doLine ?? "")
@@ -1950,6 +1969,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(threeOaks.card?.title, "Anderson Mill Road", "\(threeOaks)")
         XCTAssertNotEqual(threeOaks.card?.title, "Blue Loop", "\(threeOaks)")
         XCTAssertNotEqual(threeOaks.card?.title, "Blue Loop (Three Oaks)", "\(threeOaks)")
+        XCTAssertNotEqual(threeOaks.card?.title, "Persimmon Well", "\(threeOaks)")
         XCTAssertEqual(threeOaks.card?.fieldRoute.first, Inspect.caveCard, "\(threeOaks)")
         XCTAssertTrue((threeOaks.card?.doLine.lowercased() ?? "").contains("stay in daylight"), threeOaks.card?.doLine ?? "")
         XCTAssertFalse((threeOaks.card?.doLine.lowercased() ?? "").contains("edible"), threeOaks.card?.doLine ?? "")
@@ -1976,6 +1996,30 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(warton.card?.fieldRoute.first, Inspect.caveCard, "\(warton)")
         XCTAssertTrue((warton.card?.doLine.lowercased() ?? "").contains("stay in daylight"), warton.card?.doLine ?? "")
         XCTAssertFalse((warton.card?.doLine.lowercased() ?? "").contains("edible"), warton.card?.doLine ?? "")
+
+        let patsPit = try hold(at: Self.patsPitCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(patsPit.card?.klass, "Cave or hole", "\(patsPit)")
+        XCTAssertEqual(patsPit.card?.title, "Pat's Pit", "\(patsPit)")
+        XCTAssertNotEqual(patsPit.card?.title, "Buttercup Creek Cave Preserve", "\(patsPit)")
+        XCTAssertNotEqual(patsPit.card?.title, "Buttercup Blowhole", "\(patsPit)")
+        XCTAssertNotEqual(patsPit.card?.title, "Cedar Elm Sink", "\(patsPit)")
+        XCTAssertNotEqual(patsPit.card?.title, "Anna Court", "\(patsPit)")
+        XCTAssertNotEqual(patsPit.card?.title, "Andrew Cove", "\(patsPit)")
+        XCTAssertEqual(patsPit.card?.fieldRoute.first, Inspect.caveCard, "\(patsPit)")
+        XCTAssertTrue((patsPit.card?.doLine.lowercased() ?? "").contains("stay in daylight"), patsPit.card?.doLine ?? "")
+        XCTAssertFalse((patsPit.card?.doLine.lowercased() ?? "").contains("edible"), patsPit.card?.doLine ?? "")
+
+        let persimmon = try hold(at: Self.persimmonWell, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(persimmon.card?.klass, "Cave or hole", "\(persimmon)")
+        XCTAssertEqual(persimmon.card?.title, "Persimmon Well", "\(persimmon)")
+        XCTAssertNotEqual(persimmon.card?.title, "Discovery Well Cave Preserve", "\(persimmon)")
+        XCTAssertNotEqual(persimmon.card?.title, "Lime Creek Road Sink", "\(persimmon)")
+        XCTAssertNotEqual(persimmon.card?.title, "Jumbled Rocks", "\(persimmon)")
+        XCTAssertNotEqual(persimmon.card?.title, "Red Loop", "\(persimmon)")
+        XCTAssertNotEqual(persimmon.card?.title, "Blue Loop", "\(persimmon)")
+        XCTAssertEqual(persimmon.card?.fieldRoute.first, Inspect.caveCard, "\(persimmon)")
+        XCTAssertTrue((persimmon.card?.doLine.lowercased() ?? "").contains("stay in daylight"), persimmon.card?.doLine ?? "")
+        XCTAssertFalse((persimmon.card?.doLine.lowercased() ?? "").contains("edible"), persimmon.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {

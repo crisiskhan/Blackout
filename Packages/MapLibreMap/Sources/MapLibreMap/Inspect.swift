@@ -328,7 +328,8 @@ public enum Inspect {
     /// and no other mouth sits in the probe. Buttercup Blowhole, Cedar
     /// Elm Sink, Lime Creek Road Sink, and Under Three Oaks. Isolated
     /// mouths off those sheets: Buttercup Drain Cave and Warton
-    /// Whirlpool. Godzilla Cave stays unheld — Link's sits 84 m off
+    /// Whirlpool. Overlay-sheet mouths also Holdable: Pat's Pit and
+    /// Persimmon Well. Godzilla Cave stays unheld — Link's sits 84 m off
     /// that mouth. Good Friday stays unheld — 141 m from the
     /// Buttercup overlay Hold pip.
     static func isCavePreserve(_ t: [String: String]) -> Bool {

@@ -51,7 +51,8 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 # Well are Holdable when unique versus the overlay pip and no other
 # mouth sits in the probe. Buttercup Blowhole, Cedar Elm Sink, Lime
 # Creek Road Sink, and Under Three Oaks. Isolated mouths off those
-# sheets: Buttercup Drain Cave and Warton Whirlpool. Godzilla Cave
+# sheets: Buttercup Drain Cave and Warton Whirlpool. Overlay-sheet
+# mouths also Holdable: Pat's Pit and Persimmon Well. Godzilla Cave
 # stays unheld — Link's sits 84 m off that mouth. Good Friday stays
 # unheld — 141 m from the Buttercup overlay Hold pip.
 CAVE_PRESERVE_PHRASES = (
