@@ -178,7 +178,9 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # meal. Phrase `haozous garden`, not the word `haozous` —
 # Haozous Road stays a road. Phrase `este garden`, not the word
 # `este`. Celeste Drive stays a road. Alamo Community Garden is
-# a separate sheet. Winrock Garden is a mall bed and stays out.
+# a separate sheet. Phrase `4th street garden`, not the word
+# `4th`. West 4th Avenue stays a road. Winrock Garden is a mall
+# bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap
 # glasshouses and stay out. A named garden without a botanic
 # phrase is not this overlay. Memorial Garden stays out.
@@ -210,6 +212,7 @@ BOTANIC_GARDEN_PHRASES = (
     "explorers garden",
     "haozous garden",
     "este garden",
+    "4th street garden",
 )
 
 

@@ -30,7 +30,7 @@
             "north": 31.82,
             "east": -106.4
           },
-          "featureCount": 22171
+          "featureCount": 22174
         },
         "wild": {
           "name": "Franklin Mountains wild",
@@ -52,7 +52,7 @@
             "north": 31.9,
             "east": -106.35
           },
-          "featureCount": 62273
+          "featureCount": 62276
         },
         "corridor": {
           "name": "El Paso / Las Cruces corridor",
@@ -63,7 +63,7 @@
             "north": 32.4,
             "east": -106.2
           },
-          "featureCount": 133521
+          "featureCount": 133524
         },
         "region": {
           "name": "El Paso / Las Cruces / Organ Mountains region",
@@ -74,7 +74,7 @@
             "north": 33.15,
             "east": -105.35
           },
-          "featureCount": 203289
+          "featureCount": 203294
         }
       },
       "banners": [
@@ -117,7 +117,7 @@
         ]
       },
       "stats": {
-        "features": 203682,
+        "features": 203687,
         "highwayLines": 173901,
         "namedStreets": 60153,
         "sampleStreetNames": [
@@ -166,7 +166,7 @@
         "style.json",
         "wild.geojson"
       ],
-      "bytes": 35604254
+      "bytes": 35604675
     },
     {
       "id": "tx-east",

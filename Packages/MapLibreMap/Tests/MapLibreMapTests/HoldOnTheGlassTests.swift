@@ -270,6 +270,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `este`. Celeste Drive stays a road. 203 m from OSM water.
     private static let esteGarden = CLLocationCoordinate2D(latitude: 30.283704, longitude: -97.719118)
 
+    /// Interior of 4th Street Garden. Phrase `4th street garden`,
+    /// not the word `4th`. West 4th Avenue stays a road. 91 m from
+    /// OSM drain.
+    private static let fourthStreetGarden = CLLocationCoordinate2D(latitude: 33.134037, longitude: -107.252761)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -1212,6 +1217,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((este.card?.doLine.lowercased() ?? "").contains("edible"), este.card?.doLine ?? "")
 
+        let fourthStreet = try hold(at: Self.fourthStreetGarden, zoom: 16)
+        XCTAssertEqual(fourthStreet.card?.klass, "Botanic garden", "\(fourthStreet)")
+        XCTAssertEqual(fourthStreet.card?.title, "4th Street Garden", "\(fourthStreet)")
+        XCTAssertEqual(fourthStreet.card?.fieldRoute.first, Inspect.plantTXCard, "\(fourthStreet)")
+        XCTAssertFalse(
+            fourthStreet.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "4th Street Garden opened woodland tree-use: \(fourthStreet)"
+        )
+        XCTAssertFalse((fourthStreet.card?.doLine.lowercased() ?? "").contains("edible"), fourthStreet.card?.doLine ?? "")
+
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
         XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
@@ -1711,6 +1726,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("desert gardens", Self.desertGardens, 16.0),
             ("japaneese garden", Self.japaneeseGarden, 16.0),
             ("preston foster", Self.prestonFoster, 16.0),
+            ("4th street garden", Self.fourthStreetGarden, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),
