@@ -309,6 +309,8 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("travelMode: runtime.travelMode", read("Blackout", "MapTab.swift"))
         self.assertIn("walkDash", self.route_line)
         self.assertIn("func dashPattern", self.route_line)
+        self.assertIn("insertLayer(layer, below: fill)", offline)
+        self.assertNotIn("belowLayer:", offline)
         self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
         self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("GraphPlan.line", app)

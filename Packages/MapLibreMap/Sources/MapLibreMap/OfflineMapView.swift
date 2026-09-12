@@ -844,7 +844,7 @@ public struct OfflineMapView: UIViewRepresentable {
             } else {
                 let layer = MLNLineStyleLayer(identifier: RouteLine.casingLayerID, source: source)
                 if let fill = style.layer(withIdentifier: RouteLine.layerID) {
-                    style.insertLayer(layer, belowLayer: fill)
+                    style.insertLayer(layer, below: fill)
                 } else {
                     style.addLayer(layer)
                 }
