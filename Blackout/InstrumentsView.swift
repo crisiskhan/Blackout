@@ -86,15 +86,21 @@ struct InstrumentsView: View {
                     Text(torchWord)
                         .font(.caption.weight(.bold))
                         .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Theme.silver.opacity(0.45) : Theme.silver)
-                    hudButton("COMPASS CAL") { runtime.instruments.calibrateCompass() }
-                    hudButton("TRUE NORTH") { runtime.instruments.setTrueNorth() }
+                    hudButton("COMPASS CAL") { runtime.calibrateCompass() }
+                    Text(runtime.headingDeg == nil ? "NEED" : "CAL")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(runtime.headingDeg == nil ? Theme.silver.opacity(0.45) : Theme.silver)
+                    hudButton("TRUE NORTH") { runtime.setTrueNorth() }
+                    Text(runtime.instruments.state.magNorth ? "MAG NORTH" : "TRUE NORTH")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.silver.opacity(0.55))
                     hudToggle("USB-C PTT", Binding(
                         get: { runtime.instruments.state.usbCPTT },
-                        set: { runtime.instruments.attachUSB_C_PTT($0) }
+                        set: { runtime.attachUSB_C_PTT($0) }
                     ))
                     hudToggle("GNSS PUCK", Binding(
                         get: { runtime.instruments.state.externalGNSS },
-                        set: { runtime.instruments.attachGNSSPuck($0) }
+                        set: { runtime.attachGNSSPuck($0) }
                     ))
 
                     sectionLabel("POWER")
@@ -122,6 +128,7 @@ struct InstrumentsView: View {
         }
         .background(Theme.void)
         .preferredColorScheme(.dark)
+        .nightRedLamp(runtime.night)
     }
 
     private var header: some View {
@@ -140,6 +147,7 @@ struct InstrumentsView: View {
     }
 
     private var torchWord: String {
+        if !runtime.torchAvailable { return "LAMP · NONE" }
         let n = runtime.instruments.state.torchClicks
         return n == 0 ? "OFF" : "\(n)"
     }

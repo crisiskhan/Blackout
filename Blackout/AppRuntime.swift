@@ -117,6 +117,7 @@ final class AppRuntime {
         ptt = PTTDeck(box: box)
         speech = SpeechEngine(box: box)
         mesh.airplane = true
+        fix.applyInstrument(instruments.state)
         if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
             roster = roster.setting(code: saved)
         }
@@ -381,8 +382,38 @@ final class AppRuntime {
 
     func tapMagTrue() {
         instruments.toggleMagTrue()
+        applyInstrumentBoard()
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
         showInstruments = false
+    }
+
+    func setTrueNorth() {
+        instruments.setTrueNorth()
+        applyInstrumentBoard()
+        toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
+    }
+
+    func calibrateCompass() {
+        instruments.calibrateCompass()
+        fix.requestHeadingCalibration()
+    }
+
+    func attachUSB_C_PTT(_ present: Bool) {
+        instruments.attachUSB_C_PTT(present)
+        PTTMic.shared.preferWiredPTT(present)
+    }
+
+    func attachGNSSPuck(_ present: Bool) {
+        instruments.attachGNSSPuck(present)
+        applyInstrumentBoard()
+    }
+
+    var torchAvailable: Bool {
+        AVCaptureDevice.default(for: .video)?.hasTorch == true
+    }
+
+    private func applyInstrumentBoard() {
+        fix.applyInstrument(instruments.state)
     }
 
     /// SOS is a mesh-wide alert, not a label. The hold wakes the radio if it
@@ -557,6 +588,10 @@ final class AppRuntime {
     }
 
     func tapTorch() {
+        guard torchAvailable else {
+            box.log("torch", "lamp none")
+            return
+        }
         instruments.torchTap()
         applyTorch(level: instruments.state.torchClicks)
     }
@@ -913,11 +948,30 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     private var lastPublish: TimeInterval = 0
     private var publishedHeading: Double?
     private var publishedCoord: (lat: Double, lon: Double)?
+    private var magNorth = true
+    private var preferExternalGNSS = false
+    private var wantCalibration = false
+    private var lastTrue: Double = -1
+    private var lastMag: Double = -1
+    private var lastAcc: Double = -1
+    private var haveHeadingSample = false
+
+    func applyInstrument(_ state: InstrumentState) {
+        magNorth = state.magNorth
+        preferExternalGNSS = state.externalGNSS
+        applyAccuracy()
+        refreshHeading()
+    }
+
+    func requestHeadingCalibration() {
+        wantCalibration = true
+    }
 
     func arm() {
         let mgr = self.mgr ?? CLLocationManager()
         self.mgr = mgr
         mgr.delegate = self
+        applyAccuracy()
         switch mgr.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             mgr.startUpdatingLocation()
@@ -929,9 +983,27 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    private func applyAccuracy() {
+        guard let mgr else { return }
+        mgr.desiredAccuracy = preferExternalGNSS
+            ? kCLLocationAccuracyBestForNavigation
+            : kCLLocationAccuracyBest
+    }
+
     private func startHeading() {
         guard CLLocationManager.headingAvailable() else { return }
         mgr?.startUpdatingHeading()
+    }
+
+    private func refreshHeading() {
+        guard haveHeadingSample else { return }
+        heading = PersonCompass.liveHeading(
+            trueHeading: lastTrue,
+            magneticHeading: lastMag,
+            accuracy: lastAcc,
+            magNorth: magNorth
+        )
+        onChange?()
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -950,12 +1022,23 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        lastTrue = newHeading.trueHeading
+        lastMag = newHeading.magneticHeading
+        lastAcc = newHeading.headingAccuracy
+        haveHeadingSample = true
         heading = PersonCompass.liveHeading(
-            trueHeading: newHeading.trueHeading,
-            magneticHeading: newHeading.magneticHeading,
-            accuracy: newHeading.headingAccuracy
+            trueHeading: lastTrue,
+            magneticHeading: lastMag,
+            accuracy: lastAcc,
+            magNorth: magNorth
         )
         publishIfNeeded()
+    }
+
+    func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
+        guard wantCalibration else { return false }
+        wantCalibration = false
+        return true
     }
 
     private func publishIfNeeded() {

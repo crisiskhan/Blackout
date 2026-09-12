@@ -958,7 +958,9 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         self.assertIn("enum PersonCompass", emblem)
         self.assertIn("tickRadians", emblem)
         self.assertIn("liveHeading", emblem)
+        self.assertIn("magNorth: Bool", emblem)
         self.assertIn("PersonCompass.liveHeading", app)
+        self.assertIn("magNorth: magNorth", app)
         self.assertIn("headingAccuracy", app)
         self.assertIn("headingDeg >= 0", offline)
         self.assertIn("headingDeg >= 0", route)
@@ -1031,6 +1033,104 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
             "hawk",
         ):
             self.assertTrue((folder / f"{name}.jpg").is_file(), name)
+
+
+def _rgba(src: str, name: str) -> tuple[float, float, float, float]:
+    match = re.search(
+        rf"static let {re.escape(name)} = RGBA\(r: ([0-9.]+), g: ([0-9.]+), b: ([0-9.]+), a: ([0-9.]+)\)",
+        src,
+    )
+    if match is None:
+        raise AssertionError(f"RGBA {name} missing")
+    return tuple(float(match.group(i)) for i in range(1, 5))
+
+
+def _multiply(
+    pixel: tuple[float, float, float], lamp: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    return (pixel[0] * lamp[0], pixel[1] * lamp[1], pixel[2] * lamp[2])
+
+
+def _wash(
+    pixel: tuple[float, float, float],
+    overlay: tuple[float, float, float],
+    alpha: float = 0.28,
+) -> tuple[float, float, float]:
+    return tuple(p * (1 - alpha) + o * alpha for p, o in zip(pixel, overlay))
+
+
+class NightRedLampTests(unittest.TestCase):
+    """Night red is a lamp, not a pink wash. Void stays void. MapLibre stays mounted."""
+
+    def test_lamp_keeps_void_void_and_leaves_accent_on_red(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        night = read("Packages", "NightRed", "Sources", "NightRed", "NightRed.swift")
+        lamp = _rgba(tokens, "nightRed")
+        self.assertGreaterEqual(lamp[0], 0.95)
+        self.assertLess(lamp[1], 0.12)
+        self.assertLess(lamp[2], 0.05)
+        void = (0.0, 0.0, 0.0)
+        silver = (0.77, 0.80, 0.84)
+        accent = (225.0 / 255.0, 6.0 / 255.0, 0.0)
+        lit_void = _multiply(void, lamp[:3])
+        lit_silver = _multiply(silver, lamp[:3])
+        lit_accent = _multiply(accent, lamp[:3])
+        self.assertEqual(lit_void, void)
+        self.assertGreater(lit_silver[0], 0.7)
+        self.assertLess(lit_silver[1], 0.1)
+        self.assertGreater(lit_accent[0], lit_silver[0])
+        washed = _wash(void, (0.55, 0.05, 0.05))
+        self.assertGreater(washed[0], 0.1)
+        self.assertIn("static let identity", night)
+        self.assertIn("var multiply", night)
+        self.assertIn("static let dim", night)
+        self.assertIn("enabled ? BlackoutTokens.Color.nightRed : Self.identity", night)
+
+    def test_glass_multiplies_and_never_washes(self):
+        root = read("Blackout", "RootChrome.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        theme = read("Blackout", "Theme.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        emit_night = read("tools", "v3", "emit_swift.py")
+        for body in (root, inst, theme, app, emit_night):
+            self.assertNotIn("best in class", body.lower())
+        self.assertIn("nightRedLamp", theme)
+        self.assertIn(".colorMultiply", theme)
+        self.assertIn("NightRedState.dim", theme)
+        self.assertIn(".nightRedLamp(runtime.night)", root)
+        self.assertIn(".nightRedLamp(runtime.night)", inst)
+        self.assertNotIn("Theme.nightRed.opacity(0.28)", root)
+        self.assertNotIn("opacity(0.28).ignoresSafeArea()", root)
+        self.assertIn("MapTab(runtime: runtime)", root)
+        self.assertNotIn("if runtime.night.enabled { MapTab", root)
+        self.assertNotIn(".spring(", theme)
+        self.assertNotIn(".spring(", root)
+
+
+class InstrumentNorthAndBodyTests(unittest.TestCase):
+    """BODY instruments have to drive the heading, the lamp, and the radio."""
+
+    def test_mag_true_selects_heading_and_true_north_updates_chrome(self):
+        emblem = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift"
+        )
+        app = read("Blackout", "AppRuntime.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        board = read("Packages", "Instruments", "Sources", "Instruments", "Instruments.swift")
+        self.assertIn("magNorth: Bool", emblem)
+        self.assertIn("func setTrueNorth()", app)
+        self.assertIn("toolChrome = MagTrueChip.chrome", app.split("func setTrueNorth()")[1])
+        self.assertIn("magNorth: magNorth", app)
+        self.assertIn("runtime.setTrueNorth()", inst)
+        self.assertNotIn("runtime.instruments.setTrueNorth()", inst)
+        self.assertIn("func toggleMagTrue()", board)
+        self.assertIn("locationManagerShouldDisplayHeadingCalibration", app)
+        self.assertIn("kCLLocationAccuracyBestForNavigation", app)
+        self.assertIn("preferWiredPTT", app)
+        self.assertIn("LAMP · NONE", inst)
+        self.assertIn("runtime.calibrateCompass()", inst)
+        self.assertIn("runtime.attachUSB_C_PTT", inst)
+        self.assertIn("runtime.attachGNSSPuck", inst)
 
 
 if __name__ == "__main__":

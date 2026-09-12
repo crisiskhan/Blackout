@@ -118,15 +118,19 @@ public enum PersonCompass: Sendable {
     }
 
     /// Apple marks an unusable heading with accuracy `< 0` and `-1°`.
-    /// Those are not a live tick. Prefer true heading when it exists.
+    /// Those are not a live tick. MAG NORTH uses magnetic when it exists;
+    /// TRUE NORTH prefers true heading.
     public static func liveHeading(
         trueHeading: Double,
         magneticHeading: Double,
-        accuracy: Double
+        accuracy: Double,
+        magNorth: Bool = false
     ) -> Double? {
         guard accuracy >= 0 else { return nil }
-        if trueHeading >= 0 { return trueHeading }
-        if magneticHeading >= 0 { return magneticHeading }
+        let first = magNorth ? magneticHeading : trueHeading
+        let second = magNorth ? trueHeading : magneticHeading
+        if first >= 0 { return first }
+        if second >= 0 { return second }
         return nil
     }
 

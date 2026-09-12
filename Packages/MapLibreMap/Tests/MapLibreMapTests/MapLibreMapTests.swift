@@ -119,6 +119,24 @@ final class MapLibreMapTests: XCTestCase {
             PersonCompass.liveHeading(trueHeading: -1, magneticHeading: 8, accuracy: 5),
             8
         )
+        XCTAssertEqual(
+            PersonCompass.liveHeading(
+                trueHeading: 12, magneticHeading: 8, accuracy: 5, magNorth: true
+            ),
+            8
+        )
+        XCTAssertEqual(
+            PersonCompass.liveHeading(
+                trueHeading: 12, magneticHeading: 8, accuracy: 5, magNorth: false
+            ),
+            12
+        )
+        XCTAssertEqual(
+            PersonCompass.liveHeading(
+                trueHeading: 12, magneticHeading: -1, accuracy: 5, magNorth: true
+            ),
+            12
+        )
         for emblem in PersonEmblem.allCases {
             XCTAssertFalse(emblem.title.isEmpty, emblem.rawValue)
             XCTAssertNotNil(PersonEmblem.image(emblem), emblem.rawValue)

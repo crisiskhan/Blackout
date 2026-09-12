@@ -40,6 +40,22 @@ final class PTTMic {
         #endif
     }
 
+    func preferWiredPTT(_ on: Bool) {
+        #if canImport(AVFoundation)
+        let session = AVAudioSession.sharedInstance()
+        guard on else {
+            try? session.setPreferredInput(nil)
+            return
+        }
+        let wired = session.availableInputs?.first { port in
+            port.portType == .usbAudio || port.portType == .headsetMic
+        }
+        if let wired {
+            try? session.setPreferredInput(wired)
+        }
+        #endif
+    }
+
     func stop() -> Data {
         #if canImport(AVFoundation)
         recorder?.stop()

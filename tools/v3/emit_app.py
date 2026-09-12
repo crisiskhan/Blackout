@@ -189,7 +189,7 @@ struct RootChrome: View {
                 contextualSOS
             }
             if runtime.night.enabled {
-                Color(red: 0.55, green: 0.05, blue: 0.05).opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
+                Color(red: 1, green: 0.07, blue: 0.02).colorMultiply(Color.white)
             }
         }
         .preferredColorScheme(.dark)

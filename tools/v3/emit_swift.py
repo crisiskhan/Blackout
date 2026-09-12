@@ -60,7 +60,7 @@ public enum BlackoutTokens: Sendable {
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
         public static let sos = RGBA(r: 0.86, g: 0.14, b: 0.14, a: 1)
-        public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
+        public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
     }
 
     public struct RGBA: Equatable, Sendable {
@@ -951,9 +951,12 @@ import Tokens
 public struct NightRedState: Equatable, Sendable {
     public var enabled: Bool
     public init(enabled: Bool) { self.enabled = enabled }
-    public var filter: BlackoutTokens.RGBA {
-        enabled ? BlackoutTokens.Color.nightRed : BlackoutTokens.Color.void
+    public var filter: BlackoutTokens.RGBA { multiply }
+    public var multiply: BlackoutTokens.RGBA {
+        enabled ? BlackoutTokens.Color.nightRed : Self.identity
     }
+    public static let identity = BlackoutTokens.RGBA(r: 1, g: 1, b: 1, a: 1)
+    public static let dim: Double = -0.04
 }
 ''',
     )
@@ -964,7 +967,13 @@ public struct NightRedState: Equatable, Sendable {
 
 final class NightRedTests: XCTestCase {
     func testFilter() {
-        XCTAssertEqual(NightRedState(enabled: true).filter.r, 0.55, accuracy: 0.01)
+        let on = NightRedState(enabled: true)
+        XCTAssertEqual(on.filter.r, 1, accuracy: 0.01)
+        XCTAssertEqual(on.filter.g, 0.07, accuracy: 0.02)
+        XCTAssertLessThan(on.filter.b, 0.05)
+        let off = NightRedState(enabled: false)
+        XCTAssertEqual(off.multiply, NightRedState.identity)
+        XCTAssertLessThan(NightRedState.dim, 0)
     }
 }
 ''',
@@ -1547,12 +1556,25 @@ public struct InstrumentState: Equatable, Sendable {
     public var usbCPTT: Bool
     public var externalGNSS: Bool
     public var magNorth: Bool
+    public init(
+        torchClicks: Int = 0,
+        compassCalibrated: Bool = false,
+        usbCPTT: Bool = false,
+        externalGNSS: Bool = false,
+        magNorth: Bool = true
+    ) {
+        self.torchClicks = torchClicks
+        self.compassCalibrated = compassCalibrated
+        self.usbCPTT = usbCPTT
+        self.externalGNSS = externalGNSS
+        self.magNorth = magNorth
+    }
 }
 
-public final class Instruments: @unchecked Sendable {
-    public private(set) var state = InstrumentState(torchClicks: 0, compassCalibrated: false, usbCPTT: false, externalGNSS: false, magNorth: true)
-    private let box: BlackBox
-    public init(box: BlackBox) { self.box = box }
+public final class InstrumentBoard: @unchecked Sendable {
+    public private(set) var state = InstrumentState()
+    private let box: EventLog
+    public init(box: EventLog) { self.box = box }
     public func torchTap() {
         state.torchClicks = (state.torchClicks + 1) % 4
         box.log("torch", "\(state.torchClicks)")
@@ -1561,6 +1583,7 @@ public final class Instruments: @unchecked Sendable {
     public func attachUSB_C_PTT(_ present: Bool) { state.usbCPTT = present }
     public func attachGNSSPuck(_ present: Bool) { state.externalGNSS = present }
     public func setTrueNorth() { state.magNorth = false }
+    public func toggleMagTrue() { state.magNorth.toggle() }
 }
 ''',
     )
@@ -1570,13 +1593,22 @@ public final class Instruments: @unchecked Sendable {
 import BlackBox
 @testable import Instruments
 
-final class InstrumentsTests: XCTestCase {
+final class InstrumentBoardTests: XCTestCase {
     func testTorch3() {
-        let i = Instruments(box: BlackBox())
+        let i = InstrumentBoard(box: EventLog())
         i.torchTap(); i.torchTap(); i.torchTap()
         XCTAssertEqual(i.state.torchClicks, 3)
         i.torchTap()
         XCTAssertEqual(i.state.torchClicks, 0)
+    }
+
+    func testToggleMagTrueFlipsNorthReference() {
+        let i = InstrumentBoard(box: EventLog())
+        XCTAssertTrue(i.state.magNorth)
+        i.toggleMagTrue()
+        XCTAssertFalse(i.state.magNorth)
+        i.setTrueNorth()
+        XCTAssertFalse(i.state.magNorth)
     }
 }
 ''',

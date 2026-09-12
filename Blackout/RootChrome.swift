@@ -18,10 +18,8 @@ struct RootChrome: View {
                 }
                 contextualSOS
             }
-            if runtime.night.enabled {
-                Theme.nightRed.opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
-            }
         }
+        .nightRedLamp(runtime.night)
         .tint(Theme.silver)
         .preferredColorScheme(.dark)
         .sheet(isPresented: $runtime.showInstruments) {

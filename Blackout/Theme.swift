@@ -1,5 +1,6 @@
 import SwiftUI
 import Tokens
+import NightRed
 
 enum Theme {
     static var void: Color { Color(rgba: BlackoutTokens.Color.void) }
@@ -27,6 +28,24 @@ enum Theme {
             Rectangle().fill(.ultraThinMaterial)
             Rectangle().fill(void.opacity(opacity))
         }
+    }
+}
+
+/// Long-wavelength lamp. Multiply keeps void void and leaves accent on red.
+/// Always on the tree so toggling it cannot unmount MapLibre.
+private struct NightRedLamp: ViewModifier {
+    var night: NightRedState
+
+    func body(content: Content) -> some View {
+        content
+            .colorMultiply(night.enabled ? Theme.nightRed : Color.white)
+            .brightness(night.enabled ? NightRedState.dim : 0)
+    }
+}
+
+extension View {
+    func nightRedLamp(_ night: NightRedState) -> some View {
+        modifier(NightRedLamp(night: night))
     }
 }
 
