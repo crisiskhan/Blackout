@@ -230,6 +230,8 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("func listen(", speech)
         self.assertIn("requiresOnDeviceRecognition = true", speech)
         self.assertIn("canImport(Speech)", speech)
+        rec = speech.split("recognitionTask(with:")[1].split("armSilence")[0]
+        self.assertIn("DispatchQueue.main.async", rec)
         self.assertNotIn("SFSpeechURLRecognitionRequest", speech)
         self.assertNotIn("URLSession", speech)
         self.assertNotIn("private let synth = AVSpeechSynthesizer()", speech)

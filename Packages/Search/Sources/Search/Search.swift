@@ -100,8 +100,26 @@ public enum SearchHUDWord: Sendable {
     }
 }
 
+public struct SearchExtra: Sendable, Equatable {
+    public var name: String
+    public var kind: String
+    public var lat: Double
+    public var lon: Double
+
+    public init(name: String, kind: String, lat: Double, lon: Double) {
+        self.name = name
+        self.kind = kind
+        self.lat = lat
+        self.lon = lon
+    }
+}
+
 public struct SearchIndex: Sendable {
     private let docs: [Doc]
+    private let foldedOrder: [Int]
+    private let tokenIndex: [String: [Int]]
+    private let kindIndex: [String: [Int]]
+    private let tokenKeys: [String]
 
     private struct Doc: Sendable {
         var name: String
@@ -113,7 +131,7 @@ public struct SearchIndex: Sendable {
     }
 
     public init(pois: [[String: Any]]) {
-        docs = pois.compactMap(Self.doc(from:))
+        self.init(docs: pois.compactMap(Self.doc(from:)))
     }
 
     public static func load(data: Data) -> SearchIndex {
@@ -173,7 +191,7 @@ public struct SearchIndex: Sendable {
     public func lookup(
         _ query: String,
         you: (lat: Double, lon: Double)? = nil,
-        extra: [[String: Any]] = [],
+        extra: [SearchExtra] = [],
         cap: Int = 5
     ) -> [SearchHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -191,42 +209,52 @@ public struct SearchIndex: Sendable {
                 )
             ]
         }
-        let pool = extra.isEmpty ? docs : docs + extra.compactMap(Self.doc(from:))
         let foldedQuery = Self.fold(trimmed)
         let qTokens = Self.tokens(trimmed)
         var hits: [SearchHit] = []
-        hits.reserveCapacity(min(64, pool.count))
-        for d in pool {
-            guard let score = matchScore(foldedQuery: foldedQuery, qTokens: qTokens, doc: d) else {
-                continue
-            }
-            let meters = you.map { haversine($0.lat, $0.lon, d.lat, d.lon) }
-            hits.append(
-                SearchHit(
-                    name: d.name,
-                    kind: d.kind,
-                    lat: d.lat,
-                    lon: d.lon,
-                    score: score,
-                    meters: meters
-                )
+        for i in candidateIndices(foldedQuery: foldedQuery, qTokens: qTokens) {
+            consider(
+                docs[i],
+                foldedQuery: foldedQuery,
+                qTokens: qTokens,
+                you: you,
+                into: &hits,
+                cap: cap
             )
         }
-        hits.sort { a, b in
-            if a.score != b.score { return a.score > b.score }
-            let am = a.meters ?? .greatestFiniteMagnitude
-            let bm = b.meters ?? .greatestFiniteMagnitude
-            if am != bm { return am < bm }
-            return a.name < b.name
-        }
-        if hits.count > cap {
-            hits = Array(hits.prefix(cap))
+        for row in extra {
+            consider(
+                Self.makeDoc(name: row.name, kind: row.kind, lat: row.lat, lon: row.lon),
+                foldedQuery: foldedQuery,
+                qTokens: qTokens,
+                you: you,
+                into: &hits,
+                cap: cap
+            )
         }
         return hits
     }
 
     private init(docs: [Doc]) {
         self.docs = docs
+        var order = Array(docs.indices)
+        order.sort { docs[$0].folded < docs[$1].folded }
+        foldedOrder = order
+        var tokens: [String: [Int]] = [:]
+        var kinds: [String: [Int]] = [:]
+        for (i, d) in docs.enumerated() {
+            var seen = Set<String>()
+            for t in d.tokens where seen.insert(t).inserted {
+                tokens[t, default: []].append(i)
+            }
+            let kind = d.kind.lowercased()
+            if !kind.isEmpty {
+                kinds[kind, default: []].append(i)
+            }
+        }
+        tokenIndex = tokens
+        kindIndex = kinds
+        tokenKeys = tokens.keys.sorted()
     }
 
     private static func poi(fromFeature f: [String: Any]) -> [String: Any]? {
@@ -425,6 +453,167 @@ public struct SearchIndex: Sendable {
             }
         }
         return true
+    }
+
+    private func candidateIndices(foldedQuery: String, qTokens: [String]) -> [Int] {
+        var found = Set<Int>()
+        if !foldedQuery.isEmpty {
+            found.formUnion(foldedPrefixHits(foldedQuery))
+        }
+        for q in qTokens {
+            for alias in Self.aliases(of: q) {
+                if let ids = tokenIndex[alias] {
+                    found.formUnion(ids)
+                }
+            }
+            if q.count >= 3 {
+                for key in tokensPrefixed(by: q) {
+                    if let ids = tokenIndex[key] {
+                        found.formUnion(ids)
+                    }
+                }
+            }
+            if (4...16).contains(q.count) {
+                for edit in Self.editsOne(q) {
+                    if let ids = tokenIndex[edit] {
+                        found.formUnion(ids)
+                    }
+                }
+            }
+        }
+        for kind in Self.expand(qTokens) {
+            if let ids = kindIndex[kind] {
+                found.formUnion(ids)
+            }
+        }
+        if found.isEmpty, foldedQuery.count >= 3 {
+            for (i, d) in docs.enumerated() where d.folded.contains(foldedQuery) {
+                found.insert(i)
+            }
+        }
+        return Array(found)
+    }
+
+    private func foldedPrefixHits(_ prefix: String) -> [Int] {
+        var lo = 0
+        var hi = foldedOrder.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if docs[foldedOrder[mid]].folded < prefix {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        var out: [Int] = []
+        var i = lo
+        while i < foldedOrder.count {
+            let idx = foldedOrder[i]
+            if docs[idx].folded.hasPrefix(prefix) {
+                out.append(idx)
+                i += 1
+            } else {
+                break
+            }
+        }
+        return out
+    }
+
+    private func tokensPrefixed(by prefix: String) -> [String] {
+        var lo = 0
+        var hi = tokenKeys.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if tokenKeys[mid] < prefix {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        var out: [String] = []
+        var i = lo
+        while i < tokenKeys.count {
+            let key = tokenKeys[i]
+            if key.hasPrefix(prefix) {
+                out.append(key)
+                i += 1
+            } else {
+                break
+            }
+        }
+        return out
+    }
+
+    private static func editsOne(_ word: String) -> [String] {
+        let letters = Array("abcdefghijklmnopqrstuvwxyz")
+        let chars = Array(word)
+        var out: [String] = []
+        out.reserveCapacity(chars.count * 28)
+        for i in chars.indices {
+            var copy = chars
+            copy.remove(at: i)
+            out.append(String(copy))
+        }
+        if chars.count >= 2 {
+            for i in 0..<(chars.count - 1) {
+                var copy = chars
+                copy.swapAt(i, i + 1)
+                out.append(String(copy))
+            }
+        }
+        for i in chars.indices {
+            for letter in letters where letter != chars[i] {
+                var copy = chars
+                copy[i] = letter
+                out.append(String(copy))
+            }
+        }
+        for i in 0...chars.count {
+            for letter in letters {
+                var copy = chars
+                copy.insert(letter, at: i)
+                out.append(String(copy))
+            }
+        }
+        return out
+    }
+
+    private func consider(
+        _ doc: Doc,
+        foldedQuery: String,
+        qTokens: [String],
+        you: (lat: Double, lon: Double)?,
+        into hits: inout [SearchHit],
+        cap: Int
+    ) {
+        guard cap > 0, let score = matchScore(foldedQuery: foldedQuery, qTokens: qTokens, doc: doc) else {
+            return
+        }
+        let hit = SearchHit(
+            name: doc.name,
+            kind: doc.kind,
+            lat: doc.lat,
+            lon: doc.lon,
+            score: score,
+            meters: you.map { haversine($0.lat, $0.lon, doc.lat, doc.lon) }
+        )
+        if hits.count < cap {
+            hits.append(hit)
+            hits.sort(by: Self.better)
+            return
+        }
+        if Self.better(hit, hits[hits.count - 1]) {
+            hits[hits.count - 1] = hit
+            hits.sort(by: Self.better)
+        }
+    }
+
+    private static func better(_ a: SearchHit, _ b: SearchHit) -> Bool {
+        if a.score != b.score { return a.score > b.score }
+        let am = a.meters ?? .greatestFiniteMagnitude
+        let bm = b.meters ?? .greatestFiniteMagnitude
+        if am != bm { return am < bm }
+        return a.name < b.name
     }
 
     private func matchScore(foldedQuery: String, qTokens: [String], doc: Doc) -> Double? {

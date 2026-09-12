@@ -868,6 +868,16 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Northwest 9 m is rank 7. 521 m from a well.
     private static let velvetMesquite = CLLocationCoordinate2D(latitude: 35.119023, longitude: -106.706073)
 
+    /// `Prosopis torreyana / Western Honey Mesquite` on the NM
+    /// place slice. Named tree — shade and wood, not a meal.
+    /// Unique versus the Velvet Mesquite Hold (61 km). No
+    /// nearby name in 200 m. 1045 m from OSM water. The other
+    /// Western Honey Mesquite sits 69 m from Sandia Wash.
+    /// Texas Honey Mesquite stays unheld — Pinus pinea sits
+    /// 26 m off that tree. Do not add matcher `torreyana` or
+    /// `honey mesquite`.
+    private static let westernHoneyMesquite = CLLocationCoordinate2D(latitude: 35.511273, longitude: -106.234121)
+
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
     private static let randallDavey = CLLocationCoordinate2D(latitude: 35.688876, longitude: -105.884927)
@@ -3286,6 +3296,22 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(velvetDo.contains("not a meal"), velvet.card?.doLine ?? "")
         XCTAssertFalse(velvetDo.contains("edible"), velvet.card?.doLine ?? "")
         XCTAssertFalse(velvetDo.contains("javelina"), velvet.card?.doLine ?? "")
+
+        let honey = try hold(at: Self.westernHoneyMesquite, zoom: 16, packId: "nm")
+        XCTAssertEqual(honey.card?.klass, "Named tree", "\(honey)")
+        XCTAssertEqual(honey.card?.title, "Prosopis torreyana / Western Honey Mesquite", "\(honey)")
+        XCTAssertNotEqual(honey.card?.title, "Prosopis velutina / Velvet Mesquite", "\(honey)")
+        XCTAssertNotEqual(honey.card?.title, "Prosopis glandulosa / Texas Honey Mesquite", "\(honey)")
+        XCTAssertNotEqual(honey.card?.title, "Pinus pinea / Italian Stone Pine", "\(honey)")
+        XCTAssertEqual(honey.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(honey)")
+        XCTAssertTrue(
+            honey.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? false,
+            "a named NM tree dropped the NM tree-use card: \(honey)"
+        )
+        let honeyDo = honey.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(honeyDo.contains("not a meal"), honey.card?.doLine ?? "")
+        XCTAssertFalse(honeyDo.contains("edible"), honey.card?.doLine ?? "")
+        XCTAssertFalse(honeyDo.contains("javelina"), honey.card?.doLine ?? "")
     }
 
     func testHoldingANewMexicoBosqueOpensCottonwoodNotElkCountry() throws {

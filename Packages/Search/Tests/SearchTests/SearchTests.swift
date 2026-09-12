@@ -77,4 +77,17 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(idx.lookup("gardnr").first?.name, "Gardner Peak")
         XCTAssertEqual(idx.lookup("gardner peak").first?.name, "Gardner Peak")
     }
+
+    func testLookupCapsAndStillFindsAPrefix() {
+        var pois: [[String: Any]] = (1...40).map { i in
+            ["name": "Street \(i)", "kind": "street", "lat": 31.0, "lon": -106.0]
+        }
+        pois.append(["name": "Montana Avenue", "kind": "street", "lat": 31.78, "lon": -106.42])
+        let idx = SearchIndex(pois: pois)
+        let hits = idx.lookup("street", cap: 5)
+        XCTAssertEqual(hits.count, 5)
+        XCTAssertEqual(idx.lookup("montana ave").first?.name, "Montana Avenue")
+        let mark = SearchExtra(name: "HOME", kind: "mark", lat: 31.76, lon: -106.49)
+        XCTAssertEqual(idx.lookup("home", extra: [mark]).first?.kind, "mark")
+    }
 }

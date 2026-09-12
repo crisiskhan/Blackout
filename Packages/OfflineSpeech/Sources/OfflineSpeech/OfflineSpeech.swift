@@ -168,17 +168,19 @@ public final class SpeechEngine: @unchecked Sendable {
         heard = ""
         listening = true
         recognitionTask = rec.recognitionTask(with: req) { [weak self] result, error in
-            guard let self else { return }
-            if let result {
-                self.heard = result.bestTranscription.formattedString
-                if result.isFinal {
-                    self.finishListen(text: self.heard)
-                    return
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if let result {
+                    self.heard = result.bestTranscription.formattedString
+                    if result.isFinal {
+                        self.finishListen(text: self.heard)
+                        return
+                    }
+                    self.armSilence()
                 }
-                self.armSilence()
-            }
-            if error != nil {
-                self.finishListen(text: self.heard)
+                if error != nil {
+                    self.finishListen(text: self.heard)
+                }
             }
         }
         let cap = DispatchWorkItem { [weak self] in

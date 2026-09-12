@@ -12,6 +12,8 @@ struct MapTab: View {
     @State private var destMode: MapFieldDestMode = .bearing
     @State private var packedIndex: SearchIndex?
     @State private var sayFailed = false
+    @State private var searchGen: UInt64 = 0
+    @State private var looking = false
 
     var body: some View {
         ZStack {
@@ -27,6 +29,8 @@ struct MapTab: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear(perform: loadIndex)
         .onChange(of: runtime.packs?.active?.id) { _, _ in
+            searchGen &+= 1
+            looking = false
             query = ""
             hits = []
             sayFailed = false
@@ -221,7 +225,7 @@ struct MapTab: View {
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
             }
-            if SearchIndex.asking(query), packedIndex != nil, hits.isEmpty {
+            if SearchIndex.asking(query), packedIndex != nil, !looking, hits.isEmpty {
                 Text("NO MATCH")
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
@@ -487,19 +491,33 @@ struct MapTab: View {
 
     private func search() {
         guard SearchIndex.asking(query) else {
+            searchGen &+= 1
+            looking = false
             hits = []
             return
         }
         guard let idx = packedIndex else { return }
-        let extra: [[String: Any]] = runtime.marks.map {
-            ["name": $0.label, "kind": "mark", "lat": $0.lat, "lon": $0.lon]
+        searchGen &+= 1
+        let gen = searchGen
+        looking = true
+        let asked = query
+        let you = runtime.gnssYou
+        let extra = runtime.marks.map {
+            SearchExtra(name: $0.label, kind: "mark", lat: $0.lat, lon: $0.lon)
         }
-        hits = idx.lookup(
-            query,
-            you: runtime.gnssYou,
-            extra: extra,
-            cap: BlackoutTokens.Chrome.mapSearchHitCap
-        )
+        let cap = BlackoutTokens.Chrome.mapSearchHitCap
+        Task.detached(priority: .userInitiated) {
+            let found = idx.lookup(asked, you: you, extra: extra, cap: cap)
+            await MainActor.run {
+                applySearch(found, gen: gen)
+            }
+        }
+    }
+
+    private func applySearch(_ found: [SearchHit], gen: UInt64) {
+        guard gen == searchGen else { return }
+        hits = found
+        looking = false
     }
 
     private func loadIndex() {
@@ -510,16 +528,20 @@ struct MapTab: View {
             packedIndex = SearchIndex(pois: [])
             return
         }
-        Task { @MainActor in
+        Task.detached(priority: .userInitiated) {
             let data = (try? Data(contentsOf: url)) ?? Data()
-            let idx = await Task.detached(priority: .userInitiated) {
-                SearchIndex.load(data: data)
-            }.value
-            guard runtime.packs?.active?.id == packID else { return }
-            packedIndex = idx
-            if SearchIndex.asking(query) {
-                search()
+            let idx = SearchIndex.load(data: data)
+            await MainActor.run {
+                applyLoadedIndex(idx, packID: packID)
             }
+        }
+    }
+
+    private func applyLoadedIndex(_ idx: SearchIndex, packID: String?) {
+        guard runtime.packs?.active?.id == packID else { return }
+        packedIndex = idx
+        if SearchIndex.asking(query) {
+            search()
         }
     }
 

@@ -2583,6 +2583,18 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(velvet.doLine.lowercased().contains("edible"), velvet.doLine)
         XCTAssertTrue(velvet.doLine.lowercased().contains("not a meal"), velvet.doLine)
 
+        let honey = Inspect.read(
+            tags: ["natural": "tree", "name": "Prosopis torreyana / Western Honey Mesquite"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(honey.klass, "Named tree")
+        XCTAssertEqual(honey.title, "Prosopis torreyana / Western Honey Mesquite")
+        XCTAssertEqual(honey.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertTrue(honey.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(honey.doLine.lowercased().contains("edible"), honey.doLine)
+        XCTAssertTrue(honey.doLine.lowercased().contains("not a meal"), honey.doLine)
+
         let landry = Inspect.read(
             tags: ["highway": "residential", "name": "Landry Avenue Northwest"],
             pack: "nm"

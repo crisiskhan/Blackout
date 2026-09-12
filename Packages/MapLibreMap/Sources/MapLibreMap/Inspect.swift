@@ -208,6 +208,9 @@ public enum Inspect {
     /// Point records on the pack's `place` slice that a hold has to name even
     /// when the style drew them too small to hit. Peaks, holes and named
     /// trees. Never an animal — range is the Field book, not a GPS pin.
+    /// Western Honey Mesquite is a surveyed tree. Texas Honey
+    /// Mesquite stays unheld — Pinus pinea sits 26 m off that tree.
+    /// Do not add matcher `torreyana` or `honey mesquite`.
     public static let packGroundPointNaturals: Set<String> = [
         "peak", "sinkhole", "cave", "cave_entrance", "tree",
     ]
