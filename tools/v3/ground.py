@@ -99,7 +99,9 @@ CAVE_PRESERVE_KEYS = {
 # Wetlands Park stays bosque. Phrase `canyon preserve`, not the word
 # `canyon`. Santa Fe Canyon Preserve is range. Canyon Preserve
 # Interpretive Loop Trail stays a path. El Cerro de Los Lunas
-# Preserve and Galisteo Basin Preserve stay Open reserve. Phrase
+# Preserve and Galisteo Basin Preserve stay Open reserve and
+# are Held as Open reserve. Do not add matcher `los lunas` or
+# `galisteo`. Phrase
 # `management unit`, not `wildlife management area`. A Balcones
 # management unit is range. Waste Management Wildlife Park stays Open
 # reserve. Phrase `ecological research`, not the word `research`.
@@ -237,7 +239,9 @@ WILDLIFE_RANGE_PHRASES = (
 # hole and is matched first. Phrase `prairie preserve`, not `prairie`.
 # Prairie Hills is apartments. A named nature reserve that is not
 # already a hole, wildlife range, or garden is this walk. An unnamed
-# reserve is not. Phrase `open space` is not a bare contains —
+# reserve is not. El Cerro de Los Lunas Preserve, Galisteo Basin
+# Preserve, and Castner Range National Monument are those Holds. Do not add
+# matcher `los lunas`, `galisteo`, or `castner`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco

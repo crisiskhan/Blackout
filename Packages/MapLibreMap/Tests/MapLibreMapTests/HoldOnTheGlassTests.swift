@@ -96,6 +96,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// picnic woodland. Peak pin still wins on Mount Franklin itself.
     private static let franklinReserve = CLLocationCoordinate2D(latitude: 31.97, longitude: -106.50)
 
+    /// Interior of Castner Range National Monument. Named nature
+    /// reserve, not picnic woodland. Unique versus Aztec Cave (4268 m),
+    /// Lost Dog (7734 m), and the Franklin overlay Hold (8436 m).
+    /// Castner Range peak is 205 m (rank 1) and stays a peak. Do not
+    /// add matcher `castner`.
+    private static let castnerRange = CLLocationCoordinate2D(latitude: 31.899542, longitude: -106.466848)
+
     /// Interior of Lost Dog Nature Preserve. The listed centroid sits on a
     /// wash; this pip is on the wildlife sheet, 441 m from a path.
     private static let westWildlife = CLLocationCoordinate2D(latitude: 31.913286, longitude: -106.547160)
@@ -931,6 +938,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
     private static let nmOpenReserve = CLLocationCoordinate2D(latitude: 35.846906, longitude: -107.025703)
 
+    /// Interior of El Cerro de Los Lunas Preserve. Named nature reserve,
+    /// not wildlife range. Sunrise Trail 125 m is rank 7; open reserve
+    /// 6 still wins. Unique versus State Game Commission Land (20882 m).
+    /// Do not add matcher `los lunas`.
+    private static let elCerroLosLunas = CLLocationCoordinate2D(latitude: 34.803148, longitude: -106.794247)
+
+    /// Dry interior of Galisteo Basin Preserve. Vertex-avg sits 24 m
+    /// from water. This pip is 1364 m from OSM water. Unique versus
+    /// Haozous Garden (15628 m). No nearby name in 250 m. Do not add
+    /// matcher `galisteo`.
+    private static let galisteoBasin = CLLocationCoordinate2D(latitude: 35.451490, longitude: -105.962032)
+
     /// Interior of Isleta Rectangle. Named NM forest: cottonwood;
     /// elk is high country, not west javelina, not a wetland bosque.
     private static let nmWoodland = CLLocationCoordinate2D(latitude: 34.939900, longitude: -106.320316)
@@ -1351,6 +1370,17 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(franklin.card?.title, "Franklin Mountains State Park", "\(franklin)")
         XCTAssertEqual(franklin.card?.fieldRoute.first, Inspect.snakeTXCard, "\(franklin)")
         XCTAssertFalse((franklin.card?.doLine.lowercased() ?? "").contains("edible"), franklin.card?.doLine ?? "")
+
+        let castner = try hold(at: Self.castnerRange, zoom: 16)
+        XCTAssertEqual(castner.card?.klass, "Open reserve", "\(castner)")
+        XCTAssertEqual(castner.card?.title, "Castner Range National Monument", "\(castner)")
+        XCTAssertNotEqual(castner.card?.klass, "Peak", "\(castner)")
+        XCTAssertNotEqual(castner.card?.title, "Castner Range", "\(castner)")
+        XCTAssertNotEqual(castner.card?.title, "Franklin Mountains State Park", "\(castner)")
+        XCTAssertEqual(castner.card?.fieldRoute.first, Inspect.snakeTXCard, "\(castner)")
+        XCTAssertTrue((castner.card?.doLine.lowercased() ?? "").contains("diamondback"), castner.card?.doLine ?? "")
+        XCTAssertTrue((castner.card?.doLine.lowercased() ?? "").contains("javelina"), castner.card?.doLine ?? "")
+        XCTAssertFalse((castner.card?.doLine.lowercased() ?? "").contains("edible"), castner.card?.doLine ?? "")
     }
 
     func testHoldingASinkholeOpensTheCaveCard() throws {
@@ -3234,6 +3264,38 @@ final class HoldOnTheGlassTests: XCTestCase {
             ).first ?? ""),
             "FIELD · BITE"
         )
+
+        let losLunas = try hold(at: Self.elCerroLosLunas, zoom: 16, packId: "nm")
+        XCTAssertEqual(losLunas.card?.klass, "Open reserve", "\(losLunas)")
+        XCTAssertEqual(losLunas.card?.title, "El Cerro de Los Lunas Preserve", "\(losLunas)")
+        XCTAssertNotEqual(losLunas.card?.klass, "Wildlife range", "\(losLunas)")
+        XCTAssertNotEqual(losLunas.card?.title, "Sunrise Trail", "\(losLunas)")
+        XCTAssertEqual(losLunas.card?.fieldRoute.first, Inspect.snakeTXCard, "\(losLunas)")
+        XCTAssertTrue(
+            losLunas.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "El Cerro de Los Lunas dropped the NM snake card: \(losLunas)"
+        )
+        let losDo = losLunas.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(losDo.contains("rattler") || losDo.contains("diamondback"), losLunas.card?.doLine ?? "")
+        XCTAssertTrue(losDo.contains("sotol") || losDo.contains("cholla"), losLunas.card?.doLine ?? "")
+        XCTAssertFalse(losDo.contains("javelina"), losLunas.card?.doLine ?? "")
+        XCTAssertFalse(losDo.contains("edible"), losLunas.card?.doLine ?? "")
+
+        let galisteo = try hold(at: Self.galisteoBasin, zoom: 16, packId: "nm")
+        XCTAssertEqual(galisteo.card?.klass, "Open reserve", "\(galisteo)")
+        XCTAssertEqual(galisteo.card?.title, "Galisteo Basin Preserve", "\(galisteo)")
+        XCTAssertNotEqual(galisteo.card?.klass, "Wildlife range", "\(galisteo)")
+        XCTAssertNotEqual(galisteo.card?.title, "The Haozous Garden", "\(galisteo)")
+        XCTAssertEqual(galisteo.card?.fieldRoute.first, Inspect.snakeTXCard, "\(galisteo)")
+        XCTAssertTrue(
+            galisteo.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Galisteo Basin dropped the NM snake card: \(galisteo)"
+        )
+        let galDo = galisteo.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(galDo.contains("rattler") || galDo.contains("diamondback"), galisteo.card?.doLine ?? "")
+        XCTAssertTrue(galDo.contains("sotol") || galDo.contains("cholla"), galisteo.card?.doLine ?? "")
+        XCTAssertFalse(galDo.contains("javelina"), galisteo.card?.doLine ?? "")
+        XCTAssertFalse(galDo.contains("edible"), galisteo.card?.doLine ?? "")
     }
 
     func testHoldingNewMexicoWoodlandOpensCottonwoodNotJavelina() throws {
@@ -3585,6 +3647,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),
+            ("castner range", Self.castnerRange, 16.0),
             ("west wildlife", Self.westWildlife, 16.0),
             ("jornada range", Self.jornadaRange, 16.0),
             ("sinkhole", Self.sinkhole, 16.0),

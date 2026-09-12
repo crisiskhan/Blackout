@@ -1527,6 +1527,19 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "reserve",
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Castner Range National Monument",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"natural": "peak", "name": "Castner Range"})
+        )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Hueco Mountain Park"})
         )
@@ -2631,6 +2644,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-106.933833", glass)
         self.assertIn("32.032331", glass)
         self.assertIn("-105.633755", glass)
+        self.assertIn("Castner Range National Monument", glass)
+        self.assertIn("31.899542", glass)
+        self.assertIn("-106.466848", glass)
         self.assertIn("31.694905", glass)
         self.assertIn("-106.441133", glass)
         self.assertIn("Cactus garden", glass)
@@ -3111,6 +3127,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", glass)
         self.assertIn("35.846906", glass)
         self.assertIn("-107.025703", glass)
+        self.assertIn("El Cerro de Los Lunas Preserve", glass)
+        self.assertIn("34.803148", glass)
+        self.assertIn("-106.794247", glass)
+        self.assertIn("Galisteo Basin Preserve", glass)
+        self.assertIn("35.451490", glass)
+        self.assertIn("-105.962032", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -3159,6 +3181,7 @@ class GroundFieldSync(unittest.TestCase):
         glass_hit = False
         reserve_hit = False
         hueco_hit = False
+        castner_hit = False
         franklin_hit = False
         lost_dog_hit = False
         flora_hit = False
@@ -3204,6 +3227,9 @@ class GroundFieldSync(unittest.TestCase):
                     hueco_hit = (
                         props.get("name") == "Hueco Tanks State Park and Historic Site"
                     )
+                if kind == "reserve" and pip(-106.466848, 31.899542, ring):
+                    if props.get("name") == "Castner Range National Monument":
+                        castner_hit = True
                 if kind == "reserve" and pip(-106.50, 31.97, ring):
                     franklin_hit = props.get("name") == "Franklin Mountains State Park"
                 if kind == "wildlife" and pip(-106.545207, 31.896528, ring):
@@ -3259,6 +3285,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             hueco_hit,
             "SOLO_QA Hueco Tanks hold is not inside the named desert park",
+        )
+        self.assertTrue(
+            castner_hit,
+            "Castner Range National Monument is not Open reserve on the west overlay",
         )
         self.assertTrue(
             franklin_hit,
@@ -4571,6 +4601,36 @@ class GroundFieldSync(unittest.TestCase):
             nm_reserve_hit, "glass NM open-reserve hold is not inside Jones Canyon"
         )
 
+        nm_los_lunas_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "El Cerro de Los Lunas Preserve":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.794247, 34.803148, ring):
+                    nm_los_lunas_hit = True
+        self.assertTrue(
+            nm_los_lunas_hit,
+            "El Cerro de Los Lunas Preserve hold is not inside the named nature reserve",
+        )
+
+        nm_galisteo_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Galisteo Basin Preserve":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-105.962032, 35.451490, ring):
+                    nm_galisteo_hit = True
+        self.assertTrue(
+            nm_galisteo_hit,
+            "Galisteo Basin Preserve hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -5122,6 +5182,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Open reserve", qa)
         self.assertIn("Alamo Mountain Area of Critical Environmental Concern", qa)
         self.assertIn("Jones Canyon Area of Critical Environmental Concern", qa)
+        self.assertIn("Castner Range National Monument", qa)
+        self.assertIn("31.899542", qa)
+        self.assertIn("El Cerro de Los Lunas Preserve", qa)
+        self.assertIn("34.803148", qa)
+        self.assertIn("Galisteo Basin Preserve", qa)
+        self.assertIn("35.451490", qa)
         self.assertIn("Paseo de la Mesa Open Space", qa)
         self.assertIn("35.149083", qa)
         self.assertIn("Golden Open Space", qa)
@@ -5536,7 +5602,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Lake Perspectives", qa)
         self.assertIn("30.420633", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
+        self.assertIn("34.803148", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
+        self.assertIn("35.451490", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

@@ -387,7 +387,9 @@ public enum Inspect {
     /// Wetlands Park stays bosque. Phrase `canyon preserve`, not the
     /// word `canyon` — Santa Fe Canyon Preserve is range; Canyon
     /// Preserve Interpretive Loop Trail stays a path; El Cerro de Los
-    /// Lunas Preserve and Galisteo Basin Preserve stay Open reserve.
+    /// Lunas Preserve and Galisteo Basin Preserve stay Open reserve
+    /// and are Held as Open reserve. Do not add matcher `los lunas`
+    /// or `galisteo`.
     /// Phrase `management unit`, not `wildlife management area` — a
     /// Balcones management unit is range; Waste Management Wildlife
     /// Park stays Open reserve. Phrase `ecological research`, not the
@@ -651,9 +653,12 @@ public enum Inspect {
     /// matched first. A wilderness preserve is range (animals first,
     /// trees), not this walk — cactus does not live on Wild Basin.
     /// A named nature reserve that is not already a hole, wildlife
-    /// range, or garden is this walk — vipers use that cover. An
-    /// unnamed reserve falls through to the landcover. Phrase `open
-    /// space` is not a bare `contains` — Open Space Visitor Center, a
+    /// range, or garden is this walk — vipers use that cover. El Cerro
+    /// de Los Lunas Preserve, Galisteo Basin Preserve, and Castner
+    /// Range National Monument are those Holds. An unnamed reserve falls through to
+    /// the landcover. Do not add matcher `los lunas`, `galisteo`, or
+    /// `castner`. Phrase `open space` is not a bare `contains` —
+    /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
     /// stay parks. Named open-space cover is this walk. Phrase `hueco
     /// tanks`, not the word `hueco` — Hueco Mountain Park is a town

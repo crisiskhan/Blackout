@@ -1475,6 +1475,11 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(losLunas.klass, "Open reserve")
         XCTAssertNotEqual(losLunas.klass, "Wildlife range")
+        XCTAssertEqual(losLunas.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(losLunas.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertTrue(losLunas.doLine.lowercased().contains("rattler") || losLunas.doLine.lowercased().contains("diamondback"), losLunas.doLine)
+        XCTAssertFalse(losLunas.doLine.lowercased().contains("javelina"), losLunas.doLine)
+        XCTAssertFalse(losLunas.doLine.lowercased().contains("edible"), losLunas.doLine)
 
         let galisteo = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Galisteo Basin Preserve"],
@@ -1482,6 +1487,9 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(galisteo.klass, "Open reserve")
         XCTAssertNotEqual(galisteo.klass, "Wildlife range")
+        XCTAssertEqual(galisteo.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(galisteo.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(galisteo.doLine.lowercased().contains("edible"), galisteo.doLine)
 
         let management = Inspect.read(
             tags: [
@@ -2355,6 +2363,28 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(franklin.klass, "Open reserve")
         XCTAssertEqual(franklin.fieldRoute.first, Inspect.snakeTXCard)
+
+        let castner = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Castner Range National Monument",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(castner.klass, "Open reserve")
+        XCTAssertNotEqual(castner.klass, "Peak")
+        XCTAssertEqual(castner.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(castner.doLine.lowercased().contains("diamondback"), castner.doLine)
+        XCTAssertTrue(castner.doLine.lowercased().contains("javelina"), castner.doLine)
+        XCTAssertFalse(castner.doLine.lowercased().contains("edible"), castner.doLine)
+
+        let castnerPeak = Inspect.read(
+            tags: ["natural": "peak", "name": "Castner Range"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(castnerPeak.klass, "Peak")
+        XCTAssertNotEqual(castnerPeak.klass, "Open reserve")
 
         let huecoTown = Inspect.read(
             tags: ["leisure": "park", "name": "Hueco Mountain Park"],
