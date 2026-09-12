@@ -87,7 +87,9 @@ CAVE_PRESERVE_KEYS = {
 # `wildlife preserve`, not the word `wildlife`. Wildlife Drive stays a park.
 # Phrase `audubon`, not a street — overlay still needs park keys.
 # Phrase `habitat preserve`, not the word `habitat`. Phrase `flora y
-# fauna`, not a street. Phrase `national preserve`, not the word
+# fauna`, not a street. Loma El Gato is a named peak on that
+# sheet — rank 1 still beats the overlay. Do not add matcher
+# `gato` or `loma el gato`. Phrase `national preserve`, not the word
 # `preserve`. Phrase `wilderness park`, not the word `wilderness`.
 # Wilderness Gate stays apartments. Phrase `canyonlands preserve`,
 # not the word `canyonlands`. Canyonlands Trail Park stays a park.

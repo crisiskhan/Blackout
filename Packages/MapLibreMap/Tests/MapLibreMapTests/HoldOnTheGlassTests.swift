@@ -315,6 +315,8 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Área de Protección de Flora y Fauna Médanos de
     /// Samalayuca. Phrase `flora y fauna`, not Open reserve.
+    /// Loma El Gato is held 11744 m off this pip — rank 1 still
+    /// beats the overlay.
     private static let floraFauna = CLLocationCoordinate2D(latitude: 31.247021, longitude: -106.450970)
 
     /// Interior of Barton Creek Wilderness Park. Phrase `wilderness park`,
@@ -872,6 +874,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Unique versus the San Andres overlay Hold (5032 m). Javelina
     /// as range, not hog.
     private static let sanAndresPeak = CLLocationCoordinate2D(latitude: 32.675918, longitude: -106.536111)
+
+    /// `Loma El Gato` on the west place slice. A named peak on the
+    /// Samalayuca overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus the Samalayuca overlay Hold (11744 m).
+    /// Javelina as range, not hog.
+    private static let lomaElGato = CLLocationCoordinate2D(latitude: 31.235777, longitude: -106.573797)
 
     /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
@@ -1481,6 +1489,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             "\(flora)"
         )
         XCTAssertNotEqual(flora.card?.klass, "Open reserve", "\(flora)")
+        XCTAssertNotEqual(flora.card?.title, "Loma El Gato", "\(flora)")
         XCTAssertEqual(flora.card?.fieldRoute.first, Inspect.mammalTXCard, "\(flora)")
         XCTAssertFalse((flora.card?.doLine.lowercased() ?? "").contains("edible"), flora.card?.doLine ?? "")
 
@@ -2983,6 +2992,27 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(andresPresent.first, Inspect.mammalTXCard, "\(andres)")
         XCTAssertEqual(InspectField.label(for: andresPresent.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: andresPresent), "ANIMAL · BITE · COLD")
+
+        let gato = try hold(at: Self.lomaElGato, zoom: 16)
+        XCTAssertEqual(gato.card?.klass, "Peak", "\(gato)")
+        XCTAssertEqual(gato.card?.title, "Loma El Gato", "\(gato)")
+        XCTAssertNotEqual(gato.card?.klass, "Wildlife range", "\(gato)")
+        XCTAssertNotEqual(
+            gato.card?.title,
+            "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+            "\(gato)"
+        )
+        XCTAssertNotEqual(gato.card?.title, "San Andres Peak", "\(gato)")
+        XCTAssertNotEqual(gato.card?.title, "Mount Franklin", "\(gato)")
+        let gatoDo = gato.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(gatoDo.contains("javelina"), gato.card?.doLine ?? "")
+        XCTAssertTrue(gatoDo.contains("give it the road"), gato.card?.doLine ?? "")
+        XCTAssertFalse(gatoDo.contains("hog"), gato.card?.doLine ?? "")
+        XCTAssertFalse(gatoDo.contains("edible"), gato.card?.doLine ?? "")
+        let gatoPresent = InspectField.presentRoute(gato.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(gatoPresent.first, Inspect.mammalTXCard, "\(gato)")
+        XCTAssertEqual(InspectField.label(for: gatoPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: gatoPresent), "ANIMAL · BITE · COLD")
     }
 
     func testHoldingAnEastPeakOpensHogNotJavelina() throws {

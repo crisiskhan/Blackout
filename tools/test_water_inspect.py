@@ -1627,6 +1627,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("whitfield")', inspect)
         self.assertNotIn('contains("marquez")', inspect)
         self.assertNotIn('contains("mesa blanca")', inspect)
+        self.assertNotIn('contains("gato")', inspect)
+        self.assertNotIn('contains("loma el gato")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2754,6 +2756,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.688876", glass)
         self.assertIn("-105.884927", glass)
         self.assertIn("Área de Protección de Flora y Fauna", glass)
+        self.assertIn("Loma El Gato", glass)
+        self.assertIn("31.235777", glass)
+        self.assertIn("-106.573797", glass)
         self.assertIn("31.247021", glass)
         self.assertIn("-106.450970", glass)
         self.assertIn("Barton Creek Wilderness Park", glass)
@@ -4186,6 +4191,11 @@ class GroundFieldSync(unittest.TestCase):
             place_names_in_tile("nm", -107.263101, 35.338369),
             "Mesa Blanca did not survive tiling as a peak",
         )
+        self.assertIn(
+            "Loma El Gato",
+            place_names_in_tile("tx-west", -106.573797, 31.235777),
+            "Loma El Gato did not survive tiling as a peak",
+        )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -4425,6 +4435,7 @@ class GroundFieldSync(unittest.TestCase):
 
         peak = False
         san_andres_peak = False
+        loma_el_gato = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -4443,9 +4454,18 @@ class GroundFieldSync(unittest.TestCase):
                 and abs(lon - (-106.536111)) < 1e-6
             ):
                 san_andres_peak = True
+            if (
+                props.get("name") == "Loma El Gato"
+                and abs(lat - 31.235777) < 1e-6
+                and abs(lon - (-106.573797)) < 1e-6
+            ):
+                loma_el_gato = True
         self.assertTrue(peak, "glass west peak hold is not Mount Franklin")
         self.assertTrue(
             san_andres_peak, "San Andres Peak is not a named peak in the west extract"
+        )
+        self.assertTrue(
+            loma_el_gato, "Loma El Gato is not a named peak in the west extract"
         )
 
         nm_reserve_hit = False
@@ -5133,6 +5153,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Valles Caldera National Preserve", qa)
         self.assertIn("Barton Creek Wilderness Park", qa)
         self.assertIn("Área de Protección de Flora y Fauna", qa)
+        self.assertIn("Loma El Gato", qa)
+        self.assertIn("31.235777", qa)
         self.assertIn("31.247021", qa)
         self.assertIn("30.243962", qa)
         self.assertIn("36.000815", qa)

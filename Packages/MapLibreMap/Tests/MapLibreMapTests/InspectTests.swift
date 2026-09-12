@@ -1312,6 +1312,17 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(flora.fieldRoute.first, Inspect.mammalTXCard)
         XCTAssertFalse(flora.doLine.lowercased().contains("edible"), flora.doLine)
 
+        let lomaElGato = Inspect.read(
+            tags: ["natural": "peak", "name": "Loma El Gato"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(lomaElGato.klass, "Peak")
+        XCTAssertNotEqual(lomaElGato.klass, "Wildlife range")
+        XCTAssertTrue(lomaElGato.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(lomaElGato.doLine.lowercased().contains("javelina"), lomaElGato.doLine)
+        XCTAssertFalse(lomaElGato.doLine.lowercased().contains("hog"), lomaElGato.doLine)
+        XCTAssertFalse(lomaElGato.doLine.lowercased().contains("edible"), lomaElGato.doLine)
+
         let caldera = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -3231,6 +3242,16 @@ final class InspectTests: XCTestCase {
                     "leisure": "nature_reserve",
                     "boundary": "protected_area",
                     "name": "Marquez Wildlife Management Area",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Loma El Gato"],
+                [
+                    "leisure": "nature_reserve",
+                    "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
                 ],
             ])["natural"],
             "peak"
