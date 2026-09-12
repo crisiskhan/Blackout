@@ -295,6 +295,11 @@ struct MapTab: View {
 
     /// Up to three short deduped lines, printed where the thumb already is.
     private var fieldChrome: some View {
+        let destActive = MapFieldChrome.destRailVisible(
+            hasDestination: runtime.routeTarget != nil,
+            lockOn: runtime.lockOn,
+            hasRoute: !runtime.routeCoords.isEmpty
+        )
         let destBearing = MapFieldChrome.activeBearing(
             headingDeg: runtime.headingDeg,
             hasDestination: runtime.routeTarget != nil,
@@ -307,7 +312,8 @@ struct MapTab: View {
             tool: runtime.toolChrome,
             bearingDeg: destBearing,
             speak: runtime.speechChrome,
-            you: runtime.gnssYou
+            you: runtime.gnssYou,
+            destActive: destActive
         )
         return Group {
             if !lines.isEmpty {
@@ -330,9 +336,11 @@ struct MapTab: View {
                     }
                 }
                 .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Theme.glass(opacity: 0.62))
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .padding(.vertical, 8)
+                .background(
+                    Theme.glass(opacity: 0.62)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                )
             }
         }
     }
@@ -341,47 +349,64 @@ struct MapTab: View {
         var bearingDeg: Double?
         var you: (lat: Double, lon: Double)?
         @Binding var mode: MapFieldDestMode
+        @State private var beat: Double = 0.28
 
         var body: some View {
-            HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
-                chip(MapFieldDestMode.bearing)
-                chip(MapFieldDestMode.coordinates)
+            let field = MapFieldChrome.destValue(
+                mode: mode,
+                bearingDeg: bearingDeg,
+                you: you
+            )
+            let fieldInk = destInk(mode)
+            return VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
+                    chip(MapFieldDestMode.bearing)
+                    chip(MapFieldDestMode.coordinates)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(field)
+                    .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                    .foregroundStyle(fieldInk)
+                    .lineLimit(1)
+                    .minimumScaleFactor(1)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
+                    .accessibilityLabel(mode.title)
+                    .accessibilityValue(field)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
+            .onAppear {
+                withAnimation(Theme.Motion.beat) {
+                    beat = 1
+                }
+            }
+        }
+
+        private func destInk(_ destMode: MapFieldDestMode) -> Color {
+            switch destMode {
+            case .bearing:
+                return Theme.accent
+            case .coordinates:
+                return Theme.fix
+            }
         }
 
         private func chip(_ chipMode: MapFieldDestMode) -> some View {
             let selected = mode == chipMode
-            let field = MapFieldChrome.destValue(
-                mode: chipMode,
-                bearingDeg: bearingDeg,
-                you: you
-            )
-            let ink: Color = {
-                switch chipMode {
-                case .bearing:
-                    return Theme.accent
-                case .coordinates:
-                    return Theme.silver
-                }
-            }()
             return Button {
                 withAnimation(Theme.Motion.wake) {
                     mode = chipMode
                 }
             } label: {
-                HStack(spacing: 8) {
-                    Text(chipMode.title)
-                    if selected {
-                        Text(field)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
+                Text(chipMode.title)
             }
-            .buttonStyle(MapFieldDestChipStyle(ink: ink, expanded: selected))
+            .buttonStyle(
+                MapFieldDestChipStyle(ink: destInk(chipMode), expanded: selected, beat: beat)
+            )
             .layoutPriority(selected ? 1 : 0)
             .accessibilityLabel(chipMode.title)
-            .accessibilityValue(selected ? field : "")
+            .accessibilityAddTraits(selected ? .isSelected : [])
         }
     }
 

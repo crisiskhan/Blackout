@@ -299,18 +299,32 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
-    /// Heading token for the dest slot. The pin stays on the canvas. Live YOU
-    /// is destValue on COORDINATES — this string is never a DEST pair.
-    public static func destLine(
-        bearingDeg: Double?,
-        you: (lat: Double, lon: Double)? = nil
-    ) -> String {
-        _ = you
-        guard let bearingDeg, bearingDeg >= 0 else { return "" }
-        return String(format: "BEARING %.0f°", bearingDeg)
+    /// Dest chips mount when there is somewhere to walk, even if heading is
+    /// unusable — COORDINATES still has a line to print.
+    public static func destRailVisible(
+        hasDestination: Bool,
+        lockOn: Bool,
+        hasRoute: Bool
+    ) -> Bool {
+        hasDestination || lockOn || hasRoute
     }
 
-    /// Expanded-chip field. Bearing is the course. Coordinates are live GNSS.
+    /// Heading token for the dest slot. The pin stays on the canvas. Live YOU
+    /// is destValue on COORDINATES — this string is never a DEST pair. Dest
+    /// chips still mount without a course so the COORDINATES line can print.
+    public static func destLine(
+        bearingDeg: Double?,
+        you: (lat: Double, lon: Double)? = nil,
+        destActive: Bool = false
+    ) -> String {
+        _ = you
+        if let bearingDeg, bearingDeg >= 0 {
+            return String(format: "BEARING %.0f°", bearingDeg)
+        }
+        return destActive ? "NO HEADING" : ""
+    }
+
+    /// Dest-line field. Bearing is the course. Coordinates are live GNSS.
     public static func destValue(
         mode: MapFieldDestMode,
         bearingDeg: Double?,
@@ -346,11 +360,12 @@ public enum MapFieldChrome: Sendable {
         tool: String,
         bearingDeg: Double?,
         speak: String,
-        you: (lat: Double, lon: Double)? = nil
+        you: (lat: Double, lon: Double)? = nil,
+        destActive: Bool = false
     ) -> [MapFieldLine] {
         [
             (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
-            (.dest, destLine(bearingDeg: bearingDeg, you: you)),
+            (.dest, destLine(bearingDeg: bearingDeg, you: you, destActive: destActive)),
             (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
         ]
         .filter { !$0.1.isEmpty }

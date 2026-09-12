@@ -52,6 +52,8 @@ public enum BlackoutTokens: Sendable {
         public static let chromeAsleepOpacity: Double = 0.08
         public static let chromeSleepSeconds: Double = 1.15
         public static let chromeWakeSeconds: Double = 0.55
+        /// Dest-chip heartbeat. easeInOut, never a spring.
+        public static let destChipBeatSeconds: Double = 1.05
         /// Every control but the live one.
         public static let chromeDimOpacity: Double = 0.28
 
@@ -81,6 +83,8 @@ public enum BlackoutTokens: Sendable {
         public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
         /// Long-wavelength lamp. Multiply, not a wash: void stays void.
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
+        /// Live GNSS lamp. COORDINATES chip. Not SOS, not caution brass.
+        public static let fix = RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)
     }
 
     /// Offline MAP ink. Dark red/silver on void so walking-zoom streets and names read.
@@ -88,6 +92,7 @@ public enum BlackoutTokens: Sendable {
         public static let voidHex = "#000000"
         public static let silverHex = "#B8BDC2"
         public static let accentHex = "#E10600"
+        public static let fixHex = "#2EE67A"
         public static let roadLabelMinZoom: Double = 12
         public static let roadLabelWalkingSize: Double = 19
         public static let roadLabelCloseWalkSize: Double = 22

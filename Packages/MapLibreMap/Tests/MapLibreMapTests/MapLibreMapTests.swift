@@ -609,6 +609,50 @@ final class MapLibreMapTests: XCTestCase {
             ""
         )
         XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0, you: nil), "BEARING 0°")
+        XCTAssertEqual(
+            MapFieldChrome.destLine(bearingDeg: -1, destActive: true),
+            "NO HEADING"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(
+                bearingDeg: -1,
+                you: (lat: 31.7619, lon: -106.49),
+                destActive: true
+            ),
+            "NO HEADING"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(bearingDeg: 45, destActive: true),
+            "BEARING 45°"
+        )
+        XCTAssertFalse(
+            MapFieldChrome.destRailVisible(
+                hasDestination: false,
+                lockOn: false,
+                hasRoute: false
+            )
+        )
+        XCTAssertTrue(
+            MapFieldChrome.destRailVisible(
+                hasDestination: true,
+                lockOn: false,
+                hasRoute: false
+            )
+        )
+        XCTAssertTrue(
+            MapFieldChrome.destRailVisible(
+                hasDestination: false,
+                lockOn: true,
+                hasRoute: false
+            )
+        )
+        XCTAssertTrue(
+            MapFieldChrome.destRailVisible(
+                hasDestination: false,
+                lockOn: false,
+                hasRoute: true
+            )
+        )
     }
 
     func testMapFieldChromeIsSilentWhenNothingIsActive() {
@@ -640,6 +684,27 @@ final class MapLibreMapTests: XCTestCase {
                 you: (lat: 31.7619, lon: -106.49)
             ).isEmpty
         )
+        let destMounted = MapFieldChrome.lines(
+            lock: "",
+            route: "",
+            tool: "",
+            bearingDeg: nil,
+            speak: "",
+            destActive: true
+        )
+        XCTAssertEqual(destMounted.map(\.text), ["NO HEADING"])
+        XCTAssertEqual(destMounted.map(\.slot), [.dest])
+        let destMountedNoCourse = MapFieldChrome.lines(
+            lock: "",
+            route: "",
+            tool: "",
+            bearingDeg: -1,
+            speak: "",
+            you: (lat: 31.7619, lon: -106.49),
+            destActive: true
+        )
+        XCTAssertEqual(destMountedNoCourse.map(\.text), ["NO HEADING"])
+        XCTAssertEqual(destMountedNoCourse.map(\.slot), [.dest])
         let bearingOnly = MapFieldChrome.lines(
             lock: "",
             route: "",

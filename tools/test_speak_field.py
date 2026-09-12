@@ -96,11 +96,12 @@ def joined(parts: list[str]) -> str:
 def dest_line(
     bearing_deg: float | None,
     you: tuple[float, float] | None = None,
+    dest_active: bool = False,
 ) -> str:
     """Mirror of MapFieldChrome.destLine. Slot token only — heading, not YOU."""
     del you
     if bearing_deg is None or bearing_deg < 0:
-        return ""
+        return "NO HEADING" if dest_active else ""
     return f"BEARING {bearing_deg:.0f}°"
 
 
@@ -109,7 +110,7 @@ def dest_value(
     bearing_deg: float | None,
     you: tuple[float, float] | None,
 ) -> str:
-    """Mirror of MapFieldChrome.destValue. Expanded-chip field."""
+    """Mirror of MapFieldChrome.destValue. Dest-line field."""
     if mode == "bearing":
         if bearing_deg is None or bearing_deg < 0:
             return "NO HEADING"
@@ -128,11 +129,20 @@ def field_lines(
     bearing_deg: float | None,
     speak: str = "",
     you: tuple[float, float] | None = None,
+    dest_active: bool = False,
 ) -> list[str]:
     """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas,
     so the middle row is a heading token. Live YOU is dest_value on COORDINATES."""
     status = joined([lock, route, tool])
-    return [line for line in (status, dest_line(bearing_deg, you), speak.strip()) if line]
+    return [
+        line
+        for line in (
+            status,
+            dest_line(bearing_deg, you, dest_active=dest_active),
+            speak.strip(),
+        )
+        if line
+    ]
 
 
 def route_chrome(has_graph: bool, has_dest: bool, plan_chrome: str) -> str:
@@ -235,6 +245,11 @@ class FieldChromeTests(unittest.TestCase):
             ],
         )
         self.assertEqual(dest_line(45, you=(31.7619, -106.49)), "BEARING 45°")
+        self.assertEqual(dest_line(-1), "")
+        self.assertEqual(dest_line(None), "")
+        self.assertEqual(dest_line(-1, dest_active=True), "NO HEADING")
+        self.assertEqual(dest_line(None, dest_active=True), "NO HEADING")
+        self.assertEqual(dest_line(45, dest_active=True), "BEARING 45°")
         self.assertEqual(dest_value("bearing", 45, (31.7619, -106.49)), "45°")
         self.assertEqual(
             dest_value("coordinates", 45, (31.7619, -106.49)),
@@ -251,6 +266,11 @@ class FieldChromeTests(unittest.TestCase):
         )
         self.assertEqual(field_lines("", "", "", None, "", you=(31.7619, -106.49)), [])
         self.assertEqual(field_lines("", "", "", -1, "", you=(31.7619, -106.49)), [])
+        self.assertEqual(field_lines("", "", "", None, "", dest_active=True), ["NO HEADING"])
+        self.assertEqual(
+            field_lines("", "", "", -1, "", you=(31.7619, -106.49), dest_active=True),
+            ["NO HEADING"],
+        )
 
     def test_quiet_field_shows_nothing(self):
         self.assertEqual(field_lines("", "", "", None, ""), [])
@@ -356,15 +376,40 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("you: (lat: Double, lon: Double)?", self.route_line)
         self.assertIn("enum MapFieldDestMode", self.route_line)
         self.assertIn("func destValue(", self.route_line)
+        self.assertIn("func destRailVisible(", self.route_line)
+        self.assertIn("destActive", self.route_line)
         self.assertIn("COORDINATES", self.route_line)
         self.assertIn("NO FIX", self.route_line)
         self.assertIn("MapFieldDestRail", self.map_tab)
         self.assertIn("MapFieldDestMode", self.map_tab)
+        self.assertIn("destActive:", chrome)
+        self.assertIn("destRailVisible(", chrome)
         self.assertIn("Theme.accent", chrome)
+        self.assertIn("Theme.fix", chrome)
+        self.assertIn("Theme.Motion.beat", chrome)
+        self.assertIn("@State private var beat", chrome)
+        self.assertIn("MapFieldChrome.destValue", chrome)
+        self.assertIn("Text(field)", chrome)
+        rail = chrome.split("struct MapFieldDestRail")[1]
+        chip = rail.split("func chip(")[1]
+        self.assertNotIn("destValue", chip)
+        self.assertIn("chipMode.title", chip)
         self.assertIn("layoutPriority", chrome)
         theme = read("Blackout", "Theme.swift")
         self.assertIn("struct MapFieldDestChipStyle", theme)
         self.assertIn("var expanded: Bool", theme)
+        self.assertIn("var beat: Double", theme)
+        self.assertIn("static var beat", theme)
+        self.assertIn("repeatForever", theme)
+        self.assertIn(".shadow(", theme)
+        self.assertNotIn("Color.green", theme)
+        dest_src = self.route_line.split("func destLine(")[1].split("func destValue")[0]
+        self.assertNotIn("%.5f, %.5f", dest_src)
+        self.assertNotIn('String(format: "BEARING %.0f°", h)', self.map_tab)
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        self.assertIn("destChipBeatSeconds", tokens)
+        self.assertIn("static let fix", tokens)
+        self.assertIn("fixHex", tokens)
 
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)

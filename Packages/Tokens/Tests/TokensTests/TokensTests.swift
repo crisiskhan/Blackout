@@ -74,6 +74,16 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.MapInk.voidHex, "#000000")
         XCTAssertEqual(BlackoutTokens.MapInk.silverHex, "#B8BDC2")
         XCTAssertEqual(BlackoutTokens.MapInk.accentHex, "#E10600")
+        XCTAssertEqual(BlackoutTokens.MapInk.fixHex, "#2EE67A")
+        XCTAssertEqual(
+            BlackoutTokens.Color.fix,
+            BlackoutTokens.RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)
+        )
+        XCTAssertNotEqual(BlackoutTokens.Color.fix, BlackoutTokens.Color.accent)
+        XCTAssertNotEqual(BlackoutTokens.Color.fix, BlackoutTokens.Color.caution)
+        XCTAssertGreaterThan(BlackoutTokens.Color.fix.g, 0.7)
+        XCTAssertLessThan(BlackoutTokens.Color.fix.r, 0.3)
+        XCTAssertEqual(BlackoutTokens.Chrome.destChipBeatSeconds, 1.05)
         XCTAssertEqual(BlackoutTokens.MapInk.roadLabelMinZoom, 12)
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelWalkingSize, 16)
         XCTAssertGreaterThanOrEqual(

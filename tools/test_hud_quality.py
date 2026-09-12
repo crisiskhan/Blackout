@@ -30,6 +30,15 @@ def person_compass_const(name: str) -> float:
     return float(match.group(1))
 
 
+def dest_rail_visible(
+    has_destination: bool,
+    lock_on: bool,
+    has_route: bool,
+) -> bool:
+    """Mirror of MapFieldChrome.destRailVisible."""
+    return has_destination or lock_on or has_route
+
+
 def active_bearing(
     heading: float | None,
     has_destination: bool,
@@ -37,7 +46,7 @@ def active_bearing(
     has_route: bool,
 ) -> float | None:
     """Mirror of MapFieldChrome.activeBearing."""
-    if not (has_destination or lock_on or has_route):
+    if not dest_rail_visible(has_destination, lock_on, has_route):
         return None
     if heading is None or heading < 0:
         return None
@@ -46,6 +55,10 @@ def active_bearing(
 
 class QuietBearingTests(unittest.TestCase):
     def test_heading_alone_is_not_a_mission(self):
+        self.assertFalse(dest_rail_visible(False, False, False))
+        self.assertTrue(dest_rail_visible(True, False, False))
+        self.assertTrue(dest_rail_visible(False, True, False))
+        self.assertTrue(dest_rail_visible(False, False, True))
         self.assertIsNone(active_bearing(12, False, False, False))
         self.assertEqual(active_bearing(45, True, False, False), 45)
         self.assertEqual(active_bearing(10, False, True, False), 10)
@@ -72,6 +85,11 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("youCoordinate()", tab)
         dest_src = route.split("func destLine(")[1].split("func destValue")[0]
         self.assertNotIn("%.5f, %.5f", dest_src)
+        self.assertIn("destActive", dest_src)
+        self.assertIn("NO HEADING", dest_src)
+        self.assertIn("func destRailVisible(", route)
+        self.assertIn("destActive:", chrome)
+        self.assertIn("destRailVisible(", chrome)
         self.assertIn("func destValue(", route)
         self.assertIn("enum MapFieldDestMode", route)
         self.assertIn("%.5f, %.5f", route)
@@ -80,7 +98,24 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("MapFieldDestRail", tab)
         self.assertIn("MapFieldDestMode.coordinates", tab)
         self.assertIn("Theme.accent", chrome)
+        self.assertIn("Theme.fix", chrome)
+        self.assertIn("Theme.Motion.beat", chrome)
+        self.assertIn("@State private var beat", chrome)
+        self.assertIn("MapFieldChrome.destValue", chrome)
+        self.assertIn("Text(field)", chrome)
+        rail = chrome.split("struct MapFieldDestRail")[1]
+        chip = rail.split("func chip(")[1]
+        self.assertNotIn("destValue", chip)
+        self.assertIn("chipMode.title", chip)
         self.assertIn("layoutPriority", chrome)
+        theme = read("Blackout", "Theme.swift")
+        chip_style = theme.split("struct MapFieldDestChipStyle")[1].split("enum HUDStatusTone")[0]
+        self.assertIn("var expanded: Bool", chip_style)
+        self.assertIn("var beat: Double", chip_style)
+        self.assertIn(".shadow(", chip_style)
+        self.assertIn("repeatForever", theme)
+        self.assertNotIn("Color.green", chip_style)
+        self.assertNotIn("Color.orange", chip_style)
         app = read("Blackout", "AppRuntime.swift")
         you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
         self.assertIn("fix.last", you)

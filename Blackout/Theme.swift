@@ -10,6 +10,7 @@ enum Theme {
     static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
     static var caution: Color { Color(rgba: BlackoutTokens.Color.caution) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
+    static var fix: Color { Color(rgba: BlackoutTokens.Color.fix) }
 
     enum Motion {
         static var sleep: Animation {
@@ -20,6 +21,10 @@ enum Theme {
         }
         static var heavy: Animation {
             .easeInOut(duration: BlackoutTokens.Chrome.chromeSleepSeconds)
+        }
+        static var beat: Animation {
+            .easeInOut(duration: BlackoutTokens.Chrome.destChipBeatSeconds)
+                .repeatForever(autoreverses: true)
         }
     }
 
@@ -129,34 +134,42 @@ struct HUDOverlayChipStyle: ButtonStyle {
     }
 }
 
-/// Dest-slot chips on MAP. Selected fills the field; the other hugs its word.
+/// Dest-slot chips on MAP. Selected beats harder; the other still glows.
 struct MapFieldDestChipStyle: ButtonStyle {
     var ink: Color
     var expanded: Bool
+    var beat: Double
 
     func makeBody(configuration: Configuration) -> some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        let pulse = expanded ? beat : 0.45 * beat
+        let glow = 0.28 + 0.62 * pulse
+        let radius = (expanded ? 12.0 : 7.0) + (expanded ? 12.0 : 7.0) * pulse
+        let fill = 0.10 + 0.22 * pulse
         return configuration.label
             .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
             .minimumScaleFactor(1)
             .lineLimit(1)
-            .fixedSize(horizontal: !expanded, vertical: false)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
-            .frame(
-                minWidth: hit,
-                maxWidth: expanded ? .infinity : nil,
-                minHeight: hit,
-                maxHeight: hit,
-                alignment: .leading
-            )
+            .frame(minWidth: hit, minHeight: hit, maxHeight: hit, alignment: .leading)
             .contentShape(Rectangle())
             .foregroundStyle(ink)
-            .background(Theme.raised)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Theme.raised)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(ink.opacity(fill))
+                }
+            )
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(ink.opacity(0.85), lineWidth: 1)
+                    .strokeBorder(ink.opacity(0.48 + 0.52 * pulse), lineWidth: expanded ? 2 : 1.2)
             )
+            .shadow(color: ink.opacity(glow), radius: radius, x: 0, y: 0)
+            .shadow(color: ink.opacity(glow * 0.55), radius: radius * 1.7, x: 0, y: 0)
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }
