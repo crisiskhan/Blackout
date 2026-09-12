@@ -1572,6 +1572,11 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("hideaway")', inspect)
         self.assertNotIn('contains("shea")', inspect)
         self.assertNotIn('contains("lauren")', inspect)
+        self.assertNotIn('contains("argus")', inspect)
+        self.assertNotIn('contains("johnston")', inspect)
+        self.assertNotIn('contains("stiles")', inspect)
+        self.assertNotIn('contains("gebert")', inspect)
+        self.assertNotIn('contains("pflugerville")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2649,6 +2654,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Sorin Oak", glass)
         self.assertIn("30.229486", glass)
         self.assertIn("-97.75447", glass)
+        self.assertIn("Argus", glass)
+        self.assertIn("30.258446", glass)
+        self.assertIn("-97.680528", glass)
+        self.assertIn("Kim Bird Gebert Memorial Tree", glass)
+        self.assertIn("30.441822", glass)
+        self.assertIn("-97.575189", glass)
         self.assertIn("Lost Oasis Cave Preserve", glass)
         self.assertIn("30.163187", glass)
         self.assertIn("-97.873678", glass)
@@ -3613,6 +3624,8 @@ class GroundFieldSync(unittest.TestCase):
         east_scrub = False
         treaty_oak = False
         sorin_oak = False
+        argus_tree = False
+        kim_bird_tree = False
         airmen_cave = False
         tree_house_cave = False
         hideaway_cave = False
@@ -3654,6 +3667,18 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.75447)) < 1e-6
                 ):
                     sorin_oak = True
+                if (
+                    props.get("name") == "Argus"
+                    and abs(lat - 30.258446) < 1e-6
+                    and abs(lon - (-97.680528)) < 1e-6
+                ):
+                    argus_tree = True
+                if (
+                    props.get("name") == "Kim Bird Gebert Memorial Tree"
+                    and abs(lat - 30.441822) < 1e-6
+                    and abs(lon - (-97.575189)) < 1e-6
+                ):
+                    kim_bird_tree = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -3686,6 +3711,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(east_scrub, "glass east scrub hold is not inside unnamed east scrub")
         self.assertTrue(treaty_oak, "Treaty Oak is not a named tree in the east extract")
         self.assertTrue(sorin_oak, "Sorin Oak is not a named tree in the east extract")
+        self.assertTrue(argus_tree, "Argus is not a named tree in the east extract")
+        self.assertTrue(
+            kim_bird_tree,
+            "Kim Bird Gebert Memorial Tree is not a named tree in the east extract",
+        )
         self.assertTrue(airmen_cave, "Airmen's Cave is not a cave mouth in the east extract")
         self.assertTrue(tree_house_cave, "Tree House Cave is not a cave mouth in the east extract")
         self.assertTrue(hideaway_cave, "Hideaway is not a cave mouth in the east extract")
@@ -3701,6 +3731,16 @@ class GroundFieldSync(unittest.TestCase):
             "Sorin Oak",
             place_names_in_tile("tx-east", -97.75447, 30.229486),
             "Sorin Oak did not survive tiling",
+        )
+        self.assertIn(
+            "Argus",
+            place_names_in_tile("tx-east", -97.680528, 30.258446),
+            "Argus did not survive tiling as a named tree",
+        )
+        self.assertIn(
+            "Kim Bird Gebert Memorial Tree",
+            place_names_in_tile("tx-east", -97.575189, 30.441822),
+            "Kim Bird Gebert Memorial Tree did not survive tiling as a named tree",
         )
         self.assertIn(
             "Anthony Gap Cave",
@@ -4589,6 +4629,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Treaty Oak", qa)
         self.assertIn("Sorin Oak", qa)
         self.assertIn("30.229486", qa)
+        self.assertIn("Argus", qa)
+        self.assertIn("30.258446", qa)
+        self.assertIn("Arthur Stiles Road", qa)
+        self.assertIn("Johnston Terrace", qa)
+        self.assertIn("Kim Bird Gebert Memorial Tree", qa)
+        self.assertIn("30.441822", qa)
+        self.assertIn("Lake Pflugerville Park", qa)
+        self.assertIn("Silent Harbor Loop", qa)
         self.assertIn("Lost Oasis Cave Preserve", qa)
         self.assertIn("Sandia Man Cave", qa)
         self.assertIn("Embudo Cave", qa)

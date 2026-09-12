@@ -2129,6 +2129,56 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(landry.klass, "Road")
         XCTAssertNotEqual(landry.klass, "Named tree")
+
+        let argus = Inspect.read(
+            tags: ["natural": "tree", "name": "Argus"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(argus.klass, "Named tree")
+        XCTAssertEqual(argus.title, "Argus")
+        XCTAssertEqual(argus.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(argus.doLine.lowercased().contains("edible"), argus.doLine)
+        XCTAssertTrue(argus.doLine.lowercased().contains("not a meal"), argus.doLine)
+
+        let arthurStiles = Inspect.read(
+            tags: ["highway": "residential", "name": "Arthur Stiles Road"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(arthurStiles.klass, "Road")
+        XCTAssertNotEqual(arthurStiles.klass, "Named tree")
+
+        let johnstonTerrace = Inspect.read(
+            tags: ["landuse": "residential", "name": "Johnston Terrace"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(johnstonTerrace.klass, "Built-up ground")
+        XCTAssertNotEqual(johnstonTerrace.klass, "Named tree")
+
+        let kimBird = Inspect.read(
+            tags: ["natural": "tree", "name": "Kim Bird Gebert Memorial Tree"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(kimBird.klass, "Named tree")
+        XCTAssertEqual(kimBird.title, "Kim Bird Gebert Memorial Tree")
+        XCTAssertEqual(kimBird.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(kimBird.doLine.lowercased().contains("edible"), kimBird.doLine)
+        XCTAssertTrue(kimBird.doLine.lowercased().contains("not a meal"), kimBird.doLine)
+
+        let silentHarbor = Inspect.read(
+            tags: ["highway": "residential", "name": "Silent Harbor Loop"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(silentHarbor.klass, "Road")
+        XCTAssertNotEqual(silentHarbor.klass, "Named tree")
+
+        let pflugervillePark = Inspect.read(
+            tags: ["leisure": "park", "name": "Lake Pflugerville Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(pflugervillePark.klass, "Park")
+        XCTAssertNotEqual(pflugervillePark.klass, "Named tree")
     }
 
     func testTheOpenPackNamesItsTreesAndAnimalsAsRangeNotPins() {
@@ -2882,6 +2932,22 @@ final class InspectTests: XCTestCase {
             Inspect.pick([
                 ["natural": "tree", "name": "Prosopis velutina / Velvet Mesquite"],
                 ["highway": "residential", "name": "Landry Avenue Northwest"],
+            ])["natural"],
+            "tree"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "tree", "name": "Argus"],
+                ["highway": "residential", "name": "Arthur Stiles Road"],
+                ["landuse": "residential", "name": "Johnston Terrace"],
+            ])["natural"],
+            "tree"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "tree", "name": "Kim Bird Gebert Memorial Tree"],
+                ["highway": "residential", "name": "Silent Harbor Loop"],
+                ["leisure": "park", "name": "Lake Pflugerville Park"],
             ])["natural"],
             "tree"
         )

@@ -601,6 +601,16 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// wood, not a meal. Not Sorin Street. 267 m from OSM water.
     private static let sorinOak = CLLocationCoordinate2D(latitude: 30.229486, longitude: -97.75447)
 
+    /// `Argus` on the east place slice. Named tree — shade and wood,
+    /// not a meal. Arthur Stiles Road 48 m is rank 7. Johnston Terrace
+    /// is built-up rank 8. 1035 m from a tap.
+    private static let argusTree = CLLocationCoordinate2D(latitude: 30.258446, longitude: -97.680528)
+
+    /// `Kim Bird Gebert Memorial Tree` on the east place slice. Named
+    /// tree — shade and wood, not a meal. Silent Harbor Loop 90 m is
+    /// rank 7. Lake Pflugerville Park is park rank 8. 276 m from a tap.
+    private static let kimBirdTree = CLLocationCoordinate2D(latitude: 30.441822, longitude: -97.575189)
+
     /// Interior of Blowing Sink in east `layers/ground.geojson`. A wetland
     /// in the extract; phrase `blowing sink`, not a cave-preserve park.
     /// Vertex-avg covers the sheet. Streams and ways sit hundreds of metres off.
@@ -1609,6 +1619,34 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertFalse(sorinDo.contains("edible"), sorin.card?.doLine ?? "")
         XCTAssertFalse(sorinDo.contains("hog"), sorin.card?.doLine ?? "")
         XCTAssertFalse(sorinDo.contains("javelina"), sorin.card?.doLine ?? "")
+
+        let argus = try hold(at: Self.argusTree, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(argus.card?.klass, "Named tree", "\(argus)")
+        XCTAssertEqual(argus.card?.title, "Argus", "\(argus)")
+        XCTAssertNotEqual(argus.card?.klass, "Road", "\(argus)")
+        XCTAssertNotEqual(argus.card?.klass, "Built-up ground", "\(argus)")
+        XCTAssertNotEqual(argus.card?.title, "Arthur Stiles Road", "\(argus)")
+        XCTAssertNotEqual(argus.card?.title, "Johnston Terrace", "\(argus)")
+        XCTAssertEqual(argus.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(argus)")
+        let argusDo = argus.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(argusDo.contains("not a meal"), argus.card?.doLine ?? "")
+        XCTAssertFalse(argusDo.contains("edible"), argus.card?.doLine ?? "")
+        XCTAssertFalse(argusDo.contains("hog"), argus.card?.doLine ?? "")
+        XCTAssertFalse(argusDo.contains("javelina"), argus.card?.doLine ?? "")
+
+        let kimBird = try hold(at: Self.kimBirdTree, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(kimBird.card?.klass, "Named tree", "\(kimBird)")
+        XCTAssertEqual(kimBird.card?.title, "Kim Bird Gebert Memorial Tree", "\(kimBird)")
+        XCTAssertNotEqual(kimBird.card?.klass, "Park", "\(kimBird)")
+        XCTAssertNotEqual(kimBird.card?.klass, "Road", "\(kimBird)")
+        XCTAssertNotEqual(kimBird.card?.title, "Lake Pflugerville Park", "\(kimBird)")
+        XCTAssertNotEqual(kimBird.card?.title, "Silent Harbor Loop", "\(kimBird)")
+        XCTAssertEqual(kimBird.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(kimBird)")
+        let kimBirdDo = kimBird.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(kimBirdDo.contains("not a meal"), kimBird.card?.doLine ?? "")
+        XCTAssertFalse(kimBirdDo.contains("edible"), kimBird.card?.doLine ?? "")
+        XCTAssertFalse(kimBirdDo.contains("hog"), kimBird.card?.doLine ?? "")
+        XCTAssertFalse(kimBirdDo.contains("javelina"), kimBird.card?.doLine ?? "")
     }
 
     func testHoldingAnEastBosqueNamesCottonmouthNotAPark() throws {
