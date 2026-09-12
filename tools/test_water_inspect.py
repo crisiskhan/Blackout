@@ -1566,6 +1566,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("pepper")', inspect)
         self.assertNotIn('contains("airmen")', inspect)
         self.assertNotIn('contains("ventana")', inspect)
+        self.assertNotIn('contains("geronimo")', inspect)
+        self.assertNotIn('contains("landry")', inspect)
+        self.assertNotIn('contains("andrew")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -3067,6 +3070,7 @@ class GroundFieldSync(unittest.TestCase):
         apache_cave = False
         aztec_cave = False
         ventana_cave = False
+        geronimo_cave = False
         bosque = False
         farm = False
         west_wood = False
@@ -3123,6 +3127,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.585274)) < 1e-6
                 ):
                     ventana_cave = True
+                if (
+                    props.get("name") == "Geronimo"
+                    and abs(lat - 32.457274) < 1e-6
+                    and abs(lon - (-106.917562)) < 1e-6
+                ):
+                    geronimo_cave = True
             if (
                 props.get("natural") == "wetland"
                 and props.get("name") == "Rio Bosque Wetlands Park"
@@ -3154,6 +3164,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(apache_cave, "Cueva del Apache is not a west cave mouth in the extract")
         self.assertTrue(aztec_cave, "Aztec Cave is not a west cave mouth in the extract")
         self.assertTrue(ventana_cave, "Cueva la Ventana is not a west cave mouth in the extract")
+        self.assertTrue(geronimo_cave, "Geronimo is not a west cave mouth in the extract")
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
         self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
         self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
@@ -3594,6 +3605,7 @@ class GroundFieldSync(unittest.TestCase):
         treaty_oak = False
         sorin_oak = False
         airmen_cave = False
+        tree_house_cave = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -3639,6 +3651,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.791675)) < 1e-6
                 ):
                     airmen_cave = True
+                if (
+                    props.get("name") == "Tree House Cave"
+                    and abs(lat - 30.498201) < 1e-6
+                    and abs(lon - (-97.837346)) < 1e-6
+                ):
+                    tree_house_cave = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
@@ -3646,6 +3664,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(treaty_oak, "Treaty Oak is not a named tree in the east extract")
         self.assertTrue(sorin_oak, "Sorin Oak is not a named tree in the east extract")
         self.assertTrue(airmen_cave, "Airmen's Cave is not a cave mouth in the east extract")
+        self.assertTrue(tree_house_cave, "Tree House Cave is not a cave mouth in the east extract")
         self.assertIn(
             "Treaty Oak",
             place_names_in_tile("tx-east", -97.755462, 30.271466),
@@ -3687,6 +3706,11 @@ class GroundFieldSync(unittest.TestCase):
             "Cueva la Ventana did not survive tiling as a mouth",
         )
         self.assertIn(
+            "Geronimo",
+            place_names_in_tile("tx-west", -106.917562, 32.457274),
+            "Geronimo did not survive tiling as a mouth",
+        )
+        self.assertIn(
             "Aztec Cave",
             place_names_in_tile("tx-west", -106.503704, 31.921771),
             "Aztec Cave did not survive tiling as a mouth",
@@ -3714,6 +3738,11 @@ class GroundFieldSync(unittest.TestCase):
             "Airmen's Cave",
             place_names_in_tile("tx-east", -97.791675, 30.241656),
             "Airmen's Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Tree House Cave",
+            place_names_in_tile("tx-east", -97.837346, 30.498201),
+            "Tree House Cave did not survive tiling as a mouth",
         )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
@@ -4041,6 +4070,7 @@ class GroundFieldSync(unittest.TestCase):
         bear_cave = False
         winds_cave = False
         painted_cave = False
+        velvet_tree = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -4099,6 +4129,14 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.31994)) < 1e-6
                 ):
                     painted_cave = True
+            if props.get("natural") == "tree" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Prosopis velutina / Velvet Mesquite"
+                    and abs(lat - 35.119023) < 1e-6
+                    and abs(lon - (-106.706073)) < 1e-6
+                ):
+                    velvet_tree = True
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
@@ -4108,6 +4146,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(bear_cave, "Bear Cave is not a cave mouth in the NM extract")
         self.assertTrue(winds_cave, "Cave of the Winds is not a cave mouth in the NM extract")
         self.assertTrue(painted_cave, "Painted Cave is not a cave mouth in the NM extract")
+        self.assertTrue(
+            velvet_tree,
+            "Prosopis velutina / Velvet Mesquite is not a named tree in the NM extract",
+        )
         self.assertIn(
             "Sandia Man Cave",
             place_names_in_tile("nm", -106.405585, 35.254746),
@@ -4132,6 +4174,11 @@ class GroundFieldSync(unittest.TestCase):
             "Painted Cave",
             place_names_in_tile("nm", -106.31994, 35.722425),
             "Painted Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Prosopis velutina / Velvet Mesquite",
+            place_names_in_tile("nm", -106.706073, 35.119023),
+            "Velvet Mesquite did not survive tiling as a named tree",
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):

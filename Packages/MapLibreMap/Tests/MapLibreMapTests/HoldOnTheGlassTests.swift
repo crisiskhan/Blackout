@@ -131,6 +131,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Cueva del Apache - La Ventana` stays a trail.
     private static let cuevaLaVentana = CLLocationCoordinate2D(latitude: 31.702077, longitude: -106.585274)
 
+    /// `Geronimo` on the west place slice. A cave mouth inside Organ
+    /// Mountains-Desert Peaks — rank 1 still beats the overlay.
+    /// 258 m from OSM stream. No other cave mouth in the probe.
+    private static let geronimoCave = CLLocationCoordinate2D(latitude: 32.457274, longitude: -106.917562)
+
     /// `Aztec Cave` on the west place slice. A cave mouth inside Franklin
     /// Mountains State Park, not `Aztec Caves Trail`. 28 m from OSM stream;
     /// rank 1 still beats water.
@@ -168,6 +173,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// 24 m from Barton Creek; rank 1 still beats water. Unique
     /// versus Backdoor Cave.
     private static let airmenCave = CLLocationCoordinate2D(latitude: 30.241656, longitude: -97.791675)
+
+    /// `Tree House Cave` on the east place slice. A cave mouth off
+    /// the Buttercup overlay sheet. 46 m from the river; rank 1
+    /// still beats water. Andrew Cove 94 m is rank 7. Unique versus
+    /// the Buttercup overlay Hold. Godzilla Cave stays unheld —
+    /// Link's sits 84 m off that mouth and the probe would mix them.
+    private static let treeHouseCave = CLLocationCoordinate2D(latitude: 30.498201, longitude: -97.837346)
 
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
@@ -669,6 +681,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// still beats water. Lower Capulin Trail 61 m is rank 7.
     private static let paintedCave = CLLocationCoordinate2D(latitude: 35.722425, longitude: -106.31994)
 
+    /// `Prosopis velutina / Velvet Mesquite` on the NM place slice.
+    /// Named tree — shade and wood, not a meal. Landry Avenue
+    /// Northwest 9 m is rank 7. 521 m from a well.
+    private static let velvetMesquite = CLLocationCoordinate2D(latitude: 35.119023, longitude: -106.706073)
+
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
     private static let randallDavey = CLLocationCoordinate2D(latitude: 35.688876, longitude: -105.884927)
@@ -1140,6 +1157,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(ventana.card?.fieldRoute.first, Inspect.caveCard, "\(ventana)")
         XCTAssertTrue((ventana.card?.doLine.lowercased() ?? "").contains("stay in daylight"), ventana.card?.doLine ?? "")
         XCTAssertFalse((ventana.card?.doLine.lowercased() ?? "").contains("edible"), ventana.card?.doLine ?? "")
+
+        let geronimo = try hold(at: Self.geronimoCave, zoom: 16)
+        XCTAssertEqual(geronimo.card?.klass, "Cave or hole", "\(geronimo)")
+        XCTAssertEqual(geronimo.card?.title, "Geronimo", "\(geronimo)")
+        XCTAssertNotEqual(geronimo.card?.klass, "Open reserve", "\(geronimo)")
+        XCTAssertNotEqual(geronimo.card?.title, "Organ Mountains-Desert Peaks National Monument", "\(geronimo)")
+        XCTAssertNotEqual(geronimo.card?.title, "Robledo Mountains Wilderness", "\(geronimo)")
+        XCTAssertEqual(geronimo.card?.fieldRoute.first, Inspect.caveCard, "\(geronimo)")
+        XCTAssertTrue((geronimo.card?.doLine.lowercased() ?? "").contains("stay in daylight"), geronimo.card?.doLine ?? "")
+        XCTAssertFalse((geronimo.card?.doLine.lowercased() ?? "").contains("edible"), geronimo.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {
@@ -1669,6 +1696,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(airmen.card?.fieldRoute.first, Inspect.caveCard, "\(airmen)")
         XCTAssertTrue((airmen.card?.doLine.lowercased() ?? "").contains("stay in daylight"), airmen.card?.doLine ?? "")
         XCTAssertFalse((airmen.card?.doLine.lowercased() ?? "").contains("edible"), airmen.card?.doLine ?? "")
+
+        let treeHouse = try hold(at: Self.treeHouseCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(treeHouse.card?.klass, "Cave or hole", "\(treeHouse)")
+        XCTAssertEqual(treeHouse.card?.title, "Tree House Cave", "\(treeHouse)")
+        XCTAssertNotEqual(treeHouse.card?.title, "Buttercup Creek Cave Preserve", "\(treeHouse)")
+        XCTAssertNotEqual(treeHouse.card?.title, "Andrew Cove", "\(treeHouse)")
+        XCTAssertNotEqual(treeHouse.card?.title, "Godzilla Cave", "\(treeHouse)")
+        XCTAssertEqual(treeHouse.card?.fieldRoute.first, Inspect.caveCard, "\(treeHouse)")
+        XCTAssertTrue((treeHouse.card?.doLine.lowercased() ?? "").contains("stay in daylight"), treeHouse.card?.doLine ?? "")
+        XCTAssertFalse((treeHouse.card?.doLine.lowercased() ?? "").contains("edible"), treeHouse.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {
@@ -2538,6 +2575,21 @@ final class HoldOnTheGlassTests: XCTestCase {
             )),
             "PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI"
         )
+
+        let velvet = try hold(at: Self.velvetMesquite, zoom: 16, packId: "nm")
+        XCTAssertEqual(velvet.card?.klass, "Named tree", "\(velvet)")
+        XCTAssertEqual(velvet.card?.title, "Prosopis velutina / Velvet Mesquite", "\(velvet)")
+        XCTAssertNotEqual(velvet.card?.klass, "Road", "\(velvet)")
+        XCTAssertNotEqual(velvet.card?.title, "Landry Avenue Northwest", "\(velvet)")
+        XCTAssertEqual(velvet.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(velvet)")
+        XCTAssertTrue(
+            velvet.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? false,
+            "a named NM tree dropped the NM tree-use card: \(velvet)"
+        )
+        let velvetDo = velvet.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(velvetDo.contains("not a meal"), velvet.card?.doLine ?? "")
+        XCTAssertFalse(velvetDo.contains("edible"), velvet.card?.doLine ?? "")
+        XCTAssertFalse(velvetDo.contains("javelina"), velvet.card?.doLine ?? "")
     }
 
     func testHoldingANewMexicoBosqueOpensCottonwoodNotElkCountry() throws {

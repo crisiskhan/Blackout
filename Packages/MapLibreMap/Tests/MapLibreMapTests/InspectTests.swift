@@ -569,6 +569,41 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(paintedTrail.klass, "Trail")
         XCTAssertFalse(paintedTrail.fieldRoute.contains(Inspect.caveCard))
 
+        let geronimo = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Geronimo"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(geronimo.klass, "Cave or hole")
+        XCTAssertNotEqual(geronimo.klass, "Open reserve")
+        XCTAssertEqual(geronimo.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(geronimo.doLine.lowercased().contains("edible"), geronimo.doLine)
+
+        let organMonument = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Organ Mountains-Desert Peaks National Monument",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(organMonument.klass, "Open reserve")
+        XCTAssertFalse(organMonument.fieldRoute.contains(Inspect.caveCard))
+
+        let treeHouse = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Tree House Cave"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(treeHouse.klass, "Cave or hole")
+        XCTAssertEqual(treeHouse.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(treeHouse.doLine.lowercased().contains("edible"), treeHouse.doLine)
+
+        let andrewCove = Inspect.read(
+            tags: ["highway": "residential", "name": "Andrew Cove"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(andrewCove.klass, "Road")
+        XCTAssertFalse(andrewCove.fieldRoute.contains(Inspect.caveCard))
+
         let daffan = Inspect.read(
             tags: ["highway": "tertiary", "name": "Daffan Lane"],
             pack: "tx-east"
@@ -2029,6 +2064,25 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(sorinStreet.klass, "Road")
         XCTAssertNotEqual(sorinStreet.klass, "Named tree")
+
+        let velvet = Inspect.read(
+            tags: ["natural": "tree", "name": "Prosopis velutina / Velvet Mesquite"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(velvet.klass, "Named tree")
+        XCTAssertEqual(velvet.title, "Prosopis velutina / Velvet Mesquite")
+        XCTAssertEqual(velvet.fieldRoute.first, Inspect.treeUseTXCard)
+        XCTAssertTrue(velvet.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(velvet.doLine.lowercased().contains("edible"), velvet.doLine)
+        XCTAssertTrue(velvet.doLine.lowercased().contains("not a meal"), velvet.doLine)
+
+        let landry = Inspect.read(
+            tags: ["highway": "residential", "name": "Landry Avenue Northwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(landry.klass, "Road")
+        XCTAssertNotEqual(landry.klass, "Named tree")
     }
 
     func testTheOpenPackNamesItsTreesAndAnimalsAsRangeNotPins() {
@@ -2740,6 +2794,33 @@ final class InspectTests: XCTestCase {
                 ["highway": "footway", "name": "Lower Capulin Trail"],
             ])["natural"],
             "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Geronimo"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Organ Mountains-Desert Peaks National Monument",
+                ],
+                ["leisure": "nature_reserve", "name": "Robledo Mountains Wilderness"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Tree House Cave"],
+                ["highway": "residential", "name": "Andrew Cove"],
+                ["waterway": "river"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "tree", "name": "Prosopis velutina / Velvet Mesquite"],
+                ["highway": "residential", "name": "Landry Avenue Northwest"],
+            ])["natural"],
+            "tree"
         )
     }
 
