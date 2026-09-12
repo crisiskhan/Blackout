@@ -198,6 +198,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("memorial rose garden", nm_blob)
         self.assertIn("la joya wildlife management area", nm_blob)
         self.assertIn("rio rancho bosque nature preserve", nm_blob)
+        self.assertIn("pecos river complex wildlife management areas", nm_blob)
         self.assertNotIn("orchard gardens road", nm_blob)
         self.assertNotIn("rose park avenue", nm_blob)
         self.assertNotIn("wildrose park", nm_blob)
@@ -244,6 +245,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("stillhouse hollow nature preserve", east_blob)
         self.assertIn("big walnut creek nature preserve", east_blob)
         self.assertIn("bright leaf natural area", east_blob)
+        self.assertIn("red bluff nature preserve", east_blob)
+        self.assertNotIn("red bluff neighborhood park", east_blob)
+        self.assertIn("balcones canyonlands preserve - romberg", east_blob)
         self.assertIn("decker tallgrass prairie preserve", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertIn("ladybird johnson wildflower center", east_blob)
@@ -1548,6 +1552,11 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("stillhouse")', inspect)
         self.assertNotIn('contains("walnut")', inspect)
         self.assertNotIn('contains("shady")', inspect)
+        self.assertNotIn('contains("buttercup")', inspect)
+        self.assertNotIn('contains("bright")', inspect)
+        self.assertNotIn('contains("pecos")', inspect)
+        self.assertNotIn('contains("bluff")', inspect)
+        self.assertNotIn('contains("romberg")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2646,6 +2655,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("William H. Russell Karst Preserve", glass)
         self.assertIn("30.197158", glass)
         self.assertIn("-97.851485", glass)
+        self.assertIn("Buttercup Creek Cave Preserve", glass)
+        self.assertIn("30.498830", glass)
+        self.assertIn("-97.841827", glass)
         self.assertIn("Nalle Bunny Run Wildlife Preserve", glass)
         self.assertIn("30.349686", glass)
         self.assertIn("-97.803982", glass)
@@ -2803,8 +2815,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.387998", glass)
         self.assertIn("-97.772249", glass)
         self.assertIn("Lower Barton Creek Management Unit", glass)
-        self.assertIn("30.257910", glass)
-        self.assertIn("-97.942892", glass)
+        self.assertIn("30.243478", glass)
+        self.assertIn("-97.938144", glass)
         self.assertIn("Little Bear Creek Management Unit", glass)
         self.assertIn("30.098137", glass)
         self.assertIn("-97.928628", glass)
@@ -2817,6 +2829,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Lime Creek", glass)
         self.assertIn("30.490657", glass)
         self.assertIn("-97.871229", glass)
+        self.assertIn("Balcones Canyonlands Preserve - Romberg", glass)
+        self.assertIn("30.420315", glass)
+        self.assertIn("-97.894690", glass)
+        self.assertIn("Bright Leaf Natural Area", glass)
+        self.assertIn("30.328746", glass)
+        self.assertIn("-97.774978", glass)
+        self.assertIn("Red Bluff Nature Preserve", glass)
+        self.assertIn("30.266661", glass)
+        self.assertIn("-97.681788", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2844,6 +2865,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Rio Rancho Bosque Nature Preserve", glass)
         self.assertIn("35.289327", glass)
         self.assertIn("-106.592122", glass)
+        self.assertIn("Pecos River Complex Wildlife Management Areas", glass)
+        self.assertIn("35.701711", glass)
+        self.assertIn("-105.688095", glass)
         self.assertIn("Sandia Mountain Natural History Center", glass)
         self.assertIn("35.126801", glass)
         self.assertIn("-106.379801", glass)
@@ -3138,6 +3162,9 @@ class GroundFieldSync(unittest.TestCase):
         big_walnut_hit = False
         colorado_sanctuary_hit = False
         shady_hollow_hit = False
+        bright_leaf_hit = False
+        red_bluff_hit = False
+        romberg_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -3164,7 +3191,7 @@ class GroundFieldSync(unittest.TestCase):
                     cave_hit = True
                 if kind == "cave" and name == "Blowing Sink" and pip(-97.850443, 30.193035, ring):
                     blowing_hit = True
-                if kind == "cave" and name == "Buttercup Creek Cave Preserve" and pip(-97.839459, 30.494626, ring):
+                if kind == "cave" and name == "Buttercup Creek Cave Preserve" and pip(-97.841827, 30.498830, ring):
                     buttercup_hit = True
                 if kind == "cave" and name == "Lost Oasis Cave Preserve" and pip(-97.873678, 30.163187, ring):
                     oasis_hit = True
@@ -3246,7 +3273,7 @@ class GroundFieldSync(unittest.TestCase):
                     onion_unit_hit = True
                 if kind == "wildlife" and name == "Bull Creek Management Unit" and pip(-97.772249, 30.387998, ring):
                     bull_creek_hit = True
-                if kind == "wildlife" and name == "Lower Barton Creek Management Unit" and pip(-97.942892, 30.257910, ring):
+                if kind == "wildlife" and name == "Lower Barton Creek Management Unit" and pip(-97.938144, 30.243478, ring):
                     lower_barton_hit = True
                 if kind == "wildlife" and name == "Little Bear Creek Management Unit" and pip(-97.928628, 30.098137, ring):
                     little_bear_hit = True
@@ -3270,6 +3297,12 @@ class GroundFieldSync(unittest.TestCase):
                     colorado_sanctuary_hit = True
                 if kind == "wildlife" and name == "Shady Hollow West Nature Preserve" and pip(-97.873372, 30.167029, ring):
                     shady_hollow_hit = True
+                if kind == "wildlife" and name == "Bright Leaf Natural Area" and pip(-97.774978, 30.328746, ring):
+                    bright_leaf_hit = True
+                if kind == "wildlife" and name == "Red Bluff Nature Preserve" and pip(-97.681788, 30.266661, ring):
+                    red_bluff_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Romberg" and pip(-97.894690, 30.420315, ring):
+                    romberg_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -3483,6 +3516,18 @@ class GroundFieldSync(unittest.TestCase):
             "Shady Hollow West Nature Preserve is not wildlife range on the east overlay",
         )
         self.assertTrue(
+            bright_leaf_hit,
+            "Bright Leaf Natural Area is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            red_bluff_hit,
+            "Red Bluff Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            romberg_hit,
+            "Balcones Canyonlands Preserve Romberg is not wildlife range",
+        )
+        self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
         )
 
@@ -3621,6 +3666,7 @@ class GroundFieldSync(unittest.TestCase):
         valle_hit = False
         la_joya_hit = False
         rio_rancho_hit = False
+        pecos_hit = False
         barelas_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -3667,6 +3713,11 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "wildlife" and pip(-106.592122, 35.289327, ring):
                     rio_rancho_hit = (
                         props.get("name") == "Rio Rancho Bosque Nature Preserve"
+                    )
+                if kind == "wildlife" and pip(-105.688095, 35.701711, ring):
+                    pecos_hit = (
+                        props.get("name")
+                        == "Pecos River Complex Wildlife Management Areas"
                     )
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
                     audubon_hit = (
@@ -3764,6 +3815,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             rio_rancho_hit,
             "Rio Rancho Bosque Nature Preserve is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            pecos_hit,
+            "Pecos River Complex Wildlife Management Areas is not wildlife range on the NM overlay",
         )
         self.assertTrue(
             audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
@@ -4234,7 +4289,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("glasshouse", qa)
         self.assertIn("Discovery Well Cave Preserve", qa)
         self.assertIn("Buttercup Creek Cave Preserve", qa)
-        self.assertIn("30.494626", qa)
+        self.assertIn("30.498830", qa)
+        self.assertIn("Stone Well #1", qa)
         self.assertIn("35.093625", qa)
         self.assertIn("33.157743", qa)
         self.assertIn("30.490391", qa)
@@ -4287,6 +4343,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Stillhouse Hollow Nature Preserve", qa)
         self.assertIn("Big Walnut Creek Nature Preserve", qa)
         self.assertIn("Bright Leaf Natural Area", qa)
+        self.assertIn("30.328746", qa)
+        self.assertIn("Red Bluff Nature Preserve", qa)
+        self.assertIn("30.266661", qa)
+        self.assertIn("Pecos River Complex Wildlife Management Areas", qa)
+        self.assertIn("35.701711", qa)
+        self.assertIn("Balcones Canyonlands Preserve - Romberg", qa)
+        self.assertIn("30.420315", qa)
         self.assertIn("Beaukiss Woods", qa)
         self.assertIn("Isleta Rectangle", qa)
         self.assertIn("Rio Grande Bosque", qa)
@@ -4537,13 +4600,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.387998", qa)
         self.assertIn("bull creek management", qa)
         self.assertIn("Lower Barton Creek Management Unit", qa)
-        self.assertIn("30.257910", qa)
+        self.assertIn("30.243478", qa)
         self.assertIn("lower barton creek", qa)
         self.assertIn("Little Bear Creek Management Unit", qa)
         self.assertIn("30.098137", qa)
         self.assertIn("little bear creek", qa)
         self.assertIn("Barrow Nature Preserve", qa)
         self.assertIn("30.371582", qa)
+        self.assertIn("water still outranks overlay", qa)
         self.assertIn("La Joya Wildlife Management Area", qa)
         self.assertIn("34.334717", qa)
         self.assertIn("la joya wildlife", qa)
