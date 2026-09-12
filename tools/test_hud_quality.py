@@ -1231,6 +1231,77 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertIn("runtime.attachGNSSPuck", inst)
 
 
+class MapSearchTests(unittest.TestCase):
+    """MAP SEARCH is a local index. Type or SAY. Empty waits. Miss is NO MATCH."""
+
+    def test_lookup_is_prefix_folded_and_near_you(self):
+        search = read("Packages", "Search", "Sources", "Search", "Search.swift")
+        tests = read("Packages", "Search", "Tests", "SearchTests", "SearchTests.swift")
+        self.assertIn("func lookup(", search)
+        self.assertIn("func asking(", search)
+        self.assertIn("func coordinates(in", search)
+        self.assertIn("diacriticInsensitive", search)
+        self.assertIn("haversine", search)
+        self.assertIn("enum SearchHUDWord", search)
+        self.assertIn('return "WATER"', search)
+        self.assertIn('return "STREET"', search)
+        self.assertIn('return "PEAK"', search)
+        self.assertIn('return "COORDINATES"', search)
+        self.assertIn("case .mark:", search)
+        self.assertIn("testPrefixFindsHospital", tests)
+        self.assertIn("testDiacriticFoldsNinos", tests)
+        self.assertIn("testProximityRanksNearer", tests)
+        self.assertIn("testCoordinatePasteIsAHit", tests)
+        self.assertIn("testEmptyQueryIsNotADump", tests)
+        self.assertIn("testAvenueAliasAndNamePrefix", tests)
+        self.assertIn("testTypoFindsGardner", tests)
+        self.assertIn("editDistanceOne", search)
+        self.assertIn("avenida", search)
+        self.assertNotIn("best in class", search.lower())
+        self.assertNotIn("best in class", tests.lower())
+
+    def test_map_types_and_says_and_does_not_invent(self):
+        tab = read("Blackout", "MapTab.swift")
+        search = tab.split("private func search()")[1]
+        chrome = tab.split("private var searchField")[1].split("private var overlayRail")[0]
+        hits = tab.split("private var hitList")[1].split("private var markList")[0]
+        marks = tab.split("private var markList")[1].split("private var fieldChrome")[0]
+        self.assertIn('packURL("search.json")', tab)
+        self.assertIn("onChange(of: query)", tab)
+        self.assertIn(".submitLabel(.search)", tab)
+        self.assertIn('Button("SAY")', chrome)
+        self.assertIn("SAY FAILED", chrome)
+        self.assertIn("NO MATCH", tab)
+        self.assertIn("SearchIndex.asking(", tab)
+        self.assertIn("runtime.gnssYou", search)
+        self.assertIn(".lookup(", search)
+        self.assertNotIn('["name": query', tab)
+        self.assertNotIn("youCoordinate()", search)
+        self.assertNotIn("lastKnownFix", search)
+        self.assertNotIn('"\\(h.name) · \\(h.kind)"', hits)
+        self.assertIn("SearchHUDWord.from", hits)
+        self.assertIn("SearchIndex.rangeLabel", hits)
+        self.assertIn("SearchIndex.asking(", marks)
+        self.assertNotIn("OpenStreetMap", tab)
+        self.assertNotIn("best in class", tab.lower())
+        self.assertNotIn(".spring(", tab)
+
+    def test_solo_qa_and_device_score_map_search(self):
+        qa = read("docs", "SOLO_QA.md")
+        device = read("docs", "DEVICE.md")
+        self.assertIn("as you type", qa.lower())
+        self.assertIn("NO MATCH", qa)
+        self.assertIn("MAP SEARCH", qa)
+        self.assertIn("Hits cap at five", qa)
+        self.assertIn("Montana Avenue", qa)
+        self.assertIn("Gardner Peak", qa)
+        self.assertIn("MAP SEARCH", device)
+        self.assertIn("NO MATCH", device)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("best in class", device.lower())
+        self.assertNotIn("Search FTS returns pack POI names", qa)
+
+
 if __name__ == "__main__":
     unittest.main()
 

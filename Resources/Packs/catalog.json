@@ -163,10 +163,11 @@
         "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
+        "search.json",
         "style.json",
         "wild.geojson"
       ],
-      "bytes": 35604969
+      "bytes": 37374935
     },
     {
       "id": "tx-east",
@@ -312,11 +313,12 @@
         "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
+        "search.json",
         "style.json",
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 30804566
+      "bytes": 31947514
     },
     {
       "id": "nm",
@@ -463,11 +465,12 @@
         "osm.pmtiles",
         "pois.geojson",
         "region.geojson",
+        "search.json",
         "style.json",
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 35989928
+      "bytes": 37576631
     }
   ]
 }

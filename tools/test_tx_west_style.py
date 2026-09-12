@@ -405,6 +405,35 @@ def assert_source_geojson_stays_off_the_phone(pack_id: str) -> None:
         fail("the resource copy step no longer excludes osm.geojson; the IPA would carry it again")
 
 
+def assert_search_index_ships(pack_id: str) -> None:
+    """Named streets and peaks ride a compact index. The 800-POI slice is not the book."""
+    dest = ROOT / "Resources" / "Packs" / pack_id
+    manifest = json.loads((dest / "manifest.json").read_text())
+    files = manifest.get("files") or []
+    if "search.json" not in files:
+        fail(f"{pack_id} manifest does not list search.json")
+    path = dest / "search.json"
+    if not path.is_file():
+        fail(f"{pack_id} search.json missing")
+    blob = json.loads(path.read_text())
+    docs = blob.get("docs") or []
+    if len(docs) < 1000:
+        fail(f"{pack_id} search.json is still a POI slice ({len(docs)} docs)")
+    names = {row[0] for row in docs if isinstance(row, list) and row}
+    kinds = {row[1] for row in docs if isinstance(row, list) and len(row) > 1}
+    if "street" not in kinds:
+        fail(f"{pack_id} search.json has no streets")
+    if pack_id == "tx-west":
+        if "Gardner Peak" not in names:
+            fail("tx-west search.json lost Gardner Peak")
+        if "Montana Avenue" not in names:
+            fail("tx-west search.json lost Montana Avenue")
+        if "North Franklin Mountain" not in names:
+            fail("tx-west search.json lost North Franklin Mountain")
+    if "OpenStreetMap" not in json.dumps(blob.get("attribution") or ""):
+        fail(f"{pack_id} search.json dropped ODbL attribution")
+
+
 def main() -> None:
     if PRIMARY_PACK_ID != "tx-west":
         fail(f"default open pack drifted to {PRIMARY_PACK_ID}")
@@ -498,6 +527,7 @@ def main() -> None:
         assert_walkable_osm(pack_id)
         assert_every_tile_layer_names_its_slice(pack_id)
         assert_source_geojson_stays_off_the_phone(pack_id)
+        assert_search_index_ships(pack_id)
 
     zoom = open_zoom()
     for pack_id in sorted(walkable_ids()):

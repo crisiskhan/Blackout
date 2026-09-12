@@ -143,9 +143,10 @@
     "osm.pmtiles",
     "pois.geojson",
     "region.geojson",
+    "search.json",
     "style.json",
     "union.geojson",
     "wild.geojson"
   ],
-  "bytes": 35989928
+  "bytes": 37576631
 }

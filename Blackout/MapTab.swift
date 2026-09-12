@@ -10,6 +10,8 @@ struct MapTab: View {
     @State private var query = ""
     @State private var hits: [SearchHit] = []
     @State private var destMode: MapFieldDestMode = .bearing
+    @State private var packedIndex: SearchIndex?
+    @State private var sayFailed = false
 
     var body: some View {
         ZStack {
@@ -23,6 +25,13 @@ struct MapTab: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onAppear(perform: loadIndex)
+        .onChange(of: runtime.packs?.active?.id) { _, _ in
+            query = ""
+            hits = []
+            sayFailed = false
+            loadIndex()
+        }
     }
 
     @ViewBuilder
@@ -178,24 +187,46 @@ struct MapTab: View {
     }
 
     private var searchField: some View {
-        TextField("SEARCH", text: $query)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Theme.silver)
-            .padding(.horizontal, 12)
-            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .background(Theme.glass())
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
-            )
-            .onSubmit {
-                runtime.touch(.search)
-                search()
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                TextField("SEARCH", text: $query)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.search)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.silver)
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                    .background(Theme.glass())
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                    )
+                    .onSubmit {
+                        runtime.touch(.search)
+                        search()
+                    }
+                    .onTapGesture { runtime.touch(.search) }
+                    .onChange(of: query) { _, _ in
+                        sayFailed = false
+                        runtime.touch(.search)
+                        search()
+                    }
+                Button("SAY") { say() }
+                    .buttonStyle(HUDOverlayChipStyle())
             }
-            .onTapGesture { runtime.touch(.search) }
+            if sayFailed {
+                Text("SAY FAILED")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+            }
+            if SearchIndex.asking(query), packedIndex != nil, hits.isEmpty {
+                Text("NO MATCH")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+            }
+        }
     }
 
     private var overlayRail: some View {
@@ -214,14 +245,19 @@ struct MapTab: View {
 
     private var hitList: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap), id: \.name) { h in
-                Button("\(h.name) · \(h.kind)") {
+            ForEach(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap), id: \.self) { h in
+                let word = SearchHUDWord.from(packed: h.kind).title
+                let range = h.meters.map { SearchIndex.rangeLabel($0) }
+                let label = [h.name, word, range].compactMap { $0 }.joined(separator: " · ")
+                Button(label) {
                     runtime.pickDestination(lat: h.lat, lon: h.lon)
                     hits = []
                     query = ""
                 }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Theme.silver)
+                .lineLimit(2)
+                .minimumScaleFactor(1)
                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                 .padding(.horizontal, 12)
             }
@@ -233,7 +269,7 @@ struct MapTab: View {
     private var markList: some View {
         let rows = Array(runtime.marks.suffix(BlackoutTokens.Chrome.mapSearchHitCap).reversed())
         return Group {
-            if !rows.isEmpty {
+            if !SearchIndex.asking(query), !rows.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(rows) { m in
                         Button(m.label) {
@@ -450,27 +486,65 @@ struct MapTab: View {
     }
 
     private func search() {
-        let idx = SearchIndex(pois: [["name": query, "kind": "place", "lat": 0.0, "lon": 0.0]])
-        if let pack = runtime.packs?.packURL("pois.geojson"),
-           let data = try? Data(contentsOf: pack),
-           let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let feats = obj["features"] as? [[String: Any]] {
-            let pois: [[String: Any]] = feats.compactMap { f in
-                guard let props = f["properties"] as? [String: Any],
-                      let geom = f["geometry"] as? [String: Any],
-                      let coords = geom["coordinates"] as? [Double], coords.count >= 2 else { return nil }
-                return [
-                    "name": props["name"] as? String ?? props["amenity"] as? String ?? "poi",
-                    "kind": props["amenity"] as? String ?? props["natural"] as? String ?? "poi",
-                    "lat": coords[1],
-                    "lon": coords[0],
-                ]
+        guard SearchIndex.asking(query) else {
+            hits = []
+            return
+        }
+        guard let idx = packedIndex else { return }
+        let extra: [[String: Any]] = runtime.marks.map {
+            ["name": $0.label, "kind": "mark", "lat": $0.lat, "lon": $0.lon]
+        }
+        hits = idx.lookup(
+            query,
+            you: runtime.gnssYou,
+            extra: extra,
+            cap: BlackoutTokens.Chrome.mapSearchHitCap
+        )
+    }
+
+    private func loadIndex() {
+        let packID = runtime.packs?.active?.id
+        let url = runtime.packs?.packURL("search.json")
+            ?? runtime.packs?.packURL("pois.geojson")
+        guard let url else {
+            packedIndex = SearchIndex(pois: [])
+            return
+        }
+        Task { @MainActor in
+            let data = (try? Data(contentsOf: url)) ?? Data()
+            let idx = await Task.detached(priority: .userInitiated) {
+                SearchIndex.load(data: data)
+            }.value
+            guard runtime.packs?.active?.id == packID else { return }
+            packedIndex = idx
+            if SearchIndex.asking(query) {
+                search()
             }
-            let found = SearchIndex(pois: pois)
-            hits = found.fts(query)
-            if hits.isEmpty { hits = found.semantic(query) }
-        } else {
-            hits = idx.fts(query)
+        }
+    }
+
+    /// Spoken place uses the same lookup as type. Deny, PTT live, and
+    /// a missing on-device recognizer are SAY FAILED — not a network model.
+    private func say() {
+        sayFailed = false
+        if runtime.ptt.live || runtime.clipLive {
+            sayFailed = true
+            return
+        }
+        if runtime.speech.listening {
+            runtime.speech.endListen()
+            return
+        }
+        let started = runtime.speech.listen(locale: runtime.locale) { spoken in
+            if spoken.isEmpty {
+                sayFailed = true
+                return
+            }
+            query = spoken
+            search()
+        }
+        if !started {
+            sayFailed = true
         }
     }
 }

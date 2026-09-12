@@ -26,7 +26,7 @@ from shapely.geometry import Polygon, mapping
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from . import graphbin, ground, tiles
+from . import graphbin, ground, search_index, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -1978,6 +1978,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
+    search_index.write_search(dest, fc)
 
     stats = pack_stats(fc, graph)
     terrain_note = (
@@ -2178,6 +2179,7 @@ def finalize_existing(dest: Path) -> dict:
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
+    search_index.write_search(dest, fc)
     stats = pack_stats(fc, graph)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
