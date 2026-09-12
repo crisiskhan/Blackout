@@ -106,6 +106,15 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// not Coyote Cave Park. 2.5 km from OSM water.
     private static let batCave = CLLocationCoordinate2D(latitude: 32.932316, longitude: -107.234781)
 
+    /// `Cueva del Apache` on the west place slice. A cave mouth, not the
+    /// path `Cueva del Apache - La Ventana`. 126 m from OSM stream.
+    private static let cuevaDelApache = CLLocationCoordinate2D(latitude: 31.702715, longitude: -106.583114)
+
+    /// `Aztec Cave` on the west place slice. A cave mouth inside Franklin
+    /// Mountains State Park, not `Aztec Caves Trail`. 28 m from OSM stream;
+    /// rank 1 still beats water.
+    private static let aztecCave = CLLocationCoordinate2D(latitude: 31.921771, longitude: -106.503704)
+
     /// Interior of Indiangrass Wildlife Sanctuary in east `layers/ground.geojson`.
     /// Scrub fill does not win. Range, not a pin.
     private static let wildlifeRange = CLLocationCoordinate2D(latitude: 30.315667, longitude: -97.591821)
@@ -326,6 +335,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Sandia Man Cave` on the NM place slice. A cave mouth, not a pin
     /// and not picnic woodland.
     private static let sandiaManCave = CLLocationCoordinate2D(latitude: 35.254746, longitude: -106.405585)
+
+    /// `Embudo Cave` on the NM place slice. A cave mouth, not Embudo Hills
+    /// Park, not Embudo Trail. 300 m from OSM water.
+    private static let embudoCave = CLLocationCoordinate2D(latitude: 35.204126, longitude: -106.414502)
 
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
@@ -741,6 +754,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(bat.card?.fieldRoute.first, Inspect.caveCard, "\(bat)")
         XCTAssertTrue((bat.card?.doLine.lowercased() ?? "").contains("stay in daylight"), bat.card?.doLine ?? "")
         XCTAssertFalse((bat.card?.doLine.lowercased() ?? "").contains("edible"), bat.card?.doLine ?? "")
+
+        let apache = try hold(at: Self.cuevaDelApache, zoom: 16)
+        XCTAssertEqual(apache.card?.klass, "Cave or hole", "\(apache)")
+        XCTAssertEqual(apache.card?.title, "Cueva del Apache", "\(apache)")
+        XCTAssertNotEqual(apache.card?.title, "Cueva del Apache - La Ventana", "\(apache)")
+        XCTAssertEqual(apache.card?.fieldRoute.first, Inspect.caveCard, "\(apache)")
+        XCTAssertTrue((apache.card?.doLine.lowercased() ?? "").contains("stay in daylight"), apache.card?.doLine ?? "")
+        XCTAssertFalse((apache.card?.doLine.lowercased() ?? "").contains("edible"), apache.card?.doLine ?? "")
+
+        let aztec = try hold(at: Self.aztecCave, zoom: 16)
+        XCTAssertEqual(aztec.card?.klass, "Cave or hole", "\(aztec)")
+        XCTAssertEqual(aztec.card?.title, "Aztec Cave", "\(aztec)")
+        XCTAssertNotEqual(aztec.card?.klass, "Open reserve", "\(aztec)")
+        XCTAssertNotEqual(aztec.card?.title, "Franklin Mountains State Park", "\(aztec)")
+        XCTAssertNotEqual(aztec.card?.title, "Aztec Caves Trail", "\(aztec)")
+        XCTAssertEqual(aztec.card?.fieldRoute.first, Inspect.caveCard, "\(aztec)")
+        XCTAssertTrue((aztec.card?.doLine.lowercased() ?? "").contains("stay in daylight"), aztec.card?.doLine ?? "")
+        XCTAssertFalse((aztec.card?.doLine.lowercased() ?? "").contains("edible"), aztec.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {
@@ -1412,6 +1443,15 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(mouth.card?.title, "Sandia Man Cave", "\(mouth)")
         XCTAssertEqual(mouth.card?.fieldRoute.first, Inspect.caveCard, "\(mouth)")
         XCTAssertFalse((mouth.card?.doLine.lowercased() ?? "").contains("edible"), mouth.card?.doLine ?? "")
+
+        let embudo = try hold(at: Self.embudoCave, zoom: 16, packId: "nm")
+        XCTAssertEqual(embudo.card?.klass, "Cave or hole", "\(embudo)")
+        XCTAssertEqual(embudo.card?.title, "Embudo Cave", "\(embudo)")
+        XCTAssertNotEqual(embudo.card?.klass, "Park", "\(embudo)")
+        XCTAssertNotEqual(embudo.card?.title, "Embudo Hills Park", "\(embudo)")
+        XCTAssertEqual(embudo.card?.fieldRoute.first, Inspect.caveCard, "\(embudo)")
+        XCTAssertTrue((embudo.card?.doLine.lowercased() ?? "").contains("stay in daylight"), embudo.card?.doLine ?? "")
+        XCTAssertFalse((embudo.card?.doLine.lowercased() ?? "").contains("edible"), embudo.card?.doLine ?? "")
     }
 
     func testHoldingAWestPeakOpensAnimalsNotIce() throws {

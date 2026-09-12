@@ -414,6 +414,52 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(bat.doLine.lowercased().contains("edible"), bat.doLine)
         XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
 
+        let apache = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Cueva del Apache"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(apache.klass, "Cave or hole")
+        XCTAssertEqual(apache.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(apache.doLine.lowercased().contains("edible"), apache.doLine)
+
+        let apachePath = Inspect.read(
+            tags: ["highway": "path", "name": "Cueva del Apache - La Ventana"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(apachePath.klass, "Trail")
+        XCTAssertFalse(apachePath.fieldRoute.contains(Inspect.caveCard))
+
+        let aztec = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Aztec Cave"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(aztec.klass, "Cave or hole")
+        XCTAssertNotEqual(aztec.klass, "Open reserve")
+        XCTAssertEqual(aztec.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(aztec.doLine.lowercased().contains("edible"), aztec.doLine)
+
+        let aztecTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Aztec Caves Trail"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(aztecTrail.klass, "Trail")
+        XCTAssertFalse(aztecTrail.fieldRoute.contains(Inspect.caveCard))
+
+        let embudo = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Embudo Cave"],
+            pack: "nm"
+        )
+        XCTAssertEqual(embudo.klass, "Cave or hole")
+        XCTAssertEqual(embudo.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(embudo.doLine.lowercased().contains("edible"), embudo.doLine)
+
+        let embudoPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Embudo Hills Park"],
+            pack: "nm"
+        )
+        XCTAssertEqual(embudoPark.klass, "Park")
+        XCTAssertFalse(embudoPark.fieldRoute.contains(Inspect.caveCard))
+
         let blowing = Inspect.read(
             tags: ["natural": "wetland", "name": "Blowing Sink"],
             pack: "tx-east"
@@ -2112,6 +2158,27 @@ final class InspectTests: XCTestCase {
                 ["waterway": "drain", "class": "drain"],
             ])["natural"],
             "sinkhole"
+        )
+        // A stream 28 m off Aztec Cave is still a channel. Rank 1 mouth
+        // beats rank 2 water. Franklin Mountains overlay does not swallow it.
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Aztec Cave"],
+                ["waterway": "stream"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Franklin Mountains State Park",
+                ],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Embudo Cave"],
+                ["leisure": "park", "name": "Embudo Hills Park"],
+            ])["natural"],
+            "cave_entrance"
         )
     }
 
