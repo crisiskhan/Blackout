@@ -42,7 +42,9 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 
 # Phrase match, not a bare contains of the word cave. Must stay in step with
 # `Inspect.isCavePreserve`. Bee Cave, Coyote Cave Park, and Cave Drive
-# stay out. Karst preserve is a hole. A nature reserve named for a
+# stay out. Karst preserve is a hole. William H. Russell Karst
+# Preserve is a hole, not wildlife range. Karst Lane stays a
+# road. A nature reserve named for a
 # cave is a hole. Blowing Sink is a wetland in the extract; the word
 # sink is not a match.
 CAVE_PRESERVE_PHRASES = (
@@ -89,7 +91,10 @@ CAVE_PRESERVE_KEYS = {
 # or `woods`. Phrase `beck preserve`, not the word `beck`. Beck
 # Preserve is Travis Audubon bird sanctuary. Phrase `brodie
 # wild`, not the word `brodie`. Brodie Lane stays a road.
-# Brodie and Oakdale Properties stay Open reserve. `preserve`
+# Brodie and Oakdale Properties stay Open reserve. Phrase
+# `dahlstrom nature`, not the word `dahlstrom`. Dahlstrom
+# Road stays a road. The `nature preserve` phrase already
+# matches that sheet. `preserve`
 # alone is still forbidden.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
@@ -185,7 +190,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # `4th`. West 4th Avenue stays a road. Phrase `alamogordo
 # community garden`, not the word `alamogordo`. The Alamogordo
 # street stays a road. The `community garden` phrase already
-# matches that sheet. Winrock Garden is a mall
+# matches that sheet. Phrase `albuquerque rose garden`,
+# not the word `albuquerque`. Memorial Rose Garden is a
+# separate sheet. The `rose garden` phrase already matches
+# both. Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap
 # glasshouses and stay out. A named garden without a botanic

@@ -189,6 +189,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("the haozous garden", nm_blob)
         self.assertNotIn("haozous road", nm_blob)
         self.assertIn("albuquerque rose garden", nm_blob)
+        self.assertIn("memorial rose garden", nm_blob)
         self.assertNotIn("orchard gardens road", nm_blob)
         self.assertNotIn("rose park avenue", nm_blob)
         self.assertNotIn("wildrose park", nm_blob)
@@ -224,6 +225,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("blair woods sanctuary", east_blob)
         self.assertIn("beck preserve", east_blob)
         self.assertIn("brodie wild", east_blob)
+        self.assertIn("gay ruby dahlstrom nature preserve", east_blob)
+        self.assertNotIn("dahlstrom road", east_blob)
+        self.assertIn("william h. russell karst preserve", east_blob)
+        self.assertNotIn("karst lane", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
         self.assertIn("barrow nature preserve", east_blob)
         self.assertIn("stillhouse hollow nature preserve", east_blob)
@@ -388,6 +393,18 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertEqual(
             ground.overlay_kind(
                 {"leisure": "park", "name": "Harvey Cornell Rose Park"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Albuquerque Rose Garden"}
+            ),
+            "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Memorial Rose Garden"}
             ),
             "botanic",
         )
@@ -684,6 +701,18 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {
                     "leisure": "nature_reserve",
+                    "name": "William H. Russell Karst Preserve",
+                }
+            ),
+            "cave",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Karst Lane"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
                     "name": "Village of Western Oaks Karst Preserve and Watershed Management Area",
                 }
             ),
@@ -868,6 +897,21 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"leisure": "nature_reserve", "name": "Brodie Wild"}
             ),
             "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Gay Ruby Dahlstrom Nature Preserve",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Dahlstrom Road"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "service", "name": "Dahlstrom"})
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -1172,6 +1216,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("beck")', inspect)
         self.assertNotIn('contains("brodie")', inspect)
         self.assertNotIn('contains("wild")', inspect)
+        self.assertNotIn('contains("dahlstrom")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2234,12 +2279,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Embudo Cave", glass)
         self.assertIn("35.204126", glass)
         self.assertIn("-106.414502", glass)
+        self.assertIn("Bear Cave", glass)
+        self.assertIn("35.791534", glass)
+        self.assertIn("-105.799885", glass)
         self.assertIn("Whirlpool Cave", glass)
         self.assertIn("30.215509", glass)
         self.assertIn("-97.845277", glass)
         self.assertIn("Goat Cave Karst Nature Preserve", glass)
         self.assertIn("30.199538", glass)
         self.assertIn("-97.846758", glass)
+        self.assertIn("William H. Russell Karst Preserve", glass)
+        self.assertIn("30.197158", glass)
+        self.assertIn("-97.851485", glass)
         self.assertIn("Nalle Bunny Run Wildlife Preserve", glass)
         self.assertIn("30.349686", glass)
         self.assertIn("-97.803982", glass)
@@ -2348,9 +2399,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Brodie Wild", glass)
         self.assertIn("30.183433", glass)
         self.assertIn("-97.850150", glass)
+        self.assertIn("Gay Ruby Dahlstrom Nature Preserve", glass)
+        self.assertIn("30.085079", glass)
+        self.assertIn("-97.898228", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
+        self.assertIn("Albuquerque Rose Garden", glass)
+        self.assertIn("35.107927", glass)
+        self.assertIn("-106.552812", glass)
         self.assertIn("Sandia Mountain Natural History Center", glass)
         self.assertIn("35.126801", glass)
         self.assertIn("-106.379801", glass)
@@ -2595,6 +2652,7 @@ class GroundFieldSync(unittest.TestCase):
         oasis_hit = False
         whirl_hit = False
         goat_hit = False
+        russell_hit = False
         nalle_hit = False
         sunset_hit = False
         habitat_hit = False
@@ -2608,6 +2666,7 @@ class GroundFieldSync(unittest.TestCase):
         blair_hit = False
         beck_hit = False
         brodie_hit = False
+        dahlstrom_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -2636,6 +2695,8 @@ class GroundFieldSync(unittest.TestCase):
                     whirl_hit = True
                 if kind == "cave" and name == "Goat Cave Karst Nature Preserve" and pip(-97.846758, 30.199538, ring):
                     goat_hit = True
+                if kind == "cave" and name == "William H. Russell Karst Preserve" and pip(-97.851485, 30.197158, ring):
+                    russell_hit = True
                 if kind == "wildlife" and name == "Nalle Bunny Run Wildlife Preserve" and pip(-97.803982, 30.349686, ring):
                     nalle_hit = True
                 if kind == "wildlife" and name == "Sunset Valley Nature Area" and pip(-97.822707, 30.222831, ring):
@@ -2680,6 +2741,8 @@ class GroundFieldSync(unittest.TestCase):
                     beck_hit = True
                 if kind == "wildlife" and name == "Brodie Wild" and pip(-97.850150, 30.183433, ring):
                     brodie_hit = True
+                if kind == "wildlife" and name == "Gay Ruby Dahlstrom Nature Preserve" and pip(-97.898228, 30.085079, ring):
+                    dahlstrom_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2702,6 +2765,9 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             goat_hit, "Goat Cave Karst Nature Preserve is not a cave overlay"
+        )
+        self.assertTrue(
+            russell_hit, "William H. Russell Karst Preserve is not a cave overlay"
         )
         self.assertTrue(
             nalle_hit, "Nalle Bunny Run Wildlife Preserve is not wildlife range"
@@ -2784,6 +2850,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             brodie_hit,
             "Brodie Wild is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            dahlstrom_hit,
+            "Gay Ruby Dahlstrom Nature Preserve is not wildlife range on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -2906,6 +2976,7 @@ class GroundFieldSync(unittest.TestCase):
         los_alamos_demo_hit = False
         desert_oasis_hit = False
         haozous_hit = False
+        albuquerque_rose_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2926,6 +2997,8 @@ class GroundFieldSync(unittest.TestCase):
                     desert_oasis_hit = props.get("name") == "Desert Oasis Teaching Garden"
                 if kind == "botanic" and pip(-106.010271, 35.586438, ring):
                     haozous_hit = props.get("name") == "The Haozous Garden"
+                if kind == "botanic" and pip(-106.552812, 35.107927, ring):
+                    albuquerque_rose_hit = props.get("name") == "Albuquerque Rose Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
@@ -2985,6 +3058,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             haozous_hit,
             "The Haozous Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            albuquerque_rose_hit,
+            "Albuquerque Rose Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -3114,6 +3191,7 @@ class GroundFieldSync(unittest.TestCase):
         nm_scrub = False
         sandia_cave = False
         embudo_cave = False
+        bear_cave = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -3154,12 +3232,19 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.414502)) < 1e-6
                 ):
                     embudo_cave = True
+                if (
+                    props.get("name") == "Bear Cave"
+                    and abs(lat - 35.791534) < 1e-6
+                    and abs(lon - (-105.799885)) < 1e-6
+                ):
+                    bear_cave = True
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
         self.assertTrue(embudo_cave, "Embudo Cave is not a cave mouth in the NM extract")
+        self.assertTrue(bear_cave, "Bear Cave is not a cave mouth in the NM extract")
         self.assertIn(
             "Sandia Man Cave",
             place_names_in_tile("nm", -106.405585, 35.254746),
@@ -3169,6 +3254,11 @@ class GroundFieldSync(unittest.TestCase):
             "Embudo Cave",
             place_names_in_tile("nm", -106.414502, 35.204126),
             "Embudo Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Bear Cave",
+            place_names_in_tile("nm", -105.799885, 35.791534),
+            "Bear Cave did not survive tiling as a mouth",
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
@@ -3524,8 +3614,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Embudo Cave", qa)
         self.assertIn("35.204126", qa)
         self.assertIn("Embudo Hills Park", qa)
+        self.assertIn("Bear Cave", qa)
+        self.assertIn("35.791534", qa)
         self.assertIn("Whirlpool Cave", qa)
         self.assertIn("Goat Cave Karst Nature Preserve", qa)
+        self.assertIn("William H. Russell Karst Preserve", qa)
+        self.assertIn("30.197158", qa)
+        self.assertIn("karst preserve", qa)
+        self.assertIn("Karst Lane", qa)
         self.assertIn("Nalle Bunny Run Wildlife Preserve", qa)
         self.assertIn("Randall Davey Audubon Center", qa)
         self.assertIn("Valles Caldera National Preserve", qa)
@@ -3602,6 +3698,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Alamogordo Community Garden", qa)
         self.assertIn("32.908810", qa)
         self.assertIn("alamogordo community garden", qa)
+        self.assertIn("Albuquerque Rose Garden", qa)
+        self.assertIn("35.107927", qa)
+        self.assertIn("albuquerque rose garden", qa)
+        self.assertIn("Memorial Rose Garden", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)
@@ -3630,6 +3730,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("brodie wild", qa)
         self.assertIn("Brodie Wild", qa)
         self.assertIn("30.183433", qa)
+        self.assertIn("Gay Ruby Dahlstrom Nature Preserve", qa)
+        self.assertIn("30.085079", qa)
+        self.assertIn("dahlstrom nature", qa)
+        self.assertIn("Dahlstrom Road", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)

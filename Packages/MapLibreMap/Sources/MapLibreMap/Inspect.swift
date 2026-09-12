@@ -317,7 +317,9 @@ public enum Inspect {
     }
 
     /// A park named Bee Cave is a town park. A park named Cave Preserve is
-    /// the hole. Phrase `karst preserve`. A nature reserve named for a
+    /// the hole. Phrase `karst preserve`. William H. Russell Karst
+    /// Preserve is a hole, not wildlife range. Karst Lane stays a
+    /// road. A nature reserve named for a
     /// cave is the hole. Not the word cave as a bare contains — Bee Cave,
     /// Coyote Cave Park, and Cave Drive stay parks. Phrase `blowing sink`,
     /// not the word `sink` — a highway named Blowing Sink Road is a road,
@@ -374,7 +376,10 @@ public enum Inspect {
     /// `woods`. Phrase `beck preserve`, not the word `beck`. Beck
     /// Preserve is Travis Audubon bird sanctuary. Phrase `brodie
     /// wild`, not the word `brodie`. Brodie Lane stays a road.
-    /// Brodie and Oakdale Properties stay Open reserve. Austin
+    /// Brodie and Oakdale Properties stay Open reserve. Phrase
+    /// `dahlstrom nature`, not the word `dahlstrom`. Dahlstrom
+    /// Road stays a road. The `nature preserve` phrase already
+    /// matches that sheet. Austin
     /// wildland, animals as range, not a pin. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
@@ -467,7 +472,10 @@ public enum Inspect {
     /// `4th street garden`, not the word `4th`. West 4th Avenue
     /// stays a road. Phrase `alamogordo community garden`, not the
     /// word `alamogordo`. The Alamogordo street stays a road. The
-    /// `community garden` phrase already matches that sheet. Winrock Garden is a mall bed and stays out.
+    /// `community garden` phrase already matches that sheet. Phrase
+    /// `albuquerque rose garden`, not the word `albuquerque`.
+    /// Memorial Rose Garden is a separate sheet. The `rose garden`
+    /// phrase already matches both. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,
