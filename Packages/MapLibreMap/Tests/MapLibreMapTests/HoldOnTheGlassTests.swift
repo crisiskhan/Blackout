@@ -102,6 +102,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Franklin Mountains overlay that contains it.
     private static let anthonyGapCave = CLLocationCoordinate2D(latitude: 31.998167, longitude: -106.51017)
 
+    /// `Bat Cave` on the west place slice. A cave mouth, not Bee Cave,
+    /// not Coyote Cave Park. 2.5 km from OSM water.
+    private static let batCave = CLLocationCoordinate2D(latitude: 32.932316, longitude: -107.234781)
+
     /// Interior of Indiangrass Wildlife Sanctuary in east `layers/ground.geojson`.
     /// Scrub fill does not win. Range, not a pin.
     private static let wildlifeRange = CLLocationCoordinate2D(latitude: 30.315667, longitude: -97.591821)
@@ -725,6 +729,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(cave.card?.title, "Anthony Gap Cave", "\(cave)")
         XCTAssertEqual(cave.card?.fieldRoute.first, Inspect.caveCard, "\(cave)")
         XCTAssertFalse((cave.card?.doLine.lowercased() ?? "").contains("edible"), cave.card?.doLine ?? "")
+
+        let bat = try hold(at: Self.batCave, zoom: 16)
+        XCTAssertEqual(bat.card?.klass, "Cave or hole", "\(bat)")
+        XCTAssertEqual(bat.card?.title, "Bat Cave", "\(bat)")
+        XCTAssertNotEqual(bat.card?.klass, "Park", "\(bat)")
+        XCTAssertEqual(bat.card?.fieldRoute.first, Inspect.caveCard, "\(bat)")
+        XCTAssertTrue((bat.card?.doLine.lowercased() ?? "").contains("stay in daylight"), bat.card?.doLine ?? "")
+        XCTAssertFalse((bat.card?.doLine.lowercased() ?? "").contains("edible"), bat.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {

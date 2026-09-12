@@ -2203,6 +2203,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Anthony Gap Cave", glass)
         self.assertIn("31.998167", glass)
         self.assertIn("-106.51017", glass)
+        self.assertIn("Bat Cave", glass)
+        self.assertIn("32.932316", glass)
+        self.assertIn("-107.234781", glass)
         self.assertIn("Treaty Oak", glass)
         self.assertIn("30.271466", glass)
         self.assertIn("-97.755462", glass)
@@ -2479,6 +2482,7 @@ class GroundFieldSync(unittest.TestCase):
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
         sink = False
         anthony_cave = False
+        bat_cave = False
         bosque = False
         farm = False
         west_wood = False
@@ -2499,6 +2503,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.51017)) < 1e-6
                 ):
                     anthony_cave = True
+                if (
+                    props.get("name") == "Bat Cave"
+                    and abs(lat - 32.932316) < 1e-6
+                    and abs(lon - (-107.234781)) < 1e-6
+                ):
+                    bat_cave = True
             if (
                 props.get("natural") == "wetland"
                 and props.get("name") == "Rio Bosque Wetlands Park"
@@ -2524,6 +2534,7 @@ class GroundFieldSync(unittest.TestCase):
                         west_wood = True
         self.assertTrue(sink, "glass sinkhole hold is not the unnamed west sinkhole")
         self.assertTrue(anthony_cave, "Anthony Gap Cave is not a west cave mouth in the extract")
+        self.assertTrue(bat_cave, "Bat Cave is not a west cave mouth in the extract")
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
         self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
         self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
@@ -2784,6 +2795,11 @@ class GroundFieldSync(unittest.TestCase):
             "Anthony Gap Cave",
             place_names_in_tile("tx-west", -106.51017, 31.998167),
             "Anthony Gap Cave did not survive tiling",
+        )
+        self.assertIn(
+            "Bat Cave",
+            place_names_in_tile("tx-west", -107.234781, 32.932316),
+            "Bat Cave did not survive tiling as a mouth",
         )
         pepper = False
         for feat in east_osm["features"]:
@@ -3411,6 +3427,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("31.913286", qa)
         self.assertIn("30.346188", qa)
         self.assertIn("Anthony Gap Cave", qa)
+        self.assertIn("Bat Cave", qa)
+        self.assertIn("32.932316", qa)
         self.assertIn("Treaty Oak", qa)
         self.assertIn("Lost Oasis Cave Preserve", qa)
         self.assertIn("Sandia Man Cave", qa)

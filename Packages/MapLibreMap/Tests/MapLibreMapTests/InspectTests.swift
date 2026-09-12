@@ -403,6 +403,15 @@ final class InspectTests: XCTestCase {
 
         let coyote = Inspect.read(tags: ["leisure": "park", "name": "Coyote Cave Park"])
         XCTAssertEqual(coyote.klass, "Park")
+
+        let bat = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Bat Cave"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(bat.klass, "Cave or hole")
+        XCTAssertNotEqual(bat.klass, "Park")
+        XCTAssertEqual(bat.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(bat.doLine.lowercased().contains("edible"), bat.doLine)
         XCTAssertFalse(coyote.fieldRoute.contains(Inspect.caveCard))
 
         let blowing = Inspect.read(
