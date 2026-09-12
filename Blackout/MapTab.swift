@@ -9,6 +9,7 @@ struct MapTab: View {
     @Bindable var runtime: AppRuntime
     @State private var query = ""
     @State private var hits: [SearchHit] = []
+    @State private var destMode: MapFieldDestMode = .bearing
 
     var body: some View {
         ZStack {
@@ -254,16 +255,17 @@ struct MapTab: View {
 
     /// Up to three short deduped lines, printed where the thumb already is.
     private var fieldChrome: some View {
+        let destBearing = MapFieldChrome.activeBearing(
+            headingDeg: runtime.headingDeg,
+            hasDestination: runtime.routeTarget != nil,
+            lockOn: runtime.lockOn,
+            hasRoute: !runtime.routeCoords.isEmpty
+        )
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
             tool: runtime.toolChrome,
-            bearingDeg: MapFieldChrome.activeBearing(
-                headingDeg: runtime.headingDeg,
-                hasDestination: runtime.routeTarget != nil,
-                lockOn: runtime.lockOn,
-                hasRoute: !runtime.routeCoords.isEmpty
-            ),
+            bearingDeg: destBearing,
             speak: runtime.speechChrome,
             you: runtime.gnssYou
         )
@@ -271,11 +273,20 @@ struct MapTab: View {
             if !lines.isEmpty {
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(lines) { line in
-                        Text(line.text)
-                            .font(.caption.weight(line.warn ? .bold : .semibold))
-                            .foregroundStyle(line.warn ? Theme.warn : Theme.silver)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        switch line.slot {
+                        case .status, .speak:
+                            Text(line.text)
+                                .font(.caption.weight(line.warn ? .bold : .semibold))
+                                .foregroundStyle(line.warn ? Theme.warn : Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        case .dest:
+                            MapFieldDestRail(
+                                bearingDeg: destBearing,
+                                you: runtime.gnssYou,
+                                mode: $destMode
+                            )
+                        }
                     }
                 }
                 .padding(.horizontal, 10)
@@ -283,6 +294,54 @@ struct MapTab: View {
                 .background(Theme.glass(opacity: 0.62))
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
+        }
+    }
+
+    private struct MapFieldDestRail: View {
+        var bearingDeg: Double?
+        var you: (lat: Double, lon: Double)?
+        @Binding var mode: MapFieldDestMode
+
+        var body: some View {
+            HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
+                chip(MapFieldDestMode.bearing)
+                chip(MapFieldDestMode.coordinates)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+
+        private func chip(_ chipMode: MapFieldDestMode) -> some View {
+            let selected = mode == chipMode
+            let field = MapFieldChrome.destValue(
+                mode: chipMode,
+                bearingDeg: bearingDeg,
+                you: you
+            )
+            let ink: Color = {
+                switch chipMode {
+                case .bearing:
+                    return Theme.accent
+                case .coordinates:
+                    return Theme.silver
+                }
+            }()
+            return Button {
+                withAnimation(Theme.Motion.wake) {
+                    mode = chipMode
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Text(chipMode.title)
+                    if selected {
+                        Text(field)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .buttonStyle(MapFieldDestChipStyle(ink: ink, expanded: selected))
+            .layoutPriority(selected ? 1 : 0)
+            .accessibilityLabel(chipMode.title)
+            .accessibilityValue(selected ? field : "")
         }
     }
 

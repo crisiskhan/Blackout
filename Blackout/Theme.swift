@@ -129,6 +129,38 @@ struct HUDOverlayChipStyle: ButtonStyle {
     }
 }
 
+/// Dest-slot chips on MAP. Selected fills the field; the other hugs its word.
+struct MapFieldDestChipStyle: ButtonStyle {
+    var ink: Color
+    var expanded: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        return configuration.label
+            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+            .minimumScaleFactor(1)
+            .lineLimit(1)
+            .fixedSize(horizontal: !expanded, vertical: false)
+            .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
+            .frame(
+                minWidth: hit,
+                maxWidth: expanded ? .infinity : nil,
+                minHeight: hit,
+                maxHeight: hit,
+                alignment: .leading
+            )
+            .contentShape(Rectangle())
+            .foregroundStyle(ink)
+            .background(Theme.raised)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(ink.opacity(0.85), lineWidth: 1)
+            )
+            .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+}
+
 /// Status ink on a HUD page. Silver is idle, warn is honesty chrome, caution is
 /// CONDITION YELLOW, crisis is RED.
 enum HUDStatusTone: Sendable {

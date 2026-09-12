@@ -97,13 +97,28 @@ def dest_line(
     bearing_deg: float | None,
     you: tuple[float, float] | None = None,
 ) -> str:
-    """Mirror of MapFieldChrome.destLine. Heading first; YOU from a live fix."""
+    """Mirror of MapFieldChrome.destLine. Slot token only — heading, not YOU."""
+    del you
     if bearing_deg is None or bearing_deg < 0:
         return ""
-    heading = f"BEARING {bearing_deg:.0f}°"
-    if you is None:
-        return heading
-    return f"{heading}{SEPARATOR}{you[0]:.5f}, {you[1]:.5f}"
+    return f"BEARING {bearing_deg:.0f}°"
+
+
+def dest_value(
+    mode: str,
+    bearing_deg: float | None,
+    you: tuple[float, float] | None,
+) -> str:
+    """Mirror of MapFieldChrome.destValue. Expanded-chip field."""
+    if mode == "bearing":
+        if bearing_deg is None or bearing_deg < 0:
+            return "NO HEADING"
+        return f"{bearing_deg:.0f}°"
+    if mode == "coordinates":
+        if you is None:
+            return "NO FIX"
+        return f"{you[0]:.5f}, {you[1]:.5f}"
+    raise AssertionError(f"unhandled dest mode {mode}")
 
 
 def field_lines(
@@ -115,7 +130,7 @@ def field_lines(
     you: tuple[float, float] | None = None,
 ) -> list[str]:
     """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas,
-    so the middle row carries heading plus YOU, never a DEST coordinate pair."""
+    so the middle row is a heading token. Live YOU is dest_value on COORDINATES."""
     status = joined([lock, route, tool])
     return [line for line in (status, dest_line(bearing_deg, you), speak.strip()) if line]
 
@@ -201,8 +216,8 @@ class FieldChromeTests(unittest.TestCase):
             self.assertNotIn("DEST 31.", line)
 
     def test_bearing_line_also_prints_live_you_coords(self):
-        # The dest pin is on the canvas. This row already carries heading;
-        # when GNSS has a live fix it also carries YOU, never DEST.
+        # Two chips, one field. The dest slot in the stack is still the heading
+        # token. COORDINATES owns the live GNSS pair when that chip is selected.
         with_fix = field_lines(
             OFF_GRAPH,
             OFF_GRAPH,
@@ -215,19 +230,21 @@ class FieldChromeTests(unittest.TestCase):
             with_fix,
             [
                 "OFF GRAPH · TRUE NORTH",
-                "BEARING 45° · 31.76190, -106.49000",
+                "BEARING 45°",
                 "SPEAK · 3 TURNS · 300 M",
             ],
         )
-        far_west = field_lines("", "", "", 359, "", you=(-90.0, -180.0))
-        self.assertEqual(far_west, ["BEARING 359° · -90.00000, -180.00000"])
-        for line in with_fix + far_west:
-            self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
-            self.assertNotIn("DEST 31.", line)
-            self.assertNotIn("DEST %.4f", line)
-        # A dead GPS does not invent 0,0. A live fix without a heading does
-        # not invent a dest row — coords ride the bearing line, they do not
-        # replace it.
+        self.assertEqual(dest_line(45, you=(31.7619, -106.49)), "BEARING 45°")
+        self.assertEqual(dest_value("bearing", 45, (31.7619, -106.49)), "45°")
+        self.assertEqual(
+            dest_value("coordinates", 45, (31.7619, -106.49)),
+            "31.76190, -106.49000",
+        )
+        self.assertEqual(dest_value("coordinates", 45, None), "NO FIX")
+        far_west = dest_value("coordinates", 359, (-90.0, -180.0))
+        self.assertEqual(far_west, "-90.00000, -180.00000")
+        self.assertLessEqual(len(far_west), FIELD_MAX_CHARACTERS)
+        self.assertNotIn("DEST", far_west)
         self.assertEqual(
             field_lines(OFF_GRAPH, "", "TRUE NORTH", 45, "", you=None),
             ["OFF GRAPH · TRUE NORTH", "BEARING 45°"],
@@ -337,6 +354,17 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("center", you)
         self.assertIn("%.5f, %.5f", self.route_line)
         self.assertIn("you: (lat: Double, lon: Double)?", self.route_line)
+        self.assertIn("enum MapFieldDestMode", self.route_line)
+        self.assertIn("func destValue(", self.route_line)
+        self.assertIn("COORDINATES", self.route_line)
+        self.assertIn("NO FIX", self.route_line)
+        self.assertIn("MapFieldDestRail", self.map_tab)
+        self.assertIn("MapFieldDestMode", self.map_tab)
+        self.assertIn("Theme.accent", chrome)
+        self.assertIn("layoutPriority", chrome)
+        theme = read("Blackout", "Theme.swift")
+        self.assertIn("struct MapFieldDestChipStyle", theme)
+        self.assertIn("var expanded: Bool", theme)
 
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)

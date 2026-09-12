@@ -70,10 +70,17 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("youCoordinate()", chrome)
         self.assertNotIn("lastKnownFix", chrome)
         self.assertNotIn("youCoordinate()", tab)
-        self.assertIn("func destLine(", route)
+        dest_src = route.split("func destLine(")[1].split("func destValue")[0]
+        self.assertNotIn("%.5f, %.5f", dest_src)
+        self.assertIn("func destValue(", route)
+        self.assertIn("enum MapFieldDestMode", route)
         self.assertIn("%.5f, %.5f", route)
         self.assertNotIn("DEST %.4f", route)
         self.assertNotIn("packs?.active?.center", chrome)
+        self.assertIn("MapFieldDestRail", tab)
+        self.assertIn("MapFieldDestMode.coordinates", tab)
+        self.assertIn("Theme.accent", chrome)
+        self.assertIn("layoutPriority", chrome)
         app = read("Blackout", "AppRuntime.swift")
         you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
         self.assertIn("fix.last", you)
@@ -175,7 +182,9 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         self.assertNotIn("DEST ... · BEARING", device)
         self.assertIn("BEARING", device)
         self.assertIn("31.76190", device)
-        self.assertIn("BEARING 45° · 31.76190", qa)
+        self.assertIn("COORDINATES", device)
+        self.assertIn("COORDINATES", qa)
+        self.assertIn("31.76190", qa)
         self.assertIn("no `DEST 31.7619, -106.4850`", qa)
 
 

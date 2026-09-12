@@ -507,21 +507,47 @@ final class MapLibreMapTests: XCTestCase {
             speak: "SPEAK · 3 TURNS · 300 M",
             you: (lat: 31.7619, lon: -106.49)
         )
-        XCTAssertEqual(withYou[1].text, "BEARING 45° · 31.76190, -106.49000")
+        // The dest slot is two chips, not one concatenated string. The stack
+        // still only spends a heading token here; the field value lives on
+        // destValue so COORDINATES can own the readout without a DEST pair.
+        XCTAssertEqual(withYou[1].text, "BEARING 45°")
         XCTAssertFalse(withYou[1].text.contains("DEST 31."))
+        XCTAssertFalse(withYou[1].text.contains("31.76190"))
         XCTAssertLessThanOrEqual(withYou[1].text.count, 44)
+        XCTAssertEqual(MapFieldDestMode.bearing.title, "BEARING")
+        XCTAssertEqual(MapFieldDestMode.coordinates.title, "COORDINATES")
         XCTAssertEqual(
             MapFieldChrome.destLine(bearingDeg: 45, you: (lat: 31.7619, lon: -106.49)),
-            "BEARING 45° · 31.76190, -106.49000"
+            "BEARING 45°"
         )
         XCTAssertEqual(
-            MapFieldChrome.destLine(bearingDeg: 359, you: (lat: -90, lon: -180)),
-            "BEARING 359° · -90.00000, -180.00000"
+            MapFieldChrome.destValue(
+                mode: .bearing,
+                bearingDeg: 45,
+                you: (lat: 31.7619, lon: -106.49)
+            ),
+            "45°"
         )
-        XCTAssertLessThanOrEqual(
-            MapFieldChrome.destLine(bearingDeg: 359, you: (lat: -90, lon: -180)).count,
-            44
+        XCTAssertEqual(
+            MapFieldChrome.destValue(
+                mode: .coordinates,
+                bearingDeg: 45,
+                you: (lat: 31.7619, lon: -106.49)
+            ),
+            "31.76190, -106.49000"
         )
+        XCTAssertEqual(
+            MapFieldChrome.destValue(mode: .coordinates, bearingDeg: 45, you: nil),
+            "NO FIX"
+        )
+        let farWest = MapFieldChrome.destValue(
+            mode: .coordinates,
+            bearingDeg: 359,
+            you: (lat: -90, lon: -180)
+        )
+        XCTAssertEqual(farWest, "-90.00000, -180.00000")
+        XCTAssertLessThanOrEqual(farWest.count, 44)
+        XCTAssertFalse(farWest.contains("DEST"))
     }
 
     func testActiveBearingIsQuietWithoutSomewhereToWalk() {

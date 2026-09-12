@@ -256,6 +256,20 @@ public enum MagTrueChip {
     public static func chrome(magNorth: Bool) -> String { magNorth ? "MAG NORTH" : "TRUE NORTH" }
 }
 
+public enum MapFieldDestMode: String, CaseIterable, Sendable {
+    case bearing
+    case coordinates
+
+    public var title: String {
+        switch self {
+        case .bearing:
+            return "BEARING"
+        case .coordinates:
+            return "COORDINATES"
+        }
+    }
+}
+
 public struct MapFieldLine: Equatable, Sendable, Identifiable {
     public enum Slot: String, CaseIterable, Sendable {
         case status, dest, speak
@@ -285,17 +299,31 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
-    /// The destination is a pin on the canvas, so this line carries heading
-    /// plus YOU when GNSS has a live fix. Printing `DEST 31.7619, -106.4850`
-    /// spent the row on a pin nobody can steer by.
+    /// Heading token for the dest slot. The pin stays on the canvas. Live YOU
+    /// is destValue on COORDINATES — this string is never a DEST pair.
     public static func destLine(
         bearingDeg: Double?,
         you: (lat: Double, lon: Double)? = nil
     ) -> String {
+        _ = you
         guard let bearingDeg, bearingDeg >= 0 else { return "" }
-        let heading = String(format: "BEARING %.0f°", bearingDeg)
-        guard let you else { return heading }
-        return heading + separator + String(format: "%.5f, %.5f", you.lat, you.lon)
+        return String(format: "BEARING %.0f°", bearingDeg)
+    }
+
+    /// Expanded-chip field. Bearing is the course. Coordinates are live GNSS.
+    public static func destValue(
+        mode: MapFieldDestMode,
+        bearingDeg: Double?,
+        you: (lat: Double, lon: Double)?
+    ) -> String {
+        switch mode {
+        case .bearing:
+            guard let bearingDeg, bearingDeg >= 0 else { return "NO HEADING" }
+            return String(format: "%.0f°", bearingDeg)
+        case .coordinates:
+            guard let you else { return "NO FIX" }
+            return String(format: "%.5f, %.5f", you.lat, you.lon)
+        }
     }
 
     /// Inactive chrome stays quiet: no BEARING row unless there is somewhere
