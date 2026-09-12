@@ -378,6 +378,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// 62 m is rank 7.
     private static let redBluff = CLLocationCoordinate2D(latitude: 30.266661, longitude: -97.681788)
 
+    /// Interior of Blunn Creek Nature Preserve. Phrase `nature
+    /// preserve`, not the word `blunn`. Listed hunt sat on water.
+    /// This interior is 248 m from OSM stream. East Oltorf Street
+    /// 44 m is rank 7; wildlife 4 still wins.
+    private static let blunnCreek = CLLocationCoordinate2D(latitude: 30.235167, longitude: -97.745515)
+
     /// Interior of Balcones Canyonlands Preserve - Austin Simon.
     /// Phrase `canyonlands preserve`. Unique title, not Grandview
     /// Hills, not Lime Creek.
@@ -410,6 +416,19 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Jornada Experimental Range. Phrase `experimental
     /// range`, not Open reserve. Far from water.
     private static let jornadaRange = CLLocationCoordinate2D(latitude: 32.594082, longitude: -106.823441)
+
+    /// Interior of Charlie Wakeem/Richard Teschner Nature Preserve of
+    /// Resler Canyon. Phrase `nature preserve`, not the word `charlie`
+    /// or `resler`. Listed hunt sat on water. This interior is 220 m
+    /// from OSM stream. Cadiz Street 54 m is rank 7; wildlife 4 still
+    /// wins. Fiesta Drive stays a road.
+    private static let charlieWakeem = CLLocationCoordinate2D(latitude: 31.831091, longitude: -106.543456)
+
+    /// Interior of San Andres National Wildlife Refuge. Phrase
+    /// `national wildlife`, not the word `andres`. White Sands
+    /// Missile Range S Route 287 stays a road. San Andres Peak is
+    /// off this pip. Unique overlay.
+    private static let sanAndres = CLLocationCoordinate2D(latitude: 32.688003, longitude: -106.484294)
 
     /// Interior of Chihuahuan Desert Gardens. Phrase `desert garden` on a
     /// garden sheet; spines, not oleander. 314 m from water.
@@ -676,6 +695,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Rio Grande Stables Road 81 m is rank 7; wildlife 4 still
     /// wins. Other Game Commission sheets stay their own.
     private static let gameCommission = CLLocationCoordinate2D(latitude: 34.620499, longitude: -106.741123)
+
+    /// Interior of Sevilleta National Wildlife Refuge. Phrase
+    /// `national wildlife`, not the word `sevilleta`. Old Highway 85
+    /// stays a road. Unique overlay. Dry interiors with no nearby name
+    /// stay unheld; this pip sits on the named highway.
+    private static let sevilleta = CLLocationCoordinate2D(latitude: 34.396837, longitude: -106.874225)
 
     /// Interior of Pronoun Cave ACEC in NM `layers/ground.geojson`. A cave
     /// phrase, not open reserve, even though the name also says ACEC.
@@ -1244,6 +1269,31 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((jornada.card?.doLine.lowercased() ?? "").contains("javelina"), jornada.card?.doLine ?? "")
         XCTAssertFalse((jornada.card?.doLine.lowercased() ?? "").contains("edible"), jornada.card?.doLine ?? "")
 
+        let charlie = try hold(at: Self.charlieWakeem, zoom: 16)
+        XCTAssertEqual(charlie.card?.klass, "Wildlife range", "\(charlie)")
+        XCTAssertEqual(
+            charlie.card?.title,
+            "Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon",
+            "\(charlie)"
+        )
+        XCTAssertNotEqual(charlie.card?.klass, "Open reserve", "\(charlie)")
+        XCTAssertNotEqual(charlie.card?.klass, "Road", "\(charlie)")
+        XCTAssertNotEqual(charlie.card?.title, "Cadiz Street", "\(charlie)")
+        XCTAssertNotEqual(charlie.card?.title, "Fiesta Drive", "\(charlie)")
+        XCTAssertEqual(charlie.card?.fieldRoute.first, Inspect.mammalTXCard, "\(charlie)")
+        XCTAssertTrue((charlie.card?.doLine.lowercased() ?? "").contains("javelina"), charlie.card?.doLine ?? "")
+        XCTAssertFalse((charlie.card?.doLine.lowercased() ?? "").contains("edible"), charlie.card?.doLine ?? "")
+
+        let sanAndres = try hold(at: Self.sanAndres, zoom: 16)
+        XCTAssertEqual(sanAndres.card?.klass, "Wildlife range", "\(sanAndres)")
+        XCTAssertEqual(sanAndres.card?.title, "San Andres National Wildlife Refuge", "\(sanAndres)")
+        XCTAssertNotEqual(sanAndres.card?.klass, "Open reserve", "\(sanAndres)")
+        XCTAssertNotEqual(sanAndres.card?.klass, "Road", "\(sanAndres)")
+        XCTAssertNotEqual(sanAndres.card?.title, "White Sands Missile Range S Route 287", "\(sanAndres)")
+        XCTAssertEqual(sanAndres.card?.fieldRoute.first, Inspect.mammalTXCard, "\(sanAndres)")
+        XCTAssertTrue((sanAndres.card?.doLine.lowercased() ?? "").contains("javelina"), sanAndres.card?.doLine ?? "")
+        XCTAssertFalse((sanAndres.card?.doLine.lowercased() ?? "").contains("edible"), sanAndres.card?.doLine ?? "")
+
         let nalle = try hold(at: Self.nalleWildlife, zoom: 16, packId: "tx-east")
         XCTAssertEqual(nalle.card?.klass, "Wildlife range", "\(nalle)")
         XCTAssertEqual(nalle.card?.title, "Nalle Bunny Run Wildlife Preserve", "\(nalle)")
@@ -1573,6 +1623,17 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((redBluff.card?.doLine.lowercased() ?? "").contains("hog"), redBluff.card?.doLine ?? "")
         XCTAssertFalse((redBluff.card?.doLine.lowercased() ?? "").contains("javelina"), redBluff.card?.doLine ?? "")
         XCTAssertFalse((redBluff.card?.doLine.lowercased() ?? "").contains("edible"), redBluff.card?.doLine ?? "")
+
+        let blunn = try hold(at: Self.blunnCreek, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(blunn.card?.klass, "Wildlife range", "\(blunn)")
+        XCTAssertEqual(blunn.card?.title, "Blunn Creek Nature Preserve", "\(blunn)")
+        XCTAssertNotEqual(blunn.card?.klass, "Open reserve", "\(blunn)")
+        XCTAssertNotEqual(blunn.card?.klass, "Road", "\(blunn)")
+        XCTAssertNotEqual(blunn.card?.title, "East Oltorf Street", "\(blunn)")
+        XCTAssertEqual(blunn.card?.fieldRoute.first, Inspect.mammalEastCard, "\(blunn)")
+        XCTAssertTrue((blunn.card?.doLine.lowercased() ?? "").contains("hog"), blunn.card?.doLine ?? "")
+        XCTAssertFalse((blunn.card?.doLine.lowercased() ?? "").contains("javelina"), blunn.card?.doLine ?? "")
+        XCTAssertFalse((blunn.card?.doLine.lowercased() ?? "").contains("edible"), blunn.card?.doLine ?? "")
     }
 
     func testHoldingEastWoodlandOpensTreeUseNotCottonmouth() throws {
@@ -2445,6 +2506,21 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((gameLand.card?.doLine.lowercased() ?? "").contains("elk is high country"), gameLand.card?.doLine ?? "")
         XCTAssertFalse((gameLand.card?.doLine.lowercased() ?? "").contains("javelina"), gameLand.card?.doLine ?? "")
         XCTAssertFalse((gameLand.card?.doLine.lowercased() ?? "").contains("edible"), gameLand.card?.doLine ?? "")
+
+        let sevilleta = try hold(at: Self.sevilleta, zoom: 16, packId: "nm")
+        XCTAssertEqual(sevilleta.card?.klass, "Wildlife range", "\(sevilleta)")
+        XCTAssertEqual(sevilleta.card?.title, "Sevilleta National Wildlife Refuge", "\(sevilleta)")
+        XCTAssertNotEqual(sevilleta.card?.klass, "Open reserve", "\(sevilleta)")
+        XCTAssertNotEqual(sevilleta.card?.klass, "Road", "\(sevilleta)")
+        XCTAssertNotEqual(sevilleta.card?.title, "Old Highway 85", "\(sevilleta)")
+        XCTAssertEqual(sevilleta.card?.fieldRoute.first, Inspect.mammalTXCard, "\(sevilleta)")
+        XCTAssertTrue(
+            sevilleta.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "Sevilleta dropped the NM mammal card: \(sevilleta)"
+        )
+        XCTAssertTrue((sevilleta.card?.doLine.lowercased() ?? "").contains("elk is high country"), sevilleta.card?.doLine ?? "")
+        XCTAssertFalse((sevilleta.card?.doLine.lowercased() ?? "").contains("javelina"), sevilleta.card?.doLine ?? "")
+        XCTAssertFalse((sevilleta.card?.doLine.lowercased() ?? "").contains("edible"), sevilleta.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {

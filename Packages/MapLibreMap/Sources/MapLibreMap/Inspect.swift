@@ -423,7 +423,17 @@ public enum Inspect {
     /// the word `shady`. Lost Oasis Hollow stays a road. Bear
     /// Creek Management Unit is a separate sheet. The `nature
     /// preserve` phrase already matches that sheet. Austin
-    /// wildland, animals as range, not a pin. `preserve` alone is
+    /// wildland, animals as range, not a pin. Phrase `nature
+    /// preserve` already matches Charlie Wakeem/Richard Teschner
+    /// Nature Preserve of Resler Canyon and Blunn Creek Nature
+    /// Preserve. Cadiz Street and East Oltorf Street stay roads.
+    /// Do not add matcher `charlie`, `resler`, or `blunn`. Phrase
+    /// `national wildlife` already matches San Andres National
+    /// Wildlife Refuge and Sevilleta National Wildlife Refuge.
+    /// Do not add matcher `san andres` or `sevilleta`. White
+    /// Sands Missile Range S Route 287 and Old Highway 85 stay
+    /// roads. Whitfield dry interiors have no nearby name that is
+    /// not Acequia Madre and stay unheld. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"

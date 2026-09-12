@@ -1262,6 +1262,52 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(jornada.doLine.lowercased().contains("javelina"), jornada.doLine)
         XCTAssertFalse(jornada.doLine.lowercased().contains("edible"), jornada.doLine)
 
+        let charlie = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(charlie.klass, "Wildlife range")
+        XCTAssertNotEqual(charlie.klass, "Open reserve")
+        XCTAssertEqual(charlie.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(charlie.doLine.lowercased().contains("javelina"), charlie.doLine)
+        XCTAssertFalse(charlie.doLine.lowercased().contains("edible"), charlie.doLine)
+
+        let cadiz = Inspect.read(
+            tags: ["highway": "residential", "name": "Cadiz Street"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(cadiz.klass, "Road")
+        XCTAssertNotEqual(cadiz.klass, "Wildlife range")
+
+        let fiestaDrive = Inspect.read(
+            tags: ["highway": "tertiary", "name": "Fiesta Drive"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(fiestaDrive.klass, "Road")
+        XCTAssertNotEqual(fiestaDrive.klass, "Wildlife range")
+
+        let sanAndres = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "San Andres National Wildlife Refuge",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(sanAndres.klass, "Wildlife range")
+        XCTAssertNotEqual(sanAndres.klass, "Open reserve")
+        XCTAssertEqual(sanAndres.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertFalse(sanAndres.doLine.lowercased().contains("edible"), sanAndres.doLine)
+
+        let missileRoute = Inspect.read(
+            tags: ["highway": "residential", "name": "White Sands Missile Range S Route 287"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(missileRoute.klass, "Road")
+        XCTAssertNotEqual(missileRoute.klass, "Wildlife range")
+
         let history = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -1502,6 +1548,25 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(redBluffPark.klass, "Park")
         XCTAssertNotEqual(redBluffPark.klass, "Wildlife range")
 
+        let blunn = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Blunn Creek Nature Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(blunn.klass, "Wildlife range")
+        XCTAssertNotEqual(blunn.klass, "Open reserve")
+        XCTAssertEqual(blunn.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(blunn.doLine.lowercased().contains("edible"), blunn.doLine)
+
+        let oltorf = Inspect.read(
+            tags: ["highway": "secondary", "name": "East Oltorf Street"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(oltorf.klass, "Road")
+        XCTAssertNotEqual(oltorf.klass, "Wildlife range")
+
         let austinSimon = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -1608,6 +1673,26 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(valleBosque.klass, "Park")
         XCTAssertNotEqual(valleBosque.klass, "Wildlife range")
+
+        let sevilleta = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Sevilleta National Wildlife Refuge",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(sevilleta.klass, "Wildlife range")
+        XCTAssertNotEqual(sevilleta.klass, "Open reserve")
+        XCTAssertEqual(sevilleta.fieldRoute.first, Inspect.mammalTXCard)
+        XCTAssertTrue(sevilleta.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertFalse(sevilleta.doLine.lowercased().contains("edible"), sevilleta.doLine)
+
+        let oldHighway85 = Inspect.read(
+            tags: ["highway": "unclassified", "name": "Old Highway 85"],
+            pack: "nm"
+        )
+        XCTAssertEqual(oldHighway85.klass, "Road")
+        XCTAssertNotEqual(oldHighway85.klass, "Wildlife range")
 
         let laJoya = Inspect.read(
             tags: [
@@ -3024,6 +3109,62 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([history, wilderness]), pack: "nm").klass,
+            "Wildlife range"
+        )
+
+        let charlieSheet: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon",
+        ]
+        let cadizStreet: [String: String] = [
+            "highway": "residential",
+            "name": "Cadiz Street",
+        ]
+        XCTAssertEqual(Inspect.pick([charlieSheet, cadizStreet])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([charlieSheet, cadizStreet]), pack: "tx-west").klass,
+            "Wildlife range"
+        )
+
+        let blunnSheet: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Blunn Creek Nature Preserve",
+        ]
+        let oltorfStreet: [String: String] = [
+            "highway": "secondary",
+            "name": "East Oltorf Street",
+        ]
+        XCTAssertEqual(Inspect.pick([blunnSheet, oltorfStreet])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([blunnSheet, oltorfStreet]), pack: "tx-east").klass,
+            "Wildlife range"
+        )
+
+        let sanAndresSheet: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "San Andres National Wildlife Refuge",
+        ]
+        let missileRoad: [String: String] = [
+            "highway": "residential",
+            "name": "White Sands Missile Range S Route 287",
+        ]
+        XCTAssertEqual(Inspect.pick([sanAndresSheet, missileRoad])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([sanAndresSheet, missileRoad]), pack: "tx-west").klass,
+            "Wildlife range"
+        )
+
+        let sevilletaSheet: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Sevilleta National Wildlife Refuge",
+        ]
+        let oldHighway: [String: String] = [
+            "highway": "unclassified",
+            "name": "Old Highway 85",
+        ]
+        XCTAssertEqual(Inspect.pick([sevilletaSheet, oldHighway])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([sevilletaSheet, oldHighway]), pack: "nm").klass,
             "Wildlife range"
         )
     }

@@ -1577,6 +1577,16 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("stiles")', inspect)
         self.assertNotIn('contains("gebert")', inspect)
         self.assertNotIn('contains("pflugerville")', inspect)
+        self.assertNotIn('contains("charlie")', inspect)
+        self.assertNotIn('contains("wakeem")', inspect)
+        self.assertNotIn('contains("resler")', inspect)
+        self.assertNotIn('contains("teschner")', inspect)
+        self.assertNotIn('contains("cadiz")', inspect)
+        self.assertNotIn('contains("blunn")', inspect)
+        self.assertNotIn('contains("oltorf")', inspect)
+        self.assertNotIn('contains("andres")', inspect)
+        self.assertNotIn('contains("sevilleta")', inspect)
+        self.assertNotIn('contains("whitfield")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2729,6 +2739,23 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jornada Experimental Range", glass)
         self.assertIn("32.594082", glass)
         self.assertIn("-106.823441", glass)
+        self.assertIn("Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon", glass)
+        self.assertIn("31.831091", glass)
+        self.assertIn("-106.543456", glass)
+        self.assertIn("Cadiz Street", glass)
+        self.assertIn("Fiesta Drive", glass)
+        self.assertIn("San Andres National Wildlife Refuge", glass)
+        self.assertIn("32.688003", glass)
+        self.assertIn("-106.484294", glass)
+        self.assertIn("White Sands Missile Range S Route 287", glass)
+        self.assertIn("Blunn Creek Nature Preserve", glass)
+        self.assertIn("30.235167", glass)
+        self.assertIn("-97.745515", glass)
+        self.assertIn("East Oltorf Street", glass)
+        self.assertIn("Sevilleta National Wildlife Refuge", glass)
+        self.assertIn("34.396837", glass)
+        self.assertIn("-106.874225", glass)
+        self.assertIn("Old Highway 85", glass)
         self.assertIn("Wildflower Preserve", glass)
         self.assertIn("30.242251", glass)
         self.assertIn("-97.828949", glass)
@@ -2983,6 +3010,8 @@ class GroundFieldSync(unittest.TestCase):
         lost_dog_hit = False
         flora_hit = False
         jornada_hit = False
+        charlie_hit = False
+        san_andres_hit = False
         desert_gardens_hit = False
         japaneese_hit = False
         preston_foster_hit = False
@@ -3032,6 +3061,15 @@ class GroundFieldSync(unittest.TestCase):
                     )
                 if kind == "wildlife" and pip(-106.823441, 32.594082, ring):
                     jornada_hit = props.get("name") == "Jornada Experimental Range"
+                if kind == "wildlife" and pip(-106.543456, 31.831091, ring):
+                    charlie_hit = (
+                        props.get("name")
+                        == "Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon"
+                    )
+                if kind == "wildlife" and pip(-106.484294, 32.688003, ring):
+                    san_andres_hit = (
+                        props.get("name") == "San Andres National Wildlife Refuge"
+                    )
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
@@ -3079,6 +3117,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             jornada_hit,
             "Jornada Experimental Range is not wildlife range on the west overlay",
+        )
+        self.assertTrue(
+            charlie_hit,
+            "Charlie Wakeem Nature Preserve is not wildlife range on the west overlay",
+        )
+        self.assertTrue(
+            san_andres_hit,
+            "San Andres National Wildlife Refuge is not wildlife range on the west overlay",
         )
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
@@ -3236,6 +3282,7 @@ class GroundFieldSync(unittest.TestCase):
         shady_hollow_hit = False
         bright_leaf_hit = False
         red_bluff_hit = False
+        blunn_hit = False
         romberg_hit = False
         mcgregor_hit = False
         ladybird_hit = False
@@ -3375,6 +3422,8 @@ class GroundFieldSync(unittest.TestCase):
                     bright_leaf_hit = True
                 if kind == "wildlife" and name == "Red Bluff Nature Preserve" and pip(-97.681788, 30.266661, ring):
                     red_bluff_hit = True
+                if kind == "wildlife" and name == "Blunn Creek Nature Preserve" and pip(-97.745515, 30.235167, ring):
+                    blunn_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Romberg" and pip(-97.894690, 30.420315, ring):
                     romberg_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - McGregor" and pip(-97.894955, 30.421875, ring):
@@ -3600,6 +3649,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             red_bluff_hit,
             "Red Bluff Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            blunn_hit,
+            "Blunn Creek Nature Preserve is not wildlife range on the east overlay",
         )
         self.assertTrue(
             romberg_hit,
@@ -3850,6 +3903,7 @@ class GroundFieldSync(unittest.TestCase):
         pecos_hit = False
         nature_center_hit = False
         game_commission_hit = False
+        sevilleta_hit = False
         barelas_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -3909,6 +3963,10 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "wildlife" and pip(-106.741123, 34.620499, ring):
                     game_commission_hit = (
                         props.get("name") == "State Game Commission Land"
+                    )
+                if kind == "wildlife" and pip(-106.874225, 34.396837, ring):
+                    sevilleta_hit = (
+                        props.get("name") == "Sevilleta National Wildlife Refuge"
                     )
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
                     audubon_hit = (
@@ -4018,6 +4076,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             game_commission_hit,
             "State Game Commission Land is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            sevilleta_hit,
+            "Sevilleta National Wildlife Refuge is not wildlife range on the NM overlay",
         )
         self.assertTrue(
             audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
@@ -4694,6 +4756,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.069828", qa)
         self.assertIn("hawk watch", qa)
         self.assertIn("Jornada Experimental Range", qa)
+        self.assertIn("Charlie Wakeem/Richard Teschner Nature Preserve of Resler Canyon", qa)
+        self.assertIn("31.831091", qa)
+        self.assertIn("Cadiz Street", qa)
+        self.assertIn("San Andres National Wildlife Refuge", qa)
+        self.assertIn("32.688003", qa)
+        self.assertIn("White Sands Missile Range S Route 287", qa)
+        self.assertIn("Blunn Creek Nature Preserve", qa)
+        self.assertIn("30.235167", qa)
+        self.assertIn("East Oltorf Street", qa)
+        self.assertIn("Sevilleta National Wildlife Refuge", qa)
+        self.assertIn("34.396837", qa)
+        self.assertIn("Old Highway 85", qa)
         self.assertIn("32.594082", qa)
         self.assertIn("experimental range", qa)
         self.assertIn("Wildflower Preserve", qa)

@@ -149,7 +149,15 @@ CAVE_PRESERVE_KEYS = {
 # water. Rio Grande Stables Road stays a road. Other Game
 # Commission sheets stay their own. Whitfield dry interiors
 # have no nearby name that is not Acequia Madre and stay
-# unheld.
+# unheld. Phrase `nature preserve` already matches Charlie
+# Wakeem/Richard Teschner Nature Preserve of Resler Canyon
+# and Blunn Creek Nature Preserve. Cadiz Street and East
+# Oltorf Street stay roads. Do not add matcher `charlie`,
+# `resler`, or `blunn`. Phrase `national wildlife` already
+# matches San Andres National Wildlife Refuge and Sevilleta
+# National Wildlife Refuge. Do not add matcher `san andres`
+# or `sevilleta`. White Sands Missile Range S Route 287 and
+# Old Highway 85 stay roads.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",
