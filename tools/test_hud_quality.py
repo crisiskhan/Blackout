@@ -61,6 +61,25 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("MapFieldChrome.activeBearing(", tab)
         self.assertNotIn("bearingDeg: runtime.headingDeg", tab)
 
+    def test_bearing_line_prints_live_gnss_not_pack_center(self):
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        tab = read("Blackout", "MapTab.swift")
+        chrome = tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
+        self.assertIn("runtime.gnssYou", chrome)
+        self.assertIn("you:", chrome)
+        self.assertNotIn("youCoordinate()", chrome)
+        self.assertNotIn("lastKnownFix", chrome)
+        self.assertNotIn("youCoordinate()", tab)
+        self.assertIn("func destLine(", route)
+        self.assertIn("%.5f, %.5f", route)
+        self.assertNotIn("DEST %.4f", route)
+        self.assertNotIn("packs?.active?.center", chrome)
+        app = read("Blackout", "AppRuntime.swift")
+        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        self.assertIn("fix.last", you)
+        self.assertNotIn("lastKnownFix", you)
+        self.assertNotIn("center", you)
+
 
 class KeepMapMountedTests(unittest.TestCase):
     def test_map_stays_in_the_tree_on_every_tab(self):
@@ -151,9 +170,13 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
 
     def test_device_script_scores_bearing_not_dest_coords(self):
         device = read("docs", "DEVICE.md")
+        qa = read("docs", "SOLO_QA.md")
         self.assertNotIn("DEST … · BEARING", device)
         self.assertNotIn("DEST ... · BEARING", device)
         self.assertIn("BEARING", device)
+        self.assertIn("31.76190", device)
+        self.assertIn("BEARING 45° · 31.76190", qa)
+        self.assertIn("no `DEST 31.7619, -106.4850`", qa)
 
 
 class OffGridNoDisclaimerTests(unittest.TestCase):

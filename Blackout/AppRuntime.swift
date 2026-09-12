@@ -734,6 +734,12 @@ final class AppRuntime {
         )
     }
 
+    /// Live GNSS only. Pack center and cached fallbacks stay off the bearing row.
+    var gnssYou: (lat: Double, lon: Double)? {
+        guard let c = fix.last else { return nil }
+        return (lat: c.latitude, lon: c.longitude)
+    }
+
     private func youCoordinate() -> (lat: Double, lon: Double) {
         let pack = packs?.active
         let home = packs?.homeCoordinate()

@@ -93,18 +93,31 @@ def joined(parts: list[str]) -> str:
     return SEPARATOR.join(kept)
 
 
+def dest_line(
+    bearing_deg: float | None,
+    you: tuple[float, float] | None = None,
+) -> str:
+    """Mirror of MapFieldChrome.destLine. Heading first; YOU from a live fix."""
+    if bearing_deg is None or bearing_deg < 0:
+        return ""
+    heading = f"BEARING {bearing_deg:.0f}°"
+    if you is None:
+        return heading
+    return f"{heading}{SEPARATOR}{you[0]:.5f}, {you[1]:.5f}"
+
+
 def field_lines(
     lock: str,
     route: str,
     tool: str,
     bearing_deg: float | None,
     speak: str = "",
+    you: tuple[float, float] | None = None,
 ) -> list[str]:
-    """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas, so the
-    middle row carries the heading rather than a latitude nobody can steer by."""
+    """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas,
+    so the middle row carries heading plus YOU, never a DEST coordinate pair."""
     status = joined([lock, route, tool])
-    fix = "" if bearing_deg is None or bearing_deg < 0 else f"BEARING {bearing_deg:.0f}°"
-    return [line for line in (status, fix, speak.strip()) if line]
+    return [line for line in (status, dest_line(bearing_deg, you), speak.strip()) if line]
 
 
 def route_chrome(has_graph: bool, has_dest: bool, plan_chrome: str) -> str:
@@ -186,6 +199,41 @@ class FieldChromeTests(unittest.TestCase):
             self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
             self.assertNotIn("\n", line)
             self.assertNotIn("DEST 31.", line)
+
+    def test_bearing_line_also_prints_live_you_coords(self):
+        # The dest pin is on the canvas. This row already carries heading;
+        # when GNSS has a live fix it also carries YOU, never DEST.
+        with_fix = field_lines(
+            OFF_GRAPH,
+            OFF_GRAPH,
+            "TRUE NORTH",
+            45,
+            "SPEAK · 3 TURNS · 300 M",
+            you=(31.7619, -106.49),
+        )
+        self.assertEqual(
+            with_fix,
+            [
+                "OFF GRAPH · TRUE NORTH",
+                "BEARING 45° · 31.76190, -106.49000",
+                "SPEAK · 3 TURNS · 300 M",
+            ],
+        )
+        far_west = field_lines("", "", "", 359, "", you=(-90.0, -180.0))
+        self.assertEqual(far_west, ["BEARING 359° · -90.00000, -180.00000"])
+        for line in with_fix + far_west:
+            self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
+            self.assertNotIn("DEST 31.", line)
+            self.assertNotIn("DEST %.4f", line)
+        # A dead GPS does not invent 0,0. A live fix without a heading does
+        # not invent a dest row — coords ride the bearing line, they do not
+        # replace it.
+        self.assertEqual(
+            field_lines(OFF_GRAPH, "", "TRUE NORTH", 45, "", you=None),
+            ["OFF GRAPH · TRUE NORTH", "BEARING 45°"],
+        )
+        self.assertEqual(field_lines("", "", "", None, "", you=(31.7619, -106.49)), [])
+        self.assertEqual(field_lines("", "", "", -1, "", you=(31.7619, -106.49)), [])
 
     def test_quiet_field_shows_nothing(self):
         self.assertEqual(field_lines("", "", "", None, ""), [])
@@ -276,6 +324,19 @@ class FieldChromeSourceContracts(unittest.TestCase):
             'String(format: "BEARING %.0f°", h)',
         ):
             self.assertNotIn(stale, self.map_tab, f"{stale} still sprays its own row")
+        chrome = self.map_tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
+        self.assertIn("runtime.gnssYou", chrome)
+        self.assertIn("you:", chrome)
+        self.assertNotIn("youCoordinate()", chrome)
+        self.assertNotIn("lastKnownFix", chrome)
+        self.assertNotIn("youCoordinate()", self.map_tab)
+        app = read("Blackout", "AppRuntime.swift")
+        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        self.assertIn("fix.last", you)
+        self.assertNotIn("lastKnownFix", you)
+        self.assertNotIn("center", you)
+        self.assertIn("%.5f, %.5f", self.route_line)
+        self.assertIn("you: (lat: Double, lon: Double)?", self.route_line)
 
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)

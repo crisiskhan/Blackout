@@ -264,7 +264,8 @@ struct MapTab: View {
                 lockOn: runtime.lockOn,
                 hasRoute: !runtime.routeCoords.isEmpty
             ),
-            speak: runtime.speechChrome
+            speak: runtime.speechChrome,
+            you: runtime.gnssYou
         )
         return Group {
             if !lines.isEmpty {

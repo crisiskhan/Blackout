@@ -499,6 +499,29 @@ final class MapLibreMapTests: XCTestCase {
             XCTAssertLessThanOrEqual(line.text.count, 44)
             XCTAssertFalse(line.text.contains("\n"))
         }
+        let withYou = MapFieldChrome.lines(
+            lock: RouteLine.offGraph,
+            route: RouteLine.offGraph,
+            tool: MagTrueChip.chrome(magNorth: false),
+            bearingDeg: 45,
+            speak: "SPEAK · 3 TURNS · 300 M",
+            you: (lat: 31.7619, lon: -106.49)
+        )
+        XCTAssertEqual(withYou[1].text, "BEARING 45° · 31.76190, -106.49000")
+        XCTAssertFalse(withYou[1].text.contains("DEST 31."))
+        XCTAssertLessThanOrEqual(withYou[1].text.count, 44)
+        XCTAssertEqual(
+            MapFieldChrome.destLine(bearingDeg: 45, you: (lat: 31.7619, lon: -106.49)),
+            "BEARING 45° · 31.76190, -106.49000"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(bearingDeg: 359, you: (lat: -90, lon: -180)),
+            "BEARING 359° · -90.00000, -180.00000"
+        )
+        XCTAssertLessThanOrEqual(
+            MapFieldChrome.destLine(bearingDeg: 359, you: (lat: -90, lon: -180)).count,
+            44
+        )
     }
 
     func testActiveBearingIsQuietWithoutSomewhereToWalk() {
@@ -555,6 +578,11 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: -1), "")
         XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0), "BEARING 0°")
+        XCTAssertEqual(
+            MapFieldChrome.destLine(bearingDeg: -1, you: (lat: 31.7619, lon: -106.49)),
+            ""
+        )
+        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0, you: nil), "BEARING 0°")
     }
 
     func testMapFieldChromeIsSilentWhenNothingIsActive() {
@@ -574,6 +602,16 @@ final class MapLibreMapTests: XCTestCase {
                 tool: "",
                 bearingDeg: -1,
                 speak: ""
+            ).isEmpty
+        )
+        XCTAssertTrue(
+            MapFieldChrome.lines(
+                lock: "",
+                route: "",
+                tool: "",
+                bearingDeg: nil,
+                speak: "",
+                you: (lat: 31.7619, lon: -106.49)
             ).isEmpty
         )
         let bearingOnly = MapFieldChrome.lines(

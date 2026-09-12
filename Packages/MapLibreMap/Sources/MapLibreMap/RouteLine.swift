@@ -285,12 +285,17 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
-    /// The destination is a pin on the canvas, so this line carries the one thing a
-    /// pin cannot: which way to walk. Printing `DEST 31.7619, -106.4850` spent the
-    /// row on a number nobody can steer by.
-    public static func destLine(bearingDeg: Double?) -> String {
+    /// The destination is a pin on the canvas, so this line carries heading
+    /// plus YOU when GNSS has a live fix. Printing `DEST 31.7619, -106.4850`
+    /// spent the row on a pin nobody can steer by.
+    public static func destLine(
+        bearingDeg: Double?,
+        you: (lat: Double, lon: Double)? = nil
+    ) -> String {
         guard let bearingDeg, bearingDeg >= 0 else { return "" }
-        return String(format: "BEARING %.0f°", bearingDeg)
+        let heading = String(format: "BEARING %.0f°", bearingDeg)
+        guard let you else { return heading }
+        return heading + separator + String(format: "%.5f, %.5f", you.lat, you.lon)
     }
 
     /// Inactive chrome stays quiet: no BEARING row unless there is somewhere
@@ -312,11 +317,12 @@ public enum MapFieldChrome: Sendable {
         route: String,
         tool: String,
         bearingDeg: Double?,
-        speak: String
+        speak: String,
+        you: (lat: Double, lon: Double)? = nil
     ) -> [MapFieldLine] {
         [
             (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
-            (.dest, destLine(bearingDeg: bearingDeg)),
+            (.dest, destLine(bearingDeg: bearingDeg, you: you)),
             (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
         ]
         .filter { !$0.1.isEmpty }
