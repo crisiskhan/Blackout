@@ -181,6 +181,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Link's sits 84 m off that mouth and the probe would mix them.
     private static let treeHouseCave = CLLocationCoordinate2D(latitude: 30.498201, longitude: -97.837346)
 
+    /// `Hideaway` on the east place slice. A cave mouth inside
+    /// Westside Preserve — rank 1 still beats the overlay. Nelson
+    /// Ranch Loop 73 m is rank 7. Unique versus the Buttercup overlay
+    /// Hold. Off the cave-overlay sheet. No other mouth in 120 m.
+    private static let hideawayCave = CLLocationCoordinate2D(latitude: 30.494247, longitude: -97.84547)
+
+    /// `Buttercup Wind` on the east place slice. A cave mouth off
+    /// the Buttercup overlay sheet. Shea Drive and Lauren Trail are
+    /// rank 7. Unique versus Discovery Well overlay Hold. Godzilla
+    /// Cave stays unheld — Link's sits 84 m off that mouth.
+    private static let buttercupWindCave = CLLocationCoordinate2D(latitude: 30.494273, longitude: -97.853218)
+
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
     private static let lostOasisCave = CLLocationCoordinate2D(latitude: 30.163187, longitude: -97.873678)
@@ -1706,6 +1718,29 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(treeHouse.card?.fieldRoute.first, Inspect.caveCard, "\(treeHouse)")
         XCTAssertTrue((treeHouse.card?.doLine.lowercased() ?? "").contains("stay in daylight"), treeHouse.card?.doLine ?? "")
         XCTAssertFalse((treeHouse.card?.doLine.lowercased() ?? "").contains("edible"), treeHouse.card?.doLine ?? "")
+
+        let hideaway = try hold(at: Self.hideawayCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(hideaway.card?.klass, "Cave or hole", "\(hideaway)")
+        XCTAssertEqual(hideaway.card?.title, "Hideaway", "\(hideaway)")
+        XCTAssertNotEqual(hideaway.card?.klass, "Open reserve", "\(hideaway)")
+        XCTAssertNotEqual(hideaway.card?.title, "Westside Preserve", "\(hideaway)")
+        XCTAssertNotEqual(hideaway.card?.title, "Nelson Ranch Loop", "\(hideaway)")
+        XCTAssertNotEqual(hideaway.card?.title, "Buttercup Creek Cave Preserve", "\(hideaway)")
+        XCTAssertEqual(hideaway.card?.fieldRoute.first, Inspect.caveCard, "\(hideaway)")
+        XCTAssertTrue((hideaway.card?.doLine.lowercased() ?? "").contains("stay in daylight"), hideaway.card?.doLine ?? "")
+        XCTAssertFalse((hideaway.card?.doLine.lowercased() ?? "").contains("edible"), hideaway.card?.doLine ?? "")
+
+        let buttercupWind = try hold(at: Self.buttercupWindCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(buttercupWind.card?.klass, "Cave or hole", "\(buttercupWind)")
+        XCTAssertEqual(buttercupWind.card?.title, "Buttercup Wind", "\(buttercupWind)")
+        XCTAssertNotEqual(buttercupWind.card?.title, "Shea Drive", "\(buttercupWind)")
+        XCTAssertNotEqual(buttercupWind.card?.title, "Lauren Trail", "\(buttercupWind)")
+        XCTAssertNotEqual(buttercupWind.card?.title, "Godzilla Preserve", "\(buttercupWind)")
+        XCTAssertNotEqual(buttercupWind.card?.title, "Godzilla Cave", "\(buttercupWind)")
+        XCTAssertNotEqual(buttercupWind.card?.title, "Discovery Well Cave Preserve", "\(buttercupWind)")
+        XCTAssertEqual(buttercupWind.card?.fieldRoute.first, Inspect.caveCard, "\(buttercupWind)")
+        XCTAssertTrue((buttercupWind.card?.doLine.lowercased() ?? "").contains("stay in daylight"), buttercupWind.card?.doLine ?? "")
+        XCTAssertFalse((buttercupWind.card?.doLine.lowercased() ?? "").contains("edible"), buttercupWind.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {

@@ -1569,6 +1569,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("geronimo")', inspect)
         self.assertNotIn('contains("landry")', inspect)
         self.assertNotIn('contains("andrew")', inspect)
+        self.assertNotIn('contains("hideaway")', inspect)
+        self.assertNotIn('contains("shea")', inspect)
+        self.assertNotIn('contains("lauren")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2859,6 +2862,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Airmen's Cave", glass)
         self.assertIn("30.241656", glass)
         self.assertIn("-97.791675", glass)
+        self.assertIn("Hideaway", glass)
+        self.assertIn("30.494247", glass)
+        self.assertIn("-97.84547", glass)
+        self.assertIn("Buttercup Wind", glass)
+        self.assertIn("30.494273", glass)
+        self.assertIn("-97.853218", glass)
         self.assertIn("Painted Cave", glass)
         self.assertIn("35.722425", glass)
         self.assertIn("-106.31994", glass)
@@ -3606,6 +3615,8 @@ class GroundFieldSync(unittest.TestCase):
         sorin_oak = False
         airmen_cave = False
         tree_house_cave = False
+        hideaway_cave = False
+        buttercup_wind_cave = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -3657,6 +3668,18 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.837346)) < 1e-6
                 ):
                     tree_house_cave = True
+                if (
+                    props.get("name") == "Hideaway"
+                    and abs(lat - 30.494247) < 1e-6
+                    and abs(lon - (-97.84547)) < 1e-6
+                ):
+                    hideaway_cave = True
+                if (
+                    props.get("name") == "Buttercup Wind"
+                    and abs(lat - 30.494273) < 1e-6
+                    and abs(lon - (-97.853218)) < 1e-6
+                ):
+                    buttercup_wind_cave = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
@@ -3665,6 +3688,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(sorin_oak, "Sorin Oak is not a named tree in the east extract")
         self.assertTrue(airmen_cave, "Airmen's Cave is not a cave mouth in the east extract")
         self.assertTrue(tree_house_cave, "Tree House Cave is not a cave mouth in the east extract")
+        self.assertTrue(hideaway_cave, "Hideaway is not a cave mouth in the east extract")
+        self.assertTrue(
+            buttercup_wind_cave, "Buttercup Wind is not a cave mouth in the east extract"
+        )
         self.assertIn(
             "Treaty Oak",
             place_names_in_tile("tx-east", -97.755462, 30.271466),
@@ -3743,6 +3770,16 @@ class GroundFieldSync(unittest.TestCase):
             "Tree House Cave",
             place_names_in_tile("tx-east", -97.837346, 30.498201),
             "Tree House Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Hideaway",
+            place_names_in_tile("tx-east", -97.84547, 30.494247),
+            "Hideaway did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Buttercup Wind",
+            place_names_in_tile("tx-east", -97.853218, 30.494273),
+            "Buttercup Wind did not survive tiling as a mouth",
         )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
@@ -4567,6 +4604,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Pepper Rock Park", qa)
         self.assertIn("Airmen's Cave", qa)
         self.assertIn("30.241656", qa)
+        self.assertIn("Hideaway", qa)
+        self.assertIn("30.494247", qa)
+        self.assertIn("Buttercup Wind", qa)
+        self.assertIn("30.494273", qa)
+        self.assertIn("Shea Drive", qa)
+        self.assertIn("Lauren Trail", qa)
         self.assertIn("Painted Cave", qa)
         self.assertIn("35.722425", qa)
         self.assertIn("Whirlpool Cave", qa)

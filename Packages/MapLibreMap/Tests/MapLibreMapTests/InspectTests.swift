@@ -604,6 +604,52 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(andrewCove.klass, "Road")
         XCTAssertFalse(andrewCove.fieldRoute.contains(Inspect.caveCard))
 
+        let hideaway = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Hideaway"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(hideaway.klass, "Cave or hole")
+        XCTAssertNotEqual(hideaway.klass, "Open reserve")
+        XCTAssertEqual(hideaway.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(hideaway.doLine.lowercased().contains("edible"), hideaway.doLine)
+
+        let westsidePreserve = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Westside Preserve"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(westsidePreserve.klass, "Open reserve")
+        XCTAssertFalse(westsidePreserve.fieldRoute.contains(Inspect.caveCard))
+
+        let nelsonLoop = Inspect.read(
+            tags: ["highway": "residential", "name": "Nelson Ranch Loop"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(nelsonLoop.klass, "Road")
+        XCTAssertFalse(nelsonLoop.fieldRoute.contains(Inspect.caveCard))
+
+        let buttercupWind = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Buttercup Wind"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(buttercupWind.klass, "Cave or hole")
+        XCTAssertEqual(buttercupWind.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(buttercupWind.doLine.lowercased().contains("edible"), buttercupWind.doLine)
+
+        let sheaDrive = Inspect.read(
+            tags: ["highway": "residential", "name": "Shea Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sheaDrive.klass, "Road")
+        XCTAssertFalse(sheaDrive.fieldRoute.contains(Inspect.caveCard))
+
+        let laurenTrail = Inspect.read(
+            tags: ["highway": "residential", "name": "Lauren Trail"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(laurenTrail.klass, "Road")
+        XCTAssertNotEqual(laurenTrail.klass, "Trail")
+        XCTAssertFalse(laurenTrail.fieldRoute.contains(Inspect.caveCard))
+
         let daffan = Inspect.read(
             tags: ["highway": "tertiary", "name": "Daffan Lane"],
             pack: "tx-east"
@@ -2812,6 +2858,23 @@ final class InspectTests: XCTestCase {
                 ["natural": "cave_entrance", "name": "Tree House Cave"],
                 ["highway": "residential", "name": "Andrew Cove"],
                 ["waterway": "river"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Hideaway"],
+                ["leisure": "nature_reserve", "name": "Westside Preserve"],
+                ["highway": "residential", "name": "Nelson Ranch Loop"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Buttercup Wind"],
+                ["highway": "residential", "name": "Shea Drive"],
+                ["highway": "residential", "name": "Lauren Trail"],
+                ["leisure": "park", "name": "Godzilla Preserve"],
             ])["natural"],
             "cave_entrance"
         )
