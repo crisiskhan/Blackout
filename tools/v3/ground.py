@@ -81,8 +81,10 @@ CAVE_PRESERVE_KEYS = {
 # stays a park. Phrase `wilderness preserve`, not the word `wilderness`.
 # Wilderness Gate is apartments and stays out. Phrase `nature preserve`
 # / `nature center` / `natural area` / `nature area`, not the word
-# `preserve`. Godzilla Preserve stays a park. Phrase `wildlife
-# preserve`, not the word `wildlife`. Wildlife Drive stays a park.
+# `preserve`. Godzilla Preserve stays a park. Mount Lucas is a
+# named peak on Bright Leaf — rank 1 still beats the overlay.
+# Trail #3 stays a trail. Do not add matcher `lucas`. Phrase
+# `wildlife preserve`, not the word `wildlife`. Wildlife Drive stays a park.
 # Phrase `audubon`, not a street — overlay still needs park keys.
 # Phrase `habitat preserve`, not the word `habitat`. Phrase `flora y
 # fauna`, not a street. Phrase `national preserve`, not the word

@@ -367,7 +367,9 @@ public enum Inspect {
     /// `wilderness preserve`, not the word `wilderness` — Wilderness
     /// Gate is apartments. Phrase `nature preserve` / `nature center` /
     /// `natural area` / `nature area`, not the word `preserve` — Godzilla
-    /// Preserve is a park. Phrase `wildlife preserve`, not the word
+    /// Preserve is a park. Mount Lucas is a named peak on Bright Leaf —
+    /// rank 1 still beats the overlay. Trail #3 stays a trail. Do not
+    /// add matcher `lucas`. Phrase `wildlife preserve`, not the word
     /// `wildlife` — Wildlife Drive stays a park. Phrase `audubon`, not
     /// a street. Phrase `habitat preserve`, not the word `habitat`.
     /// Phrase `flora y fauna`, not a street. Phrase `national

@@ -3011,6 +3011,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bright Leaf Natural Area", glass)
         self.assertIn("30.328746", glass)
         self.assertIn("-97.774978", glass)
+        self.assertIn("Mount Lucas", glass)
+        self.assertIn("30.329372", glass)
+        self.assertIn("-97.773062", glass)
+        self.assertIn("Trail #3", glass)
         self.assertIn("Red Bluff Nature Preserve", glass)
         self.assertIn("30.266661", glass)
         self.assertIn("-97.681788", glass)
@@ -3801,6 +3805,7 @@ class GroundFieldSync(unittest.TestCase):
         woods = False
         east_bosque = False
         east_peak = False
+        mount_lucas_peak = False
         east_scrub = False
         treaty_oak = False
         sorin_oak = False
@@ -3843,6 +3848,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.882228)) < 1e-6
                 ):
                     east_peak = True
+                if (
+                    props.get("name") == "Mount Lucas"
+                    and abs(lat - 30.329372) < 1e-6
+                    and abs(lon - (-97.773062)) < 1e-6
+                ):
+                    mount_lucas_peak = True
             if props.get("natural") == "tree" and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -3958,6 +3969,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
+        self.assertTrue(mount_lucas_peak, "Mount Lucas is not a named peak in the east extract")
         self.assertTrue(east_scrub, "glass east scrub hold is not inside unnamed east scrub")
         self.assertTrue(treaty_oak, "Treaty Oak is not a named tree in the east extract")
         self.assertTrue(sorin_oak, "Sorin Oak is not a named tree in the east extract")
@@ -4150,6 +4162,11 @@ class GroundFieldSync(unittest.TestCase):
             "Jumbled Rocks",
             place_names_in_tile("tx-east", -97.857723, 30.490379),
             "Jumbled Rocks did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Mount Lucas",
+            place_names_in_tile("tx-east", -97.773062, 30.329372),
+            "Mount Lucas did not survive tiling as a peak",
         )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
@@ -4941,6 +4958,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Big Walnut Creek Nature Preserve", qa)
         self.assertIn("Bright Leaf Natural Area", qa)
         self.assertIn("30.328746", qa)
+        self.assertIn("Mount Lucas", qa)
+        self.assertIn("30.329372", qa)
         self.assertIn("Red Bluff Nature Preserve", qa)
         self.assertIn("30.266661", qa)
         self.assertIn("Pecos River Complex Wildlife Management Areas", qa)

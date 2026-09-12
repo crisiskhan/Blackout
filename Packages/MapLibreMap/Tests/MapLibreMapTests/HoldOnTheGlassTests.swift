@@ -456,9 +456,9 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Bright Leaf Natural Area. Phrase `natural area`.
     /// Listed centroid sits 90 m from OSM water. This interior is
-    /// unique, 259 m from OSM water. Mount Lucas is 197 m off this
-    /// pip. Mount Bonnell Road 77 m is rank 7; wildlife 4 still
-    /// wins.
+    /// unique, 259 m from OSM water. Mount Lucas is held 197 m off
+    /// this pip — rank 1 still beats the overlay. Mount Bonnell
+    /// Road 77 m is rank 7; wildlife 4 still wins.
     private static let brightLeaf = CLLocationCoordinate2D(latitude: 30.328746, longitude: -97.774978)
 
     /// Interior of Red Bluff Nature Preserve. Phrase `nature
@@ -882,6 +882,12 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
+
+    /// `Mount Lucas` on the east place slice. A named peak on the
+    /// Bright Leaf overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus the Bright Leaf overlay Hold (197 m). Trail #3
+    /// stays a trail. 107 m from OSM water. Hog as range, not javelina.
+    private static let mountLucas = CLLocationCoordinate2D(latitude: 30.329372, longitude: -97.773062)
 
     /// Interior of unnamed east scrub. Ordinary cover: cottonmouth and hog,
     /// not west diamondback, not an overlay prairie.
@@ -2968,6 +2974,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(present.first, Inspect.mammalEastCard, "\(held)")
         XCTAssertEqual(InspectField.label(for: present.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: present), "ANIMAL · BITE · COLD")
+
+        let lucas = try hold(at: Self.mountLucas, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(lucas.card?.klass, "Peak", "\(lucas)")
+        XCTAssertEqual(lucas.card?.title, "Mount Lucas", "\(lucas)")
+        XCTAssertNotEqual(lucas.card?.klass, "Wildlife range", "\(lucas)")
+        XCTAssertNotEqual(lucas.card?.title, "Bright Leaf Natural Area", "\(lucas)")
+        XCTAssertNotEqual(lucas.card?.title, "Trail #3", "\(lucas)")
+        XCTAssertNotEqual(lucas.card?.title, "Mount Bonnell Road", "\(lucas)")
+        XCTAssertNotEqual(lucas.card?.title, "Barton Hill", "\(lucas)")
+        let lucasDo = lucas.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(lucasDo.contains("hog"), lucas.card?.doLine ?? "")
+        XCTAssertTrue(lucasDo.contains("give it the road"), lucas.card?.doLine ?? "")
+        XCTAssertFalse(lucasDo.contains("javelina"), lucas.card?.doLine ?? "")
+        XCTAssertFalse(lucasDo.contains("edible"), lucas.card?.doLine ?? "")
+        let lucasPresent = InspectField.presentRoute(lucas.card?.fieldRoute ?? [], in: east)
+        XCTAssertEqual(lucasPresent.first, Inspect.mammalEastCard, "\(lucas)")
+        XCTAssertEqual(InspectField.label(for: lucasPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: lucasPresent), "ANIMAL · BITE · COLD")
     }
 
     func testHoldingANewMexicoOpenReserveOpensBiteNotPicnicWoodland() throws {

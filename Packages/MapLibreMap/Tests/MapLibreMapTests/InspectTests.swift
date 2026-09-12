@@ -1200,6 +1200,24 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(leaf.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(leaf.doLine.lowercased().contains("edible"), leaf.doLine)
 
+        let mountLucas = Inspect.read(
+            tags: ["natural": "peak", "name": "Mount Lucas"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(mountLucas.klass, "Peak")
+        XCTAssertNotEqual(mountLucas.klass, "Wildlife range")
+        XCTAssertTrue(mountLucas.fieldRoute.contains(Inspect.mammalEastCard))
+        XCTAssertTrue(mountLucas.doLine.lowercased().contains("hog"), mountLucas.doLine)
+        XCTAssertFalse(mountLucas.doLine.lowercased().contains("javelina"), mountLucas.doLine)
+        XCTAssertFalse(mountLucas.doLine.lowercased().contains("edible"), mountLucas.doLine)
+
+        let trailThree = Inspect.read(
+            tags: ["highway": "path", "name": "Trail #3"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(trailThree.klass, "Trail")
+        XCTAssertFalse(trailThree.fieldRoute.contains(Inspect.mammalEastCard))
+
         let godzilla = Inspect.read(
             tags: ["leisure": "park", "name": "Godzilla Preserve"],
             pack: "tx-east"
@@ -3155,6 +3173,19 @@ final class InspectTests: XCTestCase {
             Inspect.pick([
                 ["highway": "track", "name": "North Franklin Trail"],
                 ["natural": "peak", "name": "North Franklin"],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Mount Lucas"],
+                [
+                    "leisure": "park",
+                    "natural": "wood",
+                    "name": "Bright Leaf Natural Area",
+                ],
+                ["highway": "path", "name": "Trail #3"],
+                ["waterway": "stream"],
             ])["natural"],
             "peak"
         )
