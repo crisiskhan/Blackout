@@ -982,6 +982,14 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
             "Dictionary(uniqueKeysWithValues: partyMarks.map",
             offline,
         )
+        self.assertNotIn("MLNPolyline(coordinates: &empty, count: 0)", offline)
+        self.assertNotIn("count: 0", offline)
+        self.assertIn("emptyOverlayShape", offline)
+        self.assertNotIn(
+            "a.lat != b.lat || a.lon != b.lon || a.emblem != b.emblem",
+            route,
+        )
+        self.assertIn("a.id != b.id || a.emblem != b.emblem", route)
         self.assertIn("HiddenUserLocationView", offline)
         self.assertIn("circleStrokeOpacity", offline)
         self.assertGreaterEqual(offline.count("circleStrokeOpacity"), 2)

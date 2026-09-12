@@ -573,6 +573,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 view.removeAnnotation(old)
             }
             partyMarks = next
+            storedPips = spec.pips
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -795,8 +796,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     style.addLayer(core)
                 }
             } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
-                var empty = [CLLocationCoordinate2D]()
-                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+                src.shape = emptyOverlayShape()
             }
 
             if let point = spec.held {
@@ -825,8 +825,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     style.addLayer(core)
                 }
             } else if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
-                var empty = [CLLocationCoordinate2D]()
-                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+                src.shape = emptyOverlayShape()
             }
 
             if RouteLine.shouldDraw(spec.route) {
@@ -843,8 +842,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     paintRoute(on: style, source: src, mode: spec.travelMode)
                 }
             } else if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
-                var empty = [CLLocationCoordinate2D]()
-                src.shape = MLNPolyline(coordinates: &empty, count: 0)
+                src.shape = emptyOverlayShape()
             }
 
             let party = partyShape(spec.pips)
@@ -953,14 +951,29 @@ public struct OfflineMapView: UIViewRepresentable {
                 "type": "FeatureCollection",
                 "features": features,
             ]
-            guard
-                let data = try? JSONSerialization.data(withJSONObject: geo),
-                let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
-            else {
-                var empty = [CLLocationCoordinate2D]()
-                return MLNPolyline(coordinates: &empty, count: 0)
+            if let data = try? JSONSerialization.data(withJSONObject: geo),
+               let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) {
+                return shape
             }
-            return shape
+            return coincidentLine()
+        }
+
+        /// Empty FeatureCollection. Never a 0-vertex polyline — MapLibre
+        /// Native can crash when a 0-count `MLNPolyline` is assigned during
+        /// LOCK-ON `setCenter` / WALK (same class as tearing YOU down on GPS
+        /// ticks). Closing a Hold, OFF GRAPH, pack switch, and a failed
+        /// party JSON all used to take that path.
+        func emptyOverlayShape() -> MLNShape {
+            partyShape([])
+        }
+
+        /// Last resort if FeatureCollection JSON fails. Two vertices. Never count 0.
+        func coincidentLine() -> MLNShape {
+            var coords = [
+                CLLocationCoordinate2D(latitude: 0, longitude: 0),
+                CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            ]
+            return MLNPolyline(coordinates: &coords, count: 2)
         }
 
         public func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {

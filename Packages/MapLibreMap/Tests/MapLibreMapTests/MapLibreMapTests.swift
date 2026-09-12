@@ -704,6 +704,18 @@ final class MapLibreMapTests: XCTestCase {
         let wolf = PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 12, emblem: "wolf")
         let turned = PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 90, emblem: "wolf")
         XCTAssertFalse(PartyPips.needsReapply(stored: [wolf], pips: [turned]))
+        let walked = PartyBody(id: "p1", lat: 31.76004, lon: -106.49, headingDeg: 90, emblem: "wolf")
+        XCTAssertFalse(PartyPips.needsReapply(stored: [wolf], pips: [walked]))
+        XCTAssertFalse(
+            OverlaySync.needsStyleMutation(
+                force: false,
+                puckNeedsReapply: false,
+                routeNeedsReapply: false,
+                partyNeedsReapply: PartyPips.needsReapply(stored: [wolf], pips: [walked])
+            )
+        )
+        XCTAssertTrue(PartyPips.needsReapply(stored: [wolf], pips: []))
+        XCTAssertTrue(PartyPips.needsReapply(stored: [], pips: [wolf]))
         XCTAssertTrue(
             PartyPips.needsReapply(
                 stored: [wolf],

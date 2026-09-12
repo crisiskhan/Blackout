@@ -797,6 +797,8 @@ public enum PackStyle {
 }
 
 public enum OverlaySync: Sendable {
+    /// Style mutation is add/remove of sources and layers. GPS ticks must
+    /// not request it for YOU or party position — those move in place.
     public static func needsStyleMutation(
         force: Bool,
         puckNeedsReapply: Bool,

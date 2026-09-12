@@ -124,10 +124,13 @@ public enum PartyPips {
         stored: [PartyBody]?,
         pips: [PartyBody]
     ) -> Bool {
+        // Position and heading move in place via syncPartyMarks. Rebuilding
+        // style sources on every peer POS is the same class as tearing YOU
+        // down on GPS ticks.
         guard let stored else { return true }
         if stored.count != pips.count { return true }
         for (a, b) in zip(stored, pips) {
-            if a.id != b.id || a.lat != b.lat || a.lon != b.lon || a.emblem != b.emblem {
+            if a.id != b.id || a.emblem != b.emblem {
                 return true
             }
         }

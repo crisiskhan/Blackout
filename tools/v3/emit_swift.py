@@ -1165,8 +1165,24 @@ public struct StepperState: Equatable, Sendable {
         self.sentToParty = sentToParty
     }
 
-    public var step: FieldStep { card.steps[index] }
-    public var isLast: Bool { index == card.steps.count - 1 }
+    public var step: FieldStep {
+        if card.steps.indices.contains(index) {
+            return card.steps[index]
+        }
+        if let first = card.steps.first {
+            return first
+        }
+        return FieldStep(
+            do: FieldLoc(en: "", es: ""),
+            why: FieldLoc(en: "", es: ""),
+            child: FieldLoc(en: "", es: ""),
+            stop: FieldLoc(en: "", es: ""),
+            image: ""
+        )
+    }
+    public var isLast: Bool {
+        card.steps.count <= 1 || index >= card.steps.count - 1
+    }
     public mutating func next() { if !isLast { index += 1 } }
     public mutating func speak() { speaking = card.speak }
     public mutating func send() { sentToParty = card.sendToParty }
@@ -1189,6 +1205,15 @@ final class FieldStepperTests: XCTestCase {
         XCTAssertEqual(s.index, 1)
         XCTAssertTrue(s.speaking)
         XCTAssertEqual(s.step.metronomeBpm, 110)
+        var stale = StepperState(card: card, index: 99, speaking: false, sentToParty: false)
+        XCTAssertEqual(stale.step.metronomeBpm, 110)
+        XCTAssertTrue(stale.isLast)
+        let emptyCard = FieldCard(schema: "1.4", id: "empty", category: "medical", states: ["TX"], title: loc, situation: loc, stop_if: [loc], get_to_care: loc, speak: true, sendToParty: true, steps: [])
+        var empty = StepperState(card: emptyCard, index: 0, speaking: false, sentToParty: false)
+        XCTAssertTrue(empty.isLast)
+        XCTAssertEqual(empty.step.image, "")
+        empty.next()
+        XCTAssertEqual(empty.index, 0)
     }
 }
 ''',
@@ -1356,10 +1381,11 @@ public struct GuidedCapture: Equatable, Sendable {
         frames.append(CaptureFrame(features: features, added: true))
     }
     public func mergedFeatures() -> [Double] {
-        guard !frames.isEmpty else { return [0, 0, 0]
-        }
+        guard !frames.isEmpty else { return [0, 0, 0] }
+        let width = frames.map(\.features.count).min() ?? 0
+        guard width > 0 else { return [0, 0, 0] }
         let n = Double(frames.count)
-        return (0..<frames[0].features.count).map { i in
+        return (0..<width).map { i in
             frames.map { $0.features[i] }.reduce(0, +) / n
         }
     }
@@ -1382,6 +1408,13 @@ final class VisionCaptureTests: XCTestCase {
         g.addFrame([0, 1, 0])
         XCTAssertEqual(g.frames.count, 2)
         XCTAssertEqual(g.mergedFeatures()[0], 0.5, accuracy: 0.01)
+        g.addFrame([1, 0])
+        XCTAssertEqual(g.mergedFeatures().count, 2)
+        XCTAssertEqual(g.mergedFeatures()[0], 2.0 / 3.0, accuracy: 0.01)
+        var empty = GuidedCapture()
+        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
+        empty.addFrame([])
+        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
     }
 }
 ''',
