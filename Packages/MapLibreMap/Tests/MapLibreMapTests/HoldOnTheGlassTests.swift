@@ -292,6 +292,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// wood, not a meal.
     private static let treatyOak = CLLocationCoordinate2D(latitude: 30.271466, longitude: -97.755462)
 
+    /// `Sorin Oak` on the east place slice. A surveyed tree, shade and
+    /// wood, not a meal. Not Sorin Street. 267 m from OSM water.
+    private static let sorinOak = CLLocationCoordinate2D(latitude: 30.229486, longitude: -97.75447)
+
     /// Interior of Blowing Sink in east `layers/ground.geojson`. A wetland
     /// in the extract; phrase `blowing sink`, not a cave-preserve park.
     /// Vertex-avg covers the sheet. Streams and ways sit hundreds of metres off.
@@ -927,6 +931,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(oakDo.contains("not a meal"), oak.card?.doLine ?? "")
         XCTAssertFalse(oakDo.contains("edible"), oak.card?.doLine ?? "")
         XCTAssertFalse(oakDo.contains("hog"), oak.card?.doLine ?? "")
+
+        let sorin = try hold(at: Self.sorinOak, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(sorin.card?.klass, "Named tree", "\(sorin)")
+        XCTAssertEqual(sorin.card?.title, "Sorin Oak", "\(sorin)")
+        XCTAssertEqual(sorin.card?.fieldRoute.first, Inspect.treeUseEastCard, "\(sorin)")
+        let sorinDo = sorin.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sorinDo.contains("not a meal"), sorin.card?.doLine ?? "")
+        XCTAssertFalse(sorinDo.contains("edible"), sorin.card?.doLine ?? "")
+        XCTAssertFalse(sorinDo.contains("hog"), sorin.card?.doLine ?? "")
+        XCTAssertFalse(sorinDo.contains("javelina"), sorin.card?.doLine ?? "")
     }
 
     func testHoldingAnEastBosqueNamesCottonmouthNotAPark() throws {

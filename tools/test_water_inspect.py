@@ -2209,6 +2209,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Treaty Oak", glass)
         self.assertIn("30.271466", glass)
         self.assertIn("-97.755462", glass)
+        self.assertIn("Sorin Oak", glass)
+        self.assertIn("30.229486", glass)
+        self.assertIn("-97.75447", glass)
         self.assertIn("Lost Oasis Cave Preserve", glass)
         self.assertIn("30.163187", glass)
         self.assertIn("-97.873678", glass)
@@ -2750,6 +2753,7 @@ class GroundFieldSync(unittest.TestCase):
         east_peak = False
         east_scrub = False
         treaty_oak = False
+        sorin_oak = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -2781,15 +2785,27 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.755462)) < 1e-6
                 ):
                     treaty_oak = True
+                if (
+                    props.get("name") == "Sorin Oak"
+                    and abs(lat - 30.229486) < 1e-6
+                    and abs(lon - (-97.75447)) < 1e-6
+                ):
+                    sorin_oak = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
         self.assertTrue(east_scrub, "glass east scrub hold is not inside unnamed east scrub")
         self.assertTrue(treaty_oak, "Treaty Oak is not a named tree in the east extract")
+        self.assertTrue(sorin_oak, "Sorin Oak is not a named tree in the east extract")
         self.assertIn(
             "Treaty Oak",
             place_names_in_tile("tx-east", -97.755462, 30.271466),
             "Treaty Oak did not survive tiling",
+        )
+        self.assertIn(
+            "Sorin Oak",
+            place_names_in_tile("tx-east", -97.75447, 30.229486),
+            "Sorin Oak did not survive tiling",
         )
         self.assertIn(
             "Anthony Gap Cave",
@@ -3430,6 +3446,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bat Cave", qa)
         self.assertIn("32.932316", qa)
         self.assertIn("Treaty Oak", qa)
+        self.assertIn("Sorin Oak", qa)
+        self.assertIn("30.229486", qa)
         self.assertIn("Lost Oasis Cave Preserve", qa)
         self.assertIn("Sandia Man Cave", qa)
         self.assertIn("Whirlpool Cave", qa)

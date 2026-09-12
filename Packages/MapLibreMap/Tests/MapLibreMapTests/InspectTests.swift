@@ -1441,6 +1441,24 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(nmTreeDo.contains("bear"), nmTree.doLine)
         XCTAssertFalse(nmTreeDo.contains("elk"), nmTree.doLine)
         XCTAssertFalse(nmTreeDo.contains("javelina"), nmTree.doLine)
+
+        let sorin = Inspect.read(
+            tags: ["natural": "tree", "name": "Sorin Oak"],
+            state: "TX",
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sorin.klass, "Named tree")
+        XCTAssertEqual(sorin.title, "Sorin Oak")
+        XCTAssertEqual(sorin.fieldRoute.first, Inspect.treeUseEastCard)
+        XCTAssertFalse(sorin.doLine.lowercased().contains("edible"), sorin.doLine)
+        XCTAssertTrue(sorin.doLine.lowercased().contains("not a meal"), sorin.doLine)
+
+        let sorinStreet = Inspect.read(
+            tags: ["highway": "residential", "name": "Sorin Street"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(sorinStreet.klass, "Road")
+        XCTAssertNotEqual(sorinStreet.klass, "Named tree")
     }
 
     func testTheOpenPackNamesItsTreesAndAnimalsAsRangeNotPins() {
