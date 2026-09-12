@@ -4136,79 +4136,6 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(ojitoSanDo.contains("sotol") || ojitoSanDo.contains("cholla"), ojitoSanAntonio.card?.doLine ?? "")
         XCTAssertFalse(ojitoSanDo.contains("javelina"), ojitoSanAntonio.card?.doLine ?? "")
         XCTAssertFalse(ojitoSanDo.contains("edible"), ojitoSanAntonio.card?.doLine ?? "")
-
-        let bearCanyonWest = try hold(at: Self.bearCanyonOpenSpaceWest, zoom: 16, packId: "nm")
-        XCTAssertEqual(bearCanyonWest.card?.klass, "Open reserve", "\(bearCanyonWest)")
-        XCTAssertEqual(bearCanyonWest.card?.title, "Bear Canyon Open Space West", "\(bearCanyonWest)")
-        XCTAssertNotEqual(bearCanyonWest.card?.klass, "Park", "\(bearCanyonWest)")
-        XCTAssertNotEqual(bearCanyonWest.card?.title, "Bear Canyon Open Space East", "\(bearCanyonWest)")
-        XCTAssertNotEqual(bearCanyonWest.card?.title, "Bear Canyon Scenic Easement", "\(bearCanyonWest)")
-        XCTAssertNotEqual(bearCanyonWest.card?.title, "Key West Drive Northeast", "\(bearCanyonWest)")
-        XCTAssertNotEqual(bearCanyonWest.card?.title, "Sandia Mountain Wilderness", "\(bearCanyonWest)")
-        XCTAssertEqual(bearCanyonWest.card?.fieldRoute.first, Inspect.snakeTXCard, "\(bearCanyonWest)")
-        XCTAssertTrue(
-            bearCanyonWest.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
-            "Bear Canyon Open Space West dropped the NM snake card: \(bearCanyonWest)"
-        )
-        let bearWestDo = bearCanyonWest.card?.doLine.lowercased() ?? ""
-        XCTAssertTrue(bearWestDo.contains("rattler") || bearWestDo.contains("diamondback"), bearCanyonWest.card?.doLine ?? "")
-        XCTAssertTrue(bearWestDo.contains("sotol") || bearWestDo.contains("cholla"), bearCanyonWest.card?.doLine ?? "")
-        XCTAssertFalse(bearWestDo.contains("javelina"), bearCanyonWest.card?.doLine ?? "")
-        XCTAssertFalse(bearWestDo.contains("edible"), bearCanyonWest.card?.doLine ?? "")
-
-        let bearCanyonEast = try hold(at: Self.bearCanyonOpenSpaceEast, zoom: 16, packId: "nm")
-        XCTAssertEqual(bearCanyonEast.card?.klass, "Open reserve", "\(bearCanyonEast)")
-        XCTAssertEqual(bearCanyonEast.card?.title, "Bear Canyon Open Space East", "\(bearCanyonEast)")
-        XCTAssertNotEqual(bearCanyonEast.card?.klass, "Park", "\(bearCanyonEast)")
-        XCTAssertNotEqual(bearCanyonEast.card?.title, "Bear Canyon Open Space West", "\(bearCanyonEast)")
-        XCTAssertNotEqual(bearCanyonEast.card?.title, "Michael Emery Trail", "\(bearCanyonEast)")
-        XCTAssertNotEqual(bearCanyonEast.card?.title, "Bear Canyon Trail", "\(bearCanyonEast)")
-        XCTAssertNotEqual(bearCanyonEast.card?.title, "Sandia Mountain Wilderness", "\(bearCanyonEast)")
-        XCTAssertEqual(bearCanyonEast.card?.fieldRoute.first, Inspect.snakeTXCard, "\(bearCanyonEast)")
-        XCTAssertTrue(
-            bearCanyonEast.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
-            "Bear Canyon Open Space East dropped the NM snake card: \(bearCanyonEast)"
-        )
-        let bearEastDo = bearCanyonEast.card?.doLine.lowercased() ?? ""
-        XCTAssertTrue(bearEastDo.contains("rattler") || bearEastDo.contains("diamondback"), bearCanyonEast.card?.doLine ?? "")
-        XCTAssertTrue(bearEastDo.contains("sotol") || bearEastDo.contains("cholla"), bearCanyonEast.card?.doLine ?? "")
-        XCTAssertFalse(bearEastDo.contains("javelina"), bearCanyonEast.card?.doLine ?? "")
-        XCTAssertFalse(bearEastDo.contains("edible"), bearCanyonEast.card?.doLine ?? "")
-
-        let conservationTrust = try hold(at: Self.santaFeConservationTrust, zoom: 16, packId: "nm")
-        XCTAssertEqual(conservationTrust.card?.klass, "Open reserve", "\(conservationTrust)")
-        XCTAssertEqual(conservationTrust.card?.title, "Santa Fe Conservation Trust", "\(conservationTrust)")
-        XCTAssertNotEqual(conservationTrust.card?.klass, "Park", "\(conservationTrust)")
-        XCTAssertNotEqual(conservationTrust.card?.title, "Galisteo Basin Preserve", "\(conservationTrust)")
-        XCTAssertNotEqual(conservationTrust.card?.title, "South Trail", "\(conservationTrust)")
-        XCTAssertNotEqual(conservationTrust.card?.title, "Santa Fe Open Space", "\(conservationTrust)")
-        XCTAssertEqual(conservationTrust.card?.fieldRoute.first, Inspect.snakeTXCard, "\(conservationTrust)")
-        XCTAssertTrue(
-            conservationTrust.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
-            "Santa Fe Conservation Trust dropped the NM snake card: \(conservationTrust)"
-        )
-        let trustDo = conservationTrust.card?.doLine.lowercased() ?? ""
-        XCTAssertTrue(trustDo.contains("rattler") || trustDo.contains("diamondback"), conservationTrust.card?.doLine ?? "")
-        XCTAssertTrue(trustDo.contains("sotol") || trustDo.contains("cholla"), conservationTrust.card?.doLine ?? "")
-        XCTAssertFalse(trustDo.contains("javelina"), conservationTrust.card?.doLine ?? "")
-        XCTAssertFalse(trustDo.contains("edible"), conservationTrust.card?.doLine ?? "")
-
-        let landConservancy = try hold(at: Self.newMexicoLandConservancy, zoom: 16, packId: "nm")
-        XCTAssertEqual(landConservancy.card?.klass, "Open reserve", "\(landConservancy)")
-        XCTAssertEqual(landConservancy.card?.title, "New Mexico Land Conservancy", "\(landConservancy)")
-        XCTAssertNotEqual(landConservancy.card?.klass, "Park", "\(landConservancy)")
-        XCTAssertNotEqual(landConservancy.card?.title, "The Haozous Garden", "\(landConservancy)")
-        XCTAssertNotEqual(landConservancy.card?.title, "LC Loop", "\(landConservancy)")
-        XCTAssertEqual(landConservancy.card?.fieldRoute.first, Inspect.snakeTXCard, "\(landConservancy)")
-        XCTAssertTrue(
-            landConservancy.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
-            "New Mexico Land Conservancy dropped the NM snake card: \(landConservancy)"
-        )
-        let conservancyDo = landConservancy.card?.doLine.lowercased() ?? ""
-        XCTAssertTrue(conservancyDo.contains("rattler") || conservancyDo.contains("diamondback"), landConservancy.card?.doLine ?? "")
-        XCTAssertTrue(conservancyDo.contains("sotol") || conservancyDo.contains("cholla"), landConservancy.card?.doLine ?? "")
-        XCTAssertFalse(conservancyDo.contains("javelina"), landConservancy.card?.doLine ?? "")
-        XCTAssertFalse(conservancyDo.contains("edible"), landConservancy.card?.doLine ?? "")
     }
 
     func testHoldingNewMexicoWoodlandOpensCottonwoodNotJavelina() throws {
@@ -4287,6 +4214,25 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(honeyDo.contains("not a meal"), honey.card?.doLine ?? "")
         XCTAssertFalse(honeyDo.contains("edible"), honey.card?.doLine ?? "")
         XCTAssertFalse(honeyDo.contains("javelina"), honey.card?.doLine ?? "")
+
+        let bearCanyonWest = try hold(at: Self.bearCanyonOpenSpaceWest, zoom: 16, packId: "nm")
+        XCTAssertEqual(bearCanyonWest.card?.klass, "Open reserve", "\(bearCanyonWest)")
+        XCTAssertEqual(bearCanyonWest.card?.title, "Bear Canyon Open Space West", "\(bearCanyonWest)")
+        XCTAssertNotEqual(bearCanyonWest.card?.klass, "Park", "\(bearCanyonWest)")
+        XCTAssertNotEqual(bearCanyonWest.card?.title, "Bear Canyon Open Space East", "\(bearCanyonWest)")
+        XCTAssertNotEqual(bearCanyonWest.card?.title, "Bear Canyon Scenic Easement", "\(bearCanyonWest)")
+        XCTAssertNotEqual(bearCanyonWest.card?.title, "Key West Drive Northeast", "\(bearCanyonWest)")
+        XCTAssertNotEqual(bearCanyonWest.card?.title, "Sandia Mountain Wilderness", "\(bearCanyonWest)")
+        XCTAssertEqual(bearCanyonWest.card?.fieldRoute.first, Inspect.snakeTXCard, "\(bearCanyonWest)")
+        XCTAssertTrue(
+            bearCanyonWest.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Bear Canyon Open Space West dropped the NM snake card: \(bearCanyonWest)"
+        )
+        let bearWestDo = bearCanyonWest.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(bearWestDo.contains("rattler") || bearWestDo.contains("diamondback"), bearCanyonWest.card?.doLine ?? "")
+        XCTAssertTrue(bearWestDo.contains("sotol") || bearWestDo.contains("cholla"), bearCanyonWest.card?.doLine ?? "")
+        XCTAssertFalse(bearWestDo.contains("javelina"), bearCanyonWest.card?.doLine ?? "")
+        XCTAssertFalse(bearWestDo.contains("edible"), bearCanyonWest.card?.doLine ?? "")
     }
 
     func testHoldingANewMexicoBosqueOpensCottonwoodNotElkCountry() throws {
@@ -4314,6 +4260,25 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · PLANT"
         )
+
+        let bearCanyonEast = try hold(at: Self.bearCanyonOpenSpaceEast, zoom: 16, packId: "nm")
+        XCTAssertEqual(bearCanyonEast.card?.klass, "Open reserve", "\(bearCanyonEast)")
+        XCTAssertEqual(bearCanyonEast.card?.title, "Bear Canyon Open Space East", "\(bearCanyonEast)")
+        XCTAssertNotEqual(bearCanyonEast.card?.klass, "Park", "\(bearCanyonEast)")
+        XCTAssertNotEqual(bearCanyonEast.card?.title, "Bear Canyon Open Space West", "\(bearCanyonEast)")
+        XCTAssertNotEqual(bearCanyonEast.card?.title, "Michael Emery Trail", "\(bearCanyonEast)")
+        XCTAssertNotEqual(bearCanyonEast.card?.title, "Bear Canyon Trail", "\(bearCanyonEast)")
+        XCTAssertNotEqual(bearCanyonEast.card?.title, "Sandia Mountain Wilderness", "\(bearCanyonEast)")
+        XCTAssertEqual(bearCanyonEast.card?.fieldRoute.first, Inspect.snakeTXCard, "\(bearCanyonEast)")
+        XCTAssertTrue(
+            bearCanyonEast.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Bear Canyon Open Space East dropped the NM snake card: \(bearCanyonEast)"
+        )
+        let bearEastDo = bearCanyonEast.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(bearEastDo.contains("rattler") || bearEastDo.contains("diamondback"), bearCanyonEast.card?.doLine ?? "")
+        XCTAssertTrue(bearEastDo.contains("sotol") || bearEastDo.contains("cholla"), bearCanyonEast.card?.doLine ?? "")
+        XCTAssertFalse(bearEastDo.contains("javelina"), bearCanyonEast.card?.doLine ?? "")
+        XCTAssertFalse(bearEastDo.contains("edible"), bearCanyonEast.card?.doLine ?? "")
     }
 
     func testHoldingANewMexicoPeakOpensColdThenAnimals() throws {
@@ -4390,6 +4355,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(antonioPresent.first, Inspect.iceRockCard, "\(antonio)")
         XCTAssertEqual(InspectField.label(for: antonioPresent.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: antonioPresent), "COLD · ANIMAL · BITE")
+
+        let conservationTrust = try hold(at: Self.santaFeConservationTrust, zoom: 16, packId: "nm")
+        XCTAssertEqual(conservationTrust.card?.klass, "Open reserve", "\(conservationTrust)")
+        XCTAssertEqual(conservationTrust.card?.title, "Santa Fe Conservation Trust", "\(conservationTrust)")
+        XCTAssertNotEqual(conservationTrust.card?.klass, "Park", "\(conservationTrust)")
+        XCTAssertNotEqual(conservationTrust.card?.title, "Galisteo Basin Preserve", "\(conservationTrust)")
+        XCTAssertNotEqual(conservationTrust.card?.title, "South Trail", "\(conservationTrust)")
+        XCTAssertNotEqual(conservationTrust.card?.title, "Santa Fe Open Space", "\(conservationTrust)")
+        XCTAssertEqual(conservationTrust.card?.fieldRoute.first, Inspect.snakeTXCard, "\(conservationTrust)")
+        XCTAssertTrue(
+            conservationTrust.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Santa Fe Conservation Trust dropped the NM snake card: \(conservationTrust)"
+        )
+        let trustDo = conservationTrust.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(trustDo.contains("rattler") || trustDo.contains("diamondback"), conservationTrust.card?.doLine ?? "")
+        XCTAssertTrue(trustDo.contains("sotol") || trustDo.contains("cholla"), conservationTrust.card?.doLine ?? "")
+        XCTAssertFalse(trustDo.contains("javelina"), conservationTrust.card?.doLine ?? "")
+        XCTAssertFalse(trustDo.contains("edible"), conservationTrust.card?.doLine ?? "")
     }
 
     func testHoldingAnEastPrairiePreserveOpensBiteNotPicnicWoodland() throws {
@@ -4573,6 +4556,23 @@ final class HoldOnTheGlassTests: XCTestCase {
             )),
             "BITE · ANIMAL · PLANT · FOOD · HEAT"
         )
+
+        let landConservancy = try hold(at: Self.newMexicoLandConservancy, zoom: 16, packId: "nm")
+        XCTAssertEqual(landConservancy.card?.klass, "Open reserve", "\(landConservancy)")
+        XCTAssertEqual(landConservancy.card?.title, "New Mexico Land Conservancy", "\(landConservancy)")
+        XCTAssertNotEqual(landConservancy.card?.klass, "Park", "\(landConservancy)")
+        XCTAssertNotEqual(landConservancy.card?.title, "The Haozous Garden", "\(landConservancy)")
+        XCTAssertNotEqual(landConservancy.card?.title, "LC Loop", "\(landConservancy)")
+        XCTAssertEqual(landConservancy.card?.fieldRoute.first, Inspect.snakeTXCard, "\(landConservancy)")
+        XCTAssertTrue(
+            landConservancy.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "New Mexico Land Conservancy dropped the NM snake card: \(landConservancy)"
+        )
+        let conservancyDo = landConservancy.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(conservancyDo.contains("rattler") || conservancyDo.contains("diamondback"), landConservancy.card?.doLine ?? "")
+        XCTAssertTrue(conservancyDo.contains("sotol") || conservancyDo.contains("cholla"), landConservancy.card?.doLine ?? "")
+        XCTAssertFalse(conservancyDo.contains("javelina"), landConservancy.card?.doLine ?? "")
+        XCTAssertFalse(conservancyDo.contains("edible"), landConservancy.card?.doLine ?? "")
     }
 
     /// Whatever came back, it has to carry the four lines the card shows and a
