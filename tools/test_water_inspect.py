@@ -2793,6 +2793,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("32.688003", glass)
         self.assertIn("-106.484294", glass)
         self.assertIn("White Sands Missile Range S Route 287", glass)
+        self.assertIn("San Andres Peak", glass)
+        self.assertIn("32.675918", glass)
+        self.assertIn("-106.536111", glass)
         self.assertIn("Feather Lake Wildlife Refuge", glass)
         self.assertIn("31.690659", glass)
         self.assertIn("-106.305767", glass)
@@ -4168,6 +4171,11 @@ class GroundFieldSync(unittest.TestCase):
             place_names_in_tile("tx-east", -97.773062, 30.329372),
             "Mount Lucas did not survive tiling as a peak",
         )
+        self.assertIn(
+            "San Andres Peak",
+            place_names_in_tile("tx-west", -106.536111, 32.675918),
+            "San Andres Peak did not survive tiling as a peak",
+        )
 
         nm = json.loads((PACK_ROOT / "nm" / "layers" / "ground.geojson").read_text())
         botanic_hit = False
@@ -4406,6 +4414,7 @@ class GroundFieldSync(unittest.TestCase):
         )
 
         peak = False
+        san_andres_peak = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -4418,7 +4427,16 @@ class GroundFieldSync(unittest.TestCase):
                 and abs(lon - (-106.492210)) < 1e-6
             ):
                 peak = True
+            if (
+                props.get("name") == "San Andres Peak"
+                and abs(lat - 32.675918) < 1e-6
+                and abs(lon - (-106.536111)) < 1e-6
+            ):
+                san_andres_peak = True
         self.assertTrue(peak, "glass west peak hold is not Mount Franklin")
+        self.assertTrue(
+            san_andres_peak, "San Andres Peak is not a named peak in the west extract"
+        )
 
         nm_reserve_hit = False
         for feat in nm["features"]:
@@ -5122,6 +5140,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("San Andres National Wildlife Refuge", qa)
         self.assertIn("32.688003", qa)
         self.assertIn("White Sands Missile Range S Route 287", qa)
+        self.assertIn("San Andres Peak", qa)
+        self.assertIn("32.675918", qa)
         self.assertIn("Feather Lake Wildlife Refuge", qa)
         self.assertIn("31.690659", qa)
         self.assertIn("Nottingham Drive", qa)

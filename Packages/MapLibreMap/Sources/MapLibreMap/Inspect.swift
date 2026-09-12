@@ -448,7 +448,9 @@ public enum Inspect {
     /// Do not add matcher `charlie`, `resler`, or `blunn`. Phrase
     /// `national wildlife` already matches San Andres National
     /// Wildlife Refuge and Sevilleta National Wildlife Refuge.
-    /// Do not add matcher `san andres` or `sevilleta`. White
+    /// San Andres Peak is a named peak on that sheet — rank 1
+    /// still beats the overlay. Do not add matcher `san andres`
+    /// or `sevilleta`. White
     /// Sands Missile Range S Route 287 and Old Highway 85 stay
     /// roads. Phrase `wildlife refuge` already matches Feather
     /// Lake Wildlife Refuge. Ditches sit on most of that sheet;
