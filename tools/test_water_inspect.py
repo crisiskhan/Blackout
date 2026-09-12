@@ -248,6 +248,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("red bluff nature preserve", east_blob)
         self.assertNotIn("red bluff neighborhood park", east_blob)
         self.assertIn("balcones canyonlands preserve - romberg", east_blob)
+        self.assertIn("balcones canyonlands preserve - mcgregor", east_blob)
         self.assertIn("decker tallgrass prairie preserve", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertIn("ladybird johnson wildflower center", east_blob)
@@ -1557,6 +1558,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("pecos")', inspect)
         self.assertNotIn('contains("bluff")', inspect)
         self.assertNotIn('contains("romberg")', inspect)
+        self.assertNotIn('contains("mcgregor")', inspect)
+        self.assertNotIn('contains("stables")', inspect)
+        self.assertNotIn('contains("candelaria")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -2832,6 +2836,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Romberg", glass)
         self.assertIn("30.420315", glass)
         self.assertIn("-97.894690", glass)
+        self.assertIn("Balcones Canyonlands Preserve - McGregor", glass)
+        self.assertIn("30.421875", glass)
+        self.assertIn("-97.894955", glass)
         self.assertIn("Bright Leaf Natural Area", glass)
         self.assertIn("30.328746", glass)
         self.assertIn("-97.774978", glass)
@@ -2868,6 +2875,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Pecos River Complex Wildlife Management Areas", glass)
         self.assertIn("35.701711", glass)
         self.assertIn("-105.688095", glass)
+        self.assertIn("Rio Grande Nature Center State Park", glass)
+        self.assertIn("35.124701", glass)
+        self.assertIn("-106.683528", glass)
+        self.assertIn("State Game Commission Land", glass)
+        self.assertIn("34.620499", glass)
+        self.assertIn("-106.741123", glass)
         self.assertIn("Sandia Mountain Natural History Center", glass)
         self.assertIn("35.126801", glass)
         self.assertIn("-106.379801", glass)
@@ -3165,6 +3178,7 @@ class GroundFieldSync(unittest.TestCase):
         bright_leaf_hit = False
         red_bluff_hit = False
         romberg_hit = False
+        mcgregor_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -3303,6 +3317,8 @@ class GroundFieldSync(unittest.TestCase):
                     red_bluff_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Romberg" and pip(-97.894690, 30.420315, ring):
                     romberg_hit = True
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - McGregor" and pip(-97.894955, 30.421875, ring):
+                    mcgregor_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -3528,6 +3544,10 @@ class GroundFieldSync(unittest.TestCase):
             "Balcones Canyonlands Preserve Romberg is not wildlife range",
         )
         self.assertTrue(
+            mcgregor_hit,
+            "Balcones Canyonlands Preserve McGregor is not wildlife range",
+        )
+        self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
         )
 
@@ -3667,6 +3687,8 @@ class GroundFieldSync(unittest.TestCase):
         la_joya_hit = False
         rio_rancho_hit = False
         pecos_hit = False
+        nature_center_hit = False
+        game_commission_hit = False
         barelas_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -3718,6 +3740,14 @@ class GroundFieldSync(unittest.TestCase):
                     pecos_hit = (
                         props.get("name")
                         == "Pecos River Complex Wildlife Management Areas"
+                    )
+                if kind == "wildlife" and pip(-106.683528, 35.124701, ring):
+                    nature_center_hit = (
+                        props.get("name") == "Rio Grande Nature Center State Park"
+                    )
+                if kind == "wildlife" and pip(-106.741123, 34.620499, ring):
+                    game_commission_hit = (
+                        props.get("name") == "State Game Commission Land"
                     )
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
                     audubon_hit = (
@@ -3819,6 +3849,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             pecos_hit,
             "Pecos River Complex Wildlife Management Areas is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            nature_center_hit,
+            "Rio Grande Nature Center State Park is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            game_commission_hit,
+            "State Game Commission Land is not wildlife range on the NM overlay",
         )
         self.assertTrue(
             audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
@@ -4301,6 +4339,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Marquez Wildlife Management Area", qa)
         self.assertIn("Wildlife Drive", qa)
         self.assertIn("State Game Commission Land", qa)
+        self.assertIn("34.620499", qa)
+        self.assertIn("Rio Grande Stables Road", qa)
+        self.assertIn("Calle del Bosque Northwest", qa)
+        self.assertIn("Hippie Hollow Park", qa)
         self.assertIn("loblolly", qa)
         self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
         self.assertIn("ANIMAL · BITE · FOOD · PLANT", qa)
@@ -4350,6 +4392,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.701711", qa)
         self.assertIn("Balcones Canyonlands Preserve - Romberg", qa)
         self.assertIn("30.420315", qa)
+        self.assertIn("Balcones Canyonlands Preserve - McGregor", qa)
+        self.assertIn("30.421875", qa)
         self.assertIn("Beaukiss Woods", qa)
         self.assertIn("Isleta Rectangle", qa)
         self.assertIn("Rio Grande Bosque", qa)
@@ -4363,6 +4407,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Barton Hill", qa)
         self.assertIn("La Cruz Peak", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
+        self.assertIn("35.124701", qa)
         self.assertIn("Open Space Visitor Center", qa)
         self.assertIn("Godzilla Preserve", qa)
         self.assertIn("Wilderness Gate", qa)

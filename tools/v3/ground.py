@@ -119,8 +119,9 @@ CAVE_PRESERVE_KEYS = {
 # `wildlife management area` phrase already matches that
 # sheet. Phrase `canyonlands preserve` already matches
 # Grandview Hills, Blackmore, Lake Perspectives, Austin
-# Simon, and Lime Creek as unique titles. Cuevas East sits
-# next to Cuevas and stays unheld. Barrow Nature Preserve
+# Simon, Lime Creek, Romberg, and McGregor as unique titles.
+# Cuevas East sits next to Cuevas and stays unheld. Hippie
+# Hollow Park sits on another McGregor interior. Barrow Nature Preserve
 # vertex-avg sits off the sheet; the listed interior is on
 # it. The `nature preserve` phrase already matches that
 # sheet. Rio Rancho Bosque Nature Preserve is range, not
@@ -139,7 +140,15 @@ CAVE_PRESERVE_KEYS = {
 # `shady`. Lost Oasis Hollow stays a road. Bear Creek
 # Management Unit is a separate sheet. The `nature
 # preserve` phrase already matches that sheet. `preserve`
-# alone is still forbidden.
+# alone is still forbidden. Phrase `nature center` already
+# matches Rio Grande Nature Center State Park. Listed
+# centroid sits on the park ponds. Calle del Bosque
+# Northwest stays a road. Phrase `game commission`, not the
+# word `game`. Listed State Game Commission pip sits on
+# water. Rio Grande Stables Road stays a road. Other Game
+# Commission sheets stay their own. Whitfield dry interiors
+# have no nearby name that is not Acequia Madre and stay
+# unheld.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",

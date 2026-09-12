@@ -1391,6 +1391,32 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(romberg.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(romberg.doLine.lowercased().contains("edible"), romberg.doLine)
 
+        let mcgregor = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Balcones Canyonlands Preserve - McGregor",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(mcgregor.klass, "Wildlife range")
+        XCTAssertNotEqual(mcgregor.klass, "Open reserve")
+        XCTAssertEqual(mcgregor.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(mcgregor.doLine.lowercased().contains("edible"), mcgregor.doLine)
+
+        let comancheTrail = Inspect.read(
+            tags: ["highway": "unclassified", "name": "Comanche Trail"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(comancheTrail.klass, "Road")
+        XCTAssertNotEqual(comancheTrail.klass, "Wildlife range")
+
+        let hippieHollow = Inspect.read(
+            tags: ["leisure": "park", "name": "Hippie Hollow Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(hippieHollow.klass, "Park")
+        XCTAssertNotEqual(hippieHollow.klass, "Wildlife range")
+
         let bernardo = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -1489,6 +1515,21 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(pecosHighway.klass, "Road")
         XCTAssertNotEqual(pecosHighway.klass, "Wildlife range")
+
+        let stablesRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "Rio Grande Stables Road"],
+            pack: "nm"
+        )
+        XCTAssertEqual(stablesRoad.klass, "Road")
+        XCTAssertNotEqual(stablesRoad.klass, "Wildlife range")
+
+        let calleDelBosque = Inspect.read(
+            tags: ["highway": "residential", "name": "Calle del Bosque Northwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(calleDelBosque.klass, "Road")
+        XCTAssertNotEqual(calleDelBosque.klass, "Bosque or wetland")
+        XCTAssertNotEqual(calleDelBosque.klass, "Wildlife range")
 
         let oakdale = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Brodie and Oakdale Properties"],

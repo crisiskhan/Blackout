@@ -351,6 +351,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// wins.
     private static let rombergPreserve = CLLocationCoordinate2D(latitude: 30.420315, longitude: -97.894690)
 
+    /// Interior of Balcones Canyonlands Preserve - McGregor. Phrase
+    /// `canyonlands preserve`. Hippie Hollow Park sits on another
+    /// interior. This interior is unique, 312 m from OSM stream.
+    /// Romberg is 135 m off this pip, outside the z16 probe.
+    /// Comanche Trail 81 m is rank 7; wildlife 4 still wins.
+    private static let mcgregorPreserve = CLLocationCoordinate2D(latitude: 30.421875, longitude: -97.894955)
+
     /// Interior of Hawk Watch Open Space. Phrase `hawk watch`, not
     /// picnic open space. 449 m from water.
     private static let hawkWatch = CLLocationCoordinate2D(latitude: 35.069828, longitude: -106.424820)
@@ -600,6 +607,20 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// unique, 587 m from the Pecos River. State Highway 63 76 m
     /// is rank 7; wildlife 4 still wins.
     private static let pecosComplex = CLLocationCoordinate2D(latitude: 35.701711, longitude: -105.688095)
+
+    /// Interior of Rio Grande Nature Center State Park. Phrase
+    /// `nature center`, not bosque. Listed centroid sits on the
+    /// park ponds. This interior is unique, 323 m from the
+    /// Riverside Drain. Calle del Bosque Northwest 74 m is rank
+    /// 7; wildlife 4 still wins.
+    private static let rioGrandeNature = CLLocationCoordinate2D(latitude: 35.124701, longitude: -106.683528)
+
+    /// Interior of State Game Commission Land. Phrase `game
+    /// commission`, not the word `game`. Listed pip sits 73 m
+    /// from water. This interior is unique, 598 m from OSM drain.
+    /// Rio Grande Stables Road 81 m is rank 7; wildlife 4 still
+    /// wins. Other Game Commission sheets stay their own.
+    private static let gameCommission = CLLocationCoordinate2D(latitude: 34.620499, longitude: -106.741123)
 
     /// Interior of Pronoun Cave ACEC in NM `layers/ground.geojson`. A cave
     /// phrase, not open reserve, even though the name also says ACEC.
@@ -1227,6 +1248,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((romberg.card?.doLine.lowercased() ?? "").contains("hog"), romberg.card?.doLine ?? "")
         XCTAssertFalse((romberg.card?.doLine.lowercased() ?? "").contains("javelina"), romberg.card?.doLine ?? "")
         XCTAssertFalse((romberg.card?.doLine.lowercased() ?? "").contains("edible"), romberg.card?.doLine ?? "")
+
+        let mcgregor = try hold(at: Self.mcgregorPreserve, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(mcgregor.card?.klass, "Wildlife range", "\(mcgregor)")
+        XCTAssertEqual(mcgregor.card?.title, "Balcones Canyonlands Preserve - McGregor", "\(mcgregor)")
+        XCTAssertNotEqual(mcgregor.card?.title, "Balcones Canyonlands Preserve - Romberg", "\(mcgregor)")
+        XCTAssertNotEqual(mcgregor.card?.title, "Balcones Canyonlands Preserve - Grandview Hills", "\(mcgregor)")
+        XCTAssertNotEqual(mcgregor.card?.title, "Hippie Hollow Park", "\(mcgregor)")
+        XCTAssertNotEqual(mcgregor.card?.title, "Bob Wentz Park", "\(mcgregor)")
+        XCTAssertNotEqual(mcgregor.card?.title, "Comanche Trail", "\(mcgregor)")
+        XCTAssertEqual(mcgregor.card?.fieldRoute.first, Inspect.mammalEastCard, "\(mcgregor)")
+        XCTAssertTrue((mcgregor.card?.doLine.lowercased() ?? "").contains("hog"), mcgregor.card?.doLine ?? "")
+        XCTAssertFalse((mcgregor.card?.doLine.lowercased() ?? "").contains("javelina"), mcgregor.card?.doLine ?? "")
+        XCTAssertFalse((mcgregor.card?.doLine.lowercased() ?? "").contains("edible"), mcgregor.card?.doLine ?? "")
 
         let management = try hold(at: Self.bearCreekUnit, zoom: 16, packId: "tx-east")
         XCTAssertEqual(management.card?.klass, "Wildlife range", "\(management)")
@@ -2204,6 +2238,36 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((pecos.card?.doLine.lowercased() ?? "").contains("elk is high country"), pecos.card?.doLine ?? "")
         XCTAssertFalse((pecos.card?.doLine.lowercased() ?? "").contains("javelina"), pecos.card?.doLine ?? "")
         XCTAssertFalse((pecos.card?.doLine.lowercased() ?? "").contains("edible"), pecos.card?.doLine ?? "")
+
+        let natureCenter = try hold(at: Self.rioGrandeNature, zoom: 16, packId: "nm")
+        XCTAssertEqual(natureCenter.card?.klass, "Wildlife range", "\(natureCenter)")
+        XCTAssertEqual(natureCenter.card?.title, "Rio Grande Nature Center State Park", "\(natureCenter)")
+        XCTAssertNotEqual(natureCenter.card?.klass, "Bosque or wetland", "\(natureCenter)")
+        XCTAssertNotEqual(natureCenter.card?.klass, "Park", "\(natureCenter)")
+        XCTAssertNotEqual(natureCenter.card?.title, "Calle del Bosque Northwest", "\(natureCenter)")
+        XCTAssertNotEqual(natureCenter.card?.title, "Calle Grande Northwest", "\(natureCenter)")
+        XCTAssertEqual(natureCenter.card?.fieldRoute.first, Inspect.mammalTXCard, "\(natureCenter)")
+        XCTAssertTrue(
+            natureCenter.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "Rio Grande Nature Center dropped the NM mammal card: \(natureCenter)"
+        )
+        XCTAssertTrue((natureCenter.card?.doLine.lowercased() ?? "").contains("elk is high country"), natureCenter.card?.doLine ?? "")
+        XCTAssertFalse((natureCenter.card?.doLine.lowercased() ?? "").contains("cottonwood"), natureCenter.card?.doLine ?? "")
+        XCTAssertFalse((natureCenter.card?.doLine.lowercased() ?? "").contains("edible"), natureCenter.card?.doLine ?? "")
+
+        let gameLand = try hold(at: Self.gameCommission, zoom: 16, packId: "nm")
+        XCTAssertEqual(gameLand.card?.klass, "Wildlife range", "\(gameLand)")
+        XCTAssertEqual(gameLand.card?.title, "State Game Commission Land", "\(gameLand)")
+        XCTAssertNotEqual(gameLand.card?.klass, "Open reserve", "\(gameLand)")
+        XCTAssertNotEqual(gameLand.card?.title, "Rio Grande Stables Road", "\(gameLand)")
+        XCTAssertEqual(gameLand.card?.fieldRoute.first, Inspect.mammalTXCard, "\(gameLand)")
+        XCTAssertTrue(
+            gameLand.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
+            "State Game Commission Land dropped the NM mammal card: \(gameLand)"
+        )
+        XCTAssertTrue((gameLand.card?.doLine.lowercased() ?? "").contains("elk is high country"), gameLand.card?.doLine ?? "")
+        XCTAssertFalse((gameLand.card?.doLine.lowercased() ?? "").contains("javelina"), gameLand.card?.doLine ?? "")
+        XCTAssertFalse((gameLand.card?.doLine.lowercased() ?? "").contains("edible"), gameLand.card?.doLine ?? "")
     }
 
     func testHoldingACaveACECOpensTheCaveCardNotOpenReserve() throws {
