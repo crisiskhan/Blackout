@@ -100,6 +100,21 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.pips.count, 1)
         XCTAssertEqual(try XCTUnwrap(net.pips.first).from, "peer-1")
         XCTAssertEqual(try XCTUnwrap(net.pips.first).lat, 31.76, accuracy: 0.01)
+        XCTAssertNil(try XCTUnwrap(net.pips.first).headingDeg)
+        XCTAssertNil(try XCTUnwrap(net.pips.first).emblem)
+        radio.deliver(MeshEnvelope(
+            id: "p2",
+            from: "peer-1",
+            to: "*",
+            kind: "pos",
+            body: Data("31.77,-106.50,90,owl".utf8)
+        ))
+        XCTAssertEqual(net.pips.count, 1)
+        XCTAssertEqual(try XCTUnwrap(net.pips.first).headingDeg, 90)
+        XCTAssertEqual(try XCTUnwrap(net.pips.first).emblem, "owl")
+        XCTAssertEqual(MeshPOS.parse("31.76,-106.49,,wolf")?.emblem, "wolf")
+        XCTAssertNil(MeshPOS.parse("31.76,-106.49,,wolf")?.headingDeg)
+        XCTAssertTrue(MeshPOS.body(lat: 31.7, lon: -106.4, headingDeg: 12, emblem: "wolf").contains("wolf"))
         radio.losePeer("peer-1")
         XCTAssertTrue(net.pips.isEmpty)
         net.sendPOS(from: net.localID, lat: 31.8, lon: -106.5)

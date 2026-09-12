@@ -68,7 +68,17 @@ struct MapTab: View {
                 },
                 pips: runtime.mesh.pips
                     .filter { $0.from != runtime.mesh.localID }
-                    .map { (lat: $0.lat, lon: $0.lon) },
+                    .map {
+                        PartyBody(
+                            id: $0.from,
+                            lat: $0.lat,
+                            lon: $0.lon,
+                            headingDeg: $0.headingDeg,
+                            emblem: $0.emblem
+                        )
+                    },
+                youHeading: runtime.headingDeg,
+                youEmblem: runtime.youEmblem.rawValue,
                 onPulse: { runtime.pulse() },
                 lockOn: runtime.lockOn,
                 travelMode: runtime.travelMode

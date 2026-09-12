@@ -17,7 +17,11 @@ let package = Package(
         .package(path: "../../Vendor/MapLibre"),
     ],
     targets: [
-        .target(name: "MapLibreMap", dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"]),
+        .target(
+            name: "MapLibreMap",
+            dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"],
+            resources: [.process("Emblems")]
+        ),
         .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap", "Router"]),
     ]
 )

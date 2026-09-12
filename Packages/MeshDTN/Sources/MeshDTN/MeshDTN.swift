@@ -28,10 +28,53 @@ public struct MeshPip: Equatable, Sendable {
     public var from: String
     public var lat: Double
     public var lon: Double
-    public init(from: String, lat: Double, lon: Double) {
+    public var headingDeg: Double?
+    public var emblem: String?
+    public init(
+        from: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil
+    ) {
         self.from = from
         self.lat = lat
         self.lon = lon
+        self.headingDeg = headingDeg
+        self.emblem = emblem
+    }
+}
+
+/// `lat,lon` still parses. Newer peers add heading and face.
+public enum MeshPOS {
+    public static func body(
+        lat: Double,
+        lon: Double,
+        headingDeg: Double?,
+        emblem: String?
+    ) -> String {
+        let heading = headingDeg.map { String($0) } ?? ""
+        let face = emblem ?? ""
+        return "\(lat),\(lon),\(heading),\(face)"
+    }
+
+    public static func parse(
+        _ text: String
+    ) -> (lat: Double, lon: Double, headingDeg: Double?, emblem: String?)? {
+        let parts = text.split(separator: ",", omittingEmptySubsequences: false)
+        guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else {
+            return nil
+        }
+        var heading: Double?
+        if parts.count >= 3, !parts[2].isEmpty {
+            heading = Double(parts[2])
+        }
+        var emblem: String?
+        if parts.count >= 4 {
+            let raw = String(parts[3])
+            if !raw.isEmpty { emblem = raw }
+        }
+        return (lat, lon, heading, emblem)
     }
 }
 
@@ -251,10 +294,24 @@ public final class MeshNet: @unchecked Sendable {
         }
     }
 
-    public func sendPOS(from: String, lat: Double, lon: Double) {
-        enqueue(make(from: from, kind: "pos", body: Data("\(lat),\(lon)".utf8)))
+    public func sendPOS(
+        from: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil
+    ) {
+        enqueue(
+            make(
+                from: from,
+                kind: "pos",
+                body: Data(MeshPOS.body(lat: lat, lon: lon, headingDeg: headingDeg, emblem: emblem).utf8)
+            )
+        )
         if from != localID {
-            upsertPip(MeshPip(from: from, lat: lat, lon: lon))
+            upsertPip(
+                MeshPip(from: from, lat: lat, lon: lon, headingDeg: headingDeg, emblem: emblem)
+            )
         }
     }
 
@@ -317,11 +374,17 @@ public final class MeshNet: @unchecked Sendable {
         store.append(env)
         switch env.kind {
         case "pos":
-            if let text = String(data: env.body, encoding: .utf8) {
-                let parts = text.split(separator: ",")
-                if parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) {
-                    upsertPip(MeshPip(from: env.from, lat: lat, lon: lon))
-                }
+            if let text = String(data: env.body, encoding: .utf8),
+               let parsed = MeshPOS.parse(text) {
+                upsertPip(
+                    MeshPip(
+                        from: env.from,
+                        lat: parsed.lat,
+                        lon: parsed.lon,
+                        headingDeg: parsed.headingDeg,
+                        emblem: parsed.emblem
+                    )
+                )
             }
         case "chip":
             if let name = String(data: env.body, encoding: .utf8) {

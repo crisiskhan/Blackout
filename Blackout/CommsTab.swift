@@ -1,6 +1,8 @@
 import SwiftUI
 import CommsUI
 import Tokens
+import MapLibreMap
+import UIKit
 
 struct CommsTab: View {
     @Bindable var runtime: AppRuntime
@@ -21,6 +23,9 @@ struct CommsTab: View {
 
                     sectionLabel("PARTY")
                     partyCard
+
+                    sectionLabel("FACE")
+                    faceCard
 
                     sectionLabel("NET")
                     Button(runtime.mesh.listening ? "LEAVE NET" : "JOIN LOCAL NET") {
@@ -170,8 +175,60 @@ struct CommsTab: View {
                     Button(L10n.t("scan.qr", runtime.locale)) { scanQR = true }
                         .buttonStyle(HUDOverlayChipStyle())
                 }
+                faceThumb(runtime.youEmblem, selected: true)
             }
         }
+    }
+
+    private var faceCard: some View {
+        HUDGlassCard {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 72), spacing: 8)],
+                spacing: 8
+            ) {
+                ForEach(PersonEmblem.allCases, id: \.self) { emblem in
+                    Button {
+                        runtime.pickEmblem(emblem)
+                    } label: {
+                        VStack(spacing: 4) {
+                            faceThumb(emblem, selected: runtime.youEmblem == emblem)
+                            Text(emblem.title)
+                                .font(.system(size: 8, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+                                .minimumScaleFactor(1)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                    .accessibilityLabel(emblem.title)
+                }
+            }
+            .padding(4)
+        }
+    }
+
+    private func faceThumb(_ emblem: PersonEmblem, selected: Bool) -> some View {
+        let size: CGFloat = 56
+        return Group {
+            if let image = PersonEmblem.image(emblem) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Circle().fill(Theme.raised)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(
+            Circle().strokeBorder(
+                selected ? Theme.accent : Theme.silver.opacity(0.35),
+                lineWidth: selected ? 2.4 : 1
+            )
+        )
+        .accessibilityHidden(true)
     }
 
     private var pttPad: some View {

@@ -899,12 +899,86 @@ class HUDSeductionTests(unittest.TestCase):
         self.assertIn("RESET HUD", qa)
         self.assertIn("LAYOUT", qa)
         self.assertIn("party dots", qa.lower())
+        self.assertIn("compass ring", qa.lower())
+        self.assertIn("FACE", qa)
         self.assertIn("no bounce", qa.lower())
         self.assertIn("NET · NONE", qa)
         self.assertIn("silver route", qa.lower())
         self.assertNotIn("cyan route", qa.lower())
         self.assertNotIn("does not replace 911", qa)
         self.assertNotIn("I UNDERSTAND", qa)
+
+
+class PersonMarkOnTheMapTests(unittest.TestCase):
+    """YOU and party are faces with a live north-up compass, not silver dots."""
+
+    def test_face_picker_and_live_ring_are_on_the_glass(self):
+        comms = read("Blackout", "CommsTab.swift")
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        emblem = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift"
+        )
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        folder = ROOT.joinpath(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "Emblems"
+        )
+        self.assertIn('sectionLabel("FACE")', comms)
+        self.assertIn("PersonEmblem.allCases", comms)
+        self.assertIn("pickEmblem", comms)
+        self.assertIn("youHeading: runtime.headingDeg", tab)
+        self.assertIn("youEmblem: runtime.youEmblem.rawValue", tab)
+        self.assertIn("PartyBody(", tab)
+        self.assertIn("var youEmblem", app)
+        self.assertIn("func pickEmblem", app)
+        self.assertIn("sendPOSIfPossible()", app.split("func pullFix()")[1].split("static func resourceRoot")[0])
+        self.assertIn("enum PersonEmblem", emblem)
+        self.assertIn("enum PersonCompass", emblem)
+        self.assertIn("tickRadians", emblem)
+        self.assertNotIn("best in class", emblem.lower())
+        self.assertNotIn("best in class", comms.lower())
+        self.assertNotIn("best in class", offline.lower())
+        self.assertIn("PersonCompassArt", offline)
+        self.assertIn("headingView", offline)
+        self.assertIn("YouPuckAnnotationView", offline)
+        self.assertIn("you-puck-core", offline)
+        self.assertIn("enum MeshPOS", mesh)
+        self.assertIn("headingDeg", mesh)
+        self.assertIn("struct PartyBody", route)
+        self.assertEqual(len(list(folder.glob("*.jpg"))), 26)
+        for name in (
+            "wolf",
+            "owl",
+            "bear",
+            "heron",
+            "raven",
+            "eagle",
+            "turtle",
+            "raccoon",
+            "horse",
+            "mule",
+            "beaver",
+            "ibex",
+            "roadrunner",
+            "mule-deer",
+            "husky",
+            "pronghorn",
+            "labrador",
+            "deer",
+            "falcon",
+            "otter",
+            "fox",
+            "boar",
+            "bighorn",
+            "bison",
+            "bat",
+            "hawk",
+        ):
+            self.assertTrue((folder / f"{name}.jpg").is_file(), name)
 
 
 if __name__ == "__main__":

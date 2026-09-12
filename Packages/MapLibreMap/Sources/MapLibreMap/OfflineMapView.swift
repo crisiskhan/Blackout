@@ -31,7 +31,11 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
-    public var pips: [(lat: Double, lon: Double)]
+    public var pips: [PartyBody]
+    /// Live heading on YOU. Nil until the compass has a reading.
+    public var youHeading: Double?
+    /// Face on YOU. Party faces arrive on each pip.
+    public var youEmblem: String
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
@@ -57,7 +61,9 @@ public struct OfflineMapView: UIViewRepresentable {
         interactive: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
         onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil,
-        pips: [(lat: Double, lon: Double)] = [],
+        pips: [PartyBody] = [],
+        youHeading: Double? = nil,
+        youEmblem: String = PersonEmblem.fallback.rawValue,
         onPulse: (() -> Void)? = nil,
         lockOn: Bool = false,
         travelMode: TravelMode = .walk
@@ -80,6 +86,8 @@ public struct OfflineMapView: UIViewRepresentable {
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
         self.pips = pips
+        self.youHeading = youHeading
+        self.youEmblem = youEmblem
         self.onPulse = onPulse
         self.lockOn = lockOn
         self.travelMode = travelMode
@@ -177,6 +185,8 @@ public struct OfflineMapView: UIViewRepresentable {
             held: held,
             fitToken: fitToken,
             pips: pips,
+            youHeading: youHeading,
+            youEmblem: youEmblem,
             lockOn: lockOn,
             travelMode: travelMode
         )
@@ -194,7 +204,9 @@ public struct OfflineMapView: UIViewRepresentable {
             var destination: (lat: Double, lon: Double)?
             var held: (lat: Double, lon: Double)?
             var fitToken: Int
-            var pips: [(lat: Double, lon: Double)]
+            var pips: [PartyBody]
+            var youHeading: Double?
+            var youEmblem: String
             var lockOn: Bool
             var travelMode: TravelMode
         }
@@ -210,12 +222,13 @@ public struct OfflineMapView: UIViewRepresentable {
         var routeLine: MLNPolyline?
         var puckHalo: MLNPolygon?
         var puck: MLNPointAnnotation?
+        var partyMarks: [PersonMarkAnnotation] = []
         var storedPack: (south: Double, west: Double, north: Double, east: Double)?
         var storedPuck: (lat: Double, lon: Double)?
         var storedRoute: [(lat: Double, lon: Double)]?
         var storedDestination: (lat: Double, lon: Double)?
         var storedHeld: (lat: Double, lon: Double)?
-        var storedPips: [(lat: Double, lon: Double)]?
+        var storedPips: [PartyBody]?
         var fittedPack: (south: Double, west: Double, north: Double, east: Double)?
         var fittedSize: (width: Double, height: Double)?
         var fittedFitToken = 0
@@ -464,64 +477,109 @@ public struct OfflineMapView: UIViewRepresentable {
             // reason enough to run it.
             let heldNeeds = force || HoldPin.needsReapply(stored: storedHeld, held: spec.held)
             let partyNeeds = force || PartyPips.needsReapply(stored: storedPips, pips: spec.pips)
-            if !OverlaySync.needsStyleMutation(
+            if OverlaySync.needsStyleMutation(
                 force: force,
                 puckNeedsReapply: puckNeeds,
                 routeNeedsReapply: routeNeeds,
                 destinationNeedsReapply: destNeeds || heldNeeds,
                 partyNeedsReapply: partyNeeds
             ) {
-                return
-            }
-            if !puckNeeds {
-                syncRoute(on: view, spec: spec, force: force)
-                syncStyleOverlays(on: view, spec: spec)
-                storedDestination = spec.destination
-                storedHeld = spec.held
-                storedPips = spec.pips
-                storedMode = spec.travelMode
-                return
-            }
+                if !puckNeeds {
+                    syncRoute(on: view, spec: spec, force: force)
+                    syncStyleOverlays(on: view, spec: spec)
+                    storedDestination = spec.destination
+                    storedHeld = spec.held
+                    storedPips = spec.pips
+                    storedMode = spec.travelMode
+                } else {
+                    if let old = packOutline {
+                        view.remove(old)
+                    }
+                    if let old = puckHalo {
+                        view.remove(old)
+                    }
+                    if let old = puck {
+                        view.removeAnnotation(old)
+                    }
 
-            if let old = packOutline {
-                view.remove(old)
+                    var ring = PackGeometry.bboxRing(
+                        south: spec.packSouth,
+                        west: spec.packWest,
+                        north: spec.packNorth,
+                        east: spec.packEast
+                    ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+                    let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
+                    view.add(outline)
+                    packOutline = outline
+
+                    var halo = UserPuck.haloRing(lat: spec.puckLat, lon: spec.puckLon)
+                        .map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
+                    let haloPoly = MLNPolygon(coordinates: &halo, count: UInt(halo.count))
+                    view.add(haloPoly)
+                    puckHalo = haloPoly
+
+                    let you = PersonMarkAnnotation()
+                    you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                    you.title = UserPuck.title
+                    you.memberID = UserPuck.title
+                    you.emblemID = spec.youEmblem
+                    you.headingDeg = spec.youHeading
+                    view.addAnnotation(you)
+                    puck = you
+                    storedPack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
+                    storedPuck = (spec.puckLat, spec.puckLon)
+                    syncRoute(on: view, spec: spec, force: true)
+                    syncStyleOverlays(on: view, spec: spec)
+                    storedDestination = spec.destination
+                    storedHeld = spec.held
+                    storedPips = spec.pips
+                    storedMode = spec.travelMode
+                }
             }
-            if let old = puckHalo {
-                view.remove(old)
+            syncPersonMarks(on: view, spec: spec)
+        }
+
+        func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
+            if let you = puck as? PersonMarkAnnotation {
+                you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                you.emblemID = spec.youEmblem
+                you.headingDeg = spec.youHeading
+                if let mark = view.view(for: you) as? YouPuckAnnotationView {
+                    mark.apply(emblemID: spec.youEmblem, headingDeg: spec.youHeading)
+                }
             }
-            if let old = puck {
+            syncPartyMarks(on: view, spec: spec)
+        }
+
+        func syncPartyMarks(on view: MLNMapView, spec: OverlaySpec) {
+            let existing = Dictionary(uniqueKeysWithValues: partyMarks.map { ($0.memberID, $0) })
+            var next: [PersonMarkAnnotation] = []
+            var seen = Set<String>()
+            for pip in spec.pips {
+                seen.insert(pip.id)
+                if let old = existing[pip.id] {
+                    old.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                    old.emblemID = pip.emblem
+                    old.headingDeg = pip.headingDeg
+                    if let mark = view.view(for: old) as? YouPuckAnnotationView {
+                        mark.apply(emblemID: pip.emblem, headingDeg: pip.headingDeg)
+                    }
+                    next.append(old)
+                } else {
+                    let mark = PersonMarkAnnotation()
+                    mark.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                    mark.title = "\(PartyPips.titlePrefix)\(pip.id)"
+                    mark.memberID = pip.id
+                    mark.emblemID = pip.emblem
+                    mark.headingDeg = pip.headingDeg
+                    view.addAnnotation(mark)
+                    next.append(mark)
+                }
+            }
+            for old in partyMarks where !seen.contains(old.memberID) {
                 view.removeAnnotation(old)
             }
-
-            var ring = PackGeometry.bboxRing(
-                south: spec.packSouth,
-                west: spec.packWest,
-                north: spec.packNorth,
-                east: spec.packEast
-            ).map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-            let outline = MLNPolyline(coordinates: &ring, count: UInt(ring.count))
-            view.add(outline)
-            packOutline = outline
-
-            var halo = UserPuck.haloRing(lat: spec.puckLat, lon: spec.puckLon)
-                .map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) }
-            let haloPoly = MLNPolygon(coordinates: &halo, count: UInt(halo.count))
-            view.add(haloPoly)
-            puckHalo = haloPoly
-
-            let you = MLNPointAnnotation()
-            you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
-            you.title = UserPuck.title
-            view.addAnnotation(you)
-            puck = you
-            storedPack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
-            storedPuck = (spec.puckLat, spec.puckLon)
-            syncRoute(on: view, spec: spec, force: true)
-            syncStyleOverlays(on: view, spec: spec)
-            storedDestination = spec.destination
-            storedHeld = spec.held
-            storedPips = spec.pips
-            storedMode = spec.travelMode
+            partyMarks = next
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -704,10 +762,12 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
                 )
                 halo.circleStrokeWidth = NSExpression(forConstantValue: 3)
+                halo.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(halo)
                 let core = MLNCircleStyleLayer(identifier: "you-puck-core", source: src)
                 core.circleColor = NSExpression(forConstantValue: UIColor.white)
                 core.circleRadius = NSExpression(forConstantValue: 8)
+                core.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(core)
             }
 
@@ -800,6 +860,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28)
                 )
                 halo.circleRadius = NSExpression(forConstantValue: PartyPips.haloRadius)
+                halo.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(halo)
                 let core = MLNCircleStyleLayer(identifier: PartyPips.coreLayerID, source: src)
                 core.circleColor = NSExpression(
@@ -808,6 +869,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 core.circleRadius = NSExpression(forConstantValue: PartyPips.coreRadius)
                 core.circleStrokeColor = NSExpression(forConstantValue: UIColor.black)
                 core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                core.circleOpacity = NSExpression(forConstantValue: 0)
                 style.addLayer(core)
             }
         }
@@ -875,7 +937,7 @@ public struct OfflineMapView: UIViewRepresentable {
 
         /// Silver bodies. MapLibre's Swift overlay does not import the ObjC
         /// collection factory. A FeatureCollection is the documented many-point source.
-        func partyShape(_ pips: [(lat: Double, lon: Double)]) -> MLNShape {
+        func partyShape(_ pips: [PartyBody]) -> MLNShape {
             let features: [[String: Any]] = pips.map { pip in
                 [
                     "type": "Feature",
@@ -935,18 +997,33 @@ public struct OfflineMapView: UIViewRepresentable {
             if annotation is MLNUserLocation {
                 return nil
             }
-            let reuse = "you-puck"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: reuse) ?? YouPuckAnnotationView(reuseIdentifier: reuse)
+            let you = annotation.title == UserPuck.title
+            let reuse = you ? "you-puck" : "party-puck"
+            let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
+                ?? YouPuckAnnotationView(reuseIdentifier: reuse)
+            if let mark = annotation as? PersonMarkAnnotation {
+                view.apply(emblemID: mark.emblemID, headingDeg: mark.headingDeg)
+            } else if you {
+                view.apply(emblemID: spec?.youEmblem, headingDeg: spec?.youHeading)
+            }
             return view
         }
 
+        public func mapView(_ mapView: MLNMapView, annotationCanShowCallout annotation: MLNAnnotation) -> Bool {
+            _ = mapView
+            _ = annotation
+            return false
+        }
+
         public func mapView(styleForDefaultUserLocationAnnotationView mapView: MLNMapView) -> MLNUserLocationAnnotationViewStyle {
+            _ = mapView
             let style = MLNUserLocationAnnotationViewStyle()
-            style.puckFillColor = .white
-            style.puckShadowColor = .black
-            style.puckShadowOpacity = 0.85
-            style.puckArrowFillColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-            style.haloFillColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.35)
+            let clear = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+            style.puckFillColor = clear
+            style.puckShadowColor = clear
+            style.puckShadowOpacity = 0
+            style.puckArrowFillColor = clear
+            style.haloFillColor = clear
             return style
         }
 
@@ -987,28 +1064,189 @@ final class FillingMapView: MLNMapView {
     }
 }
 
+final class PersonMarkAnnotation: MLNPointAnnotation {
+    var memberID = ""
+    var emblemID: String?
+    var headingDeg: Double?
+}
+
 final class YouPuckAnnotationView: MLNAnnotationView {
+    private let rose = UIImageView()
+    private let emblemView = UIImageView()
+    private let headingView = UIView()
+    private let chevronLayer = CAShapeLayer()
+    private var lastHeading: Double?
+
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
-        bounds = CGRect(x: 0, y: 0, width: 36, height: 36)
+        let size = CGFloat(PersonCompass.puckPoints)
+        bounds = CGRect(x: 0, y: 0, width: size, height: size)
         backgroundColor = .clear
         isOpaque = false
+        isEnabled = false
         scalesWithViewingDistance = false
+        rotatesToMatchCamera = false
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.72
+        layer.shadowRadius = 3.5
+        layer.shadowOffset = .zero
 
-        let halo = UIView(frame: CGRect(x: 0, y: 0, width: 36, height: 36))
-        halo.backgroundColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.28)
-        halo.layer.cornerRadius = 18
-        addSubview(halo)
+        rose.frame = bounds
+        rose.image = PersonCompassArt.rose
+        rose.contentMode = .scaleAspectFit
+        addSubview(rose)
 
-        let core = UIView(frame: CGRect(x: 8, y: 8, width: 20, height: 20))
-        core.backgroundColor = .white
-        core.layer.cornerRadius = 10
-        core.layer.borderWidth = 3
-        core.layer.borderColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
-        addSubview(core)
+        let well = CGFloat(PersonCompass.wellPoints)
+        emblemView.frame = CGRect(
+            x: (size - well) / 2,
+            y: (size - well) / 2,
+            width: well,
+            height: well
+        )
+        emblemView.contentMode = .scaleAspectFill
+        emblemView.clipsToBounds = true
+        emblemView.layer.cornerRadius = well / 2
+        emblemView.layer.borderWidth = 1
+        emblemView.layer.borderColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.55).cgColor
+        addSubview(emblemView)
+
+        headingView.frame = bounds
+        headingView.isUserInteractionEnabled = false
+        headingView.backgroundColor = .clear
+        headingView.isHidden = true
+        addSubview(headingView)
+
+        chevronLayer.fillColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
+        chevronLayer.strokeColor = UIColor.black.cgColor
+        chevronLayer.lineWidth = 0.7
+        chevronLayer.path = PersonCompassArt.chevronPath(in: bounds).cgPath
+        headingView.layer.addSublayer(chevronLayer)
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        lastHeading = nil
+        headingView.isHidden = true
+        headingView.layer.transform = CATransform3DIdentity
+        emblemView.image = nil
+    }
+
+    func apply(emblemID: String?, headingDeg: Double?) {
+        let emblem = PersonEmblem.resolved(emblemID)
+        emblemView.image = PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback)
+        guard let headingDeg else {
+            headingView.isHidden = true
+            lastHeading = nil
+            return
+        }
+        headingView.isHidden = false
+        let radians = PersonCompass.tickRadians(headingDeg: headingDeg)
+        let transform = CATransform3DMakeRotation(CGFloat(radians), 0, 0, 1)
+        if let lastHeading {
+            let delta = abs(PersonCompass.shortestDelta(from: lastHeading, to: headingDeg))
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(delta > 0.4 ? 0.16 : 0)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .linear))
+            headingView.layer.transform = transform
+            CATransaction.commit()
+        } else {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            headingView.layer.transform = transform
+            CATransaction.commit()
+        }
+        lastHeading = headingDeg
+    }
+}
+
+enum PersonCompassArt {
+    static let rose: UIImage = renderRose()
+
+    static func chevronPath(in bounds: CGRect) -> UIBezierPath {
+        let cx = bounds.midX
+        let top = bounds.minY + 1.6
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: cx, y: top))
+        path.addLine(to: CGPoint(x: cx + 5.4, y: top + 9.2))
+        path.addLine(to: CGPoint(x: cx, y: top + 7.1))
+        path.addLine(to: CGPoint(x: cx - 5.4, y: top + 9.2))
+        path.close()
+        return path
+    }
+
+    private static func renderRose() -> UIImage {
+        let size = CGFloat(PersonCompass.puckPoints)
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let cg = ctx.cgContext
+            let silver = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+            let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+            let center = CGPoint(x: size / 2, y: size / 2)
+            let outer = size / 2 - 1.1
+            let well = CGFloat(PersonCompass.wellPoints) / 2
+
+            cg.setFillColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.72).cgColor)
+            cg.fillEllipse(in: CGRect(x: 1, y: 1, width: size - 2, height: size - 2))
+
+            cg.setStrokeColor(silver.cgColor)
+            cg.setLineWidth(2.3)
+            cg.strokeEllipse(in: CGRect(x: 1.15, y: 1.15, width: size - 2.3, height: size - 2.3))
+
+            cg.setStrokeColor(UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.22).cgColor)
+            cg.setLineWidth(1)
+            cg.strokeEllipse(
+                in: CGRect(
+                    x: center.x - well - 0.6,
+                    y: center.y - well - 0.6,
+                    width: (well + 0.6) * 2,
+                    height: (well + 0.6) * 2
+                )
+            )
+
+            for deg in stride(from: 0, to: 360, by: PersonCompass.minorTickEvery) {
+                let major = deg % PersonCompass.majorTickEvery == 0
+                let cardinal = deg % 90 == 0
+                let length: CGFloat = cardinal ? 6.6 : (major ? 5.0 : 3.0)
+                let width: CGFloat = cardinal ? 1.45 : (major ? 1.0 : 0.55)
+                let alpha: CGFloat = cardinal ? 1 : (major ? 0.88 : 0.42)
+                let color = deg == 0 ? accent : silver.withAlphaComponent(alpha)
+                let rad = CGFloat(PersonCompass.tickRadians(headingDeg: Double(deg)))
+                let outerR = outer - 1.2
+                let innerR = outerR - length
+                cg.setStrokeColor(color.cgColor)
+                cg.setLineWidth(width)
+                cg.setLineCap(.square)
+                cg.move(to: CGPoint(x: center.x + sin(rad) * innerR, y: center.y - cos(rad) * innerR))
+                cg.addLine(to: CGPoint(x: center.x + sin(rad) * outerR, y: center.y - cos(rad) * outerR))
+                cg.strokePath()
+            }
+
+            let font = UIFont.systemFont(ofSize: 8, weight: .heavy)
+            let labels: [(String, Int, UIColor)] = [
+                ("N", 0, accent),
+                ("E", 90, silver),
+                ("S", 180, silver),
+                ("W", 270, silver),
+            ]
+            for (text, deg, color) in labels {
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: font,
+                    .foregroundColor: color,
+                ]
+                let draw = NSString(string: text)
+                let textSize = draw.size(withAttributes: attrs)
+                let rad = CGFloat(PersonCompass.tickRadians(headingDeg: Double(deg)))
+                let r = well + 8.4
+                let p = CGPoint(
+                    x: center.x + sin(rad) * r - textSize.width / 2,
+                    y: center.y - cos(rad) * r - textSize.height / 2
+                )
+                draw.draw(at: p, withAttributes: attrs)
+            }
+        }
     }
 }

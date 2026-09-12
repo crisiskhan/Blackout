@@ -88,6 +88,29 @@ public enum DestinationPin {
     }
 }
 
+/// A party body on the canvas. Heading is live when the peer sent it.
+public struct PartyBody: Equatable, Sendable {
+    public var id: String
+    public var lat: Double
+    public var lon: Double
+    public var headingDeg: Double?
+    public var emblem: String?
+
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        headingDeg: Double? = nil,
+        emblem: String? = nil
+    ) {
+        self.id = id
+        self.lat = lat
+        self.lon = lon
+        self.headingDeg = headingDeg
+        self.emblem = emblem
+    }
+}
+
 /// Bodies on the canvas. Silver only — red stays scarce.
 public enum PartyPips {
     public static let sourceID = "party-pips-src"
@@ -95,15 +118,18 @@ public enum PartyPips {
     public static let coreLayerID = "party-pips-core"
     public static let haloRadius: Double = 16
     public static let coreRadius: Double = 7
+    public static let titlePrefix = "PARTY·"
 
     public static func needsReapply(
-        stored: [(lat: Double, lon: Double)]?,
-        pips: [(lat: Double, lon: Double)]
+        stored: [PartyBody]?,
+        pips: [PartyBody]
     ) -> Bool {
         guard let stored else { return true }
         if stored.count != pips.count { return true }
         for (a, b) in zip(stored, pips) {
-            if a.lat != b.lat || a.lon != b.lon { return true }
+            if a.id != b.id || a.lat != b.lat || a.lon != b.lon || a.emblem != b.emblem {
+                return true
+            }
         }
         return false
     }

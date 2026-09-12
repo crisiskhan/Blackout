@@ -83,6 +83,24 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(ring.first?.lat, ring.last?.lat)
         XCTAssertEqual(ring.first?.lon, ring.last?.lon)
         XCTAssertTrue(ring.contains { abs($0.lat - 29.95) > 0.0001 })
+        XCTAssertEqual(PersonEmblem.allCases.count, 26)
+        XCTAssertEqual(PersonEmblem.resolved("nope"), .wolf)
+        XCTAssertEqual(PersonEmblem.parse("owl"), .owl)
+        XCTAssertNil(PersonEmblem.parse(nil))
+        XCTAssertEqual(PersonEmblem.owl.title, "OWL")
+        XCTAssertEqual(PersonEmblem.muleDeer.rawValue, "mule-deer")
+        let suite = UserDefaults(suiteName: "you.emblem.test.\(UUID().uuidString)")!
+        XCTAssertEqual(PersonEmblem.load(defaults: suite), .wolf)
+        PersonEmblem.save(.owl, defaults: suite)
+        XCTAssertEqual(PersonEmblem.load(defaults: suite), .owl)
+        XCTAssertEqual(PersonCompass.tickRadians(headingDeg: 90), .pi / 2, accuracy: 1e-9)
+        XCTAssertEqual(PersonCompass.normalized(-45), 315, accuracy: 1e-9)
+        XCTAssertEqual(PersonCompass.shortestDelta(from: 350, to: 10), 20, accuracy: 1e-9)
+        XCTAssertGreaterThan(PersonCompass.puckPoints, PersonCompass.wellPoints)
+        for emblem in PersonEmblem.allCases {
+            XCTAssertFalse(emblem.title.isEmpty, emblem.rawValue)
+            XCTAssertNotNil(PersonEmblem.image(emblem), emblem.rawValue)
+        }
     }
 
     func testUserPuckReappliesWhenMapLostTheAnnotation() {
@@ -607,6 +625,16 @@ final class MapLibreMapTests: XCTestCase {
                 partyNeedsReapply: true
             )
         )
+        let wolf = PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 12, emblem: "wolf")
+        let turned = PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 90, emblem: "wolf")
+        XCTAssertFalse(PartyPips.needsReapply(stored: [wolf], pips: [turned]))
+        XCTAssertTrue(
+            PartyPips.needsReapply(
+                stored: [wolf],
+                pips: [PartyBody(id: "p1", lat: 31.76, lon: -106.49, headingDeg: 12, emblem: "owl")]
+            )
+        )
+        XCTAssertEqual(PartyPips.titlePrefix, "PARTY·")
     }
 
     func testCanvasOpensWhereStreetNamesRender() {

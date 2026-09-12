@@ -72,6 +72,7 @@ final class AppRuntime {
     /// for an ice-on-rock card that is not in the book.
     var fieldBookIDs: Set<String> = []
     var headingDeg: Double?
+    var youEmblem: PersonEmblem = .wolf
     var lockChrome = ""
     var speechChrome = ""
     /// Mic deny on CALL. Empty unless the last arm failed.
@@ -120,6 +121,7 @@ final class AppRuntime {
             roster = roster.setting(code: saved)
         }
         mesh.partyCode = roster.code
+        youEmblem = PersonEmblem.load()
         mesh.onInbound = { [weak self] env in
             Task { @MainActor in self?.applyInbound(env) }
         }
@@ -192,6 +194,12 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
+    }
+
+    func pickEmblem(_ emblem: PersonEmblem) {
+        youEmblem = emblem
+        PersonEmblem.save(emblem)
+        sendPOSIfPossible()
     }
 
     func dropMark() {
@@ -618,7 +626,13 @@ final class AppRuntime {
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
         guard let lat, let lon else { return }
         lastKnownFix = (lat, lon)
-        mesh.sendPOS(from: mesh.localID, lat: lat, lon: lon)
+        mesh.sendPOS(
+            from: mesh.localID,
+            lat: lat,
+            lon: lon,
+            headingDeg: headingDeg,
+            emblem: youEmblem.rawValue
+        )
     }
 
     func applyInbound(_ env: MeshEnvelope) {
@@ -874,6 +888,7 @@ final class AppRuntime {
         if let c = fix.last {
             lastKnownFix = (c.latitude, c.longitude)
         }
+        sendPOSIfPossible()
     }
 
     static func resourceRoot() -> URL? {
