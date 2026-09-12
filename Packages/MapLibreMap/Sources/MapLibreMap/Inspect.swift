@@ -325,9 +325,12 @@ public enum Inspect {
     /// not the word `sink` — a highway named Blowing Sink Road is a road,
     /// and Kitchen Sink is not a hole. Overlay-sheet mouths on Buttercup
     /// / Discovery Well are Holdable when unique versus the overlay pip
-    /// and no other mouth sits in the probe. Buttercup Blowhole and
-    /// Lime Creek Road Sink. Godzilla Cave stays unheld — Link's sits
-    /// 84 m off that mouth.
+    /// and no other mouth sits in the probe. Buttercup Blowhole, Cedar
+    /// Elm Sink, Lime Creek Road Sink, and Under Three Oaks. Isolated
+    /// mouths off those sheets: Buttercup Drain Cave and Warton
+    /// Whirlpool. Godzilla Cave stays unheld — Link's sits 84 m off
+    /// that mouth. Good Friday stays unheld — 141 m from the
+    /// Buttercup overlay Hold pip.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {

@@ -687,6 +687,88 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(blueLoop.klass, "Trail")
         XCTAssertFalse(blueLoop.fieldRoute.contains(Inspect.caveCard))
 
+        let cedarElm = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Cedar Elm Sink"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(cedarElm.klass, "Cave or hole")
+        XCTAssertEqual(cedarElm.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(cedarElm.doLine.lowercased().contains("edible"), cedarElm.doLine)
+
+        let annaCourt = Inspect.read(
+            tags: ["highway": "residential", "name": "Anna Court"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(annaCourt.klass, "Road")
+        XCTAssertFalse(annaCourt.fieldRoute.contains(Inspect.caveCard))
+
+        let cedarTrail = Inspect.read(
+            tags: ["highway": "footway", "name": "Cedar Elm Preserve Trail"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(cedarTrail.klass, "Trail")
+        XCTAssertFalse(cedarTrail.fieldRoute.contains(Inspect.caveCard))
+
+        let brookMeadow = Inspect.read(
+            tags: ["highway": "residential", "name": "Brook Meadow Trail"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(brookMeadow.klass, "Road")
+        XCTAssertNotEqual(brookMeadow.klass, "Trail")
+        XCTAssertFalse(brookMeadow.fieldRoute.contains(Inspect.caveCard))
+
+        let threeOaks = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Under Three Oaks"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(threeOaks.klass, "Cave or hole")
+        XCTAssertEqual(threeOaks.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(threeOaks.doLine.lowercased().contains("edible"), threeOaks.doLine)
+
+        let threeOaksLoop = Inspect.read(
+            tags: ["highway": "footway", "name": "Blue Loop (Three Oaks)"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(threeOaksLoop.klass, "Trail")
+        XCTAssertFalse(threeOaksLoop.fieldRoute.contains(Inspect.caveCard))
+
+        let drainCave = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Buttercup Drain Cave"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(drainCave.klass, "Cave or hole")
+        XCTAssertEqual(drainCave.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(drainCave.doLine.lowercased().contains("edible"), drainCave.doLine)
+
+        let kaiDrive = Inspect.read(
+            tags: ["highway": "residential", "name": "Kai Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(kaiDrive.klass, "Road")
+        XCTAssertFalse(kaiDrive.fieldRoute.contains(Inspect.caveCard))
+
+        let burnieBishop = Inspect.read(
+            tags: ["highway": "residential", "name": "Burnie Bishop Place"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(burnieBishop.klass, "Road")
+        XCTAssertFalse(burnieBishop.fieldRoute.contains(Inspect.caveCard))
+
+        let warton = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Warton Whirlpool"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(warton.klass, "Cave or hole")
+        XCTAssertEqual(warton.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(warton.doLine.lowercased().contains("edible"), warton.doLine)
+
+        let janetPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Janet Bartles Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(janetPark.klass, "Park")
+        XCTAssertFalse(janetPark.fieldRoute.contains(Inspect.caveCard))
+
         let daffan = Inspect.read(
             tags: ["highway": "tertiary", "name": "Daffan Lane"],
             pack: "tx-east"
@@ -3064,6 +3146,44 @@ final class InspectTests: XCTestCase {
                 ["leisure": "park", "name": "Discovery Well Cave Preserve"],
                 ["highway": "secondary", "name": "Anderson Mill Road"],
                 ["highway": "footway", "name": "Blue Loop"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Cedar Elm Sink"],
+                ["leisure": "park", "name": "Buttercup Creek Cave Preserve"],
+                ["highway": "residential", "name": "Anna Court"],
+                ["highway": "footway", "name": "Cedar Elm Preserve Trail"],
+                ["highway": "residential", "name": "Brook Meadow Trail"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Under Three Oaks"],
+                ["leisure": "park", "name": "Discovery Well Cave Preserve"],
+                ["highway": "secondary", "name": "Anderson Mill Road"],
+                ["highway": "footway", "name": "Blue Loop (Three Oaks)"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Buttercup Drain Cave"],
+                ["leisure": "nature_reserve", "name": "Westside Preserve"],
+                ["highway": "residential", "name": "Kai Drive"],
+                ["highway": "residential", "name": "Burnie Bishop Place"],
+                ["waterway": "drain"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Warton Whirlpool"],
+                ["leisure": "park", "name": "Janet Bartles Park"],
+                ["highway": "tertiary", "name": "Buttercup Creek Boulevard"],
+                ["waterway": "stream"],
             ])["natural"],
             "cave_entrance"
         )
