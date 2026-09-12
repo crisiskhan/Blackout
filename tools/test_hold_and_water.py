@@ -219,14 +219,17 @@ def assert_style_draws_ground_and_water(pack_id: str) -> None:
         if layer["source-layer"] != OSM_SOURCE_LAYER[layer["id"]]:
             fail(f"{pack_id} layer {layer['id']} points at the wrong slice")
 
-    # Ground cover is a hint at the zoom where there is nothing else, and is
-    # nearly gone by the zoom where streets carry the map.
+    # Ground cover is louder zoomed out, quieter at street zoom. Streets
+    # still own the walk (last stop at most 0.2), but the last stop has to
+    # stay visible enough to tell desert from bosque at the open zoom.
     stops = layers["land-fill"]["paint"]["fill-opacity"][3:]
     far, close = stops[1], stops[-1]
     if not far > close:
         fail(f"{pack_id} land fill does not quieten as you zoom in ({far} -> {close})")
     if close > 0.2:
         fail(f"{pack_id} land fill is still {close} at street zoom — it will fight the streets")
+    if close < 0.15:
+        fail(f"{pack_id} land fill is {close} at street zoom — desert and bosque vanish")
 
     # A wash is dry most of the year. A solid line would promise otherwise.
     if "line-dasharray" not in layers["water-ephemeral"]["paint"]:

@@ -297,6 +297,12 @@ final class MapLibreMapTests: XCTestCase {
     func testRouteLineSourceHooksAndOffGraphHasNoDrawableCoords() {
         XCTAssertEqual(RouteLine.sourceID, "route-line-src")
         XCTAssertEqual(RouteLine.layerID, "route-line")
+        XCTAssertEqual(RouteLine.casingLayerID, "route-line-casing")
+        XCTAssertEqual(RouteLine.coreLayerID, "route-line-core")
+        XCTAssertGreaterThan(RouteLine.casingWidth, RouteLine.fillWidth)
+        XCTAssertGreaterThan(RouteLine.fillWidth, RouteLine.coreWidth)
+        XCTAssertGreaterThan(RouteLine.fillWidth, 6.6)
+        XCTAssertLessThan(RouteLine.annotationWidth, 0.1)
         XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
         XCTAssertFalse(RouteLine.shouldDraw([]))
@@ -684,6 +690,38 @@ final class MapLibreMapTests: XCTestCase {
                 pack: pack,
                 fittedSize: (width: 390, height: 640),
                 size: (width: 390, height: 640)
+            )
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFollow(
+                lockOn: false,
+                wasLocked: false,
+                lastFollow: nil,
+                puck: (lat: 31.76, lon: -106.49)
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFollow(
+                lockOn: true,
+                wasLocked: false,
+                lastFollow: (lat: 31.76, lon: -106.49),
+                puck: (lat: 31.76, lon: -106.49)
+            )
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFollow(
+                lockOn: true,
+                wasLocked: true,
+                lastFollow: (lat: 31.76, lon: -106.49),
+                puck: (lat: 31.76, lon: -106.49)
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFollow(
+                lockOn: true,
+                wasLocked: true,
+                lastFollow: (lat: 31.76, lon: -106.49),
+                puck: (lat: 31.77, lon: -106.49)
             )
         )
     }

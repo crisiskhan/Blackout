@@ -163,6 +163,10 @@ final class WaterInspectTests: XCTestCase {
 
         let line = try XCTUnwrap(layers.first { $0["id"] as? String == PackStyle.groundWorkedLineLayerID })
         XCTAssertEqual(line["type"] as? String, "line")
+        let linePaint = try XCTUnwrap(line["paint"] as? [String: Any])
+        XCTAssertEqual(linePaint["line-color"] as? String, PackStyle.silverInk)
+        XCTAssertEqual(linePaint["line-width"] as? Double, 2.2)
+        XCTAssertEqual(linePaint["line-opacity"] as? Double, 0.88)
         XCTAssertNil(layers.first { $0["id"] as? String == PackStyle.groundLabelsLayerID })
         let compact = String(describing: layers)
         XCTAssertFalse(compact.contains("animal"), compact)

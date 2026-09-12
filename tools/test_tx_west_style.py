@@ -157,6 +157,36 @@ def assert_readable_style(style: dict, label: str) -> None:
         if opacity > 0.22:
             fail(f"{label} hillshade {opacity} washes street contrast")
 
+    land = layer(style, "land-fill")
+    color = (land.get("paint") or {}).get("fill-color")
+    if not isinstance(color, list) or not color or color[0] != "match":
+        fail(f"{label} land-fill must class ground cover, got {color!r}")
+    body = color[2:]
+    if len(body) < 3:
+        fail(f"{label} land-fill match is empty")
+    pairs = dict(zip(body[0:-1:2], body[1:-1:2]))
+    desert = pairs.get("desert")
+    bosque = pairs.get("bosque")
+    playa = pairs.get("playa")
+    if not desert or not bosque or not playa:
+        fail(f"{label} land-fill is missing desert/bosque/playa ink")
+    if desert == bosque:
+        fail(f"{label} desert and bosque use the same ink {desert}")
+    if desert == playa:
+        fail(f"{label} desert and playa use the same ink {desert}")
+    opacity = interpolate_at((land.get("paint") or {}).get("fill-opacity"), 15)
+    if opacity < 0.15:
+        fail(f"{label} land fill {opacity} at z15 — desert and bosque vanish")
+    if opacity > 0.2:
+        fail(f"{label} land fill {opacity} at z15 fights the streets")
+
+    water = layer(style, "water-fill")
+    water_color = (water.get("paint") or {}).get("fill-color")
+    if water_color == VOID:
+        fail(f"{label} water fill is void — lakes vanish")
+    if str(water_color).lower() == "#1a1c1e":
+        fail(f"{label} water fill {water_color} is too close to void to read")
+
     meta = style.get("metadata") or {}
     if meta.get("attribution") != OSM_CREDIT:
         fail(f"{label} missing OSM credit in style metadata")
@@ -404,6 +434,25 @@ def main() -> None:
         }
     generated = maplibre_style("tx-west", hillshade)
     assert_readable_style(generated, "maplibre_style(tx-west)")
+    for pack_id in sorted(walkable_ids()):
+        disk = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+        hill_src = (disk.get("sources") or {}).get("hillshade")
+        hill_meta = None
+        if hill_src:
+            hill_meta = {
+                "present": True,
+                "file": hill_src.get("url"),
+                "coordinates": hill_src.get("coordinates"),
+            }
+        made = maplibre_style(pack_id, hill_meta)
+        disk_land = layer(disk, "land-fill").get("paint")
+        made_land = layer(made, "land-fill").get("paint")
+        if disk_land != made_land:
+            fail(f"{pack_id} style.json land-fill is not maplibre_style")
+        disk_water = layer(disk, "water-fill").get("paint")
+        made_water = layer(made, "water-fill").get("paint")
+        if disk_water != made_water:
+            fail(f"{pack_id} style.json water-fill is not maplibre_style")
 
     refs = next((item for item in style.get("layers") or [] if item.get("id") == "road-refs"), None)
     if not refs:

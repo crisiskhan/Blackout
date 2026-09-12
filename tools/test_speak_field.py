@@ -293,6 +293,13 @@ class FieldChromeSourceContracts(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("RouteLine.sourceID", offline)
         self.assertIn("RouteLine.layerID", offline)
+        self.assertIn("RouteLine.casingLayerID", offline)
+        self.assertIn("RouteLine.coreLayerID", offline)
+        self.assertIn("func shouldFollow(", read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ))
+        self.assertIn("PackCamera.shouldFollow", offline)
+        self.assertIn("lockOn: runtime.lockOn", read("Blackout", "MapTab.swift"))
         self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
         self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("GraphPlan.line", app)

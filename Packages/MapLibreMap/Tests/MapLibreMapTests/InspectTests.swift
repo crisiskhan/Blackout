@@ -2994,6 +2994,8 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(Inspect.pick([[:], [:]]).isEmpty)
         XCTAssertEqual(Inspect.pick([[:], ["natural": "spring"]])["natural"], "spring")
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(RouteLine.layerID))
+        XCTAssertTrue(Inspect.overlayLayerIDs.contains(RouteLine.casingLayerID))
+        XCTAssertTrue(Inspect.overlayLayerIDs.contains(RouteLine.coreLayerID))
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(HoldPin.ringLayerID))
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(DestinationPin.coreLayerID))
         XCTAssertTrue(Inspect.overlayLayerIDs.contains(PartyPips.haloLayerID))

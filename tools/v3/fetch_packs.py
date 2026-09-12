@@ -104,26 +104,26 @@ VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
 WATER_INK = "#6E747A"
-WATER_FILL = "#1A1C1E"
+WATER_FILL = "#1E2A32"
 WATER_EPHEMERAL = "#54595E"
 TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
-# Ground cover ink. All of it is within a few points of black on purpose: the
-# job is to tell desert from bosque at a glance without ever competing with a
-# silver street or a red route. Anything the tiler classes and this does not
-# name falls through to the default and draws as plain ground.
+# Ground cover ink. Near black so silver streets and a red route still own the
+# walk, but far enough apart that desert (warm), playa (cool), and bosque
+# (deep green) read as different empty at a glance. Anything the tiler classes
+# and this does not name falls through to the default and draws as plain ground.
 LAND_INK = [
     "match",
     ["get", "class"],
-    "desert", "#17120c",
-    "playa", "#1a1a1e",
-    "mountain", "#121417",
-    "bosque", "#0b1410",
-    "woodland", "#0a120d",
-    "farm", "#0e1410",
-    "town", "#141417",
-    "park", "#0a140a",
-    "protected", "#0c1310",
-    "#101010",
+    "desert", "#2C1608",
+    "playa", "#1C1E28",
+    "mountain", "#10141C",
+    "bosque", "#05160C",
+    "woodland", "#0A1A0E",
+    "farm", "#14180A",
+    "town", "#1A1A1E",
+    "park", "#0C1A0C",
+    "protected", "#0C1812",
+    "#121212",
 ]
 MAJOR_HIGHWAYS = [
     "motorway",
@@ -1395,10 +1395,10 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "raster",
                 "source": "hillshade",
                 "paint": {
-                    "raster-opacity": 0.16,
+                    "raster-opacity": 0.20,
                     "raster-saturation": -0.65,
                     "raster-brightness-max": 0.38,
-                    "raster-contrast": 0.12,
+                    "raster-contrast": 0.16,
                 },
             }
         )
@@ -1407,14 +1407,15 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         [
             {
                 # What kind of empty the empty ground is. Loudest zoomed out,
-                # where there is nothing else to look at, and almost gone by
-                # the zoom you walk at, where the streets do the talking.
+                # where there is nothing else to look at. Quiet by walking
+                # zoom so silver streets still own the walk, not gone — desert
+                # has to stay warm and bosque cool at the zoom the canvas opens.
                 "id": "land-fill",
                 "type": "fill",
                 "source": "osm",
                 "paint": {
                     "fill-color": LAND_INK,
-                    "fill-opacity": zoom_stops(6, 0.62, 11, 0.46, 13, 0.22, 14, 0.12),
+                    "fill-opacity": zoom_stops(6, 0.70, 11, 0.52, 13, 0.30, 15, 0.18),
                 },
             },
             {
@@ -1445,7 +1446,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "filter": ["in", ["get", "class"], ["literal", ["river", "canal", "creek", "acequia", "dam"]]],
                 "paint": {
                     "line-color": WATER_INK,
-                    "line-width": zoom_stops(10, 0.8, 15, 2.6),
+                    "line-width": zoom_stops(10, 0.8, 15, 3.2),
                 },
             },
             {
@@ -1458,7 +1459,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "filter": ["in", ["get", "class"], ["literal", ["wash", "drain", "channel"]]],
                 "paint": {
                     "line-color": WATER_EPHEMERAL,
-                    "line-width": zoom_stops(12, 0.7, 15, 2.0),
+                    "line-width": zoom_stops(12, 0.7, 15, 2.4),
                     "line-dasharray": [2.5, 2.0],
                 },
             },
@@ -2212,6 +2213,42 @@ def main(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def restyle_existing(dest: Path) -> None:
+    """Rewrite style.json from maplibre_style. Tiles, overlay, and graph stay put."""
+    pack = PACKS[dest.name]
+    bb = union_bbox(pack["slices"])
+    hill = dest / "hillshade.png"
+    hillshade_meta: dict = {"present": False, "reason": "no hillshade.png"}
+    if hill.is_file() and hill.stat().st_size > 100:
+        hillshade_meta = {
+            "present": True,
+            "file": "hillshade.png",
+            "bytes": hill.stat().st_size,
+            "attribution": "USGS 3DEP hillshade, build-time only",
+            "coordinates": [
+                [bb["west"], bb["north"]],
+                [bb["east"], bb["north"]],
+                [bb["east"], bb["south"]],
+                [bb["west"], bb["south"]],
+            ],
+        }
+    write_json(
+        dest / "style.json",
+        maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None),
+    )
+    write_manifest(dest)
+    print(f"  restyled {pack['id']}", flush=True)
+
+
+def restyle(ids: list[str] | None = None) -> None:
+    """Rewrite pack styles without recutting tiles or touching the overlay."""
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("RESTYLE", pid, flush=True)
+        restyle_existing(root / pid)
+    write_catalog(root)
+
+
 def rebuild(ids: list[str] | None = None) -> None:
     """Redo tiles, style and manifest from the OSM already on disk.
 
@@ -2260,6 +2297,8 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
+    elif argv and argv[0] == "--restyle":
+        restyle(argv[1:] or None)
     elif argv and argv[0] == "--resources":
         resources(argv[1:] or None)
     elif argv and argv[0] == "--notable":

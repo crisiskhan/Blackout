@@ -3,8 +3,19 @@ import Router
 
 public enum RouteLine {
     public static let sourceID = "route-line-src"
+    public static let casingLayerID = "route-line-casing"
     public static let layerID = "route-line"
+    public static let coreLayerID = "route-line-core"
     public static let offGraph = GraphPlan.offGraph
+    /// Void halo has to beat the street casing at walking zoom (10.6 at z15).
+    public static let casingWidth: Double = 12.5
+    /// Silver fill has to beat the major street fill at walking zoom (6.6 at z15).
+    public static let fillWidth: Double = 7.4
+    /// Scarce accent thread so the path still reads on an arterial.
+    public static let coreWidth: Double = 2.4
+    /// The annotation is a hook. Style layers carry the paint, so this stays
+    /// thin enough not to cover the void casing or the accent core.
+    public static let annotationWidth: Double = 0.01
 
     public static func shouldDraw(_ coords: [(lat: Double, lon: Double)]) -> Bool {
         coords.count >= 2

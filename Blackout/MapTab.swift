@@ -69,7 +69,8 @@ struct MapTab: View {
                 pips: runtime.mesh.pips
                     .filter { $0.from != runtime.mesh.localID }
                     .map { (lat: $0.lat, lon: $0.lon) },
-                onPulse: { runtime.pulse() }
+                onPulse: { runtime.pulse() },
+                lockOn: runtime.lockOn
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the

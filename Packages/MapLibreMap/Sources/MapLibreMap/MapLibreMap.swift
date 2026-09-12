@@ -353,6 +353,22 @@ public enum PackCamera {
         if fittedPack != pack { return true }
         return abs(fittedSize.width - size.width) > 1 || abs(fittedSize.height - size.height) > 1
     }
+
+    /// LOCK-ON keeps YOU in frame. GPS jitter under this stays put so the
+    /// canvas does not swim. Arming always recenters even if YOU have not moved.
+    public static let followMeters: Double = 8
+
+    public static func shouldFollow(
+        lockOn: Bool,
+        wasLocked: Bool,
+        lastFollow: (lat: Double, lon: Double)?,
+        puck: (lat: Double, lon: Double)
+    ) -> Bool {
+        guard lockOn else { return false }
+        if !wasLocked { return true }
+        guard let lastFollow else { return true }
+        return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
+    }
 }
 
 public enum PackStyle {
@@ -392,7 +408,7 @@ public enum PackStyle {
     /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
     /// silver ground marks for peaks, holes and named trees, and the glasshouse
     /// and cave-preserve overlay from `layers/ground.geojson`.
-    public static let resolverVersion = 6
+    public static let resolverVersion = 7
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -702,8 +718,9 @@ public enum PackStyle {
     /// read as picnic woodland. Quiet fill under the streets
     /// so a hold can name them — and the hold also asks this geojson source,
     /// not only the faint fill, the same way a tank is asked of the pack
-    /// source. Silver outline at walking zoom so the record is visible. No
-    /// class label, not a meal, not an animal pin.
+    /// source. Silver outline at walking zoom so the record is visible — wide
+    /// enough to read, not a fill that greys the streets. No class label, not
+    /// a meal, not an animal pin.
     private static func attachWorkedGround(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
@@ -741,8 +758,8 @@ public enum PackStyle {
             "minzoom": groundMinZoom,
             "paint": [
                 "line-color": silverInk,
-                "line-opacity": 0.72,
-                "line-width": 1.4,
+                "line-opacity": 0.88,
+                "line-width": 2.2,
             ],
         ]
         if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
