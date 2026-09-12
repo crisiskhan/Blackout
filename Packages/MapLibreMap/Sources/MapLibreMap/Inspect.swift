@@ -409,7 +409,20 @@ public enum Inspect {
     /// interior is on it. The `nature preserve` phrase already
     /// matches that sheet. Rio Rancho Bosque Nature Preserve is
     /// range, not bosque overlay. The `nature preserve` phrase
-    /// already matches that sheet. Austin
+    /// already matches that sheet. Phrase `wild basin
+    /// wilderness`, not the word `basin`. The `wilderness
+    /// preserve` phrase already matches that sheet. Listed
+    /// centroid sits on water. Phrase `stillhouse hollow`. The
+    /// `nature preserve` phrase already matches that sheet. Listed
+    /// centroid sits on water. Phrase `big walnut creek`, not the
+    /// word `walnut`. The `nature preserve` phrase already matches
+    /// that sheet. Listed centroid sits on Walnut Creek. Phrase
+    /// `colorado river park wildlife`. The `wildlife sanctuary`
+    /// phrase already matches that sheet. Listed centroid sits
+    /// on the Colorado River. Phrase `shady hollow west`, not
+    /// the word `shady`. Lost Oasis Hollow stays a road. Bear
+    /// Creek Management Unit is a separate sheet. The `nature
+    /// preserve` phrase already matches that sheet. Austin
     /// wildland, animals as range, not a pin. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
@@ -524,8 +537,10 @@ public enum Inspect {
     /// `unity`. Phrase `colorado community`, not the word
     /// `colorado`. Colorado River Park Wildlife Sanctuary stays
     /// wildlife. Phrase `alamo community`, not the word `alamo`.
-    /// Alamo Street stays a road. Alamo Pocket Park stays a park. The
-    /// `community garden` phrase already matches those
+    /// Alamo Street stays a road. Alamo Pocket Park stays a park. Phrase
+    /// `barelas community`, not the word `barelas`. 4th Street
+    /// Southwest stays a road. The `community garden` phrase
+    /// already matches those
     /// sheets. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is

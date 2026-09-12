@@ -270,6 +270,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("colorado community garden", east_blob)
         self.assertIn("alamo community garden", east_blob)
         self.assertNotIn("alamo street", east_blob)
+        self.assertIn("shady hollow west nature preserve", east_blob)
+        self.assertNotIn("lost oasis hollow", east_blob)
         self.assertNotIn("lamplight village avenue", east_blob)
         self.assertIn("north austin community garden", east_blob)
         self.assertNotIn("ladybird johnson wildflower center foot paths", east_blob)
@@ -1542,6 +1544,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("barton")', inspect)
         self.assertNotIn('contains("joya")', inspect)
         self.assertNotIn('contains("barrow")', inspect)
+        self.assertNotIn('contains("basin")', inspect)
+        self.assertNotIn('contains("stillhouse")', inspect)
+        self.assertNotIn('contains("walnut")', inspect)
+        self.assertNotIn('contains("shady")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1585,6 +1591,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("unity")', inspect)
         self.assertNotIn('contains("colorado")', inspect)
         self.assertNotIn('contains("alamo")', inspect)
+        self.assertNotIn('contains("barelas")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
         self.assertIn('t["leisure"] == "garden"', inspect)
@@ -3126,6 +3133,11 @@ class GroundFieldSync(unittest.TestCase):
         lime_creek_hit = False
         colorado_hit = False
         alamo_hit = False
+        wild_basin_hit = False
+        stillhouse_hit = False
+        big_walnut_hit = False
+        colorado_sanctuary_hit = False
+        shady_hollow_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -3248,6 +3260,16 @@ class GroundFieldSync(unittest.TestCase):
                     colorado_hit = True
                 if kind == "botanic" and name == "Alamo Community Garden" and pip(-97.719697, 30.282202, ring):
                     alamo_hit = True
+                if kind == "wildlife" and name == "Wild Basin Wilderness Preserve" and pip(-97.820597, 30.318096, ring):
+                    wild_basin_hit = True
+                if kind == "wildlife" and name == "Stillhouse Hollow Nature Preserve" and pip(-97.761957, 30.369023, ring):
+                    stillhouse_hit = True
+                if kind == "wildlife" and name == "Big Walnut Creek Nature Preserve" and pip(-97.651732, 30.326237, ring):
+                    big_walnut_hit = True
+                if kind == "wildlife" and name == "Colorado River Park Wildlife Sanctuary" and pip(-97.691879, 30.247020, ring):
+                    colorado_sanctuary_hit = True
+                if kind == "wildlife" and name == "Shady Hollow West Nature Preserve" and pip(-97.873372, 30.167029, ring):
+                    shady_hollow_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -3441,6 +3463,26 @@ class GroundFieldSync(unittest.TestCase):
             "Alamo Community Garden is not botanic on the east overlay",
         )
         self.assertTrue(
+            wild_basin_hit,
+            "Wild Basin Wilderness Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            stillhouse_hit,
+            "Stillhouse Hollow Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            big_walnut_hit,
+            "Big Walnut Creek Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            colorado_sanctuary_hit,
+            "Colorado River Park Wildlife Sanctuary is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            shady_hollow_hit,
+            "Shady Hollow West Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
         )
 
@@ -3579,6 +3621,7 @@ class GroundFieldSync(unittest.TestCase):
         valle_hit = False
         la_joya_hit = False
         rio_rancho_hit = False
+        barelas_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -3607,6 +3650,8 @@ class GroundFieldSync(unittest.TestCase):
                     international_hit = props.get("name") == "International District Community Garden"
                 if kind == "botanic" and pip(-106.301719, 35.882522, ring):
                     memorial_rose_hit = props.get("name") == "Memorial Rose Garden"
+                if kind == "botanic" and pip(-106.653090, 35.078118, ring):
+                    barelas_hit = props.get("name") == "Barelas Community Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-106.829413, 34.423426, ring):
@@ -3696,6 +3741,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             memorial_rose_hit,
             "Memorial Rose Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            barelas_hit,
+            "Barelas Community Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -4412,6 +4461,24 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("alamo community", qa)
         self.assertIn("Alamo Street", qa)
         self.assertIn("Alamo Pocket Park", qa)
+        self.assertIn("wild basin wilderness", qa)
+        self.assertIn("30.318096", qa)
+        self.assertIn("Stillhouse Hollow Nature Preserve", qa)
+        self.assertIn("30.369023", qa)
+        self.assertIn("stillhouse hollow", qa)
+        self.assertIn("Big Walnut Creek Nature Preserve", qa)
+        self.assertIn("30.326237", qa)
+        self.assertIn("big walnut creek", qa)
+        self.assertIn("Colorado River Park Wildlife Sanctuary", qa)
+        self.assertIn("30.247020", qa)
+        self.assertIn("colorado river park wildlife", qa)
+        self.assertIn("Shady Hollow West Nature Preserve", qa)
+        self.assertIn("30.167029", qa)
+        self.assertIn("shady hollow west", qa)
+        self.assertIn("Barelas Community Garden", qa)
+        self.assertIn("35.078118", qa)
+        self.assertIn("barelas community", qa)
+        self.assertIn("4th Street Southwest", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

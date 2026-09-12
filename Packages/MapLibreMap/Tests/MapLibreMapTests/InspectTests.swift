@@ -796,6 +796,9 @@ final class InspectTests: XCTestCase {
             pack: "tx-east"
         )
         XCTAssertEqual(overlayBarrow.klass, "Wildlife range")
+        XCTAssertNotEqual(overlayBarrow.klass, "Open reserve")
+        XCTAssertEqual(overlayBarrow.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(overlayBarrow.doLine.lowercased().contains("edible"), overlayBarrow.doLine)
 
         let center = Inspect.read(
             tags: ["leisure": "park", "name": "Rio Grande Nature Center State Park"],
@@ -1278,14 +1281,42 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(littleBear.fieldRoute.first, Inspect.mammalEastCard)
         XCTAssertFalse(littleBear.doLine.lowercased().contains("edible"), littleBear.doLine)
 
-        let barrow = Inspect.read(
-            tags: ["leisure": "nature_reserve", "name": "Barrow Nature Preserve"],
+        let stillhouse = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Stillhouse Hollow Nature Preserve",
+            ],
             pack: "tx-east"
         )
-        XCTAssertEqual(barrow.klass, "Wildlife range")
-        XCTAssertNotEqual(barrow.klass, "Open reserve")
-        XCTAssertEqual(barrow.fieldRoute.first, Inspect.mammalEastCard)
-        XCTAssertFalse(barrow.doLine.lowercased().contains("edible"), barrow.doLine)
+        XCTAssertEqual(stillhouse.klass, "Wildlife range")
+        XCTAssertNotEqual(stillhouse.klass, "Open reserve")
+        XCTAssertEqual(stillhouse.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(stillhouse.doLine.lowercased().contains("edible"), stillhouse.doLine)
+
+        let bigWalnut = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Big Walnut Creek Nature Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(bigWalnut.klass, "Wildlife range")
+        XCTAssertNotEqual(bigWalnut.klass, "Open reserve")
+        XCTAssertEqual(bigWalnut.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(bigWalnut.doLine.lowercased().contains("edible"), bigWalnut.doLine)
+
+        let shadyHollow = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "name": "Shady Hollow West Nature Preserve",
+            ],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(shadyHollow.klass, "Wildlife range")
+        XCTAssertNotEqual(shadyHollow.klass, "Open reserve")
+        XCTAssertNotEqual(shadyHollow.klass, "Cave or hole")
+        XCTAssertEqual(shadyHollow.fieldRoute.first, Inspect.mammalEastCard)
+        XCTAssertFalse(shadyHollow.doLine.lowercased().contains("edible"), shadyHollow.doLine)
 
         let austinSimon = Inspect.read(
             tags: [
@@ -3403,6 +3434,25 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(alamoPocket.klass, "Park")
         XCTAssertNotEqual(alamoPocket.klass, "Botanic garden")
+
+        let barelasGarden = Inspect.read(
+            tags: ["leisure": "park", "name": "Barelas Community Garden"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(barelasGarden.klass, "Botanic garden")
+        XCTAssertNotEqual(barelasGarden.klass, "Park")
+        XCTAssertEqual(barelasGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(barelasGarden.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(barelasGarden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(barelasGarden.doLine.lowercased().contains("edible"), barelasGarden.doLine)
+
+        let fourthStreetSW = Inspect.read(
+            tags: ["highway": "tertiary", "name": "4th Street Southwest"],
+            pack: "nm"
+        )
+        XCTAssertEqual(fourthStreetSW.klass, "Road")
+        XCTAssertNotEqual(fourthStreetSW.klass, "Botanic garden")
 
         let winrock = Inspect.read(
             tags: ["leisure": "garden", "name": "Winrock Garden"],
