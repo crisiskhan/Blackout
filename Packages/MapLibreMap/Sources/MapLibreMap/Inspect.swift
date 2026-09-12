@@ -323,7 +323,11 @@ public enum Inspect {
     /// cave is the hole. Not the word cave as a bare contains — Bee Cave,
     /// Coyote Cave Park, and Cave Drive stay parks. Phrase `blowing sink`,
     /// not the word `sink` — a highway named Blowing Sink Road is a road,
-    /// and Kitchen Sink is not a hole.
+    /// and Kitchen Sink is not a hole. Overlay-sheet mouths on Buttercup
+    /// / Discovery Well are Holdable when unique versus the overlay pip
+    /// and no other mouth sits in the probe. Buttercup Blowhole and
+    /// Lime Creek Road Sink. Godzilla Cave stays unheld — Link's sits
+    /// 84 m off that mouth.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {

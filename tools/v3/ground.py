@@ -47,7 +47,10 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 # Preserve is a hole, not wildlife range. Karst Lane stays a
 # road. A nature reserve named for a
 # cave is a hole. Blowing Sink is a wetland in the extract; the word
-# sink is not a match.
+# sink is not a match. Overlay-sheet mouths on Buttercup / Discovery
+# Well are Holdable when unique versus the overlay pip and no other
+# mouth sits in the probe. Buttercup Blowhole and Lime Creek Road
+# Sink. Godzilla Cave stays unheld — Link's sits 84 m off that mouth.
 CAVE_PRESERVE_PHRASES = (
     "cave preserve",
     "cave area of critical",

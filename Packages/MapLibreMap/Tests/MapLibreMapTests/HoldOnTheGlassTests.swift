@@ -155,13 +155,15 @@ final class HoldOnTheGlassTests: XCTestCase {
     private static let eastBosque = CLLocationCoordinate2D(latitude: 30.346188, longitude: -97.795410)
 
     /// Interior of Discovery Well Cave Preserve in east `layers/ground.geojson`.
+    /// Lime Creek Road Sink is 443 m off this pip.
     private static let cavePreserve = CLLocationCoordinate2D(latitude: 30.490391, longitude: -97.855063)
 
     /// Interior of Buttercup Creek Cave Preserve. Phrase `cave
     /// preserve`. Listed centroid sits 71 m from Stone Well #1, a
     /// cave mouth — rank 1 beats cave overlay 3. This interior is
     /// unique, 277 m from OSM water. Good Friday is 141 m off this
-    /// pip. Nelson Ranch Road 24 m is rank 7; cave 3 still wins.
+    /// pip. Blowhole is 412 m off this pip. Nelson Ranch Road 24 m
+    /// is rank 7; cave 3 still wins.
     private static let buttercupCave = CLLocationCoordinate2D(latitude: 30.498830, longitude: -97.841827)
 
     /// `Pepper Rock Cave` on the east place slice. A cave mouth,
@@ -192,6 +194,21 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// rank 7. Unique versus Discovery Well overlay Hold. Godzilla
     /// Cave stays unheld — Link's sits 84 m off that mouth.
     private static let buttercupWindCave = CLLocationCoordinate2D(latitude: 30.494273, longitude: -97.853218)
+
+    /// `Buttercup Blowhole` on the east place slice. A cave mouth
+    /// on the Buttercup overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus the Buttercup overlay Hold (412 m)
+    /// and Tree House Cave (228 m). Stone Well #2 is 154 m off this
+    /// pip. Buttercup Creek Boulevard 56 m is rank 7.
+    private static let buttercupBlowhole = CLLocationCoordinate2D(latitude: 30.496429, longitude: -97.838549)
+
+    /// `Lime Creek Road Sink` on the east place slice. A cave mouth
+    /// on the Discovery Well overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus the Discovery Well overlay Hold
+    /// (443 m) and Buttercup Wind (494 m). Persimmon Well is 277 m
+    /// off this pip. Anderson Mill Road 93 m is rank 7. Blue Loop
+    /// stays a trail. Lime Creek Road itself is 395 m off this pip.
+    private static let limeCreekRoadSink = CLLocationCoordinate2D(latitude: 30.493286, longitude: -97.858242)
 
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
@@ -1747,6 +1764,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         let held = try hold(at: Self.cavePreserve, zoom: 16, packId: "tx-east")
         XCTAssertEqual(held.card?.klass, "Cave or hole", "\(held)")
         XCTAssertEqual(held.card?.title, "Discovery Well Cave Preserve", "\(held)")
+        XCTAssertNotEqual(held.card?.title, "Lime Creek Road Sink", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.caveCard, "\(held)")
         let doLine = held.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(doLine.contains("stay in daylight"), held.card?.doLine ?? "")
@@ -1791,6 +1809,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(buttercup.card?.title, "Buttercup Creek Cave Preserve", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Stone Well #1", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Good Friday", "\(buttercup)")
+        XCTAssertNotEqual(buttercup.card?.title, "Buttercup Blowhole", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Nelson Ranch Road", "\(buttercup)")
         XCTAssertNotEqual(buttercup.card?.title, "Discovery Well Cave Preserve", "\(buttercup)")
         XCTAssertEqual(buttercup.card?.fieldRoute.first, Inspect.caveCard, "\(buttercup)")
@@ -1847,6 +1866,29 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(buttercupWind.card?.fieldRoute.first, Inspect.caveCard, "\(buttercupWind)")
         XCTAssertTrue((buttercupWind.card?.doLine.lowercased() ?? "").contains("stay in daylight"), buttercupWind.card?.doLine ?? "")
         XCTAssertFalse((buttercupWind.card?.doLine.lowercased() ?? "").contains("edible"), buttercupWind.card?.doLine ?? "")
+
+        let blowhole = try hold(at: Self.buttercupBlowhole, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(blowhole.card?.klass, "Cave or hole", "\(blowhole)")
+        XCTAssertEqual(blowhole.card?.title, "Buttercup Blowhole", "\(blowhole)")
+        XCTAssertNotEqual(blowhole.card?.title, "Buttercup Creek Cave Preserve", "\(blowhole)")
+        XCTAssertNotEqual(blowhole.card?.title, "Buttercup Creek Boulevard", "\(blowhole)")
+        XCTAssertNotEqual(blowhole.card?.title, "Stone Well #2", "\(blowhole)")
+        XCTAssertNotEqual(blowhole.card?.title, "Tree House Cave", "\(blowhole)")
+        XCTAssertEqual(blowhole.card?.fieldRoute.first, Inspect.caveCard, "\(blowhole)")
+        XCTAssertTrue((blowhole.card?.doLine.lowercased() ?? "").contains("stay in daylight"), blowhole.card?.doLine ?? "")
+        XCTAssertFalse((blowhole.card?.doLine.lowercased() ?? "").contains("edible"), blowhole.card?.doLine ?? "")
+
+        let limeSink = try hold(at: Self.limeCreekRoadSink, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(limeSink.card?.klass, "Cave or hole", "\(limeSink)")
+        XCTAssertEqual(limeSink.card?.title, "Lime Creek Road Sink", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Discovery Well Cave Preserve", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Anderson Mill Road", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Blue Loop", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Lime Creek Road", "\(limeSink)")
+        XCTAssertNotEqual(limeSink.card?.title, "Balcones Canyonlands Preserve - Lime Creek", "\(limeSink)")
+        XCTAssertEqual(limeSink.card?.fieldRoute.first, Inspect.caveCard, "\(limeSink)")
+        XCTAssertTrue((limeSink.card?.doLine.lowercased() ?? "").contains("stay in daylight"), limeSink.card?.doLine ?? "")
+        XCTAssertFalse((limeSink.card?.doLine.lowercased() ?? "").contains("edible"), limeSink.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {

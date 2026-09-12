@@ -650,6 +650,43 @@ final class InspectTests: XCTestCase {
         XCTAssertNotEqual(laurenTrail.klass, "Trail")
         XCTAssertFalse(laurenTrail.fieldRoute.contains(Inspect.caveCard))
 
+        let blowhole = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Buttercup Blowhole"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(blowhole.klass, "Cave or hole")
+        XCTAssertEqual(blowhole.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(blowhole.doLine.lowercased().contains("edible"), blowhole.doLine)
+
+        let boulevard = Inspect.read(
+            tags: ["highway": "tertiary", "name": "Buttercup Creek Boulevard"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(boulevard.klass, "Road")
+        XCTAssertFalse(boulevard.fieldRoute.contains(Inspect.caveCard))
+
+        let limeSink = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Lime Creek Road Sink"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(limeSink.klass, "Cave or hole")
+        XCTAssertEqual(limeSink.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(limeSink.doLine.lowercased().contains("edible"), limeSink.doLine)
+
+        let andersonMill = Inspect.read(
+            tags: ["highway": "secondary", "name": "Anderson Mill Road"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(andersonMill.klass, "Road")
+        XCTAssertFalse(andersonMill.fieldRoute.contains(Inspect.caveCard))
+
+        let blueLoop = Inspect.read(
+            tags: ["highway": "footway", "name": "Blue Loop"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(blueLoop.klass, "Trail")
+        XCTAssertFalse(blueLoop.fieldRoute.contains(Inspect.caveCard))
+
         let daffan = Inspect.read(
             tags: ["highway": "tertiary", "name": "Daffan Lane"],
             pack: "tx-east"
@@ -3010,6 +3047,23 @@ final class InspectTests: XCTestCase {
                 ["highway": "residential", "name": "Shea Drive"],
                 ["highway": "residential", "name": "Lauren Trail"],
                 ["leisure": "park", "name": "Godzilla Preserve"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Buttercup Blowhole"],
+                ["leisure": "park", "name": "Buttercup Creek Cave Preserve"],
+                ["highway": "tertiary", "name": "Buttercup Creek Boulevard"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Lime Creek Road Sink"],
+                ["leisure": "park", "name": "Discovery Well Cave Preserve"],
+                ["highway": "secondary", "name": "Anderson Mill Road"],
+                ["highway": "footway", "name": "Blue Loop"],
             ])["natural"],
             "cave_entrance"
         )
