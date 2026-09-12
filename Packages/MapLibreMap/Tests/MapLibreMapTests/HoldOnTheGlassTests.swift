@@ -162,10 +162,10 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Buttercup Creek Cave Preserve. Phrase `cave
     /// preserve`. Listed centroid sits 71 m from Stone Well #1, a
     /// cave mouth — rank 1 beats cave overlay 3. This interior is
-    /// unique, 277 m from OSM water. Good Friday is 141 m off this
-    /// pip. Blowhole is 412 m off this pip. Cedar Elm Sink is 270 m
-    /// off this pip. Nelson Ranch Road 24 m
-    /// is rank 7; cave 3 still wins.
+    /// unique, 277 m from OSM water. Good Friday is held 141 m off
+    /// this pip — rank 1 still beats the overlay. Blowhole is 412 m
+    /// off this pip. Cedar Elm Sink is 270 m off this pip. Nelson
+    /// Ranch Road 24 m is rank 7; cave 3 still wins.
     private static let buttercupCave = CLLocationCoordinate2D(latitude: 30.498830, longitude: -97.841827)
 
     /// `Pepper Rock Cave` on the east place slice. A cave mouth,
@@ -219,8 +219,9 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// on the Buttercup overlay sheet — rank 1 still beats the
     /// overlay. Unique versus Buttercup Blowhole (189 m) and
     /// the Buttercup overlay Hold. Pat's Pit is 131 m off this
-    /// pip. Anna Court 93 m is rank 7. Cedar Elm Preserve Trail
-    /// stays a trail. Brook Meadow Trail is residential, a road.
+    /// pip. Good Friday is 165 m off this pip. Anna Court 93 m
+    /// is rank 7. Cedar Elm Preserve Trail stays a trail. Brook
+    /// Meadow Trail is residential, a road.
     private static let cedarElmSink = CLLocationCoordinate2D(latitude: 30.496675, longitude: -97.840497)
 
     /// `Under Three Oaks` on the east place slice. A cave mouth
@@ -250,6 +251,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Sink (131 m). Anna Court 89 m is rank 7. Andrew Cove stays
     /// a road.
     private static let patsPitCave = CLLocationCoordinate2D(latitude: 30.497611, longitude: -97.839661)
+
+    /// `Good Friday` on the east place slice. A cave mouth on the
+    /// Buttercup overlay sheet — rank 1 still beats the overlay.
+    /// Unique versus the Buttercup overlay Hold (141 m) and
+    /// Cedar Elm Sink (165 m). Cedar Elm Preserve Trail 4 m is
+    /// rank 7. Brook Meadow Trail is residential, a road. Anna
+    /// Court stays a road. 405 m from OSM water.
+    private static let goodFriday = CLLocationCoordinate2D(latitude: 30.497564, longitude: -97.841872)
 
     /// `Persimmon Well` on the east place slice. A cave mouth on
     /// the Discovery Well overlay sheet — rank 1 still beats the
@@ -823,6 +832,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Bandelier National Monument. 101 m from Capulin Creek; rank 1
     /// still beats water. Lower Capulin Trail 61 m is rank 7.
     private static let paintedCave = CLLocationCoordinate2D(latitude: 35.722425, longitude: -106.31994)
+
+    /// `Hot Springs Cave` on the NM place slice. A cave mouth
+    /// inside Jemez National Recreation Area — rank 1 still
+    /// beats the overlay. 103 m from Jemez River; rank 1 still
+    /// beats water. Soda Dam 107 m is rock, not the hole.
+    /// Unique versus the Jemez overlay Hold on Cerro Pelado.
+    /// Generic Cave and the two La Cueva stay unheld.
+    private static let hotSpringsCave = CLLocationCoordinate2D(latitude: 35.791493, longitude: -106.687498)
 
     /// `Prosopis velutina / Velvet Mesquite` on the NM place slice.
     /// Named tree — shade and wood, not a meal. Landry Avenue
@@ -2024,6 +2041,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(cedarElm.card?.title, "Cedar Elm Preserve Trail", "\(cedarElm)")
         XCTAssertNotEqual(cedarElm.card?.title, "Brook Meadow Trail", "\(cedarElm)")
         XCTAssertNotEqual(cedarElm.card?.title, "Pat's Pit", "\(cedarElm)")
+        XCTAssertNotEqual(cedarElm.card?.title, "Good Friday", "\(cedarElm)")
         XCTAssertEqual(cedarElm.card?.fieldRoute.first, Inspect.caveCard, "\(cedarElm)")
         XCTAssertTrue((cedarElm.card?.doLine.lowercased() ?? "").contains("stay in daylight"), cedarElm.card?.doLine ?? "")
         XCTAssertFalse((cedarElm.card?.doLine.lowercased() ?? "").contains("edible"), cedarElm.card?.doLine ?? "")
@@ -2075,6 +2093,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(patsPit.card?.fieldRoute.first, Inspect.caveCard, "\(patsPit)")
         XCTAssertTrue((patsPit.card?.doLine.lowercased() ?? "").contains("stay in daylight"), patsPit.card?.doLine ?? "")
         XCTAssertFalse((patsPit.card?.doLine.lowercased() ?? "").contains("edible"), patsPit.card?.doLine ?? "")
+
+        let goodFriday = try hold(at: Self.goodFriday, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(goodFriday.card?.klass, "Cave or hole", "\(goodFriday)")
+        XCTAssertEqual(goodFriday.card?.title, "Good Friday", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Buttercup Creek Cave Preserve", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Brook Meadow Trail", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Anna Court", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Cedar Elm Sink", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Cedar Elm Preserve Trail", "\(goodFriday)")
+        XCTAssertNotEqual(goodFriday.card?.title, "Pat's Pit", "\(goodFriday)")
+        XCTAssertEqual(goodFriday.card?.fieldRoute.first, Inspect.caveCard, "\(goodFriday)")
+        XCTAssertTrue((goodFriday.card?.doLine.lowercased() ?? "").contains("stay in daylight"), goodFriday.card?.doLine ?? "")
+        XCTAssertFalse((goodFriday.card?.doLine.lowercased() ?? "").contains("edible"), goodFriday.card?.doLine ?? "")
 
         let persimmon = try hold(at: Self.persimmonWell, zoom: 16, packId: "tx-east")
         XCTAssertEqual(persimmon.card?.klass, "Cave or hole", "\(persimmon)")
@@ -2851,6 +2882,18 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(painted.card?.fieldRoute.first, Inspect.caveCard, "\(painted)")
         XCTAssertTrue((painted.card?.doLine.lowercased() ?? "").contains("stay in daylight"), painted.card?.doLine ?? "")
         XCTAssertFalse((painted.card?.doLine.lowercased() ?? "").contains("edible"), painted.card?.doLine ?? "")
+
+        let hotSprings = try hold(at: Self.hotSpringsCave, zoom: 16, packId: "nm")
+        XCTAssertEqual(hotSprings.card?.klass, "Cave or hole", "\(hotSprings)")
+        XCTAssertEqual(hotSprings.card?.title, "Hot Springs Cave", "\(hotSprings)")
+        XCTAssertNotEqual(hotSprings.card?.klass, "Open reserve", "\(hotSprings)")
+        XCTAssertNotEqual(hotSprings.card?.klass, "Rock", "\(hotSprings)")
+        XCTAssertNotEqual(hotSprings.card?.title, "Jemez National Recreation Area", "\(hotSprings)")
+        XCTAssertNotEqual(hotSprings.card?.title, "Soda Dam", "\(hotSprings)")
+        XCTAssertNotEqual(hotSprings.card?.title, "Painted Cave", "\(hotSprings)")
+        XCTAssertEqual(hotSprings.card?.fieldRoute.first, Inspect.caveCard, "\(hotSprings)")
+        XCTAssertTrue((hotSprings.card?.doLine.lowercased() ?? "").contains("stay in daylight"), hotSprings.card?.doLine ?? "")
+        XCTAssertFalse((hotSprings.card?.doLine.lowercased() ?? "").contains("edible"), hotSprings.card?.doLine ?? "")
     }
 
     func testHoldingAWestPeakOpensAnimalsNotIce() throws {
