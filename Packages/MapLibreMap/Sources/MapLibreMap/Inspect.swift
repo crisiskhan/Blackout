@@ -465,7 +465,9 @@ public enum Inspect {
     /// `este garden`, not the word `este`. Celeste Drive stays a
     /// road. Alamo Community Garden is a separate sheet. Phrase
     /// `4th street garden`, not the word `4th`. West 4th Avenue
-    /// stays a road. Winrock Garden is a mall bed and stays out.
+    /// stays a road. Phrase `alamogordo community garden`, not the
+    /// word `alamogordo`. The Alamogordo street stays a road. The
+    /// `community garden` phrase already matches that sheet. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,

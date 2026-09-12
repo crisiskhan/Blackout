@@ -545,6 +545,13 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "West 4th Avenue"})
         )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "garden", "name": "Alamogordo Community Garden"}),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Alamogordo"})
+        )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "garden", "name": "Winrock Garden"})
         )
@@ -2335,6 +2342,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
+        self.assertIn("Alamogordo Community Garden", glass)
+        self.assertIn("32.908810", glass)
+        self.assertIn("-105.948195", glass)
         self.assertIn("Brodie Wild", glass)
         self.assertIn("30.183433", glass)
         self.assertIn("-97.850150", glass)
@@ -2404,6 +2414,7 @@ class GroundFieldSync(unittest.TestCase):
         japaneese_hit = False
         preston_foster_hit = False
         fourth_street_hit = False
+        alamogordo_hit = False
         for feat in west["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2424,6 +2435,8 @@ class GroundFieldSync(unittest.TestCase):
                     preston_foster_hit = props.get("name") == "Preston Foster Native Garden"
                 if kind == "botanic" and pip(-107.252761, 33.134037, ring):
                     fourth_street_hit = props.get("name") == "4th Street Garden"
+                if kind == "botanic" and pip(-105.948195, 32.908810, ring):
+                    alamogordo_hit = props.get("name") == "Alamogordo Community Garden"
                 if kind == "glasshouse" and pip(-106.933833, 32.502967, ring):
                     glass_hit = True
                 if kind == "reserve" and pip(-105.633755, 32.032331, ring):
@@ -2467,6 +2480,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             fourth_street_hit,
             "4th Street Garden is not botanic on the west overlay",
+        )
+        self.assertTrue(
+            alamogordo_hit,
+            "Alamogordo Community Garden is not botanic on the west overlay",
         )
         self.assertTrue(glass_hit, "glass glasshouse hold is not inside a greenhouse sheet")
         self.assertTrue(reserve_hit, "glass ACEC hold is not inside Alamo Mountain")
@@ -3582,6 +3599,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("4th street garden", qa)
         self.assertIn("33.134037", qa)
         self.assertIn("4th Street Garden", qa)
+        self.assertIn("Alamogordo Community Garden", qa)
+        self.assertIn("32.908810", qa)
+        self.assertIn("alamogordo community garden", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

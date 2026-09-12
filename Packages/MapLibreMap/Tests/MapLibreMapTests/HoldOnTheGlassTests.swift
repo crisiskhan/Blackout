@@ -293,6 +293,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// OSM drain.
     private static let fourthStreetGarden = CLLocationCoordinate2D(latitude: 33.134037, longitude: -107.252761)
 
+    /// Interior of Alamogordo Community Garden. Phrase `alamogordo
+    /// community garden`, not the word `alamogordo`. The Alamogordo
+    /// street stays a road. 419 m from OSM ditch.
+    private static let alamogordoGarden = CLLocationCoordinate2D(latitude: 32.908810, longitude: -105.948195)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -1298,6 +1303,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((fourthStreet.card?.doLine.lowercased() ?? "").contains("edible"), fourthStreet.card?.doLine ?? "")
 
+        let alamogordo = try hold(at: Self.alamogordoGarden, zoom: 16)
+        XCTAssertEqual(alamogordo.card?.klass, "Botanic garden", "\(alamogordo)")
+        XCTAssertEqual(alamogordo.card?.title, "Alamogordo Community Garden", "\(alamogordo)")
+        XCTAssertEqual(alamogordo.card?.fieldRoute.first, Inspect.plantTXCard, "\(alamogordo)")
+        XCTAssertFalse(
+            alamogordo.card?.fieldRoute.contains(Inspect.treeUseTXCard) ?? true,
+            "Alamogordo Community Garden opened woodland tree-use: \(alamogordo)"
+        )
+        XCTAssertFalse((alamogordo.card?.doLine.lowercased() ?? "").contains("edible"), alamogordo.card?.doLine ?? "")
+
         let cornell = try hold(at: Self.cornellRose, zoom: 16, packId: "nm")
         XCTAssertEqual(cornell.card?.klass, "Botanic garden", "\(cornell)")
         XCTAssertEqual(cornell.card?.title, "Harvey Cornell Rose Park", "\(cornell)")
@@ -1807,6 +1822,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("japaneese garden", Self.japaneeseGarden, 16.0),
             ("preston foster", Self.prestonFoster, 16.0),
             ("4th street garden", Self.fourthStreetGarden, 16.0),
+            ("alamogordo community garden", Self.alamogordoGarden, 16.0),
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),
