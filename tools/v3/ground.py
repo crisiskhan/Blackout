@@ -97,7 +97,12 @@ CAVE_PRESERVE_KEYS = {
 # matches that sheet. Phrase `bernardo wildlife`, not the
 # word `bernardo`. Bernardo Trails Park stays a park. Don
 # Bernardo Road stays a road. The `wildlife management area`
-# phrase already matches that sheet. `preserve`
+# phrase already matches that sheet. Phrase `national
+# wildlife`, not the word `valle`. Valle de Oro National
+# Wildlife Refuge is range. Valle del Bosque Park stays a
+# park. Phrase `stephenson nature`, not the word
+# `stephenson`. The `nature preserve` phrase already
+# matches that sheet. `preserve`
 # alone is still forbidden.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
@@ -201,7 +206,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Court stays a road. The `community garden` phrase already
 # matches that sheet. Phrase `international district`, not
 # the word `international`. The `community garden` phrase already
-# matches that sheet. Winrock Garden is a mall
+# matches that sheet. Phrase `bastrop community`, not the
+# word `bastrop`. Bastrop Street stays a road. Bastrop
+# State Park stays a park. The `community garden` phrase
+# already matches that sheet. Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap
 # glasshouses and stay out. A named garden without a botanic

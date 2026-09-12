@@ -253,6 +253,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("este garden", east_blob)
         self.assertNotIn("brazos street", east_blob)
         self.assertNotIn("celeste drive", east_blob)
+        self.assertIn("stephenson nature preserve and outdoor education center", east_blob)
+        self.assertIn("bastrop community garden", east_blob)
+        self.assertNotIn("bastrop street", east_blob)
+        self.assertNotIn("longview neighborhood park", east_blob)
         self.assertIn("north austin community garden", east_blob)
         self.assertNotIn("ladybird johnson wildflower center foot paths", east_blob)
         self.assertNotIn("moontower saloon beer garden", east_blob)
@@ -439,6 +443,20 @@ class ShippedWaterLayers(unittest.TestCase):
                 {"leisure": "garden", "name": "Memorial Rose Garden"}
             ),
             "botanic",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "garden", "name": "Bastrop Community Garden"}
+            ),
+            "botanic",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Bastrop Street"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Bastrop State Park"})
         )
         self.assertIsNone(
             ground.overlay_kind(
@@ -949,6 +967,25 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {
                     "leisure": "nature_reserve",
+                    "name": "Stephenson Nature Preserve And Outdoor Education Center",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"highway": "residential", "name": "Stephenson Drive"}
+            )
+        )
+        self.assertIsNone(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "Longview Neighborhood Park"}
+            )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
                     "boundary": "protected_area",
                     "name": "Bernardo Wildlife Management Area",
                 }
@@ -962,6 +999,19 @@ class ShippedWaterLayers(unittest.TestCase):
             ground.overlay_kind(
                 {"highway": "residential", "name": "Don Bernardo Road"}
             )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Valle de Oro National Wildlife Refuge",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"leisure": "park", "name": "Valle del Bosque Park"})
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -1268,6 +1318,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("wild")', inspect)
         self.assertNotIn('contains("dahlstrom")', inspect)
         self.assertNotIn('contains("bernardo")', inspect)
+        self.assertNotIn('contains("valle")', inspect)
+        self.assertNotIn('contains("stephenson")', inspect)
         self.assertIn("isWildlifeRange", inspect)
         self.assertIn("Wildlife range", inspect)
         for phrase in ground.OPEN_RESERVE_PHRASES:
@@ -1302,6 +1354,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("arboretum")', inspect)
         self.assertNotIn('contains("la mesa")', inspect)
         self.assertNotIn('contains("international")', inspect)
+        self.assertNotIn('contains("memorial")', inspect)
+        self.assertNotIn('contains("bastrop")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
         self.assertIn('t["leisure"] == "garden"', inspect)
@@ -2455,6 +2509,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Este Garden", glass)
         self.assertIn("30.283704", glass)
         self.assertIn("-97.719118", glass)
+        self.assertIn("Bastrop Community Garden", glass)
+        self.assertIn("30.112298", glass)
+        self.assertIn("-97.319724", glass)
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
@@ -2467,6 +2524,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Gay Ruby Dahlstrom Nature Preserve", glass)
         self.assertIn("30.085079", glass)
         self.assertIn("-97.898228", glass)
+        self.assertIn("Stephenson Nature Preserve And Outdoor Education Center", glass)
+        self.assertIn("30.205991", glass)
+        self.assertIn("-97.827853", glass)
         self.assertIn("Harvey Cornell Rose Park", glass)
         self.assertIn("35.670293", glass)
         self.assertIn("-105.946141", glass)
@@ -2479,9 +2539,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("International District Community Garden", glass)
         self.assertIn("35.062299", glass)
         self.assertIn("-106.608226", glass)
+        self.assertIn("Memorial Rose Garden", glass)
+        self.assertIn("35.882522", glass)
+        self.assertIn("-106.301719", glass)
         self.assertIn("Bernardo Wildlife Management Area", glass)
         self.assertIn("34.423426", glass)
         self.assertIn("-106.829413", glass)
+        self.assertIn("Valle de Oro National Wildlife Refuge", glass)
+        self.assertIn("34.977244", glass)
+        self.assertIn("-106.679397", glass)
         self.assertIn("Sandia Mountain Natural History Center", glass)
         self.assertIn("35.126801", glass)
         self.assertIn("-106.379801", glass)
@@ -2757,6 +2823,7 @@ class GroundFieldSync(unittest.TestCase):
         beck_hit = False
         brodie_hit = False
         dahlstrom_hit = False
+        stephenson_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -2766,6 +2833,7 @@ class GroundFieldSync(unittest.TestCase):
         brazos_bluff_hit = False
         explorers_hit = False
         este_hit = False
+        bastrop_hit = False
         for feat in east["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -2823,6 +2891,8 @@ class GroundFieldSync(unittest.TestCase):
                     explorers_hit = True
                 if kind == "botanic" and name == "Este Garden" and pip(-97.719118, 30.283704, ring):
                     este_hit = True
+                if kind == "botanic" and name == "Bastrop Community Garden" and pip(-97.319724, 30.112298, ring):
+                    bastrop_hit = True
                 if kind == "wildlife" and name == "Baker Sanctuary" and pip(-97.865747, 30.483183, ring):
                     baker_hit = True
                 if kind == "wildlife" and name == "Blair Woods Sanctuary" and pip(-97.675658, 30.286405, ring):
@@ -2833,6 +2903,8 @@ class GroundFieldSync(unittest.TestCase):
                     brodie_hit = True
                 if kind == "wildlife" and name == "Gay Ruby Dahlstrom Nature Preserve" and pip(-97.898228, 30.085079, ring):
                     dahlstrom_hit = True
+                if kind == "wildlife" and name == "Stephenson Nature Preserve And Outdoor Education Center" and pip(-97.827853, 30.205991, ring):
+                    stephenson_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
                     decker_hit = True
         self.assertTrue(
@@ -2926,6 +2998,10 @@ class GroundFieldSync(unittest.TestCase):
             "Este Garden is not botanic on the east overlay",
         )
         self.assertTrue(
+            bastrop_hit,
+            "Bastrop Community Garden is not botanic on the east overlay",
+        )
+        self.assertTrue(
             baker_hit,
             "Baker Sanctuary is not wildlife range on the east overlay",
         )
@@ -2944,6 +3020,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             dahlstrom_hit,
             "Gay Ruby Dahlstrom Nature Preserve is not wildlife range on the east overlay",
+        )
+        self.assertTrue(
+            stephenson_hit,
+            "Stephenson Nature Preserve is not wildlife range on the east overlay",
         )
         self.assertTrue(
             decker_hit, "glass east open-reserve hold is not inside Decker"
@@ -3080,6 +3160,8 @@ class GroundFieldSync(unittest.TestCase):
         albuquerque_rose_hit = False
         la_mesa_hit = False
         international_hit = False
+        memorial_rose_hit = False
+        valle_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -3106,10 +3188,16 @@ class GroundFieldSync(unittest.TestCase):
                     la_mesa_hit = props.get("name") == "La Mesa Neighborhood Community Garden"
                 if kind == "botanic" and pip(-106.608226, 35.062299, ring):
                     international_hit = props.get("name") == "International District Community Garden"
+                if kind == "botanic" and pip(-106.301719, 35.882522, ring):
+                    memorial_rose_hit = props.get("name") == "Memorial Rose Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-106.829413, 34.423426, ring):
                     bernardo_hit = props.get("name") == "Bernardo Wildlife Management Area"
+                if kind == "wildlife" and pip(-106.679397, 34.977244, ring):
+                    valle_hit = (
+                        props.get("name") == "Valle de Oro National Wildlife Refuge"
+                    )
                 if kind == "wildlife" and pip(-105.884927, 35.688876, ring):
                     audubon_hit = (
                         props.get("name") == "Randall Davey Audubon Center & Sanctuary"
@@ -3181,11 +3269,19 @@ class GroundFieldSync(unittest.TestCase):
             "International District Community Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
+            memorial_rose_hit,
+            "Memorial Rose Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
         )
         self.assertTrue(
             bernardo_hit,
             "Bernardo Wildlife Management Area is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            valle_hit,
+            "Valle de Oro National Wildlife Refuge is not wildlife range on the NM overlay",
         )
         self.assertTrue(
             audubon_hit, "Randall Davey Audubon is not wildlife range on the NM overlay"
@@ -3850,6 +3946,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.062299", qa)
         self.assertIn("international district", qa)
         self.assertIn("Memorial Rose Garden", qa)
+        self.assertIn("35.882522", qa)
+        self.assertIn("rose garden", qa)
+        self.assertIn("Bastrop Community Garden", qa)
+        self.assertIn("30.112298", qa)
+        self.assertIn("bastrop community", qa)
+        self.assertIn("Bastrop Street", qa)
+        self.assertIn("Bastrop State Park", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)
@@ -3887,6 +3990,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("bernardo wildlife", qa)
         self.assertIn("Bernardo Trails Park", qa)
         self.assertIn("Don Bernardo Road", qa)
+        self.assertIn("Valle de Oro National Wildlife Refuge", qa)
+        self.assertIn("34.977244", qa)
+        self.assertIn("national wildlife", qa)
+        self.assertIn("Valle del Bosque Park", qa)
+        self.assertIn("Stephenson Nature Preserve And Outdoor Education Center", qa)
+        self.assertIn("30.205991", qa)
+        self.assertIn("stephenson nature", qa)
         self.assertIn("El Cerro de Los Lunas Preserve", qa)
         self.assertIn("Galisteo Basin Preserve", qa)
         self.assertIn("Named tree", qa)
