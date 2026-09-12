@@ -2846,6 +2846,33 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(floridaWSA.fieldRoute.first, Inspect.snakeTXCard)
         XCTAssertFalse(floridaWSA.doLine.lowercased().contains("edible"), floridaWSA.doLine)
 
+        let organPeaks = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "national_park",
+                "name": "Organ Mountains-Desert Peaks National Monument",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(organPeaks.klass, "Open reserve")
+        XCTAssertNotEqual(organPeaks.klass, "Wildlife range")
+        XCTAssertNotEqual(organPeaks.klass, "Peak")
+        XCTAssertEqual(organPeaks.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(organPeaks.doLine.lowercased().contains("diamondback"), organPeaks.doLine)
+        XCTAssertTrue(organPeaks.doLine.lowercased().contains("javelina"), organPeaks.doLine)
+        XCTAssertFalse(organPeaks.doLine.lowercased().contains("edible"), organPeaks.doLine)
+
+        let organWilderness = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Organ Mountains Wilderness",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(organWilderness.klass, "Open reserve")
+        XCTAssertNotEqual(organWilderness.klass, "Wildlife range")
+
         let huecoTown = Inspect.read(
             tags: ["leisure": "park", "name": "Hueco Mountain Park"],
             pack: "tx-west"
@@ -2872,6 +2899,124 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(golden.doLine.lowercased().contains("sotol") || golden.doLine.lowercased().contains("cholla"), golden.doLine)
         XCTAssertFalse(golden.doLine.lowercased().contains("cottonwood"), golden.doLine)
         XCTAssertFalse(golden.doLine.lowercased().contains("edible"), golden.doLine)
+
+        let bandelier = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "national_park",
+                "name": "Bandelier National Monument",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(bandelier.klass, "Open reserve")
+        XCTAssertNotEqual(bandelier.klass, "Wildlife range")
+        XCTAssertNotEqual(bandelier.klass, "Cave or hole")
+        XCTAssertNotEqual(bandelier.klass, "Peak")
+        XCTAssertEqual(bandelier.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(bandelier.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(bandelier.doLine.lowercased().contains("edible"), bandelier.doLine)
+
+        let escobas = Inspect.read(
+            tags: ["natural": "peak", "name": "Escobas Mesa"],
+            pack: "nm"
+        )
+        XCTAssertEqual(escobas.klass, "Peak")
+        XCTAssertNotEqual(escobas.klass, "Open reserve")
+
+        let carlito = Inspect.read(
+            tags: ["leisure": "park", "name": "Carlito Springs Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(carlito.klass, "Open reserve")
+        XCTAssertNotEqual(carlito.klass, "Park")
+        XCTAssertEqual(carlito.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(carlito.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(carlito.doLine.lowercased().contains("edible"), carlito.doLine)
+
+        let sedillo = Inspect.read(
+            tags: ["leisure": "park", "name": "Sedillo Ridge Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(sedillo.klass, "Open reserve")
+        XCTAssertNotEqual(sedillo.klass, "Park")
+        XCTAssertEqual(sedillo.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(sedillo.doLine.lowercased().contains("edible"), sedillo.doLine)
+
+        let juanTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Juan Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(juanTrail.klass, "Trail")
+        XCTAssertNotEqual(juanTrail.klass, "Open reserve")
+
+        let ponderosa = Inspect.read(
+            tags: ["leisure": "park", "name": "Loma Ponderosa Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(ponderosa.klass, "Open reserve")
+        XCTAssertNotEqual(ponderosa.klass, "Park")
+        XCTAssertFalse(ponderosa.doLine.lowercased().contains("edible"), ponderosa.doLine)
+
+        let sabino = Inspect.read(
+            tags: ["leisure": "park", "name": "Sabino Canyon Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(sabino.klass, "Open reserve")
+        XCTAssertNotEqual(sabino.klass, "Park")
+        XCTAssertFalse(sabino.doLine.lowercased().contains("edible"), sabino.doLine)
+
+        let sabinoTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Sabino Canyon East Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(sabinoTrail.klass, "Trail")
+        XCTAssertNotEqual(sabinoTrail.klass, "Open reserve")
+
+        let gutierrez = Inspect.read(
+            tags: ["leisure": "park", "name": "Gutierrez Canyon-Milne Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(gutierrez.klass, "Open reserve")
+        XCTAssertNotEqual(gutierrez.klass, "Park")
+        XCTAssertFalse(gutierrez.doLine.lowercased().contains("edible"), gutierrez.doLine)
+
+        let canyonTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Canyon Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(canyonTrail.klass, "Trail")
+        XCTAssertNotEqual(canyonTrail.klass, "Open reserve")
+
+        let pistolas = Inspect.read(
+            tags: ["leisure": "park", "name": "Tres Pistolas Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(pistolas.klass, "Open reserve")
+        XCTAssertNotEqual(pistolas.klass, "Park")
+        XCTAssertNotEqual(pistolas.klass, "Wildlife range")
+        XCTAssertFalse(pistolas.doLine.lowercased().contains("edible"), pistolas.doLine)
+
+        let hawkSpur = Inspect.read(
+            tags: ["highway": "path", "name": "Hawk Watch Connector Spur"],
+            pack: "nm"
+        )
+        XCTAssertEqual(hawkSpur.klass, "Trail")
+        XCTAssertNotEqual(hawkSpur.klass, "Open reserve")
+
+        let ojitoSanAntonio = Inspect.read(
+            tags: ["leisure": "park", "name": "Ojito de San Antonio Open Space"],
+            pack: "nm"
+        )
+        XCTAssertEqual(ojitoSanAntonio.klass, "Open reserve")
+        XCTAssertNotEqual(ojitoSanAntonio.klass, "Park")
+        XCTAssertFalse(ojitoSanAntonio.doLine.lowercased().contains("edible"), ojitoSanAntonio.doLine)
+
+        let ojoGrande = Inspect.read(
+            tags: ["highway": "residential", "name": "Ojo Grande Drive"],
+            pack: "nm"
+        )
+        XCTAssertEqual(ojoGrande.klass, "Road")
+        XCTAssertNotEqual(ojoGrande.klass, "Open reserve")
 
         let bearCanyon = Inspect.read(
             tags: ["leisure": "park", "name": "Bear Canyon Open Space West"],
@@ -4404,6 +4549,49 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([domePeakTags, domeReserve]), pack: "nm").klass,
             "Peak"
+        )
+
+        let bandelierPeakTags: [String: String] = [
+            "natural": "peak",
+            "name": "Escobas Mesa",
+        ]
+        let bandelierReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "boundary": "national_park",
+            "name": "Bandelier National Monument",
+        ]
+        XCTAssertEqual(Inspect.pick([bandelierPeakTags, bandelierReserve])["natural"], "peak")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([bandelierPeakTags, bandelierReserve]), pack: "nm").klass,
+            "Peak"
+        )
+
+        let sedilloPark: [String: String] = [
+            "leisure": "park",
+            "name": "Sedillo Ridge Open Space",
+        ]
+        let juanPath: [String: String] = [
+            "highway": "path",
+            "name": "Juan Trail",
+        ]
+        XCTAssertEqual(Inspect.pick([sedilloPark, juanPath])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([sedilloPark, juanPath]), pack: "nm").klass,
+            "Open reserve"
+        )
+
+        let ojitoSanPark: [String: String] = [
+            "leisure": "park",
+            "name": "Ojito de San Antonio Open Space",
+        ]
+        let ojoRoad: [String: String] = [
+            "highway": "residential",
+            "name": "Ojo Grande Drive",
+        ]
+        XCTAssertEqual(Inspect.pick([ojitoSanPark, ojoRoad])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([ojitoSanPark, ojoRoad]), pack: "nm").klass,
+            "Open reserve"
         )
         XCTAssertEqual(
             Inspect.read(tags: sunSlope, state: "NM", pack: "nm").klass,

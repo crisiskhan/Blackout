@@ -169,6 +169,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// stays unheld. Do not add matcher `florida`.
     private static let floridaMountainsWSA = CLLocationCoordinate2D(latitude: 32.014948, longitude: -107.646608)
 
+    /// Dry interior of Organ Mountains-Desert Peaks National Monument.
+    /// Named nature reserve, not wildlife range. Unique overlay at the
+    /// pip. Unique versus Uvas Valley ACEC (28965 m). No nearby name
+    /// in 250 m. Nested Organ Mountains wilderness leftovers stay
+    /// unheld. Do not add matcher `organ` or `desert peaks`.
+    private static let organMountainsDesertPeaks = CLLocationCoordinate2D(latitude: 32.182443, longitude: -107.289004)
+
     /// Interior of Lost Dog Nature Preserve. The listed centroid sits on a
     /// wash; this pip is on the wildlife sheet, 441 m from a path.
     private static let westWildlife = CLLocationCoordinate2D(latitude: 31.913286, longitude: -106.547160)
@@ -1142,6 +1149,61 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// No nearby name in 250 m. Do not add matcher `sandia`.
     private static let sandiaMountainWilderness = CLLocationCoordinate2D(latitude: 35.088383, longitude: -106.416369)
 
+    /// Dry interior of Bandelier National Monument. Named nature
+    /// reserve, not wildlife range, not the cave mouth. Unique overlay
+    /// at the pip (not Bandelier Wilderness). Unique versus Dome
+    /// Wilderness (9029 m) and Painted Cave (11983 m). Escobas Mesa
+    /// 1105 m stays a peak. No nearby name in 250 m. Nested Bandelier
+    /// Wilderness stays unheld. Do not add matcher `bandelier`.
+    private static let bandelierMonument = CLLocationCoordinate2D(latitude: 35.827039, longitude: -106.351807)
+
+    /// Dry interior of Carlito Springs Open Space. Named open-space
+    /// cover, not picnic woodland. Unique overlay at the pip. Unique
+    /// versus Sandia Mountain Wilderness (1656 m) and Hawk Watch
+    /// (2734 m). Old US Highway 66 271 m is rank 7; open reserve 6
+    /// still wins. Carlito Spring 510 m. Do not add matcher `carlito`.
+    private static let carlitoSprings = CLLocationCoordinate2D(latitude: 35.082960, longitude: -106.399414)
+
+    /// Dry interior of Sedillo Ridge Open Space. Named open-space
+    /// cover. Unique overlay at the pip. Unique versus Sandia Mountain
+    /// Wilderness (11587 m). Juan Trail 36 m is rank 7 (Trail); open
+    /// reserve 6 still wins. Do not add matcher `sedillo`.
+    private static let sedilloRidge = CLLocationCoordinate2D(latitude: 35.045049, longitude: -106.300582)
+
+    /// Dry interior of Loma Ponderosa Open Space. Named open-space
+    /// cover. Unique overlay at the pip. Unique versus Sandia Mountain
+    /// Natural History Center (9769 m). Dog Run South 246 m is rank
+    /// 7. Do not add matcher `ponderosa`.
+    private static let lomaPonderosa = CLLocationCoordinate2D(latitude: 35.058435, longitude: -106.312371)
+
+    /// Dry interior of Sabino Canyon Open Space. Named open-space
+    /// cover. Unique overlay at the pip. Unique versus Hawk Watch
+    /// (8351 m). Sabino Canyon East Trail 80 m is rank 7 (Trail);
+    /// open reserve 6 still wins. Cedro Peak 1569 m stays a peak.
+    /// Do not add matcher `sabino`.
+    private static let sabinoCanyonOpenSpace = CLLocationCoordinate2D(latitude: 35.039861, longitude: -106.340695)
+
+    /// Dry interior of Gutierrez Canyon-Milne Open Space. Named
+    /// open-space cover. Unique overlay at the pip. Unique versus
+    /// Sandia Mountain Natural History Center (2991 m). Canyon Trail
+    /// 48 m is rank 7 (Trail); open reserve 6 still wins. Do not add
+    /// matcher `gutierrez` or `milne`.
+    private static let gutierrezCanyonMilne = CLLocationCoordinate2D(latitude: 35.125815, longitude: -106.346931)
+
+    /// Dry interior of Tres Pistolas Open Space. Named open-space
+    /// cover. Unique overlay at the pip. Unique versus Hawk Watch
+    /// (1372 m). Hawk Watch Connector Spur 210 m is rank 7 (Trail);
+    /// open reserve 6 still wins. Do not add matcher `tres pistolas`
+    /// or `pistolas`.
+    private static let tresPistolas = CLLocationCoordinate2D(latitude: 35.075040, longitude: -106.438490)
+
+    /// Dry interior of Ojito de San Antonio Open Space. Named
+    /// open-space cover, not Ojito Wilderness. Unique overlay at the
+    /// pip. Unique versus Sandia Mountain Natural History Center
+    /// (2360 m). Ojo Grande Drive 129 m is rank 7; open reserve 6
+    /// still wins. Do not add matcher `ojito` or `san antonio`.
+    private static let ojitoDeSanAntonio = CLLocationCoordinate2D(latitude: 35.106397, longitude: -106.386934)
+
     /// Interior of Isleta Rectangle. Named NM forest: cottonwood;
     /// elk is high country, not west javelina, not a wetland bosque.
     private static let nmWoodland = CLLocationCoordinate2D(latitude: 34.939900, longitude: -106.320316)
@@ -1680,6 +1742,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((florida.card?.doLine.lowercased() ?? "").contains("diamondback"), florida.card?.doLine ?? "")
         XCTAssertTrue((florida.card?.doLine.lowercased() ?? "").contains("javelina"), florida.card?.doLine ?? "")
         XCTAssertFalse((florida.card?.doLine.lowercased() ?? "").contains("edible"), florida.card?.doLine ?? "")
+
+        let organ = try hold(at: Self.organMountainsDesertPeaks, zoom: 16)
+        XCTAssertEqual(organ.card?.klass, "Open reserve", "\(organ)")
+        XCTAssertEqual(organ.card?.title, "Organ Mountains-Desert Peaks National Monument", "\(organ)")
+        XCTAssertNotEqual(organ.card?.klass, "Wildlife range", "\(organ)")
+        XCTAssertNotEqual(organ.card?.klass, "Peak", "\(organ)")
+        XCTAssertNotEqual(organ.card?.title, "Organ Mountains Wilderness", "\(organ)")
+        XCTAssertNotEqual(organ.card?.title, "Uvas Valley Area of Critical Environmental Concern", "\(organ)")
+        XCTAssertNotEqual(organ.card?.title, "Geronimo", "\(organ)")
+        XCTAssertEqual(organ.card?.fieldRoute.first, Inspect.snakeTXCard, "\(organ)")
+        XCTAssertTrue((organ.card?.doLine.lowercased() ?? "").contains("diamondback"), organ.card?.doLine ?? "")
+        XCTAssertTrue((organ.card?.doLine.lowercased() ?? "").contains("javelina"), organ.card?.doLine ?? "")
+        XCTAssertFalse((organ.card?.doLine.lowercased() ?? "").contains("edible"), organ.card?.doLine ?? "")
     }
 
     func testHoldingASinkholeOpensTheCaveCard() throws {
@@ -3883,6 +3958,152 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(sandiaDo.contains("sotol") || sandiaDo.contains("cholla"), sandia.card?.doLine ?? "")
         XCTAssertFalse(sandiaDo.contains("javelina"), sandia.card?.doLine ?? "")
         XCTAssertFalse(sandiaDo.contains("edible"), sandia.card?.doLine ?? "")
+
+        let bandelier = try hold(at: Self.bandelierMonument, zoom: 16, packId: "nm")
+        XCTAssertEqual(bandelier.card?.klass, "Open reserve", "\(bandelier)")
+        XCTAssertEqual(bandelier.card?.title, "Bandelier National Monument", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.klass, "Wildlife range", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.klass, "Cave or hole", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.klass, "Peak", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.title, "Painted Cave", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.title, "Bandelier Wilderness", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.title, "Dome Wilderness", "\(bandelier)")
+        XCTAssertNotEqual(bandelier.card?.title, "Escobas Mesa", "\(bandelier)")
+        XCTAssertEqual(bandelier.card?.fieldRoute.first, Inspect.snakeTXCard, "\(bandelier)")
+        XCTAssertTrue(
+            bandelier.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Bandelier dropped the NM snake card: \(bandelier)"
+        )
+        let bandelierDo = bandelier.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(bandelierDo.contains("rattler") || bandelierDo.contains("diamondback"), bandelier.card?.doLine ?? "")
+        XCTAssertTrue(bandelierDo.contains("sotol") || bandelierDo.contains("cholla"), bandelier.card?.doLine ?? "")
+        XCTAssertFalse(bandelierDo.contains("javelina"), bandelier.card?.doLine ?? "")
+        XCTAssertFalse(bandelierDo.contains("edible"), bandelier.card?.doLine ?? "")
+
+        let carlito = try hold(at: Self.carlitoSprings, zoom: 16, packId: "nm")
+        XCTAssertEqual(carlito.card?.klass, "Open reserve", "\(carlito)")
+        XCTAssertEqual(carlito.card?.title, "Carlito Springs Open Space", "\(carlito)")
+        XCTAssertNotEqual(carlito.card?.klass, "Park", "\(carlito)")
+        XCTAssertNotEqual(carlito.card?.klass, "Wildlife range", "\(carlito)")
+        XCTAssertNotEqual(carlito.card?.title, "Sandia Mountain Wilderness", "\(carlito)")
+        XCTAssertNotEqual(carlito.card?.title, "Hawk Watch Open Space", "\(carlito)")
+        XCTAssertNotEqual(carlito.card?.title, "Old US Highway 66", "\(carlito)")
+        XCTAssertEqual(carlito.card?.fieldRoute.first, Inspect.snakeTXCard, "\(carlito)")
+        XCTAssertTrue(
+            carlito.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Carlito Springs dropped the NM snake card: \(carlito)"
+        )
+        let carlitoDo = carlito.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(carlitoDo.contains("rattler") || carlitoDo.contains("diamondback"), carlito.card?.doLine ?? "")
+        XCTAssertTrue(carlitoDo.contains("sotol") || carlitoDo.contains("cholla"), carlito.card?.doLine ?? "")
+        XCTAssertFalse(carlitoDo.contains("javelina"), carlito.card?.doLine ?? "")
+        XCTAssertFalse(carlitoDo.contains("edible"), carlito.card?.doLine ?? "")
+
+        let sedillo = try hold(at: Self.sedilloRidge, zoom: 16, packId: "nm")
+        XCTAssertEqual(sedillo.card?.klass, "Open reserve", "\(sedillo)")
+        XCTAssertEqual(sedillo.card?.title, "Sedillo Ridge Open Space", "\(sedillo)")
+        XCTAssertNotEqual(sedillo.card?.klass, "Park", "\(sedillo)")
+        XCTAssertNotEqual(sedillo.card?.title, "Juan Trail", "\(sedillo)")
+        XCTAssertNotEqual(sedillo.card?.title, "Sandia Mountain Wilderness", "\(sedillo)")
+        XCTAssertEqual(sedillo.card?.fieldRoute.first, Inspect.snakeTXCard, "\(sedillo)")
+        XCTAssertTrue(
+            sedillo.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Sedillo Ridge dropped the NM snake card: \(sedillo)"
+        )
+        let sedilloDo = sedillo.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sedilloDo.contains("rattler") || sedilloDo.contains("diamondback"), sedillo.card?.doLine ?? "")
+        XCTAssertTrue(sedilloDo.contains("sotol") || sedilloDo.contains("cholla"), sedillo.card?.doLine ?? "")
+        XCTAssertFalse(sedilloDo.contains("javelina"), sedillo.card?.doLine ?? "")
+        XCTAssertFalse(sedilloDo.contains("edible"), sedillo.card?.doLine ?? "")
+
+        let ponderosa = try hold(at: Self.lomaPonderosa, zoom: 16, packId: "nm")
+        XCTAssertEqual(ponderosa.card?.klass, "Open reserve", "\(ponderosa)")
+        XCTAssertEqual(ponderosa.card?.title, "Loma Ponderosa Open Space", "\(ponderosa)")
+        XCTAssertNotEqual(ponderosa.card?.klass, "Park", "\(ponderosa)")
+        XCTAssertNotEqual(ponderosa.card?.title, "Dog Run South", "\(ponderosa)")
+        XCTAssertNotEqual(ponderosa.card?.title, "Sandia Mountain Natural History Center", "\(ponderosa)")
+        XCTAssertEqual(ponderosa.card?.fieldRoute.first, Inspect.snakeTXCard, "\(ponderosa)")
+        XCTAssertTrue(
+            ponderosa.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Loma Ponderosa dropped the NM snake card: \(ponderosa)"
+        )
+        let ponderosaDo = ponderosa.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(ponderosaDo.contains("rattler") || ponderosaDo.contains("diamondback"), ponderosa.card?.doLine ?? "")
+        XCTAssertTrue(ponderosaDo.contains("sotol") || ponderosaDo.contains("cholla"), ponderosa.card?.doLine ?? "")
+        XCTAssertFalse(ponderosaDo.contains("javelina"), ponderosa.card?.doLine ?? "")
+        XCTAssertFalse(ponderosaDo.contains("edible"), ponderosa.card?.doLine ?? "")
+
+        let sabino = try hold(at: Self.sabinoCanyonOpenSpace, zoom: 16, packId: "nm")
+        XCTAssertEqual(sabino.card?.klass, "Open reserve", "\(sabino)")
+        XCTAssertEqual(sabino.card?.title, "Sabino Canyon Open Space", "\(sabino)")
+        XCTAssertNotEqual(sabino.card?.klass, "Park", "\(sabino)")
+        XCTAssertNotEqual(sabino.card?.klass, "Peak", "\(sabino)")
+        XCTAssertNotEqual(sabino.card?.title, "Sabino Canyon East Trail", "\(sabino)")
+        XCTAssertNotEqual(sabino.card?.title, "Cedro Peak", "\(sabino)")
+        XCTAssertNotEqual(sabino.card?.title, "Hawk Watch Open Space", "\(sabino)")
+        XCTAssertEqual(sabino.card?.fieldRoute.first, Inspect.snakeTXCard, "\(sabino)")
+        XCTAssertTrue(
+            sabino.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Sabino Canyon Open Space dropped the NM snake card: \(sabino)"
+        )
+        let sabinoDo = sabino.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sabinoDo.contains("rattler") || sabinoDo.contains("diamondback"), sabino.card?.doLine ?? "")
+        XCTAssertTrue(sabinoDo.contains("sotol") || sabinoDo.contains("cholla"), sabino.card?.doLine ?? "")
+        XCTAssertFalse(sabinoDo.contains("javelina"), sabino.card?.doLine ?? "")
+        XCTAssertFalse(sabinoDo.contains("edible"), sabino.card?.doLine ?? "")
+
+        let gutierrez = try hold(at: Self.gutierrezCanyonMilne, zoom: 16, packId: "nm")
+        XCTAssertEqual(gutierrez.card?.klass, "Open reserve", "\(gutierrez)")
+        XCTAssertEqual(gutierrez.card?.title, "Gutierrez Canyon-Milne Open Space", "\(gutierrez)")
+        XCTAssertNotEqual(gutierrez.card?.klass, "Park", "\(gutierrez)")
+        XCTAssertNotEqual(gutierrez.card?.title, "Canyon Trail", "\(gutierrez)")
+        XCTAssertNotEqual(gutierrez.card?.title, "Sandia Mountain Natural History Center", "\(gutierrez)")
+        XCTAssertEqual(gutierrez.card?.fieldRoute.first, Inspect.snakeTXCard, "\(gutierrez)")
+        XCTAssertTrue(
+            gutierrez.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Gutierrez Canyon-Milne dropped the NM snake card: \(gutierrez)"
+        )
+        let gutierrezDo = gutierrez.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(gutierrezDo.contains("rattler") || gutierrezDo.contains("diamondback"), gutierrez.card?.doLine ?? "")
+        XCTAssertTrue(gutierrezDo.contains("sotol") || gutierrezDo.contains("cholla"), gutierrez.card?.doLine ?? "")
+        XCTAssertFalse(gutierrezDo.contains("javelina"), gutierrez.card?.doLine ?? "")
+        XCTAssertFalse(gutierrezDo.contains("edible"), gutierrez.card?.doLine ?? "")
+
+        let pistolas = try hold(at: Self.tresPistolas, zoom: 16, packId: "nm")
+        XCTAssertEqual(pistolas.card?.klass, "Open reserve", "\(pistolas)")
+        XCTAssertEqual(pistolas.card?.title, "Tres Pistolas Open Space", "\(pistolas)")
+        XCTAssertNotEqual(pistolas.card?.klass, "Park", "\(pistolas)")
+        XCTAssertNotEqual(pistolas.card?.klass, "Wildlife range", "\(pistolas)")
+        XCTAssertNotEqual(pistolas.card?.title, "Hawk Watch Open Space", "\(pistolas)")
+        XCTAssertNotEqual(pistolas.card?.title, "Hawk Watch Connector Spur", "\(pistolas)")
+        XCTAssertEqual(pistolas.card?.fieldRoute.first, Inspect.snakeTXCard, "\(pistolas)")
+        XCTAssertTrue(
+            pistolas.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Tres Pistolas dropped the NM snake card: \(pistolas)"
+        )
+        let pistolasDo = pistolas.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(pistolasDo.contains("rattler") || pistolasDo.contains("diamondback"), pistolas.card?.doLine ?? "")
+        XCTAssertTrue(pistolasDo.contains("sotol") || pistolasDo.contains("cholla"), pistolas.card?.doLine ?? "")
+        XCTAssertFalse(pistolasDo.contains("javelina"), pistolas.card?.doLine ?? "")
+        XCTAssertFalse(pistolasDo.contains("edible"), pistolas.card?.doLine ?? "")
+
+        let ojitoSanAntonio = try hold(at: Self.ojitoDeSanAntonio, zoom: 16, packId: "nm")
+        XCTAssertEqual(ojitoSanAntonio.card?.klass, "Open reserve", "\(ojitoSanAntonio)")
+        XCTAssertEqual(ojitoSanAntonio.card?.title, "Ojito de San Antonio Open Space", "\(ojitoSanAntonio)")
+        XCTAssertNotEqual(ojitoSanAntonio.card?.klass, "Park", "\(ojitoSanAntonio)")
+        XCTAssertNotEqual(ojitoSanAntonio.card?.title, "Ojito Wilderness", "\(ojitoSanAntonio)")
+        XCTAssertNotEqual(ojitoSanAntonio.card?.title, "Ojo Grande Drive", "\(ojitoSanAntonio)")
+        XCTAssertNotEqual(ojitoSanAntonio.card?.title, "Sandia Mountain Natural History Center", "\(ojitoSanAntonio)")
+        XCTAssertEqual(ojitoSanAntonio.card?.fieldRoute.first, Inspect.snakeTXCard, "\(ojitoSanAntonio)")
+        XCTAssertTrue(
+            ojitoSanAntonio.card?.fieldRoute.contains(Inspect.snakeNMCard) ?? false,
+            "Ojito de San Antonio dropped the NM snake card: \(ojitoSanAntonio)"
+        )
+        let ojitoSanDo = ojitoSanAntonio.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(ojitoSanDo.contains("rattler") || ojitoSanDo.contains("diamondback"), ojitoSanAntonio.card?.doLine ?? "")
+        XCTAssertTrue(ojitoSanDo.contains("sotol") || ojitoSanDo.contains("cholla"), ojitoSanAntonio.card?.doLine ?? "")
+        XCTAssertFalse(ojitoSanDo.contains("javelina"), ojitoSanAntonio.card?.doLine ?? "")
+        XCTAssertFalse(ojitoSanDo.contains("edible"), ojitoSanAntonio.card?.doLine ?? "")
     }
 
     func testHoldingNewMexicoWoodlandOpensCottonwoodNotJavelina() throws {
@@ -4285,6 +4506,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("thunder canyon", Self.thunderCanyon, 16.0),
             ("cornundas acec", Self.cornundasACEC, 16.0),
             ("florida mountains wsa", Self.floridaMountainsWSA, 16.0),
+            ("organ mountains desert peaks", Self.organMountainsDesertPeaks, 16.0),
             ("west wildlife", Self.westWildlife, 16.0),
             ("jornada range", Self.jornadaRange, 16.0),
             ("sinkhole", Self.sinkhole, 16.0),
