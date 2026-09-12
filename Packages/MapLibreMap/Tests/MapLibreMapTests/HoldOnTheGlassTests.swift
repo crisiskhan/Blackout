@@ -20,8 +20,8 @@ import XCTest
 /// `record(under:on:)` the long-press handler calls. The coordinates are in the
 /// test because they are evidence: each one is a real record in
 /// `Resources/Packs/tx-west`, `tx-east`, or `nm` `osm.geojson` /
-/// `layers/ground.geojson`. West wildlife range is Lost Dog and San Andres,
-/// not invented pins. Animals as range are also held on an east sanctuary
+/// `layers/ground.geojson`. West wildlife range is Lost Dog, San Andres,
+/// and Feather Lake, not invented pins. Animals as range are also held on an east sanctuary
 /// and on a west peak. New Mexico botanic, wildlife,
 /// cave-preserve, and open-reserve sheets are held on the NM archive.
 /// East also holds a named sink tagged wetland (not bosque) and a prairie
@@ -275,6 +275,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// road. 396 m from OSM water.
     private static let russellKarst = CLLocationCoordinate2D(latitude: 30.197158, longitude: -97.851485)
 
+    /// Interior of Village of Western Oaks Karst Preserve and Watershed
+    /// Management Area. Phrase `karst preserve`. Listed hunt sat on
+    /// water. This interior is 140 m from Tiombe Branch. La Cresada
+    /// Drive 12 m is rank 7; cave overlay 3 still wins. Davis Lane
+    /// stays a road. No named mouth on the sheet.
+    private static let westernOaksKarst = CLLocationCoordinate2D(latitude: 30.208365, longitude: -97.864477)
+
     /// Interior of Nalle Bunny Run Wildlife Preserve. East wildlife range,
     /// not Open reserve.
     private static let nalleWildlife = CLLocationCoordinate2D(latitude: 30.349686, longitude: -97.803982)
@@ -498,6 +505,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// from OSM stream. Cadiz Street 54 m is rank 7; wildlife 4 still
     /// wins. Fiesta Drive stays a road.
     private static let charlieWakeem = CLLocationCoordinate2D(latitude: 31.831091, longitude: -106.543456)
+
+    /// Interior of Feather Lake Wildlife Refuge. Phrase `wildlife
+    /// refuge`. Ditches sit on most of the sheet. This corner is 203 m
+    /// from Bowman Lateral. Nottingham Drive 64 m is rank 7;
+    /// wildlife 4 still wins. Envoy Way stays a road. Do not add
+    /// matcher `feather`.
+    private static let featherLakeRefuge = CLLocationCoordinate2D(latitude: 31.690659, longitude: -106.305767)
 
     /// Interior of San Andres National Wildlife Refuge. Phrase
     /// `national wildlife`, not the word `andres`. White Sands
@@ -1376,6 +1390,19 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue((sanAndres.card?.doLine.lowercased() ?? "").contains("javelina"), sanAndres.card?.doLine ?? "")
         XCTAssertFalse((sanAndres.card?.doLine.lowercased() ?? "").contains("edible"), sanAndres.card?.doLine ?? "")
 
+        let featherLake = try hold(at: Self.featherLakeRefuge, zoom: 16)
+        XCTAssertEqual(featherLake.card?.klass, "Wildlife range", "\(featherLake)")
+        XCTAssertEqual(featherLake.card?.title, "Feather Lake Wildlife Refuge", "\(featherLake)")
+        XCTAssertNotEqual(featherLake.card?.klass, "Open reserve", "\(featherLake)")
+        XCTAssertNotEqual(featherLake.card?.klass, "Road", "\(featherLake)")
+        XCTAssertNotEqual(featherLake.card?.title, "Nottingham Drive", "\(featherLake)")
+        XCTAssertNotEqual(featherLake.card?.title, "Envoy Way", "\(featherLake)")
+        XCTAssertNotEqual(featherLake.card?.title, "Lost Dog Nature Preserve", "\(featherLake)")
+        XCTAssertEqual(featherLake.card?.fieldRoute.first, Inspect.mammalTXCard, "\(featherLake)")
+        XCTAssertTrue((featherLake.card?.doLine.lowercased() ?? "").contains("javelina"), featherLake.card?.doLine ?? "")
+        XCTAssertFalse((featherLake.card?.doLine.lowercased() ?? "").contains("hog"), featherLake.card?.doLine ?? "")
+        XCTAssertFalse((featherLake.card?.doLine.lowercased() ?? "").contains("edible"), featherLake.card?.doLine ?? "")
+
         let nalle = try hold(at: Self.nalleWildlife, zoom: 16, packId: "tx-east")
         XCTAssertEqual(nalle.card?.klass, "Wildlife range", "\(nalle)")
         XCTAssertEqual(nalle.card?.title, "Nalle Bunny Run Wildlife Preserve", "\(nalle)")
@@ -1876,6 +1903,22 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(russell.card?.fieldRoute.first, Inspect.caveCard, "\(russell)")
         XCTAssertTrue((russell.card?.doLine.lowercased() ?? "").contains("stay in daylight"), russell.card?.doLine ?? "")
         XCTAssertFalse((russell.card?.doLine.lowercased() ?? "").contains("edible"), russell.card?.doLine ?? "")
+
+        let westernOaks = try hold(at: Self.westernOaksKarst, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(westernOaks.card?.klass, "Cave or hole", "\(westernOaks)")
+        XCTAssertNotEqual(westernOaks.card?.klass, "Wildlife range", "\(westernOaks)")
+        XCTAssertEqual(
+            westernOaks.card?.title,
+            "Village of Western Oaks Karst Preserve and Watershed Management Area",
+            "\(westernOaks)"
+        )
+        XCTAssertNotEqual(westernOaks.card?.title, "La Cresada Drive", "\(westernOaks)")
+        XCTAssertNotEqual(westernOaks.card?.title, "Davis Lane", "\(westernOaks)")
+        XCTAssertNotEqual(westernOaks.card?.title, "William H. Russell Karst Preserve", "\(westernOaks)")
+        XCTAssertNotEqual(westernOaks.card?.title, "Goat Cave Karst Nature Preserve", "\(westernOaks)")
+        XCTAssertEqual(westernOaks.card?.fieldRoute.first, Inspect.caveCard, "\(westernOaks)")
+        XCTAssertTrue((westernOaks.card?.doLine.lowercased() ?? "").contains("stay in daylight"), westernOaks.card?.doLine ?? "")
+        XCTAssertFalse((westernOaks.card?.doLine.lowercased() ?? "").contains("edible"), westernOaks.card?.doLine ?? "")
 
         let buttercup = try hold(at: Self.buttercupCave, zoom: 16, packId: "tx-east")
         XCTAssertEqual(buttercup.card?.klass, "Cave or hole", "\(buttercup)")

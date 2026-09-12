@@ -329,7 +329,10 @@ public enum Inspect {
     /// Elm Sink, Lime Creek Road Sink, and Under Three Oaks. Isolated
     /// mouths off those sheets: Buttercup Drain Cave and Warton
     /// Whirlpool. Overlay-sheet mouths also Holdable: Pat's Pit and
-    /// Persimmon Well. Godzilla Cave stays unheld — Link's sits 84 m off
+    /// Persimmon Well. Village of Western Oaks Karst Preserve is a
+    /// hole — phrase `karst preserve`. Listed hunt sat on water.
+    /// This interior is 140 m from Tiombe Branch. La Cresada Drive
+    /// stays a road. Godzilla Cave stays unheld — Link's sits 84 m off
     /// that mouth. Good Friday stays unheld — 141 m from the
     /// Buttercup overlay Hold pip.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
@@ -441,8 +444,12 @@ public enum Inspect {
     /// Wildlife Refuge and Sevilleta National Wildlife Refuge.
     /// Do not add matcher `san andres` or `sevilleta`. White
     /// Sands Missile Range S Route 287 and Old Highway 85 stay
-    /// roads. Whitfield dry interiors have no nearby name that is
-    /// not Acequia Madre and stay unheld. `preserve` alone is
+    /// roads. Phrase `wildlife refuge` already matches Feather
+    /// Lake Wildlife Refuge. Ditches sit on most of that sheet;
+    /// this corner is 203 m from Bowman Lateral. Nottingham Drive
+    /// stays a road. Do not add matcher `feather`. Whitfield dry
+    /// interiors have no nearby name that is not Acequia Madre
+    /// and stay unheld. `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"

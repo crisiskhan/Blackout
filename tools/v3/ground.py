@@ -165,7 +165,10 @@ CAVE_PRESERVE_KEYS = {
 # matches San Andres National Wildlife Refuge and Sevilleta
 # National Wildlife Refuge. Do not add matcher `san andres`
 # or `sevilleta`. White Sands Missile Range S Route 287 and
-# Old Highway 85 stay roads.
+# Old Highway 85 stay roads. Phrase `wildlife refuge` already
+# matches Feather Lake Wildlife Refuge. Ditches sit on most
+# of that sheet; this corner is 203 m from Bowman Lateral.
+# Nottingham Drive stays a road. Do not add matcher `feather`.
 WILDLIFE_RANGE_PHRASES = (
     "wildlife refuge",
     "wildlife management area",

@@ -241,6 +241,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn("dahlstrom road", east_blob)
         self.assertIn("william h. russell karst preserve", east_blob)
         self.assertNotIn("karst lane", east_blob)
+        self.assertIn("village of western oaks karst preserve", east_blob)
+        self.assertNotIn("la cresada drive", east_blob)
+        self.assertNotIn("davis lane", east_blob)
         self.assertIn("wild basin wilderness preserve", east_blob)
         self.assertIn("barrow nature preserve", east_blob)
         self.assertIn("stillhouse hollow nature preserve", east_blob)
@@ -306,6 +309,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("médanos de samalayuca", west_blob)
         self.assertIn("flora y fauna", west_blob)
         self.assertIn("san andres national wildlife refuge", west_blob)
+        self.assertIn("feather lake wildlife refuge", west_blob)
+        self.assertNotIn("nottingham drive", west_blob)
+        self.assertNotIn("envoy way", west_blob)
         self.assertIn("jornada experimental range", west_blob)
         self.assertNotIn("cactus point park", west_blob)
         self.assertNotIn("parque cactus del desierto", west_blob)
@@ -869,6 +875,12 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "cave",
         )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "tertiary", "name": "La Cresada Drive"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "secondary", "name": "Davis Lane"})
+        )
         self.assertEqual(
             ground.overlay_kind(
                 {
@@ -1223,6 +1235,21 @@ class ShippedWaterLayers(unittest.TestCase):
                 }
             ),
             "wildlife",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "name": "Feather Lake Wildlife Refuge",
+                }
+            ),
+            "wildlife",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Nottingham Drive"})
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "Envoy Way"})
         )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Valle del Bosque Park"})
@@ -2707,6 +2734,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("William H. Russell Karst Preserve", glass)
         self.assertIn("30.197158", glass)
         self.assertIn("-97.851485", glass)
+        self.assertIn("Village of Western Oaks Karst Preserve and Watershed Management Area", glass)
+        self.assertIn("30.208365", glass)
+        self.assertIn("-97.864477", glass)
+        self.assertIn("La Cresada Drive", glass)
+        self.assertIn("Davis Lane", glass)
         self.assertIn("Buttercup Creek Cave Preserve", glass)
         self.assertIn("30.498830", glass)
         self.assertIn("-97.841827", glass)
@@ -2761,6 +2793,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("32.688003", glass)
         self.assertIn("-106.484294", glass)
         self.assertIn("White Sands Missile Range S Route 287", glass)
+        self.assertIn("Feather Lake Wildlife Refuge", glass)
+        self.assertIn("31.690659", glass)
+        self.assertIn("-106.305767", glass)
+        self.assertIn("Nottingham Drive", glass)
+        self.assertIn("Envoy Way", glass)
         self.assertIn("Blunn Creek Nature Preserve", glass)
         self.assertIn("30.235167", glass)
         self.assertIn("-97.745515", glass)
@@ -3068,6 +3105,7 @@ class GroundFieldSync(unittest.TestCase):
         jornada_hit = False
         charlie_hit = False
         san_andres_hit = False
+        feather_lake_hit = False
         desert_gardens_hit = False
         japaneese_hit = False
         preston_foster_hit = False
@@ -3126,6 +3164,10 @@ class GroundFieldSync(unittest.TestCase):
                     san_andres_hit = (
                         props.get("name") == "San Andres National Wildlife Refuge"
                     )
+                if kind == "wildlife" and pip(-106.305767, 31.690659, ring):
+                    feather_lake_hit = (
+                        props.get("name") == "Feather Lake Wildlife Refuge"
+                    )
         self.assertTrue(cactus_hit, "glass cactus hold is not inside Three Crosses")
         self.assertTrue(
             conservatory_hit, "glass conservatory hold is not inside Chihuahuan Desert Conservatory"
@@ -3181,6 +3223,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             san_andres_hit,
             "San Andres National Wildlife Refuge is not wildlife range on the west overlay",
+        )
+        self.assertTrue(
+            feather_lake_hit,
+            "Feather Lake Wildlife Refuge is not wildlife range on the west overlay",
         )
 
         osm = json.loads((PACK_ROOT / "tx-west" / "osm.geojson").read_text())
@@ -3303,6 +3349,7 @@ class GroundFieldSync(unittest.TestCase):
         whirl_hit = False
         goat_hit = False
         russell_hit = False
+        western_oaks_hit = False
         nalle_hit = False
         sunset_hit = False
         habitat_hit = False
@@ -3379,6 +3426,8 @@ class GroundFieldSync(unittest.TestCase):
                     goat_hit = True
                 if kind == "cave" and name == "William H. Russell Karst Preserve" and pip(-97.851485, 30.197158, ring):
                     russell_hit = True
+                if kind == "cave" and name == "Village of Western Oaks Karst Preserve and Watershed Management Area" and pip(-97.864477, 30.208365, ring):
+                    western_oaks_hit = True
                 if kind == "wildlife" and name == "Nalle Bunny Run Wildlife Preserve" and pip(-97.803982, 30.349686, ring):
                     nalle_hit = True
                 if kind == "wildlife" and name == "Sunset Valley Nature Area" and pip(-97.822707, 30.222831, ring):
@@ -3514,6 +3563,10 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             russell_hit, "William H. Russell Karst Preserve is not a cave overlay"
+        )
+        self.assertTrue(
+            western_oaks_hit,
+            "Village of Western Oaks Karst Preserve is not a cave overlay",
         )
         self.assertTrue(
             nalle_hit, "Nalle Bunny Run Wildlife Preserve is not wildlife range"
@@ -4948,6 +5001,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.197158", qa)
         self.assertIn("karst preserve", qa)
         self.assertIn("Karst Lane", qa)
+        self.assertIn("Village of Western Oaks Karst Preserve and Watershed Management Area", qa)
+        self.assertIn("30.208365", qa)
+        self.assertIn("La Cresada Drive", qa)
+        self.assertIn("Davis Lane", qa)
         self.assertIn("Nalle Bunny Run Wildlife Preserve", qa)
         self.assertIn("Randall Davey Audubon Center", qa)
         self.assertIn("Valles Caldera National Preserve", qa)
@@ -4982,6 +5039,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("San Andres National Wildlife Refuge", qa)
         self.assertIn("32.688003", qa)
         self.assertIn("White Sands Missile Range S Route 287", qa)
+        self.assertIn("Feather Lake Wildlife Refuge", qa)
+        self.assertIn("31.690659", qa)
+        self.assertIn("Nottingham Drive", qa)
+        self.assertIn("Envoy Way", qa)
         self.assertIn("Blunn Creek Nature Preserve", qa)
         self.assertIn("30.235167", qa)
         self.assertIn("East Oltorf Street", qa)
