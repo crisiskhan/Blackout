@@ -1573,6 +1573,35 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(tentRocks.fieldRoute.contains(Inspect.snakeNMCard))
         XCTAssertFalse(tentRocks.doLine.lowercased().contains("edible"), tentRocks.doLine)
 
+        let pecosPark = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Pecos National Historical Park",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(pecosPark.klass, "Open reserve")
+        XCTAssertNotEqual(pecosPark.klass, "Wildlife range")
+        XCTAssertEqual(pecosPark.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(pecosPark.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(pecosPark.doLine.lowercased().contains("edible"), pecosPark.doLine)
+
+        let elkSprings = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Elk Springs Area of Critical Environmental Concern",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(elkSprings.klass, "Open reserve")
+        XCTAssertNotEqual(elkSprings.klass, "Wildlife range")
+        XCTAssertEqual(elkSprings.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(elkSprings.fieldRoute.contains(Inspect.snakeNMCard))
+        XCTAssertFalse(elkSprings.doLine.lowercased().contains("javelina"), elkSprings.doLine)
+        XCTAssertFalse(elkSprings.doLine.lowercased().contains("edible"), elkSprings.doLine)
+
         let management = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -2324,6 +2353,25 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(overlayPrairie.klass, "Open reserve")
         XCTAssertEqual(overlayPrairie.fieldRoute.first, Inspect.snakeEastCard)
 
+        let carrington = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Carrington's Prairie"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(carrington.klass, "Open reserve")
+        XCTAssertNotEqual(carrington.klass, "Park")
+        XCTAssertEqual(carrington.fieldRoute.first, Inspect.snakeEastCard)
+        XCTAssertTrue(carrington.doLine.lowercased().contains("cottonmouth"), carrington.doLine)
+        XCTAssertTrue(carrington.doLine.lowercased().contains("hog"), carrington.doLine)
+        XCTAssertFalse(carrington.doLine.lowercased().contains("javelina"), carrington.doLine)
+        XCTAssertFalse(carrington.doLine.lowercased().contains("edible"), carrington.doLine)
+
+        let trailWest = Inspect.read(
+            tags: ["highway": "residential", "name": "Trail West Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(trailWest.klass, "Road")
+        XCTAssertNotEqual(trailWest.klass, "Open reserve")
+
         let cave = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -2509,6 +2557,92 @@ final class InspectTests: XCTestCase {
             pack: "tx-west"
         )
         XCTAssertNotEqual(missileRoad.klass, "Open reserve")
+
+        let knapp = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Knapp Land Conservation Easement"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(knapp.klass, "Open reserve")
+        XCTAssertNotEqual(knapp.klass, "Wildlife range")
+        XCTAssertEqual(knapp.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(knapp.doLine.lowercased().contains("diamondback"), knapp.doLine)
+        XCTAssertTrue(knapp.doLine.lowercased().contains("javelina"), knapp.doLine)
+        XCTAssertFalse(knapp.doLine.lowercased().contains("edible"), knapp.doLine)
+
+        let windACEC = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Wind Mountain Area of Critical Environmental Concern",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(windACEC.klass, "Open reserve")
+        XCTAssertNotEqual(windACEC.klass, "Peak")
+        XCTAssertEqual(windACEC.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(windACEC.doLine.lowercased().contains("diamondback"), windACEC.doLine)
+        XCTAssertFalse(windACEC.doLine.lowercased().contains("edible"), windACEC.doLine)
+
+        let windPeak = Inspect.read(
+            tags: ["natural": "peak", "name": "Wind Mountain"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(windPeak.klass, "Peak")
+        XCTAssertNotEqual(windPeak.klass, "Open reserve")
+
+        let rincon = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Rincon Area of Critical Environmental Concern",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(rincon.klass, "Open reserve")
+        XCTAssertNotEqual(rincon.klass, "Wildlife range")
+        XCTAssertEqual(rincon.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(rincon.doLine.lowercased().contains("edible"), rincon.doLine)
+
+        let sacramento = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Sacramento Escarpment Area of Critical Environmental Concern",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(sacramento.klass, "Open reserve")
+        XCTAssertEqual(sacramento.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(sacramento.doLine.lowercased().contains("edible"), sacramento.doLine)
+
+        let uvas = Inspect.read(
+            tags: [
+                "leisure": "nature_reserve",
+                "boundary": "protected_area",
+                "name": "Uvas Valley Area of Critical Environmental Concern",
+            ],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(uvas.klass, "Open reserve")
+        XCTAssertNotEqual(uvas.klass, "Wildlife range")
+        XCTAssertEqual(uvas.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(uvas.doLine.lowercased().contains("edible"), uvas.doLine)
+
+        let thunder = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Thunder Canyon Conservation Easement"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(thunder.klass, "Open reserve")
+        XCTAssertNotEqual(thunder.klass, "Park")
+        XCTAssertEqual(thunder.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertFalse(thunder.doLine.lowercased().contains("edible"), thunder.doLine)
+
+        let sharondale = Inspect.read(
+            tags: ["highway": "residential", "name": "Sharondale Drive"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(sharondale.klass, "Road")
+        XCTAssertNotEqual(sharondale.klass, "Open reserve")
 
         let huecoTown = Inspect.read(
             tags: ["leisure": "park", "name": "Hueco Mountain Park"],
@@ -4022,6 +4156,21 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([sunPeak, sunSlope])["natural"], "peak")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([sunPeak, sunSlope]), pack: "nm").klass,
+            "Peak"
+        )
+
+        let windPeakTags: [String: String] = [
+            "natural": "peak",
+            "name": "Wind Mountain",
+        ]
+        let windReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "boundary": "protected_area",
+            "name": "Wind Mountain Area of Critical Environmental Concern",
+        ]
+        XCTAssertEqual(Inspect.pick([windPeakTags, windReserve])["natural"], "peak")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([windPeakTags, windReserve]), pack: "tx-west").klass,
             "Peak"
         )
         XCTAssertEqual(

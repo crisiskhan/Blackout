@@ -659,11 +659,17 @@ public enum Inspect {
     /// Monument, White Sands National Park, Ojito Wilderness,
     /// Cabezon Wilderness Study Area, Kasha-Katuwe Tent Rocks
     /// National Monument, Petroglyph National Monument, Placitas
-    /// Open Space, and Cerrillos Hills State Park are those Holds.
-    /// An unnamed reserve falls through to
+    /// Open Space, Cerrillos Hills State Park, Knapp Land
+    /// Conservation Easement, Wind Mountain ACEC, Rincon ACEC,
+    /// Sacramento Escarpment ACEC, Uvas Valley ACEC, Thunder
+    /// Canyon Conservation Easement, Pecos National Historical
+    /// Park, Elk Springs ACEC, and Carrington's Prairie are those
+    /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
-    /// `tent rocks`, `petroglyph`, `placitas`, or `cerrillos`. Phrase
+    /// `tent rocks`, `petroglyph`, `placitas`, `cerrillos`,
+    /// `knapp`, `wind`, `rincon`, `sacramento`, `uvas`, `thunder`,
+    /// `pecos`, `elk springs`, `elk`, or `carrington`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
