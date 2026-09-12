@@ -377,8 +377,17 @@ class HUDSyncTests(unittest.TestCase):
         offline = read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
         )
+        tab = read("Blackout", "MapTab.swift")
+        qa = read("docs", "SOLO_QA.md")
         self.assertIn("logoView.isHidden = true", offline)
         self.assertNotIn("logoView.isHidden = false", offline)
+        self.assertIn("attributionButton.isHidden = true", offline)
+        self.assertNotIn("OSMCredit.line", tab)
+        self.assertNotIn("OpenStreetMap", tab)
+        self.assertNotIn("©", tab)
+        self.assertIn("No OSM credit", qa)
+        self.assertIn("No © OpenStreetMap on the glass", qa)
+        self.assertNotIn("`© OpenStreetMap contributors` is visible", qa)
 
     def test_dock_is_the_token_rail(self):
         tab = read("Blackout", "MapTab.swift")
@@ -737,7 +746,8 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("attributionButton.isHidden = true", offline)
         self.assertIn("compassView.isHidden = true", offline)
         self.assertIn("scaleBar.isHidden = true", offline)
-        self.assertIn("OSMCredit.line", read("Blackout", "MapTab.swift"))
+        self.assertNotIn("OSMCredit.line", read("Blackout", "MapTab.swift"))
+        self.assertNotIn("OpenStreetMap", read("Blackout", "MapTab.swift"))
 
     def test_solo_qa_scores_the_honest_taps(self):
         qa = read("docs", "SOLO_QA.md")
@@ -842,7 +852,8 @@ class HUDSeductionTests(unittest.TestCase):
         self.assertIn('static let title = "YOU"', read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
         ))
-        self.assertIn("OSMCredit.line", tab)
+        self.assertNotIn("OSMCredit.line", tab)
+        self.assertNotIn("OpenStreetMap", tab)
         self.assertIn("0.77, green: 0.80, blue: 0.84", offline)
         self.assertNotIn("0.12, green: 0.82, blue: 0.94", offline)
         self.assertNotIn("UIColor(white:", offline)

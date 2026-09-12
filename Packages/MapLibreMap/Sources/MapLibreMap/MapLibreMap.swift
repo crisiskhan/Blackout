@@ -165,6 +165,7 @@ public enum PackOverlay {
     public static let fillsBBox = false
 }
 
+/// Pack-file license line. Never HUD. MapLibre's own mark stays hidden.
 public enum OSMCredit {
     public static let line = "© OpenStreetMap contributors"
 }

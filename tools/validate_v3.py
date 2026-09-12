@@ -339,8 +339,11 @@ def walkable_pack() -> None:
     if 'defaultPackID = "tx-west"' not in pack_io or "func hasUsableGraph" not in pack_io:
         bad("PackStore must default to tx-west and expose honest hasUsableGraph")
         return
-    if "OSMCredit.line" not in map_tab or "© OpenStreetMap contributors" not in map_lib:
-        bad("MAP chrome missing © OpenStreetMap contributors")
+    if "OSMCredit.line" in map_tab or "OpenStreetMap" in map_tab or "©" in map_tab:
+        bad("MAP chrome still draws © OpenStreetMap on the glass")
+        return
+    if "© OpenStreetMap contributors" not in map_lib:
+        bad("pack license line missing from MapLibreMap.swift")
         return
     if "hasUsableGraph()" not in app:
         bad("LOCK-ON must use hasUsableGraph for honest OFF GRAPH")
@@ -1134,7 +1137,9 @@ def tip62_nav() -> None:
         and "case .mark:" in map_tab
     )
     canvas_clean_ok = (
-        "OSMCredit.line" in map_tab
+        "OSMCredit.line" not in map_tab
+        and "OpenStreetMap" not in map_tab
+        and "©" not in map_tab
         and "© OpenStreetMap contributors" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
         and "logoView.isHidden = true" in offline
         and "no MapKit engine" not in map_tab

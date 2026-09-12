@@ -412,7 +412,8 @@ class NoRegressionContracts(unittest.TestCase):
             self.assertIn(f'Button("{title}")', inst)
         self.assertIn("mapChipHitPoints", map_tab)
         self.assertIn("layoutPriority(1)", map_tab)
-        self.assertIn("OSMCredit.line", map_tab)
+        self.assertNotIn("OSMCredit.line", map_tab)
+        self.assertNotIn("OpenStreetMap", map_tab)
 
     def test_no_new_surface_and_cpv_stays_one(self):
         pbx = read("Blackout.xcodeproj", "project.pbxproj")

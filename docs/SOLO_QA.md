@@ -22,7 +22,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## MAP
 
-- [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INSTRUMENTS + LOCK-ON overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. OSM credit `© OpenStreetMap contributors` is visible. No MapLibre compass, scale bar, or attribution i. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
+- [ ] PASS / FAIL / N/A — Active pack draws full-height under the HUD (search + INSTRUMENTS + LOCK-ON overlay the canvas; the tab strip overlays the bottom). Pinch-out shows pack outline + YOU puck, no solid-red slab. No OSM credit, no MapLibre logo, compass, scale bar, or attribution i. No `style.json` / `MapLibre Metal offline` / `no MapKit engine` debug chrome on the canvas.
 - [ ] PASS / FAIL / N/A — MAP thumb dock: MARK / WALK / DRIVE / SPEAK are equal-width 44pt cells (never disabled). INSTRUMENTS and LOCK-ON sit under search as whole words (they wrap; they never become `INST` or `INSTRUME…`). RULER / USNG / MAG/TRUE live in INSTRUMENTS, not on the canvas. Other MapTool leftovers are not on MAP.
 - [ ] PASS / FAIL / N/A — Search FTS returns pack POI names (type a known POI, submit). Hits cap at five — no scroll on MAP.
 - [ ] PASS / FAIL / N/A — MARK drops one `MARK <pack> <lat>, <lon>` line per coordinate (no duplicate rows from one tap). If GPS is outside the open pack, chrome is `OFF PACK` and the mark is labeled `OFF PACK` (not the pack name). Marks sit as 44pt glass rows on MAP (tap one to set DEST). Kill app and relaunch: the same mark is still listed.
@@ -35,7 +35,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Pinch to walking zoom (a block or two across): silver street names are drawn on the streets with a black halo and are legible at arm's length. If no name draws at any zoom, the glyph template failed — report it.
 - [ ] PASS / FAIL / N/A — Active pack name/size/state listed on MAP (TX WEST first-open, or the pack last chosen in INSTRUMENTS).
 - [ ] PASS / FAIL / N/A — Browse MAP (lock-on off): no SOS disk.
-- [ ] PASS / FAIL / N/A — After ~3s idle on MAP, chrome fades (search, dock, tabs toward black; no bounce). Touch / pan / pinch / hold brings the pulse back. SOS never fades. OSM credit stays. Hold-to-inspect is the map's words — almost no labels on the canvas besides the credit.
+- [ ] PASS / FAIL / N/A — After ~3s idle on MAP, chrome fades (search, dock, tabs toward black; no bounce). Touch / pan / pinch / hold brings the pulse back. SOS never fades. Hold-to-inspect is the map's words — almost no labels on the canvas. No OSM credit, no MapLibre mark.
 - [ ] PASS / FAIL / N/A — Party dots (silver bodies, no names) appear on the map when POS peers exist. Solo with nobody is empty — not fake people. Red only when it matters (SOS / RED / OVERDUE / YOU ring / dest / hold pin) — not on JOIN LOCAL NET / VISION / RADIO CHECK.
 
 ## COMMS (solo, no peer)
@@ -83,7 +83,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 ## INSTRUMENTS
 
 - [ ] PASS / FAIL / N/A — MAP → INSTRUMENTS opens a HUD sheet (compass mark + INSTRUMENTS + CLOSE, not a system navigation bar). MAP section is RULER / USNG / MAG/TRUE (44pt). `TORCH 3×` cycles OFF / 1 / 2 / 3 and drives the lamp. SUN shows RISE / SET for the open pack (offline almanac, not weather). Auction is QUIET / NORMAL / SEARCH. Tapping a MAP instrument dismisses the sheet so the canvas status is visible.
-- [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom with © OpenStreetMap. `LEFT HAND` and `NIGHT RED` live here, not on boot.
+- [ ] PASS / FAIL / N/A — INSTRUMENTS → PACKS switches TX WEST / NM / TX EAST. Streets and a local WALK/DRIVE graph should be present at walking zoom. No © OpenStreetMap on the glass. `LEFT HAND` and `NIGHT RED` live here, not on boot.
 - [ ] PASS / FAIL / N/A — INSTRUMENTS `LAYOUT` lets every HUD plate move (search, overlay, dock, footer, tabs, SOS). While LAYOUT is on, the SOS plate is on MAP so you can place it; browse MAP still has no SOS. Placements survive kill-and-relaunch. `RESET HUD` returns every piece to origin.
 
 ## Kill-and-relaunch

@@ -93,21 +93,6 @@ struct MapTab: View {
                 .padding(hudReserve)
             }
         }
-        .overlay(alignment: .topLeading) {
-            // The card takes the bottom of the canvas and the footer's credit
-            // with it, but the top half is still drawing OSM's map. The line
-            // has to stay wherever the map is.
-            if runtime.tab == .map, runtime.held != nil {
-                Text(OSMCredit.line)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Theme.silver.opacity(0.75))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Theme.void.opacity(0.66))
-                    .padding(6)
-                    .allowsHitTesting(false)
-            }
-        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .layoutPriority(1)
         .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
@@ -175,7 +160,6 @@ struct MapTab: View {
             ) {
                 canvasFooter(packName: packName, offPack: offPack)
             }
-            osmCredit
         }
         .padding(.horizontal, 10)
         .padding(.top, 8)
@@ -364,8 +348,8 @@ struct MapTab: View {
         }
     }
 
-    /// Everything the canvas is allowed to say: which pack, who drew it, and
-    /// one way back out to the whole region. No byte counts, no raw coordinates.
+    /// Everything the canvas is allowed to say: which pack, and one way back
+    /// out to the whole region. No byte counts, no raw coordinates, no vendor mark.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
         HStack(alignment: .bottom, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
@@ -387,14 +371,6 @@ struct MapTab: View {
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 2)
-    }
-
-    /// License stays when chrome sleeps. Pack name can fade; this cannot.
-    private var osmCredit: some View {
-        Text(OSMCredit.line)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(Theme.silver.opacity(0.75))
-            .allowsHitTesting(false)
     }
 
     private func styleURL() -> URL? {

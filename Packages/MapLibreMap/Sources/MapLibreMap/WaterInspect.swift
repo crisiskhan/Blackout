@@ -168,7 +168,7 @@ public struct WaterHit: Equatable, Sendable {
 /// How sure the app is about the **record**, in percent.
 ///
 /// This is not a statement about the water. A tagged spring scores 95 because
-/// OpenStreetMap says it is a spring, not because anything says it is safe; a
+/// the record says it is a spring, not because anything says it is safe; a
 /// press that lands 100 m off scores lower because it is less likely to be
 /// talking about the thing under the thumb. Nothing in here has ever seen the
 /// water, and the card says so out loud.
@@ -787,7 +787,7 @@ public enum MapInspect {
         let tag = hit.record.tag
         switch hit.record.evidence {
         case .tagged:
-            return "OpenStreetMap tags this \(tag)."
+            return "Tagged \(tag)."
         case .named:
             let name = hit.record.name.isEmpty ? "its name" : "the name \(hit.record.name)"
             return "Tagged \(tag); \(name) says \(hit.record.kind.title.lowercased())."
