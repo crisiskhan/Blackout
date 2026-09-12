@@ -27,7 +27,7 @@ public enum VoiceNav: Sendable {
     ) -> String {
         _ = locale
         let headingBit: String
-        if let headingDeg {
+        if let headingDeg, headingDeg >= 0 {
             headingBit = "Heading \(metersPhrase(headingDeg, asHeading: true))."
         } else {
             headingBit = "Heading unavailable."

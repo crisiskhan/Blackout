@@ -950,8 +950,11 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        let trueH = newHeading.trueHeading
-        heading = trueH >= 0 ? trueH : newHeading.magneticHeading
+        heading = PersonCompass.liveHeading(
+            trueHeading: newHeading.trueHeading,
+            magneticHeading: newHeading.magneticHeading,
+            accuracy: newHeading.headingAccuracy
+        )
         publishIfNeeded()
     }
 

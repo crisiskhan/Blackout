@@ -227,6 +227,18 @@ final class RouterTests: XCTestCase {
         XCTAssertTrue(text.contains("Heading unavailable."))
         XCTAssertTrue(text.contains("Set a destination, then WALK, then SPEAK for turn by turn."))
         XCTAssertNotEqual(text.trimmingCharacters(in: .whitespacesAndNewlines), "TX WEST no heading")
+        let invalid = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: -1,
+            routeCoords: [],
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(invalid.contains("Heading unavailable."))
+        XCTAssertFalse(invalid.contains("Heading -1"))
+        XCTAssertFalse(invalid.contains("359"))
     }
 
     func testVoiceNavDestWithoutLineDoesNotInventStreets() {

@@ -53,7 +53,12 @@ public enum MeshPOS {
         headingDeg: Double?,
         emblem: String?
     ) -> String {
-        let heading = headingDeg.map { String($0) } ?? ""
+        let heading: String
+        if let headingDeg, headingDeg >= 0 {
+            heading = String(headingDeg)
+        } else {
+            heading = ""
+        }
         let face = emblem ?? ""
         return "\(lat),\(lon),\(heading),\(face)"
     }
@@ -66,8 +71,8 @@ public enum MeshPOS {
             return nil
         }
         var heading: Double?
-        if parts.count >= 3, !parts[2].isEmpty {
-            heading = Double(parts[2])
+        if parts.count >= 3, !parts[2].isEmpty, let value = Double(parts[2]), value >= 0 {
+            heading = value
         }
         var emblem: String?
         if parts.count >= 4 {

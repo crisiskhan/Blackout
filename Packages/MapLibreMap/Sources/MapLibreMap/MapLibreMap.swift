@@ -845,6 +845,7 @@ public enum FixPublish: Sendable {
             return true
         }
         if heading != nil && lastHeading == nil { return true }
+        if heading == nil && lastHeading != nil { return true }
         if let coord, let lastCoord {
             return GraphRouter.haversine(coord.lat, coord.lon, lastCoord.lat, lastCoord.lon) >= minMoveMeters
         }

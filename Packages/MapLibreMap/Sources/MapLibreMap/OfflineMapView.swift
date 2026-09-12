@@ -1138,7 +1138,7 @@ final class YouPuckAnnotationView: MLNAnnotationView {
     func apply(emblemID: String?, headingDeg: Double?) {
         let emblem = PersonEmblem.resolved(emblemID)
         emblemView.image = PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback)
-        guard let headingDeg else {
+        guard let headingDeg, headingDeg >= 0 else {
             headingView.isHidden = true
             lastHeading = nil
             return

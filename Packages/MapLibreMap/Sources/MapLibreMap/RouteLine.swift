@@ -286,12 +286,13 @@ public enum MapFieldChrome: Sendable {
     /// pin cannot: which way to walk. Printing `DEST 31.7619, -106.4850` spent the
     /// row on a number nobody can steer by.
     public static func destLine(bearingDeg: Double?) -> String {
-        guard let bearingDeg else { return "" }
+        guard let bearingDeg, bearingDeg >= 0 else { return "" }
         return String(format: "BEARING %.0f°", bearingDeg)
     }
 
     /// Inactive chrome stays quiet: no BEARING row unless there is somewhere
-    /// to walk (dest, drawn route, or LOCK-ON).
+    /// to walk (dest, drawn route, or LOCK-ON). An unusable heading is not a
+    /// course — Apple's `-1°` must not print as 359°.
     public static func activeBearing(
         headingDeg: Double?,
         hasDestination: Bool,
@@ -299,6 +300,7 @@ public enum MapFieldChrome: Sendable {
         hasRoute: Bool
     ) -> Double? {
         guard hasDestination || lockOn || hasRoute else { return nil }
+        guard let headingDeg, headingDeg >= 0 else { return nil }
         return headingDeg
     }
 

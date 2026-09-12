@@ -97,6 +97,23 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PersonCompass.normalized(-45), 315, accuracy: 1e-9)
         XCTAssertEqual(PersonCompass.shortestDelta(from: 350, to: 10), 20, accuracy: 1e-9)
         XCTAssertGreaterThan(PersonCompass.puckPoints, PersonCompass.wellPoints)
+        XCTAssertNil(
+            PersonCompass.liveHeading(trueHeading: -1, magneticHeading: -1, accuracy: -1)
+        )
+        XCTAssertNil(
+            PersonCompass.liveHeading(trueHeading: 12, magneticHeading: 8, accuracy: -1)
+        )
+        XCTAssertNil(
+            PersonCompass.liveHeading(trueHeading: -1, magneticHeading: -1, accuracy: 5)
+        )
+        XCTAssertEqual(
+            PersonCompass.liveHeading(trueHeading: 12, magneticHeading: 8, accuracy: 5),
+            12
+        )
+        XCTAssertEqual(
+            PersonCompass.liveHeading(trueHeading: -1, magneticHeading: 8, accuracy: 5),
+            8
+        )
         for emblem in PersonEmblem.allCases {
             XCTAssertFalse(emblem.title.isEmpty, emblem.rawValue)
             XCTAssertNotNil(PersonEmblem.image(emblem), emblem.rawValue)
@@ -486,6 +503,16 @@ final class MapLibreMapTests: XCTestCase {
                 hasRoute: false
             )
         )
+        XCTAssertNil(
+            MapFieldChrome.activeBearing(
+                headingDeg: -1,
+                hasDestination: true,
+                lockOn: true,
+                hasRoute: true
+            )
+        )
+        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: -1), "")
+        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0), "BEARING 0°")
     }
 
     func testMapFieldChromeIsSilentWhenNothingIsActive() {
@@ -495,6 +522,15 @@ final class MapLibreMapTests: XCTestCase {
                 route: "",
                 tool: "",
                 bearingDeg: nil,
+                speak: ""
+            ).isEmpty
+        )
+        XCTAssertTrue(
+            MapFieldChrome.lines(
+                lock: "",
+                route: "",
+                tool: "",
+                bearingDeg: -1,
                 speak: ""
             ).isEmpty
         )
@@ -692,6 +728,26 @@ final class MapLibreMapTests: XCTestCase {
                 lastPublished: 10,
                 heading: 14,
                 lastHeading: 10,
+                coord: (31.76, -106.49),
+                lastCoord: (31.76, -106.49)
+            )
+        )
+        XCTAssertTrue(
+            FixPublish.shouldPublish(
+                now: 10.4,
+                lastPublished: 10,
+                heading: nil,
+                lastHeading: 14,
+                coord: (31.76, -106.49),
+                lastCoord: (31.76, -106.49)
+            )
+        )
+        XCTAssertFalse(
+            FixPublish.shouldPublish(
+                now: 10.4,
+                lastPublished: 10,
+                heading: nil,
+                lastHeading: nil,
                 coord: (31.76, -106.49),
                 lastCoord: (31.76, -106.49)
             )

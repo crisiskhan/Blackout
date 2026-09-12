@@ -103,7 +103,7 @@ def field_lines(
     """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas, so the
     middle row carries the heading rather than a latitude nobody can steer by."""
     status = joined([lock, route, tool])
-    fix = "" if bearing_deg is None else f"BEARING {bearing_deg:.0f}°"
+    fix = "" if bearing_deg is None or bearing_deg < 0 else f"BEARING {bearing_deg:.0f}°"
     return [line for line in (status, fix, speak.strip()) if line]
 
 
@@ -189,8 +189,10 @@ class FieldChromeTests(unittest.TestCase):
 
     def test_quiet_field_shows_nothing(self):
         self.assertEqual(field_lines("", "", "", None, ""), [])
-        # lines() still prints a bearing it is given. The map must not pass a
-        # heading unless there is somewhere to walk — that filter is active_bearing.
+        self.assertEqual(field_lines("", "", "", -1, ""), [])
+        # lines() still prints a usable bearing it is given. The map must not
+        # pass a heading unless there is somewhere to walk — that filter is
+        # active_bearing. An Apple -1° heading is not a course.
         self.assertEqual(field_lines("", "", "", 12, "   "), ["BEARING 12°"])
 
     def test_header_controls_are_the_whole_words(self):

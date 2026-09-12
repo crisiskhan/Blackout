@@ -117,6 +117,19 @@ public enum PersonCompass: Sendable {
         normalized(headingDeg) * .pi / 180
     }
 
+    /// Apple marks an unusable heading with accuracy `< 0` and `-1°`.
+    /// Those are not a live tick. Prefer true heading when it exists.
+    public static func liveHeading(
+        trueHeading: Double,
+        magneticHeading: Double,
+        accuracy: Double
+    ) -> Double? {
+        guard accuracy >= 0 else { return nil }
+        if trueHeading >= 0 { return trueHeading }
+        if magneticHeading >= 0 { return magneticHeading }
+        return nil
+    }
+
     public static func shortestDelta(from: Double, to: Double) -> Double {
         var delta = normalized(to) - normalized(from)
         if delta > 180 { delta -= 360 }

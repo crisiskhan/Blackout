@@ -27,6 +27,8 @@ def active_bearing(
     """Mirror of MapFieldChrome.activeBearing."""
     if not (has_destination or lock_on or has_route):
         return None
+    if heading is None or heading < 0:
+        return None
     return heading
 
 
@@ -37,6 +39,8 @@ class QuietBearingTests(unittest.TestCase):
         self.assertEqual(active_bearing(10, False, True, False), 10)
         self.assertEqual(active_bearing(8, False, False, True), 8)
         self.assertIsNone(active_bearing(None, True, False, False))
+        self.assertIsNone(active_bearing(-1, True, True, True))
+        self.assertEqual(active_bearing(0, True, False, False), 0)
 
     def test_map_filters_bearing_through_active_bearing(self):
         route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
@@ -901,6 +905,8 @@ class HUDSeductionTests(unittest.TestCase):
         self.assertIn("party dots", qa.lower())
         self.assertIn("compass ring", qa.lower())
         self.assertIn("FACE", qa)
+        self.assertIn("tick dark", qa.lower())
+        self.assertIn("359", qa)
         self.assertIn("no bounce", qa.lower())
         self.assertIn("NET · NONE", qa)
         self.assertIn("silver route", qa.lower())
@@ -939,6 +945,13 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         self.assertIn("enum PersonEmblem", emblem)
         self.assertIn("enum PersonCompass", emblem)
         self.assertIn("tickRadians", emblem)
+        self.assertIn("liveHeading", emblem)
+        self.assertIn("PersonCompass.liveHeading", app)
+        self.assertIn("headingAccuracy", app)
+        self.assertIn("headingDeg >= 0", offline)
+        self.assertIn("headingDeg >= 0", route)
+        self.assertIn("value >= 0", mesh)
+        self.assertIn("headingDeg >= 0", mesh)
         self.assertNotIn("best in class", emblem.lower())
         self.assertNotIn("best in class", comms.lower())
         self.assertNotIn("best in class", offline.lower())
