@@ -77,11 +77,11 @@ final class InspectTests: XCTestCase {
     /// only part of the question the record can actually answer.
     func testUnnamedWaterCarriesTheSizeOfItsOwnOutline() {
         let pool = Inspect.read(tags: ["natural": "water", "span_m": "9"])
-        XCTAssertTrue(pool.why.contains("9m across"), pool.why)
+        XCTAssertTrue(pool.why.contains("30 FT across"), pool.why)
         XCTAssertTrue(pool.why.contains("rock pool"), pool.why)
 
         let tank = Inspect.read(tags: ["natural": "water", "span_m": "70"])
-        XCTAssertTrue(tank.why.contains("70m across"), tank.why)
+        XCTAssertTrue(tank.why.contains("230 FT across"), tank.why)
         XCTAssertFalse(tank.why.contains("rock pool"), "a 70m pool is not a rock pool: \(tank.why)")
 
         // Size is a fact about the outline and must not move confidence in the

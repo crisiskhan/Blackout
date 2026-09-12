@@ -56,8 +56,8 @@ final class SearchTests: XCTestCase {
         XCTAssertTrue(idx.lookup("   ").isEmpty)
         XCTAssertEqual(SearchHUDWord.from(packed: "drinking_water").title, "WATER")
         XCTAssertEqual(SearchHUDWord.from(packed: "residential").title, "STREET")
-        XCTAssertEqual(SearchIndex.rangeLabel(340), "340 M")
-        XCTAssertEqual(SearchIndex.rangeLabel(12_400), "12.4 KM")
+        XCTAssertEqual(SearchIndex.rangeLabel(340), "1115 FT")
+        XCTAssertEqual(SearchIndex.rangeLabel(12_400), "7.7 MI")
     }
 
     func testAvenueAliasAndNamePrefix() {

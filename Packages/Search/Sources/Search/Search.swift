@@ -1,4 +1,5 @@
 import Foundation
+import Tokens
 
 public struct SearchHit: Equatable, Hashable, Sendable {
     public var name: String
@@ -171,10 +172,7 @@ public struct SearchIndex: Sendable {
     }
 
     public static func rangeLabel(_ meters: Double) -> String {
-        if meters < 1000 {
-            return String(format: "%.0f M", meters)
-        }
-        return String(format: "%.1f KM", meters / 1000)
+        BlackoutTokens.Distance.hud(meters)
     }
 
     public func fts(_ query: String) -> [SearchHit] {

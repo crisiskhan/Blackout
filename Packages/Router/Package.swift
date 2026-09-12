@@ -8,10 +8,10 @@ let package = Package(
         .library(name: "Router", targets: ["Router"]),
     ],
     dependencies: [
-
+        .package(path: "../Tokens"),
     ],
     targets: [
-        .target(name: "Router", dependencies: []),
+        .target(name: "Router", dependencies: ["Tokens"]),
         .testTarget(name: "RouterTests", dependencies: ["Router"]),
 
     ]

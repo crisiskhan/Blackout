@@ -1,4 +1,5 @@
 import Foundation
+import Tokens
 
 /// What kind of water a record is, in the words used on the ground in Texas and
 /// New Mexico.
@@ -762,13 +763,13 @@ public enum MapInspect {
         radius: Double,
         nearest: WaterHit?
     ) -> InspectFinding {
-        var why = "No water record within \(Int(radius.rounded())) m of this press."
+        var why = "No water record within \(distance(radius)) of this press."
         if let nearest {
             let name = nearest.record.name.isEmpty ? nearest.record.kind.title : nearest.record.name
             why += " Nearest is \(name), \(distance(nearest.distanceMeters)) "
             why += compass(from: press, to: (nearest.lat, nearest.lon)) + "."
         } else {
-            why += " Nothing else within \(Int(landReachMeters / 1000)) km either."
+            why += " Nothing else within \(distance(landReachMeters)) either."
         }
         return InspectFinding(
             lat: press.lat,
@@ -797,9 +798,7 @@ public enum MapInspect {
     }
 
     static func distance(_ metres: Double) -> String {
-        metres >= 1000
-            ? String(format: "%.1f km", metres / 1000)
-            : "\(Int(metres.rounded())) m"
+        BlackoutTokens.Distance.hud(metres)
     }
 
     static func compass(from: (lat: Double, lon: Double), to: (lat: Double, lon: Double)) -> String {

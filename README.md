@@ -270,7 +270,7 @@ across TX WEST and NM are under 100 m², and 45 of the 51 in TX WEST are outside
 any mapped town. So the tiler measures each water body's longest side off the
 whole record — before the tile clips it, or a pool sitting on a tile seam would
 shrink at the join — and the card passes the measurement on and stops there.
-Nine metres reads *"the outline is only about 9m across — a rock pool, a trough
+Nine metres reads *"the outline is only about 30 FT across — a rock pool, a trough
 and a dugout all read this way"*; seventy reads as a stock tank or a pool that
 fills after rain. The size never moves `SURE`, because it is a fact about the
 outline and not about the water.

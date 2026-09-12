@@ -26,6 +26,15 @@ VOID = "#000000"
 SILVER = "#B8BDC2"
 WALKABLE_PACKS = ("tx-west", "nm", "tx-east")
 SCRIPT_PHRASES = ("Walk ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
+METERS_PER_MILE = 1609.344
+FEET_PER_METER = 3.280839895
+
+
+def distance_hud(meters: float) -> str:
+    """Mirror of BlackoutTokens.Distance.hud."""
+    if meters >= METERS_PER_MILE:
+        return f"{meters / METERS_PER_MILE:.1f} MI"
+    return f"{round(round(meters) * FEET_PER_METER):.0f} FT"
 
 
 def haversine(a_lat: float, a_lon: float, b_lat: float, b_lon: float) -> float:
@@ -72,12 +81,12 @@ def speak_status(
         )
         count = turns(route_coords)
         turn_phrase = "1 TURN" if count == 1 else f"{count} TURNS"
-        return SEPARATOR.join(["SPEAK", turn_phrase, f"{round(meters):.0f} M"])
+        return SEPARATOR.join(["SPEAK", turn_phrase, distance_hud(meters)])
     if plan_chrome == OFF_GRAPH:
         return SEPARATOR.join(["SPEAK", OFF_GRAPH])
     if dest is not None and you is not None:
         span = haversine(you[0], you[1], dest[0], dest[1])
-        return SEPARATOR.join(["SPEAK", "DEST", f"{round(span):.0f} M"])
+        return SEPARATOR.join(["SPEAK", "DEST", distance_hud(span)])
     return SEPARATOR.join(["SPEAK", "SET DEST"])
 
 
@@ -178,7 +187,7 @@ class SpeakStatusTests(unittest.TestCase):
     def test_speak_reports_one_short_line_not_the_walk_script(self):
         coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
         status = speak_status(True, coords, "", (0.0008993, 0.0017966), (0.0, 0.0))
-        self.assertEqual(status, "SPEAK · 1 TURN · 300 M")
+        self.assertEqual(status, "SPEAK · 1 TURN · 984 FT")
         for phrase in SCRIPT_PHRASES:
             self.assertNotIn(phrase, status)
         self.assertNotIn("\n", status)
@@ -209,14 +218,14 @@ class FieldChromeTests(unittest.TestCase):
             OFF_GRAPH,
             "TRUE NORTH",
             45,
-            "SPEAK · 3 TURNS · 300 M",
+            "SPEAK · 3 TURNS · 984 FT",
         )
         self.assertEqual(
             lines,
             [
                 "OFF GRAPH · TRUE NORTH",
                 "BEARING 45°",
-                "SPEAK · 3 TURNS · 300 M",
+                "SPEAK · 3 TURNS · 984 FT",
             ],
         )
         self.assertLessEqual(len(lines), MAX_FIELD_LINES)
@@ -233,7 +242,7 @@ class FieldChromeTests(unittest.TestCase):
             OFF_GRAPH,
             "TRUE NORTH",
             45,
-            "SPEAK · 3 TURNS · 300 M",
+            "SPEAK · 3 TURNS · 984 FT",
             you=(31.7619, -106.49),
         )
         self.assertEqual(
@@ -241,7 +250,7 @@ class FieldChromeTests(unittest.TestCase):
             [
                 "OFF GRAPH · TRUE NORTH",
                 "BEARING 45°",
-                "SPEAK · 3 TURNS · 300 M",
+                "SPEAK · 3 TURNS · 984 FT",
             ],
         )
         self.assertEqual(dest_line(45, you=(31.7619, -106.49)), "BEARING 45°")
@@ -410,6 +419,13 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("destChipBeatSeconds", tokens)
         self.assertIn("static let fix", tokens)
         self.assertIn("fixHex", tokens)
+        self.assertIn("func hud(", tokens)
+        self.assertIn("func spoken(", tokens)
+        self.assertIn("Distance.hud", read("Packages", "Search", "Sources", "Search", "Search.swift"))
+        self.assertIn("Distance.hud", self.route_line)
+        voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
+        self.assertIn("Distance.hud", voice)
+        self.assertIn("Distance.spoken", voice)
 
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)

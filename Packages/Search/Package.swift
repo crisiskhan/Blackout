@@ -8,10 +8,10 @@ let package = Package(
         .library(name: "Search", targets: ["Search"]),
     ],
     dependencies: [
-
+        .package(path: "../Tokens"),
     ],
     targets: [
-        .target(name: "Search", dependencies: []),
+        .target(name: "Search", dependencies: ["Tokens"]),
         .testTarget(name: "SearchTests", dependencies: ["Search"]),
 
     ]

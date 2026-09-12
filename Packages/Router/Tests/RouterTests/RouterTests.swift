@@ -185,11 +185,11 @@ final class RouterTests: XCTestCase {
             you: nil,
             locale: "en"
         )
-        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Walk 656 feet."))
         XCTAssertTrue(text.contains("Turn left."))
-        XCTAssertTrue(text.contains("Walk 100 meters."))
+        XCTAssertTrue(text.contains("Walk 328 feet."))
         XCTAssertTrue(text.contains("Arrive at destination."))
-        XCTAssertTrue(text.contains("Total 300 meters."))
+        XCTAssertTrue(text.contains("Total 984 feet."))
         XCTAssertTrue(text.contains("Heading 90 degrees."))
         XCTAssertFalse(text.hasSuffix("Walk"))
         XCTAssertNotEqual(text, "TX WEST 90 degrees")
@@ -270,10 +270,10 @@ final class RouterTests: XCTestCase {
             destination: (0.0008993, 0.0017966),
             you: (0.0, 0.0)
         )
-        XCTAssertEqual(chrome, "SPEAK · 1 TURN · 300 M")
+        XCTAssertEqual(chrome, "SPEAK · 1 TURN · 984 FT")
         XCTAssertEqual(SpeakStatus.turns(coords), 1)
         // The script the voice speaks must never reach the field.
-        for phrase in ["Walk 200 meters.", "Turn left.", "Arrive at destination."] {
+        for phrase in ["Walk 656 feet.", "Turn left.", "Arrive at destination."] {
             XCTAssertFalse(chrome.contains(phrase))
         }
         XCTAssertFalse(chrome.contains("\n"))
@@ -337,7 +337,7 @@ final class RouterTests: XCTestCase {
             you: nil,
             locale: "en"
         )
-        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Walk 656 feet."))
         XCTAssertTrue(text.contains("Turn left."))
         XCTAssertTrue(text.contains("Arrive at destination."))
         XCTAssertGreaterThan(text.count, SpeakStatus.maxCharacters)

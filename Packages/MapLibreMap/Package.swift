@@ -9,6 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../PackIO"),
+        .package(path: "../Tokens"),
         .package(path: "../Search"),
         .package(path: "../Router"),
         .package(path: "../DeadReckoning"),
@@ -19,7 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "MapLibreMap",
-            dependencies: ["PackIO", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"],
+            dependencies: ["PackIO", "Tokens", "Search", "Router", "DeadReckoning", "Almanac", "BlackBox", "MapLibre"],
             resources: [.process("Emblems")]
         ),
         .testTarget(name: "MapLibreMapTests", dependencies: ["MapLibreMap", "Router"]),

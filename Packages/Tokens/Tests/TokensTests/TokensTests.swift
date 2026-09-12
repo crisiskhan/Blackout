@@ -84,6 +84,13 @@ final class TokensTests: XCTestCase {
         XCTAssertGreaterThan(BlackoutTokens.Color.fix.g, 0.7)
         XCTAssertLessThan(BlackoutTokens.Color.fix.r, 0.3)
         XCTAssertEqual(BlackoutTokens.Chrome.destChipBeatSeconds, 1.05)
+        XCTAssertEqual(BlackoutTokens.Distance.hud(340), "1115 FT")
+        XCTAssertEqual(BlackoutTokens.Distance.hud(12_400), "7.7 MI")
+        XCTAssertEqual(BlackoutTokens.Distance.hud(1600), "5249 FT")
+        XCTAssertEqual(BlackoutTokens.Distance.hud(1609.344), "1.0 MI")
+        XCTAssertEqual(BlackoutTokens.Distance.spoken(200), "656 feet")
+        XCTAssertEqual(BlackoutTokens.Distance.spoken(100), "328 feet")
+        XCTAssertEqual(BlackoutTokens.Distance.spoken(12_400), "7.7 miles")
         XCTAssertEqual(BlackoutTokens.MapInk.roadLabelMinZoom, 12)
         XCTAssertGreaterThanOrEqual(BlackoutTokens.MapInk.roadLabelWalkingSize, 16)
         XCTAssertGreaterThanOrEqual(

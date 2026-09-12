@@ -1,4 +1,5 @@
 import Foundation
+import Tokens
 
 public enum VoiceTurn: String, Equatable, Sendable {
     case straight
@@ -115,7 +116,7 @@ public enum VoiceNav: Sendable {
         if asHeading {
             return String(format: "%.0f degrees", value)
         }
-        return String(format: "%.0f meters", value.rounded())
+        return BlackoutTokens.Distance.spoken(value)
     }
 }
 
@@ -128,7 +129,7 @@ public enum SpeakStatus: Sendable {
     public static let offGraph = GraphPlan.offGraph
     public static let setDest = "SET DEST"
     public static let ellipsis = "…"
-    /// Wide enough for `SPEAK · 999 TURNS · 99999 M`, narrow enough that no phone has to
+    /// Wide enough for `SPEAK · 999 TURNS · 99999 FT`, narrow enough that no phone has to
     /// wrap it. Anything longer is a text wall, not status.
     public static let maxCharacters = 32
 
@@ -175,6 +176,6 @@ public enum SpeakStatus: Sendable {
     }
 
     private static func metersPhrase(_ meters: Double) -> String {
-        String(format: "%.0f M", meters.rounded())
+        BlackoutTokens.Distance.hud(meters)
     }
 }

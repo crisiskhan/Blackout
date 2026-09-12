@@ -110,6 +110,31 @@ public enum BlackoutTokens: Sendable {
         }
     }
 
+    /// HUD and voice distance. Graph, GNSS, and OSM stay in metres; the glass
+    /// prints feet under a mile and miles after that.
+    public enum Distance: Sendable {
+        public static let metersPerMile: Double = 1609.344
+        public static let feetPerMeter: Double = 3.280839895
+
+        public static func feet(_ meters: Double) -> Double {
+            (meters * feetPerMeter).rounded()
+        }
+
+        public static func hud(_ meters: Double) -> String {
+            if meters >= metersPerMile {
+                return String(format: "%.1f MI", meters / metersPerMile)
+            }
+            return String(format: "%.0f FT", feet(meters.rounded()))
+        }
+
+        public static func spoken(_ meters: Double) -> String {
+            if meters >= metersPerMile {
+                return String(format: "%.1f miles", meters / metersPerMile)
+            }
+            return String(format: "%.0f feet", feet(meters.rounded()))
+        }
+    }
+
     public enum Tab: String, CaseIterable, Sendable {
         case map, comms, field, expedition
     }

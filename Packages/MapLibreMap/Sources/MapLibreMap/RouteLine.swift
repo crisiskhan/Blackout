@@ -1,5 +1,6 @@
 import Foundation
 import Router
+import Tokens
 
 public enum RouteLine {
     public static let sourceID = "route-line-src"
@@ -235,8 +236,7 @@ public enum RouteSummary {
     }
 
     public static func distancePhrase(_ meters: Double) -> String {
-        if meters < 1000 { return String(format: "%.0f m", meters.rounded()) }
-        return String(format: "%.1f km", meters / 1000)
+        BlackoutTokens.Distance.hud(meters)
     }
 }
 
@@ -247,7 +247,7 @@ public enum MapRuler {
     ) -> String {
         guard let from, let to else { return "RULER —" }
         let meters = GraphRouter.haversine(from.lat, from.lon, to.lat, to.lon)
-        return String(format: "RULER %.0f m", meters)
+        return "RULER \(BlackoutTokens.Distance.hud(meters))"
     }
 }
 

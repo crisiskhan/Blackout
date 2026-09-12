@@ -467,7 +467,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(MapRuler.chrome(from: nil, to: (lat: 31.80, lon: -106.50)), "RULER —")
         let span = MapRuler.chrome(from: (lat: 31.76, lon: -106.49), to: (lat: 31.76, lon: -106.49))
         XCTAssertTrue(span.hasPrefix("RULER "))
-        XCTAssertTrue(span.hasSuffix(" m"))
+        XCTAssertTrue(span.hasSuffix(" FT"))
         XCTAssertEqual(MagTrueChip.chrome(magNorth: true), "MAG NORTH")
         XCTAssertEqual(MagTrueChip.chrome(magNorth: false), "TRUE NORTH")
     }
@@ -478,7 +478,7 @@ final class MapLibreMapTests: XCTestCase {
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
             bearingDeg: 45,
-            speak: "SPEAK · 3 TURNS · 300 M"
+            speak: "SPEAK · 3 TURNS · 984 FT"
         )
         XCTAssertEqual(sprayed.count, 3)
         XCTAssertLessThanOrEqual(sprayed.count, MapFieldChrome.maxLines)
@@ -493,7 +493,7 @@ final class MapLibreMapTests: XCTestCase {
         for line in sprayed {
             XCTAssertFalse(line.text.contains("DEST 31."))
         }
-        XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 300 M")
+        XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 984 FT")
         for line in sprayed {
             // Short status chrome, never a wrapped paragraph over the canvas.
             XCTAssertLessThanOrEqual(line.text.count, 44)
@@ -504,7 +504,7 @@ final class MapLibreMapTests: XCTestCase {
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
             bearingDeg: 45,
-            speak: "SPEAK · 3 TURNS · 300 M",
+            speak: "SPEAK · 3 TURNS · 984 FT",
             you: (lat: 31.7619, lon: -106.49)
         )
         // The dest slot is two chips, not one concatenated string. The stack
@@ -759,11 +759,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertLessThan(meters, 1100)
         let walk = RouteSummary.chrome(mode: .walk, coords: leg)
         XCTAssertTrue(walk.hasPrefix("WALK "))
-        XCTAssertTrue(walk.contains("km"))
+        XCTAssertTrue(walk.contains("FT"))
         XCTAssertTrue(walk.contains("min"))
         let drive = RouteSummary.chrome(mode: .drive, coords: leg)
         XCTAssertTrue(drive.hasPrefix("DRIVE "))
-        XCTAssertEqual(RouteSummary.distancePhrase(240), "240 m")
+        XCTAssertEqual(RouteSummary.distancePhrase(240), "787 FT")
         XCTAssertEqual(RouteSummary.meters([]), 0)
         XCTAssertTrue(RouteSummary.chrome(mode: .walk, coords: []).hasPrefix(RouteLine.offGraph))
     }

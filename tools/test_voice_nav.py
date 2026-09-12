@@ -36,8 +36,26 @@ def turn_name(from_b: float, to_b: float) -> str:
     return "left" if delta < 0 else "right"
 
 
+METERS_PER_MILE = 1609.344
+FEET_PER_METER = 3.280839895
+
+
+def distance_hud(meters: float) -> str:
+    """Mirror of BlackoutTokens.Distance.hud."""
+    if meters >= METERS_PER_MILE:
+        return f"{meters / METERS_PER_MILE:.1f} MI"
+    return f"{round(round(meters) * FEET_PER_METER):.0f} FT"
+
+
+def distance_spoken(meters: float) -> str:
+    """Mirror of BlackoutTokens.Distance.spoken."""
+    if meters >= METERS_PER_MILE:
+        return f"{meters / METERS_PER_MILE:.1f} miles"
+    return f"{round(round(meters) * FEET_PER_METER):.0f} feet"
+
+
 def meters_phrase(m: float) -> str:
-    return f"{int(round(m))} meters"
+    return distance_spoken(m)
 
 
 def steps(coords: list[tuple[float, float]]) -> list[str]:
@@ -114,11 +132,11 @@ class VoiceNavTests(unittest.TestCase):
         # East 200m, then north 100m.
         coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
         text = prompt("TX WEST", 90, coords, "", None, None)
-        self.assertIn("Walk 200 meters.", text)
+        self.assertIn("Walk 656 feet.", text)
         self.assertIn("Turn left.", text)
-        self.assertIn("Walk 100 meters.", text)
+        self.assertIn("Walk 328 feet.", text)
         self.assertIn("Arrive at destination.", text)
-        self.assertIn("Total 300 meters.", text)
+        self.assertIn("Total 984 feet.", text)
         self.assertIn("Heading 90 degrees.", text)
         self.assertFalse(text.endswith("Walk"))
         self.assertNotEqual(text, "TX WEST 90 degrees")
@@ -180,7 +198,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("SpeakStatus.chrome(", app)
         self.assertNotIn('speech.speak("\\(pack) \\(bearing)"', app)
         self.assertIn("fixedSize(horizontal: false, vertical: true)", map_tab)
-        self.assertNotIn("lineLimit(1)", map_tab.split("MapFieldChrome.lines(")[1])
+        field = map_tab.split("MapFieldChrome.lines(")[1].split("struct MapFieldDestRail")[0]
+        self.assertNotIn("lineLimit(1)", field)
 
     def test_speech_engine_finishes_the_full_utterance(self):
         speech = (

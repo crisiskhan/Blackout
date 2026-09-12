@@ -485,20 +485,21 @@ final class WaterInspectTests: XCTestCase {
         )
         let finding = MapInspect.land(at: (35.10, -106.65), radius: 120, nearest: hit)
         XCTAssertTrue(finding.why.contains("Acequia Madre"), finding.why)
-        XCTAssertTrue(finding.why.contains("640 m"), finding.why)
+        XCTAssertTrue(finding.why.contains("2100 FT"), finding.why)
         XCTAssertTrue(finding.why.contains("N"), finding.why)
         XCTAssertNil(finding.sure)
     }
 
     func testGroundWithNothingNearSaysSoRatherThanGuessing() {
         let finding = MapInspect.land(at: (31.0, -104.0), radius: 120, nearest: nil)
-        XCTAssertTrue(finding.why.contains("No water record within 120 m"), finding.why)
+        XCTAssertTrue(finding.why.contains("No water record within 394 FT"), finding.why)
         XCTAssertEqual(finding.fieldCardID, InspectField.land)
     }
 
     func testDistanceReadsInMetresCloseAndKilometresFar() {
-        XCTAssertEqual(MapInspect.distance(640), "640 m")
-        XCTAssertEqual(MapInspect.distance(1_450), "1.4 km")
+        XCTAssertEqual(MapInspect.distance(640), "2100 FT")
+        XCTAssertEqual(MapInspect.distance(1_450), "4757 FT")
+        XCTAssertEqual(MapInspect.distance(12_400), "7.7 MI")
     }
 
     func testTheCompassPointsTheRightWay() {

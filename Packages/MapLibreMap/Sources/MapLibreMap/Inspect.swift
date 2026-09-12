@@ -1,4 +1,5 @@
 import Foundation
+import Tokens
 
 /// What one held point on the map turns out to be.
 ///
@@ -950,7 +951,7 @@ public enum Inspect {
     /// measures it and the card passes the measurement on and stops there. A
     /// tinaja is not a class anyone can hold, because nothing in the record is
     /// tagged as one — but a hold on nine metres of unnamed water in a canyon
-    /// can at least say it is nine metres, and let the reader draw their own
+    /// can at least say it is about 30 FT, and let the reader draw their own
     /// conclusion. It is a fact about the outline, never about the water.
     static let smallWaterSpanMetres = 15
 
@@ -959,9 +960,9 @@ public enum Inspect {
             return "mapped as standing water with no name, which often means a stock tank or a seasonal pool"
         }
         if across <= smallWaterSpanMetres {
-            return "mapped as standing water with no name, and the outline is only about \(across)m across — a rock pool, a trough and a dugout all read this way"
+            return "mapped as standing water with no name, and the outline is only about \(BlackoutTokens.Distance.hud(Double(across))) across — a rock pool, a trough and a dugout all read this way"
         }
-        return "mapped as standing water with no name and about \(across)m across, which out here usually means a stock tank or a pool that fills after rain"
+        return "mapped as standing water with no name and about \(BlackoutTokens.Distance.hud(Double(across))) across, which out here usually means a stock tank or a pool that fills after rain"
     }
 
     /// A plain storage tank, which is only water if the record says so.
