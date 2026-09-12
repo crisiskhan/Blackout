@@ -1978,6 +1978,69 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(ground.overlay_kind({"highway": "footway", "name": "LC Loop"}))
         self.assertEqual(
             ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Billy Rogers Arroyo"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "East Robinson Avenue"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Piedmont City Preserve"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "service", "name": "Cerro de Paz"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Westside Preserve"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "residential", "name": "Bit Lane"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Manzano Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Ojito Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "San Luis Mesa Area of Critical Environmental Concern",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Pecos Wilderness",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
                 {"leisure": "nature_reserve", "name": "Indian Grass Prarie Preserve"}
             ),
             "reserve",
@@ -2057,6 +2120,10 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("mcgregor")', inspect)
         self.assertNotIn('contains("cuevas")', inspect)
         self.assertNotIn('contains("patterson")', inspect)
+        self.assertNotIn('contains("westside")', inspect)
+        self.assertNotIn('contains("billy")', inspect)
+        self.assertNotIn('contains("piedmont")', inspect)
+        self.assertNotIn('contains("san luis")', inspect)
         self.assertNotIn('contains("stables")', inspect)
         self.assertNotIn('contains("candelaria")', inspect)
         self.assertNotIn('contains("vickery")', inspect)
@@ -3127,6 +3194,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Organ Mountains-Desert Peaks National Monument", glass)
         self.assertIn("32.182443", glass)
         self.assertIn("-107.289004", glass)
+        self.assertIn("Organ Mountains Wilderness", glass)
+        self.assertIn("32.422085", glass)
+        self.assertIn("-106.585887", glass)
+        self.assertIn("Billy Rogers Arroyo", glass)
+        self.assertIn("31.781032", glass)
+        self.assertIn("-106.495826", glass)
+        self.assertIn("Piedmont City Preserve", glass)
+        self.assertIn("31.796082", glass)
+        self.assertIn("-106.499771", glass)
+        self.assertIn("Westside Preserve", glass)
+        self.assertIn("30.488794", glass)
+        self.assertIn("-97.846455", glass)
         self.assertIn("Carrington's Prairie", glass)
         self.assertIn("30.247099", glass)
         self.assertIn("-97.830910", glass)
@@ -3440,10 +3519,6 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Alamo Community Garden", glass)
         self.assertIn("30.282202", glass)
         self.assertIn("-97.719697", glass)
-        self.assertIn("Patterson Park Community Garden", glass)
-        self.assertIn("30.295635", glass)
-        self.assertIn("-97.708798", glass)
-        self.assertIn("Brookview Road", glass)
         self.assertIn("4th Street Garden", glass)
         self.assertIn("33.134037", glass)
         self.assertIn("-107.252761", glass)
@@ -3496,8 +3571,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.405959", glass)
         self.assertIn("-97.853307", glass)
         self.assertIn("Balcones Canyonlands Preserve - Cuevas", glass)
-        self.assertIn("30.407861", glass)
-        self.assertIn("-97.855934", glass)
+        self.assertIn("30.413269", glass)
+        self.assertIn("-97.853406", glass)
+        self.assertIn("Vista Parke Drive", glass)
         self.assertIn("Ranch Road 620 North", glass)
         self.assertIn("Four Points Drive", glass)
         self.assertIn("Vickery Wholesale Greenhouse", glass)
@@ -3713,6 +3789,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("New Mexico Land Conservancy", glass)
         self.assertIn("35.616355", glass)
         self.assertIn("-106.005767", glass)
+        self.assertIn("Manzano Wilderness Study Area", glass)
+        self.assertIn("34.776218", glass)
+        self.assertIn("-106.460632", glass)
+        self.assertIn("Ojito Wilderness Study Area", glass)
+        self.assertIn("35.543397", glass)
+        self.assertIn("-106.882305", glass)
+        self.assertIn("San Luis Mesa Area of Critical Environmental Concern", glass)
+        self.assertIn("35.656758", glass)
+        self.assertIn("-107.128272", glass)
+        self.assertIn("Pecos Wilderness", glass)
+        self.assertIn("35.878269", glass)
+        self.assertIn("-105.828379", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -3773,6 +3861,9 @@ class GroundFieldSync(unittest.TestCase):
         cornundas_hit = False
         florida_hit = False
         organ_hit = False
+        organ_wilderness_hit = False
+        billy_hit = False
+        piedmont_hit = False
         franklin_hit = False
         lost_dog_hit = False
         flora_hit = False
@@ -3854,6 +3945,15 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "reserve" and pip(-107.289004, 32.182443, ring):
                     if props.get("name") == "Organ Mountains-Desert Peaks National Monument":
                         organ_hit = True
+                if kind == "reserve" and pip(-106.585887, 32.422085, ring):
+                    if props.get("name") == "Organ Mountains Wilderness":
+                        organ_wilderness_hit = True
+                if kind == "reserve" and pip(-106.495826, 31.781032, ring):
+                    if props.get("name") == "Billy Rogers Arroyo":
+                        billy_hit = True
+                if kind == "reserve" and pip(-106.499771, 31.796082, ring):
+                    if props.get("name") == "Piedmont City Preserve":
+                        piedmont_hit = True
                 if kind == "reserve" and pip(-106.50, 31.97, ring):
                     franklin_hit = props.get("name") == "Franklin Mountains State Park"
                 if kind == "wildlife" and pip(-106.545207, 31.896528, ring):
@@ -3957,6 +4057,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             organ_hit,
             "Organ Mountains-Desert Peaks hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            organ_wilderness_hit,
+            "Organ Mountains Wilderness hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            billy_hit,
+            "Billy Rogers Arroyo hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            piedmont_hit,
+            "Piedmont City Preserve hold is not inside the named nature reserve",
         )
         self.assertTrue(
             franklin_hit,
@@ -4138,7 +4250,6 @@ class GroundFieldSync(unittest.TestCase):
         lime_creek_hit = False
         colorado_hit = False
         alamo_hit = False
-        patterson_hit = False
         wild_basin_hit = False
         stillhouse_hit = False
         big_walnut_hit = False
@@ -4151,6 +4262,7 @@ class GroundFieldSync(unittest.TestCase):
         mcgregor_hit = False
         cuevas_east_hit = False
         cuevas_hit = False
+        westside_hit = False
         ladybird_hit = False
         zilker_hit = False
         capitol_flower_hit = False
@@ -4276,8 +4388,6 @@ class GroundFieldSync(unittest.TestCase):
                     colorado_hit = True
                 if kind == "botanic" and name == "Alamo Community Garden" and pip(-97.719697, 30.282202, ring):
                     alamo_hit = True
-                if kind == "botanic" and name == "Patterson Park Community Garden" and pip(-97.708798, 30.295635, ring):
-                    patterson_hit = True
                 if kind == "wildlife" and name == "Wild Basin Wilderness Preserve" and pip(-97.820597, 30.318096, ring):
                     wild_basin_hit = True
                 if kind == "wildlife" and name == "Stillhouse Hollow Nature Preserve" and pip(-97.761957, 30.369023, ring):
@@ -4300,8 +4410,10 @@ class GroundFieldSync(unittest.TestCase):
                     mcgregor_hit = True
                 if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas East" and pip(-97.853307, 30.405959, ring):
                     cuevas_east_hit = True
-                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas" and pip(-97.855934, 30.407861, ring):
+                if kind == "wildlife" and name == "Balcones Canyonlands Preserve - Cuevas" and pip(-97.853406, 30.413269, ring):
                     cuevas_hit = True
+                if kind == "reserve" and name == "Westside Preserve" and pip(-97.846455, 30.488794, ring):
+                    westside_hit = True
                 if kind == "glasshouse" and name == "Vickery Wholesale Greenhouse" and pip(-97.617624, 30.313804, ring):
                     vickery_hit = True
                 if kind == "reserve" and name == "Decker Tallgrass Prairie Preserve" and pip(-97.603942, 30.294331, ring):
@@ -4505,10 +4617,6 @@ class GroundFieldSync(unittest.TestCase):
             "Alamo Community Garden is not botanic on the east overlay",
         )
         self.assertTrue(
-            patterson_hit,
-            "Patterson Park Community Garden is not botanic on the east overlay",
-        )
-        self.assertTrue(
             wild_basin_hit,
             "Wild Basin Wilderness Preserve is not wildlife range on the east overlay",
         )
@@ -4555,6 +4663,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             cuevas_hit,
             "Balcones Canyonlands Preserve Cuevas is not wildlife range",
+        )
+        self.assertTrue(
+            westside_hit,
+            "Westside Preserve hold is not inside the named nature reserve",
         )
         self.assertTrue(
             vickery_hit,
@@ -5761,6 +5873,66 @@ class GroundFieldSync(unittest.TestCase):
             "New Mexico Land Conservancy hold is not inside the named nature reserve",
         )
 
+        nm_manzano_wsa_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Manzano Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.460632, 34.776218, ring):
+                    nm_manzano_wsa_hit = True
+        self.assertTrue(
+            nm_manzano_wsa_hit,
+            "Manzano WSA hold is not inside the named nature reserve",
+        )
+
+        nm_ojito_wsa_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Ojito Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.882305, 35.543397, ring):
+                    nm_ojito_wsa_hit = True
+        self.assertTrue(
+            nm_ojito_wsa_hit,
+            "Ojito WSA hold is not inside the named nature reserve",
+        )
+
+        nm_san_luis_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "San Luis Mesa Area of Critical Environmental Concern":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.128272, 35.656758, ring):
+                    nm_san_luis_hit = True
+        self.assertTrue(
+            nm_san_luis_hit,
+            "San Luis Mesa ACEC hold is not inside the named nature reserve",
+        )
+
+        nm_pecos_wild_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Pecos Wilderness":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-105.828379, 35.878269, ring):
+                    nm_pecos_wild_hit = True
+        self.assertTrue(
+            nm_pecos_wild_hit,
+            "Pecos Wilderness hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -6398,6 +6570,22 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.438722", qa)
         self.assertIn("New Mexico Land Conservancy", qa)
         self.assertIn("35.616355", qa)
+        self.assertIn("Organ Mountains Wilderness", qa)
+        self.assertIn("32.422085", qa)
+        self.assertIn("Billy Rogers Arroyo", qa)
+        self.assertIn("31.781032", qa)
+        self.assertIn("Piedmont City Preserve", qa)
+        self.assertIn("31.796082", qa)
+        self.assertIn("Westside Preserve", qa)
+        self.assertIn("30.488794", qa)
+        self.assertIn("Manzano Wilderness Study Area", qa)
+        self.assertIn("34.776218", qa)
+        self.assertIn("Ojito Wilderness Study Area", qa)
+        self.assertIn("35.543397", qa)
+        self.assertIn("San Luis Mesa Area of Critical Environmental Concern", qa)
+        self.assertIn("35.656758", qa)
+        self.assertIn("Pecos Wilderness", qa)
+        self.assertIn("35.878269", qa)
         self.assertIn("Prehistoric Trackways National Monument", qa)
         self.assertIn("32.370257", qa)
         self.assertIn("White Sands National Park", qa)
@@ -6436,7 +6624,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Balcones Canyonlands Preserve - Cuevas East", qa)
         self.assertIn("30.405959", qa)
         self.assertIn("Balcones Canyonlands Preserve - Cuevas", qa)
-        self.assertIn("30.407861", qa)
+        self.assertIn("30.413269", qa)
+        self.assertIn("Vista Parke Drive", qa)
         self.assertIn("Ranch Road 620 North", qa)
         self.assertIn("Four Points Drive", qa)
         self.assertIn("Beaukiss Woods", qa)
@@ -6717,7 +6906,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Alamo Street", qa)
         self.assertIn("Alamo Pocket Park", qa)
         self.assertIn("Patterson Park Community Garden", qa)
-        self.assertIn("30.295635", qa)
+        self.assertIn("public tap sits in the garden", qa)
         self.assertIn("Brookview Road", qa)
         self.assertIn("wild basin wilderness", qa)
         self.assertIn("30.318096", qa)
@@ -6864,6 +7053,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bear Canyon Open Space East", qa)
         self.assertIn("Santa Fe Conservation Trust", qa)
         self.assertIn("New Mexico Land Conservancy", qa)
+        self.assertIn("Organ Mountains Wilderness", qa)
+        self.assertIn("Billy Rogers Arroyo", qa)
+        self.assertIn("Piedmont City Preserve", qa)
+        self.assertIn("Westside Preserve", qa)
+        self.assertIn("Manzano Wilderness Study Area", qa)
+        self.assertIn("Ojito Wilderness Study Area", qa)
+        self.assertIn("San Luis Mesa Area of Critical Environmental Concern", qa)
+        self.assertIn("Pecos Wilderness", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

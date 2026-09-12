@@ -258,7 +258,10 @@ WILDLIFE_RANGE_PHRASES = (
 # Space, Sabino Canyon Open Space, Gutierrez Canyon-Milne Open Space,
 # Tres Pistolas Open Space, Ojito de San Antonio Open Space, Bear
 # Canyon Open Space West, Bear Canyon Open Space East, Santa Fe
-# Conservation Trust, and New Mexico Land Conservancy are those
+# Conservation Trust, New Mexico Land Conservancy, Organ Mountains
+# Wilderness, Billy Rogers Arroyo, Piedmont City Preserve, Westside
+# Preserve, Manzano Wilderness Study Area, Ojito Wilderness Study
+# Area, San Luis Mesa ACEC, and Pecos Wilderness are those
 # Holds. Do not add
 # matcher `los lunas`, `galisteo`, `castner`, `trackways`,
 # `white sands`, `ojito`, `cabezon`, `tent rocks`, `petroglyph`,
@@ -270,7 +273,8 @@ WILDLIFE_RANGE_PHRASES = (
 # `manzano`, `sandia`, `organ`, `desert peaks`, `bandelier`,
 # `carlito`, `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
 # `tres pistolas`, `pistolas`, `bear canyon`, `conservation trust`,
-# `land conservancy`, or `conservancy`. Phrase `open space` is not a bare contains —
+# `land conservancy`, `conservancy`, `westside`, `billy`,
+# `piedmont`, or `san luis`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
@@ -357,7 +361,8 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Vuelta Colorada stay roads. Do not add matcher `prisma`
 # or `colonia`. Phrase `community garden` already matches
 # Patterson Park Community Garden. Brookview Road stays a
-# road. Do not add matcher `patterson`. Cherry Creek
+# road. Do not add matcher `patterson`. Patterson stays
+# unheld — a public tap sits in the garden. Cherry Creek
 # Community Garden stays unheld (water too close). Desert
 # Garden Park stays unheld.
 # Winrock Garden is a mall
