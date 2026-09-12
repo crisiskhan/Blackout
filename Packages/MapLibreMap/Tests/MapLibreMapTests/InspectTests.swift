@@ -4019,6 +4019,34 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(fourthStreetSW.klass, "Road")
         XCTAssertNotEqual(fourthStreetSW.klass, "Botanic garden")
 
+        let prisma = Inspect.read(
+            tags: [
+                "leisure": "garden",
+                "name": "Colonia Prisma Community Garden",
+            ],
+            pack: "nm"
+        )
+        XCTAssertEqual(prisma.klass, "Botanic garden")
+        XCTAssertNotEqual(prisma.klass, "Park")
+        XCTAssertEqual(prisma.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(prisma.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(prisma.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(prisma.doLine.lowercased().contains("edible"), prisma.doLine)
+
+        let caminoRojo = Inspect.read(
+            tags: ["highway": "residential", "name": "Camino Rojo"],
+            pack: "nm"
+        )
+        XCTAssertEqual(caminoRojo.klass, "Road")
+        XCTAssertNotEqual(caminoRojo.klass, "Botanic garden")
+
+        let vueltaColorada = Inspect.read(
+            tags: ["highway": "residential", "name": "Vuelta Colorada"],
+            pack: "nm"
+        )
+        XCTAssertEqual(vueltaColorada.klass, "Road")
+        XCTAssertNotEqual(vueltaColorada.klass, "Botanic garden")
+
         let winrock = Inspect.read(
             tags: ["leisure": "garden", "name": "Winrock Garden"],
             pack: "nm"
@@ -4093,6 +4121,20 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([rose, utah])["leisure"], "garden")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([rose, utah]), pack: "nm").klass,
+            "Botanic garden"
+        )
+
+        let prismaSheet: [String: String] = [
+            "leisure": "garden",
+            "name": "Colonia Prisma Community Garden",
+        ]
+        let caminoRojoStreet: [String: String] = [
+            "highway": "residential",
+            "name": "Camino Rojo",
+        ]
+        XCTAssertEqual(Inspect.pick([prismaSheet, caminoRojoStreet])["leisure"], "garden")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([prismaSheet, caminoRojoStreet]), pack: "nm").klass,
             "Botanic garden"
         )
     }

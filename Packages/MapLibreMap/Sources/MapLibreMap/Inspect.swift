@@ -550,8 +550,10 @@ public enum Inspect {
     /// Alamo Street stays a road. Alamo Pocket Park stays a park. Phrase
     /// `barelas community`, not the word `barelas`. 4th Street
     /// Southwest stays a road. The `community garden` phrase
-    /// already matches those
-    /// sheets. Winrock Garden is a mall bed and stays out.
+    /// already matches those sheets and Colonia Prisma Community
+    /// Garden. Camino Rojo and Vuelta Colorada stay roads. Do not
+    /// add matcher `prisma` or `colonia`. Desert Garden Park stays
+    /// unheld. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,

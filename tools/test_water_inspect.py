@@ -183,6 +183,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("pronoun cave area of critical environmental concern", nm_blob)
         self.assertIn("albuquerque biopark botanic garden", nm_blob)
         self.assertIn("barelas community garden", nm_blob)
+        self.assertIn("colonia prisma community garden", nm_blob)
         self.assertIn("harvey cornell rose park", nm_blob)
         self.assertIn("santa fe botanical garden", nm_blob)
         self.assertIn("japanese memorial garden", nm_blob)
@@ -1631,6 +1632,8 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("colorado")', inspect)
         self.assertNotIn('contains("alamo")', inspect)
         self.assertNotIn('contains("barelas")', inspect)
+        self.assertNotIn('contains("prisma")', inspect)
+        self.assertNotIn('contains("colonia")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
         self.assertIn('t["leisure"] == "garden"', inspect)
@@ -2927,6 +2930,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("International District Community Garden", glass)
         self.assertIn("35.062299", glass)
         self.assertIn("-106.608226", glass)
+        self.assertIn("Colonia Prisma Community Garden", glass)
+        self.assertIn("35.627487", glass)
+        self.assertIn("-106.047423", glass)
+        self.assertIn("Camino Rojo", glass)
+        self.assertIn("Vuelta Colorada", glass)
         self.assertIn("Memorial Rose Garden", glass)
         self.assertIn("35.882522", glass)
         self.assertIn("-106.301719", glass)
@@ -3905,6 +3913,7 @@ class GroundFieldSync(unittest.TestCase):
         game_commission_hit = False
         sevilleta_hit = False
         barelas_hit = False
+        prisma_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -3935,6 +3944,8 @@ class GroundFieldSync(unittest.TestCase):
                     memorial_rose_hit = props.get("name") == "Memorial Rose Garden"
                 if kind == "botanic" and pip(-106.653090, 35.078118, ring):
                     barelas_hit = props.get("name") == "Barelas Community Garden"
+                if kind == "botanic" and pip(-106.047423, 35.627487, ring):
+                    prisma_hit = props.get("name") == "Colonia Prisma Community Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-106.829413, 34.423426, ring):
@@ -4045,6 +4056,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             barelas_hit,
             "Barelas Community Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            prisma_hit,
+            "Colonia Prisma Community Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -4878,6 +4893,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.078118", qa)
         self.assertIn("barelas community", qa)
         self.assertIn("4th Street Southwest", qa)
+        self.assertIn("Colonia Prisma Community Garden", qa)
+        self.assertIn("35.627487", qa)
+        self.assertIn("Camino Rojo", qa)
+        self.assertIn("Vuelta Colorada", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

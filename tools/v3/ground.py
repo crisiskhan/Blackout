@@ -277,7 +277,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Alamo Pocket Park stays a park. Phrase `barelas
 # community`, not the word `barelas`. 4th Street Southwest
 # stays a road. The
-# `community garden` phrase already matches those sheets.
+# `community garden` phrase already matches those sheets
+# and Colonia Prisma Community Garden. Camino Rojo and
+# Vuelta Colorada stay roads. Do not add matcher `prisma`
+# or `colonia`. Desert Garden Park stays unheld.
 # Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap

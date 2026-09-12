@@ -608,6 +608,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// 51 m is rank 7; botanic 5 still wins.
     private static let barelasGarden = CLLocationCoordinate2D(latitude: 35.078118, longitude: -106.653090)
 
+    /// Interior of Colonia Prisma Community Garden. Phrase
+    /// `community garden`, not the word `prisma` or `colonia`.
+    /// Camino Rojo 28 m is rank 7; botanic 5 still wins. Vuelta
+    /// Colorada stays a road. 145 m from OSM stream. Desert Garden
+    /// Park stays unheld.
+    private static let coloniaPrisma = CLLocationCoordinate2D(latitude: 35.627487, longitude: -106.047423)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -2207,6 +2214,28 @@ final class HoldOnTheGlassTests: XCTestCase {
             "Barelas Community Garden opened woodland tree-use: \(barelas)"
         )
         XCTAssertFalse((barelas.card?.doLine.lowercased() ?? "").contains("edible"), barelas.card?.doLine ?? "")
+
+        let prisma = try hold(at: Self.coloniaPrisma, zoom: 16, packId: "nm")
+        XCTAssertEqual(prisma.card?.klass, "Botanic garden", "\(prisma)")
+        XCTAssertEqual(prisma.card?.title, "Colonia Prisma Community Garden", "\(prisma)")
+        XCTAssertNotEqual(prisma.card?.klass, "Park", "\(prisma)")
+        XCTAssertNotEqual(prisma.card?.klass, "Road", "\(prisma)")
+        XCTAssertNotEqual(prisma.card?.title, "Camino Rojo", "\(prisma)")
+        XCTAssertNotEqual(prisma.card?.title, "Vuelta Colorada", "\(prisma)")
+        XCTAssertEqual(prisma.card?.fieldRoute.first, Inspect.plantTXCard, "\(prisma)")
+        XCTAssertTrue(
+            prisma.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "Colonia Prisma dropped the NM plant-danger card: \(prisma)"
+        )
+        XCTAssertFalse(
+            prisma.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "Colonia Prisma opened woodland tree-use: \(prisma)"
+        )
+        XCTAssertFalse(
+            prisma.card?.fieldRoute.contains(Inspect.cactusNMCard) ?? true,
+            "Colonia Prisma opened cactus: \(prisma)"
+        )
+        XCTAssertFalse((prisma.card?.doLine.lowercased() ?? "").contains("edible"), prisma.card?.doLine ?? "")
 
         let fourthStreet = try hold(at: Self.fourthStreetGarden, zoom: 16)
         XCTAssertEqual(fourthStreet.card?.klass, "Botanic garden", "\(fourthStreet)")
