@@ -770,7 +770,8 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// Interior of Marquez Wildlife Management Area in NM `layers/ground.geojson`.
     /// SOLO_QA 35.327562, −107.319389 is on the sheet and far from water or a way.
     /// Mesa Blanca is held 5246 m off this pip — rank 1 still
-    /// beats the overlay.
+    /// beats the overlay. Cerritos de la Jolla de Santa Rosa is
+    /// held 9111 m off this pip — rank 1 still beats the overlay.
     private static let nmWildlifeRange = CLLocationCoordinate2D(latitude: 35.327562, longitude: -107.319389)
 
     /// Interior of Bernardo Wildlife Management Area. Phrase `bernardo
@@ -903,6 +904,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// and elk as range, not javelina. Ice-on-rock is in this
     /// book, so FIELD names cold first.
     private static let mesaBlanca = CLLocationCoordinate2D(latitude: 35.338369, longitude: -107.263101)
+
+    /// `Cerritos de la Jolla de Santa Rosa` on the NM place
+    /// slice. A named peak on the Marquez overlay sheet — rank 1
+    /// still beats the overlay. Unique versus the Marquez
+    /// overlay Hold (9111 m) and Mesa Blanca (9295 m). Bear and
+    /// elk as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first.
+    private static let cerritosDeLaJolla = CLLocationCoordinate2D(latitude: 35.409477, longitude: -107.316992)
 
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
@@ -2667,6 +2676,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(held.card?.klass, "Wildlife range", "\(held)")
         XCTAssertEqual(held.card?.title, "Marquez Wildlife Management Area", "\(held)")
         XCTAssertNotEqual(held.card?.title, "Mesa Blanca", "\(held)")
+        XCTAssertNotEqual(held.card?.title, "Cerritos de la Jolla de Santa Rosa", "\(held)")
         XCTAssertEqual(held.card?.fieldRoute.first, Inspect.mammalTXCard, "\(held)")
         XCTAssertTrue(
             held.card?.fieldRoute.contains(Inspect.mammalNMCard) ?? false,
@@ -3227,6 +3237,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(blancaPresent.first, Inspect.iceRockCard, "\(blanca)")
         XCTAssertEqual(InspectField.label(for: blancaPresent.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: blancaPresent), "COLD · ANIMAL · BITE")
+
+        let cerritos = try hold(at: Self.cerritosDeLaJolla, zoom: 16, packId: "nm")
+        XCTAssertEqual(cerritos.card?.klass, "Peak", "\(cerritos)")
+        XCTAssertEqual(cerritos.card?.title, "Cerritos de la Jolla de Santa Rosa", "\(cerritos)")
+        XCTAssertNotEqual(cerritos.card?.klass, "Wildlife range", "\(cerritos)")
+        XCTAssertNotEqual(cerritos.card?.title, "Marquez Wildlife Management Area", "\(cerritos)")
+        XCTAssertNotEqual(cerritos.card?.title, "Mesa Blanca", "\(cerritos)")
+        XCTAssertNotEqual(cerritos.card?.title, "La Cruz Peak", "\(cerritos)")
+        let cerritosDo = cerritos.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(cerritosDo.contains("black bear and elk range"), cerritos.card?.doLine ?? "")
+        XCTAssertTrue(cerritosDo.contains("give it the road"), cerritos.card?.doLine ?? "")
+        XCTAssertFalse(cerritosDo.contains("javelina"), cerritos.card?.doLine ?? "")
+        XCTAssertFalse(cerritosDo.contains("hog"), cerritos.card?.doLine ?? "")
+        XCTAssertFalse(cerritosDo.contains("edible"), cerritos.card?.doLine ?? "")
+        let cerritosPresent = InspectField.presentRoute(cerritos.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(cerritosPresent.first, Inspect.iceRockCard, "\(cerritos)")
+        XCTAssertEqual(InspectField.label(for: cerritosPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: cerritosPresent), "COLD · ANIMAL · BITE")
     }
 
     func testHoldingAnEastPrairiePreserveOpensBiteNotPicnicWoodland() throws {

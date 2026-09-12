@@ -991,6 +991,22 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(mesaBlanca.doLine.lowercased().contains("hog"), mesaBlanca.doLine)
         XCTAssertFalse(mesaBlanca.doLine.lowercased().contains("edible"), mesaBlanca.doLine)
 
+        let cerritosDeLaJolla = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerritos de la Jolla de Santa Rosa"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerritosDeLaJolla.klass, "Peak")
+        XCTAssertNotEqual(cerritosDeLaJolla.klass, "Wildlife range")
+        XCTAssertTrue(cerritosDeLaJolla.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(
+            cerritosDeLaJolla.doLine.lowercased().contains("black bear and elk range"),
+            cerritosDeLaJolla.doLine
+        )
+        XCTAssertFalse(cerritosDeLaJolla.doLine.lowercased().contains("javelina"), cerritosDeLaJolla.doLine)
+        XCTAssertFalse(cerritosDeLaJolla.doLine.lowercased().contains("hog"), cerritosDeLaJolla.doLine)
+        XCTAssertFalse(cerritosDeLaJolla.doLine.lowercased().contains("edible"), cerritosDeLaJolla.doLine)
+
         let refuge = Inspect.read(
             tags: [
                 "boundary": "protected_area",
@@ -3252,6 +3268,17 @@ final class InspectTests: XCTestCase {
                 [
                     "leisure": "nature_reserve",
                     "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Cerritos de la Jolla de Santa Rosa"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Marquez Wildlife Management Area",
                 ],
             ])["natural"],
             "peak"
