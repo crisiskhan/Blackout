@@ -209,5 +209,76 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertNotIn("best in class", qa.lower())
 
 
+class FieldSearchSayAndStepperTests(unittest.TestCase):
+    """Type or SAY finds a pack card. Miss is silence. Never invent a protocol."""
+
+    def test_say_is_on_device_dictation_into_the_same_ask(self):
+        tab = read("Blackout", "FieldTab.swift")
+        speech = read(
+            "Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift"
+        )
+        gen = read("tools", "v3", "generate_project.py")
+        pbx = read("Blackout.xcodeproj", "project.pbxproj")
+        self.assertIn('Button("SAY")', tab)
+        self.assertIn("SAY FAILED", tab)
+        self.assertIn("runtime.speech.listen(locale:", tab)
+        self.assertIn("runtime.ptt.live", tab)
+        self.assertIn("openAnswer()", tab)
+        self.assertNotIn("import Speech", tab)
+        self.assertNotIn("URLSession", tab)
+        self.assertNotIn("SFSpeechURLRecognitionRequest", tab)
+        self.assertIn("func listen(", speech)
+        self.assertIn("requiresOnDeviceRecognition = true", speech)
+        self.assertIn("canImport(Speech)", speech)
+        self.assertNotIn("SFSpeechURLRecognitionRequest", speech)
+        self.assertNotIn("URLSession", speech)
+        self.assertNotIn("private let synth = AVSpeechSynthesizer()", speech)
+        self.assertIn("INFOPLIST_KEY_NSSpeechRecognitionUsageDescription", gen)
+        self.assertIn("INFOPLIST_KEY_NSSpeechRecognitionUsageDescription", pbx)
+        self.assertGreaterEqual(
+            pbx.count("INFOPLIST_KEY_NSSpeechRecognitionUsageDescription"), 2
+        )
+        self.assertIn("Deny is supported", gen)
+        self.assertIn("on this device", gen.lower())
+        self.assertIn("Deny is supported.", pbx)
+        self.assertIn("on this device", pbx.lower())
+
+    def test_open_card_is_situation_do_stop_if_get_to_care_with_pictures(self):
+        tab = read("Blackout", "FieldTab.swift")
+        open_fn = tab.split("private func open(")[1].split("private func sectionLabel")[0]
+        self.assertIn('sectionLabel("SITUATION")', tab)
+        self.assertIn('sectionLabel("DO")', tab)
+        self.assertIn('L10n.t("stop.if"', tab)
+        self.assertIn('sectionLabel("GET-TO-CARE")', tab)
+        self.assertNotIn('sectionLabel("CARE")', tab)
+        self.assertIn("s.step.image", open_fn)
+        self.assertIn("Field/images", tab)
+        self.assertIn("UIImage(contentsOfFile:", tab)
+        self.assertTrue((ROOT / "Resources/Field/images/bleed-pack.png").is_file())
+        self.assertIn("x.next()", tab)
+        self.assertIn("openRoute([first.id])", tab)
+        self.assertNotIn("ForEach(listCards)", tab)
+        self.assertIn("NO MATCH", tab)
+        self.assertNotIn("edible", tab.lower())
+        self.assertNotIn("drinkable", tab.lower())
+        self.assertNotIn("g.percent", tab)
+
+    def test_solo_qa_scores_say_pictures_and_silence(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("SAY", qa)
+        self.assertIn("GET-TO-CARE", qa)
+        self.assertIn("SITUATION", qa)
+        self.assertIn("NO MATCH", qa)
+        self.assertIn("on this device", qa.lower())
+        self.assertIn("Remaining hits stay out", qa)
+        blob = qa.lower().replace("’", "'")
+        self.assertIn("we don't have that", blob)
+        self.assertIn("never invent", blob)
+        self.assertIn("picture", blob)
+        field_sec = qa.split("## FIELD")[1].split("## EXPEDITION")[0]
+        self.assertIn("Sure % is not on SEARCH", field_sec)
+        self.assertIn("no drinkable or edible number", field_sec.lower())
+
+
 if __name__ == "__main__":
     unittest.main()

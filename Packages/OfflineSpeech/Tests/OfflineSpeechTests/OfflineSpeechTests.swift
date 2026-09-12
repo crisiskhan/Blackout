@@ -29,4 +29,13 @@ final class SpeechEngineTests: XCTestCase {
         XCTAssertTrue(s.lastFailed)
         XCTAssertTrue(s.lastUtterance.contains("SPEECH FAILED") || s.lastFailed)
     }
+
+    func testListenFailsClosedWithoutOnDeviceSpeech() {
+        #if !canImport(Speech) || !os(iOS)
+        let s = SpeechEngine(box: EventLog())
+        var called = false
+        XCTAssertFalse(s.listen(locale: "en") { _ in called = true })
+        XCTAssertFalse(called)
+        #endif
+    }
 }

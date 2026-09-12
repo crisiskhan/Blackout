@@ -1,8 +1,10 @@
 import SwiftUI
+import UIKit
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
 import MapLibreMap
+import OfflineSpeech
 import Tokens
 import VisionCoreML
 
@@ -16,6 +18,7 @@ struct FieldTab: View {
     @State private var fieldTrailBook: String = ""
     @State private var guess: VisionGuess?
     @State private var showVision = false
+    @State private var sayFailed = false
 
     var body: some View {
         HUDPage(
@@ -75,6 +78,7 @@ struct FieldTab: View {
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .onChange(of: runtime.packs?.active?.id) { _, _ in
             query = ""
+            sayFailed = false
             load()
         }
     }
@@ -229,6 +233,7 @@ struct FieldTab: View {
                 Button("ALL CARDS") { leaveCard() }
                     .buttonStyle(HUDOverlayChipStyle())
             }
+            sectionLabel("SITUATION")
             Text(loc(s.card.situation))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Theme.silver.opacity(0.7))
@@ -256,8 +261,20 @@ struct FieldTab: View {
                     )
             }
 
+            sectionLabel("DO")
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
+                    if !s.step.image.isEmpty,
+                       let root = AppRuntime.resourceRoot()?.appendingPathComponent("Field/images/\(s.step.image)"),
+                       let ui = UIImage(contentsOfFile: root.path)
+                    {
+                        Image(uiImage: ui)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 180)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .accessibilityHidden(true)
+                    }
                     Text(loc(s.step.`do`))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Theme.silver)
@@ -287,7 +304,7 @@ struct FieldTab: View {
                 }
             }
 
-            sectionLabel("CARE")
+            sectionLabel("GET-TO-CARE")
             Text(loc(s.card.get_to_care))
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Theme.silver)
@@ -367,21 +384,59 @@ struct FieldTab: View {
     }
 
     private var searchField: some View {
-        TextField("SEARCH", text: $query)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .submitLabel(.search)
-            .onSubmit(openAnswer)
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Theme.silver)
-            .padding(.horizontal, 12)
-            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .background(Theme.glass())
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
-            )
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                TextField("SEARCH", text: $query)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.search)
+                    .onSubmit(openAnswer)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.silver)
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                    .background(Theme.glass())
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                    )
+                Button("SAY") { say() }
+                    .buttonStyle(HUDOverlayChipStyle())
+            }
+            if sayFailed {
+                Text("SAY FAILED")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+            }
+        }
+    }
+
+    /// Spoken question uses the same ask path as type. Deny, PTT live, and
+    /// a missing on-device recognizer are SAY FAILED — not a network model.
+    private func say() {
+        sayFailed = false
+        if runtime.ptt.live || runtime.clipLive {
+            sayFailed = true
+            return
+        }
+        if runtime.speech.listening {
+            runtime.speech.endListen()
+            return
+        }
+        let started = runtime.speech.listen(locale: runtime.locale) { spoken in
+            if spoken.isEmpty {
+                sayFailed = true
+                return
+            }
+            query = spoken
+            if FieldCorpus.asking(query) {
+                openAnswer()
+            }
+        }
+        if !started {
+            sayFailed = true
+        }
     }
 
     private func load() {
@@ -406,6 +461,7 @@ struct FieldTab: View {
     private func openAnswer() {
         guard FieldCorpus.asking(catalogQuery) else { return }
         guard let first = listCards.first else { return }
+        sayFailed = false
         openRoute([first.id])
     }
 

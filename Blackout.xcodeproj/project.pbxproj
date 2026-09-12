@@ -509,6 +509,7 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SEARCH listens for a spoken question on this device. Deny is supported.";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -564,6 +565,7 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SEARCH listens for a spoken question on this device. Deny is supported.";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;

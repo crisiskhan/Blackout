@@ -512,6 +512,15 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn('TextField("SEARCH"', field)
         self.assertIn("NO MATCH", field)
         self.assertNotIn("mapSearchHitCap", field)
+        self.assertIn('Button("SAY")', field)
+        self.assertIn("SAY FAILED", field)
+        self.assertIn('sectionLabel("SITUATION")', field)
+        self.assertIn('sectionLabel("DO")', field)
+        self.assertIn('sectionLabel("GET-TO-CARE")', field)
+        self.assertNotIn('sectionLabel("CARE")', field)
+        self.assertIn("s.step.image", field)
+        self.assertIn("Field/images", field)
+        self.assertIn("openRoute([first.id])", field)
 
     def test_solo_qa_scores_stop_if_and_step_speak(self):
         qa = read("docs", "SOLO_QA.md")
@@ -520,6 +529,8 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("VISION captures one still", qa)
         self.assertIn("NO MATCH", qa)
         self.assertIn("FIELD SEARCH", qa)
+        self.assertIn("GET-TO-CARE", qa)
+        self.assertIn("SAY", qa)
 
 
 class CommsInstrumentTests(unittest.TestCase):

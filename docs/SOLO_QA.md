@@ -63,9 +63,9 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 
 ## FIELD
 
-- [ ] PASS / FAIL / N/A — Open a card. The card shows STOP-IF lines, situation, the open step (do / why / child / stop), and CARE. NEXT advances the step. ALL CARDS returns to SEARCH and dumps any remaining biome trail. TX EAST SEARCH does not list `tx-mammal` / javelina; TX WEST SEARCH does not list `tx-east-tree-use`. A `tx-javelina` still still opens `tx-mammal`.
-- [ ] PASS / FAIL / N/A — FIELD SEARCH ranks this pack's book (type `thirst`, `snake`, `starting from nothing`, `wildfire`, `seep`, `wool`). Empty query is SEARCH, not a dump of the book. Type a situation and search. The first answering card's steps open. No hit is `NO MATCH`, not an invented card. No title list. Never edible.
-- [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`.
+- [ ] PASS / FAIL / N/A — Open a card. The card shows SITUATION, DO (one open step: do / why / child / stop, plus its picture from Field/images when the pack shipped one), STOP-IF, and GET-TO-CARE. NEXT is a tap that advances the step. ALL CARDS returns to SEARCH and dumps any remaining biome trail. TX EAST SEARCH does not list `tx-mammal` / javelina; TX WEST SEARCH does not list `tx-east-tree-use`. A `tx-javelina` still still opens `tx-mammal`.
+- [ ] PASS / FAIL / N/A — FIELD SEARCH ranks this pack's book (type or SAY `thirst`, `snake`, `starting from nothing`, `wildfire`, `seep`, `wool`). SAY listens on this device (deny is supported). Empty query is SEARCH, not a dump of the book. Type or say a situation and search. The first answering card's steps open. Remaining hits stay out of the trail. No hit is `NO MATCH` — we don't have that, not an invented card. Never invent a protocol. No title list. Never edible. Water and plants have no drinkable or edible number. Sure % is not on SEARCH.
+- [ ] PASS / FAIL / N/A — SPEAK speaks the open step, **or** chrome `SPEECH FAILED`. SAY FAILED is deny / PTT live / no on-device listen — not a network model.
 - [ ] PASS / FAIL / N/A — SEND TO PARTY with no peer: chrome `NO PEERS · LOGGED`. Write stays local.
 - [ ] PASS / FAIL / N/A — No SOS lecture and no SOS disk on FIELD. SOS lives on COMMS.
 - [ ] PASS / FAIL / N/A — Empty book is `FIELD BOOK · NONE`, not a blank list. VISION captures one still. A new capture clears the last guess. Result is `UNKNOWN` or a pack-book name. Fungi is `LEAVE IT`. Never edible. No percent. Camera deny or no classifier: `NO VISION MODEL`. No CoreML lecture.
