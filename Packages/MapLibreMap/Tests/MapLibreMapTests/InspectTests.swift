@@ -438,6 +438,15 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(apachePath.klass, "Trail")
         XCTAssertFalse(apachePath.fieldRoute.contains(Inspect.caveCard))
 
+        let indio = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Cueva del Indio"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(indio.klass, "Cave or hole")
+        XCTAssertNotEqual(indio.klass, "Park")
+        XCTAssertEqual(indio.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(indio.doLine.lowercased().contains("edible"), indio.doLine)
+
         let aztec = Inspect.read(
             tags: ["natural": "cave_entrance", "name": "Aztec Cave"],
             pack: "tx-west"
@@ -469,6 +478,21 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(bearCave.klass, "Cave or hole")
         XCTAssertEqual(bearCave.fieldRoute.first, Inspect.caveCard)
         XCTAssertFalse(bearCave.doLine.lowercased().contains("edible"), bearCave.doLine)
+
+        let winds = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Cave of the Winds"],
+            pack: "nm"
+        )
+        XCTAssertEqual(winds.klass, "Cave or hole")
+        XCTAssertEqual(winds.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(winds.doLine.lowercased().contains("edible"), winds.doLine)
+
+        let windsTrail = Inspect.read(
+            tags: ["highway": "path", "name": "Cave of the Winds Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(windsTrail.klass, "Trail")
+        XCTAssertFalse(windsTrail.fieldRoute.contains(Inspect.caveCard))
 
         let embudoPark = Inspect.read(
             tags: ["leisure": "park", "name": "Embudo Hills Park"],
@@ -2994,6 +3018,16 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(laMesaGarden.fieldRoute.contains(Inspect.plantNMCard))
         XCTAssertFalse(laMesaGarden.fieldRoute.contains(Inspect.treeUseNMCard))
         XCTAssertFalse(laMesaGarden.doLine.lowercased().contains("edible"), laMesaGarden.doLine)
+
+        let internationalGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "International District Community Garden"],
+            pack: "nm"
+        )
+        XCTAssertEqual(internationalGarden.klass, "Botanic garden")
+        XCTAssertEqual(internationalGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertTrue(internationalGarden.fieldRoute.contains(Inspect.plantNMCard))
+        XCTAssertFalse(internationalGarden.fieldRoute.contains(Inspect.treeUseNMCard))
+        XCTAssertFalse(internationalGarden.doLine.lowercased().contains("edible"), internationalGarden.doLine)
 
         let laMesaCourt = Inspect.read(
             tags: ["highway": "residential", "name": "La Mesa Court Northwest"],

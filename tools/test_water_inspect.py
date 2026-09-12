@@ -194,6 +194,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("albuquerque rose garden", nm_blob)
         self.assertIn("la mesa neighborhood community garden", nm_blob)
         self.assertNotIn("la mesa court", nm_blob)
+        self.assertIn("international district community garden", nm_blob)
         self.assertIn("memorial rose garden", nm_blob)
         self.assertNotIn("orchard gardens road", nm_blob)
         self.assertNotIn("rose park avenue", nm_blob)
@@ -423,6 +424,15 @@ class ShippedWaterLayers(unittest.TestCase):
                     "name": "La Mesa Court Northwest",
                 }
             )
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "garden",
+                    "name": "International District Community Garden",
+                }
+            ),
+            "botanic",
         )
         self.assertEqual(
             ground.overlay_kind(
@@ -1291,6 +1301,7 @@ class ShippedWaterLayers(unittest.TestCase):
             self.assertIn(f'"{phrase}"', (ROOT / "tools/v3/ground.py").read_text())
         self.assertNotIn('contains("arboretum")', inspect)
         self.assertNotIn('contains("la mesa")', inspect)
+        self.assertNotIn('contains("international")', inspect)
         self.assertIn("isBotanicGarden", inspect)
         self.assertIn("Botanic garden", inspect)
         self.assertIn('t["leisure"] == "garden"', inspect)
@@ -2306,6 +2317,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Manilla Thrilla Cave", glass)
         self.assertIn("32.930831", glass)
         self.assertIn("-107.233037", glass)
+        self.assertIn("Cueva del Indio", glass)
+        self.assertIn("31.690888", glass)
+        self.assertIn("-106.581974", glass)
         self.assertIn("Cueva del Apache", glass)
         self.assertIn("31.702715", glass)
         self.assertIn("-106.583114", glass)
@@ -2330,6 +2344,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Bear Cave", glass)
         self.assertIn("35.791534", glass)
         self.assertIn("-105.799885", glass)
+        self.assertIn("Cave of the Winds", glass)
+        self.assertIn("35.880941", glass)
+        self.assertIn("-106.341764", glass)
         self.assertIn("Whirlpool Cave", glass)
         self.assertIn("30.215509", glass)
         self.assertIn("-97.845277", glass)
@@ -2459,6 +2476,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("La Mesa Neighborhood Community Garden", glass)
         self.assertIn("35.080221", glass)
         self.assertIn("-106.563856", glass)
+        self.assertIn("International District Community Garden", glass)
+        self.assertIn("35.062299", glass)
+        self.assertIn("-106.608226", glass)
         self.assertIn("Bernardo Wildlife Management Area", glass)
         self.assertIn("34.423426", glass)
         self.assertIn("-106.829413", glass)
@@ -2624,6 +2644,7 @@ class GroundFieldSync(unittest.TestCase):
         anthony_cave = False
         bat_cave = False
         manilla_cave = False
+        indio_cave = False
         apache_cave = False
         aztec_cave = False
         bosque = False
@@ -2658,6 +2679,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-107.233037)) < 1e-6
                 ):
                     manilla_cave = True
+                if (
+                    props.get("name") == "Cueva del Indio"
+                    and abs(lat - 31.690888) < 1e-6
+                    and abs(lon - (-106.581974)) < 1e-6
+                ):
+                    indio_cave = True
                 if (
                     props.get("name") == "Cueva del Apache"
                     and abs(lat - 31.702715) < 1e-6
@@ -2697,6 +2724,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(anthony_cave, "Anthony Gap Cave is not a west cave mouth in the extract")
         self.assertTrue(bat_cave, "Bat Cave is not a west cave mouth in the extract")
         self.assertTrue(manilla_cave, "Manilla Thrilla Cave is not a west cave mouth in the extract")
+        self.assertTrue(indio_cave, "Cueva del Indio is not a west cave mouth in the extract")
         self.assertTrue(apache_cave, "Cueva del Apache is not a west cave mouth in the extract")
         self.assertTrue(aztec_cave, "Aztec Cave is not a west cave mouth in the extract")
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
@@ -2997,6 +3025,11 @@ class GroundFieldSync(unittest.TestCase):
             "Manilla Thrilla Cave did not survive tiling as a mouth",
         )
         self.assertIn(
+            "Cueva del Indio",
+            place_names_in_tile("tx-west", -106.581974, 31.690888),
+            "Cueva del Indio did not survive tiling as a mouth",
+        )
+        self.assertIn(
             "Cueva del Apache",
             place_names_in_tile("tx-west", -106.583114, 31.702715),
             "Cueva del Apache did not survive tiling as a mouth",
@@ -3046,6 +3079,7 @@ class GroundFieldSync(unittest.TestCase):
         haozous_hit = False
         albuquerque_rose_hit = False
         la_mesa_hit = False
+        international_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -3070,6 +3104,8 @@ class GroundFieldSync(unittest.TestCase):
                     albuquerque_rose_hit = props.get("name") == "Albuquerque Rose Garden"
                 if kind == "botanic" and pip(-106.563856, 35.080221, ring):
                     la_mesa_hit = props.get("name") == "La Mesa Neighborhood Community Garden"
+                if kind == "botanic" and pip(-106.608226, 35.062299, ring):
+                    international_hit = props.get("name") == "International District Community Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-106.829413, 34.423426, ring):
@@ -3139,6 +3175,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             la_mesa_hit,
             "La Mesa Neighborhood Community Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            international_hit,
+            "International District Community Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -3273,6 +3313,7 @@ class GroundFieldSync(unittest.TestCase):
         sandia_cave = False
         embudo_cave = False
         bear_cave = False
+        winds_cave = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -3319,6 +3360,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-105.799885)) < 1e-6
                 ):
                     bear_cave = True
+                if (
+                    props.get("name") == "Cave of the Winds"
+                    and abs(lat - 35.880941) < 1e-6
+                    and abs(lon - (-106.341764)) < 1e-6
+                ):
+                    winds_cave = True
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
@@ -3326,6 +3373,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
         self.assertTrue(embudo_cave, "Embudo Cave is not a cave mouth in the NM extract")
         self.assertTrue(bear_cave, "Bear Cave is not a cave mouth in the NM extract")
+        self.assertTrue(winds_cave, "Cave of the Winds is not a cave mouth in the NM extract")
         self.assertIn(
             "Sandia Man Cave",
             place_names_in_tile("nm", -106.405585, 35.254746),
@@ -3340,6 +3388,11 @@ class GroundFieldSync(unittest.TestCase):
             "Bear Cave",
             place_names_in_tile("nm", -105.799885, 35.791534),
             "Bear Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
+            "Cave of the Winds",
+            place_names_in_tile("nm", -106.341764, 35.880941),
+            "Cave of the Winds did not survive tiling as a mouth",
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
@@ -3686,6 +3739,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Cueva del Apache", qa)
         self.assertIn("31.702715", qa)
         self.assertIn("Cueva del Apache - La Ventana", qa)
+        self.assertIn("Cueva del Indio", qa)
+        self.assertIn("31.690888", qa)
         self.assertIn("Aztec Cave", qa)
         self.assertIn("31.921771", qa)
         self.assertIn("Aztec Caves Trail", qa)
@@ -3699,6 +3754,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Embudo Hills Park", qa)
         self.assertIn("Bear Cave", qa)
         self.assertIn("35.791534", qa)
+        self.assertIn("Cave of the Winds", qa)
+        self.assertIn("35.880941", qa)
+        self.assertIn("Cave of the Winds Trail", qa)
         self.assertIn("Whirlpool Cave", qa)
         self.assertIn("Goat Cave Karst Nature Preserve", qa)
         self.assertIn("William H. Russell Karst Preserve", qa)
@@ -3788,6 +3846,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.080221", qa)
         self.assertIn("la mesa neighborhood", qa)
         self.assertIn("La Mesa Court Northwest", qa)
+        self.assertIn("International District Community Garden", qa)
+        self.assertIn("35.062299", qa)
+        self.assertIn("international district", qa)
         self.assertIn("Memorial Rose Garden", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)

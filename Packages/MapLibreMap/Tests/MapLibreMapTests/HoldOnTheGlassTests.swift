@@ -111,6 +111,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// from OSM water.
     private static let manillaThrilla = CLLocationCoordinate2D(latitude: 32.930831, longitude: -107.233037)
 
+    /// `Cueva del Indio` on the west place slice. A cave mouth, 1.3 km
+    /// from Cueva del Apache so the probe does not mix them. 76 m
+    /// from OSM wash; rank 1 still beats water.
+    private static let cuevaDelIndio = CLLocationCoordinate2D(latitude: 31.690888, longitude: -106.581974)
+
     /// `Cueva del Apache` on the west place slice. A cave mouth, not the
     /// path `Cueva del Apache - La Ventana`. 126 m from OSM stream.
     private static let cuevaDelApache = CLLocationCoordinate2D(latitude: 31.702715, longitude: -106.583114)
@@ -324,6 +329,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// from OSM ditch.
     private static let laMesaGarden = CLLocationCoordinate2D(latitude: 35.080221, longitude: -106.563856)
 
+    /// Interior of International District Community Garden. Phrase
+    /// `international district`, not the word `international`. 301 m
+    /// from OSM water.
+    private static let internationalDistrictGarden = CLLocationCoordinate2D(latitude: 35.062299, longitude: -106.608226)
+
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
     private static let sandiaHistory = CLLocationCoordinate2D(latitude: 35.126801, longitude: -106.379801)
@@ -379,6 +389,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Bear Cave` on the NM place slice. A cave mouth. 206 m from
     /// Rio En Medio; rank 1 still beats water.
     private static let bearCave = CLLocationCoordinate2D(latitude: 35.791534, longitude: -105.799885)
+
+    /// `Cave of the Winds` on the NM place slice. A cave mouth, not the
+    /// path `Cave of the Winds Trail`. 121 m from Los Alamos Canyon;
+    /// rank 1 still beats water.
+    private static let caveOfTheWinds = CLLocationCoordinate2D(latitude: 35.880941, longitude: -106.341764)
 
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
@@ -810,6 +825,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(apache.card?.fieldRoute.first, Inspect.caveCard, "\(apache)")
         XCTAssertTrue((apache.card?.doLine.lowercased() ?? "").contains("stay in daylight"), apache.card?.doLine ?? "")
         XCTAssertFalse((apache.card?.doLine.lowercased() ?? "").contains("edible"), apache.card?.doLine ?? "")
+
+        let indio = try hold(at: Self.cuevaDelIndio, zoom: 16)
+        XCTAssertEqual(indio.card?.klass, "Cave or hole", "\(indio)")
+        XCTAssertEqual(indio.card?.title, "Cueva del Indio", "\(indio)")
+        XCTAssertNotEqual(indio.card?.title, "Cueva del Apache", "\(indio)")
+        XCTAssertEqual(indio.card?.fieldRoute.first, Inspect.caveCard, "\(indio)")
+        XCTAssertTrue((indio.card?.doLine.lowercased() ?? "").contains("stay in daylight"), indio.card?.doLine ?? "")
+        XCTAssertFalse((indio.card?.doLine.lowercased() ?? "").contains("edible"), indio.card?.doLine ?? "")
 
         let aztec = try hold(at: Self.aztecCave, zoom: 16)
         XCTAssertEqual(aztec.card?.klass, "Cave or hole", "\(aztec)")
@@ -1421,6 +1444,20 @@ final class HoldOnTheGlassTests: XCTestCase {
             "La Mesa Neighborhood Community Garden opened woodland tree-use: \(laMesa)"
         )
         XCTAssertFalse((laMesa.card?.doLine.lowercased() ?? "").contains("edible"), laMesa.card?.doLine ?? "")
+
+        let international = try hold(at: Self.internationalDistrictGarden, zoom: 16, packId: "nm")
+        XCTAssertEqual(international.card?.klass, "Botanic garden", "\(international)")
+        XCTAssertEqual(international.card?.title, "International District Community Garden", "\(international)")
+        XCTAssertEqual(international.card?.fieldRoute.first, Inspect.plantTXCard, "\(international)")
+        XCTAssertTrue(
+            international.card?.fieldRoute.contains(Inspect.plantNMCard) ?? false,
+            "International District Community Garden dropped the NM plant-danger card: \(international)"
+        )
+        XCTAssertFalse(
+            international.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? true,
+            "International District Community Garden opened woodland tree-use: \(international)"
+        )
+        XCTAssertFalse((international.card?.doLine.lowercased() ?? "").contains("edible"), international.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeManagementAreaOpensAnimalsNotPicnicWoodland() throws {
@@ -1581,6 +1618,14 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(bear.card?.fieldRoute.first, Inspect.caveCard, "\(bear)")
         XCTAssertTrue((bear.card?.doLine.lowercased() ?? "").contains("stay in daylight"), bear.card?.doLine ?? "")
         XCTAssertFalse((bear.card?.doLine.lowercased() ?? "").contains("edible"), bear.card?.doLine ?? "")
+
+        let winds = try hold(at: Self.caveOfTheWinds, zoom: 16, packId: "nm")
+        XCTAssertEqual(winds.card?.klass, "Cave or hole", "\(winds)")
+        XCTAssertEqual(winds.card?.title, "Cave of the Winds", "\(winds)")
+        XCTAssertNotEqual(winds.card?.title, "Cave of the Winds Trail", "\(winds)")
+        XCTAssertEqual(winds.card?.fieldRoute.first, Inspect.caveCard, "\(winds)")
+        XCTAssertTrue((winds.card?.doLine.lowercased() ?? "").contains("stay in daylight"), winds.card?.doLine ?? "")
+        XCTAssertFalse((winds.card?.doLine.lowercased() ?? "").contains("edible"), winds.card?.doLine ?? "")
     }
 
     func testHoldingAWestPeakOpensAnimalsNotIce() throws {

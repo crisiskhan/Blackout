@@ -481,6 +481,8 @@ public enum Inspect {
     /// phrase already matches both. Phrase `la mesa neighborhood`,
     /// not `la mesa`. Paseo de la Mesa Open Space stays Open reserve.
     /// La Mesa Court stays a road. The `community garden` phrase
+    /// already matches that sheet. Phrase `international district`,
+    /// not the word `international`. The `community garden` phrase
     /// already matches that sheet. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
