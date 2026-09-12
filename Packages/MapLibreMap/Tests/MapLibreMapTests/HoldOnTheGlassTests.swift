@@ -84,6 +84,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// verified inside the overlay polygon.
     private static let glasshouse = CLLocationCoordinate2D(latitude: 32.502967, longitude: -106.933833)
 
+    /// Interior of Vickery Wholesale Greenhouse. Named glasshouse,
+    /// not woodland tree-use. 137 m from OSM water. Daffan Lane 64 m
+    /// is rank 7; glasshouse 5 still wins.
+    private static let vickeryGlasshouse = CLLocationCoordinate2D(latitude: 30.313804, longitude: -97.617624)
+
     /// Interior of Alamo Mountain ACEC in `layers/ground.geojson`.
     private static let openReserve = CLLocationCoordinate2D(latitude: 32.032331, longitude: -105.633755)
 
@@ -120,6 +125,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// path `Cueva del Apache - La Ventana`. 126 m from OSM stream.
     private static let cuevaDelApache = CLLocationCoordinate2D(latitude: 31.702715, longitude: -106.583114)
 
+    /// `Cueva la Ventana` on the west place slice. A cave mouth, 216 m
+    /// from Cueva del Apache so the probe does not mix them. 165 m
+    /// from OSM stream; rank 1 still beats water. The path
+    /// `Cueva del Apache - La Ventana` stays a trail.
+    private static let cuevaLaVentana = CLLocationCoordinate2D(latitude: 31.702077, longitude: -106.585274)
+
     /// `Aztec Cave` on the west place slice. A cave mouth inside Franklin
     /// Mountains State Park, not `Aztec Caves Trail`. 28 m from OSM stream;
     /// rank 1 still beats water.
@@ -147,6 +158,16 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// unique, 277 m from OSM water. Good Friday is 141 m off this
     /// pip. Nelson Ranch Road 24 m is rank 7; cave 3 still wins.
     private static let buttercupCave = CLLocationCoordinate2D(latitude: 30.498830, longitude: -97.841827)
+
+    /// `Pepper Rock Cave` on the east place slice. A cave mouth,
+    /// not Pepper Rock Park. 147 m from a tap; rank 1 still beats
+    /// water. Chatham Wood Drive 56 m is rank 7.
+    private static let pepperRockCave = CLLocationCoordinate2D(latitude: 30.496964, longitude: -97.740832)
+
+    /// `Airmen's Cave` on the east place slice. A cave mouth.
+    /// 24 m from Barton Creek; rank 1 still beats water. Unique
+    /// versus Backdoor Cave.
+    private static let airmenCave = CLLocationCoordinate2D(latitude: 30.241656, longitude: -97.791675)
 
     /// Interior of Lost Oasis Cave Preserve. Named nature-reserve cave
     /// phrase, not a picnic park.
@@ -643,6 +664,11 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// rank 1 still beats water.
     private static let caveOfTheWinds = CLLocationCoordinate2D(latitude: 35.880941, longitude: -106.341764)
 
+    /// `Painted Cave` on the NM place slice. A cave mouth, not
+    /// Bandelier National Monument. 101 m from Capulin Creek; rank 1
+    /// still beats water. Lower Capulin Trail 61 m is rank 7.
+    private static let paintedCave = CLLocationCoordinate2D(latitude: 35.722425, longitude: -106.31994)
+
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
     private static let randallDavey = CLLocationCoordinate2D(latitude: 35.688876, longitude: -105.884927)
@@ -1000,6 +1026,20 @@ final class HoldOnTheGlassTests: XCTestCase {
             InspectField.label(for: held.card?.fieldRoute.first ?? ""),
             "FIELD · PLANT"
         )
+
+        let vickery = try hold(at: Self.vickeryGlasshouse, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(vickery.card?.klass, "Glasshouse", "\(vickery)")
+        XCTAssertEqual(vickery.card?.title, "Vickery Wholesale Greenhouse", "\(vickery)")
+        XCTAssertNotEqual(vickery.card?.klass, "Irrigated ground", "\(vickery)")
+        XCTAssertNotEqual(vickery.card?.title, "Daffan Lane", "\(vickery)")
+        XCTAssertEqual(vickery.card?.fieldRoute.first, Inspect.plantTXCard, "\(vickery)")
+        XCTAssertFalse(
+            vickery.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "a named glasshouse opened woodland tree-use: \(vickery)"
+        )
+        XCTAssertTrue((vickery.card?.doLine.lowercased() ?? "").contains("oleander"), vickery.card?.doLine ?? "")
+        XCTAssertFalse((vickery.card?.doLine.lowercased() ?? "").contains("live oak"), vickery.card?.doLine ?? "")
+        XCTAssertFalse((vickery.card?.doLine.lowercased() ?? "").contains("edible"), vickery.card?.doLine ?? "")
     }
 
     func testHoldingAnOpenReserveOpensBiteNotPicnicWoodland() throws {
@@ -1091,6 +1131,15 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(aztec.card?.fieldRoute.first, Inspect.caveCard, "\(aztec)")
         XCTAssertTrue((aztec.card?.doLine.lowercased() ?? "").contains("stay in daylight"), aztec.card?.doLine ?? "")
         XCTAssertFalse((aztec.card?.doLine.lowercased() ?? "").contains("edible"), aztec.card?.doLine ?? "")
+
+        let ventana = try hold(at: Self.cuevaLaVentana, zoom: 16)
+        XCTAssertEqual(ventana.card?.klass, "Cave or hole", "\(ventana)")
+        XCTAssertEqual(ventana.card?.title, "Cueva la Ventana", "\(ventana)")
+        XCTAssertNotEqual(ventana.card?.title, "Cueva del Apache", "\(ventana)")
+        XCTAssertNotEqual(ventana.card?.title, "Cueva del Apache - La Ventana", "\(ventana)")
+        XCTAssertEqual(ventana.card?.fieldRoute.first, Inspect.caveCard, "\(ventana)")
+        XCTAssertTrue((ventana.card?.doLine.lowercased() ?? "").contains("stay in daylight"), ventana.card?.doLine ?? "")
+        XCTAssertFalse((ventana.card?.doLine.lowercased() ?? "").contains("edible"), ventana.card?.doLine ?? "")
     }
 
     func testHoldingAWildlifeSanctuaryOpensAnimalsNotPicnicWoodland() throws {
@@ -1602,6 +1651,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(buttercup.card?.fieldRoute.first, Inspect.caveCard, "\(buttercup)")
         XCTAssertTrue((buttercup.card?.doLine.lowercased() ?? "").contains("stay in daylight"), buttercup.card?.doLine ?? "")
         XCTAssertFalse((buttercup.card?.doLine.lowercased() ?? "").contains("edible"), buttercup.card?.doLine ?? "")
+
+        let pepperRock = try hold(at: Self.pepperRockCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(pepperRock.card?.klass, "Cave or hole", "\(pepperRock)")
+        XCTAssertEqual(pepperRock.card?.title, "Pepper Rock Cave", "\(pepperRock)")
+        XCTAssertNotEqual(pepperRock.card?.klass, "Park", "\(pepperRock)")
+        XCTAssertNotEqual(pepperRock.card?.title, "Pepper Rock Park", "\(pepperRock)")
+        XCTAssertNotEqual(pepperRock.card?.title, "Chatham Wood Drive", "\(pepperRock)")
+        XCTAssertEqual(pepperRock.card?.fieldRoute.first, Inspect.caveCard, "\(pepperRock)")
+        XCTAssertTrue((pepperRock.card?.doLine.lowercased() ?? "").contains("stay in daylight"), pepperRock.card?.doLine ?? "")
+        XCTAssertFalse((pepperRock.card?.doLine.lowercased() ?? "").contains("edible"), pepperRock.card?.doLine ?? "")
+
+        let airmen = try hold(at: Self.airmenCave, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(airmen.card?.klass, "Cave or hole", "\(airmen)")
+        XCTAssertEqual(airmen.card?.title, "Airmen's Cave", "\(airmen)")
+        XCTAssertNotEqual(airmen.card?.title, "Barton Creek Greenbelt", "\(airmen)")
+        XCTAssertEqual(airmen.card?.fieldRoute.first, Inspect.caveCard, "\(airmen)")
+        XCTAssertTrue((airmen.card?.doLine.lowercased() ?? "").contains("stay in daylight"), airmen.card?.doLine ?? "")
+        XCTAssertFalse((airmen.card?.doLine.lowercased() ?? "").contains("edible"), airmen.card?.doLine ?? "")
     }
 
     func testHoldingANamedSinkOpensTheCaveCardNotBosque() throws {
@@ -2319,6 +2386,16 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(winds.card?.fieldRoute.first, Inspect.caveCard, "\(winds)")
         XCTAssertTrue((winds.card?.doLine.lowercased() ?? "").contains("stay in daylight"), winds.card?.doLine ?? "")
         XCTAssertFalse((winds.card?.doLine.lowercased() ?? "").contains("edible"), winds.card?.doLine ?? "")
+
+        let painted = try hold(at: Self.paintedCave, zoom: 16, packId: "nm")
+        XCTAssertEqual(painted.card?.klass, "Cave or hole", "\(painted)")
+        XCTAssertEqual(painted.card?.title, "Painted Cave", "\(painted)")
+        XCTAssertNotEqual(painted.card?.klass, "Open reserve", "\(painted)")
+        XCTAssertNotEqual(painted.card?.title, "Bandelier National Monument", "\(painted)")
+        XCTAssertNotEqual(painted.card?.title, "Lower Capulin Trail", "\(painted)")
+        XCTAssertEqual(painted.card?.fieldRoute.first, Inspect.caveCard, "\(painted)")
+        XCTAssertTrue((painted.card?.doLine.lowercased() ?? "").contains("stay in daylight"), painted.card?.doLine ?? "")
+        XCTAssertFalse((painted.card?.doLine.lowercased() ?? "").contains("edible"), painted.card?.doLine ?? "")
     }
 
     func testHoldingAWestPeakOpensAnimalsNotIce() throws {

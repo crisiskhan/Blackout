@@ -514,6 +514,68 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(windsTrail.klass, "Trail")
         XCTAssertFalse(windsTrail.fieldRoute.contains(Inspect.caveCard))
 
+        let ventana = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Cueva la Ventana"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(ventana.klass, "Cave or hole")
+        XCTAssertEqual(ventana.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(ventana.doLine.lowercased().contains("edible"), ventana.doLine)
+
+        let pepperRock = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Pepper Rock Cave"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(pepperRock.klass, "Cave or hole")
+        XCTAssertNotEqual(pepperRock.klass, "Park")
+        XCTAssertEqual(pepperRock.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(pepperRock.doLine.lowercased().contains("edible"), pepperRock.doLine)
+
+        let pepperPark = Inspect.read(
+            tags: ["leisure": "park", "name": "Pepper Rock Park"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(pepperPark.klass, "Park")
+        XCTAssertFalse(pepperPark.fieldRoute.contains(Inspect.caveCard))
+
+        let chathamWood = Inspect.read(
+            tags: ["highway": "residential", "name": "Chatham Wood Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(chathamWood.klass, "Road")
+        XCTAssertFalse(chathamWood.fieldRoute.contains(Inspect.caveCard))
+
+        let airmen = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Airmen's Cave"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(airmen.klass, "Cave or hole")
+        XCTAssertEqual(airmen.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(airmen.doLine.lowercased().contains("edible"), airmen.doLine)
+
+        let painted = Inspect.read(
+            tags: ["natural": "cave_entrance", "name": "Painted Cave"],
+            pack: "nm"
+        )
+        XCTAssertEqual(painted.klass, "Cave or hole")
+        XCTAssertNotEqual(painted.klass, "Open reserve")
+        XCTAssertEqual(painted.fieldRoute.first, Inspect.caveCard)
+        XCTAssertFalse(painted.doLine.lowercased().contains("edible"), painted.doLine)
+
+        let paintedTrail = Inspect.read(
+            tags: ["highway": "footway", "name": "Lower Capulin Trail"],
+            pack: "nm"
+        )
+        XCTAssertEqual(paintedTrail.klass, "Trail")
+        XCTAssertFalse(paintedTrail.fieldRoute.contains(Inspect.caveCard))
+
+        let daffan = Inspect.read(
+            tags: ["highway": "tertiary", "name": "Daffan Lane"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(daffan.klass, "Road")
+        XCTAssertNotEqual(daffan.klass, "Glasshouse")
+
         let embudoPark = Inspect.read(
             tags: ["leisure": "park", "name": "Embudo Hills Park"],
             pack: "nm"
@@ -2649,6 +2711,36 @@ final class InspectTests: XCTestCase {
             ])["natural"],
             "cave_entrance"
         )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Cueva la Ventana"],
+                ["highway": "path", "name": "Cueva del Apache - La Ventana"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Pepper Rock Cave"],
+                ["leisure": "park", "name": "Pepper Rock Park"],
+                ["highway": "residential", "name": "Chatham Wood Drive"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Airmen's Cave"],
+                ["waterway": "stream", "name": "Barton Creek"],
+            ])["natural"],
+            "cave_entrance"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "cave_entrance", "name": "Painted Cave"],
+                ["leisure": "nature_reserve", "name": "Bandelier National Monument"],
+                ["highway": "footway", "name": "Lower Capulin Trail"],
+            ])["natural"],
+            "cave_entrance"
+        )
     }
 
     func testAWildlifeSanctuaryBeatsWoodlandAndANamedStreet() {
@@ -2851,6 +2943,13 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(Inspect.pick([farm, glass, road])["landuse"], "greenhouse_horticulture")
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([farm, glass, road]), pack: "tx-east").klass,
+            "Glasshouse"
+        )
+
+        let daffan: [String: String] = ["highway": "tertiary", "name": "Daffan Lane"]
+        XCTAssertEqual(Inspect.pick([farm, glass, daffan])["landuse"], "greenhouse_horticulture")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([farm, glass, daffan]), pack: "tx-east").klass,
             "Glasshouse"
         )
     }

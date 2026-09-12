@@ -37,7 +37,8 @@ KEEP_TAGS = ("name", "landuse", "leisure", "boundary", "amenity")
 # Worked plant ground the current land tiles miss. Orchard and farmland already
 # paint as farm; these glasshouses do not. Recreation ground is named by the
 # card already and is a park-coloured class for the next tile cut, not this
-# overlay — sports fields are not glasshouses.
+# overlay — sports fields are not glasshouses. Named Vickery Wholesale
+# Greenhouse is the east Hold; unnamed west glasshouse stays the west Hold.
 WORKED_LANDUSE = {"greenhouse_horticulture"}
 
 # Phrase match, not a bare contains of the word cave. Must stay in step with
