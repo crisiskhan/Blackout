@@ -1713,6 +1713,102 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "Trail West Drive"})
         )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Cornundas Mountain Area of Critical Environmental Concern",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"natural": "peak", "name": "Cornudas Mountain"}))
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "residential", "name": "County Road F022"})
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Florida Mountains Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Chamisa Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Tapia Canyon Area of Critical Environmental Concern",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "track", "name": "Griegos Road"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Empedrado Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"highway": "tertiary", "name": "San Luis Road"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Ignacio Chavez Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "La Leña Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Sierra Ladrones Wilderness Study Area",
+                }
+            ),
+            "reserve",
+        )
+        self.assertIsNone(ground.overlay_kind({"natural": "peak", "name": "Cerro Colorado"}))
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Indian Grass Prarie Preserve"}
+            ),
+            "reserve",
+        )
+        self.assertIsNone(
+            ground.overlay_kind({"highway": "cycleway", "name": "Violet Crown Trail"})
+        )
         self.assertIsNone(
             ground.overlay_kind({"leisure": "park", "name": "Hueco Mountain Park"})
         )
@@ -2844,9 +2940,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Thunder Canyon Conservation Easement", glass)
         self.assertIn("31.834020", glass)
         self.assertIn("-106.508651", glass)
+        self.assertIn("Cornundas Mountain Area of Critical Environmental Concern", glass)
+        self.assertIn("32.082995", glass)
+        self.assertIn("-105.510686", glass)
+        self.assertIn("Florida Mountains Wilderness Study Area", glass)
+        self.assertIn("32.014948", glass)
+        self.assertIn("-107.646608", glass)
         self.assertIn("Carrington's Prairie", glass)
         self.assertIn("30.247099", glass)
         self.assertIn("-97.830910", glass)
+        self.assertIn("Indian Grass Prarie Preserve", glass)
+        self.assertIn("30.225834", glass)
+        self.assertIn("-97.826212", glass)
         self.assertIn("31.694905", glass)
         self.assertIn("-106.441133", glass)
         self.assertIn("Cactus garden", glass)
@@ -3357,6 +3462,24 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Elk Springs Area of Critical Environmental Concern", glass)
         self.assertIn("35.859437", glass)
         self.assertIn("-106.928156", glass)
+        self.assertIn("Chamisa Wilderness Study Area", glass)
+        self.assertIn("35.536017", glass)
+        self.assertIn("-107.253383", glass)
+        self.assertIn("Tapia Canyon Area of Critical Environmental Concern", glass)
+        self.assertIn("35.499193", glass)
+        self.assertIn("-107.195388", glass)
+        self.assertIn("Empedrado Wilderness Study Area", glass)
+        self.assertIn("35.609314", glass)
+        self.assertIn("-107.191865", glass)
+        self.assertIn("Ignacio Chavez Wilderness Study Area", glass)
+        self.assertIn("35.609320", glass)
+        self.assertIn("-107.358965", glass)
+        self.assertIn("La Leña Wilderness Study Area", glass)
+        self.assertIn("35.679164", glass)
+        self.assertIn("-107.221909", glass)
+        self.assertIn("Sierra Ladrones Wilderness Study Area", glass)
+        self.assertIn("34.421613", glass)
+        self.assertIn("-107.139863", glass)
         self.assertIn('packId: "nm"', glass)
         self.assertIn("Botanic garden", glass)
         self.assertIn("Irrigated ground", glass)
@@ -3414,6 +3537,8 @@ class GroundFieldSync(unittest.TestCase):
         sacramento_hit = False
         uvas_hit = False
         thunder_hit = False
+        cornundas_hit = False
+        florida_hit = False
         franklin_hit = False
         lost_dog_hit = False
         flora_hit = False
@@ -3486,6 +3611,12 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "reserve" and pip(-106.508651, 31.834020, ring):
                     if props.get("name") == "Thunder Canyon Conservation Easement":
                         thunder_hit = True
+                if kind == "reserve" and pip(-105.510686, 32.082995, ring):
+                    if props.get("name") == "Cornundas Mountain Area of Critical Environmental Concern":
+                        cornundas_hit = True
+                if kind == "reserve" and pip(-107.646608, 32.014948, ring):
+                    if props.get("name") == "Florida Mountains Wilderness Study Area":
+                        florida_hit = True
                 if kind == "reserve" and pip(-106.50, 31.97, ring):
                     franklin_hit = props.get("name") == "Franklin Mountains State Park"
                 if kind == "wildlife" and pip(-106.545207, 31.896528, ring):
@@ -3577,6 +3708,14 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             thunder_hit,
             "Thunder Canyon Conservation Easement is not Open reserve on the west overlay",
+        )
+        self.assertTrue(
+            cornundas_hit,
+            "Cornundas Mountain ACEC is not Open reserve on the west overlay",
+        )
+        self.assertTrue(
+            florida_hit,
+            "Florida Mountains WSA is not Open reserve on the west overlay",
         )
         self.assertTrue(
             franklin_hit,
@@ -3723,6 +3862,7 @@ class GroundFieldSync(unittest.TestCase):
         blowing_hit = False
         decker_hit = False
         carrington_hit = False
+        indian_grass_hit = False
         buttercup_hit = False
         oasis_hit = False
         whirl_hit = False
@@ -3921,6 +4061,8 @@ class GroundFieldSync(unittest.TestCase):
                     decker_hit = True
                 if kind == "reserve" and name == "Carrington's Prairie" and pip(-97.830910, 30.247099, ring):
                     carrington_hit = True
+                if kind == "reserve" and name == "Indian Grass Prarie Preserve" and pip(-97.826212, 30.225834, ring):
+                    indian_grass_hit = True
         self.assertTrue(
             wildlife_hit, "glass wildlife hold is not inside Indiangrass"
         )
@@ -4168,6 +4310,10 @@ class GroundFieldSync(unittest.TestCase):
         )
         self.assertTrue(
             carrington_hit, "Carrington's Prairie hold is not inside the named nature reserve"
+        )
+        self.assertTrue(
+            indian_grass_hit,
+            "Indian Grass Prarie Preserve hold is not inside the named nature reserve",
         )
 
         east_osm = json.loads((PACK_ROOT / "tx-east" / "osm.geojson").read_text())
@@ -5045,6 +5191,96 @@ class GroundFieldSync(unittest.TestCase):
             "Elk Springs ACEC hold is not inside the named nature reserve",
         )
 
+        nm_chamisa_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Chamisa Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.253383, 35.536017, ring):
+                    nm_chamisa_hit = True
+        self.assertTrue(
+            nm_chamisa_hit,
+            "Chamisa WSA hold is not inside the named nature reserve",
+        )
+
+        nm_tapia_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Tapia Canyon Area of Critical Environmental Concern":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.195388, 35.499193, ring):
+                    nm_tapia_hit = True
+        self.assertTrue(
+            nm_tapia_hit,
+            "Tapia Canyon ACEC hold is not inside the named nature reserve",
+        )
+
+        nm_empedrado_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Empedrado Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.191865, 35.609314, ring):
+                    nm_empedrado_hit = True
+        self.assertTrue(
+            nm_empedrado_hit,
+            "Empedrado WSA hold is not inside the named nature reserve",
+        )
+
+        nm_ignacio_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Ignacio Chavez Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.358965, 35.609320, ring):
+                    nm_ignacio_hit = True
+        self.assertTrue(
+            nm_ignacio_hit,
+            "Ignacio Chavez WSA hold is not inside the named nature reserve",
+        )
+
+        nm_lalena_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "La Leña Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.221909, 35.679164, ring):
+                    nm_lalena_hit = True
+        self.assertTrue(
+            nm_lalena_hit,
+            "La Leña WSA hold is not inside the named nature reserve",
+        )
+
+        nm_ladrones_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Sierra Ladrones Wilderness Study Area":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-107.139863, 34.421613, ring):
+                    nm_ladrones_hit = True
+        self.assertTrue(
+            nm_ladrones_hit,
+            "Sierra Ladrones WSA hold is not inside the named nature reserve",
+        )
+
         nm_mesa_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
@@ -5632,6 +5868,24 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.859437", qa)
         self.assertIn("Carrington's Prairie", qa)
         self.assertIn("30.247099", qa)
+        self.assertIn("Cornundas Mountain Area of Critical Environmental Concern", qa)
+        self.assertIn("32.082995", qa)
+        self.assertIn("Florida Mountains Wilderness Study Area", qa)
+        self.assertIn("32.014948", qa)
+        self.assertIn("Chamisa Wilderness Study Area", qa)
+        self.assertIn("35.536017", qa)
+        self.assertIn("Tapia Canyon Area of Critical Environmental Concern", qa)
+        self.assertIn("35.499193", qa)
+        self.assertIn("Empedrado Wilderness Study Area", qa)
+        self.assertIn("35.609314", qa)
+        self.assertIn("Ignacio Chavez Wilderness Study Area", qa)
+        self.assertIn("35.609320", qa)
+        self.assertIn("La Leña Wilderness Study Area", qa)
+        self.assertIn("35.679164", qa)
+        self.assertIn("Sierra Ladrones Wilderness Study Area", qa)
+        self.assertIn("34.421613", qa)
+        self.assertIn("Indian Grass Prarie Preserve", qa)
+        self.assertIn("30.225834", qa)
         self.assertIn("Prehistoric Trackways National Monument", qa)
         self.assertIn("32.370257", qa)
         self.assertIn("White Sands National Park", qa)
@@ -6068,6 +6322,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Pecos National Historical Park", qa)
         self.assertIn("Elk Springs Area of Critical Environmental Concern", qa)
         self.assertIn("Carrington's Prairie", qa)
+        self.assertIn("Cornundas Mountain Area of Critical Environmental Concern", qa)
+        self.assertIn("Florida Mountains Wilderness Study Area", qa)
+        self.assertIn("Chamisa Wilderness Study Area", qa)
+        self.assertIn("Tapia Canyon Area of Critical Environmental Concern", qa)
+        self.assertIn("Empedrado Wilderness Study Area", qa)
+        self.assertIn("Ignacio Chavez Wilderness Study Area", qa)
+        self.assertIn("La Leña Wilderness Study Area", qa)
+        self.assertIn("Sierra Ladrones Wilderness Study Area", qa)
+        self.assertIn("Indian Grass Prarie Preserve", qa)
         self.assertIn("Named tree", qa)
         self.assertIn("BITE · ANIMAL · PLANT · FOOD · HEAT", qa)
         self.assertIn("Hold DO on wildlife range names the food card", qa)

@@ -663,13 +663,19 @@ public enum Inspect {
     /// Conservation Easement, Wind Mountain ACEC, Rincon ACEC,
     /// Sacramento Escarpment ACEC, Uvas Valley ACEC, Thunder
     /// Canyon Conservation Easement, Pecos National Historical
-    /// Park, Elk Springs ACEC, and Carrington's Prairie are those
+    /// Park, Elk Springs ACEC, Carrington's Prairie, Cornundas
+    /// Mountain ACEC, Florida Mountains WSA, Chamisa WSA, Tapia
+    /// Canyon ACEC, Empedrado WSA, Ignacio Chavez WSA, La Leña WSA,
+    /// Sierra Ladrones WSA, and Indian Grass Prarie Preserve are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
     /// `tent rocks`, `petroglyph`, `placitas`, `cerrillos`,
     /// `knapp`, `wind`, `rincon`, `sacramento`, `uvas`, `thunder`,
-    /// `pecos`, `elk springs`, `elk`, or `carrington`. Phrase
+    /// `pecos`, `elk springs`, `elk`, `carrington`, `cornundas`,
+    /// `cornudas`, `florida`, `chamisa`, `tapia`, `empedrado`,
+    /// `ignacio`, `chavez`, `la leña`, `lena`, `ladrones`,
+    /// `ladron`, `indian grass`, or `indian`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
