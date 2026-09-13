@@ -21,6 +21,7 @@ struct PartyHoldCard: View {
     let onFaceHold: () -> Void
     let timers: TimerBoard
     let kit: KitBag
+    let timerSeq: Int
 
     @State private var drag: CGFloat = 0
     @State private var nameDraft: String = ""
@@ -213,6 +214,7 @@ struct PartyHoldCard: View {
                     Text("TIMER")
                         .font(.system(size: 11, weight: .heavy))
                         .foregroundStyle(Theme.silver.opacity(0.75))
+                    let _ = timerSeq
                     TimelineView(.periodic(from: .now, by: 1)) { context in
                         VStack(alignment: .leading, spacing: 6) {
                             ForEach(profileTimers) { t in
@@ -225,6 +227,14 @@ struct PartyHoldCard: View {
                                         Text(clock(t.remaining(now: context.date)))
                                             .font(.system(size: 13, weight: .heavy))
                                             .foregroundStyle(t.remaining(now: context.date) == 0 ? Theme.accent : Theme.silver)
+                                    }
+                                    if !t.owner.isEmpty,
+                                       t.owner != "ALL",
+                                       t.owner.uppercased() != displayName.uppercased(),
+                                       t.owner.uppercased() != t.task.uppercased() {
+                                        Text(t.owner.uppercased())
+                                            .font(.system(size: 11, weight: .heavy))
+                                            .foregroundStyle(Theme.silver.opacity(0.7))
                                     }
                                     GeometryReader { geo in
                                         ZStack(alignment: .leading) {

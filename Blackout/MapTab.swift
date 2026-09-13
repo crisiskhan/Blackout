@@ -130,7 +130,8 @@ struct MapTab: View {
                     onClose: { runtime.closeHold() },
                     onFaceHold: { runtime.openEmblemPick() },
                     timers: runtime.timers,
-                    kit: runtime.kit
+                    kit: runtime.kit,
+                    timerSeq: runtime.timerSeq
                 )
                 .padding(hudReserve)
                 if runtime.pickingEmblem {

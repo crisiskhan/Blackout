@@ -12,6 +12,7 @@ struct ExpeditionTab: View {
     @State private var paperText = ""
     @State private var navChrome: String?
     @State private var timerName = ""
+    @State private var timerSeconds: TimeInterval = 60
     @State private var itemDraft = ""
     @State private var assigningID: String?
 
@@ -83,6 +84,7 @@ struct ExpeditionTab: View {
                     sectionLabel("TIMERS")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
+                            let _ = runtime.timerSeq
                             TextField("NAME", text: $timerName)
                                 .textFieldStyle(.plain)
                                 .textInputAutocapitalization(.characters)
@@ -93,11 +95,20 @@ struct ExpeditionTab: View {
                                 .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                                 .background(Theme.glass())
                                 .clipShape(Theme.plateRect())
+                            HStack(spacing: 8) {
+                                Button("1 MIN") { timerSeconds = 60 }
+                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 60, expand: true))
+                                Button("5 MIN") { timerSeconds = 300 }
+                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 300, expand: true))
+                                Button("2H") { timerSeconds = 7200 }
+                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 7200, expand: true))
+                            }
                             VStack(spacing: 1) {
                                 Button("SET") {
-                                    let named = timerName.trimmingCharacters(in: .whitespacesAndNewlines)
-                                    guard !named.isEmpty else { return }
-                                    runtime.addPartyTimer(task: named, duration: 60)
+                                    runtime.addPartyTimer(
+                                        task: timerName,
+                                        duration: timerSeconds
+                                    )
                                     timerName = ""
                                 }
                                 .buttonStyle(HUDDockStyle())
@@ -285,7 +296,7 @@ struct ExpeditionTab: View {
     private func timerRow(_ t: PartyTimer, now: Date) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("\(t.task) \(t.who)")
+                Text("\(t.task) \(timerWho(t))")
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.silver)
                 Spacer(minLength: 8)
@@ -293,8 +304,7 @@ struct ExpeditionTab: View {
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.silver)
                 Button("DONE") {
-                    runtime.timers.markDone(t.id)
-                    runtime.mesh.sendTimer(from: runtime.mesh.localID, task: t.task, done: true)
+                    runtime.finishPartyTimer(t.id, task: t.task)
                 }
                 .buttonStyle(HUDOverlayChipStyle())
             }
@@ -351,6 +361,13 @@ struct ExpeditionTab: View {
                     .foregroundStyle(Theme.silver.opacity(0.7))
             }
         }
+    }
+
+    private func timerWho(_ t: PartyTimer) -> String {
+        if t.who == "ALL", !t.owner.isEmpty, t.owner != "ALL" {
+            return t.owner
+        }
+        return t.who.isEmpty ? t.owner : t.who
     }
 
     private func clock(_ t: TimeInterval) -> String {

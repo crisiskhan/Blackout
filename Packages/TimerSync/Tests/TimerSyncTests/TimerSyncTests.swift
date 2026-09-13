@@ -64,4 +64,19 @@ final class TimerSyncTests: XCTestCase {
         XCTAssertEqual(b.onProfile(personID: "YOU", name: "", isYou: true).map(\.task), ["1min"])
         XCTAssertFalse(b.onProfile(personID: "peer", name: "Sam", isYou: false).contains(where: { $0.task == "1min" }))
     }
+
+    func testGroupPresetShowsOnTheSetterProfile() {
+        let b = TimerBoard(box: EventLog())
+        XCTAssertNotNil(
+            b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true, owner: "Khan")
+        )
+        XCTAssertEqual(
+            b.onProfile(personID: "peer-1", name: "Khan", isYou: false).map(\.task),
+            ["1min"]
+        )
+        XCTAssertTrue(b.onProfile(personID: "peer-2", name: "Sam", isYou: false).isEmpty)
+        let id = b.timers[0].id
+        b.markDone(id)
+        XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
+    }
 }

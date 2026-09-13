@@ -36,6 +36,7 @@ final class AppRuntime {
     var lastConditionSOS = ""
     var red: RedPlate
     var timers: TimerBoard
+    var timerSeq = 0
     var roster = PartyRoster.create(lead: "Lead")
     var trip = TripFactory.make(brief: "", hours: 2)
     var kit = KitBag(items: [
@@ -944,17 +945,33 @@ final class AppRuntime {
 
     func addPartyTimer(task: String, duration: TimeInterval) {
         let trimmed = task.trimmingCharacters(in: .whitespacesAndNewlines)
-        let preset = trimmed.isEmpty || trimmed == "1min" || trimmed == "water"
+        let preset = trimmed.isEmpty
+            || trimmed == "1min"
+            || trimmed == "5min"
+            || trimmed == "water"
         let name: String
         if trimmed.isEmpty {
-            name = duration <= 60 ? "1min" : "water"
+            if duration <= 60 {
+                name = "1min"
+            } else if duration <= 300 {
+                name = "5min"
+            } else {
+                name = "water"
+            }
         } else {
             name = trimmed
         }
         let who = preset ? "ALL" : timerOwner()
-        if timers.add(who: who, task: name, duration: duration, subjectAll: true) != nil {
+        if timers.add(who: who, task: name, duration: duration, subjectAll: true, owner: timerOwner()) != nil {
             mesh.sendTimer(from: mesh.localID, task: name, done: false, duration: duration)
+            timerSeq += 1
         }
+    }
+
+    func finishPartyTimer(_ id: String, task: String) {
+        timers.markDone(id)
+        mesh.sendTimer(from: mesh.localID, task: task, done: true)
+        timerSeq += 1
     }
 
     func bumpKit(_ id: String, by: Int) {
@@ -1063,12 +1080,20 @@ final class AppRuntime {
         case "timer.set":
             if let raw = String(data: env.body, encoding: .utf8) {
                 let parsed = MeshTimerBody.parse(raw)
-                _ = timers.add(who: env.from, task: parsed.task, duration: parsed.duration, subjectAll: true)
+                _ = timers.add(
+                    who: env.from,
+                    task: parsed.task,
+                    duration: parsed.duration,
+                    subjectAll: true,
+                    owner: env.from
+                )
+                timerSeq += 1
             }
         case "timer.done":
             if let raw = String(data: env.body, encoding: .utf8) {
                 let parsed = MeshTimerBody.parse(raw)
                 timers.markDoneTask(parsed.task)
+                timerSeq += 1
             }
         case "kit":
             if let raw = String(data: env.body, encoding: .utf8),

@@ -914,8 +914,27 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var duration: TimeInterval
     public var started: Date
     public var subjectAllTurnaround: Bool
+    public var owner: String
     public var overdue: Bool { Date().timeIntervalSince(started) > duration }
     public var overdueRowID: String { "overdue:\\(id)" }
+
+    public init(
+        id: String,
+        who: String,
+        task: String,
+        duration: TimeInterval,
+        started: Date,
+        subjectAllTurnaround: Bool,
+        owner: String = ""
+    ) {
+        self.id = id
+        self.who = who
+        self.task = task
+        self.duration = duration
+        self.started = started
+        self.subjectAllTurnaround = subjectAllTurnaround
+        self.owner = owner.isEmpty ? who : owner
+    }
 
     public func remaining(now: Date = Date()) -> TimeInterval {
         max(0, duration - now.timeIntervalSince(started))
@@ -935,13 +954,28 @@ public final class TimerBoard: @unchecked Sendable {
     public init(box: EventLog) { self.box = box }
 
     @discardableResult
-    public func add(who: String, task: String, duration: TimeInterval, subjectAll: Bool, now: Date = Date()) -> PartyTimer? {
+    public func add(
+        who: String,
+        task: String,
+        duration: TimeInterval,
+        subjectAll: Bool,
+        now: Date = Date(),
+        owner: String = ""
+    ) -> PartyTimer? {
         let who = who.isEmpty ? "ALL" : who
         if timers.contains(where: { $0.task == task && $0.who == who }) {
             return nil
         }
         guard timers.count < Self.maxActive else { return nil }
-        let t = PartyTimer(id: UUID().uuidString, who: who, task: task, duration: duration, started: now, subjectAllTurnaround: subjectAll)
+        let t = PartyTimer(
+            id: UUID().uuidString,
+            who: who,
+            task: task,
+            duration: duration,
+            started: now,
+            subjectAllTurnaround: subjectAll,
+            owner: owner
+        )
         timers.append(t)
         box.log("timer", "\\(who) \\(task) \\(duration)")
         return t
@@ -954,6 +988,7 @@ public final class TimerBoard: @unchecked Sendable {
     public func onProfile(personID: String, name: String, isYou: Bool) -> [PartyTimer] {
         timers.filter { t in
             if t.who == personID || t.who == name { return true }
+            if !t.owner.isEmpty && (t.owner == personID || t.owner == name) { return true }
             if isYou && (t.who == "ALL" || t.who == "YOU") { return true }
             return false
         }

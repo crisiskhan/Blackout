@@ -810,7 +810,7 @@ def mesh() -> None:
         ok("join is QR plus typed party code")
     if "chip.rally" not in comms or "chip.down" not in comms:
         bad("comms missing RALLY/DOWN chips")
-    if "sendRED" not in app or "sendTimer" not in exp:
+    if "sendRED" not in app or "sendTimer" not in app:
         bad("RED/timer not wired to mesh")
     else:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
