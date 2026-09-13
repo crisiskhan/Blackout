@@ -638,6 +638,7 @@ class UnlockGlassTests(unittest.TestCase):
         self.assertIn("Theme.fix", unlock)
         self.assertIn("Theme.accent", unlock)
         self.assertIn("RotationGesture", unlock)
+        self.assertIn('Button("INVERT")', unlock)
         self.assertIn("inverted", unlock)
         self.assertIn("180", unlock)
         self.assertNotIn("Color.green", unlock)
@@ -649,7 +650,11 @@ class UnlockGlassTests(unittest.TestCase):
         self.assertIn("NSFaceIDUsageDescription", gen)
         self.assertIn("UNLOCK", qa)
         self.assertIn("ARE YOU SURE", qa)
+        self.assertIn("INVERT", qa)
         self.assertNotIn("best in class", qa.lower())
+        wipe = app.split("func wipeVessel", 1)[1].split("func joinNet", 1)[0]
+        self.assertIn("temporaryDirectory", wipe)
+        self.assertIn(".libraryDirectory", wipe)
 
 
 class HUDSyncTests(unittest.TestCase):

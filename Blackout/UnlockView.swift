@@ -35,6 +35,7 @@ struct UnlockView: View {
             if runtime.wipeConfirm {
                 sure
             } else {
+                invert
                 unlock
             }
         }
@@ -46,7 +47,7 @@ struct UnlockView: View {
         Image(systemName: "touchid")
             .resizable()
             .scaledToFit()
-            .frame(width: 96, height: 96)
+            .frame(width: 128, height: 128)
             .foregroundStyle(Theme.silver)
             .rotationEffect(.degrees(turn))
             .gesture(
@@ -55,6 +56,7 @@ struct UnlockView: View {
                         turn = value.degrees
                     }
             )
+            .onTapGesture { flipPrint() }
             .accessibilityLabel("Fingerprint")
     }
 
@@ -66,6 +68,25 @@ struct UnlockView: View {
             .frame(maxWidth: .infinity)
             .frame(minHeight: 16)
             .padding(.bottom, 22)
+    }
+
+    private func flipPrint() {
+        goTick.impactOccurred()
+        withAnimation(Theme.Motion.heavy) {
+            turn = UnlockGlass.inverted(degrees: turn) ? 0 : 180
+        }
+    }
+
+    private var invert: some View {
+        Button("INVERT") {
+            flipPrint()
+        }
+        .font(.system(size: 16, weight: .heavy))
+        .tracking(4)
+        .foregroundStyle(Theme.silver)
+        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+        .padding(.bottom, 10)
+        .accessibilityHint("Turns the fingerprint upside down")
     }
 
     private var unlock: some View {

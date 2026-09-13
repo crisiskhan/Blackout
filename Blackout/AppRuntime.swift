@@ -236,12 +236,14 @@ final class AppRuntime {
             .documentDirectory,
             .cachesDirectory,
             .applicationSupportDirectory,
+            .libraryDirectory,
         ]
         for dir in homes {
             if let url = fm.urls(for: dir, in: .userDomainMask).first {
                 try? fm.removeItem(at: url)
             }
         }
+        try? fm.removeItem(at: fm.temporaryDirectory)
         if let id = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: id)
             UserDefaults.standard.synchronize()
