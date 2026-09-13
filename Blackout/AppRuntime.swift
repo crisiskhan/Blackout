@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import CoreLocation
+import LocalAuthentication
 import UIKit
 import AVFoundation
 import BlackBox
@@ -48,6 +49,9 @@ final class AppRuntime {
     var ptt: PTTDeck
     var speech: SpeechEngine
     var armed = false
+    var unlocked = false
+    var wipeConfirm = false
+    var unlockChrome = ""
     var bootStage: BootStage = .cold
     var bootProgress: Double = 0
     var bootStyleURL: URL?
@@ -112,6 +116,7 @@ final class AppRuntime {
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
+    private var unlockContext: LAContext?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
     private var pttHold = false
     /// CLIP tap is waiting on the mic. Not live yet.
@@ -182,6 +187,66 @@ final class AppRuntime {
         box.log("arming", "activated")
         applyMapKeepAwake()
         pulse()
+    }
+
+    func requestUnlock(inverted: Bool) {
+        if inverted {
+            wipeConfirm = true
+            unlockChrome = ""
+            pulse()
+            return
+        }
+        wipeConfirm = false
+        let ctx = LAContext()
+        unlockContext = ctx
+        var err: NSError?
+        guard ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err) else {
+            unlockContext = nil
+            unlockChrome = "UNLOCK FAILED"
+            pulse()
+            return
+        }
+        ctx.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "UNLOCK") { ok, _ in
+            Task { @MainActor in
+                self.unlockContext = nil
+                if ok {
+                    self.unlocked = true
+                    self.unlockChrome = ""
+                    self.pulse()
+                } else {
+                    self.unlockChrome = "UNLOCK FAILED"
+                    self.pulse()
+                }
+            }
+        }
+    }
+
+    func cancelWipe() {
+        wipeConfirm = false
+        pulse()
+    }
+
+    func confirmWipe() {
+        wipeVessel()
+    }
+
+    func wipeVessel() {
+        let fm = FileManager.default
+        let homes: [FileManager.SearchPathDirectory] = [
+            .documentDirectory,
+            .cachesDirectory,
+            .applicationSupportDirectory,
+        ]
+        for dir in homes {
+            if let url = fm.urls(for: dir, in: .userDomainMask).first {
+                try? fm.removeItem(at: url)
+            }
+        }
+        if let id = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: id)
+            UserDefaults.standard.synchronize()
+        }
+        exit(0)
     }
 
     func joinNet() {
@@ -263,6 +328,7 @@ final class AppRuntime {
     /// raise the card. This never calls SOS and never routes anywhere; it only
     /// says what is there.
     func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
         pulse()
         pickingEmblem = false
         heldParty = nil
@@ -367,6 +433,7 @@ final class AppRuntime {
     }
 
     func holdParty(id: String, lat: Double, lon: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
         pulse()
         pickingEmblem = false
         held = nil
@@ -387,13 +454,16 @@ final class AppRuntime {
             return
         }
         let pip = mesh.pips.first { $0.from == id }
+        let plat = pip?.lat ?? lat
+        let plon = pip?.lon ?? lon
+        guard plat.isFinite, plon.isFinite else { return }
         heldParty = HeldPerson(
             id: id,
             name: MeshPOS.nameToken(pip?.name ?? ""),
             emblem: pip?.emblem ?? PersonEmblem.fallback.rawValue,
             status: PartyStatus.parse(pip?.status),
-            lat: pip?.lat ?? lat,
-            lon: pip?.lon ?? lon,
+            lat: plat,
+            lon: plon,
             headingDeg: pip?.headingDeg,
             isYou: false,
             vitals: PartyVitals.fromPOS(pip?.vitals)
@@ -493,6 +563,7 @@ final class AppRuntime {
             return
         }
         guard let pip = mesh.pips.first(where: { $0.from == card.id }) else { return }
+        guard pip.lat.isFinite, pip.lon.isFinite else { return }
         heldParty?.lat = pip.lat
         heldParty?.lon = pip.lon
         heldParty?.headingDeg = pip.headingDeg
@@ -875,7 +946,7 @@ final class AppRuntime {
         let pack = packs?.active?.center
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? pack?.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
-        guard let lat, let lon else { return }
+        guard let lat, let lon, lat.isFinite, lon.isFinite else { return }
         lastKnownFix = (lat, lon)
         mesh.sendPOS(
             from: mesh.localID,

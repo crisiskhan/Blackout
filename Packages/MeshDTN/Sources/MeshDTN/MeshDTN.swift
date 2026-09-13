@@ -133,7 +133,8 @@ public enum MeshPOS {
         vitals: [Double]?
     )? {
         let parts = text.split(separator: ",", omittingEmptySubsequences: false)
-        guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else {
+        guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]),
+              lat.isFinite, lon.isFinite else {
             return nil
         }
         var heading: Double?
@@ -390,6 +391,7 @@ public final class MeshNet: @unchecked Sendable {
         status: String? = nil,
         vitals: [Double]? = nil
     ) {
+        guard lat.isFinite, lon.isFinite else { return }
         enqueue(
             make(
                 from: from,

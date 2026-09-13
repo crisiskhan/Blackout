@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 import unittest
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -413,6 +414,88 @@ def png_ihdr(path: Path) -> tuple[int, int, int]:
     return width, height, color
 
 
+def _png_paeth(a: int, b: int, c: int) -> int:
+    p = a + b - c
+    pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+    if pa <= pb and pa <= pc:
+        return a
+    if pb <= pc:
+        return b
+    return c
+
+
+def png_rgba(path: Path) -> tuple[int, int, bytes]:
+    """Decode an 8-bit RGB/RGBA PNG into packed RGBA bytes."""
+    data = path.read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise AssertionError(f"{path} is not a PNG")
+    width = height = bit = color = interlace = None
+    idat = bytearray()
+    i = 8
+    while i + 8 <= len(data):
+        length = int.from_bytes(data[i : i + 4], "big")
+        ctype = data[i + 4 : i + 8]
+        chunk = data[i + 8 : i + 8 + length]
+        i += 12 + length
+        if ctype == b"IHDR":
+            width = int.from_bytes(chunk[0:4], "big")
+            height = int.from_bytes(chunk[4:8], "big")
+            bit = chunk[8]
+            color = chunk[9]
+            interlace = chunk[12]
+        elif ctype == b"IDAT":
+            idat.extend(chunk)
+        elif ctype == b"IEND":
+            break
+    if width is None or height is None or bit != 8 or interlace != 0 or color not in (2, 6):
+        raise AssertionError(f"{path} is not an 8-bit RGB/RGBA PNG")
+    bpp = 3 if color == 2 else 4
+    raw = zlib.decompress(bytes(idat))
+    stride = width * bpp
+    out = bytearray(width * height * 4)
+    prev = bytearray(stride)
+    src = 0
+    for y in range(height):
+        filt = raw[src]
+        src += 1
+        row = bytearray(raw[src : src + stride])
+        src += stride
+        if filt == 1:
+            for x in range(stride):
+                row[x] = (row[x] + (row[x - bpp] if x >= bpp else 0)) & 255
+        elif filt == 2:
+            for x in range(stride):
+                row[x] = (row[x] + prev[x]) & 255
+        elif filt == 3:
+            for x in range(stride):
+                left = row[x - bpp] if x >= bpp else 0
+                row[x] = (row[x] + ((left + prev[x]) // 2)) & 255
+        elif filt == 4:
+            for x in range(stride):
+                left = row[x - bpp] if x >= bpp else 0
+                up = prev[x]
+                ul = prev[x - bpp] if x >= bpp else 0
+                row[x] = (row[x] + _png_paeth(left, up, ul)) & 255
+        elif filt != 0:
+            raise AssertionError(f"{path} has PNG filter {filt}")
+        prev = row
+        dst = y * width * 4
+        if color == 6:
+            out[dst : dst + width * 4] = row
+        else:
+            for x in range(width):
+                o = dst + x * 4
+                p = x * 3
+                out[o : o + 3] = row[p : p + 3]
+                out[o + 3] = 255
+    return width, height, bytes(out)
+
+
+def png_px(px: bytes, width: int, x: int, y: int) -> tuple[int, int, int, int]:
+    o = (y * width + x) * 4
+    return px[o], px[o + 1], px[o + 2], px[o + 3]
+
+
 def jpeg_size(path: Path) -> tuple[int, int]:
     data = path.read_bytes()
     if data[:2] != b"\xff\xd8":
@@ -446,6 +529,39 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual((width, height), (1024, 1024))
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
+    def _assert_open_compass_well(self, path: Path) -> None:
+        """Black plate and inner well are gone; red sight and ring stay; some alpha."""
+        width, height, color = png_ihdr(path)
+        self.assertEqual(color, 6, f"{path.name} has alpha")
+        self.assertEqual(width, height)
+        _, _, px = png_rgba(path)
+        for x, y in (
+            (0, 0),
+            (width - 1, 0),
+            (0, height - 1),
+            (width - 1, height - 1),
+        ):
+            self.assertEqual(png_px(px, width, x, y)[3], 0, f"{path.name} corner {x},{y}")
+        well = png_px(px, width, width // 2 + 200, height // 2)
+        self.assertLess(well[3], 24, f"{path.name} inner well is open")
+        core = png_px(px, width, width // 2, height // 2)
+        self.assertGreaterEqual(core[0], 160, f"{path.name} red sight stays")
+        self.assertGreaterEqual(core[3], 160, f"{path.name} red sight stays")
+        ring = png_px(px, width, width // 2, int(height * 200 / 1024))
+        self.assertGreaterEqual(ring[3], 140, f"{path.name} ring stays")
+        keep_max = 0
+        black_opaque = 0
+        pixels = width * height
+        for i in range(0, len(px), 4):
+            r, g, b, a = px[i], px[i + 1], px[i + 2], px[i + 3]
+            if a > keep_max:
+                keep_max = a
+            if a > 200 and max(r, g, b) < 12:
+                black_opaque += 1
+        self.assertLess(black_opaque / pixels, 0.02, f"{path.name} black plate remains")
+        self.assertLess(keep_max, 255, f"{path.name} has some transparency")
+        self.assertGreaterEqual(keep_max, 180, f"{path.name} still reads on the glass")
+
     def test_home_screen_dark_and_tinted_drop_the_black_plate(self):
         iconset = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
         manifest = read("Blackout", "Assets.xcassets", "AppIcon.appiconset", "Contents.json")
@@ -463,6 +579,8 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("AppIcon-dark.png", manifest)
         self.assertIn("AppIcon-tinted.png", manifest)
         self.assertIn("AppIcon.png", manifest)
+        self._assert_open_compass_well(dark)
+        self._assert_open_compass_well(tinted)
 
     def test_boot_logo_is_the_square_mark(self):
         logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
@@ -486,6 +604,52 @@ class CompassMarkTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
         self.assertIn("CLLocationCoordinate2DIsValid", gnss)
+        self._assert_open_compass_well(logo)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("well inside the ring is open", qa.lower())
+
+
+class UnlockGlassTests(unittest.TestCase):
+    """Fingerprint glass before ACTIVATE. Inverted print asks before a wipe."""
+
+    def test_fingerprint_unlock_sits_before_activate(self):
+        root = read("Blackout", "RootChrome.swift")
+        unlock = read("Blackout", "UnlockView.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        pbx = read("Blackout.xcodeproj", "project.pbxproj")
+        gen = read("tools", "v3", "generate_project.py")
+        qa = read("docs", "SOLO_QA.md")
+        self.assertLess(root.find("UnlockView"), root.find("ARMINGView"))
+        self.assertIn("runtime.unlocked", root)
+        self.assertIn("var unlocked", app)
+        self.assertIn("func requestUnlock", app)
+        self.assertIn("import LocalAuthentication", app)
+        self.assertIn("LAContext", app)
+        self.assertIn("deviceOwnerAuthentication", app)
+        self.assertIn("UNLOCK FAILED", app)
+        self.assertIn("func wipeVessel", app)
+        self.assertIn("exit(0)", app)
+        self.assertIn("removePersistentDomain", app)
+        self.assertIn("struct UnlockView", unlock)
+        self.assertIn("UNLOCK", unlock)
+        self.assertIn("ARE YOU SURE", unlock)
+        self.assertIn('Button("YES")', unlock)
+        self.assertIn('Button("NO")', unlock)
+        self.assertIn("Theme.fix", unlock)
+        self.assertIn("Theme.accent", unlock)
+        self.assertIn("RotationGesture", unlock)
+        self.assertIn("inverted", unlock)
+        self.assertIn("180", unlock)
+        self.assertNotIn("Color.green", unlock)
+        self.assertNotIn("Color.orange", unlock)
+        self.assertNotIn(".spring(", unlock)
+        self.assertNotIn("tel://", unlock.lower())
+        self.assertNotIn("best in class", unlock.lower())
+        self.assertIn("NSFaceIDUsageDescription", pbx)
+        self.assertIn("NSFaceIDUsageDescription", gen)
+        self.assertIn("UNLOCK", qa)
+        self.assertIn("ARE YOU SURE", qa)
+        self.assertNotIn("best in class", qa.lower())
 
 
 class HUDSyncTests(unittest.TestCase):
@@ -1209,6 +1373,7 @@ class HUDSeductionTests(unittest.TestCase):
             "ExpeditionTab.swift",
             "InstrumentsView.swift",
             "ARMINGView.swift",
+            "UnlockView.swift",
             "Theme.swift",
             "HUDLayout.swift",
         ):
@@ -1778,6 +1943,31 @@ class AddressHoldCardTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         hold = app.split("func holdAddress", 1)[1].split("func walkHeldAddress", 1)[0]
         self.assertIn("isFinite", hold)
+
+    def test_hold_inspect_refuses_a_broken_coordinate(self):
+        app = read("Blackout", "AppRuntime.swift")
+        hold = app.split("func holdInspect", 1)[1].split("func closeHold", 1)[0]
+        self.assertIn("isFinite", hold)
+
+    def test_hold_party_and_pos_refuse_broken_coordinates(self):
+        app = read("Blackout", "AppRuntime.swift")
+        hold = app.split("func holdParty", 1)[1].split("func setYouName", 1)[0]
+        self.assertIn("isFinite", hold)
+        refresh = app.split("func refreshHeldParty", 1)[1].split("func toggleLockOn", 1)[0]
+        self.assertIn("isFinite", refresh)
+        send = app.split("func sendPOSIfPossible()", 1)[1].split("func applyInbound", 1)[0]
+        self.assertIn("isFinite", send)
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        parse = mesh.split("public static func parse", 1)[1].split("public struct MeshTimerEvent", 1)[0]
+        self.assertIn("isFinite", parse)
+        tab = read("Blackout", "MapTab.swift")
+        pips = tab.split("pips:", 1)[1].split("youHeading", 1)[0]
+        self.assertIn("isFinite", pips)
+        offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
+        hold_fn = offline.split("func handleHold", 1)[1].split("func personMark", 1)[0]
+        self.assertIn("CLLocationCoordinate2DIsValid", hold_fn)
+        sync = offline.split("func syncPartyMarks", 1)[1].split("func syncRoute", 1)[0]
+        self.assertIn("CLLocationCoordinate2DIsValid", sync)
 
     def test_solo_qa_scores_address_search(self):
         qa = read("docs", "SOLO_QA.md")

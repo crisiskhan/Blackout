@@ -84,7 +84,7 @@ struct MapTab: View {
                     runtime.holdParty(id: id, lat: lat, lon: lon)
                 },
                 pips: runtime.mesh.pips
-                    .filter { $0.from != runtime.mesh.localID }
+                    .filter { $0.from != runtime.mesh.localID && $0.lat.isFinite && $0.lon.isFinite }
                     .map {
                         PartyBody(
                             id: $0.from,

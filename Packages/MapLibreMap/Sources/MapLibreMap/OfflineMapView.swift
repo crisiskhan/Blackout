@@ -246,6 +246,7 @@ public struct OfflineMapView: UIViewRepresentable {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
+            guard CLLocationCoordinate2DIsValid(coord) else { return }
             onMapTap?(coord.latitude, coord.longitude)
             onPulse?()
         }
@@ -253,14 +254,17 @@ public struct OfflineMapView: UIViewRepresentable {
         @objc func handleHold(_ gesture: UILongPressGestureRecognizer) {
             guard interactive, gesture.state == .began, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
-            let coord = view.convert(point, toCoordinateFrom: view)
-            holdTick.impactOccurred()
             if let mark = personMark(at: point, on: view) {
+                guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
+                holdTick.impactOccurred()
                 onPersonHold?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
                 onPulse?()
                 liftIntoView(point, on: view)
                 return
             }
+            let coord = view.convert(point, toCoordinateFrom: view)
+            guard CLLocationCoordinate2DIsValid(coord) else { return }
+            holdTick.impactOccurred()
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
             onPulse?()
             liftIntoView(point, on: view)
@@ -593,9 +597,11 @@ public struct OfflineMapView: UIViewRepresentable {
             var next: [PersonMarkAnnotation] = []
             var seen = Set<String>()
             for pip in spec.pips {
+                let coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
                 seen.insert(pip.id)
                 if let old = existing[pip.id] {
-                    old.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                    old.coordinate = coordinate
                     old.emblemID = pip.emblem
                     old.headingDeg = pip.headingDeg
                     if let mark = view.view(for: old) as? YouPuckAnnotationView {
@@ -604,7 +610,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     next.append(old)
                 } else {
                     let mark = PersonMarkAnnotation()
-                    mark.coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                    mark.coordinate = coordinate
                     mark.title = "\(PartyPips.titlePrefix)\(pip.id)"
                     mark.memberID = pip.id
                     mark.emblemID = pip.emblem
@@ -991,8 +997,10 @@ public struct OfflineMapView: UIViewRepresentable {
         /// Silver bodies. MapLibre's Swift overlay does not import the ObjC
         /// collection factory. A FeatureCollection is the documented many-point source.
         func partyShape(_ pips: [PartyBody]) -> MLNShape {
-            let features: [[String: Any]] = pips.map { pip in
-                [
+            let features: [[String: Any]] = pips.compactMap { pip in
+                let coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+                guard CLLocationCoordinate2DIsValid(coordinate) else { return nil }
+                return [
                     "type": "Feature",
                     "properties": [:] as [String: Any],
                     "geometry": [

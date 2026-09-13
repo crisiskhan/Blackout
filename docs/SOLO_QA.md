@@ -6,7 +6,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## BOOT
 
-- [ ] PASS / FAIL / N/A — Cold launch is the compass mark on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No black plate — the mark is transparent around the compass. No BLACKOUT wordmark. No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — Cold launch is UNLOCK before ACTIVATE. Fingerprint mark on void. Rotate it upright, then UNLOCK — Face ID or the device passcode. Deny is `UNLOCK FAILED`. Rotate the mark upside down, then UNLOCK → `ARE YOU SURE`. YES (green) wipes local data and quits; the Home Screen icon stays until you delete it. NO (red) stays on UNLOCK. Then the compass mark on void, not an ARMING menu. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No black plate — the mark is transparent around the compass and the well inside the ring is open. No BLACKOUT wordmark. No account prompt. No network/login gate.
 - [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP. No lawyer sheet. Tabs are live.
 - [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
