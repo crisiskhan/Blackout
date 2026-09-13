@@ -1824,6 +1824,218 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertNotIn("Waze", qa)
 
 
+ROSTER_ROLES = ("lead", "medic", "nav", "tail", "guest")
+ROSTER_TITLES = {
+    "lead": "LEAD",
+    "medic": "MEDIC",
+    "nav": "NAV",
+    "tail": "TAIL",
+    "guest": "GUEST",
+}
+UNIQUE_SEATS = frozenset({"lead", "medic", "nav", "tail"})
+
+
+def roster_title(role: str) -> str:
+    return ROSTER_TITLES[role]
+
+
+def roster_unique(role: str) -> bool:
+    return role in UNIQUE_SEATS
+
+
+def roster_next(role: str) -> str:
+    return ROSTER_ROLES[(ROSTER_ROLES.index(role) + 1) % len(ROSTER_ROLES)]
+
+
+def roster_next_open(current: str, taken: set[str]) -> str:
+    role = roster_next(current)
+    for _ in ROSTER_ROLES:
+        if not roster_unique(role) or role not in taken:
+            return role
+        role = roster_next(role)
+    return "guest"
+
+
+def roster_seating(
+    members: list[dict[str, str]],
+    person_id: str,
+    role: str,
+    name: str | None = None,
+) -> list[dict[str, str]]:
+    for member in members:
+        if member["id"] == person_id and member["role"] == role:
+            return members
+    if roster_unique(role):
+        for member in members:
+            if member["role"] == role and member["id"] != person_id:
+                return members
+    out = [dict(member) for member in members]
+    for member in out:
+        if member["id"] == person_id:
+            member["role"] = role
+            if name:
+                member["name"] = name
+            return out
+    out.append({"id": person_id, "name": name or person_id, "role": role})
+    return out
+
+
+def roster_live(
+    members: list[dict[str, str]],
+    you_id: str,
+    you_name: str,
+    peers: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    by_id = {member["id"]: member for member in members}
+    you_role = by_id.get(you_id, {}).get("role", "lead")
+    label = you_name.strip() if you_name.strip() else "YOU"
+    rows = [{"id": you_id, "name": label, "role": you_role}]
+    seen = {you_id}
+    for peer in peers:
+        pid = peer["id"]
+        if pid == you_id or pid in seen:
+            continue
+        seen.add(pid)
+        stored = by_id.get(pid)
+        role = stored["role"] if stored else "guest"
+        name = peer.get("name") or pid
+        rows.append({"id": pid, "name": name, "role": role})
+    return rows
+
+
+def roster_seated_chrome(role: str) -> str:
+    return f"{roster_title(role)} · SEATED"
+
+
+class LiveRosterOnTheGlassTests(unittest.TestCase):
+    """The roster is the live party. One person is one row. JOIN NAV seats YOU."""
+
+    def test_live_you_is_first_even_solo_and_peers_are_guests(self):
+        planted = [{"id": "lead", "name": "Lead", "role": "lead"}]
+        solo = roster_live(planted, "local-1", "", [])
+        self.assertEqual(len(solo), 1)
+        self.assertEqual(solo[0]["id"], "local-1")
+        self.assertEqual(solo[0]["name"], "YOU")
+        self.assertEqual(solo[0]["role"], "lead")
+        named = roster_live(planted, "local-1", "KHAN", [])
+        self.assertEqual(named[0]["name"], "KHAN")
+        seated = roster_seating(planted, "local-1", "nav", "KHAN")
+        seated = roster_seating(seated, "peer-1", "medic", "RUI")
+        rows = roster_live(
+            seated,
+            "local-1",
+            "KHAN",
+            [
+                {"id": "peer-1", "name": "RUI"},
+                {"id": "peer-2", "name": "SAM"},
+                {"id": "local-1", "name": "echo"},
+            ],
+        )
+        self.assertEqual([row["id"] for row in rows], ["local-1", "peer-1", "peer-2"])
+        self.assertEqual([row["role"] for row in rows], ["nav", "medic", "guest"])
+        self.assertEqual(len(rows), 3)
+        self.assertNotIn("lead", [row["id"] for row in rows])
+
+    def test_seating_nav_is_sticky_and_unique_seats_do_not_stack(self):
+        members = [{"id": "you", "name": "YOU", "role": "lead"}]
+        nav = roster_seating(members, "you", "nav")
+        self.assertEqual(nav[0]["role"], "nav")
+        again = roster_seating(nav, "you", "nav")
+        self.assertIs(again, nav)
+        self.assertEqual(roster_seated_chrome("nav"), "NAV · SEATED")
+        self.assertEqual(roster_seated_chrome("lead"), "LEAD · SEATED")
+        taken = roster_seating(nav, "peer", "nav", "RUI")
+        self.assertIs(taken, nav)
+        guests = roster_seating(nav, "a", "guest", "A")
+        guests = roster_seating(guests, "b", "guest", "B")
+        self.assertEqual([m["role"] for m in guests if m["role"] == "guest"], ["guest", "guest"])
+        taken_unique = {"nav"}
+        self.assertEqual(roster_next_open("lead", taken_unique), "medic")
+        self.assertEqual(roster_next_open("medic", {"lead", "medic", "nav", "tail"}), "guest")
+        for role, title in ROSTER_TITLES.items():
+            self.assertEqual(roster_title(role), title)
+            self.assertEqual(roster_unique(role), role in UNIQUE_SEATS)
+
+    def test_expedition_seats_you_as_nav_and_paints_live_rows(self):
+        exped = read("Blackout", "ExpeditionTab.swift")
+        roles = read("Packages", "RosterRoles", "Sources", "RosterRoles", "RosterRoles.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        paper = read("Packages", "PaperGen", "Sources", "PaperGen", "PaperGen.swift")
+        paper_tests = read(
+            "Packages", "PaperGen", "Tests", "PaperGenTests", "PaperGenTests.swift"
+        )
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        roster_tests = read(
+            "Packages", "RosterRoles", "Tests", "RosterRolesTests", "RosterRolesTests.swift"
+        )
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn('Button("JOIN NAV")', exped)
+        self.assertIn("NAV · SEATED", exped)
+        self.assertNotIn('joining("Nav"', exped)
+        self.assertNotIn("m.role.rawValue", exped)
+        self.assertIn("runtime.liveRoster", exped)
+        self.assertIn("row.role.title", exped)
+        self.assertIn("row.statusTitle", exped)
+        self.assertIn("runtime.seatNav()", exped)
+        row = exped.split("private func rosterRow")[1].split("private func rosterFace")[0]
+        self.assertIn("mapChipHitPoints", row)
+        face = exped.split("private func rosterFace")[1].split("private func rosterStatusInk")[0]
+        self.assertIn("PersonEmblem.image", face)
+        self.assertIn("func live(", roles)
+        self.assertIn("func seating(", roles)
+        self.assertIn("func rebindingLead(", roles)
+        self.assertIn("var uniqueSeat", roles)
+        self.assertIn("func nextOpen(", roles)
+        self.assertIn('return "LEAD"', roles)
+        self.assertIn('return "MEDIC"', roles)
+        self.assertIn('return "NAV"', roles)
+        self.assertIn('return "TAIL"', roles)
+        self.assertIn('return "GUEST"', roles)
+        title = roles.split("var title")[1].split("var uniqueSeat")[0]
+        self.assertIn("Never", title)
+        unique = roles.split("var uniqueSeat")[1].split("func nextOpen")[0]
+        self.assertIn("Never", unique)
+        self.assertIn("struct LiveRosterRow", roles)
+        self.assertIn("struct RosterPeer", roles)
+        self.assertIn("var liveRoster", app)
+        self.assertIn("func seatNav()", app)
+        self.assertIn("func paperRoster()", app)
+        self.assertIn("func sendRosterSeat()", app)
+        self.assertIn("rebindingLead(to:", app)
+        self.assertIn('"you.role"', app)
+        peers = app.split("mesh.onPeersChanged")[1].split("mesh.startLocal()")[0]
+        self.assertIn("sendRosterSeat()", peers)
+        inbound = app.split("func applyInbound")[1].split("func raiseIncoming")[0]
+        self.assertIn('case "roster":', inbound)
+        self.assertIn("MeshRosterBody.parse", inbound)
+        self.assertIn("upserting(", inbound)
+        self.assertIn("enum MeshRosterBody", mesh)
+        self.assertIn("func sendRoster(", mesh)
+        self.assertIn('kind: "roster"', mesh)
+        self.assertIn('vitals.count == 6', mesh)
+        self.assertIn("role.title", paper)
+        self.assertIn('"LEAD A"', paper_tests)
+        self.assertNotIn('"lead A"', paper_tests)
+        self.assertIn("func testLiveYouIsFirstEvenSolo", roster_tests)
+        self.assertIn("func testSeatingNavIsStickyAndUnique", roster_tests)
+        self.assertIn("JOIN NAV seats YOU as NAV", qa)
+        self.assertIn("YOU is the first row", qa)
+        self.assertIn("NAME, FACE, ROLE, STATUS", qa)
+        self.assertIn("One person is one row", qa)
+        self.assertIn("LEAD / MEDIC / NAV / TAIL / GUEST", qa)
+        self.assertIn("guests can repeat", qa.lower())
+        self.assertNotIn("`nav Nav`", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
+        assign = exped.split("private var assignPeople")[1].split("private func timerWho")[0]
+        self.assertIn("liveRoster", assign)
+        export = exped.split('Button("EXPORT PAPER")')[1].split("if !paperText.isEmpty")[0]
+        self.assertIn("paperRoster()", export)
+        self.assertIn("func cycling(", roles)
+        self.assertIn("runtime.cycleSeat", exped)
+
+
 def tap_lamp(current: str, tap: str) -> str:
     """NIGHT and SUN are exclusive. Tap the live one to return to void."""
     if tap == "off":

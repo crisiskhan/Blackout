@@ -1049,48 +1049,10 @@ final class TimerSyncTests: XCTestCase {
     )
 
     w(PKG / "RosterRoles" / "Package.swift", package_swift("RosterRoles", []))
-    w(
-        PKG / "RosterRoles" / "Sources" / "RosterRoles" / "RosterRoles.swift",
-        r'''import Foundation
-
-public enum PartyRole: String, CaseIterable, Sendable {
-    case lead, medic, nav, tail, guest
-}
-
-public struct PartyMember: Equatable, Sendable, Identifiable {
-    public var id: String
-    public var name: String
-    public var role: PartyRole
-}
-
-public struct PartyRoster: Equatable, Sendable {
-    public var code: String
-    public var members: [PartyMember]
-    public static func create(lead: String) -> PartyRoster {
-        PartyRoster(code: String(UUID().uuidString.prefix(6)), members: [PartyMember(id: "lead", name: lead, role: .lead)])
-    }
-    public func joining(_ name: String, role: PartyRole) -> PartyRoster {
-        var copy = self
-        copy.members.append(PartyMember(id: UUID().uuidString, name: name, role: role))
-        return copy
-    }
-}
-''',
-    )
-    w(
-        PKG / "RosterRoles" / "Tests" / "RosterRolesTests" / "RosterRolesTests.swift",
-        r'''import XCTest
-@testable import RosterRoles
-
-final class RosterRolesTests: XCTestCase {
-    func testCreateJoin() {
-        let r = PartyRoster.create(lead: "A").joining("B", role: .nav)
-        XCTAssertEqual(r.members.count, 2)
-        XCTAssertEqual(r.members[0].role, .lead)
-    }
-}
-''',
-    )
+    roster_src = PKG / "RosterRoles" / "Sources" / "RosterRoles" / "RosterRoles.swift"
+    roster_tests = PKG / "RosterRoles" / "Tests" / "RosterRolesTests" / "RosterRolesTests.swift"
+    w(roster_src, roster_src.read_text(encoding="utf-8"))
+    w(roster_tests, roster_tests.read_text(encoding="utf-8"))
 
     w(PKG / "Almanac" / "Package.swift", package_swift("Almanac", []))
     w(
@@ -1837,7 +1799,7 @@ import RosterRoles
 public enum PaperGen {
     public static func export(trip: TripSheet, roster: PartyRoster, packName: String) -> String {
         var lines = ["BLACKOUT PAPER", packName, trip.brief, "due \(trip.dueBack)", "roster:"]
-        lines += roster.members.map { "\($0.role.rawValue) \($0.name)" }
+        lines += roster.members.map { "\($0.role.title) \($0.name)" }
         return lines.joined(separator: "\n")
     }
 }
@@ -1854,7 +1816,7 @@ final class PaperGenTests: XCTestCase {
     func testExport() {
         let text = PaperGen.export(trip: TripBrief.make(brief: "loop", hours: 2), roster: PartyRoster.create(lead: "A"), packName: "TX WEST")
         XCTAssertTrue(text.contains("TX WEST"))
-        XCTAssertTrue(text.contains("lead A"))
+        XCTAssertTrue(text.contains("LEAD A"))
     }
 }
 ''',

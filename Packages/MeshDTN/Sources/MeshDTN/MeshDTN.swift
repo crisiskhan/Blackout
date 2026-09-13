@@ -260,6 +260,21 @@ public enum MeshMarkBody {
     }
 }
 
+/// Seat announcement. Separate from POS so vitals stay a 12-part body.
+public enum MeshRosterBody {
+    public static func encode(id: String, role: String, name: String) -> String {
+        [id, role, MeshMarkBody.clean(name)].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (id: String, role: String, name: String)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 3 else { return nil }
+        let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !id.isEmpty else { return nil }
+        return (id, parts[1], parts[2])
+    }
+}
+
 public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
     public var id: String
     public var from: String
@@ -584,6 +599,11 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "mark", body: Data(body.utf8)))
     }
 
+    public func sendRoster(from: String, id: String, role: String, name: String) {
+        let body = MeshRosterBody.encode(id: id, role: role, name: name)
+        enqueue(make(from: from, kind: "roster", body: Data(body.utf8)))
+    }
+
     public func linkKind() -> LinkKind {
         if loRaBrickPresent { return .optionalLoRaBrick }
         if joined { return .bleTensOfMeters }
@@ -662,7 +682,7 @@ public final class MeshNet: @unchecked Sendable {
                 let parsed = MeshTimerBody.parse(raw)
                 upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
-        case "mark", "kit", "voice":
+        case "mark", "kit", "voice", "roster":
             break
         default:
             break

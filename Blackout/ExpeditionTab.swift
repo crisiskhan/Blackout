@@ -6,6 +6,7 @@ import Tokens
 import MapLibreMap
 import KitStore
 import MeshDTN
+import RosterRoles
 
 private struct KitAssignPerson: Identifiable {
     let label: String
@@ -59,10 +60,8 @@ struct ExpeditionTab: View {
                                         .foregroundStyle(Theme.warn)
                                 }
                             }
-                            ForEach(runtime.roster.members) { m in
-                                Text("\(m.role.rawValue) \(m.name)")
-                                    .font(.system(size: 13, weight: .heavy))
-                                    .foregroundStyle(Theme.silver)
+                            ForEach(runtime.liveRoster) { row in
+                                rosterRow(row)
                             }
                             if let navChrome {
                                 Text(navChrome)
@@ -70,12 +69,7 @@ struct ExpeditionTab: View {
                                     .foregroundStyle(Theme.warn)
                             }
                             Button("JOIN NAV") {
-                                if runtime.roster.members.contains(where: { $0.role == .nav }) {
-                                    navChrome = "NAV · SEATED"
-                                } else {
-                                    navChrome = nil
-                                    runtime.roster = runtime.roster.joining("Nav", role: .nav)
-                                }
+                                navChrome = runtime.seatNav() == nil ? nil : "NAV · SEATED"
                             }
                             .buttonStyle(HUDActionStyle(filled: false))
                         }
@@ -179,7 +173,7 @@ struct ExpeditionTab: View {
 
                     sectionLabel("PAPER")
                     Button("EXPORT PAPER") {
-                        let text = PaperGen.export(trip: runtime.trip, roster: runtime.roster, packName: runtime.packs?.active?.name ?? "")
+                        let text = PaperGen.export(trip: runtime.trip, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
                         paperText = text
                         runtime.box.log("paper", text)
                     }
@@ -349,12 +343,9 @@ struct ExpeditionTab: View {
             seen.append(key)
             rows.append(KitAssignPerson(label: label.isEmpty ? token : label, token: token))
         }
-        for member in runtime.roster.members {
-            add(member.name, token: member.name)
-        }
-        for pip in runtime.mesh.pips {
-            let named = (pip.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-            add(named.isEmpty ? pip.from : named, token: named.isEmpty ? pip.from : named)
+        for row in runtime.liveRoster {
+            if row.id == runtime.mesh.localID { continue }
+            add(row.name, token: row.name)
         }
         return rows
     }
@@ -383,6 +374,69 @@ struct ExpeditionTab: View {
                 Theme.plateRect()
                     .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
             )
+    }
+
+    private func rosterRow(_ row: LiveRosterRow) -> some View {
+        let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        return HStack(spacing: 10) {
+            rosterFace(row)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.name)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("NAME")
+                    .accessibilityValue(row.name)
+                Text(row.statusTitle)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(rosterStatusInk(row.statusTitle))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .accessibilityLabel("STATUS")
+                    .accessibilityValue(row.statusTitle)
+            }
+            Spacer(minLength: 8)
+            Button(row.role.title) {
+                navChrome = runtime.cycleSeat(row.id)
+            }
+            .buttonStyle(HUDOverlayChipStyle())
+            .accessibilityLabel("ROLE")
+            .accessibilityValue(row.role.title)
+        }
+        .frame(maxWidth: .infinity, minHeight: hit, alignment: .leading)
+    }
+
+    private func rosterFace(_ row: LiveRosterRow) -> some View {
+        let size = CGFloat(BlackoutTokens.Chrome.mapChipHitPoints)
+        return Group {
+            if let image = PersonEmblem.image(PersonEmblem.resolved(row.emblem)) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Circle().fill(Theme.metalLow)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(
+            Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: Theme.strokeWidth(1))
+        )
+        .accessibilityLabel("FACE")
+    }
+
+    private func rosterStatusInk(_ title: String) -> Color {
+        switch PartyStatus.parse(title) {
+        case .good:
+            return Theme.fix
+        case .okay:
+            return Theme.caution
+        case .bad:
+            return Theme.heat
+        case .emergency:
+            return Theme.accent
+        }
     }
 
     private func sectionLabel(_ title: String) -> some View {

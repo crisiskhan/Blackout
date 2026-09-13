@@ -176,9 +176,18 @@ final class AppRuntime {
             Task { @MainActor in self?.applyInbound(env) }
         }
         mesh.onPeersChanged = { [weak self] in
-            Task { @MainActor in self?.sendPOSIfPossible() }
+            Task { @MainActor in
+                self?.sendPOSIfPossible()
+                self?.sendRosterSeat()
+            }
         }
         mesh.startLocal()
+        roster = roster.rebindingLead(to: mesh.localID, name: displayYouName)
+        if let raw = UserDefaults.standard.string(forKey: "you.role"),
+           let role = PartyRole.parse(raw)
+        {
+            roster = roster.seating(id: mesh.localID, name: displayYouName, role: role)
+        }
         fix.onChange = { [weak self] in
             Task { @MainActor in self?.pullFix() }
         }
@@ -246,6 +255,80 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
+    }
+
+    var displayYouName: String {
+        let named = youName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return named.isEmpty ? "YOU" : named
+    }
+
+    var liveRoster: [LiveRosterRow] {
+        roster.live(
+            youID: mesh.localID,
+            youName: youName,
+            youEmblem: youEmblem.rawValue,
+            youStatusTitle: youStatus.title,
+            peers: mesh.pips.compactMap { pip in
+                guard pip.from != mesh.localID else { return nil }
+                let named = MeshPOS.nameToken(pip.name ?? "")
+                return RosterPeer(
+                    id: pip.from,
+                    name: named.isEmpty ? pip.from.uppercased() : named,
+                    emblem: pip.emblem ?? "",
+                    statusTitle: PartyStatus.parse(pip.status).title
+                )
+            }
+        )
+    }
+
+    func paperRoster() -> PartyRoster {
+        PartyRoster(
+            code: roster.code,
+            members: liveRoster.map { PartyMember(id: $0.id, name: $0.name, role: $0.role) }
+        )
+    }
+
+    func seatNav() -> String? {
+        seat(id: mesh.localID, name: displayYouName, role: .nav)
+    }
+
+    func cycleSeat(_ id: String) -> String? {
+        let rows = liveRoster
+        let name = rows.first(where: { $0.id == id })?.name ?? displayYouName
+        let before = roster
+        roster = roster.cycling(id: id, name: name, from: rows)
+        if roster == before {
+            let role = rows.first(where: { $0.id == id })?.role ?? .lead
+            return "\(role.title) · SEATED"
+        }
+        let role = roster.members.first(where: { $0.id == id })?.role ?? .lead
+        if id == mesh.localID {
+            UserDefaults.standard.set(role.rawValue, forKey: "you.role")
+        }
+        sendRosterSeat(id: id, name: name, role: role)
+        return nil
+    }
+
+    func seat(id: String, name: String, role: PartyRole) -> String? {
+        let before = roster
+        roster = roster.seating(id: id, name: name, role: role)
+        if roster == before {
+            return "\(role.title) · SEATED"
+        }
+        if id == mesh.localID {
+            UserDefaults.standard.set(role.rawValue, forKey: "you.role")
+        }
+        sendRosterSeat(id: id, name: name, role: role)
+        return nil
+    }
+
+    func sendRosterSeat() {
+        let row = liveRoster.first { $0.id == mesh.localID }
+        sendRosterSeat(id: mesh.localID, name: displayYouName, role: row?.role ?? .lead)
+    }
+
+    func sendRosterSeat(id: String, name: String, role: PartyRole) {
+        mesh.sendRoster(from: mesh.localID, id: id, role: role.rawValue, name: name)
     }
 
     func tapLamp(_ tap: HUDLamp) {
@@ -590,6 +673,8 @@ final class AppRuntime {
         if heldParty?.isYou == true {
             heldParty?.name = youName
         }
+        let role = liveRoster.first(where: { $0.id == mesh.localID })?.role ?? .lead
+        roster = roster.seating(id: mesh.localID, name: displayYouName, role: role)
         sendPOSIfPossible()
     }
 
@@ -1355,6 +1440,20 @@ final class AppRuntime {
             }
         case "pos":
             refreshHeldParty()
+        case "roster":
+            if let raw = String(data: env.body, encoding: .utf8),
+               let parsed = MeshRosterBody.parse(raw),
+               let role = PartyRole.parse(parsed.role)
+            {
+                let beforeYou = roster.members.first(where: { $0.id == mesh.localID })?.role
+                roster = roster.upserting(id: parsed.id, name: parsed.name, role: role)
+                if let youRole = roster.members.first(where: { $0.id == mesh.localID })?.role {
+                    UserDefaults.standard.set(youRole.rawValue, forKey: "you.role")
+                }
+                if parsed.id != mesh.localID, beforeYou != roster.members.first(where: { $0.id == mesh.localID })?.role {
+                    sendRosterSeat()
+                }
+            }
         case "note":
             if let text = String(data: env.body, encoding: .utf8) {
                 let note = PartyNote.clean(text)

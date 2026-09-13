@@ -296,4 +296,33 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
         XCTAssertTrue(net.store.contains(where: { $0.kind == "kit" }))
     }
+
+    func testRosterBodyRoundtripAndSendDoesNotTouchPOS() {
+        let packed = MeshRosterBody.encode(id: "local-1", role: "nav", name: "KHAN")
+        XCTAssertTrue(packed.contains("nav"))
+        XCTAssertTrue(packed.contains("KHAN"))
+        let parsed = MeshRosterBody.parse(packed)
+        XCTAssertEqual(parsed?.id, "local-1")
+        XCTAssertEqual(parsed?.role, "nav")
+        XCTAssertEqual(parsed?.name, "KHAN")
+        XCTAssertNil(MeshRosterBody.parse("only-one-field"))
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        net.sendRoster(from: net.localID, id: net.localID, role: "nav", name: "KHAN")
+        XCTAssertEqual(net.store.last?.kind, "roster")
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        let withRails = MeshPOS.body(
+            lat: 31.76,
+            lon: -106.49,
+            headingDeg: 90,
+            emblem: "owl",
+            name: "Crisis",
+            status: "wait",
+            vitals: [0.2, 0.45, 0.2, 0.65, 0.2, 0.8]
+        )
+        XCTAssertEqual(withRails.split(",").count, 12)
+        XCTAssertEqual(MeshPOS.parse(withRails)?.vitals?.count, 6)
+    }
 }
