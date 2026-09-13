@@ -264,11 +264,15 @@ public struct SearchIndex: Sendable {
         return name.isEmpty ? nil : name
     }
 
-    /// One name per route segment, mid-point lookup. Missing names stay nil.
+    /// One name per route segment. Try the start, then the mid-point, then
+    /// the end. Mid-point-only missed a packed pin that sat on the vertex.
+    /// Missing names stay nil. SPEAK must not invent a road.
     public func streetNames(along: [(lat: Double, lon: Double)]) -> [String?] {
         guard along.count >= 2 else { return [] }
         return zip(along, along.dropFirst()).map { a, b in
-            streetName(near: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2)
+            streetName(near: a.lat, lon: a.lon)
+                ?? streetName(near: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2)
+                ?? streetName(near: b.lat, lon: b.lon)
         }
     }
 

@@ -1239,6 +1239,7 @@ class InstrumentsSunTorchTests(unittest.TestCase):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("RISE", qa)
         self.assertIn("TORCH 3×", qa)
+        self.assertIn("POCKET", qa)
 
 
 class MapMarksGlassTests(unittest.TestCase):
@@ -1936,6 +1937,35 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertIn("runtime.calibrateCompass()", inst)
         self.assertIn("runtime.attachUSB_C_PTT", inst)
         self.assertIn("runtime.attachGNSSPuck", inst)
+        self.assertIn("import Observation", board)
+        self.assertIn("@Observable", board)
+        auction = read(
+            "Packages", "BatteryAuction", "Sources", "BatteryAuction", "BatteryAuction.swift"
+        )
+        self.assertIn("import Observation", auction)
+        self.assertIn("@Observable", auction)
+        self.assertIn("func setPocket(", app)
+        self.assertIn("runtime.setPocket", inst)
+        self.assertNotIn("runtime.power.setPocket", inst)
+        pocket = app.split("func setPocket(")[1].split("func ", 1)[0]
+        self.assertIn("applyMapKeepAwake()", pocket)
+        keep = app.split("func applyMapKeepAwake()")[1].split("func ", 1)[0]
+        self.assertIn("pocket:", keep)
+        cal = app.split("func requestHeadingCalibration()")[1].split("func ", 1)[0]
+        self.assertIn("stopUpdatingHeading()", cal)
+        self.assertIn("startHeading()", cal)
+        mic = read("Blackout", "PTTMic.swift")
+        begin = mic.split("private func beginRecorder()")[1].split("private func pcm(")[0]
+        self.assertIn("applyPreferredInput()", begin)
+        self.assertGreater(begin.index("applyPreferredInput()"), begin.index("setActive(true)"))
+        usng = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ).split("enum USNG")[1].split("enum PackGeometry")[0]
+        self.assertIn("lat.isFinite", usng)
+        keep_src = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ).split("enum MapKeepAwake")[1].split("enum MapCanvasHit")[0]
+        self.assertIn("pocket: Bool", keep_src)
 
 
 class MapSearchTests(unittest.TestCase):
@@ -1974,6 +2004,7 @@ class MapSearchTests(unittest.TestCase):
         self.assertIn("func houseQuery", search)
         self.assertIn("func streetName(near", search)
         self.assertIn("func streetNames(along:", search)
+        self.assertIn("streetName(near: a.lat, lon: a.lon)", search)
         self.assertIn("struct AddrRange", search)
         self.assertIn("avenida", search)
         self.assertNotIn("best in class", search.lower())

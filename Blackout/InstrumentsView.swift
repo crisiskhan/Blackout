@@ -122,7 +122,7 @@ struct InstrumentsView: View {
                     .clipShape(Theme.plateRect())
                     hudToggle("POCKET", Binding(
                         get: { runtime.power.state.pocket },
-                        set: { runtime.power.setPocket($0) }
+                        set: { runtime.setPocket($0) }
                     ))
                     Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
                         .font(.caption.weight(.bold))

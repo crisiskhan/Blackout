@@ -1014,8 +1014,14 @@ final class AppRuntime {
 
     func applyMapKeepAwake() {
         UIApplication.shared.isIdleTimerDisabled = MapKeepAwake.idleTimerDisabled(
-            mapInstrumentActive: armed && tab == .map
+            mapInstrumentActive: armed && tab == .map,
+            pocket: power.state.pocket
         )
+    }
+
+    func setPocket(_ on: Bool) {
+        power.setPocket(on)
+        applyMapKeepAwake()
     }
 
     /// Live GNSS only. Pack center and cached fallbacks stay off the MAP COORDINATES rail.
@@ -1249,14 +1255,21 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     private var haveHeadingSample = false
 
     func applyInstrument(_ state: InstrumentState) {
+        let gnssChanged = preferExternalGNSS != state.externalGNSS
         magNorth = state.magNorth
         preferExternalGNSS = state.externalGNSS
         applyAccuracy()
+        if gnssChanged, mgr != nil {
+            mgr?.stopUpdatingLocation()
+            mgr?.startUpdatingLocation()
+        }
         refreshHeading()
     }
 
     func requestHeadingCalibration() {
         wantCalibration = true
+        mgr?.stopUpdatingHeading()
+        startHeading()
     }
 
     func arm() {
@@ -1326,13 +1339,14 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
             accuracy: lastAcc,
             magNorth: magNorth
         )
+        if wantCalibration, lastAcc >= 0 {
+            wantCalibration = false
+        }
         publishIfNeeded()
     }
 
     func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
-        guard wantCalibration else { return false }
-        wantCalibration = false
-        return true
+        wantCalibration
     }
 
     private func publishIfNeeded() {

@@ -208,6 +208,20 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// water. Do not add matcher `piedmont`.
     private static let piedmontCityPreserve = CLLocationCoordinate2D(latitude: 31.796082, longitude: -106.499771)
 
+    /// Dry interior of North Open Reserve. Named nature reserve,
+    /// not picnic woodland. Unique overlay at the pip. Unique versus
+    /// Franklin Mountains State Park (536 m) and South Open Reserve
+    /// (1386 m). Ridge Top Drive 106 m is outside the 90 m probe.
+    /// 174 m from OSM stream. Do not add matcher `north open`.
+    private static let northOpenReserve = CLLocationCoordinate2D(latitude: 31.839764, longitude: -106.459543)
+
+    /// Dry interior of South Open Reserve. Named nature reserve,
+    /// not picnic woodland. Unique overlay at the pip. Unique versus
+    /// Franklin Mountains State Park (479 m) and North Open Reserve
+    /// (1043 m). Alabama Street 128 m is rank 7; open reserve 6
+    /// still wins. Stream 423 m. Do not add matcher `south open`.
+    private static let southOpenReserve = CLLocationCoordinate2D(latitude: 31.827637, longitude: -106.455905)
+
     /// Interior of Lost Dog Nature Preserve. The listed centroid sits on a
     /// wash; this pip is on the wildlife sheet, 441 m from a path.
     private static let westWildlife = CLLocationCoordinate2D(latitude: 31.913286, longitude: -106.547160)
@@ -888,9 +902,18 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `amenity=community garden`, not the name. Unique versus Memorial
     /// Tree (2016 m) and Juan Navarro (2096 m). Wildcat Pass 66 m is
     /// rank 7; botanic 5 still wins. Hammock Park stays Park.
-    /// Drain 248 m. Do not add matcher `crestview`. Patterson and
-    /// Cherry Creek stay unheld.
+    /// Drain 248 m. Do not add matcher `crestview`. Patterson stays
+    /// unheld. Cherry Creek Community Garden is Held at 30.220468,
+    /// −97.808122.
     private static let crestviewGarden = CLLocationCoordinate2D(latitude: 30.343843, longitude: -97.720514)
+
+    /// Interior of Cherry Creek Community Garden. Phrase
+    /// `community garden`, not the word `cherry`. Unique overlay at
+    /// the pip. Unique versus South Hills (449 m) and Westgate
+    /// (449 m). Bayton Loop 25 m is rank 7; botanic 5 still wins.
+    /// Cherry Creek Drive 73 m stays a road. Williamson Creek /
+    /// Cherry Creek 106 m. Do not add matcher `cherry`.
+    private static let cherryCreekGarden = CLLocationCoordinate2D(latitude: 30.220468, longitude: -97.808122)
 
     /// Interior of Sandia Mountain Natural History Center. Phrase
     /// `natural history`, not Open reserve. Far from water.
@@ -1360,14 +1383,16 @@ final class HoldOnTheGlassTests: XCTestCase {
 
     /// Interior of Sandia Foothills Open Space. Named open-space
     /// cover. Unique overlay at the pip. Unique versus Sandia Mountain
-    /// Wilderness (8079 m) and High Desert Embudito Open Space (282 m).
-    /// High Desert Street Northeast 127 m is rank 7; open reserve 6
-    /// still wins. Embudito Arroyo 282 m. Do not add matcher `sandia`
-    /// or `foothills`.
-    private static let sandiaFoothills = CLLocationCoordinate2D(latitude: 35.138700, longitude: -106.480448)
+    /// Wilderness (127 m) and High Desert Embudito Open Space (144 m).
+    /// The listed 35.138700, −106.480448 pip sits 4 m off the wilderness
+    /// sheet, so wilderness (more tags, same rank) stole that Hold.
+    /// High Desert Street Northeast 16 m is rank 7; open reserve 6
+    /// still wins. Foothills Trail North stays a trail. Embudito Arroyo
+    /// is 205 m. Do not add matcher `sandia` or `foothills`.
+    private static let sandiaFoothills = CLLocationCoordinate2D(latitude: 35.138370, longitude: -106.481801)
 
-    /// High Desert Embudito Open Space stays unheld — Embudito
-    /// Arroyo sits inside the probe on every sampled interior.
+    /// High Desert Embudito Open Space stays unheld — Embudito Arroyo
+    /// sits inside the probe on every sampled interior.
     /// Unique versus Sandia Foothills as overlay cover. Do not add
     /// matcher `embudito`.
 
@@ -1996,6 +2021,30 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(franklin.card?.title, "Franklin Mountains State Park", "\(franklin)")
         XCTAssertEqual(franklin.card?.fieldRoute.first, Inspect.snakeTXCard, "\(franklin)")
         XCTAssertFalse((franklin.card?.doLine.lowercased() ?? "").contains("edible"), franklin.card?.doLine ?? "")
+
+        let northOpen = try hold(at: Self.northOpenReserve, zoom: 16)
+        XCTAssertEqual(northOpen.card?.klass, "Open reserve", "\(northOpen)")
+        XCTAssertEqual(northOpen.card?.title, "North Open Reserve", "\(northOpen)")
+        XCTAssertNotEqual(northOpen.card?.klass, "Park", "\(northOpen)")
+        XCTAssertNotEqual(northOpen.card?.title, "Franklin Mountains State Park", "\(northOpen)")
+        XCTAssertNotEqual(northOpen.card?.title, "South Open Reserve", "\(northOpen)")
+        XCTAssertNotEqual(northOpen.card?.title, "Ridge Top Drive", "\(northOpen)")
+        XCTAssertEqual(northOpen.card?.fieldRoute.first, Inspect.snakeTXCard, "\(northOpen)")
+        XCTAssertTrue((northOpen.card?.doLine.lowercased() ?? "").contains("diamondback"), northOpen.card?.doLine ?? "")
+        XCTAssertTrue((northOpen.card?.doLine.lowercased() ?? "").contains("javelina"), northOpen.card?.doLine ?? "")
+        XCTAssertFalse((northOpen.card?.doLine.lowercased() ?? "").contains("edible"), northOpen.card?.doLine ?? "")
+
+        let southOpen = try hold(at: Self.southOpenReserve, zoom: 16)
+        XCTAssertEqual(southOpen.card?.klass, "Open reserve", "\(southOpen)")
+        XCTAssertEqual(southOpen.card?.title, "South Open Reserve", "\(southOpen)")
+        XCTAssertNotEqual(southOpen.card?.klass, "Park", "\(southOpen)")
+        XCTAssertNotEqual(southOpen.card?.title, "Franklin Mountains State Park", "\(southOpen)")
+        XCTAssertNotEqual(southOpen.card?.title, "North Open Reserve", "\(southOpen)")
+        XCTAssertNotEqual(southOpen.card?.title, "Alabama Street", "\(southOpen)")
+        XCTAssertEqual(southOpen.card?.fieldRoute.first, Inspect.snakeTXCard, "\(southOpen)")
+        XCTAssertTrue((southOpen.card?.doLine.lowercased() ?? "").contains("diamondback"), southOpen.card?.doLine ?? "")
+        XCTAssertTrue((southOpen.card?.doLine.lowercased() ?? "").contains("javelina"), southOpen.card?.doLine ?? "")
+        XCTAssertFalse((southOpen.card?.doLine.lowercased() ?? "").contains("edible"), southOpen.card?.doLine ?? "")
 
         let hueco = try hold(at: Self.huecoTanks, zoom: 16)
         XCTAssertEqual(hueco.card?.klass, "Open reserve", "\(hueco)")
@@ -3488,6 +3537,26 @@ final class HoldOnTheGlassTests: XCTestCase {
         )
         XCTAssertFalse((crestview.card?.doLine.lowercased() ?? "").contains("edible"), crestview.card?.doLine ?? "")
 
+        let cherryCreek = try hold(at: Self.cherryCreekGarden, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(cherryCreek.card?.klass, "Botanic garden", "\(cherryCreek)")
+        XCTAssertEqual(cherryCreek.card?.title, "Cherry Creek Community Garden", "\(cherryCreek)")
+        XCTAssertNotEqual(cherryCreek.card?.klass, "Park", "\(cherryCreek)")
+        XCTAssertNotEqual(cherryCreek.card?.title, "Bayton Loop", "\(cherryCreek)")
+        XCTAssertNotEqual(cherryCreek.card?.title, "Cherry Creek Drive", "\(cherryCreek)")
+        XCTAssertNotEqual(cherryCreek.card?.title, "South Hills Conservation Area", "\(cherryCreek)")
+        XCTAssertNotEqual(cherryCreek.card?.title, "Westgate and Sunset Properties", "\(cherryCreek)")
+        XCTAssertEqual(cherryCreek.card?.fieldRoute.first, Inspect.plantTXCard, "\(cherryCreek)")
+        XCTAssertFalse(
+            cherryCreek.card?.fieldRoute.contains(Inspect.treeUseEastCard) ?? true,
+            "Cherry Creek Community Garden opened woodland tree-use: \(cherryCreek)"
+        )
+        XCTAssertFalse(
+            cherryCreek.card?.fieldRoute.contains(Inspect.cactusTXCard) ?? true,
+            "Cherry Creek Community Garden opened cactus: \(cherryCreek)"
+        )
+        XCTAssertTrue((cherryCreek.card?.doLine.lowercased() ?? "").contains("oleander"), cherryCreek.card?.doLine ?? "")
+        XCTAssertFalse((cherryCreek.card?.doLine.lowercased() ?? "").contains("edible"), cherryCreek.card?.doLine ?? "")
+
         let fourthStreet = try hold(at: Self.fourthStreetGarden, zoom: 16)
         XCTAssertEqual(fourthStreet.card?.klass, "Botanic garden", "\(fourthStreet)")
         XCTAssertEqual(fourthStreet.card?.title, "4th Street Garden", "\(fourthStreet)")
@@ -4483,6 +4552,8 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(foothills.card?.title, "Sandia Mountain Wilderness", "\(foothills)")
         XCTAssertNotEqual(foothills.card?.title, "High Desert Embudito Open Space", "\(foothills)")
         XCTAssertNotEqual(foothills.card?.title, "High Desert Street Northeast", "\(foothills)")
+        XCTAssertNotEqual(foothills.card?.title, "Foothills Trail North", "\(foothills)")
+        XCTAssertNotEqual(foothills.card?.title, "Embudito View Court Northeast", "\(foothills)")
         XCTAssertNotEqual(foothills.card?.title, "Bear Canyon Open Space East", "\(foothills)")
         XCTAssertEqual(foothills.card?.fieldRoute.first, Inspect.snakeTXCard, "\(foothills)")
         XCTAssertTrue(
@@ -5520,6 +5591,8 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("glasshouse", Self.glasshouse, 16.0),
             ("open reserve", Self.openReserve, 16.0),
             ("franklin reserve", Self.franklinReserve, 16.0),
+            ("north open reserve", Self.northOpenReserve, 16.0),
+            ("south open reserve", Self.southOpenReserve, 16.0),
             ("castner range", Self.castnerRange, 16.0),
             ("prehistoric trackways", Self.trackways, 16.0),
             ("white sands", Self.whiteSands, 16.0),

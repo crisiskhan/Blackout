@@ -216,6 +216,7 @@ public struct MapSession: Sendable {
 
 public enum USNG {
     public static func label(lat: Double, lon: Double) -> String {
+        guard lat.isFinite, lon.isFinite else { return "USNG —" }
         let zone = Int(floor((lon + 180) / 6) + 1)
         return String(format: "USNG %d / %.4f %.4f", zone, lat, lon)
     }
@@ -812,8 +813,9 @@ public enum OverlaySync: Sendable {
 }
 
 public enum MapKeepAwake: Sendable {
-    public static func idleTimerDisabled(mapInstrumentActive: Bool) -> Bool {
-        mapInstrumentActive
+    public static func idleTimerDisabled(mapInstrumentActive: Bool, pocket: Bool = false) -> Bool {
+        if pocket { return false }
+        return mapInstrumentActive
     }
 }
 

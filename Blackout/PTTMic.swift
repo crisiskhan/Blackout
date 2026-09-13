@@ -40,10 +40,19 @@ final class PTTMic {
         #endif
     }
 
+    /// Wired PTT is remembered across category changes. setCategory in
+    /// beginRecorder would otherwise drop the preferred input.
+    private var wantWiredPTT = false
+
     func preferWiredPTT(_ on: Bool) {
+        wantWiredPTT = on
+        applyPreferredInput()
+    }
+
+    private func applyPreferredInput() {
         #if canImport(AVFoundation)
         let session = AVAudioSession.sharedInstance()
-        guard on else {
+        guard wantWiredPTT else {
             try? session.setPreferredInput(nil)
             return
         }
@@ -93,6 +102,7 @@ final class PTTMic {
         do {
             try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker])
             try session.setActive(true)
+            applyPreferredInput()
         } catch {
             return false
         }

@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import BlackBox
 
 /// Five on-device Speak voices. Compact identifiers so airplane mode never
@@ -142,6 +143,7 @@ public struct InstrumentState: Equatable, Sendable {
     }
 }
 
+@Observable
 public final class InstrumentBoard: @unchecked Sendable {
     public private(set) var state = InstrumentState()
     private let box: EventLog

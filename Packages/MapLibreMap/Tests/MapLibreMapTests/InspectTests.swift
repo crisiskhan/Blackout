@@ -3441,6 +3441,42 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(cerroDePaz.klass, "Service road")
         XCTAssertNotEqual(cerroDePaz.klass, "Open reserve")
 
+        let northOpen = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "North Open Reserve"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(northOpen.klass, "Open reserve")
+        XCTAssertNotEqual(northOpen.klass, "Park")
+        XCTAssertEqual(northOpen.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(northOpen.doLine.lowercased().contains("diamondback"), northOpen.doLine)
+        XCTAssertTrue(northOpen.doLine.lowercased().contains("javelina"), northOpen.doLine)
+        XCTAssertFalse(northOpen.doLine.lowercased().contains("edible"), northOpen.doLine)
+
+        let ridgeTop = Inspect.read(
+            tags: ["highway": "residential", "name": "Ridge Top Drive"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(ridgeTop.klass, "Road")
+        XCTAssertNotEqual(ridgeTop.klass, "Open reserve")
+
+        let southOpen = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "South Open Reserve"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(southOpen.klass, "Open reserve")
+        XCTAssertNotEqual(southOpen.klass, "Park")
+        XCTAssertEqual(southOpen.fieldRoute.first, Inspect.snakeTXCard)
+        XCTAssertTrue(southOpen.doLine.lowercased().contains("diamondback"), southOpen.doLine)
+        XCTAssertTrue(southOpen.doLine.lowercased().contains("javelina"), southOpen.doLine)
+        XCTAssertFalse(southOpen.doLine.lowercased().contains("edible"), southOpen.doLine)
+
+        let alabamaStreet = Inspect.read(
+            tags: ["highway": "secondary", "name": "Alabama Street"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(alabamaStreet.klass, "Road")
+        XCTAssertNotEqual(alabamaStreet.klass, "Open reserve")
+
         let manzanoWSA = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -5242,6 +5278,34 @@ final class InspectTests: XCTestCase {
             "Open reserve"
         )
 
+        let northOpenReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "North Open Reserve",
+        ]
+        let ridgeTopDrive: [String: String] = [
+            "highway": "residential",
+            "name": "Ridge Top Drive",
+        ]
+        XCTAssertEqual(Inspect.pick([northOpenReserve, ridgeTopDrive])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([northOpenReserve, ridgeTopDrive]), pack: "tx-west").klass,
+            "Open reserve"
+        )
+
+        let southOpenReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "South Open Reserve",
+        ]
+        let alabamaWay: [String: String] = [
+            "highway": "secondary",
+            "name": "Alabama Street",
+        ]
+        XCTAssertEqual(Inspect.pick([southOpenReserve, alabamaWay])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([southOpenReserve, alabamaWay]), pack: "tx-west").klass,
+            "Open reserve"
+        )
+
         let westsideReserve: [String: String] = [
             "leisure": "nature_reserve",
             "name": "Westside Preserve",
@@ -6252,6 +6316,32 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(pattersonGarden.fieldRoute.contains(Inspect.treeUseEastCard))
         XCTAssertFalse(pattersonGarden.doLine.lowercased().contains("edible"), pattersonGarden.doLine)
 
+        let cherryCreekGarden = Inspect.read(
+            tags: ["leisure": "garden", "name": "Cherry Creek Community Garden"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(cherryCreekGarden.klass, "Botanic garden")
+        XCTAssertNotEqual(cherryCreekGarden.klass, "Park")
+        XCTAssertEqual(cherryCreekGarden.fieldRoute.first, Inspect.plantTXCard)
+        XCTAssertFalse(cherryCreekGarden.fieldRoute.contains(Inspect.treeUseEastCard))
+        XCTAssertFalse(cherryCreekGarden.fieldRoute.contains(Inspect.cactusTXCard))
+        XCTAssertTrue(cherryCreekGarden.doLine.lowercased().contains("oleander"), cherryCreekGarden.doLine)
+        XCTAssertFalse(cherryCreekGarden.doLine.lowercased().contains("edible"), cherryCreekGarden.doLine)
+
+        let baytonLoop = Inspect.read(
+            tags: ["highway": "residential", "name": "Bayton Loop"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(baytonLoop.klass, "Road")
+        XCTAssertNotEqual(baytonLoop.klass, "Botanic garden")
+
+        let cherryCreekDrive = Inspect.read(
+            tags: ["highway": "residential", "name": "Cherry Creek Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(cherryCreekDrive.klass, "Road")
+        XCTAssertNotEqual(cherryCreekDrive.klass, "Botanic garden")
+
         let brookviewRoad = Inspect.read(
             tags: ["highway": "residential", "name": "Brookview Road"],
             pack: "tx-east"
@@ -6340,7 +6430,7 @@ final class InspectTests: XCTestCase {
             tags: ["highway": "service", "name": "Cerro Gordo Road"],
             pack: "nm"
         )
-        XCTAssertEqual(cerroGordoRoad.klass, "Road")
+        XCTAssertEqual(cerroGordoRoad.klass, "Service road")
         XCTAssertNotEqual(cerroGordoRoad.klass, "Botanic garden")
 
         let winrock = Inspect.read(
@@ -6468,6 +6558,28 @@ final class InspectTests: XCTestCase {
         )
         XCTAssertEqual(
             Inspect.read(tags: Inspect.pick([pattersonSheet, brookviewStreet]), pack: "tx-east").klass,
+            "Botanic garden"
+        )
+
+        let cherryCreekSheet: [String: String] = [
+            "leisure": "garden",
+            "name": "Cherry Creek Community Garden",
+        ]
+        let baytonStreet: [String: String] = [
+            "highway": "residential",
+            "name": "Bayton Loop",
+        ]
+        let cherryDrive: [String: String] = [
+            "highway": "residential",
+            "name": "Cherry Creek Drive",
+        ]
+        XCTAssertEqual(Inspect.pick([cherryCreekSheet, baytonStreet, cherryDrive])["leisure"], "garden")
+        XCTAssertEqual(
+            Inspect.pick([cherryCreekSheet, baytonStreet, cherryDrive])["name"],
+            "Cherry Creek Community Garden"
+        )
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([cherryCreekSheet, baytonStreet, cherryDrive]), pack: "tx-east").klass,
             "Botanic garden"
         )
 

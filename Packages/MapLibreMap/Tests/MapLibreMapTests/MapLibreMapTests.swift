@@ -9,6 +9,7 @@ final class MapLibreMapTests: XCTestCase {
         let s = MapSession(pack: pack)
         XCTAssertEqual(s.tools.count, MapTool.allCases.count)
         XCTAssertTrue(USNG.label(lat: 31.76, lon: -106.49).contains("USNG"))
+        XCTAssertEqual(USNG.label(lat: .nan, lon: -106.49), "USNG —")
         XCTAssertTrue(s.styleRelativePath().contains("style.json"))
     }
 
@@ -966,6 +967,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(FixPublish.headingDelta(359, 1), 2)
         XCTAssertTrue(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true))
         XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: false))
+        XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true, pocket: true))
+        XCTAssertTrue(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true, pocket: false))
         XCTAssertTrue(MapCanvasHit.enabled(onMap: true, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: false, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: true, holding: true))

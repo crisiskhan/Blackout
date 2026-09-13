@@ -270,7 +270,7 @@ WILDLIFE_RANGE_PHRASES = (
 # Tract, Brodie and Oakdale Properties, Shudde Fath Tract,
 # Waste Management Wildlife Park, Southern Walnut Creek
 # Greenbelt, Uplands, Westgate and Sunset Properties, Alpine
-# Road Site, Sandia
+# Road Site, North Open Reserve, South Open Reserve, Sandia
 # Foothills Open Space, Golden Open Space, Paseo de la Mesa
 # Open Space, Arroyo Hondo Open Space, Durand Open Space,
 # East Tijeras Arroyo Open Space, Fenton Lake State Park,
@@ -289,7 +289,7 @@ WILDLIFE_RANGE_PHRASES = (
 # `land conservancy`, `conservancy`, `westside`, `billy`,
 # `piedmont`, `san luis`, `south hills`, `deer park`, `maple`,
 # `golden`, `paseo`, `anthem`, `oakdale`, `shudde`, `uplands`,
-# `westgate`, `alpine`, `hondo`, `durand`, `tijeras`, `fenton`, or `pino`. Phrase `open space` is not a bare contains —
+# `westgate`, `alpine`, `north open`, `south open`, `hondo`, `durand`, `tijeras`, `fenton`, or `pino`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
@@ -378,7 +378,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Patterson Park Community Garden. Brookview Road stays a
 # road. Do not add matcher `patterson`. Patterson stays
 # unheld — a public tap sits in the garden. Cherry Creek
-# Community Garden stays unheld (water too close). White Rock
+# Community Garden is Held at 30.220468, −97.808122. Unique
+# overlay versus South Hills / Westgate. Bayton Loop and
+# Cherry Creek Drive stay roads. Do not add matcher `cherry`.
+# White Rock
 # Community Garden stays unheld — Cañada del Buey sits 61 m
 # off that sheet. Phrase `community garden` already matches
 # Adam Gabriel Armijo Community Garden. Cerro Gordo Park stays

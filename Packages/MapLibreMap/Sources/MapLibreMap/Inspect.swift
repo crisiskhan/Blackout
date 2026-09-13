@@ -613,8 +613,10 @@ public enum Inspect {
     /// already matches Patterson Park Community Garden. Brookview
     /// Road stays a road. Do not add matcher `patterson`. Patterson
     /// stays unheld — a public tap sits in the garden. Cherry
-    /// Creek Community Garden stays unheld (water too close).
-    /// Amenity `community garden` already matches Crestview Commons
+    /// Creek Community Garden is Held at 30.220468, −97.808122.
+    /// Unique overlay versus South Hills / Westgate. Bayton Loop
+    /// and Cherry Creek Drive stay roads. Do not add matcher
+    /// `cherry`. Amenity `community garden` already matches Crestview Commons
     /// Neighborhood Park. Wildcat Pass stays a road. Hammock Park
     /// stays a park. Do not add matcher `crestview`. Desert Garden Park
     /// is Held at 31.790737, −106.228850. Winrock Garden is a mall bed and stays out.
@@ -697,7 +699,7 @@ public enum Inspect {
     /// Tract, Brodie and Oakdale Properties, Shudde Fath Tract,
     /// Waste Management Wildlife Park, Southern Walnut Creek
     /// Greenbelt, Uplands, Westgate and Sunset Properties, Alpine
-    /// Road Site, Sandia
+    /// Road Site, North Open Reserve, South Open Reserve, Sandia
     /// Foothills Open Space, Golden Open Space, Paseo de la Mesa
     /// Open Space, Arroyo Hondo Open Space, Durand Open Space,
     /// East Tijeras Arroyo Open Space, Fenton Lake State Park,
@@ -717,7 +719,7 @@ public enum Inspect {
     /// trust`, `land conservancy`, `conservancy`, `westside`,
     /// `billy`, `piedmont`, `san luis`, `south hills`, `deer park`,
     /// `maple`, `golden`, `paseo`, `anthem`, `oakdale`, `shudde`,
-    /// `uplands`, `westgate`, `alpine`, `hondo`, `durand`, `tijeras`, `fenton`,
+    /// `uplands`, `westgate`, `alpine`, `north open`, `south open`, `hondo`, `durand`, `tijeras`, `fenton`,
     /// or `pino`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
