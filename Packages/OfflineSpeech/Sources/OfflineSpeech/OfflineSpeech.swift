@@ -7,10 +7,33 @@ import AVFoundation
 import Speech
 #endif
 
+public struct SpeechTone: Equatable, Sendable {
+    public var identifier: String
+    public var rate: Float
+    public var pitch: Float
+    public var preDelay: TimeInterval
+    public var postDelay: TimeInterval
+
+    public init(
+        identifier: String,
+        rate: Float,
+        pitch: Float,
+        preDelay: TimeInterval,
+        postDelay: TimeInterval
+    ) {
+        self.identifier = identifier
+        self.rate = rate
+        self.pitch = pitch
+        self.preDelay = preDelay
+        self.postDelay = postDelay
+    }
+}
+
 public final class SpeechEngine: @unchecked Sendable {
     public private(set) var lastUtterance: String = ""
     public private(set) var lastFailed = false
     public private(set) var listening = false
+    private var tone: SpeechTone?
     private let box: EventLog
     #if canImport(AVFoundation)
     private var synth: AVSpeechSynthesizer?
@@ -26,6 +49,10 @@ public final class SpeechEngine: @unchecked Sendable {
     #endif
 
     public init(box: EventLog) { self.box = box }
+
+    public func setTone(_ tone: SpeechTone) {
+        self.tone = tone
+    }
 
     @discardableResult
     public func speak(_ text: String, locale: String) -> Bool {
@@ -44,13 +71,24 @@ public final class SpeechEngine: @unchecked Sendable {
             engine.stopSpeaking(at: .immediate)
         }
         let u = AVSpeechUtterance(string: trimmed)
-        u.voice = AVSpeechSynthesisVoice(language: locale == "es" ? "es-MX" : "en-US")
-        u.rate = AVSpeechUtteranceDefaultSpeechRate
-        u.preUtteranceDelay = 0.12
-        u.postUtteranceDelay = 0.2
+        let lang = locale == "es" ? "es-MX" : "en-US"
+        if let tone {
+            u.voice = AVSpeechSynthesisVoice(identifier: tone.identifier)
+                ?? AVSpeechSynthesisVoice(language: lang)
+            u.rate = tone.rate
+            u.pitchMultiplier = tone.pitch
+            u.preUtteranceDelay = tone.preDelay
+            u.postUtteranceDelay = tone.postDelay
+        } else {
+            u.voice = AVSpeechSynthesisVoice(language: lang)
+            u.rate = AVSpeechUtteranceDefaultSpeechRate
+            u.preUtteranceDelay = 0.12
+            u.postUtteranceDelay = 0.2
+        }
         engine.speak(u)
         lastFailed = false
-        lastUtterance = "\(locale):\(trimmed)"
+        let voiceBit = tone?.identifier ?? lang
+        lastUtterance = "\(locale):\(voiceBit):\(trimmed)"
         box.log("speech", lastUtterance)
         return true
         #else

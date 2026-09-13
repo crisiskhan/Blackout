@@ -153,4 +153,21 @@ final class SearchTests: XCTestCase {
         let book = SearchIndex.load(data: data)
         XCTAssertTrue(book.lookup("221 montana").isEmpty)
     }
+
+    func testStreetNameNearAPackedStreetAndNotAtNullIsland() {
+        let idx = SearchIndex(pois: [
+            ["name": "Montana Avenue", "kind": "street", "lat": 31.783693, "lon": -106.419278],
+            ["name": "Piedras Street", "kind": "street", "lat": 31.780000, "lon": -106.419278],
+        ])
+        XCTAssertEqual(
+            idx.streetName(near: 31.783693, lon: -106.419278),
+            "Montana Avenue"
+        )
+        XCTAssertNil(idx.streetName(near: 0, lon: 0))
+        let names = idx.streetNames(along: [
+            (31.783693, -106.419278),
+            (31.783693, -106.418000),
+        ])
+        XCTAssertEqual(names, ["Montana Avenue"])
+    }
 }

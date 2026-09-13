@@ -210,6 +210,52 @@ final class RouterTests: XCTestCase {
         XCTAssertGreaterThan(text.count, 40)
     }
 
+    func testVoiceNavNamesTheStreetsItTurnsOnto() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let streets: [String?] = ["Montana Avenue", "Piedras Street"]
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en",
+            streets: streets
+        )
+        XCTAssertTrue(text.contains("Walk 656 feet on Montana Avenue."))
+        XCTAssertTrue(text.contains("Turn left onto Piedras Street."))
+        XCTAssertTrue(text.contains("Walk 328 feet on Piedras Street."))
+        XCTAssertFalse(text.contains("Turn left. "))
+        let drive = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en",
+            travelMode: .drive,
+            streets: streets
+        )
+        XCTAssertTrue(drive.contains("Drive 656 feet on Montana Avenue."))
+        XCTAssertTrue(drive.contains("Turn left onto Piedras Street."))
+        XCTAssertEqual(
+            VoiceNav.hudTurns(coords, travelMode: .drive, streets: streets),
+            [
+                "DRIVE · 656 FT · MONTANA AVENUE",
+                "LEFT · PIEDRAS STREET",
+                "DRIVE · 328 FT · PIEDRAS STREET",
+                "ARRIVE",
+            ]
+        )
+        XCTAssertEqual(VoiceNav.nextTurnHUD(coords, streets: streets), "LEFT · PIEDRAS STREET")
+    }
+
     func testVoiceNavDriveTurnByTurnUsesDriveNotWalk() {
         let coords: [(lat: Double, lon: Double)] = [
             (0.0, 0.0),

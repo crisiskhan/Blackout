@@ -26,8 +26,9 @@ unfinished tabs.
   Numbers sit on void — no grey plate. No MAP BEARING chip — profile BEARING on the
   party and address cards is enough.
 - WALK is the shortest walkable street path. DRIVE is the fastest packed street path
-  (road class on the graph, one-ways bind cars). SPEAK says Walk or Drive turn by turn
-  and never paints that script on the field.
+  (road class on the graph, one-ways bind cars). SPEAK says Walk or Drive turn by turn,
+  names the streets it turns onto when the pack has them, and never paints that script
+  on the field. INSTRUMENTS VOICE picks STEEL / NIGHT / RANGE / MESH / DESERT.
 - Honesty over debug. `NET · NONE` and `NO VISION MODEL` stay. `Whisper <10 m: yes`
   does not. Capability honesty is not lawyer copy.
 - Off-grid instrument: the glass carries no lawyer copy. No `WHAT WE CANNOT DO`

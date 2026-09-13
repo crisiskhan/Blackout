@@ -159,6 +159,12 @@ public struct SearchIndex: Sendable {
     private let streetTokenKeys: [String]
     private let streetCenters: [(lat: Double, lon: Double)]
     private let streetFreq: [Int]
+    private let streetCell: [Int64: [Int]]
+    private let rangeCell: [Int64: [Int]]
+
+    private static let nameCellDegrees = 0.01
+    private static let nameReachMeters = 55.0
+    private static let cellStride: Int64 = 100_000
 
     private struct Doc: Sendable {
         var name: String
@@ -217,6 +223,53 @@ public struct SearchIndex: Sendable {
 
     public static func rangeLabel(_ meters: Double) -> String {
         BlackoutTokens.Distance.hud(meters)
+    }
+
+    /// Nearest packed street name. Nil when nothing named sits in reach —
+    /// SPEAK must not invent a road.
+    public func streetName(near lat: Double, lon: Double, withinMeters: Double = 55) -> String? {
+        guard lat.isFinite, lon.isFinite else { return nil }
+        let reach = min(withinMeters, Self.nameReachMeters)
+        var best: (name: String, metres: Double)?
+        let cy = Int64((lat / Self.nameCellDegrees).rounded(.down))
+        let cx = Int64((lon / Self.nameCellDegrees).rounded(.down))
+        for dy in Int64(-1)...1 {
+            for dx in Int64(-1)...1 {
+                let key = Self.nameCell(y: cy + dy, x: cx + dx)
+                for i in streetCell[key] ?? [] {
+                    let d = docs[i]
+                    let metres = haversine(lat, lon, d.lat, d.lon)
+                    if metres <= reach, best == nil || metres < best!.metres {
+                        best = (d.name, metres)
+                    }
+                }
+                for i in rangeCell[key] ?? [] {
+                    let range = addrRanges[i]
+                    guard addrStreets.indices.contains(range.street) else { continue }
+                    let metres = metresToSegment(
+                        lat: lat,
+                        lon: lon,
+                        aLat: range.lat0,
+                        aLon: range.lon0,
+                        bLat: range.lat1,
+                        bLon: range.lon1
+                    )
+                    if metres <= reach, best == nil || metres < best!.metres {
+                        best = (addrStreets[range.street], metres)
+                    }
+                }
+            }
+        }
+        let name = best?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return name.isEmpty ? nil : name
+    }
+
+    /// One name per route segment, mid-point lookup. Missing names stay nil.
+    public func streetNames(along: [(lat: Double, lon: Double)]) -> [String?] {
+        guard along.count >= 2 else { return [] }
+        return zip(along, along.dropFirst()).map { a, b in
+            streetName(near: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2)
+        }
     }
 
     public func fts(_ query: String) -> [SearchHit] {
@@ -369,6 +422,18 @@ public struct SearchIndex: Sendable {
         }
         streetCenters = centers
         streetFreq = counts
+        var streetCell: [Int64: [Int]] = [:]
+        for (i, d) in docs.enumerated() where SearchHUDWord.from(packed: d.kind) == .street {
+            streetCell[Self.nameCell(lat: d.lat, lon: d.lon), default: []].append(i)
+        }
+        self.streetCell = streetCell
+        var rangeCell: [Int64: [Int]] = [:]
+        for (i, range) in addrRanges.enumerated() {
+            let lat = (range.lat0 + range.lat1) / 2
+            let lon = (range.lon0 + range.lon1) / 2
+            rangeCell[Self.nameCell(lat: lat, lon: lon), default: []].append(i)
+        }
+        self.rangeCell = rangeCell
     }
 
     private static func poi(fromFeature f: [String: Any]) -> [String: Any]? {
@@ -1066,5 +1131,42 @@ public struct SearchIndex: Sendable {
             + cos(p1) * cos(p2) * sin(dl / 2) * sin(dl / 2)
         let clamped = max(0, min(1, h))
         return 2 * r * asin(sqrt(clamped))
+    }
+
+    private func metresToSegment(
+        lat: Double,
+        lon: Double,
+        aLat: Double,
+        aLon: Double,
+        bLat: Double,
+        bLon: Double
+    ) -> Double {
+        let metresLon = 111_320.0 * cos(lat * .pi / 180)
+        let ax = (aLon - lon) * metresLon
+        let ay = (aLat - lat) * 110_540.0
+        let bx = (bLon - lon) * metresLon
+        let by = (bLat - lat) * 110_540.0
+        let dx = bx - ax
+        let dy = by - ay
+        let len2 = dx * dx + dy * dy
+        if len2 < 1 {
+            return haversine(lat, lon, aLat, aLon)
+        }
+        var t = (-ax * dx - ay * dy) / len2
+        t = min(1, max(0, t))
+        let px = ax + t * dx
+        let py = ay + t * dy
+        return (px * px + py * py).squareRoot()
+    }
+
+    private static func nameCell(lat: Double, lon: Double) -> Int64 {
+        nameCell(
+            y: Int64((lat / nameCellDegrees).rounded(.down)),
+            x: Int64((lon / nameCellDegrees).rounded(.down))
+        )
+    }
+
+    private static func nameCell(y: Int64, x: Int64) -> Int64 {
+        y &* cellStride &+ x
     }
 }

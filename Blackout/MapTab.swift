@@ -70,7 +70,7 @@ struct MapTab: View {
                 fitToken: runtime.fitPackToken,
                 interactive: MapCanvasHit.enabled(
                     onMap: runtime.tab == .map,
-                    holding: runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil,
+                    holding: runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil || runtime.showSpeakTurns,
                     arranging: runtime.hudLayoutMode
                 ),
                 onMapTap: { lat, lon in
@@ -104,10 +104,17 @@ struct MapTab: View {
             // The scrim already keeps a thumb off the canvas. This is the
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
-            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil)
-            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil {
+            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil || runtime.showSpeakTurns)
+            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil, !runtime.showSpeakTurns {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
+            }
+            if runtime.tab == .map, runtime.showSpeakTurns, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil {
+                SpeakTurnCard(
+                    turns: runtime.speakHUDTurns,
+                    onClose: { runtime.closeSpeakTurns() }
+                )
+                .padding(hudReserve)
             }
             if runtime.tab == .map, let person = runtime.heldParty {
                 PartyHoldCard(
@@ -370,7 +377,7 @@ struct MapTab: View {
                                 .shadow(color: Theme.void.opacity(0.95), radius: 3)
                                 .shadow(color: Theme.void.opacity(0.72), radius: 8)
                         case .dest:
-                            MapFieldDestRail(dest: point)
+                            MapFieldDestRail(dest: point, nextTurn: runtime.speakNextHUD)
                         }
                     }
                 }
@@ -382,14 +389,19 @@ struct MapTab: View {
 
     private struct MapFieldDestRail: View {
         var dest: (lat: Double, lon: Double)?
+        var nextTurn: String
         @State private var beat: Double = 0.28
 
         var body: some View {
             let field = MapFieldChrome.destValue(point: dest)
             let fieldInk = destInk(MapFieldDestMode.coordinates)
+            let turn = nextTurn.trimmingCharacters(in: .whitespacesAndNewlines)
             return VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
                     chip(MapFieldDestMode.coordinates)
+                    if !turn.isEmpty {
+                        chip(MapFieldDestMode.turns)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Text(field)
@@ -403,6 +415,18 @@ struct MapTab: View {
                     .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
                     .accessibilityLabel(MapFieldDestMode.coordinates.title)
                     .accessibilityValue(field)
+                if !turn.isEmpty {
+                    Text(turn)
+                        .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+                        .foregroundStyle(destInk(MapFieldDestMode.turns))
+                        .lineLimit(1)
+                        .minimumScaleFactor(1)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                        .accessibilityLabel(MapFieldDestMode.turns.title)
+                        .accessibilityValue(turn)
+                }
             }
             .padding(.vertical, 6)
             .onAppear {
@@ -416,6 +440,8 @@ struct MapTab: View {
             switch destMode {
             case .coordinates:
                 return Theme.fix
+            case .turns:
+                return Theme.silver
             }
         }
 
@@ -574,6 +600,7 @@ struct MapTab: View {
             ?? runtime.packs?.packURL("pois.geojson")
         guard let url else {
             packedIndex = SearchIndex(pois: [])
+            runtime.searchIndex = packedIndex
             return
         }
         Task.detached(priority: .userInitiated) {
@@ -588,6 +615,7 @@ struct MapTab: View {
     private func applyLoadedIndex(_ idx: SearchIndex, packID: String?) {
         guard runtime.packs?.active?.id == packID else { return }
         packedIndex = idx
+        runtime.searchIndex = idx
         if SearchIndex.asking(query) {
             search()
         }

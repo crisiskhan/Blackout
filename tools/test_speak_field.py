@@ -335,6 +335,23 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         speech = read("Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift")
         self.assertNotIn("prefix(", speech)
         self.assertIn("AVSpeechUtterance(string: trimmed)", speech)
+        self.assertIn("setTone", speech)
+        tab = self.map_tab
+        self.assertIn("SpeakTurnCard(", tab)
+        self.assertIn("runtime.speakHUDTurns", tab)
+        self.assertNotIn("ScrollView", tab)
+        card = read("Blackout", "SpeakTurnCard.swift")
+        self.assertIn("struct SpeakTurnCard", card)
+        self.assertIn("Theme.glass", card)
+        self.assertNotIn(".spring(", card)
+        self.assertNotIn("Turn left onto", card)
+        self.assertNotIn("best in class", card.lower())
+        self.assertNotIn("Waze", card)
+        app = read("Blackout", "AppRuntime.swift")
+        speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        self.assertIn("speakHUDTurns", speak)
+        self.assertIn("speakNextHUD", speak)
+        self.assertIn("streetNames(along:", speak)
 
 
 class FieldChromeSourceContracts(unittest.TestCase):
@@ -372,6 +389,9 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("%.5f, %.5f", self.route_line)
         self.assertIn("point: (lat: Double, lon: Double)?", self.route_line)
         self.assertIn("enum MapFieldDestMode", self.route_line)
+        self.assertIn("case coordinates", self.route_line)
+        self.assertIn("case turns", self.route_line)
+        self.assertIn('return "TURNS"', self.route_line)
         self.assertIn("func destValue(", self.route_line)
         self.assertIn("func destRailVisible(", self.route_line)
         self.assertIn("hasYouFix", self.route_line)
@@ -393,6 +413,9 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("destValue", chip)
         self.assertIn("chipMode.title", chip)
         self.assertNotIn("MapFieldDestMode.bearing", rail)
+        self.assertIn("MapFieldDestMode.turns", rail)
+        self.assertIn("nextTurn", rail)
+        self.assertIn("runtime.speakNextHUD", chrome)
         self.assertIn("layoutPriority", chrome)
         theme = read("Blackout", "Theme.swift")
         self.assertIn("struct MapFieldDestChipStyle", theme)

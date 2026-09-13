@@ -40,7 +40,8 @@ public enum VoiceNav: Sendable {
         destination: (lat: Double, lon: Double)?,
         you: (lat: Double, lon: Double)?,
         locale: String,
-        travelMode: TravelMode = .walk
+        travelMode: TravelMode = .walk,
+        streets: [String?] = []
     ) -> String {
         _ = locale
         let headingBit: String
@@ -53,7 +54,7 @@ public enum VoiceNav: Sendable {
             let total = zip(routeCoords, routeCoords.dropFirst()).reduce(0.0) { acc, pair in
                 acc + GraphRouter.haversine(pair.0.lat, pair.0.lon, pair.1.lat, pair.1.lon)
             }
-            let body = steps(routeCoords, travelMode: travelMode).joined(separator: " ")
+            let body = steps(routeCoords, travelMode: travelMode, streets: streets).joined(separator: " ")
             return "\(body) Total \(metersPhrase(total)). \(headingBit)"
         }
         if planChrome == GraphPlan.offGraph {
@@ -68,13 +69,45 @@ public enum VoiceNav: Sendable {
 
     public static func steps(
         _ coords: [(lat: Double, lon: Double)],
-        travelMode: TravelMode = .walk
+        travelMode: TravelMode = .walk,
+        streets: [String?] = []
+    ) -> [String] {
+        walk(coords, travelMode: travelMode, streets: streets, spoken: true)
+    }
+
+    /// HUD words for the glass TURNS plate. Never the spoken script.
+    public static func hudTurns(
+        _ coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode = .walk,
+        streets: [String?] = []
+    ) -> [String] {
+        walk(coords, travelMode: travelMode, streets: streets, spoken: false)
+    }
+
+    /// The next named turn for the dest rail. Empty when the line is straight in.
+    public static func nextTurnHUD(
+        _ coords: [(lat: Double, lon: Double)],
+        streets: [String?] = []
+    ) -> String {
+        for line in hudTurns(coords, streets: streets) {
+            if line.hasPrefix("LEFT") || line.hasPrefix("RIGHT") || line.hasPrefix("AROUND") {
+                return line
+            }
+        }
+        return ""
+    }
+
+    private static func walk(
+        _ coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode,
+        streets: [String?],
+        spoken: Bool
     ) -> [String] {
         guard coords.count >= 2 else { return [] }
-        let verb = legVerb(travelMode)
         var lines: [String] = []
         var acc = 0.0
         var prevBearing: Double?
+        var legStreet = streetAt(streets, 0)
         for i in 0..<(coords.count - 1) {
             let a = coords[i]
             let b = coords[i + 1]
@@ -92,27 +125,74 @@ public enum VoiceNav: Sendable {
                 prevBearing = brg
             case .left, .right, .uturn:
                 if acc >= minLegMeters {
-                    lines.append("\(verb) \(metersPhrase(acc)).")
+                    lines.append(legLine(travelMode, acc, legStreet, spoken: spoken))
                 }
-                switch kind {
-                case .left:
-                    lines.append("Turn left.")
-                case .right:
-                    lines.append("Turn right.")
-                case .uturn:
-                    lines.append("Turn around.")
-                case .straight:
-                    break
-                }
+                let onto = streetAt(streets, i)
+                lines.append(turnLine(kind, onto, spoken: spoken))
                 acc = m
                 prevBearing = brg
+                legStreet = onto
             }
         }
         if acc >= minLegMeters {
-            lines.append("\(verb) \(metersPhrase(acc)).")
+            lines.append(legLine(travelMode, acc, legStreet, spoken: spoken))
         }
-        lines.append(arrive)
+        lines.append(spoken ? arrive : "ARRIVE")
         return lines
+    }
+
+    private static func streetAt(_ streets: [String?], _ index: Int) -> String? {
+        guard streets.indices.contains(index) else { return nil }
+        let name = streets[index]?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return name.isEmpty ? nil : name
+    }
+
+    private static func legLine(
+        _ mode: TravelMode,
+        _ meters: Double,
+        _ street: String?,
+        spoken: Bool
+    ) -> String {
+        if spoken {
+            if let street {
+                return "\(legVerb(mode)) \(metersPhrase(meters)) on \(street)."
+            }
+            return "\(legVerb(mode)) \(metersPhrase(meters))."
+        }
+        let verb = mode == .drive ? "DRIVE" : "WALK"
+        return hudFit([verb, BlackoutTokens.Distance.hud(meters)] + (street.map { [$0.uppercased()] } ?? []))
+    }
+
+    private static func turnLine(_ kind: VoiceTurn, _ onto: String?, spoken: Bool) -> String {
+        switch kind {
+        case .straight:
+            return spoken ? "" : ""
+        case .left:
+            if spoken {
+                return onto.map { "Turn left onto \($0)." } ?? "Turn left."
+            }
+            return hudFit(["LEFT"] + (onto.map { [$0.uppercased()] } ?? []))
+        case .right:
+            if spoken {
+                return onto.map { "Turn right onto \($0)." } ?? "Turn right."
+            }
+            return hudFit(["RIGHT"] + (onto.map { [$0.uppercased()] } ?? []))
+        case .uturn:
+            if spoken {
+                return onto.map { "Turn around onto \($0)." } ?? "Turn around."
+            }
+            return hudFit(["AROUND"] + (onto.map { [$0.uppercased()] } ?? []))
+        }
+    }
+
+    private static func hudFit(_ parts: [String]) -> String {
+        var parts = parts.filter { !$0.isEmpty }
+        var line = parts.joined(separator: " · ")
+        while line.count > 44, parts.count > 1 {
+            parts.removeLast()
+            line = parts.joined(separator: " · ")
+        }
+        return line
     }
 
     public static func turn(from: Double, to: Double) -> VoiceTurn {

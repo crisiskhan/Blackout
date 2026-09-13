@@ -66,6 +66,14 @@ final class AppRuntime {
     var locale = "en"
     var lastKnownFix: (lat: Double, lon: Double)?
     var marks: [MapMark] = []
+    /// Packed name index for SEARCH and named SPEAK streets.
+    var searchIndex: SearchIndex?
+    /// HUD words for the glass TURNS plate. Empty until SPEAK has a line.
+    var speakHUDTurns: [String] = []
+    /// Dest-rail next street. Empty when the line is straight in.
+    var speakNextHUD = ""
+    /// Glass TURNS plate after SPEAK. Not a paragraph over the canvas.
+    var showSpeakTurns = false
     /// The inspect card the map is holding open. `nil` whenever it is clear.
     var held: HeldPoint?
     /// A person mark the map is holding open. Mutually exclusive with `held`.
@@ -132,6 +140,8 @@ final class AppRuntime {
         ptt = PTTDeck(box: box)
         speech = SpeechEngine(box: box)
         mesh.airplane = true
+        instruments.setVoice(NavVoice.parse(UserDefaults.standard.string(forKey: "nav.voice")))
+        applySpeechTone()
         fix.applyInstrument(instruments.state)
         if let saved = UserDefaults.standard.string(forKey: "party.code"), !saved.isEmpty {
             roster = roster.setting(code: saved)
@@ -333,6 +343,7 @@ final class AppRuntime {
         guard lat.isFinite, lon.isFinite else { return }
         pulse()
         pickingEmblem = false
+        closeSpeakTurns()
         heldParty = nil
         heldAddress = nil
         let id = packs?.active?.id
@@ -376,6 +387,7 @@ final class AppRuntime {
         guard hit.lat.isFinite, hit.lon.isFinite else { return }
         pulse()
         pickingEmblem = false
+        closeSpeakTurns()
         held = nil
         heldParty = nil
         let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -438,6 +450,7 @@ final class AppRuntime {
         guard lat.isFinite, lon.isFinite else { return }
         pulse()
         pickingEmblem = false
+        closeSpeakTurns()
         held = nil
         heldAddress = nil
         if id == UserPuck.title {
@@ -600,12 +613,14 @@ final class AppRuntime {
         routeChrome = ""
         toolChrome = ""
         speechChrome = ""
+        clearSpeakTurns()
     }
 
     func navigate(mode: TravelMode) {
         touch(.dock)
         speechChrome = ""
         travelMode = mode
+        clearSpeakTurns()
         let pack = packs?.active
         let packName = pack?.name ?? ""
         let dest = destination()
@@ -777,6 +792,7 @@ final class AppRuntime {
     func speakMap() {
         touch(.dock)
         let pack = packs?.active?.name ?? "no pack"
+        let streets = searchIndex?.streetNames(along: routeCoords) ?? []
         let text = VoiceNav.prompt(
             packName: pack,
             headingDeg: headingDeg,
@@ -785,10 +801,13 @@ final class AppRuntime {
             destination: destination(),
             you: youCoordinate(),
             locale: locale,
-            travelMode: travelMode
+            travelMode: travelMode,
+            streets: streets
         )
         // The whole turn-by-turn script goes to the voice. The field only gets one short
-        // status line — the route itself is already drawn in silver.
+        // status line — the route itself is already drawn in silver. Named streets live
+        // on the TURNS plate and the dest rail, never as a spoken paragraph on the canvas.
+        applySpeechTone()
         let spoke = speech.speak(text, locale: locale)
         speechChrome = SpeakStatus.chrome(
             spoke: spoke,
@@ -796,6 +815,42 @@ final class AppRuntime {
             planChrome: navChrome,
             destination: destination(),
             you: youCoordinate()
+        )
+        if spoke, routeCoords.count >= 2 {
+            speakHUDTurns = VoiceNav.hudTurns(routeCoords, travelMode: travelMode, streets: streets)
+            speakNextHUD = VoiceNav.nextTurnHUD(routeCoords, streets: streets)
+            showSpeakTurns = !speakHUDTurns.isEmpty
+        } else {
+            clearSpeakTurns()
+        }
+    }
+
+    func closeSpeakTurns() {
+        showSpeakTurns = false
+    }
+
+    private func clearSpeakTurns() {
+        speakHUDTurns = []
+        speakNextHUD = ""
+        showSpeakTurns = false
+    }
+
+    func setNavVoice(_ voice: NavVoice) {
+        instruments.setVoice(voice)
+        UserDefaults.standard.set(voice.rawValue, forKey: "nav.voice")
+        applySpeechTone()
+    }
+
+    func applySpeechTone() {
+        let voice = instruments.state.voice
+        speech.setTone(
+            SpeechTone(
+                identifier: voice.identifier(locale: locale),
+                rate: voice.rate,
+                pitch: voice.pitch,
+                preDelay: voice.preDelay,
+                postDelay: voice.postDelay
+            )
         )
     }
 
@@ -1182,6 +1237,7 @@ final class AppRuntime {
         navChrome = plan
         routeChrome = chrome
         speechChrome = ""
+        clearSpeakTurns()
     }
 
     private func destinationOnPack(_ dest: (lat: Double, lon: Double)?) -> Bool {

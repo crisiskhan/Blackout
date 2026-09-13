@@ -2,6 +2,7 @@ import SwiftUI
 import BatteryAuction
 import Tokens
 import Almanac
+import Instruments
 
 struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
@@ -103,6 +104,14 @@ struct InstrumentsView: View {
                         set: { runtime.attachGNSSPuck($0) }
                     ))
 
+                    sectionLabel("VOICE")
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        ForEach(NavVoice.allCases, id: \.self) { voice in
+                            Button(voice.title) { runtime.setNavVoice(voice) }
+                                .buttonStyle(HUDActionStyle(filled: runtime.instruments.state.voice == voice))
+                        }
+                    }
+
                     sectionLabel("POWER")
                     HStack(spacing: 1) {
                         ForEach(PowerMode.allCases, id: \.self) { mode in
@@ -121,6 +130,7 @@ struct InstrumentsView: View {
 
                     hudButton("ES / EN") {
                         runtime.locale = runtime.locale == "es" ? "en" : "es"
+                        runtime.applySpeechTone()
                     }
                 }
                 .padding(16)

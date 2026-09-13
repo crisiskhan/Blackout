@@ -263,11 +263,14 @@ public enum MagTrueChip {
 
 public enum MapFieldDestMode: String, CaseIterable, Sendable {
     case coordinates
+    case turns
 
     public var title: String {
         switch self {
         case .coordinates:
             return "COORDINATES"
+        case .turns:
+            return "TURNS"
         }
     }
 }

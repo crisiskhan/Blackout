@@ -514,6 +514,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(withDest[1].text.contains("31.76190"))
         XCTAssertLessThanOrEqual(withDest[1].text.count, 44)
         XCTAssertEqual(MapFieldDestMode.coordinates.title, "COORDINATES")
+        XCTAssertEqual(MapFieldDestMode.turns.title, "TURNS")
         XCTAssertEqual(
             MapFieldChrome.destLine(dest: dest),
             "31.75800, -106.48700"

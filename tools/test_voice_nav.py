@@ -71,12 +71,66 @@ START_HINT = "Set a destination, then WALK or DRIVE, then SPEAK for turn by turn
 DEST_HINT = "Tap WALK or DRIVE for the street path, then SPEAK."
 
 
-def steps(coords: list[tuple[float, float]], mode: str = "walk") -> list[str]:
+def street_at(streets: list[str | None], index: int) -> str | None:
+    if index < 0 or index >= len(streets):
+        return None
+    name = streets[index]
+    if not name:
+        return None
+    trimmed = name.strip()
+    return trimmed or None
+
+
+def spoken_leg(mode: str, meters: float, street: str | None) -> str:
+    if street:
+        return f"{verb(mode)} {meters_phrase(meters)} on {street}."
+    return f"{verb(mode)} {meters_phrase(meters)}."
+
+
+def spoken_turn(kind: str, onto: str | None) -> str:
+    if kind == "uturn":
+        return f"Turn around onto {onto}." if onto else "Turn around."
+    word = "left" if kind == "left" else "right"
+    if onto:
+        return f"Turn {word} onto {onto}."
+    return f"Turn {word}."
+
+
+def hud_turn_word(kind: str) -> str:
+    if kind == "left":
+        return "LEFT"
+    if kind == "right":
+        return "RIGHT"
+    return "AROUND"
+
+
+def hud_leg(mode: str, meters: float, street: str | None) -> str:
+    word = "DRIVE" if mode == "drive" else "WALK"
+    parts = [word, distance_hud(meters)]
+    if street:
+        parts.append(street.upper())
+    return " · ".join(parts)
+
+
+def hud_turn(kind: str, onto: str | None) -> str:
+    parts = [hud_turn_word(kind)]
+    if onto:
+        parts.append(onto.upper())
+    return " · ".join(parts)
+
+
+def steps(
+    coords: list[tuple[float, float]],
+    mode: str = "walk",
+    streets: list[str | None] | None = None,
+) -> list[str]:
     if len(coords) < 2:
         return []
+    names = streets or []
     lines: list[str] = []
     acc = 0.0
     prev_bearing: float | None = None
+    leg_street: str | None = street_at(names, 0)
     for i in range(len(coords) - 1):
         a, b = coords[i], coords[i + 1]
         m = haversine(a[0], a[1], b[0], b[1])
@@ -91,19 +145,64 @@ def steps(coords: list[tuple[float, float]], mode: str = "walk") -> list[str]:
             prev_bearing = brg
             continue
         if acc >= 8:
-            lines.append(f"{verb(mode)} {meters_phrase(acc)}.")
-        if kind == "uturn":
-            lines.append("Turn around.")
-        elif kind == "left":
-            lines.append("Turn left.")
-        else:
-            lines.append("Turn right.")
+            lines.append(spoken_leg(mode, acc, leg_street))
+        onto = street_at(names, i)
+        lines.append(spoken_turn(kind, onto))
         acc = m
         prev_bearing = brg
+        leg_street = onto
     if acc >= 8:
-        lines.append(f"{verb(mode)} {meters_phrase(acc)}.")
+        lines.append(spoken_leg(mode, acc, leg_street))
     lines.append("Arrive at destination.")
     return lines
+
+
+def hud_turns(
+    coords: list[tuple[float, float]],
+    mode: str = "walk",
+    streets: list[str | None] | None = None,
+) -> list[str]:
+    if len(coords) < 2:
+        return []
+    names = streets or []
+    lines: list[str] = []
+    acc = 0.0
+    prev_bearing: float | None = None
+    leg_street: str | None = street_at(names, 0)
+    for i in range(len(coords) - 1):
+        a, b = coords[i], coords[i + 1]
+        m = haversine(a[0], a[1], b[0], b[1])
+        brg = bearing(a[0], a[1], b[0], b[1])
+        if prev_bearing is None:
+            acc += m
+            prev_bearing = brg
+            continue
+        kind = turn_name(prev_bearing, brg)
+        if kind == "straight":
+            acc += m
+            prev_bearing = brg
+            continue
+        if acc >= 8:
+            lines.append(hud_leg(mode, acc, leg_street))
+        onto = street_at(names, i)
+        lines.append(hud_turn(kind, onto))
+        acc = m
+        prev_bearing = brg
+        leg_street = onto
+    if acc >= 8:
+        lines.append(hud_leg(mode, acc, leg_street))
+    lines.append("ARRIVE")
+    return lines
+
+
+def next_turn_hud(
+    coords: list[tuple[float, float]],
+    streets: list[str | None] | None = None,
+) -> str:
+    for line in hud_turns(coords, streets=streets):
+        if line.startswith("LEFT") or line.startswith("RIGHT") or line.startswith("AROUND"):
+            return line
+    return ""
 
 
 def prompt(
@@ -115,6 +214,7 @@ def prompt(
     you: tuple[float, float] | None,
     locale: str = "en",
     mode: str = "walk",
+    streets: list[str | None] | None = None,
 ) -> str:
     _ = locale
     heading_bit = (
@@ -125,7 +225,7 @@ def prompt(
         for i in range(len(route_coords) - 1):
             a, b = route_coords[i], route_coords[i + 1]
             total += haversine(a[0], a[1], b[0], b[1])
-        body = " ".join(steps(route_coords, mode))
+        body = " ".join(steps(route_coords, mode, streets))
         return f"{body} Total {meters_phrase(total)}. {heading_bit}"
     if plan_chrome == OFF_GRAPH:
         return f"OFF GRAPH. {off_graph_path(mode)} {pack_name}. {heading_bit}"
@@ -199,6 +299,52 @@ class VoiceNavTests(unittest.TestCase):
         self.assertIn("No drivable street path from YOU.", text)
         self.assertNotIn("walkable", text)
 
+    def test_named_streets_are_spoken_on_each_leg_and_turn(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        streets = ["Montana Avenue", "Piedras Street"]
+        text = prompt("TX WEST", 90, coords, "", None, None, streets=streets)
+        self.assertIn("Walk 656 feet on Montana Avenue.", text)
+        self.assertIn("Turn left onto Piedras Street.", text)
+        self.assertIn("Walk 328 feet on Piedras Street.", text)
+        self.assertIn("Arrive at destination.", text)
+        self.assertNotIn("Turn left. ", text)
+        self.assertNotIn("Walk 656 feet.", text.replace("Walk 656 feet on Montana Avenue.", ""))
+
+    def test_drive_names_the_streets_it_turns_onto(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        streets = ["Montana Avenue", "Piedras Street"]
+        text = prompt("TX WEST", 90, coords, "", None, None, mode="drive", streets=streets)
+        self.assertIn("Drive 656 feet on Montana Avenue.", text)
+        self.assertIn("Turn left onto Piedras Street.", text)
+        self.assertIn("Drive 328 feet on Piedras Street.", text)
+        self.assertNotIn("Walk ", text)
+
+    def test_missing_street_names_do_not_invent_a_road(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        text = prompt("TX WEST", 90, coords, "", None, None)
+        self.assertIn("Turn left.", text)
+        self.assertNotIn("onto", text)
+        self.assertNotIn("Montana", text)
+
+    def test_hud_turns_are_street_by_street_not_the_spoken_script(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        streets = ["Montana Avenue", "Piedras Street"]
+        lines = hud_turns(coords, mode="drive", streets=streets)
+        self.assertEqual(
+            lines,
+            [
+                "DRIVE · 656 FT · MONTANA AVENUE",
+                "LEFT · PIEDRAS STREET",
+                "DRIVE · 328 FT · PIEDRAS STREET",
+                "ARRIVE",
+            ],
+        )
+        self.assertEqual(next_turn_hud(coords, streets), "LEFT · PIEDRAS STREET")
+        for line in lines:
+            self.assertNotIn("Turn left", line)
+            self.assertNotIn("feet.", line)
+            self.assertLessEqual(len(line), 44)
+
 
 class VoiceNavSourceContracts(unittest.TestCase):
     def test_swift_voice_nav_is_not_the_truncated_stub(self):
@@ -250,7 +396,39 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("testVoiceNavOffGraphIsFullHonestSentence", tests)
         self.assertIn("testVoiceNavDriveTurnByTurnUsesDriveNotWalk", tests)
         self.assertIn("testDriveTakesTheFasterRoadNotTheShortestResidential", tests)
+        self.assertIn("testVoiceNavNamesTheStreetsItTurnsOnto", tests)
         self.assertIn("Arrive at destination.", tests)
+
+    def test_swift_speaks_named_streets_and_keeps_five_voices(self):
+        voice = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "VoiceNav.swift").read_text()
+        app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+        inst = (ROOT / "Packages" / "Instruments" / "Sources" / "Instruments" / "Instruments.swift").read_text()
+        sheet = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
+        speech = (
+            ROOT / "Packages" / "OfflineSpeech" / "Sources" / "OfflineSpeech" / "OfflineSpeech.swift"
+        ).read_text()
+        search = (ROOT / "Packages" / "Search" / "Sources" / "Search" / "Search.swift").read_text()
+        self.assertIn("Turn left onto", voice)
+        self.assertIn("Turn right onto", voice)
+        self.assertIn("streets:", voice)
+        self.assertIn("func hudTurns(", voice)
+        self.assertIn("func nextTurnHUD(", voice)
+        self.assertIn("func streetName(near", search)
+        self.assertIn("streets:", app.split("func speakMap()")[1].split("func beginPTTSolo")[0])
+        self.assertIn("enum NavVoice", inst)
+        for name in ("STEEL", "NIGHT", "RANGE", "MESH", "DESERT"):
+            self.assertIn(f'return "{name}"', inst, name)
+        self.assertIn("NavVoice.allCases", sheet)
+        self.assertIn("voice.title", sheet)
+        self.assertIn('sectionLabel("VOICE")', sheet)
+        self.assertNotIn("pickerStyle", sheet)
+        self.assertIn("setTone", speech)
+        self.assertIn("pitchMultiplier", speech)
+        for slogan in ("best in class", "Waze", "Google Maps", "Apple Maps"):
+            self.assertNotIn(slogan, voice)
+            self.assertNotIn(slogan, inst)
+            self.assertNotIn(slogan, sheet)
+            self.assertNotIn(slogan, speech)
 
 
 if __name__ == "__main__":

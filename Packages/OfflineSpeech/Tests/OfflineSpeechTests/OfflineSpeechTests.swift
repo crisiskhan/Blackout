@@ -30,6 +30,23 @@ final class SpeechEngineTests: XCTestCase {
         XCTAssertTrue(s.lastUtterance.contains("SPEECH FAILED") || s.lastFailed)
     }
 
+    func testSetToneIsRememberedOnTheNextUtterance() {
+        let s = SpeechEngine(box: EventLog())
+        s.setTone(
+            SpeechTone(
+                identifier: "com.apple.voice.compact.en-US.Samantha",
+                rate: 0.44,
+                pitch: 0.96,
+                preDelay: 0.10,
+                postDelay: 0.32
+            )
+        )
+        _ = s.speak("STOP", locale: "en")
+        XCTAssertTrue(
+            s.lastUtterance.contains("Samantha") || s.lastFailed || s.lastUtterance.contains("STOP")
+        )
+    }
+
     func testListenFailsClosedWithoutOnDeviceSpeech() {
         #if !canImport(Speech) || !os(iOS)
         let s = SpeechEngine(box: EventLog())

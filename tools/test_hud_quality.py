@@ -109,11 +109,13 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("destRailVisible(", chrome)
         self.assertIn("func destValue(", route)
         self.assertIn("enum MapFieldDestMode", route)
+        self.assertIn("case turns", route)
         self.assertIn("%.5f, %.5f", route)
         self.assertNotIn("DEST %.4f", route)
         self.assertNotIn("packs?.active?.center", chrome)
         self.assertIn("MapFieldDestRail", tab)
         self.assertIn("MapFieldDestMode.coordinates", tab)
+        self.assertIn("MapFieldDestMode.turns", tab)
         self.assertNotIn("Theme.accent", chrome)
         self.assertIn("Theme.fix", chrome)
         self.assertIn("Theme.Motion.beat", chrome)
@@ -125,6 +127,7 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("destValue", chip)
         self.assertIn("chipMode.title", chip)
         self.assertNotIn("MapFieldDestMode.bearing", rail)
+        self.assertIn("MapFieldDestMode.turns", tab)
         self.assertIn("layoutPriority", chrome)
         self.assertNotIn("Theme.glass", chrome)
         self.assertNotIn("ultraThinMaterial", chrome)
@@ -1288,8 +1291,22 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         offline = read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
         )
-        for stamp in ("LEFT HAND", "NIGHT RED", "TORCH 3×", "COMPASS CAL", "TRUE NORTH", "USB-C PTT", "GNSS PUCK"):
+        for stamp in (
+            "LEFT HAND",
+            "NIGHT RED",
+            "TORCH 3×",
+            "COMPASS CAL",
+            "TRUE NORTH",
+            "USB-C PTT",
+            "GNSS PUCK",
+        ):
             self.assertIn(stamp, inst, stamp)
+        self.assertIn('sectionLabel("VOICE")', inst)
+        self.assertIn("NavVoice.allCases", inst)
+        self.assertIn("voice.title", inst)
+        voices = read("Packages", "Instruments", "Sources", "Instruments", "Instruments.swift")
+        for stamp in ("STEEL", "NIGHT", "RANGE", "MESH", "DESERT"):
+            self.assertIn(f'return "{stamp}"', voices, stamp)
         self.assertNotIn("blackout-hotspare:", inst)
         for label in ("HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"):
             self.assertIn(f'slider("{label}"', exped, label)
@@ -1307,6 +1324,12 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("NAV · SEATED", qa)
         self.assertIn("TORCH 3×", qa)
         self.assertIn("HUNGER", qa)
+        self.assertIn("STEEL", qa)
+        self.assertIn("DESERT", qa)
+        self.assertIn("onto", qa)
+        self.assertIn("TURNS", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
 
 
 ASLEEP = 0.08
@@ -1884,6 +1907,8 @@ class MapSearchTests(unittest.TestCase):
         self.assertIn("struct SearchExtra", search)
         self.assertIn("func editsOne(", search)
         self.assertIn("func houseQuery", search)
+        self.assertIn("func streetName(near", search)
+        self.assertIn("func streetNames(along:", search)
         self.assertIn("struct AddrRange", search)
         self.assertIn("avenida", search)
         self.assertNotIn("best in class", search.lower())
@@ -2074,6 +2099,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "PartyHoldCard.swift",
         "AddressHoldCard.swift",
         "EmblemPickCard.swift",
+        "SpeakTurnCard.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
     )
@@ -2177,6 +2203,8 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("Theme.glass", address)
         pick = read("Blackout", "EmblemPickCard.swift")
         self.assertIn("Theme.glass", pick)
+        turns = read("Blackout", "SpeakTurnCard.swift")
+        self.assertIn("Theme.glass", turns)
         inst = read("Blackout", "InstrumentsView.swift")
         self.assertIn("Theme.glass", inst)
         self.assertIn("Theme.plateRect", inst)

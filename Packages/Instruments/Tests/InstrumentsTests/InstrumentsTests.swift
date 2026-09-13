@@ -38,4 +38,22 @@ final class InstrumentBoardTests: XCTestCase {
         XCTAssertFalse(i.state.usbCPTT)
         XCTAssertFalse(i.state.externalGNSS)
     }
+
+    func testFiveSpeakVoicesAndUnknownFallsToSteel() {
+        let i = InstrumentBoard(box: EventLog())
+        XCTAssertEqual(NavVoice.allCases.count, 5)
+        XCTAssertEqual(NavVoice.steel.title, "STEEL")
+        XCTAssertEqual(NavVoice.night.title, "NIGHT")
+        XCTAssertEqual(NavVoice.range.title, "RANGE")
+        XCTAssertEqual(NavVoice.mesh.title, "MESH")
+        XCTAssertEqual(NavVoice.desert.title, "DESERT")
+        XCTAssertEqual(NavVoice.parse(nil), .steel)
+        XCTAssertEqual(NavVoice.parse("ghost"), .steel)
+        i.setVoice(.desert)
+        XCTAssertEqual(i.state.voice, .desert)
+        i.setVoice(.steel)
+        XCTAssertEqual(i.state.voice, .steel)
+        XCTAssertFalse(NavVoice.desert.rate > NavVoice.range.rate)
+        XCTAssertGreaterThan(NavVoice.desert.postDelay, NavVoice.range.postDelay)
+    }
 }
