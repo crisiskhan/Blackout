@@ -269,7 +269,8 @@ WILDLIFE_RANGE_PHRASES = (
 # Conservation Area, Deer Park at Maple Run Preserve, Anthem
 # Tract, Brodie and Oakdale Properties, Shudde Fath Tract,
 # Waste Management Wildlife Park, Southern Walnut Creek
-# Greenbelt, Uplands, Westgate and Sunset Properties, Sandia
+# Greenbelt, Uplands, Westgate and Sunset Properties, Alpine
+# Road Site, Sandia
 # Foothills Open Space, Golden Open Space, Paseo de la Mesa
 # Open Space, Arroyo Hondo Open Space, Durand Open Space,
 # East Tijeras Arroyo Open Space, Fenton Lake State Park,
@@ -288,7 +289,7 @@ WILDLIFE_RANGE_PHRASES = (
 # `land conservancy`, `conservancy`, `westside`, `billy`,
 # `piedmont`, `san luis`, `south hills`, `deer park`, `maple`,
 # `golden`, `paseo`, `anthem`, `oakdale`, `shudde`, `uplands`,
-# `westgate`, `hondo`, `durand`, `tijeras`, `fenton`, or `pino`. Phrase `open space` is not a bare contains —
+# `westgate`, `alpine`, `hondo`, `durand`, `tijeras`, `fenton`, or `pino`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
@@ -386,7 +387,7 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Crestview Commons Neighborhood Park. Wildcat Pass stays a
 # road. Hammock Park stays a park. Do not add matcher
 # `crestview`. Desert
-# Garden Park stays unheld.
+# Garden Park is Held at 31.790737, −106.228850.
 # Winrock Garden is a mall
 # bed and stays out.
 # Schepps' Garden stays out. Experimental Gardens overlap

@@ -680,6 +680,14 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// garden sheet; spines, not oleander. 314 m from water.
     private static let desertGardens = CLLocationCoordinate2D(latitude: 31.769382, longitude: -106.506453)
 
+    /// Interior of Desert Garden Park. Phrase `desert garden` on a
+    /// park sheet; spines, not oleander, not picnic woodland.
+    /// Unique overlay at the pip. Unique versus Chihuahuan Desert
+    /// Gardens (26347 m). Water 169 m. Rudy Valdez Drive 60 m is
+    /// rank 7; cactus 5 still wins. Garden Point Drive stays a
+    /// road. Parque Cactus del Desierto stays Park.
+    private static let desertGardenPark = CLLocationCoordinate2D(latitude: 31.790737, longitude: -106.228850)
+
     /// Interior of Wildflower Preserve. Phrase `wildflower preserve`,
     /// botanic not Open reserve, not a wildflower park. 194 m from water.
     private static let wildflowerPreserve = CLLocationCoordinate2D(latitude: 30.242251, longitude: -97.828949)
@@ -866,7 +874,7 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `community garden`, not the word `prisma` or `colonia`.
     /// Camino Rojo 28 m is rank 7; botanic 5 still wins. Vuelta
     /// Colorada stays a road. 145 m from OSM stream. Desert Garden
-    /// Park stays unheld.
+    /// Park is Held at 31.790737, −106.228850.
     private static let coloniaPrisma = CLLocationCoordinate2D(latitude: 35.627487, longitude: -106.047423)
 
     /// Interior of Adam Gabriel Armijo Community Garden. Phrase
@@ -1001,6 +1009,13 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// 7; open reserve 6 still wins. Do not add matcher
     /// `westgate`.
     private static let westgateSunset = CLLocationCoordinate2D(latitude: 30.226090, longitude: -97.804326)
+
+    /// Interior of Alpine Road Site. Named nature reserve —
+    /// cottonmouth and hog. Unique overlay at the pip. Unique
+    /// versus Blunn Creek Nature Preserve (1840 m). Water 102 m.
+    /// Woodbury Drive 111 m is rank 7; open reserve 6 still wins.
+    /// East Alpine Road stays a road. Do not add matcher `alpine`.
+    private static let alpineRoadSite = CLLocationCoordinate2D(latitude: 30.223606, longitude: -97.759224)
 
     /// Interior of Albuquerque BioPark Botanic Garden in NM `layers/ground.geojson`.
     /// The listed centroid sits next to a pond; water outranks the sheet.
@@ -1715,6 +1730,25 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(gardensDo.contains("prickly pear"), gardens.card?.doLine ?? "")
         XCTAssertFalse(gardensDo.contains("oleander"), gardens.card?.doLine ?? "")
         XCTAssertFalse(gardensDo.contains("edible"), gardens.card?.doLine ?? "")
+
+        let gardenPark = try hold(at: Self.desertGardenPark, zoom: 16)
+        XCTAssertEqual(gardenPark.card?.klass, "Cactus garden", "\(gardenPark)")
+        XCTAssertNotEqual(gardenPark.card?.klass, "Botanic garden", "\(gardenPark)")
+        XCTAssertNotEqual(gardenPark.card?.klass, "Park", "\(gardenPark)")
+        XCTAssertEqual(gardenPark.card?.title, "Desert Garden Park", "\(gardenPark)")
+        XCTAssertNotEqual(gardenPark.card?.title, "Chihuahuan Desert Gardens", "\(gardenPark)")
+        XCTAssertNotEqual(gardenPark.card?.title, "Rudy Valdez Drive", "\(gardenPark)")
+        XCTAssertNotEqual(gardenPark.card?.title, "Garden Point Drive", "\(gardenPark)")
+        XCTAssertEqual(gardenPark.card?.fieldRoute.first, Inspect.cactusTXCard, "\(gardenPark)")
+        XCTAssertFalse(
+            gardenPark.card?.fieldRoute.contains(Inspect.plantTXCard) ?? true,
+            "Desert Garden Park opened oleander: \(gardenPark)"
+        )
+        let gardenParkDo = gardenPark.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(gardenParkDo.contains("prickly pear"), gardenPark.card?.doLine ?? "")
+        XCTAssertTrue(gardenParkDo.contains("give it room"), gardenPark.card?.doLine ?? "")
+        XCTAssertFalse(gardenParkDo.contains("oleander"), gardenPark.card?.doLine ?? "")
+        XCTAssertFalse(gardenParkDo.contains("edible"), gardenPark.card?.doLine ?? "")
     }
 
     func testHoldingARoseGardenOpensPlantDangerNotCactus() throws {
@@ -5309,6 +5343,25 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(westgateDo.contains("hog"), westgate.card?.doLine ?? "")
         XCTAssertFalse(westgateDo.contains("javelina"), westgate.card?.doLine ?? "")
         XCTAssertFalse(westgateDo.contains("edible"), westgate.card?.doLine ?? "")
+
+        let alpine = try hold(at: Self.alpineRoadSite, zoom: 16, packId: "tx-east")
+        XCTAssertEqual(alpine.card?.klass, "Open reserve", "\(alpine)")
+        XCTAssertEqual(alpine.card?.title, "Alpine Road Site", "\(alpine)")
+        XCTAssertNotEqual(alpine.card?.klass, "Wildlife range", "\(alpine)")
+        XCTAssertNotEqual(alpine.card?.title, "Blunn Creek Nature Preserve", "\(alpine)")
+        XCTAssertNotEqual(alpine.card?.title, "Woodbury Drive", "\(alpine)")
+        XCTAssertNotEqual(alpine.card?.title, "East Alpine Road", "\(alpine)")
+        XCTAssertEqual(alpine.card?.fieldRoute.first, Inspect.snakeEastCard, "\(alpine)")
+        XCTAssertNotEqual(
+            alpine.card?.fieldRoute.first,
+            Inspect.treeUseEastCard,
+            "Alpine Road Site opened picnic woodland: \(alpine)"
+        )
+        let alpineDo = alpine.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(alpineDo.contains("cottonmouth"), alpine.card?.doLine ?? "")
+        XCTAssertTrue(alpineDo.contains("hog"), alpine.card?.doLine ?? "")
+        XCTAssertFalse(alpineDo.contains("javelina"), alpine.card?.doLine ?? "")
+        XCTAssertFalse(alpineDo.contains("edible"), alpine.card?.doLine ?? "")
     }
 
     func testHoldingEastScrubOpensBiteNotPicnicWoodland() throws {
@@ -5459,6 +5512,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             ("rose garden", Self.roseGarden, 16.0),
             ("lush n lean garden", Self.lushNLean, 16.0),
             ("desert gardens", Self.desertGardens, 16.0),
+            ("desert garden park", Self.desertGardenPark, 16.0),
             ("japaneese garden", Self.japaneeseGarden, 16.0),
             ("preston foster", Self.prestonFoster, 16.0),
             ("4th street garden", Self.fourthStreetGarden, 16.0),

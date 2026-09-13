@@ -2701,6 +2701,32 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(westWind.klass, "Road")
         XCTAssertNotEqual(westWind.klass, "Open reserve")
 
+        let alpineSite = Inspect.read(
+            tags: ["leisure": "nature_reserve", "name": "Alpine Road Site"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(alpineSite.klass, "Open reserve")
+        XCTAssertNotEqual(alpineSite.klass, "Wildlife range")
+        XCTAssertEqual(alpineSite.fieldRoute.first, Inspect.snakeEastCard)
+        XCTAssertTrue(alpineSite.doLine.lowercased().contains("cottonmouth"), alpineSite.doLine)
+        XCTAssertTrue(alpineSite.doLine.lowercased().contains("hog"), alpineSite.doLine)
+        XCTAssertFalse(alpineSite.doLine.lowercased().contains("javelina"), alpineSite.doLine)
+        XCTAssertFalse(alpineSite.doLine.lowercased().contains("edible"), alpineSite.doLine)
+
+        let woodbury = Inspect.read(
+            tags: ["highway": "residential", "name": "Woodbury Drive"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(woodbury.klass, "Road")
+        XCTAssertNotEqual(woodbury.klass, "Open reserve")
+
+        let eastAlpineRoad = Inspect.read(
+            tags: ["highway": "residential", "name": "East Alpine Road"],
+            pack: "tx-east"
+        )
+        XCTAssertEqual(eastAlpineRoad.klass, "Road")
+        XCTAssertNotEqual(eastAlpineRoad.klass, "Open reserve")
+
         let senderaMesa = Inspect.read(
             tags: ["highway": "residential", "name": "Sendera Mesa Drive"],
             pack: "tx-east"
@@ -5351,6 +5377,20 @@ final class InspectTests: XCTestCase {
             "Open reserve"
         )
 
+        let alpineReserve: [String: String] = [
+            "leisure": "nature_reserve",
+            "name": "Alpine Road Site",
+        ]
+        let woodburyDrive: [String: String] = [
+            "highway": "residential",
+            "name": "Woodbury Drive",
+        ]
+        XCTAssertEqual(Inspect.pick([alpineReserve, woodburyDrive])["leisure"], "nature_reserve")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([alpineReserve, woodburyDrive]), pack: "tx-east").klass,
+            "Open reserve"
+        )
+
         let fentonReserve: [String: String] = [
             "leisure": "nature_reserve",
             "boundary": "protected_area",
@@ -5677,7 +5717,15 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(desertGarden.fieldRoute.first, Inspect.cactusTXCard)
         XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.plantTXCard), "a desert garden is not oleander")
         XCTAssertTrue(desertGarden.doLine.lowercased().contains("prickly pear"), desertGarden.doLine)
+        XCTAssertFalse(desertGarden.doLine.lowercased().contains("edible"), desertGarden.doLine)
         XCTAssertFalse(desertGarden.fieldRoute.contains(Inspect.treeUseTXCard))
+
+        let rudyValdez = Inspect.read(
+            tags: ["highway": "residential", "name": "Rudy Valdez Drive"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(rudyValdez.klass, "Road")
+        XCTAssertNotEqual(rudyValdez.klass, "Cactus garden")
 
         let desertGardens = Inspect.read(
             tags: ["leisure": "garden", "name": "Chihuahuan Desert Gardens"],
@@ -6582,6 +6630,24 @@ final class InspectTests: XCTestCase {
             "Cactus garden"
         )
         XCTAssertNil(Inspect.pick([park, sheet, road])["highway"])
+
+        let desertParkSheet: [String: String] = [
+            "leisure": "park",
+            "name": "Desert Garden Park",
+        ]
+        let rudyRoad: [String: String] = [
+            "highway": "residential",
+            "name": "Rudy Valdez Drive",
+        ]
+        XCTAssertEqual(Inspect.pick([desertParkSheet, rudyRoad])["leisure"], "park")
+        XCTAssertEqual(
+            Inspect.read(tags: Inspect.pick([desertParkSheet, rudyRoad]), pack: "tx-west").klass,
+            "Cactus garden"
+        )
+        XCTAssertNotEqual(
+            Inspect.read(tags: Inspect.pick([desertParkSheet, rudyRoad]), pack: "tx-west").klass,
+            "Botanic garden"
+        )
     }
 
     func testARoseGardenBeatsParkFillAndANamedStreet() {

@@ -270,6 +270,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("southern walnut creek greenbelt", east_blob)
         self.assertIn("uplands", east_blob)
         self.assertIn("westgate and sunset properties", east_blob)
+        self.assertIn("alpine road site", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertIn("ladybird johnson wildflower center", east_blob)
         self.assertIn("zilker botanical garden", east_blob)
@@ -2121,6 +2122,10 @@ class ShippedWaterLayers(unittest.TestCase):
             "reserve",
         )
         self.assertEqual(
+            ground.overlay_kind({"leisure": "nature_reserve", "name": "Alpine Road Site"}),
+            "reserve",
+        )
+        self.assertEqual(
             ground.overlay_kind({"leisure": "park", "name": "Arroyo Hondo Open Space"}),
             "reserve",
         )
@@ -2276,6 +2281,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("shudde")', inspect)
         self.assertNotIn('contains("uplands")', inspect)
         self.assertNotIn('contains("westgate")', inspect)
+        self.assertNotIn('contains("alpine")', inspect)
         self.assertNotIn('contains("hondo")', inspect)
         self.assertNotIn('contains("durand")', inspect)
         self.assertNotIn('contains("tijeras")', inspect)
@@ -3374,6 +3380,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.226090", glass)
         self.assertIn("-97.804326", glass)
         self.assertIn("West Wind Trail", glass)
+        self.assertIn("Alpine Road Site", glass)
+        self.assertIn("30.223606", glass)
+        self.assertIn("-97.759224", glass)
+        self.assertIn("Woodbury Drive", glass)
+        self.assertIn("East Alpine Road", glass)
         self.assertIn("Sendera Mesa Drive", glass)
         self.assertIn("Sendera Mesa Neighborhood Park", glass)
         self.assertIn("31.694905", glass)
@@ -3631,6 +3642,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Chihuahuan Desert Gardens", glass)
         self.assertIn("31.769382", glass)
         self.assertIn("-106.506453", glass)
+        self.assertIn("Desert Garden Park", glass)
+        self.assertIn("31.790737", glass)
+        self.assertIn("-106.228850", glass)
+        self.assertIn("Rudy Valdez Drive", glass)
+        self.assertIn("Garden Point Drive", glass)
         self.assertIn("Japaneese Garden", glass)
         self.assertIn("31.803975", glass)
         self.assertIn("-106.436233", glass)
@@ -4118,6 +4134,7 @@ class GroundFieldSync(unittest.TestCase):
         san_andres_hit = False
         feather_lake_hit = False
         desert_gardens_hit = False
+        desert_garden_park_hit = False
         japaneese_hit = False
         preston_foster_hit = False
         fourth_street_hit = False
@@ -4136,6 +4153,8 @@ class GroundFieldSync(unittest.TestCase):
                     lush_hit = props.get("name") == "Lush n Lean Garden"
                 if kind == "botanic" and pip(-106.506453, 31.769382, ring):
                     desert_gardens_hit = props.get("name") == "Chihuahuan Desert Gardens"
+                if kind == "botanic" and pip(-106.228850, 31.790737, ring):
+                    desert_garden_park_hit = props.get("name") == "Desert Garden Park"
                 if kind == "botanic" and pip(-106.436233, 31.803975, ring):
                     japaneese_hit = props.get("name") == "Japaneese Garden"
                 if kind == "botanic" and pip(-106.490443, 31.759280, ring):
@@ -4233,6 +4252,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             desert_gardens_hit,
             "Chihuahuan Desert Gardens is not botanic on the west overlay",
+        )
+        self.assertTrue(
+            desert_garden_park_hit,
+            "Desert Garden Park hold is not inside the named park sheet",
         )
         self.assertTrue(
             japaneese_hit,
@@ -4483,6 +4506,7 @@ class GroundFieldSync(unittest.TestCase):
         walnut_belt_hit = False
         uplands_hit = False
         westgate_hit = False
+        alpine_hit = False
         buttercup_hit = False
         oasis_hit = False
         whirl_hit = False
@@ -4708,6 +4732,8 @@ class GroundFieldSync(unittest.TestCase):
                     uplands_hit = True
                 if kind == "reserve" and name == "Westgate and Sunset Properties" and pip(-97.804326, 30.226090, ring):
                     westgate_hit = True
+                if kind == "reserve" and name == "Alpine Road Site" and pip(-97.759224, 30.223606, ring):
+                    alpine_hit = True
                 if kind == "botanic" and name == "Crestview Commons Neighborhood Park" and pip(-97.720514, 30.343843, ring):
                     crestview_hit = True
         self.assertTrue(
@@ -5009,6 +5035,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             westgate_hit,
             "Westgate and Sunset Properties hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            alpine_hit,
+            "Alpine Road Site hold is not inside the named nature reserve",
         )
 
         east_osm = json.loads((PACK_ROOT / "tx-east" / "osm.geojson").read_text())
@@ -6947,6 +6977,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Conservatory At North Austin", qa)
         self.assertIn("Three Crosses Cactus Garden", qa)
         self.assertIn("Desert Garden Park", qa)
+        self.assertIn("31.790737", qa)
         self.assertIn("Chihuahuan Desert Gardens", qa)
         self.assertIn("31.769382", qa)
         self.assertIn("Barelas Community Garden", qa)
@@ -7034,6 +7065,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Westgate and Sunset Properties", qa)
         self.assertIn("30.226090", qa)
         self.assertIn("West Wind Trail", qa)
+        self.assertIn("Alpine Road Site", qa)
+        self.assertIn("30.223606", qa)
+        self.assertIn("Woodbury Drive", qa)
+        self.assertIn("East Alpine Road", qa)
         self.assertIn("Sendera Mesa Drive", qa)
         self.assertIn("Sendera Mesa Neighborhood Park", qa)
         self.assertIn("Dome Wilderness", qa)
