@@ -13,7 +13,7 @@ import time
 import urllib.error
 import urllib.request
 import zipfile
-from math import asin, cos, radians, sin, sqrt
+from math import asin, cos, isfinite, radians, sin, sqrt
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -301,6 +301,8 @@ class AddressBook:
         if asked is None:
             return None
         hn, street_tokens = asked
+        if street_tokens and all(tok in _TYPE_TOKENS for tok in street_tokens):
+            return None
         hits: list[dict[str, Any]] = []
         for row in self.rows:
             street = str(row.get("street") or "")
@@ -319,6 +321,8 @@ class AddressBook:
                 float(row["lat1"]),
                 float(row["lon1"]),
             )
+            if not isfinite(lat) or not isfinite(lon):
+                continue
             zipcode = str(row.get("zipcode") or "")
             span = abs(to_hn - from_hn)
             meters = 0.0

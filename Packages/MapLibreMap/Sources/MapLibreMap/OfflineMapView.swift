@@ -815,58 +815,68 @@ public struct OfflineMapView: UIViewRepresentable {
             }
 
             if let dest = spec.destination {
-                let pin = MLNPointFeature()
-                pin.coordinate = CLLocationCoordinate2D(latitude: dest.lat, longitude: dest.lon)
-                if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
-                    src.shape = pin
-                } else {
-                    let src = MLNShapeSource(identifier: DestinationPin.sourceID, shape: pin, options: nil)
-                    style.addSource(src)
-                    let ring = MLNCircleStyleLayer(identifier: DestinationPin.ringLayerID, source: src)
-                    ring.circleColor = NSExpression(forConstantValue: UIColor.clear)
-                    ring.circleRadius = NSExpression(forConstantValue: DestinationPin.ringRadius)
-                    ring.circleStrokeColor = NSExpression(
-                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-                    )
-                    ring.circleStrokeWidth = NSExpression(forConstantValue: 3)
-                    style.addLayer(ring)
-                    let core = MLNCircleStyleLayer(identifier: DestinationPin.coreLayerID, source: src)
-                    core.circleColor = NSExpression(
-                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-                    )
-                    core.circleRadius = NSExpression(forConstantValue: DestinationPin.coreRadius)
-                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
-                    core.circleStrokeWidth = NSExpression(forConstantValue: 1.5)
-                    style.addLayer(core)
+                let destCoord = CLLocationCoordinate2D(latitude: dest.lat, longitude: dest.lon)
+                if CLLocationCoordinate2DIsValid(destCoord) {
+                    let pin = MLNPointFeature()
+                    pin.coordinate = destCoord
+                    if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                        src.shape = pin
+                    } else {
+                        let src = MLNShapeSource(identifier: DestinationPin.sourceID, shape: pin, options: nil)
+                        style.addSource(src)
+                        let ring = MLNCircleStyleLayer(identifier: DestinationPin.ringLayerID, source: src)
+                        ring.circleColor = NSExpression(forConstantValue: UIColor.clear)
+                        ring.circleRadius = NSExpression(forConstantValue: DestinationPin.ringRadius)
+                        ring.circleStrokeColor = NSExpression(
+                            forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                        )
+                        ring.circleStrokeWidth = NSExpression(forConstantValue: 3)
+                        style.addLayer(ring)
+                        let core = MLNCircleStyleLayer(identifier: DestinationPin.coreLayerID, source: src)
+                        core.circleColor = NSExpression(
+                            forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                        )
+                        core.circleRadius = NSExpression(forConstantValue: DestinationPin.coreRadius)
+                        core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                        core.circleStrokeWidth = NSExpression(forConstantValue: 1.5)
+                        style.addLayer(core)
+                    }
+                } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
+                    src.shape = emptyOverlayShape()
                 }
             } else if let src = style.source(withIdentifier: DestinationPin.sourceID) as? MLNShapeSource {
                 src.shape = emptyOverlayShape()
             }
 
             if let point = spec.held {
-                let mark = MLNPointFeature()
-                mark.coordinate = CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
-                if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
-                    src.shape = mark
-                } else {
-                    let src = MLNShapeSource(identifier: HoldPin.sourceID, shape: mark, options: nil)
-                    style.addSource(src)
-                    let ring = MLNCircleStyleLayer(identifier: HoldPin.ringLayerID, source: src)
-                    ring.circleColor = NSExpression(
-                        forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.18)
-                    )
-                    ring.circleRadius = NSExpression(forConstantValue: HoldPin.ringRadius)
-                    ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
-                    ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
-                    style.addLayer(ring)
-                    let core = MLNCircleStyleLayer(identifier: HoldPin.coreLayerID, source: src)
-                    core.circleColor = NSExpression(
-                        forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
-                    )
-                    core.circleRadius = NSExpression(forConstantValue: HoldPin.coreRadius)
-                    core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
-                    core.circleStrokeWidth = NSExpression(forConstantValue: 2)
-                    style.addLayer(core)
+                let heldCoord = CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
+                if CLLocationCoordinate2DIsValid(heldCoord) {
+                    let mark = MLNPointFeature()
+                    mark.coordinate = heldCoord
+                    if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
+                        src.shape = mark
+                    } else {
+                        let src = MLNShapeSource(identifier: HoldPin.sourceID, shape: mark, options: nil)
+                        style.addSource(src)
+                        let ring = MLNCircleStyleLayer(identifier: HoldPin.ringLayerID, source: src)
+                        ring.circleColor = NSExpression(
+                            forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.18)
+                        )
+                        ring.circleRadius = NSExpression(forConstantValue: HoldPin.ringRadius)
+                        ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                        ring.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                        style.addLayer(ring)
+                        let core = MLNCircleStyleLayer(identifier: HoldPin.coreLayerID, source: src)
+                        core.circleColor = NSExpression(
+                            forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                        )
+                        core.circleRadius = NSExpression(forConstantValue: HoldPin.coreRadius)
+                        core.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                        core.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                        style.addLayer(core)
+                    }
+                } else if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
+                    src.shape = emptyOverlayShape()
                 }
             } else if let src = style.source(withIdentifier: HoldPin.sourceID) as? MLNShapeSource {
                 src.shape = emptyOverlayShape()

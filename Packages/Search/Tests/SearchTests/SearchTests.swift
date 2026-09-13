@@ -113,4 +113,44 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(SearchHUDWord.from(packed: "address").title, "ADDRESS")
         XCTAssertNotNil(SearchIndex.houseQuery("221 montana"))
     }
+
+    func testTypeOnlyStreetIsNotEveryDoor() {
+        let packed: [String: Any] = [
+            "docs": [[
+                "Main Street", "street", 31.76, -106.49,
+            ]],
+            "addr": [
+                "streets": ["Main Street", "Kansas Street", "Montana Avenue"],
+                "zips": ["79901", "79902"],
+                "ranges": [
+                    [0, 201, 299, 0, 3_176_000, -10_649_000, 3_176_100, -10_648_000],
+                    [1, 201, 299, 0, 3_176_200, -10_649_500, 3_176_300, -10_648_500],
+                    [2, 201, 299, 1, 3_177_700, -10_647_500, 3_177_900, -10_645_500],
+                ],
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: packed)
+        let book = SearchIndex.load(data: data)
+        XCTAssertFalse(book.lookup("221 st").contains { $0.kind == "address" })
+        XCTAssertTrue(book.lookup("221").isEmpty)
+        let hit = book.lookup("221 montana").first
+        XCTAssertEqual(hit?.kind, "address")
+        XCTAssertEqual(hit?.name, "221 Montana Avenue")
+        XCTAssertTrue(hit?.lat.isFinite ?? false)
+        XCTAssertTrue(hit?.lon.isFinite ?? false)
+    }
+
+    func testCutAddrRangeDoesNotCrash() {
+        let packed: [String: Any] = [
+            "docs": [],
+            "addr": [
+                "streets": ["Montana Avenue"],
+                "zips": ["79902"],
+                "ranges": [[0, 201]],
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: packed)
+        let book = SearchIndex.load(data: data)
+        XCTAssertTrue(book.lookup("221 montana").isEmpty)
+    }
 }

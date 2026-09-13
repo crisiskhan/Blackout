@@ -154,6 +154,7 @@ public struct SearchIndex: Sendable {
     private let addrStreets: [String]
     private let addrZips: [String]
     private let addrRanges: [AddrRange]
+    private let rangesByStreet: [Int: [AddrRange]]
     private let streetTokenIndex: [String: [Int]]
     private let streetTokenKeys: [String]
     private let streetCenters: [(lat: Double, lon: Double)]
@@ -351,12 +352,15 @@ public struct SearchIndex: Sendable {
         var latSum = Array(repeating: 0.0, count: addrStreets.count)
         var lonSum = Array(repeating: 0.0, count: addrStreets.count)
         var counts = Array(repeating: 0, count: addrStreets.count)
+        var buckets: [Int: [AddrRange]] = [:]
         for range in addrRanges {
             guard range.street >= 0, range.street < addrStreets.count else { continue }
             latSum[range.street] += (range.lat0 + range.lat1) / 2
             lonSum[range.street] += (range.lon0 + range.lon1) / 2
             counts[range.street] += 1
+            buckets[range.street, default: []].append(range)
         }
+        rangesByStreet = buckets
         var centers: [(lat: Double, lon: Double)] = []
         centers.reserveCapacity(addrStreets.count)
         for i in addrStreets.indices {
@@ -904,53 +908,77 @@ public struct SearchIndex: Sendable {
         into hits: inout [SearchHit],
         cap: Int
     ) {
+        guard streetTokens.contains(where: { !Self.typeTokens.contains($0) }) else { return }
         let streets = matchingStreets(streetTokens)
         guard !streets.isEmpty, cap > 0 else { return }
-        var found: [(hit: SearchHit, penalty: Int, freq: Int, centerMeters: Double)] = []
-        for range in addrRanges where streets.contains(range.street) {
-            guard Self.hnOnRange(hn, range.from, range.to) else { continue }
-            guard range.street >= 0, range.street < addrStreets.count else { continue }
-            let (lat, lon) = Self.interpolate(
-                hn,
-                range.from,
-                range.to,
-                range.lat0,
-                range.lon0,
-                range.lat1,
-                range.lon1
-            )
-            let street = addrStreets[range.street]
-            let zip = (range.zip >= 0 && range.zip < addrZips.count) ? addrZips[range.zip] : ""
-            let penalty = Self.contentPenalty(street: street, query: streetTokens)
-            let center: (lat: Double, lon: Double)
-            if streetCenters.indices.contains(range.street) {
-                center = streetCenters[range.street]
-            } else {
-                center = (lat: lat, lon: lon)
-            }
-            let hit = SearchHit(
-                name: "\(hn) \(street)",
-                kind: "address",
-                lat: lat,
-                lon: lon,
-                score: 95 - Double(penalty),
-                meters: you.map { haversine($0.lat, $0.lon, lat, lon) },
-                city: Self.cityForZip(zip),
-                post: zip,
-                what: "door on \(street)",
-                sure: 72,
-                why: "census range \(range.from)–\(range.to)"
-            )
-            found.append(
-                (
+        let liveYou: (lat: Double, lon: Double)?
+        if let you, you.lat.isFinite, you.lon.isFinite {
+            liveYou = you
+        } else {
+            liveYou = nil
+        }
+        var found: [(hit: SearchHit, penalty: Int, freq: Int, centerMeters: Double, span: Int)] = []
+        for streetId in streets {
+            guard let bucket = rangesByStreet[streetId],
+                  streetId >= 0, streetId < addrStreets.count
+            else { continue }
+            var best: (hit: SearchHit, penalty: Int, freq: Int, centerMeters: Double, span: Int)?
+            for range in bucket {
+                guard Self.hnOnRange(hn, range.from, range.to) else { continue }
+                let (lat, lon) = Self.interpolate(
+                    hn,
+                    range.from,
+                    range.to,
+                    range.lat0,
+                    range.lon0,
+                    range.lat1,
+                    range.lon1
+                )
+                guard lat.isFinite, lon.isFinite else { continue }
+                let street = addrStreets[streetId]
+                let zip = (range.zip >= 0 && range.zip < addrZips.count) ? addrZips[range.zip] : ""
+                let penalty = Self.contentPenalty(street: street, query: streetTokens)
+                let center: (lat: Double, lon: Double)
+                if streetCenters.indices.contains(streetId) {
+                    center = streetCenters[streetId]
+                } else {
+                    center = (lat: lat, lon: lon)
+                }
+                let youMeters = liveYou.map { haversine($0.lat, $0.lon, lat, lon) }
+                let hit = SearchHit(
+                    name: "\(hn) \(street)",
+                    kind: "address",
+                    lat: lat,
+                    lon: lon,
+                    score: 95 - Double(penalty),
+                    meters: youMeters,
+                    city: Self.cityForZip(zip),
+                    post: zip,
+                    what: "door on \(street)",
+                    sure: 72,
+                    why: "census range \(range.from)–\(range.to)"
+                )
+                let span = abs(range.to - range.from)
+                let item = (
                     hit,
                     penalty,
-                    streetFreq.indices.contains(range.street) ? streetFreq[range.street] : 0,
-                    haversine(center.lat, center.lon, lat, lon)
+                    streetFreq.indices.contains(streetId) ? streetFreq[streetId] : 0,
+                    haversine(center.lat, center.lon, lat, lon),
+                    span
                 )
-            )
+                if let current = best {
+                    if span < current.span || (span == current.span && hit.name < current.hit.name) {
+                        best = item
+                    }
+                } else {
+                    best = item
+                }
+            }
+            if let best {
+                found.append(best)
+            }
         }
-        if you != nil {
+        if liveYou != nil {
             found.sort { a, b in
                 let am = a.hit.meters ?? .greatestFiniteMagnitude
                 let bm = b.hit.meters ?? .greatestFiniteMagnitude
@@ -1026,6 +1054,9 @@ public struct SearchIndex: Sendable {
     }
 
     private func haversine(_ aLat: Double, _ aLon: Double, _ bLat: Double, _ bLon: Double) -> Double {
+        guard aLat.isFinite, aLon.isFinite, bLat.isFinite, bLon.isFinite else {
+            return .greatestFiniteMagnitude
+        }
         let r = 6_371_000.0
         let p1 = aLat * .pi / 180
         let p2 = bLat * .pi / 180
@@ -1033,6 +1064,7 @@ public struct SearchIndex: Sendable {
         let dl = (bLon - aLon) * .pi / 180
         let h = sin(dp / 2) * sin(dp / 2)
             + cos(p1) * cos(p2) * sin(dl / 2) * sin(dl / 2)
-        return 2 * r * asin(min(1, sqrt(h)))
+        let clamped = max(0, min(1, h))
+        return 2 * r * asin(sqrt(clamped))
     }
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 import unittest
 from pathlib import Path
@@ -80,6 +81,39 @@ class GeocodeTests(unittest.TestCase):
             ]
         )
         self.assertIsNone(book.geocode("221 kansas"))
+
+    def test_a_street_type_alone_is_not_every_door(self):
+        blob = json.loads((ROOT / "Resources" / "Packs" / "tx-west" / "search.json").read_text())
+        book = addrfeat.AddressBook.from_packed(blob)
+        self.assertIsNone(book.geocode("221 st"))
+        self.assertIsNone(book.geocode("221"))
+        hit = book.geocode("221 montana")
+        self.assertIsNotNone(hit)
+        self.assertTrue(math.isfinite(hit["lat"]))
+        self.assertTrue(math.isfinite(hit["lon"]))
+
+    def test_a_cut_range_row_does_not_raise(self):
+        book = addrfeat.AddressBook.from_packed(
+            {"docs": [], "addr": {"streets": ["Montana Ave"], "zips": ["79902"], "ranges": [[0, 201]]}}
+        )
+        self.assertIsNone(book.geocode("221 montana"))
+
+    def test_a_broken_coordinate_is_skipped(self):
+        book = addrfeat.AddressBook.from_ranges(
+            [
+                {
+                    "street": "Montana Avenue",
+                    "from_hn": 201,
+                    "to_hn": 299,
+                    "zipcode": "79902",
+                    "lat0": float("nan"),
+                    "lon0": -106.475,
+                    "lat1": 31.779,
+                    "lon1": -106.455,
+                }
+            ]
+        )
+        self.assertIsNone(book.geocode("221 montana"))
 
 
 class PackedSearchTests(unittest.TestCase):

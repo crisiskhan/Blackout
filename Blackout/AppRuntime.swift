@@ -229,6 +229,7 @@ final class AppRuntime {
     /// record's own name when it has one; it goes in front of the coordinate
     /// label so a list of marks reads as places instead of numbers.
     func dropMark(lat: Double, lon: Double, name: String? = nil) {
+        guard lat.isFinite, lon.isFinite else { return }
         let pack = packs?.active
         let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
         let coords = PackChrome.markLabel(
@@ -289,6 +290,7 @@ final class AppRuntime {
     }
 
     func holdAddress(_ hit: SearchHit) {
+        guard hit.lat.isFinite, hit.lon.isFinite else { return }
         pulse()
         held = nil
         heldParty = nil
@@ -489,6 +491,7 @@ final class AppRuntime {
     }
 
     func pickDestination(lat: Double, lon: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
         pulse()
         routeTarget = (lat, lon)
         // A new destination invalidates everything the old one produced.

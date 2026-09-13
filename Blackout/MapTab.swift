@@ -277,7 +277,7 @@ struct MapTab: View {
 
     private var hitList: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap), id: \.self) { h in
+            ForEach(Array(hits.prefix(BlackoutTokens.Chrome.mapSearchHitCap).enumerated()), id: \.offset) { _, h in
                 let word = SearchHUDWord.from(packed: h.kind).title
                 let range = h.meters.map { SearchIndex.rangeLabel($0) }
                 let label = [h.name, word, range].compactMap { $0 }.joined(separator: " · ")

@@ -1597,6 +1597,16 @@ class AddressHoldCardTests(unittest.TestCase):
         self.assertIn("case address", search)
         self.assertIn("holdCardDismissDragPoints", card)
 
+    def test_search_skips_a_broken_coordinate_instead_of_crashing(self):
+        search = read("Packages", "Search", "Sources", "Search", "Search.swift")
+        self.assertIn("isFinite", search)
+        self.assertIn("rangesByStreet", search)
+
+    def test_hold_address_refuses_a_broken_coordinate(self):
+        app = read("Blackout", "AppRuntime.swift")
+        hold = app.split("func holdAddress", 1)[1].split("func walkHeldAddress", 1)[0]
+        self.assertIn("isFinite", hold)
+
     def test_solo_qa_scores_address_search(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("221 Montana", qa)
