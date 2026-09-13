@@ -658,13 +658,24 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("Logo.png", manifest)
         self.assertNotIn("Logo.jpg", manifest)
         arming = read("Blackout", "ARMINGView.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         self.assertIn("Image(\"Logo\")", arming)
         self.assertNotIn("1712.0 / 1152.0", arming)
         self.assertNotIn('Text("BLACKOUT")', arming)
-        self.assertIn(
-            "BlackoutTokens.Chrome.bootLogoPoints",
-            arming,
+        self.assertIn("bootLogoWidthFraction", tokens)
+        self.assertIn("bootLogoSide", tokens)
+        self.assertIn("bootLogoRingDiameter", tokens)
+        self.assertIn("BlackoutTokens.Chrome.bootLogoSide", arming)
+        self.assertIn("bootLogoRingDiameter", arming)
+        self.assertIn("GeometryReader", arming)
+        frac = re.search(
+            r"bootLogoWidthFraction: Double = ([0-9.]+)",
+            tokens,
         )
+        self.assertIsNotNone(frac)
+        self.assertGreaterEqual(float(frac.group(1)), 0.72)
+        self.assertLessEqual(float(frac.group(1)), 0.86)
+        self.assertNotIn("bootLogoPoints: Double = 196", tokens)
         app = read("Blackout", "AppRuntime.swift")
         gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
         self.assertIn("CLLocationCoordinate2DIsValid", gnss)
@@ -710,9 +721,24 @@ class BootFieldTests(unittest.TestCase):
         core = png_px(px, width, width // 2, height // 2)
         self.assertGreaterEqual(core[0], 160, "field red sight stays")
         self.assertGreaterEqual(core[3], 220, "field red sight stays")
-        ring = png_px(px, width, width // 2, int(height * 200 / 1712))
+        origin_y = (height - width) // 2
+        ring = png_px(px, width, width // 2, origin_y + int(width * 56 / 1024))
         self.assertGreaterEqual(ring[3], 230, "field metal ring stays")
         self.assertGreaterEqual(max(ring[:3]), 160, "field metal ring stays")
+        minx, miny, maxx, maxy = width, height, -1, -1
+        for y in range(0, height, 2):
+            for x in range(0, width, 2):
+                if png_px(px, width, x, y)[3] > 20:
+                    minx = min(minx, x)
+                    miny = min(miny, y)
+                    maxx = max(maxx, x)
+                    maxy = max(maxy, y)
+        self.assertGreater(maxx, minx)
+        self.assertLess(
+            (maxy - miny + 1) / (maxx - minx + 1),
+            1.2,
+            "field still has the BLACKOUT wordmark under the mark",
+        )
         open_count = 0
         metal_count = 0
         for y in range(0, height, 4):
@@ -734,7 +760,13 @@ class BootFieldTests(unittest.TestCase):
         field_view = arming.split("private var field:")[1].split("private var vignette")[0]
         self.assertIn(".scaledToFill()", field_view)
         self.assertIn(".clipped()", field_view)
-        self.assertIn(".ignoresSafeArea()", field_view)
+        self.assertIn("bootLogoSide", field_view)
+        self.assertNotIn(".ignoresSafeArea()", field_view)
+        self.assertIn("Theme.Motion.heavy", arming)
+        self.assertNotIn(".spring(", arming)
+        maker = read("tools", "make_boot_field.py")
+        self.assertIn("Logo.png", maker)
+        self.assertNotIn("boot_field_src.jpg", maker)
         world = re.search(r"worldIn \? ([0-9.]+)", arming)
         self.assertIsNotNone(world)
         self.assertGreaterEqual(float(world.group(1)), 0.48, "map too dim under the field")
@@ -750,9 +782,51 @@ class BootFieldTests(unittest.TestCase):
         self.assertIn("streets show through", qa.lower())
         self.assertIn("field poster", qa.lower())
         self.assertIn("No BLACKOUT as HUD type", qa)
+        self.assertIn("fills the well", qa.lower())
+        self.assertIn("same mark on void", qa.lower())
+        self.assertNotIn("best in class", qa.lower())
         device = read("docs", "DEVICE.md")
         self.assertIn("streets show through", device.lower())
         self.assertIn("field poster", device.lower())
+        self.assertIn("fills the well", device.lower())
+
+
+class BootLaunchScreenTests(unittest.TestCase):
+    """Cold splash is the HUD mark on void, same size as ACTIVATE."""
+
+    def test_launch_storyboard_is_the_mark_on_void(self):
+        story_path = ROOT / "Blackout" / "LaunchScreen.storyboard"
+        self.assertTrue(story_path.is_file(), "LaunchScreen.storyboard missing")
+        story = story_path.read_text()
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        frac = re.search(
+            r"bootLogoWidthFraction: Double = ([0-9.]+)",
+            tokens,
+        )
+        self.assertIsNotNone(frac)
+        self.assertIn('image="Logo"', story)
+        self.assertIn("scaleAspectFit", story)
+        self.assertIn(f'multiplier="{frac.group(1)}"', story)
+        self.assertIn('red="0"', story)
+        self.assertIn('green="0"', story)
+        self.assertIn('blue="0"', story)
+        self.assertNotIn("systemBlue", story)
+        self.assertNotIn("systemBackgroundColor", story)
+        self.assertNotIn("UILabel", story)
+        self.assertNotIn("BLACKOUT", story)
+        self.assertNotIn("best in class", story.lower())
+        gen = read("tools", "v3", "generate_project.py")
+        pbx = read("Blackout.xcodeproj", "project.pbxproj")
+        self.assertIn('"INFOPLIST_KEY_UILaunchStoryboardName": "LaunchScreen"', gen)
+        self.assertNotIn("UILaunchScreen_Generation", gen)
+        self.assertIn("INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;", pbx)
+        self.assertNotIn("INFOPLIST_KEY_UILaunchScreen_Generation", pbx)
+        arming = read("Blackout", "ARMINGView.swift")
+        self.assertIn("GeometryReader", arming)
+        self.assertIn("bootLogoSide", arming)
+        chrome = arming.split("private var chrome:")[1].split("private var mark")[0]
+        self.assertIn("ZStack", chrome)
+        self.assertIn("alignment: .center", chrome)
 
 
 class BootGlassTests(unittest.TestCase):

@@ -13,8 +13,12 @@ public enum BlackoutTokens: Sendable {
         /// Overlay left-hand tab column on MAP.
         public static let hudSideReservePoints: Double = 72
         public static let mapChipHitPoints: Double = 44
-        /// Title-screen mark. Square compass, same as the App Icon. Not a chip.
-        public static let bootLogoPoints: Double = 196
+        /// Title-screen mark. Fraction of the shorter screen edge. Not a chip.
+        public static let bootLogoWidthFraction: Double = 0.78
+        /// Asset fill of the compass metal inside Logo.png (padding knocked out).
+        public static let bootLogoMetalFill: Double = 0.84
+        /// Ring hugs the metal, not the transparent plate around the asset.
+        public static let bootLogoRingPadPoints: Double = 10
         /// Overlay-page mark. Same compass, small enough to sit beside a title.
         public static let hudMarkPoints: Double = 20
         /// Selected-tab tick. The logo's center reticle, not a random underline.
@@ -68,6 +72,15 @@ public enum BlackoutTokens: Sendable {
             case .field, .expedition:
                 return false
             }
+        }
+
+        /// Hero mark on ACTIVATE and the launch splash. Same well on every phone.
+        public static func bootLogoSide(width: Double, height: Double) -> Double {
+            min(width, height) * bootLogoWidthFraction
+        }
+
+        public static func bootLogoRingDiameter(side: Double) -> Double {
+            side * bootLogoMetalFill + bootLogoRingPadPoints
         }
     }
 

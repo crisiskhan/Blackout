@@ -15,21 +15,21 @@ struct ARMINGView: View {
         ZStack {
             Theme.void.ignoresSafeArea()
             world
-            field
+            field.ignoresSafeArea()
             vignette
-            chrome
+            chrome.ignoresSafeArea()
         }
         .onAppear {
             runtime.bootVessel()
-            withAnimation(.easeOut(duration: 0.9)) { markIn = true }
+            withAnimation(Theme.Motion.heavy) { markIn = true }
             if runtime.bootStyleURL != nil {
-                withAnimation(.easeIn(duration: 1.15)) { worldIn = true }
+                withAnimation(Theme.Motion.heavy) { worldIn = true }
             }
             if runtime.bootReady { readyTick.notificationOccurred(.success) }
         }
         .onChange(of: runtime.bootStyleURL) { _, url in
             if url != nil {
-                withAnimation(.easeIn(duration: 1.15)) { worldIn = true }
+                withAnimation(Theme.Motion.heavy) { worldIn = true }
             }
         }
         .onChange(of: runtime.bootReady) { _, ready in
@@ -62,14 +62,23 @@ struct ARMINGView: View {
         }
     }
 
+    /// Same well as the square mark. Not a second full-screen poster.
     private var field: some View {
-        Image("BootField")
-            .resizable()
-            .scaledToFill()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+        GeometryReader { geo in
+            let size = CGFloat(
+                BlackoutTokens.Chrome.bootLogoSide(
+                    width: Double(geo.size.width),
+                    height: Double(geo.size.height)
+                )
+            )
+            Image("BootField")
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipped()
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                .allowsHitTesting(false)
+        }
     }
 
     private var vignette: some View {
@@ -88,38 +97,51 @@ struct ARMINGView: View {
     }
 
     private var chrome: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack(alignment: .center) {
             mark
-            Spacer()
-            status
-            activate
+            VStack(spacing: 0) {
+                Spacer()
+                status
+                activate
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 36)
         }
-        .padding(.horizontal, 28)
-        .padding(.bottom, 36)
     }
 
     private var mark: some View {
-        TimelineView(.animation(minimumInterval: 0.08, paused: runtime.bootReady)) { context in
-            let pulse = runtime.bootReady
-                ? 1.0
-                : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
-            let size = CGFloat(BlackoutTokens.Chrome.bootLogoPoints)
-            let bloom = 0.38 + 0.22 * pulse
-            ZStack {
-                HUDRing(diameter: size + 28, lit: runtime.bootReady)
-                Image("Logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: size, height: size)
-                    .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
-                    .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
-                    .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
-                    .compositingGroup()
+        GeometryReader { geo in
+            let size = CGFloat(
+                BlackoutTokens.Chrome.bootLogoSide(
+                    width: Double(geo.size.width),
+                    height: Double(geo.size.height)
+                )
+            )
+            let ring = CGFloat(
+                BlackoutTokens.Chrome.bootLogoRingDiameter(side: Double(size))
+            )
+            TimelineView(.animation(minimumInterval: 0.08, paused: runtime.bootReady)) { context in
+                let pulse = runtime.bootReady
+                    ? 1.0
+                    : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
+                let bloom = 0.38 + 0.22 * pulse
+                ZStack {
+                    HUDRing(diameter: ring, lit: runtime.bootReady)
+                    Image("Logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size, height: size)
+                        .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
+                        .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
+                        .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
+                        .compositingGroup()
+                }
+                .frame(width: size, height: size)
+                .scaleEffect(markIn ? 1 : 0.98)
+                .opacity(markIn ? 1 : 0)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                .accessibilityLabel("Blackout")
             }
-            .scaleEffect(markIn ? 1 : 0.98)
-            .opacity(markIn ? 1 : 0)
-            .accessibilityLabel("Blackout")
         }
     }
 
@@ -179,6 +201,6 @@ struct ARMINGView: View {
         )
         .allowsHitTesting(runtime.bootReady)
         .accessibilityHint("Loads the vessel and opens the map")
-        .animation(.easeOut(duration: 0.25), value: runtime.bootReady)
+        .animation(Theme.Motion.wake, value: runtime.bootReady)
     }
 }

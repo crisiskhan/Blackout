@@ -58,7 +58,24 @@ final class TokensTests: XCTestCase {
     }
 
     func testMapInstrumentChipsAreDockPlusSheet() {
-        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoPoints, 196)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoWidthFraction, 0.78)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoMetalFill, 0.84)
+        XCTAssertEqual(BlackoutTokens.Chrome.bootLogoRingPadPoints, 10)
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.bootLogoSide(width: 390, height: 844),
+            304.2,
+            accuracy: 0.05
+        )
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.bootLogoSide(width: 844, height: 390),
+            304.2,
+            accuracy: 0.05
+        )
+        XCTAssertEqual(
+            BlackoutTokens.Chrome.bootLogoRingDiameter(side: 304.2),
+            304.2 * 0.84 + 10,
+            accuracy: 0.05
+        )
         XCTAssertEqual(BlackoutTokens.Chrome.bootActivateHeight, 56)
         XCTAssertEqual(BlackoutTokens.Chrome.bootMinSeconds, 0.8)
         XCTAssertEqual(BlackoutTokens.Chrome.hudTabReservePoints, 52)

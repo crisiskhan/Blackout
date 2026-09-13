@@ -272,7 +272,7 @@ def ios_target_settings(debug: bool) -> dict:
             "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "SEARCH listens for a spoken question on this device. Deny is supported.",
             "INFOPLIST_KEY_NSMotionUsageDescription": "Heading for dead reckoning when GNSS dies. Deny is supported.",
             "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
-            "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
+            "INFOPLIST_KEY_UILaunchStoryboardName": "LaunchScreen",
             "INFOPLIST_KEY_UISupportedInterfaceOrientations": "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight",
             "INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad": "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight",
             "INFOPLIST_KEY_UIUserInterfaceStyle": "Dark",
