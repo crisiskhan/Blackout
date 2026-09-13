@@ -109,10 +109,84 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertEqual(g.percent, 0)
     }
 
+    func testSucculentBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.9),
+                VisionObservation(identifier: "Succulent plant", confidence: 0.34),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "PRICKLY PEAR")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testYuccaBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.88),
+                VisionObservation(identifier: "Yucca", confidence: 0.31),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "YUCCA")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testPeccaryHitsJavelina() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Collared peccary", confidence: 0.7)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "JAVELINA")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testBoarIsMammalNotATree() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.8),
+                VisionObservation(identifier: "Wild boar", confidence: 0.33),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "MAMMAL")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testWoodIsNotACottonwood() {
+        let book = VisionBook(
+            state: "NM",
+            neverEdibleUnlock: true,
+            fungiDefault: "LEAVE_IT",
+            labels: [
+                VisionLabel(
+                    id: "nm-cottonwood",
+                    kind: "tree",
+                    lookalikes: [],
+                    leaveIt: false,
+                    edibleUnlock: false,
+                    name: ["en": "Rio Grande cottonwood"]
+                ),
+            ]
+        )
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Wood", confidence: 0.9)],
+            book: book
+        )
+        XCTAssertEqual(g.name, "UNKNOWN")
+        XCTAssertFalse(g.edible)
+    }
+
     private func txBook() -> VisionBook {
         VisionBook(state: "TX", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: [
             VisionLabel(id: "tx-prickly-pear", kind: "cactus", lookalikes: ["glochid-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Prickly pear"]),
+            VisionLabel(id: "tx-yucca", kind: "cacti_yucca", lookalikes: ["sotol-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Yucca"]),
             VisionLabel(id: "tx-coyote", kind: "mammal", lookalikes: ["dog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Coyote"]),
+            VisionLabel(id: "tx-javelina", kind: "mammal", lookalikes: ["feral-hog-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Javelina"]),
             VisionLabel(id: "tx-western-diamondback", kind: "snake", lookalikes: ["bullsnake-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Western diamondback"]),
             VisionLabel(id: "tx-amanita", kind: "fungi", lookalikes: ["x"], leaveIt: true, edibleUnlock: false, name: ["en": "Amanita"]),
         ])

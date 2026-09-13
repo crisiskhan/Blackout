@@ -65,6 +65,7 @@ struct VisionStill: UIViewControllerRepresentable {
         var onCancel: (() -> Void)?
         private let session = AVCaptureSession()
         private let output = AVCapturePhotoOutput()
+        private let sessionQueue = DispatchQueue(label: "blackout.vision.session")
         private var captureButton: UIButton?
         private var started = false
         private var finished = false
@@ -86,7 +87,7 @@ struct VisionStill: UIViewControllerRepresentable {
 
         override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
-            session.stopRunning()
+            haltSession()
         }
 
         override func viewDidLayoutSubviews() {
@@ -121,27 +122,43 @@ struct VisionStill: UIViewControllerRepresentable {
             let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
                 ?? AVCaptureDevice.default(for: .video)
             guard let device,
-                  let input = try? AVCaptureDeviceInput(device: device),
-                  session.canAddInput(input) else {
+                  let input = try? AVCaptureDeviceInput(device: device) else {
                 failClosed()
                 return
             }
-            session.addInput(input)
-            if session.canAddOutput(output) {
-                session.addOutput(output)
+            sessionQueue.async {
+                guard !self.finished else { return }
+                self.session.beginConfiguration()
+                defer { self.session.commitConfiguration() }
+                guard self.session.canAddInput(input) else {
+                    DispatchQueue.main.async { self.failClosed() }
+                    return
+                }
+                self.session.addInput(input)
+                guard self.session.canAddOutput(self.output) else {
+                    DispatchQueue.main.async { self.failClosed() }
+                    return
+                }
+                self.session.addOutput(self.output)
+                if let connection = self.output.connection(with: .video), connection.isVideoOrientationSupported {
+                    connection.videoOrientation = .portrait
+                }
             }
-            if let connection = output.connection(with: .video), connection.isVideoOrientationSupported {
-                connection.videoOrientation = .portrait
-            }
-            DispatchQueue.global(qos: .userInitiated).async {
+            sessionQueue.async {
+                guard !self.finished else { return }
                 self.session.startRunning()
+                let running = self.session.isRunning
                 DispatchQueue.main.async {
-                    self.captureButton?.isEnabled = self.session.isRunning
-                    if !self.session.isRunning {
+                    self.captureButton?.isEnabled = running
+                    if !running {
                         self.failClosed()
                     }
                 }
             }
+        }
+
+        private func haltSession() {
+            sessionQueue.async { self.session.stopRunning() }
         }
 
         private func installChrome() {
@@ -179,14 +196,17 @@ struct VisionStill: UIViewControllerRepresentable {
 
         @objc private func cancel() {
             finish {
-                self.session.stopRunning()
+                self.haltSession()
                 self.onCancel?()
             }
         }
 
         @objc private func shoot() {
-            guard session.isRunning else { return }
-            output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+            sessionQueue.async {
+                guard self.session.isRunning,
+                      self.output.connections.contains(where: \.isEnabled) else { return }
+                self.output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+            }
         }
 
         func photoOutput(
@@ -194,8 +214,8 @@ struct VisionStill: UIViewControllerRepresentable {
             didFinishProcessingPhoto photo: AVCapturePhoto,
             error: Error?
         ) {
+            haltSession()
             DispatchQueue.main.async {
-                self.session.stopRunning()
                 guard error == nil,
                       let data = photo.fileDataRepresentation(),
                       let image = UIImage(data: data)?.cgImage else {
@@ -208,7 +228,7 @@ struct VisionStill: UIViewControllerRepresentable {
 
         private func failClosed() {
             finish {
-                self.session.stopRunning()
+                self.haltSession()
                 self.onFail?()
             }
         }

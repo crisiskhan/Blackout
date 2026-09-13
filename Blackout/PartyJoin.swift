@@ -71,6 +71,7 @@ struct PartyQRScanner: UIViewControllerRepresentable {
         var onFail: (() -> Void)?
         var onCancel: (() -> Void)?
         private let session = AVCaptureSession()
+        private let sessionQueue = DispatchQueue(label: "blackout.qr.session")
         private var started = false
         private var finished = false
 
@@ -90,7 +91,7 @@ struct PartyQRScanner: UIViewControllerRepresentable {
 
         override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
-            session.stopRunning()
+            haltSession()
         }
 
         override func viewDidLayoutSubviews() {
@@ -122,20 +123,44 @@ struct PartyQRScanner: UIViewControllerRepresentable {
         private func startSession() {
             guard !started else { return }
             guard let device = AVCaptureDevice.default(for: .video),
-                  let input = try? AVCaptureDeviceInput(device: device),
-                  session.canAddInput(input) else {
+                  let input = try? AVCaptureDeviceInput(device: device) else {
                 failClosed()
                 return
             }
             started = true
-            session.addInput(input)
-            let output = AVCaptureMetadataOutput()
-            if session.canAddOutput(output) {
-                session.addOutput(output)
+            sessionQueue.async {
+                guard !self.finished else { return }
+                self.session.beginConfiguration()
+                defer { self.session.commitConfiguration() }
+                guard self.session.canAddInput(input) else {
+                    DispatchQueue.main.async { self.failClosed() }
+                    return
+                }
+                self.session.addInput(input)
+                let output = AVCaptureMetadataOutput()
+                guard self.session.canAddOutput(output) else {
+                    DispatchQueue.main.async { self.failClosed() }
+                    return
+                }
+                self.session.addOutput(output)
                 output.setMetadataObjectsDelegate(self, queue: .main)
+                guard output.availableMetadataObjectTypes.contains(.qr) else {
+                    DispatchQueue.main.async { self.failClosed() }
+                    return
+                }
                 output.metadataObjectTypes = [.qr]
             }
-            DispatchQueue.global(qos: .userInitiated).async { self.session.startRunning() }
+            sessionQueue.async {
+                guard !self.finished else { return }
+                self.session.startRunning()
+                if !self.session.isRunning {
+                    DispatchQueue.main.async { self.failClosed() }
+                }
+            }
+        }
+
+        private func haltSession() {
+            sessionQueue.async { self.session.stopRunning() }
         }
 
         private func installChrome() {
@@ -156,14 +181,14 @@ struct PartyQRScanner: UIViewControllerRepresentable {
 
         @objc private func cancel() {
             finish {
-                self.session.stopRunning()
+                self.haltSession()
                 self.onCancel?()
             }
         }
 
         private func failClosed() {
             finish {
-                self.session.stopRunning()
+                self.haltSession()
                 self.onFail?()
             }
         }
@@ -178,7 +203,7 @@ struct PartyQRScanner: UIViewControllerRepresentable {
             guard let obj = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
                   let raw = obj.stringValue else { return }
             finish {
-                self.session.stopRunning()
+                self.haltSession()
                 self.onCode?(PartyQR.parse(raw))
             }
         }

@@ -168,7 +168,7 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(withRails.contains("0.20"))
         XCTAssertTrue(withRails.contains("0.45"))
         let railsParsed = MeshPOS.parse(withRails)
-        XCTAssertEqual(railsParsed?.status, "wait")
+        XCTAssertEqual(railsParsed?.status, "okay")
         XCTAssertEqual(railsParsed?.vitals, [0.2, 0.45, 0.2, 0.65, 0.2, 0.8])
         XCTAssertEqual(MeshPOS.parse("31.76,-106.49,12,wolf,CRISIS,wait")?.vitals, nil)
         let net = MeshNet(box: EventLog())
@@ -184,7 +184,7 @@ final class MeshDTNTests: XCTestCase {
             body: Data("31.76,-106.49,12,wolf,CRISIS,wait".utf8)
         ))
         XCTAssertEqual(net.pips.first?.name, "CRISIS")
-        XCTAssertEqual(net.pips.first?.status, "wait")
+        XCTAssertEqual(net.pips.first?.status, "okay")
         radio.deliver(MeshEnvelope(
             id: "n2",
             from: "peer-1",

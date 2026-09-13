@@ -1461,6 +1461,12 @@ class VisionInstrumentTests(unittest.TestCase):
         shoot = still.split("func shoot()")[1].split("func photoOutput")[0]
         self.assertNotIn("failClosed()", shoot)
         self.assertIn("session.isRunning", shoot)
+        self.assertIn("sessionQueue", still)
+        self.assertIn("beginConfiguration", still)
+        self.assertIn("commitConfiguration", still)
+        start = still.split("func startSession")[1].split("func installChrome")[0]
+        self.assertIn("canAddOutput", start)
+        self.assertIn("failClosed()", start)
 
     def test_matcher_needles_are_in_the_package(self):
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift").lower()
@@ -1471,8 +1477,22 @@ class VisionInstrumentTests(unittest.TestCase):
             "coyote",
             "yucca",
             "unknown",
+            "succulent",
+            "saguaro",
+            "peccary",
+            "boar",
         ):
             self.assertIn(needle, vis, needle)
+
+    def test_generic_wood_is_not_a_tree_name(self):
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        self.assertIn("genericIdents", vis)
+        self.assertIn('"wood"', vis)
+
+    def test_qr_scan_does_not_set_missing_metadata_types(self):
+        scan = read("Blackout", "PartyJoin.swift")
+        self.assertIn("availableMetadataObjectTypes", scan)
+        self.assertIn("sessionQueue", scan)
 
     def test_solo_qa_scores_a_still_not_a_percent(self):
         qa = read("docs", "SOLO_QA.md")
@@ -1913,6 +1933,9 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn('return "EMERGENCY!"', mesh)
         self.assertIn('"ok"', mesh)
         self.assertIn('"wait"', mesh)
+        tests = read("Packages", "MeshDTN", "Tests", "MeshDTNTests", "MeshDTNTests.swift")
+        self.assertIn('XCTAssertEqual(railsParsed?.status, "okay")', tests)
+        self.assertIn('XCTAssertEqual(net.pips.first?.status, "okay")', tests)
         self.assertIn('"water"', mesh)
         self.assertIn('"down"', mesh)
         self.assertIn("case .good", card)

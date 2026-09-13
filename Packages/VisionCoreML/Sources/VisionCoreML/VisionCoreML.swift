@@ -132,6 +132,7 @@ public enum VisionCoreML {
         switch kindRank(guess) {
         case .fungi: return 50
         case .snake: return 40
+        case .cactus: return 35
         case .specific: return 30
         case .tree: return 10
         }
@@ -140,6 +141,7 @@ public enum VisionCoreML {
     private enum KindRank {
         case fungi
         case snake
+        case cactus
         case specific
         case tree
     }
@@ -155,6 +157,12 @@ public enum VisionCoreML {
             || id.contains("rattler") || id.contains("copperhead") || id.contains("cottonmouth")
         {
             return .snake
+        }
+        if id == "kind:cactus" || id == "kind:cacti_yucca" || id.contains("cactus")
+            || id.contains("prickly") || id.contains("cholla") || id.contains("yucca")
+            || id.contains("sotol") || guess.name == "CACTUS" || guess.name == "YUCCA"
+        {
+            return .cactus
         }
         if id == "kind:tree" || guess.name == "TREE" {
             return .tree
@@ -180,9 +188,17 @@ public enum VisionCoreML {
         if fungiNeedles.contains(where: { ident.contains($0) }) {
             return fungiGuess(book, locale: locale)
         }
+        if ident.contains("javelina") || ident.contains("peccary") {
+            if let javelina = book.labels.first(where: {
+                $0.id.contains("javelina") || normalize($0.displayName("en")).contains("javelina")
+            }) {
+                return speciesGuess(javelina, locale: locale)
+            }
+        }
 
         let species = book.labels.filter { label in
             if label.kind == "fungi" { return false }
+            if genericIdents.contains(ident) { return false }
             let names = label.name.values.map(normalize)
             let shortId = normalize(
                 label.id
@@ -298,15 +314,21 @@ public enum VisionCoreML {
             .replacingOccurrences(of: "-", with: " ")
     }
 
+    private static let genericIdents: Set<String> = [
+        "wood", "plant", "animal", "flower", "leaf", "fruit", "food", "wildlife",
+        "flora", "fauna", "nature",
+    ]
+
     private static let fungiNeedles = [
         "mushroom", "fungus", "fungi", "toadstool", "morel", "amanita", "galerina",
+        "puffball", "bracket",
     ]
 
     private static let kindNeedles: [(String, [String])] = [
-        ("cactus", ["cactus", "cholla", "opuntia"]),
+        ("cactus", ["cactus", "cholla", "opuntia", "succulent", "saguaro", "nopal"]),
         ("cacti_yucca", ["yucca", "sotol", "agave"]),
         ("snake", ["rattlesnake", "copperhead", "cottonmouth", "snake", "viper"]),
-        ("mammal", ["coyote", "javelina", "peccary", "deer", "elk", "bear", "hog"]),
+        ("mammal", ["coyote", "javelina", "peccary", "deer", "elk", "bear", "hog", "boar"]),
         ("tree", ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
     ]
 }
