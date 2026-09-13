@@ -1,6 +1,51 @@
 import Foundation
 import BlackBox
 
+/// Typed TIME on EXPEDITION. Minutes unless the field ends in H / HR / HRS.
+public enum TimerDuration {
+    public static func parse(_ raw: String) -> TimeInterval? {
+        var body = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: ",", with: ".")
+            .uppercased()
+        guard !body.isEmpty else { return nil }
+        let hours: Bool
+        if body.hasSuffix("HRS") {
+            body = String(body.dropLast(3))
+            hours = true
+        } else if body.hasSuffix("MINS") {
+            body = String(body.dropLast(4))
+            hours = false
+        } else if body.hasSuffix("MIN") {
+            body = String(body.dropLast(3))
+            hours = false
+        } else if body.hasSuffix("HR") {
+            body = String(body.dropLast(2))
+            hours = true
+        } else if body.hasSuffix("H") {
+            body = String(body.dropLast())
+            hours = true
+        } else if body.hasSuffix("M") {
+            body = String(body.dropLast())
+            hours = false
+        } else {
+            hours = false
+        }
+        guard let value = Double(body), value.isFinite, value > 0 else { return nil }
+        return hours ? value * 3600 : value * 60
+    }
+
+    public static func label(_ duration: TimeInterval) -> String {
+        let secs = Int(duration.rounded())
+        if secs >= 3600, secs % 3600 == 0 {
+            let hours = secs / 3600
+            return hours == 1 ? "1 HR" : "\(hours) HR"
+        }
+        let minutes = max(1, Int((duration / 60.0).rounded()))
+        return minutes == 1 ? "1 MIN" : "\(minutes) MIN"
+    }
+}
+
 public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var id: String
     public var who: String

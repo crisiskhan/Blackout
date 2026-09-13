@@ -18,7 +18,7 @@ struct ExpeditionTab: View {
     @State private var paperText = ""
     @State private var navChrome: String?
     @State private var timerName = ""
-    @State private var timerSeconds: TimeInterval = 60
+    @State private var timerTime = ""
     @State private var itemDraft = ""
     @State private var assigningID: String?
 
@@ -92,37 +92,21 @@ struct ExpeditionTab: View {
                         VStack(alignment: .leading, spacing: 8) {
                             let _ = runtime.timerSeq
                             HUDField("NAME", text: $timerName, id: "exped.timer", locked: true)
-                            HStack(spacing: 8) {
-                                Button("1 MIN") { timerSeconds = 60 }
-                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 60, expand: true))
-                                Button("5 MIN") { timerSeconds = 300 }
-                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 300, expand: true))
-                                Button("2H") { timerSeconds = 7200 }
-                                    .buttonStyle(HoldActionStyle(filled: timerSeconds == 7200, expand: true))
-                            }
+                            HUDField("TIME",
+                                text: $timerTime,
+                                id: "exped.time",
+                                digits: true
+                            )
                             VStack(spacing: 1) {
                                 Button("SET") {
+                                    guard let duration = TimerDuration.parse(timerTime) else { return }
                                     runtime.addPartyTimer(
                                         task: timerName,
-                                        duration: timerSeconds
+                                        duration: duration
                                     )
                                     timerName = ""
-                                }
-                                .buttonStyle(HUDDockStyle())
-                                Button("1 MIN TIMER SET") {
-                                    runtime.addPartyTimer(
-                                        task: timerName.isEmpty ? "1min" : timerName,
-                                        duration: 60
-                                    )
-                                    timerName = ""
-                                }
-                                .buttonStyle(HUDDockStyle())
-                                Button("2H WATER TIMER SET") {
-                                    runtime.addPartyTimer(
-                                        task: timerName.isEmpty ? "water" : timerName,
-                                        duration: 7200
-                                    )
-                                    timerName = ""
+                                    timerTime = ""
+                                    runtime.hudKeys.close()
                                 }
                                 .buttonStyle(HUDDockStyle())
                             }

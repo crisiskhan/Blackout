@@ -1054,24 +1054,10 @@ final class AppRuntime {
     }
 
     func addPartyTimer(task: String, duration: TimeInterval) {
+        guard duration.isFinite, duration > 0 else { return }
         let trimmed = task.trimmingCharacters(in: .whitespacesAndNewlines)
-        let preset = trimmed.isEmpty
-            || trimmed == "1min"
-            || trimmed == "5min"
-            || trimmed == "water"
-        let name: String
-        if trimmed.isEmpty {
-            if duration <= 60 {
-                name = "1min"
-            } else if duration <= 300 {
-                name = "5min"
-            } else {
-                name = "water"
-            }
-        } else {
-            name = trimmed
-        }
-        let who = preset ? "ALL" : timerOwner()
+        let name = trimmed.isEmpty ? TimerDuration.label(duration) : trimmed
+        let who = trimmed.isEmpty ? "ALL" : timerOwner()
         if timers.add(who: who, task: name, duration: duration, subjectAll: true, owner: timerOwner()) != nil {
             mesh.sendTimer(from: mesh.localID, task: name, done: false, duration: duration)
             timerSeq += 1

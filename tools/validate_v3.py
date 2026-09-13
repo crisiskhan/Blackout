@@ -899,13 +899,18 @@ def tip58_solo_qa() -> None:
         and re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech) is None
     )
     timer_ok = (
-        'Button("1 MIN TIMER SET")' in exp
+        'HUDField("TIME"' in exp
+        and 'Button("SET")' in exp
+        and 'Button("1 MIN TIMER SET")' not in exp
+        and 'Button("2H WATER TIMER SET")' not in exp
         and 'Button("DONE")' in exp
         and "TimelineView" in exp
         and "overdueRowID" in timers
         and "overduePlate" in exp
         and ("who.isEmpty" in timers)
         and "isSOS" in timers
+        and "enum TimerDuration" in timers
+        and "static func parse(" in timers
     )
     red_ok = (
         "APPLY RED BAND" in exp

@@ -19,6 +19,7 @@ final class HUDKeyboardGate {
         text: String,
         submit: String,
         locked: Bool,
+        digits: Bool,
         write: @escaping (String) -> Void,
         onOpen: (() -> Void)?,
         onSubmit: (() -> Void)?
@@ -28,7 +29,12 @@ final class HUDKeyboardGate {
         self.write = write
         self.onOpen = onOpen
         self.onSubmit = onSubmit
-        state = HUDKeyboardState(text: text, shift: true, locked: locked, face: .letters)
+        state = HUDKeyboardState(
+            text: text,
+            shift: locked || !digits,
+            locked: locked,
+            face: digits ? .digits : .letters
+        )
         onOpen?()
     }
 
@@ -61,6 +67,7 @@ struct HUDField: View {
     var id: String
     var submit: String = "DONE"
     var locked: Bool = false
+    var digits: Bool = false
     var pointSize: CGFloat = 14
     var weight: Font.Weight = .semibold
     var ink: Color = Theme.silver
@@ -74,6 +81,7 @@ struct HUDField: View {
         id: String,
         submit: String = "DONE",
         locked: Bool = false,
+        digits: Bool = false,
         pointSize: CGFloat = 14,
         weight: Font.Weight = .semibold,
         ink: Color = Theme.silver,
@@ -85,6 +93,7 @@ struct HUDField: View {
         self.id = id
         self.submit = submit
         self.locked = locked
+        self.digits = digits
         self.pointSize = pointSize
         self.weight = weight
         self.ink = ink
@@ -101,6 +110,7 @@ struct HUDField: View {
                     text: text,
                     submit: submit,
                     locked: locked,
+                    digits: digits,
                     write: { text = $0 },
                     onOpen: onOpen,
                     onSubmit: onSubmit

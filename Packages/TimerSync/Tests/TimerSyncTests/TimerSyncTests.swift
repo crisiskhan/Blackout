@@ -65,6 +65,18 @@ final class TimerSyncTests: XCTestCase {
         XCTAssertFalse(b.onProfile(personID: "peer", name: "Sam", isYou: false).contains(where: { $0.task == "1min" }))
     }
 
+    func testDurationParseReadsMinutesAndHours() {
+        XCTAssertEqual(TimerDuration.parse("1"), 60)
+        XCTAssertEqual(TimerDuration.parse("30"), 1800)
+        XCTAssertEqual(TimerDuration.parse("2H"), 7200)
+        XCTAssertEqual(TimerDuration.parse("2 HR"), 7200)
+        XCTAssertEqual(TimerDuration.parse("90m"), 5400)
+        XCTAssertNil(TimerDuration.parse(""))
+        XCTAssertNil(TimerDuration.parse("0"))
+        XCTAssertEqual(TimerDuration.label(60), "1 MIN")
+        XCTAssertEqual(TimerDuration.label(7200), "2 HR")
+    }
+
     func testGroupPresetShowsOnTheSetterProfile() {
         let b = TimerBoard(box: EventLog())
         XCTAssertNotNil(
