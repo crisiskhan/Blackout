@@ -915,26 +915,76 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var started: Date
     public var subjectAllTurnaround: Bool
     public var overdue: Bool { Date().timeIntervalSince(started) > duration }
+    public var overdueRowID: String { "overdue:\\(id)" }
+
+    public func remaining(now: Date = Date()) -> TimeInterval {
+        max(0, duration - now.timeIntervalSince(started))
+    }
+
+    public func remainingFraction(now: Date = Date()) -> Double {
+        guard duration > 0 else { return 0 }
+        return min(1, max(0, remaining(now: now) / duration))
+    }
 }
 
 public final class TimerBoard: @unchecked Sendable {
     public private(set) var timers: [PartyTimer] = []
-    private let box: BlackBox
+    public private(set) var completed: [PartyTimer] = []
+    private let box: EventLog
     public static let maxActive = 4
-    public init(box: BlackBox) { self.box = box }
+    public init(box: EventLog) { self.box = box }
 
     @discardableResult
     public func add(who: String, task: String, duration: TimeInterval, subjectAll: Bool, now: Date = Date()) -> PartyTimer? {
-        guard timers.filter({ !$0.overdue || true }).count < Self.maxActive else { return nil }
+        let who = who.isEmpty ? "ALL" : who
+        if timers.contains(where: { $0.task == task && $0.who == who }) {
+            return nil
+        }
         guard timers.count < Self.maxActive else { return nil }
         let t = PartyTimer(id: UUID().uuidString, who: who, task: task, duration: duration, started: now, subjectAllTurnaround: subjectAll)
         timers.append(t)
-        box.log("timer", "\(who) \(task) \(duration)")
+        box.log("timer", "\\(who) \\(task) \\(duration)")
         return t
     }
 
     public func overduePlate(now: Date = Date()) -> [PartyTimer] {
         timers.filter { now.timeIntervalSince($0.started) > $0.duration }
+    }
+
+    public func onProfile(personID: String, name: String, isYou: Bool) -> [PartyTimer] {
+        timers.filter { t in
+            if t.who == personID || t.who == name { return true }
+            if isYou && (t.who == "ALL" || t.who == "YOU") { return true }
+            return false
+        }
+    }
+
+    public func markDone(_ id: String) {
+        if let t = timers.first(where: { $0.id == id }) {
+            timers.removeAll { $0.id == id }
+            if !completed.contains(where: { $0.id == id }) {
+                completed.append(t)
+            }
+            box.log("timer", "DONE \\(id)")
+        }
+    }
+
+    public func markDoneTask(_ task: String) {
+        if let t = timers.first(where: { $0.task == task }) {
+            markDone(t.id)
+        }
+    }
+
+    public func doneLines(id: String? = nil) -> [String] {
+        let rows = id == nil ? completed : completed.filter { $0.id == id }
+        var seen: [String] = []
+        var lines: [String] = []
+        for t in rows {
+            if seen.contains(t.id) { continue }
+            seen.append(t.id)
+            lines.append("\\(t.task) \\(t.who) DONE")
+        }
+        return lines
     }
 
     public func isSOS(_ t: PartyTimer) -> Bool { false }
@@ -1594,12 +1644,16 @@ public struct GearItem: Equatable, Sendable, Identifiable {
     public var name: String
     public var working: Bool
     public var failureHazard: String?
+    public var count: Int
+    public var assignedTo: String?
 
-    public init(id: String, name: String, working: Bool, failureHazard: String? = nil) {
+    public init(id: String, name: String, working: Bool, failureHazard: String? = nil, count: Int = 1, assignedTo: String? = nil) {
         self.id = id
         self.name = name
         self.working = working
         self.failureHazard = failureHazard
+        self.count = count
+        self.assignedTo = assignedTo
     }
 }
 
@@ -1611,6 +1665,48 @@ public struct KitBag: Equatable, Sendable {
         if let i = items.firstIndex(where: { $0.id == id }) {
             items[i].working = false
             items[i].failureHazard = hazard
+        }
+    }
+
+    public mutating func setWorking(_ id: String, working: Bool) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            items[i].working = working
+        }
+    }
+
+    public mutating func bump(_ id: String, by: Int) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            items[i].count = max(0, min(99, items[i].count + by))
+        }
+    }
+
+    public mutating func assign(_ id: String, to: String) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            let token = to.trimmingCharacters(in: .whitespacesAndNewlines)
+            items[i].assignedTo = token.isEmpty ? nil : token
+        }
+    }
+
+    public mutating func addNamed(_ name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        items.append(GearItem(id: UUID().uuidString, name: trimmed, working: true, count: 1))
+    }
+
+    public func assigned(to personID: String, name: String, isYou: Bool) -> [GearItem] {
+        items.filter { item in
+            guard let a = item.assignedTo, !a.isEmpty else { return false }
+            if a == personID || a == name { return true }
+            if isYou && a == "YOU" { return true }
+            return false
+        }
+    }
+
+    public mutating func upsert(_ item: GearItem) {
+        if let i = items.firstIndex(where: { $0.id == item.id }) {
+            items[i] = item
+        } else {
+            items.append(item)
         }
     }
 }

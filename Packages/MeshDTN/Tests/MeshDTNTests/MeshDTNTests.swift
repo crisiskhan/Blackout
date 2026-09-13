@@ -272,4 +272,28 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(net.inboundTimers.first?.task, "1min")
         XCTAssertTrue(net.inboundTimers.first?.done == true)
     }
+
+    func testTimerBodyKeepsOneMinAndCarriesNamedDuration() {
+        XCTAssertEqual(MeshTimerBody.parse("1min").task, "1min")
+        XCTAssertEqual(MeshTimerBody.parse("1min").duration, 60)
+        XCTAssertEqual(MeshTimerBody.parse("water").duration, 7200)
+        XCTAssertEqual(MeshTimerBody.parse("COOK\t90").task, "COOK")
+        XCTAssertEqual(MeshTimerBody.parse("COOK\t90").duration, 90)
+        XCTAssertEqual(MeshTimerBody.encode(task: "1min", duration: 60, done: false), "1min")
+        XCTAssertEqual(MeshTimerBody.encode(task: "COOK", duration: 90, done: false), "COOK\t90")
+        XCTAssertEqual(MeshTimerBody.encode(task: "COOK", duration: 90, done: true), "COOK")
+    }
+
+    func testSendKitLogsWhenSolo() {
+        let box = EventLog()
+        let net = MeshNet(box: box)
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.partyCode = "ABC123"
+        net.startLocal()
+        net.sendKit(from: net.localID, itemID: "stove", name: "Stove", count: 2, assignedTo: "Khan", working: true)
+        XCTAssertTrue(radio.sent.isEmpty)
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        XCTAssertTrue(net.store.contains(where: { $0.kind == "kit" }))
+    }
 }

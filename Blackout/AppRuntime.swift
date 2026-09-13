@@ -937,6 +937,78 @@ final class AppRuntime {
         mesh.sendChip(from: mesh.localID, chip: "field:\(cardID)")
     }
 
+    func timerOwner() -> String {
+        let named = youName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return named.isEmpty ? "YOU" : named
+    }
+
+    func addPartyTimer(task: String, duration: TimeInterval) {
+        let trimmed = task.trimmingCharacters(in: .whitespacesAndNewlines)
+        let preset = trimmed.isEmpty || trimmed == "1min" || trimmed == "water"
+        let name: String
+        if trimmed.isEmpty {
+            name = duration <= 60 ? "1min" : "water"
+        } else {
+            name = trimmed
+        }
+        let who = preset ? "ALL" : timerOwner()
+        if timers.add(who: who, task: name, duration: duration, subjectAll: true) != nil {
+            mesh.sendTimer(from: mesh.localID, task: name, done: false, duration: duration)
+        }
+    }
+
+    func bumpKit(_ id: String, by: Int) {
+        kit.bump(id, by: by)
+        sendKitItem(id)
+    }
+
+    func syncKit(_ id: String) {
+        sendKitItem(id)
+    }
+
+    func assignKitItem(_ id: String, to: String) {
+        kit.assign(id, to: to)
+        sendKitItem(id)
+    }
+
+    func addKitItem(_ name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        kit.addNamed(trimmed)
+        if let item = kit.items.last, item.name == trimmed {
+            sendKitMesh(item)
+        }
+    }
+
+    private func sendKitItem(_ id: String) {
+        guard let item = kit.items.first(where: { $0.id == id }) else { return }
+        sendKitMesh(item)
+    }
+
+    private func sendKitMesh(_ item: GearItem) {
+        mesh.sendKit(
+            from: mesh.localID,
+            itemID: item.id,
+            name: item.name,
+            count: item.count,
+            assignedTo: item.assignedTo ?? "",
+            working: item.working
+        )
+    }
+
+    private func applyKitMesh(
+        _ parsed: (id: String, name: String, count: Int, assignedTo: String, working: Bool)
+    ) {
+        kit.upsert(
+            GearItem(
+                id: parsed.id,
+                name: parsed.name,
+                working: parsed.working,
+                count: parsed.count,
+                assignedTo: parsed.assignedTo.isEmpty ? nil : parsed.assignedTo
+            )
+        )
+    }
+
     private var meshDest: String {
         comms.meshTo(nearby: mesh.nearby)
     }
@@ -989,12 +1061,19 @@ final class AppRuntime {
         case "red":
             red.force(String(data: env.body, encoding: .utf8) == "on")
         case "timer.set":
-            if let task = String(data: env.body, encoding: .utf8) {
-                _ = timers.add(who: env.from, task: task, duration: 7200, subjectAll: true)
+            if let raw = String(data: env.body, encoding: .utf8) {
+                let parsed = MeshTimerBody.parse(raw)
+                _ = timers.add(who: env.from, task: parsed.task, duration: parsed.duration, subjectAll: true)
             }
         case "timer.done":
-            if let task = String(data: env.body, encoding: .utf8) {
-                timers.markDoneTask(task)
+            if let raw = String(data: env.body, encoding: .utf8) {
+                let parsed = MeshTimerBody.parse(raw)
+                timers.markDoneTask(parsed.task)
+            }
+        case "kit":
+            if let raw = String(data: env.body, encoding: .utf8),
+               let parsed = MeshKitBody.parse(raw) {
+                applyKitMesh(parsed)
             }
         case "chip":
             if let raw = String(data: env.body, encoding: .utf8) {

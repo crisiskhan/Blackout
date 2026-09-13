@@ -3,11 +3,17 @@ import Vitals
 import TimerSync
 import PaperGen
 import Tokens
+import MapLibreMap
+import KitStore
+import MeshDTN
 
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
     @State private var paperText = ""
     @State private var navChrome: String?
+    @State private var timerName = ""
+    @State private var itemDraft = ""
+    @State private var assigningID: String?
 
     var body: some View {
         HUDPage(
@@ -77,17 +83,38 @@ struct ExpeditionTab: View {
                     sectionLabel("TIMERS")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
+                            TextField("NAME", text: $timerName)
+                                .textFieldStyle(.plain)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.silver)
+                                .padding(.horizontal, 10)
+                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                                .background(Theme.glass())
+                                .clipShape(Theme.plateRect())
                             VStack(spacing: 1) {
+                                Button("SET") {
+                                    let named = timerName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    guard !named.isEmpty else { return }
+                                    runtime.addPartyTimer(task: named, duration: 60)
+                                    timerName = ""
+                                }
+                                .buttonStyle(HUDDockStyle())
                                 Button("1 MIN TIMER SET") {
-                                    if runtime.timers.add(who: "ALL", task: "1min", duration: 60, subjectAll: true) != nil {
-                                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "1min", done: false)
-                                    }
+                                    runtime.addPartyTimer(
+                                        task: timerName.isEmpty ? "1min" : timerName,
+                                        duration: 60
+                                    )
+                                    timerName = ""
                                 }
                                 .buttonStyle(HUDDockStyle())
                                 Button("2H WATER TIMER SET") {
-                                    if runtime.timers.add(who: "ALL", task: "water", duration: 7200, subjectAll: true) != nil {
-                                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: "water", done: false)
-                                    }
+                                    runtime.addPartyTimer(
+                                        task: timerName.isEmpty ? "water" : timerName,
+                                        duration: 7200
+                                    )
+                                    timerName = ""
                                 }
                                 .buttonStyle(HUDDockStyle())
                             }
@@ -97,20 +124,6 @@ struct ExpeditionTab: View {
                                 Theme.plateRect()
                                     .strokeBorder(Theme.metalStroke, lineWidth: 1)
                             )
-                            ForEach(runtime.timers.timers, id: \.id) { t in
-                                HStack {
-                                    Text("\(t.task) \(t.who)")
-                                        .font(.system(size: 13, weight: .heavy))
-                                        .foregroundStyle(Theme.silver)
-                                    Spacer(minLength: 8)
-                                    Button("DONE") {
-                                        runtime.timers.markDone(t.id)
-                                        runtime.mesh.sendTimer(from: runtime.mesh.localID, task: t.task, done: true)
-                                    }
-                                    .buttonStyle(HUDOverlayChipStyle())
-                                }
-                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                            }
                             ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.caption.weight(.bold))
@@ -123,6 +136,9 @@ struct ExpeditionTab: View {
                             }
                             TimelineView(.periodic(from: .now, by: 1)) { context in
                                 VStack(alignment: .leading, spacing: 6) {
+                                    ForEach(runtime.timers.timers, id: \.id) { t in
+                                        timerRow(t, now: context.date)
+                                    }
                                     ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
                                         overdueRow(t)
                                     }
@@ -134,24 +150,47 @@ struct ExpeditionTab: View {
                     sectionLabel("KIT")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 6) {
+                            TextField("ITEM", text: $itemDraft)
+                                .textFieldStyle(.plain)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.silver)
+                                .padding(.horizontal, 10)
+                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                                .background(Theme.glass())
+                                .clipShape(Theme.plateRect())
+                            Button("ADD") {
+                                runtime.addKitItem(itemDraft)
+                                itemDraft = ""
+                            }
+                            .buttonStyle(HUDActionStyle(filled: false))
                             ForEach(runtime.kit.items) { item in
-                                Button {
-                                    if item.working {
-                                        runtime.kit.markFailed(item.id, hazard: item.failureHazard ?? "FAILED")
-                                    } else {
-                                        runtime.kit.setWorking(item.id, working: true)
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(item.name.uppercased())
-                                            .foregroundStyle(Theme.silver)
-                                        Spacer()
-                                        Text(item.working ? "OK" : "FAILED")
-                                            .foregroundStyle(item.working ? Theme.silver : Theme.accent)
-                                    }
+                                kitRow(item)
+                            }
+                            if let id = assigningID {
+                                Text("ASSIGN")
+                                    .font(.system(size: 11, weight: .heavy))
+                                    .foregroundStyle(Theme.silver.opacity(0.5))
+                                Button("YOU") {
+                                    runtime.assignKitItem(id, to: runtime.timerOwner())
+                                    assigningID = nil
                                 }
-                                .font(.system(size: 13, weight: .heavy))
-                                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                                .buttonStyle(HUDOverlayChipStyle())
+                                ForEach(runtime.roster.members) { member in
+                                    Button(member.name.uppercased()) {
+                                        runtime.assignKitItem(id, to: member.name)
+                                        assigningID = nil
+                                    }
+                                    .buttonStyle(HUDOverlayChipStyle())
+                                }
+                                ForEach(runtime.mesh.pips, id: \.from) { pip in
+                                    Button((pip.name ?? pip.from).uppercased()) {
+                                        runtime.assignKitItem(id, to: pip.from)
+                                        assigningID = nil
+                                    }
+                                    .buttonStyle(HUDOverlayChipStyle())
+                                }
                             }
                             ForEach(Array(runtime.kit.hazards.enumerated()), id: \.offset) { _, hazard in
                                 Text(hazard.uppercased())
@@ -241,6 +280,82 @@ struct ExpeditionTab: View {
             Theme.plateRect()
                 .strokeBorder(Theme.accent, lineWidth: 1.5)
         )
+    }
+
+    private func timerRow(_ t: PartyTimer, now: Date) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("\(t.task) \(t.who)")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                Spacer(minLength: 8)
+                Text(clock(t.remaining(now: now)))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                Button("DONE") {
+                    runtime.timers.markDone(t.id)
+                    runtime.mesh.sendTimer(from: runtime.mesh.localID, task: t.task, done: true)
+                }
+                .buttonStyle(HUDOverlayChipStyle())
+            }
+            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Theme.silver.opacity(0.2))
+                    Rectangle()
+                        .fill(t.remaining(now: now) == 0 ? Theme.accent : Theme.silver)
+                        .frame(width: geo.size.width * t.remainingFraction(now: now))
+                }
+            }
+            .frame(height: 8)
+            .clipShape(Theme.plateRect())
+        }
+    }
+
+    private func kitRow(_ item: GearItem) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text(item.name.uppercased())
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                    .contentShape(Rectangle())
+                    .highPriorityGesture(
+                        LongPressGesture(minimumDuration: Inspect.holdSeconds)
+                            .onEnded { _ in
+                                assigningID = item.id
+                            }
+                    )
+                Text("\(item.count)")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver)
+                Spacer(minLength: 8)
+                Button("+1") { runtime.bumpKit(item.id, by: 1) }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button("−1") { runtime.bumpKit(item.id, by: -1) }
+                    .buttonStyle(HUDOverlayChipStyle())
+                Button(item.working ? "OK" : "FAILED") {
+                    if item.working {
+                        runtime.kit.markFailed(item.id, hazard: item.failureHazard ?? "FAILED")
+                    } else {
+                        runtime.kit.setWorking(item.id, working: true)
+                    }
+                    runtime.syncKit(item.id)
+                }
+                .buttonStyle(HUDOverlayChipStyle())
+            }
+            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            if let assigned = item.assignedTo, !assigned.isEmpty {
+                Text(assigned.uppercased())
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Theme.silver.opacity(0.7))
+            }
+        }
+    }
+
+    private func clock(_ t: TimeInterval) -> String {
+        let s = max(0, Int(t.rounded()))
+        return "\(s / 60):" + String(format: "%02d", s % 60)
     }
 
     private func overdueRow(_ t: PartyTimer) -> some View {

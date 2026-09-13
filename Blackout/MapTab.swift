@@ -128,7 +128,9 @@ struct MapTab: View {
                     onCall: { runtime.callHeldParty() },
                     onMessage: { runtime.messageHeldParty() },
                     onClose: { runtime.closeHold() },
-                    onFaceHold: { runtime.openEmblemPick() }
+                    onFaceHold: { runtime.openEmblemPick() },
+                    timers: runtime.timers,
+                    kit: runtime.kit
                 )
                 .padding(hudReserve)
                 if runtime.pickingEmblem {

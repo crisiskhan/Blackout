@@ -48,4 +48,20 @@ final class TimerSyncTests: XCTestCase {
         XCTAssertEqual(b.doneLines(id: id), ["1min ALL DONE"])
         XCTAssertEqual(b.doneLines().count, 1)
     }
+
+    func testNamedTimerProgressAndProfile() {
+        let b = TimerBoard(box: EventLog())
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        XCTAssertNotNil(b.add(who: "Khan", task: "COOK", duration: 60, subjectAll: true, now: start))
+        XCTAssertEqual(b.timers[0].remaining(now: start), 60, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remainingFraction(now: start), 1, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remainingFraction(now: start.addingTimeInterval(30)), 0.5, accuracy: 0.001)
+        XCTAssertEqual(b.timers[0].remaining(now: start.addingTimeInterval(61)), 0, accuracy: 0.001)
+        let mine = b.onProfile(personID: "YOU", name: "Khan", isYou: false)
+        XCTAssertEqual(mine.map(\.task), ["COOK"])
+        XCTAssertTrue(b.onProfile(personID: "peer", name: "Sam", isYou: false).isEmpty)
+        XCTAssertNotNil(b.add(who: "ALL", task: "1min", duration: 60, subjectAll: true, now: start))
+        XCTAssertEqual(b.onProfile(personID: "YOU", name: "", isYou: true).map(\.task), ["1min"])
+        XCTAssertFalse(b.onProfile(personID: "peer", name: "Sam", isYou: false).contains(where: { $0.task == "1min" }))
+    }
 }

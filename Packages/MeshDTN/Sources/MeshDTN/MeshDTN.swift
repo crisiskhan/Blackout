@@ -175,6 +175,34 @@ public enum MeshPOS {
     }
 }
 
+public enum MeshTimerBody {
+    public static func parse(_ raw: String) -> (task: String, duration: TimeInterval) {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        if parts.count >= 2, let sec = TimeInterval(parts[1]), sec > 0 {
+            return (parts[0], sec)
+        }
+        if raw == "1min" { return ("1min", 60) }
+        return (raw, 7200)
+    }
+
+    public static func encode(task: String, duration: TimeInterval, done: Bool) -> String {
+        if done { return task }
+        if task == "1min", duration == 60 { return "1min" }
+        if task == "water", duration == 7200 { return "water" }
+        return "\(task)\t\(Int(duration.rounded()))"
+    }
+}
+
+public enum MeshKitBody {
+    public static func parse(_ raw: String) -> (id: String, name: String, count: Int, assignedTo: String, working: Bool)? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 5 else { return nil }
+        let count = Int(parts[2]) ?? 0
+        let assigned = parts[3] == "-" ? "" : parts[3]
+        return (parts[0], parts[1], count, assigned, parts[4] == "1")
+    }
+}
+
 public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
     public var id: String
     public var from: String
@@ -457,8 +485,23 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "red", body: Data((on ? "on" : "off").utf8)))
     }
 
-    public func sendTimer(from: String, task: String, done: Bool) {
-        enqueue(make(from: from, kind: done ? "timer.done" : "timer.set", body: Data(task.utf8)))
+    public func sendTimer(from: String, task: String, done: Bool, duration: TimeInterval = 7200) {
+        let body = MeshTimerBody.encode(task: task, duration: duration, done: done)
+        enqueue(make(from: from, kind: done ? "timer.done" : "timer.set", body: Data(body.utf8)))
+    }
+
+    public func sendKit(
+        from: String,
+        itemID: String,
+        name: String,
+        count: Int,
+        assignedTo: String,
+        working: Bool
+    ) {
+        let assigned = assignedTo.isEmpty ? "-" : assignedTo
+        let work = working ? "1" : "0"
+        let body = "\(itemID)\t\(name)\t\(count)\t\(assigned)\t\(work)"
+        enqueue(make(from: from, kind: "kit", body: Data(body.utf8)))
     }
 
     public func linkKind() -> LinkKind {
@@ -535,8 +578,9 @@ public final class MeshNet: @unchecked Sendable {
         case "red":
             lastRedOn = String(data: env.body, encoding: .utf8) == "on"
         case "timer.set", "timer.done":
-            if let task = String(data: env.body, encoding: .utf8) {
-                upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: task, done: env.kind == "timer.done"))
+            if let raw = String(data: env.body, encoding: .utf8) {
+                let parsed = MeshTimerBody.parse(raw)
+                upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
         default:
             break

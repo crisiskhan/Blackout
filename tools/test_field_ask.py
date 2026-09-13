@@ -8,10 +8,171 @@ is a canvas rule, not a book rule.
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+STOP = {
+    "a", "an", "the", "to", "of", "for", "in", "on", "at", "is", "be", "as",
+    "or", "and", "how", "do", "i", "we", "you", "your", "my", "me", "what",
+    "where", "when", "why", "can", "with", "from", "this", "that", "it",
+    "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
+    "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
+    "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
+    "mi", "tu", "su",
+}
+LIVE = {"javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear"}
+MEAL = {"meat", "hunt", "cook", "already", "caza", "carne"}
+
+
+def _corpus_src() -> str:
+    return ROOT.joinpath(
+        "Packages", "FieldCorpus", "Sources", "FieldCorpus", "FieldCorpus.swift"
+    ).read_text()
+
+
+def _swift_map(name: str, as_set: bool) -> dict:
+    src = _corpus_src()
+    start = src.index("= [", src.index(f"private static let {name}")) + 2
+    depth = 0
+    block = ""
+    for j, ch in enumerate(src[start:], start):
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                block = src[start:j + 1]
+                break
+    out: dict = {}
+    for key, vals in re.findall(r'"([^"]+)":\s*\[(.*?)\]', block, re.S):
+        items = re.findall(r'"([^"]+)"', vals)
+        out[key] = set(items) if as_set else items
+    return out
+
+
+EXPAND = _swift_map("expand", as_set=True)
+BOOST = _swift_map("boost", as_set=False)
+
+
+def _fold(s: str) -> str:
+    return unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode("ascii").lower()
+
+
+def _stem(w: str) -> str:
+    if len(w) > 4 and w.endswith("ies"):
+        return w[:-3] + "y"
+    if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+        return w[:-1]
+    return w
+
+
+def _tokens(s: str) -> list[str]:
+    folded = _fold(s)
+    words: list[str] = []
+    cur = ""
+    for ch in folded:
+        if ch.isalnum():
+            cur += ch
+        elif cur:
+            words.append(cur)
+            cur = ""
+    if cur:
+        words.append(cur)
+    out: list[str] = []
+    for raw in words:
+        w = _stem(raw)
+        if len(w) < 2 or w in STOP:
+            continue
+        out.append(w)
+    return out
+
+
+def _index(card: dict) -> set[str]:
+    parts = [
+        card["id"].replace("-", " "),
+        card["category"],
+        card["title"]["en"], card["title"]["es"],
+        card["situation"]["en"], card["situation"]["es"],
+        card["get_to_care"]["en"], card["get_to_care"]["es"],
+    ]
+    for line in card["stop_if"]:
+        parts += [line["en"], line["es"]]
+    for st in card["steps"]:
+        parts += [st["do"]["en"], st["do"]["es"], st["why"]["en"], st["why"]["es"]]
+    toks: set[str] = set()
+    for p in parts:
+        toks.update(_tokens(p))
+    return toks
+
+
+def _boost_index(cid: str, expanded: set[str]) -> int:
+    best = 10**9
+    for word in expanded:
+        ids = BOOST.get(word)
+        if ids and cid in ids:
+            best = min(best, ids.index(cid))
+    return best
+
+
+def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
+    q_tokens = _tokens(query)
+    if not q_tokens:
+        return []
+    expanded = set(q_tokens)
+    for w in q_tokens:
+        expanded |= EXPAND.get(w, set())
+    boosted: set[str] = set()
+    for w in expanded:
+        boosted |= set(BOOST.get(w, []))
+    folded_query = " ".join(q_tokens)
+    prefer_es = locale == "es"
+    live = any(t in LIVE for t in q_tokens)
+    meal = any(t in MEAL for t in q_tokens)
+    scored = []
+    for card in cards:
+        if live and not meal and card.get("category") == "food":
+            continue
+        title_tok = set(_tokens(card["title"]["en"]) + _tokens(card["title"]["es"]))
+        id_tok = set(_tokens(card["id"].replace("-", " ")))
+        cat_tok = set(_tokens(card["category"]))
+        body_tok = _index(card)
+        title_hits = len(expanded & title_tok)
+        overlap = len(expanded & body_tok)
+        boosted_hit = card["id"] in boosted
+        if overlap == 0 and title_hits == 0 and not boosted_hit:
+            continue
+        score = overlap * 2 + title_hits * 10 + len(expanded & id_tok) * 8 + len(expanded & cat_tok) * 6
+        if boosted_hit:
+            score += 20
+        if "wool" in q_tokens and card["id"] == "camp-layers":
+            score += 25
+        preferred = set(_tokens(card["title"]["es"] if prefer_es else card["title"]["en"]))
+        score += len(expanded & preferred) * 3
+        if len(q_tokens) >= 2:
+            title_fold = _fold(card["title"]["en"]) + " " + _fold(card["title"]["es"])
+            if title_tok.issuperset(set(q_tokens)):
+                score += 40
+            if len(folded_query) >= 4 and folded_query in title_fold:
+                score += 20
+        if score <= 0:
+            continue
+        scored.append((card, score, _boost_index(card["id"], expanded)))
+    scored.sort(key=lambda a: (-a[1], a[2], a[0]["category"], a[0]["title"]["en"]))
+    return [c for c, _, _ in scored]
+
+
+def load_book() -> list[dict]:
+    cards = json.loads((ROOT / "Resources/Field/field.core.json").read_text())["cards"]
+    for st in ("tx", "nm"):
+        cards += json.loads((ROOT / "Resources/Field" / f"field.{st}.json").read_text())["cards"]
+    seen: dict[str, dict] = {}
+    for card in cards:
+        seen[card["id"]] = card
+    return list(seen.values())
 
 FROM_NOTHING = (
     "camp-start",
@@ -299,6 +460,49 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         field_sec = qa.split("## FIELD")[1].split("## EXPEDITION")[0]
         self.assertIn("Sure % is not on SEARCH", field_sec)
         self.assertIn("no drinkable or edible number", field_sec.lower())
+
+
+class FieldRankedBookTests(unittest.TestCase):
+    """SEARCH opens the procedure the situation asked for, not a title hit."""
+
+    def test_expand_and_boost_tables_are_loaded(self):
+        self.assertIn("thirst", EXPAND)
+        self.assertEqual(BOOST["thirst"][0], "water-disinfect")
+        self.assertEqual(BOOST["food"][0], "food-cook")
+        self.assertEqual(BOOST["wool"][0], "camp-layers")
+
+    def test_shipped_book_opens_the_procedure(self):
+        cards = load_book()
+        first = lambda q: ask_book(cards, q)[0]["id"]
+        self.assertEqual(first("javelina"), "tx-mammal")
+        self.assertEqual(first("hog"), "tx-east-mammal")
+        self.assertEqual(first("javelina meat"), "tx-game")
+        self.assertEqual(first("wet wool"), "camp-layers")
+        self.assertEqual(first("food"), "food-cook")
+        self.assertEqual(first("thirst"), "water-disinfect")
+        self.assertEqual(first("thirsty"), "water-disinfect")
+        self.assertEqual(first("snake"), "animal-bite")
+        self.assertEqual(first("starting from nothing"), "camp-start")
+        self.assertEqual(first("wildfire"), "env-wildfire")
+        self.assertEqual(first("seep"), "water-seep")
+        self.assertEqual(first("mushroom"), "fungi-leave")
+        self.assertEqual(first("panic"), "tact-breathe")
+        self.assertEqual(first("gps"), "nav-lost")
+        self.assertEqual(first("sed"), "water-find")
+        self.assertEqual(first("comida"), "food-cook")
+        self.assertFalse(ask_book(cards, "xyzzy plugh"))
+        self.assertEqual(ask_book(cards, "javelina")[0]["category"], "animals")
+
+    def test_every_open_step_has_a_picture_and_a_child_line(self):
+        cards = load_book()
+        images = {p.name for p in (ROOT / "Resources/Field/images").iterdir()}
+        for card in cards:
+            for i, step in enumerate(card["steps"]):
+                img = step["image"]
+                self.assertTrue(img, f"{card['id']} step {i} has no picture")
+                self.assertIn(img, images, f"{card['id']} step {i} {img}")
+                self.assertTrue(step["child"]["en"].strip(), f"{card['id']} step {i} child")
+                self.assertTrue(step["do"]["en"].strip(), f"{card['id']} step {i} do")
 
 
 if __name__ == "__main__":

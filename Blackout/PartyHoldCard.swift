@@ -3,6 +3,8 @@ import MapLibreMap
 import MeshDTN
 import Tokens
 import Vitals
+import TimerSync
+import KitStore
 
 /// Glass profile over a person mark. CALL and MESSAGE are mesh, never a cell.
 struct PartyHoldCard: View {
@@ -17,6 +19,8 @@ struct PartyHoldCard: View {
     let onMessage: () -> Void
     let onClose: () -> Void
     let onFaceHold: () -> Void
+    let timers: TimerBoard
+    let kit: KitBag
 
     @State private var drag: CGFloat = 0
     @State private var nameDraft: String = ""
@@ -79,9 +83,11 @@ struct PartyHoldCard: View {
                     statusRail
                     conditionBlock
                     rows
+                    timerBlock
                     if !person.isYou {
                         actions
                     }
+                    inventoryBlock
                 }
             }
             .scrollIndicators(.hidden)
@@ -190,6 +196,82 @@ struct PartyHoldCard: View {
             row(key: "BEARING", value: bearing, ink: Color.white)
             row(key: "COORDINATES", value: coordinates, ink: Color.white)
         }
+    }
+
+    private var profileTimers: [PartyTimer] {
+        timers.onProfile(personID: person.id, name: person.name, isYou: person.isYou)
+    }
+
+    private var kitItems: [GearItem] {
+        kit.assigned(to: person.id, name: person.name, isYou: person.isYou)
+    }
+
+    private var timerBlock: some View {
+        Group {
+            if !profileTimers.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("TIMER")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(Theme.silver.opacity(0.75))
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(profileTimers) { t in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(t.task.uppercased())
+                                            .font(.system(size: 13, weight: .heavy))
+                                            .foregroundStyle(Theme.silver)
+                                        Spacer(minLength: 8)
+                                        Text(clock(t.remaining(now: context.date)))
+                                            .font(.system(size: 13, weight: .heavy))
+                                            .foregroundStyle(t.remaining(now: context.date) == 0 ? Theme.accent : Theme.silver)
+                                    }
+                                    GeometryReader { geo in
+                                        ZStack(alignment: .leading) {
+                                            Rectangle()
+                                                .fill(Theme.silver.opacity(0.2))
+                                            Rectangle()
+                                                .fill(t.remaining(now: context.date) == 0 ? Theme.accent : Theme.silver)
+                                                .frame(width: geo.size.width * t.remainingFraction(now: context.date))
+                                        }
+                                    }
+                                    .frame(height: 8)
+                                    .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var inventoryBlock: some View {
+        Group {
+            if !kitItems.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("INVENTORY")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(Theme.silver.opacity(0.75))
+                    ForEach(kitItems) { item in
+                        HStack {
+                            Text(item.name.uppercased())
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                            Spacer(minLength: 8)
+                            Text("\(item.count)")
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func clock(_ t: TimeInterval) -> String {
+        let s = max(0, Int(t.rounded()))
+        return "\(s / 60):" + String(format: "%02d", s % 60)
     }
 
     private var statusRail: some View {

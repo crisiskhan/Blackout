@@ -10,6 +10,31 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var subjectAllTurnaround: Bool
     public var overdue: Bool { Date().timeIntervalSince(started) > duration }
     public var overdueRowID: String { "overdue:\(id)" }
+
+    public init(
+        id: String,
+        who: String,
+        task: String,
+        duration: TimeInterval,
+        started: Date,
+        subjectAllTurnaround: Bool
+    ) {
+        self.id = id
+        self.who = who
+        self.task = task
+        self.duration = duration
+        self.started = started
+        self.subjectAllTurnaround = subjectAllTurnaround
+    }
+
+    public func remaining(now: Date = Date()) -> TimeInterval {
+        max(0, duration - now.timeIntervalSince(started))
+    }
+
+    public func remainingFraction(now: Date = Date()) -> Double {
+        guard duration > 0 else { return 0 }
+        return min(1, max(0, remaining(now: now) / duration))
+    }
 }
 
 public final class TimerBoard: @unchecked Sendable {
@@ -35,6 +60,14 @@ public final class TimerBoard: @unchecked Sendable {
 
     public func overduePlate(now: Date = Date()) -> [PartyTimer] {
         timers.filter { now.timeIntervalSince($0.started) > $0.duration }
+    }
+
+    public func onProfile(personID: String, name: String, isYou: Bool) -> [PartyTimer] {
+        timers.filter { t in
+            if t.who == personID || t.who == name { return true }
+            if isYou && (t.who == "ALL" || t.who == "YOU") { return true }
+            return false
+        }
     }
 
     public func markDone(_ id: String) {
