@@ -916,8 +916,9 @@ def tip58_solo_qa() -> None:
         and "static func parse(" in timers
     )
     red_ok = (
-        "APPLY RED BAND" in exp
-        and "applySelfRed" in app
+        "APPLY RED BAND" not in exp
+        and "sectionLabel(\"RED\")" not in exp
+        and "redPlate" in exp
         and "cancelSelfRed" in exp
         and "isSOS" in red
         and "openURL" not in red

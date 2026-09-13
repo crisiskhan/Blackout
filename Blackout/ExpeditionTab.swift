@@ -42,11 +42,6 @@ struct ExpeditionTab: View {
                         }
                     }
 
-                    sectionLabel("RED")
-                    Button("APPLY RED BAND") {
-                        runtime.applySelfRed()
-                    }
-                    .buttonStyle(HUDActionStyle(filled: true, crisis: true))
                     if runtime.red.isRed || runtime.mesh.lastRedOn == true {
                         redPlate
                     }
