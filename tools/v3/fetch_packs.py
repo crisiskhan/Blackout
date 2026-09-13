@@ -65,6 +65,8 @@ RENDER_DP = 6
 # vertices it stops shipping.
 RENDER_EPS = 1e-5
 WALK_FORWARD, DRIVE_FORWARD, WALK_BACK, DRIVE_BACK = 1, 2, 4, 8
+CLASS_FLAG_SHIFT = 4
+CLASS_FLAG_MASK = 0x0F
 
 KEEP_TAGS = {
     "name",
@@ -836,6 +838,47 @@ def way_directions(tags: dict) -> tuple[bool, bool, bool, bool]:
     return walk_fwd, walk_back, drive_fwd, drive_back
 
 
+def highway_class(highway: str | None) -> int:
+    """Rank a way for drive time. 0 is unknown; 1 is motorway; 7 is the slowest local street.
+
+    Walk still costs metres. Drive uses this rank as speed so an arterial beats a
+    residential maze of the same length. Unknown stays distance-only, which is how
+    already-shipped graphs behave until they are classed.
+    """
+    if not highway:
+        return 0
+    if highway in {"motorway", "motorway_link"}:
+        return 1
+    if highway in {"trunk", "trunk_link"}:
+        return 2
+    if highway in {"primary", "primary_link"}:
+        return 3
+    if highway in {"secondary", "secondary_link"}:
+        return 4
+    if highway in {"tertiary", "tertiary_link"}:
+        return 5
+    if highway in {"residential", "unclassified"}:
+        return 6
+    if highway in {"living_street", "service", "track"}:
+        return 7
+    return 0
+
+
+def merge_class(a: int, b: int) -> int:
+    """Keep the slower known class so a compacted chain never pretends to be a motorway."""
+    if a == 0:
+        return b
+    if b == 0:
+        return a
+    return max(a, b)
+
+
+def merge_segment_flags(old: int, new: int) -> int:
+    perm = (old | new) & 0x0F
+    cls = merge_class((old >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK, (new >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK)
+    return perm | (cls << CLASS_FLAG_SHIFT)
+
+
 def build_graph(osm: dict) -> dict:
     nodes = {
         el["id"]: {"id": el["id"], "lon": el["lon"], "lat": el["lat"]}
@@ -903,7 +946,14 @@ def build_graph(osm: dict) -> dict:
                 if not walk and not drive:
                     continue
                 edges.append(
-                    {"a": x, "b": y, "m": round(dist, 2), "walk": walk, "drive": drive}
+                    {
+                        "a": x,
+                        "b": y,
+                        "m": round(dist, 2),
+                        "walk": walk,
+                        "drive": drive,
+                        "cls": highway_class(highway),
+                    }
                 )
                 used.add(x)
                 used.add(y)
@@ -924,22 +974,24 @@ def build_graph(osm: dict) -> dict:
 def compact_graph(g: dict) -> dict:
     """Collapse degree-2 chains so the graph still matches streets without 80MB JSON."""
     nodes = {int(k): v for k, v in (g.get("nodes") or {}).items()}
-    fwd: dict[int, list[tuple[int, float, bool, bool]]] = defaultdict(list)
+    fwd: dict[int, list[tuple[int, float, bool, bool, int]]] = defaultdict(list)
     for e in g.get("edges") or []:
-        fwd[int(e["a"])].append((int(e["b"]), float(e["m"]), bool(e["walk"]), bool(e["drive"])))
+        fwd[int(e["a"])].append(
+            (int(e["b"]), float(e["m"]), bool(e["walk"]), bool(e["drive"]), int(e.get("cls") or 0))
+        )
 
     rev: dict[int, set[int]] = defaultdict(set)
     for a, lst in fwd.items():
-        for b, _, _, _ in lst:
+        for b, _, _, _, _ in lst:
             rev[b].add(a)
 
     def neigh(nid: int) -> set[int]:
-        return {b for b, _, _, _ in fwd.get(nid, [])} | set(rev.get(nid, ()))
+        return {b for b, _, _, _, _ in fwd.get(nid, [])} | set(rev.get(nid, ()))
 
-    def edge_between(a: int, b: int) -> tuple[float, bool, bool] | None:
-        for dest, m, w, d in fwd.get(a, []):
+    def edge_between(a: int, b: int) -> tuple[float, bool, bool, int] | None:
+        for dest, m, w, d, cls in fwd.get(a, []):
             if dest == b:
-                return (m, w, d)
+                return (m, w, d, cls)
         return None
 
     def unlink(a: int, b: int) -> None:
@@ -949,9 +1001,9 @@ def compact_graph(g: dict) -> dict:
         if not fwd[a]:
             fwd.pop(a, None)
 
-    def link(a: int, b: int, m: float, w: bool, d: bool) -> None:
+    def link(a: int, b: int, m: float, w: bool, d: bool, cls: int) -> None:
         unlink(a, b)
-        fwd[a].append((b, round(m, 2), w, d))
+        fwd[a].append((b, round(m, 2), w, d, cls))
         rev[b].add(a)
 
     # iterate a snapshot of deg-2 nodes
@@ -966,9 +1018,9 @@ def compact_graph(g: dict) -> dict:
         vu = edge_between(v, nid)
         nu = edge_between(nid, u)
         if uv and nv:
-            link(u, v, uv[0] + nv[0], uv[1] and nv[1], uv[2] and nv[2])
+            link(u, v, uv[0] + nv[0], uv[1] and nv[1], uv[2] and nv[2], merge_class(uv[3], nv[3]))
         if vu and nu:
-            link(v, u, vu[0] + nu[0], vu[1] and nu[1], vu[2] and nu[2])
+            link(v, u, vu[0] + nu[0], vu[1] and nu[1], vu[2] and nu[2], merge_class(vu[3], nu[3]))
         unlink(u, nid)
         unlink(nid, u)
         unlink(v, nid)
@@ -980,10 +1032,10 @@ def compact_graph(g: dict) -> dict:
     edges = []
     used = set()
     for a, lst in fwd.items():
-        for b, m, w, d in lst:
+        for b, m, w, d, cls in lst:
             if a not in nodes or b not in nodes:
                 continue
-            edges.append({"a": a, "b": b, "m": round(m, 2), "walk": w, "drive": d})
+            edges.append({"a": a, "b": b, "m": round(m, 2), "walk": w, "drive": d, "cls": cls})
             used.add(a)
             used.add(b)
     slim = {str(k): nodes[k] for k in used if k in nodes}
@@ -1044,7 +1096,10 @@ def pack_graph(g: dict) -> dict:
             flags |= WALK_BACK if backward else WALK_FORWARD
         if e.get("drive"):
             flags |= DRIVE_BACK if backward else DRIVE_FORWARD
-        segments[key] = segments.get(key, 0) | flags
+        cls = int(e.get("cls") or 0) & CLASS_FLAG_MASK
+        if cls:
+            flags |= cls << CLASS_FLAG_SHIFT
+        segments[key] = merge_segment_flags(segments.get(key, 0), flags)
 
     flat: list[float] = []
     for (a, b, metres), flags in segments.items():
@@ -1073,9 +1128,27 @@ def unpack_graph(g: dict) -> dict:
         if str(a) not in nodes or str(b) not in nodes:
             continue
         if flags & (WALK_FORWARD | DRIVE_FORWARD):
-            edges.append({"a": a, "b": b, "m": metres, "walk": bool(flags & WALK_FORWARD), "drive": bool(flags & DRIVE_FORWARD)})
+            edges.append(
+                {
+                    "a": a,
+                    "b": b,
+                    "m": metres,
+                    "walk": bool(flags & WALK_FORWARD),
+                    "drive": bool(flags & DRIVE_FORWARD),
+                    "cls": (flags >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK,
+                }
+            )
         if flags & (WALK_BACK | DRIVE_BACK):
-            edges.append({"a": b, "b": a, "m": metres, "walk": bool(flags & WALK_BACK), "drive": bool(flags & DRIVE_BACK)})
+            edges.append(
+                {
+                    "a": b,
+                    "b": a,
+                    "m": metres,
+                    "walk": bool(flags & WALK_BACK),
+                    "drive": bool(flags & DRIVE_BACK),
+                    "cls": (flags >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK,
+                }
+            )
     return {
         "engine": g.get("engine"),
         "valhallaCosting": g.get("valhallaCosting"),
@@ -1113,6 +1186,67 @@ def read_graph(path: Path) -> dict:
         }
         return {"engine": "osm-graph", "valhallaCosting": None, "nodes": nodes, "edges": graphbin.edges(g)}
     return unpack_graph(json.loads(path.read_text()))
+
+
+def classify_graph(graph: dict, fc: dict, cell: float = 0.01) -> dict:
+    """Stamp highway class onto already-compacted edges from the packed extract.
+
+    The phone graph is collapsed chains, not OSM ways, so a class is the nearest
+    highway to the edge midpoint. Slow enough to be honest when a chain mixes
+    classes, never a fake motorway through a neighbourhood.
+    """
+    buckets: dict[tuple[int, int], list[tuple[float, float, int]]] = defaultdict(list)
+    for feat in fc.get("features") or []:
+        props = feat.get("properties") or {}
+        cls = highway_class(props.get("highway"))
+        if not cls:
+            continue
+        geom = feat.get("geometry") or {}
+        if geom.get("type") != "LineString":
+            continue
+        coords = geom.get("coordinates") or []
+        for (lon1, lat1), (lon2, lat2) in zip(coords, coords[1:]):
+            mlat = (lat1 + lat2) / 2
+            mlon = (lon1 + lon2) / 2
+            buckets[(int(mlat / cell), int(mlon / cell))].append((mlat, mlon, cls))
+
+    nodes = graph.get("nodes") or {}
+    reach = (0.0004) ** 2
+    for e in graph.get("edges") or []:
+        na = nodes.get(str(e["a"]))
+        nb = nodes.get(str(e["b"]))
+        if not na or not nb:
+            e["cls"] = int(e.get("cls") or 0)
+            continue
+        mlat = (float(na["lat"]) + float(nb["lat"])) / 2
+        mlon = (float(na["lon"]) + float(nb["lon"])) / 2
+        cy, cx = int(mlat / cell), int(mlon / cell)
+        best: tuple[float, int] | None = None
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for lat, lon, cls in buckets.get((cy + dy, cx + dx), ()):
+                    d = (mlat - lat) ** 2 + (mlon - lon) ** 2
+                    if best is None or d < best[0]:
+                        best = (d, cls)
+        e["cls"] = best[1] if best and best[0] <= reach else int(e.get("cls") or 0)
+    return graph
+
+
+def stamp_road_class(dest: Path) -> None:
+    """Rewrite graph.bin mode bytes with highway class. Topology stays put."""
+    graph_path = dest / "graph.bin"
+    osm_path = dest / "osm.geojson"
+    graph = read_graph(graph_path)
+    fc = json.loads(osm_path.read_text())
+    classify_graph(graph, fc)
+    write_graph_binary(graph_path, graph)
+    drive = [e for e in graph["edges"] if e.get("drive")]
+    classified = [e for e in drive if e.get("cls")]
+    share = (len(classified) / len(drive)) if drive else 0.0
+    print(
+        f"  class {dest.name} drive={len(drive)} classed={len(classified)} ({share:.1%})",
+        flush=True,
+    )
 
 
 def elevation_grid(south: float, west: float, north: float, east: float, step: float = 0.01) -> dict:
@@ -2308,6 +2442,14 @@ def notable(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def classify_packs(ids: list[str] | None = None) -> None:
+    """Stamp road class onto packed graphs without reshaping them."""
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("CLASS", pid, flush=True)
+        stamp_road_class(root / pid)
+
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--rebuild":
@@ -2318,5 +2460,7 @@ if __name__ == "__main__":
         resources(argv[1:] or None)
     elif argv and argv[0] == "--notable":
         notable(argv[1:] or None)
+    elif argv and argv[0] == "--classify-graph":
+        classify_packs(argv[1:] or None)
     else:
         main(argv or None)

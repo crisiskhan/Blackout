@@ -557,7 +557,7 @@ final class AppRuntime {
                 self.routeCoords = plan.coords
                 self.navChrome = plan.chrome
                 self.routeChrome = RouteLine.shouldDraw(plan.coords)
-                    ? RouteSummary.chrome(mode: mode, coords: plan.coords)
+                    ? RouteSummary.chrome(mode: mode, coords: plan.coords, seconds: plan.seconds)
                     : RouteBlock.noPath.chrome(mode: mode, packName: packName)
             }
         }
@@ -694,7 +694,8 @@ final class AppRuntime {
             planChrome: navChrome,
             destination: destination(),
             you: youCoordinate(),
-            locale: locale
+            locale: locale,
+            travelMode: travelMode
         )
         // The whole turn-by-turn script goes to the voice. The field only gets one short
         // status line — the route itself is already drawn in silver.

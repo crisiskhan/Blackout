@@ -25,7 +25,7 @@ MAX_FIELD_LINES = 3
 VOID = "#000000"
 SILVER = "#B8BDC2"
 WALKABLE_PACKS = ("tx-west", "nm", "tx-east")
-SCRIPT_PHRASES = ("Walk ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
+SCRIPT_PHRASES = ("Walk ", "Drive ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
 METERS_PER_MILE = 1609.344
 FEET_PER_METER = 3.280839895
 
@@ -330,6 +330,8 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertIn("runtime.speakMap()", self.map_tab)
         self.assertIn("VoiceNav.prompt", app)
         self.assertIn("speech.speak(text, locale: locale)", app)
+        speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        self.assertIn("travelMode:", speak)
         speech = read("Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift")
         self.assertNotIn("prefix(", speech)
         self.assertIn("AVSpeechUtterance(string: trimmed)", speech)

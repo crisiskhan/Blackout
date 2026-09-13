@@ -24,6 +24,9 @@ unfinished tabs.
   (deferred teardown).
 - MAP COORDINATES rail prints live YOU when idle and dest pin coords while navigating.
   No MAP BEARING chip — profile BEARING on the party and address cards is enough.
+- WALK is the shortest walkable street path. DRIVE is the fastest packed street path
+  (road class on the graph, one-ways bind cars). SPEAK says Walk or Drive turn by turn
+  and never paints that script on the field.
 - Honesty over debug. `NET · NONE` and `NO VISION MODEL` stay. `Whisper <10 m: yes`
   does not. Capability honesty is not lawyer copy.
 - Off-grid instrument: the glass carries no lawyer copy. No `WHAT WE CANNOT DO`

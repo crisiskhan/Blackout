@@ -11,11 +11,26 @@ public enum VoiceTurn: String, Equatable, Sendable {
 public enum VoiceNav: Sendable {
     public static let arrive = "Arrive at destination."
     public static let offGraphPath = "No walkable street path from YOU."
-    public static let startHint = "Set a destination, then WALK, then SPEAK for turn by turn."
-    public static let destHint = "Tap WALK for the street path, then SPEAK."
+    public static let offGraphDrivePath = "No drivable street path from YOU."
+    public static let startHint = "Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."
+    public static let destHint = "Tap WALK or DRIVE for the street path, then SPEAK."
     public static let minLegMeters: Double = 8
     public static let straightDeg: Double = 35
     public static let uturnDeg: Double = 135
+
+    public static func pathFailure(_ mode: TravelMode) -> String {
+        switch mode {
+        case .walk: return offGraphPath
+        case .drive: return offGraphDrivePath
+        }
+    }
+
+    public static func legVerb(_ mode: TravelMode) -> String {
+        switch mode {
+        case .walk: return "Walk"
+        case .drive: return "Drive"
+        }
+    }
 
     public static func prompt(
         packName: String,
@@ -24,7 +39,8 @@ public enum VoiceNav: Sendable {
         planChrome: String,
         destination: (lat: Double, lon: Double)?,
         you: (lat: Double, lon: Double)?,
-        locale: String
+        locale: String,
+        travelMode: TravelMode = .walk
     ) -> String {
         _ = locale
         let headingBit: String
@@ -37,11 +53,11 @@ public enum VoiceNav: Sendable {
             let total = zip(routeCoords, routeCoords.dropFirst()).reduce(0.0) { acc, pair in
                 acc + GraphRouter.haversine(pair.0.lat, pair.0.lon, pair.1.lat, pair.1.lon)
             }
-            let body = steps(routeCoords).joined(separator: " ")
+            let body = steps(routeCoords, travelMode: travelMode).joined(separator: " ")
             return "\(body) Total \(metersPhrase(total)). \(headingBit)"
         }
         if planChrome == GraphPlan.offGraph {
-            return "OFF GRAPH. \(offGraphPath) \(packName). \(headingBit)"
+            return "OFF GRAPH. \(pathFailure(travelMode)) \(packName). \(headingBit)"
         }
         if let destination, let you {
             let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
@@ -50,8 +66,12 @@ public enum VoiceNav: Sendable {
         return "\(packName). \(headingBit) \(startHint)"
     }
 
-    public static func steps(_ coords: [(lat: Double, lon: Double)]) -> [String] {
+    public static func steps(
+        _ coords: [(lat: Double, lon: Double)],
+        travelMode: TravelMode = .walk
+    ) -> [String] {
         guard coords.count >= 2 else { return [] }
+        let verb = legVerb(travelMode)
         var lines: [String] = []
         var acc = 0.0
         var prevBearing: Double?
@@ -72,7 +92,7 @@ public enum VoiceNav: Sendable {
                 prevBearing = brg
             case .left, .right, .uturn:
                 if acc >= minLegMeters {
-                    lines.append("Walk \(metersPhrase(acc)).")
+                    lines.append("\(verb) \(metersPhrase(acc)).")
                 }
                 switch kind {
                 case .left:
@@ -89,7 +109,7 @@ public enum VoiceNav: Sendable {
             }
         }
         if acc >= minLegMeters {
-            lines.append("Walk \(metersPhrase(acc)).")
+            lines.append("\(verb) \(metersPhrase(acc)).")
         }
         lines.append(arrive)
         return lines

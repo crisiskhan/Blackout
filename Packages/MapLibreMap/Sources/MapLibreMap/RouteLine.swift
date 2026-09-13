@@ -225,13 +225,18 @@ public enum RouteSummary {
         }
     }
 
-    public static func chrome(mode: TravelMode, coords: [(lat: Double, lon: Double)]) -> String {
+    public static func chrome(mode: TravelMode, coords: [(lat: Double, lon: Double)], seconds: Double? = nil) -> String {
         guard RouteLine.shouldDraw(coords) else {
             return RouteBlock.noPath.chrome(mode: mode, packName: "")
         }
         let total = meters(coords)
-        let speed = mode == .walk ? walkMetersPerSecond : driveMetersPerSecond
-        let minutes = max(1, Int((total / speed / 60).rounded()))
+        let speed: Double
+        switch mode {
+        case .walk: speed = walkMetersPerSecond
+        case .drive: speed = driveMetersPerSecond
+        }
+        let elapsed = seconds ?? (total / speed)
+        let minutes = max(1, Int((elapsed / 60).rounded()))
         return "\(WalkDriveChip.verb(mode)) \(distancePhrase(total)) · ~\(minutes) min"
     }
 

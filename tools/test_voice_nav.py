@@ -58,7 +58,20 @@ def meters_phrase(m: float) -> str:
     return distance_spoken(m)
 
 
-def steps(coords: list[tuple[float, float]]) -> list[str]:
+def verb(mode: str) -> str:
+    return "Drive" if mode == "drive" else "Walk"
+
+
+def off_graph_path(mode: str) -> str:
+    kind = "drivable" if mode == "drive" else "walkable"
+    return f"No {kind} street path from YOU."
+
+
+START_HINT = "Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."
+DEST_HINT = "Tap WALK or DRIVE for the street path, then SPEAK."
+
+
+def steps(coords: list[tuple[float, float]], mode: str = "walk") -> list[str]:
     if len(coords) < 2:
         return []
     lines: list[str] = []
@@ -78,7 +91,7 @@ def steps(coords: list[tuple[float, float]]) -> list[str]:
             prev_bearing = brg
             continue
         if acc >= 8:
-            lines.append(f"Walk {meters_phrase(acc)}.")
+            lines.append(f"{verb(mode)} {meters_phrase(acc)}.")
         if kind == "uturn":
             lines.append("Turn around.")
         elif kind == "left":
@@ -88,7 +101,7 @@ def steps(coords: list[tuple[float, float]]) -> list[str]:
         acc = m
         prev_bearing = brg
     if acc >= 8:
-        lines.append(f"Walk {meters_phrase(acc)}.")
+        lines.append(f"{verb(mode)} {meters_phrase(acc)}.")
     lines.append("Arrive at destination.")
     return lines
 
@@ -101,6 +114,7 @@ def prompt(
     dest: tuple[float, float] | None,
     you: tuple[float, float] | None,
     locale: str = "en",
+    mode: str = "walk",
 ) -> str:
     _ = locale
     heading_bit = (
@@ -111,20 +125,17 @@ def prompt(
         for i in range(len(route_coords) - 1):
             a, b = route_coords[i], route_coords[i + 1]
             total += haversine(a[0], a[1], b[0], b[1])
-        body = " ".join(steps(route_coords))
+        body = " ".join(steps(route_coords, mode))
         return f"{body} Total {meters_phrase(total)}. {heading_bit}"
     if plan_chrome == OFF_GRAPH:
-        return f"OFF GRAPH. No walkable street path from YOU. {pack_name}. {heading_bit}"
+        return f"OFF GRAPH. {off_graph_path(mode)} {pack_name}. {heading_bit}"
     if dest is not None and you is not None:
         span = haversine(you[0], you[1], dest[0], dest[1])
         return (
             f"Destination set. {meters_phrase(span)}. "
-            f"{pack_name}. {heading_bit} Tap WALK for the street path, then SPEAK."
+            f"{pack_name}. {heading_bit} {DEST_HINT}"
         )
-    return (
-        f"{pack_name}. {heading_bit} "
-        "Set a destination, then WALK, then SPEAK for turn by turn."
-    )
+    return f"{pack_name}. {heading_bit} {START_HINT}"
 
 
 class VoiceNavTests(unittest.TestCase):
@@ -154,7 +165,7 @@ class VoiceNavTests(unittest.TestCase):
         text = prompt("TX WEST", None, [], "", None, None)
         self.assertIn("TX WEST.", text)
         self.assertIn("Heading unavailable.", text)
-        self.assertIn("Set a destination, then WALK, then SPEAK for turn by turn.", text)
+        self.assertIn(START_HINT, text)
         self.assertNotEqual(text.strip(), "TX WEST no heading")
 
     def test_dest_without_line_does_not_invent_streets(self):
@@ -167,9 +178,26 @@ class VoiceNavTests(unittest.TestCase):
             (31.76, -106.49),
         )
         self.assertIn("Destination set.", text)
-        self.assertIn("Tap WALK for the street path, then SPEAK.", text)
+        self.assertIn(DEST_HINT, text)
         self.assertNotIn("Turn left.", text)
         self.assertNotIn("Arrive at destination.", text)
+
+    def test_drive_turn_by_turn_uses_drive_not_walk(self):
+        coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+        text = prompt("TX WEST", 90, coords, "", None, None, mode="drive")
+        self.assertIn("Drive 656 feet.", text)
+        self.assertIn("Turn left.", text)
+        self.assertIn("Drive 328 feet.", text)
+        self.assertIn("Arrive at destination.", text)
+        self.assertIn("Total 984 feet.", text)
+        self.assertNotIn("Walk 656 feet.", text)
+        self.assertFalse(text.endswith("Drive"))
+
+    def test_drive_off_graph_is_honest_about_cars(self):
+        text = prompt("TX WEST", 45, [], OFF_GRAPH, (31.8, -106.5), (31.76, -106.49), mode="drive")
+        self.assertTrue(text.startswith("OFF GRAPH."))
+        self.assertIn("No drivable street path from YOU.", text)
+        self.assertNotIn("walkable", text)
 
 
 class VoiceNavSourceContracts(unittest.TestCase):
@@ -184,7 +212,14 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("Turn left.", blob)
         self.assertIn("Turn right.", blob)
         self.assertIn("No walkable street path from YOU.", blob)
-        self.assertIn("Set a destination, then WALK, then SPEAK for turn by turn.", blob)
+        self.assertIn("No drivable street path from YOU.", blob)
+        self.assertIn(START_HINT, blob)
+        self.assertIn(DEST_HINT, blob)
+        self.assertIn('return "Drive"', blob)
+        self.assertIn('return "Walk"', blob)
+        speak = (ROOT / "Blackout" / "AppRuntime.swift").read_text().split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        self.assertIn("travelMode:", speak)
+        self.assertIn("VoiceNav.prompt", speak)
 
     def test_speak_chip_stays_and_voice_gets_the_full_prompt(self):
         # tip-68 supersedes the tip-65 banner: the complete prompt is spoken, and the
@@ -213,6 +248,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         tests = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
         self.assertIn("testVoiceNavOnGraphLeftTurnIsCompleteNotTruncated", tests)
         self.assertIn("testVoiceNavOffGraphIsFullHonestSentence", tests)
+        self.assertIn("testVoiceNavDriveTurnByTurnUsesDriveNotWalk", tests)
+        self.assertIn("testDriveTakesTheFasterRoadNotTheShortestResidential", tests)
         self.assertIn("Arrive at destination.", tests)
 
 
