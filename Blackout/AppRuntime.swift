@@ -81,7 +81,7 @@ final class AppRuntime {
     var pickingEmblem = false
     /// Chosen name on YOU. Empty is still YOU on the card.
     var youName = ""
-    var youStatus: PartyStatus = .ok
+    var youStatus: PartyStatus = .good
     /// Cards the FIELD tab should try to open the next time it appears, best
     /// first, set by the hold card's FIELD button. The last one is always core,
     /// so the walk down the list cannot come up empty.

@@ -56,28 +56,38 @@ public struct MeshPip: Equatable, Sendable {
 
 /// Safety chrome on a person, not a party-wide chip blast.
 public enum PartyStatus: String, CaseIterable, Sendable {
-    case ok, wait, water, down
+    case good, okay, bad, emergency
 
-    public static let fallback = PartyStatus.ok
+    public static let fallback = PartyStatus.good
 
     public var title: String {
         switch self {
-        case .ok:
-            return "OK"
-        case .wait:
-            return "WAIT"
-        case .water:
-            return "WATER"
-        case .down:
-            return "DOWN"
+        case .good:
+            return "GOOD"
+        case .okay:
+            return "OKAY"
+        case .bad:
+            return "BAD"
+        case .emergency:
+            return "EMERGENCY!"
         }
     }
 
     public static func parse(_ raw: String?) -> PartyStatus {
-        guard let raw, let value = PartyStatus(rawValue: raw.lowercased()) else {
-            return .ok
+        guard let raw else { return .good }
+        let key = raw.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        switch key {
+        case "good", "ok":
+            return .good
+        case "okay", "wait":
+            return .okay
+        case "bad", "water":
+            return .bad
+        case "emergency", "emergency!", "down":
+            return .emergency
+        default:
+            return .good
         }
-        return value
     }
 }
 

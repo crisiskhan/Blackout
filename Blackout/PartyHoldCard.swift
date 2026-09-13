@@ -267,11 +267,13 @@ struct PartyHoldCard: View {
 
     private func statusInk(_ status: PartyStatus) -> Color {
         switch status {
-        case .ok:
+        case .good:
             return Theme.fix
-        case .wait, .water:
+        case .okay:
             return Theme.caution
-        case .down:
+        case .bad:
+            return Theme.heat
+        case .emergency:
             return Theme.accent
         }
     }

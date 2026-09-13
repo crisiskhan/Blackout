@@ -132,8 +132,12 @@ final class MeshDTNTests: XCTestCase {
 
     func testPOSCarriesNameAndStatus() {
         XCTAssertEqual(MeshPOS.nameToken("Crisis, Khan!"), "CRISIS KHAN")
-        XCTAssertEqual(PartyStatus.parse("down").title, "DOWN")
-        XCTAssertEqual(PartyStatus.parse(nil), .ok)
+        XCTAssertEqual(PartyStatus.parse("down").title, "EMERGENCY!")
+        XCTAssertEqual(PartyStatus.parse("ok"), .good)
+        XCTAssertEqual(PartyStatus.parse("wait"), .okay)
+        XCTAssertEqual(PartyStatus.parse("water"), .bad)
+        XCTAssertEqual(PartyStatus.parse("emergency!"), .emergency)
+        XCTAssertEqual(PartyStatus.parse(nil), .good)
         XCTAssertEqual(PartyNote.clean("  wait at the tank  ").count, 16)
         let packed = MeshPOS.body(
             lat: 31.76,
@@ -145,11 +149,11 @@ final class MeshDTNTests: XCTestCase {
         )
         XCTAssertTrue(packed.contains("owl"))
         XCTAssertTrue(packed.contains("CRISIS"))
-        XCTAssertTrue(packed.contains("down"))
+        XCTAssertTrue(packed.contains("emergency"))
         let parsed = MeshPOS.parse(packed)
         XCTAssertEqual(parsed?.emblem, "owl")
         XCTAssertEqual(parsed?.name, "CRISIS")
-        XCTAssertEqual(parsed?.status, "down")
+        XCTAssertEqual(parsed?.status, "emergency")
         XCTAssertEqual(MeshPOS.parse("31.76,-106.49")?.status, nil)
         XCTAssertNil(MeshPOS.parse("31.76,-106.49")?.vitals)
         let withRails = MeshPOS.body(
