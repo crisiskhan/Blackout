@@ -2486,7 +2486,7 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("tab = .comms", message)
         send = app.split("func sendPartyNote(")[1].split("func partyCourse(")[0]
         self.assertNotIn("appendPartyNote", send)
-        self.assertIn('"YOU"', send)
+        self.assertIn("meshDest", send)
         self.assertIn("sendNote", send)
         self.assertNotIn("var partyNotes", app)
         self.assertIn("var pendingNoteFocus", app)
@@ -2684,8 +2684,13 @@ class IncomingLineTests(unittest.TestCase):
         self.assertIn("incomingLineSeconds", raise_fn)
         self.assertIn("incomingTask", raise_fn)
         self.assertIn("NO FIX", raise_fn)
+        self.assertNotIn("guard env.from != mesh.localID", raise_fn)
+        self.assertIn("displayYouName", raise_fn)
+        self.assertIn("youEmblem", raise_fn)
+        self.assertIn("gnssYou", raise_fn)
         answer = app.split("func answerIncoming(")[1].split("func ", 1)[0]
         self.assertIn("pickPeer", answer)
+        self.assertIn('pickPeer("YOU")', answer)
         self.assertIn("tab = .comms", answer)
         self.assertIn("beginPTTSolo()", answer)
         self.assertIn("pendingNoteFocus", answer)
@@ -2693,6 +2698,7 @@ class IncomingLineTests(unittest.TestCase):
         self.assertIn("case .call", answer)
         self.assertIn("case .message", answer)
         self.assertIn("nearby", answer)
+        self.assertIn('"YOU"', answer)
         self.assertIn("Task { @MainActor in", answer)
         self.assertNotIn("tel://", answer.lower())
         clear = app.split("func clearIncoming(")[1].split("func ", 1)[0]
@@ -2727,6 +2733,72 @@ class IncomingLineTests(unittest.TestCase):
         self.assertIn("never `tel://`", incoming)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
+
+    def test_call_message_radio_to_you_notify_even_without_a_party(self):
+        app = read("Blackout", "AppRuntime.swift")
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        qa = read("docs", "SOLO_QA.md")
+        mesh_tests = read(
+            "Packages", "MeshDTN", "Tests", "MeshDTNTests", "MeshDTNTests.swift"
+        )
+        self.assertTrue(mesh_is_self_addressed("local-1", "YOU", "local-1"))
+        self.assertTrue(mesh_is_self_addressed("local-1", "local-1", "local-1"))
+        self.assertFalse(mesh_is_self_addressed("local-1", "*", "local-1"))
+        self.assertFalse(mesh_is_self_addressed("peer-1", "YOU", "local-1"))
+        self.assertIn("func isSelfAddressed", mesh)
+        enqueue = mesh.split("public func enqueue(")[1].split("public func sendPOS(")[0]
+        self.assertIn("isSelfAddressed", enqueue)
+        self.assertIn("receive(", enqueue)
+        recv = mesh.split("private func receive(")[1].split("private func upsertPip")[0]
+        self.assertIn("isSelfAddressed", recv)
+        self.assertNotIn("if env.from == localID { return }", recv)
+        self.assertIn("inbox.contains", recv)
+        call = app.split("func callHeldParty(")[1].split("func messageHeldParty(")[0]
+        self.assertNotIn("if person.isYou { return }", call)
+        self.assertIn("person.isYou || mesh.nearby.isEmpty", call)
+        self.assertIn("sendChip", call)
+        self.assertIn('chip: "ptt"', call)
+        send = app.split("func sendPartyNote(")[1].split("func partyCourse(")[0]
+        self.assertIn("sendNote", send)
+        self.assertNotIn('if dest == "YOU"', send)
+        radio = app.split("func radioCheckParty(")[1].split("func ", 1)[0]
+        self.assertIn('chip: "radio"', radio)
+        self.assertIn('"YOU"', radio)
+        self.assertIn("nearby.isEmpty", radio)
+        inbound = app.split("func applyInbound(")[1].split("func raiseIncoming(")[0]
+        chip = inbound.split('case "chip":')[1].split("case ", 1)[0]
+        self.assertIn('raw == "ptt"', chip)
+        self.assertIn('raw == "radio"', chip)
+        self.assertEqual(chip.count("raiseIncoming"), 1)
+        self.assertIn(".call", chip)
+        self.assertIn("peer != \"YOU\"", comms)
+        self.assertIn('pickPeer("YOU")', comms)
+        self.assertIn('sectionLabel("PEERS")', comms)
+        peers = comms.split('sectionLabel("PEERS")')[1].split("sectionLabel(", 1)[0]
+        self.assertIn('pickPeer("YOU")', peers)
+        self.assertNotIn("if !runtime.mesh.nearby.isEmpty", peers)
+        self.assertIn("func testSelfAddressedYouLoopsBackWithNoPeer", mesh_tests)
+        person = next(
+            line for line in qa.splitlines() if "Hold YOU or a party emblem" in line
+        )
+        self.assertIn("even with no party", person)
+        self.assertIn("Incoming CALL and MESSAGE pop a HUD line", person)
+        self.assertNotIn("YOU does not auto-arm", person)
+        incoming = next(
+            line for line in qa.splitlines() if "Incoming CALL (PTT chip)" in line
+        )
+        self.assertIn("CALL, MESSAGE, or RADIO to YOU", incoming)
+        self.assertIn("no party", incoming)
+        self.assertIn("NET · NONE", incoming)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
+
+
+def mesh_is_self_addressed(from_id: str, to: str, local_id: str) -> bool:
+    dest = to.strip()
+    return from_id == local_id and dest in ("YOU", local_id)
 
 
 def _rgba(src: str, name: str) -> tuple[float, float, float, float]:

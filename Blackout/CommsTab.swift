@@ -56,10 +56,13 @@ struct CommsTab: View {
                         Theme.plateRect()
                             .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                     )
-                    if !runtime.mesh.nearby.isEmpty {
-                        sectionLabel("PEERS")
-                        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                            ForEach(Array(runtime.mesh.nearby.enumerated()), id: \.offset) { _, name in
+                    sectionLabel("PEERS")
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        chip(peerWord("YOU")) {
+                            runtime.comms.pickPeer("YOU")
+                        }
+                        ForEach(Array(runtime.mesh.nearby.enumerated()), id: \.offset) { _, name in
+                            if name != "YOU" {
                                 chip(peerWord(name)) {
                                     runtime.comms.pickPeer(name)
                                 }

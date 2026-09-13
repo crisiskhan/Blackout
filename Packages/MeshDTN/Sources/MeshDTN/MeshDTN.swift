@@ -489,6 +489,9 @@ public final class MeshNet: @unchecked Sendable {
             chromeNet = "NO PEERS · LOGGED"
             box.log("mesh", "NO PEERS · LOGGED local write \(env.kind) \(env.id)")
         }
+        if isSelfAddressed(env) {
+            receive(env)
+        }
     }
 
     public func sendPOS(
@@ -621,6 +624,12 @@ public final class MeshNet: @unchecked Sendable {
         MeshEnvelope(id: UUID().uuidString, from: from, to: to, kind: kind, body: body)
     }
 
+    private func isSelfAddressed(_ env: MeshEnvelope) -> Bool {
+        guard env.from == localID else { return false }
+        let dest = env.to.trimmingCharacters(in: .whitespacesAndNewlines)
+        return dest == "YOU" || dest == localID
+    }
+
     private func heardPeer(_ peer: String) {
         if !nearby.contains(peer) { nearby.append(peer) }
         refreshChrome()
@@ -637,10 +646,12 @@ public final class MeshNet: @unchecked Sendable {
     }
 
     private func receive(_ env: MeshEnvelope) {
-        if env.from == localID { return }
+        if env.from == localID, !isSelfAddressed(env) { return }
         if inbox.contains(where: { $0.id == env.id }) { return }
         inbox.append(env)
-        store.append(env)
+        if !store.contains(where: { $0.id == env.id }) {
+            store.append(env)
+        }
         switch env.kind {
         case "pos":
             if let text = String(data: env.body, encoding: .utf8),

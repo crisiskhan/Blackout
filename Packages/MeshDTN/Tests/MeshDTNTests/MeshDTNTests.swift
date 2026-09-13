@@ -239,6 +239,25 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(net.inbox.isEmpty)
     }
 
+    func testSelfAddressedYouLoopsBackWithNoPeer() {
+        let net = MeshNet(box: EventLog())
+        net.startLocal()
+        XCTAssertTrue(net.inbox.isEmpty)
+        net.sendChip(from: net.localID, chip: "ptt", to: "YOU")
+        XCTAssertEqual(net.inbox.count, 1)
+        XCTAssertEqual(net.inbox.first?.kind, "chip")
+        XCTAssertEqual(net.inbox.first?.to, "YOU")
+        XCTAssertEqual(net.chromeNet, "NO PEERS · LOGGED")
+        XCTAssertEqual(net.store.filter { $0.kind == "chip" }.count, 1)
+        net.sendNote(from: net.localID, text: "at the tank", to: "YOU")
+        XCTAssertEqual(net.inbox.last?.kind, "note")
+        net.sendChip(from: net.localID, chip: "radio", to: "YOU")
+        XCTAssertEqual(net.inbox.filter { $0.to == "YOU" }.count, 3)
+        let before = net.inbox.count
+        net.sendChip(from: net.localID, chip: "rally")
+        XCTAssertEqual(net.inbox.count, before)
+    }
+
     func testInboundRedTimerChipVisibleAndDeduped() {
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)

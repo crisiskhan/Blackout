@@ -716,8 +716,7 @@ final class AppRuntime {
             tab = .comms
             closeHold()
             applyMapKeepAwake()
-            if person.isYou { return }
-            if mesh.nearby.isEmpty {
+            if person.isYou || mesh.nearby.isEmpty {
                 mesh.sendChip(from: mesh.localID, chip: "ptt", to: meshDest)
             } else {
                 beginPTTSolo()
@@ -743,15 +742,7 @@ final class AppRuntime {
     func sendPartyNote(_ raw: String) {
         let text = PartyNote.clean(raw)
         guard !text.isEmpty else { return }
-        let dest = meshDest
-        if dest == "YOU" {
-            if mesh.nearby.isEmpty {
-                commsChrome = "NO PEERS · LOGGED"
-            }
-            box.log("note", text)
-            return
-        }
-        mesh.sendNote(from: mesh.localID, text: text, to: dest)
+        mesh.sendNote(from: mesh.localID, text: text, to: meshDest)
     }
 
     func partyCourse(for person: HeldPerson) -> String {
@@ -1168,7 +1159,8 @@ final class AppRuntime {
 
     func radioCheckParty() {
         comms.radioCheck(heard: mesh.joined)
-        mesh.sendChip(from: mesh.localID, chip: "radio", to: meshDest)
+        let dest = comms.peer == "YOU" || mesh.nearby.isEmpty ? "YOU" : meshDest
+        mesh.sendChip(from: mesh.localID, chip: "radio", to: dest)
     }
 
     func sendPartyChip(_ chip: Chip) {
@@ -1404,7 +1396,7 @@ final class AppRuntime {
                 if let chip = Chip(rawValue: raw) {
                     comms.push(chip)
                 }
-                if raw == "ptt" {
+                if raw == "ptt" || (raw == "radio" && (env.to == "YOU" || env.to == mesh.localID)) {
                     raiseIncoming(from: env, kind: .call)
                 }
             }
@@ -1469,22 +1461,39 @@ final class AppRuntime {
     }
 
     func raiseIncoming(from env: MeshEnvelope, kind: IncomingKind) {
-        guard env.from != mesh.localID else { return }
         guard incomingIsForLocal(env) else { return }
+        let selfLine = env.from == mesh.localID
         let pip = mesh.pips.first { $0.from == env.from }
-        let named = MeshPOS.nameToken(pip?.name ?? "")
-        let name = named.isEmpty ? env.from.uppercased() : named.uppercased()
+        let name: String
+        let emblem: String
         let location: String
-        if let pip, pip.lat.isFinite, pip.lon.isFinite {
-            location = MapFieldChrome.destValue(point: (pip.lat, pip.lon))
+        let from: String
+        if selfLine {
+            name = displayYouName.uppercased()
+            emblem = youEmblem.rawValue
+            if let you = gnssYou, you.lat.isFinite, you.lon.isFinite {
+                location = MapFieldChrome.destValue(point: (you.lat, you.lon))
+            } else {
+                // NO FIX when YOU has no usable GNSS.
+                location = MapFieldChrome.destValue(point: nil)
+            }
+            from = "YOU"
         } else {
-            // NO FIX when the pip has no usable coordinate.
-            location = MapFieldChrome.destValue(point: nil)
+            let named = MeshPOS.nameToken(pip?.name ?? "")
+            name = named.isEmpty ? env.from.uppercased() : named.uppercased()
+            emblem = pip?.emblem ?? ""
+            if let pip, pip.lat.isFinite, pip.lon.isFinite {
+                location = MapFieldChrome.destValue(point: (pip.lat, pip.lon))
+            } else {
+                // NO FIX when the pip has no usable coordinate.
+                location = MapFieldChrome.destValue(point: nil)
+            }
+            from = env.from
         }
         incoming = IncomingLine(
-            from: env.from,
+            from: from,
             name: name,
-            emblem: pip?.emblem ?? "",
+            emblem: emblem,
             location: location,
             kind: kind,
             raisedAt: Date()
@@ -1504,7 +1513,12 @@ final class AppRuntime {
 
     func answerIncoming() {
         guard let line = incoming else { return }
-        comms.pickPeer(line.from)
+        let selfLine = line.from == "YOU" || line.from == mesh.localID
+        if selfLine {
+            comms.pickPeer("YOU")
+        } else {
+            comms.pickPeer(line.from)
+        }
         switch line.kind {
         case .call:
             break
@@ -1518,7 +1532,7 @@ final class AppRuntime {
             applyMapKeepAwake()
             switch line.kind {
             case .call:
-                if mesh.nearby.contains(line.from) {
+                if selfLine || mesh.nearby.contains(line.from) {
                     beginPTTSolo()
                 }
             case .message:
