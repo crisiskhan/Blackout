@@ -15,6 +15,7 @@ struct ARMINGView: View {
         ZStack {
             Theme.void.ignoresSafeArea()
             world
+            field
             vignette
             chrome
         }
@@ -57,20 +58,30 @@ struct ARMINGView: View {
             )
             .allowsHitTesting(false)
             .ignoresSafeArea()
-            .opacity(worldIn ? 0.22 : 0)
+            .opacity(worldIn ? 0.56 : 0)
         }
+    }
+
+    private var field: some View {
+        Image("BootField")
+            .resizable()
+            .scaledToFill()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
     }
 
     private var vignette: some View {
         RadialGradient(
             colors: [
-                Theme.void.opacity(0.62),
-                Theme.void.opacity(0.82),
-                Theme.void.opacity(0.97),
+                Theme.void.opacity(0.06),
+                Theme.void.opacity(0.22),
+                Theme.void.opacity(0.52),
             ],
             center: .center,
-            startRadius: 40,
-            endRadius: 520
+            startRadius: 160,
+            endRadius: 620
         )
         .ignoresSafeArea()
         .allowsHitTesting(false)

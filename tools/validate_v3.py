@@ -710,8 +710,15 @@ def tip55_chrome() -> None:
         bad("ARMING missing bundled logo")
     elif "1712.0 / 1152.0" in arming or "Text(\"BLACKOUT\")" in arming:
         bad("ARMING still uses the wordmark poster")
+    elif 'Image("BootField")' not in arming:
+        bad("ARMING missing field poster")
     else:
-        ok("ARMING shows bundled logo")
+        ok("ARMING shows bundled logo over the field poster")
+    field = ROOT / "Blackout" / "Assets.xcassets" / "BootField.imageset" / "BootField.png"
+    if not field.is_file():
+        bad("BootField.imageset missing")
+    else:
+        ok("BootField.imageset bundled")
     if "ForEach(packs.catalog.packs" in arming:
         bad("ARMING is still a pack menu")
     else:

@@ -333,8 +333,10 @@ class OffGridNoDisclaimerTests(unittest.TestCase):
         self.assertIn("ACTIVATE", qa)
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("compass mark", qa.lower())
-        self.assertIn("No BLACKOUT wordmark", qa)
+        self.assertIn("No BLACKOUT as HUD type", qa)
         self.assertIn("no black plate", qa.lower())
+        self.assertIn("streets show through", qa.lower())
+        self.assertIn("field poster", qa.lower())
 
 
 class WaterClassifyOnHoldTests(unittest.TestCase):
@@ -669,6 +671,82 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("outer rays are gone", qa.lower())
         self.assertIn("red glow", qa.lower())
         self.assertIn("metal on the mark is fully opaque", qa.lower())
+
+
+class BootFieldTests(unittest.TestCase):
+    """ACTIVATE field is the compass poster. Black is open so the pack map shows."""
+
+    def test_boot_field_knocks_black_so_the_map_shows(self):
+        field_dir = ROOT / "Blackout" / "Assets.xcassets" / "BootField.imageset"
+        field = field_dir / "BootField.png"
+        self.assertTrue(field.is_file(), "BootField.png missing")
+        width, height, color = png_ihdr(field)
+        self.assertEqual(color, 6, "field poster has alpha so black can open")
+        self.assertGreater(height, width)
+        self.assertGreaterEqual(width, 1024)
+        self.assertFalse((field_dir / "BootField.jpg").exists())
+        manifest = read("Blackout", "Assets.xcassets", "BootField.imageset", "Contents.json")
+        self.assertIn("BootField.png", manifest)
+        self.assertNotIn("BootField.jpg", manifest)
+        _, _, px = png_rgba(field)
+        for x, y in (
+            (0, 0),
+            (width - 1, 0),
+            (0, height - 1),
+            (width - 1, height - 1),
+            (48, 48),
+        ):
+            self.assertLessEqual(
+                png_px(px, width, x, y)[3],
+                8,
+                f"field corner {x},{y} still blocks the map",
+            )
+        core = png_px(px, width, width // 2, height // 2)
+        self.assertGreaterEqual(core[0], 160, "field red sight stays")
+        self.assertGreaterEqual(core[3], 220, "field red sight stays")
+        ring = png_px(px, width, width // 2, int(height * 200 / 1712))
+        self.assertGreaterEqual(ring[3], 230, "field metal ring stays")
+        self.assertGreaterEqual(max(ring[:3]), 160, "field metal ring stays")
+        open_count = 0
+        metal_count = 0
+        for y in range(0, height, 4):
+            for x in range(0, width, 4):
+                r, g, b, a = png_px(px, width, x, y)
+                if a <= 8:
+                    open_count += 1
+                if a >= 230 and max(r, g, b) >= 140:
+                    metal_count += 1
+        sample = ((height + 3) // 4) * ((width + 3) // 4)
+        self.assertGreater(open_count / sample, 0.38, "not enough black knocked out")
+        self.assertGreater(metal_count / sample, 0.02, "field metal disappeared")
+        arming = read("Blackout", "ARMINGView.swift")
+        self.assertIn('Image("BootField")', arming)
+        self.assertNotIn("1712.0 / 1152.0", arming)
+        self.assertNotIn('Text("BLACKOUT")', arming)
+        self.assertLess(arming.find("world"), arming.find("field"))
+        self.assertLess(arming.find("private var field"), arming.find("private var vignette"))
+        field_view = arming.split("private var field:")[1].split("private var vignette")[0]
+        self.assertIn(".scaledToFill()", field_view)
+        self.assertIn(".clipped()", field_view)
+        self.assertIn(".ignoresSafeArea()", field_view)
+        world = re.search(r"worldIn \? ([0-9.]+)", arming)
+        self.assertIsNotNone(world)
+        self.assertGreaterEqual(float(world.group(1)), 0.48, "map too dim under the field")
+        vignette = arming.split("private var vignette")[1].split("private var chrome")[0]
+        opacities = [
+            float(value)
+            for value in re.findall(r"Theme\.void\.opacity\(([0-9.]+)\)", vignette)
+        ]
+        self.assertGreaterEqual(len(opacities), 3)
+        self.assertLessEqual(opacities[0], 0.16, "center vignette still hides the map")
+        self.assertLessEqual(max(opacities), 0.62, "edge vignette still blacks out the map")
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("streets show through", qa.lower())
+        self.assertIn("field poster", qa.lower())
+        self.assertIn("No BLACKOUT as HUD type", qa)
+        device = read("docs", "DEVICE.md")
+        self.assertIn("streets show through", device.lower())
+        self.assertIn("field poster", device.lower())
 
 
 class UnlockGlassTests(unittest.TestCase):
