@@ -103,18 +103,63 @@ public enum VisionCoreML {
         let usable = observations
             .filter { $0.confidence >= 0.2 }
             .sorted { $0.confidence > $1.confidence }
+        var best: (VisionGuess, Int)?
         for obs in usable {
-            if let hit = match(obs.identifier, book: book, locale: locale) {
-                return sealed(hit)
+            guard let hit = match(obs.identifier, book: book, locale: locale) else { continue }
+            let rank = specificity(hit)
+            if let current = best {
+                if rank > current.1 {
+                    best = (hit, rank)
+                }
+            } else {
+                best = (hit, rank)
             }
         }
-        return unknownGuess()
+        guard let picked = best?.0 else { return unknownGuess() }
+        return sealed(picked)
     }
 
     public static func lookalikeWord(_ raw: String) -> String {
         raw.replacingOccurrences(of: "-lookalike", with: "")
             .replacingOccurrences(of: "-", with: " ")
             .uppercased()
+    }
+
+    /// Apple's classifier often ranks Plant/Tree above Cactus or a mushroom
+    /// on a log. A generic tree needle must not beat the book kind the still
+    /// also named. Fungi and snake stay leave-it even when tree scored higher.
+    private static func specificity(_ guess: VisionGuess) -> Int {
+        switch kindRank(guess) {
+        case .fungi: return 50
+        case .snake: return 40
+        case .specific: return 30
+        case .tree: return 10
+        }
+    }
+
+    private enum KindRank {
+        case fungi
+        case snake
+        case specific
+        case tree
+    }
+
+    private static func kindRank(_ guess: VisionGuess) -> KindRank {
+        let id = guess.labelId
+        if guess.name == "FUNGI" || id.contains("fungi") || id.contains("amanita")
+            || id.contains("galerina") || id.contains("morel") || id.hasSuffix("jack")
+        {
+            return .fungi
+        }
+        if guess.name == "SNAKE" || id.contains("snake") || id.contains("diamondback")
+            || id.contains("rattler") || id.contains("copperhead") || id.contains("cottonmouth")
+        {
+            return .snake
+        }
+        if id == "kind:tree" || guess.name == "TREE" {
+            return .tree
+        }
+        return .specific
     }
 
     private static func sealed(_ guess: VisionGuess) -> VisionGuess {

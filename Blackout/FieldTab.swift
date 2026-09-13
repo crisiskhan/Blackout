@@ -362,11 +362,12 @@ struct FieldTab: View {
             .foregroundStyle(Theme.silver.opacity(0.5))
     }
 
-    /// SEARCH is the menu. Empty is waiting, not a dump of the book. The
-    /// loaded `cards` book stays the whole state so a javelina still still
-    /// opens the west mammal card. SEARCH ranks this pack's chapter. It
-    /// does not invent a card the book lacks. ALL CARDS on an open card
-    /// returns here.
+    /// SEARCH is the menu. Empty is waiting, not a dump of the book. Hits
+    /// are not a title list — the SEARCH chip (or keyboard Search) opens the
+    /// first answering card. The loaded `cards` book stays the whole state
+    /// so a javelina still still opens the west mammal card. SEARCH ranks
+    /// this pack's chapter. It does not invent a card the book lacks. ALL
+    /// CARDS on an open card returns here.
     private var catalogQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -385,22 +386,24 @@ struct FieldTab: View {
 
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
+            TextField("SEARCH", text: $query)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .onSubmit(openAnswer)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.silver)
+                .padding(.horizontal, 12)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .background(Theme.glass())
+                .clipShape(Theme.plateRect())
+                .overlay(
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                )
             HStack(alignment: .center, spacing: 8) {
-                TextField("SEARCH", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .submitLabel(.search)
-                    .onSubmit(openAnswer)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.silver)
-                    .padding(.horizontal, 12)
-                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
-                    )
+                Button("SEARCH") { openAnswer() }
+                    .buttonStyle(HUDOverlayChipStyle())
                 Button("SAY") { say() }
                     .buttonStyle(HUDOverlayChipStyle())
             }

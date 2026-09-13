@@ -68,6 +68,47 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertEqual(g.percent, 0)
     }
 
+    func testAPearStillIsCactusEvenWhenAppleRanksTreeFirst() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Plant", confidence: 0.92),
+                VisionObservation(identifier: "Tree", confidence: 0.88),
+                VisionObservation(identifier: "Cactus", confidence: 0.41),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "PRICKLY PEAR")
+        XCTAssertEqual(g.labelId, "tx-prickly-pear")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testFungiBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.9),
+                VisionObservation(identifier: "mushroom", confidence: 0.35),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "FUNGI")
+        XCTAssertEqual(g.labelId, "kind:fungi")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+    }
+
+    func testATreeStillStillWorksWhenThatIsAllAppleSaid() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Tree", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "TREE")
+        XCTAssertEqual(g.labelId, "kind:tree")
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
     private func txBook() -> VisionBook {
         VisionBook(state: "TX", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: [
             VisionLabel(id: "tx-prickly-pear", kind: "cactus", lookalikes: ["glochid-lookalike"], leaveIt: false, edibleUnlock: false, name: ["en": "Prickly pear"]),

@@ -1184,6 +1184,9 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn('TextField("SEARCH"', field)
         self.assertIn("NO MATCH", field)
         self.assertNotIn("mapSearchHitCap", field)
+        search = field.split("private var searchField")[1].split("private func say")[0]
+        self.assertIn('Button("SEARCH")', search)
+        self.assertIn("openAnswer()", search)
         self.assertIn('Button("SAY")', field)
         self.assertIn("SAY FAILED", field)
         self.assertIn('sectionLabel("SITUATION")', field)
@@ -1347,6 +1350,13 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("CAPTURE", still)
         self.assertIn("requestAccess", still)
         self.assertIn("Vision/labels.tx.json", read("Blackout.xcodeproj", "project.pbxproj"))
+        classify = vis.split("func classify(observations:")[1].split("func lookalikeWord")[0]
+        self.assertNotIn("return sealed(hit)", classify)
+        self.assertIn("specificity(", classify)
+        self.assertNotIn("prefix(8)", still)
+        shoot = still.split("func shoot()")[1].split("func photoOutput")[0]
+        self.assertNotIn("failClosed()", shoot)
+        self.assertIn("session.isRunning", shoot)
 
     def test_matcher_needles_are_in_the_package(self):
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift").lower()

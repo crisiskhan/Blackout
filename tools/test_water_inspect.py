@@ -8231,6 +8231,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertNotIn("ForEach(listCards)", tab)
         self.assertIn("onSubmit(openAnswer)", tab)
+        search = tab.split("private var searchField")[1].split("private func say")[0]
+        self.assertIn('Button("SEARCH")', search)
+        self.assertIn("openAnswer()", search)
         self.assertIn("runtime.packs?.active?.id", tab)
         book = json.loads((ROOT / "Resources/Field/field.tx.json").read_text())
         by_id = {c["id"]: c for c in book["cards"]}

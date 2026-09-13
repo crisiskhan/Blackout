@@ -28,9 +28,11 @@ enum SystemVision {
             return nil
         }
         let results = request.results ?? []
-        return results.prefix(8).map {
-            SystemVisionHit(identifier: $0.identifier, confidence: Double($0.confidence))
-        }
+        return results
+            .filter { $0.confidence >= 0.2 }
+            .map {
+                SystemVisionHit(identifier: $0.identifier, confidence: Double($0.confidence))
+            }
         #else
         return nil
         #endif
@@ -63,6 +65,7 @@ struct VisionStill: UIViewControllerRepresentable {
         var onCancel: (() -> Void)?
         private let session = AVCaptureSession()
         private let output = AVCapturePhotoOutput()
+        private var captureButton: UIButton?
         private var started = false
         private var finished = false
 
@@ -130,7 +133,15 @@ struct VisionStill: UIViewControllerRepresentable {
             if let connection = output.connection(with: .video), connection.isVideoOrientationSupported {
                 connection.videoOrientation = .portrait
             }
-            DispatchQueue.global(qos: .userInitiated).async { self.session.startRunning() }
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.session.startRunning()
+                DispatchQueue.main.async {
+                    self.captureButton?.isEnabled = self.session.isRunning
+                    if !self.session.isRunning {
+                        self.failClosed()
+                    }
+                }
+            }
         }
 
         private func installChrome() {
@@ -149,6 +160,8 @@ struct VisionStill: UIViewControllerRepresentable {
             capture.layer.cornerRadius = 10
             capture.addTarget(self, action: #selector(shoot), for: .touchUpInside)
             capture.translatesAutoresizingMaskIntoConstraints = false
+            capture.isEnabled = false
+            captureButton = capture
 
             view.addSubview(close)
             view.addSubview(capture)
@@ -172,10 +185,7 @@ struct VisionStill: UIViewControllerRepresentable {
         }
 
         @objc private func shoot() {
-            guard session.isRunning else {
-                failClosed()
-                return
-            }
+            guard session.isRunning else { return }
             output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
         }
 

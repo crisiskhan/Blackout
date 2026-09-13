@@ -101,6 +101,9 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("openAnswer()", tab)
         self.assertIn("onSubmit(openAnswer)", tab)
         self.assertIn(".submitLabel(.search)", tab)
+        search = tab.split("private var searchField")[1].split("private func say")[0]
+        self.assertIn('Button("SEARCH")', search)
+        self.assertIn("openAnswer()", search)
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertNotIn("mapSearchHitCap", tab)
         self.assertNotIn("best in class", tab.lower())
@@ -221,6 +224,9 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         pbx = read("Blackout.xcodeproj", "project.pbxproj")
         self.assertIn('Button("SAY")', tab)
         self.assertIn("SAY FAILED", tab)
+        search = tab.split("private var searchField")[1].split("private func say")[0]
+        self.assertIn('Button("SEARCH")', search)
+        self.assertIn("openAnswer()", search)
         self.assertIn("runtime.speech.listen(locale:", tab)
         self.assertIn("runtime.ptt.live", tab)
         self.assertIn("openAnswer()", tab)
