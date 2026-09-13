@@ -120,9 +120,18 @@ struct MapTab: View {
                     onVitals: { runtime.setYouVitals($0) },
                     onCall: { runtime.callHeldParty() },
                     onMessage: { runtime.messageHeldParty() },
-                    onClose: { runtime.closeHold() }
+                    onClose: { runtime.closeHold() },
+                    onFaceHold: { runtime.openEmblemPick() }
                 )
                 .padding(hudReserve)
+                if runtime.pickingEmblem {
+                    EmblemPickCard(
+                        selected: runtime.youEmblem,
+                        onPick: { runtime.pickEmblem($0) },
+                        onClose: { runtime.closeEmblemPick() }
+                    )
+                    .padding(hudReserve)
+                }
             } else if runtime.tab == .map, let address = runtime.heldAddress {
                 AddressHoldCard(
                     address: address,
@@ -151,6 +160,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.held)
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
+        .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
     }
 
     /// Everything that is not the map, sitting on the map. Search, lock and

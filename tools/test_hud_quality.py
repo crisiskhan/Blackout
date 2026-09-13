@@ -496,6 +496,7 @@ class HUDSyncTests(unittest.TestCase):
             "Theme.swift",
             "HoldCard.swift",
             "PartyHoldCard.swift",
+            "EmblemPickCard.swift",
             "AddressHoldCard.swift",
             "SOSHold.swift",
             "InstrumentsView.swift",
@@ -1149,6 +1150,7 @@ class HUDSeductionTests(unittest.TestCase):
             "RootChrome.swift",
             "HoldCard.swift",
             "PartyHoldCard.swift",
+            "EmblemPickCard.swift",
             "AddressHoldCard.swift",
             "CommsTab.swift",
             "FieldTab.swift",
@@ -1396,8 +1398,68 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("PTT mesh", person)
         self.assertIn("never `tel://`", qa)
         self.assertIn("Names stay off the canvas", person)
+        self.assertIn("Hold the face", person)
+        self.assertIn("FACE", person)
+        self.assertIn("26", person)
+        self.assertIn("second glass", person)
+        self.assertIn("party card's face does not open FACE", person)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
+
+    def test_hold_you_face_opens_emblem_glass(self):
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        card = read("Blackout", "PartyHoldCard.swift")
+        pick = read("Blackout", "EmblemPickCard.swift")
+        device = read("docs", "DEVICE.md")
+        face = card.split("private var face")[1].split("private var displayName")[0]
+        self.assertIn("struct EmblemPickCard", pick)
+        self.assertIn("PersonEmblem.allCases", pick)
+        self.assertIn("emblem.title", pick)
+        self.assertIn('"FACE"', pick)
+        self.assertIn("onPick", pick)
+        self.assertIn("holdCardDismissDragPoints", pick)
+        self.assertIn("Theme.Motion.heavy", pick)
+        self.assertIn("BlackoutTokens.Chrome.mapChipHitPoints", pick)
+        self.assertNotIn("closeHold", pick)
+        self.assertNotIn(".spring(", pick)
+        self.assertNotIn("tel://", pick.lower())
+        self.assertNotIn("Color.orange", pick)
+        self.assertNotIn("Color.green", pick)
+        self.assertNotIn("best in class", pick.lower())
+        self.assertIn("person.isYou", face)
+        self.assertIn("Inspect.holdSeconds", face)
+        self.assertIn("LongPressGesture", face)
+        self.assertIn("highPriorityGesture", face)
+        self.assertIn("onFaceHold", face)
+        self.assertIn("accessibilityLabel(\"FACE\")", face)
+        self.assertIn("onFaceHold:", tab)
+        self.assertIn("openEmblemPick()", tab)
+        self.assertIn("EmblemPickCard(", tab)
+        self.assertIn("runtime.pickingEmblem", tab)
+        self.assertIn("closeEmblemPick()", tab)
+        self.assertIn("pickEmblem", tab)
+        self.assertIn("var pickingEmblem", app)
+        self.assertIn("func openEmblemPick(", app)
+        self.assertIn("func closeEmblemPick(", app)
+        open_pick = app.split("func openEmblemPick(")[1].split("func ", 1)[0]
+        self.assertIn("isYou", open_pick)
+        self.assertIn("pickingEmblem = true", open_pick)
+        close_pick = app.split("func closeEmblemPick(")[1].split("func ", 1)[0]
+        self.assertIn("pickingEmblem = false", close_pick)
+        self.assertNotIn("heldParty = nil", close_pick)
+        for fn in (
+            "func holdInspect(",
+            "func holdAddress(",
+            "func holdParty(",
+            "func closeHold()",
+        ):
+            body = app.split(fn)[1].split("func ", 1)[0]
+            self.assertIn("pickingEmblem = false", body, fn)
+        self.assertIn("Hold the face", device)
+        self.assertIn("FACE", device)
+        self.assertNotIn("best in class", device.lower())
+        self.assertNotIn("best in class", card.lower())
 
 
 def _rgba(src: str, name: str) -> tuple[float, float, float, float]:

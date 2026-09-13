@@ -16,6 +16,7 @@ struct PartyHoldCard: View {
     let onCall: () -> Void
     let onMessage: () -> Void
     let onClose: () -> Void
+    let onFaceHold: () -> Void
 
     @State private var drag: CGFloat = 0
     @State private var nameDraft: String = ""
@@ -148,7 +149,7 @@ struct PartyHoldCard: View {
             }
             Spacer(minLength: 0)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: person.isYou ? .contain : .combine)
     }
 
     private var face: some View {
@@ -167,7 +168,21 @@ struct PartyHoldCard: View {
         .overlay(
             Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: 1)
         )
-        .accessibilityHidden(true)
+        .contentShape(Circle())
+        .accessibilityHidden(!person.isYou)
+        .accessibilityLabel("FACE")
+        .accessibilityHint("Hold to pick a mark")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction(named: "FACE") {
+            if person.isYou { onFaceHold() }
+        }
+        .highPriorityGesture(
+            LongPressGesture(minimumDuration: Inspect.holdSeconds)
+                .onEnded { _ in
+                    if person.isYou { onFaceHold() }
+                }
+        )
+        .allowsHitTesting(person.isYou)
     }
 
     private var displayName: String {

@@ -68,6 +68,8 @@ final class AppRuntime {
     var heldParty: HeldPerson?
     /// A packed door the search book interpolated. Mutually exclusive with ground and party.
     var heldAddress: HeldAddress?
+    /// FACE glass over the YOU profile. Never on a peer card.
+    var pickingEmblem = false
     /// Chosen name on YOU. Empty is still YOU on the card.
     var youName = ""
     var youStatus: PartyStatus = .ok
@@ -216,6 +218,17 @@ final class AppRuntime {
         sendPOSIfPossible()
     }
 
+    func openEmblemPick() {
+        guard heldParty?.isYou == true else { return }
+        pickingEmblem = true
+        pulse()
+    }
+
+    func closeEmblemPick() {
+        pickingEmblem = false
+        pulse()
+    }
+
     func dropMark() {
         pulse()
         fix.arm()
@@ -251,6 +264,7 @@ final class AppRuntime {
     /// says what is there.
     func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
         pulse()
+        pickingEmblem = false
         heldParty = nil
         heldAddress = nil
         let id = packs?.active?.id
@@ -279,6 +293,7 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldAddress = nil
+        pickingEmblem = false
         pulse()
     }
 
@@ -292,6 +307,7 @@ final class AppRuntime {
     func holdAddress(_ hit: SearchHit) {
         guard hit.lat.isFinite, hit.lon.isFinite else { return }
         pulse()
+        pickingEmblem = false
         held = nil
         heldParty = nil
         let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -352,6 +368,7 @@ final class AppRuntime {
 
     func holdParty(id: String, lat: Double, lon: Double) {
         pulse()
+        pickingEmblem = false
         held = nil
         heldAddress = nil
         if id == UserPuck.title {
