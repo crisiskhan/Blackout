@@ -141,6 +141,26 @@ public enum FieldCorpus {
         !tokens(query).isEmpty
     }
 
+    /// One open step can still be several moves. Split on sentence end so
+    /// the glass can number them. SPEAK still reads the whole do.
+    public static func doLines(_ raw: String) -> [String] {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return [] }
+        var lines: [String] = []
+        var current = ""
+        for ch in trimmed {
+            current.append(ch)
+            if ch == "." || ch == "!" || ch == "?" {
+                let piece = current.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !piece.isEmpty { lines.append(piece) }
+                current = ""
+            }
+        }
+        let tail = current.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !tail.isEmpty { lines.append(tail) }
+        return lines
+    }
+
     /// Rank the open chapter for a situation. Empty or stopword-only query
     /// returns nothing — SEARCH is waiting, not a dump of the book.
     /// Unknown words return nothing — the catalog does not invent a card.
@@ -161,8 +181,11 @@ public enum FieldCorpus {
         }
         let foldedQuery = qTokens.joined(separator: " ")
         let preferEs = locale == "es"
-        var scored: [(FieldCard, Double)] = []
+        let live = qTokens.contains(where: { liveAnimal.contains($0) })
+        let meal = qTokens.contains(where: { mealWord.contains($0) })
+        var scored: [(FieldCard, Double, Int)] = []
         for card in cards {
+            if live && !meal && card.category == "food" { continue }
             let titleTok = Set(tokens(card.title.en) + tokens(card.title.es))
             let idTok = Set(tokens(card.id.replacingOccurrences(of: "-", with: " ")))
             let catTok = Set(tokens(card.category))
@@ -176,21 +199,33 @@ public enum FieldCorpus {
             score += Double(expanded.intersection(idTok).count) * 8
             score += Double(expanded.intersection(catTok).count) * 6
             if boostedHit { score += 20 }
+            if qTokens.contains("wool") && card.id == "camp-layers" { score += 25 }
             let preferredTitle = Set(tokens(preferEs ? card.title.es : card.title.en))
             score += Double(expanded.intersection(preferredTitle).count) * 3
-            if !foldedQuery.isEmpty {
+            if qTokens.count >= 2 {
                 let titleFold = fold(card.title.en) + " " + fold(card.title.es)
                 if titleTok.isSuperset(of: Set(qTokens)) { score += 40 }
                 if foldedQuery.count >= 4 && titleFold.contains(foldedQuery) { score += 20 }
             }
             guard score > 0 else { continue }
-            scored.append((card, score))
+            scored.append((card, score, boostIndex(card.id, expanded: expanded)))
         }
         return scored.sorted { a, b in
             if a.1 != b.1 { return a.1 > b.1 }
+            if a.2 != b.2 { return a.2 < b.2 }
             if a.0.category != b.0.category { return a.0.category < b.0.category }
             return a.0.title.en < b.0.title.en
         }.map(\.0)
+    }
+
+    private static func boostIndex(_ id: String, expanded: Set<String>) -> Int {
+        var best = Int.max
+        for word in expanded {
+            if let ids = boost[word], let idx = ids.firstIndex(of: id) {
+                best = min(best, idx)
+            }
+        }
+        return best
     }
 
     private static func index(_ card: FieldCard) -> Set<String> {
@@ -260,6 +295,16 @@ public enum FieldCorpus {
         "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
         "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
         "mi", "tu", "su",
+    ]
+
+    /// A live animal name opens give-space, not the meal, unless the query
+    /// already named meat, hunt, or cook.
+    private static let liveAnimal: Set<String> = [
+        "javelina", "peccary", "pecari", "hog", "coyote", "deer", "elk", "bear",
+    ]
+
+    private static let mealWord: Set<String> = [
+        "meat", "hunt", "cook", "already", "caza", "carne",
     ]
 
     /// Extra query tokens so a situation word hits the procedure that answers it.
@@ -333,6 +378,8 @@ public enum FieldCorpus {
         "berry": ["plant-unknown"],
         "plant": ["plant-unknown", "plant-use"],
         "planta": ["plant-unknown", "plant-use"],
+        "food": ["food-cook", "food-pantry"],
+        "comida": ["food-cook", "food-pantry"],
         "chew": ["plant-unknown", "tx-plant-danger", "nm-plant-danger"],
         "taste": ["plant-unknown"],
         "hunt": ["food-game"],

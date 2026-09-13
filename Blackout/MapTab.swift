@@ -528,26 +528,17 @@ struct MapTab: View {
         }
     }
 
-    /// Everything the canvas is allowed to say: which pack, and one way back
-    /// out to the whole region. No byte counts, no raw coordinates, no vendor mark.
+    /// Pack name on the canvas. The map opens on YOU at walking zoom.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
-                if offPack {
-                    Text(PackChrome.offPack)
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(Theme.accent)
-                }
-                Text(packName)
+        VStack(alignment: .leading, spacing: 2) {
+            if offPack {
+                Text(PackChrome.offPack)
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(Theme.silver)
+                    .foregroundStyle(Theme.accent)
             }
-            Spacer()
-            Button("FIT PACK") {
-                runtime.touch(.footer)
-                runtime.fitPack()
-            }
-                .buttonStyle(HUDOverlayChipStyle())
+            Text(packName)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(Theme.silver)
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 2)

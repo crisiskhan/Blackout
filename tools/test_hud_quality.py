@@ -1196,6 +1196,14 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("s.step.image", field)
         self.assertIn("Field/images", field)
         self.assertIn("openRoute([first.id])", field)
+        self.assertIn("FieldCorpus.doLines", field)
+        self.assertIn("s.step.child", open_fn)
+        self.assertLess(
+            open_fn.find('sectionLabel("DO")'),
+            open_fn.find('L10n.t("stop.if"'),
+        )
+        self.assertLess(open_fn.find("s.step.image"), open_fn.find("FieldCorpus.doLines"))
+        self.assertLess(open_fn.find("FieldCorpus.doLines"), open_fn.find("s.step.child"))
 
     def test_solo_qa_scores_stop_if_and_step_speak(self):
         qa = read("docs", "SOLO_QA.md")
@@ -1302,7 +1310,7 @@ class MapMarksGlassTests(unittest.TestCase):
         self.assertIn("pickDestination(lat: m.lat, lon: m.lon)", tab)
         self.assertIn("mapChipHitPoints", tab)
         self.assertNotIn("minHeight: 36", tab)
-        self.assertIn('Button("FIT PACK")', tab)
+        self.assertNotIn('Button("FIT PACK")', tab)
         self.assertIn("HUDOverlayChipStyle()", tab)
         self.assertIn("mapChipHitPoints", sos)
 

@@ -245,22 +245,6 @@ struct FieldTab: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            sectionLabel(L10n.t("stop.if", runtime.locale))
-            ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
-                Text(loc(line))
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.accent)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(10)
-                    .background(Theme.accent.opacity(0.14))
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: 1)
-                    )
-            }
-
             sectionLabel("DO")
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 8) {
@@ -271,20 +255,33 @@ struct FieldTab: View {
                         Image(uiImage: ui)
                             .resizable()
                             .scaledToFit()
-                            .frame(maxHeight: 180)
+                            .frame(maxHeight: 240)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .accessibilityHidden(true)
                     }
-                    Text(loc(s.step.`do`))
-                        .font(.system(size: 15, weight: .semibold))
+                    if s.card.steps.count > 1 {
+                        Text("STEP \(s.index + 1) OF \(s.card.steps.count)")
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                    }
+                    ForEach(Array(FieldCorpus.doLines(loc(s.step.`do`)).enumerated()), id: \.offset) { n, line in
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("\(n + 1)")
+                                .font(.system(size: 18, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .frame(minWidth: 18, alignment: .leading)
+                            Text(line)
+                                .font(.system(size: 18, weight: .heavy))
+                                .foregroundStyle(Theme.silver)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    Text(loc(s.step.child))
+                        .font(.system(size: 18, weight: .heavy))
                         .foregroundStyle(Theme.silver)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(loc(s.step.why))
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.silver.opacity(0.7))
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(loc(s.step.child))
-                        .font(.caption)
                         .foregroundStyle(Theme.silver.opacity(0.7))
                         .fixedSize(horizontal: false, vertical: true)
                     Text(loc(s.step.stop))
@@ -302,6 +299,22 @@ struct FieldTab: View {
                             .foregroundStyle(Theme.accent)
                     }
                 }
+            }
+
+            sectionLabel(L10n.t("stop.if", runtime.locale))
+            ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
+                Text(loc(line))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(Theme.accent.opacity(0.14))
+                    .clipShape(Theme.plateRect())
+                    .overlay(
+                        Theme.plateRect()
+                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: 1)
+                    )
             }
 
             sectionLabel("GET-TO-CARE")

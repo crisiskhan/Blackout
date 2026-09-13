@@ -105,6 +105,12 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn('Button("SEARCH")', search)
         self.assertIn("openAnswer()", search)
         self.assertIn("FieldCorpus.chapter(", tab)
+        self.assertIn("static func doLines", corpus)
+        ask = corpus.split("static func ask(")[1].split("private static func index")[0]
+        self.assertIn("liveAnimal", ask)
+        self.assertIn('category == "food"', ask)
+        self.assertIn("camp-layers", ask)
+        self.assertIn('"food"', corpus)
         self.assertNotIn("mapSearchHitCap", tab)
         self.assertNotIn("best in class", tab.lower())
         self.assertNotIn("best in class", corpus.lower())
@@ -260,6 +266,13 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn('sectionLabel("GET-TO-CARE")', tab)
         self.assertNotIn('sectionLabel("CARE")', tab)
         self.assertIn("s.step.image", open_fn)
+        self.assertIn("FieldCorpus.doLines", open_fn)
+        self.assertIn("s.step.child", open_fn)
+        self.assertLess(
+            open_fn.find('sectionLabel("DO")'),
+            open_fn.find('L10n.t("stop.if"'),
+        )
+        self.assertLess(open_fn.find("s.step.image"), open_fn.find("FieldCorpus.doLines"))
         self.assertIn("Field/images", tab)
         self.assertIn("UIImage(contentsOfFile:", tab)
         self.assertTrue((ROOT / "Resources/Field/images/bleed-pack.png").is_file())

@@ -98,6 +98,52 @@ final class FieldCorpusTests: XCTestCase {
             FieldCorpus.ask([layers, cook], query: "wet wool", locale: "en").map(\.id),
             ["camp-layers"]
         )
+        let cold = card("env-cold", title: "Cold and wet — stop the slide", situation: "wet cotton layer")
+        XCTAssertEqual(
+            FieldCorpus.ask([cold, layers], query: "wet wool", locale: "en").first?.id,
+            "camp-layers"
+        )
+    }
+
+    func testAskJavelinaOpensGiveSpaceNotTheMeal() {
+        let mammal = card(
+            "tx-mammal",
+            category: "animals",
+            title: "West Texas mammals — give space",
+            situation: "javelina coyote deer"
+        )
+        let game = card(
+            "tx-game",
+            category: "food",
+            title: "Javelina or deer you already have",
+            situation: "javelina"
+        )
+        XCTAssertEqual(
+            FieldCorpus.ask([game, mammal], query: "javelina", locale: "en").first?.id,
+            "tx-mammal"
+        )
+        XCTAssertEqual(
+            FieldCorpus.ask([game, mammal], query: "javelina meat", locale: "en").first?.id,
+            "tx-game"
+        )
+    }
+
+    func testAskFoodOpensCookNotCordage() {
+        let cook = card("food-cook", category: "food", title: "Cook what you already trust")
+        let cord = card("plant-cordage", category: "plants", title: "Fiber is cordage, not food")
+        XCTAssertEqual(
+            FieldCorpus.ask([cord, cook], query: "food", locale: "en").first?.id,
+            "food-cook"
+        )
+    }
+
+    func testDoLinesSplitsTheOpenStepIntoKidTaps() {
+        XCTAssertEqual(
+            FieldCorpus.doLines("Clear first: settle, then filter cloth. Boil one minute."),
+            ["Clear first: settle, then filter cloth.", "Boil one minute."]
+        )
+        XCTAssertEqual(FieldCorpus.doLines("One move"), ["One move"])
+        XCTAssertEqual(FieldCorpus.doLines("   "), [])
     }
 
     private func card(
