@@ -246,3 +246,7 @@ HUD tree `0a1b83b` tagged `tf-119`. Run [34767753179](https://github.com/crisisk
 
 HUD tree `1b880e8` tagged `tf-120`. Run [34788757841](https://github.com/crisiskhan/Blackout/actions/runs/34788757841) archived with Dist `W98723J9XB`. KEEP `45YLWHL6UP` untouched. Stale runner Dist `2NV89KF3X3` revoked (not KEEP). `HAS_LOCAL_DIST_KEY=1`. `exportArchive OK`. CPV **113** in the archive product. IPA inspect then failed closed: `llama.framework` `CFBundleIdentifier=org.ggml.llama` was required to be `com.maplibre.mapbox`. No altool. No unique IPA. Do not retag 85–120. Tree CPV stays 1. Leave **112** until a later tag uploads. CPV **113** is tag `tf-121`.
 
+## HUD 121 Internal (in flight)
+
+HUD tree `d4a6293` tagged `tf-121`. IPA inspect keeps vendor `org.ggml.llama` on `llama.framework` (and `com.maplibre.mapbox` on MapLibre). Re-sign names llama separately so it is not sealed as MapLibre. KEEP `45YLWHL6UP` untouched. Do not retag 85–120. Tree CPV stays 1. Tag 121 mints max ASC + 1 (expected **113** if 112 is still the tip). Leave **112** until TestFlight shows the new CPV Ready, then install that `0.1.0`. Do not wait for a build numbered 120 or 121. IPA 121 is FIELD SEARCH live ASK, open-card layout, FieldAsk device compile, MeshDTN leftover, and the llama vendor-BID inspect/re-sign fix.
+
