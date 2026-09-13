@@ -892,7 +892,7 @@ import BlackBox
 final class RedAlertTests: XCTestCase {
     func testCancel() {
         let p = RedPlate(box: BlackBox())
-        p.apply(PartyVitals(water: 0.9, fatigue: 0.2, weatherExposure: 0.1))
+        p.apply(PartyVitals(thirst: 0.9, water: 0.2, fatigue: 0.2, weatherExposure: 0.1))
         XCTAssertTrue(p.isRed)
         p.cancelRED()
         XCTAssertTrue(p.cancelled)

@@ -1132,6 +1132,12 @@ class ExpeditionHUDTests(unittest.TestCase):
         self.assertIn("`HUNGER` / `THIRST` / `PAIN` / `FATIGUE` / `EXPOSURE`", qa)
         self.assertNotIn("`HUNGER` / `THIRST` / `PAIN` / `WATER`", qa)
 
+    def test_red_plate_uses_thirst_not_hidden_water(self):
+        red = read("Packages", "RedAlert", "Tests", "RedAlertTests", "RedAlertTests.swift")
+        cancel = red.split("func testCancel()")[1].split("func ")[0]
+        self.assertIn("thirst: 0.9", cancel)
+        self.assertNotIn("water: 0.9", cancel)
+
     def test_condition_yellow_is_caution_ink_not_silver(self):
         exped = read("Blackout", "ExpeditionTab.swift")
         theme = read("Blackout", "Theme.swift")
