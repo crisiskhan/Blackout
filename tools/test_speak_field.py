@@ -401,6 +401,10 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("static var beat", theme)
         self.assertIn("repeatForever", theme)
         self.assertIn(".shadow(", theme)
+        chip_style = theme.split("struct MapFieldDestChipStyle")[1].split("enum HUDStatusTone")[0]
+        self.assertNotIn("Theme.raised", chip_style)
+        self.assertNotIn("ultraThinMaterial", chrome)
+        self.assertNotIn("Theme.glass", chrome)
         self.assertNotIn("Color.green", theme)
         dest_src = self.route_line.split("func destLine(")[1].split("func destValue")[0]
         self.assertIn("destValue", dest_src)

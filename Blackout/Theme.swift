@@ -152,6 +152,8 @@ struct HUDOverlayChipStyle: ButtonStyle {
 }
 
 /// Dest-slot chips on MAP. Selected beats harder; the other still glows.
+/// The lamp is the green stroke and halo. No raised plate — COORDINATES
+/// sit on void so the map stays in view.
 struct MapFieldDestChipStyle: ButtonStyle {
     var ink: Color
     var expanded: Bool
@@ -162,7 +164,6 @@ struct MapFieldDestChipStyle: ButtonStyle {
         let pulse = expanded ? beat : 0.45 * beat
         let glow = 0.28 + 0.62 * pulse
         let radius = (expanded ? 12.0 : 7.0) + (expanded ? 12.0 : 7.0) * pulse
-        let fill = 0.10 + 0.22 * pulse
         return configuration.label
             .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
             .minimumScaleFactor(1)
@@ -172,19 +173,11 @@ struct MapFieldDestChipStyle: ButtonStyle {
             .frame(minWidth: hit, minHeight: hit, maxHeight: hit, alignment: .leading)
             .contentShape(Rectangle())
             .foregroundStyle(ink)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Theme.raised)
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(ink.opacity(fill))
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(ink.opacity(0.48 + 0.52 * pulse), lineWidth: expanded ? 2 : 1.2)
             )
+            .shadow(color: Theme.void.opacity(0.9), radius: 2, x: 0, y: 0)
             .shadow(color: ink.opacity(glow), radius: radius, x: 0, y: 0)
             .shadow(color: ink.opacity(glow * 0.55), radius: radius * 1.7, x: 0, y: 0)
             .opacity(configuration.isPressed ? 0.65 : 1)

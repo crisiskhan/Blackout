@@ -337,6 +337,7 @@ struct MapTab: View {
     }
 
     /// Up to three short deduped lines, printed where the thumb already is.
+    /// COORDINATES sit on void — no grey glass plate over the map.
     private var fieldChrome: some View {
         let dest = runtime.routeTarget
         let you = runtime.gnssYou
@@ -366,6 +367,8 @@ struct MapTab: View {
                                 .foregroundStyle(line.warn ? Theme.warn : Theme.silver)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                                .shadow(color: Theme.void.opacity(0.72), radius: 8)
                         case .dest:
                             MapFieldDestRail(dest: point)
                         }
@@ -373,10 +376,6 @@ struct MapTab: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
-                .background(
-                    Theme.glass(opacity: 0.62)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                )
             }
         }
     }
@@ -400,6 +399,7 @@ struct MapTab: View {
                     .minimumScaleFactor(1)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .shadow(color: Theme.void.opacity(0.95), radius: 3)
                     .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
                     .accessibilityLabel(MapFieldDestMode.coordinates.title)
                     .accessibilityValue(field)
