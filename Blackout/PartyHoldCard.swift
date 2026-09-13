@@ -81,15 +81,13 @@ struct PartyHoldCard: View {
             Rectangle()
                 .fill(Theme.silver.opacity(0.22))
                 .frame(height: 1)
+            actions
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     statusRail
                     conditionBlock
                     rows
                     timerBlock
-                    if !person.isYou {
-                        actions
-                    }
                     inventoryBlock
                 }
             }
@@ -363,9 +361,9 @@ struct PartyHoldCard: View {
     private var actions: some View {
         HStack(spacing: 8) {
             Button("CALL") { onCall() }
-                .buttonStyle(HoldActionStyle(filled: false, expand: true))
+                .buttonStyle(HUDActionStyle(filled: false))
             Button("MESSAGE") { onMessage() }
-                .buttonStyle(HoldActionStyle(filled: false, expand: true))
+                .buttonStyle(HUDActionStyle(filled: false))
         }
     }
 

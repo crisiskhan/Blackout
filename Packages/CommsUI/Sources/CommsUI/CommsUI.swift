@@ -48,8 +48,9 @@ public struct CommsState: Sendable {
     }
 
     public func meshTo(nearby: [String]) -> String {
+        if let peer, peer == "YOU" { return "YOU" }
         guard channel == "1:1" else { return "*" }
-        if let peer, nearby.contains(peer) { return peer }
+        if let peer, !peer.isEmpty { return peer }
         return nearby.first ?? "*"
     }
 

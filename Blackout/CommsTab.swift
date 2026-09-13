@@ -1,5 +1,6 @@
 import SwiftUI
 import CommsUI
+import MeshDTN
 import Tokens
 import MapLibreMap
 import UIKit
@@ -41,7 +42,7 @@ struct CommsTab: View {
                         Button("ALL") { runtime.comms.setChannel("ALL") }
                             .buttonStyle(HUDDockStyle())
                         Button("1:1") {
-                            if runtime.mesh.nearby.isEmpty {
+                            if runtime.mesh.nearby.isEmpty && runtime.comms.peer != "YOU" {
                                 runtime.commsChrome = "NO PEERS"
                                 return
                             }
@@ -105,6 +106,24 @@ struct CommsTab: View {
                         .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                     }
 
+                    sectionLabel("THREAD")
+                    HUDGlassCard {
+                        if threadLines.isEmpty {
+                            Text("NONE")
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Theme.silver.opacity(0.7))
+                        } else {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(threadLines) { line in
+                                    Text(threadWord(line))
+                                        .font(.system(size: 13, weight: .heavy))
+                                        .foregroundStyle(Theme.silver)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                        }
+                    }
+
                     sectionLabel("CHIPS")
                     HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         chip(L10n.t("chip.rally", runtime.locale)) {
@@ -153,13 +172,22 @@ struct CommsTab: View {
             .presentationBackground(Theme.void)
             #endif
         }
+        .onAppear { openPendingNote() }
+        .onChange(of: runtime.pendingNoteFocus) { _, _ in
+            openPendingNote()
+        }
     }
 
     private var pageStatus: String {
         if runtime.ptt.live { return "PTT" }
         if runtime.clipLive { return "CLIP" }
-        if runtime.comms.channel == "1:1" && !runtime.mesh.nearby.isEmpty {
-            return "1:1 · \(runtime.mesh.chromeNet)"
+        if runtime.comms.channel == "1:1" {
+            if runtime.comms.peer == "YOU" {
+                return "1:1 · YOU"
+            }
+            if !runtime.mesh.nearby.isEmpty {
+                return "1:1 · \(runtime.mesh.chromeNet)"
+            }
         }
         return runtime.mesh.chromeNet
     }
@@ -323,6 +351,43 @@ struct CommsTab: View {
 
     private var meshSOS: Bool {
         runtime.comms.chips.contains(.sos) || runtime.mesh.inboundChips.contains(Chip.sos.rawValue)
+    }
+
+    private var threadLines: [PartyThreadLine] {
+        guard runtime.comms.channel == "1:1", let peer = runtime.comms.peer, !peer.isEmpty else {
+            return runtime.partyNotes
+        }
+        return runtime.partyNotes.filter { line in
+            line.to == peer || line.from == peer || (peer == "YOU" && (line.to == "YOU" || line.from == "YOU"))
+        }
+    }
+
+    private func openPendingNote() {
+        guard runtime.pendingNoteFocus else { return }
+        runtime.pendingNoteFocus = false
+        runtime.hudKeys.open(
+            id: "comms.note",
+            text: note,
+            submit: "SEND",
+            locked: false,
+            digits: false,
+            write: { note = $0 },
+            onOpen: nil,
+            onSubmit: {
+                runtime.sendPartyNote(note)
+                note = ""
+            }
+        )
+    }
+
+    private func threadWord(_ line: PartyThreadLine) -> String {
+        let who: String
+        if line.from == "YOU" || line.from == runtime.mesh.localID {
+            who = "YOU"
+        } else {
+            who = line.from.uppercased()
+        }
+        return "\(who) · \(line.text.uppercased())"
     }
 
     private func sectionLabel(_ title: String) -> some View {

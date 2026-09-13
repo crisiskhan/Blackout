@@ -99,6 +99,20 @@ public enum PartyNote {
     }
 }
 
+public struct PartyThreadLine: Codable, Equatable, Sendable, Identifiable {
+    public var id: String
+    public var from: String
+    public var to: String
+    public var text: String
+
+    public init(id: String = UUID().uuidString, from: String, to: String, text: String) {
+        self.id = id
+        self.from = from
+        self.to = to
+        self.text = PartyNote.clean(text)
+    }
+}
+
 /// `lat,lon` still parses. Newer peers add heading, face, name, status, rails.
 public enum MeshPOS {
     public static func body(

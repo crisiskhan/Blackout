@@ -102,6 +102,10 @@ final class AppRuntime {
     var speechChrome = ""
     /// Mic deny on CALL. Empty unless the last arm failed.
     var commsChrome = ""
+    /// NOTE field should open after MESSAGE from a profile glass.
+    var pendingNoteFocus = false
+    /// 1:1 and YOU notes on COMMS THREAD. Survives kill-and-relaunch.
+    var partyNotes: [PartyThreadLine] = []
     /// 15s CLIP is armed. The pad reads RECORDING until the clip ends.
     var clipLive = false
     /// HUD typewriter. Replaces the iPhone keyboard on every field.
@@ -172,6 +176,7 @@ final class AppRuntime {
         }
         marks = MarkStore.load()
         relabelMarksForActivePack()
+        loadPartyNotes()
         loadFieldBookIDs()
         bootVessel()
         applyMapKeepAwake()
@@ -226,6 +231,28 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
+    }
+
+    func loadPartyNotes() {
+        guard let data = UserDefaults.standard.data(forKey: "party.notes"),
+              let lines = try? JSONDecoder().decode([PartyThreadLine].self, from: data)
+        else { return }
+        partyNotes = lines
+    }
+
+    func persistPartyNotes() {
+        guard let data = try? JSONEncoder().encode(partyNotes) else { return }
+        UserDefaults.standard.set(data, forKey: "party.notes")
+    }
+
+    func appendPartyNote(from: String, to: String, text: String) {
+        let line = PartyThreadLine(from: from, to: to, text: text)
+        guard !line.text.isEmpty else { return }
+        partyNotes.append(line)
+        if partyNotes.count > 32 {
+            partyNotes.removeFirst(partyNotes.count - 32)
+        }
+        persistPartyNotes()
     }
 
     func pickEmblem(_ emblem: PersonEmblem) {
@@ -567,12 +594,17 @@ final class AppRuntime {
     }
 
     func callHeldParty() {
-        guard let person = heldParty, !person.isYou else { return }
-        comms.pickPeer(person.id)
+        guard let person = heldParty else { return }
+        if person.isYou {
+            comms.pickPeer("YOU")
+        } else {
+            comms.pickPeer(person.id)
+        }
         Task { @MainActor in
             tab = .comms
             closeHold()
             applyMapKeepAwake()
+            if person.isYou { return }
             if mesh.nearby.isEmpty {
                 mesh.sendChip(from: mesh.localID, chip: "ptt", to: meshDest)
             } else {
@@ -582,8 +614,13 @@ final class AppRuntime {
     }
 
     func messageHeldParty() {
-        guard let person = heldParty, !person.isYou else { return }
-        comms.pickPeer(person.id)
+        guard let person = heldParty else { return }
+        if person.isYou {
+            comms.pickPeer("YOU")
+        } else {
+            comms.pickPeer(person.id)
+        }
+        pendingNoteFocus = true
         Task { @MainActor in
             tab = .comms
             closeHold()
@@ -594,7 +631,16 @@ final class AppRuntime {
     func sendPartyNote(_ raw: String) {
         let text = PartyNote.clean(raw)
         guard !text.isEmpty else { return }
-        mesh.sendNote(from: mesh.localID, text: text, to: meshDest)
+        let dest = meshDest
+        appendPartyNote(from: "YOU", to: dest, text: text)
+        if dest == "YOU" {
+            if mesh.nearby.isEmpty {
+                commsChrome = "NO PEERS · LOGGED"
+            }
+            box.log("note", text)
+            return
+        }
+        mesh.sendNote(from: mesh.localID, text: text, to: dest)
     }
 
     func partyCourse(for person: HeldPerson) -> String {
@@ -1245,6 +1291,9 @@ final class AppRuntime {
         case "note":
             if let text = String(data: env.body, encoding: .utf8) {
                 let note = PartyNote.clean(text)
+                if !note.isEmpty {
+                    appendPartyNote(from: env.from, to: env.to, text: note)
+                }
                 if note.hasPrefix("SOS ") {
                     lastConditionSOS = note
                 }

@@ -26,6 +26,10 @@ final class CommsUITests: XCTestCase {
         XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "A")
         s.pickPeer("B")
         XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "B")
+        XCTAssertEqual(s.meshTo(nearby: []), "B")
         XCTAssertEqual(s.channel, "1:1")
+        s.pickPeer("YOU")
+        XCTAssertEqual(s.meshTo(nearby: []), "YOU")
+        XCTAssertEqual(s.meshTo(nearby: ["A", "B"]), "YOU")
     }
 }
