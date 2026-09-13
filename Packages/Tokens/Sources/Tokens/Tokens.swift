@@ -35,7 +35,9 @@ public enum BlackoutTokens: Sendable {
         /// The inspect card. It grows to its content and stops at half the
         /// screen, so the pin the thumb is holding is never behind it.
         public static let holdCardMaxHeightFraction: Double = 0.5
-        public static let holdCardCornerPoints: Double = 18
+        public static let holdCardCornerPoints: Double = 8
+        /// Machined HUD plates. Tighter than a system sheet.
+        public static let hudPlateCornerPoints: Double = 6
         /// The scrim is graded rather than flat. It has to read as "the map is
         /// not taking taps right now" everywhere, but half of the point of
         /// capping the card is that the pin stays visible, and a flat 55% wash
@@ -75,6 +77,10 @@ public enum BlackoutTokens: Sendable {
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silver = metal
         public static let silverEdge = silver
+        /// Facet highlight. Brighter than the mid silver, never white.
+        public static let metalHighlight = RGBA(r: 0.93, g: 0.94, b: 0.96, a: 1)
+        /// Facet recess. Darker than silver, still above void.
+        public static let metalShade = RGBA(r: 0.18, g: 0.19, b: 0.22, a: 1)
         public static let accent = RGBA(r: 225.0 / 255.0, g: 6.0 / 255.0, b: 0, a: 1)
         public static let sos = accent
         /// Honesty ink. Crisis (SOS / RED / OVERDUE) uses accent. No leftover orange.

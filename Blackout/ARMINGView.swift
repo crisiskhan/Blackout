@@ -95,17 +95,20 @@ struct ARMINGView: View {
                 : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
             let size = CGFloat(BlackoutTokens.Chrome.bootLogoPoints)
             let bloom = 0.38 + 0.22 * pulse
-            Image("Logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: size, height: size)
-                .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
-                .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
-                .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
-                .compositingGroup()
-                .scaleEffect(markIn ? 1 : 0.98)
-                .opacity(markIn ? 1 : 0)
-                .accessibilityLabel("Blackout")
+            ZStack {
+                HUDRing(diameter: size + 28, lit: runtime.bootReady)
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+                    .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
+                    .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
+                    .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
+                    .compositingGroup()
+            }
+            .scaleEffect(markIn ? 1 : 0.98)
+            .opacity(markIn ? 1 : 0)
+            .accessibilityLabel("Blackout")
         }
     }
 
@@ -141,15 +144,23 @@ struct ARMINGView: View {
         .tracking(4)
         .foregroundStyle(runtime.bootReady ? Color.white : Theme.silver.opacity(0.45))
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
-        .background(runtime.bootReady ? Theme.accent : Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(
-                    runtime.bootReady ? Theme.accent : Theme.silver.opacity(0.28),
-                    lineWidth: 1
-                )
-        )
+        .background {
+            if runtime.bootReady {
+                Theme.accent
+            } else {
+                Theme.glass()
+            }
+        }
+        .clipShape(Theme.plateRect())
+        .overlay {
+            if runtime.bootReady {
+                Theme.plateRect()
+                    .strokeBorder(Theme.accent, lineWidth: 1)
+            } else {
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+            }
+        }
         .opacity(runtime.bootReady ? 1 : 0.55)
         .shadow(
             color: Theme.accent.opacity(runtime.bootReady ? 0.42 : 0),

@@ -30,7 +30,7 @@ struct SOSHold: View {
                         height: BlackoutTokens.Chrome.sosDiameter
                     )
                 Circle()
-                    .stroke(Theme.silver.opacity(0.55), lineWidth: 1.5)
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1.5)
                     .frame(
                         width: BlackoutTokens.Chrome.sosDiameter,
                         height: BlackoutTokens.Chrome.sosDiameter
@@ -87,10 +87,10 @@ struct IAMOKBar: View {
                 .padding(.horizontal, 12)
                 .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 .background(Theme.glass())
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(Theme.plateRect())
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
                 )
                 Spacer()
             }

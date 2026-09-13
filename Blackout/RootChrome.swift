@@ -103,10 +103,19 @@ struct RootChrome: View {
             .padding(.horizontal, 4)
             .padding(.top, 4)
             .padding(.bottom, 2)
-            .background(Theme.void.opacity(0.94))
+            .background(
+                ZStack {
+                    Theme.void.opacity(0.96)
+                    LinearGradient(
+                        colors: [Theme.metalHigh.opacity(0.18), Color.clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+            )
             .overlay(alignment: .top) {
                 Rectangle()
-                    .fill(Theme.silver.opacity(0.18))
+                    .fill(Theme.metalStroke)
                     .frame(height: 1)
             }
         }
@@ -122,10 +131,19 @@ struct RootChrome: View {
                 }
                 Spacer()
             }
-            .background(Theme.void.opacity(0.94))
+            .background(
+                ZStack {
+                    Theme.void.opacity(0.96)
+                    LinearGradient(
+                        colors: [Theme.metalHigh.opacity(0.14), Color.clear],
+                        startPoint: .trailing,
+                        endPoint: .leading
+                    )
+                }
+            )
             .overlay(alignment: .trailing) {
                 Rectangle()
-                    .fill(Theme.silver.opacity(0.18))
+                    .fill(Theme.metalStroke)
                     .frame(width: 1)
             }
         }

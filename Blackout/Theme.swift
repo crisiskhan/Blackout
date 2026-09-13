@@ -12,6 +12,9 @@ enum Theme {
     static var heat: Color { Color(rgba: BlackoutTokens.Color.heat) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
     static var fix: Color { Color(rgba: BlackoutTokens.Color.fix) }
+    static var metalHigh: Color { Color(rgba: BlackoutTokens.Color.metalHighlight) }
+    static var metalLow: Color { Color(rgba: BlackoutTokens.Color.metalShade) }
+    static var plateCorner: CGFloat { CGFloat(BlackoutTokens.Chrome.hudPlateCornerPoints) }
 
     enum Motion {
         static var sleep: Animation {
@@ -29,11 +32,40 @@ enum Theme {
         }
     }
 
-    /// Dark glass the HUD sits on. Blur alone lets streets through the type.
-    static func glass(opacity: Double = 0.72) -> some View {
+    static func plateRect() -> RoundedRectangle {
+        RoundedRectangle(cornerRadius: plateCorner, style: .continuous)
+    }
+
+    static var metalStroke: LinearGradient {
+        LinearGradient(
+            colors: [metalHigh, silver, metalLow],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    /// Faceted metal plate on void. No iOS blur — streets stay under the type.
+    static func glass(opacity: Double = 0.88) -> some View {
         ZStack {
-            Rectangle().fill(.ultraThinMaterial)
             Rectangle().fill(void.opacity(opacity))
+            LinearGradient(
+                colors: [
+                    metalHigh.opacity(0.22),
+                    Color.clear,
+                    metalLow.opacity(0.58),
+                ],
+                startPoint: UnitPoint(x: 0.04, y: 0.0),
+                endPoint: UnitPoint(x: 0.96, y: 1.0)
+            )
+            LinearGradient(
+                colors: [
+                    Color.clear,
+                    metalHigh.opacity(0.11),
+                    Color.clear,
+                ],
+                startPoint: UnitPoint(x: 0.0, y: 0.30),
+                endPoint: UnitPoint(x: 1.0, y: 0.70)
+            )
         }
     }
 }
@@ -62,16 +94,40 @@ extension Color {
     }
 }
 
+/// Double metal ring. Stroke only — the well stays empty.
+struct HUDRing: View {
+    var diameter: CGFloat
+    var lit: Bool = false
+
+    var body: some View {
+        let ink = lit ? Theme.accent : Theme.silver
+        ZStack {
+            Circle()
+                .strokeBorder(Theme.metalStroke, lineWidth: 1.7)
+            Circle()
+                .strokeBorder(ink.opacity(lit ? 0.95 : 0.34), lineWidth: 1)
+                .padding(3)
+        }
+        .frame(width: diameter, height: diameter)
+        .shadow(color: lit ? Theme.accent.opacity(0.55) : Color.clear, radius: lit ? 9 : 0)
+        .accessibilityHidden(true)
+    }
+}
+
 /// The product mark on the glass. Same compass as the App Icon and boot.
 struct HUDMark: View {
     var points: Double = BlackoutTokens.Chrome.hudMarkPoints
 
     var body: some View {
-        Image("Logo")
-            .resizable()
-            .scaledToFit()
-            .frame(width: CGFloat(points), height: CGFloat(points))
-            .accessibilityHidden(true)
+        let size = CGFloat(points)
+        ZStack {
+            HUDRing(diameter: size + 8)
+            Image("Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -91,6 +147,9 @@ struct HUDReticle: View {
         return ZStack {
             Circle()
                 .stroke(ink, lineWidth: 1)
+            Circle()
+                .stroke(ink.opacity(0.45), lineWidth: 1)
+                .padding(2)
             Rectangle()
                 .fill(ink)
                 .frame(width: size, height: 1)
@@ -126,7 +185,12 @@ struct HUDDockStyle: ButtonStyle {
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())
             .foregroundStyle(Theme.silver)
-            .background(Theme.raised.opacity(configuration.isPressed ? 0.55 : 1))
+            .background(Theme.glass(opacity: configuration.isPressed ? 0.55 : 0.92))
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+            )
     }
 }
 
@@ -142,10 +206,10 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .contentShape(Rectangle())
             .foregroundStyle(Theme.silver)
             .background(Theme.glass())
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(Theme.plateRect())
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
@@ -174,7 +238,7 @@ struct MapFieldDestChipStyle: ButtonStyle {
             .contentShape(Rectangle())
             .foregroundStyle(ink)
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                Theme.plateRect()
                     .strokeBorder(ink.opacity(0.48 + 0.52 * pulse), lineWidth: expanded ? 2 : 1.2)
             )
             .shadow(color: Theme.void.opacity(0.9), radius: 2, x: 0, y: 0)
@@ -187,7 +251,7 @@ struct MapFieldDestChipStyle: ButtonStyle {
 /// Status ink on a HUD page. Silver is idle, warn is honesty chrome, go is
 /// CONDITION GREEN, caution is CONDITION YELLOW, heat is CONDITION ORANGE,
 /// crisis is RED.
-enum HUDStatusTone: Sendable {
+enum HUDStatusTone: Sendable, Equatable {
     case silver
     case warn
     case go
@@ -203,6 +267,13 @@ enum HUDStatusTone: Sendable {
         case .caution: return Theme.caution
         case .heat: return Theme.heat
         case .crisis: return Theme.accent
+        }
+    }
+
+    var crisis: Bool {
+        switch self {
+        case .crisis: return true
+        case .silver, .warn, .go, .caution, .heat: return false
         }
     }
 }
@@ -230,7 +301,10 @@ struct HUDPage<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 8) {
-                HUDMark()
+                ZStack {
+                    HUDRing(diameter: 30, lit: statusTone.crisis)
+                    HUDMark()
+                }
                 Text(title)
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.silver)
@@ -247,7 +321,12 @@ struct HUDPage<Content: View>: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Theme.glass(opacity: 0.78))
+        .background(Theme.glass(opacity: 0.86))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Theme.metalStroke)
+                .frame(height: 1)
+        }
     }
 }
 
@@ -263,10 +342,10 @@ struct HUDGlassCard<Content: View>: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.glass())
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(Theme.plateRect())
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
             )
     }
 }
@@ -281,12 +360,29 @@ struct HUDActionStyle: ButtonStyle {
             .foregroundStyle(filled ? Color.white : Theme.silver)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .contentShape(Rectangle())
-            .background(filled ? (crisis ? Theme.accent : Theme.silver.opacity(0.22)) : Theme.raised)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)
+            .background(
+                Group {
+                    if filled && crisis {
+                        Theme.accent
+                    } else {
+                        Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92)
+                    }
+                }
             )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                if filled && crisis {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: 1.5)
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                }
+            }
+            .clipShape(Theme.plateRect())
+            .shadow(
+                color: Theme.accent.opacity(filled && crisis ? 0.42 : 0),
+                radius: filled && crisis ? 10 : 0
+            )
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }

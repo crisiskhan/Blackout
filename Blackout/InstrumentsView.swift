@@ -30,8 +30,8 @@ struct InstrumentsView: View {
                             .foregroundStyle(Theme.silver)
                             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                             .padding(.horizontal, 12)
-                            .background(Theme.raised)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .background(Theme.glass())
+                            .clipShape(Theme.plateRect())
                         }
                     } else {
                         Text("PACKS · NONE")
@@ -65,11 +65,11 @@ struct InstrumentsView: View {
                         Button("MAG/TRUE") { runtime.tapMagTrue() }
                             .buttonStyle(HUDDockStyle())
                     }
-                    .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Theme.glass())
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
                     )
 
                     sectionLabel("SUN")
@@ -81,8 +81,8 @@ struct InstrumentsView: View {
                         .foregroundStyle(Theme.silver)
                         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
                         .padding(.horizontal, 12)
-                        .background(Theme.raised)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(Theme.glass())
+                        .clipShape(Theme.plateRect())
                     Text(torchWord)
                         .font(.caption.weight(.bold))
                         .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Theme.silver.opacity(0.45) : Theme.silver)
@@ -110,7 +110,7 @@ struct InstrumentsView: View {
                                 .buttonStyle(HUDActionStyle(filled: runtime.power.state.mode == mode))
                         }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .clipShape(Theme.plateRect())
                     hudToggle("POCKET", Binding(
                         get: { runtime.power.state.pocket },
                         set: { runtime.power.setPocket($0) }
@@ -192,8 +192,8 @@ struct InstrumentsView: View {
             .foregroundStyle(Theme.silver)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
             .padding(.horizontal, 12)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
     }
 
     /// 44pt plate. ON / OFF is the instrument, not a system Toggle.
@@ -212,7 +212,7 @@ struct InstrumentsView: View {
         .font(.system(size: 13, weight: .heavy))
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
         .padding(.horizontal, 12)
-        .background(Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Theme.glass())
+        .clipShape(Theme.plateRect())
     }
 }

@@ -114,11 +114,14 @@ public struct OfflineMapView: UIViewRepresentable {
         view.shouldRequestAuthorizationToUseLocationServices = trackUser
         view.showsUserLocation = trackUser
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
-        view.setCenter(
-            CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
-            zoomLevel: PackCamera.openZoom,
-            animated: false
-        )
+        let home = CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon)
+        if CLLocationCoordinate2DIsValid(home) {
+            view.setCenter(
+                home,
+                zoomLevel: PackCamera.openZoom,
+                animated: false
+            )
+        }
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         tap.numberOfTapsRequired = 1
         tap.delegate = context.coordinator
@@ -649,13 +652,15 @@ public struct OfflineMapView: UIViewRepresentable {
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
+            let puckCoord = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+            let puckOK = CLLocationCoordinate2DIsValid(puckCoord)
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
                 fitPack(spec, on: view)
                 fittedPack = pack
                 fittedSize = size
                 storedLockOn = spec.lockOn
-                if spec.lockOn {
+                if spec.lockOn, puckOK {
                     followedPuck = (spec.puckLat, spec.puckLon)
                 } else {
                     followedPuck = nil
@@ -671,19 +676,16 @@ public struct OfflineMapView: UIViewRepresentable {
                 fittedPack = pack
                 fittedSize = size
                 storedLockOn = spec.lockOn
-                followedPuck = spec.lockOn ? (spec.puckLat, spec.puckLon) : nil
+                followedPuck = spec.lockOn && puckOK ? (spec.puckLat, spec.puckLon) : nil
                 return
             }
-            if PackCamera.shouldFollow(
+            if puckOK, PackCamera.shouldFollow(
                 lockOn: spec.lockOn,
                 wasLocked: storedLockOn,
                 lastFollow: followedPuck,
                 puck: (spec.puckLat, spec.puckLon)
             ) {
-                view.setCenter(
-                    CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon),
-                    animated: storedLockOn
-                )
+                view.setCenter(puckCoord, animated: storedLockOn)
                 followedPuck = (spec.puckLat, spec.puckLon)
             }
             storedLockOn = spec.lockOn
@@ -691,16 +693,13 @@ public struct OfflineMapView: UIViewRepresentable {
                 followedPuck = nil
             }
             if spec.lockOn {
-                if force || PackCamera.shouldRefit(
+                if puckOK, force || PackCamera.shouldRefit(
                     fittedPack: fittedPack,
                     pack: pack,
                     fittedSize: fittedSize,
                     size: size
                 ) {
-                    view.setCenter(
-                        CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon),
-                        animated: false
-                    )
+                    view.setCenter(puckCoord, animated: false)
                     fittedPack = pack
                     fittedSize = size
                 }
@@ -712,8 +711,9 @@ public struct OfflineMapView: UIViewRepresentable {
                 fittedSize: fittedSize,
                 size: size
             ) { return }
+            guard puckOK else { return }
             view.setCenter(
-                CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon),
+                puckCoord,
                 zoomLevel: PackCamera.openZoom,
                 animated: false
             )

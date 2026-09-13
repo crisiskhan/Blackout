@@ -2027,11 +2027,24 @@ class AddressHoldCardTests(unittest.TestCase):
         tab = read("Blackout", "MapTab.swift")
         pips = tab.split("pips:", 1)[1].split("youHeading", 1)[0]
         self.assertIn("isFinite", pips)
+        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        self.assertIn("isFinite", you)
         offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
         hold_fn = offline.split("func handleHold", 1)[1].split("func personMark", 1)[0]
         self.assertIn("CLLocationCoordinate2DIsValid", hold_fn)
         sync = offline.split("func syncPartyMarks", 1)[1].split("func syncRoute", 1)[0]
         self.assertIn("CLLocationCoordinate2DIsValid", sync)
+        make = offline.split("func makeUIView")[1].split("func updateUIView")[0]
+        self.assertIn("CLLocationCoordinate2DIsValid", make)
+        cam = offline.split("func applyCamera")[1].split("func fitPack")[0]
+        self.assertIn("CLLocationCoordinate2DIsValid", cam)
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertNotIn("ForEach(runtime.timers.doneLines(), id: \\.self)", exped)
+        self.assertNotIn("ForEach(runtime.kit.hazards, id: \\.self)", exped)
+        comms = read("Blackout", "CommsTab.swift")
+        self.assertNotIn("ForEach(runtime.mesh.nearby, id: \\.self)", comms)
+        field = read("Blackout", "FieldTab.swift")
+        self.assertNotIn("ForEach(g.lookalikes, id: \\.self)", field)
 
     def test_solo_qa_scores_address_search(self):
         qa = read("docs", "SOLO_QA.md")
@@ -2043,6 +2056,140 @@ class AddressHoldCardTests(unittest.TestCase):
         self.assertIn("POST", qa)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
+
+
+class FacetedMetalHUDTests(unittest.TestCase):
+    """Void, faceted silver metal, HUD red lamp. No iOS blur mush."""
+
+    HUD_FILES = (
+        "Theme.swift",
+        "RootChrome.swift",
+        "UnlockView.swift",
+        "ARMINGView.swift",
+        "MapTab.swift",
+        "CommsTab.swift",
+        "FieldTab.swift",
+        "ExpeditionTab.swift",
+        "HoldCard.swift",
+        "PartyHoldCard.swift",
+        "AddressHoldCard.swift",
+        "EmblemPickCard.swift",
+        "SOSHold.swift",
+        "InstrumentsView.swift",
+    )
+
+    def test_facet_tokens_are_highlight_and_shade_not_flat_grey(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        silver = _rgba(tokens, "metal")
+        high = _rgba(tokens, "metalHighlight")
+        shade = _rgba(tokens, "metalShade")
+        self.assertGreater(high[0], silver[0])
+        self.assertGreater(high[1], silver[1])
+        self.assertGreater(high[2], silver[2])
+        self.assertLess(high[0], 1.0)
+        self.assertLess(shade[0], silver[0])
+        self.assertGreater(shade[0], 0.05)
+        self.assertGreater(silver[0], shade[0])
+        self.assertIn("hudPlateCornerPoints", tokens)
+        self.assertIn("static let metalHighlight", tokens)
+        self.assertIn("static let metalShade", tokens)
+
+    def test_glass_is_a_metal_plate_not_ios_blur(self):
+        theme = read("Blackout", "Theme.swift")
+        glass = theme.split("static func glass(")[1].split("struct HUDMark")[0]
+        self.assertNotIn("ultraThinMaterial", glass)
+        self.assertIn("LinearGradient", glass)
+        self.assertIn("metalHigh", glass)
+        self.assertIn("metalLow", glass)
+        self.assertIn("static var metalHigh", theme)
+        self.assertIn("static var metalLow", theme)
+        self.assertIn("static var metalStroke", theme)
+        self.assertIn("static func plateRect", theme)
+        self.assertIn("hudPlateCornerPoints", theme)
+        self.assertIn("struct HUDRing", theme)
+        ring = theme.split("struct HUDRing")[1].split("struct HUDMark")[0]
+        self.assertIn("Circle()", ring)
+        self.assertIn("strokeBorder", ring)
+        self.assertIn("metalStroke", ring)
+        self.assertNotIn("Circle().fill", ring.replace(" ", ""))
+        self.assertNotIn(".spring(", theme)
+        self.assertNotIn("Color.orange", theme)
+        self.assertNotIn("Color.green", theme)
+        self.assertNotIn("best in class", theme.lower())
+
+    def test_mark_unlock_boot_and_tabs_carry_the_metal_ring(self):
+        theme = read("Blackout", "Theme.swift")
+        mark = theme.split("struct HUDMark")[1].split("struct HUDReticle")[0]
+        self.assertIn("HUDRing(", mark)
+        self.assertIn('Image("Logo")', mark)
+        unlock = read("Blackout", "UnlockView.swift")
+        unlock_mark = unlock.split("private var mark:")[1].split("private var status")[0]
+        self.assertIn("HUDRing(", unlock_mark)
+        self.assertIn('Image(systemName: "touchid")', unlock_mark)
+        self.assertNotIn("Color.orange", unlock)
+        self.assertNotIn(".spring(", unlock)
+        arming = read("Blackout", "ARMINGView.swift")
+        boot = arming.split("private var mark:")[1].split("private var status")[0]
+        self.assertIn("HUDRing(", boot)
+        self.assertIn('Image("Logo")', boot)
+        self.assertNotIn(".spring(", arming)
+        root = read("Blackout", "RootChrome.swift")
+        self.assertIn("metalHigh", root)
+        self.assertIn("metalStroke", root)
+        self.assertNotIn(".spring(", root)
+
+    def test_hud_controls_are_faceted_metal_not_flat_raised(self):
+        theme = read("Blackout", "Theme.swift")
+        dock = theme.split("struct HUDDockStyle")[1].split("struct HUDOverlayChipStyle")[0]
+        self.assertIn("Theme.glass", dock)
+        self.assertIn("metalStroke", dock)
+        self.assertNotIn("Theme.raised", dock)
+        overlay = theme.split("struct HUDOverlayChipStyle")[1].split("struct MapFieldDestChipStyle")[0]
+        self.assertIn("Theme.glass", overlay)
+        self.assertIn("metalStroke", overlay)
+        self.assertNotIn("ultraThinMaterial", overlay)
+        action = theme.split("struct HUDActionStyle")[1].split("struct HUDWrapRail")[0]
+        self.assertIn("Theme.glass", action)
+        self.assertIn("metalStroke", action)
+        page = theme.split("struct HUDPage")[1].split("struct HUDGlassCard")[0]
+        self.assertIn("HUDRing(", page)
+        self.assertIn("Theme.glass", page)
+        card = theme.split("struct HUDGlassCard")[1].split("struct HUDActionStyle")[0]
+        self.assertIn("Theme.glass", card)
+        self.assertIn("metalStroke", card)
+        dest = theme.split("struct MapFieldDestChipStyle")[1].split("enum HUDStatusTone")[0]
+        self.assertNotIn("Theme.raised", dest)
+        self.assertNotIn("ultraThinMaterial", dest)
+
+    def test_every_hud_surface_drops_ios_blur_and_magic_ten_corners(self):
+        for name in self.HUD_FILES:
+            text = read("Blackout", name)
+            self.assertNotIn("ultraThinMaterial", text, name)
+            self.assertNotIn("cornerRadius: 10", text, name)
+            self.assertNotIn("Color.orange", text, name)
+            self.assertNotIn("best in class", text.lower(), name)
+            self.assertNotIn(".spring(", text, name)
+        hold = read("Blackout", "HoldCard.swift")
+        self.assertIn("Theme.glass", hold)
+        party = read("Blackout", "PartyHoldCard.swift")
+        self.assertIn("Theme.glass", party)
+        address = read("Blackout", "AddressHoldCard.swift")
+        self.assertIn("Theme.glass", address)
+        pick = read("Blackout", "EmblemPickCard.swift")
+        self.assertIn("Theme.glass", pick)
+        inst = read("Blackout", "InstrumentsView.swift")
+        self.assertIn("Theme.glass", inst)
+        self.assertIn("Theme.plateRect", inst)
+        comms = read("Blackout", "CommsTab.swift")
+        self.assertIn("Theme.glass", comms)
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn("Theme.plateRect", exped)
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("Theme.plateRect", tab)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("faceted metal", qa.lower())
+        self.assertIn("no ios blur", qa.lower())
+        self.assertNotIn("best in class", qa.lower())
 
 
 if __name__ == "__main__":

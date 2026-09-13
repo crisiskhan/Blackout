@@ -141,7 +141,7 @@ struct FieldTab: View {
                                 .foregroundStyle(Theme.accent)
                         }
                         if !g.leaveIt {
-                            ForEach(g.lookalikes, id: \.self) { word in
+                            ForEach(Array(g.lookalikes.enumerated()), id: \.offset) { _, word in
                                 Text(word)
                                     .font(.system(size: 13, weight: .heavy))
                                     .foregroundStyle(Theme.silver)
@@ -254,9 +254,9 @@ struct FieldTab: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
                     .background(Theme.accent.opacity(0.14))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        Theme.plateRect()
                             .strokeBorder(Theme.accent.opacity(0.55), lineWidth: 1)
                     )
             }
@@ -311,8 +311,8 @@ struct FieldTab: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(Theme.raised)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Theme.glass())
+                .clipShape(Theme.plateRect())
 
             HStack(spacing: 8) {
                 // On the last step NEXT did nothing at all, which reads as a
@@ -396,10 +396,10 @@ struct FieldTab: View {
                     .padding(.horizontal, 12)
                     .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                     .background(Theme.glass())
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
                     )
                 Button("SAY") { say() }
                     .buttonStyle(HUDOverlayChipStyle())

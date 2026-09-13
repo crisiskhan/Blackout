@@ -49,16 +49,16 @@ struct CommsTab: View {
                         }
                             .buttonStyle(HUDDockStyle())
                     }
-                    .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Theme.glass())
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
                     )
                     if !runtime.mesh.nearby.isEmpty {
                         sectionLabel("PEERS")
                         HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                            ForEach(runtime.mesh.nearby, id: \.self) { name in
+                            ForEach(Array(runtime.mesh.nearby.enumerated()), id: \.offset) { _, name in
                                 chip(peerWord(name)) {
                                     runtime.comms.pickPeer(name)
                                 }
@@ -72,11 +72,11 @@ struct CommsTab: View {
                         Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
                             .buttonStyle(HUDDockStyle())
                     }
-                    .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Theme.glass())
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
                     )
                     Button("RADIO CHECK") { runtime.radioCheckParty() }
                         .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
@@ -189,8 +189,8 @@ struct CommsTab: View {
                     .foregroundStyle(Theme.silver)
                     .padding(.horizontal, 10)
                     .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Theme.glass())
+                    .clipShape(Theme.plateRect())
                     .textInputAutocapitalization(.characters)
                     Button(L10n.t("scan.qr", runtime.locale)) { scanQR = true }
                         .buttonStyle(HUDOverlayChipStyle())
@@ -237,7 +237,7 @@ struct CommsTab: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Circle().fill(Theme.raised)
+                Circle().fill(Theme.metalLow)
             }
         }
         .frame(width: size, height: size)
@@ -253,6 +253,7 @@ struct CommsTab: View {
 
     private var pttPad: some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
+        let liveFill = runtime.ptt.live ? Theme.silver : Theme.void
         return Text(runtime.ptt.live ? "RELEASE PTT" : "HOLD PTT")
             .font(.system(size: 12, weight: .heavy))
             .lineLimit(2)
@@ -262,7 +263,14 @@ struct CommsTab: View {
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())
             .foregroundStyle(runtime.ptt.live ? Theme.void : Theme.silver)
-            .background(runtime.ptt.live ? Theme.silver : Theme.raised.opacity(pttDown ? 0.55 : 1))
+            .background {
+                if runtime.ptt.live {
+                    liveFill
+                } else {
+                    Theme.glass(opacity: pttDown ? 0.55 : 0.92)
+                }
+            }
+            .clipShape(Theme.plateRect())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -309,9 +317,9 @@ struct CommsTab: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
         .background(Theme.accent.opacity(0.16))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(Theme.plateRect())
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            Theme.plateRect()
                 .strokeBorder(Theme.accent, lineWidth: 1.5)
         )
     }

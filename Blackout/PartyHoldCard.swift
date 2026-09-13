@@ -89,7 +89,7 @@ struct PartyHoldCard: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(maxHeight: cap, alignment: .top)
-        .background(glass)
+        .background(Theme.glass())
         .overlay(alignment: .top) {
             Rectangle()
                 .fill(Theme.accent)
@@ -98,18 +98,11 @@ struct PartyHoldCard: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)
         .padding(.bottom, 8)
-    }
-
-    private var glass: some View {
-        ZStack {
-            Rectangle().fill(.ultraThinMaterial)
-            Rectangle().fill(Theme.void.opacity(0.74))
-        }
     }
 
     private var grabber: some View {
@@ -160,7 +153,7 @@ struct PartyHoldCard: View {
                     .resizable()
                     .scaledToFill()
             } else {
-                Circle().fill(Theme.raised)
+                Circle().fill(Theme.metalLow)
             }
         }
         .frame(width: size, height: size)

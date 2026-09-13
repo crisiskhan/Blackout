@@ -141,7 +141,7 @@ struct HoldCardView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(maxHeight: cap, alignment: .top)
-        .background(glass)
+        .background(Theme.glass())
         .overlay(alignment: .top) {
             // One red hairline so the card reads as this app's and not as a
             // system sheet. The card's own clip rounds its ends.
@@ -152,20 +152,11 @@ struct HoldCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)
         .padding(.bottom, 8)
-    }
-
-    /// Blur plus a black wash. The blur alone would let bright streets through
-    /// and the text would fight them.
-    private var glass: some View {
-        ZStack {
-            Rectangle().fill(.ultraThinMaterial)
-            Rectangle().fill(Theme.void.opacity(0.74))
-        }
     }
 
     private var grabber: some View {
@@ -270,12 +261,12 @@ struct HoldActionStyle: ButtonStyle {
                 minHeight: BlackoutTokens.Chrome.mapChipHitPoints
             )
             .contentShape(Rectangle())
-            .background(filled ? Theme.silver.opacity(0.22) : Theme.raised)
+            .background(Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92))
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(Theme.plateRect())
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }

@@ -241,10 +241,10 @@ struct MapTab: View {
                     .padding(.horizontal, 12)
                     .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                     .background(Theme.glass())
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .clipShape(Theme.plateRect())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
                     )
                     .onSubmit {
                         runtime.touch(.search)
@@ -310,7 +310,7 @@ struct MapTab: View {
             }
         }
         .background(Theme.glass())
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(Theme.plateRect())
     }
 
     private var markList: some View {
@@ -331,7 +331,7 @@ struct MapTab: View {
                     }
                 }
                 .background(Theme.glass())
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(Theme.plateRect())
             }
         }
     }
@@ -467,9 +467,9 @@ struct MapTab: View {
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
         .background(Theme.glass(opacity: 0.78))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(Theme.plateRect())
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            Theme.plateRect()
                 .strokeBorder(Theme.accent.opacity(0.85), lineWidth: 1)
         )
     }
@@ -483,11 +483,11 @@ struct MapTab: View {
                     .buttonStyle(HUDDockStyle())
             }
         }
-        .background(Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Theme.glass())
+        .clipShape(Theme.plateRect())
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+            Theme.plateRect()
+                .strokeBorder(Theme.metalStroke, lineWidth: 1)
         )
         .frame(maxWidth: .infinity)
     }

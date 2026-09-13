@@ -91,11 +91,11 @@ struct ExpeditionTab: View {
                                 }
                                 .buttonStyle(HUDDockStyle())
                             }
-                            .background(Theme.raised)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .background(Theme.glass())
+                            .clipShape(Theme.plateRect())
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .strokeBorder(Theme.silver.opacity(0.22), lineWidth: 1)
+                                Theme.plateRect()
+                                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
                             )
                             ForEach(runtime.timers.timers, id: \.id) { t in
                                 HStack {
@@ -111,7 +111,7 @@ struct ExpeditionTab: View {
                                 }
                                 .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                             }
-                            ForEach(runtime.timers.doneLines(), id: \.self) { line in
+                            ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(Theme.silver.opacity(0.7))
@@ -153,7 +153,7 @@ struct ExpeditionTab: View {
                                 .font(.system(size: 13, weight: .heavy))
                                 .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                             }
-                            ForEach(runtime.kit.hazards, id: \.self) { hazard in
+                            ForEach(Array(runtime.kit.hazards.enumerated()), id: \.offset) { _, hazard in
                                 Text(hazard.uppercased())
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(Theme.accent)
@@ -173,8 +173,8 @@ struct ExpeditionTab: View {
                             .foregroundStyle(Theme.silver)
                             .padding(.horizontal, 10)
                             .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                            .background(Theme.raised)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .background(Theme.glass())
+                            .clipShape(Theme.plateRect())
                             Text("DUE \(dueClock)")
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)
@@ -230,9 +230,9 @@ struct ExpeditionTab: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
         .background(Theme.accent.opacity(0.16))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(Theme.plateRect())
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            Theme.plateRect()
                 .strokeBorder(Theme.accent, lineWidth: 1.5)
         )
     }
@@ -244,9 +244,9 @@ struct ExpeditionTab: View {
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
             .padding(.horizontal, 12)
             .background(Theme.accent.opacity(0.16))
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(Theme.plateRect())
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                Theme.plateRect()
                     .strokeBorder(Theme.accent, lineWidth: 1)
             )
     }
@@ -281,9 +281,9 @@ struct HUDVitalsRail: View {
             GeometryReader { geo in
                 let width = geo.size.width
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Theme.raised)
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    Theme.plateRect()
+                        .fill(Theme.metalLow)
+                    Theme.plateRect()
                         .fill(ink.opacity(0.88))
                         .frame(width: max(0, width * CGFloat(value)))
                     ForEach(Array(PartyVitals.railSteps.enumerated()), id: \.offset) { _, step in
@@ -296,10 +296,10 @@ struct HUDVitalsRail: View {
                     }
                 }
                 .frame(height: hit)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(Theme.plateRect())
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
                 )
                 .contentShape(Rectangle())
                 .allowsHitTesting(editable)

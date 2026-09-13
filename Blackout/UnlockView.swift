@@ -44,20 +44,26 @@ struct UnlockView: View {
     }
 
     private var mark: some View {
-        Image(systemName: "touchid")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 128, height: 128)
-            .foregroundStyle(Theme.silver)
-            .rotationEffect(.degrees(turn))
-            .gesture(
-                RotationGesture()
-                    .onChanged { value in
-                        turn = value.degrees
-                    }
+        ZStack {
+            HUDRing(
+                diameter: 148,
+                lit: UnlockGlass.inverted(degrees: turn) || runtime.wipeConfirm
             )
-            .onTapGesture { flipPrint() }
-            .accessibilityLabel("Fingerprint")
+            Image(systemName: "touchid")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 128, height: 128)
+                .foregroundStyle(Theme.silver)
+        }
+        .rotationEffect(.degrees(turn))
+        .gesture(
+            RotationGesture()
+                .onChanged { value in
+                    turn = value.degrees
+                }
+        )
+        .onTapGesture { flipPrint() }
+        .accessibilityLabel("Fingerprint")
     }
 
     private var status: some View {
@@ -99,11 +105,12 @@ struct UnlockView: View {
         .foregroundStyle(Color.white)
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
         .background(Theme.accent)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(Theme.plateRect())
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Theme.plateRect()
                 .strokeBorder(Theme.accent, lineWidth: 1)
         )
+        .shadow(color: Theme.accent.opacity(0.45), radius: 12)
         .accessibilityHint("Unlocks the vessel")
     }
 
@@ -118,7 +125,7 @@ struct UnlockView: View {
             .foregroundStyle(Color.white)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
             .background(Theme.fix)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(Theme.plateRect())
             Button("NO") {
                 goTick.impactOccurred()
                 runtime.cancelWipe()
@@ -128,7 +135,7 @@ struct UnlockView: View {
             .foregroundStyle(Color.white)
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
             .background(Theme.accent)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(Theme.plateRect())
         }
     }
 }
