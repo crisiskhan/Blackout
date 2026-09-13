@@ -1,5 +1,6 @@
 import SwiftUI
 import MapLibreMap
+import MeshDTN
 import Tokens
 
 /// The place the thumb is holding, and what the pack says is there.
@@ -9,6 +10,18 @@ struct HeldPoint: Equatable {
     var card: Inspect.Card
     /// Set once MARK has been pressed, so the card can show it took.
     var marked = false
+}
+
+/// A party body the thumb is holding. Names live here, never on the canvas.
+struct HeldPerson: Equatable {
+    var id: String
+    var name: String
+    var emblem: String
+    var status: PartyStatus
+    var lat: Double
+    var lon: Double
+    var headingDeg: Double?
+    var isYou: Bool
 }
 
 /// Dark glass over the canvas: what this is, how sure the record is, what to
@@ -228,14 +241,19 @@ struct HoldCardView: View {
     }
 }
 
-private struct HoldActionStyle: ButtonStyle {
+struct HoldActionStyle: ButtonStyle {
     var filled: Bool
+    var expand: Bool = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .heavy))
             .foregroundStyle(filled ? Color.white : Theme.silver)
-            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                maxWidth: expand ? .infinity : nil,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+            )
             .contentShape(Rectangle())
             .background(filled ? Theme.silver.opacity(0.22) : Theme.raised)
             .overlay(

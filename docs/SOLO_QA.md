@@ -37,6 +37,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — Browse MAP (lock-on off): no SOS disk.
 - [ ] PASS / FAIL / N/A — After ~3s idle on MAP, chrome fades (search, dock, tabs toward black; no bounce). Touch / pan / pinch / hold brings the pulse back. SOS never fades. Hold-to-inspect is the map's words — almost no labels on the canvas. No OSM credit, no MapLibre mark.
 - [ ] PASS / FAIL / N/A — Party dots (emblem + compass ring, no names) appear on the map when POS peers exist. YOU is the same mark with a live heading tick when heading exists. Unusable heading (accuracy `< 0`, `-1°`) keeps the tick dark on YOU and on party — never a 359° fake north. Solo with nobody is empty — not fake people. Red only when it matters (SOS / RED / OVERDUE / YOU ring / dest / hold pin) — not on JOIN LOCAL NET / VISION / RADIO CHECK.
+- [ ] PASS / FAIL / N/A — Hold YOU or a party emblem → glass card (same language as the ground hold). Chosen NAME, emblem, STATUS, BEARING, COORDINATES. Names stay off the canvas. Self can set STATUS (`OK` / `WAIT` / `WATER` / `DOWN`) from the card; others read it. CALL starts a 1:1 party call (PTT mesh, no cell, never `tel://`). MESSAGE opens COMMS 1:1 NOTE. Solo with nobody is `NO PEERS · LOGGED`. Close the card the same way as a ground hold.
 
 ## COMMS (solo, no peer)
 

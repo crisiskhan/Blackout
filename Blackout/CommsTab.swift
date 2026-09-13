@@ -8,6 +8,7 @@ struct CommsTab: View {
     @Bindable var runtime: AppRuntime
     @State private var scanQR = false
     @State private var pttDown = false
+    @State private var note = ""
 
     var body: some View {
         HUDPage(
@@ -84,6 +85,25 @@ struct CommsTab: View {
                             .font(.system(size: 13, weight: .heavy))
                             .foregroundStyle(Theme.warn)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    sectionLabel("NOTE")
+                    HUDGlassCard {
+                        HStack(spacing: 8) {
+                            TextField("NOTE", text: $note)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.silver)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                            Button("SEND") {
+                                runtime.sendPartyNote(note)
+                                note = ""
+                            }
+                            .buttonStyle(HUDOverlayChipStyle())
+                        }
+                        .padding(.horizontal, 10)
+                        .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                     }
 
                     sectionLabel("CHIPS")

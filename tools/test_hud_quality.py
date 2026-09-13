@@ -461,6 +461,7 @@ class HUDSyncTests(unittest.TestCase):
             "ExpeditionTab.swift",
             "Theme.swift",
             "HoldCard.swift",
+            "PartyHoldCard.swift",
             "SOSHold.swift",
             "InstrumentsView.swift",
             "RootChrome.swift",
@@ -1112,6 +1113,7 @@ class HUDSeductionTests(unittest.TestCase):
             "MapTab.swift",
             "RootChrome.swift",
             "HoldCard.swift",
+            "PartyHoldCard.swift",
             "CommsTab.swift",
             "FieldTab.swift",
             "ExpeditionTab.swift",
@@ -1250,6 +1252,92 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
             "hawk",
         ):
             self.assertTrue((folder / f"{name}.jpg").is_file(), name)
+
+
+class PartyHoldCardTests(unittest.TestCase):
+    """Hold a person emblem: glass profile, status, course, party call, note."""
+
+    def test_hold_on_emblem_opens_glass_not_ground(self):
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        hold = read("Blackout", "HoldCard.swift")
+        card = read("Blackout", "PartyHoldCard.swift")
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        tests = ROOT.joinpath("Packages", "MapLibreMap", "Tests")
+        count = 0
+        for path in tests.rglob("*.swift"):
+            count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
+        self.assertEqual(count, 175)
+        self.assertIn("var onPersonHold", offline)
+        self.assertIn("onPersonHold:", tab)
+        self.assertIn("func personMark(at:", offline)
+        self.assertIn("toPointTo:", offline)
+        self.assertIn("isUserInteractionEnabled = false", offline.split("final class YouPuckAnnotationView")[1])
+        hold_fn = offline.split("func handleHold")[1].split("func liftIntoView")[0]
+        self.assertLess(hold_fn.find("personMark(at:"), hold_fn.find("onMapHold"))
+        self.assertIn("onPersonHold?", hold_fn)
+        self.assertIn("func holdParty(", app)
+        self.assertIn("var heldParty", app)
+        self.assertIn("struct HeldPerson", hold)
+        self.assertIn("struct PartyHoldCard", card)
+        self.assertIn('Button("CALL")', card)
+        self.assertIn('Button("MESSAGE")', card)
+        self.assertIn("STATUS", card)
+        self.assertIn("BEARING", card)
+        self.assertIn("COORDINATES", card)
+        self.assertIn("func setYouStatus(", app)
+        self.assertIn("func setYouName(", app)
+        self.assertIn("func callHeldParty(", app)
+        self.assertIn("func messageHeldParty(", app)
+        self.assertIn("func sendPartyNote(", app)
+        call = app.split("func callHeldParty(")[1].split("func messageHeldParty(")[0]
+        self.assertIn("pickPeer", call)
+        self.assertIn("beginPTTSolo()", call)
+        self.assertIn("tab = .comms", call)
+        self.assertIn("Task { @MainActor in", call)
+        message = app.split("func messageHeldParty(")[1].split("func sendPartyNote(")[0]
+        self.assertIn("pickPeer", message)
+        self.assertIn("tab = .comms", message)
+        self.assertIn("Task { @MainActor in", message)
+        self.assertNotIn("tel://", card.lower())
+        self.assertNotIn("tel://", app.lower())
+        self.assertNotIn("Color.orange", card)
+        self.assertNotIn("Color.green", card)
+        self.assertNotIn("best in class", card.lower())
+        self.assertNotIn(".spring(", card)
+        self.assertIn("enum PartyStatus", mesh)
+        self.assertIn("case ok, wait, water, down", mesh)
+        pos = mesh.split("enum MeshPOS")[1].split("struct MeshTimerEvent")[0]
+        self.assertIn("name", pos)
+        self.assertIn("status", pos)
+        self.assertIn("func nameToken", pos)
+        self.assertIn("func sendNote(", mesh)
+        self.assertIn('kind: "note"', mesh)
+        self.assertIn("VoiceNav.bearing", app)
+        self.assertIn("PartyHoldCard(", tab)
+        self.assertIn("runtime.heldParty", tab)
+        self.assertIn("heldParty!=nil", tab.replace(" ", ""))
+        self.assertIn('sectionLabel("NOTE")', comms)
+        self.assertIn('Button("SEND")', comms)
+        self.assertIn("sendPartyNote", comms)
+        self.assertNotIn("emblem: $0.emblem, name:", tab.replace(" ", ""))
+        self.assertIn("holdCardDismissDragPoints", card)
+
+    def test_solo_qa_scores_the_person_card(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("Hold YOU or a party emblem", qa)
+        self.assertIn("STATUS", qa)
+        self.assertIn("CALL starts a 1:1 party call", qa)
+        self.assertIn("MESSAGE opens COMMS", qa)
+        self.assertIn("PTT mesh", qa)
+        self.assertIn("never `tel://`", qa)
+        self.assertIn("Names stay off the canvas", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
 
 
 def _rgba(src: str, name: str) -> tuple[float, float, float, float]:

@@ -127,6 +127,45 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertTrue(net.pips.isEmpty)
     }
 
+    func testPOSCarriesNameAndStatus() {
+        XCTAssertEqual(MeshPOS.nameToken("Crisis, Khan!"), "CRISIS KHAN")
+        XCTAssertEqual(PartyStatus.parse("down").title, "DOWN")
+        XCTAssertEqual(PartyStatus.parse(nil), .ok)
+        XCTAssertEqual(PartyNote.clean("  wait at the tank  ").count, 16)
+        let packed = MeshPOS.body(
+            lat: 31.76,
+            lon: -106.49,
+            headingDeg: 90,
+            emblem: "owl",
+            name: "Crisis",
+            status: "down"
+        )
+        XCTAssertTrue(packed.contains("owl"))
+        XCTAssertTrue(packed.contains("CRISIS"))
+        XCTAssertTrue(packed.contains("down"))
+        let parsed = MeshPOS.parse(packed)
+        XCTAssertEqual(parsed?.emblem, "owl")
+        XCTAssertEqual(parsed?.name, "CRISIS")
+        XCTAssertEqual(parsed?.status, "down")
+        XCTAssertEqual(MeshPOS.parse("31.76,-106.49")?.status, nil)
+        let net = MeshNet(box: EventLog())
+        let radio = LoopbackRadio(path: .ble)
+        net.attach(radio)
+        net.startLocal()
+        radio.appearPeer("peer-1")
+        radio.deliver(MeshEnvelope(
+            id: "n1",
+            from: "peer-1",
+            to: "*",
+            kind: "pos",
+            body: Data("31.76,-106.49,12,wolf,CRISIS,wait".utf8)
+        ))
+        XCTAssertEqual(net.pips.first?.name, "CRISIS")
+        XCTAssertEqual(net.pips.first?.status, "wait")
+        net.sendNote(from: net.localID, text: "  at the tank  ", to: "peer-1")
+        XCTAssertEqual(radio.sent.last?.kind, "note")
+    }
+
     func testPartyMeshUUIDStableForCode() {
         let a = PartyMeshUUID.uuid(for: "abc123")
         let b = PartyMeshUUID.uuid(for: "ABC123")

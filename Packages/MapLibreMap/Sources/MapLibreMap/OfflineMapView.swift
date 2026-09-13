@@ -29,6 +29,8 @@ public struct OfflineMapView: UIViewRepresentable {
     /// A thumb held still on a place, with whatever the pack has drawn there,
     /// and the zoom so the water index can claim the same ground the thumb covers.
     public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
+    /// A thumb held still on YOU or a party emblem. Id is `YOU` or the peer.
+    public var onPersonHold: ((String, Double, Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
     public var pips: [PartyBody]
@@ -61,6 +63,7 @@ public struct OfflineMapView: UIViewRepresentable {
         interactive: Bool = true,
         onMapTap: ((Double, Double) -> Void)? = nil,
         onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil,
+        onPersonHold: ((String, Double, Double) -> Void)? = nil,
         pips: [PartyBody] = [],
         youHeading: Double? = nil,
         youEmblem: String = PersonEmblem.fallback.rawValue,
@@ -85,6 +88,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.interactive = interactive
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
+        self.onPersonHold = onPersonHold
         self.pips = pips
         self.youHeading = youHeading
         self.youEmblem = youEmblem
@@ -134,6 +138,7 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.require(toFail: hold)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.onPersonHold = onPersonHold
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -150,6 +155,7 @@ public struct OfflineMapView: UIViewRepresentable {
         applyInteraction(uiView)
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
+        context.coordinator.onPersonHold = onPersonHold
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -214,6 +220,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
+        var onPersonHold: ((String, Double, Double) -> Void)?
         var onPulse: (() -> Void)?
         var trackUser = true
         var interactive = true
@@ -248,9 +255,37 @@ public struct OfflineMapView: UIViewRepresentable {
             let point = gesture.location(in: view)
             let coord = view.convert(point, toCoordinateFrom: view)
             holdTick.impactOccurred()
+            if let mark = personMark(at: point, on: view) {
+                onPersonHold?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
+                onPulse?()
+                liftIntoView(point, on: view)
+                return
+            }
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
             onPulse?()
             liftIntoView(point, on: view)
+        }
+
+        /// YOU and party emblems win over the ground record under the same thumb.
+        func personMark(at: CGPoint, on view: MLNMapView) -> PersonMarkAnnotation? {
+            var marks = partyMarks
+            if let you = puck as? PersonMarkAnnotation {
+                marks.append(you)
+            }
+            let reach = CGFloat(Inspect.holdProbePoints) / 2
+            var hit: PersonMarkAnnotation?
+            var best = CGFloat.greatestFiniteMagnitude
+            for mark in marks {
+                let screen = view.convert(mark.coordinate, toPointTo: view)
+                let dx = screen.x - at.x
+                let dy = screen.y - at.y
+                let d = (dx * dx + dy * dy).squareRoot()
+                if d <= reach, d < best {
+                    best = d
+                    hit = mark
+                }
+            }
+            return hit
         }
 
         /// Slide the map so the held place is above the card instead of behind
@@ -1137,6 +1172,7 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         backgroundColor = .clear
         isOpaque = false
         isEnabled = false
+        isUserInteractionEnabled = false
         scalesWithViewingDistance = false
         rotatesToMatchCamera = false
         layer.shadowColor = UIColor.black.cgColor

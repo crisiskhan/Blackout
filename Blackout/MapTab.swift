@@ -70,7 +70,7 @@ struct MapTab: View {
                 fitToken: runtime.fitPackToken,
                 interactive: MapCanvasHit.enabled(
                     onMap: runtime.tab == .map,
-                    holding: runtime.held != nil,
+                    holding: runtime.held != nil || runtime.heldParty != nil,
                     arranging: runtime.hudLayoutMode
                 ),
                 onMapTap: { lat, lon in
@@ -79,6 +79,9 @@ struct MapTab: View {
                 },
                 onMapHold: { lat, lon, tags, zoom in
                     runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
+                },
+                onPersonHold: { id, lat, lon in
+                    runtime.holdParty(id: id, lat: lat, lon: lon)
                 },
                 pips: runtime.mesh.pips
                     .filter { $0.from != runtime.mesh.localID }
@@ -101,12 +104,24 @@ struct MapTab: View {
             // The scrim already keeps a thumb off the canvas. This is the
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
-            .accessibilityHidden(runtime.held != nil)
-            if runtime.tab == .map, runtime.held == nil {
+            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil)
+            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if runtime.tab == .map, let held = runtime.held {
+            if runtime.tab == .map, let person = runtime.heldParty {
+                PartyHoldCard(
+                    person: person,
+                    bearing: runtime.partyCourse(for: person),
+                    coordinates: runtime.partyFix(person),
+                    onName: { runtime.setYouName($0) },
+                    onStatus: { runtime.setYouStatus($0) },
+                    onCall: { runtime.callHeldParty() },
+                    onMessage: { runtime.messageHeldParty() },
+                    onClose: { runtime.closeHold() }
+                )
+                .padding(hudReserve)
+            } else if runtime.tab == .map, let held = runtime.held {
                 HoldCardView(
                     held: held,
                     fieldBook: runtime.fieldBookIDs,
@@ -122,6 +137,7 @@ struct MapTab: View {
         .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
         .animation(Theme.Motion.heavy, value: runtime.hudFocus)
         .animation(Theme.Motion.heavy, value: runtime.held)
+        .animation(Theme.Motion.heavy, value: runtime.heldParty)
     }
 
     /// Everything that is not the map, sitting on the map. Search, lock and

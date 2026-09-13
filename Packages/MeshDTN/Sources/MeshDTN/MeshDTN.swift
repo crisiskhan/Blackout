@@ -30,28 +30,71 @@ public struct MeshPip: Equatable, Sendable {
     public var lon: Double
     public var headingDeg: Double?
     public var emblem: String?
+    public var name: String?
+    public var status: String?
     public init(
         from: String,
         lat: Double,
         lon: Double,
         headingDeg: Double? = nil,
-        emblem: String? = nil
+        emblem: String? = nil,
+        name: String? = nil,
+        status: String? = nil
     ) {
         self.from = from
         self.lat = lat
         self.lon = lon
         self.headingDeg = headingDeg
         self.emblem = emblem
+        self.name = name
+        self.status = status
     }
 }
 
-/// `lat,lon` still parses. Newer peers add heading and face.
+/// Safety chrome on a person, not a party-wide chip blast.
+public enum PartyStatus: String, CaseIterable, Sendable {
+    case ok, wait, water, down
+
+    public static let fallback = PartyStatus.ok
+
+    public var title: String {
+        switch self {
+        case .ok:
+            return "OK"
+        case .wait:
+            return "WAIT"
+        case .water:
+            return "WATER"
+        case .down:
+            return "DOWN"
+        }
+    }
+
+    public static func parse(_ raw: String?) -> PartyStatus {
+        guard let raw, let value = PartyStatus(rawValue: raw.lowercased()) else {
+            return .ok
+        }
+        return value
+    }
+}
+
+public enum PartyNote {
+    public static let maxChars = 80
+
+    public static func clean(_ raw: String) -> String {
+        String(raw.trimmingCharacters(in: .whitespacesAndNewlines).prefix(maxChars))
+    }
+}
+
+/// `lat,lon` still parses. Newer peers add heading, face, name, status.
 public enum MeshPOS {
     public static func body(
         lat: Double,
         lon: Double,
         headingDeg: Double?,
-        emblem: String?
+        emblem: String?,
+        name: String? = nil,
+        status: String? = nil
     ) -> String {
         let heading: String
         if let headingDeg, headingDeg >= 0 {
@@ -60,12 +103,27 @@ public enum MeshPOS {
             heading = ""
         }
         let face = emblem ?? ""
-        return "\(lat),\(lon),\(heading),\(face)"
+        let who = nameToken(name ?? "")
+        let band = PartyStatus.parse(status).rawValue
+        return "\(lat),\(lon),\(heading),\(face),\(who),\(band)"
+    }
+
+    public static func nameToken(_ raw: String) -> String {
+        let kept = raw.uppercased().filter { $0.isLetter || $0.isNumber || $0 == " " }
+        let collapsed = kept.split(whereSeparator: { $0 == " " }).joined(separator: " ")
+        return String(collapsed.prefix(16))
     }
 
     public static func parse(
         _ text: String
-    ) -> (lat: Double, lon: Double, headingDeg: Double?, emblem: String?)? {
+    ) -> (
+        lat: Double,
+        lon: Double,
+        headingDeg: Double?,
+        emblem: String?,
+        name: String?,
+        status: String?
+    )? {
         let parts = text.split(separator: ",", omittingEmptySubsequences: false)
         guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else {
             return nil
@@ -79,7 +137,17 @@ public enum MeshPOS {
             let raw = String(parts[3])
             if !raw.isEmpty { emblem = raw }
         }
-        return (lat, lon, heading, emblem)
+        var name: String?
+        if parts.count >= 5 {
+            let token = nameToken(String(parts[4]))
+            if !token.isEmpty { name = token }
+        }
+        var status: String?
+        if parts.count >= 6 {
+            let raw = String(parts[5])
+            if !raw.isEmpty { status = PartyStatus.parse(raw).rawValue }
+        }
+        return (lat, lon, heading, emblem, name, status)
     }
 }
 
@@ -304,24 +372,49 @@ public final class MeshNet: @unchecked Sendable {
         lat: Double,
         lon: Double,
         headingDeg: Double? = nil,
-        emblem: String? = nil
+        emblem: String? = nil,
+        name: String? = nil,
+        status: String? = nil
     ) {
         enqueue(
             make(
                 from: from,
                 kind: "pos",
-                body: Data(MeshPOS.body(lat: lat, lon: lon, headingDeg: headingDeg, emblem: emblem).utf8)
+                body: Data(
+                    MeshPOS.body(
+                        lat: lat,
+                        lon: lon,
+                        headingDeg: headingDeg,
+                        emblem: emblem,
+                        name: name,
+                        status: status
+                    ).utf8
+                )
             )
         )
         if from != localID {
             upsertPip(
-                MeshPip(from: from, lat: lat, lon: lon, headingDeg: headingDeg, emblem: emblem)
+                MeshPip(
+                    from: from,
+                    lat: lat,
+                    lon: lon,
+                    headingDeg: headingDeg,
+                    emblem: emblem,
+                    name: name,
+                    status: status
+                )
             )
         }
     }
 
     public func sendChip(from: String, chip: String, to: String = "*") {
         enqueue(make(from: from, kind: "chip", body: Data(chip.utf8), to: to))
+    }
+
+    public func sendNote(from: String, text: String, to: String = "*") {
+        let body = PartyNote.clean(text)
+        guard !body.isEmpty else { return }
+        enqueue(make(from: from, kind: "note", body: Data(body.utf8), to: to))
     }
 
     public func clearInboundChip(_ name: String) {
@@ -387,7 +480,9 @@ public final class MeshNet: @unchecked Sendable {
                         lat: parsed.lat,
                         lon: parsed.lon,
                         headingDeg: parsed.headingDeg,
-                        emblem: parsed.emblem
+                        emblem: parsed.emblem,
+                        name: parsed.name,
+                        status: parsed.status
                     )
                 )
             }
@@ -396,6 +491,16 @@ public final class MeshNet: @unchecked Sendable {
                 inboundChips.append(name)
                 if inboundChips.count > 16 {
                     inboundChips.removeFirst(inboundChips.count - 16)
+                }
+            }
+        case "note":
+            if let text = String(data: env.body, encoding: .utf8) {
+                let note = PartyNote.clean(text)
+                if !note.isEmpty {
+                    inboundChips.append(note)
+                    if inboundChips.count > 16 {
+                        inboundChips.removeFirst(inboundChips.count - 16)
+                    }
                 }
             }
         case "red":

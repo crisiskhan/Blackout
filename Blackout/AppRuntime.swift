@@ -63,6 +63,11 @@ final class AppRuntime {
     var marks: [MapMark] = []
     /// The inspect card the map is holding open. `nil` whenever it is clear.
     var held: HeldPoint?
+    /// A person mark the map is holding open. Mutually exclusive with `held`.
+    var heldParty: HeldPerson?
+    /// Chosen name on YOU. Empty is still YOU on the card.
+    var youName = ""
+    var youStatus: PartyStatus = .ok
     /// Cards the FIELD tab should try to open the next time it appears, best
     /// first, set by the hold card's FIELD button. The last one is always core,
     /// so the walk down the list cannot come up empty.
@@ -123,6 +128,8 @@ final class AppRuntime {
         }
         mesh.partyCode = roster.code
         youEmblem = PersonEmblem.load()
+        youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
+        youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
         mesh.onInbound = { [weak self] env in
             Task { @MainActor in self?.applyInbound(env) }
         }
@@ -200,6 +207,9 @@ final class AppRuntime {
     func pickEmblem(_ emblem: PersonEmblem) {
         youEmblem = emblem
         PersonEmblem.save(emblem)
+        if heldParty?.isYou == true {
+            heldParty?.emblem = emblem.rawValue
+        }
         sendPOSIfPossible()
     }
 
@@ -237,6 +247,7 @@ final class AppRuntime {
     /// says what is there.
     func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
         pulse()
+        heldParty = nil
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
@@ -261,6 +272,7 @@ final class AppRuntime {
 
     func closeHold() {
         held = nil
+        heldParty = nil
         pulse()
     }
 
@@ -286,6 +298,126 @@ final class AppRuntime {
             closeHold()
             applyMapKeepAwake()
         }
+    }
+
+    func holdParty(id: String, lat: Double, lon: Double) {
+        pulse()
+        held = nil
+        if id == UserPuck.title {
+            let you = youCoordinate()
+            heldParty = HeldPerson(
+                id: id,
+                name: youName,
+                emblem: youEmblem.rawValue,
+                status: youStatus,
+                lat: you.lat,
+                lon: you.lon,
+                headingDeg: headingDeg,
+                isYou: true
+            )
+            return
+        }
+        let pip = mesh.pips.first { $0.from == id }
+        heldParty = HeldPerson(
+            id: id,
+            name: MeshPOS.nameToken(pip?.name ?? ""),
+            emblem: pip?.emblem ?? PersonEmblem.fallback.rawValue,
+            status: PartyStatus.parse(pip?.status),
+            lat: pip?.lat ?? lat,
+            lon: pip?.lon ?? lon,
+            headingDeg: pip?.headingDeg,
+            isYou: false
+        )
+    }
+
+    func setYouName(_ raw: String) {
+        youName = MeshPOS.nameToken(raw)
+        UserDefaults.standard.set(youName, forKey: "you.name")
+        if heldParty?.isYou == true {
+            heldParty?.name = youName
+        }
+        sendPOSIfPossible()
+    }
+
+    func setYouStatus(_ status: PartyStatus) {
+        youStatus = status
+        UserDefaults.standard.set(status.rawValue, forKey: "you.status")
+        if heldParty?.isYou == true {
+            heldParty?.status = status
+        }
+        sendPOSIfPossible()
+    }
+
+    func callHeldParty() {
+        guard let person = heldParty, !person.isYou else { return }
+        comms.pickPeer(person.id)
+        Task { @MainActor in
+            tab = .comms
+            closeHold()
+            applyMapKeepAwake()
+            if mesh.nearby.isEmpty {
+                mesh.sendChip(from: mesh.localID, chip: "ptt", to: meshDest)
+            } else {
+                beginPTTSolo()
+            }
+        }
+    }
+
+    func messageHeldParty() {
+        guard let person = heldParty, !person.isYou else { return }
+        comms.pickPeer(person.id)
+        Task { @MainActor in
+            tab = .comms
+            closeHold()
+            applyMapKeepAwake()
+        }
+    }
+
+    func sendPartyNote(_ raw: String) {
+        let text = PartyNote.clean(raw)
+        guard !text.isEmpty else { return }
+        mesh.sendNote(from: mesh.localID, text: text, to: meshDest)
+    }
+
+    func partyCourse(for person: HeldPerson) -> String {
+        if person.isYou {
+            if let headingDeg, headingDeg >= 0 {
+                return String(format: "%.0f°", headingDeg)
+            }
+            return "NO HEADING"
+        }
+        let you = youCoordinate()
+        let deg = VoiceNav.bearing(from: you, to: (person.lat, person.lon))
+        return String(format: "%.0f°", deg)
+    }
+
+    func partyFix(_ person: HeldPerson) -> String {
+        MapFieldChrome.destValue(
+            mode: .coordinates,
+            bearingDeg: nil,
+            you: (person.lat, person.lon)
+        )
+    }
+
+    private func refreshHeldParty() {
+        guard let card = heldParty else { return }
+        if card.isYou {
+            let you = youCoordinate()
+            heldParty?.lat = you.lat
+            heldParty?.lon = you.lon
+            heldParty?.headingDeg = headingDeg
+            heldParty?.name = youName
+            heldParty?.status = youStatus
+            heldParty?.emblem = youEmblem.rawValue
+            return
+        }
+        guard let pip = mesh.pips.first(where: { $0.from == card.id }) else { return }
+        heldParty?.lat = pip.lat
+        heldParty?.lon = pip.lon
+        heldParty?.headingDeg = pip.headingDeg
+        heldParty?.emblem = pip.emblem ?? card.emblem
+        heldParty?.name = MeshPOS.nameToken(pip.name ?? "")
+        heldParty?.status = PartyStatus.parse(pip.status)
     }
 
     func toggleLockOn() {
@@ -443,7 +575,7 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || hudLayoutMode || held != nil { return }
+            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil { return }
             hudFocus = .none
             chromeAwake = false
         }
@@ -666,7 +798,9 @@ final class AppRuntime {
             lat: lat,
             lon: lon,
             headingDeg: headingDeg,
-            emblem: youEmblem.rawValue
+            emblem: youEmblem.rawValue,
+            name: youName,
+            status: youStatus.rawValue
         )
     }
 
@@ -695,6 +829,10 @@ final class AppRuntime {
             if let pcm = OpusLite.decode(env.body) {
                 PTTMic.shared.play(pcm)
             }
+        case "pos":
+            refreshHeldParty()
+        case "note":
+            break
         default:
             break
         }
@@ -930,6 +1068,7 @@ final class AppRuntime {
             lastKnownFix = (c.latitude, c.longitude)
         }
         sendPOSIfPossible()
+        refreshHeldParty()
     }
 
     static func resourceRoot() -> URL? {
