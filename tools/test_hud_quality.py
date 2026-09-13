@@ -35,8 +35,9 @@ def dest_rail_visible(
     lock_on: bool,
     has_route: bool,
 ) -> bool:
-    """Mirror of MapFieldChrome.destRailVisible."""
-    return has_destination or lock_on or has_route
+    """Mirror of MapFieldChrome.destRailVisible. Dest coords need a dest."""
+    del lock_on, has_route
+    return has_destination
 
 
 def active_bearing(
@@ -45,7 +46,7 @@ def active_bearing(
     lock_on: bool,
     has_route: bool,
 ) -> float | None:
-    """Mirror of MapFieldChrome.activeBearing."""
+    """Mirror of MapFieldChrome.activeBearing. Profile course, not MAP dest."""
     if not dest_rail_visible(has_destination, lock_on, has_route):
         return None
     if heading is None or heading < 0:
@@ -57,38 +58,45 @@ class QuietBearingTests(unittest.TestCase):
     def test_heading_alone_is_not_a_mission(self):
         self.assertFalse(dest_rail_visible(False, False, False))
         self.assertTrue(dest_rail_visible(True, False, False))
-        self.assertTrue(dest_rail_visible(False, True, False))
-        self.assertTrue(dest_rail_visible(False, False, True))
+        self.assertFalse(dest_rail_visible(False, True, False))
+        self.assertFalse(dest_rail_visible(False, False, True))
         self.assertIsNone(active_bearing(12, False, False, False))
         self.assertEqual(active_bearing(45, True, False, False), 45)
-        self.assertEqual(active_bearing(10, False, True, False), 10)
-        self.assertEqual(active_bearing(8, False, False, True), 8)
+        self.assertIsNone(active_bearing(10, False, True, False))
+        self.assertIsNone(active_bearing(8, False, False, True))
         self.assertIsNone(active_bearing(None, True, False, False))
         self.assertIsNone(active_bearing(-1, True, True, True))
         self.assertEqual(active_bearing(0, True, False, False), 0)
 
-    def test_map_filters_bearing_through_active_bearing(self):
-        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
-        tab = read("Blackout", "MapTab.swift")
-        self.assertIn("func activeBearing(", route)
-        self.assertIn("MapFieldChrome.activeBearing(", tab)
-        self.assertNotIn("bearingDeg: runtime.headingDeg", tab)
-
-    def test_bearing_line_prints_live_gnss_not_pack_center(self):
+    def test_map_dest_rail_does_not_print_bearing(self):
         route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
         tab = read("Blackout", "MapTab.swift")
         chrome = tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
-        self.assertIn("runtime.gnssYou", chrome)
-        self.assertIn("you:", chrome)
+        self.assertIn("func activeBearing(", route)
+        self.assertNotIn("MapFieldChrome.activeBearing(", tab)
+        self.assertNotIn("bearingDeg: runtime.headingDeg", tab)
+        vis = route.split("func destRailVisible(")[1].split("func destLine")[0]
+        self.assertIn("hasDestination", vis)
+        self.assertNotIn("|| lockOn", vis)
+        self.assertNotIn("|| hasRoute", vis)
+        self.assertNotIn("MapFieldDestMode.bearing", tab)
+        self.assertNotIn("case bearing", route)
+        self.assertNotIn("@State private var destMode", tab)
+
+    def test_dest_line_prints_dest_coords_not_live_gnss(self):
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        tab = read("Blackout", "MapTab.swift")
+        chrome = tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
+        self.assertIn("runtime.routeTarget", chrome)
+        self.assertNotIn("runtime.gnssYou", chrome)
         self.assertNotIn("youCoordinate()", chrome)
         self.assertNotIn("lastKnownFix", chrome)
         self.assertNotIn("youCoordinate()", tab)
         dest_src = route.split("func destLine(")[1].split("func destValue")[0]
-        self.assertNotIn("%.5f, %.5f", dest_src)
-        self.assertIn("destActive", dest_src)
-        self.assertIn("NO HEADING", dest_src)
+        self.assertIn("destValue", dest_src)
+        self.assertNotIn("NO HEADING", dest_src)
+        self.assertNotIn("BEARING", dest_src)
         self.assertIn("func destRailVisible(", route)
-        self.assertIn("destActive:", chrome)
         self.assertIn("destRailVisible(", chrome)
         self.assertIn("func destValue(", route)
         self.assertIn("enum MapFieldDestMode", route)
@@ -97,7 +105,7 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("packs?.active?.center", chrome)
         self.assertIn("MapFieldDestRail", tab)
         self.assertIn("MapFieldDestMode.coordinates", tab)
-        self.assertIn("Theme.accent", chrome)
+        self.assertNotIn("Theme.accent", chrome)
         self.assertIn("Theme.fix", chrome)
         self.assertIn("Theme.Motion.beat", chrome)
         self.assertIn("@State private var beat", chrome)
@@ -107,6 +115,7 @@ class QuietBearingTests(unittest.TestCase):
         chip = rail.split("func chip(")[1]
         self.assertNotIn("destValue", chip)
         self.assertIn("chipMode.title", chip)
+        self.assertNotIn("MapFieldDestMode.bearing", rail)
         self.assertIn("layoutPriority", chrome)
         theme = read("Blackout", "Theme.swift")
         chip_style = theme.split("struct MapFieldDestChipStyle")[1].split("enum HUDStatusTone")[0]
@@ -121,6 +130,12 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("fix.last", you)
         self.assertNotIn("lastKnownFix", you)
         self.assertNotIn("center", you)
+        party = read("Blackout", "PartyHoldCard.swift")
+        address = read("Blackout", "AddressHoldCard.swift")
+        self.assertIn("BEARING", party)
+        self.assertIn("COORDINATES", party)
+        self.assertIn("BEARING", address)
+        self.assertIn("COORDINATES", address)
 
 
 class KeepMapMountedTests(unittest.TestCase):
@@ -210,17 +225,27 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         self.assertIn("tf:", agents)
         self.assertIn("CURRENT_PROJECT_VERSION", agents)
 
-    def test_device_script_scores_bearing_not_dest_coords(self):
+    def test_device_script_scores_dest_coords_not_map_bearing(self):
         device = read("docs", "DEVICE.md")
         qa = read("docs", "SOLO_QA.md")
+        agents = read("AGENTS.md")
         self.assertNotIn("DEST … · BEARING", device)
         self.assertNotIn("DEST ... · BEARING", device)
-        self.assertIn("BEARING", device)
+        self.assertIn("location being traveled to", device)
+        self.assertIn("location being traveled to", qa)
         self.assertIn("31.76190", device)
         self.assertIn("COORDINATES", device)
         self.assertIn("COORDINATES", qa)
         self.assertIn("31.76190", qa)
         self.assertIn("no `DEST 31.7619, -106.4850`", qa)
+        self.assertNotIn("two 44pt chips", device)
+        self.assertNotIn("two 44pt chips", qa)
+        self.assertNotIn("Dest chips (`BEARING` / `COORDINATES`)", qa)
+        self.assertNotIn("live GNSS", device)
+        self.assertNotIn("live GNSS", qa)
+        self.assertIn("BEARING", qa)
+        self.assertIn("MAP dest rail prints dest coordinates", agents)
+        self.assertNotIn("BEARING is quiet unless there is somewhere to walk", agents)
 
 
 class OffGridNoDisclaimerTests(unittest.TestCase):

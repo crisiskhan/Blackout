@@ -9,7 +9,6 @@ struct MapTab: View {
     @Bindable var runtime: AppRuntime
     @State private var query = ""
     @State private var hits: [SearchHit] = []
-    @State private var destMode: MapFieldDestMode = .bearing
     @State private var packedIndex: SearchIndex?
     @State private var sayFailed = false
     @State private var searchGen: UInt64 = 0
@@ -332,20 +331,13 @@ struct MapTab: View {
             lockOn: runtime.lockOn,
             hasRoute: !runtime.routeCoords.isEmpty
         )
-        let destBearing = MapFieldChrome.activeBearing(
-            headingDeg: runtime.headingDeg,
-            hasDestination: runtime.routeTarget != nil,
-            lockOn: runtime.lockOn,
-            hasRoute: !runtime.routeCoords.isEmpty
-        )
+        let dest = destActive ? runtime.routeTarget : nil
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
             tool: runtime.toolChrome,
-            bearingDeg: destBearing,
-            speak: runtime.speechChrome,
-            you: runtime.gnssYou,
-            destActive: destActive
+            dest: dest,
+            speak: runtime.speechChrome
         )
         return Group {
             if !lines.isEmpty {
@@ -359,11 +351,7 @@ struct MapTab: View {
                                 .fixedSize(horizontal: false, vertical: true)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         case .dest:
-                            MapFieldDestRail(
-                                bearingDeg: destBearing,
-                                you: runtime.gnssYou,
-                                mode: $destMode
-                            )
+                            MapFieldDestRail(dest: dest)
                         }
                     }
                 }
@@ -378,21 +366,14 @@ struct MapTab: View {
     }
 
     private struct MapFieldDestRail: View {
-        var bearingDeg: Double?
-        var you: (lat: Double, lon: Double)?
-        @Binding var mode: MapFieldDestMode
+        var dest: (lat: Double, lon: Double)?
         @State private var beat: Double = 0.28
 
         var body: some View {
-            let field = MapFieldChrome.destValue(
-                mode: mode,
-                bearingDeg: bearingDeg,
-                you: you
-            )
-            let fieldInk = destInk(mode)
+            let field = MapFieldChrome.destValue(point: dest)
+            let fieldInk = destInk(MapFieldDestMode.coordinates)
             return VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
-                    chip(MapFieldDestMode.bearing)
                     chip(MapFieldDestMode.coordinates)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -404,7 +385,7 @@ struct MapTab: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .shadow(color: fieldInk.opacity(0.28 + 0.42 * beat), radius: 5 + 5 * beat)
-                    .accessibilityLabel(mode.title)
+                    .accessibilityLabel(MapFieldDestMode.coordinates.title)
                     .accessibilityValue(field)
             }
             .padding(.vertical, 6)
@@ -417,28 +398,22 @@ struct MapTab: View {
 
         private func destInk(_ destMode: MapFieldDestMode) -> Color {
             switch destMode {
-            case .bearing:
-                return Theme.accent
             case .coordinates:
                 return Theme.fix
             }
         }
 
         private func chip(_ chipMode: MapFieldDestMode) -> some View {
-            let selected = mode == chipMode
-            return Button {
-                withAnimation(Theme.Motion.wake) {
-                    mode = chipMode
-                }
+            Button {
             } label: {
                 Text(chipMode.title)
             }
             .buttonStyle(
-                MapFieldDestChipStyle(ink: destInk(chipMode), expanded: selected, beat: beat)
+                MapFieldDestChipStyle(ink: destInk(chipMode), expanded: true, beat: beat)
             )
-            .layoutPriority(selected ? 1 : 0)
+            .layoutPriority(1)
             .accessibilityLabel(chipMode.title)
-            .accessibilityAddTraits(selected ? .isSelected : [])
+            .accessibilityAddTraits(.isSelected)
         }
     }
 

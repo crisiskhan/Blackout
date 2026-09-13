@@ -330,11 +330,7 @@ final class AppRuntime {
     }
 
     func addressFix(lat: Double, lon: Double) -> String {
-        MapFieldChrome.destValue(
-            mode: .coordinates,
-            bearingDeg: nil,
-            you: (lat, lon)
-        )
+        MapFieldChrome.destValue(point: (lat, lon))
     }
 
     /// FIELD on the card hands the matching card to the FIELD tab and goes
@@ -447,11 +443,7 @@ final class AppRuntime {
     }
 
     func partyFix(_ person: HeldPerson) -> String {
-        MapFieldChrome.destValue(
-            mode: .coordinates,
-            bearingDeg: nil,
-            you: (person.lat, person.lon)
-        )
+        MapFieldChrome.destValue(point: (person.lat, person.lon))
     }
 
     private func refreshHeldParty() {

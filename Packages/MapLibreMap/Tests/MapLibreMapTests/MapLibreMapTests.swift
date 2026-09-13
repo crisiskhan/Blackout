@@ -473,11 +473,12 @@ final class MapLibreMapTests: XCTestCase {
     }
 
     func testMapFieldChromeCollapsesDestTrueStackSpray() {
+        let dest = (lat: 31.758, lon: -106.487)
         let sprayed = MapFieldChrome.lines(
             lock: RouteLine.offGraph,
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
-            bearingDeg: 45,
+            dest: dest,
             speak: "SPEAK · 3 TURNS · 984 FT"
         )
         XCTAssertEqual(sprayed.count, 3)
@@ -486,12 +487,12 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(Set(sprayed.map(\.id)).count, sprayed.count)
         XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
         XCTAssertTrue(sprayed[0].warn)
-        // The destination is a pin on the canvas, so this row spends itself on the
-        // heading instead of on a latitude nobody can steer by.
-        XCTAssertEqual(sprayed[1].text, "BEARING 45°")
+        // Dest slot is dest coords of the pin being walked to, never YOU, never a DEST pair.
+        XCTAssertEqual(sprayed[1].text, "31.75800, -106.48700")
         XCTAssertFalse(sprayed[1].warn)
         for line in sprayed {
             XCTAssertFalse(line.text.contains("DEST 31."))
+            XCTAssertFalse(line.text.contains("BEARING"))
         }
         XCTAssertEqual(sprayed[2].text, "SPEAK · 3 TURNS · 984 FT")
         for line in sprayed {
@@ -499,52 +500,35 @@ final class MapLibreMapTests: XCTestCase {
             XCTAssertLessThanOrEqual(line.text.count, 44)
             XCTAssertFalse(line.text.contains("\n"))
         }
-        let withYou = MapFieldChrome.lines(
+        let withDest = MapFieldChrome.lines(
             lock: RouteLine.offGraph,
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
-            bearingDeg: 45,
-            speak: "SPEAK · 3 TURNS · 984 FT",
-            you: (lat: 31.7619, lon: -106.49)
+            dest: dest,
+            speak: "SPEAK · 3 TURNS · 984 FT"
         )
-        // The dest slot is two chips, not one concatenated string. The stack
-        // still only spends a heading token here; the field value lives on
-        // destValue so COORDINATES can own the readout without a DEST pair.
-        XCTAssertEqual(withYou[1].text, "BEARING 45°")
-        XCTAssertFalse(withYou[1].text.contains("DEST 31."))
-        XCTAssertFalse(withYou[1].text.contains("31.76190"))
-        XCTAssertLessThanOrEqual(withYou[1].text.count, 44)
-        XCTAssertEqual(MapFieldDestMode.bearing.title, "BEARING")
+        XCTAssertEqual(withDest[1].text, "31.75800, -106.48700")
+        XCTAssertFalse(withDest[1].text.contains("DEST 31."))
+        XCTAssertFalse(withDest[1].text.contains("31.76190"))
+        XCTAssertLessThanOrEqual(withDest[1].text.count, 44)
         XCTAssertEqual(MapFieldDestMode.coordinates.title, "COORDINATES")
         XCTAssertEqual(
-            MapFieldChrome.destLine(bearingDeg: 45, you: (lat: 31.7619, lon: -106.49)),
-            "BEARING 45°"
+            MapFieldChrome.destLine(dest: dest),
+            "31.75800, -106.48700"
         )
         XCTAssertEqual(
-            MapFieldChrome.destValue(
-                mode: .bearing,
-                bearingDeg: 45,
-                you: (lat: 31.7619, lon: -106.49)
-            ),
-            "45°"
+            MapFieldChrome.destValue(point: dest),
+            "31.75800, -106.48700"
         )
         XCTAssertEqual(
-            MapFieldChrome.destValue(
-                mode: .coordinates,
-                bearingDeg: 45,
-                you: (lat: 31.7619, lon: -106.49)
-            ),
+            MapFieldChrome.destValue(point: (lat: 31.7619, lon: -106.49)),
             "31.76190, -106.49000"
         )
         XCTAssertEqual(
-            MapFieldChrome.destValue(mode: .coordinates, bearingDeg: 45, you: nil),
+            MapFieldChrome.destValue(point: nil),
             "NO FIX"
         )
-        let farWest = MapFieldChrome.destValue(
-            mode: .coordinates,
-            bearingDeg: 359,
-            you: (lat: -90, lon: -180)
-        )
+        let farWest = MapFieldChrome.destValue(point: (lat: -90, lon: -180))
         XCTAssertEqual(farWest, "-90.00000, -180.00000")
         XCTAssertLessThanOrEqual(farWest.count, 44)
         XCTAssertFalse(farWest.contains("DEST"))
@@ -568,23 +552,21 @@ final class MapLibreMapTests: XCTestCase {
             ),
             45
         )
-        XCTAssertEqual(
+        XCTAssertNil(
             MapFieldChrome.activeBearing(
                 headingDeg: 10,
                 hasDestination: false,
                 lockOn: true,
                 hasRoute: false
-            ),
-            10
+            )
         )
-        XCTAssertEqual(
+        XCTAssertNil(
             MapFieldChrome.activeBearing(
                 headingDeg: 8,
                 hasDestination: false,
                 lockOn: false,
                 hasRoute: true
-            ),
-            8
+            )
         )
         XCTAssertNil(
             MapFieldChrome.activeBearing(
@@ -602,28 +584,15 @@ final class MapLibreMapTests: XCTestCase {
                 hasRoute: true
             )
         )
-        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: -1), "")
-        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0), "BEARING 0°")
+        XCTAssertEqual(MapFieldChrome.destLine(), "")
+        XCTAssertEqual(MapFieldChrome.destLine(dest: nil), "")
         XCTAssertEqual(
-            MapFieldChrome.destLine(bearingDeg: -1, you: (lat: 31.7619, lon: -106.49)),
-            ""
-        )
-        XCTAssertEqual(MapFieldChrome.destLine(bearingDeg: 0, you: nil), "BEARING 0°")
-        XCTAssertEqual(
-            MapFieldChrome.destLine(bearingDeg: -1, destActive: true),
-            "NO HEADING"
+            MapFieldChrome.destLine(dest: (lat: 31.758, lon: -106.487)),
+            "31.75800, -106.48700"
         )
         XCTAssertEqual(
-            MapFieldChrome.destLine(
-                bearingDeg: -1,
-                you: (lat: 31.7619, lon: -106.49),
-                destActive: true
-            ),
-            "NO HEADING"
-        )
-        XCTAssertEqual(
-            MapFieldChrome.destLine(bearingDeg: 45, destActive: true),
-            "BEARING 45°"
+            MapFieldChrome.destLine(dest: (lat: 31.7619, lon: -106.49)),
+            "31.76190, -106.49000"
         )
         XCTAssertFalse(
             MapFieldChrome.destRailVisible(
@@ -639,14 +608,14 @@ final class MapLibreMapTests: XCTestCase {
                 hasRoute: false
             )
         )
-        XCTAssertTrue(
+        XCTAssertFalse(
             MapFieldChrome.destRailVisible(
                 hasDestination: false,
                 lockOn: true,
                 hasRoute: false
             )
         )
-        XCTAssertTrue(
+        XCTAssertFalse(
             MapFieldChrome.destRailVisible(
                 hasDestination: false,
                 lockOn: false,
@@ -661,7 +630,7 @@ final class MapLibreMapTests: XCTestCase {
                 lock: "",
                 route: "",
                 tool: "",
-                bearingDeg: nil,
+                dest: nil,
                 speak: ""
             ).isEmpty
         )
@@ -670,7 +639,7 @@ final class MapLibreMapTests: XCTestCase {
                 lock: "",
                 route: "",
                 tool: "",
-                bearingDeg: -1,
+                dest: nil,
                 speak: ""
             ).isEmpty
         )
@@ -679,41 +648,35 @@ final class MapLibreMapTests: XCTestCase {
                 lock: "",
                 route: "",
                 tool: "",
-                bearingDeg: nil,
-                speak: "",
-                you: (lat: 31.7619, lon: -106.49)
+                dest: nil,
+                speak: ""
             ).isEmpty
         )
         let destMounted = MapFieldChrome.lines(
             lock: "",
             route: "",
             tool: "",
-            bearingDeg: nil,
-            speak: "",
-            destActive: true
+            dest: nil,
+            speak: ""
         )
-        XCTAssertEqual(destMounted.map(\.text), ["NO HEADING"])
-        XCTAssertEqual(destMounted.map(\.slot), [.dest])
+        XCTAssertTrue(destMounted.isEmpty)
         let destMountedNoCourse = MapFieldChrome.lines(
             lock: "",
             route: "",
             tool: "",
-            bearingDeg: -1,
-            speak: "",
-            you: (lat: 31.7619, lon: -106.49),
-            destActive: true
+            dest: nil,
+            speak: ""
         )
-        XCTAssertEqual(destMountedNoCourse.map(\.text), ["NO HEADING"])
-        XCTAssertEqual(destMountedNoCourse.map(\.slot), [.dest])
-        let bearingOnly = MapFieldChrome.lines(
+        XCTAssertTrue(destMountedNoCourse.isEmpty)
+        let destOnly = MapFieldChrome.lines(
             lock: "",
             route: "",
             tool: "",
-            bearingDeg: 12,
+            dest: (lat: 31.758, lon: -106.487),
             speak: "   "
         )
-        XCTAssertEqual(bearingOnly.map(\.text), ["BEARING 12°"])
-        XCTAssertEqual(bearingOnly.map(\.slot), [.dest])
+        XCTAssertEqual(destOnly.map(\.text), ["31.75800, -106.48700"])
+        XCTAssertEqual(destOnly.map(\.slot), [.dest])
         XCTAssertEqual(
             MapFieldChrome.joined([" OFF GRAPH ", "OFF GRAPH", "", "RULER 40 m"]),
             "OFF GRAPH · RULER 40 m"
