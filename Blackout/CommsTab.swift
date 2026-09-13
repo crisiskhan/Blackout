@@ -307,9 +307,11 @@ struct CommsTab: View {
             Circle()
                 .fill(Theme.accent)
                 .frame(width: 10, height: 10)
-            Text(L10n.t("sos.mesh", runtime.locale))
-                .font(.system(size: 18, weight: .heavy))
+            Text(runtime.lastConditionSOS.isEmpty ? L10n.t("sos.mesh", runtime.locale) : runtime.lastConditionSOS)
+                .font(.system(size: runtime.lastConditionSOS.isEmpty ? 18 : 13, weight: .heavy))
                 .foregroundStyle(Theme.accent)
+                .lineLimit(2)
+                .minimumScaleFactor(1)
             Spacer(minLength: 8)
             Button(L10n.t("ok.chip", runtime.locale)) { runtime.iamOK() }
                 .buttonStyle(HUDOverlayChipStyle())

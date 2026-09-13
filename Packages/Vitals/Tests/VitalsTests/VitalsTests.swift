@@ -8,7 +8,18 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
         XCTAssertEqual(
             ConditionBand.allCases.map(\.rawValue),
-            ["green", "yellow", "orange", "red"]
+            ["green", "yellow", "orange", "red", "black"]
+        )
+        XCTAssertEqual(
+            PartyVitals(
+                hunger: 1.0,
+                thirst: 0.2,
+                pain: 0.2,
+                water: 0.2,
+                fatigue: 0.2,
+                weatherExposure: 0.2
+            ).band,
+            .black
         )
     }
 
@@ -26,6 +37,13 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals.yellowAt, 0.45)
         XCTAssertEqual(PartyVitals.orangeAt, 0.65)
         XCTAssertEqual(PartyVitals.redAt, 0.8)
+        XCTAssertEqual(PartyVitals.blackAt, 1.0)
+        XCTAssertEqual(PartyVitals.blackLoad, 4)
+        XCTAssertEqual(PartyVitals.colorSteps, [0.2, 0.45, 0.65, 0.8, 1.0])
+        XCTAssertEqual(
+            PartyVitals.railTitles,
+            ["HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"]
+        )
         XCTAssertEqual(PartyVitals.stackYellowToOrange, 2)
         XCTAssertEqual(PartyVitals.stackYellowToRed, 3)
         XCTAssertEqual(PartyVitals.stackOrangeToRed, 2)
@@ -41,10 +59,13 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals.band(of: 0.45), .yellow)
         XCTAssertEqual(PartyVitals.band(of: 0.65), .orange)
         XCTAssertEqual(PartyVitals.band(of: 0.8), .red)
+        XCTAssertEqual(PartyVitals.band(of: 0.999), .red)
+        XCTAssertEqual(PartyVitals.band(of: 1.0), .black)
         XCTAssertEqual(PartyVitals.load(of: 0.2), 0)
         XCTAssertEqual(PartyVitals.load(of: 0.45), 1)
         XCTAssertEqual(PartyVitals.load(of: 0.65), 2)
         XCTAssertEqual(PartyVitals.load(of: 0.8), 3)
+        XCTAssertEqual(PartyVitals.load(of: 1.0), 4)
         let packed = PartyVitals.fromPOS([0.1, 0.2, 0.45, 0.65, 0.8, 1.0])
         XCTAssertEqual(packed?.hunger, 0.2)
         XCTAssertEqual(packed?.thirst, 0.2)
@@ -116,5 +137,42 @@ final class VitalsTests: XCTestCase {
         )
         XCTAssertEqual(orangePlusYellow.band, .red)
         XCTAssertEqual(PartyVitals.orangeLoad * PartyVitals.stackOrangeToRed, 4)
+        let oneBlack = PartyVitals(
+            hunger: 1.0,
+            thirst: 0.2,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(oneBlack.band, .black)
+        XCTAssertEqual(oneBlack.blackTitles, ["HUNGER"])
+        XCTAssertEqual(
+            oneBlack.partyAlertLine(coordinates: "31.76190, -106.49000", bearing: "042°"),
+            "SOS HUNGER BLACK 31.76190, -106.49000 042°"
+        )
+        let twoBlack = PartyVitals(
+            hunger: 1.0,
+            thirst: 1.0,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(twoBlack.band, .black)
+        XCTAssertEqual(
+            twoBlack.partyAlertLine(coordinates: "NO FIX", bearing: "NO HEADING"),
+            "SOS CONDITION BLACK NO FIX NO HEADING"
+        )
+        let redFlagStillBlack = PartyVitals(
+            hunger: 1.0,
+            thirst: 0.2,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2,
+            flags: ["RED"]
+        )
+        XCTAssertEqual(redFlagStillBlack.band, .black)
     }
 }

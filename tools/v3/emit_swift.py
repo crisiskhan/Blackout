@@ -602,7 +602,7 @@ final class CryptoPartyTests: XCTestCase {
         r'''import Foundation
 
 public enum ConditionBand: String, CaseIterable, Sendable {
-    case green, yellow, orange, red
+    case green, yellow, orange, red, black
 }
 
 public struct PartyVitals: Equatable, Sendable {
@@ -610,6 +610,8 @@ public struct PartyVitals: Equatable, Sendable {
     public static let yellowAt: Double = 0.45
     public static let orangeAt: Double = 0.65
     public static let redAt: Double = 0.8
+    /// The fifth CONDITION color. Past RED. Mesh SOS, not a phone dial.
+    public static let blackAt: Double = 1.0
     /// Two YELLOW rails is CONDITION ORANGE, not a yellow average.
     public static let stackYellowToOrange: Int = 2
     /// Three YELLOW rails is a compounding body.
@@ -619,7 +621,12 @@ public struct PartyVitals: Equatable, Sendable {
     public static let yellowLoad: Int = 1
     public static let orangeLoad: Int = 2
     public static let redLoad: Int = 3
+    public static let blackLoad: Int = 4
     public static let railSteps: [Double] = [0, 0.2, 0.45, 0.65, 0.8, 1.0]
+    public static let colorSteps: [Double] = [0.2, 0.45, 0.65, 0.8, 1.0]
+    public static let railTitles: [String] = [
+        "HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE",
+    ]
 
     public var hunger: Double
     public var thirst: Double
@@ -655,13 +662,14 @@ public struct PartyVitals: Equatable, Sendable {
     }
 
     public static func band(of value: Double) -> ConditionBand {
+        if value >= blackAt { return .black }
         if value >= redAt { return .red }
         if value >= orangeAt { return .orange }
         if value >= yellowAt { return .yellow }
         return .green
     }
 
-    /// YELLOW is 1, ORANGE is 2, RED is 3. Load 2 is ORANGE. Load 3 is RED.
+    /// YELLOW is 1, ORANGE is 2, RED is 3, BLACK is 4. Load 2 is ORANGE. Load 3 is RED.
     public static func load(of value: Double) -> Int {
         switch band(of: value) {
         case .green:
@@ -672,10 +680,13 @@ public struct PartyVitals: Equatable, Sendable {
             return orangeLoad
         case .red:
             return redLoad
+        case .black:
+            return blackLoad
         }
     }
 
     public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
+        if rails.contains(where: { band(of: $0) == .black }) { return .black }
         if flags.contains("RED") { return .red }
         var total = 0
         for value in rails {
@@ -687,6 +698,23 @@ public struct PartyVitals: Equatable, Sendable {
         if total >= stackYellowToOrange { return .orange }
         if total > 0 { return .yellow }
         return .green
+    }
+
+    public var blackTitles: [String] {
+        zip(Self.railTitles, rails).compactMap { title, value in
+            PartyVitals.band(of: value) == .black ? title : nil
+        }
+    }
+
+    public func partyAlertLine(coordinates: String, bearing: String) -> String {
+        let titles = blackTitles
+        let condition: String
+        if titles.count == 1 {
+            condition = "\(titles[0]) BLACK"
+        } else {
+            condition = "CONDITION BLACK"
+        }
+        return "SOS \(condition) \(coordinates) \(bearing)"
     }
 
     /// Midpoint and above belongs to the worse tick, so CONDITION never sits between bands.
@@ -724,7 +752,7 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
         XCTAssertEqual(
             ConditionBand.allCases.map(\.rawValue),
-            ["green", "yellow", "orange", "red"]
+            ["green", "yellow", "orange", "red", "black"]
         )
     }
 

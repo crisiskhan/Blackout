@@ -202,6 +202,9 @@ struct ExpeditionTab: View {
     }
 
     private var statusTone: HUDStatusTone {
+        if runtime.vitals.band == .black {
+            return .sos
+        }
         if runtime.red.isRed || runtime.mesh.lastRedOn == true {
             return .crisis
         }
@@ -210,6 +213,7 @@ struct ExpeditionTab: View {
         case .yellow: return .caution
         case .orange: return .heat
         case .red: return .crisis
+        case .black: return .sos
         }
     }
 
@@ -218,9 +222,11 @@ struct ExpeditionTab: View {
             Circle()
                 .fill(Theme.accent)
                 .frame(width: 10, height: 10)
-            Text(L10n.t("red.plate", runtime.locale))
-                .font(.system(size: 18, weight: .heavy))
+            Text(runtime.lastConditionSOS.isEmpty ? L10n.t("red.plate", runtime.locale) : runtime.lastConditionSOS)
+                .font(.system(size: runtime.lastConditionSOS.isEmpty ? 18 : 13, weight: .heavy))
                 .foregroundStyle(Theme.accent)
+                .lineLimit(2)
+                .minimumScaleFactor(1)
             Spacer(minLength: 8)
             Button(L10n.t("red.cancel", runtime.locale)) {
                 runtime.cancelSelfRed()
@@ -266,7 +272,7 @@ struct ExpeditionTab: View {
     }
 }
 
-/// 44pt metal rail. Ticks aligned to PartyVitals band math. Not a system Slider.
+/// 44pt metal rail. Five color cells, not a system Slider. BLACK carries SOS.
 struct HUDVitalsRail: View {
     let title: String
     @Binding var value: Double
@@ -280,22 +286,36 @@ struct HUDVitalsRail: View {
                 .foregroundStyle(ink)
             GeometryReader { geo in
                 let width = geo.size.width
-                ZStack(alignment: .leading) {
-                    Theme.plateRect()
-                        .fill(Theme.metalLow)
-                    Theme.plateRect()
-                        .fill(ink.opacity(0.88))
-                        .frame(width: max(0, width * CGFloat(value)))
-                    ForEach(Array(PartyVitals.railSteps.enumerated()), id: \.offset) { _, step in
-                        if step > 0 && step < 1 {
+                let steps = PartyVitals.colorSteps
+                HStack(spacing: 1) {
+                    ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
+                        let band = PartyVitals.band(of: step)
+                        let on = PartyVitals.band(of: PartyVitals.snap(value)) == band
+                        ZStack {
                             Rectangle()
-                                .fill(Theme.silver.opacity(0.4))
-                                .frame(width: 1, height: hit * 0.5)
-                                .offset(x: width * CGFloat(step))
+                                .fill(plateInk(for: band))
+                            if band == .black {
+                                Text("SOS")
+                                    .font(.system(size: 10, weight: .heavy))
+                                    .foregroundStyle(Theme.accent)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(1)
+                            }
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(band == .black || on ? 1 : 0.5)
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(
+                                    on ? (band == .black ? Theme.accent : Theme.silver) : Color.clear,
+                                    lineWidth: 1.5
+                                )
+                        )
                     }
                 }
-                .frame(height: hit)
+                .padding(1)
+                .frame(width: width, height: hit)
+                .background(Theme.metalLow)
                 .clipShape(Theme.plateRect())
                 .overlay(
                     Theme.plateRect()
@@ -306,7 +326,9 @@ struct HUDVitalsRail: View {
                 .gesture(
                     DragGesture(minimumDistance: 0).onChanged { gesture in
                         guard editable, width > 0 else { return }
-                        value = PartyVitals.snap(gesture.location.x / width)
+                        let t = max(0, min(0.999, gesture.location.x / width))
+                        let i = min(steps.count - 1, Int(t * CGFloat(steps.count)))
+                        value = PartyVitals.snap(steps[i])
                     }
                 )
             }
@@ -334,6 +356,17 @@ struct HUDVitalsRail: View {
         case .yellow: return Theme.caution
         case .orange: return Theme.heat
         case .red: return Theme.accent
+        case .black: return Theme.accent
+        }
+    }
+
+    private func plateInk(for band: ConditionBand) -> Color {
+        switch band {
+        case .green: return Theme.fix
+        case .yellow: return Theme.caution
+        case .orange: return Theme.heat
+        case .red: return Theme.accent
+        case .black: return Theme.void
         }
     }
 }

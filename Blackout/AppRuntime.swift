@@ -33,6 +33,7 @@ final class AppRuntime {
     var packs: PackStore?
     var mesh: MeshNet
     var vitals = PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2)
+    var lastConditionSOS = ""
     var red: RedPlate
     var timers: TimerBoard
     var roster = PartyRoster.create(lead: "Lead")
@@ -437,11 +438,15 @@ final class AppRuntime {
     }
 
     func setYouVitals(_ next: PartyVitals) {
+        let gained = Set(next.blackTitles).subtracting(vitals.blackTitles)
         vitals = next
         if heldParty?.isYou == true {
             heldParty?.vitals = next
         }
         sendPOSIfPossible()
+        if !gained.isEmpty {
+            offerConditionSOS()
+        }
     }
 
     func setYouRail(_ key: WritableKeyPath<PartyVitals, Double>, _ value: Double) {
@@ -707,9 +712,38 @@ final class AppRuntime {
         box.log("sos", "mesh SOS armed")
     }
 
+    /// BLACK CONDITION tick. Mesh-wide note with condition, coordinates, and
+    /// bearing. Same radio as hold SOS. Not a phone call.
+    func offerConditionSOS() {
+        offerSOS()
+        let pack = packs?.active?.center
+        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? pack?.lat
+        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
+        let coordinates: String
+        if let lat, let lon, lat.isFinite, lon.isFinite {
+            coordinates = MapFieldChrome.destValue(point: (lat, lon))
+        } else {
+            coordinates = MapFieldChrome.destValue(point: nil)
+        }
+        let bearing: String
+        if let headingDeg, headingDeg >= 0 {
+            bearing = String(format: "%.0f°", headingDeg)
+        } else {
+            bearing = "NO HEADING"
+        }
+        let line = PartyNote.clean(
+            vitals.partyAlertLine(coordinates: coordinates, bearing: bearing)
+        )
+        guard !line.isEmpty else { return }
+        lastConditionSOS = line
+        mesh.sendNote(from: mesh.localID, text: line, to: "*")
+        box.log("sos", line)
+    }
+
     /// I AM OK is the all-clear: the mesh hears it, the SOS chip goes dark,
     /// and a RED plate we lit goes dark.
     func iamOK() {
+        lastConditionSOS = ""
         comms.chips.removeAll { $0 == .sos }
         mesh.clearInboundChip(Chip.sos.rawValue)
         if !comms.chips.contains(.ok) {
@@ -978,7 +1012,12 @@ final class AppRuntime {
         case "pos":
             refreshHeldParty()
         case "note":
-            break
+            if let text = String(data: env.body, encoding: .utf8) {
+                let note = PartyNote.clean(text)
+                if note.hasPrefix("SOS ") {
+                    lastConditionSOS = note
+                }
+            }
         default:
             break
         }

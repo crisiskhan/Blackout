@@ -249,7 +249,7 @@ struct MapFieldDestChipStyle: ButtonStyle {
 
 /// Status ink on a HUD page. Silver is idle, warn is honesty chrome, go is
 /// CONDITION GREEN, caution is CONDITION YELLOW, heat is CONDITION ORANGE,
-/// crisis is RED.
+/// crisis is RED, sos is CONDITION BLACK.
 enum HUDStatusTone: Sendable, Equatable {
     case silver
     case warn
@@ -257,6 +257,7 @@ enum HUDStatusTone: Sendable, Equatable {
     case caution
     case heat
     case crisis
+    case sos
 
     var ink: Color {
         switch self {
@@ -266,12 +267,13 @@ enum HUDStatusTone: Sendable, Equatable {
         case .caution: return Theme.caution
         case .heat: return Theme.heat
         case .crisis: return Theme.accent
+        case .sos: return Color.white
         }
     }
 
     var crisis: Bool {
         switch self {
-        case .crisis: return true
+        case .crisis, .sos: return true
         case .silver, .warn, .go, .caution, .heat: return false
         }
     }

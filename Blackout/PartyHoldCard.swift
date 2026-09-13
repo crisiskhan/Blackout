@@ -286,6 +286,8 @@ struct PartyHoldCard: View {
             return Theme.heat
         case .red:
             return Theme.accent
+        case .black:
+            return Color.white
         }
     }
 }
