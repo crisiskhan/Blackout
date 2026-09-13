@@ -88,7 +88,7 @@ public enum FieldAsk {
         let toks = Set(tokens(query))
         let asked = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let family = family(for: toks)
-        let picture = picture(chapter)
+        let bookPic = picture(chapter)
         let bleedPic = picture(chapter, prefer: "bleed-pack.png")
         let start: [FieldStep] = [
             step(
@@ -100,7 +100,7 @@ public enum FieldAsk {
                 "Correr te hace perder el peligro y el camino de vuelta.",
                 "Stop if the ground is falling, on fire, or under traffic.",
                 "Para si el piso se cae, hay fuego o hay tráfico.",
-                picture
+                bookPic
             ),
             step(
                 "Move to the safest near spot you can see: off the road, out of the water, away from fire.",
@@ -111,7 +111,7 @@ public enum FieldAsk {
                 "Lo primero es un lugar que no te golpee.",
                 "Stop if moving would put you in the hazard.",
                 "Para si moverte te mete en el peligro.",
-                picture
+                bookPic
             ),
         ]
         let body: [FieldStep]
@@ -157,7 +157,7 @@ public enum FieldAsk {
                     "El aire aún puede pasar si tosen.",
                     "If they stop coughing and cannot breathe, go to the next move.",
                     "Si dejan de toser y no respiran, pasa al siguiente movimiento.",
-                    picture
+                    bookPic
                 ),
                 step(
                     "If they cannot cough, speak, or breathe, hit their back hard between the shoulders five times.",
@@ -168,7 +168,7 @@ public enum FieldAsk {
                     "Un golpe fuerte en la espalda puede mover el bloqueo.",
                     "Stop if they start coughing or breathing.",
                     "Para si empiezan a toser o respirar.",
-                    picture
+                    bookPic
                 ),
             ]
             care = FieldLoc(
@@ -215,7 +215,7 @@ public enum FieldAsk {
                     "El hielo y la grasa guardan el calor.",
                     "Stop cooling if they start to shake from cold.",
                     "Deja de enfriar si empiezan a temblar de frío.",
-                    picture
+                    bookPic
                 ),
                 step(
                     "Cover loosely with a clean cloth. Do not pop blisters.",
@@ -226,7 +226,7 @@ public enum FieldAsk {
                     "La piel abierta es por donde entra suciedad.",
                     "Stop if the cloth sticks — leave it and get care.",
                     "Para si el paño se pega — déjalo y busca cuidado.",
-                    picture
+                    bookPic
                 ),
             ]
             care = FieldLoc(
@@ -244,7 +244,7 @@ public enum FieldAsk {
                     "Los buscadores caminan una línea. Un niño que se mueve es el que pierden.",
                     "Move only if fire, water, or night cold will hit you here.",
                     "Muévete solo si el fuego, el agua o el frío de noche te van a pegar aquí.",
-                    picture
+                    bookPic
                 ),
                 step(
                     "Make yourself big and loud from that spot: yell in threes, wave a bright cloth.",
@@ -255,7 +255,7 @@ public enum FieldAsk {
                     "Un patrón es cómo saben que eres una persona.",
                     "Stop yelling if you need that breath to stay warm.",
                     "Deja de gritar si necesitas ese aire para no enfriar.",
-                    picture
+                    bookPic
                 ),
             ]
             care = FieldLoc(
@@ -273,7 +273,7 @@ public enum FieldAsk {
                     "Mover el hueso puede cortar el resto del miembro.",
                     "Stop if they faint or the fingers go white and cold.",
                     "Para si se desmayan o los dedos se ponen blancos y fríos.",
-                    picture
+                    bookPic
                 ),
                 step(
                     "Pad around the limb with cloth and tie it to something stiff so it cannot flop. Tie loose enough to slip a finger under.",
@@ -284,7 +284,7 @@ public enum FieldAsk {
                     "Una fractura suelta sigue rasgando.",
                     "Stop if the tie makes fingers numb or blue.",
                     "Para si el nudo deja los dedos entumecidos o azules.",
-                    picture
+                    bookPic
                 ),
             ]
             care = FieldLoc(
@@ -303,7 +303,7 @@ public enum FieldAsk {
                     "La primera vez es un acto, luego revisar.",
                     "Stop if it hurts more or the scene turns unsafe.",
                     "Para si duele más o la escena se vuelve insegura.",
-                    picture
+                    bookPic
                 ),
                 step(
                     "Check the person or the camp after that one move. Then do the next one move, not three.",
@@ -314,7 +314,7 @@ public enum FieldAsk {
                     "Apilar tareas es cómo los principiantes saltan la que los salva.",
                     "Stop if you cannot see, cannot stand, or cannot hear.",
                     "Para si no ves, no te sostienes o no oyes.",
-                    picture
+                    bookPic
                 ),
             ]
             care = FieldLoc(
@@ -332,7 +332,7 @@ public enum FieldAsk {
                 "Plantas desconocidas y agua sin tratar convierten un problema en dos.",
                 "Stop if you feel faint. Sit. Yell.",
                 "Para si te desmayas. Siéntate. Grita.",
-                picture
+                bookPic
             ),
         ]
         var steps = start + body + finish

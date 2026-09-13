@@ -1246,6 +1246,31 @@ class FieldInstrumentTests(unittest.TestCase):
         )
         self.assertLess(open_fn.find("s.step.image"), open_fn.find("FieldCorpus.doLines"))
         self.assertLess(open_fn.find("FieldCorpus.doLines"), open_fn.find("s.step.child"))
+        self.assertLess(
+            open_fn.find("stepTitle"),
+            open_fn.find('L10n.t("stop.if"'),
+            "NEXT after DO, not under GET-TO-CARE",
+        )
+        self.assertLess(
+            open_fn.find('Button("SPEAK")'),
+            open_fn.find('L10n.t("stop.if"'),
+        )
+        self.assertGreater(
+            open_fn.find("SEND TO PARTY"),
+            open_fn.find('sectionLabel("GET-TO-CARE")'),
+        )
+        self.assertRegex(
+            open_fn,
+            r"maxHeight:\s*1[0-6]\d",
+            "open-card picture must stay short so DO and NEXT fit",
+        )
+        self.assertNotIn("visionHUD", open_fn)
+        body = field.split("var body:")[1].split("private var fieldStatus")[0]
+        self.assertNotRegex(
+            body,
+            r"maxHeight: \.infinity\)\s+visionHUD",
+            "VISION is SEARCH-only",
+        )
 
     def test_search_and_say_sit_at_the_end_of_the_bar(self):
         field = read("Blackout", "FieldTab.swift")
@@ -1268,6 +1293,8 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("STOP-IF", qa)
         self.assertIn("open step", qa.lower())
         self.assertIn("VISION captures one still", qa)
+        self.assertIn("VISION stays on SEARCH", qa)
+        self.assertIn("NEXT sits after DO", qa)
         self.assertIn("NO MATCH", qa)
         self.assertIn("FIELD SEARCH", qa)
         self.assertIn("GET-TO-CARE", qa)

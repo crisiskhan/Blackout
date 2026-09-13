@@ -33,6 +33,7 @@ struct FieldTab: View {
             VStack(alignment: .leading, spacing: 10) {
                 // One card open, or SEARCH. Never both. SEARCH submits the
                 // answering card's steps. A title dump is not an answer.
+                // VISION stays on SEARCH so the open procedure is the book.
                 Group {
                     if let s = stepper {
                         ScrollView {
@@ -62,10 +63,10 @@ struct FieldTab: View {
                                 }
                             }
                         }
+                        visionHUD
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                visionHUD
             }
         }
         .sheet(isPresented: $showVision) {
@@ -277,7 +278,7 @@ struct FieldTab: View {
                         Image(uiImage: ui)
                             .resizable()
                             .scaledToFit()
-                            .frame(maxHeight: 240)
+                            .frame(maxHeight: 160)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .accessibilityHidden(true)
                     }
@@ -322,33 +323,6 @@ struct FieldTab: View {
                     }
                 }
             }
-
-            sectionLabel(L10n.t("stop.if", runtime.locale))
-            ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
-                Text(loc(line))
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.accent)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(10)
-                    .background(Theme.accent.opacity(0.14))
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
-                    )
-            }
-
-            sectionLabel("GET-TO-CARE")
-            Text(loc(s.card.get_to_care))
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(Theme.silver)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(12)
-                .background(Theme.glass())
-                .clipShape(Theme.plateRect())
-
             HStack(spacing: 8) {
                 // On the last step NEXT did nothing at all, which reads as a
                 // broken button rather than the end of the card. A hold that
@@ -376,6 +350,36 @@ struct FieldTab: View {
                 }
                 .buttonStyle(HUDActionStyle(filled: false))
             }
+            if !runtime.speechChrome.isEmpty {
+                Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
+            }
+
+            sectionLabel(L10n.t("stop.if", runtime.locale))
+            ForEach(Array(s.card.stop_if.enumerated()), id: \.offset) { _, line in
+                Text(loc(line))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(Theme.accent.opacity(0.14))
+                    .clipShape(Theme.plateRect())
+                    .overlay(
+                        Theme.plateRect()
+                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
+                    )
+            }
+
+            sectionLabel("GET-TO-CARE")
+            Text(loc(s.card.get_to_care))
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(12)
+                .background(Theme.glass())
+                .clipShape(Theme.plateRect())
+
             Button("SEND TO PARTY") {
                 var x = s
                 x.send()
@@ -384,9 +388,6 @@ struct FieldTab: View {
             }
             .buttonStyle(HUDActionStyle(filled: false))
             Text(runtime.mesh.chromeNet).font(.caption).foregroundStyle(Theme.warn)
-            if !runtime.speechChrome.isEmpty {
-                Text(runtime.speechChrome).font(.caption).foregroundStyle(Theme.warn)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

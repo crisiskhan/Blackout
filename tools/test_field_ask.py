@@ -457,6 +457,33 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
             open_fn.find('L10n.t("stop.if"'),
         )
         self.assertLess(open_fn.find("s.step.image"), open_fn.find("FieldCorpus.doLines"))
+        self.assertLess(
+            open_fn.find("stepTitle"),
+            open_fn.find('L10n.t("stop.if"'),
+            "NEXT must sit after DO, before STOP-IF",
+        )
+        self.assertLess(
+            open_fn.find('Button("SPEAK")'),
+            open_fn.find('L10n.t("stop.if"'),
+            "SPEAK stays with NEXT on the move",
+        )
+        self.assertGreater(
+            open_fn.find("SEND TO PARTY"),
+            open_fn.find('sectionLabel("GET-TO-CARE")'),
+        )
+        self.assertRegex(
+            open_fn,
+            r"maxHeight:\s*1[0-6]\d",
+            "open-card picture must stay short so DO and NEXT fit on the glass",
+        )
+        body = tab.split("var body:")[1].split("private var fieldStatus")[0]
+        self.assertNotRegex(
+            body,
+            r"maxHeight: \.infinity\)\s+visionHUD",
+            "VISION must not sit under an open card",
+        )
+        self.assertIn("visionHUD", tab.split("} else {", 1)[1].split("private var fieldStatus")[0])
+        self.assertNotIn("visionHUD", open_fn)
         self.assertIn("Field/images", tab)
         self.assertIn("UIImage(contentsOfFile:", tab)
         self.assertTrue((ROOT / "Resources/Field/images/bleed-pack.png").is_file())
@@ -480,6 +507,8 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("ASK · LIVE", qa)
         self.assertIn("on this device", qa.lower())
         self.assertIn("Remaining hits stay out", qa)
+        self.assertIn("NEXT sits after DO", qa)
+        self.assertIn("VISION stays on SEARCH", qa)
         blob = qa.lower().replace("’", "'")
         self.assertIn("live walk", blob)
         self.assertIn("not a catalog", blob)
@@ -1144,6 +1173,11 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("static func parse(", ask)
         self.assertIn("static func sanitize(", ask)
         self.assertIn("static func grounded(", ask)
+        self.assertNotIn(
+            "let picture = picture(",
+            ask,
+            "local picture shadows picture(chapter:) and will not compile on device",
+        )
         self.assertIn("static func modelURL(", ask)
         self.assertIn(MODEL_FILE, ask)
         self.assertIn("NO ASK MODEL", ask)
