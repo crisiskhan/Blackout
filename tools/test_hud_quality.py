@@ -1389,6 +1389,75 @@ class MapMarksGlassTests(unittest.TestCase):
         self.assertNotIn('Button("FIT PACK")', tab)
         self.assertIn("HUDOverlayChipStyle()", tab)
         self.assertIn("mapChipHitPoints", sos)
+        self.assertIn("PlaceMarkCard(", tab)
+        self.assertIn("PlaceMark.body", tab)
+
+
+class PartyPlaceMarkTests(unittest.TestCase):
+    """MARK names a party place, writes a note, and plants a FACE emblem."""
+
+    def test_mark_composer_names_notes_and_plants_face(self):
+        marks = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        tab = read("Blackout", "MapTab.swift")
+        card = read("Blackout", "PlaceMarkCard.swift")
+        mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
+        emblem = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift"
+        )
+        qa = read("docs", "SOLO_QA.md")
+        tests = ROOT.joinpath("Packages", "MapLibreMap", "Tests")
+        count = 0
+        for path in tests.rglob("*.swift"):
+            count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
+        self.assertEqual(count, 175)
+        self.assertIn("var name: String", marks)
+        self.assertIn("var note: String", marks)
+        self.assertIn("var emblem: String", marks)
+        self.assertIn("decodeIfPresent", marks)
+        self.assertIn("enum PlaceMark", marks)
+        self.assertIn('idPrefix = "MARK·"', marks)
+        self.assertIn("static func upsert(", marks)
+        self.assertIn("func merging(", marks)
+        self.assertIn("func openMark(", app)
+        self.assertIn("func commitMark(", app)
+        self.assertIn("func holdPlaceMark(", app)
+        self.assertIn("var markDraft", app)
+        self.assertIn("var heldMark", app)
+        self.assertIn("mesh.sendMark(", app)
+        self.assertIn("case \"mark\":", app)
+        self.assertIn("dropMark()", app)
+        self.assertIn("PlaceMarkCard(", tab)
+        self.assertIn("PlaceMark.body", tab)
+        self.assertIn("PersonEmblem.allCases", card)
+        self.assertIn('HUDField("NAME"', card)
+        self.assertIn('HUDField("NOTE"', card)
+        self.assertIn('Button("DROP")', card)
+        self.assertIn("COORDINATES", card)
+        self.assertIn("locked: true", card)
+        self.assertNotIn("TextField(", card)
+        self.assertNotIn(".spring(", card)
+        self.assertNotIn("Color.orange", card)
+        self.assertNotIn("best in class", card.lower())
+        self.assertIn("PersonEmblem.allCases", emblem)
+        self.assertIn("case hawk", emblem)
+        self.assertIn("kind: \"mark\"", mesh)
+        self.assertIn("enum MeshMarkBody", mesh)
+        self.assertIn("func sendMark(", mesh)
+        mark_line = next(
+            line
+            for line in qa.splitlines()
+            if "NAME, NOTE, FACE" in line or ("MARK" in line and "FACE" in line)
+        )
+        self.assertIn("NAME", mark_line)
+        self.assertIn("NOTE", mark_line)
+        self.assertIn("FACE", mark_line)
+        self.assertIn("DROP", mark_line)
+        self.assertIn("emblem", mark_line.lower())
+        self.assertIn("party", mark_line.lower())
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertIn("PlaceMark.parse", app)
 
 
 class ExpeditionKitPaperTests(unittest.TestCase):
@@ -2492,6 +2561,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "SOSHold.swift",
         "InstrumentsView.swift",
         "HUDKeyboard.swift",
+        "PlaceMarkCard.swift",
     )
 
     def test_facet_tokens_are_highlight_and_shade_not_flat_grey(self):
@@ -2613,6 +2683,7 @@ class HUDKeyboardTests(unittest.TestCase):
         "ExpeditionTab.swift",
         "CommsTab.swift",
         "PartyHoldCard.swift",
+        "PlaceMarkCard.swift",
     )
 
     def test_every_field_is_hud_glass_not_uitextfield(self):

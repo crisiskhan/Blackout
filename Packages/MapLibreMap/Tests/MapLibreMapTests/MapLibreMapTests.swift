@@ -22,6 +22,13 @@ final class MapLibreMapTests: XCTestCase {
         // A mark must come back off disk as the same mark. Deduping the reload
         // through MarkDrop.merging used to mint a fresh id on every launch.
         XCTAssertEqual(back.first?.id, "m1")
+        XCTAssertEqual(back.first?.name, "")
+        XCTAssertEqual(back.first?.note, "")
+        XCTAssertEqual(back.first?.emblem, PersonEmblem.fallback.rawValue)
+        XCTAssertEqual(PlaceMark.parse(PlaceMark.canvasID("m1")), "m1")
+        XCTAssertNil(PlaceMark.parse("peer-1"))
+        XCTAssertEqual(PlaceMark.body(marks[0]).id, "MARK·m1")
+        XCTAssertNil(PlaceMark.body(marks[0]).headingDeg)
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: false), "OFF GRAPH")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: true, hasGraph: false), "")
         XCTAssertEqual(LockOnChrome.banner(hasGPS: false, hasGraph: true), "")
@@ -33,6 +40,13 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
         suite.set(Data([0x00, 0x01, 0x02]), forKey: MarkStore.key)
         XCTAssertEqual(MarkStore.load(defaults: suite), [])
+        let legacy = Data(#"[{"id":"old","lat":31.76,"lon":-106.49,"label":"TX WEST"}]"#.utf8)
+        suite.set(legacy, forKey: MarkStore.key)
+        let loaded = MarkStore.load(defaults: suite)
+        XCTAssertEqual(loaded.first?.id, "old")
+        XCTAssertEqual(loaded.first?.name, "")
+        XCTAssertEqual(loaded.first?.note, "")
+        XCTAssertEqual(loaded.first?.emblem, PersonEmblem.fallback.rawValue)
         MarkStore.save([MapMark(id: "m2", lat: 35.0844, lon: -106.6504, label: "NM")], defaults: suite)
         let back = MarkStore.load(defaults: suite)
         XCTAssertEqual(back.first?.label, "NM")
@@ -338,6 +352,36 @@ final class MapLibreMapTests: XCTestCase {
         }
         XCTAssertEqual(marks.count, 1)
         XCTAssertEqual(marks[0].label, PackChrome.offPack)
+        let keptID = marks[0].id
+        let planted = MapMark(
+            id: "cache",
+            lat: 31.8705,
+            lon: -106.5973,
+            label: PackChrome.offPack,
+            name: "CACHE",
+            note: "water",
+            emblem: "hawk"
+        )
+        marks = MarkDrop.upsert(marks, mark: planted)
+        XCTAssertEqual(marks.count, 1)
+        XCTAssertEqual(marks[0].id, keptID)
+        XCTAssertEqual(marks[0].name, "CACHE")
+        XCTAssertEqual(marks[0].note, "water")
+        XCTAssertEqual(marks[0].emblem, "hawk")
+        let again = MapMark(
+            id: "other",
+            lat: 31.87054,
+            lon: -106.59731,
+            label: PackChrome.offPack,
+            name: "CACHE 2",
+            note: "dry",
+            emblem: "owl"
+        )
+        marks = MarkDrop.upsert(marks, mark: again)
+        XCTAssertEqual(marks.count, 1)
+        XCTAssertEqual(marks[0].name, "CACHE 2")
+        XCTAssertEqual(marks[0].note, "dry")
+        XCTAssertEqual(marks[0].emblem, "owl")
         XCTAssertEqual(MarkDrop.rounded(31.87054), 31.8705)
         XCTAssertTrue(MarkDrop.sameCoord((31.87054, -106.59731), (31.8705, -106.5973)))
     }

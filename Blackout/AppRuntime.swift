@@ -79,6 +79,10 @@ final class AppRuntime {
     var heldParty: HeldPerson?
     /// A packed door the search book interpolated. Mutually exclusive with ground and party.
     var heldAddress: HeldAddress?
+    /// Party place composer. NAME / NOTE / FACE live here until DROP.
+    var markDraft: MapMarkDraft?
+    /// Planted place the thumb is holding. Mutually exclusive with ground and party.
+    var heldMark: MapMark?
     /// FACE glass over the YOU profile. Never on a peer card.
     var pickingEmblem = false
     /// Chosen name on YOU. Empty is still YOU on the card.
@@ -250,26 +254,119 @@ final class AppRuntime {
         let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
         let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
         guard let lat, let lon else { return }
-        dropMark(lat: lat, lon: lon)
+        openMark(lat: lat, lon: lon)
     }
 
     /// A mark on a place the thumb chose rather than on the fix. `name` is the
-    /// record's own name when it has one; it goes in front of the coordinate
-    /// label so a list of marks reads as places instead of numbers.
+    /// record's own name when it has one; it fills NAME on the composer.
     func dropMark(lat: Double, lon: Double, name: String? = nil) {
+        openMark(lat: lat, lon: lon, name: name)
+    }
+
+    func openMark(lat: Double, lon: Double, name: String? = nil) {
         guard lat.isFinite, lon.isFinite else { return }
+        hudKeys.close()
+        pickingEmblem = false
+        closeSpeakTurns()
+        held = nil
+        heldParty = nil
+        heldAddress = nil
+        let pref = MeshMarkBody.clean(name ?? "")
+        let unnamed = pref.isEmpty || pref == Inspect.unnamed
+        if let existing = marks.first(where: { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }) {
+            heldMark = existing
+            let named = existing.name.isEmpty && !unnamed ? pref : existing.name
+            markDraft = MapMarkDraft(
+                lat: existing.lat,
+                lon: existing.lon,
+                name: named,
+                note: existing.note,
+                emblem: existing.emblem,
+                existingID: existing.id
+            )
+            pulse()
+            return
+        }
+        heldMark = nil
+        markDraft = MapMarkDraft(
+            lat: lat,
+            lon: lon,
+            name: unnamed ? "" : pref,
+            note: "",
+            emblem: PersonEmblem.fallback.rawValue,
+            existingID: nil
+        )
+        pulse()
+    }
+
+    /// Same coord stays one pin. MarkDrop.merging is insert-only; DROP uses upsert.
+    func commitMark() {
+        guard let draft = markDraft else { return }
+        guard draft.lat.isFinite, draft.lon.isFinite else { return }
         let pack = packs?.active
         let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
         let coords = PackChrome.markLabel(
-            lat: lat,
-            lon: lon,
+            lat: draft.lat,
+            lon: draft.lon,
             packName: pack?.name ?? "mark",
             bbox: bbox
         )
-        let named = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let named = MeshMarkBody.clean(draft.name)
+        let note = MeshMarkBody.clean(draft.note)
         let label = named.isEmpty || named == Inspect.unnamed ? coords : "\(named) · \(coords)"
-        marks = MarkDrop.merging(marks, lat: lat, lon: lon, label: label)
+        let emblem = PersonEmblem.resolved(draft.emblem).rawValue
+        let existing = marks.first {
+            $0.id == draft.existingID || MarkDrop.sameCoord(($0.lat, $0.lon), (draft.lat, draft.lon))
+        }
+        let mark = MapMark(
+            id: existing?.id ?? draft.existingID ?? UUID().uuidString,
+            lat: draft.lat,
+            lon: draft.lon,
+            label: label,
+            name: named == Inspect.unnamed ? "" : named,
+            note: note,
+            emblem: emblem,
+            from: mesh.localID
+        )
+        marks = MarkDrop.upsert(marks, mark: mark)
         MarkStore.save(marks)
+        mesh.sendMark(
+            from: mesh.localID,
+            id: mark.id,
+            lat: mark.lat,
+            lon: mark.lon,
+            name: mark.name,
+            note: mark.note,
+            emblem: mark.emblem,
+            label: mark.label
+        )
+        closeMark()
+    }
+
+    func closeMark() {
+        markDraft = nil
+        heldMark = nil
+        hudKeys.close()
+        pulse()
+    }
+
+    func holdPlaceMark(_ mark: MapMark) {
+        hudKeys.close()
+        pickingEmblem = false
+        closeSpeakTurns()
+        held = nil
+        heldParty = nil
+        heldAddress = nil
+        heldMark = mark
+        markDraft = MapMarkDraft(
+            lat: mark.lat,
+            lon: mark.lon,
+            name: mark.name,
+            note: mark.note,
+            emblem: mark.emblem,
+            existingID: mark.id
+        )
+        pulse()
     }
 
     // MARK: - Hold to inspect
@@ -282,6 +379,8 @@ final class AppRuntime {
         pulse()
         pickingEmblem = false
         closeSpeakTurns()
+        markDraft = nil
+        heldMark = nil
         heldParty = nil
         heldAddress = nil
         let id = packs?.active?.id
@@ -314,11 +413,10 @@ final class AppRuntime {
         pulse()
     }
 
-    /// MARK on the card puts the mark on the held place, not on the fix.
+    /// MARK on the card opens the composer on the held place, not on the fix.
     func markHeld() {
         guard let point = held, !point.marked else { return }
-        dropMark(lat: point.lat, lon: point.lon, name: point.card.title)
-        held?.marked = true
+        openMark(lat: point.lat, lon: point.lon, name: point.card.title)
     }
 
     func holdAddress(_ hit: SearchHit) {
@@ -326,6 +424,8 @@ final class AppRuntime {
         pulse()
         pickingEmblem = false
         closeSpeakTurns()
+        markDraft = nil
+        heldMark = nil
         held = nil
         heldParty = nil
         let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -353,8 +453,7 @@ final class AppRuntime {
 
     func markHeldAddress() {
         guard let address = heldAddress, !address.marked else { return }
-        dropMark(lat: address.lat, lon: address.lon, name: address.name)
-        heldAddress?.marked = true
+        openMark(lat: address.lat, lon: address.lon, name: address.name)
     }
 
     func addressCourse(lat: Double, lon: Double) -> String {
@@ -386,9 +485,17 @@ final class AppRuntime {
 
     func holdParty(id: String, lat: Double, lon: Double) {
         guard lat.isFinite, lon.isFinite else { return }
+        if let markID = PlaceMark.parse(id) {
+            if let mark = marks.first(where: { $0.id == markID }) {
+                holdPlaceMark(mark)
+            }
+            return
+        }
         pulse()
         pickingEmblem = false
         closeSpeakTurns()
+        markDraft = nil
+        heldMark = nil
         held = nil
         heldAddress = nil
         if id == UserPuck.title {
@@ -688,7 +795,7 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil { return }
+            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || markDraft != nil || heldMark != nil { return }
             hudFocus = .none
             chromeAwake = false
         }
@@ -1117,6 +1224,32 @@ final class AppRuntime {
                     comms.push(chip)
                 }
             }
+        case "mark":
+            if let raw = String(data: env.body, encoding: .utf8),
+               let parsed = MeshMarkBody.parse(raw),
+               parsed.lat.isFinite,
+               parsed.lon.isFinite {
+                let pack = packs?.active
+                let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
+                let fallback = PackChrome.markLabel(
+                    lat: parsed.lat,
+                    lon: parsed.lon,
+                    packName: pack?.name ?? "mark",
+                    bbox: bbox
+                )
+                let mark = MapMark(
+                    id: parsed.id.isEmpty ? UUID().uuidString : parsed.id,
+                    lat: parsed.lat,
+                    lon: parsed.lon,
+                    label: parsed.label.isEmpty ? fallback : parsed.label,
+                    name: parsed.name,
+                    note: parsed.note,
+                    emblem: PersonEmblem.resolved(parsed.emblem).rawValue,
+                    from: env.from
+                )
+                marks = MarkDrop.upsert(marks, mark: mark)
+                MarkStore.save(marks)
+            }
         case "voice":
             if let pcm = OpusLite.decode(env.body) {
                 PTTMic.shared.play(pcm)
@@ -1360,7 +1493,11 @@ final class AppRuntime {
                     packName: pack.name,
                     packNames: names,
                     offPack: !coordinateOnPack(lat: m.lat, lon: m.lon)
-                )
+                ),
+                name: m.name,
+                note: m.note,
+                emblem: m.emblem,
+                from: m.from
             )
         }
         MarkStore.save(marks)

@@ -6,16 +6,121 @@ import DeadReckoning
 import Almanac
 import BlackBox
 
-public struct MapMark: Codable, Equatable, Sendable, Identifiable {
+public struct MapMark: Equatable, Sendable, Identifiable {
     public var id: String
     public var lat: Double
     public var lon: Double
     public var label: String
-    public init(id: String, lat: Double, lon: Double, label: String) {
+    public var name: String
+    public var note: String
+    public var emblem: String
+    public var from: String
+
+    public init(
+        id: String,
+        lat: Double,
+        lon: Double,
+        label: String,
+        name: String = "",
+        note: String = "",
+        emblem: String = PersonEmblem.fallback.rawValue,
+        from: String = ""
+    ) {
         self.id = id
         self.lat = lat
         self.lon = lon
         self.label = label
+        self.name = name
+        self.note = note
+        self.emblem = emblem
+        self.from = from
+    }
+
+    /// Glass row and SEARCH use the chosen NAME. Label keeps pack / OFF PACK.
+    public var title: String {
+        let named = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return named.isEmpty ? label : named
+    }
+}
+
+extension MapMark: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, lat, lon, label, name, note, emblem, from
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        lat = try c.decode(Double.self, forKey: .lat)
+        lon = try c.decode(Double.self, forKey: .lon)
+        label = try c.decode(String.self, forKey: .label)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
+        emblem = try c.decodeIfPresent(String.self, forKey: .emblem) ?? PersonEmblem.fallback.rawValue
+        from = try c.decodeIfPresent(String.self, forKey: .from) ?? ""
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(lat, forKey: .lat)
+        try c.encode(lon, forKey: .lon)
+        try c.encode(label, forKey: .label)
+        try c.encode(name, forKey: .name)
+        try c.encode(note, forKey: .note)
+        try c.encode(emblem, forKey: .emblem)
+        try c.encode(from, forKey: .from)
+    }
+}
+
+/// Composer for a party place. NAME / NOTE / FACE live here until DROP.
+public struct MapMarkDraft: Equatable, Sendable {
+    public var lat: Double
+    public var lon: Double
+    public var name: String
+    public var note: String
+    public var emblem: String
+    public var existingID: String?
+
+    public init(
+        lat: Double,
+        lon: Double,
+        name: String = "",
+        note: String = "",
+        emblem: String = PersonEmblem.fallback.rawValue,
+        existingID: String? = nil
+    ) {
+        self.lat = lat
+        self.lon = lon
+        self.name = name
+        self.note = note
+        self.emblem = emblem
+        self.existingID = existingID
+    }
+}
+
+/// Canvas id for a planted place, distinct from a person pip.
+public enum PlaceMark {
+    public static let idPrefix = "MARK·"
+
+    public static func canvasID(_ id: String) -> String {
+        idPrefix + id
+    }
+
+    public static func parse(_ raw: String) -> String? {
+        guard raw.hasPrefix(idPrefix) else { return nil }
+        let rest = String(raw.dropFirst(idPrefix.count))
+        return rest.isEmpty ? nil : rest
+    }
+
+    public static func body(_ mark: MapMark) -> PartyBody {
+        PartyBody(
+            id: canvasID(mark.id),
+            lat: mark.lat,
+            lon: mark.lon,
+            headingDeg: nil,
+            emblem: mark.emblem
+        )
     }
 }
 
@@ -77,6 +182,28 @@ public enum MarkDrop {
             return marks
         }
         return marks + [MapMark(id: UUID().uuidString, lat: lat, lon: lon, label: label)]
+    }
+
+    /// NAME / NOTE / FACE rewrite the pin at that coordinate. Same coord stays one mark.
+    public static func upsert(_ marks: [MapMark], mark: MapMark) -> [MapMark] {
+        if let i = marks.firstIndex(where: {
+            $0.id == mark.id || sameCoord(($0.lat, $0.lon), (mark.lat, mark.lon))
+        }) {
+            var next = marks
+            let kept = next[i]
+            next[i] = MapMark(
+                id: kept.id,
+                lat: mark.lat,
+                lon: mark.lon,
+                label: mark.label,
+                name: mark.name,
+                note: mark.note,
+                emblem: mark.emblem,
+                from: mark.from.isEmpty ? kept.from : mark.from
+            )
+            return next
+        }
+        return marks + [mark]
     }
 }
 

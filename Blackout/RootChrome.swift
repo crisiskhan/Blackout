@@ -41,7 +41,10 @@ struct RootChrome: View {
             runtime.pulse()
         }
         .onChange(of: runtime.armed) { _, now in
-            if !now { runtime.hudKeys.close() }
+            if !now {
+                runtime.hudKeys.close()
+                runtime.closeMark()
+            }
             runtime.applyMapKeepAwake()
         }
     }

@@ -33,6 +33,7 @@ public enum PersonEmblem: String, CaseIterable, Sendable, Equatable {
 
     public static let fallback = PersonEmblem.wolf
     public static let key = "you.emblem"
+    /// FACE grids iterate PersonEmblem.allCases — same metal-ring faces as YOU.
 
     public var title: String {
         switch self {

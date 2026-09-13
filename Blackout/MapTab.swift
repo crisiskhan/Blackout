@@ -66,11 +66,12 @@ struct MapTab: View {
                 route: runtime.routeCoords,
                 destination: runtime.routeTarget,
                 held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
-                    ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) },
+                    ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
+                    ?? runtime.markDraft.map { (lat: $0.lat, lon: $0.lon) },
                 fitToken: runtime.fitPackToken,
                 interactive: MapCanvasHit.enabled(
                     onMap: runtime.tab == .map,
-                    holding: runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil || runtime.showSpeakTurns,
+                    holding: coverUp,
                     arranging: runtime.hudLayoutMode
                 ),
                 onMapTap: { lat, lon in
@@ -93,7 +94,7 @@ struct MapTab: View {
                             headingDeg: $0.headingDeg,
                             emblem: $0.emblem
                         )
-                    },
+                    } + runtime.marks.map(PlaceMark.body),
                 youHeading: runtime.headingDeg,
                 youEmblem: runtime.youEmblem.rawValue,
                 onPulse: { runtime.pulse() },
@@ -104,19 +105,22 @@ struct MapTab: View {
             // The scrim already keeps a thumb off the canvas. This is the
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
-            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil || runtime.showSpeakTurns)
-            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil, !runtime.showSpeakTurns {
+            .accessibilityHidden(coverUp)
+            if runtime.tab == .map, !coverUp {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if runtime.tab == .map, runtime.showSpeakTurns, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil {
+            if runtime.tab == .map, runtime.showSpeakTurns, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil, runtime.markDraft == nil {
                 SpeakTurnCard(
                     turns: runtime.speakHUDTurns,
                     onClose: { runtime.closeSpeakTurns() }
                 )
                 .padding(hudReserve)
             }
-            if runtime.tab == .map, let person = runtime.heldParty {
+            if runtime.tab == .map, runtime.markDraft != nil {
+                PlaceMarkCard(runtime: runtime)
+                    .padding(hudReserve)
+            } else if runtime.tab == .map, let person = runtime.heldParty {
                 PartyHoldCard(
                     person: person,
                     bearing: runtime.partyCourse(for: person),
@@ -173,6 +177,16 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
+        .animation(Theme.Motion.heavy, value: runtime.markDraft)
+    }
+
+    private var coverUp: Bool {
+        runtime.held != nil
+            || runtime.heldParty != nil
+            || runtime.heldAddress != nil
+            || runtime.showSpeakTurns
+            || runtime.markDraft != nil
+            || runtime.heldMark != nil
     }
 
     /// Everything that is not the map, sitting on the map. Search, lock and
@@ -322,7 +336,7 @@ struct MapTab: View {
             if !SearchIndex.asking(query), !rows.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(rows) { m in
-                        Button(m.label) {
+                        Button(m.title) {
                             runtime.pickDestination(lat: m.lat, lon: m.lon)
                         }
                         .font(.system(size: 13, weight: .heavy))
@@ -560,7 +574,7 @@ struct MapTab: View {
         let asked = query
         let you = runtime.gnssYou
         let extra = runtime.marks.map {
-            SearchExtra(name: $0.label, kind: "mark", lat: $0.lat, lon: $0.lon)
+            SearchExtra(name: $0.title, kind: "mark", lat: $0.lat, lon: $0.lon)
         }
         let cap = BlackoutTokens.Chrome.mapSearchHitCap
         Task.detached(priority: .userInitiated) {

@@ -203,6 +203,49 @@ public enum MeshKitBody {
     }
 }
 
+public enum MeshMarkBody {
+    public static func encode(
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    ) -> String {
+        [
+            id,
+            String(lat),
+            String(lon),
+            clean(name),
+            clean(note),
+            emblem,
+            clean(label),
+        ].joined(separator: "\t")
+    }
+
+    public static func parse(_ raw: String) -> (
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    )? {
+        let parts = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count >= 7 else { return nil }
+        guard let lat = Double(parts[1]), let lon = Double(parts[2]) else { return nil }
+        return (parts[0], lat, lon, parts[3], parts[4], parts[5], parts[6])
+    }
+
+    public static func clean(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "\t", with: " ")
+            .replacingOccurrences(of: "\n", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 public struct MeshTimerEvent: Equatable, Sendable, Identifiable {
     public var id: String
     public var from: String
@@ -504,6 +547,29 @@ public final class MeshNet: @unchecked Sendable {
         enqueue(make(from: from, kind: "kit", body: Data(body.utf8)))
     }
 
+    public func sendMark(
+        from: String,
+        id: String,
+        lat: Double,
+        lon: Double,
+        name: String,
+        note: String,
+        emblem: String,
+        label: String
+    ) {
+        guard lat.isFinite, lon.isFinite else { return }
+        let body = MeshMarkBody.encode(
+            id: id,
+            lat: lat,
+            lon: lon,
+            name: name,
+            note: note,
+            emblem: emblem,
+            label: label
+        )
+        enqueue(make(from: from, kind: "mark", body: Data(body.utf8)))
+    }
+
     public func linkKind() -> LinkKind {
         if loRaBrickPresent { return .optionalLoRaBrick }
         if joined { return .bleTensOfMeters }
@@ -582,6 +648,8 @@ public final class MeshNet: @unchecked Sendable {
                 let parsed = MeshTimerBody.parse(raw)
                 upsertTimer(MeshTimerEvent(id: env.id, from: env.from, task: parsed.task, done: env.kind == "timer.done"))
             }
+        case "mark", "kit", "voice":
+            break
         default:
             break
         }
