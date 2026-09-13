@@ -56,12 +56,13 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 # Persimmon Well, Good Friday, and Jumbled Rocks. Unique versus
 # the Buttercup overlay Hold (141 m). Cedar Elm Preserve Trail
 # stays a trail. Brook Meadow Trail is a road. Godzilla Cave
-# stays unheld — Link's sits 84 m off that mouth. Zig Zag stays
+# stays unheld — Link's sits 84 m off that mouth. Backdoor Cave
+# stays unheld — a spring sits 11 m off that mouth. Zig Zag stays
 # unheld. Hot Springs Cave is a named mouth inside Jemez NRA —
 # rank 1 still beats the overlay. Soda Dam is rock, not the hole.
 # Generic Cave and the two La Cueva stay unheld. Do not add
-# matcher `good friday`, `hot springs`, `jumbled`, `dies`, or
-# `treasure`.
+# matcher `good friday`, `hot springs`, `jumbled`, `dies`,
+# `treasure`, or `backdoor`.
 CAVE_PRESERVE_PHRASES = (
     "cave preserve",
     "cave area of critical",
@@ -262,7 +263,10 @@ WILDLIFE_RANGE_PHRASES = (
 # Conservation Trust, New Mexico Land Conservancy, Organ Mountains
 # Wilderness, Billy Rogers Arroyo, Piedmont City Preserve, Westside
 # Preserve, Manzano Wilderness Study Area, Ojito Wilderness Study
-# Area, San Luis Mesa ACEC, and Pecos Wilderness are those
+# Area, San Luis Mesa ACEC, Pecos Wilderness, South Hills
+# Conservation Area, Deer Park at Maple Run Preserve, Sandia
+# Foothills Open Space, Golden Open Space, and Paseo de la Mesa
+# Open Space are those
 # Holds. Do not add
 # matcher `los lunas`, `galisteo`, `castner`, `trackways`,
 # `white sands`, `ojito`, `cabezon`, `tent rocks`, `petroglyph`,
@@ -271,11 +275,12 @@ WILDLIFE_RANGE_PHRASES = (
 # `carrington`, `cornundas`, `cornudas`, `florida`, `chamisa`,
 # `tapia`, `empedrado`, `ignacio`, `chavez`, `la leña`, `lena`,
 # `ladrones`, `ladron`, `indian grass`, `indian`, `dome`,
-# `manzano`, `sandia`, `organ`, `desert peaks`, `bandelier`,
+# `manzano`, `sandia`, `foothills`, `organ`, `desert peaks`, `bandelier`,
 # `carlito`, `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
 # `tres pistolas`, `pistolas`, `bear canyon`, `conservation trust`,
 # `land conservancy`, `conservancy`, `westside`, `billy`,
-# `piedmont`, `san luis`, or `south hills`. Phrase `open space` is not a bare contains —
+# `piedmont`, `san luis`, `south hills`, `deer park`, `maple`,
+# `golden`, or `paseo`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
@@ -369,7 +374,10 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # off that sheet. Phrase `community garden` already matches
 # Adam Gabriel Armijo Community Garden. Cerro Gordo Park stays
 # Park. Cerro Gordo Road stays a road. Do not add matcher
-# `adam` or `armijo`. Desert
+# `adam` or `armijo`. Amenity `community garden` already matches
+# Crestview Commons Neighborhood Park. Wildcat Pass stays a
+# road. Hammock Park stays a park. Do not add matcher
+# `crestview`. Desert
 # Garden Park stays unheld.
 # Winrock Garden is a mall
 # bed and stays out.

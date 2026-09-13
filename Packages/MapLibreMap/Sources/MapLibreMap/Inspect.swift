@@ -341,11 +341,12 @@ public enum Inspect {
     /// Preserve is a hole — phrase `karst preserve`. Listed hunt sat
     /// on water. This interior is 140 m from Tiombe Branch. La
     /// Cresada Drive stays a road. Godzilla Cave stays unheld —
-    /// Link's sits 84 m off that mouth. Zig Zag stays unheld. Hot Springs Cave is a named
+    /// Link's sits 84 m off that mouth. Backdoor Cave stays unheld —
+    /// a spring sits 11 m off that mouth. Zig Zag stays unheld. Hot Springs Cave is a named
     /// mouth inside Jemez NRA — rank 1 still beats the overlay. Soda
     /// Dam is rock, not the hole. Generic Cave and the two La Cueva
     /// stay unheld. Do not add matcher `good friday`, `hot springs`, `jumbled`,
-    /// `dies`, or `treasure`.
+    /// `dies`, `treasure`, or `backdoor`.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {
@@ -610,7 +611,9 @@ public enum Inspect {
     /// Road stays a road. Do not add matcher `patterson`. Patterson
     /// stays unheld — a public tap sits in the garden. Cherry
     /// Creek Community Garden stays unheld (water too close).
-    /// Desert Garden Park stays unheld. Winrock Garden is a mall bed and stays out.
+    /// Amenity `community garden` already matches Crestview Commons
+    /// Neighborhood Park. Wildcat Pass stays a road. Hammock Park
+    /// stays a park. Do not add matcher `crestview`. Desert Garden Park stays unheld. Winrock Garden is a mall bed and stays out.
     /// Experimental Gardens
     /// overlap glasshouses and stay out. `leisure=garden` is
     /// botanic-eligible with a phrase; it is not a cave, wildlife,
@@ -685,8 +688,10 @@ public enum Inspect {
     /// Conservation Trust, New Mexico Land Conservancy, Organ Mountains
     /// Wilderness, Billy Rogers Arroyo, Piedmont City Preserve, Westside
     /// Preserve, Manzano Wilderness Study Area, Ojito Wilderness Study
-    /// Area, San Luis Mesa ACEC, Pecos Wilderness, and South Hills
-    /// Conservation Area are those
+    /// Area, San Luis Mesa ACEC, Pecos Wilderness, South Hills
+    /// Conservation Area, Deer Park at Maple Run Preserve, Sandia
+    /// Foothills Open Space, Golden Open Space, and Paseo de la Mesa
+    /// Open Space are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
@@ -696,11 +701,12 @@ public enum Inspect {
     /// `cornudas`, `florida`, `chamisa`, `tapia`, `empedrado`,
     /// `ignacio`, `chavez`, `la leña`, `lena`, `ladrones`,
     /// `ladron`, `indian grass`, `indian`, `dome`, `manzano`,
-    /// `sandia`, `organ`, `desert peaks`, `bandelier`, `carlito`,
+    /// `sandia`, `foothills`, `organ`, `desert peaks`, `bandelier`, `carlito`,
     /// `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
     /// `tres pistolas`, `pistolas`, `bear canyon`, `conservation
     /// trust`, `land conservancy`, `conservancy`, `westside`,
-    /// `billy`, `piedmont`, `san luis`, or `south hills`. Phrase
+    /// `billy`, `piedmont`, `san luis`, `south hills`, `deer park`,
+    /// `maple`, `golden`, or `paseo`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
