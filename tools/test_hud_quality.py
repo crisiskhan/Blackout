@@ -2772,6 +2772,16 @@ class HUDKeyboardTests(unittest.TestCase):
         self.assertIn("Theme.glass", board)
         self.assertIn("Theme.Motion.heavy", board)
         self.assertIn("Theme.metalStroke", board)
+        self.assertNotRegex(
+            board,
+            r"\? Theme\.accent : Theme\.metalStroke",
+            "Xcode 26 archive rejects Color vs LinearGradient in one ternary; stroke live with accent, idle with metal",
+        )
+        self.assertNotRegex(
+            board,
+            r"\? Theme\.metalStroke : Theme\.accent",
+            "Xcode 26 archive rejects Color vs LinearGradient in one ternary",
+        )
         self.assertNotIn(".spring(", board)
         self.assertNotIn("TextField(", board)
         self.assertNotIn("UIKeyboardType", board)

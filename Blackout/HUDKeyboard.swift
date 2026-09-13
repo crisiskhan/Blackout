@@ -137,10 +137,15 @@ struct HUDField: View {
             .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .background(Theme.glass())
             .clipShape(Theme.plateRect())
-            .overlay(
-                Theme.plateRect()
-                    .strokeBorder(live ? Theme.accent : Theme.metalStroke, lineWidth: 1)
-            )
+            .overlay {
+                if live {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: 1)
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                }
+            }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
@@ -303,12 +308,14 @@ struct HUDKeyCapStyle: ButtonStyle {
                 }
             }
             .clipShape(Theme.plateRect())
-            .overlay(
-                Theme.plateRect()
-                    .strokeBorder(
-                        lit || fill != nil ? Theme.accent : Theme.metalStroke,
-                        lineWidth: 1
-                    )
-            )
+            .overlay {
+                if lit || fill != nil {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: 1)
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                }
+            }
     }
 }
