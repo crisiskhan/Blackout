@@ -311,11 +311,11 @@ final class AppRuntime {
 
     func dropMark() {
         pulse()
-        fix.arm()
-        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? packs?.active?.center.lat
-        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? packs?.active?.center.lon
-        guard let lat, let lon else { return }
-        openMark(lat: lat, lon: lon)
+        guard let dest = routeTarget else {
+            routeChrome = PlaceMark.setDest
+            return
+        }
+        openMark(lat: dest.lat, lon: dest.lon)
     }
 
     /// A mark on a place the thumb chose rather than on the fix. `name` is the
@@ -459,9 +459,6 @@ final class AppRuntime {
                 state: packs?.active?.state,
                 pack: packs?.active?.id
             ),
-            // Holding a spring marked last week has to open reading MARKED.
-            // Marks merge by coordinate, so pressing MARK there does nothing,
-            // and a button that offers something it will not do is a lie.
             marked: marks.contains { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }
         )
     }
@@ -472,12 +469,6 @@ final class AppRuntime {
         heldAddress = nil
         pickingEmblem = false
         pulse()
-    }
-
-    /// MARK on the card opens the composer on the held place, not on the fix.
-    func markHeld() {
-        guard let point = held, !point.marked else { return }
-        openMark(lat: point.lat, lon: point.lon, name: point.card.title)
     }
 
     func holdAddress(_ hit: SearchHit) {
@@ -514,6 +505,7 @@ final class AppRuntime {
 
     func markHeldAddress() {
         guard let address = heldAddress, !address.marked else { return }
+        pickDestination(lat: address.lat, lon: address.lon)
         openMark(lat: address.lat, lon: address.lon, name: address.name)
     }
 

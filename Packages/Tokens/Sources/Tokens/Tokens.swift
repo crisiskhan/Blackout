@@ -50,9 +50,8 @@ public enum BlackoutTokens: Sendable {
         public static let holdCardScrimTopOpacity: Double = 0.14
         /// How far the card has to be dragged down before it goes.
         public static let holdCardDismissDragPoints: Double = 44
-        /// Field and Mark. A third button turns a glance into a menu, and SOS
-        /// is never one of them — it lives on Comms and nowhere else.
-        public static let holdCardMaxActions: Int = 2
+        /// FIELD only. MARK names DEST on the dock, and SOS lives on Comms.
+        public static let holdCardMaxActions: Int = 1
         /// Incoming CALL / MESSAGE glass line. Newest replaces; then it clears.
         public static let incomingLineSeconds: Double = 8
         /// MAP chrome sleeps so the world can feel like it might disappear.

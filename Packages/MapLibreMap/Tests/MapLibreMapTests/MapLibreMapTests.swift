@@ -26,6 +26,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(back.first?.note, "")
         XCTAssertEqual(back.first?.emblem, PersonEmblem.fallback.rawValue)
         XCTAssertEqual(PlaceMark.parse(PlaceMark.canvasID("m1")), "m1")
+        XCTAssertEqual(PlaceMark.setDest, "SET DEST")
         XCTAssertNil(PlaceMark.parse("peer-1"))
         XCTAssertEqual(PlaceMark.body(marks[0]).id, "MARK·m1")
         XCTAssertNil(PlaceMark.body(marks[0]).headingDeg)

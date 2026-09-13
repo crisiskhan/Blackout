@@ -25,7 +25,7 @@ final class InspectTests: XCTestCase {
 
     func testAnEmptyHoldIsStillAnAnswer() {
         // A hold that finds nothing must not be a dead press. It reports the
-        // ground and still offers Field and Mark.
+        // ground and still offers Field.
         let card = Inspect.read(tags: [:])
         XCTAssertEqual(card.title, Inspect.unnamed)
         XCTAssertEqual(card.klass, "Open ground")

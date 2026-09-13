@@ -136,26 +136,23 @@ def assert_the_glass_has_no_osm_credit() -> None:
     print("OK   the glass has no OpenStreetMap credit")
 
 
-def assert_the_card_offers_exactly_two_actions() -> None:
-    """Two buttons. A third turns a glance into a menu."""
+def assert_the_card_offers_field_and_not_mark() -> None:
+    """Long-press inspects. MARK lives on the dock after DEST, not on this card."""
     body = (APP / "HoldCard.swift").read_text()
     buttons = re.findall(r"Button\(action:", body)
-    if len(buttons) != 2:
-        fail(f"hold card has {len(buttons)} actions, expected 2")
-    for want in ("FIELD", "MARK"):
-        if want == "FIELD" and "InspectField.label" in body:
-            continue
-        if f'"{want}"' not in body and want != "FIELD":
-            fail(f"hold card is missing its {want} action")
-        if want == "MARK" and '"MARK"' not in body and "MARKED" not in body:
-            fail("hold card is missing its MARK action")
+    if len(buttons) != 1:
+        fail(f"hold card has {len(buttons)} actions, expected 1")
     if "InspectField.label" not in body:
         fail("hold card does not name the Field procedure from the route")
-    if "holdCardMaxActions: Int = 2" not in TOKENS:
-        fail("holdCardMaxActions is not 2")
+    if "onMark" in body or "MARKED" in body:
+        fail("hold card still plants a mark from a long-press")
+    if '"MARK"' in body:
+        fail("hold card still offers MARK")
+    if "holdCardMaxActions: Int = 1" not in TOKENS:
+        fail("holdCardMaxActions is not 1")
     if "holdCardMaxHeightFraction: Double = 0.5" not in TOKENS:
         fail("the card is not capped at half the screen")
-    print("OK   hold card offers FIELD and MARK and nothing else")
+    print("OK   hold card offers FIELD and not MARK")
 
 
 def assert_a_hold_is_not_a_pan() -> None:
@@ -619,7 +616,7 @@ def assert_the_generator_cannot_undo_the_audit() -> None:
 def main() -> None:
     assert_the_card_never_sells_the_water()
     assert_sos_is_not_on_the_map_hold()
-    assert_the_card_offers_exactly_two_actions()
+    assert_the_card_offers_field_and_not_mark()
     assert_the_glass_has_no_osm_credit()
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()

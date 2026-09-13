@@ -2682,9 +2682,9 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn('key: "BOOK"', card)
         self.assertIn("InspectField.label", card)
         self.assertIn("held.card.fieldRoute", card)
-        self.assertIn("MARKED", card)
+        self.assertNotIn("MARKED", card)
         self.assertIn("onField", card)
-        self.assertIn("onMark", card)
+        self.assertNotIn("onMark", card)
         self.assertNotIn("animal-icon", card)
         self.assertNotIn("edible", card.lower())
 

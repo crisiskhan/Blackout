@@ -102,6 +102,7 @@ public struct MapMarkDraft: Equatable, Sendable {
 /// Canvas id for a planted place, distinct from a person pip.
 public enum PlaceMark {
     public static let idPrefix = "MARK·"
+    public static let setDest = "SET DEST"
 
     public static func canvasID(_ id: String) -> String {
         idPrefix + id

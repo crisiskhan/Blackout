@@ -9,7 +9,7 @@ struct HeldPoint: Equatable {
     var lat: Double
     var lon: Double
     var card: Inspect.Card
-    /// Set once MARK has been pressed, so the card can show it took.
+    /// True when a party row already sits on this coordinate.
     var marked = false
 }
 
@@ -40,7 +40,7 @@ struct HeldAddress: Equatable {
 }
 
 /// Dark glass over the canvas: what this is, how sure the record is, what to
-/// do, and two ways to act on it. Tapping the dim map or dragging the card
+/// do, and FIELD as the one action. Tapping the dim map or dragging the card
 /// down puts it away. There is no SOS here and there never will be — SOS is a
 /// Comms button, and a thumb resting on a map is not a call for help.
 struct HoldCardView: View {
@@ -49,7 +49,6 @@ struct HoldCardView: View {
     /// these, not a New Mexico ice card on a Texas peak.
     let fieldBook: Set<String>
     let onField: () -> Void
-    let onMark: () -> Void
     let onClose: () -> Void
 
     private var fieldRoute: [String] {
@@ -60,8 +59,8 @@ struct HoldCardView: View {
     @State private var drag: CGFloat = 0
 
     /// Floor for the cap, for the one layout pass where the canvas has not been
-    /// measured yet. Below this the card cannot show a headline and two
-    /// buttons, and a card you cannot press is worse than a tall one.
+    /// measured yet. Below this the card cannot show a headline and the FIELD
+    /// button, and a card you cannot press is worse than a tall one.
     private static let smallestUsableCard: CGFloat = 180
 
     private var corner: CGFloat { CGFloat(BlackoutTokens.Chrome.holdCardCornerPoints) }
@@ -126,7 +125,7 @@ struct HoldCardView: View {
 
     /// Sized to its content until it reaches `cap`, then squeezed rather than
     /// cut off. Nothing here is `fixedSize`, so under a short canvas the
-    /// sentences give up lines while the grabber and the two buttons — the
+    /// sentences give up lines while the grabber and the FIELD button — the
     /// only parts that have to stay hittable — keep their height.
     private func card(cappedAt cap: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -230,20 +229,13 @@ struct HoldCardView: View {
         .accessibilityHint(hint ?? "")
     }
 
-    /// Two, and only two. `holdCardMaxActions` is the contract a guard reads.
+    /// One FIELD action. `holdCardMaxActions` is the contract a guard reads.
     private var actions: some View {
-        HStack(spacing: 8) {
-            Button(action: onField) {
-                Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(HoldActionStyle(filled: false))
-            Button(action: onMark) {
-                Text(held.marked ? "MARKED" : "MARK")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(HoldActionStyle(filled: held.marked))
+        Button(action: onField) {
+            Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
+                .frame(maxWidth: .infinity)
         }
+        .buttonStyle(HoldActionStyle(filled: false, expand: true))
     }
 }
 

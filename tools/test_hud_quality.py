@@ -1477,8 +1477,43 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertNotIn("Waze", qa)
         self.assertIn("PlaceMark.parse", app)
 
+    def test_mark_names_a_dest_for_the_party_not_the_fix_or_a_hold(self):
+        app = read("Blackout", "AppRuntime.swift")
+        tab = read("Blackout", "MapTab.swift")
+        hold = read("Blackout", "HoldCard.swift")
+        marks = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        qa = read("docs", "SOLO_QA.md")
+        drop = app.split("func dropMark()")[1].split("func ", 1)[0]
+        self.assertIn("routeTarget", drop)
+        self.assertIn("PlaceMark.setDest", drop)
+        self.assertNotIn("fix.last", drop)
+        self.assertNotIn("lastKnownFix", drop)
+        self.assertNotIn("center.lat", drop)
+        self.assertNotIn("fix.arm()", drop)
+        self.assertIn("runtime.dropMark()", tab)
+        self.assertIn("pickDestination(lat: lat, lon: lon)", tab)
+        self.assertIn("static let setDest", marks)
+        self.assertIn('setDest = "SET DEST"', marks)
+        self.assertNotIn("onMark", hold)
+        self.assertNotIn("MARKED", hold)
+        self.assertIn("InspectField.label", hold)
+        self.assertIn("holdCardMaxActions: Int = 1", tokens)
+        self.assertIn("func markHeldAddress(", app)
+        mark_line = next(
+            line
+            for line in qa.splitlines()
+            if "NAME, NOTE, FACE" in line or ("MARK" in line and "FACE" in line)
+        )
+        self.assertIn("one mark = one row", mark_line.lower())
+        self.assertIn("party", mark_line.lower())
+        self.assertIn("DEST", mark_line)
+        self.assertIn("long-press", mark_line.lower())
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", drop)
 
-class ExpeditionKitPaperTests(unittest.TestCase):
+
     def test_kit_trip_and_paper_are_on_glass(self):
         exped = read("Blackout", "ExpeditionTab.swift")
         self.assertIn('sectionLabel("INVENTORY")', exped)
