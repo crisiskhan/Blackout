@@ -539,8 +539,8 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual((width, height), (1024, 1024))
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
-    def _assert_open_compass_well(self, path: Path, *, match_store_rgb: bool) -> None:
-        """Black plate and inner well are gone; metal and red sight stay fully opaque."""
+    def _assert_emblem_without_plate(self, path: Path, *, match_store_rgb: bool) -> None:
+        """Outer black and outer rays are gone; original metal and well stay opaque."""
         width, height, color = png_ihdr(path)
         self.assertEqual(color, 6, f"{path.name} has alpha")
         self.assertEqual(width, height)
@@ -555,7 +555,14 @@ class CompassMarkTests(unittest.TestCase):
         ):
             self.assertEqual(png_px(px, width, x, y)[3], 0, f"{path.name} corner {x},{y}")
         well = png_px(px, width, width // 2 + 200, height // 2)
-        self.assertLess(well[3], 24, f"{path.name} inner well is open")
+        self.assertEqual(well[3], 255, f"{path.name} inner well stays with the emblem")
+        if match_store_rgb:
+            sr, sg, sb, _ = png_px(store_px, width, width // 2 + 200, height // 2)
+            self.assertEqual(
+                well[:3],
+                (sr, sg, sb),
+                f"{path.name} inner well matches the storefront mark",
+            )
         core = png_px(px, width, width // 2, height // 2)
         self.assertGreaterEqual(core[0], 160, f"{path.name} red sight stays")
         self.assertEqual(core[3], 255, f"{path.name} red sight is fully opaque")
@@ -577,40 +584,36 @@ class CompassMarkTests(unittest.TestCase):
                     f"{path.name} metal RGB {x},{y} matches the storefront mark",
                 )
         keep_max = 0
-        black_opaque = 0
         black_margin = 0
         metal_punched = 0
         metal_rewritten = 0
-        pixels = width * height
+        outer_rays = 0
         margin = int(48 * width / 1024)
-        bloom = int(236 * width / 1024)
         cx = (width - 1) / 2
         cy = (height - 1) / 2
+        ray_r = 465 * width / 1024
+        body_r = 400 * width / 1024
         for y in range(height):
             for x in range(width):
                 r, g, b, a = png_px(px, width, x, y)
                 sr, sg, sb, _ = png_px(store_px, width, x, y)
+                rad = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
                 if a > keep_max:
                     keep_max = a
                 if a > 200 and max(r, g, b) < 12:
-                    black_opaque += 1
                     if x < margin or y < margin or x >= width - margin or y >= height - margin:
                         black_margin += 1
                 if a == 255 and match_store_rgb and (r, g, b) != (sr, sg, sb):
                     metal_rewritten += 1
-                store_max = max(sr, sg, sb)
-                dx = x - cx
-                dy = y - cy
-                if store_max >= 40 and (dx * dx + dy * dy) ** 0.5 >= bloom:
-                    if a == 0:
-                        metal_punched += 1
-                    elif match_store_rgb and ((r, g, b) != (sr, sg, sb) or a != 255):
-                        metal_rewritten += 1
-        self.assertLess(black_opaque / pixels, 0.04, f"{path.name} black plate remains")
+                if max(sr, sg, sb) >= 40 and rad < body_r and a == 0:
+                    metal_punched += 1
+                if a > 0 and rad > ray_r:
+                    outer_rays += 1
         self.assertEqual(black_margin, 0, f"{path.name} black plate in the margin")
         self.assertEqual(keep_max, 255, f"{path.name} metal is fully opaque")
         self.assertEqual(metal_punched, 0, f"{path.name} punched metal")
         self.assertEqual(metal_rewritten, 0, f"{path.name} rewrote metal")
+        self.assertEqual(outer_rays, 0, f"{path.name} outer rays remain")
 
     def test_home_screen_dark_and_tinted_drop_the_black_plate(self):
         iconset = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
@@ -629,8 +632,8 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("AppIcon-dark.png", manifest)
         self.assertIn("AppIcon-tinted.png", manifest)
         self.assertIn("AppIcon.png", manifest)
-        self._assert_open_compass_well(dark, match_store_rgb=True)
-        self._assert_open_compass_well(tinted, match_store_rgb=False)
+        self._assert_emblem_without_plate(dark, match_store_rgb=True)
+        self._assert_emblem_without_plate(tinted, match_store_rgb=False)
 
     def test_boot_logo_is_the_square_mark(self):
         logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
@@ -648,15 +651,20 @@ class CompassMarkTests(unittest.TestCase):
         self.assertNotIn("1712.0 / 1152.0", arming)
         self.assertNotIn('Text("BLACKOUT")', arming)
         self.assertIn(
-            "height: BlackoutTokens.Chrome.bootLogoPoints",
+            "BlackoutTokens.Chrome.bootLogoPoints",
             arming,
         )
         app = read("Blackout", "AppRuntime.swift")
         gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
         self.assertIn("CLLocationCoordinate2DIsValid", gnss)
-        self._assert_open_compass_well(logo, match_store_rgb=True)
+        self._assert_emblem_without_plate(logo, match_store_rgb=True)
+        mark = arming.split("private var mark:")[1].split("private var status")[0]
+        self.assertGreaterEqual(mark.count("Theme.accent"), 2)
+        self.assertGreaterEqual(mark.count(".shadow("), 2)
+        self.assertNotIn(".spring(", mark)
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn("well inside the ring is open", qa.lower())
+        self.assertIn("outer rays are gone", qa.lower())
+        self.assertIn("red glow", qa.lower())
         self.assertIn("metal on the mark is fully opaque", qa.lower())
 
 

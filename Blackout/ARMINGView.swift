@@ -57,20 +57,20 @@ struct ARMINGView: View {
             )
             .allowsHitTesting(false)
             .ignoresSafeArea()
-            .opacity(worldIn ? 0.55 : 0)
+            .opacity(worldIn ? 0.22 : 0)
         }
     }
 
     private var vignette: some View {
         RadialGradient(
             colors: [
-                Theme.void.opacity(0.18),
-                Theme.void.opacity(0.72),
-                Theme.void.opacity(0.94),
+                Theme.void.opacity(0.62),
+                Theme.void.opacity(0.82),
+                Theme.void.opacity(0.97),
             ],
             center: .center,
-            startRadius: 20,
-            endRadius: 420
+            startRadius: 40,
+            endRadius: 520
         )
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -93,15 +93,17 @@ struct ARMINGView: View {
             let pulse = runtime.bootReady
                 ? 1.0
                 : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
+            let size = CGFloat(BlackoutTokens.Chrome.bootLogoPoints)
+            let bloom = 0.38 + 0.22 * pulse
             Image("Logo")
                 .resizable()
                 .scaledToFit()
-                .frame(
-                    width: BlackoutTokens.Chrome.bootLogoPoints,
-                    height: BlackoutTokens.Chrome.bootLogoPoints
-                )
-                .shadow(color: Theme.accent.opacity(0.25 + 0.45 * pulse), radius: 18 + 14 * pulse)
-                .scaleEffect(markIn ? 1 : 0.86)
+                .frame(width: size, height: size)
+                .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
+                .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
+                .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
+                .compositingGroup()
+                .scaleEffect(markIn ? 1 : 0.98)
                 .opacity(markIn ? 1 : 0)
                 .accessibilityLabel("Blackout")
         }
@@ -111,6 +113,7 @@ struct ARMINGView: View {
         VStack(spacing: 10) {
             Text(runtime.bootStage.line)
                 .font(.system(size: 11, weight: .heavy))
+                .tracking(1.6)
                 .foregroundStyle(runtime.bootReady ? Theme.silver : Theme.silver.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -148,6 +151,10 @@ struct ARMINGView: View {
                 )
         )
         .opacity(runtime.bootReady ? 1 : 0.55)
+        .shadow(
+            color: Theme.accent.opacity(runtime.bootReady ? 0.42 : 0),
+            radius: runtime.bootReady ? 14 : 0
+        )
         .allowsHitTesting(runtime.bootReady)
         .accessibilityHint("Loads the vessel and opens the map")
         .animation(.easeOut(duration: 0.25), value: runtime.bootReady)
