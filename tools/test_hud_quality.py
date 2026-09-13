@@ -539,12 +539,14 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual((width, height), (1024, 1024))
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
-    def _assert_open_compass_well(self, path: Path) -> None:
-        """Black plate and inner well are gone; red sight and ring stay; some alpha."""
+    def _assert_open_compass_well(self, path: Path, *, match_store_rgb: bool) -> None:
+        """Black plate and inner well are gone; metal and red sight stay fully opaque."""
         width, height, color = png_ihdr(path)
         self.assertEqual(color, 6, f"{path.name} has alpha")
         self.assertEqual(width, height)
         _, _, px = png_rgba(path)
+        store = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon.png"
+        _, _, store_px = png_rgba(store)
         for x, y in (
             (0, 0),
             (width - 1, 0),
@@ -556,21 +558,59 @@ class CompassMarkTests(unittest.TestCase):
         self.assertLess(well[3], 24, f"{path.name} inner well is open")
         core = png_px(px, width, width // 2, height // 2)
         self.assertGreaterEqual(core[0], 160, f"{path.name} red sight stays")
-        self.assertGreaterEqual(core[3], 160, f"{path.name} red sight stays")
+        self.assertEqual(core[3], 255, f"{path.name} red sight is fully opaque")
         ring = png_px(px, width, width // 2, int(height * 200 / 1024))
-        self.assertGreaterEqual(ring[3], 140, f"{path.name} ring stays")
+        self.assertEqual(ring[3], 255, f"{path.name} ring is fully opaque")
+        metal = (
+            (width // 2, int(height * 200 / 1024)),
+            (int(width * 792 / 1024), height // 2),
+            (width // 2, int(height * 56 / 1024)),
+        )
+        for x, y in metal:
+            r, g, b, a = png_px(px, width, x, y)
+            self.assertEqual(a, 255, f"{path.name} metal {x},{y} is fully opaque")
+            if match_store_rgb:
+                sr, sg, sb, _ = png_px(store_px, width, x, y)
+                self.assertEqual(
+                    (r, g, b),
+                    (sr, sg, sb),
+                    f"{path.name} metal RGB {x},{y} matches the storefront mark",
+                )
         keep_max = 0
         black_opaque = 0
+        black_margin = 0
+        metal_punched = 0
+        metal_rewritten = 0
         pixels = width * height
-        for i in range(0, len(px), 4):
-            r, g, b, a = px[i], px[i + 1], px[i + 2], px[i + 3]
-            if a > keep_max:
-                keep_max = a
-            if a > 200 and max(r, g, b) < 12:
-                black_opaque += 1
-        self.assertLess(black_opaque / pixels, 0.02, f"{path.name} black plate remains")
-        self.assertLess(keep_max, 255, f"{path.name} has some transparency")
-        self.assertGreaterEqual(keep_max, 180, f"{path.name} still reads on the glass")
+        margin = int(48 * width / 1024)
+        bloom = int(236 * width / 1024)
+        cx = (width - 1) / 2
+        cy = (height - 1) / 2
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = png_px(px, width, x, y)
+                sr, sg, sb, _ = png_px(store_px, width, x, y)
+                if a > keep_max:
+                    keep_max = a
+                if a > 200 and max(r, g, b) < 12:
+                    black_opaque += 1
+                    if x < margin or y < margin or x >= width - margin or y >= height - margin:
+                        black_margin += 1
+                if a == 255 and match_store_rgb and (r, g, b) != (sr, sg, sb):
+                    metal_rewritten += 1
+                store_max = max(sr, sg, sb)
+                dx = x - cx
+                dy = y - cy
+                if store_max >= 40 and (dx * dx + dy * dy) ** 0.5 >= bloom:
+                    if a == 0:
+                        metal_punched += 1
+                    elif match_store_rgb and ((r, g, b) != (sr, sg, sb) or a != 255):
+                        metal_rewritten += 1
+        self.assertLess(black_opaque / pixels, 0.04, f"{path.name} black plate remains")
+        self.assertEqual(black_margin, 0, f"{path.name} black plate in the margin")
+        self.assertEqual(keep_max, 255, f"{path.name} metal is fully opaque")
+        self.assertEqual(metal_punched, 0, f"{path.name} punched metal")
+        self.assertEqual(metal_rewritten, 0, f"{path.name} rewrote metal")
 
     def test_home_screen_dark_and_tinted_drop_the_black_plate(self):
         iconset = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
@@ -589,8 +629,8 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("AppIcon-dark.png", manifest)
         self.assertIn("AppIcon-tinted.png", manifest)
         self.assertIn("AppIcon.png", manifest)
-        self._assert_open_compass_well(dark)
-        self._assert_open_compass_well(tinted)
+        self._assert_open_compass_well(dark, match_store_rgb=True)
+        self._assert_open_compass_well(tinted, match_store_rgb=False)
 
     def test_boot_logo_is_the_square_mark(self):
         logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
@@ -614,9 +654,10 @@ class CompassMarkTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
         self.assertIn("CLLocationCoordinate2DIsValid", gnss)
-        self._assert_open_compass_well(logo)
+        self._assert_open_compass_well(logo, match_store_rgb=True)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("well inside the ring is open", qa.lower())
+        self.assertIn("metal on the mark is fully opaque", qa.lower())
 
 
 class UnlockGlassTests(unittest.TestCase):
