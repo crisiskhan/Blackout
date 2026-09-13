@@ -3212,6 +3212,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Indian Grass Prarie Preserve", glass)
         self.assertIn("30.225834", glass)
         self.assertIn("-97.826212", glass)
+        self.assertIn("South Hills Conservation Area", glass)
+        self.assertIn("30.216143", glass)
+        self.assertIn("-97.819308", glass)
         self.assertIn("31.694905", glass)
         self.assertIn("-106.441133", glass)
         self.assertIn("Cactus garden", glass)
@@ -3310,6 +3313,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Kim Bird Gebert Memorial Tree", glass)
         self.assertIn("30.441822", glass)
         self.assertIn("-97.575189", glass)
+        self.assertIn("Memorial Tree", glass)
+        self.assertIn("30.325782", glass)
+        self.assertIn("-97.722392", glass)
+        self.assertIn("Guadalupe Street", glass)
+        self.assertIn("Skyview", glass)
+        self.assertIn("Arbol del dique", glass)
+        self.assertIn("31.658550", glass)
+        self.assertIn("-106.445377", glass)
+        self.assertIn("Eje Vial Juan Gabriel", glass)
         self.assertIn("Lost Oasis Cave Preserve", glass)
         self.assertIn("30.163187", glass)
         self.assertIn("-97.873678", glass)
@@ -3629,6 +3641,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Jumbled Rocks", glass)
         self.assertIn("30.490379", glass)
         self.assertIn("-97.857723", glass)
+        self.assertIn("Dies Ranch Treasure Cave", glass)
+        self.assertIn("30.478531", glass)
+        self.assertIn("-97.855407", glass)
+        self.assertIn("Gholson Drive", glass)
+        self.assertIn("Cypress Canyon Park", glass)
         self.assertIn("Anderson Mill Road", glass)
         self.assertIn("Buttercup Creek Boulevard", glass)
         self.assertIn("Painted Cave", glass)
@@ -3665,6 +3682,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-106.047423", glass)
         self.assertIn("Camino Rojo", glass)
         self.assertIn("Vuelta Colorada", glass)
+        self.assertIn("Adam Gabriel Armijo Community Garden", glass)
+        self.assertIn("35.682330", glass)
+        self.assertIn("-105.908258", glass)
+        self.assertIn("Cerro Gordo Park", glass)
+        self.assertIn("Cerro Gordo Road", glass)
         self.assertIn("Memorial Rose Garden", glass)
         self.assertIn("35.882522", glass)
         self.assertIn("-106.301719", glass)
@@ -4109,6 +4131,7 @@ class GroundFieldSync(unittest.TestCase):
         aztec_cave = False
         ventana_cave = False
         geronimo_cave = False
+        arbol_tree = False
         bosque = False
         farm = False
         west_wood = False
@@ -4171,6 +4194,14 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.917562)) < 1e-6
                 ):
                     geronimo_cave = True
+            if props.get("natural") == "tree" and geom.get("type") == "Point":
+                lon, lat = geom["coordinates"][:2]
+                if (
+                    props.get("name") == "Arbol del dique"
+                    and abs(lat - 31.658550) < 1e-6
+                    and abs(lon - (-106.445377)) < 1e-6
+                ):
+                    arbol_tree = True
             if (
                 props.get("natural") == "wetland"
                 and props.get("name") == "Rio Bosque Wetlands Park"
@@ -4203,6 +4234,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(aztec_cave, "Aztec Cave is not a west cave mouth in the extract")
         self.assertTrue(ventana_cave, "Cueva la Ventana is not a west cave mouth in the extract")
         self.assertTrue(geronimo_cave, "Geronimo is not a west cave mouth in the extract")
+        self.assertTrue(
+            arbol_tree, "Arbol del dique is not a named tree in the west extract"
+        )
         self.assertTrue(bosque, "glass bosque hold is not inside Rio Bosque")
         self.assertTrue(farm, "glass irrigated hold is not inside west farmland")
         self.assertTrue(west_wood, "glass west woodland hold is not inside unnamed west wood")
@@ -4216,6 +4250,7 @@ class GroundFieldSync(unittest.TestCase):
         decker_hit = False
         carrington_hit = False
         indian_grass_hit = False
+        south_hills_hit = False
         buttercup_hit = False
         oasis_hit = False
         whirl_hit = False
@@ -4422,6 +4457,8 @@ class GroundFieldSync(unittest.TestCase):
                     carrington_hit = True
                 if kind == "reserve" and name == "Indian Grass Prarie Preserve" and pip(-97.826212, 30.225834, ring):
                     indian_grass_hit = True
+                if kind == "reserve" and name == "South Hills Conservation Area" and pip(-97.819308, 30.216143, ring):
+                    south_hills_hit = True
         self.assertTrue(
             wildlife_hit, "glass wildlife hold is not inside Indiangrass"
         )
@@ -4682,6 +4719,10 @@ class GroundFieldSync(unittest.TestCase):
             indian_grass_hit,
             "Indian Grass Prarie Preserve hold is not inside the named nature reserve",
         )
+        self.assertTrue(
+            south_hills_hit,
+            "South Hills Conservation Area hold is not inside the named nature reserve",
+        )
 
         east_osm = json.loads((PACK_ROOT / "tx-east" / "osm.geojson").read_text())
         woods = False
@@ -4693,6 +4734,7 @@ class GroundFieldSync(unittest.TestCase):
         sorin_oak = False
         argus_tree = False
         kim_bird_tree = False
+        memorial_tree = False
         airmen_cave = False
         tree_house_cave = False
         hideaway_cave = False
@@ -4707,6 +4749,7 @@ class GroundFieldSync(unittest.TestCase):
         good_friday_cave = False
         persimmon_cave = False
         jumbled_rocks_cave = False
+        dies_ranch_cave = False
         for feat in east_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -4762,6 +4805,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.575189)) < 1e-6
                 ):
                     kim_bird_tree = True
+                if (
+                    props.get("name") == "Memorial Tree"
+                    and abs(lat - 30.325782) < 1e-6
+                    and abs(lon - (-97.722392)) < 1e-6
+                ):
+                    memorial_tree = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -4848,6 +4897,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-97.857723)) < 1e-6
                 ):
                     jumbled_rocks_cave = True
+                if (
+                    props.get("name") == "Dies Ranch Treasure Cave"
+                    and abs(lat - 30.478531) < 1e-6
+                    and abs(lon - (-97.855407)) < 1e-6
+                ):
+                    dies_ranch_cave = True
         self.assertTrue(woods, "glass east woodland hold is not inside Beaukiss Woods")
         self.assertTrue(east_bosque, "glass east bosque hold is not inside an unnamed wetland")
         self.assertTrue(east_peak, "glass east peak hold is not Barton Hill")
@@ -4859,6 +4914,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             kim_bird_tree,
             "Kim Bird Gebert Memorial Tree is not a named tree in the east extract",
+        )
+        self.assertTrue(
+            memorial_tree,
+            "Memorial Tree is not a named tree in the east extract",
         )
         self.assertTrue(airmen_cave, "Airmen's Cave is not a cave mouth in the east extract")
         self.assertTrue(tree_house_cave, "Tree House Cave is not a cave mouth in the east extract")
@@ -4896,6 +4955,9 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             jumbled_rocks_cave, "Jumbled Rocks is not a cave mouth in the east extract"
         )
+        self.assertTrue(
+            dies_ranch_cave, "Dies Ranch Treasure Cave is not a cave mouth in the east extract"
+        )
         self.assertIn(
             "Treaty Oak",
             place_names_in_tile("tx-east", -97.755462, 30.271466),
@@ -4915,6 +4977,16 @@ class GroundFieldSync(unittest.TestCase):
             "Kim Bird Gebert Memorial Tree",
             place_names_in_tile("tx-east", -97.575189, 30.441822),
             "Kim Bird Gebert Memorial Tree did not survive tiling as a named tree",
+        )
+        self.assertIn(
+            "Memorial Tree",
+            place_names_in_tile("tx-east", -97.722392, 30.325782),
+            "Memorial Tree did not survive tiling as a named tree",
+        )
+        self.assertIn(
+            "Arbol del dique",
+            place_names_in_tile("tx-west", -106.445377, 31.658550),
+            "Arbol del dique did not survive tiling as a named tree",
         )
         self.assertIn(
             "Anthony Gap Cave",
@@ -5046,6 +5118,11 @@ class GroundFieldSync(unittest.TestCase):
             "Jumbled Rocks did not survive tiling as a mouth",
         )
         self.assertIn(
+            "Dies Ranch Treasure Cave",
+            place_names_in_tile("tx-east", -97.855407, 30.478531),
+            "Dies Ranch Treasure Cave did not survive tiling as a mouth",
+        )
+        self.assertIn(
             "Mount Lucas",
             place_names_in_tile("tx-east", -97.773062, 30.329372),
             "Mount Lucas did not survive tiling as a peak",
@@ -5122,6 +5199,7 @@ class GroundFieldSync(unittest.TestCase):
         sevilleta_hit = False
         barelas_hit = False
         prisma_hit = False
+        adam_gabriel_hit = False
         for feat in nm["features"]:
             props = feat.get("properties") or {}
             kind = ground.overlay_kind(props)
@@ -5154,6 +5232,8 @@ class GroundFieldSync(unittest.TestCase):
                     barelas_hit = props.get("name") == "Barelas Community Garden"
                 if kind == "botanic" and pip(-106.047423, 35.627487, ring):
                     prisma_hit = props.get("name") == "Colonia Prisma Community Garden"
+                if kind == "botanic" and pip(-105.908258, 35.682330, ring):
+                    adam_gabriel_hit = props.get("name") == "Adam Gabriel Armijo Community Garden"
                 if kind == "wildlife" and pip(-107.319389, 35.327562, ring):
                     nm_wildlife_hit = props.get("name") == "Marquez Wildlife Management Area"
                 if kind == "wildlife" and pip(-106.829413, 34.423426, ring):
@@ -5268,6 +5348,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             prisma_hit,
             "Colonia Prisma Community Garden is not botanic on the NM overlay",
+        )
+        self.assertTrue(
+            adam_gabriel_hit,
+            "Adam Gabriel Armijo Community Garden is not botanic on the NM overlay",
         )
         self.assertTrue(
             nm_wildlife_hit, "glass NM wildlife hold is not inside Marquez"
@@ -6540,6 +6624,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.421613", qa)
         self.assertIn("Indian Grass Prarie Preserve", qa)
         self.assertIn("30.225834", qa)
+        self.assertIn("South Hills Conservation Area", qa)
+        self.assertIn("30.216143", qa)
         self.assertIn("Dome Wilderness", qa)
         self.assertIn("35.746173", qa)
         self.assertIn("Manzano Mountain Wilderness", qa)
@@ -6683,6 +6769,13 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.441822", qa)
         self.assertIn("Lake Pflugerville Park", qa)
         self.assertIn("Silent Harbor Loop", qa)
+        self.assertIn("Memorial Tree", qa)
+        self.assertIn("30.325782", qa)
+        self.assertIn("Guadalupe Street", qa)
+        self.assertIn("Skyview", qa)
+        self.assertIn("Arbol del dique", qa)
+        self.assertIn("31.658550", qa)
+        self.assertIn("Eje Vial Juan Gabriel", qa)
         self.assertIn("Lost Oasis Cave Preserve", qa)
         self.assertIn("Sandia Man Cave", qa)
         self.assertIn("Prosopis velutina / Velvet Mesquite", qa)
@@ -6742,6 +6835,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Red Loop", qa)
         self.assertIn("Jumbled Rocks", qa)
         self.assertIn("30.490379", qa)
+        self.assertIn("Dies Ranch Treasure Cave", qa)
+        self.assertIn("30.478531", qa)
+        self.assertIn("Gholson Drive", qa)
+        self.assertIn("Cypress Canyon Park", qa)
         self.assertIn("Painted Cave", qa)
         self.assertIn("35.722425", qa)
         self.assertIn("Hot Springs Cave", qa)
@@ -6930,6 +7027,11 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.627487", qa)
         self.assertIn("Camino Rojo", qa)
         self.assertIn("Vuelta Colorada", qa)
+        self.assertIn("Adam Gabriel Armijo Community Garden", qa)
+        self.assertIn("35.682330", qa)
+        self.assertIn("Cerro Gordo Park", qa)
+        self.assertIn("Cerro Gordo Road", qa)
+        self.assertIn("White Rock Community Garden", qa)
         self.assertIn("Lush n Lean Garden", qa)
         self.assertIn("32.316751", qa)
         self.assertIn("lush n lean", qa)

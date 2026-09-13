@@ -211,7 +211,9 @@ public enum Inspect {
     /// trees. Never an animal — range is the Field book, not a GPS pin.
     /// Western Honey Mesquite is a surveyed tree. Texas Honey
     /// Mesquite stays unheld — Pinus pinea sits 26 m off that tree.
-    /// Do not add matcher `torreyana` or `honey mesquite`.
+    /// Arbol del dique is a surveyed west tree. Memorial Tree is
+    /// a surveyed east tree. Do not add matcher `torreyana`,
+    /// `honey mesquite`, `arbol`, or `memorial`.
     public static let packGroundPointNaturals: Set<String> = [
         "peak", "sinkhole", "cave", "cave_entrance", "tree",
     ]
@@ -331,8 +333,8 @@ public enum Inspect {
     /// / Discovery Well are Holdable when unique versus the overlay pip
     /// and no other mouth sits in the probe. Buttercup Blowhole, Cedar
     /// Elm Sink, Lime Creek Road Sink, and Under Three Oaks. Isolated
-    /// mouths off those sheets: Buttercup Drain Cave and Warton
-    /// Whirlpool. Overlay-sheet mouths also Holdable: Pat's Pit,
+    /// mouths off those sheets: Buttercup Drain Cave, Warton
+    /// Whirlpool, and Dies Ranch Treasure Cave. Overlay-sheet mouths also Holdable: Pat's Pit,
     /// Persimmon Well, Good Friday, and Jumbled Rocks. Unique versus the Buttercup
     /// overlay Hold (141 m). Cedar Elm Preserve Trail stays a trail.
     /// Brook Meadow Trail is a road. Village of Western Oaks Karst
@@ -342,7 +344,8 @@ public enum Inspect {
     /// Link's sits 84 m off that mouth. Zig Zag stays unheld. Hot Springs Cave is a named
     /// mouth inside Jemez NRA — rank 1 still beats the overlay. Soda
     /// Dam is rock, not the hole. Generic Cave and the two La Cueva
-    /// stay unheld. Do not add matcher `good friday`, `hot springs`, or `jumbled`.
+    /// stay unheld. Do not add matcher `good friday`, `hot springs`, `jumbled`,
+    /// `dies`, or `treasure`.
     static func isCavePreserve(_ t: [String: String]) -> Bool {
         let n = (t["name"] ?? "").lowercased()
         if n.contains("blowing sink") {
@@ -682,7 +685,8 @@ public enum Inspect {
     /// Conservation Trust, New Mexico Land Conservancy, Organ Mountains
     /// Wilderness, Billy Rogers Arroyo, Piedmont City Preserve, Westside
     /// Preserve, Manzano Wilderness Study Area, Ojito Wilderness Study
-    /// Area, San Luis Mesa ACEC, and Pecos Wilderness are those
+    /// Area, San Luis Mesa ACEC, Pecos Wilderness, and South Hills
+    /// Conservation Area are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
@@ -696,7 +700,7 @@ public enum Inspect {
     /// `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
     /// `tres pistolas`, `pistolas`, `bear canyon`, `conservation
     /// trust`, `land conservancy`, `conservancy`, `westside`,
-    /// `billy`, `piedmont`, or `san luis`. Phrase
+    /// `billy`, `piedmont`, `san luis`, or `south hills`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead

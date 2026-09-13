@@ -51,16 +51,17 @@ WORKED_LANDUSE = {"greenhouse_horticulture"}
 # Well are Holdable when unique versus the overlay pip and no other
 # mouth sits in the probe. Buttercup Blowhole, Cedar Elm Sink, Lime
 # Creek Road Sink, and Under Three Oaks. Isolated mouths off those
-# sheets: Buttercup Drain Cave and Warton Whirlpool. Overlay-sheet
-# mouths also Holdable: Pat's Pit, Persimmon Well, Good Friday,
-# and Jumbled Rocks. Unique versus the Buttercup overlay Hold
-# (141 m). Cedar Elm Preserve Trail stays a trail. Brook Meadow
-# Trail is a road. Godzilla Cave stays unheld — Link's sits 84 m
-# off that mouth. Zig Zag stays unheld. Hot Springs Cave is a
-# named mouth inside Jemez NRA — rank 1 still beats the overlay.
-# Soda Dam is rock, not the hole. Generic Cave and the two La
-# Cueva stay unheld. Do not add matcher `good friday`, `hot
-# springs`, or `jumbled`.
+# sheets: Buttercup Drain Cave, Warton Whirlpool, and Dies Ranch
+# Treasure Cave. Overlay-sheet mouths also Holdable: Pat's Pit,
+# Persimmon Well, Good Friday, and Jumbled Rocks. Unique versus
+# the Buttercup overlay Hold (141 m). Cedar Elm Preserve Trail
+# stays a trail. Brook Meadow Trail is a road. Godzilla Cave
+# stays unheld — Link's sits 84 m off that mouth. Zig Zag stays
+# unheld. Hot Springs Cave is a named mouth inside Jemez NRA —
+# rank 1 still beats the overlay. Soda Dam is rock, not the hole.
+# Generic Cave and the two La Cueva stay unheld. Do not add
+# matcher `good friday`, `hot springs`, `jumbled`, `dies`, or
+# `treasure`.
 CAVE_PRESERVE_PHRASES = (
     "cave preserve",
     "cave area of critical",
@@ -274,7 +275,7 @@ WILDLIFE_RANGE_PHRASES = (
 # `carlito`, `sedillo`, `ponderosa`, `sabino`, `gutierrez`, `milne`,
 # `tres pistolas`, `pistolas`, `bear canyon`, `conservation trust`,
 # `land conservancy`, `conservancy`, `westside`, `billy`,
-# `piedmont`, or `san luis`. Phrase `open space` is not a bare contains —
+# `piedmont`, `san luis`, or `south hills`. Phrase `open space` is not a bare contains —
 # Open Space Visitor Center, a farm open space, Alameda/Rio Grande
 # Open Space, and a trailhead stay parks. Named open-space cover is
 # this walk. Phrase `hueco tanks`, not the word `hueco`. Hueco
@@ -363,7 +364,12 @@ OPEN_RESERVE_KEEP_OUT = ("national forest",)
 # Patterson Park Community Garden. Brookview Road stays a
 # road. Do not add matcher `patterson`. Patterson stays
 # unheld — a public tap sits in the garden. Cherry Creek
-# Community Garden stays unheld (water too close). Desert
+# Community Garden stays unheld (water too close). White Rock
+# Community Garden stays unheld — Cañada del Buey sits 61 m
+# off that sheet. Phrase `community garden` already matches
+# Adam Gabriel Armijo Community Garden. Cerro Gordo Park stays
+# Park. Cerro Gordo Road stays a road. Do not add matcher
+# `adam` or `armijo`. Desert
 # Garden Park stays unheld.
 # Winrock Garden is a mall
 # bed and stays out.
