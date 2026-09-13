@@ -317,7 +317,6 @@ struct PartyHoldCard: View {
                 HUDVitalsRail(title: "HUNGER", value: rail(\.hunger), editable: person.isYou)
                 HUDVitalsRail(title: "THIRST", value: rail(\.thirst), editable: person.isYou)
                 HUDVitalsRail(title: "PAIN", value: rail(\.pain), editable: person.isYou)
-                HUDVitalsRail(title: "WATER", value: rail(\.water), editable: person.isYou)
                 HUDVitalsRail(title: "FATIGUE", value: rail(\.fatigue), editable: person.isYou)
                 HUDVitalsRail(title: "EXPOSURE", value: rail(\.weatherExposure), editable: person.isYou)
             } else {

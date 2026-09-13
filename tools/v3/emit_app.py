@@ -84,8 +84,7 @@ final class AppRuntime {
     var roster = PartyRoster.create(lead: "Lead")
     var trip = TripBrief.make(brief: "", hours: 2)
     var kit = KitBag(items: [
-        GearItem(id: "water", name: "Water filter", working: true, failureHazard: "no drinkable water"),
-        GearItem(id: "headlamp", name: "Headlamp", working: true, failureHazard: "no night march"),
+        GearItem(id: "water", name: "Water", working: true, count: 0),
     ])
     var power: BatteryAuction
     var night = NightRedState(enabled: false)

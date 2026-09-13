@@ -25,7 +25,7 @@ public struct PartyVitals: Equatable, Sendable {
     /// Five color cells on the CONDITION menu. 0 stays a step below GREEN.
     public static let colorSteps: [Double] = [0.2, 0.45, 0.65, 0.8, 1.0]
     public static let railTitles: [String] = [
-        "HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE",
+        "HUNGER", "THIRST", "PAIN", "FATIGUE", "EXPOSURE",
     ]
 
     public var hunger: Double
@@ -54,7 +54,7 @@ public struct PartyVitals: Equatable, Sendable {
     }
 
     public var rails: [Double] {
-        [hunger, thirst, pain, water, fatigue, weatherExposure]
+        [hunger, thirst, pain, fatigue, weatherExposure]
     }
 
     public var band: ConditionBand {
@@ -153,6 +153,6 @@ public struct PartyVitals: Equatable, Sendable {
     }
 
     public var posRails: [Double] {
-        rails.map { Self.snap($0) }
+        [hunger, thirst, pain, water, fatigue, weatherExposure].map { Self.snap($0) }
     }
 }

@@ -625,7 +625,7 @@ public struct PartyVitals: Equatable, Sendable {
     public static let railSteps: [Double] = [0, 0.2, 0.45, 0.65, 0.8, 1.0]
     public static let colorSteps: [Double] = [0.2, 0.45, 0.65, 0.8, 1.0]
     public static let railTitles: [String] = [
-        "HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE",
+        "HUNGER", "THIRST", "PAIN", "FATIGUE", "EXPOSURE",
     ]
 
     public var hunger: Double
@@ -654,7 +654,7 @@ public struct PartyVitals: Equatable, Sendable {
     }
 
     public var rails: [Double] {
-        [hunger, thirst, pain, water, fatigue, weatherExposure]
+        [hunger, thirst, pain, fatigue, weatherExposure]
     }
 
     public var band: ConditionBand {
@@ -748,7 +748,8 @@ public struct PartyVitals: Equatable, Sendable {
 final class VitalsTests: XCTestCase {
     func testBands() {
         XCTAssertEqual(PartyVitals(water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .green)
-        XCTAssertEqual(PartyVitals(water: 0.5, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(thirst: 0.5, water: 0.2, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(water: 0.8, fatigue: 0.2, weatherExposure: 0.2).band, .green)
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
         XCTAssertEqual(
             ConditionBand.allCases.map(\.rawValue),

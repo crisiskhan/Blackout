@@ -106,24 +106,6 @@ struct CommsTab: View {
                         .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                     }
 
-                    sectionLabel("THREAD")
-                    HUDGlassCard {
-                        if threadLines.isEmpty {
-                            Text("NONE")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver.opacity(0.7))
-                        } else {
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(threadLines) { line in
-                                    Text(threadWord(line))
-                                        .font(.system(size: 13, weight: .heavy))
-                                        .foregroundStyle(Theme.silver)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                        }
-                    }
-
                     sectionLabel("CHIPS")
                     HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         chip(L10n.t("chip.rally", runtime.locale)) {
@@ -353,15 +335,6 @@ struct CommsTab: View {
         runtime.comms.chips.contains(.sos) || runtime.mesh.inboundChips.contains(Chip.sos.rawValue)
     }
 
-    private var threadLines: [PartyThreadLine] {
-        guard runtime.comms.channel == "1:1", let peer = runtime.comms.peer, !peer.isEmpty else {
-            return runtime.partyNotes
-        }
-        return runtime.partyNotes.filter { line in
-            line.to == peer || line.from == peer || (peer == "YOU" && (line.to == "YOU" || line.from == "YOU"))
-        }
-    }
-
     private func openPendingNote() {
         guard runtime.pendingNoteFocus else { return }
         runtime.pendingNoteFocus = false
@@ -378,16 +351,6 @@ struct CommsTab: View {
                 note = ""
             }
         )
-    }
-
-    private func threadWord(_ line: PartyThreadLine) -> String {
-        let who: String
-        if line.from == "YOU" || line.from == runtime.mesh.localID {
-            who = "YOU"
-        } else {
-            who = line.from.uppercased()
-        }
-        return "\(who) · \(line.text.uppercased())"
     }
 
     private func sectionLabel(_ title: String) -> some View {

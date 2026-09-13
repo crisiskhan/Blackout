@@ -36,7 +36,6 @@ struct ExpeditionTab: View {
                             slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.setYouRail(\.hunger, $0) }))
                             slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.setYouRail(\.thirst, $0) }))
                             slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.setYouRail(\.pain, $0) }))
-                            slider("WATER", Binding(get: { runtime.vitals.water }, set: { runtime.setYouRail(\.water, $0) }))
                             slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.setYouRail(\.fatigue, $0) }))
                             slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.setYouRail(\.weatherExposure, $0) }))
                         }

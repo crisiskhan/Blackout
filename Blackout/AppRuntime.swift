@@ -41,8 +41,7 @@ final class AppRuntime {
     var roster = PartyRoster.create(lead: "Lead")
     var trip = TripFactory.make(brief: "", hours: 2)
     var kit = KitBag(items: [
-        GearItem(id: "water", name: "Water filter", working: true, failureHazard: "no drinkable water"),
-        GearItem(id: "headlamp", name: "Headlamp", working: true, failureHazard: "no night march"),
+        GearItem(id: "water", name: "Water", working: true, count: 0),
     ])
     var power: AuctionBoard
     var night = NightRedState(enabled: false)
@@ -104,8 +103,6 @@ final class AppRuntime {
     var commsChrome = ""
     /// NOTE field should open after MESSAGE from a profile glass.
     var pendingNoteFocus = false
-    /// 1:1 and YOU notes on COMMS THREAD. Survives kill-and-relaunch.
-    var partyNotes: [PartyThreadLine] = []
     /// 15s CLIP is armed. The pad reads RECORDING until the clip ends.
     var clipLive = false
     /// HUD typewriter. Replaces the iPhone keyboard on every field.
@@ -176,7 +173,6 @@ final class AppRuntime {
         }
         marks = MarkStore.load()
         relabelMarksForActivePack()
-        loadPartyNotes()
         loadFieldBookIDs()
         bootVessel()
         applyMapKeepAwake()
@@ -231,28 +227,6 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
-    }
-
-    func loadPartyNotes() {
-        guard let data = UserDefaults.standard.data(forKey: "party.notes"),
-              let lines = try? JSONDecoder().decode([PartyThreadLine].self, from: data)
-        else { return }
-        partyNotes = lines
-    }
-
-    func persistPartyNotes() {
-        guard let data = try? JSONEncoder().encode(partyNotes) else { return }
-        UserDefaults.standard.set(data, forKey: "party.notes")
-    }
-
-    func appendPartyNote(from: String, to: String, text: String) {
-        let line = PartyThreadLine(from: from, to: to, text: text)
-        guard !line.text.isEmpty else { return }
-        partyNotes.append(line)
-        if partyNotes.count > 32 {
-            partyNotes.removeFirst(partyNotes.count - 32)
-        }
-        persistPartyNotes()
     }
 
     func pickEmblem(_ emblem: PersonEmblem) {
@@ -632,7 +606,6 @@ final class AppRuntime {
         let text = PartyNote.clean(raw)
         guard !text.isEmpty else { return }
         let dest = meshDest
-        appendPartyNote(from: "YOU", to: dest, text: text)
         if dest == "YOU" {
             if mesh.nearby.isEmpty {
                 commsChrome = "NO PEERS · LOGGED"
@@ -1291,9 +1264,6 @@ final class AppRuntime {
         case "note":
             if let text = String(data: env.body, encoding: .utf8) {
                 let note = PartyNote.clean(text)
-                if !note.isEmpty {
-                    appendPartyNote(from: env.from, to: env.to, text: note)
-                }
                 if note.hasPrefix("SOS ") {
                     lastConditionSOS = note
                 }

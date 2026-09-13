@@ -4,7 +4,8 @@ import XCTest
 final class VitalsTests: XCTestCase {
     func testBands() {
         XCTAssertEqual(PartyVitals(water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .green)
-        XCTAssertEqual(PartyVitals(water: 0.5, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(thirst: 0.5, water: 0.2, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(water: 0.8, fatigue: 0.2, weatherExposure: 0.2).band, .green)
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
         XCTAssertEqual(
             ConditionBand.allCases.map(\.rawValue),
@@ -42,8 +43,10 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals.colorSteps, [0.2, 0.45, 0.65, 0.8, 1.0])
         XCTAssertEqual(
             PartyVitals.railTitles,
-            ["HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"]
+            ["HUNGER", "THIRST", "PAIN", "FATIGUE", "EXPOSURE"]
         )
+        XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2).rails.count, 5)
+        XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2).posRails.count, 6)
         XCTAssertEqual(PartyVitals.stackYellowToOrange, 2)
         XCTAssertEqual(PartyVitals.stackYellowToRed, 3)
         XCTAssertEqual(PartyVitals.stackOrangeToRed, 2)
