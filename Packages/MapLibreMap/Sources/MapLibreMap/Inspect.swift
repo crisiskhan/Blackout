@@ -385,8 +385,9 @@ public enum Inspect {
     /// Phrase `flora y fauna`, not a street. Loma El Gato is a
     /// named peak on that sheet — rank 1 still beats the overlay.
     /// Cerro el Contrabando is a named peak on that sheet — rank 1
-    /// still beats the overlay. Do not add matcher `gato`,
-    /// `loma el gato`, or `contrabando`. Phrase `national
+    /// still beats the overlay. Cerros El Sabinoso is a named peak
+    /// on that sheet — rank 1 still beats the overlay. Do not add
+    /// matcher `gato`, `loma el gato`, `contrabando`, or `sabinoso`. Phrase `national
     /// preserve`, not the word `preserve`. San Antonio Mountain is a
     /// named peak on that sheet — rank 1 still beats the overlay.
     /// Do not add matcher `san antonio` or `valles`. Phrase `wilderness park`,

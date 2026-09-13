@@ -2330,6 +2330,7 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("onate")', inspect)
         self.assertNotIn('contains("block")', inspect)
         self.assertNotIn('contains("contrabando")', inspect)
+        self.assertNotIn('contains("sabinoso")', inspect)
         self.assertNotIn('contains("cerritos")', inspect)
         self.assertNotIn('contains("cerritos de la jolla")', inspect)
         self.assertIn("isWildlifeRange", inspect)
@@ -3667,6 +3668,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("31.251240", glass)
         self.assertIn("-106.278240", glass)
         self.assertIn("cerroElContrabando", glass)
+        self.assertIn("Cerros El Sabinoso", glass)
+        self.assertIn("31.235259", glass)
+        self.assertIn("-106.315716", glass)
+        self.assertIn("cerrosElSabinoso", glass)
         self.assertIn("Feather Lake Wildlife Refuge", glass)
         self.assertIn("31.690659", glass)
         self.assertIn("-106.305767", glass)
@@ -5568,6 +5573,11 @@ class GroundFieldSync(unittest.TestCase):
             "Cerro el Contrabando did not survive tiling as a peak",
         )
         self.assertIn(
+            "Cerros El Sabinoso",
+            place_names_in_tile("tx-west", -106.315716, 31.235259),
+            "Cerros El Sabinoso did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Mesa Blanca",
             place_names_in_tile("nm", -107.263101, 35.338369),
             "Mesa Blanca did not survive tiling as a peak",
@@ -5849,6 +5859,7 @@ class GroundFieldSync(unittest.TestCase):
         onate_mountain = False
         block_mountain = False
         cerro_el_contrabando = False
+        cerros_el_sabinoso = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -5904,6 +5915,12 @@ class GroundFieldSync(unittest.TestCase):
             ):
                 cerro_el_contrabando = True
             if (
+                props.get("name") == "Cerros El Sabinoso"
+                and abs(lat - 31.235259) < 1e-6
+                and abs(lon - (-106.315716)) < 1e-6
+            ):
+                cerros_el_sabinoso = True
+            if (
                 props.get("name") == "Loma El Gato"
                 and abs(lat - 31.235777) < 1e-6
                 and abs(lon - (-106.573797)) < 1e-6
@@ -5935,6 +5952,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             cerro_el_contrabando,
             "Cerro el Contrabando is not a named peak in the west extract",
+        )
+        self.assertTrue(
+            cerros_el_sabinoso,
+            "Cerros El Sabinoso is not a named peak in the west extract",
         )
         self.assertTrue(
             loma_el_gato, "Loma El Gato is not a named peak in the west extract"
@@ -7537,6 +7558,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("32.817304", qa)
         self.assertIn("Cerro el Contrabando", qa)
         self.assertIn("31.251240", qa)
+        self.assertIn("Cerros El Sabinoso", qa)
+        self.assertIn("31.235259", qa)
         self.assertIn("Feather Lake Wildlife Refuge", qa)
         self.assertIn("31.690659", qa)
         self.assertIn("Nottingham Drive", qa)

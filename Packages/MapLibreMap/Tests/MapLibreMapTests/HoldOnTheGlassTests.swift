@@ -1247,6 +1247,15 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// matcher `contrabando`.
     private static let cerroElContrabando = CLLocationCoordinate2D(latitude: 31.251240, longitude: -106.278240)
 
+    /// `Cerros El Sabinoso` on the west place slice. A named peak
+    /// on the Samalayuca overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus Cerro el Contrabando (3981 m),
+    /// the Samalayuca overlay Hold (12925 m), and Loma El Gato
+    /// (24537 m). Overlay containment is the nearby name. Unique
+    /// title (one OSM peak). Nearest water ~27875 m. Javelina
+    /// as range, not hog. Do not add matcher `sabinoso`.
+    private static let cerrosElSabinoso = CLLocationCoordinate2D(latitude: 31.235259, longitude: -106.315716)
+
     /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
     private static let nmOpenReserve = CLLocationCoordinate2D(latitude: 35.846906, longitude: -107.025703)
@@ -4179,6 +4188,7 @@ final class HoldOnTheGlassTests: XCTestCase {
             "\(contrabando)"
         )
         XCTAssertNotEqual(contrabando.card?.title, "Loma El Gato", "\(contrabando)")
+        XCTAssertNotEqual(contrabando.card?.title, "Cerros El Sabinoso", "\(contrabando)")
         XCTAssertNotEqual(contrabando.card?.title, "San Andres Peak", "\(contrabando)")
         XCTAssertNotEqual(contrabando.card?.title, "Mount Franklin", "\(contrabando)")
         let contrabandoDo = contrabando.card?.doLine.lowercased() ?? ""
@@ -4190,6 +4200,29 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(contrabandoPresent.first, Inspect.mammalTXCard, "\(contrabando)")
         XCTAssertEqual(InspectField.label(for: contrabandoPresent.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: contrabandoPresent), "ANIMAL · BITE · COLD")
+
+        let sabinoso = try hold(at: Self.cerrosElSabinoso, zoom: 16)
+        XCTAssertEqual(sabinoso.card?.klass, "Peak", "\(sabinoso)")
+        XCTAssertEqual(sabinoso.card?.title, "Cerros El Sabinoso", "\(sabinoso)")
+        XCTAssertNotEqual(sabinoso.card?.klass, "Wildlife range", "\(sabinoso)")
+        XCTAssertNotEqual(
+            sabinoso.card?.title,
+            "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+            "\(sabinoso)"
+        )
+        XCTAssertNotEqual(sabinoso.card?.title, "Cerro el Contrabando", "\(sabinoso)")
+        XCTAssertNotEqual(sabinoso.card?.title, "Loma El Gato", "\(sabinoso)")
+        XCTAssertNotEqual(sabinoso.card?.title, "San Andres Peak", "\(sabinoso)")
+        XCTAssertNotEqual(sabinoso.card?.title, "Mount Franklin", "\(sabinoso)")
+        let sabinosoDo = sabinoso.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sabinosoDo.contains("javelina"), sabinoso.card?.doLine ?? "")
+        XCTAssertTrue(sabinosoDo.contains("give it the road"), sabinoso.card?.doLine ?? "")
+        XCTAssertFalse(sabinosoDo.contains("hog"), sabinoso.card?.doLine ?? "")
+        XCTAssertFalse(sabinosoDo.contains("edible"), sabinoso.card?.doLine ?? "")
+        let sabinosoPresent = InspectField.presentRoute(sabinoso.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(sabinosoPresent.first, Inspect.mammalTXCard, "\(sabinoso)")
+        XCTAssertEqual(InspectField.label(for: sabinosoPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: sabinosoPresent), "ANIMAL · BITE · COLD")
     }
 
     func testHoldingAnEastPeakOpensHogNotJavelina() throws {

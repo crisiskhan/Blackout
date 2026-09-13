@@ -1940,6 +1940,17 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(cerroElContrabando.doLine.lowercased().contains("hog"), cerroElContrabando.doLine)
         XCTAssertFalse(cerroElContrabando.doLine.lowercased().contains("edible"), cerroElContrabando.doLine)
 
+        let cerrosElSabinoso = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerros El Sabinoso"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(cerrosElSabinoso.klass, "Peak")
+        XCTAssertNotEqual(cerrosElSabinoso.klass, "Wildlife range")
+        XCTAssertTrue(cerrosElSabinoso.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(cerrosElSabinoso.doLine.lowercased().contains("javelina"), cerrosElSabinoso.doLine)
+        XCTAssertFalse(cerrosElSabinoso.doLine.lowercased().contains("hog"), cerrosElSabinoso.doLine)
+        XCTAssertFalse(cerrosElSabinoso.doLine.lowercased().contains("edible"), cerrosElSabinoso.doLine)
+
         let featherLake = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -4597,6 +4608,16 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(
             Inspect.pick([
                 ["natural": "peak", "name": "Cerro el Contrabando"],
+                [
+                    "leisure": "nature_reserve",
+                    "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Cerros El Sabinoso"],
                 [
                     "leisure": "nature_reserve",
                     "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
