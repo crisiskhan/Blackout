@@ -51,6 +51,8 @@ final class AppRuntime {
     var ptt: PTTDeck
     var speech: SpeechEngine
     var armed = false
+    /// Live Morse beat. Screen veil reads this; the LED follows the same edge.
+    var sosFlashLit = false
     var bootStage: BootStage = .cold
     var bootProgress: Double = 0
     var bootStyleURL: URL?
@@ -134,6 +136,7 @@ final class AppRuntime {
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
     private var incomingTask: Task<Void, Never>?
+    private var flashTask: Task<Void, Never>?
     private var savedBrightness: CGFloat?
     private var brightnessLock: NSObjectProtocol?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
@@ -1083,24 +1086,52 @@ final class AppRuntime {
         mesh.sendChip(from: mesh.localID, chip: chip.rawValue, to: meshDest)
     }
 
-    func tapTorch() {
-        guard torchAvailable else {
-            box.log("torch", "lamp none")
-            return
+    func tapSOSFlashlight() {
+        instruments.sosFlashTap()
+        if instruments.state.sosFlash {
+            startSOSFlash()
+        } else {
+            stopSOSFlash()
         }
-        instruments.torchTap()
-        applyTorch(level: instruments.state.torchClicks)
+        applyMapKeepAwake()
     }
 
-    private func applyTorch(level: Int) {
+    func haltSOSFlash() {
+        instruments.setSOSFlash(false)
+        stopSOSFlash()
+        applyMapKeepAwake()
+    }
+
+    private func startSOSFlash() {
+        flashTask?.cancel()
+        flashTask = Task { @MainActor in
+            while !Task.isCancelled, instruments.state.sosFlash {
+                for (on, units) in SOSFlash.cycleUnits {
+                    if Task.isCancelled || !instruments.state.sosFlash { return }
+                    sosFlashLit = on
+                    applyTorchLamp(on: on)
+                    let ns = UInt64(SOSFlash.unitMs) * UInt64(units) * 1_000_000
+                    try? await Task.sleep(nanoseconds: ns)
+                }
+            }
+        }
+    }
+
+    private func stopSOSFlash() {
+        flashTask?.cancel()
+        flashTask = nil
+        sosFlashLit = false
+        applyTorchLamp(on: false)
+    }
+
+    private func applyTorchLamp(on: Bool) {
         guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
         do {
             try device.lockForConfiguration()
-            if level == 0 {
+            if on, device.isTorchModeSupported(.on) {
+                try device.setTorchModeOn(level: 1)
+            } else {
                 device.torchMode = .off
-            } else if device.isTorchModeSupported(.on) {
-                let fraction = Float(level) / 3.0
-                try device.setTorchModeOn(level: max(0.1, min(1, fraction)))
             }
             device.unlockForConfiguration()
         } catch {
@@ -1436,7 +1467,8 @@ final class AppRuntime {
     func applyMapKeepAwake() {
         UIApplication.shared.isIdleTimerDisabled = MapKeepAwake.idleTimerDisabled(
             mapInstrumentActive: armed && tab == .map,
-            pocket: power.state.pocket
+            pocket: power.state.pocket,
+            signaling: instruments.state.sosFlash
         )
     }
 

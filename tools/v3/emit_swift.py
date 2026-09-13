@@ -1866,20 +1866,44 @@ final class PaperGenTests: XCTestCase {
         r'''import Foundation
 import BlackBox
 
+public enum SOSFlash: Sendable {
+    public static let unitMs: Double = 250
+    public static let cycleUnits: [(Bool, Int)] = [
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 3),
+        (true, 3),
+        (false, 1),
+        (true, 3),
+        (false, 1),
+        (true, 3),
+        (false, 3),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 7),
+    ]
+}
+
 public struct InstrumentState: Equatable, Sendable {
-    public var torchClicks: Int
+    public var sosFlash: Bool
     public var compassCalibrated: Bool
     public var usbCPTT: Bool
     public var externalGNSS: Bool
     public var magNorth: Bool
     public init(
-        torchClicks: Int = 0,
+        sosFlash: Bool = false,
         compassCalibrated: Bool = false,
         usbCPTT: Bool = false,
         externalGNSS: Bool = false,
         magNorth: Bool = true
     ) {
-        self.torchClicks = torchClicks
+        self.sosFlash = sosFlash
         self.compassCalibrated = compassCalibrated
         self.usbCPTT = usbCPTT
         self.externalGNSS = externalGNSS
@@ -1891,9 +1915,12 @@ public final class InstrumentBoard: @unchecked Sendable {
     public private(set) var state = InstrumentState()
     private let box: EventLog
     public init(box: EventLog) { self.box = box }
-    public func torchTap() {
-        state.torchClicks = (state.torchClicks + 1) % 4
-        box.log("torch", "\(state.torchClicks)")
+    public func sosFlashTap() {
+        state.sosFlash.toggle()
+        box.log("sosflash", state.sosFlash ? "on" : "off")
+    }
+    public func setSOSFlash(_ on: Bool) {
+        state.sosFlash = on
     }
     public func calibrateCompass() { state.compassCalibrated = true }
     public func attachUSB_C_PTT(_ present: Bool) { state.usbCPTT = present }
@@ -1910,12 +1937,18 @@ import BlackBox
 @testable import Instruments
 
 final class InstrumentBoardTests: XCTestCase {
-    func testTorch3() {
+    func testSOSFlashTogglesAndKeepsITUMorse() {
         let i = InstrumentBoard(box: EventLog())
-        i.torchTap(); i.torchTap(); i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 3)
-        i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 0)
+        XCTAssertFalse(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertTrue(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertFalse(i.state.sosFlash)
+        let on = SOSFlash.cycleUnits.filter(\.0).map(\.1)
+        XCTAssertEqual(on, [1, 1, 1, 3, 3, 3, 1, 1, 1])
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.0, false)
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.1, 7)
+        XCTAssertEqual(SOSFlash.unitMs, 250)
     }
 
     func testToggleMagTrueFlipsNorthReference() {

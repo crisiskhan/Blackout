@@ -81,16 +81,14 @@ struct InstrumentsView: View {
                     sunPlate
 
                     sectionLabel("BODY")
-                    Button("TORCH 3×") { runtime.tapTorch() }
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.silver)
-                        .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints, alignment: .leading)
-                        .padding(.horizontal, 12)
-                        .background(Theme.glass())
-                        .clipShape(Theme.plateRect())
-                    Text(torchWord)
+                    Button("SOS FLASHLIGHT") { runtime.tapSOSFlashlight() }
+                        .buttonStyle(HUDActionStyle(
+                            filled: runtime.instruments.state.sosFlash,
+                            crisis: runtime.instruments.state.sosFlash
+                        ))
+                    Text(lampWord)
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(runtime.instruments.state.torchClicks == 0 ? Theme.silver.opacity(0.45) : Theme.silver)
+                        .foregroundStyle(runtime.instruments.state.sosFlash ? Theme.silver : Theme.silver.opacity(0.45))
                     hudButton("COMPASS CAL") { runtime.calibrateCompass() }
                     Text(runtime.headingDeg == nil ? "NEED" : "CAL")
                         .font(.caption.weight(.bold))
@@ -160,10 +158,12 @@ struct InstrumentsView: View {
         .padding(.bottom, 8)
     }
 
-    private var torchWord: String {
+    private var lampWord: String {
+        if runtime.instruments.state.sosFlash {
+            return runtime.torchAvailable ? "SOS" : "SOS · SCREEN"
+        }
         if !runtime.torchAvailable { return "LAMP · NONE" }
-        let n = runtime.instruments.state.torchClicks
-        return n == 0 ? "OFF" : "\(n)"
+        return "OFF"
     }
 
     @ViewBuilder

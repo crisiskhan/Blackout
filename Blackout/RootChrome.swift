@@ -31,6 +31,11 @@ struct RootChrome: View {
         .environment(runtime.hudKeys)
         .animation(Theme.Motion.heavy, value: runtime.hudKeys.isOpen)
         .nightRedLamp(runtime.night)
+        .overlay {
+            if runtime.instruments.state.sosFlash {
+                sosFlashVeil
+            }
+        }
         .tint(Theme.silver)
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .sheet(isPresented: $runtime.showInstruments) {
@@ -52,6 +57,7 @@ struct RootChrome: View {
                 runtime.hudKeys.close()
                 runtime.closeMark()
                 runtime.clearIncoming()
+                runtime.haltSOSFlash()
             }
             runtime.applyMapKeepAwake()
         }
@@ -241,6 +247,29 @@ struct RootChrome: View {
                 )
         }
         .transition(.opacity)
+    }
+
+    private var sosFlashVeil: some View {
+        ZStack(alignment: .topTrailing) {
+            (runtime.sosFlashLit
+                ? Color.white
+                : Color(rgba: BlackoutTokens.Color.void))
+                .ignoresSafeArea()
+            Button("SOS FLASHLIGHT") {
+                runtime.tapSOSFlashlight()
+            }
+            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+            .foregroundStyle(Color.white)
+            .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+            )
+            .background(Theme.accent)
+            .clipShape(Theme.plateRect())
+            .padding(12)
+        }
+        .allowsHitTesting(true)
     }
 
     private var sosBottomPad: CGFloat {

@@ -1337,18 +1337,61 @@ class InstrumentsSunTorchTests(unittest.TestCase):
         self.assertIn("Almanac.sun", inst)
         self.assertIn("RISE", inst)
         self.assertIn("SET", inst)
-        self.assertIn('Button("TORCH 3×")', inst)
-        self.assertIn("tapTorch()", inst)
-        self.assertIn("func tapTorch()", runtime)
+        self.assertIn('Button("SOS FLASHLIGHT")', inst)
+        self.assertIn("tapSOSFlashlight()", inst)
+        self.assertIn("func tapSOSFlashlight()", runtime)
         self.assertIn("setTorchModeOn", runtime)
         self.assertIn("func clock(", almanac)
+        self.assertNotIn('Button("TORCH 3×")', inst)
         self.assertNotIn("Screen buffer OFF default", inst)
+
+    def test_sos_flashlight_is_itu_morse_not_a_dimmer(self):
+        on_units = [u for on, u in sos_flash_cycle() if on]
+        self.assertEqual(on_units, [1, 1, 1, 3, 3, 3, 1, 1, 1])
+        self.assertEqual(sos_flash_cycle()[-1], (False, 7))
+        self.assertEqual(sum(u for on, u in sos_flash_cycle() if on), 15)
+        board = read(
+            "Packages", "Instruments", "Sources", "Instruments", "Instruments.swift"
+        )
+        app = read("Blackout", "AppRuntime.swift")
+        inst = read("Blackout", "InstrumentsView.swift")
+        root = read("Blackout", "RootChrome.swift")
+        self.assertIn("enum SOSFlash", board)
+        self.assertIn("static let unitMs: Double = 250", board)
+        self.assertIn("static let cycleUnits", board)
+        for on, units in sos_flash_cycle():
+            self.assertIn(f"({str(on).lower()}, {units})", board)
+        self.assertIn("var sosFlash: Bool", board)
+        self.assertIn("func sosFlashTap()", board)
+        self.assertIn("state.sosFlash.toggle()", board)
+        tap = app.split("func tapSOSFlashlight()")[1].split("func ", 1)[0]
+        self.assertIn("instruments.sosFlashTap()", tap)
+        self.assertNotIn("offerSOS()", tap)
+        self.assertNotIn("torchClicks", tap)
+        self.assertIn("setTorchModeOn(level: 1)", app)
+        self.assertIn("signaling:", app.split("func applyMapKeepAwake()")[1].split("func ", 1)[0])
+        self.assertIn("var sosFlashLit", app)
+        self.assertIn("sosFlashLit", root)
+        self.assertIn("SOS FLASHLIGHT", root)
+        self.assertIn("LAMP · NONE", inst)
+        self.assertIn("SOS · SCREEN", inst)
+        self.assertNotIn("best in class", board.lower())
+        self.assertNotIn("best in class", app.lower())
+        self.assertNotIn("Waze", app)
+        keep = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ).split("enum MapKeepAwake")[1].split("enum MapCanvasHit")[0]
+        self.assertIn("signaling: Bool", keep)
+        self.assertIn("if signaling { return true }", keep)
 
     def test_solo_qa_scores_sun_and_torch(self):
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("RISE", qa)
-        self.assertIn("TORCH 3×", qa)
+        self.assertIn("SOS FLASHLIGHT", qa)
+        self.assertIn("Morse", qa)
         self.assertIn("POCKET", qa)
+        self.assertNotIn("TORCH 3×", qa)
+        self.assertNotIn("best in class", qa.lower())
 
 
 class MapMarksGlassTests(unittest.TestCase):
@@ -1707,7 +1750,7 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         )
         for stamp in (
             "LEFT HAND",
-            "TORCH 3×",
+            "SOS FLASHLIGHT",
             "COMPASS CAL",
             "TRUE NORTH",
             "USB-C PTT",
@@ -1736,7 +1779,7 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("RECORDING", qa)
         self.assertIn("NO PEERS", qa)
         self.assertIn("NAV · SEATED", qa)
-        self.assertIn("TORCH 3×", qa)
+        self.assertIn("SOS FLASHLIGHT", qa)
         self.assertIn("HUNGER", qa)
         self.assertIn("STEEL", qa)
         self.assertIn("DESERT", qa)
@@ -1753,6 +1796,30 @@ def tap_lamp(current: str, tap: str) -> str:
     if tap not in ("night", "sun"):
         raise AssertionError(tap)
     return "off" if current == tap else tap
+
+
+def sos_flash_cycle():
+    """ITU Morse SOS as (on, units). Dit=1, dah=3, letter=3, word=7."""
+    return [
+        (True, 1),
+        (False, 1),
+        (True, 1),
+        (False, 1),
+        (True, 1),
+        (False, 3),
+        (True, 3),
+        (False, 1),
+        (True, 3),
+        (False, 1),
+        (True, 3),
+        (False, 3),
+        (True, 1),
+        (False, 1),
+        (True, 1),
+        (False, 1),
+        (True, 1),
+        (False, 7),
+    ]
 
 
 ASLEEP = 0.08

@@ -3,12 +3,18 @@ import BlackBox
 @testable import Instruments
 
 final class InstrumentBoardTests: XCTestCase {
-    func testTorch3() {
+    func testSOSFlashTogglesAndKeepsITUMorse() {
         let i = InstrumentBoard(box: EventLog())
-        i.torchTap(); i.torchTap(); i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 3)
-        i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 0)
+        XCTAssertFalse(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertTrue(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertFalse(i.state.sosFlash)
+        let on = SOSFlash.cycleUnits.filter(\.0).map(\.1)
+        XCTAssertEqual(on, [1, 1, 1, 3, 3, 3, 1, 1, 1])
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.0, false)
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.1, 7)
+        XCTAssertEqual(SOSFlash.unitMs, 250)
     }
 
     func testToggleMagTrueFlipsNorthReference() {

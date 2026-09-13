@@ -942,7 +942,12 @@ public enum OverlaySync: Sendable {
 }
 
 public enum MapKeepAwake: Sendable {
-    public static func idleTimerDisabled(mapInstrumentActive: Bool, pocket: Bool = false) -> Bool {
+    public static func idleTimerDisabled(
+        mapInstrumentActive: Bool,
+        pocket: Bool = false,
+        signaling: Bool = false
+    ) -> Bool {
+        if signaling { return true }
         if pocket { return false }
         return mapInstrumentActive
     }

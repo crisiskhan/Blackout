@@ -1013,6 +1013,13 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: false))
         XCTAssertFalse(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true, pocket: true))
         XCTAssertTrue(MapKeepAwake.idleTimerDisabled(mapInstrumentActive: true, pocket: false))
+        XCTAssertTrue(
+            MapKeepAwake.idleTimerDisabled(
+                mapInstrumentActive: false,
+                pocket: true,
+                signaling: true
+            )
+        )
         XCTAssertTrue(MapCanvasHit.enabled(onMap: true, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: false, holding: false))
         XCTAssertFalse(MapCanvasHit.enabled(onMap: true, holding: true))

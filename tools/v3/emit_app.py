@@ -653,7 +653,7 @@ struct InstrumentsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Button("Torch 3×") { runtime.instruments.torchTap() }
+                Button("SOS FLASHLIGHT") { runtime.tapSOSFlashlight() }
                 Button("Compass cal") { runtime.instruments.calibrateCompass() }
                 Button("True north") { runtime.instruments.setTrueNorth() }
                 Toggle("USB-C PTT present", isOn: Binding(get: { runtime.instruments.state.usbCPTT }, set: { runtime.instruments.attachUSB_C_PTT($0) }))
