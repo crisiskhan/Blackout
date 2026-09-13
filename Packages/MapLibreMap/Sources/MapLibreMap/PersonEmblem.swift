@@ -33,7 +33,15 @@ public enum PersonEmblem: String, CaseIterable, Sendable, Equatable {
 
     public static let fallback = PersonEmblem.wolf
     public static let key = "you.emblem"
-    /// FACE grids iterate PersonEmblem.allCases — same metal-ring faces as YOU.
+    /// FACE grids iterate faces — same 26 metal-ring marks, ordered by how they look.
+    /// PersonEmblem.allCases stays the enum dump; FACE plates do not use that order.
+    public static let faces: [PersonEmblem] = [
+        .owl, .falcon, .eagle, .hawk, .raven, .bat, .heron, .roadrunner,
+        .wolf, .husky, .fox, .raccoon, .labrador,
+        .horse, .mule, .muleDeer, .deer, .pronghorn,
+        .ibex, .bighorn, .bison, .boar,
+        .bear, .beaver, .otter, .turtle
+    ]
 
     public var title: String {
         switch self {

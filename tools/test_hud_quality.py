@@ -1447,7 +1447,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn("dropMark()", app)
         self.assertIn("PlaceMarkCard(", tab)
         self.assertIn("PlaceMark.body", tab)
-        self.assertIn("PersonEmblem.allCases", card)
+        self.assertIn("EmblemFaceGrid(", card)
         self.assertIn('HUDField("NAME"', card)
         self.assertIn('HUDField("NOTE"', card)
         self.assertIn('Button("DROP")', card)
@@ -2243,7 +2243,7 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "Emblems"
         )
         self.assertIn('sectionLabel("FACE")', comms)
-        self.assertIn("PersonEmblem.allCases", comms)
+        self.assertIn("EmblemFaceGrid(", comms)
         self.assertIn("pickEmblem", comms)
         self.assertIn("youHeading: runtime.headingDeg", tab)
         self.assertIn("youEmblem: runtime.youEmblem.rawValue", tab)
@@ -2551,16 +2551,17 @@ class PartyHoldCardTests(unittest.TestCase):
         app = read("Blackout", "AppRuntime.swift")
         card = read("Blackout", "PartyHoldCard.swift")
         pick = read("Blackout", "EmblemPickCard.swift")
+        grid = read("Blackout", "EmblemFaceGrid.swift")
         device = read("docs", "DEVICE.md")
         face = card.split("private var face")[1].split("private var displayName")[0]
         self.assertIn("struct EmblemPickCard", pick)
-        self.assertIn("PersonEmblem.allCases", pick)
-        self.assertIn("emblem.title", pick)
+        self.assertIn("EmblemFaceGrid(", pick)
+        self.assertIn("emblem.title", grid)
         self.assertIn('"FACE"', pick)
         self.assertIn("onPick", pick)
         self.assertIn("holdCardDismissDragPoints", pick)
         self.assertIn("Theme.Motion.heavy", pick)
-        self.assertIn("BlackoutTokens.Chrome.mapChipHitPoints", pick)
+        self.assertIn("BlackoutTokens.Chrome.mapChipHitPoints", grid)
         self.assertNotIn("closeHold", pick)
         self.assertNotIn(".spring(", pick)
         self.assertNotIn("tel://", pick.lower())
@@ -2794,6 +2795,93 @@ class IncomingLineTests(unittest.TestCase):
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
         self.assertNotIn("Google", qa)
+
+
+class EmblemFaceGridTests(unittest.TestCase):
+    """FACE lists stay short, scroll, and sit in look-alike order."""
+
+    def test_face_lists_scroll_in_look_order_and_stay_compact(self):
+        emblem = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift"
+        )
+        grid_path = ROOT.joinpath("Blackout", "EmblemFaceGrid.swift")
+        self.assertTrue(grid_path.is_file(), "EmblemFaceGrid.swift")
+        grid = grid_path.read_text()
+        comms = read("Blackout", "CommsTab.swift")
+        pick = read("Blackout", "EmblemPickCard.swift")
+        mark = read("Blackout", "PlaceMarkCard.swift")
+        qa = read("docs", "SOLO_QA.md")
+        tests = read(
+            "Packages", "MapLibreMap", "Tests", "MapLibreMapTests", "MapLibreMapTests.swift"
+        )
+        faces = person_emblem_faces(emblem)
+        cases = re.findall(r"case (\w+)", emblem.split("enum PersonEmblem")[1].split("public static let fallback")[0])
+        self.assertEqual(len(faces), 26)
+        self.assertEqual(len(cases), 26)
+        self.assertEqual(set(faces), set(cases))
+        self.assertLessEqual(_cluster_span(faces, ["falcon", "eagle", "hawk"]), 3)
+        self.assertLessEqual(_cluster_span(faces, ["raven", "bat"]), 2)
+        self.assertLessEqual(_cluster_span(faces, ["heron", "roadrunner"]), 2)
+        self.assertLessEqual(_cluster_span(faces, ["wolf", "husky", "fox"]), 3)
+        self.assertLessEqual(_cluster_span(faces, ["raccoon", "labrador"]), 3)
+        self.assertLessEqual(_cluster_span(faces, ["horse", "mule"]), 2)
+        self.assertLessEqual(_cluster_span(faces, ["muleDeer", "deer", "pronghorn"]), 3)
+        self.assertLessEqual(_cluster_span(faces, ["ibex", "bighorn", "bison"]), 3)
+        self.assertLessEqual(_cluster_span(faces, ["bear", "beaver", "otter", "turtle"]), 4)
+        self.assertIn("static let faces", emblem)
+        self.assertIn("PersonEmblem.faces", grid)
+        self.assertIn("ScrollView", grid)
+        self.assertIn("mapChipHitPoints", grid)
+        self.assertIn("*4", grid.replace(" ", ""))
+        self.assertIn("var compact", grid)
+        self.assertIn("emblem.title", grid)
+        self.assertIn("PersonEmblem.image", grid)
+        self.assertNotIn("PersonEmblem.allCases", grid)
+        self.assertNotIn(".spring(", grid)
+        self.assertNotIn("tel://", grid.lower())
+        self.assertNotIn("best in class", grid.lower())
+        self.assertNotIn("Waze", grid)
+        self.assertNotIn("Google", grid)
+        face_card = comms.split("private var faceCard")[1].split("private func faceThumb")[0]
+        self.assertIn("EmblemFaceGrid(", face_card)
+        self.assertIn("compact: true", face_card)
+        self.assertNotIn("LazyVGrid", face_card)
+        self.assertIn("EmblemFaceGrid(", pick)
+        self.assertIn("compact: false", pick)
+        self.assertNotIn("LazyVGrid", pick)
+        self.assertIn("EmblemFaceGrid(", mark)
+        self.assertIn("compact: true", mark)
+        self.assertNotIn("LazyVGrid", mark)
+        self.assertIn("PersonEmblem.faces", tests)
+        self.assertIn("Set(PersonEmblem.faces)", tests.replace(" ", ""))
+        comms_qa = next(
+            line for line in qa.splitlines() if "FACE picks the person mark" in line
+        )
+        self.assertIn("scroll", comms_qa.lower())
+        self.assertIn("look", comms_qa.lower())
+        mark_qa = next(
+            line
+            for line in qa.splitlines()
+            if "NAME, NOTE, FACE" in line or ("MARK" in line and "FACE" in line)
+        )
+        self.assertIn("scroll", mark_qa.lower())
+        you_qa = next(
+            line for line in qa.splitlines() if "Hold YOU or a party emblem" in line
+        )
+        self.assertIn("scroll", you_qa.lower())
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
+
+
+def person_emblem_faces(src: str) -> list[str]:
+    block = src.split("static let faces")[1].split("= [", 1)[1].split("]", 1)[0]
+    return re.findall(r"\.(\w+)", block)
+
+
+def _cluster_span(order: list[str], group: list[str]) -> int:
+    idx = [order.index(name) for name in group]
+    return max(idx) - min(idx)
 
 
 def mesh_is_self_addressed(from_id: str, to: str, local_id: str) -> bool:

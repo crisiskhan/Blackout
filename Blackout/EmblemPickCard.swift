@@ -62,35 +62,11 @@ struct EmblemPickCard: View {
             Rectangle()
                 .fill(Theme.silver.opacity(0.22))
                 .frame(height: 1)
-            ScrollView {
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 72), spacing: 8)],
-                    spacing: 8
-                ) {
-                    ForEach(PersonEmblem.allCases, id: \.self) { emblem in
-                        Button {
-                            onPick(emblem)
-                        } label: {
-                            VStack(spacing: 4) {
-                                thumb(emblem, lit: selected == emblem)
-                                Text(emblem.title)
-                                    .font(.system(size: 11, weight: .heavy))
-                                    .foregroundStyle(Theme.silver)
-                                    .lineLimit(2)
-                                    .multilineTextAlignment(.center)
-                                    .minimumScaleFactor(1)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .frame(
-                            minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
-                            minHeight: BlackoutTokens.Chrome.mapChipHitPoints
-                        )
-                        .accessibilityLabel(emblem.title)
-                    }
-                }
-            }
-            .scrollIndicators(.hidden)
+            EmblemFaceGrid(
+                selected: selected,
+                onPick: onPick,
+                compact: false
+            )
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -134,27 +110,5 @@ struct EmblemPickCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-    }
-
-    private func thumb(_ emblem: PersonEmblem, lit: Bool) -> some View {
-        let size: CGFloat = 56
-        return Group {
-            if let image = PersonEmblem.image(emblem) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Circle().fill(Theme.metalLow)
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-        .overlay(
-            Circle().strokeBorder(
-                lit ? Theme.accent : Theme.silver.opacity(0.35),
-                lineWidth: lit ? 2.4 : 1
-            )
-        )
-        .accessibilityHidden(true)
     }
 }

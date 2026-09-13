@@ -210,29 +210,12 @@ struct CommsTab: View {
 
     private var faceCard: some View {
         HUDGlassCard {
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 72), spacing: 8)],
-                spacing: 8
-            ) {
-                ForEach(PersonEmblem.allCases, id: \.self) { emblem in
-                    Button {
-                        runtime.pickEmblem(emblem)
-                    } label: {
-                        VStack(spacing: 4) {
-                            faceThumb(emblem, selected: runtime.youEmblem == emblem)
-                            Text(emblem.title)
-                                .font(.system(size: 8, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.center)
-                                .minimumScaleFactor(1)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .accessibilityLabel(emblem.title)
-                }
-            }
+            EmblemFaceGrid(
+                selected: runtime.youEmblem,
+                onPick: { runtime.pickEmblem($0) },
+                titleSize: 8,
+                compact: true
+            )
             .padding(4)
         }
     }

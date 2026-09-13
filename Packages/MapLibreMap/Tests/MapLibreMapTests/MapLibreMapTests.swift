@@ -103,6 +103,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(ring.first?.lon, ring.last?.lon)
         XCTAssertTrue(ring.contains { abs($0.lat - 29.95) > 0.0001 })
         XCTAssertEqual(PersonEmblem.allCases.count, 26)
+        XCTAssertEqual(PersonEmblem.faces.count, 26)
+        XCTAssertEqual(Set(PersonEmblem.faces), Set(PersonEmblem.allCases))
         XCTAssertEqual(PersonEmblem.resolved("nope"), .wolf)
         XCTAssertEqual(PersonEmblem.parse("owl"), .owl)
         XCTAssertNil(PersonEmblem.parse(nil))

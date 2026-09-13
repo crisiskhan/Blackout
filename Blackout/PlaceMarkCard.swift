@@ -162,32 +162,11 @@ struct PlaceMarkCard: View {
             Text("FACE")
                 .font(.system(size: 11, weight: .heavy))
                 .foregroundStyle(Theme.silver.opacity(0.75))
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 72), spacing: 8)],
-                spacing: 8
-            ) {
-                ForEach(PersonEmblem.allCases, id: \.self) { emblem in
-                    Button {
-                        pick(emblem)
-                    } label: {
-                        VStack(spacing: 4) {
-                            thumb(emblem, lit: selected == emblem)
-                            Text(emblem.title)
-                                .font(.system(size: 11, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.center)
-                                .minimumScaleFactor(1)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(
-                        minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
-                        minHeight: BlackoutTokens.Chrome.mapChipHitPoints
-                    )
-                    .accessibilityLabel(emblem.title)
-                }
-            }
+            EmblemFaceGrid(
+                selected: selected,
+                onPick: pick,
+                compact: true
+            )
         }
     }
 
@@ -201,28 +180,6 @@ struct PlaceMarkCard: View {
         draft.emblem = emblem.rawValue
         runtime.markDraft = draft
         runtime.pulse()
-    }
-
-    private func thumb(_ emblem: PersonEmblem, lit: Bool) -> some View {
-        let size: CGFloat = 56
-        return Group {
-            if let image = PersonEmblem.image(emblem) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Circle().fill(Theme.metalLow)
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-        .overlay(
-            Circle().strokeBorder(
-                lit ? Theme.accent : Theme.silver.opacity(0.35),
-                lineWidth: lit ? 2.4 : 1
-            )
-        )
-        .accessibilityHidden(true)
     }
 
     private func row(key: String, value: String) -> some View {
