@@ -8,9 +8,10 @@ when upload had no --apple-id/--bundle-id.
 FMWK CFBundleIdentifier '' and Identifier MapLibre vs $bundleIdentifier.
 Keep vendor com.maplibre.mapbox. Do not strip. Do not rewrite onto
 com.crisiskhan.blackout.* (owned collision). Keep CFBundlePackageType=FMWK.
-Fail closed if Payload/*.app or PlugIns/*.appex is outside
-{com.crisiskhan.blackout, com.crisiskhan.blackout.widgets}.
-No ASC app for MapLibre. No network.
+Allow vendor llama.framework BID org.ggml.llama the same way. No ASC app
+for MapLibre or llama. Fail closed if Payload/*.app or PlugIns/*.appex is
+outside {com.crisiskhan.blackout, com.crisiskhan.blackout.widgets}.
+No network.
 """
 from __future__ import annotations
 
@@ -26,8 +27,10 @@ from typing import Any
 APP_BID = "com.crisiskhan.blackout"
 WIDGET_BID = "com.crisiskhan.blackout.widgets"
 MAPBOX = "com.maplibre.mapbox"
+LLAMA = "org.ggml.llama"
 CHILD_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
 OWNED_PREFIX = "com.crisiskhan.blackout"
+VENDOR_FMWK = frozenset({MAPBOX, LLAMA})
 
 
 class InspectError(RuntimeError):
@@ -103,10 +106,10 @@ def validate_framework_identifier(path: Path) -> None:
     if pkg and pkg != "FMWK":
         return
     bid = str(body.get("CFBundleIdentifier") or "").strip()
-    if bid != MAPBOX:
+    if bid not in VENDOR_FMWK:
         raise InspectError(
             f"{path.as_posix()} CFBundleIdentifier={bid or 'MISSING'} "
-            f"— require {MAPBOX} (do not strip; do not use owned BID)"
+            f"— require {MAPBOX} or {LLAMA} (do not strip; do not use owned BID)"
         )
 
 
@@ -175,12 +178,12 @@ def inspect_and_rewrite_payload(payload_dir: Path) -> bool:
             fbid = str(body.get("CFBundleIdentifier") or "")
             if _is_owned_bid(fbid) or fbid == CHILD_MAPLIBRE:
                 leftover_owned.append(plist)
-            if fbid != MAPBOX:
+            if fbid not in VENDOR_FMWK:
                 leftover_bad.append(plist)
     if leftover_owned or leftover_bad:
         paths = leftover_owned or leftover_bad
         raise InspectError(
-            "IPA nested FMWK CFBundleIdentifier must be com.maplibre.mapbox: "
+            "IPA nested FMWK CFBundleIdentifier must be com.maplibre.mapbox or org.ggml.llama: "
             + ", ".join(p.as_posix() for p in paths)
         )
     return rewritten

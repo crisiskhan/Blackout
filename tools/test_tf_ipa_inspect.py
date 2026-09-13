@@ -16,6 +16,8 @@ APP_BID = "com.crisiskhan.blackout"
 WIDGET_BID = "com.crisiskhan.blackout.widgets"
 MAPBOX = "com.maplibre.mapbox"
 CHILD_MAPLIBRE = "com.crisiskhan.blackout.maplibre"
+LLAMA = "org.ggml.llama"
+CHILD_LLAMA = "com.crisiskhan.blackout.llama"
 
 
 def _write_plist(path: Path, body: dict) -> None:
@@ -27,7 +29,13 @@ def _read_plist(path: Path) -> dict:
     return plistlib.loads(path.read_bytes())
 
 
-def _fake_payload(root: Path, *, maplibre_bid: str | None = MAPBOX, widget: bool = True) -> Path:
+def _fake_payload(
+    root: Path,
+    *,
+    maplibre_bid: str | None = MAPBOX,
+    widget: bool = True,
+    llama_bid: str | None = None,
+) -> Path:
     payload = root / "Payload"
     app = payload / "Blackout.app"
     _write_plist(
@@ -54,6 +62,13 @@ def _fake_payload(root: Path, *, maplibre_bid: str | None = MAPBOX, widget: bool
     if maplibre_bid is not None:
         body["CFBundleIdentifier"] = maplibre_bid
     _write_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist", body)
+    if llama_bid is not None:
+        llama: dict = {
+            "CFBundlePackageType": "FMWK",
+            "CFBundleExecutable": "llama",
+            "CFBundleIdentifier": llama_bid,
+        }
+        _write_plist(app / "Frameworks" / "llama.framework" / "Info.plist", llama)
     return payload
 
 
@@ -111,6 +126,50 @@ class TestValidateFrameworkPlist(unittest.TestCase):
             with self.assertRaises(inspect.InspectError):
                 inspect.validate_framework_identifier(path)
 
+    def test_keeps_llama_vendor_bid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "llama.framework" / "Info.plist"
+            _write_plist(
+                path,
+                {
+                    "CFBundleIdentifier": LLAMA,
+                    "CFBundlePackageType": "FMWK",
+                    "CFBundleName": "llama",
+                },
+            )
+            inspect.validate_framework_identifier(path)
+            pl = _read_plist(path)
+            self.assertEqual(pl["CFBundleIdentifier"], LLAMA)
+            self.assertEqual(pl["CFBundlePackageType"], "FMWK")
+
+    def test_owned_llama_bid_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "llama.framework" / "Info.plist"
+            _write_plist(
+                path,
+                {
+                    "CFBundleIdentifier": CHILD_LLAMA,
+                    "CFBundlePackageType": "FMWK",
+                },
+            )
+            with self.assertRaises(inspect.InspectError) as ctx:
+                inspect.validate_framework_identifier(path)
+            self.assertIn(CHILD_LLAMA, str(ctx.exception))
+            self.assertEqual(_read_plist(path)["CFBundleIdentifier"], CHILD_LLAMA)
+
+    def test_unknown_fmwk_bid_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "Other.framework" / "Info.plist"
+            _write_plist(
+                path,
+                {
+                    "CFBundleIdentifier": "com.example.other",
+                    "CFBundlePackageType": "FMWK",
+                },
+            )
+            with self.assertRaises(inspect.InspectError):
+                inspect.validate_framework_identifier(path)
+
 
 class TestInspectPayload(unittest.TestCase):
     def test_keeps_nested_maplibre_and_accepts_app_and_widget(self) -> None:
@@ -131,6 +190,27 @@ class TestInspectPayload(unittest.TestCase):
             ml = _read_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist")
             self.assertEqual(ml["CFBundleIdentifier"], MAPBOX)
             self.assertEqual(ml["CFBundlePackageType"], "FMWK")
+
+    def test_keeps_nested_llama_with_maplibre(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = _fake_payload(Path(tmp), llama_bid=LLAMA)
+            rewritten = inspect.inspect_and_rewrite_payload(payload)
+            self.assertFalse(rewritten)
+            app = payload / "Blackout.app"
+            llama = _read_plist(app / "Frameworks" / "llama.framework" / "Info.plist")
+            self.assertEqual(llama["CFBundleIdentifier"], LLAMA)
+            ml = _read_plist(app / "Frameworks" / "MapLibre.framework" / "Info.plist")
+            self.assertEqual(ml["CFBundleIdentifier"], MAPBOX)
+
+    def test_does_not_rewrite_llama_onto_owned_bid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = _fake_payload(Path(tmp), llama_bid=CHILD_LLAMA)
+            with self.assertRaises(inspect.InspectError):
+                inspect.inspect_and_rewrite_payload(payload)
+            llama = _read_plist(
+                payload / "Blackout.app" / "Frameworks" / "llama.framework" / "Info.plist"
+            )
+            self.assertEqual(llama["CFBundleIdentifier"], CHILD_LLAMA)
 
     def test_does_not_rewrite_fmwk_onto_owned_bid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

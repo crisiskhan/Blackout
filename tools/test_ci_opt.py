@@ -418,6 +418,8 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
         fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the −19000 stays documented")
     if "strip_framework_identifier" in helper:
         fail("33931992681: do not strip FMWK BID to empty — Apple rejects ''")
+    if "org.ggml.llama" not in helper:
+        fail("tf_ipa_inspect.py must keep vendor llama.framework BID org.ggml.llama")
     if "validate_framework_identifier" not in helper:
         fail("tf_ipa_inspect.py must require nested FMWK CFBundleIdentifier=com.maplibre.mapbox")
     if "flatten_reserved_resources" not in helper:
@@ -560,6 +562,10 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("re-sign widget must pass --identifier com.crisiskhan.blackout.widgets")
     if "--identifier com.maplibre.mapbox" not in archive:
         fail("re-sign MapLibre must pass --identifier com.maplibre.mapbox")
+    if "llama.framework" not in archive:
+        fail("re-sign must name llama.framework so it is not sealed as MapLibre")
+    if "--identifier org.ggml.llama" not in archive:
+        fail("re-sign llama must pass --identifier org.ggml.llama")
     if "check-identifier" not in archive:
         fail("tf-archive.sh must require codesign Identifier to match CFBundleIdentifier")
     if "codesign --verify --deep --strict" not in archive:
