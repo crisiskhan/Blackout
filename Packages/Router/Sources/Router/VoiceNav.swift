@@ -12,8 +12,8 @@ public enum VoiceNav: Sendable {
     public static let arrive = "Arrive at destination."
     public static let offGraphPath = "No walkable street path from YOU."
     public static let offGraphDrivePath = "No drivable street path from YOU."
-    public static let startHint = "Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."
-    public static let destHint = "Tap WALK or DRIVE for the street path, then SPEAK."
+    public static let startHint = "Set a destination, then WALK or DRIVE."
+    public static let destHint = "Tap WALK or DRIVE for the street path."
     public static let minLegMeters: Double = 8
     public static let straightDeg: Double = 35
     public static let uturnDeg: Double = 135

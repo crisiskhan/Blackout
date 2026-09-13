@@ -325,7 +325,7 @@ final class RouterTests: XCTestCase {
         )
         XCTAssertTrue(text.contains("TX WEST."))
         XCTAssertTrue(text.contains("Heading unavailable."))
-        XCTAssertTrue(text.contains("Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."))
+        XCTAssertTrue(text.contains("Set a destination, then WALK or DRIVE."))
         XCTAssertNotEqual(text.trimmingCharacters(in: .whitespacesAndNewlines), "TX WEST no heading")
         let invalid = VoiceNav.prompt(
             packName: "TX WEST",
@@ -352,7 +352,7 @@ final class RouterTests: XCTestCase {
             locale: "en"
         )
         XCTAssertTrue(text.contains("Destination set."))
-        XCTAssertTrue(text.contains("Tap WALK or DRIVE for the street path, then SPEAK."))
+        XCTAssertTrue(text.contains("Tap WALK or DRIVE for the street path."))
         XCTAssertFalse(text.contains("Turn left."))
         XCTAssertFalse(text.contains("Arrive at destination."))
     }

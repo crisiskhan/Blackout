@@ -67,8 +67,8 @@ def off_graph_path(mode: str) -> str:
     return f"No {kind} street path from YOU."
 
 
-START_HINT = "Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."
-DEST_HINT = "Tap WALK or DRIVE for the street path, then SPEAK."
+START_HINT = "Set a destination, then WALK or DRIVE."
+DEST_HINT = "Tap WALK or DRIVE for the street path."
 
 
 def street_at(streets: list[str | None], index: int) -> str | None:
@@ -366,6 +366,28 @@ class VoiceNavSourceContracts(unittest.TestCase):
         speak = (ROOT / "Blackout" / "AppRuntime.swift").read_text().split("func speakMap()")[1].split("func beginPTTSolo")[0]
         self.assertIn("travelMode:", speak)
         self.assertIn("VoiceNav.prompt", speak)
+
+    def test_walk_and_drive_speak_with_the_live_voice(self):
+        app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
+        qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
+        nav = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        tone = app.split("func applySpeechTone()")[1].split("func ", 1)[0]
+        blocked = nav.split("Task {", 1)[0]
+        plotted = nav.split("GraphPlan.line")[1]
+        self.assertIn("speakMap()", blocked)
+        self.assertIn("speakMap()", plotted)
+        self.assertIn("navSeq", nav)
+        self.assertIn("applySpeechTone()", speak)
+        self.assertIn("instruments.state.voice", tone)
+        self.assertIn("speech.setTone", tone)
+        self.assertIn("WALK and DRIVE speak", qa)
+        self.assertIn("SPEAK replays", qa)
+        self.assertIn("WALK, DRIVE, and SPEAK", qa)
+        self.assertNotIn("then SPEAK for turn by turn", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", app)
+        self.assertNotIn("Google Maps", speak)
 
     def test_speak_chip_stays_and_voice_gets_the_full_prompt(self):
         # tip-68 supersedes the tip-65 banner: the complete prompt is spoken, and the

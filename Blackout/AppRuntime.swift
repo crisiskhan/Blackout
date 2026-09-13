@@ -124,6 +124,8 @@ final class AppRuntime {
     /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
+    /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.
+    private var navSeq = 0
     private var graphCache: RouteGraph?
     private var graphsByPack: [String: RouteGraph] = [:]
     private var graphPackID: String?
@@ -747,6 +749,8 @@ final class AppRuntime {
         speechChrome = ""
         travelMode = mode
         clearSpeakTurns()
+        navSeq += 1
+        let seq = navSeq
         let pack = packs?.active
         let packName = pack?.name ?? ""
         let dest = destination()
@@ -757,6 +761,7 @@ final class AppRuntime {
             destinationOnPack: destinationOnPack(dest)
         ) {
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
+            speakMap()
             return
         }
         guard let dest else { return }
@@ -782,7 +787,7 @@ final class AppRuntime {
                 GraphPlan.line(graph: graph, from: from, to: dest, mode: mode)
             }.value
             await MainActor.run {
-                guard let self, self.packs?.active?.id == id else { return }
+                guard let self, self.packs?.active?.id == id, self.navSeq == seq else { return }
                 self.graphCache = graph
                 self.graphPackID = id
                 self.routeCoords = plan.coords
@@ -790,6 +795,7 @@ final class AppRuntime {
                 self.routeChrome = RouteLine.shouldDraw(plan.coords)
                     ? RouteSummary.chrome(mode: mode, coords: plan.coords, seconds: plan.seconds)
                     : RouteBlock.noPath.chrome(mode: mode, packName: packName)
+                self.speakMap()
             }
         }
     }
