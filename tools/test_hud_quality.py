@@ -1316,7 +1316,19 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("STATUS", card)
         self.assertIn("BEARING", card)
         self.assertIn("COORDINATES", card)
+        self.assertIn("PartyStatus.allCases", card)
+        self.assertIn("CONDITION", card)
+        for label in ("HUNGER", "THIRST", "PAIN", "WATER", "FATIGUE", "EXPOSURE"):
+            self.assertIn(f'HUDVitalsRail(title: "{label}"', card, label)
+        self.assertIn("editable: person.isYou", card)
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn("struct HUDVitalsRail", exped)
+        self.assertIn("var editable: Bool", exped)
+        self.assertIn("ScrollView", card)
         self.assertIn("func setYouStatus(", app)
+        self.assertIn("func setYouVitals(", app)
+        set_vitals = app.split("func setYouVitals(")[1].split("func ", 1)[0]
+        self.assertIn("sendPOSIfPossible()", set_vitals)
         self.assertIn("func setYouName(", app)
         self.assertIn("func callHeldParty(", app)
         self.assertIn("func messageHeldParty(", app)
@@ -1341,7 +1353,12 @@ class PartyHoldCardTests(unittest.TestCase):
         pos = mesh.split("enum MeshPOS")[1].split("struct MeshTimerEvent")[0]
         self.assertIn("name", pos)
         self.assertIn("status", pos)
+        self.assertIn("vitals", pos)
+        self.assertIn("%.2f", pos)
         self.assertIn("func nameToken", pos)
+        send = app.split("func sendPOSIfPossible()")[1].split("func applyInbound")[0]
+        self.assertIn("vitals:", send)
+        self.assertIn("heldParty?.vitals", app)
         self.assertIn("func sendNote(", mesh)
         self.assertIn('kind: "note"', mesh)
         self.assertIn("VoiceNav.bearing", app)
@@ -1356,13 +1373,20 @@ class PartyHoldCardTests(unittest.TestCase):
 
     def test_solo_qa_scores_the_person_card(self):
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn("Hold YOU or a party emblem", qa)
-        self.assertIn("STATUS", qa)
-        self.assertIn("CALL starts a 1:1 party call", qa)
-        self.assertIn("MESSAGE opens COMMS", qa)
-        self.assertIn("PTT mesh", qa)
+        person = next(
+            line for line in qa.splitlines() if "Hold YOU or a party emblem" in line
+        )
+        self.assertIn("STATUS", person)
+        self.assertIn("`OK` / `WAIT` / `WATER` / `DOWN`", person)
+        self.assertIn("CONDITION", person)
+        self.assertIn("HUNGER", person)
+        self.assertIn("THIRST", person)
+        self.assertIn("others read", person)
+        self.assertIn("CALL starts a 1:1 party call", person)
+        self.assertIn("MESSAGE opens COMMS", person)
+        self.assertIn("PTT mesh", person)
         self.assertIn("never `tel://`", qa)
-        self.assertIn("Names stay off the canvas", qa)
+        self.assertIn("Names stay off the canvas", person)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
 

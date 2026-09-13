@@ -45,6 +45,19 @@ final class VitalsTests: XCTestCase {
         XCTAssertEqual(PartyVitals.load(of: 0.45), 1)
         XCTAssertEqual(PartyVitals.load(of: 0.65), 2)
         XCTAssertEqual(PartyVitals.load(of: 0.8), 3)
+        let packed = PartyVitals.fromPOS([0.1, 0.2, 0.45, 0.65, 0.8, 1.0])
+        XCTAssertEqual(packed?.hunger, 0.2)
+        XCTAssertEqual(packed?.thirst, 0.2)
+        XCTAssertEqual(packed?.pain, 0.45)
+        XCTAssertEqual(packed?.water, 0.65)
+        XCTAssertEqual(packed?.fatigue, 0.8)
+        XCTAssertEqual(packed?.weatherExposure, 1.0)
+        XCTAssertNil(PartyVitals.fromPOS(nil))
+        XCTAssertNil(PartyVitals.fromPOS([0.2, 0.2]))
+        XCTAssertEqual(
+            PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2).posRails,
+            [0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+        )
     }
 
     func testStackedYellowIsARedBody() {

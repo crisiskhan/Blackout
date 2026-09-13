@@ -108,4 +108,21 @@ public struct PartyVitals: Equatable, Sendable {
         let j = min(steps.count - 1, max(0, i + delta))
         return steps[j]
     }
+
+    /// POS carries six snapped ticks. Old peers with no rails parse as nil.
+    public static func fromPOS(_ rails: [Double]?) -> PartyVitals? {
+        guard let rails, rails.count == 6 else { return nil }
+        return PartyVitals(
+            hunger: snap(rails[0]),
+            thirst: snap(rails[1]),
+            pain: snap(rails[2]),
+            water: snap(rails[3]),
+            fatigue: snap(rails[4]),
+            weatherExposure: snap(rails[5])
+        )
+    }
+
+    public var posRails: [Double] {
+        rails.map { Self.snap($0) }
+    }
 }

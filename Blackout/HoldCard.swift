@@ -2,6 +2,7 @@ import SwiftUI
 import MapLibreMap
 import MeshDTN
 import Tokens
+import Vitals
 
 /// The place the thumb is holding, and what the pack says is there.
 struct HeldPoint: Equatable {
@@ -22,6 +23,7 @@ struct HeldPerson: Equatable {
     var lon: Double
     var headingDeg: Double?
     var isYou: Bool
+    var vitals: PartyVitals? = nil
 }
 
 /// A packed door the search book interpolated. The card is the record.

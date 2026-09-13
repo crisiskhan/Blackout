@@ -20,12 +20,12 @@ struct ExpeditionTab: View {
                     sectionLabel("CONDITION")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 10) {
-                            slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.vitals.hunger = $0 }))
-                            slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.vitals.thirst = $0 }))
-                            slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.vitals.pain = $0 }))
-                            slider("WATER", Binding(get: { runtime.vitals.water }, set: { runtime.vitals.water = $0 }))
-                            slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.vitals.fatigue = $0 }))
-                            slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.vitals.weatherExposure = $0 }))
+                            slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.setYouRail(\.hunger, $0) }))
+                            slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.setYouRail(\.thirst, $0) }))
+                            slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.setYouRail(\.pain, $0) }))
+                            slider("WATER", Binding(get: { runtime.vitals.water }, set: { runtime.setYouRail(\.water, $0) }))
+                            slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.setYouRail(\.fatigue, $0) }))
+                            slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.setYouRail(\.weatherExposure, $0) }))
                         }
                     }
 
@@ -270,6 +270,7 @@ struct ExpeditionTab: View {
 struct HUDVitalsRail: View {
     let title: String
     @Binding var value: Double
+    var editable: Bool = true
 
     var body: some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
@@ -301,9 +302,10 @@ struct HUDVitalsRail: View {
                         .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
                 )
                 .contentShape(Rectangle())
+                .allowsHitTesting(editable)
                 .gesture(
                     DragGesture(minimumDistance: 0).onChanged { gesture in
-                        guard width > 0 else { return }
+                        guard editable, width > 0 else { return }
                         value = PartyVitals.snap(gesture.location.x / width)
                     }
                 )
@@ -314,6 +316,7 @@ struct HUDVitalsRail: View {
         .accessibilityLabel(title)
         .accessibilityValue(value.formatted(.number.precision(.fractionLength(2))))
         .accessibilityAdjustableAction { direction in
+            guard editable else { return }
             switch direction {
             case .increment:
                 value = PartyVitals.step(value, 1)

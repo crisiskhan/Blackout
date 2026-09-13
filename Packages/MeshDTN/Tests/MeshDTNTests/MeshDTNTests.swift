@@ -148,6 +148,22 @@ final class MeshDTNTests: XCTestCase {
         XCTAssertEqual(parsed?.name, "CRISIS")
         XCTAssertEqual(parsed?.status, "down")
         XCTAssertEqual(MeshPOS.parse("31.76,-106.49")?.status, nil)
+        XCTAssertNil(MeshPOS.parse("31.76,-106.49")?.vitals)
+        let withRails = MeshPOS.body(
+            lat: 31.76,
+            lon: -106.49,
+            headingDeg: 90,
+            emblem: "owl",
+            name: "Crisis",
+            status: "wait",
+            vitals: [0.2, 0.45, 0.2, 0.65, 0.2, 0.8]
+        )
+        XCTAssertTrue(withRails.contains("0.20"))
+        XCTAssertTrue(withRails.contains("0.45"))
+        let railsParsed = MeshPOS.parse(withRails)
+        XCTAssertEqual(railsParsed?.status, "wait")
+        XCTAssertEqual(railsParsed?.vitals, [0.2, 0.45, 0.2, 0.65, 0.2, 0.8])
+        XCTAssertEqual(MeshPOS.parse("31.76,-106.49,12,wolf,CRISIS,wait")?.vitals, nil)
         let net = MeshNet(box: EventLog())
         let radio = LoopbackRadio(path: .ble)
         net.attach(radio)
@@ -162,6 +178,14 @@ final class MeshDTNTests: XCTestCase {
         ))
         XCTAssertEqual(net.pips.first?.name, "CRISIS")
         XCTAssertEqual(net.pips.first?.status, "wait")
+        radio.deliver(MeshEnvelope(
+            id: "n2",
+            from: "peer-1",
+            to: "*",
+            kind: "pos",
+            body: Data("31.76,-106.49,12,wolf,CRISIS,wait,0.20,0.45,0.20,0.65,0.20,0.80".utf8)
+        ))
+        XCTAssertEqual(net.pips.first?.vitals, [0.2, 0.45, 0.2, 0.65, 0.2, 0.8])
         net.sendNote(from: net.localID, text: "  at the tank  ", to: "peer-1")
         XCTAssertEqual(radio.sent.last?.kind, "note")
     }

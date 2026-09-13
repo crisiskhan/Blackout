@@ -32,6 +32,7 @@ public struct MeshPip: Equatable, Sendable {
     public var emblem: String?
     public var name: String?
     public var status: String?
+    public var vitals: [Double]?
     public init(
         from: String,
         lat: Double,
@@ -39,7 +40,8 @@ public struct MeshPip: Equatable, Sendable {
         headingDeg: Double? = nil,
         emblem: String? = nil,
         name: String? = nil,
-        status: String? = nil
+        status: String? = nil,
+        vitals: [Double]? = nil
     ) {
         self.from = from
         self.lat = lat
@@ -48,6 +50,7 @@ public struct MeshPip: Equatable, Sendable {
         self.emblem = emblem
         self.name = name
         self.status = status
+        self.vitals = vitals
     }
 }
 
@@ -86,7 +89,7 @@ public enum PartyNote {
     }
 }
 
-/// `lat,lon` still parses. Newer peers add heading, face, name, status.
+/// `lat,lon` still parses. Newer peers add heading, face, name, status, rails.
 public enum MeshPOS {
     public static func body(
         lat: Double,
@@ -94,7 +97,8 @@ public enum MeshPOS {
         headingDeg: Double?,
         emblem: String?,
         name: String? = nil,
-        status: String? = nil
+        status: String? = nil,
+        vitals: [Double]? = nil
     ) -> String {
         let heading: String
         if let headingDeg, headingDeg >= 0 {
@@ -105,7 +109,10 @@ public enum MeshPOS {
         let face = emblem ?? ""
         let who = nameToken(name ?? "")
         let band = PartyStatus.parse(status).rawValue
-        return "\(lat),\(lon),\(heading),\(face),\(who),\(band)"
+        let core = "\(lat),\(lon),\(heading),\(face),\(who),\(band)"
+        guard let vitals, vitals.count == 6 else { return core }
+        let rails = vitals.map { String(format: "%.2f", $0) }.joined(separator: ",")
+        return "\(core),\(rails)"
     }
 
     public static func nameToken(_ raw: String) -> String {
@@ -122,7 +129,8 @@ public enum MeshPOS {
         headingDeg: Double?,
         emblem: String?,
         name: String?,
-        status: String?
+        status: String?,
+        vitals: [Double]?
     )? {
         let parts = text.split(separator: ",", omittingEmptySubsequences: false)
         guard parts.count >= 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else {
@@ -147,7 +155,12 @@ public enum MeshPOS {
             let raw = String(parts[5])
             if !raw.isEmpty { status = PartyStatus.parse(raw).rawValue }
         }
-        return (lat, lon, heading, emblem, name, status)
+        var vitals: [Double]?
+        if parts.count >= 12 {
+            let rails = (6..<12).compactMap { Double(String(parts[$0])) }
+            if rails.count == 6 { vitals = rails }
+        }
+        return (lat, lon, heading, emblem, name, status, vitals)
     }
 }
 
@@ -374,7 +387,8 @@ public final class MeshNet: @unchecked Sendable {
         headingDeg: Double? = nil,
         emblem: String? = nil,
         name: String? = nil,
-        status: String? = nil
+        status: String? = nil,
+        vitals: [Double]? = nil
     ) {
         enqueue(
             make(
@@ -387,7 +401,8 @@ public final class MeshNet: @unchecked Sendable {
                         headingDeg: headingDeg,
                         emblem: emblem,
                         name: name,
-                        status: status
+                        status: status,
+                        vitals: vitals
                     ).utf8
                 )
             )
@@ -401,7 +416,8 @@ public final class MeshNet: @unchecked Sendable {
                     headingDeg: headingDeg,
                     emblem: emblem,
                     name: name,
-                    status: status
+                    status: status,
+                    vitals: vitals
                 )
             )
         }
@@ -482,7 +498,8 @@ public final class MeshNet: @unchecked Sendable {
                         headingDeg: parsed.headingDeg,
                         emblem: parsed.emblem,
                         name: parsed.name,
-                        status: parsed.status
+                        status: parsed.status,
+                        vitals: parsed.vitals
                     )
                 )
             }

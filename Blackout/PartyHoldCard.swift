@@ -2,14 +2,17 @@ import SwiftUI
 import MapLibreMap
 import MeshDTN
 import Tokens
+import Vitals
 
 /// Glass profile over a person mark. CALL and MESSAGE are mesh, never a cell.
 struct PartyHoldCard: View {
     let person: HeldPerson
     let bearing: String
     let coordinates: String
+    let vitals: PartyVitals?
     let onName: (String) -> Void
     let onStatus: (PartyStatus) -> Void
+    let onVitals: (PartyVitals) -> Void
     let onCall: () -> Void
     let onMessage: () -> Void
     let onClose: () -> Void
@@ -70,12 +73,17 @@ struct PartyHoldCard: View {
             Rectangle()
                 .fill(Theme.silver.opacity(0.22))
                 .frame(height: 1)
-            rows
-            if person.isYou {
-                statusRail
-            } else {
-                actions
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    statusRail
+                    conditionBlock
+                    rows
+                    if !person.isYou {
+                        actions
+                    }
+                }
             }
+            .scrollIndicators(.hidden)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -179,10 +187,49 @@ struct PartyHoldCard: View {
     private var statusRail: some View {
         HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
             ForEach(PartyStatus.allCases, id: \.self) { status in
-                Button(status.title) { onStatus(status) }
-                    .buttonStyle(HoldActionStyle(filled: person.status == status))
+                Button(status.title) {
+                    if person.isYou { onStatus(status) }
+                }
+                .buttonStyle(HoldActionStyle(filled: person.status == status))
+                .allowsHitTesting(person.isYou)
             }
         }
+    }
+
+    private var conditionBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let vitals {
+                Text("CONDITION \(vitals.band.rawValue.uppercased())")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(bandInk(vitals.band))
+                    .lineLimit(1)
+                    .minimumScaleFactor(1)
+                HUDVitalsRail(title: "HUNGER", value: rail(\.hunger), editable: person.isYou)
+                HUDVitalsRail(title: "THIRST", value: rail(\.thirst), editable: person.isYou)
+                HUDVitalsRail(title: "PAIN", value: rail(\.pain), editable: person.isYou)
+                HUDVitalsRail(title: "WATER", value: rail(\.water), editable: person.isYou)
+                HUDVitalsRail(title: "FATIGUE", value: rail(\.fatigue), editable: person.isYou)
+                HUDVitalsRail(title: "EXPOSURE", value: rail(\.weatherExposure), editable: person.isYou)
+            } else {
+                Text("NO CONDITION")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .lineLimit(1)
+                    .minimumScaleFactor(1)
+            }
+        }
+    }
+
+    private func rail(_ key: WritableKeyPath<PartyVitals, Double>) -> Binding<Double> {
+        Binding(
+            get: { vitals?[keyPath: key] ?? 0 },
+            set: { value in
+                guard person.isYou else { return }
+                var next = vitals ?? PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2)
+                next[keyPath: key] = PartyVitals.snap(value)
+                onVitals(next)
+            }
+        )
     }
 
     private func row(key: String, value: String, ink: Color) -> some View {
@@ -217,6 +264,19 @@ struct PartyHoldCard: View {
         case .wait, .water:
             return Theme.caution
         case .down:
+            return Theme.accent
+        }
+    }
+
+    private func bandInk(_ band: ConditionBand) -> Color {
+        switch band {
+        case .green:
+            return Theme.fix
+        case .yellow:
+            return Theme.caution
+        case .orange:
+            return Theme.heat
+        case .red:
             return Theme.accent
         }
     }

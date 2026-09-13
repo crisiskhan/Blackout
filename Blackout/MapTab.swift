@@ -114,8 +114,10 @@ struct MapTab: View {
                     person: person,
                     bearing: runtime.partyCourse(for: person),
                     coordinates: runtime.partyFix(person),
+                    vitals: person.isYou ? runtime.vitals : person.vitals,
                     onName: { runtime.setYouName($0) },
                     onStatus: { runtime.setYouStatus($0) },
+                    onVitals: { runtime.setYouVitals($0) },
                     onCall: { runtime.callHeldParty() },
                     onMessage: { runtime.messageHeldParty() },
                     onClose: { runtime.closeHold() }

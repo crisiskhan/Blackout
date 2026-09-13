@@ -364,7 +364,8 @@ final class AppRuntime {
                 lat: you.lat,
                 lon: you.lon,
                 headingDeg: headingDeg,
-                isYou: true
+                isYou: true,
+                vitals: vitals
             )
             return
         }
@@ -377,7 +378,8 @@ final class AppRuntime {
             lat: pip?.lat ?? lat,
             lon: pip?.lon ?? lon,
             headingDeg: pip?.headingDeg,
-            isYou: false
+            isYou: false,
+            vitals: PartyVitals.fromPOS(pip?.vitals)
         )
     }
 
@@ -397,6 +399,20 @@ final class AppRuntime {
             heldParty?.status = status
         }
         sendPOSIfPossible()
+    }
+
+    func setYouVitals(_ next: PartyVitals) {
+        vitals = next
+        if heldParty?.isYou == true {
+            heldParty?.vitals = next
+        }
+        sendPOSIfPossible()
+    }
+
+    func setYouRail(_ key: WritableKeyPath<PartyVitals, Double>, _ value: Double) {
+        var next = vitals
+        next[keyPath: key] = PartyVitals.snap(value)
+        setYouVitals(next)
     }
 
     func callHeldParty() {
@@ -456,6 +472,7 @@ final class AppRuntime {
             heldParty?.name = youName
             heldParty?.status = youStatus
             heldParty?.emblem = youEmblem.rawValue
+            heldParty?.vitals = vitals
             return
         }
         guard let pip = mesh.pips.first(where: { $0.from == card.id }) else { return }
@@ -465,6 +482,7 @@ final class AppRuntime {
         heldParty?.emblem = pip.emblem ?? card.emblem
         heldParty?.name = MeshPOS.nameToken(pip.name ?? "")
         heldParty?.status = PartyStatus.parse(pip.status)
+        heldParty?.vitals = PartyVitals.fromPOS(pip.vitals)
     }
 
     func toggleLockOn() {
@@ -848,7 +866,8 @@ final class AppRuntime {
             headingDeg: headingDeg,
             emblem: youEmblem.rawValue,
             name: youName,
-            status: youStatus.rawValue
+            status: youStatus.rawValue,
+            vitals: vitals.posRails
         )
     }
 
