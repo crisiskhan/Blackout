@@ -22,12 +22,41 @@ public struct GraphEdge: Codable, Sendable {
     public var m: Double
     public var walk: Bool
     public var drive: Bool
-    public init(a: Int, b: Int, m: Double, walk: Bool, drive: Bool) {
+    public var roadClass: UInt8
+
+    public init(a: Int, b: Int, m: Double, walk: Bool, drive: Bool, roadClass: UInt8 = 0) {
         self.a = a
         self.b = b
         self.m = m
         self.walk = walk
         self.drive = drive
+        self.roadClass = roadClass
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case a, b, m, walk, drive, roadClass
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        a = try c.decode(Int.self, forKey: .a)
+        b = try c.decode(Int.self, forKey: .b)
+        m = try c.decode(Double.self, forKey: .m)
+        walk = try c.decode(Bool.self, forKey: .walk)
+        drive = try c.decode(Bool.self, forKey: .drive)
+        roadClass = try c.decodeIfPresent(UInt8.self, forKey: .roadClass) ?? 0
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(a, forKey: .a)
+        try c.encode(b, forKey: .b)
+        try c.encode(m, forKey: .m)
+        try c.encode(walk, forKey: .walk)
+        try c.encode(drive, forKey: .drive)
+        if roadClass != 0 {
+            try c.encode(roadClass, forKey: .roadClass)
+        }
     }
 }
 
@@ -42,10 +71,16 @@ public struct GraphEdge: Codable, Sendable {
 /// `span(of:)` gives the slice of `target`/`metres`/`mode` belonging to a node.
 /// Both travel modes share one set of links with a bit each, because nearly
 /// every street is walkable and drivable and storing them apart duplicated the
-/// larger half of the structure.
+/// larger half of the structure. Bits 2-5 of `mode` are the road class so drive
+/// can cost time instead of metres.
 public struct GraphIndex: Sendable {
     static let walkBit: UInt8 = 1
     static let driveBit: UInt8 = 2
+    static let classShift: UInt8 = 2
+    static let classMask: UInt8 = 0x0F
+    static let fastestDriveMps = 29.0
+    static let walkMps = 1.25
+    static let unknownDriveMps = 11.0
 
     static let cellDegrees = 0.02
     private static let cellStride: Int64 = 100_000
@@ -91,7 +126,7 @@ public struct GraphIndex: Sendable {
             cursor[e.a] += 1
             target[slot] = Int32(e.b)
             metres[slot] = e.m
-            mode[slot] = (e.walk ? Self.walkBit : 0) | (e.drive ? Self.driveBit : 0)
+            mode[slot] = Self.modeBits(walk: e.walk, drive: e.drive, roadClass: e.roadClass)
         }
         self.offset = offset
         self.target = target
@@ -140,6 +175,50 @@ public struct GraphIndex: Sendable {
         switch mode {
         case .walk: return walkBit
         case .drive: return driveBit
+        }
+    }
+
+    static func modeBits(walk: Bool, drive: Bool, roadClass: UInt8) -> UInt8 {
+        (walk ? walkBit : 0) | (drive ? driveBit : 0) | ((roadClass & classMask) << classShift)
+    }
+
+    static func roadClass(_ bits: UInt8) -> UInt8 {
+        (bits >> classShift) & classMask
+    }
+
+    static func driveSpeedMps(_ cls: UInt8) -> Double {
+        switch cls {
+        case 1: return 29.0
+        case 2: return 24.6
+        case 3: return 20.1
+        case 4: return 15.6
+        case 5: return 13.4
+        case 6: return 11.0
+        case 7: return 8.0
+        default: return unknownDriveMps
+        }
+    }
+
+    static func stepCost(metres: Double, mode: TravelMode, bits: UInt8) -> Double {
+        switch mode {
+        case .walk:
+            return metres
+        case .drive:
+            return metres / driveSpeedMps(roadClass(bits))
+        }
+    }
+
+    static func heuristicScale(_ mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return 1.0
+        case .drive: return 1.0 / fastestDriveMps
+        }
+    }
+
+    static func seconds(metres: Double, cost: Double, mode: TravelMode) -> Double {
+        switch mode {
+        case .walk: return metres / walkMps
+        case .drive: return cost
         }
     }
 
@@ -219,12 +298,14 @@ public struct RouteGraph: Sendable {
 public struct RouteResult: Equatable, Sendable {
     public var nodeIds: [Int]
     public var meters: Double
+    public var seconds: Double
     public var mode: TravelMode
     public var fallback: RouteFallback
 
-    public init(nodeIds: [Int], meters: Double, mode: TravelMode, fallback: RouteFallback) {
+    public init(nodeIds: [Int], meters: Double, mode: TravelMode, fallback: RouteFallback, seconds: Double = 0) {
         self.nodeIds = nodeIds
         self.meters = meters
+        self.seconds = seconds
         self.mode = mode
         self.fallback = fallback
     }
@@ -251,11 +332,14 @@ public enum GraphRouter {
         // Flat arrays rather than dictionaries: ids are positions, so there is
         // nothing to hash, and the search touches these on every relaxation.
         var dist = [Double](repeating: .infinity, count: n)
+        var metresAlong = [Double](repeating: .infinity, count: n)
         var prev = [Int32](repeating: -1, count: n)
         var seen = [Bool](repeating: false, count: n)
         dist[from] = 0
+        metresAlong[from] = 0
         var heap = MinHeap()
-        heap.push(from, remaining(from))
+        let scale = GraphIndex.heuristicScale(mode)
+        heap.push(from, remaining(from) * scale)
 
         while let (u, _) = heap.pop() {
             if seen[u] { continue }
@@ -266,11 +350,13 @@ public enum GraphRouter {
                 guard index.mode[i] & want != 0 else { continue }
                 let v = Int(index.target[i])
                 if avoid.contains(v) { continue }
-                let alt = du + index.metres[i]
+                let step = index.metres[i]
+                let alt = du + GraphIndex.stepCost(metres: step, mode: mode, bits: index.mode[i])
                 if alt < dist[v] {
                     dist[v] = alt
+                    metresAlong[v] = metresAlong[u] + step
                     prev[v] = Int32(u)
-                    heap.push(v, alt + remaining(v))
+                    heap.push(v, alt + remaining(v) * scale)
                 }
             }
         }
@@ -282,7 +368,14 @@ public enum GraphRouter {
             path.append(cur)
         }
         path.reverse()
-        return RouteResult(nodeIds: path, meters: dist[to], mode: mode, fallback: .onGraph)
+        let meters = metresAlong[to]
+        return RouteResult(
+            nodeIds: path,
+            meters: meters,
+            mode: mode,
+            fallback: .onGraph,
+            seconds: GraphIndex.seconds(metres: meters, cost: dist[to], mode: mode)
+        )
     }
 
     /// Nearest node by way of the grid, so snapping a tap to the street network
@@ -342,7 +435,13 @@ public enum GraphRouter {
 
     public static func bearingFallback(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double) -> RouteResult {
         let m = haversine(fromLat, fromLon, toLat, toLon)
-        return RouteResult(nodeIds: [], meters: m, mode: .walk, fallback: .bearingOffGraph)
+        return RouteResult(
+            nodeIds: [],
+            meters: m,
+            mode: .walk,
+            fallback: .bearingOffGraph,
+            seconds: m / GraphIndex.walkMps
+        )
     }
 
     public static func haversine(_ a: Double, _ b: Double, _ c: Double, _ d: Double) -> Double {
@@ -362,18 +461,18 @@ public enum GraphPlan {
         from: (lat: Double, lon: Double),
         to: (lat: Double, lon: Double),
         mode: TravelMode
-    ) -> (coords: [(lat: Double, lon: Double)], chrome: String) {
+    ) -> (coords: [(lat: Double, lon: Double)], chrome: String, seconds: Double) {
         guard let graph, !graph.isEmpty,
               let a = GraphRouter.nearestNode(graph: graph, lat: from.lat, lon: from.lon),
               let b = GraphRouter.nearestNode(graph: graph, lat: to.lat, lon: to.lon),
               let r = GraphRouter.route(graph: graph, from: a, to: b, mode: mode),
               r.fallback == .onGraph
         else {
-            return ([], offGraph)
+            return ([], offGraph, 0)
         }
         let coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
-        if coords.count < 2 { return ([], offGraph) }
-        return (coords, "")
+        if coords.count < 2 { return ([], offGraph, 0) }
+        return (coords, "", r.seconds)
     }
 }
 
@@ -419,13 +518,14 @@ struct PackedGraph: Decodable {
             guard a >= 0, a < lat.count, b >= 0, b < lat.count else { continue }
             let walkAB = flags & Self.walkForward != 0
             let driveAB = flags & Self.driveForward != 0
+            let cls = UInt8((flags >> 4) & 0x0F)
             if walkAB || driveAB {
-                edges.append(GraphEdge(a: a, b: b, m: metres, walk: walkAB, drive: driveAB))
+                edges.append(GraphEdge(a: a, b: b, m: metres, walk: walkAB, drive: driveAB, roadClass: cls))
             }
             let walkBA = flags & Self.walkBack != 0
             let driveBA = flags & Self.driveBack != 0
             if walkBA || driveBA {
-                edges.append(GraphEdge(a: b, b: a, m: metres, walk: walkBA, drive: driveBA))
+                edges.append(GraphEdge(a: b, b: a, m: metres, walk: walkBA, drive: driveBA, roadClass: cls))
             }
         }
         // Ids are already positions here, so skip the renumbering pass.

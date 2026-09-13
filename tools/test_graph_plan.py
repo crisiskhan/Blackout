@@ -27,6 +27,7 @@ from v3.fetch_packs import (  # noqa: E402
     unpack_graph,
     way_access,
     way_directions,
+    highway_class,
 )
 
 OFF_GRAPH = "OFF GRAPH"
@@ -76,12 +77,30 @@ def nearest(graph: Graph, lat: float, lon: float):
     return None if best is None else best[1]
 
 
+DRIVE_SPEED = {
+    0: 11.0,
+    1: 29.0,
+    2: 24.6,
+    3: 20.1,
+    4: 15.6,
+    5: 13.4,
+    6: 11.0,
+    7: 8.0,
+}
+
+
+def edge_cost(metres: float, mode: str, cls: int = 0) -> float:
+    if mode == "walk":
+        return metres
+    return metres / DRIVE_SPEED.get(int(cls), 11.0)
+
+
 def route(graph: Graph, src: int, dst: int, mode: str):
     adj: dict[int, list[tuple[int, float]]] = {}
     for e in graph.edges:
         ok = e["walk"] if mode == "walk" else e["drive"]
         if ok:
-            adj.setdefault(e["a"], []).append((e["b"], e["m"]))
+            adj.setdefault(e["a"], []).append((e["b"], edge_cost(e["m"], mode, e.get("cls", 0))))
     dist = {src: 0.0}
     prev: dict[int, int] = {}
     seen: set[int] = set()
@@ -127,6 +146,28 @@ def plan(graph: Graph | None, frm, to, mode: str):
     return coords, ""
 
 
+def diamond() -> Graph:
+    """Short residential via 3, longer motorway via 2. Walk takes 3; drive takes 2."""
+    return Graph(
+        {
+            "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+            "2": {"id": 2, "lon": 0.010, "lat": 0.010},
+            "3": {"id": 3, "lon": 0.010, "lat": 0.001},
+            "4": {"id": 4, "lon": 0.020, "lat": 0.0},
+        },
+        [
+            {"a": 1, "b": 2, "m": haversine(0.0, 0.0, 0.010, 0.010), "walk": True, "drive": True, "cls": 1},
+            {"a": 2, "b": 1, "m": haversine(0.010, 0.010, 0.0, 0.0), "walk": True, "drive": True, "cls": 1},
+            {"a": 2, "b": 4, "m": haversine(0.010, 0.010, 0.0, 0.020), "walk": True, "drive": True, "cls": 1},
+            {"a": 4, "b": 2, "m": haversine(0.0, 0.020, 0.010, 0.010), "walk": True, "drive": True, "cls": 1},
+            {"a": 1, "b": 3, "m": haversine(0.0, 0.0, 0.001, 0.010), "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 1, "m": haversine(0.001, 0.010, 0.0, 0.0), "walk": True, "drive": True, "cls": 6},
+            {"a": 3, "b": 4, "m": haversine(0.001, 0.010, 0.0, 0.020), "walk": True, "drive": True, "cls": 6},
+            {"a": 4, "b": 3, "m": haversine(0.0, 0.020, 0.001, 0.010), "walk": True, "drive": True, "cls": 6},
+        ],
+    )
+
+
 def walk_only() -> Graph:
     return Graph(
         {
@@ -166,6 +207,16 @@ class GraphPlanTests(unittest.TestCase):
         self.assertEqual(chrome, OFF_GRAPH)
         self.assertEqual(coords, [])
 
+    def test_drive_takes_the_faster_road_not_the_shortest_residential(self):
+        g = diamond()
+        self.assertEqual(route(g, 1, 4, "walk"), [1, 3, 4])
+        self.assertEqual(route(g, 1, 4, "drive"), [1, 2, 4])
+        unclassified = Graph(
+            g.nodes,
+            [{**e, "cls": 0} for e in g.edges],
+        )
+        self.assertEqual(route(unclassified, 1, 4, "drive"), [1, 3, 4])
+
 
 class WalkDriveChipTests(unittest.TestCase):
     def test_first_blocker_wins_and_ready_state_draws(self):
@@ -191,9 +242,11 @@ class WalkDriveChipTests(unittest.TestCase):
         self.assertIn("alwaysTappable = true", src)
         map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
+        tokens = (ROOT / "Packages" / "Tokens" / "Sources" / "Tokens" / "Tokens.swift").read_text()
         self.assertNotIn(".disabled(", map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", map_tab)
         for chip in ("MARK", "WALK", "DRIVE", "SPEAK"):
-            self.assertIn(f'Button("{chip}")', map_tab)
+            self.assertIn(f'return "{chip}"', tokens)
         for chip in ("RULER", "USNG", "MAG/TRUE"):
             self.assertIn(f'Button("{chip}")', inst)
 
@@ -225,8 +278,9 @@ class PackedGraphTests(unittest.TestCase):
         self.assertEqual(packed["lon"], [0.0, 0.01, 0.02])
         # Two segments, four numbers each: a, b, metres, flags.
         self.assertEqual(len(packed["e"]), 8)
-        self.assertEqual(packed["e"][3], WALK_FORWARD | DRIVE_FORWARD | WALK_BACK | DRIVE_BACK)
-        self.assertEqual(packed["e"][7], WALK_FORWARD)
+        self.assertEqual(packed["e"][3] & 0x0F, WALK_FORWARD | DRIVE_FORWARD | WALK_BACK | DRIVE_BACK)
+        self.assertEqual(packed["e"][7] & 0x0F, WALK_FORWARD)
+        self.assertEqual((packed["e"][3] >> 4) & 0x0F, 0)
 
         back = unpack_graph(packed)
         walkable = {(e["a"], e["b"]) for e in back["edges"] if e["walk"]}
@@ -250,6 +304,29 @@ class PackedGraphTests(unittest.TestCase):
         packed = pack_graph(self.one_way_pair())
         back = unpack_graph(packed)
         self.assertNotIn((2, 1), {(e["a"], e["b"]) for e in back["edges"]})
+
+    def test_pack_keeps_road_class_on_the_wire(self):
+        raw = {
+            "engine": "osm-graph",
+            "nodes": {
+                "1": {"id": 1, "lon": 0.0, "lat": 0.0},
+                "2": {"id": 2, "lon": 0.01, "lat": 0.0},
+            },
+            "edges": [
+                {"a": 1, "b": 2, "m": 100.0, "walk": True, "drive": True, "cls": 1},
+                {"a": 2, "b": 1, "m": 100.0, "walk": True, "drive": True, "cls": 1},
+            ],
+        }
+        packed = pack_graph(raw)
+        flags = int(packed["e"][3])
+        self.assertEqual(flags & 0x0F, WALK_FORWARD | DRIVE_FORWARD | WALK_BACK | DRIVE_BACK)
+        self.assertEqual((flags >> 4) & 0x0F, 1)
+        back = unpack_graph(packed)
+        self.assertEqual({e.get("cls") for e in back["edges"]}, {1})
+        tmp = Path(tempfile.mkdtemp()) / "graph.bin"
+        write_graph_binary(tmp, raw)
+        loaded = graphbin.read(tmp)
+        self.assertTrue(all((m >> graphbin.CLASS_SHIFT) & graphbin.CLASS_MASK == 1 for m in loaded["mode"]))
 
     def test_swift_reader_agrees_with_the_python_writer(self):
         src = ROUTER.read_text()
@@ -275,6 +352,7 @@ class PackedGraphTests(unittest.TestCase):
         # Bit for bit, or a one-way street changes direction on the phone.
         self.assertIn(f"static let walkBit: UInt8 = {graphbin.WALK_BIT}", src)
         self.assertIn(f"static let driveBit: UInt8 = {graphbin.DRIVE_BIT}", src)
+        self.assertIn(f"static let classShift: UInt8 = {graphbin.CLASS_SHIFT}", src)
         self.assertIn("/ 1e7", src)
         self.assertEqual(graphbin.COORD_SCALE, 10_000_000)
         self.assertIn("/ 1000", src)
@@ -296,6 +374,15 @@ class PackedGraphTests(unittest.TestCase):
             self.assertEqual(sorted(g["rowStart"]), list(g["rowStart"]), f"{pack} rows are out of order")
             self.assertTrue(all(0 <= t < len(g["lat"]) for t in g["target"]), f"{pack} links off the end")
             self.assertTrue(all(m > 0 for m in g["mode"]), f"{pack} carries a link nobody may take")
+            drive = [m for m in g["mode"] if m & graphbin.DRIVE_BIT]
+            self.assertTrue(drive, f"{pack} has no drive links")
+            classified = [m for m in drive if (m >> graphbin.CLASS_SHIFT) & graphbin.CLASS_MASK]
+            share = len(classified) / len(drive)
+            self.assertGreater(
+                share,
+                0.80,
+                f"{pack}: only {share:.1%} of drive links carry a road class",
+            )
 
     def test_rebuilding_a_pack_leaves_its_graph_alone(self):
         """`--rebuild` re-encodes the graph; it must not reshape it.
@@ -362,6 +449,12 @@ class WalkGraphTests(unittest.TestCase):
         self.assertEqual(self.passable({"motor_vehicle": "no"}, "pedestrian"), (True, True, False, False))
         self.assertEqual(self.passable({}, "steps"), (True, True, False, False))
         self.assertEqual(self.passable({"oneway": "yes"}, "motorway"), (False, False, True, False))
+
+    def test_highway_class_ranks_motorway_above_residential(self):
+        self.assertEqual(highway_class("motorway"), 1)
+        self.assertEqual(highway_class("residential"), 6)
+        self.assertEqual(highway_class("footway"), 0)
+        self.assertEqual(highway_class("motorway_link"), 1)
 
     def test_shipped_walk_graphs_are_two_way_on_the_ordinary_street(self):
         for path in sorted((ROOT / "Resources" / "Packs").glob("*/graph.bin")):

@@ -157,6 +157,48 @@ def assert_readable_style(style: dict, label: str) -> None:
         if opacity > 0.22:
             fail(f"{label} hillshade {opacity} washes street contrast")
 
+    land = layer(style, "land-fill")
+    color = (land.get("paint") or {}).get("fill-color")
+    if not isinstance(color, list) or not color or color[0] != "match":
+        fail(f"{label} land-fill must class ground cover, got {color!r}")
+    body = color[2:]
+    if len(body) < 3:
+        fail(f"{label} land-fill match is empty")
+    pairs = dict(zip(body[0:-1:2], body[1:-1:2]))
+    desert = pairs.get("desert")
+    bosque = pairs.get("bosque")
+    playa = pairs.get("playa")
+    if not desert or not bosque or not playa:
+        fail(f"{label} land-fill is missing desert/bosque/playa ink")
+    if desert == bosque:
+        fail(f"{label} desert and bosque use the same ink {desert}")
+    if desert == playa:
+        fail(f"{label} desert and playa use the same ink {desert}")
+    woodland = pairs.get("woodland")
+    if woodland and bosque and woodland == bosque:
+        fail(f"{label} woodland and bosque use the same ink {woodland}")
+    opacity = interpolate_at((land.get("paint") or {}).get("fill-opacity"), 15)
+    if opacity < 0.15:
+        fail(f"{label} land fill {opacity} at z15 — desert and bosque vanish")
+    if opacity > 0.2:
+        fail(f"{label} land fill {opacity} at z15 fights the streets")
+
+    water = layer(style, "water-fill")
+    water_color = (water.get("paint") or {}).get("fill-color")
+    if water_color == VOID:
+        fail(f"{label} water fill is void — lakes vanish")
+    if str(water_color).lower() == "#1a1c1e":
+        fail(f"{label} water fill {water_color} is too close to void to read")
+    if str(water_color).lower() == "#1e2a32":
+        fail(f"{label} water fill {water_color} is still the old near-void lake")
+
+    park = layer(style, "public-land-fill")
+    park_op = float((park.get("paint") or {}).get("fill-opacity") or 1)
+    if park_op > 0.18:
+        fail(f"{label} public-land fill {park_op} buries biomes")
+    if not any(item.get("id") == "public-land-line" for item in layers):
+        fail(f"{label} public land has no outline, so parks vanish when the fill is quiet")
+
     meta = style.get("metadata") or {}
     if meta.get("attribution") != OSM_CREDIT:
         fail(f"{label} missing OSM credit in style metadata")
@@ -363,6 +405,42 @@ def assert_source_geojson_stays_off_the_phone(pack_id: str) -> None:
         fail("the resource copy step no longer excludes osm.geojson; the IPA would carry it again")
 
 
+def assert_search_index_ships(pack_id: str) -> None:
+    """Named streets and peaks ride a compact index. The 800-POI slice is not the book."""
+    dest = ROOT / "Resources" / "Packs" / pack_id
+    manifest = json.loads((dest / "manifest.json").read_text())
+    files = manifest.get("files") or []
+    if "search.json" not in files:
+        fail(f"{pack_id} manifest does not list search.json")
+    path = dest / "search.json"
+    if not path.is_file():
+        fail(f"{pack_id} search.json missing")
+    blob = json.loads(path.read_text())
+    docs = blob.get("docs") or []
+    if len(docs) < 1000:
+        fail(f"{pack_id} search.json is still a POI slice ({len(docs)} docs)")
+    names = {row[0] for row in docs if isinstance(row, list) and row}
+    kinds = {row[1] for row in docs if isinstance(row, list) and len(row) > 1}
+    if "street" not in kinds:
+        fail(f"{pack_id} search.json has no streets")
+    if pack_id == "tx-west":
+        if "Gardner Peak" not in names:
+            fail("tx-west search.json lost Gardner Peak")
+        if "Montana Avenue" not in names:
+            fail("tx-west search.json lost Montana Avenue")
+        if "North Franklin Mountain" not in names:
+            fail("tx-west search.json lost North Franklin Mountain")
+    if "OpenStreetMap" not in json.dumps(blob.get("attribution") or ""):
+        fail(f"{pack_id} search.json dropped ODbL attribution")
+    addr = blob.get("addr") or {}
+    ranges = addr.get("ranges") or []
+    if len(ranges) < 500:
+        fail(f"{pack_id} search.json has no address ranges ({len(ranges)})")
+    streets = {str(s).casefold() for s in (addr.get("streets") or [])}
+    if pack_id == "tx-west" and not any("montana" in s for s in streets):
+        fail("tx-west address book lost Montana")
+
+
 def main() -> None:
     if PRIMARY_PACK_ID != "tx-west":
         fail(f"default open pack drifted to {PRIMARY_PACK_ID}")
@@ -404,16 +482,35 @@ def main() -> None:
         }
     generated = maplibre_style("tx-west", hillshade)
     assert_readable_style(generated, "maplibre_style(tx-west)")
+    for pack_id in sorted(walkable_ids()):
+        disk = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
+        hill_src = (disk.get("sources") or {}).get("hillshade")
+        hill_meta = None
+        if hill_src:
+            hill_meta = {
+                "present": True,
+                "file": hill_src.get("url"),
+                "coordinates": hill_src.get("coordinates"),
+            }
+        made = maplibre_style(pack_id, hill_meta)
+        disk_land = layer(disk, "land-fill").get("paint")
+        made_land = layer(made, "land-fill").get("paint")
+        if disk_land != made_land:
+            fail(f"{pack_id} style.json land-fill is not maplibre_style")
+        disk_water = layer(disk, "water-fill").get("paint")
+        made_water = layer(made, "water-fill").get("paint")
+        if disk_water != made_water:
+            fail(f"{pack_id} style.json water-fill is not maplibre_style")
 
     refs = next((item for item in style.get("layers") or [] if item.get("id") == "road-refs"), None)
     if not refs:
-        fail("tx-west needs a road-refs layer so highway numbers read in #E10600")
+        fail("tx-west needs a road-refs layer so highway numbers read at walking zoom")
     if float(refs.get("minzoom") or 99) > 12:
         fail("road-refs must appear by walking approach zoom")
-    if (refs.get("paint") or {}).get("text-color") != ACCENT:
-        fail(f"road-refs must be {ACCENT}")
-    if (refs.get("paint") or {}).get("text-halo-color") != SILVER:
-        fail("road-refs need a silver halo so #E10600 reads on void")
+    if (refs.get("paint") or {}).get("text-color") != SILVER:
+        fail(f"road-refs must be {SILVER}, not leftover accent")
+    if (refs.get("paint") or {}).get("text-halo-color") != VOID:
+        fail("road-refs need a void halo so silver reads on the pack")
     if interpolate_at((refs.get("layout") or {}).get("text-size"), 16) < 18:
         fail("road-refs too small at walking zoom")
     ref_key = (refs.get("layout") or {}).get("symbol-sort-key")
@@ -437,6 +534,7 @@ def main() -> None:
         assert_walkable_osm(pack_id)
         assert_every_tile_layer_names_its_slice(pack_id)
         assert_source_geojson_stays_off_the_phone(pack_id)
+        assert_search_index_ships(pack_id)
 
     zoom = open_zoom()
     for pack_id in sorted(walkable_ids()):

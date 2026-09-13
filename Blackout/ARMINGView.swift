@@ -15,6 +15,7 @@ struct ARMINGView: View {
         ZStack {
             Theme.void.ignoresSafeArea()
             world
+            field
             vignette
             chrome
         }
@@ -51,24 +52,36 @@ struct ARMINGView: View {
                 packWest: pack.bbox.west,
                 packNorth: pack.bbox.north,
                 packEast: pack.bbox.east,
-                trackUser: false
+                trackUser: false,
+                interactive: false,
+                youEmblem: runtime.youEmblem.rawValue
             )
             .allowsHitTesting(false)
             .ignoresSafeArea()
-            .opacity(worldIn ? 0.55 : 0)
+            .opacity(worldIn ? 0.56 : 0)
         }
+    }
+
+    private var field: some View {
+        Image("BootField")
+            .resizable()
+            .scaledToFill()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
     }
 
     private var vignette: some View {
         RadialGradient(
             colors: [
-                Theme.void.opacity(0.18),
-                Theme.void.opacity(0.72),
-                Theme.void.opacity(0.94),
+                Theme.void.opacity(0.06),
+                Theme.void.opacity(0.22),
+                Theme.void.opacity(0.52),
             ],
             center: .center,
-            startRadius: 20,
-            endRadius: 420
+            startRadius: 160,
+            endRadius: 620
         )
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -91,18 +104,22 @@ struct ARMINGView: View {
             let pulse = runtime.bootReady
                 ? 1.0
                 : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
-            Image("Logo")
-                .resizable()
-                .scaledToFit()
-                .frame(
-                    width: BlackoutTokens.Chrome.bootLogoPoints,
-                    // Poster is 1152×1712. Keep the wordmark; do not letterbox a square.
-                    height: BlackoutTokens.Chrome.bootLogoPoints * (1712.0 / 1152.0)
-                )
-                .shadow(color: Theme.accent.opacity(0.25 + 0.45 * pulse), radius: 18 + 14 * pulse)
-                .scaleEffect(markIn ? 1 : 0.86)
-                .opacity(markIn ? 1 : 0)
-                .accessibilityLabel("Blackout")
+            let size = CGFloat(BlackoutTokens.Chrome.bootLogoPoints)
+            let bloom = 0.38 + 0.22 * pulse
+            ZStack {
+                HUDRing(diameter: size + 28, lit: runtime.bootReady)
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+                    .shadow(color: Theme.accent.opacity(0.82 + 0.18 * pulse), radius: 6 + 3 * pulse)
+                    .shadow(color: Theme.accent.opacity(bloom), radius: 18 + 8 * pulse)
+                    .shadow(color: Theme.accent.opacity(0.18 + 0.16 * pulse), radius: 36 + 10 * pulse)
+                    .compositingGroup()
+            }
+            .scaleEffect(markIn ? 1 : 0.98)
+            .opacity(markIn ? 1 : 0)
+            .accessibilityLabel("Blackout")
         }
     }
 
@@ -110,7 +127,8 @@ struct ARMINGView: View {
         VStack(spacing: 10) {
             Text(runtime.bootStage.line)
                 .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(runtime.bootReady ? Theme.silver : Color(white: 0.55))
+                .tracking(1.6)
+                .foregroundStyle(runtime.bootReady ? Theme.silver : Theme.silver.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: 16)
@@ -135,18 +153,30 @@ struct ARMINGView: View {
         }
         .font(.system(size: 16, weight: .heavy))
         .tracking(4)
-        .foregroundStyle(runtime.bootReady ? Color.white : Color(white: 0.45))
+        .foregroundStyle(runtime.bootReady ? Color.white : Theme.silver.opacity(0.45))
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
-        .background(runtime.bootReady ? Theme.accent : Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(
-                    runtime.bootReady ? Theme.accent : Theme.silver.opacity(0.28),
-                    lineWidth: 1
-                )
-        )
+        .background {
+            if runtime.bootReady {
+                Theme.accent
+            } else {
+                Theme.glass()
+            }
+        }
+        .clipShape(Theme.plateRect())
+        .overlay {
+            if runtime.bootReady {
+                Theme.plateRect()
+                    .strokeBorder(Theme.accent, lineWidth: 1)
+            } else {
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+            }
+        }
         .opacity(runtime.bootReady ? 1 : 0.55)
+        .shadow(
+            color: Theme.accent.opacity(runtime.bootReady ? 0.42 : 0),
+            radius: runtime.bootReady ? 14 : 0
+        )
         .allowsHitTesting(runtime.bootReady)
         .accessibilityHint("Loads the vessel and opens the map")
         .animation(.easeOut(duration: 0.25), value: runtime.bootReady)

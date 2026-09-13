@@ -52,6 +52,20 @@ final class RouterTests: XCTestCase {
         return RouteGraph(nodes: nodes, edges: edges)
     }
 
+    private func measuredClassedGraph(
+        _ points: [Int: (lat: Double, lon: Double)],
+        _ links: [(Int, Int, UInt8)]
+    ) -> RouteGraph {
+        let nodes = points.map { GraphNode(id: $0.key, lon: $0.value.lon, lat: $0.value.lat) }
+        var edges: [GraphEdge] = []
+        for (a, b, cls) in links {
+            let m = GraphRouter.haversine(points[a]!.lat, points[a]!.lon, points[b]!.lat, points[b]!.lon)
+            edges.append(GraphEdge(a: a, b: b, m: m, walk: true, drive: true, roadClass: cls))
+            edges.append(GraphEdge(a: b, b: a, m: m, walk: true, drive: true, roadClass: cls))
+        }
+        return RouteGraph(nodes: nodes, edges: edges)
+    }
+
     func testRouteTakesTheShorterWayNotTheOnePointingAtTheDestination() {
         // Both ways reach node 4. Going through 2 bulges much further north, so
         // steering by the straight line must not be what picks the route.
@@ -185,15 +199,101 @@ final class RouterTests: XCTestCase {
             you: nil,
             locale: "en"
         )
-        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Walk 656 feet."))
         XCTAssertTrue(text.contains("Turn left."))
-        XCTAssertTrue(text.contains("Walk 100 meters."))
+        XCTAssertTrue(text.contains("Walk 328 feet."))
         XCTAssertTrue(text.contains("Arrive at destination."))
-        XCTAssertTrue(text.contains("Total 300 meters."))
+        XCTAssertTrue(text.contains("Total 984 feet."))
         XCTAssertTrue(text.contains("Heading 90 degrees."))
         XCTAssertFalse(text.hasSuffix("Walk"))
         XCTAssertNotEqual(text, "TX WEST 90 degrees")
         XCTAssertGreaterThan(text.count, 40)
+    }
+
+    func testVoiceNavNamesTheStreetsItTurnsOnto() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let streets: [String?] = ["Montana Avenue", "Piedras Street"]
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en",
+            streets: streets
+        )
+        XCTAssertTrue(text.contains("Walk 656 feet on Montana Avenue."))
+        XCTAssertTrue(text.contains("Turn left onto Piedras Street."))
+        XCTAssertTrue(text.contains("Walk 328 feet on Piedras Street."))
+        XCTAssertFalse(text.contains("Turn left. "))
+        let drive = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en",
+            travelMode: .drive,
+            streets: streets
+        )
+        XCTAssertTrue(drive.contains("Drive 656 feet on Montana Avenue."))
+        XCTAssertTrue(drive.contains("Turn left onto Piedras Street."))
+        XCTAssertEqual(
+            VoiceNav.hudTurns(coords, travelMode: .drive, streets: streets),
+            [
+                "DRIVE · 656 FT · MONTANA AVENUE",
+                "LEFT · PIEDRAS STREET",
+                "DRIVE · 328 FT · PIEDRAS STREET",
+                "ARRIVE",
+            ]
+        )
+        XCTAssertEqual(VoiceNav.nextTurnHUD(coords, streets: streets), "LEFT · PIEDRAS STREET")
+    }
+
+    func testVoiceNavDriveTurnByTurnUsesDriveNotWalk() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 90,
+            routeCoords: coords,
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en",
+            travelMode: .drive
+        )
+        XCTAssertTrue(text.contains("Drive 656 feet."))
+        XCTAssertTrue(text.contains("Turn left."))
+        XCTAssertTrue(text.contains("Drive 328 feet."))
+        XCTAssertTrue(text.contains("Arrive at destination."))
+        XCTAssertFalse(text.contains("Walk 656 feet."))
+        XCTAssertFalse(text.hasSuffix("Drive"))
+    }
+
+    func testVoiceNavDriveOffGraphIsHonestAboutCars() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: 45,
+            routeCoords: [],
+            planChrome: GraphPlan.offGraph,
+            destination: (31.8, -106.5),
+            you: (31.76, -106.49),
+            locale: "en",
+            travelMode: .drive
+        )
+        XCTAssertTrue(text.hasPrefix("OFF GRAPH."))
+        XCTAssertTrue(text.contains("No drivable street path from YOU."))
+        XCTAssertFalse(text.contains("walkable"))
     }
 
     func testVoiceNavOffGraphIsFullHonestSentence() {
@@ -225,8 +325,20 @@ final class RouterTests: XCTestCase {
         )
         XCTAssertTrue(text.contains("TX WEST."))
         XCTAssertTrue(text.contains("Heading unavailable."))
-        XCTAssertTrue(text.contains("Set a destination, then WALK, then SPEAK for turn by turn."))
+        XCTAssertTrue(text.contains("Set a destination, then WALK or DRIVE, then SPEAK for turn by turn."))
         XCTAssertNotEqual(text.trimmingCharacters(in: .whitespacesAndNewlines), "TX WEST no heading")
+        let invalid = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: -1,
+            routeCoords: [],
+            planChrome: "",
+            destination: nil,
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(invalid.contains("Heading unavailable."))
+        XCTAssertFalse(invalid.contains("Heading -1"))
+        XCTAssertFalse(invalid.contains("359"))
     }
 
     func testVoiceNavDestWithoutLineDoesNotInventStreets() {
@@ -240,7 +352,7 @@ final class RouterTests: XCTestCase {
             locale: "en"
         )
         XCTAssertTrue(text.contains("Destination set."))
-        XCTAssertTrue(text.contains("Tap WALK for the street path, then SPEAK."))
+        XCTAssertTrue(text.contains("Tap WALK or DRIVE for the street path, then SPEAK."))
         XCTAssertFalse(text.contains("Turn left."))
         XCTAssertFalse(text.contains("Arrive at destination."))
     }
@@ -258,10 +370,10 @@ final class RouterTests: XCTestCase {
             destination: (0.0008993, 0.0017966),
             you: (0.0, 0.0)
         )
-        XCTAssertEqual(chrome, "SPEAK · 1 TURN · 300 M")
+        XCTAssertEqual(chrome, "SPEAK · 1 TURN · 984 FT")
         XCTAssertEqual(SpeakStatus.turns(coords), 1)
         // The script the voice speaks must never reach the field.
-        for phrase in ["Walk 200 meters.", "Turn left.", "Arrive at destination."] {
+        for phrase in ["Walk 656 feet.", "Turn left.", "Arrive at destination."] {
             XCTAssertFalse(chrome.contains(phrase))
         }
         XCTAssertFalse(chrome.contains("\n"))
@@ -325,7 +437,7 @@ final class RouterTests: XCTestCase {
             you: nil,
             locale: "en"
         )
-        XCTAssertTrue(text.contains("Walk 200 meters."))
+        XCTAssertTrue(text.contains("Walk 656 feet."))
         XCTAssertTrue(text.contains("Turn left."))
         XCTAssertTrue(text.contains("Arrive at destination."))
         XCTAssertGreaterThan(text.count, SpeakStatus.maxCharacters)
@@ -418,6 +530,20 @@ final class RouterTests: XCTestCase {
         XCTAssertNil(GraphRouter.route(graph: g, from: 0, to: 1, mode: .walk))
         XCTAssertEqual(GraphRouter.route(graph: g, from: 0, to: 3, mode: .walk)?.nodeIds, [0, 3])
         XCTAssertEqual(GraphRouter.coordinates(graph: g, nodeIds: [0, 1, 3]).count, 2)
+    }
+
+    func testDriveTakesTheFasterRoadNotTheShortestResidential() {
+        let g = measuredClassedGraph(
+            [1: (0, 0), 2: (0.010, 0.010), 3: (0.001, 0.010), 4: (0, 0.020)],
+            [(1, 2, 1), (2, 4, 1), (1, 3, 6), (3, 4, 6)]
+        )
+        XCTAssertEqual(GraphRouter.route(graph: g, from: 1, to: 4, mode: .walk)?.nodeIds, [1, 3, 4])
+        XCTAssertEqual(GraphRouter.route(graph: g, from: 1, to: 4, mode: .drive)?.nodeIds, [1, 2, 4])
+        let unknown = measuredClassedGraph(
+            [1: (0, 0), 2: (0.010, 0.010), 3: (0.001, 0.010), 4: (0, 0.020)],
+            [(1, 2, 0), (2, 4, 0), (1, 3, 0), (3, 4, 0)]
+        )
+        XCTAssertEqual(GraphRouter.route(graph: unknown, from: 1, to: 4, mode: .drive)?.nodeIds, [1, 3, 4])
     }
 
     private func twoHopWalkOnly() -> RouteGraph {

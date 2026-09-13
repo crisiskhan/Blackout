@@ -51,6 +51,17 @@ Crisis: iPhone 12 Pro Max. Safari. No Mac. No Xcode. No p12.
 - `34264462418` (`960a8a2`): tip-67 `workflow_dispatch` with a concatenated `git_ref`. Checkout fetch failed. No IPA.
 - `34264699162` (`960a8a2`): tip-67 `workflow_dispatch` retry. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **67**. Dist `Q8AX4T282L` (`DISTRIBUTION`). altool no errors. ASC `e2cf188e-1fa8-4e07-b306-1e088087c7d0` **VALID**. PATCH 200. `ASSIGN Internal 67 204`. GraphProbe + warmup + keep-awake. Leave 66 until TestFlight shows 67 Ready.
 - `34269174169` (`20d2df7`): tip-68 `tf:` push. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **68**. Dist `S4B68PPMFK` (`DISTRIBUTION`). altool no errors. ASC `6f4ebfca-b491-408e-831a-e63a1bac63cb` **VALID**. PATCH 200. `ASSIGN Internal 68 204`. Speak finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready.
+- `34463051408` (`9911aaf`): HUD tag `tf-79`. CPV **79**. Unnamed tank sure. Leave 78 until TestFlight showed 79 Ready.
+- `34464769463` (`15516ec`): HUD tag `tf-80`. CPV **80**. Compass mark as App Icon and boot logo. Leave 79 until TestFlight shows 80 Ready.
+- `34480452541` (`98bb68a`): HUD tag `tf-81`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **81**. Dist `TPTQ6GKWZ7` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 81`, then ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. `ASSIGN Internal 81 204`. HUD on every tab + hold water classify + named marks. Leave 80 until TestFlight shows 81 Ready.
+- `34491969097` (`323aa7f`): HUD tag `tf-82`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **82**. Dist `8872S8A8NY` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 82`, then ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. `ASSIGN Internal 82 204`. Textless compass + HUD mark language through the instrument. Leave 81 until TestFlight shows 82 Ready.
+- `34502826993` (`3abaf58`): HUD tag `tf-83`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **83**. Dist `947QX8HSZ9` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 83`, then ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. `ASSIGN Internal 83 204`. Expedition HUD + FIELD vision still + COMMS call. Leave 82 until TestFlight shows 83 Ready.
+- `34536953430` (`4ec42d4`): HUD tag `tf-84`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **84**. Dist `WK9VCHNP39` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 84`, then ASC `e0ac0030-87e3-4952-b2a7-8336dffe99ef` **VALID**. PATCH 200. `ASSIGN Internal 84 204`. Scarce red, no fake party bodies, chrome that actually sleeps. Leave 83 until TestFlight shows 84 Ready.
+- `34547063820` (`487f290`): HUD tag `tf-85`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **85**. Dist `JVJ9WKTV5A` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool no errors. `WAIT no build 85`, then ASC `5cbd4db3-9642-4892-bef4-e8542a75afa9` **VALID**. PATCH 200. `ASSIGN Internal 85 204`. Hold ground + VISION still open this pack's plant, bite, animal, and cave cards. Never edible. Leave 84 until TestFlight shows 85 Ready.
+- `34550033439` (`0d0e0b3`): HUD tag `tf-86`. macos-15 / Xcode 26.3. `exportArchive OK`. CPV **86**. Dist `6KKC39285N` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool `UPLOAD SUCCEEDED with no errors`. `WAIT no build 86`, then ASC `f1a73104-c56c-4171-ba94-c08b0853c716` **VALID**. PATCH 200. `ASSIGN Internal 86 204`. Tree-use first on woodland, `BOOK` + `CARD n OF`, named tree is not woodland, hole walks cave then cold. Never edible. Leave 85 until TestFlight shows 86 Ready.
+- `34572153310` (`2c91036`): HUD tag `tf-87`. macos-15 / Xcode 26.3. `HAS_LOCAL_DIST_KEY=1`. `exportArchive OK`. CPV **87**. Dist `SJ7LCMGH3L` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool `UPLOAD SUCCEEDED with no errors`. `WAIT no build 87`, then ASC `6ab6b596-0c4f-4a60-89f6-6cc39dfad22b` **VALID**. PATCH 200. `ASSIGN Internal 87 204`. `usesNonExemptEncryption: null`. Peak walk includes bite; NM mammal SPEAK names the bite card. Never edible. Leave 86 until TestFlight shows 87 Ready.
+- `34629533409` (`6295e73`): HUD tag `tf-88`. macos-15 / Xcode 26.3. `HAS_LOCAL_DIST_KEY=1`. `exportArchive OK`. CPV **88**. Dist `4JYX5MF425` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool `UPLOAD SUCCEEDED with no errors`. `WAIT no build 88`, then ASC `a0a32168-94a7-422d-8204-31332e32eaa1` **VALID**. PATCH 200. `ASSIGN Internal 88 204`. `usesNonExemptEncryption: null`. Notable OSM reserves, caves, and named trees; karst / wildlife preserve / Audubon / nature area / habitat preserve Holds. Never edible. Leave 87 until TestFlight shows 88 Ready.
+- `34648083111` (`c1388f3`): HUD tag `tf-89`. macos-15 / Xcode 26.3. `HAS_LOCAL_DIST_KEY=1`. `exportArchive OK`. CPV **89**. Dist `NVH99KH233` (`DISTRIBUTION`). KEEP `45YLWHL6UP` untouched. altool `UPLOAD SUCCEEDED with no errors`. `WAIT no build 89`, then ASC `24e2c615-db24-4f09-b362-563cdafd1d4c` **VALID**. PATCH 200. `ASSIGN Internal 89 204`. `usesNonExemptEncryption: null`. FIELD SEARCH, from-nothing book, botanic Holds (Lush n Lean / Orchard Garden / Harvey Cornell). Never edible. Leave 88 until TestFlight shows 89 Ready.
 
 ## Watch omitted from App Store archive (re-enable later)
 
@@ -141,3 +152,59 @@ SOURCE GO tip `b7953348` / merge `a72a8478`. Run `34264699162` uploaded CPV **67
 ## Tip 68 Internal (CoS 2026-09-08)
 
 SOURCE GO tip `afb2e2fc` / merge `7abb9e0b`. Run `34269174169` uploaded CPV **68** and `ASSIGN Internal 68 204`. Speak banner finish + clean field + walking-zoom names. Leave 67 until TestFlight shows 68 Ready. Watch omitted. Internal only. Do not re-upload 54–67.
+
+## HUD 79–80 Internal
+
+HUD side path, not bible-v3. Tag `tf-79` (`9911aaf`, run `34463051408`) uploaded CPV **79**. Tag `tf-80` (`15516ec`, run `34464769463`) uploaded CPV **80** — compass mark as App Icon and boot logo. Watch omitted. Internal only. Do not re-upload 54–80.
+
+## HUD 81 Internal (Crisis GO)
+
+HUD tree `98bb68a` tagged `tf-81`. Run `34480452541` uploaded CPV **81** and `ASSIGN Internal 81 204`. Dist `TPTQ6GKWZ7`. ASC `b4d4d85f-7f42-4338-a38c-58e0c3ae4591` **VALID**. PATCH 200. Keep Map mounted, classify hold water, named marks survive pack re-read. Leave 80 until TestFlight shows 81 Ready. Watch omitted. Internal only. Do not re-upload 54–80.
+
+## HUD 82 Internal (Crisis GO)
+
+HUD tree `323aa7f` tagged `tf-82`. Run `34491969097` uploaded CPV **82** and `ASSIGN Internal 82 204`. Dist `8872S8A8NY`. ASC `f5262825-9fc6-44a3-90c5-4eade1cee20b` **VALID**. PATCH 200. Textless compass on the home screen and boot; overlay titles carry the mark; selected tab is the reticle; SOS silver ring; INSTRUMENTS is HUD. Leave 81 until TestFlight shows 82 Ready. Watch omitted. Internal only. Do not re-upload 54–81.
+
+## HUD 83 Internal (Crisis GO)
+
+HUD tree `3abaf58` tagged `tf-83`. Run `34502826993` uploaded CPV **83** and `ASSIGN Internal 83 204`. Dist `947QX8HSZ9`. ASC `9ef5ecfb-f11a-40a8-b2c9-27148f0a02ea` **VALID**. PATCH 200. Expedition condition rails; FIELD book + VISION still (pack-book name / UNKNOWN / NO VISION MODEL, never edible); COMMS HOLD PTT, real mic clip, LEAVE NET. Leave 82 until TestFlight shows 83 Ready. Watch omitted. Internal only. Do not re-upload 54–82.
+
+## HUD 84 Internal (Crisis GO)
+
+HUD tree `4ec42d4` tagged `tf-84`. Run `34536953430` uploaded CPV **84** and `ASSIGN Internal 84 204`. Dist `WK9VCHNP39`. ASC `e0ac0030-87e3-4952-b2a7-8336dffe99ef` **VALID**. PATCH 200. Unsigned compile [34536170362](https://github.com/crisiskhan/Blackout/actions/runs/34536170362) (generic device + simulator). No fake party body on YOU; highway refs and the walk line silver; water class labels off the canvas; hit/mark rows fade; LAYOUT can place SOS. Leave 83 until TestFlight shows 84 Ready. Watch omitted. Internal only. Do not re-upload 54–83.
+
+## HUD 85 Internal (Crisis GO)
+
+HUD tree `487f290` tagged `tf-85`. Run `34547063820` uploaded CPV **85** and `ASSIGN Internal 85 204`. Dist `JVJ9WKTV5A`. ASC `5cbd4db3-9642-4892-bef4-e8542a75afa9` **VALID**. PATCH 200. Unsigned compile [34546255034](https://github.com/crisiskhan/Blackout/actions/runs/34546255034) (generic device + simulator). Hold woodland/scrub/peak/hole opens plant, bite, animal, cave cards; a FIELD still of the same kind offers the same procedure. TX WEST sinkhole 31.694905, −106.441133. No wildlife GPS. Never edible. Leave 84 until TestFlight shows 85 Ready. Watch omitted. Internal only. Do not re-upload 54–84.
+
+## HUD 86 Internal (Crisis GO)
+
+HUD tree `0d0e0b3` tagged `tf-86`. Run [34550033439](https://github.com/crisiskhan/Blackout/actions/runs/34550033439) uploaded CPV **86** and `ASSIGN Internal 86 204`. Dist `6KKC39285N`. ASC `f1a73104-c56c-4171-ba94-c08b0853c716` **VALID**. PATCH 200. Unsigned compile [34549187846](https://github.com/crisiskhan/Blackout/actions/runs/34549187846) (generic device + simulator). Woodland `FIELD · PLANT` opens tree-use first; `BOOK` / `CARD n OF`; a named tree is tree cards only; a hole is `FIELD · CAVE` then `NEXT · COLD`. No wildlife GPS. Never edible. Leave 85 until TestFlight shows 86 Ready. Watch omitted. Internal only. Do not re-upload 54–85.
+
+## HUD 87 Internal (Crisis GO)
+
+HUD tree `2c91036` tagged `tf-87`. Run [34572153310](https://github.com/crisiskhan/Blackout/actions/runs/34572153310) uploaded CPV **87** and `ASSIGN Internal 87 204`. Dist `SJ7LCMGH3L`. ASC `6ab6b596-0c4f-4a60-89f6-6cc39dfad22b` **VALID**. PATCH 200. Unsigned compile [34571356306](https://github.com/crisiskhan/Blackout/actions/runs/34571356306) (generic device + simulator). A Texas peak is `FIELD · ANIMAL` then `NEXT · BITE` then `NEXT · COLD`. NM mammal SPEAK names the bite card. No wildlife GPS. Never edible. Leave 86 until TestFlight shows 87 Ready. Watch omitted. Internal only. Do not re-upload 54–86. Do not retag 85, 86, or 87.
+
+## HUD 88 Internal (Crisis GO)
+
+HUD tree `6295e73` tagged `tf-88`. Run [34629533409](https://github.com/crisiskhan/Blackout/actions/runs/34629533409) uploaded CPV **88** and `ASSIGN Internal 88 204`. Dist `4JYX5MF425`. ASC `a0a32168-94a7-422d-8204-31332e32eaa1` **VALID**. PATCH 200. Unsigned compile [34629197731](https://github.com/crisiskhan/Blackout/actions/runs/34629197731) on the tagged tree. Notable OSM extract: named nature-reserve relations, cave mouths, named trees; karst / wildlife preserve / Audubon / nature area / habitat preserve Holds. No wildlife GPS. Never edible. Leave 87 until TestFlight shows 88 Ready, then install `0.1.0 (88)`. Watch omitted. Internal only. Do not re-upload 54–87. Do not retag 85, 86, 87, or 88.
+
+## HUD 89 Internal (Crisis GO)
+
+HUD tree `c1388f3` tagged `tf-89`. Run [34648083111](https://github.com/crisiskhan/Blackout/actions/runs/34648083111) uploaded CPV **89** and `ASSIGN Internal 89 204`. Dist `NVH99KH233`. ASC `24e2c615-db24-4f09-b362-563cdafd1d4c` **VALID**. PATCH 200. Unsigned compile generic iOS green on [34647718165](https://github.com/crisiskhan/Blackout/actions/runs/34647718165); simulator still in flight. FIELD SEARCH + from-nothing book. Botanic Holds: Lush n Lean Garden, Orchard Garden, Harvey Cornell Rose Park. No wildlife GPS. Never edible. Leave 88 until TestFlight shows 89 Ready, then install `0.1.0 (89)`. Watch omitted. Internal only. Do not re-upload 54–88. Do not retag 85–89.
+
+## HUD 90 Internal (Crisis GO)
+
+HUD tree `3eace8e` tagged `tf-90`. Run [34698148948](https://github.com/crisiskhan/Blackout/actions/runs/34698148948) uploaded CPV **90** and `ASSIGN Internal 90 204`. Dist `WQLW3QMVCJ`. ASC `9c8557d6-3735-44bd-9027-cd1b3bb712ac` **VALID**. PATCH 200. Unsigned compile [34697829522](https://github.com/crisiskhan/Blackout/actions/runs/34697829522) (generic device + simulator). MapLibreMapTests **Executed 175 tests, with 0 failures** (104.749s). FACE on YOU and party, Bennett Mountain, heading fail-closed (tick dark until accuracy is real). No wildlife GPS. Never edible. Leave 89 until TestFlight shows 90 Ready, then install `0.1.0 (90)`. Watch omitted. Internal only. Do not re-upload 54–89. **91** is caught. Leave 90 until TestFlight shows 91 Ready, then install `0.1.0 (91)`. Do not retag 85–90.
+
+## HUD 91 Internal (Crisis GO)
+
+HUD tree `6572ba2` tagged `tf-91`. Run [34702742398](https://github.com/crisiskhan/Blackout/actions/runs/34702742398) uploaded CPV **91** and `ASSIGN Internal 91 204`. Dist `QC3528L4VU`. KEEP `45YLWHL6UP` untouched. ASC `4bc30e84-fb08-4c6e-aba8-163788614c73` **VALID**. PATCH 200. Unsigned compile [34701892788](https://github.com/crisiskhan/Blackout/actions/runs/34701892788) (generic device + simulator). MapLibreMapTests **Executed 175 tests, with 0 failures** (114.035s). Empty polyline / rest-of-app fail-closed, puck/crash, San Antonio Mountain. IPA 91 is `6572ba2`. Big Brushy Mountain (`587c984`) is a later SHA and is not on 91. No wildlife GPS. Never edible. Leave 90 until TestFlight shows 91 Ready, then install `0.1.0 (91)`. Watch omitted. Internal only. Do not re-upload 54–90. **92** is caught. Leave 91 until TestFlight shows 92 Ready, then install `0.1.0 (92)`. Do not retag 85–91.
+
+## HUD 92 Internal (Crisis GO)
+
+HUD tree `4764bc5` tagged `tf-92`. Run [34712071568](https://github.com/crisiskhan/Blackout/actions/runs/34712071568) uploaded CPV **92** and `ASSIGN Internal 92 204`. Dist `635A8PMWLS`. KEEP `45YLWHL6UP` untouched. ASC `1faed6d4-3d3e-4a92-839e-ba3f023e6bed` **VALID**. PATCH 200. `usesNonExemptEncryption: null`. Crash-safe MAP SEARCH (rank off the HUD) + Western Honey Mesquite. IPA 92 is `4764bc5`. Castner / El Cerro / Galisteo (`4865b3d`) and later open-reserve Holds are later SHAs and are not on 92. No wildlife GPS. Never edible. Leave 91 until TestFlight shows 92 Ready, then install `0.1.0 (92)`. Watch omitted. Internal only. Do not re-upload 54–91. **93** is caught. Leave 92 until TestFlight shows 93 Ready, then install `0.1.0 (93)`. Do not retag 85–92.
+
+## HUD 93 Internal (Crisis GO)
+
+HUD tree `85e10d0` tagged `tf-93`. Run [34714005365](https://github.com/crisiskhan/Blackout/actions/runs/34714005365) uploaded CPV **93** and `ASSIGN Internal 93 204`. Dist `T4LZRLF5GZ`. KEEP `45YLWHL6UP` untouched. ASC `4fee472b-bce2-4779-8433-ed317bfa8c19` **VALID**. PATCH 200. `usesNonExemptEncryption: null`. Unsigned compile [34713786716](https://github.com/crisiskhan/Blackout/actions/runs/34713786716) (generic device + simulator). MapLibreMapTests **Executed 175 tests, with 0 failures** (107.484s). Hold overlay PIP bbox-rejects far sheets so a White Sands / Petroglyph press cannot stall the HUD. PTT clip refuses a 0-channel buffer. IPA 93 is `85e10d0` (Castner / Trackways / White Sands / Ojito / Tent Rocks / Petroglyph / Placitas / Cerrillos and the Hold PIP fix). IPA 92 (`4764bc5`) is not this tree. No wildlife GPS. Never edible. Leave 92 until TestFlight shows 93 Ready, then install `0.1.0 (93)`. Watch omitted. Internal only. Do not re-upload 54–92. Do not retag 85–93.

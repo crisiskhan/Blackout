@@ -269,6 +269,7 @@ def ios_target_settings(debug: bool) -> dict:
             "INFOPLIST_KEY_NSCameraUsageDescription": "Vision classifies a still on this device. It is a guess. Deny is supported.",
             "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.",
             "INFOPLIST_KEY_NSMicrophoneUsageDescription": "PTT live and 15s clip stay on this device. Deny is supported.",
+            "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "SEARCH listens for a spoken question on this device. Deny is supported.",
             "INFOPLIST_KEY_NSMotionUsageDescription": "Heading for dead reckoning when GNSS dies. Deny is supported.",
             "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
             "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
@@ -389,6 +390,7 @@ ditto "${SRC}" "${DST}"
 rm -rf "${DST}/Resources"
 test -f "${DST}/Packs/catalog.json"
 test -f "${DST}/Field/field.core.json"
+test -f "${DST}/Vision/labels.tx.json"
 """
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 

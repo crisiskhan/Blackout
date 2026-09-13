@@ -4,7 +4,7 @@
 Device tip 67 came back PARTIAL, then the stills showed a second failure: the Speak row
 read `INSTRUME… LOCK-ON`, the field stacked `OFF GRAPH` twice plus a bare `TRUE`, street
 names never drew, and SPEAK painted the whole walk script over the canvas as an orange
-text wall. Speak is voice plus the cyan route line plus one short status line — the
+text wall. Speak is voice plus the silver route line plus one short status line — the
 script never reaches the field. These contracts hold that without touching Walk or PERF.
 """
 from __future__ import annotations
@@ -25,7 +25,16 @@ MAX_FIELD_LINES = 3
 VOID = "#000000"
 SILVER = "#B8BDC2"
 WALKABLE_PACKS = ("tx-west", "nm", "tx-east")
-SCRIPT_PHRASES = ("Walk ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
+SCRIPT_PHRASES = ("Walk ", "Drive ", "Turn left.", "Turn right.", "Arrive at destination.", "Total ")
+METERS_PER_MILE = 1609.344
+FEET_PER_METER = 3.280839895
+
+
+def distance_hud(meters: float) -> str:
+    """Mirror of BlackoutTokens.Distance.hud."""
+    if meters >= METERS_PER_MILE:
+        return f"{meters / METERS_PER_MILE:.1f} MI"
+    return f"{round(round(meters) * FEET_PER_METER):.0f} FT"
 
 
 def haversine(a_lat: float, a_lon: float, b_lat: float, b_lon: float) -> float:
@@ -72,12 +81,12 @@ def speak_status(
         )
         count = turns(route_coords)
         turn_phrase = "1 TURN" if count == 1 else f"{count} TURNS"
-        return SEPARATOR.join(["SPEAK", turn_phrase, f"{round(meters):.0f} M"])
+        return SEPARATOR.join(["SPEAK", turn_phrase, distance_hud(meters)])
     if plan_chrome == OFF_GRAPH:
         return SEPARATOR.join(["SPEAK", OFF_GRAPH])
     if dest is not None and you is not None:
         span = haversine(you[0], you[1], dest[0], dest[1])
-        return SEPARATOR.join(["SPEAK", "DEST", f"{round(span):.0f} M"])
+        return SEPARATOR.join(["SPEAK", "DEST", distance_hud(span)])
     return SEPARATOR.join(["SPEAK", "SET DEST"])
 
 
@@ -93,18 +102,44 @@ def joined(parts: list[str]) -> str:
     return SEPARATOR.join(kept)
 
 
+def dest_line(
+    dest: tuple[float, float] | None = None,
+    you: tuple[float, float] | None = None,
+) -> str:
+    """Mirror of MapFieldChrome.destLine. Dest pin while navigating, YOU when idle."""
+    if dest is not None:
+        return dest_value(dest)
+    if you is not None:
+        return dest_value(you)
+    return ""
+
+
+def dest_value(point: tuple[float, float] | None) -> str:
+    """Mirror of MapFieldChrome.destValue. Coordinate pair formatter."""
+    if point is None:
+        return "NO FIX"
+    return f"{point[0]:.5f}, {point[1]:.5f}"
+
+
 def field_lines(
     lock: str,
     route: str,
     tool: str,
-    bearing_deg: float | None,
+    dest: tuple[float, float] | None = None,
     speak: str = "",
+    you: tuple[float, float] | None = None,
 ) -> list[str]:
-    """Mirror of MapFieldChrome.lines. The destination is a pin on the canvas, so the
-    middle row carries the heading rather than a latitude nobody can steer by."""
+    """Mirror of MapFieldChrome.lines. Dest pin, or YOU when idle. Never bearing."""
     status = joined([lock, route, tool])
-    fix = "" if bearing_deg is None else f"BEARING {bearing_deg:.0f}°"
-    return [line for line in (status, fix, speak.strip()) if line]
+    return [
+        line
+        for line in (
+            status,
+            dest_line(dest, you),
+            speak.strip(),
+        )
+        if line
+    ]
 
 
 def route_chrome(has_graph: bool, has_dest: bool, plan_chrome: str) -> str:
@@ -140,7 +175,7 @@ class SpeakStatusTests(unittest.TestCase):
     def test_speak_reports_one_short_line_not_the_walk_script(self):
         coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
         status = speak_status(True, coords, "", (0.0008993, 0.0017966), (0.0, 0.0))
-        self.assertEqual(status, "SPEAK · 1 TURN · 300 M")
+        self.assertEqual(status, "SPEAK · 1 TURN · 984 FT")
         for phrase in SCRIPT_PHRASES:
             self.assertNotIn(phrase, status)
         self.assertNotIn("\n", status)
@@ -170,15 +205,15 @@ class FieldChromeTests(unittest.TestCase):
             OFF_GRAPH,
             OFF_GRAPH,
             "TRUE NORTH",
-            45,
-            "SPEAK · 3 TURNS · 300 M",
+            (31.758, -106.487),
+            "SPEAK · 3 TURNS · 984 FT",
         )
         self.assertEqual(
             lines,
             [
                 "OFF GRAPH · TRUE NORTH",
-                "BEARING 45°",
-                "SPEAK · 3 TURNS · 300 M",
+                "31.75800, -106.48700",
+                "SPEAK · 3 TURNS · 984 FT",
             ],
         )
         self.assertLessEqual(len(lines), MAX_FIELD_LINES)
@@ -186,10 +221,65 @@ class FieldChromeTests(unittest.TestCase):
             self.assertLessEqual(len(line), FIELD_MAX_CHARACTERS)
             self.assertNotIn("\n", line)
             self.assertNotIn("DEST 31.", line)
+            self.assertNotIn("BEARING", line)
+
+    def test_dest_line_prints_dest_while_navigating_and_you_when_idle(self):
+        dest = (31.758, -106.487)
+        you = (31.7619, -106.49)
+        with_dest = field_lines(
+            OFF_GRAPH,
+            OFF_GRAPH,
+            "TRUE NORTH",
+            dest,
+            "SPEAK · 3 TURNS · 984 FT",
+            you,
+        )
+        self.assertEqual(
+            with_dest,
+            [
+                "OFF GRAPH · TRUE NORTH",
+                "31.75800, -106.48700",
+                "SPEAK · 3 TURNS · 984 FT",
+            ],
+        )
+        self.assertNotIn("31.76190", with_dest[1])
+        self.assertEqual(dest_line(dest), "31.75800, -106.48700")
+        self.assertEqual(dest_line(dest, you), "31.75800, -106.48700")
+        self.assertEqual(dest_line(None, you), "31.76190, -106.49000")
+        self.assertEqual(dest_line(None), "")
+        self.assertEqual(dest_line(), "")
+        self.assertEqual(dest_value(dest), "31.75800, -106.48700")
+        self.assertEqual(dest_value(you), "31.76190, -106.49000")
+        self.assertEqual(dest_value(None), "NO FIX")
+        far_west = dest_value((-90.0, -180.0))
+        self.assertEqual(far_west, "-90.00000, -180.00000")
+        self.assertLessEqual(len(far_west), FIELD_MAX_CHARACTERS)
+        self.assertNotIn("DEST", far_west)
+        self.assertEqual(
+            field_lines(OFF_GRAPH, "", "TRUE NORTH", dest, ""),
+            ["OFF GRAPH · TRUE NORTH", "31.75800, -106.48700"],
+        )
+        self.assertEqual(
+            field_lines("", "", "", None, "", you),
+            ["31.76190, -106.49000"],
+        )
+        self.assertEqual(field_lines("", "", "", None, ""), [])
+        self.assertEqual(field_lines("", "", "", None, "   "), [])
 
     def test_quiet_field_shows_nothing(self):
         self.assertEqual(field_lines("", "", "", None, ""), [])
-        self.assertEqual(field_lines("", "", "", 12, "   "), ["BEARING 12°"])
+        # Heading is not a dest. Dest pin wins. Idle YOU mounts live GNSS.
+        self.assertEqual(field_lines("", "", "", (31.758, -106.487), "   "), ["31.75800, -106.48700"])
+        self.assertEqual(
+            field_lines("", "", "", None, "   ", (31.7619, -106.49)),
+            ["31.76190, -106.49000"],
+        )
+
+    def test_header_controls_are_the_whole_words(self):
+        # INSTRUME… was the failure. INST was a workaround. Wrap the full word.
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
 
     def test_off_graph_is_a_routing_failure_not_a_missing_dest(self):
         self.assertEqual(route_chrome(has_graph=True, has_dest=False, plan_chrome=""), "")
@@ -211,13 +301,14 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         # Overlay chips keep their whole word; SPEAK sits in the thumb dock.
         self.assertIn("HUDOverlayChipStyle", self.map_tab)
         self.assertIn("HUDDockStyle", self.map_tab)
-        self.assertIn('Button("SPEAK")', self.map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", self.map_tab)
         self.assertIn("runtime.speakMap()", self.map_tab)
         self.assertIn("fixedSize(horizontal: true, vertical: false)", self.theme)
         self.assertNotIn("truncationMode", self.map_tab)
         self.assertNotIn("truncationMode", self.theme)
-        self.assertIn('Button("INST")', self.map_tab)
-        self.assertIn('"LOCKED" : "LOCK"', self.map_tab)
+        self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", self.map_tab)
+        self.assertIn("BlackoutTokens.MapOverlay.lockTitle", self.map_tab)
+        self.assertIn("HUDWrapRail", self.map_tab)
 
     def test_no_walk_script_text_wall_is_painted_on_the_field(self):
         app = read("Blackout", "AppRuntime.swift")
@@ -235,13 +326,32 @@ class SpeakChromeSourceContracts(unittest.TestCase):
 
     def test_speak_chip_still_speaks_the_whole_prompt(self):
         app = read("Blackout", "AppRuntime.swift")
-        self.assertIn('Button("SPEAK")', self.map_tab)
+        self.assertIn("BlackoutTokens.MapDock.allCases", self.map_tab)
         self.assertIn("runtime.speakMap()", self.map_tab)
         self.assertIn("VoiceNav.prompt", app)
         self.assertIn("speech.speak(text, locale: locale)", app)
+        speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        self.assertIn("travelMode:", speak)
         speech = read("Packages", "OfflineSpeech", "Sources", "OfflineSpeech", "OfflineSpeech.swift")
         self.assertNotIn("prefix(", speech)
         self.assertIn("AVSpeechUtterance(string: trimmed)", speech)
+        self.assertIn("setTone", speech)
+        tab = self.map_tab
+        self.assertIn("SpeakTurnCard(", tab)
+        self.assertIn("runtime.speakHUDTurns", tab)
+        self.assertNotIn("ScrollView", tab)
+        card = read("Blackout", "SpeakTurnCard.swift")
+        self.assertIn("struct SpeakTurnCard", card)
+        self.assertIn("Theme.glass", card)
+        self.assertNotIn(".spring(", card)
+        self.assertNotIn("Turn left onto", card)
+        self.assertNotIn("best in class", card.lower())
+        self.assertNotIn("Waze", card)
+        app = read("Blackout", "AppRuntime.swift")
+        speak = app.split("func speakMap()")[1].split("func beginPTTSolo")[0]
+        self.assertIn("speakHUDTurns", speak)
+        self.assertIn("speakNextHUD", speak)
+        self.assertIn("streetNames(along:", speak)
 
 
 class FieldChromeSourceContracts(unittest.TestCase):
@@ -265,6 +375,81 @@ class FieldChromeSourceContracts(unittest.TestCase):
             'String(format: "BEARING %.0f°", h)',
         ):
             self.assertNotIn(stale, self.map_tab, f"{stale} still sprays its own row")
+        chrome = self.map_tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
+        self.assertIn("runtime.routeTarget", chrome)
+        self.assertIn("runtime.gnssYou", chrome)
+        self.assertNotIn("youCoordinate()", chrome)
+        self.assertNotIn("lastKnownFix", chrome)
+        self.assertNotIn("youCoordinate()", self.map_tab)
+        app = read("Blackout", "AppRuntime.swift")
+        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        self.assertIn("fix.last", you)
+        self.assertNotIn("lastKnownFix", you)
+        self.assertNotIn("center", you)
+        self.assertIn("%.5f, %.5f", self.route_line)
+        self.assertIn("point: (lat: Double, lon: Double)?", self.route_line)
+        self.assertIn("enum MapFieldDestMode", self.route_line)
+        self.assertIn("case coordinates", self.route_line)
+        self.assertIn("case turns", self.route_line)
+        self.assertIn('return "TURNS"', self.route_line)
+        self.assertIn("func destValue(", self.route_line)
+        self.assertIn("func destRailVisible(", self.route_line)
+        self.assertIn("hasYouFix", self.route_line)
+        self.assertNotIn("destActive", self.route_line)
+        self.assertIn("COORDINATES", self.route_line)
+        self.assertIn("destRailVisible(", chrome)
+        self.assertIn("NO FIX", self.route_line)
+        self.assertIn("MapFieldDestRail", self.map_tab)
+        self.assertIn("MapFieldDestMode", self.map_tab)
+        self.assertIn("destRailVisible(", chrome)
+        self.assertNotIn("Theme.accent", chrome)
+        self.assertIn("Theme.fix", chrome)
+        self.assertIn("Theme.Motion.beat", chrome)
+        self.assertIn("@State private var beat", chrome)
+        self.assertIn("MapFieldChrome.destValue", chrome)
+        self.assertIn("Text(field)", chrome)
+        rail = chrome.split("struct MapFieldDestRail")[1]
+        self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)
+        self.assertIn("chip(MapFieldDestMode.turns)", rail)
+        chip = rail.split("func chip(")[1]
+        self.assertNotIn("destValue", chip)
+        self.assertIn("chipMode.title", chip)
+        self.assertNotIn("MapFieldDestMode.bearing", rail)
+        self.assertIn("MapFieldDestMode.turns", rail)
+        self.assertIn("nextTurn", rail)
+        self.assertIn("runtime.speakNextHUD", chrome)
+        self.assertIn("layoutPriority", chrome)
+        theme = read("Blackout", "Theme.swift")
+        self.assertIn("struct MapFieldDestChipStyle", theme)
+        self.assertIn("var expanded: Bool", theme)
+        self.assertIn("var beat: Double", theme)
+        self.assertIn("static var beat", theme)
+        self.assertIn("repeatForever", theme)
+        self.assertIn(".shadow(", theme)
+        chip_style = theme.split("struct MapFieldDestChipStyle")[1].split("enum HUDStatusTone")[0]
+        self.assertNotIn("Theme.raised", chip_style)
+        self.assertNotIn("ultraThinMaterial", chrome)
+        self.assertNotIn("Theme.glass", chrome)
+        self.assertNotIn("Color.green", theme)
+        dest_src = self.route_line.split("func destLine(")[1].split("func destValue")[0]
+        self.assertIn("destValue", dest_src)
+        self.assertIn("you", dest_src)
+        self.assertNotIn("NO HEADING", dest_src)
+        self.assertNotIn("BEARING", dest_src)
+        self.assertNotIn('String(format: "BEARING %.0f°", h)', self.map_tab)
+        self.assertNotIn("MapFieldDestMode.bearing", self.map_tab)
+        self.assertNotIn("MapFieldChrome.activeBearing(", self.map_tab)
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        self.assertIn("destChipBeatSeconds", tokens)
+        self.assertIn("static let fix", tokens)
+        self.assertIn("fixHex", tokens)
+        self.assertIn("func hud(", tokens)
+        self.assertIn("func spoken(", tokens)
+        self.assertIn("Distance.hud", read("Packages", "Search", "Sources", "Search", "Search.swift"))
+        self.assertIn("Distance.hud", self.route_line)
+        voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
+        self.assertIn("Distance.hud", voice)
+        self.assertIn("Distance.spoken", voice)
 
     def test_mag_true_says_which_north(self):
         self.assertIn('magNorth ? "MAG NORTH" : "TRUE NORTH"', self.route_line)
@@ -276,15 +461,34 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn('speechChrome = ""', pick)
         navigate = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
         self.assertIn('speechChrome = ""', navigate)
+        self.assertIn("travelMode = mode", navigate)
         clear = app.split("private func clearRoute(")[1].split("\n    }")[0]
         self.assertIn('speechChrome = ""', clear)
 
-    def test_walk_cyan_route_hooks_are_untouched(self):
+    def test_walk_silver_route_hooks_are_untouched(self):
         offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
         app = read("Blackout", "AppRuntime.swift")
         self.assertIn("RouteLine.sourceID", offline)
         self.assertIn("RouteLine.layerID", offline)
-        self.assertIn("red: 0.12, green: 0.82, blue: 0.94", offline)
+        self.assertIn("RouteLine.casingLayerID", offline)
+        self.assertIn("RouteLine.coreLayerID", offline)
+        self.assertIn("func shouldFollow(", read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ))
+        self.assertIn("PackCamera.shouldFollow", offline)
+        self.assertIn("PackCamera.shouldFitRoute", offline)
+        self.assertIn("func fitRoute(", offline)
+        self.assertIn("allowsRotating = false", offline)
+        self.assertIn("allowsTilting = false", offline)
+        self.assertNotIn("allowsRotating = true", offline)
+        self.assertIn("lockOn: runtime.lockOn", read("Blackout", "MapTab.swift"))
+        self.assertIn("travelMode: runtime.travelMode", read("Blackout", "MapTab.swift"))
+        self.assertIn("walkDash", self.route_line)
+        self.assertIn("func dashPattern", self.route_line)
+        self.assertIn("insertLayer(layer, below: fill)", offline)
+        self.assertNotIn("belowLayer:", offline)
+        self.assertIn("red: 0.77, green: 0.80, blue: 0.84", offline)
+        self.assertNotIn("red: 0.12, green: 0.82, blue: 0.94", offline)
         self.assertIn("GraphPlan.line", app)
         self.assertIn("warmupActiveGraph", app)
         self.assertIn("graphWarmup", app)
@@ -363,7 +567,7 @@ class WalkingZoomNameContracts(unittest.TestCase):
         washed = {"#e8eef4", "#f0f4f8", "#0c0e10"}
         for pack_id in WALKABLE_PACKS:
             style = json.loads((ROOT / "Resources" / "Packs" / pack_id / "style.json").read_text())
-            for layer_id in ("road-labels", "place-labels"):
+            for layer_id in ("road-labels", "place-labels", "road-refs"):
                 item = layer(style, layer_id)
                 if item is None:
                     continue
@@ -378,12 +582,14 @@ class NoRegressionContracts(unittest.TestCase):
         map_tab = read("Blackout", "MapTab.swift")
         inst = read("Blackout", "InstrumentsView.swift")
         for title in ("MARK", "WALK", "DRIVE", "SPEAK"):
-            self.assertIn(f'Button("{title}")', map_tab)
+            self.assertIn(f'return "{title}"', read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift"))
+        self.assertIn("BlackoutTokens.MapDock.allCases", map_tab)
         for title in ("RULER", "USNG", "MAG/TRUE"):
             self.assertIn(f'Button("{title}")', inst)
         self.assertIn("mapChipHitPoints", map_tab)
         self.assertIn("layoutPriority(1)", map_tab)
-        self.assertIn("OSMCredit.line", map_tab)
+        self.assertNotIn("OSMCredit.line", map_tab)
+        self.assertNotIn("OpenStreetMap", map_tab)
 
     def test_no_new_surface_and_cpv_stays_one(self):
         pbx = read("Blackout.xcodeproj", "project.pbxproj")

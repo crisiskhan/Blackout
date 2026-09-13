@@ -388,7 +388,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\n# osm.geojson is the source the vector tiles are built from, not something\n# the phone reads. Shipping it too would put ~150 MB of dead weight in the\n# IPA. Guarded by tools/test_tx_west_style.py.\nrsync -a --exclude 'Packs/*/osm.geojson' --exclude 'Packs/*/osm.fetched' \"${SRC}/\" \"${DST}/\"\nrm -rf \"${DST}/Resources\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\n";
+			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\n# osm.geojson is the source the vector tiles are built from, not something\n# the phone reads. Shipping it too would put ~150 MB of dead weight in the\n# IPA. Guarded by tools/test_tx_west_style.py.\nrsync -a --exclude 'Packs/*/osm.geojson' --exclude 'Packs/*/osm.fetched' \"${SRC}/\" \"${DST}/\"\nrm -rf \"${DST}/Resources\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\ntest -f \"${DST}/Vision/labels.tx.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -509,6 +509,7 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SEARCH listens for a spoken question on this device. Deny is supported.";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -564,6 +565,7 @@
 					INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.";
 					INFOPLIST_KEY_NSMicrophoneUsageDescription = "PTT live and 15s clip stay on this device. Deny is supported.";
 					INFOPLIST_KEY_NSMotionUsageDescription = "Heading for dead reckoning when GNSS dies. Deny is supported.";
+					INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SEARCH listens for a spoken question on this device. Deny is supported.";
 					INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 					INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 					INFOPLIST_KEY_UILaunchScreen_Generation = YES;

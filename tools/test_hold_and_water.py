@@ -119,23 +119,21 @@ def assert_sos_is_not_on_the_map_hold() -> None:
     print("OK   map hold never calls SOS, and never puts Comms out of reach")
 
 
-def assert_the_credit_survives_the_card() -> None:
-    """The card covers the footer, and the footer carried OSM's line.
+def assert_the_glass_has_no_osm_credit() -> None:
+    """ODbL credit lives in the pack files. The HUD is Blackout, not OSM.
 
-    Capping the card at half the screen means the map keeps drawing above it,
-    so the attribution has to move up there with it. Hiding the footer and
-    stopping there drops the credit for as long as a card is open, and the
-    older guards only check that the string is somewhere in the file.
+    The hold card used to lift `© OpenStreetMap contributors` onto the canvas
+    so the footer credit would survive. That is vendor marking on the glass.
     """
     body = (APP / "MapTab.swift").read_text()
-    if "OSMCredit.line" not in body:
-        fail("MapTab does not credit OpenStreetMap at all")
-    if not any(
-        "OSMCredit.line" in brace_body(body, match.end() - 1)
-        for match in re.finditer(r"runtime\.held != nil \{", body)
-    ):
-        fail("the hold card hides the footer and takes the OpenStreetMap credit with it")
-    print("OK   OpenStreetMap keeps its credit while the card is open")
+    if "OSMCredit.line" in body:
+        fail("MapTab still draws OpenStreetMap credit on the HUD")
+    if "OpenStreetMap" in body or "©" in body:
+        fail("MapTab still names OpenStreetMap on the glass")
+    hold = (APP / "HoldCard.swift").read_text()
+    if "OpenStreetMap" in hold or "©" in hold:
+        fail("the hold card names OpenStreetMap")
+    print("OK   the glass has no OpenStreetMap credit")
 
 
 def assert_the_card_offers_exactly_two_actions() -> None:
@@ -145,8 +143,14 @@ def assert_the_card_offers_exactly_two_actions() -> None:
     if len(buttons) != 2:
         fail(f"hold card has {len(buttons)} actions, expected 2")
     for want in ("FIELD", "MARK"):
-        if f'"{want}"' not in body:
+        if want == "FIELD" and "InspectField.label" in body:
+            continue
+        if f'"{want}"' not in body and want != "FIELD":
             fail(f"hold card is missing its {want} action")
+        if want == "MARK" and '"MARK"' not in body and "MARKED" not in body:
+            fail("hold card is missing its MARK action")
+    if "InspectField.label" not in body:
+        fail("hold card does not name the Field procedure from the route")
     if "holdCardMaxActions: Int = 2" not in TOKENS:
         fail("holdCardMaxActions is not 2")
     if "holdCardMaxHeightFraction: Double = 0.5" not in TOKENS:
@@ -213,14 +217,17 @@ def assert_style_draws_ground_and_water(pack_id: str) -> None:
         if layer["source-layer"] != OSM_SOURCE_LAYER[layer["id"]]:
             fail(f"{pack_id} layer {layer['id']} points at the wrong slice")
 
-    # Ground cover is a hint at the zoom where there is nothing else, and is
-    # nearly gone by the zoom where streets carry the map.
+    # Ground cover is louder zoomed out, quieter at street zoom. Streets
+    # still own the walk (last stop at most 0.2), but the last stop has to
+    # stay visible enough to tell desert from bosque at the open zoom.
     stops = layers["land-fill"]["paint"]["fill-opacity"][3:]
     far, close = stops[1], stops[-1]
     if not far > close:
         fail(f"{pack_id} land fill does not quieten as you zoom in ({far} -> {close})")
     if close > 0.2:
         fail(f"{pack_id} land fill is still {close} at street zoom — it will fight the streets")
+    if close < 0.15:
+        fail(f"{pack_id} land fill is {close} at street zoom — desert and bosque vanish")
 
     # A wash is dry most of the year. A solid line would promise otherwise.
     if "line-dasharray" not in layers["water-ephemeral"]["paint"]:
@@ -475,6 +482,15 @@ def assert_a_hold_asks_the_pack_not_just_the_paint() -> None:
         fail("the pack source id drifted off the source the style actually uses")
     if "packPointClasses" not in inspect:
         fail("the hold no longer names the point classes the tiler emits")
+    if "PackStyle.groundWorkedSourceID" not in view:
+        fail(
+            "a hold never asks the overlay source, so a cave preserve the "
+            "fill is too faint to hit cannot be held"
+        )
+    if "features(matching:" not in view:
+        fail("a hold never asks the geojson overlay source for the sheet under the thumb")
+    if "packWorkedGround" not in view:
+        fail("the overlay source query drifted off the name the glass tests call")
     print("OK   a hold asks the pack for the points the paint is too small to admit")
 
 
@@ -521,6 +537,13 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
         if card not in states:
             fail(f"a hold prefers {card}, which no state book ships")
 
+    extras = named(" ".join(re.findall(r"extra\s*[:=]\s*\[([^\]]*)\]", swift)))
+    if not extras:
+        fail("no ground lists extra core cards — woodland never opens plant-use or bite")
+    for card in extras:
+        if card not in everywhere:
+            fail(f"a hold lists extra core {card}, which field.core.json does not ship")
+
     # The runtime has to hand over the whole route, and the tab has to walk it
     # rather than take the head. Either half alone loses the fallback, and it
     # only shows up in the state that does not ship the preferred card.
@@ -530,7 +553,10 @@ def assert_every_field_card_the_map_can_open_is_really_shipped() -> None:
     jump = brace_body(tab, tab.index("private func jump()"))
     if "runtime.fieldJump" not in jump:
         fail("FieldTab never reads the hold card's request")
-    if not re.search(r"for \w+ in route\b", jump):
+    walk = jump
+    if "private func openRoute(" in tab:
+        walk += brace_body(tab, tab.index("private func openRoute("))
+    if "InspectField.presentRoute" not in walk and not re.search(r"for \w+ in route\b", walk):
         fail("FieldTab does not walk the route, so a state card that is not loaded opens nothing")
     print(f"OK   {len(set(fallbacks))} core Field cards behind {len(set(preferred))} state ones, all shipped")
 
@@ -541,8 +567,8 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     The tab used to draw the whole card list and hang the open card's steps
     underneath it, so arriving from a hold on the ground put you in front of
     seventeen titles with the answer pushed off the bottom of a phone. One
-    card open, or the list, never both — and an open card has to carry the way
-    back to the list, or a hold is a one-way door into it.
+    card open, or SEARCH, never both — and an open card has to carry the way
+    back to SEARCH, or a hold is a one-way door into it.
     """
     tab = (APP / "FieldTab.swift").read_text()
     opened = re.search(r"if let (\w+) = stepper \{", tab)
@@ -552,14 +578,21 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
     if "List(cards)" in held:
         fail("FieldTab draws the card list over the card the hold already picked")
     if "ALL CARDS" not in tab:
-        fail("an open card has no way back to the list, so a hold is a one-way door into it")
+        fail("an open card has no way back to SEARCH, so a hold is a one-way door into it")
     rest = tab[opened.end() + len(held):]
     fallback = re.match(r"\}\s*else \{", rest)
     if not fallback:
-        fail("FieldTab has no list to fall back to when no card is open")
-    if "ForEach(cards)" not in brace_body(rest, fallback.end() - 1):
-        fail("FieldTab never shows the card list at all")
-    print("OK   a land hold opens one card's steps, with the list behind ALL CARDS")
+        fail("FieldTab has no SEARCH to fall back to when no card is open")
+    body = brace_body(rest, fallback.end() - 1)
+    if "searchField" not in body:
+        fail("FieldTab has no SEARCH when no card is open")
+    if "ForEach(listCards)" in body:
+        fail("SEARCH still dumps card titles instead of opening the answer")
+    if 'TextField("SEARCH"' not in tab:
+        fail("FieldTab has no SEARCH field")
+    if "onSubmit(openAnswer)" not in tab:
+        fail("SEARCH does not open the answering card's steps")
+    print("OK   a land hold opens one card's steps, with SEARCH behind ALL CARDS")
 
 
 def assert_the_pack_says_when_it_was_pulled(pack_id: str) -> None:
@@ -587,7 +620,7 @@ def main() -> None:
     assert_the_card_never_sells_the_water()
     assert_sos_is_not_on_the_map_hold()
     assert_the_card_offers_exactly_two_actions()
-    assert_the_credit_survives_the_card()
+    assert_the_glass_has_no_osm_credit()
     assert_a_hold_is_not_a_pan()
     assert_the_generator_cannot_undo_the_audit()
     assert_the_tiler_and_the_card_know_the_same_words()

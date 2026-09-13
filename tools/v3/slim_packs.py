@@ -110,6 +110,7 @@ def main() -> None:
             write_json(pack_dir / "dem.json", slim_dem(pack_dir / "dem.json"))
         if (pack_dir / "pois.geojson").exists():
             write_json(pack_dir / "pois.geojson", slim_fc(pack_dir / "pois.geojson", 250, 1))
+        # search.json is the packed name index. Never cap it to a POI slice.
         for extra in pack_dir.glob("*.geojson"):
             if extra.name in {"osm.geojson", "contours.geojson", "pois.geojson"}:
                 continue

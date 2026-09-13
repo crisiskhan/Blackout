@@ -1,6 +1,8 @@
 import SwiftUI
 import MapLibreMap
+import MeshDTN
 import Tokens
+import Vitals
 
 /// The place the thumb is holding, and what the pack says is there.
 struct HeldPoint: Equatable {
@@ -11,15 +13,49 @@ struct HeldPoint: Equatable {
     var marked = false
 }
 
+/// A party body the thumb is holding. Names live here, never on the canvas.
+struct HeldPerson: Equatable {
+    var id: String
+    var name: String
+    var emblem: String
+    var status: PartyStatus
+    var lat: Double
+    var lon: Double
+    var headingDeg: Double?
+    var isYou: Bool
+    var vitals: PartyVitals? = nil
+}
+
+/// A packed door the search book interpolated. The card is the record.
+struct HeldAddress: Equatable {
+    var name: String
+    var city: String
+    var post: String
+    var what: String
+    var sure: Int
+    var why: String
+    var lat: Double
+    var lon: Double
+    var marked = false
+}
+
 /// Dark glass over the canvas: what this is, how sure the record is, what to
 /// do, and two ways to act on it. Tapping the dim map or dragging the card
 /// down puts it away. There is no SOS here and there never will be — SOS is a
 /// Comms button, and a thumb resting on a map is not a call for help.
 struct HoldCardView: View {
     let held: HeldPoint
+    /// Cards the open pack actually ships. The button names the first of
+    /// these, not a New Mexico ice card on a Texas peak.
+    let fieldBook: Set<String>
     let onField: () -> Void
     let onMark: () -> Void
     let onClose: () -> Void
+
+    private var fieldRoute: [String] {
+        if fieldBook.isEmpty { return held.card.fieldRoute }
+        return InspectField.presentRoute(held.card.fieldRoute, in: fieldBook)
+    }
 
     @State private var drag: CGFloat = 0
 
@@ -58,7 +94,7 @@ struct HoldCardView: View {
                         if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
                             onClose()
                         }
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.85)) { drag = 0 }
+                        withAnimation(Theme.Motion.heavy) { drag = 0 }
                     }
             )
             // Deliberately not `.isModal`. It would be the tidy thing for a
@@ -105,7 +141,7 @@ struct HoldCardView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(maxHeight: cap, alignment: .top)
-        .background(glass)
+        .background(Theme.glass())
         .overlay(alignment: .top) {
             // One red hairline so the card reads as this app's and not as a
             // system sheet. The card's own clip rounds its ends.
@@ -116,26 +152,17 @@ struct HoldCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)
         .padding(.bottom, 8)
     }
 
-    /// Blur plus a black wash. The blur alone would let bright streets through
-    /// and the text would fight them.
-    private var glass: some View {
-        ZStack {
-            Rectangle().fill(.ultraThinMaterial)
-            Rectangle().fill(Theme.void.opacity(0.74))
-        }
-    }
-
     private var grabber: some View {
-        Capsule()
+        Rectangle()
             .fill(Theme.silver.opacity(0.4))
-            .frame(width: 36, height: 4)
+            .frame(width: 36, height: 3)
             .frame(maxWidth: .infinity)
             .accessibilityHidden(true)
     }
@@ -149,7 +176,7 @@ struct HoldCardView: View {
                 .minimumScaleFactor(0.7)
             Text(held.card.klass.uppercased())
                 .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.silver)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -159,13 +186,17 @@ struct HoldCardView: View {
 
     private var rows: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // SURE is confidence in the record.
             row(
                 key: "SURE",
                 value: "\(held.card.sure)%",
                 note: held.card.why,
-                hint: "Confidence in the record, not in the water."
+                hint: nil
             )
             row(key: "DO", value: nil, note: held.card.doLine, hint: nil)
+            if let book = InspectField.bookLine(for: fieldRoute) {
+                row(key: "BOOK", value: nil, note: book, hint: nil)
+            }
             if let date = held.card.packDate {
                 row(key: "PACK", value: date, note: nil, hint: nil)
             }
@@ -185,10 +216,12 @@ struct HoldCardView: View {
                         .foregroundStyle(Color.white)
                 }
                 if let note {
+                    // Woodland deadfall and wildlife cook-through are the
+                    // Field SPEAK. Four lines clips them on a phone.
                     Text(note)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Theme.silver)
-                        .lineLimit(4)
+                        .lineLimit(6)
                 }
             }
             Spacer(minLength: 0)
@@ -201,7 +234,7 @@ struct HoldCardView: View {
     private var actions: some View {
         HStack(spacing: 8) {
             Button(action: onField) {
-                Text("FIELD")
+                Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(HoldActionStyle(filled: false))
@@ -214,21 +247,26 @@ struct HoldCardView: View {
     }
 }
 
-private struct HoldActionStyle: ButtonStyle {
+struct HoldActionStyle: ButtonStyle {
     var filled: Bool
+    var expand: Bool = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .heavy))
             .foregroundStyle(filled ? Color.white : Theme.silver)
-            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-            .contentShape(Rectangle())
-            .background(filled ? Theme.accent : Theme.raised)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.silver.opacity(filled ? 0 : 0.3), lineWidth: 1)
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                maxWidth: expand ? .infinity : nil,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
             )
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .contentShape(Rectangle())
+            .background(Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92))
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+            )
+            .clipShape(Theme.plateRect())
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }

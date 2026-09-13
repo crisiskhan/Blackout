@@ -13,12 +13,16 @@ public enum BlackoutTokens: Sendable {
         /// Overlay left-hand tab column on MAP.
         public static let hudSideReservePoints: Double = 72
         public static let mapChipHitPoints: Double = 44
-        /// Title-screen mark. Large enough to read as the product, not a chip.
+        /// Title-screen mark. Square compass, same as the App Icon. Not a chip.
         public static let bootLogoPoints: Double = 196
+        /// Overlay-page mark. Same compass, small enough to sit beside a title.
+        public static let hudMarkPoints: Double = 20
+        /// Selected-tab tick. The logo's center reticle, not a random underline.
+        public static let hudReticlePoints: Double = 10
         public static let bootActivateHeight: Double = 56
         /// Even a warm launch holds the logo long enough to land, then ACTIVATE.
         public static let bootMinSeconds: Double = 0.8
-        /// Overlay chips on the canvas (INST / LOCK). Fixed point size so an
+        /// Overlay chips on the canvas (INSTRUMENTS / LOCK-ON). Fixed point size so an
         /// xxxLarge body never squeezes a word into a tail-ellipsis.
         public static let mapActionChipTextPoints: Double = 11
         public static let mapActionChipGutterPoints: Double = 10
@@ -31,7 +35,9 @@ public enum BlackoutTokens: Sendable {
         /// The inspect card. It grows to its content and stops at half the
         /// screen, so the pin the thumb is holding is never behind it.
         public static let holdCardMaxHeightFraction: Double = 0.5
-        public static let holdCardCornerPoints: Double = 18
+        public static let holdCardCornerPoints: Double = 8
+        /// Machined HUD plates. Tighter than a system sheet.
+        public static let hudPlateCornerPoints: Double = 6
         /// The scrim is graded rather than flat. It has to read as "the map is
         /// not taking taps right now" everywhere, but half of the point of
         /// capping the card is that the pin stays visible, and a flat 55% wash
@@ -43,12 +49,23 @@ public enum BlackoutTokens: Sendable {
         /// Field and Mark. A third button turns a glance into a menu, and SOS
         /// is never one of them — it lives on Comms and nowhere else.
         public static let holdCardMaxActions: Int = 2
+        /// MAP chrome sleeps so the world can feel like it might disappear.
+        public static let chromeIdleSeconds: Double = 3.2
+        public static let chromeAsleepOpacity: Double = 0.08
+        public static let chromeSleepSeconds: Double = 1.15
+        public static let chromeWakeSeconds: Double = 0.55
+        /// Dest-chip heartbeat. easeInOut, never a spring.
+        public static let destChipBeatSeconds: Double = 1.05
+        /// Every control but the live one.
+        public static let chromeDimOpacity: Double = 0.28
 
-        public static func sosFAB(tab: Tab, lockOn _: Bool) -> Bool {
+        public static func sosFAB(tab: Tab, lockOn _: Bool, arranging: Bool = false) -> Bool {
             switch tab {
             case .comms:
                 return true
-            case .map, .field, .expedition:
+            case .map:
+                return arranging
+            case .field, .expedition:
                 return false
             }
         }
@@ -56,13 +73,26 @@ public enum BlackoutTokens: Sendable {
 
     public enum Color {
         public static let void = RGBA(r: 0, g: 0, b: 0, a: 1)
-        public static let raised = RGBA(r: 0.09, g: 0.10, b: 0.12, a: 1)
+        public static let raised = RGBA(r: 0.05, g: 0.05, b: 0.05, a: 1)
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silver = metal
-        public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
+        public static let silverEdge = silver
+        /// Facet highlight. Brighter than the mid silver, never white.
+        public static let metalHighlight = RGBA(r: 0.93, g: 0.94, b: 0.96, a: 1)
+        /// Facet recess. Darker than silver, still above void.
+        public static let metalShade = RGBA(r: 0.18, g: 0.19, b: 0.22, a: 1)
         public static let accent = RGBA(r: 225.0 / 255.0, g: 6.0 / 255.0, b: 0, a: 1)
         public static let sos = accent
-        public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
+        /// Honesty ink. Crisis (SOS / RED / OVERDUE) uses accent. No leftover orange.
+        public static let warn = silver
+        /// CONDITION YELLOW. Brass lamp, not iOS orange, not SOS. Honesty chrome stays silver.
+        public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
+        /// CONDITION ORANGE. Heat lamp, not iOS orange, not SOS, not caution brass.
+        public static let heat = RGBA(r: 0.93, g: 0.32, b: 0.04, a: 1)
+        /// Long-wavelength lamp. Multiply, not a wash: void stays void.
+        public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
+        /// Live GNSS lamp. COORDINATES chip. Not SOS, not caution brass.
+        public static let fix = RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)
     }
 
     /// Offline MAP ink. Dark red/silver on void so walking-zoom streets and names read.
@@ -70,6 +100,8 @@ public enum BlackoutTokens: Sendable {
         public static let voidHex = "#000000"
         public static let silverHex = "#B8BDC2"
         public static let accentHex = "#E10600"
+        public static let fixHex = "#2EE67A"
+        public static let heatHex = "#ED510A"
         public static let roadLabelMinZoom: Double = 12
         public static let roadLabelWalkingSize: Double = 19
         public static let roadLabelCloseWalkSize: Double = 22
@@ -87,8 +119,44 @@ public enum BlackoutTokens: Sendable {
         }
     }
 
+    /// HUD and voice distance. Graph, GNSS, and OSM stay in metres; the glass
+    /// prints feet under a mile and miles after that.
+    public enum Distance: Sendable {
+        public static let metersPerMile: Double = 1609.344
+        public static let feetPerMeter: Double = 3.280839895
+
+        public static func feet(_ meters: Double) -> Double {
+            (meters * feetPerMeter).rounded()
+        }
+
+        public static func hud(_ meters: Double) -> String {
+            if meters >= metersPerMile {
+                return String(format: "%.1f MI", meters / metersPerMile)
+            }
+            return String(format: "%.0f FT", feet(meters.rounded()))
+        }
+
+        public static func spoken(_ meters: Double) -> String {
+            if meters >= metersPerMile {
+                return String(format: "%.1f miles", meters / metersPerMile)
+            }
+            return String(format: "%.0f feet", feet(meters.rounded()))
+        }
+    }
+
     public enum Tab: String, CaseIterable, Sendable {
         case map, comms, field, expedition
+    }
+
+    /// Overlay chips on MAP. Whole words; the rail wraps rather than truncating.
+    public enum MapOverlay: Sendable {
+        public static let instrumentsTitle = "INSTRUMENTS"
+        public static let lockOnTitle = "LOCK-ON"
+        public static let lockedTitle = "LOCKED"
+
+        public static func lockTitle(locked: Bool) -> String {
+            locked ? lockedTitle : lockOnTitle
+        }
     }
 
     /// The four controls that live under the thumb on MAP. Walk and Drive

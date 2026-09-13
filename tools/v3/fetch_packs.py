@@ -22,7 +22,11 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-from . import graphbin, tiles
+from shapely.geometry import Polygon, mapping
+from shapely.ops import unary_union
+from shapely.validation import make_valid
+
+from . import graphbin, ground, search_index, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -61,6 +65,8 @@ RENDER_DP = 6
 # vertices it stops shipping.
 RENDER_EPS = 1e-5
 WALK_FORWARD, DRIVE_FORWARD, WALK_BACK, DRIVE_BACK = 1, 2, 4, 8
+CLASS_FLAG_SHIFT = 4
+CLASS_FLAG_MASK = 0x0F
 
 KEEP_TAGS = {
     "name",
@@ -99,24 +105,29 @@ OSM_CREDIT = "© OpenStreetMap contributors"
 VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
+WATER_INK = "#6E747A"
+WATER_FILL = "#243844"
+WATER_EPHEMERAL = "#54595E"
 TRACK_HIGHWAYS = ["track", "path", "footway", "bridleway", "cycleway", "steps"]
-# Ground cover ink. All of it is within a few points of black on purpose: the
-# job is to tell desert from bosque at a glance without ever competing with a
-# silver street or a red route. Anything the tiler classes and this does not
-# name falls through to the default and draws as plain ground.
+# Ground cover ink. Near black so silver streets and a red route still own the
+# walk, but far enough apart that desert (warm), playa (cool), and bosque
+# (deep green) read as different empty at a glance. Anything the tiler classes
+# and this does not name falls through to the default and draws as plain ground.
+# Values are the raw ink; the layer is only ~0.18 at walking zoom, so chroma
+# has to be loud in the source colour or every class collapses to the same void.
 LAND_INK = [
     "match",
     ["get", "class"],
-    "desert", "#17120c",
-    "playa", "#1a1a1e",
-    "mountain", "#121417",
-    "bosque", "#0b1410",
-    "woodland", "#0a120d",
-    "farm", "#0e1410",
-    "town", "#141417",
-    "park", "#0a140a",
-    "protected", "#0c1310",
-    "#101010",
+    "desert", "#4A2410",
+    "playa", "#243048",
+    "mountain", "#182030",
+    "bosque", "#042818",
+    "woodland", "#0E3018",
+    "farm", "#28280C",
+    "town", "#282830",
+    "park", "#14301C",
+    "protected", "#102820",
+    "#141414",
 ]
 MAJOR_HIGHWAYS = [
     "motorway",
@@ -302,7 +313,7 @@ def slim_tags(tags: dict) -> dict:
 
 
 RESOURCE_TAGS = {
-    "natural": "^(spring|scrub|sand|dune|bare_rock|scree|wetland|heath|grassland|sinkhole)$",
+    "natural": "^(spring|scrub|sand|dune|bare_rock|scree|wetland|heath|grassland|sinkhole|cave|cave_entrance|tree)$",
     "man_made": "^(water_well|water_tank|storage_tank|cistern|reservoir_covered)$",
     "landuse": "^(farmland|orchard|meadow|vineyard|basin|salt_pond|greenhouse_horticulture|residential)$",
 }
@@ -335,6 +346,97 @@ out skel qt;
     return _overpass(q, f"res:{box}")
 
 
+# Phrase match, not a dump of every protected forest. Must stay in step with
+# `Inspect.isWildlifeRange` / `ground.WILDLIFE_RANGE_PHRASES`. Lincoln National
+# Forest does not match. Wildlife Drive is a street and is not a relation
+# with these phrases.
+NOTABLE_WILDLIFE_NAME = (
+    "wildlife refuge|wildlife management area|national wildlife|"
+    "wildlife sanctuary|wildlife conservation area|game commission|"
+    "wilderness preserve|nature preserve|nature center|natural area|"
+    "nature area|wildlife preserve|habitat preserve|national preserve|"
+    "wilderness park|audubon|flora y fauna|"
+    "canyonlands preserve|wetland preserve|"
+    "canyon preserve|management unit|ecological research|"
+    "hawk watch|experimental range|natural history|"
+    "baker sanctuary|blair woods sanctuary|beck preserve|"
+    "brodie wild"
+)
+
+# Phrase match, not a dump of every backyard garden. Must stay in step with
+# `Inspect.isBotanicGarden` / `ground.BOTANIC_GARDEN_PHRASES`. Wildflower
+# Park is not a match. Memorial Garden is not a match. Unnamed garden
+# plots stay out. Ladybird Johnson Wildflower Center is a garden
+# relation; Zilker and Santa Fe are botanical gardens. Do not fake a ring
+# from paths. El Paso's Japanese garden is OSM-spelled Japaneese.
+# Capitol flower gardens are the Texas Capitol beds, not Mayfield.
+# Japanese Memorial Garden is not Memorial Garden. Demonstration
+# gardens are worked plant ground. Preston Foster is a native
+# garden; `native garden` would steal a nested Santa Fe bed.
+# Xeriscape Garden is not Xeriscape Park. Teaching gardens are
+# worked plant ground. Fincher III is a community garden without
+# the amenity tag. Brazos Bluff and Explorers Garden are
+# educational gardens, not Brazos Street. Haozous Garden is not
+# Haozous Road. Este Garden is not Celeste Drive. Alamo Community
+# Garden is a separate sheet. 4th Street Garden is not West 4th
+# Avenue. Winrock Garden is a mall bed and
+# stays out. Experimental Gardens overlap glasshouses and stay
+# out. Not a meal.
+NOTABLE_BOTANIC_NAME = (
+    "botanic garden|botanical garden|conservatory|cactus garden|"
+    "desert garden|rose garden|community garden|wildflower preserve|"
+    "wildflower center|lush n lean|orchard garden|harvey cornell|"
+    "japaneese garden|japanese garden|capitol flower|japanese memorial|"
+    "demonstration garden|preston foster|xeriscape garden|"
+    "teaching garden|fincher iii garden|brazos bluff|"
+    "explorers garden|haozous garden|este garden|"
+    "4th street garden"
+)
+
+
+def overpass_notable(south: float, west: float, north: float, east: float) -> dict:
+    """Named nature-reserve polygons, cave mouths, named trees, botanic gardens.
+
+    The tiled street query never asked for relations, and `osm_to_geojson`
+    used to drop them even when Overpass returned them. This is a separate
+    pass so a huge reserve does not ride the 0.12° street tiles. It does not
+    ask for every `boundary=protected_area` forest — Lincoln National Forest
+    is not a picnic dump. A wildlife-named protected-area relation is range,
+    not timber. Cave *areas* come in as ways so the tiler can put a mouth
+    on the place slice. Named botanic gardens tagged `leisure=garden` are
+    worked plant ground the street pass never asked for; unnamed garden
+    plots stay out. Size is not a reason to skip a record the Hold
+    can name. Animals are range, never a GPS pin. Nothing here is a meal.
+    """
+    box = f"{south},{west},{north},{east}"
+    q = f"""
+[out:json][timeout:300];
+(
+  relation["leisure"="nature_reserve"]({box});
+  way["leisure"="nature_reserve"]({box});
+  relation["boundary"="protected_area"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
+  way["leisure"="park"]["name"~"{NOTABLE_WILDLIFE_NAME}",i]({box});
+  way["leisure"="garden"]["name"~"{NOTABLE_BOTANIC_NAME}",i]({box});
+  relation["leisure"="garden"]["name"~"{NOTABLE_BOTANIC_NAME}",i]({box});
+  way["amenity"="community_garden"]["name"]({box});
+  relation["amenity"="community_garden"]["name"]({box});
+  node["natural"="cave"]({box});
+  node["natural"="cave_entrance"]({box});
+  node["natural"="sinkhole"]({box});
+  way["natural"="cave"]({box});
+  way["natural"="cave_entrance"]({box});
+  way["natural"="sinkhole"]({box});
+  relation["natural"="cave"]({box});
+  node["natural"="tree"]["name"]({box});
+  way["natural"="tree"]["name"]({box});
+);
+out body;
+>;
+out skel qt;
+"""
+    return _overpass(q, f"notable:{box}", timeout=330)
+
+
 def overpass_bbox(south: float, west: float, north: float, east: float) -> dict:
     q = f"""
 [out:json][timeout:180];
@@ -349,6 +451,9 @@ def overpass_bbox(south: float, west: float, north: float, east: float) -> dict:
   node["amenity"~"hospital|clinic|doctors|pharmacy|police|fire_station|drinking_water|shelter"]({south},{west},{north},{east});
   node["emergency"="assembly_point"]({south},{west},{north},{east});
   node["natural"="peak"]({south},{west},{north},{east});
+  node["natural"="cave"]({south},{west},{north},{east});
+  node["natural"="cave_entrance"]({south},{west},{north},{east});
+  node["natural"="tree"]({south},{west},{north},{east});
   node["place"~"city|town|village|hamlet|suburb|neighbourhood|quarter"]({south},{west},{north},{east});
 );
 out body;
@@ -358,7 +463,7 @@ out skel qt;
     return _overpass(q, f"{south},{west},{north},{east}")
 
 
-def _overpass(q: str, cache_key: str) -> dict:
+def _overpass(q: str, cache_key: str, timeout: int = 210) -> dict:
     body = urllib.parse.urlencode({"data": q}).encode()
     # A pack is well over a hundred tiles now, so one refused slot must not
     # throw away the tiles already paid for. Cache each answer on disk and back
@@ -378,7 +483,7 @@ def _overpass(q: str, cache_key: str) -> dict:
     for attempt in range(OVERPASS_TRIES):
         for url in OVERPASS_ENDPOINTS:
             try:
-                out = _http_json(url, data=body, timeout=210)
+                out = _http_json(url, data=body, timeout=timeout)
                 OVERPASS_CACHE.mkdir(parents=True, exist_ok=True)
                 cached.write_text(json.dumps(out, separators=(",", ":")))
                 return out
@@ -408,6 +513,7 @@ def tile_bbox(bb: dict, max_span: float = 0.12) -> list[dict]:
 def merge_osm(parts: list[dict]) -> dict:
     seen_n: set[int] = set()
     seen_w: set[int] = set()
+    seen_r: set[int] = set()
     elements: list[dict] = []
     for osm in parts:
         for el in osm.get("elements") or []:
@@ -421,6 +527,10 @@ def merge_osm(parts: list[dict]) -> dict:
                 if eid in seen_w:
                     continue
                 seen_w.add(eid)
+            elif kind == "relation":
+                if eid in seen_r:
+                    continue
+                seen_r.add(eid)
             elements.append(el)
     return {"elements": elements}
 
@@ -461,6 +571,143 @@ def simplify(coords: list[list[float]], eps: float) -> list[list[float]]:
     return [c for c, k in zip(coords, keep) if k]
 
 
+def _way_chain(
+    el: dict, nodes: dict[int, tuple[float, float]]
+) -> list[tuple[float, float]] | None:
+    nids = el.get("nodes") or []
+    if nids:
+        coords = [nodes[n] for n in nids if n in nodes]
+        if len(coords) >= 2:
+            return coords
+    geom = el.get("geometry") or []
+    if len(geom) < 2:
+        return None
+    out = [
+        (round(p["lon"], RENDER_DP), round(p["lat"], RENDER_DP))
+        for p in geom
+        if "lon" in p and "lat" in p
+    ]
+    return out if len(out) >= 2 else None
+
+
+def _join_rings(chains: list[list[tuple[float, float]]]) -> list[list[list[float]]]:
+    """Join member ways that share endpoints into closed rings.
+
+    OSM multipolygons are often several open ways, not one closed way. Treating
+    each way as its own polygon dropped Franklin Mountains State Park.
+    Incomplete rings are skipped rather than closed across the pack.
+    """
+    remaining = [list(chain) for chain in chains if len(chain) >= 2]
+    rings: list[list[list[float]]] = []
+    while remaining:
+        ring = remaining.pop(0)
+        progressed = True
+        while progressed:
+            progressed = False
+            if len(ring) >= 4 and ring[0] == ring[-1]:
+                break
+            for i, other in enumerate(remaining):
+                if ring[-1] == other[0]:
+                    ring.extend(other[1:])
+                elif ring[-1] == other[-1]:
+                    ring.extend(reversed(other[:-1]))
+                elif ring[0] == other[-1]:
+                    ring = other[:-1] + ring
+                elif ring[0] == other[0]:
+                    ring = list(reversed(other[1:])) + ring
+                else:
+                    continue
+                remaining.pop(i)
+                progressed = True
+                break
+        if len(ring) < 4 or ring[0] != ring[-1]:
+            continue
+        closed = [list(pt) for pt in ring]
+        simplified = simplify(closed, RENDER_EPS)
+        if not simplified:
+            continue
+        if simplified[0] != simplified[-1]:
+            simplified.append(simplified[0])
+        if len(simplified) >= 4:
+            rings.append(simplified)
+    return rings
+
+
+def relation_geometry(
+    el: dict, nodes: dict[int, tuple[float, float]], ways: dict[int, dict]
+) -> dict | None:
+    """Assemble a relation into Polygon / MultiPolygon from member ways.
+
+    Overpass ``out body; >; out skel qt`` inlines member ways and nodes.
+    Size is not a reason to skip a named nature reserve.
+    """
+    outers: list[list[tuple[float, float]]] = []
+    inners: list[list[tuple[float, float]]] = []
+    for mem in el.get("members") or []:
+        if mem.get("type") != "way":
+            continue
+        way = ways.get(mem.get("ref"))
+        if not way:
+            continue
+        chain = _way_chain(way, nodes)
+        if not chain:
+            continue
+        role = mem.get("role") or "outer"
+        if role == "inner":
+            inners.append(chain)
+        else:
+            outers.append(chain)
+    outer_rings = _join_rings(outers)
+    inner_rings = _join_rings(inners)
+    if not outer_rings:
+        return None
+    inner_polys: list[tuple[list[list[float]], object]] = []
+    for inner in inner_rings:
+        try:
+            hole = make_valid(Polygon(inner))
+        except (ValueError, TypeError):
+            continue
+        if hole.is_empty:
+            continue
+        inner_polys.append((inner, hole))
+    polys: list = []
+    for outer in outer_rings:
+        try:
+            poly = make_valid(Polygon(outer))
+        except (ValueError, TypeError):
+            continue
+        if poly.is_empty:
+            continue
+        holes = []
+        for inner, hole in inner_polys:
+            try:
+                if poly.contains(hole.representative_point()):
+                    holes.append(inner)
+            except (ValueError, TypeError):
+                continue
+        try:
+            poly = make_valid(Polygon(outer, holes))
+        except (ValueError, TypeError):
+            continue
+        if not poly.is_empty:
+            polys.append(poly)
+    if not polys:
+        return None
+    geom = unary_union(polys)
+    if geom.is_empty:
+        return None
+    if geom.geom_type == "GeometryCollection":
+        geom = unary_union(
+            [g for g in geom.geoms if g.geom_type in ("Polygon", "MultiPolygon")]
+        )
+        if geom.is_empty:
+            return None
+    mapped = mapping(geom)
+    if mapped.get("type") not in ("Polygon", "MultiPolygon"):
+        return None
+    return mapped
+
+
 def osm_to_geojson(osm: dict) -> dict:
     """OSM elements to the GeoJSON the canvas draws.
 
@@ -468,11 +715,18 @@ def osm_to_geojson(osm: dict) -> dict:
     can put on a phone — instead of Overpass's 7. The OSM element id and the
     old constant `kind` property are dropped: no style layer filters on them
     and no Swift reads them, so they were 2 MB of dead weight per pack.
+    Relations are assembled from member ways: a nature reserve mapped as a
+    multipolygon is a polygon here, not silence.
     """
     nodes = {
         el["id"]: (round(el["lon"], RENDER_DP), round(el["lat"], RENDER_DP))
         for el in osm.get("elements", [])
         if el.get("type") == "node" and "lat" in el
+    }
+    ways = {
+        el["id"]: el
+        for el in osm.get("elements", [])
+        if el.get("type") == "way"
     }
     features = []
     for el in osm.get("elements", []):
@@ -487,6 +741,13 @@ def osm_to_geojson(osm: dict) -> dict:
                     "geometry": {"type": "Point", "coordinates": list(nodes[el["id"]])},
                 }
             )
+        elif el.get("type") == "relation":
+            if not tags:
+                continue
+            geom = relation_geometry(el, nodes, ways)
+            if not geom:
+                continue
+            features.append({"type": "Feature", "properties": tags, "geometry": geom})
         elif el.get("type") == "way" and el.get("nodes"):
             if not tags:
                 continue
@@ -502,20 +763,27 @@ def osm_to_geojson(osm: dict) -> dict:
     return {"type": "FeatureCollection", "features": features, "attribution": OSM_CREDIT}
 
 
+def _clip_anchor(geom: dict) -> tuple[float, float] | None:
+    coords = geom.get("coordinates")
+    kind = geom.get("type")
+    if kind == "Point" and isinstance(coords, list) and len(coords) >= 2:
+        return (coords[1], coords[0])
+    if kind == "LineString" and coords:
+        lon, lat = coords[0]
+        return (lat, lon)
+    if kind == "Polygon" and coords and coords[0]:
+        lon, lat = coords[0][0]
+        return (lat, lon)
+    if kind == "MultiPolygon" and coords and coords[0] and coords[0][0]:
+        lon, lat = coords[0][0][0]
+        return (lat, lon)
+    return None
+
+
 def clip_features(fc: dict, sl: dict) -> dict:
     feats = []
     for f in fc.get("features") or []:
-        g = f.get("geometry") or {}
-        coords = g.get("coordinates")
-        pt = None
-        if g.get("type") == "Point" and isinstance(coords, list) and len(coords) >= 2:
-            pt = (coords[1], coords[0])
-        elif g.get("type") == "LineString" and coords:
-            lon, lat = coords[0]
-            pt = (lat, lon)
-        elif g.get("type") == "Polygon" and coords and coords[0]:
-            lon, lat = coords[0][0]
-            pt = (lat, lon)
+        pt = _clip_anchor(f.get("geometry") or {})
         if pt is None:
             continue
         lat, lon = pt
@@ -568,6 +836,47 @@ def way_directions(tags: dict) -> tuple[bool, bool, bool, bool]:
     drive_fwd, drive_back = sides(ow)
     walk_fwd, walk_back = sides(tags.get("oneway:foot"))
     return walk_fwd, walk_back, drive_fwd, drive_back
+
+
+def highway_class(highway: str | None) -> int:
+    """Rank a way for drive time. 0 is unknown; 1 is motorway; 7 is the slowest local street.
+
+    Walk still costs metres. Drive uses this rank as speed so an arterial beats a
+    residential maze of the same length. Unknown stays distance-only, which is how
+    already-shipped graphs behave until they are classed.
+    """
+    if not highway:
+        return 0
+    if highway in {"motorway", "motorway_link"}:
+        return 1
+    if highway in {"trunk", "trunk_link"}:
+        return 2
+    if highway in {"primary", "primary_link"}:
+        return 3
+    if highway in {"secondary", "secondary_link"}:
+        return 4
+    if highway in {"tertiary", "tertiary_link"}:
+        return 5
+    if highway in {"residential", "unclassified"}:
+        return 6
+    if highway in {"living_street", "service", "track"}:
+        return 7
+    return 0
+
+
+def merge_class(a: int, b: int) -> int:
+    """Keep the slower known class so a compacted chain never pretends to be a motorway."""
+    if a == 0:
+        return b
+    if b == 0:
+        return a
+    return max(a, b)
+
+
+def merge_segment_flags(old: int, new: int) -> int:
+    perm = (old | new) & 0x0F
+    cls = merge_class((old >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK, (new >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK)
+    return perm | (cls << CLASS_FLAG_SHIFT)
 
 
 def build_graph(osm: dict) -> dict:
@@ -637,7 +946,14 @@ def build_graph(osm: dict) -> dict:
                 if not walk and not drive:
                     continue
                 edges.append(
-                    {"a": x, "b": y, "m": round(dist, 2), "walk": walk, "drive": drive}
+                    {
+                        "a": x,
+                        "b": y,
+                        "m": round(dist, 2),
+                        "walk": walk,
+                        "drive": drive,
+                        "cls": highway_class(highway),
+                    }
                 )
                 used.add(x)
                 used.add(y)
@@ -658,22 +974,24 @@ def build_graph(osm: dict) -> dict:
 def compact_graph(g: dict) -> dict:
     """Collapse degree-2 chains so the graph still matches streets without 80MB JSON."""
     nodes = {int(k): v for k, v in (g.get("nodes") or {}).items()}
-    fwd: dict[int, list[tuple[int, float, bool, bool]]] = defaultdict(list)
+    fwd: dict[int, list[tuple[int, float, bool, bool, int]]] = defaultdict(list)
     for e in g.get("edges") or []:
-        fwd[int(e["a"])].append((int(e["b"]), float(e["m"]), bool(e["walk"]), bool(e["drive"])))
+        fwd[int(e["a"])].append(
+            (int(e["b"]), float(e["m"]), bool(e["walk"]), bool(e["drive"]), int(e.get("cls") or 0))
+        )
 
     rev: dict[int, set[int]] = defaultdict(set)
     for a, lst in fwd.items():
-        for b, _, _, _ in lst:
+        for b, _, _, _, _ in lst:
             rev[b].add(a)
 
     def neigh(nid: int) -> set[int]:
-        return {b for b, _, _, _ in fwd.get(nid, [])} | set(rev.get(nid, ()))
+        return {b for b, _, _, _, _ in fwd.get(nid, [])} | set(rev.get(nid, ()))
 
-    def edge_between(a: int, b: int) -> tuple[float, bool, bool] | None:
-        for dest, m, w, d in fwd.get(a, []):
+    def edge_between(a: int, b: int) -> tuple[float, bool, bool, int] | None:
+        for dest, m, w, d, cls in fwd.get(a, []):
             if dest == b:
-                return (m, w, d)
+                return (m, w, d, cls)
         return None
 
     def unlink(a: int, b: int) -> None:
@@ -683,9 +1001,9 @@ def compact_graph(g: dict) -> dict:
         if not fwd[a]:
             fwd.pop(a, None)
 
-    def link(a: int, b: int, m: float, w: bool, d: bool) -> None:
+    def link(a: int, b: int, m: float, w: bool, d: bool, cls: int) -> None:
         unlink(a, b)
-        fwd[a].append((b, round(m, 2), w, d))
+        fwd[a].append((b, round(m, 2), w, d, cls))
         rev[b].add(a)
 
     # iterate a snapshot of deg-2 nodes
@@ -700,9 +1018,9 @@ def compact_graph(g: dict) -> dict:
         vu = edge_between(v, nid)
         nu = edge_between(nid, u)
         if uv and nv:
-            link(u, v, uv[0] + nv[0], uv[1] and nv[1], uv[2] and nv[2])
+            link(u, v, uv[0] + nv[0], uv[1] and nv[1], uv[2] and nv[2], merge_class(uv[3], nv[3]))
         if vu and nu:
-            link(v, u, vu[0] + nu[0], vu[1] and nu[1], vu[2] and nu[2])
+            link(v, u, vu[0] + nu[0], vu[1] and nu[1], vu[2] and nu[2], merge_class(vu[3], nu[3]))
         unlink(u, nid)
         unlink(nid, u)
         unlink(v, nid)
@@ -714,10 +1032,10 @@ def compact_graph(g: dict) -> dict:
     edges = []
     used = set()
     for a, lst in fwd.items():
-        for b, m, w, d in lst:
+        for b, m, w, d, cls in lst:
             if a not in nodes or b not in nodes:
                 continue
-            edges.append({"a": a, "b": b, "m": round(m, 2), "walk": w, "drive": d})
+            edges.append({"a": a, "b": b, "m": round(m, 2), "walk": w, "drive": d, "cls": cls})
             used.add(a)
             used.add(b)
     slim = {str(k): nodes[k] for k in used if k in nodes}
@@ -778,7 +1096,10 @@ def pack_graph(g: dict) -> dict:
             flags |= WALK_BACK if backward else WALK_FORWARD
         if e.get("drive"):
             flags |= DRIVE_BACK if backward else DRIVE_FORWARD
-        segments[key] = segments.get(key, 0) | flags
+        cls = int(e.get("cls") or 0) & CLASS_FLAG_MASK
+        if cls:
+            flags |= cls << CLASS_FLAG_SHIFT
+        segments[key] = merge_segment_flags(segments.get(key, 0), flags)
 
     flat: list[float] = []
     for (a, b, metres), flags in segments.items():
@@ -807,9 +1128,27 @@ def unpack_graph(g: dict) -> dict:
         if str(a) not in nodes or str(b) not in nodes:
             continue
         if flags & (WALK_FORWARD | DRIVE_FORWARD):
-            edges.append({"a": a, "b": b, "m": metres, "walk": bool(flags & WALK_FORWARD), "drive": bool(flags & DRIVE_FORWARD)})
+            edges.append(
+                {
+                    "a": a,
+                    "b": b,
+                    "m": metres,
+                    "walk": bool(flags & WALK_FORWARD),
+                    "drive": bool(flags & DRIVE_FORWARD),
+                    "cls": (flags >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK,
+                }
+            )
         if flags & (WALK_BACK | DRIVE_BACK):
-            edges.append({"a": b, "b": a, "m": metres, "walk": bool(flags & WALK_BACK), "drive": bool(flags & DRIVE_BACK)})
+            edges.append(
+                {
+                    "a": b,
+                    "b": a,
+                    "m": metres,
+                    "walk": bool(flags & WALK_BACK),
+                    "drive": bool(flags & DRIVE_BACK),
+                    "cls": (flags >> CLASS_FLAG_SHIFT) & CLASS_FLAG_MASK,
+                }
+            )
     return {
         "engine": g.get("engine"),
         "valhallaCosting": g.get("valhallaCosting"),
@@ -847,6 +1186,67 @@ def read_graph(path: Path) -> dict:
         }
         return {"engine": "osm-graph", "valhallaCosting": None, "nodes": nodes, "edges": graphbin.edges(g)}
     return unpack_graph(json.loads(path.read_text()))
+
+
+def classify_graph(graph: dict, fc: dict, cell: float = 0.01) -> dict:
+    """Stamp highway class onto already-compacted edges from the packed extract.
+
+    The phone graph is collapsed chains, not OSM ways, so a class is the nearest
+    highway to the edge midpoint. Slow enough to be honest when a chain mixes
+    classes, never a fake motorway through a neighbourhood.
+    """
+    buckets: dict[tuple[int, int], list[tuple[float, float, int]]] = defaultdict(list)
+    for feat in fc.get("features") or []:
+        props = feat.get("properties") or {}
+        cls = highway_class(props.get("highway"))
+        if not cls:
+            continue
+        geom = feat.get("geometry") or {}
+        if geom.get("type") != "LineString":
+            continue
+        coords = geom.get("coordinates") or []
+        for (lon1, lat1), (lon2, lat2) in zip(coords, coords[1:]):
+            mlat = (lat1 + lat2) / 2
+            mlon = (lon1 + lon2) / 2
+            buckets[(int(mlat / cell), int(mlon / cell))].append((mlat, mlon, cls))
+
+    nodes = graph.get("nodes") or {}
+    reach = (0.0004) ** 2
+    for e in graph.get("edges") or []:
+        na = nodes.get(str(e["a"]))
+        nb = nodes.get(str(e["b"]))
+        if not na or not nb:
+            e["cls"] = int(e.get("cls") or 0)
+            continue
+        mlat = (float(na["lat"]) + float(nb["lat"])) / 2
+        mlon = (float(na["lon"]) + float(nb["lon"])) / 2
+        cy, cx = int(mlat / cell), int(mlon / cell)
+        best: tuple[float, int] | None = None
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for lat, lon, cls in buckets.get((cy + dy, cx + dx), ()):
+                    d = (mlat - lat) ** 2 + (mlon - lon) ** 2
+                    if best is None or d < best[0]:
+                        best = (d, cls)
+        e["cls"] = best[1] if best and best[0] <= reach else int(e.get("cls") or 0)
+    return graph
+
+
+def stamp_road_class(dest: Path) -> None:
+    """Rewrite graph.bin mode bytes with highway class. Topology stays put."""
+    graph_path = dest / "graph.bin"
+    osm_path = dest / "osm.geojson"
+    graph = read_graph(graph_path)
+    fc = json.loads(osm_path.read_text())
+    classify_graph(graph, fc)
+    write_graph_binary(graph_path, graph)
+    drive = [e for e in graph["edges"] if e.get("drive")]
+    classified = [e for e in drive if e.get("cls")]
+    share = (len(classified) / len(drive)) if drive else 0.0
+    print(
+        f"  class {dest.name} drive={len(drive)} classed={len(classified)} ({share:.1%})",
+        flush=True,
+    )
 
 
 def elevation_grid(south: float, west: float, north: float, east: float, step: float = 0.01) -> dict:
@@ -1069,6 +1469,29 @@ def shipped_files(dest: Path) -> list[Path]:
     return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
 
 
+def write_manifest(dest: Path, manifest: dict | None = None) -> dict:
+    """Recount shipped files and bytes after a derived layer is added.
+
+    Used when glasshouses or water marks land on disk without recutting tiles.
+    The phone's copy step ships whatever the manifest lists, so the list and
+    the byte count have to agree with what is actually there. The manifest is
+    itself a shipped file, so the count is written, measured, and written
+    again if listing the new file changed the manifest's own size.
+    """
+    if manifest is None:
+        manifest = json.loads((dest / "manifest.json").read_text())
+    files = shipped_files(dest)
+    manifest["files"] = sorted(str(p.relative_to(dest)) for p in files)
+    write_json(dest / "manifest.json", manifest)
+    for _ in range(3):
+        actual = sum(p.stat().st_size for p in shipped_files(dest))
+        if manifest.get("bytes") == actual:
+            return manifest
+        manifest["bytes"] = actual
+        write_json(dest / "manifest.json", manifest)
+    return manifest
+
+
 def build_tiles(dest: Path, pack: dict) -> dict:
     """Cut the pack's streets into the vector tiles the canvas reads."""
     info = tiles.build(dest, union_bbox(pack["slices"]), pack["name"])
@@ -1108,10 +1531,10 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "type": "raster",
                 "source": "hillshade",
                 "paint": {
-                    "raster-opacity": 0.16,
+                    "raster-opacity": 0.20,
                     "raster-saturation": -0.65,
                     "raster-brightness-max": 0.38,
-                    "raster-contrast": 0.12,
+                    "raster-contrast": 0.16,
                 },
             }
         )
@@ -1120,34 +1543,45 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         [
             {
                 # What kind of empty the empty ground is. Loudest zoomed out,
-                # where there is nothing else to look at, and almost gone by
-                # the zoom you walk at, where the streets do the talking.
+                # where there is nothing else to look at. Quiet by walking
+                # zoom so silver streets still own the walk, not gone — desert
+                # has to stay warm and bosque cool at the zoom the canvas opens.
                 "id": "land-fill",
                 "type": "fill",
                 "source": "osm",
                 "paint": {
                     "fill-color": LAND_INK,
-                    "fill-opacity": zoom_stops(6, 0.62, 11, 0.46, 13, 0.22, 14, 0.12),
+                    "fill-opacity": zoom_stops(6, 0.70, 11, 0.52, 13, 0.30, 15, 0.18),
                 },
             },
             {
                 "id": "public-land-fill",
                 "type": "fill",
                 "source": "public-land",
-                "paint": {"fill-color": "#0a140a", "fill-opacity": 0.34},
+                "paint": {"fill-color": "#0C1810", "fill-opacity": 0.12},
+            },
+            {
+                "id": "public-land-line",
+                "type": "line",
+                "source": "public-land",
+                "paint": {
+                    "line-color": "#2A3A28",
+                    "line-width": 1.2,
+                    "line-opacity": 0.55,
+                },
             },
             {
                 "id": "flood-fill",
                 "type": "fill",
                 "source": "flood",
-                "paint": {"fill-color": "#0a1822", "fill-opacity": 0.34},
+                "paint": {"fill-color": "#0A2030", "fill-opacity": 0.22},
             },
             {
                 "id": "water-fill",
                 "type": "fill",
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["body", "reservoir"]]],
-                "paint": {"fill-color": "#142430", "fill-opacity": 0.82},
+                "paint": {"fill-color": WATER_FILL, "fill-opacity": 0.82},
             },
             {
                 # Rivers and canals: the shape of the country, drawn from the
@@ -1157,8 +1591,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["river", "canal", "creek", "acequia", "dam"]]],
                 "paint": {
-                    "line-color": "#3d6478",
-                    "line-width": zoom_stops(10, 0.8, 15, 2.6),
+                    "line-color": WATER_INK,
+                    "line-width": zoom_stops(10, 0.8, 15, 3.2),
                 },
             },
             {
@@ -1170,8 +1604,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "filter": ["in", ["get", "class"], ["literal", ["wash", "drain", "channel"]]],
                 "paint": {
-                    "line-color": "#2f4a59",
-                    "line-width": zoom_stops(12, 0.7, 15, 2.0),
+                    "line-color": WATER_EPHEMERAL,
+                    "line-width": zoom_stops(12, 0.7, 15, 2.4),
                     "line-dasharray": [2.5, 2.0],
                 },
             },
@@ -1190,12 +1624,12 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
                 ],
                 "paint": {
-                    "circle-color": "#142430",
+                    "circle-color": WATER_INK,
                     "circle-radius": zoom_stops(12, 2.2, 15, 5.0),
                     "circle-stroke-color": [
                         "match", ["get", "class"],
                         "tank_other", "#5a5f66",
-                        "#6f97a8",
+                        SILVER_INK,
                     ],
                     "circle-stroke-width": 1.4,
                 },
@@ -1215,7 +1649,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     ["literal", ["spring", "well", "tank", "tank_other", "tap"]],
                 ],
                 "paint": {
-                    "circle-color": "#142430",
+                    "circle-color": WATER_FILL,
                     # Zero opacity is treated as not drawn, so visibleFeatures
                     # skips it. One percent is enough for the query and not
                     # enough for a thumb to see a second ring.
@@ -1228,7 +1662,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "id": "contours",
                 "type": "line",
                 "source": "contours",
-                "paint": {"line-color": "#2a2e28", "line-width": 0.45, "line-opacity": 0.4},
+                "paint": {"line-color": "#3C4438", "line-width": 0.7, "line-opacity": 0.55},
             },
             {
                 "id": "roads-casing",
@@ -1282,6 +1716,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "osm",
                 "minzoom": 12,
                 "filter": highway_in(TRACK_HIGHWAYS),
+                "layout": {"line-cap": "round", "line-join": "round"},
                 "paint": {
                     "line-color": SILVER_INK,
                     "line-opacity": 0.72,
@@ -1336,7 +1771,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "text-keep-upright": True,
                 },
                 "paint": {
-                    "text-color": "#7fa6b8",
+                    "text-color": "#8A9AA4",
                     "text-halo-color": VOID_INK,
                     "text-halo-width": 2.0,
                     "text-halo-blur": 0.15,
@@ -1396,8 +1831,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                     "symbol-sort-key": 0,
                 },
                 "paint": {
-                    "text-color": ACCENT_INK,
-                    "text-halo-color": SILVER_INK,
+                    "text-color": SILVER_INK,
+                    "text-halo-color": VOID_INK,
                     "text-halo-width": 2.0,
                     "text-halo-blur": 0.05,
                 },
@@ -1651,6 +2086,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         dest / "layers" / "hazards.geojson",
         {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT},
     )
+    ground.build(dest)
 
     hillshade_meta: dict = {"present": False, "reason": "not requested"}
     if walkable:
@@ -1676,38 +2112,37 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
+    search_index.write_search(dest, fc)
 
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
         else f"3DEP omitted ({hillshade_meta.get('reason')}); contours from build-time Open-Meteo DEM (real elevations, not fake)."
     )
-    manifest = {
-        "id": pack["id"],
-        "name": pack["name"],
-        "state": pack["state"],
-        "kind": "osm-contour-extract",
-        "engine": "maplibre",
-        "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
-        "walkable": walkable,
-        "bbox": bb,
-        "slices": slice_summaries,
-        "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
-        "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
-        "home": home_point(pack["slices"], bb),
-        "osmFetched": osm_fetched(dest),
-        "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
-        "terrain": hillshade_meta,
-        "stats": stats,
-    }
-    write_json(dest / "manifest.json", manifest)
+    manifest = write_manifest(
+        dest,
+        {
+            "id": pack["id"],
+            "name": pack["name"],
+            "state": pack["state"],
+            "kind": "osm-contour-extract",
+            "engine": "maplibre",
+            "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
+            "walkable": walkable,
+            "bbox": bb,
+            "slices": slice_summaries,
+            "banners": pack["banners"],
+            "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+            "home": home_point(pack["slices"], bb),
+            "osmFetched": osm_fetched(dest),
+            "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
+            "terrain": hillshade_meta,
+            "stats": stats,
+        },
+    )
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,
@@ -1767,6 +2202,48 @@ def grow_resources(dest: Path, pack: dict, span: float = 0.5) -> dict:
     return {"before": before, "added": len(added), "after": len(fc["features"])}
 
 
+def grow_notable(dest: Path, pack: dict, span: float = 5.0) -> dict:
+    """Add named nature-reserve relations, cave mouths, named trees, botanic gardens.
+
+    Additive. Streets and the router graph stay where they are. Relations
+    that the tiled street pass never asked for land here, assembled into
+    polygons so a hold can name Franklin Mountains State Park instead of
+    picnic woodland, or Ladybird Johnson Wildflower Center instead of open
+    ground. Size is not a reason to skip a record.
+    """
+    fc = json.loads((dest / "osm.geojson").read_text())
+    before = len(fc["features"])
+    have = {feature_key(f) for f in fc["features"]}
+
+    bb = union_bbox(pack["slices"])
+    tiles = tile_bbox(bb, max_span=span)
+    print(f"  notable {pack['id']} tiles={len(tiles)}", flush=True)
+    parts = []
+    for i, tile in enumerate(tiles, 1):
+        print(f"  tile {i}/{len(tiles)} {tile}", flush=True)
+        parts.append(
+            overpass_notable(tile["south"], tile["west"], tile["north"], tile["east"])
+        )
+        time.sleep(1.0)
+
+    grown = osm_to_geojson(merge_osm(parts))
+    added = []
+    for f in grown["features"]:
+        key = feature_key(f)
+        if key in have:
+            continue
+        have.add(key)
+        added.append(f)
+    fc["features"].extend(added)
+    stamp_fetch(dest)
+    write_compact(dest / "osm.geojson", fc)
+    print(
+        f"  notable {pack['id']} {before} -> {len(fc['features'])} features (+{len(added)})",
+        flush=True,
+    )
+    return {"before": before, "added": len(added), "after": len(fc["features"])}
+
+
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
@@ -1814,6 +2291,7 @@ def finalize_existing(dest: Path) -> dict:
         },
     )
     write_compact(dest / "layers" / "hazards.geojson", {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT})
+    ground.build(dest)
 
     hill = dest / "hillshade.png"
     hillshade_meta: dict = {"present": False, "reason": "no hillshade.png"}
@@ -1835,37 +2313,36 @@ def finalize_existing(dest: Path) -> dict:
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
+    search_index.write_search(dest, fc)
     stats = pack_stats(fc, graph)
-    files = shipped_files(dest)
-    size = sum(p.stat().st_size for p in files)
     terrain_note = (
         "USGS 3DEP hillshade bundled; contours from build-time Open-Meteo DEM."
         if hillshade_meta.get("present")
         else f"3DEP omitted ({hillshade_meta.get('reason')}); contours from build-time Open-Meteo DEM."
     )
-    manifest = {
-        "id": pack["id"],
-        "name": pack["name"],
-        "state": pack["state"],
-        "kind": "osm-contour-extract",
-        "engine": "maplibre",
-        "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
-        "walkable": True,
-        "bbox": bb,
-        "slices": slice_summaries,
-        "banners": pack["banners"],
-        "bytes": size,
-        "files": sorted(str(p.relative_to(dest)) for p in files),
-        "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
-        "home": home_point(pack["slices"], bb),
-        "osmFetched": osm_fetched(dest),
-        "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
-        "terrain": hillshade_meta,
-        "stats": stats,
-    }
-    write_json(dest / "manifest.json", manifest)
+    manifest = write_manifest(
+        dest,
+        {
+            "id": pack["id"],
+            "name": pack["name"],
+            "state": pack["state"],
+            "kind": "osm-contour-extract",
+            "engine": "maplibre",
+            "defaultOpen": pack["id"] == PRIMARY_PACK_ID,
+            "walkable": True,
+            "bbox": bb,
+            "slices": slice_summaries,
+            "banners": pack["banners"],
+            "center": {"lat": (bb["south"] + bb["north"]) / 2, "lon": (bb["west"] + bb["east"]) / 2},
+            "home": home_point(pack["slices"], bb),
+            "osmFetched": osm_fetched(dest),
+            "attribution": f"{OSM_CREDIT}. {terrain_note} No runtime uplink.",
+            "terrain": hillshade_meta,
+            "stats": stats,
+        },
+    )
     print(
-        f"  packed {pack['id']} {size} bytes streets={stats['namedStreets']} "
+        f"  packed {pack['id']} {manifest['bytes']} bytes streets={stats['namedStreets']} "
         f"hwy={stats['highwayLines']} edges={stats['graphEdges']} "
         f"walking={stats['streetsVisibleAtWalkingZoom']}",
         flush=True,
@@ -1882,6 +2359,42 @@ def main(ids: list[str] | None = None) -> None:
         pack = PACKS[pid]
         print("PACK", pack["id"], flush=True)
         fetch_pack(pack, root / pack["id"])
+    write_catalog(root)
+
+
+def restyle_existing(dest: Path) -> None:
+    """Rewrite style.json from maplibre_style. Tiles, overlay, and graph stay put."""
+    pack = PACKS[dest.name]
+    bb = union_bbox(pack["slices"])
+    hill = dest / "hillshade.png"
+    hillshade_meta: dict = {"present": False, "reason": "no hillshade.png"}
+    if hill.is_file() and hill.stat().st_size > 100:
+        hillshade_meta = {
+            "present": True,
+            "file": "hillshade.png",
+            "bytes": hill.stat().st_size,
+            "attribution": "USGS 3DEP hillshade, build-time only",
+            "coordinates": [
+                [bb["west"], bb["north"]],
+                [bb["east"], bb["north"]],
+                [bb["east"], bb["south"]],
+                [bb["west"], bb["south"]],
+            ],
+        }
+    write_json(
+        dest / "style.json",
+        maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None),
+    )
+    write_manifest(dest)
+    print(f"  restyled {pack['id']}", flush=True)
+
+
+def restyle(ids: list[str] | None = None) -> None:
+    """Rewrite pack styles without recutting tiles or touching the overlay."""
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("RESTYLE", pid, flush=True)
+        restyle_existing(root / pid)
     write_catalog(root)
 
 
@@ -1914,11 +2427,40 @@ def resources(ids: list[str] | None = None) -> None:
     write_catalog(root)
 
 
+def notable(ids: list[str] | None = None) -> None:
+    """Add named reserves, cave mouths, and named trees, then rebuild tiles.
+
+    Additive only. The router's graph is re-encoded from the bytes already
+    there rather than rebuilt from the extract, so growing a pack this way
+    cannot move a street.
+    """
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("NOTABLE", pid, flush=True)
+        grow_notable(root / pid, PACKS[pid])
+        finalize_existing(root / pid)
+    write_catalog(root)
+
+
+def classify_packs(ids: list[str] | None = None) -> None:
+    """Stamp road class onto packed graphs without reshaping them."""
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("CLASS", pid, flush=True)
+        stamp_road_class(root / pid)
+
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
+    elif argv and argv[0] == "--restyle":
+        restyle(argv[1:] or None)
     elif argv and argv[0] == "--resources":
         resources(argv[1:] or None)
+    elif argv and argv[0] == "--notable":
+        notable(argv[1:] or None)
+    elif argv and argv[0] == "--classify-graph":
+        classify_packs(argv[1:] or None)
     else:
         main(argv or None)

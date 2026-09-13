@@ -32,7 +32,7 @@ With a packed bbox on device and Airplane Mode on:
 ## Architecture
 
 ```
-Blackout app          ARMING, four tabs, contextual SOS, I AM OK, cannot-do once
+Blackout app          ARMING, four tabs, contextual SOS, I AM OK
 BlackoutWatch         lock-on, SOS, I AM OK, last pip, subject timer
 BlackoutWidgets       Live Activity + Control Center CALL SOS
         │
@@ -178,9 +178,12 @@ books, because both sides are hand-written strings in two different languages.
 Arriving there used to land on a menu. The tab drew all seventeen card titles
 in a `List` and hung the open card's steps underneath them, which is fine when
 you came to browse and useless when the map already chose: on a phone the list
-ate the height and the answer was below the fold. It shows one card or the
-list, never both, with `ALL CARDS` on the open card so a hold is not a one-way
-door into it. Two things surfaced while moving it. Every card ships both
+ate the height and the answer was below the fold. It shows one card or SEARCH,
+never both, with `ALL CARDS` on the open card so a hold is not a one-way
+door into it. Empty SEARCH does not dump the book. The catalog SEARCH ranks
+this pack's chapter for a situation typed in and opens the first answering
+card's steps; no hit is `NO MATCH`, not an invented card.
+Two things surfaced while moving it. Every card ships both
 languages and the list read the locale while the steps did not, so a Spanish
 reader picked a card by its Spanish title and got the instructions in English.
 And `NEXT` on the last step called a `next()` that guards on `isLast`, so it
@@ -267,7 +270,7 @@ across TX WEST and NM are under 100 m², and 45 of the 51 in TX WEST are outside
 any mapped town. So the tiler measures each water body's longest side off the
 whole record — before the tile clips it, or a pool sitting on a tile seam would
 shrink at the join — and the card passes the measurement on and stops there.
-Nine metres reads *"the outline is only about 9m across — a rock pool, a trough
+Nine metres reads *"the outline is only about 30 FT across — a rock pool, a trough
 and a dugout all read this way"*; seventy reads as a stock tank or a pool that
 fills after rain. The size never moves `SURE`, because it is a fact about the
 outline and not about the water.
@@ -280,7 +283,40 @@ direction. A wash is drawn dashed, because a solid stroke would promise water
 that is dry eleven months a year. Springs, wells and tanks are a ring at z12+,
 not a badge — the ring says the record puts water here, not that it is good.
 There are no animal icons, no edible dots, and no number anywhere that could be
-read as safe to drink.
+read as safe to drink. Peaks, sinkholes and named trees are silver circles on
+records the extract actually has. Glasshouses, cave preserves, wildlife
+management areas, nature preserves, botanic gardens, and open reserves get a silver outline at
+walking zoom; Bee Cave, Wildlife Drive, Conservatory At North Austin, Wilderness
+Gate, Prairie Hills, Godzilla Preserve, Open Space Visitor Center, and a beer garden stay parks or apartments. A
+wildlife sanctuary tagged as woodland still opens the animal book, not picnic
+tree-use. Holding woodland opens that pack's tree-use card first (the trees this
+cover is), then plant-danger, animals, shelter, bite, meat you
+already have. Field tree-use situation names woodland, park, or bosque,
+not bosque-only, so Isleta woodland is not a bosque lie. A named bosque tagged wood or forest is cottonwoods along the
+river, not picnic timber. Valle del Bosque Park stays a park. Bosque Encantado
+stays built-up. Cactus lives on scrub, cactus gardens, and open
+reserves (a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain), not picnic woodland.
+A wilderness preserve or a nature preserve is range, not a cactus garden.
+Holding a glasshouse or botanic garden opens plant-danger, not
+woodland. Holding a wildlife management area, nature preserve, or nature
+center opens that pack's animal cards;
+this is range, not a pin. Godzilla Preserve and Open Space Visitor Center stay parks. Holding an open reserve — a named nature reserve, a mountain ACEC, a prairie preserve, Hueco Tanks, named open-space cover, a scenic easement, La Tierra Trails, or Sun Mountain — opens that pack's bite and cactus cards, not picnic tree-use. Open Space Visitor Center, a farm open space, and Alameda/Rio Grande Open Space stay parks. A riverside hike-and-bike easement stays a park. Tierra Blanca and a trails neighborhood park stay parks. Hyde Memorial and Manzano stay picnic. The Sun Mountain peak pin stays a peak. Holding scrub opens that pack's bite and mammal cards;
+holding a hole
+opens the cave card, then cold. A named tree is tree-use, not the woodland dump. TX WEST names mesquite and javelina as range and opens `tx-tree-use` / `tx-mammal`; TX EAST names copperhead, cottonmouth, loblolly pine, and hog, not javelina, and opens `tx-east-tree-use`. A javelina still still opens the west mammal card. The hold prints `BOOK` as the unique procedures that
+ground actually walks (`PLANT · ANIMAL · FOOD · BITE · SHELTER · FUNGI` on
+woodland) and the button names the first card this pack's Field book ships —
+a Texas peak is `FIELD · ANIMAL` then `NEXT · BITE` then `NEXT · COLD`, not a COLD button for
+an ice-on-rock card Texas does not have, and the DO line names coyote and deer
+range, not ice. A mammal still and a peak walk both include bite treatment. FIELD then walks the rest of the
+route — tree-use,
+cactus, animals, shelter, bite treatment, meat you already have — as `NEXT · PLANT` /
+`NEXT · ANIMAL` / `NEXT · BITE` rather than dumping you on the list after the
+first card. A FIELD still of this pack's mammal, tree, cactus or snake offers
+the same procedure (`FIELD · ANIMAL` / `PLANT` / `BITE`). UNKNOWN and no
+model do not invent a card. ALL CARDS returns to SEARCH, not a dump of
+the other pack's javelina or mesquite. A javelina still still opens the west mammal card.
+Animals of this country live in the Field book, not
+as GPS pins.
 
 Repairing geometry is part of tiling now. OSM has plenty of areas whose ring
 crosses itself, and Shapely indexes them happily then throws on the first tile

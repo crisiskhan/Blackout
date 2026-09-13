@@ -29,6 +29,12 @@ struct SOSHold: View {
                         width: BlackoutTokens.Chrome.sosDiameter,
                         height: BlackoutTokens.Chrome.sosDiameter
                     )
+                Circle()
+                    .strokeBorder(Theme.metalStroke, lineWidth: 1.5)
+                    .frame(
+                        width: BlackoutTokens.Chrome.sosDiameter,
+                        height: BlackoutTokens.Chrome.sosDiameter
+                    )
                 Text("SOS")
                     .font(.system(size: 16, weight: .heavy))
                     .foregroundStyle(Color.white)
@@ -59,7 +65,7 @@ struct SOSHold: View {
                 }
         )
         .accessibilityLabel(L10n.t("sos.call", runtime.locale))
-        .accessibilityHint(L10n.t("sos.offer", runtime.locale))
+        .accessibilityHint(L10n.t("sos.hold", runtime.locale))
         .accessibilityAddTraits(.isButton)
     }
 
@@ -79,10 +85,13 @@ struct IAMOKBar: View {
                 .font(.system(size: 11, weight: .heavy))
                 .foregroundStyle(Theme.silver)
                 .padding(.horizontal, 12)
-                .frame(minHeight: 36)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 .background(Theme.glass())
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Theme.silver.opacity(0.28), lineWidth: 1))
+                .clipShape(Theme.plateRect())
+                .overlay(
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                )
                 Spacer()
             }
             Spacer()

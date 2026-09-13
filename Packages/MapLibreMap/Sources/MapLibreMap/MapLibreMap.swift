@@ -80,6 +80,45 @@ public enum MarkDrop {
     }
 }
 
+/// What a mark's label is made of.
+///
+/// A mark used to be labelled with the pack it was dropped in, and every read
+/// off disk rewrote all of them so the OFF PACK flag stayed truthful. Once a
+/// press can mark a named acequia, that rewrite would throw the name away, so
+/// the label is now a subject plus an optional flag and only the flag moves.
+public enum MarkLabel {
+    public static let separator = " · "
+    public static var offPackSuffix: String { separator + PackChrome.offPack }
+
+    /// What the mark is of, with the pack flag taken off.
+    public static func subject(of label: String) -> String {
+        guard label.hasSuffix(offPackSuffix) else { return label }
+        return String(label.dropLast(offPackSuffix.count))
+    }
+
+    public static func flagged(subject: String, offPack: Bool) -> String {
+        offPack ? subject + offPackSuffix : subject
+    }
+
+    /// Re-flag a mark for the pack it is being read under.
+    ///
+    /// A subject that is only a pack name describes nothing, so it keeps
+    /// following the pack exactly as it always has. Anything else is what the
+    /// mark was of, and only its flag moves.
+    public static func relabel(
+        existing: String,
+        packName: String,
+        packNames: [String],
+        offPack: Bool
+    ) -> String {
+        let was = subject(of: existing)
+        if was.isEmpty || was == PackChrome.offPack || packNames.contains(was) {
+            return offPack ? PackChrome.offPack : packName
+        }
+        return flagged(subject: was, offPack: offPack)
+    }
+}
+
 public enum PackChrome {
     public static let offPack = "OFF PACK"
 
@@ -126,6 +165,7 @@ public enum PackOverlay {
     public static let fillsBBox = false
 }
 
+/// Pack-file license line. Never HUD. MapLibre's own mark stays hidden.
 public enum OSMCredit {
     public static let line = "© OpenStreetMap contributors"
 }
@@ -176,6 +216,7 @@ public struct MapSession: Sendable {
 
 public enum USNG {
     public static func label(lat: Double, lon: Double) -> String {
+        guard lat.isFinite, lon.isFinite else { return "USNG —" }
         let zone = Int(floor((lon + 180) / 6) + 1)
         return String(format: "USNG %d / %.4f %.4f", zone, lat, lon)
     }
@@ -266,18 +307,23 @@ public enum UserPuck {
 
     public static func needsReapply(
         storedPack: (south: Double, west: Double, north: Double, east: Double)?,
-        storedPuck: (lat: Double, lon: Double)?,
+        storedPuck _: (lat: Double, lon: Double)?,
         pack: (south: Double, west: Double, north: Double, east: Double),
-        puck: (lat: Double, lon: Double),
+        puck _: (lat: Double, lon: Double),
         mapHasPuck: Bool
     ) -> Bool {
-        guard mapHasPuck, let storedPack, let storedPuck else { return true }
-        return storedPack != pack || storedPuck != puck
+        // Position-only is an in-place move. Rebuilding YOU (and the pack
+        // outline) on every GPS tick is what tore the canvas down in WALK.
+        guard mapHasPuck, let storedPack else { return true }
+        return storedPack != pack
     }
 }
 
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
+    /// HUD chrome around a plotted line. Bigger than FIT PACK so DEST is
+    /// not under the dock.
+    public static let routePaddingPoints: Double = 72
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
@@ -314,6 +360,33 @@ public enum PackCamera {
         if fittedPack != pack { return true }
         return abs(fittedSize.width - size.width) > 1 || abs(fittedSize.height - size.height) > 1
     }
+
+    /// LOCK-ON keeps YOU in frame. GPS jitter under this stays put so the
+    /// canvas does not swim. Arming always recenters even if YOU have not moved.
+    public static let followMeters: Double = 8
+
+    public static func shouldFollow(
+        lockOn: Bool,
+        wasLocked: Bool,
+        lastFollow: (lat: Double, lon: Double)?,
+        puck: (lat: Double, lon: Double)
+    ) -> Bool {
+        guard lockOn else { return false }
+        if !wasLocked { return true }
+        guard let lastFollow else { return true }
+        return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
+    }
+
+    /// A new drawable line, and LOCK-ON is off, so show the whole walk.
+    public static func shouldFitRoute(
+        lockOn: Bool,
+        stored: [(lat: Double, lon: Double)]?,
+        route: [(lat: Double, lon: Double)]
+    ) -> Bool {
+        guard !lockOn else { return false }
+        guard RouteLine.shouldDraw(route) else { return false }
+        return RouteLine.needsReapply(stored: stored, route: route)
+    }
 }
 
 public enum PackStyle {
@@ -324,6 +397,21 @@ public enum PackStyle {
     public static let roadRefsLayerID = "road-refs"
     public static let placeLabelsLayerID = "place-labels"
     public static let tracksLayerID = "tracks"
+    public static let waterLineLayerID = "water"
+    public static let waterDetailSourceID = "water-detail"
+    public static let waterDetailPointsLayerID = "water-detail-points"
+    public static let waterDetailLabelsLayerID = "water-detail-labels"
+    public static let groundPointsLayerID = "ground-points"
+    public static let groundLabelsLayerID = "ground-labels"
+    public static let groundWorkedSourceID = "ground-worked"
+    public static let groundWorkedFillLayerID = "ground-worked-fill"
+    public static let groundWorkedLineLayerID = "ground-worked-line"
+    public static let landFillLayerID = "land-fill"
+    public static let waterInk = "#6E747A"
+    /// Peaks and holes live on the pack's place slice from this zoom, same as
+    /// the tiler's POI floor. Closer than that they are noise; farther they
+    /// are not in the tiles.
+    public static let groundMinZoom: Double = 13
 
     /// Streets arrive as vector tiles, which are addressed by layer. A layer on
     /// the `osm` source that does not name one draws nothing at all, silently,
@@ -335,8 +423,10 @@ public enum PackStyle {
     public static let accentInk = "#E10600"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v2 stopped percent-escaping the glyph tokens.
-    public static let resolverVersion = 2
+    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
+    /// silver ground marks for peaks, holes and named trees, and the glasshouse
+    /// and cave-preserve overlay from `layers/ground.geojson`.
+    public static let resolverVersion = 8
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -410,6 +500,8 @@ public enum PackStyle {
     public static func attachOfflineVectorLayers(_ obj: inout [String: Any], packRoot: URL) {
         var sources = obj["sources"] as? [String: Any] ?? [:]
         var layers = obj["layers"] as? [[String: Any]] ?? []
+        attachWaterLayers(&sources, &layers, packRoot: packRoot)
+        attachGroundLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
@@ -520,8 +612,8 @@ public enum PackStyle {
                     "symbol-sort-key": 0,
                 ],
                 "paint": [
-                    "text-color": accentInk,
-                    "text-halo-color": silverInk,
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
                     "text-halo-width": 2.0,
                 ],
             ])
@@ -551,22 +643,187 @@ public enum PackStyle {
         obj["sources"] = sources
         obj["layers"] = layers
     }
+
+    /// Water by zoom, on a pack that may predate the class-mark file.
+    ///
+    /// Packs that already carry the marks in `style.json` are left alone.
+    /// Others get the dots if `layers/water.geojson` is on disk, and water
+    /// lines are gated at the zoom the tiles actually carry waterways.
+    public static func attachWaterLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        for index in layers.indices where layers[index]["id"] as? String == waterLineLayerID {
+            if layers[index]["minzoom"] == nil {
+                layers[index]["minzoom"] = WaterZoom.lineMinZoom
+            }
+        }
+        layers.removeAll { $0["id"] as? String == waterDetailLabelsLayerID }
+
+        let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
+        guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
+        if var existing = sources[waterDetailSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[waterDetailSourceID] = existing
+            }
+        } else {
+            sources[waterDetailSourceID] = [
+                "type": "geojson",
+                "data": detailFile.absoluteString,
+            ]
+        }
+        if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+            layers.append([
+                "id": waterDetailPointsLayerID,
+                "type": "circle",
+                "source": waterDetailSourceID,
+                "minzoom": WaterZoom.detailMinZoom,
+                "paint": [
+                    "circle-color": waterInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                    "circle-stroke-color": silverInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+    }
+
+    /// Peaks, holes and named trees the extract already put on the place slice,
+    /// plus glasshouses the land tiles currently drop, cave preserves that
+    /// otherwise read as picnic parks, wildlife range the Field book
+    /// already has, botanic gardens that otherwise read as picnic parks,
+    /// and open reserves (named nature reserves, ACECs, prairie preserves)
+    /// that otherwise read as picnic woodland.
+    /// Silver marks, no labels, no animals.
+    /// A hold reads the record; the mark only says something is here.
+    public static func attachGroundLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        layers.removeAll { $0["id"] as? String == groundLabelsLayerID }
+        attachWorkedGround(&sources, &layers, packRoot: packRoot)
+        guard sources["osm"] != nil else { return }
+        if !layers.contains(where: { $0["id"] as? String == groundPointsLayerID }) {
+            layers.append([
+                "id": groundPointsLayerID,
+                "type": "circle",
+                "source": "osm",
+                "source-layer": placeSourceLayer,
+                "minzoom": groundMinZoom,
+                "filter": [
+                    "in",
+                    ["get", "natural"],
+                    ["literal", Array(Inspect.packGroundPointNaturals).sorted()],
+                ],
+                "paint": [
+                    "circle-color": silverInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.0, 16, 5.4],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 1.1,
+                ],
+            ])
+        }
+    }
+
+    /// Glasshouses the tiler has not yet classed as farm, cave preserves
+    /// that otherwise read as picnic parks, wildlife management areas
+    /// and nature preserves that otherwise read as picnic woodland, botanic gardens that
+    /// otherwise read as picnic parks, and open reserves (named nature
+    /// reserves, ACECs, prairie preserves) that otherwise
+    /// read as picnic woodland. Quiet fill under the streets
+    /// so a hold can name them — and the hold also asks this geojson source,
+    /// not only the faint fill, the same way a tank is asked of the pack
+    /// source. Silver outline at walking zoom so the record is visible — wide
+    /// enough to read, not a fill that greys the streets. No class label, not
+    /// a meal, not an animal pin.
+    private static func attachWorkedGround(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let groundFile = packRoot.appendingPathComponent("layers/ground.geojson")
+        guard FileManager.default.fileExists(atPath: groundFile.path) else { return }
+        if var existing = sources[groundWorkedSourceID] as? [String: Any] {
+            if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
+                existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
+                sources[groundWorkedSourceID] = existing
+            }
+        } else {
+            sources[groundWorkedSourceID] = [
+                "type": "geojson",
+                "data": groundFile.absoluteString,
+            ]
+        }
+        let fill: [String: Any] = [
+            "id": groundWorkedFillLayerID,
+            "type": "fill",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "paint": [
+                "fill-color": silverInk,
+                // One percent is enough for visibleFeatures and not enough
+                // to grey the streets that sit on top of the sheet.
+                "fill-opacity": 0.01,
+            ],
+        ]
+        let line: [String: Any] = [
+            "id": groundWorkedLineLayerID,
+            "type": "line",
+            "source": groundWorkedSourceID,
+            "minzoom": groundMinZoom,
+            "layout": [
+                "line-cap": "round",
+                "line-join": "round",
+            ],
+            "paint": [
+                "line-color": silverInk,
+                "line-opacity": 0.88,
+                "line-width": 2.2,
+            ],
+        ]
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
+            if let idx = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+                layers.insert(fill, at: idx + 1)
+            } else {
+                layers.append(fill)
+            }
+        }
+        if !layers.contains(where: { $0["id"] as? String == groundWorkedLineLayerID }) {
+            layers.append(line)
+        }
+    }
 }
 
 public enum OverlaySync: Sendable {
+    /// Style mutation is add/remove of sources and layers. GPS ticks must
+    /// not request it for YOU or party position — those move in place.
     public static func needsStyleMutation(
         force: Bool,
         puckNeedsReapply: Bool,
         routeNeedsReapply: Bool,
-        destinationNeedsReapply: Bool = false
+        destinationNeedsReapply: Bool = false,
+        inspectNeedsReapply: Bool = false,
+        partyNeedsReapply: Bool = false
     ) -> Bool {
-        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply
+        force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply || partyNeedsReapply
     }
 }
 
 public enum MapKeepAwake: Sendable {
-    public static func idleTimerDisabled(mapInstrumentActive: Bool) -> Bool {
-        mapInstrumentActive
+    public static func idleTimerDisabled(mapInstrumentActive: Bool, pocket: Bool = false) -> Bool {
+        if pocket { return false }
+        return mapInstrumentActive
+    }
+}
+
+/// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. The Metal view has
+/// to take this itself, and a hold card owns the canvas while it is up.
+public enum MapCanvasHit: Sendable {
+    public static func enabled(onMap: Bool, holding: Bool, arranging: Bool = false) -> Bool {
+        onMap && !holding && !arranging
     }
 }
 
@@ -594,6 +851,7 @@ public enum FixPublish: Sendable {
             return true
         }
         if heading != nil && lastHeading == nil { return true }
+        if heading == nil && lastHeading != nil { return true }
         if let coord, let lastCoord {
             return GraphRouter.haversine(coord.lat, coord.lon, lastCoord.lat, lastCoord.lon) >= minMoveMeters
         }
