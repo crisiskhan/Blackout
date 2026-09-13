@@ -153,4 +153,37 @@ final class TokensTests: XCTestCase {
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .expedition, lockOn: false))
         XCTAssertFalse(BlackoutTokens.Chrome.sosFAB(tab: .expedition, lockOn: false, arranging: true))
     }
+
+    func testHUDKeyboardTypesCoordinatesAndLock() {
+        XCTAssertEqual(HUDKeyboardLayout.keyHeight, 44)
+        XCTAssertEqual(HUDKeyboardLayout.comma, ",")
+        XCTAssertEqual(HUDKeyboardLayout.digitRows.last, ["-", "0", "."])
+        var state = HUDKeyboardState()
+        for ch in ["3", "1", ".", "7", ",", " "] {
+            if ch == " " {
+                state.tap(.space)
+            } else {
+                state.tap(.glyph(ch))
+            }
+        }
+        state.tap(.glyph("-"))
+        state.tap(.glyph("1"))
+        XCTAssertEqual(state.text, "31.7, -1")
+        state.tap(.back)
+        XCTAssertEqual(state.text, "31.7, -")
+        var locked = HUDKeyboardState(shift: true, locked: true)
+        locked.tap(.glyph("a"))
+        locked.tap(.glyph("b"))
+        XCTAssertEqual(locked.text, "AB")
+        XCTAssertTrue(locked.shift)
+        var mixed = HUDKeyboardState(shift: true)
+        mixed.tap(.glyph("m"))
+        mixed.tap(.glyph("o"))
+        XCTAssertEqual(mixed.text, "Mo")
+        XCTAssertFalse(mixed.shift)
+        mixed.tap(.space)
+        mixed.tap(.glyph("a"))
+        XCTAssertEqual(mixed.text, "Mo A")
+        XCTAssertFalse(mixed.shift)
+    }
 }

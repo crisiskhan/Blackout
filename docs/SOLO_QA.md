@@ -10,6 +10,10 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 - [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP. No lawyer sheet. Tabs are live.
 - [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
+## HUD KEYBOARD
+
+- [ ] PASS / FAIL / N/A — Tap SEARCH, NOTE, NAME, ITEM, BRIEF, or PARTY CODE. The HUD keyboard rises on glass, 44pt keys. SPACE, BACK, SHIFT, 123 / ABC. Digit pad is 3-wide (`-` `0` `.` and comma) so `31.76190, -106.49000` is one line. Red submit plate (`DONE` / `SEARCH` / `SEND`). NAME / ITEM / PARTY CODE stay caps. SEARCH / NOTE / BRIEF mix case. SAY is still a chip. Tap the dim field, submit, change tab, or DISARM to close. No iPhone keyboard.
+
 ## MAP STILL — tip 60 score bar (five only)
 
 Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.

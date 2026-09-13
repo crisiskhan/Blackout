@@ -91,16 +91,7 @@ struct ExpeditionTab: View {
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
                             let _ = runtime.timerSeq
-                            TextField("NAME", text: $timerName)
-                                .textFieldStyle(.plain)
-                                .textInputAutocapitalization(.characters)
-                                .autocorrectionDisabled()
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Theme.silver)
-                                .padding(.horizontal, 10)
-                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                                .background(Theme.glass())
-                                .clipShape(Theme.plateRect())
+                            HUDField("NAME", text: $timerName, id: "exped.timer", locked: true)
                             HStack(spacing: 8) {
                                 Button("1 MIN") { timerSeconds = 60 }
                                     .buttonStyle(HoldActionStyle(filled: timerSeconds == 60, expand: true))
@@ -167,16 +158,7 @@ struct ExpeditionTab: View {
                     sectionLabel("KIT")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 6) {
-                            TextField("ITEM", text: $itemDraft)
-                                .textFieldStyle(.plain)
-                                .textInputAutocapitalization(.characters)
-                                .autocorrectionDisabled()
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Theme.silver)
-                                .padding(.horizontal, 10)
-                                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                                .background(Theme.glass())
-                                .clipShape(Theme.plateRect())
+                            HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true)
                             Button("ADD") {
                                 runtime.addKitItem(itemDraft)
                                 itemDraft = ""
@@ -196,17 +178,13 @@ struct ExpeditionTab: View {
                     sectionLabel("TRIP")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            TextField("BRIEF", text: Binding(
-                                get: { runtime.trip.brief },
-                                set: { runtime.trip.brief = $0 }
-                            ))
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Theme.silver)
-                            .padding(.horizontal, 10)
-                            .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                            .background(Theme.glass())
-                            .clipShape(Theme.plateRect())
+                            HUDField("BRIEF",
+                                text: Binding(
+                                    get: { runtime.trip.brief },
+                                    set: { runtime.trip.brief = $0 }
+                                ),
+                                id: "exped.brief"
+                            )
                             Text("DUE \(dueClock)")
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)

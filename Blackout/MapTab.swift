@@ -244,32 +244,23 @@ struct MapTab: View {
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
-                TextField("SEARCH", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .submitLabel(.search)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.silver)
-                    .padding(.horizontal, 12)
-                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
-                    )
-                    .onSubmit {
+                HUDField("SEARCH",
+                    text: $query,
+                    id: "map.search",
+                    submit: "DONE",
+                    onOpen: { runtime.touch(.search) },
+                    onSubmit: {
                         runtime.touch(.search)
                         search()
                     }
-                    .onTapGesture { runtime.touch(.search) }
-                    .onChange(of: query) { _, _ in
-                        sayFailed = false
-                        runtime.touch(.search)
-                        search()
-                    }
+                )
                 Button("SAY") { say() }
                     .buttonStyle(HUDOverlayChipStyle())
+            }
+            .onChange(of: query) { _, _ in
+                sayFailed = false
+                runtime.touch(.search)
+                search()
             }
             if sayFailed {
                 Text("SAY FAILED")

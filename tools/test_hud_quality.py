@@ -1252,15 +1252,17 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("step: Int", speech)
         self.assertNotIn("ForEach(listCards)", field)
         self.assertIn("openAnswer()", field)
-        self.assertIn("onSubmit(openAnswer)", field)
+        self.assertIn("onSubmit: openAnswer", field)
         self.assertIn("FieldCorpus.ask(", field)
         self.assertIn("FieldCorpus.asking(", field)
-        self.assertIn('TextField("SEARCH"', field)
+        self.assertIn('HUDField("SEARCH"', field)
+        self.assertNotIn("TextField(", field)
         self.assertIn("NO MATCH", field)
         self.assertNotIn("mapSearchHitCap", field)
         search = field.split("private var searchField")[1].split("private func say")[0]
         self.assertIn('Button("SEARCH")', search)
         self.assertIn("openAnswer()", search)
+        self.assertIn('submit: "SEARCH"', search)
         self.assertIn('Button("SAY")', field)
         self.assertIn("SAY FAILED", field)
         self.assertIn('sectionLabel("SITUATION")', field)
@@ -1413,7 +1415,8 @@ class ExpeditionKitPaperTests(unittest.TestCase):
         self.assertIn("func assign(", kit)
         self.assertIn("func addNamed(", kit)
         self.assertIn("func assigned(", kit)
-        self.assertIn('TextField("ITEM"', exped)
+        self.assertIn('HUDField("ITEM"', exped)
+        self.assertNotIn("TextField(", exped)
         self.assertIn('Button("ADD")', exped)
         self.assertIn('Button("+1")', exped)
         self.assertIn('Button("−1")', exped)
@@ -1465,7 +1468,7 @@ class ExpeditionNamedTimerTests(unittest.TestCase):
         self.assertIn("func remaining(", timers)
         self.assertIn("func remainingFraction(", timers)
         self.assertIn("func onProfile(", timers)
-        self.assertIn('TextField("NAME"', exped)
+        self.assertIn('HUDField("NAME"', exped)
         self.assertIn('Button("SET")', exped)
         self.assertIn('Button("1 MIN")', exped)
         self.assertIn('Button("5 MIN")', exped)
@@ -2309,7 +2312,9 @@ class MapSearchTests(unittest.TestCase):
         marks = tab.split("private var markList")[1].split("private var fieldChrome")[0]
         self.assertIn('packURL("search.json")', tab)
         self.assertIn("onChange(of: query)", tab)
-        self.assertIn(".submitLabel(.search)", tab)
+        self.assertIn('HUDField("SEARCH"', chrome)
+        self.assertNotIn("TextField(", tab)
+        self.assertNotIn(".submitLabel(.search)", tab)
         self.assertIn('Button("SAY")', chrome)
         self.assertIn("SAY FAILED", chrome)
         self.assertIn("NO MATCH", tab)
@@ -2486,6 +2491,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "SpeakTurnCard.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
+        "HUDKeyboard.swift",
     )
 
     def test_facet_tokens_are_highlight_and_shade_not_flat_grey(self):
@@ -2596,6 +2602,161 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("faceted metal", qa.lower())
         self.assertIn("no ios blur", qa.lower())
         self.assertNotIn("best in class", qa.lower())
+
+
+class HUDKeyboardTests(unittest.TestCase):
+    """The vessel types on its own glass. The iPhone keyboard stays off."""
+
+    FIELDS = (
+        "MapTab.swift",
+        "FieldTab.swift",
+        "ExpeditionTab.swift",
+        "CommsTab.swift",
+        "PartyHoldCard.swift",
+    )
+
+    def test_every_field_is_hud_glass_not_uitextfield(self):
+        keys = ROOT / "Blackout" / "HUDKeyboard.swift"
+        self.assertTrue(keys.is_file(), "HUDKeyboard.swift missing")
+        board = keys.read_text()
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "HUDKeyboard.swift")
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("struct HUDKeyboardState", tokens)
+        self.assertIn("enum Key", tokens)
+        self.assertIn("case glyph", tokens)
+        self.assertIn("case space", tokens)
+        self.assertIn("case back", tokens)
+        self.assertIn("case shift", tokens)
+        self.assertIn("case letters", tokens)
+        self.assertIn("case digits", tokens)
+        self.assertIn("case done", tokens)
+        self.assertIn("mutating func tap(", tokens)
+        self.assertIn("keyHeight: Double = 44", tokens)
+        self.assertIn('["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]', tokens)
+        self.assertIn('["1", "2", "3"]', tokens)
+        self.assertIn('["-", "0", "."]', tokens)
+        self.assertIn('","', tokens)
+        self.assertIn("struct HUDField", board)
+        self.assertIn("struct HUDKeyboard", board)
+        self.assertIn("final class HUDKeyboardGate", board)
+        self.assertIn("Button(\"SPACE\")", board)
+        self.assertIn("Button(\"BACK\")", board)
+        self.assertIn("Button(\"123\")", board)
+        self.assertIn("Button(\"ABC\")", board)
+        self.assertIn("Button(\"SHIFT\")", board)
+        self.assertIn("keys.submitTitle", board)
+        self.assertIn("Theme.accent", board)
+        self.assertIn("Theme.glass", board)
+        self.assertIn("Theme.Motion.heavy", board)
+        self.assertIn("Theme.metalStroke", board)
+        self.assertNotIn(".spring(", board)
+        self.assertNotIn("TextField(", board)
+        self.assertNotIn("UIKeyboardType", board)
+        self.assertNotIn("inputAccessoryView", board)
+        self.assertNotIn("best in class", board.lower())
+        self.assertNotIn("Color.orange", board)
+        self.assertNotIn("Color.green", board)
+        self.assertIn("HUDKeyboard(", root)
+        self.assertIn("hudKeys", app)
+        self.assertIn("environment(runtime.hudKeys)", root)
+        for name in self.FIELDS:
+            body = read("Blackout", name)
+            self.assertNotIn("TextField(", body, name)
+            self.assertNotIn("textInputAutocapitalization", body, name)
+            self.assertNotIn(".submitLabel(", body, name)
+            self.assertNotIn(".keyboardType(", body, name)
+            self.assertIn("HUDField(", body, name)
+            self.assertNotIn("best in class", body.lower(), name)
+            self.assertNotIn(".spring(", body, name)
+        map_tab = read("Blackout", "MapTab.swift")
+        self.assertIn('HUDField("SEARCH"', map_tab)
+        field = read("Blackout", "FieldTab.swift")
+        self.assertIn('HUDField("SEARCH"', field)
+        self.assertIn('submit: "SEARCH"', field)
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn('HUDField("NAME"', exped)
+        self.assertIn('HUDField("ITEM"', exped)
+        self.assertIn('HUDField("BRIEF"', exped)
+        comms = read("Blackout", "CommsTab.swift")
+        self.assertIn('HUDField("NOTE"', comms)
+        self.assertIn('submit: "SEND"', comms)
+        self.assertIn('HUDField("PARTY CODE"', comms)
+        party = read("Blackout", "PartyHoldCard.swift")
+        self.assertIn('HUDField("NAME"', party)
+        self.assertIn("locked: true", exped)
+        self.assertIn("locked: true", party)
+        self.assertIn("locked: true", comms)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("HUD keyboard", qa)
+        self.assertIn("SPACE", qa)
+        self.assertIn("BACK", qa)
+        self.assertIn("no iphone keyboard", qa.lower())
+        self.assertNotIn("best in class", qa.lower())
+
+    def test_engine_types_coordinates_and_respects_lock(self):
+        state = {"text": "", "shift": False, "locked": False, "face": "letters"}
+        for ch in "31":
+            hud_tap(state, ("glyph", ch))
+        hud_tap(state, ("glyph", "."))
+        hud_tap(state, ("glyph", "7"))
+        hud_tap(state, ("glyph", ","))
+        hud_tap(state, "space")
+        hud_tap(state, ("glyph", "-"))
+        hud_tap(state, ("glyph", "1"))
+        self.assertEqual(state["text"], "31.7, -1")
+        hud_tap(state, "back")
+        self.assertEqual(state["text"], "31.7, -")
+        locked = {"text": "", "shift": True, "locked": True, "face": "letters"}
+        hud_tap(locked, ("glyph", "a"))
+        hud_tap(locked, ("glyph", "b"))
+        self.assertEqual(locked["text"], "AB")
+        self.assertTrue(locked["shift"])
+        mixed = {"text": "", "shift": True, "locked": False, "face": "letters"}
+        hud_tap(mixed, ("glyph", "m"))
+        hud_tap(mixed, ("glyph", "o"))
+        self.assertEqual(mixed["text"], "Mo")
+        self.assertFalse(mixed["shift"])
+        hud_tap(mixed, "space")
+        hud_tap(mixed, ("glyph", "a"))
+        self.assertEqual(mixed["text"], "Mo A")
+        self.assertFalse(mixed["shift"])
+
+
+def hud_tap(state: dict, key) -> None:
+    """Mirror of HUDKeyboardState.tap. Keep in lockstep with Tokens."""
+    if key == "space":
+        state["text"] += " "
+        if not state["locked"]:
+            state["shift"] = True
+        return
+    if key == "back":
+        state["text"] = state["text"][:-1]
+        return
+    if key == "shift":
+        state["shift"] = not state["shift"]
+        return
+    if key == "letters":
+        state["face"] = "letters"
+        return
+    if key == "digits":
+        state["face"] = "digits"
+        return
+    if key == "done":
+        return
+    kind, glyph = key
+    if kind != "glyph":
+        raise AssertionError(key)
+    letter = len(glyph) == 1 and glyph.isalpha()
+    if letter:
+        if state["locked"] or state["shift"]:
+            state["text"] += glyph.upper()
+        else:
+            state["text"] += glyph.lower()
+        if not state["locked"]:
+            state["shift"] = False
+        return
+    state["text"] += glyph
 
 
 if __name__ == "__main__":

@@ -100,6 +100,8 @@ final class AppRuntime {
     var commsChrome = ""
     /// 15s CLIP is armed. The pad reads RECORDING until the clip ends.
     var clipLive = false
+    /// HUD typewriter. Replaces the iPhone keyboard on every field.
+    var hudKeys = HUDKeyboardGate()
     /// Machine plan state for VoiceNav: "" on graph, `GraphPlan.offGraph` otherwise.
     var navChrome = ""
     /// What the map says after a WALK/DRIVE tap: the route, or why there isn't one.

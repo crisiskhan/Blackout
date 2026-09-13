@@ -90,15 +90,14 @@ struct CommsTab: View {
                     sectionLabel("NOTE")
                     HUDGlassCard {
                         HStack(spacing: 8) {
-                            TextField("NOTE", text: $note)
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Theme.silver)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
+                            HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND") {
+                                runtime.sendPartyNote(note)
+                                note = ""
+                            }
                             Button("SEND") {
                                 runtime.sendPartyNote(note)
                                 note = ""
+                                runtime.hudKeys.close()
                             }
                             .buttonStyle(HUDOverlayChipStyle())
                         }
@@ -176,22 +175,18 @@ struct CommsTab: View {
             HStack(alignment: .top, spacing: 12) {
                 PartyQRImage(code: runtime.roster.code)
                 VStack(alignment: .leading, spacing: 8) {
-                    TextField("PARTY CODE", text: Binding(
-                        get: { runtime.roster.code },
-                        set: {
-                            runtime.roster = runtime.roster.setting(code: $0)
-                            runtime.mesh.partyCode = runtime.roster.code
-                            runtime.persistPartyCode()
-                        }
-                    ))
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.silver)
-                    .padding(.horizontal, 10)
-                    .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .textInputAutocapitalization(.characters)
+                    HUDField("PARTY CODE",
+                        text: Binding(
+                            get: { runtime.roster.code },
+                            set: {
+                                runtime.roster = runtime.roster.setting(code: $0)
+                                runtime.mesh.partyCode = runtime.roster.code
+                                runtime.persistPartyCode()
+                            }
+                        ),
+                        id: "comms.party",
+                        locked: true
+                    )
                     Button(L10n.t("scan.qr", runtime.locale)) { scanQR = true }
                         .buttonStyle(HUDOverlayChipStyle())
                 }

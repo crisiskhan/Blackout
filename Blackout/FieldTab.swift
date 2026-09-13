@@ -399,21 +399,12 @@ struct FieldTab: View {
 
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField("SEARCH", text: $query)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.search)
-                .onSubmit(openAnswer)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Theme.silver)
-                .padding(.horizontal, 12)
-                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                .background(Theme.glass())
-                .clipShape(Theme.plateRect())
-                .overlay(
-                    Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
-                )
+            HUDField("SEARCH",
+                text: $query,
+                id: "field.search",
+                submit: "SEARCH",
+                onSubmit: openAnswer
+            )
             HStack(alignment: .center, spacing: 8) {
                 Button("SEARCH") { openAnswer() }
                     .buttonStyle(HUDOverlayChipStyle())

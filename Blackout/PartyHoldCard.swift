@@ -127,15 +127,17 @@ struct PartyHoldCard: View {
             face
             VStack(alignment: .leading, spacing: 2) {
                 if person.isYou {
-                    TextField("NAME", text: $nameDraft)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 20, weight: .heavy))
-                        .foregroundStyle(Color.white)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .onChange(of: nameDraft) { _, value in
-                            onName(value)
-                        }
+                    HUDField("NAME",
+                        text: $nameDraft,
+                        id: "party.name",
+                        locked: true,
+                        pointSize: 20,
+                        weight: .heavy,
+                        ink: Color.white
+                    )
+                    .onChange(of: nameDraft) { _, value in
+                        onName(value)
+                    }
                 } else {
                     Text(displayName)
                         .font(.system(size: 20, weight: .heavy))

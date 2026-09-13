@@ -588,9 +588,9 @@ def assert_a_land_hold_opens_the_stepper_and_not_the_menu() -> None:
         fail("FieldTab has no SEARCH when no card is open")
     if "ForEach(listCards)" in body:
         fail("SEARCH still dumps card titles instead of opening the answer")
-    if 'TextField("SEARCH"' not in tab:
+    if 'HUDField("SEARCH"' not in tab:
         fail("FieldTab has no SEARCH field")
-    if "onSubmit(openAnswer)" not in tab:
+    if "onSubmit: openAnswer" not in tab:
         fail("SEARCH does not open the answering card's steps")
     print("OK   a land hold opens one card's steps, with SEARCH behind ALL CARDS")
 

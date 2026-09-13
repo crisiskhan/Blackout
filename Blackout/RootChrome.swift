@@ -17,8 +17,13 @@ struct RootChrome: View {
                     IAMOKBar(runtime: runtime)
                 }
                 contextualSOS
+                if runtime.hudKeys.isOpen {
+                    hudTypewriter
+                }
             }
         }
+        .environment(runtime.hudKeys)
+        .animation(Theme.Motion.heavy, value: runtime.hudKeys.isOpen)
         .nightRedLamp(runtime.night)
         .tint(Theme.silver)
         .preferredColorScheme(.dark)
@@ -31,10 +36,14 @@ struct RootChrome: View {
             runtime.pulse()
         }
         .onChange(of: runtime.tab) { _, _ in
+            runtime.hudKeys.close()
             runtime.applyMapKeepAwake()
             runtime.pulse()
         }
-        .onChange(of: runtime.armed) { _, _ in runtime.applyMapKeepAwake() }
+        .onChange(of: runtime.armed) { _, now in
+            if !now { runtime.hudKeys.close() }
+            runtime.applyMapKeepAwake()
+        }
     }
 
     private var tabChrome: some View {
@@ -205,6 +214,22 @@ struct RootChrome: View {
             }
             .allowsHitTesting(true)
         }
+    }
+
+    private var hudTypewriter: some View {
+        VStack(spacing: 0) {
+            Theme.void.opacity(0.45)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(Theme.Motion.heavy) { runtime.hudKeys.close() }
+                }
+            HUDKeyboard(keys: runtime.hudKeys)
+                .padding(
+                    .bottom,
+                    runtime.leftHand ? 8 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+                )
+        }
+        .transition(.opacity)
     }
 
     private var sosBottomPad: CGFloat {
