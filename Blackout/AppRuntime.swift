@@ -121,6 +121,10 @@ final class AppRuntime {
     var routeTarget: (lat: Double, lon: Double)?
     /// Last WALK or DRIVE tap. The canvas dashes the core for a walk.
     var travelMode: TravelMode = .walk
+    /// Spoken live-turn cue already played for this plot. Empty until a turn is close.
+    private var liveSpokenTurn = ""
+    private var liveArrived = false
+    private var lastLiveRerouteAt: TimeInterval = 0
     /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
@@ -811,12 +815,15 @@ final class AppRuntime {
         toolChrome = ""
         speechChrome = ""
         clearSpeakTurns()
+        resetLiveGuide()
     }
 
     func navigate(mode: TravelMode) {
         touch(.dock)
         speechChrome = ""
         travelMode = mode
+        liveSpokenTurn = ""
+        liveArrived = false
         clearSpeakTurns()
         navSeq += 1
         let seq = navSeq
@@ -1748,6 +1755,7 @@ final class AppRuntime {
         routeChrome = chrome
         speechChrome = ""
         clearSpeakTurns()
+        resetLiveGuide()
     }
 
     private func destinationOnPack(_ dest: (lat: Double, lon: Double)?) -> Bool {
@@ -1797,6 +1805,69 @@ final class AppRuntime {
         }
         sendPOSIfPossible()
         refreshHeldParty()
+        applyLiveGuide()
+    }
+
+    private func applyLiveGuide() {
+        guard routeCoords.count >= 2 else { return }
+        guard let you = gnssYou ?? lastKnownFix else { return }
+        let streets = searchIndex?.streetNames(along: routeCoords) ?? []
+        let cue = LiveNav.progress(
+            you: you,
+            dest: destination(),
+            coords: routeCoords,
+            streets: streets,
+            travelMode: travelMode
+        )
+        if cue.arrived {
+            applyRemainingChrome(cue)
+            if !liveArrived {
+                liveArrived = true
+                applySpeechTone()
+                _ = speech.speak(VoiceNav.arrive, locale: locale)
+            }
+            return
+        }
+        if cue.offRoute {
+            speechChrome = SpeakStatus.offRouteLine()
+            let now = Date().timeIntervalSince1970
+            if now - lastLiveRerouteAt >= LiveNav.replanSeconds {
+                lastLiveRerouteAt = now
+                navigate(mode: travelMode)
+            }
+            return
+        }
+        lastLiveRerouteAt = 0
+        applyRemainingChrome(cue)
+        if !cue.speakTurn.isEmpty, cue.speakTurn != liveSpokenTurn {
+            liveSpokenTurn = cue.speakTurn
+            applySpeechTone()
+            _ = speech.speak(cue.speakTurn, locale: locale)
+        }
+    }
+
+    private func applyRemainingChrome(_ cue: LiveNav.Cue) {
+        let names = searchIndex?.streetNames(along: cue.remainingCoords) ?? []
+        speechChrome = SpeakStatus.chrome(
+            spoke: true,
+            routeCoords: cue.remainingCoords,
+            planChrome: navChrome,
+            destination: destination(),
+            you: gnssYou ?? lastKnownFix
+        )
+        speakHUDTurns = VoiceNav.hudTurns(
+            cue.remainingCoords,
+            travelMode: travelMode,
+            streets: names
+        )
+        speakNextHUD = cue.nextHUD
+        showSpeakTurns = !speakHUDTurns.isEmpty
+    }
+
+    private func resetLiveGuide() {
+        liveSpokenTurn = ""
+        liveArrived = false
+        lastLiveRerouteAt = 0
     }
 
     static func resourceRoot() -> URL? {

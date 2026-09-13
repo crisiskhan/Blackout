@@ -3268,6 +3268,49 @@ class MapSearchTests(unittest.TestCase):
         self.assertNotIn("Search FTS returns pack POI names", qa)
 
 
+class LiveStreetGuideTests(unittest.TestCase):
+    """WALK/DRIVE keep speaking as YOU move. The field stays one short line."""
+
+    def test_live_guide_wires_gnss_to_remaining_chrome_and_voice(self):
+        app = read("Blackout", "AppRuntime.swift")
+        qa = read("docs", "SOLO_QA.md")
+        device = read("docs", "DEVICE.md")
+        live = ROOT.joinpath(
+            "Packages", "Router", "Sources", "Router", "LiveNav.swift"
+        )
+        self.assertTrue(live.is_file())
+        live_text = live.read_text()
+        voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
+        self.assertIn("enum LiveNav", live_text)
+        self.assertIn("func progress(", live_text)
+        self.assertIn("func applyLiveGuide()", app)
+        pull = app.split("func pullFix()")[1].split("static func resourceRoot")[0]
+        self.assertIn("applyLiveGuide()", pull)
+        guide = app.split("func applyLiveGuide()")[1].split("static func resourceRoot")[0]
+        self.assertIn("LiveNav.progress", guide)
+        self.assertIn("VoiceNav.arrive", guide)
+        self.assertIn("SpeakStatus.offRouteLine", guide)
+        self.assertIn("SpeakStatus.chrome(", guide)
+        self.assertIn("remainingCoords", guide)
+        self.assertIn("navigate(mode: travelMode)", guide)
+        self.assertIn("liveSpokenTurn", app)
+        nav = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
+        self.assertIn("speakMap()", nav)
+        self.assertIn("YOU move", qa)
+        self.assertIn("OFF ROUTE", qa)
+        self.assertIn("SPEAK replays", qa)
+        self.assertIn("YOU move", device)
+        self.assertIn("OFF ROUTE", device)
+        self.assertIn("static let offRoute = \"OFF ROUTE\"", voice)
+        self.assertLessEqual(len("SPEAK · OFF ROUTE"), 32)
+        for slogan in ("best in class", "Waze", "Google Maps", "Apple Maps"):
+            self.assertNotIn(slogan, live_text)
+            self.assertNotIn(slogan, app)
+            self.assertNotIn(slogan, qa)
+            self.assertNotIn(slogan, device)
+            self.assertNotIn(slogan, voice)
+
+
 class AddressHoldCardTests(unittest.TestCase):
     """Type a house number. The glass card is the address, not a DEST dump."""
 

@@ -256,6 +256,51 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(VoiceNav.nextTurnHUD(coords, streets: streets), "LEFT · PIEDRAS STREET")
     }
 
+    func testLiveNavSpeaksTheUpcomingTurnOnceYouAreClose() {
+        let coords: [(lat: Double, lon: Double)] = [
+            (0.0, 0.0),
+            (0.0, 0.0017966),
+            (0.0008993, 0.0017966),
+        ]
+        let dest = coords[2]
+        let start = LiveNav.progress(you: coords[0], dest: dest, coords: coords)
+        XCTAssertFalse(start.arrived)
+        XCTAssertFalse(start.offRoute)
+        XCTAssertEqual(start.speakTurn, "")
+        XCTAssertEqual(start.nextHUD, "LEFT")
+        XCTAssertGreaterThan(start.remainingMeters, 250)
+        XCTAssertGreaterThan(start.metersToTurn, LiveNav.turnCueMeters)
+
+        let near = LiveNav.progress(you: (0.0, 0.00143728), dest: dest, coords: coords)
+        XCTAssertEqual(near.speakTurn, "Turn left.")
+        XCTAssertLessThanOrEqual(near.metersToTurn, LiveNav.turnCueMeters)
+        XCTAssertGreaterThan(near.metersToTurn, 0)
+        XCTAssertEqual(near.nextHUD, "LEFT")
+
+        let named = LiveNav.progress(
+            you: (0.0, 0.00143728),
+            dest: dest,
+            coords: coords,
+            streets: ["Montana Avenue", "Piedras Street"]
+        )
+        XCTAssertEqual(named.speakTurn, "Turn left onto Piedras Street.")
+        XCTAssertEqual(named.nextHUD, "LEFT · PIEDRAS STREET")
+
+        let atDest = LiveNav.progress(you: dest, dest: dest, coords: coords)
+        XCTAssertTrue(atDest.arrived)
+        XCTAssertEqual(atDest.speakTurn, "")
+
+        let off = LiveNav.progress(you: (0.0, -0.01), dest: dest, coords: coords)
+        XCTAssertTrue(off.offRoute)
+        XCTAssertFalse(off.arrived)
+        XCTAssertEqual(off.speakTurn, "")
+        XCTAssertGreaterThan(off.metersToLine, LiveNav.offRouteMeters)
+
+        XCTAssertEqual(SpeakStatus.offRouteLine(), "SPEAK · OFF ROUTE")
+        XCTAssertLessThanOrEqual(SpeakStatus.offRouteLine().count, SpeakStatus.maxCharacters)
+        XCTAssertFalse(SpeakStatus.isClipped(SpeakStatus.offRouteLine()))
+    }
+
     func testVoiceNavDriveTurnByTurnUsesDriveNotWalk() {
         let coords: [(lat: Double, lon: Double)] = [
             (0.0, 0.0),

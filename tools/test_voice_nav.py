@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import unittest
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -238,6 +239,133 @@ def prompt(
     return f"{pack_name}. {heading_bit} {START_HINT}"
 
 
+LIVE_NAV_ARRIVE = 25.0
+LIVE_NAV_TURN = 50.0
+LIVE_NAV_OFF = 80.0
+
+
+@dataclass(frozen=True)
+class LiveCue:
+    remaining_meters: float
+    remaining_coords: list[tuple[float, float]]
+    nearest_index: int
+    meters_to_line: float
+    meters_to_turn: float
+    arrived: bool
+    off_route: bool
+    speak_turn: str
+    next_hud: str
+
+
+def _project_on_segment(
+    point: tuple[float, float],
+    start: tuple[float, float],
+    end: tuple[float, float],
+) -> tuple[tuple[float, float], float]:
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    length2 = dx * dx + dy * dy
+    if length2 < 1e-18:
+        return start, 0.0
+    t = ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / length2
+    t = max(0.0, min(1.0, t))
+    return (start[0] + t * dx, start[1] + t * dy), t
+
+
+def vertex_kind(coords: list[tuple[float, float]], index: int) -> str:
+    if index <= 0 or index >= len(coords) - 1:
+        return ""
+    from_b = bearing(
+        coords[index - 1][0],
+        coords[index - 1][1],
+        coords[index][0],
+        coords[index][1],
+    )
+    to_b = bearing(
+        coords[index][0],
+        coords[index][1],
+        coords[index + 1][0],
+        coords[index + 1][1],
+    )
+    kind = turn_name(from_b, to_b)
+    return "" if kind == "straight" else kind
+
+
+def _polyline_meters(coords: list[tuple[float, float]]) -> float:
+    total = 0.0
+    for i in range(len(coords) - 1):
+        total += haversine(coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1])
+    return total
+
+
+def live_nav_progress(
+    you: tuple[float, float],
+    dest: tuple[float, float] | None,
+    coords: list[tuple[float, float]],
+    streets: list[str | None] | None = None,
+    mode: str = "walk",
+) -> LiveCue:
+    names = list(streets or [])
+    if len(coords) < 2:
+        dest_pt = dest or (coords[-1] if coords else you)
+        span = haversine(you[0], you[1], dest_pt[0], dest_pt[1])
+        return LiveCue(0.0, list(coords), 0, 0.0, 0.0, span < LIVE_NAV_ARRIVE, False, "", "")
+    best_d = float("inf")
+    best_i = 0
+    best_pt = coords[0]
+    for i in range(len(coords) - 1):
+        pt, _ = _project_on_segment(you, coords[i], coords[i + 1])
+        d = haversine(you[0], you[1], pt[0], pt[1])
+        if d < best_d:
+            best_d = d
+            best_i = i
+            best_pt = pt
+    remaining = [best_pt] + list(coords[best_i + 1 :])
+    sliced = list(names[best_i:]) if names else []
+    if len(remaining) >= 2:
+        first_leg = haversine(
+            remaining[0][0], remaining[0][1], remaining[1][0], remaining[1][1]
+        )
+        turn_here = bool(vertex_kind(coords, best_i + 1))
+        if first_leg < 1.0 and not turn_here:
+            remaining = remaining[1:]
+            if sliced:
+                sliced = sliced[1:]
+    remaining_m = _polyline_meters(remaining)
+    dest_pt = dest or coords[-1]
+    to_dest = haversine(you[0], you[1], dest_pt[0], dest_pt[1])
+    on_line = best_d <= LIVE_NAV_OFF
+    arrived = to_dest < LIVE_NAV_ARRIVE or (on_line and remaining_m < LIVE_NAV_ARRIVE)
+    off_route = (not arrived) and best_d > LIVE_NAV_OFF
+    meters_to_turn = remaining_m
+    for i in range(1, len(remaining) - 1):
+        if vertex_kind(remaining, i):
+            meters_to_turn = _polyline_meters(remaining[: i + 1])
+            break
+    speak_turn = ""
+    if not arrived and not off_route and meters_to_turn <= LIVE_NAV_TURN:
+        for line in steps(remaining, mode, sliced):
+            if line.startswith("Turn"):
+                speak_turn = line
+                break
+    return LiveCue(
+        remaining_meters=remaining_m,
+        remaining_coords=remaining,
+        nearest_index=best_i,
+        meters_to_line=best_d,
+        meters_to_turn=meters_to_turn,
+        arrived=arrived,
+        off_route=off_route,
+        speak_turn=speak_turn,
+        next_hud=next_turn_hud(remaining, sliced),
+    )
+
+
+LEFT_TURN_ROUTE = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
+# About 40 m before the corner on the eastbound 200 m leg.
+NEAR_LEFT_TURN = (0.0, 0.00143728)
+
+
 class VoiceNavTests(unittest.TestCase):
     def test_on_graph_left_turn_is_complete_not_truncated(self):
         # East 200m, then north 100m.
@@ -346,6 +474,58 @@ class VoiceNavTests(unittest.TestCase):
             self.assertLessEqual(len(line), 44)
 
 
+class LiveNavTests(unittest.TestCase):
+    def test_start_of_the_line_keeps_the_upcoming_turn_quiet(self):
+        cue = live_nav_progress(LEFT_TURN_ROUTE[0], LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        self.assertFalse(cue.arrived)
+        self.assertFalse(cue.off_route)
+        self.assertEqual(cue.speak_turn, "")
+        self.assertEqual(cue.next_hud, "LEFT")
+        self.assertAlmostEqual(cue.remaining_meters, 300, delta=5)
+        self.assertGreater(cue.meters_to_turn, LIVE_NAV_TURN)
+
+    def test_upcoming_turn_is_spoken_once_you_are_close(self):
+        cue = live_nav_progress(NEAR_LEFT_TURN, LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        self.assertFalse(cue.arrived)
+        self.assertFalse(cue.off_route)
+        self.assertEqual(cue.speak_turn, "Turn left.")
+        self.assertLessEqual(cue.meters_to_turn, LIVE_NAV_TURN)
+        self.assertGreater(cue.meters_to_turn, 0)
+        self.assertLess(cue.remaining_meters, 300)
+        self.assertEqual(cue.next_hud, "LEFT")
+
+    def test_named_street_turn_keeps_the_onto_name(self):
+        streets = ["Montana Avenue", "Piedras Street"]
+        cue = live_nav_progress(
+            NEAR_LEFT_TURN,
+            LEFT_TURN_ROUTE[-1],
+            LEFT_TURN_ROUTE,
+            streets=streets,
+        )
+        self.assertEqual(cue.speak_turn, "Turn left onto Piedras Street.")
+        self.assertEqual(cue.next_hud, "LEFT · PIEDRAS STREET")
+
+    def test_remaining_chrome_shrinks_as_you_move(self):
+        start = live_nav_progress(LEFT_TURN_ROUTE[0], LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        mid = live_nav_progress((0.0, 0.0008983), LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        self.assertLess(mid.remaining_meters, start.remaining_meters)
+        self.assertAlmostEqual(mid.remaining_meters, 200, delta=8)
+        self.assertEqual(mid.speak_turn, "")
+
+    def test_arrival_is_when_you_are_there(self):
+        cue = live_nav_progress(LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        self.assertTrue(cue.arrived)
+        self.assertFalse(cue.off_route)
+        self.assertEqual(cue.speak_turn, "")
+
+    def test_off_the_line_is_off_route_not_a_turn(self):
+        cue = live_nav_progress((0.0, -0.01), LEFT_TURN_ROUTE[-1], LEFT_TURN_ROUTE)
+        self.assertTrue(cue.off_route)
+        self.assertFalse(cue.arrived)
+        self.assertEqual(cue.speak_turn, "")
+        self.assertGreater(cue.meters_to_line, LIVE_NAV_OFF)
+
+
 class VoiceNavSourceContracts(unittest.TestCase):
     def test_swift_voice_nav_is_not_the_truncated_stub(self):
         router = (ROOT / "Packages" / "Router" / "Sources" / "Router" / "Router.swift").read_text()
@@ -384,10 +564,36 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("WALK and DRIVE speak", qa)
         self.assertIn("SPEAK replays", qa)
         self.assertIn("WALK, DRIVE, and SPEAK", qa)
+        self.assertIn("as YOU move", qa)
+        self.assertIn("OFF ROUTE", qa)
         self.assertNotIn("then SPEAK for turn by turn", qa)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", app)
         self.assertNotIn("Google Maps", speak)
+        self.assertNotIn("Google", qa)
+        pull = app.split("func pullFix()")[1].split("static func resourceRoot")[0]
+        self.assertIn("applyLiveGuide()", pull)
+        self.assertIn("func applyLiveGuide()", app)
+        guide = app.split("func applyLiveGuide()")[1].split("static func resourceRoot")[0]
+        self.assertIn("LiveNav.progress", guide)
+        self.assertIn("VoiceNav.arrive", guide)
+        self.assertIn("SpeakStatus.offRouteLine", guide)
+        self.assertIn("navigate(mode: travelMode)", guide)
+        self.assertIn("remainingCoords", guide)
+        self.assertIn("liveSpokenTurn", guide)
+        self.assertIn("cue.speakTurn", guide)
+        self.assertNotIn("VoiceNav.prompt", guide)
+        live = ROOT / "Packages" / "Router" / "Sources" / "Router" / "LiveNav.swift"
+        self.assertTrue(live.is_file())
+        live_text = live.read_text()
+        self.assertIn("enum LiveNav", live_text)
+        self.assertIn("func progress(", live_text)
+        self.assertIn("arriveMeters", live_text)
+        self.assertIn("turnCueMeters", live_text)
+        self.assertIn("offRouteMeters", live_text)
+        for slogan in ("best in class", "Waze", "Google Maps", "Apple Maps", "Google"):
+            self.assertNotIn(slogan, live_text)
+            self.assertNotIn(slogan, guide)
 
     def test_speak_chip_stays_and_voice_gets_the_full_prompt(self):
         # tip-68 supersedes the tip-65 banner: the complete prompt is spoken, and the
@@ -419,6 +625,7 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("testVoiceNavDriveTurnByTurnUsesDriveNotWalk", tests)
         self.assertIn("testDriveTakesTheFasterRoadNotTheShortestResidential", tests)
         self.assertIn("testVoiceNavNamesTheStreetsItTurnsOnto", tests)
+        self.assertIn("testLiveNavSpeaksTheUpcomingTurnOnceYouAreClose", tests)
         self.assertIn("Arrive at destination.", tests)
 
     def test_swift_speaks_named_streets_and_keeps_five_voices(self):
@@ -435,6 +642,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("streets:", voice)
         self.assertIn("func hudTurns(", voice)
         self.assertIn("func nextTurnHUD(", voice)
+        self.assertIn("static let offRoute = \"OFF ROUTE\"", voice)
+        self.assertIn("func offRouteLine(", voice)
         self.assertIn("func streetName(near", search)
         self.assertIn("streets:", app.split("func speakMap()")[1].split("func beginPTTSolo")[0])
         self.assertIn("enum NavVoice", inst)
