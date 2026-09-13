@@ -901,6 +901,9 @@ def tip58_solo_qa() -> None:
     timer_ok = (
         'HUDField("TIME"' in exp
         and 'Button("SET")' in exp
+        and 'Button("30 MIN")' in exp
+        and 'Button("1 HR")' in exp
+        and 'Button("2 HRS")' in exp
         and 'Button("1 MIN TIMER SET")' not in exp
         and 'Button("2H WATER TIMER SET")' not in exp
         and 'Button("DONE")' in exp

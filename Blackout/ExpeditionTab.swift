@@ -97,6 +97,14 @@ struct ExpeditionTab: View {
                                 id: "exped.time",
                                 digits: true
                             )
+                            HStack(spacing: 8) {
+                                Button("30 MIN") { timerTime = "30" }
+                                    .buttonStyle(HoldActionStyle(filled: timerTime == "30", expand: true))
+                                Button("1 HR") { timerTime = "1H" }
+                                    .buttonStyle(HoldActionStyle(filled: timerTime == "1H", expand: true))
+                                Button("2 HRS") { timerTime = "2H" }
+                                    .buttonStyle(HoldActionStyle(filled: timerTime == "2H", expand: true))
+                            }
                             VStack(spacing: 1) {
                                 Button("SET") {
                                     guard let duration = TimerDuration.parse(timerTime) else { return }
