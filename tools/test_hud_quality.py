@@ -320,7 +320,7 @@ class OffGridNoDisclaimerTests(unittest.TestCase):
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("compass mark", qa.lower())
         self.assertIn("No BLACKOUT wordmark", qa)
-
+        self.assertIn("no black plate", qa.lower())
 
 
 class WaterClassifyOnHoldTests(unittest.TestCase):
@@ -447,10 +447,16 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
     def test_boot_logo_is_the_square_mark(self):
-        logo = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset" / "Logo.jpg"
-        width, height = jpeg_size(logo)
+        logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
+        logo = logo_dir / "Logo.png"
+        width, height, color = png_ihdr(logo)
         self.assertEqual(width, height)
         self.assertGreaterEqual(width, 1024)
+        self.assertEqual(color, 6, "boot logo has alpha so the black plate is gone")
+        self.assertFalse((logo_dir / "Logo.jpg").exists())
+        manifest = read("Blackout", "Assets.xcassets", "Logo.imageset", "Contents.json")
+        self.assertIn("Logo.png", manifest)
+        self.assertNotIn("Logo.jpg", manifest)
         arming = read("Blackout", "ARMINGView.swift")
         self.assertIn("Image(\"Logo\")", arming)
         self.assertNotIn("1712.0 / 1152.0", arming)
@@ -459,6 +465,9 @@ class CompassMarkTests(unittest.TestCase):
             "height: BlackoutTokens.Chrome.bootLogoPoints",
             arming,
         )
+        app = read("Blackout", "AppRuntime.swift")
+        gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
+        self.assertIn("CLLocationCoordinate2DIsValid", gnss)
 
 
 class HUDSyncTests(unittest.TestCase):

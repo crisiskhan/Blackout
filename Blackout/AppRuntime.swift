@@ -1247,7 +1247,9 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        last = locations.last?.coordinate
+        if let coordinate = locations.last?.coordinate, CLLocationCoordinate2DIsValid(coordinate) {
+            last = coordinate
+        }
         publishIfNeeded()
     }
 
