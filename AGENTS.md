@@ -22,8 +22,8 @@ unfinished tabs.
   glass over it.
 - FIELD on the hold card must not tear the card down on the same turn as the button
   (deferred teardown).
-- MAP dest rail prints dest coordinates of the location being traveled to. No MAP
-  BEARING chip — profile BEARING on the party and address cards is enough.
+- MAP COORDINATES rail prints live YOU when idle and dest pin coords while navigating.
+  No MAP BEARING chip — profile BEARING on the party and address cards is enough.
 - Honesty over debug. `NET · NONE` and `NO VISION MODEL` stay. `Whisper <10 m: yes`
   does not. Capability honesty is not lawyer copy.
 - Off-grid instrument: the glass carries no lawyer copy. No `WHAT WE CANNOT DO`

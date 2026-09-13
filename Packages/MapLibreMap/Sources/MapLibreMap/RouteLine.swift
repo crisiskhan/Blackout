@@ -285,8 +285,9 @@ public struct MapFieldLine: Equatable, Sendable, Identifiable {
 }
 
 /// The MAP field chrome stack: at most three short lines, each one deduped. Lock, route
-/// and tool statuses share a line, dest COORDINATES are the pin being walked to, and
-/// Speak gets one status line — never a turn-by-turn paragraph over the canvas.
+/// and tool statuses share a line, COORDINATES glow YOU when idle and the dest pin
+/// while navigating, and Speak gets one status line — never a turn-by-turn paragraph
+/// over the canvas. No MAP BEARING chip.
 public enum MapFieldChrome: Sendable {
     public static let separator = " · "
     public static let maxLines = MapFieldLine.Slot.allCases.count
@@ -296,29 +297,32 @@ public enum MapFieldChrome: Sendable {
         joined([lock, route, tool])
     }
 
-    /// Dest COORDINATES mount when there is a destination. LOCK-ON or a drawn
-    /// route without a dest does not invent a pin.
+    /// COORDINATES mount for a dest pin or a live YOU fix. LOCK-ON or a drawn
+    /// route without a dest does not invent a dest pin.
     public static func destRailVisible(
         hasDestination: Bool,
         lockOn: Bool,
-        hasRoute: Bool
+        hasRoute: Bool,
+        hasYouFix: Bool = false
     ) -> Bool {
         _ = lockOn
         _ = hasRoute
-        return hasDestination
+        return hasDestination || hasYouFix
     }
 
-    /// Dest coords of the pin being walked to. Never YOU. Never a DEST pair.
-    /// No dest stays quiet — the rail does not print NO FIX as a fake dest.
+    /// Dest pin while navigating. Live YOU when idle. Never a DEST pair.
+    /// No dest and no YOU stays quiet — the rail does not print NO FIX as a fake dest.
     public static func destLine(
-        dest: (lat: Double, lon: Double)? = nil
+        dest: (lat: Double, lon: Double)? = nil,
+        you: (lat: Double, lon: Double)? = nil
     ) -> String {
-        guard dest != nil else { return "" }
-        return destValue(point: dest)
+        if dest != nil { return destValue(point: dest) }
+        if you != nil { return destValue(point: you) }
+        return ""
     }
 
-    /// Coordinate pair formatter. MAP dest rail passes the dest pin. Profile
-    /// cards pass the held person or address.
+    /// Coordinate pair formatter. MAP COORDINATES rail passes dest or YOU.
+    /// Profile cards pass the held person or address.
     public static func destValue(
         point: (lat: Double, lon: Double)?
     ) -> String {
@@ -328,17 +332,16 @@ public enum MapFieldChrome: Sendable {
 
     /// Profile course filter. MAP dest rail does not print bearing. An
     /// unusable heading is not a course — Apple's `-1°` must not print as 359°.
+    /// Idle YOU coords are not a course.
     public static func activeBearing(
         headingDeg: Double?,
         hasDestination: Bool,
         lockOn: Bool,
         hasRoute: Bool
     ) -> Double? {
-        guard destRailVisible(
-            hasDestination: hasDestination,
-            lockOn: lockOn,
-            hasRoute: hasRoute
-        ) else { return nil }
+        _ = lockOn
+        _ = hasRoute
+        guard hasDestination else { return nil }
         guard let headingDeg, headingDeg >= 0 else { return nil }
         return headingDeg
     }
@@ -348,11 +351,12 @@ public enum MapFieldChrome: Sendable {
         route: String,
         tool: String,
         dest: (lat: Double, lon: Double)? = nil,
+        you: (lat: Double, lon: Double)? = nil,
         speak: String
     ) -> [MapFieldLine] {
         [
             (MapFieldLine.Slot.status, statusLine(lock: lock, route: route, tool: tool)),
-            (.dest, destLine(dest: dest)),
+            (.dest, destLine(dest: dest, you: you)),
             (.speak, speak.trimmingCharacters(in: .whitespacesAndNewlines)),
         ]
         .filter { !$0.1.isEmpty }

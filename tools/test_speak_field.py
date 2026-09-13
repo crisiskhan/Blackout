@@ -104,11 +104,14 @@ def joined(parts: list[str]) -> str:
 
 def dest_line(
     dest: tuple[float, float] | None = None,
+    you: tuple[float, float] | None = None,
 ) -> str:
-    """Mirror of MapFieldChrome.destLine. Dest coords of the pin being walked to."""
-    if dest is None:
-        return ""
-    return dest_value(dest)
+    """Mirror of MapFieldChrome.destLine. Dest pin while navigating, YOU when idle."""
+    if dest is not None:
+        return dest_value(dest)
+    if you is not None:
+        return dest_value(you)
+    return ""
 
 
 def dest_value(point: tuple[float, float] | None) -> str:
@@ -124,14 +127,15 @@ def field_lines(
     tool: str,
     dest: tuple[float, float] | None = None,
     speak: str = "",
+    you: tuple[float, float] | None = None,
 ) -> list[str]:
-    """Mirror of MapFieldChrome.lines. Dest slot is dest coords, never bearing."""
+    """Mirror of MapFieldChrome.lines. Dest pin, or YOU when idle. Never bearing."""
     status = joined([lock, route, tool])
     return [
         line
         for line in (
             status,
-            dest_line(dest),
+            dest_line(dest, you),
             speak.strip(),
         )
         if line
@@ -219,7 +223,7 @@ class FieldChromeTests(unittest.TestCase):
             self.assertNotIn("DEST 31.", line)
             self.assertNotIn("BEARING", line)
 
-    def test_dest_line_prints_dest_coords_not_you(self):
+    def test_dest_line_prints_dest_while_navigating_and_you_when_idle(self):
         dest = (31.758, -106.487)
         you = (31.7619, -106.49)
         with_dest = field_lines(
@@ -228,6 +232,7 @@ class FieldChromeTests(unittest.TestCase):
             "TRUE NORTH",
             dest,
             "SPEAK · 3 TURNS · 984 FT",
+            you,
         )
         self.assertEqual(
             with_dest,
@@ -239,6 +244,8 @@ class FieldChromeTests(unittest.TestCase):
         )
         self.assertNotIn("31.76190", with_dest[1])
         self.assertEqual(dest_line(dest), "31.75800, -106.48700")
+        self.assertEqual(dest_line(dest, you), "31.75800, -106.48700")
+        self.assertEqual(dest_line(None, you), "31.76190, -106.49000")
         self.assertEqual(dest_line(None), "")
         self.assertEqual(dest_line(), "")
         self.assertEqual(dest_value(dest), "31.75800, -106.48700")
@@ -252,13 +259,21 @@ class FieldChromeTests(unittest.TestCase):
             field_lines(OFF_GRAPH, "", "TRUE NORTH", dest, ""),
             ["OFF GRAPH · TRUE NORTH", "31.75800, -106.48700"],
         )
+        self.assertEqual(
+            field_lines("", "", "", None, "", you),
+            ["31.76190, -106.49000"],
+        )
         self.assertEqual(field_lines("", "", "", None, ""), [])
         self.assertEqual(field_lines("", "", "", None, "   "), [])
 
     def test_quiet_field_shows_nothing(self):
         self.assertEqual(field_lines("", "", "", None, ""), [])
-        # Heading is not a dest. The dest slot mounts dest coords of the pin.
+        # Heading is not a dest. Dest pin wins. Idle YOU mounts live GNSS.
         self.assertEqual(field_lines("", "", "", (31.758, -106.487), "   "), ["31.75800, -106.48700"])
+        self.assertEqual(
+            field_lines("", "", "", None, "   ", (31.7619, -106.49)),
+            ["31.76190, -106.49000"],
+        )
 
     def test_header_controls_are_the_whole_words(self):
         # INSTRUME… was the failure. INST was a workaround. Wrap the full word.
@@ -343,7 +358,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
             self.assertNotIn(stale, self.map_tab, f"{stale} still sprays its own row")
         chrome = self.map_tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
         self.assertIn("runtime.routeTarget", chrome)
-        self.assertNotIn("runtime.gnssYou", chrome)
+        self.assertIn("runtime.gnssYou", chrome)
         self.assertNotIn("youCoordinate()", chrome)
         self.assertNotIn("lastKnownFix", chrome)
         self.assertNotIn("youCoordinate()", self.map_tab)
@@ -357,8 +372,10 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("enum MapFieldDestMode", self.route_line)
         self.assertIn("func destValue(", self.route_line)
         self.assertIn("func destRailVisible(", self.route_line)
+        self.assertIn("hasYouFix", self.route_line)
         self.assertNotIn("destActive", self.route_line)
         self.assertIn("COORDINATES", self.route_line)
+        self.assertIn("destRailVisible(", chrome)
         self.assertIn("NO FIX", self.route_line)
         self.assertIn("MapFieldDestRail", self.map_tab)
         self.assertIn("MapFieldDestMode", self.map_tab)
@@ -385,6 +402,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("Color.green", theme)
         dest_src = self.route_line.split("func destLine(")[1].split("func destValue")[0]
         self.assertIn("destValue", dest_src)
+        self.assertIn("you", dest_src)
         self.assertNotIn("NO HEADING", dest_src)
         self.assertNotIn("BEARING", dest_src)
         self.assertNotIn('String(format: "BEARING %.0f°", h)', self.map_tab)

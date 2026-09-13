@@ -34,10 +34,11 @@ def dest_rail_visible(
     has_destination: bool,
     lock_on: bool,
     has_route: bool,
+    has_you_fix: bool = False,
 ) -> bool:
-    """Mirror of MapFieldChrome.destRailVisible. Dest coords need a dest."""
+    """Mirror of MapFieldChrome.destRailVisible. Dest pin, or YOU when idle."""
     del lock_on, has_route
-    return has_destination
+    return has_destination or has_you_fix
 
 
 def active_bearing(
@@ -47,7 +48,8 @@ def active_bearing(
     has_route: bool,
 ) -> float | None:
     """Mirror of MapFieldChrome.activeBearing. Profile course, not MAP dest."""
-    if not dest_rail_visible(has_destination, lock_on, has_route):
+    del lock_on, has_route
+    if not has_destination:
         return None
     if heading is None or heading < 0:
         return None
@@ -60,6 +62,9 @@ class QuietBearingTests(unittest.TestCase):
         self.assertTrue(dest_rail_visible(True, False, False))
         self.assertFalse(dest_rail_visible(False, True, False))
         self.assertFalse(dest_rail_visible(False, False, True))
+        self.assertTrue(dest_rail_visible(False, False, False, True))
+        self.assertTrue(dest_rail_visible(True, False, False, True))
+        self.assertFalse(dest_rail_visible(False, True, False, False))
         self.assertIsNone(active_bearing(12, False, False, False))
         self.assertEqual(active_bearing(45, True, False, False), 45)
         self.assertIsNone(active_bearing(10, False, True, False))
@@ -77,23 +82,26 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("bearingDeg: runtime.headingDeg", tab)
         vis = route.split("func destRailVisible(")[1].split("func destLine")[0]
         self.assertIn("hasDestination", vis)
+        self.assertIn("hasYouFix", vis)
+        self.assertIn("hasDestination || hasYouFix", vis)
         self.assertNotIn("|| lockOn", vis)
         self.assertNotIn("|| hasRoute", vis)
         self.assertNotIn("MapFieldDestMode.bearing", tab)
         self.assertNotIn("case bearing", route)
         self.assertNotIn("@State private var destMode", tab)
 
-    def test_dest_line_prints_dest_coords_not_live_gnss(self):
+    def test_dest_line_prints_dest_while_navigating_and_you_when_idle(self):
         route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
         tab = read("Blackout", "MapTab.swift")
         chrome = tab.split("private var fieldChrome")[1].split("private var hudReserve")[0]
         self.assertIn("runtime.routeTarget", chrome)
-        self.assertNotIn("runtime.gnssYou", chrome)
+        self.assertIn("runtime.gnssYou", chrome)
         self.assertNotIn("youCoordinate()", chrome)
         self.assertNotIn("lastKnownFix", chrome)
         self.assertNotIn("youCoordinate()", tab)
         dest_src = route.split("func destLine(")[1].split("func destValue")[0]
         self.assertIn("destValue", dest_src)
+        self.assertIn("you", dest_src)
         self.assertNotIn("NO HEADING", dest_src)
         self.assertNotIn("BEARING", dest_src)
         self.assertIn("func destRailVisible(", route)
@@ -231,8 +239,8 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         agents = read("AGENTS.md")
         self.assertNotIn("DEST … · BEARING", device)
         self.assertNotIn("DEST ... · BEARING", device)
-        self.assertIn("location being traveled to", device)
-        self.assertIn("location being traveled to", qa)
+        self.assertIn("pin being walked to", device)
+        self.assertIn("dest pin coords while navigating", qa)
         self.assertIn("31.76190", device)
         self.assertIn("COORDINATES", device)
         self.assertIn("COORDINATES", qa)
@@ -241,10 +249,11 @@ class OtherTabsSpeakHUDTests(unittest.TestCase):
         self.assertNotIn("two 44pt chips", device)
         self.assertNotIn("two 44pt chips", qa)
         self.assertNotIn("Dest chips (`BEARING` / `COORDINATES`)", qa)
-        self.assertNotIn("live GNSS", device)
-        self.assertNotIn("live GNSS", qa)
+        self.assertIn("live YOU when idle", qa)
+        self.assertIn("Idle MAP with live GNSS prints YOU", device)
         self.assertIn("BEARING", qa)
-        self.assertIn("MAP dest rail prints dest coordinates", agents)
+        self.assertIn("MAP COORDINATES rail prints live YOU", agents)
+        self.assertNotIn("MAP dest rail prints dest coordinates", agents)
         self.assertNotIn("BEARING is quiet unless there is somewhere to walk", agents)
 
 

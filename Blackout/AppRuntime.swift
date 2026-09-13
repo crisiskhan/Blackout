@@ -939,7 +939,7 @@ final class AppRuntime {
         )
     }
 
-    /// Live GNSS only. Pack center and cached fallbacks stay off the bearing row.
+    /// Live GNSS only. Pack center and cached fallbacks stay off the MAP COORDINATES rail.
     var gnssYou: (lat: Double, lon: Double)? {
         guard let c = fix.last else { return nil }
         return (lat: c.latitude, lon: c.longitude)

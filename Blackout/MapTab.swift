@@ -328,17 +328,21 @@ struct MapTab: View {
 
     /// Up to three short deduped lines, printed where the thumb already is.
     private var fieldChrome: some View {
+        let dest = runtime.routeTarget
+        let you = runtime.gnssYou
         let destActive = MapFieldChrome.destRailVisible(
-            hasDestination: runtime.routeTarget != nil,
+            hasDestination: dest != nil,
             lockOn: runtime.lockOn,
-            hasRoute: !runtime.routeCoords.isEmpty
+            hasRoute: !runtime.routeCoords.isEmpty,
+            hasYouFix: you != nil
         )
-        let dest = destActive ? runtime.routeTarget : nil
+        let point = destActive ? (dest ?? you) : nil
         let lines = MapFieldChrome.lines(
             lock: runtime.lockChrome,
             route: runtime.routeChrome,
             tool: runtime.toolChrome,
             dest: dest,
+            you: you,
             speak: runtime.speechChrome
         )
         return Group {
@@ -353,7 +357,7 @@ struct MapTab: View {
                                 .fixedSize(horizontal: false, vertical: true)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         case .dest:
-                            MapFieldDestRail(dest: dest)
+                            MapFieldDestRail(dest: point)
                         }
                     }
                 }

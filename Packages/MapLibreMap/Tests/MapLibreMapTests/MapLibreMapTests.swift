@@ -487,7 +487,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(Set(sprayed.map(\.id)).count, sprayed.count)
         XCTAssertEqual(sprayed[0].text, "OFF GRAPH · TRUE NORTH")
         XCTAssertTrue(sprayed[0].warn)
-        // Dest slot is dest coords of the pin being walked to, never YOU, never a DEST pair.
+        // Dest slot is dest pin coords while navigating, never YOU, never a DEST pair.
         XCTAssertEqual(sprayed[1].text, "31.75800, -106.48700")
         XCTAssertFalse(sprayed[1].warn)
         for line in sprayed {
@@ -500,11 +500,13 @@ final class MapLibreMapTests: XCTestCase {
             XCTAssertLessThanOrEqual(line.text.count, 44)
             XCTAssertFalse(line.text.contains("\n"))
         }
+        let you = (lat: 31.7619, lon: -106.49)
         let withDest = MapFieldChrome.lines(
             lock: RouteLine.offGraph,
             route: RouteLine.offGraph,
             tool: MagTrueChip.chrome(magNorth: false),
             dest: dest,
+            you: you,
             speak: "SPEAK · 3 TURNS · 984 FT"
         )
         XCTAssertEqual(withDest[1].text, "31.75800, -106.48700")
@@ -515,6 +517,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(
             MapFieldChrome.destLine(dest: dest),
             "31.75800, -106.48700"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(dest: dest, you: you),
+            "31.75800, -106.48700"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(you: you),
+            "31.76190, -106.49000"
         )
         XCTAssertEqual(
             MapFieldChrome.destValue(point: dest),
@@ -586,6 +596,7 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertEqual(MapFieldChrome.destLine(), "")
         XCTAssertEqual(MapFieldChrome.destLine(dest: nil), "")
+        XCTAssertEqual(MapFieldChrome.destLine(you: nil), "")
         XCTAssertEqual(
             MapFieldChrome.destLine(dest: (lat: 31.758, lon: -106.487)),
             "31.75800, -106.48700"
@@ -593,6 +604,17 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(
             MapFieldChrome.destLine(dest: (lat: 31.7619, lon: -106.49)),
             "31.76190, -106.49000"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(you: (lat: 31.7619, lon: -106.49)),
+            "31.76190, -106.49000"
+        )
+        XCTAssertEqual(
+            MapFieldChrome.destLine(
+                dest: (lat: 31.758, lon: -106.487),
+                you: (lat: 31.7619, lon: -106.49)
+            ),
+            "31.75800, -106.48700"
         )
         XCTAssertFalse(
             MapFieldChrome.destRailVisible(
@@ -620,6 +642,22 @@ final class MapLibreMapTests: XCTestCase {
                 hasDestination: false,
                 lockOn: false,
                 hasRoute: true
+            )
+        )
+        XCTAssertTrue(
+            MapFieldChrome.destRailVisible(
+                hasDestination: false,
+                lockOn: false,
+                hasRoute: false,
+                hasYouFix: true
+            )
+        )
+        XCTAssertTrue(
+            MapFieldChrome.destRailVisible(
+                hasDestination: true,
+                lockOn: false,
+                hasRoute: false,
+                hasYouFix: true
             )
         )
     }
@@ -677,6 +715,16 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertEqual(destOnly.map(\.text), ["31.75800, -106.48700"])
         XCTAssertEqual(destOnly.map(\.slot), [.dest])
+        let youOnly = MapFieldChrome.lines(
+            lock: "",
+            route: "",
+            tool: "",
+            dest: nil,
+            you: (lat: 31.7619, lon: -106.49),
+            speak: "   "
+        )
+        XCTAssertEqual(youOnly.map(\.text), ["31.76190, -106.49000"])
+        XCTAssertEqual(youOnly.map(\.slot), [.dest])
         XCTAssertEqual(
             MapFieldChrome.joined([" OFF GRAPH ", "OFF GRAPH", "", "RULER 40 m"]),
             "OFF GRAPH · RULER 40 m"
