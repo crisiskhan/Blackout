@@ -1623,6 +1623,59 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `san antonio`.
     private static let sanAntonioMountain = CLLocationCoordinate2D(latitude: 35.937521, longitude: -106.615869)
 
+    /// `Cerro Grande` on the NM place slice. A named peak on
+    /// the Valles Caldera overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus San Antonio Mountain (19788 m)
+    /// and the Valles Caldera overlay Hold (15093 m). Unique
+    /// title (one OSM peak). Nearest water ~3623 m. Bear and
+    /// elk as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first. Redondo Peak stays unheld
+    /// (two OSM peaks). Do not add matcher `cerro grande`.
+    private static let cerroGrande = CLLocationCoordinate2D(latitude: 35.869445, longitude: -106.412881)
+
+    /// `Rabbit Mountain` on the NM place slice. A named peak
+    /// on the Valles Caldera overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus Cerro Grande (6689 m), San
+    /// Antonio Mountain (17531 m), and the Valles Caldera
+    /// overlay Hold (18810 m). Unique title (one OSM peak).
+    /// Nearest water ~3502 m. Bear and elk as range, not
+    /// javelina. Ice-on-rock is in this book, so FIELD names
+    /// cold first. South Mountain stays unheld (two OSM
+    /// peaks). Do not add matcher `rabbit`.
+    private static let rabbitMountain = CLLocationCoordinate2D(latitude: 35.832152, longitude: -106.471115)
+
+    /// `Whiteface Mountain` on the NM place slice. A named
+    /// peak on the Sevilleta overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus the Sevilleta overlay
+    /// Hold (28106 m) and Sierra Ladrones (38879 m). Unique
+    /// title (one OSM peak). Nearest water ~8275 m. Bear and
+    /// elk as range, not javelina. Ice-on-rock is in this
+    /// book, so FIELD names cold first. Do not add matcher
+    /// `whiteface`.
+    private static let whitefaceMountain = CLLocationCoordinate2D(latitude: 34.379788, longitude: -106.568629)
+
+    /// `Sierra Ladrones` on the NM place slice. A named peak
+    /// on the Sevilleta overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus the Sevilleta overlay Hold
+    /// (10809 m), Sierra Ladrones WSA (13911 m), and Ladrón
+    /// Peak (9595 m). Overlay containment is the nearby name.
+    /// Unique title (one OSM peak). Nearest water ~11452 m.
+    /// Bear and elk as range, not javelina. Ice-on-rock is
+    /// in this book, so FIELD names cold first. Ladrón Peak
+    /// stays a peak. Cerro Colorado stays unheld (eight OSM
+    /// peaks). Do not add matcher `ladrones` or `ladron`.
+    private static let sierraLadronesPeak = CLLocationCoordinate2D(latitude: 34.393953, longitude: -106.991977)
+
+    /// `VABM Cliff` on the NM place slice. A named peak on
+    /// the Sevilleta overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus Sierra Ladrones (10105 m) and
+    /// the Sevilleta overlay Hold (5073 m). Unique title
+    /// (one OSM peak). Nearest water ~2011 m. Bear and elk
+    /// as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first. Do not add matcher `vabm`
+    /// or `cliff`.
+    private static let vabmCliff = CLLocationCoordinate2D(latitude: 34.353957, longitude: -106.893106)
+
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
 
@@ -5261,6 +5314,106 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(antonioPresent.first, Inspect.iceRockCard, "\(antonio)")
         XCTAssertEqual(InspectField.label(for: antonioPresent.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: antonioPresent), "COLD · ANIMAL · BITE")
+
+        let grande = try hold(at: Self.cerroGrande, zoom: 16, packId: "nm")
+        XCTAssertEqual(grande.card?.klass, "Peak", "\(grande)")
+        XCTAssertEqual(grande.card?.title, "Cerro Grande", "\(grande)")
+        XCTAssertNotEqual(grande.card?.klass, "Wildlife range", "\(grande)")
+        XCTAssertNotEqual(grande.card?.title, "Valles Caldera National Preserve", "\(grande)")
+        XCTAssertNotEqual(grande.card?.title, "San Antonio Mountain", "\(grande)")
+        XCTAssertNotEqual(grande.card?.title, "Rabbit Mountain", "\(grande)")
+        XCTAssertNotEqual(grande.card?.title, "Redondo Peak", "\(grande)")
+        XCTAssertNotEqual(grande.card?.title, "La Cruz Peak", "\(grande)")
+        let grandeDo = grande.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(grandeDo.contains("black bear and elk range"), grande.card?.doLine ?? "")
+        XCTAssertTrue(grandeDo.contains("give it the road"), grande.card?.doLine ?? "")
+        XCTAssertFalse(grandeDo.contains("javelina"), grande.card?.doLine ?? "")
+        XCTAssertFalse(grandeDo.contains("hog"), grande.card?.doLine ?? "")
+        XCTAssertFalse(grandeDo.contains("edible"), grande.card?.doLine ?? "")
+        let grandePresent = InspectField.presentRoute(grande.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(grandePresent.first, Inspect.iceRockCard, "\(grande)")
+        XCTAssertEqual(InspectField.label(for: grandePresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: grandePresent), "COLD · ANIMAL · BITE")
+
+        let rabbit = try hold(at: Self.rabbitMountain, zoom: 16, packId: "nm")
+        XCTAssertEqual(rabbit.card?.klass, "Peak", "\(rabbit)")
+        XCTAssertEqual(rabbit.card?.title, "Rabbit Mountain", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.klass, "Wildlife range", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.title, "Valles Caldera National Preserve", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.title, "Cerro Grande", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.title, "San Antonio Mountain", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.title, "South Mountain", "\(rabbit)")
+        XCTAssertNotEqual(rabbit.card?.title, "La Cruz Peak", "\(rabbit)")
+        let rabbitDo = rabbit.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(rabbitDo.contains("black bear and elk range"), rabbit.card?.doLine ?? "")
+        XCTAssertTrue(rabbitDo.contains("give it the road"), rabbit.card?.doLine ?? "")
+        XCTAssertFalse(rabbitDo.contains("javelina"), rabbit.card?.doLine ?? "")
+        XCTAssertFalse(rabbitDo.contains("hog"), rabbit.card?.doLine ?? "")
+        XCTAssertFalse(rabbitDo.contains("edible"), rabbit.card?.doLine ?? "")
+        let rabbitPresent = InspectField.presentRoute(rabbit.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(rabbitPresent.first, Inspect.iceRockCard, "\(rabbit)")
+        XCTAssertEqual(InspectField.label(for: rabbitPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: rabbitPresent), "COLD · ANIMAL · BITE")
+
+        let whiteface = try hold(at: Self.whitefaceMountain, zoom: 16, packId: "nm")
+        XCTAssertEqual(whiteface.card?.klass, "Peak", "\(whiteface)")
+        XCTAssertEqual(whiteface.card?.title, "Whiteface Mountain", "\(whiteface)")
+        XCTAssertNotEqual(whiteface.card?.klass, "Wildlife range", "\(whiteface)")
+        XCTAssertNotEqual(whiteface.card?.title, "Sevilleta National Wildlife Refuge", "\(whiteface)")
+        XCTAssertNotEqual(whiteface.card?.title, "Sierra Ladrones", "\(whiteface)")
+        XCTAssertNotEqual(whiteface.card?.title, "VABM Cliff", "\(whiteface)")
+        XCTAssertNotEqual(whiteface.card?.title, "La Cruz Peak", "\(whiteface)")
+        let whitefaceDo = whiteface.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(whitefaceDo.contains("black bear and elk range"), whiteface.card?.doLine ?? "")
+        XCTAssertTrue(whitefaceDo.contains("give it the road"), whiteface.card?.doLine ?? "")
+        XCTAssertFalse(whitefaceDo.contains("javelina"), whiteface.card?.doLine ?? "")
+        XCTAssertFalse(whitefaceDo.contains("hog"), whiteface.card?.doLine ?? "")
+        XCTAssertFalse(whitefaceDo.contains("edible"), whiteface.card?.doLine ?? "")
+        let whitefacePresent = InspectField.presentRoute(whiteface.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(whitefacePresent.first, Inspect.iceRockCard, "\(whiteface)")
+        XCTAssertEqual(InspectField.label(for: whitefacePresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: whitefacePresent), "COLD · ANIMAL · BITE")
+
+        let ladronesPeak = try hold(at: Self.sierraLadronesPeak, zoom: 16, packId: "nm")
+        XCTAssertEqual(ladronesPeak.card?.klass, "Peak", "\(ladronesPeak)")
+        XCTAssertEqual(ladronesPeak.card?.title, "Sierra Ladrones", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.klass, "Wildlife range", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.klass, "Open reserve", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "Sevilleta National Wildlife Refuge", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "Sierra Ladrones Wilderness Study Area", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "Ladrón Peak", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "Whiteface Mountain", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "VABM Cliff", "\(ladronesPeak)")
+        XCTAssertNotEqual(ladronesPeak.card?.title, "La Cruz Peak", "\(ladronesPeak)")
+        let ladronesPeakDo = ladronesPeak.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(ladronesPeakDo.contains("black bear and elk range"), ladronesPeak.card?.doLine ?? "")
+        XCTAssertTrue(ladronesPeakDo.contains("give it the road"), ladronesPeak.card?.doLine ?? "")
+        XCTAssertFalse(ladronesPeakDo.contains("javelina"), ladronesPeak.card?.doLine ?? "")
+        XCTAssertFalse(ladronesPeakDo.contains("hog"), ladronesPeak.card?.doLine ?? "")
+        XCTAssertFalse(ladronesPeakDo.contains("edible"), ladronesPeak.card?.doLine ?? "")
+        let ladronesPeakPresent = InspectField.presentRoute(ladronesPeak.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(ladronesPeakPresent.first, Inspect.iceRockCard, "\(ladronesPeak)")
+        XCTAssertEqual(InspectField.label(for: ladronesPeakPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: ladronesPeakPresent), "COLD · ANIMAL · BITE")
+
+        let cliff = try hold(at: Self.vabmCliff, zoom: 16, packId: "nm")
+        XCTAssertEqual(cliff.card?.klass, "Peak", "\(cliff)")
+        XCTAssertEqual(cliff.card?.title, "VABM Cliff", "\(cliff)")
+        XCTAssertNotEqual(cliff.card?.klass, "Wildlife range", "\(cliff)")
+        XCTAssertNotEqual(cliff.card?.title, "Sevilleta National Wildlife Refuge", "\(cliff)")
+        XCTAssertNotEqual(cliff.card?.title, "Sierra Ladrones", "\(cliff)")
+        XCTAssertNotEqual(cliff.card?.title, "Whiteface Mountain", "\(cliff)")
+        XCTAssertNotEqual(cliff.card?.title, "La Cruz Peak", "\(cliff)")
+        let cliffDo = cliff.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(cliffDo.contains("black bear and elk range"), cliff.card?.doLine ?? "")
+        XCTAssertTrue(cliffDo.contains("give it the road"), cliff.card?.doLine ?? "")
+        XCTAssertFalse(cliffDo.contains("javelina"), cliff.card?.doLine ?? "")
+        XCTAssertFalse(cliffDo.contains("hog"), cliff.card?.doLine ?? "")
+        XCTAssertFalse(cliffDo.contains("edible"), cliff.card?.doLine ?? "")
+        let cliffPresent = InspectField.presentRoute(cliff.card?.fieldRoute ?? [], in: nmBook)
+        XCTAssertEqual(cliffPresent.first, Inspect.iceRockCard, "\(cliff)")
+        XCTAssertEqual(InspectField.label(for: cliffPresent.first ?? ""), "FIELD · COLD")
+        XCTAssertEqual(InspectField.bookLine(for: cliffPresent), "COLD · ANIMAL · BITE")
 
         let conservationTrust = try hold(at: Self.santaFeConservationTrust, zoom: 16, packId: "nm")
         XCTAssertEqual(conservationTrust.card?.klass, "Open reserve", "\(conservationTrust)")

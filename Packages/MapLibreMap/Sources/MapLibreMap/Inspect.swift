@@ -390,7 +390,11 @@ public enum Inspect {
     /// matcher `gato`, `loma el gato`, `contrabando`, or `sabinoso`. Phrase `national
     /// preserve`, not the word `preserve`. San Antonio Mountain is a
     /// named peak on that sheet — rank 1 still beats the overlay.
-    /// Do not add matcher `san antonio` or `valles`. Phrase `wilderness park`,
+    /// Cerro Grande is a named peak on that sheet — rank 1 still
+    /// beats the overlay. Rabbit Mountain is a named peak on that
+    /// sheet — rank 1 still beats the overlay. Do not add matcher
+    /// `san antonio`, `valles`, `cerro grande`, or `rabbit`. Redondo Peak
+    /// and South Mountain stay unheld (two OSM peaks). Phrase `wilderness park`,
     /// not the word `wilderness`. Phrase `canyonlands preserve`, not
     /// the word `canyonlands` — Canyonlands Trail Park stays a park.
     /// Phrase `wetland preserve`, not the word `wetland` — Rio Bosque
@@ -488,7 +492,16 @@ public enum Inspect {
     /// jolla`. Phrase `national preserve` already matches Valles
     /// Caldera National Preserve. San Antonio Mountain is a
     /// named peak on that sheet — rank 1 still beats the overlay.
-    /// Do not add matcher `san antonio`. White
+    /// Cerro Grande is a named peak on that sheet — rank 1 still
+    /// beats the overlay. Rabbit Mountain is a named peak on that
+    /// sheet — rank 1 still beats the overlay. Do not add matcher
+    /// `san antonio`, `cerro grande`, or `rabbit`. Whiteface Mountain
+    /// is a named peak on Sevilleta — rank 1 still beats the overlay.
+    /// Sierra Ladrones is a named peak on that sheet — rank 1 still
+    /// beats the overlay. VABM Cliff is a named peak on that sheet —
+    /// rank 1 still beats the overlay. Do not add matcher `whiteface`,
+    /// `ladrones`, `ladron`, `vabm`, or `cliff`. Cerro Colorado stays
+    /// unheld (eight OSM peaks). White
     /// Sands Missile Range S Route 287 and Old Highway 85 stay
     /// roads. Phrase `wildlife refuge` already matches Feather
     /// Lake Wildlife Refuge. Ditches sit on most of that sheet;

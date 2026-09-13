@@ -3617,6 +3617,26 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("San Antonio Mountain", glass)
         self.assertIn("35.937521", glass)
         self.assertIn("-106.615869", glass)
+        self.assertIn("Cerro Grande", glass)
+        self.assertIn("35.869445", glass)
+        self.assertIn("-106.412881", glass)
+        self.assertIn("cerroGrande", glass)
+        self.assertIn("Rabbit Mountain", glass)
+        self.assertIn("35.832152", glass)
+        self.assertIn("-106.471115", glass)
+        self.assertIn("rabbitMountain", glass)
+        self.assertIn("Whiteface Mountain", glass)
+        self.assertIn("34.379788", glass)
+        self.assertIn("-106.568629", glass)
+        self.assertIn("whitefaceMountain", glass)
+        self.assertIn("Sierra Ladrones", glass)
+        self.assertIn("34.393953", glass)
+        self.assertIn("-106.991977", glass)
+        self.assertIn("sierraLadronesPeak", glass)
+        self.assertIn("VABM Cliff", glass)
+        self.assertIn("34.353957", glass)
+        self.assertIn("-106.893106", glass)
+        self.assertIn("vabmCliff", glass)
         self.assertIn("Leonora Curtin Wetland Preserve", glass)
         self.assertIn("35.569230", glass)
         self.assertIn("-106.101626", glass)
@@ -5593,6 +5613,31 @@ class GroundFieldSync(unittest.TestCase):
             "San Antonio Mountain did not survive tiling as a peak",
         )
         self.assertIn(
+            "Cerro Grande",
+            place_names_in_tile("nm", -106.412881, 35.869445),
+            "Cerro Grande did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Rabbit Mountain",
+            place_names_in_tile("nm", -106.471115, 35.832152),
+            "Rabbit Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Whiteface Mountain",
+            place_names_in_tile("nm", -106.568629, 34.379788),
+            "Whiteface Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Sierra Ladrones",
+            place_names_in_tile("nm", -106.991977, 34.393953),
+            "Sierra Ladrones did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "VABM Cliff",
+            place_names_in_tile("nm", -106.893106, 34.353957),
+            "VABM Cliff did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Loma El Gato",
             place_names_in_tile("tx-west", -106.573797, 31.235777),
             "Loma El Gato did not survive tiling as a peak",
@@ -6663,6 +6708,11 @@ class GroundFieldSync(unittest.TestCase):
         mesa_blanca_peak = False
         cerritos_de_la_jolla_peak = False
         san_antonio_mountain_peak = False
+        cerro_grande_peak = False
+        rabbit_mountain_peak = False
+        whiteface_mountain_peak = False
+        sierra_ladrones_peak = False
+        vabm_cliff_peak = False
         nm_scrub = False
         sandia_cave = False
         embudo_cave = False
@@ -6717,6 +6767,36 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.615869)) < 1e-6
                 ):
                     san_antonio_mountain_peak = True
+                if (
+                    props.get("name") == "Cerro Grande"
+                    and abs(lat - 35.869445) < 1e-6
+                    and abs(lon - (-106.412881)) < 1e-6
+                ):
+                    cerro_grande_peak = True
+                if (
+                    props.get("name") == "Rabbit Mountain"
+                    and abs(lat - 35.832152) < 1e-6
+                    and abs(lon - (-106.471115)) < 1e-6
+                ):
+                    rabbit_mountain_peak = True
+                if (
+                    props.get("name") == "Whiteface Mountain"
+                    and abs(lat - 34.379788) < 1e-6
+                    and abs(lon - (-106.568629)) < 1e-6
+                ):
+                    whiteface_mountain_peak = True
+                if (
+                    props.get("name") == "Sierra Ladrones"
+                    and abs(lat - 34.393953) < 1e-6
+                    and abs(lon - (-106.991977)) < 1e-6
+                ):
+                    sierra_ladrones_peak = True
+                if (
+                    props.get("name") == "VABM Cliff"
+                    and abs(lat - 34.353957) < 1e-6
+                    and abs(lon - (-106.893106)) < 1e-6
+                ):
+                    vabm_cliff_peak = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -6788,6 +6868,26 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             san_antonio_mountain_peak,
             "San Antonio Mountain is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerro_grande_peak,
+            "Cerro Grande is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            rabbit_mountain_peak,
+            "Rabbit Mountain is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            whiteface_mountain_peak,
+            "Whiteface Mountain is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            sierra_ladrones_peak,
+            "Sierra Ladrones is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            vabm_cliff_peak,
+            "VABM Cliff is not a named peak in the NM extract",
         )
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
@@ -7380,6 +7480,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.409477", qa)
         self.assertIn("San Antonio Mountain", qa)
         self.assertIn("35.937521", qa)
+        self.assertIn("Cerro Grande", qa)
+        self.assertIn("35.869445", qa)
+        self.assertIn("Rabbit Mountain", qa)
+        self.assertIn("35.832152", qa)
+        self.assertIn("Whiteface Mountain", qa)
+        self.assertIn("34.379788", qa)
+        self.assertIn("34.393953", qa)
+        self.assertIn("VABM Cliff", qa)
+        self.assertIn("34.353957", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
         self.assertIn("35.124701", qa)
         self.assertIn("Open Space Visitor Center", qa)
@@ -7511,6 +7620,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Valles Caldera National Preserve", qa)
         self.assertIn("San Antonio Mountain", qa)
         self.assertIn("35.937521", qa)
+        self.assertIn("Cerro Grande", qa)
+        self.assertIn("35.869445", qa)
+        self.assertIn("Rabbit Mountain", qa)
+        self.assertIn("35.832152", qa)
+        self.assertIn("Whiteface Mountain", qa)
+        self.assertIn("34.379788", qa)
+        self.assertIn("34.393953", qa)
+        self.assertIn("VABM Cliff", qa)
+        self.assertIn("34.353957", qa)
         self.assertIn("Barton Creek Wilderness Park", qa)
         self.assertIn("Área de Protección de Flora y Fauna", qa)
         self.assertIn("Loma El Gato", qa)
@@ -8344,7 +8462,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("listCards", tab)
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertNotIn("ForEach(listCards)", tab)
-        self.assertIn("onSubmit(openAnswer)", tab)
+        self.assertIn("onSubmit: openAnswer", tab)
         search = tab.split("private var searchField")[1].split("private func say")[0]
         self.assertIn('Button("SEARCH")', search)
         self.assertIn("openAnswer()", search)
