@@ -399,13 +399,13 @@ struct FieldTab: View {
 
     private var searchField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HUDField("SEARCH",
-                text: $query,
-                id: "field.search",
-                submit: "SEARCH",
-                onSubmit: openAnswer
-            )
             HStack(alignment: .center, spacing: 8) {
+                HUDField("SEARCH",
+                    text: $query,
+                    id: "field.search",
+                    submit: "SEARCH",
+                    onSubmit: openAnswer
+                )
                 Button("SEARCH") { openAnswer() }
                     .buttonStyle(HUDOverlayChipStyle())
                 Button("SAY") { say() }

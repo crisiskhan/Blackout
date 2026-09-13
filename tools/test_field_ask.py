@@ -267,6 +267,12 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn('Button("SEARCH")', search)
         self.assertIn("openAnswer()", search)
         self.assertIn('submit: "SEARCH"', search)
+        bar = search.split("HStack", 1)[1].split("if sayFailed", 1)[0]
+        self.assertIn('HUDField("SEARCH"', bar)
+        self.assertIn('Button("SAY")', bar)
+        self.assertLess(bar.find('HUDField("SEARCH"'), bar.find('Button("SEARCH")'))
+        self.assertLess(bar.find('Button("SEARCH")'), bar.find('Button("SAY")'))
+        self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertIn("static func doLines", corpus)
         ask = corpus.split("static func ask(")[1].split("private static func index")[0]
@@ -396,6 +402,12 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         search = tab.split("private var searchField")[1].split("private func say")[0]
         self.assertIn('Button("SEARCH")', search)
         self.assertIn("openAnswer()", search)
+        bar = search.split("HStack", 1)[1].split("if sayFailed", 1)[0]
+        self.assertIn('HUDField("SEARCH"', bar)
+        self.assertIn('Button("SAY")', bar)
+        self.assertLess(bar.find('HUDField("SEARCH"'), bar.find('Button("SEARCH")'))
+        self.assertLess(bar.find('Button("SEARCH")'), bar.find('Button("SAY")'))
+        self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
         self.assertIn("runtime.speech.listen(locale:", tab)
         self.assertIn("runtime.ptt.live", tab)
         self.assertIn("openAnswer()", tab)

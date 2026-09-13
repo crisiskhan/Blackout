@@ -20,6 +20,12 @@ def read(*parts: str) -> str:
     return ROOT.joinpath(*parts).read_text()
 
 
+def field_search_bar(src: str) -> str:
+    """The SEARCH/SAY HStack on FIELD. Chips belong on this row, not under it."""
+    search = src.split("private var searchField")[1].split("private func say")[0]
+    return search.split("HStack", 1)[1].split("if sayFailed", 1)[0]
+
+
 def person_compass_const(name: str) -> float:
     src = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift")
     match = re.search(
@@ -1280,6 +1286,22 @@ class FieldInstrumentTests(unittest.TestCase):
         )
         self.assertLess(open_fn.find("s.step.image"), open_fn.find("FieldCorpus.doLines"))
         self.assertLess(open_fn.find("FieldCorpus.doLines"), open_fn.find("s.step.child"))
+
+    def test_search_and_say_sit_at_the_end_of_the_bar(self):
+        field = read("Blackout", "FieldTab.swift")
+        qa = read("docs", "SOLO_QA.md")
+        bar = field_search_bar(field)
+        self.assertIn('HUDField("SEARCH"', bar)
+        self.assertIn('Button("SEARCH")', bar)
+        self.assertIn('Button("SAY")', bar)
+        self.assertLess(bar.find('HUDField("SEARCH"'), bar.find('Button("SEARCH")'))
+        self.assertLess(bar.find('Button("SEARCH")'), bar.find('Button("SAY")'))
+        self.assertIn("HUDOverlayChipStyle()", bar)
+        search = field.split("private var searchField")[1].split("private func say")[0]
+        self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
+        self.assertIn("end of the SEARCH bar", qa)
+        self.assertIn("not a second row", qa)
+        self.assertNotIn("best in class", qa.lower())
 
     def test_solo_qa_scores_stop_if_and_step_speak(self):
         qa = read("docs", "SOLO_QA.md")
