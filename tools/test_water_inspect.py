@@ -160,6 +160,12 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("sandia foothills open space", nm_blob)
         self.assertIn("paseo de la mesa open space", nm_blob)
         self.assertIn("golden open space", nm_blob)
+        self.assertIn("arroyo hondo open space", nm_blob)
+        self.assertIn("durand open space", nm_blob)
+        self.assertIn("east tijeras arroyo open space", nm_blob)
+        self.assertIn("fenton lake state park", nm_blob)
+        self.assertIn("pino arroyo open space", nm_blob)
+        self.assertIn("santa fe open space", nm_blob)
         self.assertIn("placitas open space", nm_blob)
         self.assertIn("bear canyon scenic easement", nm_blob)
         self.assertIn("la tierra trails", nm_blob)
@@ -257,6 +263,13 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertIn("balcones canyonlands preserve - cuevas east", east_blob)
         self.assertIn("decker tallgrass prairie preserve", east_blob)
         self.assertIn("deer park at maple run preserve", east_blob)
+        self.assertIn("anthem tract", east_blob)
+        self.assertIn("brodie and oakdale properties", east_blob)
+        self.assertIn("shudde fath tract", east_blob)
+        self.assertIn("waste management wildlife park", east_blob)
+        self.assertIn("southern walnut creek greenbelt", east_blob)
+        self.assertIn("uplands", east_blob)
+        self.assertIn("westgate and sunset properties", east_blob)
         self.assertIn("crestview commons neighborhood park", east_blob)
         self.assertIn("ladybird johnson wildflower center", east_blob)
         self.assertIn("zilker botanical garden", east_blob)
@@ -2069,6 +2082,85 @@ class ShippedWaterLayers(unittest.TestCase):
             ),
             "reserve",
         )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "nature_reserve", "name": "Anthem Tract"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Brodie and Oakdale Properties"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Shudde Fath Tract"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Waste Management Wildlife Park"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Southern Walnut Creek Greenbelt"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "nature_reserve", "name": "Uplands"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "nature_reserve", "name": "Westgate and Sunset Properties"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Arroyo Hondo Open Space"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Durand Open Space"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {"leisure": "park", "name": "East Tijeras Arroyo Open Space"}
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "Fenton Lake State Park",
+                }
+            ),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Pino Arroyo Open Space"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind({"leisure": "park", "name": "Santa Fe Open Space"}),
+            "reserve",
+        )
+        self.assertEqual(
+            ground.overlay_kind(
+                {
+                    "boundary": "protected_area",
+                    "name": "Whitfield Wildlife Conservation Area",
+                }
+            ),
+            "wildlife",
+        )
         self.assertIsNone(
             ground.overlay_kind({"highway": "residential", "name": "Sendera Mesa Drive"})
         )
@@ -2179,6 +2271,16 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("andres")', inspect)
         self.assertNotIn('contains("sevilleta")', inspect)
         self.assertNotIn('contains("whitfield")', inspect)
+        self.assertNotIn('contains("anthem")', inspect)
+        self.assertNotIn('contains("oakdale")', inspect)
+        self.assertNotIn('contains("shudde")', inspect)
+        self.assertNotIn('contains("uplands")', inspect)
+        self.assertNotIn('contains("westgate")', inspect)
+        self.assertNotIn('contains("hondo")', inspect)
+        self.assertNotIn('contains("durand")', inspect)
+        self.assertNotIn('contains("tijeras")', inspect)
+        self.assertNotIn('contains("fenton")', inspect)
+        self.assertNotIn('contains("pino")', inspect)
         self.assertNotIn('contains("marquez")', inspect)
         self.assertNotIn('contains("mesa blanca")', inspect)
         self.assertNotIn('contains("gato")', inspect)
@@ -3245,6 +3347,33 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Deer Park at Maple Run Preserve", glass)
         self.assertIn("30.203030", glass)
         self.assertIn("-97.862093", glass)
+        self.assertIn("Anthem Tract", glass)
+        self.assertIn("30.051290", glass)
+        self.assertIn("-97.911724", glass)
+        self.assertIn("Brodie and Oakdale Properties", glass)
+        self.assertIn("30.218886", glass)
+        self.assertIn("-97.824144", glass)
+        self.assertIn("Oakdale Drive", glass)
+        self.assertIn("Shudde Fath Tract", glass)
+        self.assertIn("30.239353", glass)
+        self.assertIn("-97.806689", glass)
+        self.assertIn("Stearns Lane", glass)
+        self.assertIn("Waste Management Wildlife Park", glass)
+        self.assertIn("30.345424", glass)
+        self.assertIn("-97.646186", glass)
+        self.assertIn("Springdale Road", glass)
+        self.assertIn("Southern Walnut Creek Greenbelt", glass)
+        self.assertIn("30.287359", glass)
+        self.assertIn("-97.657368", glass)
+        self.assertIn("Southern Walnut Creek Trail", glass)
+        self.assertIn("Uplands", glass)
+        self.assertIn("30.231440", glass)
+        self.assertIn("-97.807240", glass)
+        self.assertIn("South Lamar Boulevard", glass)
+        self.assertIn("Westgate and Sunset Properties", glass)
+        self.assertIn("30.226090", glass)
+        self.assertIn("-97.804326", glass)
+        self.assertIn("West Wind Trail", glass)
         self.assertIn("Sendera Mesa Drive", glass)
         self.assertIn("Sendera Mesa Neighborhood Park", glass)
         self.assertIn("31.694905", glass)
@@ -3834,6 +3963,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("-106.480448", glass)
         self.assertIn("High Desert Street Northeast", glass)
         self.assertIn("High Desert Embudito Open Space", glass)
+        self.assertIn("Embudito Arroyo", glass)
         self.assertIn("Bandelier National Monument", glass)
         self.assertIn("35.827039", glass)
         self.assertIn("-106.351807", glass)
@@ -3877,6 +4007,29 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Desert Trails Community Park", glass)
         self.assertIn("Dale Ball Trails", glass)
         self.assertIn("Santa Fe Open Space", glass)
+        self.assertIn("35.693968", glass)
+        self.assertIn("-105.972175", glass)
+        self.assertIn("Paseo de Vista", glass)
+        self.assertIn("Arroyo Hondo Open Space", glass)
+        self.assertIn("35.623768", glass)
+        self.assertIn("-105.926509", glass)
+        self.assertIn("Durand Open Space", glass)
+        self.assertIn("34.999947", glass)
+        self.assertIn("-106.689481", glass)
+        self.assertIn("East Tijeras Arroyo Open Space", glass)
+        self.assertIn("35.058701", glass)
+        self.assertIn("-106.507724", glass)
+        self.assertIn("Fenton Lake State Park", glass)
+        self.assertIn("35.890850", glass)
+        self.assertIn("-106.715621", glass)
+        self.assertIn("Barley Canyon Road", glass)
+        self.assertIn("Pino Arroyo Open Space", glass)
+        self.assertIn("35.159507", glass)
+        self.assertIn("-106.495043", glass)
+        self.assertIn("Quail Run Court Northeast", glass)
+        self.assertIn("Whitfield Wildlife Conservation Area", glass)
+        self.assertIn("34.668435", glass)
+        self.assertIn("-106.739598", glass)
         self.assertIn("Sun Mountain", glass)
         self.assertIn("35.662198", glass)
         self.assertIn("-105.912801", glass)
@@ -4323,6 +4476,13 @@ class GroundFieldSync(unittest.TestCase):
         indian_grass_hit = False
         south_hills_hit = False
         deer_park_hit = False
+        anthem_hit = False
+        oakdale_hit = False
+        shudde_hit = False
+        waste_park_hit = False
+        walnut_belt_hit = False
+        uplands_hit = False
+        westgate_hit = False
         buttercup_hit = False
         oasis_hit = False
         whirl_hit = False
@@ -4534,6 +4694,20 @@ class GroundFieldSync(unittest.TestCase):
                     south_hills_hit = True
                 if kind == "reserve" and name == "Deer Park at Maple Run Preserve" and pip(-97.862093, 30.203030, ring):
                     deer_park_hit = True
+                if kind == "reserve" and name == "Anthem Tract" and pip(-97.911724, 30.051290, ring):
+                    anthem_hit = True
+                if kind == "reserve" and name == "Brodie and Oakdale Properties" and pip(-97.824144, 30.218886, ring):
+                    oakdale_hit = True
+                if kind == "reserve" and name == "Shudde Fath Tract" and pip(-97.806689, 30.239353, ring):
+                    shudde_hit = True
+                if kind == "reserve" and name == "Waste Management Wildlife Park" and pip(-97.646186, 30.345424, ring):
+                    waste_park_hit = True
+                if kind == "reserve" and name == "Southern Walnut Creek Greenbelt" and pip(-97.657368, 30.287359, ring):
+                    walnut_belt_hit = True
+                if kind == "reserve" and name == "Uplands" and pip(-97.807240, 30.231440, ring):
+                    uplands_hit = True
+                if kind == "reserve" and name == "Westgate and Sunset Properties" and pip(-97.804326, 30.226090, ring):
+                    westgate_hit = True
                 if kind == "botanic" and name == "Crestview Commons Neighborhood Park" and pip(-97.720514, 30.343843, ring):
                     crestview_hit = True
         self.assertTrue(
@@ -4807,6 +4981,34 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             deer_park_hit,
             "Deer Park at Maple Run Preserve hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            anthem_hit,
+            "Anthem Tract hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            oakdale_hit,
+            "Brodie and Oakdale Properties hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            shudde_hit,
+            "Shudde Fath Tract hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            waste_park_hit,
+            "Waste Management Wildlife Park hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            walnut_belt_hit,
+            "Southern Walnut Creek Greenbelt hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            uplands_hit,
+            "Uplands hold is not inside the named nature reserve",
+        )
+        self.assertTrue(
+            westgate_hit,
+            "Westgate and Sunset Properties hold is not inside the named nature reserve",
         )
 
         east_osm = json.loads((PACK_ROOT / "tx-east" / "osm.geojson").read_text())
@@ -5281,6 +5483,7 @@ class GroundFieldSync(unittest.TestCase):
         pecos_hit = False
         nature_center_hit = False
         game_commission_hit = False
+        whitfield_hit = False
         sevilleta_hit = False
         barelas_hit = False
         prisma_hit = False
@@ -5347,6 +5550,10 @@ class GroundFieldSync(unittest.TestCase):
                 if kind == "wildlife" and pip(-106.741123, 34.620499, ring):
                     game_commission_hit = (
                         props.get("name") == "State Game Commission Land"
+                    )
+                if kind == "wildlife" and pip(-106.739598, 34.668435, ring):
+                    whitfield_hit = (
+                        props.get("name") == "Whitfield Wildlife Conservation Area"
                     )
                 if kind == "wildlife" and pip(-106.874225, 34.396837, ring):
                     sevilleta_hit = (
@@ -5468,6 +5675,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             game_commission_hit,
             "State Game Commission Land is not wildlife range on the NM overlay",
+        )
+        self.assertTrue(
+            whitfield_hit,
+            "Whitfield Wildlife Conservation Area hold is not inside the wildlife overlay",
         )
         self.assertTrue(
             sevilleta_hit,
@@ -6183,6 +6394,81 @@ class GroundFieldSync(unittest.TestCase):
             "SOLO_QA Sun Mountain hold is not inside the slope sheet",
         )
 
+        nm_hondo_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-105.926509, 35.623768, ring):
+                    nm_hondo_hit = props.get("name") == "Arroyo Hondo Open Space"
+        self.assertTrue(
+            nm_hondo_hit,
+            "Arroyo Hondo Open Space hold is not inside the named open space",
+        )
+
+        nm_durand_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-106.689481, 34.999947, ring):
+                    nm_durand_hit = props.get("name") == "Durand Open Space"
+        self.assertTrue(
+            nm_durand_hit,
+            "Durand Open Space hold is not inside the named open space",
+        )
+
+        nm_tijeras_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-106.507724, 35.058701, ring):
+                    nm_tijeras_hit = props.get("name") == "East Tijeras Arroyo Open Space"
+        self.assertTrue(
+            nm_tijeras_hit,
+            "East Tijeras Arroyo Open Space hold is not inside the named open space",
+        )
+
+        nm_fenton_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            if ground.overlay_kind(props) != "reserve":
+                continue
+            if props.get("name") != "Fenton Lake State Park":
+                continue
+            for ring in rings_of(feat.get("geometry") or {}):
+                if pip(-106.715621, 35.890850, ring):
+                    nm_fenton_hit = True
+        self.assertTrue(
+            nm_fenton_hit,
+            "Fenton Lake State Park hold is not inside the named nature reserve",
+        )
+
+        nm_pino_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-106.495043, 35.159507, ring):
+                    nm_pino_hit = props.get("name") == "Pino Arroyo Open Space"
+        self.assertTrue(
+            nm_pino_hit,
+            "Pino Arroyo Open Space hold is not inside the named open space",
+        )
+
+        nm_santa_fe_space_hit = False
+        for feat in nm["features"]:
+            props = feat.get("properties") or {}
+            kind = ground.overlay_kind(props)
+            for ring in rings_of(feat.get("geometry") or {}):
+                if kind == "reserve" and pip(-105.972175, 35.693968, ring):
+                    nm_santa_fe_space_hit = props.get("name") == "Santa Fe Open Space"
+        self.assertTrue(
+            nm_santa_fe_space_hit,
+            "Santa Fe Open Space hold is not inside the named open space",
+        )
+
         nm_osm = json.loads((PACK_ROOT / "nm" / "osm.geojson").read_text())
         nm_wood = False
         nm_bosque = False
@@ -6728,6 +7014,26 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.216143", qa)
         self.assertIn("Deer Park at Maple Run Preserve", qa)
         self.assertIn("30.203030", qa)
+        self.assertIn("Anthem Tract", qa)
+        self.assertIn("30.051290", qa)
+        self.assertIn("Brodie and Oakdale Properties", qa)
+        self.assertIn("30.218886", qa)
+        self.assertIn("Oakdale Drive", qa)
+        self.assertIn("Shudde Fath Tract", qa)
+        self.assertIn("30.239353", qa)
+        self.assertIn("Stearns Lane", qa)
+        self.assertIn("Waste Management Wildlife Park", qa)
+        self.assertIn("30.345424", qa)
+        self.assertIn("Springdale Road", qa)
+        self.assertIn("Southern Walnut Creek Greenbelt", qa)
+        self.assertIn("30.287359", qa)
+        self.assertIn("Southern Walnut Creek Trail", qa)
+        self.assertIn("Uplands", qa)
+        self.assertIn("30.231440", qa)
+        self.assertIn("South Lamar Boulevard", qa)
+        self.assertIn("Westgate and Sunset Properties", qa)
+        self.assertIn("30.226090", qa)
+        self.assertIn("West Wind Trail", qa)
         self.assertIn("Sendera Mesa Drive", qa)
         self.assertIn("Sendera Mesa Neighborhood Park", qa)
         self.assertIn("Dome Wilderness", qa)
@@ -6740,6 +7046,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.138700", qa)
         self.assertIn("High Desert Street Northeast", qa)
         self.assertIn("High Desert Embudito Open Space", qa)
+        self.assertIn("Embudito Arroyo", qa)
+        self.assertIn("282 m", qa)
         self.assertIn("Bandelier National Monument", qa)
         self.assertIn("35.827039", qa)
         self.assertIn("Carlito Springs Open Space", qa)
@@ -6795,6 +7103,23 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.722229", qa)
         self.assertIn("Sun Mountain", qa)
         self.assertIn("35.662198", qa)
+        self.assertIn("Arroyo Hondo Open Space", qa)
+        self.assertIn("35.623768", qa)
+        self.assertIn("Durand Open Space", qa)
+        self.assertIn("34.999947", qa)
+        self.assertIn("East Tijeras Arroyo Open Space", qa)
+        self.assertIn("35.058701", qa)
+        self.assertIn("Fenton Lake State Park", qa)
+        self.assertIn("35.890850", qa)
+        self.assertIn("Barley Canyon Road", qa)
+        self.assertIn("Pino Arroyo Open Space", qa)
+        self.assertIn("35.159507", qa)
+        self.assertIn("Quail Run Court", qa)
+        self.assertIn("Santa Fe Open Space", qa)
+        self.assertIn("35.693968", qa)
+        self.assertIn("Paseo de Vista", qa)
+        self.assertIn("Whitfield Wildlife Conservation Area", qa)
+        self.assertIn("34.668435", qa)
         self.assertIn("Hueco Tanks State Park and Historic Site", qa)
         self.assertIn("31.911873", qa)
         self.assertIn("Hueco Mountain Park", qa)

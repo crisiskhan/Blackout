@@ -397,7 +397,7 @@ public enum Inspect {
     /// or `galisteo`.
     /// Phrase `management unit`, not `wildlife management area` — a
     /// Balcones management unit is range; Waste Management Wildlife
-    /// Park stays Open reserve. Phrase `ecological research`, not the
+    /// Park is Held as Open reserve. Phrase `ecological research`, not the
     /// word `research`. Phrase `hawk watch`, not the word `hawk` —
     /// Hawk Watch Trail stays a trail. Phrase `experimental range`, not
     /// the word `experimental`. Phrase `natural history`, not the word
@@ -407,7 +407,7 @@ public enum Inspect {
     /// `woods`. Phrase `beck preserve`, not the word `beck`. Beck
     /// Preserve is Travis Audubon bird sanctuary. Phrase `brodie
     /// wild`, not the word `brodie`. Brodie Lane stays a road.
-    /// Brodie and Oakdale Properties stay Open reserve. Phrase
+    /// Brodie and Oakdale Properties are Held as Open reserve. Phrase
     /// `dahlstrom nature`, not the word `dahlstrom`. Dahlstrom
     /// Road stays a road. The `nature preserve` phrase already
     /// matches that sheet. Phrase `bernardo wildlife`, not the
@@ -485,9 +485,11 @@ public enum Inspect {
     /// roads. Phrase `wildlife refuge` already matches Feather
     /// Lake Wildlife Refuge. Ditches sit on most of that sheet;
     /// this corner is 203 m from Bowman Lateral. Nottingham Drive
-    /// stays a road. Do not add matcher `feather`. Whitfield dry
-    /// interiors have no nearby name that is not Acequia Madre
-    /// and stay unheld. `preserve` alone is
+    /// stays a road. Do not add matcher `feather`. Whitfield Wildlife
+    /// Conservation Area is Held at 34.668435, −106.739598 —
+    /// phrase `wildlife conservation area`, not the word `whitfield`.
+    /// Unique versus State Game Commission Land. Never edible.
+    /// `preserve` alone is
     /// still forbidden.
     static func isWildlifeRange(_ t: [String: String]) -> Bool {
         let park = t["leisure"] == "park"
@@ -689,9 +691,14 @@ public enum Inspect {
     /// Wilderness, Billy Rogers Arroyo, Piedmont City Preserve, Westside
     /// Preserve, Manzano Wilderness Study Area, Ojito Wilderness Study
     /// Area, San Luis Mesa ACEC, Pecos Wilderness, South Hills
-    /// Conservation Area, Deer Park at Maple Run Preserve, Sandia
-    /// Foothills Open Space, Golden Open Space, and Paseo de la Mesa
-    /// Open Space are those
+    /// Conservation Area, Deer Park at Maple Run Preserve, Anthem
+    /// Tract, Brodie and Oakdale Properties, Shudde Fath Tract,
+    /// Waste Management Wildlife Park, Southern Walnut Creek
+    /// Greenbelt, Uplands, Westgate and Sunset Properties, Sandia
+    /// Foothills Open Space, Golden Open Space, Paseo de la Mesa
+    /// Open Space, Arroyo Hondo Open Space, Durand Open Space,
+    /// East Tijeras Arroyo Open Space, Fenton Lake State Park,
+    /// Pino Arroyo Open Space, and Santa Fe Open Space are those
     /// Holds. An unnamed reserve falls through to
     /// the landcover. Do not add matcher `los lunas`, `galisteo`,
     /// `castner`, `trackways`, `white sands`, `ojito`, `cabezon`,
@@ -706,7 +713,9 @@ public enum Inspect {
     /// `tres pistolas`, `pistolas`, `bear canyon`, `conservation
     /// trust`, `land conservancy`, `conservancy`, `westside`,
     /// `billy`, `piedmont`, `san luis`, `south hills`, `deer park`,
-    /// `maple`, `golden`, or `paseo`. Phrase
+    /// `maple`, `golden`, `paseo`, `anthem`, `oakdale`, `shudde`,
+    /// `uplands`, `westgate`, `hondo`, `durand`, `tijeras`, `fenton`,
+    /// or `pino`. Phrase
     /// `open space` is not a bare `contains` —
     /// Open Space Visitor Center, a
     /// farm open space, Alameda/Rio Grande Open Space, and a trailhead
