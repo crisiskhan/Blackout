@@ -1475,6 +1475,82 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(vabmCliff.doLine.lowercased().contains("hog"), vabmCliff.doLine)
         XCTAssertFalse(vabmCliff.doLine.lowercased().contains("edible"), vabmCliff.doLine)
 
+        let cerroRubio = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerro Rubio"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerroRubio.klass, "Peak")
+        XCTAssertNotEqual(cerroRubio.klass, "Wildlife range")
+        XCTAssertTrue(cerroRubio.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(cerroRubio.doLine.lowercased().contains("black bear and elk range"), cerroRubio.doLine)
+        XCTAssertFalse(cerroRubio.doLine.lowercased().contains("javelina"), cerroRubio.doLine)
+        XCTAssertFalse(cerroRubio.doLine.lowercased().contains("edible"), cerroRubio.doLine)
+
+        let cerroSanLuis = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerro San Luis"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerroSanLuis.klass, "Peak")
+        XCTAssertNotEqual(cerroSanLuis.klass, "Wildlife range")
+        XCTAssertNotEqual(cerroSanLuis.klass, "Open reserve")
+        XCTAssertTrue(cerroSanLuis.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(cerroSanLuis.doLine.lowercased().contains("black bear and elk range"), cerroSanLuis.doLine)
+        XCTAssertFalse(cerroSanLuis.doLine.lowercased().contains("javelina"), cerroSanLuis.doLine)
+        XCTAssertFalse(cerroSanLuis.doLine.lowercased().contains("edible"), cerroSanLuis.doLine)
+
+        let cerroDelMedio = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerro del Medio"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerroDelMedio.klass, "Peak")
+        XCTAssertNotEqual(cerroDelMedio.klass, "Wildlife range")
+        XCTAssertTrue(cerroDelMedio.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(cerroDelMedio.doLine.lowercased().contains("black bear and elk range"), cerroDelMedio.doLine)
+        XCTAssertFalse(cerroDelMedio.doLine.lowercased().contains("javelina"), cerroDelMedio.doLine)
+        XCTAssertFalse(cerroDelMedio.doLine.lowercased().contains("edible"), cerroDelMedio.doLine)
+
+        let cerrosDeTrasquilar = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerros de Trasquilar"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerrosDeTrasquilar.klass, "Peak")
+        XCTAssertNotEqual(cerrosDeTrasquilar.klass, "Wildlife range")
+        XCTAssertTrue(cerrosDeTrasquilar.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(
+            cerrosDeTrasquilar.doLine.lowercased().contains("black bear and elk range"),
+            cerrosDeTrasquilar.doLine
+        )
+        XCTAssertFalse(cerrosDeTrasquilar.doLine.lowercased().contains("javelina"), cerrosDeTrasquilar.doLine)
+        XCTAssertFalse(cerrosDeTrasquilar.doLine.lowercased().contains("edible"), cerrosDeTrasquilar.doLine)
+
+        let cerrosDelAbrigo = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerros del Abrigo"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(cerrosDelAbrigo.klass, "Peak")
+        XCTAssertNotEqual(cerrosDelAbrigo.klass, "Wildlife range")
+        XCTAssertTrue(cerrosDelAbrigo.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(cerrosDelAbrigo.doLine.lowercased().contains("black bear and elk range"), cerrosDelAbrigo.doLine)
+        XCTAssertFalse(cerrosDelAbrigo.doLine.lowercased().contains("javelina"), cerrosDelAbrigo.doLine)
+        XCTAssertFalse(cerrosDelAbrigo.doLine.lowercased().contains("edible"), cerrosDelAbrigo.doLine)
+
+        let sulphurPoint = Inspect.read(
+            tags: ["natural": "peak", "name": "Sulphur Point"],
+            state: "NM",
+            pack: "nm"
+        )
+        XCTAssertEqual(sulphurPoint.klass, "Peak")
+        XCTAssertNotEqual(sulphurPoint.klass, "Wildlife range")
+        XCTAssertTrue(sulphurPoint.fieldRoute.contains(Inspect.mammalNMCard))
+        XCTAssertTrue(sulphurPoint.doLine.lowercased().contains("black bear and elk range"), sulphurPoint.doLine)
+        XCTAssertFalse(sulphurPoint.doLine.lowercased().contains("javelina"), sulphurPoint.doLine)
+        XCTAssertFalse(sulphurPoint.doLine.lowercased().contains("edible"), sulphurPoint.doLine)
+
         let wildernessPark = Inspect.read(
             tags: ["leisure": "nature_reserve", "name": "Barton Creek Wilderness Park"],
             pack: "tx-east"

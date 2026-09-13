@@ -3637,6 +3637,30 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.353957", glass)
         self.assertIn("-106.893106", glass)
         self.assertIn("vabmCliff", glass)
+        self.assertIn("Cerro Rubio", glass)
+        self.assertIn("35.945855", glass)
+        self.assertIn("-106.401420", glass)
+        self.assertIn("cerroRubio", glass)
+        self.assertIn("Cerro San Luis", glass)
+        self.assertIn("35.949719", glass)
+        self.assertIn("-106.538793", glass)
+        self.assertIn("cerroSanLuis", glass)
+        self.assertIn("Cerro del Medio", glass)
+        self.assertIn("35.905856", glass)
+        self.assertIn("-106.447810", glass)
+        self.assertIn("cerroDelMedio", glass)
+        self.assertIn("Cerros de Trasquilar", glass)
+        self.assertIn("35.942521", glass)
+        self.assertIn("-106.506700", glass)
+        self.assertIn("cerrosDeTrasquilar", glass)
+        self.assertIn("Cerros del Abrigo", glass)
+        self.assertIn("35.931411", glass)
+        self.assertIn("-106.477255", glass)
+        self.assertIn("cerrosDelAbrigo", glass)
+        self.assertIn("Sulphur Point", glass)
+        self.assertIn("35.914744", glass)
+        self.assertIn("-106.619758", glass)
+        self.assertIn("sulphurPoint", glass)
         self.assertIn("Leonora Curtin Wetland Preserve", glass)
         self.assertIn("35.569230", glass)
         self.assertIn("-106.101626", glass)
@@ -5638,6 +5662,36 @@ class GroundFieldSync(unittest.TestCase):
             "VABM Cliff did not survive tiling as a peak",
         )
         self.assertIn(
+            "Cerro Rubio",
+            place_names_in_tile("nm", -106.401420, 35.945855),
+            "Cerro Rubio did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Cerro San Luis",
+            place_names_in_tile("nm", -106.538793, 35.949719),
+            "Cerro San Luis did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Cerro del Medio",
+            place_names_in_tile("nm", -106.447810, 35.905856),
+            "Cerro del Medio did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Cerros de Trasquilar",
+            place_names_in_tile("nm", -106.506700, 35.942521),
+            "Cerros de Trasquilar did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Cerros del Abrigo",
+            place_names_in_tile("nm", -106.477255, 35.931411),
+            "Cerros del Abrigo did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Sulphur Point",
+            place_names_in_tile("nm", -106.619758, 35.914744),
+            "Sulphur Point did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Loma El Gato",
             place_names_in_tile("tx-west", -106.573797, 31.235777),
             "Loma El Gato did not survive tiling as a peak",
@@ -6713,6 +6767,12 @@ class GroundFieldSync(unittest.TestCase):
         whiteface_mountain_peak = False
         sierra_ladrones_peak = False
         vabm_cliff_peak = False
+        cerro_rubio_peak = False
+        cerro_san_luis_peak = False
+        cerro_del_medio_peak = False
+        cerros_de_trasquilar_peak = False
+        cerros_del_abrigo_peak = False
+        sulphur_point_peak = False
         nm_scrub = False
         sandia_cave = False
         embudo_cave = False
@@ -6797,6 +6857,42 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.893106)) < 1e-6
                 ):
                     vabm_cliff_peak = True
+                if (
+                    props.get("name") == "Cerro Rubio"
+                    and abs(lat - 35.945855) < 1e-6
+                    and abs(lon - (-106.401420)) < 1e-6
+                ):
+                    cerro_rubio_peak = True
+                if (
+                    props.get("name") == "Cerro San Luis"
+                    and abs(lat - 35.949719) < 1e-6
+                    and abs(lon - (-106.538793)) < 1e-6
+                ):
+                    cerro_san_luis_peak = True
+                if (
+                    props.get("name") == "Cerro del Medio"
+                    and abs(lat - 35.905856) < 1e-6
+                    and abs(lon - (-106.447810)) < 1e-6
+                ):
+                    cerro_del_medio_peak = True
+                if (
+                    props.get("name") == "Cerros de Trasquilar"
+                    and abs(lat - 35.942521) < 1e-6
+                    and abs(lon - (-106.506700)) < 1e-6
+                ):
+                    cerros_de_trasquilar_peak = True
+                if (
+                    props.get("name") == "Cerros del Abrigo"
+                    and abs(lat - 35.931411) < 1e-6
+                    and abs(lon - (-106.477255)) < 1e-6
+                ):
+                    cerros_del_abrigo_peak = True
+                if (
+                    props.get("name") == "Sulphur Point"
+                    and abs(lat - 35.914744) < 1e-6
+                    and abs(lon - (-106.619758)) < 1e-6
+                ):
+                    sulphur_point_peak = True
             if props.get("natural") in ("cave", "cave_entrance") and geom.get("type") == "Point":
                 lon, lat = geom["coordinates"][:2]
                 if (
@@ -6888,6 +6984,30 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             vabm_cliff_peak,
             "VABM Cliff is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerro_rubio_peak,
+            "Cerro Rubio is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerro_san_luis_peak,
+            "Cerro San Luis is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerro_del_medio_peak,
+            "Cerro del Medio is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerros_de_trasquilar_peak,
+            "Cerros de Trasquilar is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            cerros_del_abrigo_peak,
+            "Cerros del Abrigo is not a named peak in the NM extract",
+        )
+        self.assertTrue(
+            sulphur_point_peak,
+            "Sulphur Point is not a named peak in the NM extract",
         )
         self.assertTrue(nm_scrub, "glass NM scrub hold is not inside Cerro Pelado Burn Scar")
         self.assertTrue(sandia_cave, "Sandia Man Cave is not a cave mouth in the NM extract")
@@ -7489,6 +7609,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.393953", qa)
         self.assertIn("VABM Cliff", qa)
         self.assertIn("34.353957", qa)
+        self.assertIn("Cerro Rubio", qa)
+        self.assertIn("35.945855", qa)
+        self.assertIn("Cerro San Luis", qa)
+        self.assertIn("35.949719", qa)
+        self.assertIn("Cerro del Medio", qa)
+        self.assertIn("35.905856", qa)
+        self.assertIn("Cerros de Trasquilar", qa)
+        self.assertIn("35.942521", qa)
+        self.assertIn("Cerros del Abrigo", qa)
+        self.assertIn("35.931411", qa)
+        self.assertIn("Sulphur Point", qa)
+        self.assertIn("35.914744", qa)
         self.assertIn("Rio Grande Nature Center State Park", qa)
         self.assertIn("35.124701", qa)
         self.assertIn("Open Space Visitor Center", qa)
@@ -7629,6 +7761,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("34.393953", qa)
         self.assertIn("VABM Cliff", qa)
         self.assertIn("34.353957", qa)
+        self.assertIn("Cerro Rubio", qa)
+        self.assertIn("35.945855", qa)
+        self.assertIn("Cerro San Luis", qa)
+        self.assertIn("35.949719", qa)
+        self.assertIn("Cerro del Medio", qa)
+        self.assertIn("35.905856", qa)
+        self.assertIn("Cerros de Trasquilar", qa)
+        self.assertIn("35.942521", qa)
+        self.assertIn("Cerros del Abrigo", qa)
+        self.assertIn("35.931411", qa)
+        self.assertIn("Sulphur Point", qa)
+        self.assertIn("35.914744", qa)
         self.assertIn("Barton Creek Wilderness Park", qa)
         self.assertIn("Área de Protección de Flora y Fauna", qa)
         self.assertIn("Loma El Gato", qa)

@@ -102,7 +102,12 @@ CAVE_PRESERVE_KEYS = {
 # that sheet — rank 1 still beats the overlay. Do not
 # add matcher `san antonio`, `valles`, `cerro grande`,
 # or `rabbit`. Redondo Peak and South Mountain stay unheld
-# (two OSM peaks). Phrase `wilderness park`, not the word `wilderness`.
+# (two OSM peaks). Cerro Rubio, Cerro San Luis, Cerro del
+# Medio, Cerros de Trasquilar, Cerros del Abrigo, and
+# Sulphur Point are named peaks on that sheet — rank 1
+# still beats the overlay. Do not add matcher `rubio`,
+# `san luis`, `del medio`, `trasquilar`, `abrigo`, or
+# `sulphur`. Phrase `wilderness park`, not the word `wilderness`.
 # Wilderness Gate stays apartments. Phrase `canyonlands preserve`,
 # not the word `canyonlands`. Canyonlands Trail Park stays a park.
 # Phrase `wetland preserve`, not the word `wetland`. Rio Bosque
@@ -219,8 +224,12 @@ CAVE_PRESERVE_KEYS = {
 # rank 1 still beats the overlay. Sierra Ladrones is a
 # named peak on that sheet — rank 1 still beats the
 # overlay. VABM Cliff is a named peak on that sheet —
-# rank 1 still beats the overlay. Do not add matcher
-# `whiteface`, `ladrones`, `ladron`, `vabm`, or `cliff`.
+# rank 1 still beats the overlay. Cerro Rubio, Cerro San
+# Luis, Cerro del Medio, Cerros de Trasquilar, Cerros del
+# Abrigo, and Sulphur Point are named peaks on Valles
+# Caldera — rank 1 still beats the overlay. Do not add matcher
+# `whiteface`, `ladrones`, `ladron`, `vabm`, `cliff`, `rubio`,
+# `san luis`, `del medio`, `trasquilar`, `abrigo`, or `sulphur`.
 # Cerro Colorado stays unheld (eight OSM peaks). White Sands Missile
 # Range S Route 287 and Old Highway 85 stay roads. Phrase
 # `wildlife refuge` already

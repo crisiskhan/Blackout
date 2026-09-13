@@ -1676,6 +1676,63 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// or `cliff`.
     private static let vabmCliff = CLLocationCoordinate2D(latitude: 34.353957, longitude: -106.893106)
 
+    /// `Cerro Rubio` on the NM place slice. A named peak on
+    /// the Valles Caldera overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus Cerro Grande (8559 m) and
+    /// the Valles Caldera overlay Hold (7788 m). Unique title
+    /// (one OSM peak). Nearest water ~11342 m. Bear and elk
+    /// as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first. Do not add matcher `rubio`.
+    private static let cerroRubio = CLLocationCoordinate2D(latitude: 35.945855, longitude: -106.401420)
+
+    /// `Cerro San Luis` on the NM place slice. A named peak
+    /// on the Valles Caldera overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus San Antonio Mountain
+    /// (7070 m) and Cerros de Trasquilar (2998 m). Unique
+    /// title (one OSM peak). Nearest water ~8162 m. Bear and
+    /// elk as range, not javelina. Ice-on-rock is in this
+    /// book, so FIELD names cold first. San Luis Mesa ACEC
+    /// stays Open reserve. Do not add matcher `san luis`.
+    private static let cerroSanLuis = CLLocationCoordinate2D(latitude: 35.949719, longitude: -106.538793)
+
+    /// `Cerro del Medio` on the NM place slice. A named peak
+    /// on the Valles Caldera overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus Cerro Grande (5128 m)
+    /// and Cerros del Abrigo (3887 m). Unique title (one OSM
+    /// peak). Nearest water ~8749 m. Bear and elk as range,
+    /// not javelina. Ice-on-rock is in this book, so FIELD
+    /// names cold first. Do not add matcher `del medio`.
+    private static let cerroDelMedio = CLLocationCoordinate2D(latitude: 35.905856, longitude: -106.447810)
+
+    /// `Cerros de Trasquilar` on the NM place slice. A named
+    /// peak on the Valles Caldera overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus Cerro San Luis
+    /// (2998 m) and Cerros del Abrigo (2925 m). Unique title
+    /// (one OSM peak). Nearest water ~10377 m. Bear and elk
+    /// as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first. Do not add matcher
+    /// `trasquilar`.
+    private static let cerrosDeTrasquilar = CLLocationCoordinate2D(latitude: 35.942521, longitude: -106.506700)
+
+    /// `Cerros del Abrigo` on the NM place slice. A named peak
+    /// on the Valles Caldera overlay sheet — rank 1 still
+    /// beats the overlay. Unique versus Cerros de Trasquilar
+    /// (2925 m) and Cerro del Medio (3887 m). Unique title
+    /// (one OSM peak). Nearest water ~12497 m. Bear and elk
+    /// as range, not javelina. Ice-on-rock is in this book,
+    /// so FIELD names cold first. Do not add matcher `abrigo`.
+    private static let cerrosDelAbrigo = CLLocationCoordinate2D(latitude: 35.931411, longitude: -106.477255)
+
+    /// `Sulphur Point` on the NM place slice. A named peak on
+    /// the Valles Caldera overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus San Antonio Mountain
+    /// (2557 m). Unique title (one OSM peak). Nearest water
+    /// ~788 m (Laxitive Spring) — rank 1 still beats water at
+    /// the pin. Bear and elk as range, not javelina.
+    /// Ice-on-rock is in this book, so FIELD names cold first.
+    /// Do not add matcher `sulphur`.
+    private static let sulphurPoint = CLLocationCoordinate2D(latitude: 35.914744, longitude: -106.619758)
+
     /// `Barton Hill` on the east place slice. Hog as range, not west javelina.
     private static let eastPeak = CLLocationCoordinate2D(latitude: 30.065769, longitude: -97.882228)
 
@@ -5414,6 +5471,119 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(cliffPresent.first, Inspect.iceRockCard, "\(cliff)")
         XCTAssertEqual(InspectField.label(for: cliffPresent.first ?? ""), "FIELD · COLD")
         XCTAssertEqual(InspectField.bookLine(for: cliffPresent), "COLD · ANIMAL · BITE")
+
+        let rubio = try hold(at: Self.cerroRubio, zoom: 16, packId: "nm")
+        XCTAssertEqual(rubio.card?.klass, "Peak", "\(rubio)")
+        XCTAssertEqual(rubio.card?.title, "Cerro Rubio", "\(rubio)")
+        XCTAssertNotEqual(rubio.card?.klass, "Wildlife range", "\(rubio)")
+        XCTAssertNotEqual(rubio.card?.title, "Valles Caldera National Preserve", "\(rubio)")
+        XCTAssertNotEqual(rubio.card?.title, "Cerro Grande", "\(rubio)")
+        XCTAssertNotEqual(rubio.card?.title, "San Antonio Mountain", "\(rubio)")
+        XCTAssertNotEqual(rubio.card?.title, "Redondo Peak", "\(rubio)")
+        let rubioDo = rubio.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(rubioDo.contains("black bear and elk range"), rubio.card?.doLine ?? "")
+        XCTAssertTrue(rubioDo.contains("give it the road"), rubio.card?.doLine ?? "")
+        XCTAssertFalse(rubioDo.contains("javelina"), rubio.card?.doLine ?? "")
+        XCTAssertFalse(rubioDo.contains("hog"), rubio.card?.doLine ?? "")
+        XCTAssertFalse(rubioDo.contains("edible"), rubio.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(rubio.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(rubio)"
+        )
+
+        let sanLuisPeak = try hold(at: Self.cerroSanLuis, zoom: 16, packId: "nm")
+        XCTAssertEqual(sanLuisPeak.card?.klass, "Peak", "\(sanLuisPeak)")
+        XCTAssertEqual(sanLuisPeak.card?.title, "Cerro San Luis", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.klass, "Wildlife range", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.klass, "Open reserve", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.title, "Valles Caldera National Preserve", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.title, "San Antonio Mountain", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.title, "San Luis Mesa Area of Critical Environmental Concern", "\(sanLuisPeak)")
+        XCTAssertNotEqual(sanLuisPeak.card?.title, "Cerros de Trasquilar", "\(sanLuisPeak)")
+        let sanLuisPeakDo = sanLuisPeak.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sanLuisPeakDo.contains("black bear and elk range"), sanLuisPeak.card?.doLine ?? "")
+        XCTAssertTrue(sanLuisPeakDo.contains("give it the road"), sanLuisPeak.card?.doLine ?? "")
+        XCTAssertFalse(sanLuisPeakDo.contains("javelina"), sanLuisPeak.card?.doLine ?? "")
+        XCTAssertFalse(sanLuisPeakDo.contains("edible"), sanLuisPeak.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(sanLuisPeak.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(sanLuisPeak)"
+        )
+
+        let medio = try hold(at: Self.cerroDelMedio, zoom: 16, packId: "nm")
+        XCTAssertEqual(medio.card?.klass, "Peak", "\(medio)")
+        XCTAssertEqual(medio.card?.title, "Cerro del Medio", "\(medio)")
+        XCTAssertNotEqual(medio.card?.klass, "Wildlife range", "\(medio)")
+        XCTAssertNotEqual(medio.card?.title, "Valles Caldera National Preserve", "\(medio)")
+        XCTAssertNotEqual(medio.card?.title, "Cerro Grande", "\(medio)")
+        XCTAssertNotEqual(medio.card?.title, "Cerros del Abrigo", "\(medio)")
+        let medioDo = medio.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(medioDo.contains("black bear and elk range"), medio.card?.doLine ?? "")
+        XCTAssertTrue(medioDo.contains("give it the road"), medio.card?.doLine ?? "")
+        XCTAssertFalse(medioDo.contains("javelina"), medio.card?.doLine ?? "")
+        XCTAssertFalse(medioDo.contains("edible"), medio.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(medio.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(medio)"
+        )
+
+        let trasquilar = try hold(at: Self.cerrosDeTrasquilar, zoom: 16, packId: "nm")
+        XCTAssertEqual(trasquilar.card?.klass, "Peak", "\(trasquilar)")
+        XCTAssertEqual(trasquilar.card?.title, "Cerros de Trasquilar", "\(trasquilar)")
+        XCTAssertNotEqual(trasquilar.card?.klass, "Wildlife range", "\(trasquilar)")
+        XCTAssertNotEqual(trasquilar.card?.title, "Valles Caldera National Preserve", "\(trasquilar)")
+        XCTAssertNotEqual(trasquilar.card?.title, "Cerro San Luis", "\(trasquilar)")
+        XCTAssertNotEqual(trasquilar.card?.title, "Cerros del Abrigo", "\(trasquilar)")
+        let trasquilarDo = trasquilar.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(trasquilarDo.contains("black bear and elk range"), trasquilar.card?.doLine ?? "")
+        XCTAssertTrue(trasquilarDo.contains("give it the road"), trasquilar.card?.doLine ?? "")
+        XCTAssertFalse(trasquilarDo.contains("javelina"), trasquilar.card?.doLine ?? "")
+        XCTAssertFalse(trasquilarDo.contains("edible"), trasquilar.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(trasquilar.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(trasquilar)"
+        )
+
+        let abrigo = try hold(at: Self.cerrosDelAbrigo, zoom: 16, packId: "nm")
+        XCTAssertEqual(abrigo.card?.klass, "Peak", "\(abrigo)")
+        XCTAssertEqual(abrigo.card?.title, "Cerros del Abrigo", "\(abrigo)")
+        XCTAssertNotEqual(abrigo.card?.klass, "Wildlife range", "\(abrigo)")
+        XCTAssertNotEqual(abrigo.card?.title, "Valles Caldera National Preserve", "\(abrigo)")
+        XCTAssertNotEqual(abrigo.card?.title, "Cerros de Trasquilar", "\(abrigo)")
+        XCTAssertNotEqual(abrigo.card?.title, "Cerro del Medio", "\(abrigo)")
+        let abrigoDo = abrigo.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(abrigoDo.contains("black bear and elk range"), abrigo.card?.doLine ?? "")
+        XCTAssertTrue(abrigoDo.contains("give it the road"), abrigo.card?.doLine ?? "")
+        XCTAssertFalse(abrigoDo.contains("javelina"), abrigo.card?.doLine ?? "")
+        XCTAssertFalse(abrigoDo.contains("edible"), abrigo.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(abrigo.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(abrigo)"
+        )
+
+        let sulphur = try hold(at: Self.sulphurPoint, zoom: 16, packId: "nm")
+        XCTAssertEqual(sulphur.card?.klass, "Peak", "\(sulphur)")
+        XCTAssertEqual(sulphur.card?.title, "Sulphur Point", "\(sulphur)")
+        XCTAssertNotEqual(sulphur.card?.klass, "Wildlife range", "\(sulphur)")
+        XCTAssertNotEqual(sulphur.card?.klass, "Spring", "\(sulphur)")
+        XCTAssertNotEqual(sulphur.card?.title, "Valles Caldera National Preserve", "\(sulphur)")
+        XCTAssertNotEqual(sulphur.card?.title, "San Antonio Mountain", "\(sulphur)")
+        XCTAssertNotEqual(sulphur.card?.title, "Laxitive Spring", "\(sulphur)")
+        let sulphurDo = sulphur.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(sulphurDo.contains("black bear and elk range"), sulphur.card?.doLine ?? "")
+        XCTAssertTrue(sulphurDo.contains("give it the road"), sulphur.card?.doLine ?? "")
+        XCTAssertFalse(sulphurDo.contains("javelina"), sulphur.card?.doLine ?? "")
+        XCTAssertFalse(sulphurDo.contains("edible"), sulphur.card?.doLine ?? "")
+        XCTAssertEqual(
+            InspectField.presentRoute(sulphur.card?.fieldRoute ?? [], in: nmBook).first,
+            Inspect.iceRockCard,
+            "\(sulphur)"
+        )
 
         let conservationTrust = try hold(at: Self.santaFeConservationTrust, zoom: 16, packId: "nm")
         XCTAssertEqual(conservationTrust.card?.klass, "Open reserve", "\(conservationTrust)")
