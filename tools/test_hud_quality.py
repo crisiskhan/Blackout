@@ -346,8 +346,10 @@ class OffGridNoDisclaimerTests(unittest.TestCase):
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("compass mark", qa.lower())
         self.assertIn("No BLACKOUT as HUD type", qa)
-        self.assertIn("no black plate", qa.lower())
-        self.assertIn("streets show through", qa.lower())
+        self.assertIn("covers the page", qa.lower())
+        self.assertIn("black stays", qa.lower())
+        self.assertNotIn("no black plate", qa.lower())
+        self.assertNotIn("streets show through", qa.lower())
         self.assertIn("field poster", qa.lower())
 
 
@@ -548,7 +550,7 @@ def jpeg_size(path: Path) -> tuple[int, int]:
 
 
 class CompassMarkTests(unittest.TestCase):
-    """Home screen and boot share the square compass. No wordmark poster."""
+    """Home screen and HUD share the square compass. Black and rays stay."""
 
     def test_app_icon_is_opaque_1024(self):
         icon = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon.png"
@@ -556,10 +558,10 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual((width, height), (1024, 1024))
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
-    def _assert_emblem_without_plate(self, path: Path, *, match_store_rgb: bool) -> None:
-        """Outer black and outer rays are gone; original metal and well stay opaque."""
+    def _assert_mark_keeps_black_and_rays(self, path: Path, *, match_store_rgb: bool) -> None:
+        """Leave the black outside. Do not punch rays or metal to alpha."""
         width, height, color = png_ihdr(path)
-        self.assertEqual(color, 6, f"{path.name} has alpha")
+        self.assertIn(color, (2, 6), f"{path.name} color {color}")
         self.assertEqual(width, height)
         _, _, px = png_rgba(path)
         store = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset" / "AppIcon.png"
@@ -570,69 +572,48 @@ class CompassMarkTests(unittest.TestCase):
             (0, height - 1),
             (width - 1, height - 1),
         ):
-            self.assertEqual(png_px(px, width, x, y)[3], 0, f"{path.name} corner {x},{y}")
-        well = png_px(px, width, width // 2 + 200, height // 2)
-        self.assertEqual(well[3], 255, f"{path.name} inner well stays with the emblem")
-        if match_store_rgb:
-            sr, sg, sb, _ = png_px(store_px, width, width // 2 + 200, height // 2)
-            self.assertEqual(
-                well[:3],
-                (sr, sg, sb),
-                f"{path.name} inner well matches the storefront mark",
-            )
+            r, g, b, a = png_px(px, width, x, y)
+            self.assertEqual(a, 255, f"{path.name} corner {x},{y} punched")
+            self.assertLess(max(r, g, b), 12, f"{path.name} corner {x},{y} not black")
         core = png_px(px, width, width // 2, height // 2)
         self.assertGreaterEqual(core[0], 160, f"{path.name} red sight stays")
         self.assertEqual(core[3], 255, f"{path.name} red sight is fully opaque")
-        ring = png_px(px, width, width // 2, int(height * 200 / 1024))
-        self.assertEqual(ring[3], 255, f"{path.name} ring is fully opaque")
-        metal = (
-            (width // 2, int(height * 200 / 1024)),
-            (int(width * 792 / 1024), height // 2),
-            (width // 2, int(height * 56 / 1024)),
-        )
-        for x, y in metal:
-            r, g, b, a = png_px(px, width, x, y)
-            self.assertEqual(a, 255, f"{path.name} metal {x},{y} is fully opaque")
-            if match_store_rgb:
-                sr, sg, sb, _ = png_px(store_px, width, x, y)
-                self.assertEqual(
-                    (r, g, b),
-                    (sr, sg, sb),
-                    f"{path.name} metal RGB {x},{y} matches the storefront mark",
-                )
-        keep_max = 0
+        north = png_px(px, width, width // 2, int(height * 80 / 1408))
+        self.assertEqual(north[3], 255, f"{path.name} north metal punched")
+        self.assertGreaterEqual(max(north[:3]), 140, f"{path.name} north metal gone")
         black_margin = 0
         metal_punched = 0
-        metal_rewritten = 0
-        outer_rays = 0
+        outer_lit = 0
         margin = int(48 * width / 1024)
         cx = (width - 1) / 2
         cy = (height - 1) / 2
-        ray_r = 465 * width / 1024
+        ray_r = 430 * width / 1024
         body_r = 400 * width / 1024
-        for y in range(height):
-            for x in range(width):
+        for y in range(0, height, 2):
+            for x in range(0, width, 2):
                 r, g, b, a = png_px(px, width, x, y)
-                sr, sg, sb, _ = png_px(store_px, width, x, y)
                 rad = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-                if a > keep_max:
-                    keep_max = a
                 if a > 200 and max(r, g, b) < 12:
                     if x < margin or y < margin or x >= width - margin or y >= height - margin:
                         black_margin += 1
-                if a == 255 and match_store_rgb and (r, g, b) != (sr, sg, sb):
-                    metal_rewritten += 1
-                if max(sr, sg, sb) >= 40 and rad < body_r and a == 0:
+                if max(r, g, b) >= 40 and rad < body_r and a == 0:
                     metal_punched += 1
-                if a > 0 and rad > ray_r:
-                    outer_rays += 1
-        self.assertEqual(black_margin, 0, f"{path.name} black plate in the margin")
-        self.assertEqual(keep_max, 255, f"{path.name} metal is fully opaque")
+                if max(r, g, b) >= 40 and rad > ray_r:
+                    outer_lit += 1
+        self.assertGreater(black_margin, 0, f"{path.name} black outside was cropped")
         self.assertEqual(metal_punched, 0, f"{path.name} punched metal")
-        self.assertEqual(metal_rewritten, 0, f"{path.name} rewrote metal")
-        self.assertEqual(outer_rays, 0, f"{path.name} outer rays remain")
+        self.assertGreater(outer_lit, 0, f"{path.name} rays/arrows cropped")
+        if match_store_rgb and width == 1024:
+            rewritten = 0
+            for y in range(0, height, 4):
+                for x in range(0, width, 4):
+                    r, g, b, a = png_px(px, width, x, y)
+                    sr, sg, sb, _ = png_px(store_px, width, x, y)
+                    if a == 255 and max(r, g, b) >= 40 and (r, g, b) != (sr, sg, sb):
+                        rewritten += 1
+            self.assertEqual(rewritten, 0, f"{path.name} rewrote metal")
 
-    def test_home_screen_dark_and_tinted_drop_the_black_plate(self):
+    def test_home_screen_dark_and_tinted_keep_the_black_plate(self):
         iconset = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
         manifest = read("Blackout", "Assets.xcassets", "AppIcon.appiconset", "Contents.json")
         dark = iconset / "AppIcon-dark.png"
@@ -649,62 +630,50 @@ class CompassMarkTests(unittest.TestCase):
         self.assertIn("AppIcon-dark.png", manifest)
         self.assertIn("AppIcon-tinted.png", manifest)
         self.assertIn("AppIcon.png", manifest)
-        self._assert_emblem_without_plate(dark, match_store_rgb=True)
-        self._assert_emblem_without_plate(tinted, match_store_rgb=False)
+        self._assert_mark_keeps_black_and_rays(dark, match_store_rgb=True)
+        self._assert_mark_keeps_black_and_rays(tinted, match_store_rgb=False)
+        restore = read("tools", "restore_compass_mark.py")
+        self.assertNotIn("def knock_plate", restore)
 
-    def test_boot_logo_is_the_square_mark(self):
+    def test_hud_logo_is_the_square_mark_with_black_outside(self):
         logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
         logo = logo_dir / "Logo.png"
         width, height, color = png_ihdr(logo)
         self.assertEqual(width, height)
         self.assertGreaterEqual(width, 1024)
-        self.assertEqual(color, 6, "boot logo has alpha so the black plate is gone")
+        self.assertEqual(color, 6, "HUD logo is PNG")
         self.assertFalse((logo_dir / "Logo.jpg").exists())
         manifest = read("Blackout", "Assets.xcassets", "Logo.imageset", "Contents.json")
         self.assertIn("Logo.png", manifest)
         self.assertNotIn("Logo.jpg", manifest)
+        theme = read("Blackout", "Theme.swift")
+        mark = theme.split("struct HUDMark")[1].split("struct HUDReticle")[0]
+        self.assertIn('Image("Logo")', mark)
+        self.assertIn("HUDRing(", mark)
         arming = read("Blackout", "ARMINGView.swift")
-        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
-        self.assertIn("Image(\"Logo\")", arming)
         self.assertNotIn("1712.0 / 1152.0", arming)
         self.assertNotIn('Text("BLACKOUT")', arming)
-        self.assertIn("bootLogoWidthFraction", tokens)
-        self.assertIn("bootLogoSide", tokens)
-        self.assertIn("bootLogoRingDiameter", tokens)
-        self.assertIn("BlackoutTokens.Chrome.bootLogoSide", arming)
-        self.assertIn("bootLogoRingDiameter", arming)
-        self.assertIn("GeometryReader", arming)
-        frac = re.search(
-            r"bootLogoWidthFraction: Double = ([0-9.]+)",
-            tokens,
-        )
-        self.assertIsNotNone(frac)
-        self.assertGreaterEqual(float(frac.group(1)), 0.72)
-        self.assertLessEqual(float(frac.group(1)), 0.86)
-        self.assertNotIn("bootLogoPoints: Double = 196", tokens)
+        self.assertNotIn("bootLogoSide", arming)
+        self.assertNotIn("bootLogoRingDiameter", arming)
         app = read("Blackout", "AppRuntime.swift")
         gnss = app.split("didUpdateLocations")[1].split("didUpdateHeading")[0]
         self.assertIn("CLLocationCoordinate2DIsValid", gnss)
-        self._assert_emblem_without_plate(logo, match_store_rgb=True)
-        mark = arming.split("private var mark:")[1].split("private var status")[0]
-        self.assertGreaterEqual(mark.count("Theme.accent"), 2)
-        self.assertGreaterEqual(mark.count(".shadow("), 2)
-        self.assertNotIn(".spring(", mark)
+        self._assert_mark_keeps_black_and_rays(logo, match_store_rgb=False)
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn("outer rays are gone", qa.lower())
-        self.assertIn("red glow", qa.lower())
-        self.assertIn("metal on the mark is fully opaque", qa.lower())
+        self.assertNotIn("outer rays are gone", qa.lower())
+        self.assertIn("black stays", qa.lower())
+        self.assertNotIn("best in class", qa.lower())
 
 
 class BootFieldTests(unittest.TestCase):
-    """ACTIVATE field is the compass poster. Black is open so the pack map shows."""
+    """ACTIVATE overlay is the full poster. Black stays. No crop well."""
 
-    def test_boot_field_knocks_black_so_the_map_shows(self):
+    def test_boot_field_covers_the_page_and_keeps_black(self):
         field_dir = ROOT / "Blackout" / "Assets.xcassets" / "BootField.imageset"
         field = field_dir / "BootField.png"
         self.assertTrue(field.is_file(), "BootField.png missing")
         width, height, color = png_ihdr(field)
-        self.assertEqual(color, 6, "field poster has alpha so black can open")
+        self.assertIn(color, (2, 6), "field poster is PNG")
         self.assertGreater(height, width)
         self.assertGreaterEqual(width, 1024)
         self.assertFalse((field_dir / "BootField.jpg").exists())
@@ -719,100 +688,66 @@ class BootFieldTests(unittest.TestCase):
             (width - 1, height - 1),
             (48, 48),
         ):
-            self.assertLessEqual(
-                png_px(px, width, x, y)[3],
-                8,
-                f"field corner {x},{y} still blocks the map",
-            )
-        core = png_px(px, width, width // 2, height // 2)
-        self.assertGreaterEqual(core[0], 160, "field red sight stays")
-        self.assertGreaterEqual(core[3], 220, "field red sight stays")
-        origin_y = (height - width) // 2
-        ring = png_px(px, width, width // 2, origin_y + int(width * 56 / 1024))
-        self.assertGreaterEqual(ring[3], 230, "field metal ring stays")
-        self.assertGreaterEqual(max(ring[:3]), 160, "field metal ring stays")
-        minx, miny, maxx, maxy = width, height, -1, -1
-        for y in range(0, height, 2):
-            for x in range(0, width, 2):
-                if png_px(px, width, x, y)[3] > 20:
-                    minx = min(minx, x)
-                    miny = min(miny, y)
-                    maxx = max(maxx, x)
-                    maxy = max(maxy, y)
-        self.assertGreater(maxx, minx)
-        self.assertLess(
-            (maxy - miny + 1) / (maxx - minx + 1),
-            1.2,
-            "field still has the BLACKOUT wordmark under the mark",
-        )
-        open_count = 0
+            r, g, b, a = png_px(px, width, x, y)
+            self.assertEqual(a, 255, f"field corner {x},{y} punched")
+            self.assertLess(max(r, g, b), 12, f"field corner {x},{y} not black")
+        sight = png_px(px, width, int(width * 610 / 1152), int(height * 714 / 1712))
+        self.assertGreaterEqual(sight[0], 160, "field red sight stays")
+        self.assertEqual(sight[3], 255, "field red sight punched")
         metal_count = 0
+        punched = 0
         for y in range(0, height, 4):
             for x in range(0, width, 4):
                 r, g, b, a = png_px(px, width, x, y)
-                if a <= 8:
-                    open_count += 1
+                if a < 250:
+                    punched += 1
                 if a >= 230 and max(r, g, b) >= 140:
                     metal_count += 1
-        sample = ((height + 3) // 4) * ((width + 3) // 4)
-        self.assertGreater(open_count / sample, 0.38, "not enough black knocked out")
-        self.assertGreater(metal_count / sample, 0.02, "field metal disappeared")
+        self.assertEqual(punched, 0, "field still knocks black to alpha")
+        self.assertGreater(metal_count, 0, "field metal disappeared")
         arming = read("Blackout", "ARMINGView.swift")
         self.assertIn('Image("BootField")', arming)
         self.assertNotIn("1712.0 / 1152.0", arming)
         self.assertNotIn('Text("BLACKOUT")', arming)
-        self.assertLess(arming.find("world"), arming.find("field"))
-        self.assertLess(arming.find("private var field"), arming.find("private var vignette"))
-        field_view = arming.split("private var field:")[1].split("private var vignette")[0]
-        self.assertIn(".scaledToFill()", field_view)
-        self.assertIn(".clipped()", field_view)
-        self.assertIn("bootLogoSide", field_view)
-        self.assertNotIn(".ignoresSafeArea()", field_view)
+        self.assertNotIn("OfflineMapView", arming)
+        self.assertNotIn("private var mark", arming)
+        self.assertNotIn("private var vignette", arming)
+        self.assertNotIn("HUDRing(", arming)
+        field_view = arming.split("private var field:")[1].split("private var chrome")[0]
+        self.assertIn(".scaledToFit()", field_view)
+        self.assertIn(".ignoresSafeArea()", field_view)
+        self.assertIn("maxWidth: .infinity", field_view)
+        self.assertIn("maxHeight: .infinity", field_view)
+        self.assertNotIn(".clipped()", field_view)
+        self.assertNotIn("bootLogoSide", field_view)
         self.assertIn("Theme.Motion.heavy", arming)
         self.assertNotIn(".spring(", arming)
         maker = read("tools", "make_boot_field.py")
-        self.assertIn("Logo.png", maker)
         self.assertNotIn("boot_field_src.jpg", maker)
-        world = re.search(r"worldIn \? ([0-9.]+)", arming)
-        self.assertIsNotNone(world)
-        self.assertGreaterEqual(float(world.group(1)), 0.48, "map too dim under the field")
-        vignette = arming.split("private var vignette")[1].split("private var chrome")[0]
-        opacities = [
-            float(value)
-            for value in re.findall(r"Theme\.void\.opacity\(([0-9.]+)\)", vignette)
-        ]
-        self.assertGreaterEqual(len(opacities), 3)
-        self.assertLessEqual(opacities[0], 0.16, "center vignette still hides the map")
-        self.assertLessEqual(max(opacities), 0.62, "edge vignette still blacks out the map")
+        self.assertNotIn("(0, 0, 0, 0)", maker)
         qa = read("docs", "SOLO_QA.md")
-        self.assertIn("streets show through", qa.lower())
-        self.assertIn("field poster", qa.lower())
+        self.assertIn("covers the page", qa.lower())
+        self.assertIn("black stays", qa.lower())
+        self.assertNotIn("streets show through", qa.lower())
         self.assertIn("No BLACKOUT as HUD type", qa)
-        self.assertIn("fills the well", qa.lower())
-        self.assertIn("same mark on void", qa.lower())
+        self.assertNotIn("fills the well", qa.lower())
         self.assertNotIn("best in class", qa.lower())
         device = read("docs", "DEVICE.md")
-        self.assertIn("streets show through", device.lower())
-        self.assertIn("field poster", device.lower())
-        self.assertIn("fills the well", device.lower())
+        self.assertIn("covers the page", device.lower())
+        self.assertNotIn("streets show through", device.lower())
+        self.assertNotIn("fills the well", device.lower())
 
 
 class BootLaunchScreenTests(unittest.TestCase):
-    """Cold splash is the HUD mark on void, same size as ACTIVATE."""
+    """Cold splash is the same poster on void. No crop well."""
 
-    def test_launch_storyboard_is_the_mark_on_void(self):
+    def test_launch_storyboard_is_the_poster_on_void(self):
         story_path = ROOT / "Blackout" / "LaunchScreen.storyboard"
         self.assertTrue(story_path.is_file(), "LaunchScreen.storyboard missing")
         story = story_path.read_text()
-        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
-        frac = re.search(
-            r"bootLogoWidthFraction: Double = ([0-9.]+)",
-            tokens,
-        )
-        self.assertIsNotNone(frac)
-        self.assertIn('image="Logo"', story)
+        self.assertIn('image="BootField"', story)
         self.assertIn("scaleAspectFit", story)
-        self.assertIn(f'multiplier="{frac.group(1)}"', story)
+        self.assertNotIn("multiplier=", story)
         self.assertIn('red="0"', story)
         self.assertIn('green="0"', story)
         self.assertIn('blue="0"', story)
@@ -828,11 +763,10 @@ class BootLaunchScreenTests(unittest.TestCase):
         self.assertIn("INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;", pbx)
         self.assertNotIn("INFOPLIST_KEY_UILaunchScreen_Generation", pbx)
         arming = read("Blackout", "ARMINGView.swift")
-        self.assertIn("GeometryReader", arming)
-        self.assertIn("bootLogoSide", arming)
-        chrome = arming.split("private var chrome:")[1].split("private var mark")[0]
+        chrome = arming.split("private var chrome:")[1]
         self.assertIn("ZStack", chrome)
         self.assertIn("alignment: .center", chrome)
+        self.assertNotIn("bootLogoSide", arming)
 
 
 class BootGlassTests(unittest.TestCase):
@@ -2890,10 +2824,9 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("HUDRing(", mark)
         self.assertIn('Image("Logo")', mark)
         arming = read("Blackout", "ARMINGView.swift")
-        boot = arming.split("private var mark:")[1].split("private var status")[0]
-        self.assertIn("HUDRing(", boot)
-        self.assertIn('Image("Logo")', boot)
+        self.assertIn('Image("BootField")', arming)
         self.assertNotIn(".spring(", arming)
+        self.assertNotIn("HUDRing(", arming)
         root = read("Blackout", "RootChrome.swift")
         self.assertIn("metalHigh", root)
         self.assertIn("metalStroke", root)

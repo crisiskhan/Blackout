@@ -15,9 +15,9 @@ public enum BlackoutTokens: Sendable {
         public static let mapChipHitPoints: Double = 44
         /// Title-screen mark. Fraction of the shorter screen edge. Not a chip.
         public static let bootLogoWidthFraction: Double = 0.78
-        /// Asset fill of the compass metal inside Logo.png (padding knocked out).
+        /// Asset fill of the compass metal inside Logo.png.
         public static let bootLogoMetalFill: Double = 0.84
-        /// Ring hugs the metal, not the transparent plate around the asset.
+        /// Ring hugs the metal of the HUD mark.
         public static let bootLogoRingPadPoints: Double = 10
         /// Overlay-page mark. Same compass, small enough to sit beside a title.
         public static let hudMarkPoints: Double = 20

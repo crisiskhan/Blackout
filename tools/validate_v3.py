@@ -706,14 +706,12 @@ def tip55_chrome() -> None:
         bad("ARMING still says INITIATE — the boot is ACTIVATE")
     else:
         ok("ARMING primary is ACTIVATE")
-    if "Logo" not in arming and "AppIcon" not in arming:
-        bad("ARMING missing bundled logo")
-    elif "1712.0 / 1152.0" in arming or "Text(\"BLACKOUT\")" in arming:
-        bad("ARMING still uses the wordmark poster")
-    elif 'Image("BootField")' not in arming:
+    if 'Image("BootField")' not in arming:
         bad("ARMING missing field poster")
+    elif "1712.0 / 1152.0" in arming or "Text(\"BLACKOUT\")" in arming:
+        bad("ARMING still uses HUD type BLACKOUT")
     else:
-        ok("ARMING shows bundled logo over the field poster")
+        ok("ARMING shows the field poster over the page")
     field = ROOT / "Blackout" / "Assets.xcassets" / "BootField.imageset" / "BootField.png"
     if not field.is_file():
         bad("BootField.imageset missing")

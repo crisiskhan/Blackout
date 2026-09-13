@@ -6,7 +6,7 @@ Score every row `[ ] PASS` / FAIL / N/A. Write the exact chrome string or behavi
 
 ## BOOT
 
-- [ ] PASS / FAIL / N/A — Cold launch is ACTIVATE. Compass mark over the field poster, not an ARMING menu. The compass fills the well — same size as the cold splash, not a 196pt chip on a movie poster. Cold launch splash is the same mark on void. No fingerprint lock, no Face ID. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. No black plate — the mark is transparent around the compass. Outer rays are gone. Metal on the mark is fully opaque. The emblem carries a red glow. Faceted metal plates on void. No iOS blur. Streets show through the field poster; black is open. No BLACKOUT as HUD type. No BLACKOUT wordmark on the field poster. No account prompt. No network/login gate.
+- [ ] PASS / FAIL / N/A — Cold launch is ACTIVATE. The ARMING overlay is the full BLACKOUT field poster that covers the page — compass mark and wordmark stay in the art. Black stays on the outside. Cold launch splash is the same poster on void. No fingerprint lock, no Face ID. No pack list, no left-hand toggle, no night-red on that screen. Bundled logo is visible. Metal on the mark is fully opaque. Faceted metal plates on void. No iOS blur. No BLACKOUT as HUD type. No account prompt. No network/login gate.
 - [ ] PASS / FAIL / N/A — Status line moves through the shipped packs, then `READY`. ACTIVATE is dead until then, then live. Tap ACTIVATE → MAP. No lawyer sheet. Tabs are live.
 - [ ] PASS / FAIL / N/A — No SOS disk on the boot screen. If packs are missing, the status line is `Packs missing from bundle — honest empty.`
 
