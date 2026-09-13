@@ -3,17 +3,52 @@ import Tokens
 import NightRed
 
 enum Theme {
-    static var void: Color { Color(rgba: BlackoutTokens.Color.void) }
+    static var lamp: HUDLamp = .off
+
+    static func bind(_ lamp: HUDLamp) {
+        Self.lamp = lamp
+    }
+
+    static func strokeWidth(_ points: CGFloat) -> CGFloat {
+        lamp == .sun ? points + 1 : points
+    }
+
+    static var void: Color {
+        switch lamp {
+        case .sun: return Color(rgba: BlackoutTokens.Color.sunField)
+        case .off, .night: return Color(rgba: BlackoutTokens.Color.void)
+        }
+    }
     static var accent: Color { Color(rgba: BlackoutTokens.Color.accent) }
-    static var silver: Color { Color(rgba: BlackoutTokens.Color.silver) }
-    static var raised: Color { Color(rgba: BlackoutTokens.Color.raised) }
+    static var silver: Color {
+        switch lamp {
+        case .sun: return Color(rgba: BlackoutTokens.Color.sunInk)
+        case .off, .night: return Color(rgba: BlackoutTokens.Color.silver)
+        }
+    }
+    static var raised: Color {
+        switch lamp {
+        case .sun: return Color(rgba: BlackoutTokens.Color.sunField)
+        case .off, .night: return Color(rgba: BlackoutTokens.Color.raised)
+        }
+    }
     static var warn: Color { Color(rgba: BlackoutTokens.Color.warn) }
     static var caution: Color { Color(rgba: BlackoutTokens.Color.caution) }
     static var heat: Color { Color(rgba: BlackoutTokens.Color.heat) }
     static var nightRed: Color { Color(rgba: BlackoutTokens.Color.nightRed) }
     static var fix: Color { Color(rgba: BlackoutTokens.Color.fix) }
-    static var metalHigh: Color { Color(rgba: BlackoutTokens.Color.metalHighlight) }
-    static var metalLow: Color { Color(rgba: BlackoutTokens.Color.metalShade) }
+    static var metalHigh: Color {
+        switch lamp {
+        case .sun: return Color(rgba: BlackoutTokens.Color.sunInk)
+        case .off, .night: return Color(rgba: BlackoutTokens.Color.metalHighlight)
+        }
+    }
+    static var metalLow: Color {
+        switch lamp {
+        case .sun: return Color(rgba: BlackoutTokens.Color.sunInk)
+        case .off, .night: return Color(rgba: BlackoutTokens.Color.metalShade)
+        }
+    }
     static var plateCorner: CGFloat { CGFloat(BlackoutTokens.Chrome.hudPlateCornerPoints) }
 
     enum Motion {
@@ -45,27 +80,34 @@ enum Theme {
     }
 
     /// Faceted metal plate on void. No iOS blur — streets stay under the type.
+    /// SUN kills transparency so glare cannot wash the type.
+    @ViewBuilder
     static func glass(opacity: Double = 0.88) -> some View {
-        ZStack {
-            Rectangle().fill(void.opacity(opacity))
-            LinearGradient(
-                colors: [
-                    metalHigh.opacity(0.22),
-                    Color.clear,
-                    metalLow.opacity(0.58),
-                ],
-                startPoint: UnitPoint(x: 0.04, y: 0.0),
-                endPoint: UnitPoint(x: 0.96, y: 1.0)
-            )
-            LinearGradient(
-                colors: [
-                    Color.clear,
-                    metalHigh.opacity(0.11),
-                    Color.clear,
-                ],
-                startPoint: UnitPoint(x: 0.0, y: 0.30),
-                endPoint: UnitPoint(x: 1.0, y: 0.70)
-            )
+        switch lamp {
+        case .sun:
+            Rectangle().fill(void)
+        case .off, .night:
+            ZStack {
+                Rectangle().fill(void.opacity(opacity))
+                LinearGradient(
+                    colors: [
+                        metalHigh.opacity(0.22),
+                        Color.clear,
+                        metalLow.opacity(0.58),
+                    ],
+                    startPoint: UnitPoint(x: 0.04, y: 0.0),
+                    endPoint: UnitPoint(x: 0.96, y: 1.0)
+                )
+                LinearGradient(
+                    colors: [
+                        Color.clear,
+                        metalHigh.opacity(0.11),
+                        Color.clear,
+                    ],
+                    startPoint: UnitPoint(x: 0.0, y: 0.30),
+                    endPoint: UnitPoint(x: 1.0, y: 0.70)
+                )
+            }
         }
     }
 }
@@ -103,9 +145,9 @@ struct HUDRing: View {
         let ink = lit ? Theme.accent : Theme.silver
         ZStack {
             Circle()
-                .strokeBorder(Theme.metalStroke, lineWidth: 1.7)
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1.7))
             Circle()
-                .strokeBorder(ink.opacity(lit ? 0.95 : 0.34), lineWidth: 1)
+                .strokeBorder(ink.opacity(lit ? 0.95 : 0.34), lineWidth: Theme.strokeWidth(1))
                 .padding(3)
         }
         .frame(width: diameter, height: diameter)
@@ -146,9 +188,9 @@ struct HUDReticle: View {
         let radius = (crisis ? 6.0 : 4.0) + (crisis ? 8.0 : 6.0) * pulse
         return ZStack {
             Circle()
-                .stroke(ink, lineWidth: 1)
+                .stroke(ink, lineWidth: Theme.strokeWidth(1))
             Circle()
-                .stroke(ink.opacity(0.45), lineWidth: 1)
+                .stroke(ink.opacity(0.45), lineWidth: Theme.strokeWidth(1))
                 .padding(2)
             Rectangle()
                 .fill(ink)
@@ -189,7 +231,7 @@ struct HUDDockStyle: ButtonStyle {
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
     }
 }
@@ -209,7 +251,7 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
@@ -238,7 +280,7 @@ struct MapFieldDestChipStyle: ButtonStyle {
             .foregroundStyle(ink)
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(ink.opacity(0.48 + 0.52 * pulse), lineWidth: expanded ? 2 : 1.2)
+                    .strokeBorder(ink.opacity(0.48 + 0.52 * pulse), lineWidth: Theme.strokeWidth(expanded ? 2 : 1.2))
             )
             .shadow(color: Theme.void.opacity(0.9), radius: 2, x: 0, y: 0)
             .shadow(color: ink.opacity(glow), radius: radius, x: 0, y: 0)
@@ -326,7 +368,7 @@ struct HUDPage<Content: View>: View {
         .overlay(alignment: .top) {
             Rectangle()
                 .fill(Theme.metalStroke)
-                .frame(height: 1)
+                .frame(height: Theme.strokeWidth(1))
         }
     }
 }
@@ -346,7 +388,7 @@ struct HUDGlassCard<Content: View>: View {
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
     }
 }
@@ -358,13 +400,20 @@ struct HUDActionStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .heavy))
-            .foregroundStyle(filled ? Color.white : Theme.silver)
+            .foregroundStyle(actionInk(filled: filled, crisis: crisis))
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .contentShape(Rectangle())
             .background(
                 Group {
                     if filled && crisis {
                         Theme.accent
+                    } else if filled {
+                        switch Theme.lamp {
+                        case .sun:
+                            Theme.silver
+                        case .off, .night:
+                            Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92)
+                        }
                     } else {
                         Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92)
                     }
@@ -373,10 +422,10 @@ struct HUDActionStyle: ButtonStyle {
             .overlay {
                 if filled && crisis {
                     Theme.plateRect()
-                        .strokeBorder(Theme.accent, lineWidth: 1.5)
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
                 } else {
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 }
             }
             .clipShape(Theme.plateRect())
@@ -385,6 +434,16 @@ struct HUDActionStyle: ButtonStyle {
                 radius: filled && crisis ? 10 : 0
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+
+    private func actionInk(filled: Bool, crisis: Bool) -> Color {
+        if filled && crisis { return Color.white }
+        switch Theme.lamp {
+        case .sun:
+            return filled ? Theme.void : Theme.silver
+        case .off, .night:
+            return filled ? Color.white : Theme.silver
+        }
     }
 }
 

@@ -39,7 +39,7 @@ struct IncomingLinePlate: View {
                 .background(Theme.glass())
                 .overlay(
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 )
                 .clipShape(Theme.plateRect())
                 .offset(y: drag)
@@ -99,7 +99,7 @@ struct IncomingLinePlate: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(
-            Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: 1)
+            Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: Theme.strokeWidth(1))
         )
         .accessibilityHidden(true)
     }

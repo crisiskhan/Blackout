@@ -545,9 +545,11 @@ public enum PackStyle {
     /// so the mapping lives here rather than being repeated at each call site.
     public static let roadSourceLayer = "road"
     public static let placeSourceLayer = "place"
-    public static let voidInk = "#000000"
-    public static let silverInk = "#B8BDC2"
-    public static let accentInk = "#E10600"
+        public static let voidInk = "#000000"
+        public static let silverInk = "#B8BDC2"
+        public static let accentInk = "#E10600"
+        public static let sunFieldHex = "#E6E3D9"
+        public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
     /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,

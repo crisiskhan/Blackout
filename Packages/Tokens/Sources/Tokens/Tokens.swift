@@ -108,6 +108,10 @@ public enum BlackoutTokens: Sendable {
         public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
         /// Live GNSS lamp. COORDINATES chip. Not SOS, not caution brass.
         public static let fix = RGBA(r: 46.0 / 255.0, g: 230.0 / 255.0, b: 122.0 / 255.0, a: 1)
+        /// Outdoor glare field. Pale paper, not white, not invert.
+        public static let sunField = RGBA(r: 0.90, g: 0.89, b: 0.85, a: 1)
+        /// Outdoor glare ink. Near-black roads, type, icons.
+        public static let sunInk = RGBA(r: 0.08, g: 0.08, b: 0.08, a: 1)
     }
 
     /// Offline MAP ink. Dark red/silver on void so walking-zoom streets and names read.
@@ -115,6 +119,8 @@ public enum BlackoutTokens: Sendable {
         public static let voidHex = "#000000"
         public static let silverHex = "#B8BDC2"
         public static let accentHex = "#E10600"
+        public static let sunFieldHex = "#E6E3D9"
+        public static let sunInkHex = "#141414"
         public static let fixHex = "#2EE67A"
         public static let heatHex = "#ED510A"
         public static let roadLabelMinZoom: Double = 12

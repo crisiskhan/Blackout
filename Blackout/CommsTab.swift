@@ -54,7 +54,7 @@ struct CommsTab: View {
                     .clipShape(Theme.plateRect())
                     .overlay(
                         Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                     )
                     if !runtime.mesh.nearby.isEmpty {
                         sectionLabel("PEERS")
@@ -77,7 +77,7 @@ struct CommsTab: View {
                     .clipShape(Theme.plateRect())
                     .overlay(
                         Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                     )
                     Button("RADIO CHECK") { runtime.radioCheckParty() }
                         .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
@@ -327,7 +327,7 @@ struct CommsTab: View {
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()
-                .strokeBorder(Theme.accent, lineWidth: 1.5)
+                .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
         )
     }
 

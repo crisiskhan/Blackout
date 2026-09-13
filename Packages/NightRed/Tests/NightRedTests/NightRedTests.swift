@@ -13,5 +13,11 @@ final class NightRedTests: XCTestCase {
         XCTAssertEqual(off.filter.g, 1, accuracy: 0.01)
         XCTAssertLessThan(NightRedState.dim, 0)
         XCTAssertGreaterThan(NightRedState.dim, -0.12)
+        XCTAssertEqual(HUDLamp.toggling(current: .off, tap: .night), .night)
+        XCTAssertEqual(HUDLamp.toggling(current: .night, tap: .sun), .sun)
+        XCTAssertEqual(HUDLamp.toggling(current: .sun, tap: .sun), .off)
+        XCTAssertTrue(HUDLamp.night.nightOn)
+        XCTAssertFalse(HUDLamp.sun.nightOn)
+        XCTAssertTrue(HUDLamp.sun.sunOn)
     }
 }

@@ -116,7 +116,7 @@ struct ExpeditionTab: View {
                             .clipShape(Theme.plateRect())
                             .overlay(
                                 Theme.plateRect()
-                                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                             )
                             ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
                                 Text(line)
@@ -235,7 +235,7 @@ struct ExpeditionTab: View {
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()
-                .strokeBorder(Theme.accent, lineWidth: 1.5)
+                .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
         )
     }
 
@@ -381,7 +381,7 @@ struct ExpeditionTab: View {
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.accent, lineWidth: 1)
+                    .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
             )
     }
 
@@ -436,7 +436,7 @@ struct HUDVitalsRail: View {
                             Rectangle()
                                 .strokeBorder(
                                     on ? (band == .black ? Theme.accent : Theme.silver) : Color.clear,
-                                    lineWidth: 1.5
+                                    lineWidth: Theme.strokeWidth(1.5)
                                 )
                         )
                     }
@@ -447,7 +447,7 @@ struct HUDVitalsRail: View {
                 .clipShape(Theme.plateRect())
                 .overlay(
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 )
                 .contentShape(Rectangle())
                 .allowsHitTesting(editable)

@@ -99,7 +99,8 @@ struct MapTab: View {
                 youEmblem: runtime.youEmblem.rawValue,
                 onPulse: { runtime.pulse() },
                 lockOn: runtime.lockOn,
-                travelMode: runtime.travelMode
+                travelMode: runtime.travelMode,
+                sun: runtime.lamp == .sun
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the
@@ -502,7 +503,7 @@ struct MapTab: View {
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()
-                .strokeBorder(Theme.accent.opacity(0.85), lineWidth: 1)
+                .strokeBorder(Theme.accent.opacity(0.85), lineWidth: Theme.strokeWidth(1))
         )
     }
 
@@ -519,7 +520,7 @@ struct MapTab: View {
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()
-                .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .frame(maxWidth: .infinity)
     }

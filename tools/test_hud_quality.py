@@ -1707,7 +1707,6 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         )
         for stamp in (
             "LEFT HAND",
-            "NIGHT RED",
             "TORCH 3×",
             "COMPASS CAL",
             "TRUE NORTH",
@@ -1745,6 +1744,15 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("TURNS", qa)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
+
+
+def tap_lamp(current: str, tap: str) -> str:
+    """NIGHT and SUN are exclusive. Tap the live one to return to void."""
+    if tap == "off":
+        return "off"
+    if tap not in ("night", "sun"):
+        raise AssertionError(tap)
+    return "off" if current == tap else tap
 
 
 ASLEEP = 0.08
@@ -2486,6 +2494,93 @@ class NightRedLampTests(unittest.TestCase):
         self.assertNotIn("if runtime.night.enabled { MapTab", root)
         self.assertNotIn(".spring(", theme)
         self.assertNotIn(".spring(", root)
+
+
+class SunLampTests(unittest.TestCase):
+    """Outdoor glare. Pale field, near-black type. Not Smart Invert."""
+
+    def test_night_and_sun_are_one_row_and_one_at_a_time(self):
+        self.assertEqual(tap_lamp("off", "night"), "night")
+        self.assertEqual(tap_lamp("night", "sun"), "sun")
+        self.assertEqual(tap_lamp("sun", "night"), "night")
+        self.assertEqual(tap_lamp("sun", "sun"), "off")
+        self.assertEqual(tap_lamp("night", "night"), "off")
+        night = read("Packages", "NightRed", "Sources", "NightRed", "NightRed.swift")
+        self.assertIn("enum HUDLamp", night)
+        self.assertIn("case sun", night)
+        self.assertIn("current == tap ? .off : tap", night)
+        inst = read("Blackout", "InstrumentsView.swift")
+        hud = inst.split('sectionLabel("HUD")')[1].split('sectionLabel("MAP")')[0]
+        self.assertIn('Button("NIGHT")', hud)
+        self.assertIn('Button("SUN")', hud)
+        self.assertIn("HStack(spacing: 1)", hud)
+        self.assertIn("HUDActionStyle(filled:", hud)
+        self.assertIn("runtime.tapLamp(.night)", hud)
+        self.assertIn("runtime.tapLamp(.sun)", hud)
+        self.assertNotIn('hudToggle("NIGHT RED"', inst)
+        self.assertIn('sectionLabel("SUN")', inst)
+        self.assertIn("sunPlate", inst)
+
+    def test_sun_is_a_real_palette_not_smart_invert(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        theme = read("Blackout", "Theme.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        root = read("Blackout", "RootChrome.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        pack = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        )
+        field = _rgba(tokens, "sunField")
+        ink = _rgba(tokens, "sunInk")
+        void = _rgba(tokens, "void")
+        self.assertGreater(field[0], 0.82)
+        self.assertGreater(field[1], 0.82)
+        self.assertGreater(field[2], 0.78)
+        self.assertLess(ink[0], 0.12)
+        self.assertLess(ink[1], 0.12)
+        self.assertLess(ink[2], 0.12)
+        self.assertEqual(void[:3], (0.0, 0.0, 0.0))
+        self.assertIn('sunFieldHex = "#E6E3D9"', tokens)
+        self.assertIn('sunInkHex = "#141414"', tokens)
+        self.assertIn('accentHex = "#E10600"', tokens)
+        self.assertIn("static var lamp: HUDLamp", theme)
+        self.assertIn("static func bind(", theme)
+        self.assertIn("static func strokeWidth(", theme)
+        self.assertIn("lamp == .sun ? points + 1 : points", theme)
+        self.assertIn("case .sun:", theme)
+        self.assertIn("sunField", theme)
+        self.assertIn("sunInk", theme)
+        glass = theme.split("static func glass(")[1].split("struct HUDMark")[0]
+        self.assertIn("case .sun:", glass)
+        self.assertNotIn("ultraThinMaterial", glass)
+        self.assertNotIn(".colorInvert(", theme)
+        self.assertNotIn("smartInvert", theme.lower())
+        self.assertNotIn("Smart Invert", app)
+        self.assertNotIn("UIAccessibilityIsInvertColorsEnabled", app)
+        self.assertNotIn(".colorInvert(", root)
+        self.assertIn("Theme.bind(runtime.lamp)", root)
+        self.assertIn(".nightRedLamp(runtime.night)", root)
+        self.assertIn("UIScreen.main.brightness = 1", app)
+        self.assertIn("brightnessDidChangeNotification", app)
+        self.assertIn('forKey: "hud.lamp"', app)
+        self.assertIn("func tapLamp(", app)
+        self.assertIn("sun: runtime.lamp == .sun", read("Blackout", "MapTab.swift"))
+        self.assertIn("var sun: Bool", offline)
+        self.assertIn("applyHUDLamp", offline)
+        self.assertIn("sunInkHex", pack)
+        self.assertIn("sunFieldHex", pack)
+        self.assertNotIn("if runtime.lamp == .sun { MapTab", root)
+        self.assertNotIn(".spring(", theme)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("NIGHT · SUN", qa)
+        self.assertIn("pale field", qa.lower())
+        self.assertIn("brightness", qa.lower())
+        self.assertIn("Not Smart Invert", qa)
+        self.assertNotIn("Use Smart Invert", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
 
 
 class InstrumentNorthAndBodyTests(unittest.TestCase):

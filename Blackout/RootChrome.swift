@@ -5,6 +5,7 @@ struct RootChrome: View {
     @Bindable var runtime: AppRuntime
 
     var body: some View {
+        let _ = Theme.bind(runtime.lamp)
         ZStack {
             Theme.void.ignoresSafeArea()
             if !runtime.armed {
@@ -31,12 +32,13 @@ struct RootChrome: View {
         .animation(Theme.Motion.heavy, value: runtime.hudKeys.isOpen)
         .nightRedLamp(runtime.night)
         .tint(Theme.silver)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .sheet(isPresented: $runtime.showInstruments) {
             InstrumentsView(runtime: runtime)
                 .presentationBackground(Theme.void)
         }
         .onAppear {
+            runtime.applyLampChrome()
             runtime.applyMapKeepAwake()
             runtime.pulse()
         }

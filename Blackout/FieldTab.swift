@@ -313,7 +313,7 @@ struct FieldTab: View {
                     .clipShape(Theme.plateRect())
                     .overlay(
                         Theme.plateRect()
-                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: 1)
+                            .strokeBorder(Theme.accent.opacity(0.55), lineWidth: Theme.strokeWidth(1))
                     )
             }
 

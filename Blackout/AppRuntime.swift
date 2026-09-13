@@ -45,6 +45,7 @@ final class AppRuntime {
     ])
     var power: AuctionBoard
     var night = NightRedState(enabled: false)
+    var lamp: HUDLamp = .off
     var instruments: InstrumentBoard
     var comms = CommsState()
     var ptt: PTTDeck
@@ -133,6 +134,8 @@ final class AppRuntime {
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
     private var incomingTask: Task<Void, Never>?
+    private var savedBrightness: CGFloat?
+    private var brightnessLock: NSObjectProtocol?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
     private var pttHold = false
     /// CLIP tap is waiting on the mic. Not live yet.
@@ -158,6 +161,12 @@ final class AppRuntime {
         youEmblem = PersonEmblem.load()
         youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
         youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
+        if let raw = UserDefaults.standard.string(forKey: "hud.lamp"),
+           let saved = HUDLamp(rawValue: raw)
+        {
+            lamp = saved
+            night.enabled = saved.nightOn
+        }
         mesh.onInbound = { [weak self] env in
             Task { @MainActor in self?.applyInbound(env) }
         }
@@ -231,6 +240,48 @@ final class AppRuntime {
 
     func persistPartyCode() {
         UserDefaults.standard.set(roster.code, forKey: "party.code")
+    }
+
+    func tapLamp(_ tap: HUDLamp) {
+        lamp = HUDLamp.toggling(current: lamp, tap: tap)
+        night.enabled = lamp.nightOn
+        applyLampChrome()
+        pulse()
+    }
+
+    func applyLampChrome() {
+        Theme.bind(lamp)
+        UserDefaults.standard.set(lamp.rawValue, forKey: "hud.lamp")
+        switch lamp {
+        case .sun:
+            if savedBrightness == nil {
+                savedBrightness = UIScreen.main.brightness
+            }
+            UIScreen.main.brightness = 1
+            if brightnessLock == nil {
+                brightnessLock = NotificationCenter.default.addObserver(
+                    forName: UIScreen.brightnessDidChangeNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] _ in
+                    Task { @MainActor in
+                        guard let self, self.lamp == .sun else { return }
+                        if UIScreen.main.brightness < 0.999 {
+                            UIScreen.main.brightness = 1
+                        }
+                    }
+                }
+            }
+        case .off, .night:
+            if let lock = brightnessLock {
+                NotificationCenter.default.removeObserver(lock)
+                brightnessLock = nil
+            }
+            if let saved = savedBrightness {
+                UIScreen.main.brightness = saved
+                savedBrightness = nil
+            }
+        }
     }
 
     func pickEmblem(_ emblem: PersonEmblem) {

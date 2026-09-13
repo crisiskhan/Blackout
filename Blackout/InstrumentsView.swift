@@ -8,6 +8,7 @@ struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
 
     var body: some View {
+        let _ = Theme.bind(runtime.lamp)
         VStack(alignment: .leading, spacing: 0) {
             header
             ScrollView {
@@ -42,10 +43,13 @@ struct InstrumentsView: View {
 
                     sectionLabel("HUD")
                     hudToggle("LEFT HAND", $runtime.leftHand)
-                    hudToggle("NIGHT RED", Binding(
-                        get: { runtime.night.enabled },
-                        set: { runtime.night.enabled = $0 }
-                    ))
+                    HStack(spacing: 1) {
+                        Button("NIGHT") { runtime.tapLamp(.night) }
+                            .buttonStyle(HUDActionStyle(filled: runtime.lamp == .night))
+                        Button("SUN") { runtime.tapLamp(.sun) }
+                            .buttonStyle(HUDActionStyle(filled: runtime.lamp == .sun))
+                    }
+                    .clipShape(Theme.plateRect())
                     hudToggle("LAYOUT", Binding(
                         get: { runtime.hudLayoutMode },
                         set: { on in
@@ -70,7 +74,7 @@ struct InstrumentsView: View {
                     .clipShape(Theme.plateRect())
                     .overlay(
                         Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                     )
 
                     sectionLabel("SUN")
@@ -137,7 +141,7 @@ struct InstrumentsView: View {
             }
         }
         .background(Theme.void)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .nightRedLamp(runtime.night)
     }
 

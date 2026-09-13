@@ -125,7 +125,7 @@ struct PlaceMarkCard: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)

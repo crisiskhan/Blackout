@@ -91,10 +91,10 @@ struct ARMINGView: View {
         .overlay {
             if runtime.bootReady {
                 Theme.plateRect()
-                    .strokeBorder(Theme.accent, lineWidth: 1)
+                    .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
             } else {
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             }
         }
         .opacity(runtime.bootReady ? 1 : 0.55)

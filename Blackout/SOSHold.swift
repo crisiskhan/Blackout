@@ -17,7 +17,7 @@ struct SOSHold: View {
                 : 0
             ZStack {
                 Circle()
-                    .stroke(Theme.accent.opacity(0.25 + 0.7 * pulse), lineWidth: 3 + 3 * pulse)
+                    .stroke(Theme.accent.opacity(0.25 + 0.7 * pulse), lineWidth: Theme.strokeWidth(3) + 3 * pulse)
                     .frame(
                         width: BlackoutTokens.Chrome.sosDiameter + 14,
                         height: BlackoutTokens.Chrome.sosDiameter + 14
@@ -30,7 +30,7 @@ struct SOSHold: View {
                         height: BlackoutTokens.Chrome.sosDiameter
                     )
                 Circle()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1.5)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1.5))
                     .frame(
                         width: BlackoutTokens.Chrome.sosDiameter,
                         height: BlackoutTokens.Chrome.sosDiameter
@@ -90,7 +90,7 @@ struct IAMOKBar: View {
                 .clipShape(Theme.plateRect())
                 .overlay(
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 )
                 Spacer()
             }

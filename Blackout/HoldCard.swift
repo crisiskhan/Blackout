@@ -152,7 +152,7 @@ struct HoldCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)
@@ -264,7 +264,7 @@ struct HoldActionStyle: ButtonStyle {
             .background(Theme.glass(opacity: configuration.isPressed ? 0.5 : 0.92))
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
             .clipShape(Theme.plateRect())
             .opacity(configuration.isPressed ? 0.65 : 1)

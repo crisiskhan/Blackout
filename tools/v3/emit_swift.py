@@ -1189,6 +1189,35 @@ final class BatteryAuctionTests: XCTestCase {
         r'''import Foundation
 import Tokens
 
+public enum HUDLamp: String, Sendable, Equatable, CaseIterable {
+    case off
+    case night
+    case sun
+
+    public static func toggling(current: HUDLamp, tap: HUDLamp) -> HUDLamp {
+        switch tap {
+        case .off:
+            return .off
+        case .night, .sun:
+            return current == tap ? .off : tap
+        }
+    }
+
+    public var nightOn: Bool {
+        switch self {
+        case .night: return true
+        case .off, .sun: return false
+        }
+    }
+
+    public var sunOn: Bool {
+        switch self {
+        case .sun: return true
+        case .off, .night: return false
+        }
+    }
+}
+
 public struct NightRedState: Equatable, Sendable {
     public var enabled: Bool
     public init(enabled: Bool) { self.enabled = enabled }

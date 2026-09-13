@@ -44,6 +44,7 @@ public struct OfflineMapView: UIViewRepresentable {
     /// WALK dashes the accent core. DRIVE keeps it solid. Chrome already
     /// says which; the line has to match.
     public var travelMode: TravelMode
+    public var sun: Bool
 
     public init(
         styleURL: URL,
@@ -69,7 +70,8 @@ public struct OfflineMapView: UIViewRepresentable {
         youEmblem: String = PersonEmblem.fallback.rawValue,
         onPulse: (() -> Void)? = nil,
         lockOn: Bool = false,
-        travelMode: TravelMode = .walk
+        travelMode: TravelMode = .walk,
+        sun: Bool = false
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -95,6 +97,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.onPulse = onPulse
         self.lockOn = lockOn
         self.travelMode = travelMode
+        self.sun = sun
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -113,7 +116,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.prefetchesTiles = false
         view.shouldRequestAuthorizationToUseLocationServices = trackUser
         view.showsUserLocation = trackUser
-        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+        view.backgroundColor = PackStyle.canvasColor(sun: false)
         let home = CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon)
         if CLLocationCoordinate2DIsValid(home) {
             view.setCenter(
@@ -197,7 +200,8 @@ public struct OfflineMapView: UIViewRepresentable {
             youHeading: youHeading,
             youEmblem: youEmblem,
             lockOn: lockOn,
-            travelMode: travelMode
+            travelMode: travelMode,
+            sun: sun
         )
     }
 
@@ -218,6 +222,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var youEmblem: String
             var lockOn: Bool
             var travelMode: TravelMode
+            var sun: Bool
         }
 
         var spec: OverlaySpec?
@@ -244,6 +249,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedLockOn = false
         var followedPuck: (lat: Double, lon: Double)?
         var storedMode: TravelMode?
+        var storedSun = false
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -500,6 +506,9 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
+            let lampFlip = storedSun != spec.sun
+            storedSun = spec.sun
+            view.backgroundColor = PackStyle.canvasColor(sun: spec.sun)
             applyCamera(spec, on: view, force: force)
             let mapHasPuck = (view.annotations ?? []).contains { ann in
                 ann.title == UserPuck.title
@@ -511,7 +520,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 puck: (spec.puckLat, spec.puckLon),
                 mapHasPuck: mapHasPuck
             )
-            let routeNeeds = force || RouteLine.needsReapply(
+            let routeNeeds = force || lampFlip || RouteLine.needsReapply(
                 stored: storedRoute,
                 route: spec.route,
                 storedMode: storedMode,
@@ -576,6 +585,9 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
             }
             syncPersonMarks(on: view, spec: spec)
+            if force || lampFlip, let style = view.style {
+                PackStyle.applyHUDLamp(style, sun: spec.sun)
+            }
         }
 
         func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
@@ -784,7 +796,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 style.addSource(src)
                 let layer = MLNLineStyleLayer(identifier: "pack-bbox-line", source: src)
                 layer.lineColor = NSExpression(
-                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+                    forConstantValue: PackStyle.inkColor(PackStyle.silverInk)
                 )
                 layer.lineWidth = NSExpression(forConstantValue: 3)
                 style.addLayer(layer)
@@ -895,11 +907,11 @@ public struct OfflineMapView: UIViewRepresentable {
                 let line = MLNPolyline(coordinates: &coords, count: UInt(coords.count))
                 if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
                     src.shape = line
-                    paintRoute(on: style, source: src, mode: spec.travelMode)
+                    paintRoute(on: style, source: src, mode: spec.travelMode, sun: spec.sun)
                 } else {
                     let src = MLNShapeSource(identifier: RouteLine.sourceID, shape: line, options: nil)
                     style.addSource(src)
-                    paintRoute(on: style, source: src, mode: spec.travelMode)
+                    paintRoute(on: style, source: src, mode: spec.travelMode, sun: spec.sun)
                 }
             } else if let src = style.source(withIdentifier: RouteLine.sourceID) as? MLNShapeSource {
                 src.shape = emptyOverlayShape()
@@ -937,9 +949,10 @@ public struct OfflineMapView: UIViewRepresentable {
         /// are silver with a void or red casing; a single silver stroke of the
         /// same width disappears into them. WALK dashes only the core so the
         /// path never reads as another arterial; DRIVE stays a solid thread.
-        func paintRoute(on style: MLNStyle, source: MLNSource, mode: TravelMode) {
-            let silver = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
-            let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+        func paintRoute(on style: MLNStyle, source: MLNSource, mode: TravelMode, sun: Bool) {
+            let silver = PackStyle.inkColor(sun ? PackStyle.sunInkHex : PackStyle.silverInk)
+            let accent = PackStyle.inkColor(PackStyle.accentInk)
+            let casingInk = PackStyle.inkColor(PackStyle.voidInk)
             let round = NSExpression(forConstantValue: "round")
 
             func stroke(
@@ -971,7 +984,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
                 casing = layer
             }
-            stroke(casing, color: UIColor.black, width: RouteLine.casingWidth, dashed: false)
+            stroke(casing, color: casingInk, width: RouteLine.casingWidth, dashed: false)
 
             let fill: MLNLineStyleLayer
             if let existing = style.layer(withIdentifier: RouteLine.layerID) as? MLNLineStyleLayer {
@@ -1121,7 +1134,7 @@ public struct OfflineMapView: UIViewRepresentable {
             if annotation === routeLine {
                 return UIColor(red: 0, green: 0, blue: 0, alpha: 0)
             }
-            return UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+            return PackStyle.inkColor(spec?.sun == true ? PackStyle.sunInkHex : PackStyle.silverInk)
         }
 
         public func mapView(_ mapView: MLNMapView, alphaForShapeAnnotation annotation: MLNShape) -> CGFloat {
@@ -1336,5 +1349,167 @@ enum PersonCompassArt {
                 cg.strokePath()
             }
         }
+    }
+}
+
+extension PackStyle {
+    public static func canvasColor(sun: Bool) -> UIColor {
+        inkColor(sun ? sunFieldHex : voidInk)
+    }
+
+    public static func inkColor(_ hex: String) -> UIColor {
+        var raw = hex
+        if raw.hasPrefix("#") {
+            raw.removeFirst()
+        }
+        var value: UInt64 = 0
+        Scanner(string: raw).scanHexInt64(&value)
+        let r = CGFloat((value >> 16) & 0xFF) / 255
+        let g = CGFloat((value >> 8) & 0xFF) / 255
+        let b = CGFloat(value & 0xFF) / 255
+        return UIColor(red: r, green: g, blue: b, alpha: 1)
+    }
+
+    /// Real second palette. Not invert. Restore night paints first so
+    /// widths and class fills never stack when SUN flips on and off.
+    public static func applyHUDLamp(_ style: MLNStyle, sun: Bool) {
+        capturePaintsIfNeeded(style)
+        restorePaints(style)
+        guard sun else { return }
+        let field = inkColor(sunFieldHex)
+        let ink = inkColor(sunInkHex)
+        for layer in style.layers {
+            paintSun(layer, field: field, ink: ink)
+        }
+    }
+
+    private struct LampPaint {
+        var backgroundColor: NSExpression?
+        var fillColor: NSExpression?
+        var fillOpacity: NSExpression?
+        var lineColor: NSExpression?
+        var textColor: NSExpression?
+        var textHaloColor: NSExpression?
+        var iconColor: NSExpression?
+        var circleColor: NSExpression?
+        var circleStrokeColor: NSExpression?
+        var rasterOpacity: NSExpression?
+    }
+
+    private static var capturedStyle: ObjectIdentifier?
+    private static var capturedPaints: [String: LampPaint] = [:]
+
+    private static func capturePaintsIfNeeded(_ style: MLNStyle) {
+        let id = ObjectIdentifier(style)
+        if capturedStyle != id {
+            capturedStyle = id
+            capturedPaints = [:]
+        }
+        for layer in style.layers {
+            if capturedPaints[layer.identifier] == nil {
+                capturedPaints[layer.identifier] = snapshot(layer)
+            }
+        }
+    }
+
+    private static func restorePaints(_ style: MLNStyle) {
+        for layer in style.layers {
+            guard let paint = capturedPaints[layer.identifier] else { continue }
+            restore(layer, paint)
+        }
+    }
+
+    private static func snapshot(_ layer: MLNStyleLayer) -> LampPaint {
+        switch layer {
+        case let background as MLNBackgroundStyleLayer:
+            return LampPaint(backgroundColor: background.backgroundColor)
+        case let fill as MLNFillStyleLayer:
+            return LampPaint(fillColor: fill.fillColor, fillOpacity: fill.fillOpacity)
+        case let line as MLNLineStyleLayer:
+            return LampPaint(lineColor: line.lineColor)
+        case let symbol as MLNSymbolStyleLayer:
+            return LampPaint(
+                textColor: symbol.textColor,
+                textHaloColor: symbol.textHaloColor,
+                iconColor: symbol.iconColor
+            )
+        case let circle as MLNCircleStyleLayer:
+            return LampPaint(
+                circleColor: circle.circleColor,
+                circleStrokeColor: circle.circleStrokeColor
+            )
+        case let raster as MLNRasterStyleLayer:
+            return LampPaint(rasterOpacity: raster.rasterOpacity)
+        default:
+            return LampPaint()
+        }
+    }
+
+    private static func restore(_ layer: MLNStyleLayer, _ paint: LampPaint) {
+        switch layer {
+        case let background as MLNBackgroundStyleLayer:
+            if let color = paint.backgroundColor { background.backgroundColor = color }
+        case let fill as MLNFillStyleLayer:
+            if let color = paint.fillColor { fill.fillColor = color }
+            if let opacity = paint.fillOpacity { fill.fillOpacity = opacity }
+        case let line as MLNLineStyleLayer:
+            if let color = paint.lineColor { line.lineColor = color }
+        case let symbol as MLNSymbolStyleLayer:
+            if let color = paint.textColor { symbol.textColor = color }
+            if let halo = paint.textHaloColor { symbol.textHaloColor = halo }
+            if let icon = paint.iconColor { symbol.iconColor = icon }
+        case let circle as MLNCircleStyleLayer:
+            if let color = paint.circleColor { circle.circleColor = color }
+            if let stroke = paint.circleStrokeColor { circle.circleStrokeColor = stroke }
+        case let raster as MLNRasterStyleLayer:
+            if let opacity = paint.rasterOpacity { raster.rasterOpacity = opacity }
+        default:
+            break
+        }
+    }
+
+    private static func paintSun(_ layer: MLNStyleLayer, field: UIColor, ink: UIColor) {
+        let id = layer.identifier
+        switch layer {
+        case let background as MLNBackgroundStyleLayer:
+            background.backgroundColor = NSExpression(forConstantValue: field)
+        case let fill as MLNFillStyleLayer:
+            guard id == landFillLayerID else { return }
+            fill.fillColor = NSExpression(forConstantValue: field)
+            fill.fillOpacity = NSExpression(forConstantValue: 1)
+        case let line as MLNLineStyleLayer:
+            guard !keepsLine(id) else { return }
+            line.lineColor = NSExpression(forConstantValue: ink)
+        case let symbol as MLNSymbolStyleLayer:
+            symbol.textColor = NSExpression(forConstantValue: ink)
+            symbol.textHaloColor = NSExpression(forConstantValue: field)
+            symbol.iconColor = NSExpression(forConstantValue: ink)
+        case let circle as MLNCircleStyleLayer:
+            guard !keepsCircle(id) else { return }
+            circle.circleColor = NSExpression(forConstantValue: ink)
+            circle.circleStrokeColor = NSExpression(forConstantValue: field)
+        case let raster as MLNRasterStyleLayer:
+            raster.rasterOpacity = NSExpression(forConstantValue: 0.10)
+        default:
+            break
+        }
+    }
+
+    private static func keepsLine(_ id: String) -> Bool {
+        if id == "roads-arterial-casing" || id == "hazards" { return true }
+        if id == RouteLine.coreLayerID { return true }
+        if id.hasPrefix("water") { return true }
+        if id.hasPrefix("public-land") { return true }
+        if id.hasPrefix("flood") { return true }
+        if id == "contours" { return true }
+        return false
+    }
+
+    private static func keepsCircle(_ id: String) -> Bool {
+        if id == DestinationPin.coreLayerID || id == DestinationPin.ringLayerID { return true }
+        if id == HoldPin.coreLayerID || id == HoldPin.ringLayerID { return true }
+        if id.contains("hit") { return true }
+        if id.hasPrefix("you-puck") || id.hasPrefix("party") { return true }
+        return false
     }
 }

@@ -105,7 +105,7 @@ struct PartyHoldCard: View {
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .shadow(color: .black.opacity(0.7), radius: 18, y: -4)
         .padding(.horizontal, 8)
@@ -168,7 +168,7 @@ struct PartyHoldCard: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(
-            Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: 1)
+            Circle().strokeBorder(Theme.silver.opacity(0.35), lineWidth: Theme.strokeWidth(1))
         )
         .contentShape(Circle())
         .accessibilityHidden(!person.isYou)

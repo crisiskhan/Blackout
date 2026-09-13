@@ -7,7 +7,7 @@ struct BlackoutApp: App {
     var body: some Scene {
         WindowGroup {
             RootChrome(runtime: runtime)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
                 .environment(\.dynamicTypeSize, dynamicCap(runtime))
         }
     }

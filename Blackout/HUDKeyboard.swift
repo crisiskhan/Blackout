@@ -140,10 +140,10 @@ struct HUDField: View {
             .overlay {
                 if live {
                     Theme.plateRect()
-                        .strokeBorder(Theme.accent, lineWidth: 1)
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
                 } else {
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 }
             }
         }
@@ -201,7 +201,7 @@ struct HUDKeyboard: View {
         .clipShape(Theme.plateRect())
         .overlay(
             Theme.plateRect()
-                .strokeBorder(Theme.accent, lineWidth: 1)
+                .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
         )
     }
 
@@ -311,10 +311,10 @@ struct HUDKeyCapStyle: ButtonStyle {
             .overlay {
                 if lit || fill != nil {
                     Theme.plateRect()
-                        .strokeBorder(Theme.accent, lineWidth: 1)
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
                 } else {
                     Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: 1)
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                 }
             }
     }
