@@ -87,4 +87,7 @@ def write_search(dest: Path, fc: dict[str, Any] | None = None) -> Path:
     }
     path = dest / "search.json"
     path.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    from . import addrfeat
+
+    addrfeat.attach_addr(dest)
     return path

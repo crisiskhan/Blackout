@@ -8,6 +8,11 @@ public struct SearchHit: Equatable, Hashable, Sendable {
     public var lon: Double
     public var score: Double
     public var meters: Double?
+    public var city: String
+    public var post: String
+    public var what: String
+    public var sure: Int
+    public var why: String
 
     public init(
         name: String,
@@ -15,7 +20,12 @@ public struct SearchHit: Equatable, Hashable, Sendable {
         lat: Double,
         lon: Double,
         score: Double,
-        meters: Double? = nil
+        meters: Double? = nil,
+        city: String = "",
+        post: String = "",
+        what: String = "",
+        sure: Int = 0,
+        why: String = ""
     ) {
         self.name = name
         self.kind = kind
@@ -23,7 +33,23 @@ public struct SearchHit: Equatable, Hashable, Sendable {
         self.lon = lon
         self.score = score
         self.meters = meters
+        self.city = city
+        self.post = post
+        self.what = what
+        self.sure = sure
+        self.why = why
     }
+}
+
+public struct AddrRange: Equatable, Sendable {
+    public var street: Int
+    public var from: Int
+    public var to: Int
+    public var zip: Int
+    public var lat0: Double
+    public var lon0: Double
+    public var lat1: Double
+    public var lon1: Double
 }
 
 public enum SearchHUDWord: Sendable {
@@ -42,6 +68,7 @@ public enum SearchHUDWord: Sendable {
     case place
     case coordinates
     case mark
+    case address
 
     public var title: String {
         switch self {
@@ -60,6 +87,7 @@ public enum SearchHUDWord: Sendable {
         case .place: return "PLACE"
         case .coordinates: return "COORDINATES"
         case .mark: return "MARK"
+        case .address: return "ADDRESS"
         }
     }
 
@@ -95,6 +123,8 @@ public enum SearchHUDWord: Sendable {
             return .coordinates
         case "mark":
             return .mark
+        case "address":
+            return .address
         default:
             return .place
         }
@@ -121,6 +151,13 @@ public struct SearchIndex: Sendable {
     private let tokenIndex: [String: [Int]]
     private let kindIndex: [String: [Int]]
     private let tokenKeys: [String]
+    private let addrStreets: [String]
+    private let addrZips: [String]
+    private let addrRanges: [AddrRange]
+    private let streetTokenIndex: [String: [Int]]
+    private let streetTokenKeys: [String]
+    private let streetCenters: [(lat: Double, lon: Double)]
+    private let streetFreq: [Int]
 
     private struct Doc: Sendable {
         var name: String
@@ -141,7 +178,13 @@ public struct SearchIndex: Sendable {
         }
         if let root = obj as? [String: Any] {
             if let rows = root["docs"] as? [Any] {
-                return SearchIndex(docs: rows.compactMap(Self.doc(fromJSON:)))
+                let packed = Self.packedAddr(root["addr"])
+                return SearchIndex(
+                    docs: rows.compactMap(Self.doc(fromJSON:)),
+                    addrStreets: packed.streets,
+                    addrZips: packed.zips,
+                    addrRanges: packed.ranges
+                )
             }
             if let feats = root["features"] as? [[String: Any]] {
                 return SearchIndex(pois: feats.compactMap(Self.poi(fromFeature:)))
@@ -207,6 +250,39 @@ public struct SearchIndex: Sendable {
                 )
             ]
         }
+        if let house = Self.houseQuery(trimmed) {
+            var hits: [SearchHit] = []
+            considerAddresses(
+                hn: house.0,
+                streetTokens: house.1,
+                you: you,
+                into: &hits,
+                cap: cap
+            )
+            let rest = house.1.joined(separator: " ")
+            let restFolded = Self.fold(rest)
+            for i in candidateIndices(foldedQuery: restFolded, qTokens: house.1) {
+                consider(
+                    docs[i],
+                    foldedQuery: restFolded,
+                    qTokens: house.1,
+                    you: you,
+                    into: &hits,
+                    cap: cap
+                )
+            }
+            for row in extra {
+                consider(
+                    Self.makeDoc(name: row.name, kind: row.kind, lat: row.lat, lon: row.lon),
+                    foldedQuery: restFolded,
+                    qTokens: house.1,
+                    you: you,
+                    into: &hits,
+                    cap: cap
+                )
+            }
+            return hits
+        }
         let foldedQuery = Self.fold(trimmed)
         let qTokens = Self.tokens(trimmed)
         var hits: [SearchHit] = []
@@ -233,8 +309,16 @@ public struct SearchIndex: Sendable {
         return hits
     }
 
-    private init(docs: [Doc]) {
+    private init(
+        docs: [Doc],
+        addrStreets: [String] = [],
+        addrZips: [String] = [],
+        addrRanges: [AddrRange] = []
+    ) {
         self.docs = docs
+        self.addrStreets = addrStreets
+        self.addrZips = addrZips
+        self.addrRanges = addrRanges
         var order = Array(docs.indices)
         order.sort { docs[$0].folded < docs[$1].folded }
         foldedOrder = order
@@ -253,6 +337,34 @@ public struct SearchIndex: Sendable {
         tokenIndex = tokens
         kindIndex = kinds
         tokenKeys = tokens.keys.sorted()
+        var streetTokens: [String: [Int]] = [:]
+        for (i, street) in addrStreets.enumerated() {
+            var seen = Set<String>()
+            for t in Self.tokens(street) {
+                for alias in Self.aliases(of: t) where seen.insert(alias).inserted {
+                    streetTokens[alias, default: []].append(i)
+                }
+            }
+        }
+        streetTokenIndex = streetTokens
+        streetTokenKeys = streetTokens.keys.sorted()
+        var latSum = Array(repeating: 0.0, count: addrStreets.count)
+        var lonSum = Array(repeating: 0.0, count: addrStreets.count)
+        var counts = Array(repeating: 0, count: addrStreets.count)
+        for range in addrRanges {
+            guard range.street >= 0, range.street < addrStreets.count else { continue }
+            latSum[range.street] += (range.lat0 + range.lat1) / 2
+            lonSum[range.street] += (range.lon0 + range.lon1) / 2
+            counts[range.street] += 1
+        }
+        var centers: [(lat: Double, lon: Double)] = []
+        centers.reserveCapacity(addrStreets.count)
+        for i in addrStreets.indices {
+            let n = Double(max(1, counts[i]))
+            centers.append((latSum[i] / n, lonSum[i] / n))
+        }
+        streetCenters = centers
+        streetFreq = counts
     }
 
     private static func poi(fromFeature f: [String: Any]) -> [String: Any]? {
@@ -377,6 +489,14 @@ public struct SearchIndex: Sendable {
             return ["cir", "circle"]
         case "pl", "place":
             return ["pl", "place"]
+        case "n", "north":
+            return ["n", "north"]
+        case "s", "south":
+            return ["s", "south"]
+        case "e", "east":
+            return ["e", "east"]
+        case "w", "west":
+            return ["w", "west"]
         case "mt", "mtn", "mount", "mountain":
             return ["mt", "mtn", "mount", "mountain"]
         case "pk", "peak", "summit":
@@ -633,6 +753,276 @@ public struct SearchIndex: Sendable {
             return 15
         }
         return nil
+    }
+
+    public static func houseQuery(_ raw: String) -> (Int, [String])? {
+        let toks = tokens(raw)
+        guard let first = toks.first else { return nil }
+        var i = first.startIndex
+        while i < first.endIndex, first[i].isNumber {
+            i = first.index(after: i)
+        }
+        let digitPart = String(first[..<i])
+        guard !digitPart.isEmpty, let hn = Int(digitPart) else { return nil }
+        let rest = String(first[i...])
+        switch rest {
+        case "th", "st", "nd", "rd":
+            return nil
+        default:
+            break
+        }
+        if !rest.isEmpty, rest.contains(where: { !$0.isLetter }) {
+            return nil
+        }
+        let street = Array(toks.dropFirst())
+        guard !street.isEmpty else { return nil }
+        return (hn, street)
+    }
+
+    private static func packedAddr(_ any: Any?) -> (streets: [String], zips: [String], ranges: [AddrRange]) {
+        guard let obj = any as? [String: Any] else { return ([], [], []) }
+        let streets = (obj["streets"] as? [String]) ?? []
+        let zips = (obj["zips"] as? [String]) ?? []
+        var ranges: [AddrRange] = []
+        for row in (obj["ranges"] as? [Any]) ?? [] {
+            guard let vals = row as? [Any], vals.count >= 8,
+                  let street = intNumber(vals[0]),
+                  let from = intNumber(vals[1]),
+                  let to = intNumber(vals[2]),
+                  let zip = intNumber(vals[3])
+            else { continue }
+            ranges.append(
+                AddrRange(
+                    street: street,
+                    from: from,
+                    to: to,
+                    zip: zip,
+                    lat0: coord(vals[4]),
+                    lon0: coord(vals[5]),
+                    lat1: coord(vals[6]),
+                    lon1: coord(vals[7])
+                )
+            )
+        }
+        return (streets, zips, ranges)
+    }
+
+    private static func intNumber(_ any: Any?) -> Int? {
+        if let i = any as? Int { return i }
+        if let n = any as? NSNumber { return n.intValue }
+        if let d = any as? Double { return Int(d) }
+        if let s = any as? String { return Int(s) }
+        return nil
+    }
+
+    private static func coord(_ any: Any?) -> Double {
+        let value = number(any) ?? 0
+        if abs(value) > 1000 { return value / 100_000 }
+        return value
+    }
+
+    private static func hnOnRange(_ hn: Int, _ from: Int, _ to: Int) -> Bool {
+        let lo = min(from, to)
+        let hi = max(from, to)
+        if hn < lo || hn > hi { return false }
+        if from % 2 == to % 2 {
+            return hn % 2 == from % 2
+        }
+        return true
+    }
+
+    private static func interpolate(
+        _ hn: Int,
+        _ from: Int,
+        _ to: Int,
+        _ lat0: Double,
+        _ lon0: Double,
+        _ lat1: Double,
+        _ lon1: Double
+    ) -> (Double, Double) {
+        let span = to - from
+        if span == 0 { return (lat0, lon0) }
+        let frac = Double(hn - from) / Double(span)
+        return (lat0 + frac * (lat1 - lat0), lon0 + frac * (lon1 - lon0))
+    }
+
+    private static func cityForZip(_ zip: String) -> String {
+        let digits = zip.filter(\.isNumber)
+        guard digits.count >= 3 else { return "" }
+        switch String(digits.prefix(3)) {
+        case "765": return "Temple"
+        case "786", "787": return "Austin"
+        case "789": return "Giddings"
+        case "798": return "Sierra Blanca"
+        case "799": return "El Paso"
+        case "870": return "Bernalillo"
+        case "871": return "Albuquerque"
+        case "873": return "Gallup"
+        case "875": return "Santa Fe"
+        case "877": return "Las Vegas"
+        case "878": return "Socorro"
+        case "879": return "Truth or Consequences"
+        case "880": return "Las Cruces"
+        case "881": return "Clovis"
+        case "883": return "Alamogordo"
+        default:
+            return ""
+        }
+    }
+
+    private static let typeTokens: Set<String> = [
+        "ave", "avenue", "av", "avenida",
+        "st", "street",
+        "rd", "road",
+        "blvd", "boulevard",
+        "dr", "drive",
+        "ln", "lane",
+        "hwy", "highway",
+        "pkwy", "parkway",
+        "ct", "court",
+        "cir", "circle",
+        "pl", "place",
+        "n", "north", "s", "south", "e", "east", "w", "west",
+    ]
+
+    private static func contentPenalty(street: String, query: [String]) -> Int {
+        var leftover = 0
+        for tok in tokens(street) {
+            if typeTokens.contains(tok) { continue }
+            if query.contains(where: { exactOrAlias($0, in: [tok]) || tokenHits($0, in: [tok]) }) {
+                continue
+            }
+            leftover += 1
+        }
+        return leftover
+    }
+
+    private func considerAddresses(
+        hn: Int,
+        streetTokens: [String],
+        you: (lat: Double, lon: Double)?,
+        into hits: inout [SearchHit],
+        cap: Int
+    ) {
+        let streets = matchingStreets(streetTokens)
+        guard !streets.isEmpty, cap > 0 else { return }
+        var found: [(hit: SearchHit, penalty: Int, freq: Int, centerMeters: Double)] = []
+        for range in addrRanges where streets.contains(range.street) {
+            guard Self.hnOnRange(hn, range.from, range.to) else { continue }
+            guard range.street >= 0, range.street < addrStreets.count else { continue }
+            let (lat, lon) = Self.interpolate(
+                hn,
+                range.from,
+                range.to,
+                range.lat0,
+                range.lon0,
+                range.lat1,
+                range.lon1
+            )
+            let street = addrStreets[range.street]
+            let zip = (range.zip >= 0 && range.zip < addrZips.count) ? addrZips[range.zip] : ""
+            let penalty = Self.contentPenalty(street: street, query: streetTokens)
+            let center: (lat: Double, lon: Double)
+            if streetCenters.indices.contains(range.street) {
+                center = streetCenters[range.street]
+            } else {
+                center = (lat: lat, lon: lon)
+            }
+            let hit = SearchHit(
+                name: "\(hn) \(street)",
+                kind: "address",
+                lat: lat,
+                lon: lon,
+                score: 95 - Double(penalty),
+                meters: you.map { haversine($0.lat, $0.lon, lat, lon) },
+                city: Self.cityForZip(zip),
+                post: zip,
+                what: "door on \(street)",
+                sure: 72,
+                why: "census range \(range.from)–\(range.to)"
+            )
+            found.append(
+                (
+                    hit,
+                    penalty,
+                    streetFreq.indices.contains(range.street) ? streetFreq[range.street] : 0,
+                    haversine(center.lat, center.lon, lat, lon)
+                )
+            )
+        }
+        if you != nil {
+            found.sort { a, b in
+                let am = a.hit.meters ?? .greatestFiniteMagnitude
+                let bm = b.hit.meters ?? .greatestFiniteMagnitude
+                if am != bm { return am < bm }
+                if a.penalty != b.penalty { return a.penalty < b.penalty }
+                return a.hit.name < b.hit.name
+            }
+        } else {
+            found.sort { a, b in
+                if a.penalty != b.penalty { return a.penalty < b.penalty }
+                if a.freq != b.freq { return a.freq > b.freq }
+                if a.centerMeters != b.centerMeters { return a.centerMeters < b.centerMeters }
+                return a.hit.name < b.hit.name
+            }
+        }
+        for item in found.prefix(cap) {
+            hits.append(item.hit)
+        }
+        hits.sort(by: Self.better)
+    }
+
+    private func matchingStreets(_ qTokens: [String]) -> Set<Int> {
+        var result: Set<Int>?
+        for q in qTokens {
+            var found = Set<Int>()
+            for alias in Self.aliases(of: q) {
+                if let ids = streetTokenIndex[alias] {
+                    found.formUnion(ids)
+                }
+            }
+            if q.count >= 3 {
+                for key in streetTokensPrefixed(by: q) {
+                    if let ids = streetTokenIndex[key] {
+                        found.formUnion(ids)
+                    }
+                }
+            }
+            if let current = result {
+                result = current.intersection(found)
+            } else {
+                result = found
+            }
+            if result?.isEmpty == true {
+                return []
+            }
+        }
+        return result ?? []
+    }
+
+    private func streetTokensPrefixed(by prefix: String) -> [String] {
+        var lo = 0
+        var hi = streetTokenKeys.count
+        while lo < hi {
+            let mid = (lo + hi) / 2
+            if streetTokenKeys[mid] < prefix {
+                lo = mid + 1
+            } else {
+                hi = mid
+            }
+        }
+        var out: [String] = []
+        var i = lo
+        while i < streetTokenKeys.count {
+            let key = streetTokenKeys[i]
+            if key.hasPrefix(prefix) {
+                out.append(key)
+                i += 1
+            } else {
+                break
+            }
+        }
+        return out
     }
 
     private func haversine(_ aLat: Double, _ aLon: Double, _ bLat: Double, _ bLon: Double) -> Double {

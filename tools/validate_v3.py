@@ -1254,6 +1254,7 @@ def main() -> None:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
     tip68_speak_field()
+    address_search()
     hud_quality()
     water_inspect()
     sys.exit(fail)
@@ -1350,6 +1351,20 @@ def tip68_speak_field() -> None:
             ok(f"Done: {label}")
         else:
             bad(fail_msg)
+
+
+def address_search() -> None:
+    """MAP SEARCH finds packed house numbers. The card is the address."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_address_search.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"address search contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: MAP SEARCH addresses — house number + street, glass card")
 
 
 def hud_quality() -> None:

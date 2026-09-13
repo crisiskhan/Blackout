@@ -66,11 +66,12 @@ struct MapTab: View {
                 packEast: pack.bbox.east,
                 route: runtime.routeCoords,
                 destination: runtime.routeTarget,
-                held: runtime.held.map { (lat: $0.lat, lon: $0.lon) },
+                held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
+                    ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) },
                 fitToken: runtime.fitPackToken,
                 interactive: MapCanvasHit.enabled(
                     onMap: runtime.tab == .map,
-                    holding: runtime.held != nil || runtime.heldParty != nil,
+                    holding: runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil,
                     arranging: runtime.hudLayoutMode
                 ),
                 onMapTap: { lat, lon in
@@ -104,8 +105,8 @@ struct MapTab: View {
             // The scrim already keeps a thumb off the canvas. This is the
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
-            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil)
-            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil {
+            .accessibilityHidden(runtime.held != nil || runtime.heldParty != nil || runtime.heldAddress != nil)
+            if runtime.tab == .map, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
@@ -118,6 +119,16 @@ struct MapTab: View {
                     onStatus: { runtime.setYouStatus($0) },
                     onCall: { runtime.callHeldParty() },
                     onMessage: { runtime.messageHeldParty() },
+                    onClose: { runtime.closeHold() }
+                )
+                .padding(hudReserve)
+            } else if runtime.tab == .map, let address = runtime.heldAddress {
+                AddressHoldCard(
+                    address: address,
+                    bearing: runtime.addressCourse(lat: address.lat, lon: address.lon),
+                    coordinates: runtime.addressFix(lat: address.lat, lon: address.lon),
+                    onWalk: { runtime.walkHeldAddress() },
+                    onMark: { runtime.markHeldAddress() },
                     onClose: { runtime.closeHold() }
                 )
                 .padding(hudReserve)
@@ -138,6 +149,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.hudFocus)
         .animation(Theme.Motion.heavy, value: runtime.held)
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
+        .animation(Theme.Motion.heavy, value: runtime.heldAddress)
     }
 
     /// Everything that is not the map, sitting on the map. Search, lock and
@@ -270,7 +282,11 @@ struct MapTab: View {
                 let range = h.meters.map { SearchIndex.rangeLabel($0) }
                 let label = [h.name, word, range].compactMap { $0 }.joined(separator: " · ")
                 Button(label) {
-                    runtime.pickDestination(lat: h.lat, lon: h.lon)
+                    if h.kind == "address" {
+                        runtime.holdAddress(h)
+                    } else {
+                        runtime.pickDestination(lat: h.lat, lon: h.lon)
+                    }
                     hits = []
                     query = ""
                 }

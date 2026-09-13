@@ -24,6 +24,19 @@ struct HeldPerson: Equatable {
     var isYou: Bool
 }
 
+/// A packed door the search book interpolated. The card is the record.
+struct HeldAddress: Equatable {
+    var name: String
+    var city: String
+    var post: String
+    var what: String
+    var sure: Int
+    var why: String
+    var lat: Double
+    var lon: Double
+    var marked = false
+}
+
 /// Dark glass over the canvas: what this is, how sure the record is, what to
 /// do, and two ways to act on it. Tapping the dim map or dragging the card
 /// down puts it away. There is no SOS here and there never will be — SOS is a

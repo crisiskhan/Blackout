@@ -90,4 +90,27 @@ final class SearchTests: XCTestCase {
         let mark = SearchExtra(name: "HOME", kind: "mark", lat: 31.76, lon: -106.49)
         XCTAssertEqual(idx.lookup("home", extra: [mark]).first?.kind, "mark")
     }
+
+    func testHouseNumberFindsMontanaAddress() {
+        let packed: [String: Any] = [
+            "docs": [[
+                "Montana Avenue", "street", 31.78, -106.45,
+            ]],
+            "addr": [
+                "streets": ["Montana Avenue"],
+                "zips": ["79902"],
+                "ranges": [[0, 201, 299, 0, 3_176_000, -10_650_000, 3_178_000, -10_640_000]],
+            ],
+        ]
+        let data = try! JSONSerialization.data(withJSONObject: packed)
+        let book = SearchIndex.load(data: data)
+        let hit = book.lookup("221 montana").first
+        XCTAssertEqual(hit?.kind, "address")
+        XCTAssertEqual(hit?.name, "221 Montana Avenue")
+        XCTAssertEqual(hit?.city, "El Paso")
+        XCTAssertEqual(hit?.post, "79902")
+        XCTAssertGreaterThanOrEqual(hit?.sure ?? 0, 70)
+        XCTAssertEqual(SearchHUDWord.from(packed: "address").title, "ADDRESS")
+        XCTAssertNotNil(SearchIndex.houseQuery("221 montana"))
+    }
 }

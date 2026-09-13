@@ -432,6 +432,13 @@ def assert_search_index_ships(pack_id: str) -> None:
             fail("tx-west search.json lost North Franklin Mountain")
     if "OpenStreetMap" not in json.dumps(blob.get("attribution") or ""):
         fail(f"{pack_id} search.json dropped ODbL attribution")
+    addr = blob.get("addr") or {}
+    ranges = addr.get("ranges") or []
+    if len(ranges) < 500:
+        fail(f"{pack_id} search.json has no address ranges ({len(ranges)})")
+    streets = {str(s).casefold() for s in (addr.get("streets") or [])}
+    if pack_id == "tx-west" and not any("montana" in s for s in streets):
+        fail("tx-west address book lost Montana")
 
 
 def main() -> None:

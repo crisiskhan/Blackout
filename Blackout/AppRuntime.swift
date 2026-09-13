@@ -21,6 +21,7 @@ import PTTAudio
 import OfflineSpeech
 import RegionalPacks
 import Router
+import Search
 import Tokens
 import VisionCoreML
 import FieldCorpus
@@ -65,6 +66,8 @@ final class AppRuntime {
     var held: HeldPoint?
     /// A person mark the map is holding open. Mutually exclusive with `held`.
     var heldParty: HeldPerson?
+    /// A packed door the search book interpolated. Mutually exclusive with ground and party.
+    var heldAddress: HeldAddress?
     /// Chosen name on YOU. Empty is still YOU on the card.
     var youName = ""
     var youStatus: PartyStatus = .ok
@@ -248,6 +251,7 @@ final class AppRuntime {
     func holdInspect(lat: Double, lon: Double, tags: [String: String], zoom: Double) {
         pulse()
         heldParty = nil
+        heldAddress = nil
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
@@ -273,6 +277,7 @@ final class AppRuntime {
     func closeHold() {
         held = nil
         heldParty = nil
+        heldAddress = nil
         pulse()
     }
 
@@ -281,6 +286,53 @@ final class AppRuntime {
         guard let point = held, !point.marked else { return }
         dropMark(lat: point.lat, lon: point.lon, name: point.card.title)
         held?.marked = true
+    }
+
+    func holdAddress(_ hit: SearchHit) {
+        pulse()
+        held = nil
+        heldParty = nil
+        let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
+        heldAddress = HeldAddress(
+            name: hit.name,
+            city: hit.city,
+            post: hit.post,
+            what: what.isEmpty ? "door on the street" : what,
+            sure: hit.sure == 0 ? 72 : hit.sure,
+            why: hit.why,
+            lat: hit.lat,
+            lon: hit.lon,
+            marked: marks.contains { MarkDrop.sameCoord(($0.lat, $0.lon), (hit.lat, hit.lon)) }
+        )
+    }
+
+    func walkHeldAddress() {
+        guard let address = heldAddress else { return }
+        pickDestination(lat: address.lat, lon: address.lon)
+        Task { @MainActor in
+            closeHold()
+            navigate(mode: .walk)
+        }
+    }
+
+    func markHeldAddress() {
+        guard let address = heldAddress, !address.marked else { return }
+        dropMark(lat: address.lat, lon: address.lon, name: address.name)
+        heldAddress?.marked = true
+    }
+
+    func addressCourse(lat: Double, lon: Double) -> String {
+        let you = youCoordinate()
+        let deg = VoiceNav.bearing(from: you, to: (lat, lon))
+        return String(format: "%.0f°", deg)
+    }
+
+    func addressFix(lat: Double, lon: Double) -> String {
+        MapFieldChrome.destValue(
+            mode: .coordinates,
+            bearingDeg: nil,
+            you: (lat, lon)
+        )
     }
 
     /// FIELD on the card hands the matching card to the FIELD tab and goes
@@ -303,6 +355,7 @@ final class AppRuntime {
     func holdParty(id: String, lat: Double, lon: Double) {
         pulse()
         held = nil
+        heldAddress = nil
         if id == UserPuck.title {
             let you = youCoordinate()
             heldParty = HeldPerson(
@@ -575,7 +628,7 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil { return }
+            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil { return }
             hudFocus = .none
             chromeAwake = false
         }

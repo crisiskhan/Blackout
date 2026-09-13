@@ -462,6 +462,7 @@ class HUDSyncTests(unittest.TestCase):
             "Theme.swift",
             "HoldCard.swift",
             "PartyHoldCard.swift",
+            "AddressHoldCard.swift",
             "SOSHold.swift",
             "InstrumentsView.swift",
             "RootChrome.swift",
@@ -1114,6 +1115,7 @@ class HUDSeductionTests(unittest.TestCase):
             "RootChrome.swift",
             "HoldCard.swift",
             "PartyHoldCard.swift",
+            "AddressHoldCard.swift",
             "CommsTab.swift",
             "FieldTab.swift",
             "ExpeditionTab.swift",
@@ -1462,6 +1464,7 @@ class MapSearchTests(unittest.TestCase):
         self.assertIn('return "WATER"', search)
         self.assertIn('return "STREET"', search)
         self.assertIn('return "PEAK"', search)
+        self.assertIn('return "ADDRESS"', search)
         self.assertIn('return "COORDINATES"', search)
         self.assertIn("case .mark:", search)
         self.assertIn("testPrefixFindsHospital", tests)
@@ -1474,13 +1477,18 @@ class MapSearchTests(unittest.TestCase):
         self.assertIn("7.7 MI", tests)
         self.assertIn("testTypoFindsGardner", tests)
         self.assertIn("testLookupCapsAndStillFindsAPrefix", tests)
+        self.assertIn("testHouseNumberFindsMontanaAddress", tests)
         self.assertIn("editDistanceOne", search)
         self.assertIn("tokenIndex", search)
         self.assertIn("struct SearchExtra", search)
         self.assertIn("func editsOne(", search)
+        self.assertIn("func houseQuery", search)
+        self.assertIn("struct AddrRange", search)
         self.assertIn("avenida", search)
         self.assertNotIn("best in class", search.lower())
         self.assertNotIn("best in class", tests.lower())
+        self.assertNotIn("Waze", search)
+        self.assertNotIn("Waze", tests)
 
     def test_map_types_and_says_and_does_not_invent(self):
         tab = read("Blackout", "MapTab.swift")
@@ -1541,6 +1549,64 @@ class MapSearchTests(unittest.TestCase):
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("best in class", device.lower())
         self.assertNotIn("Search FTS returns pack POI names", qa)
+
+
+class AddressHoldCardTests(unittest.TestCase):
+    """Type a house number. The glass card is the address, not a DEST dump."""
+
+    def test_address_hit_opens_glass_with_walk_and_mark(self):
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        hold = read("Blackout", "HoldCard.swift")
+        card = read("Blackout", "AddressHoldCard.swift")
+        search = read("Packages", "Search", "Sources", "Search", "Search.swift")
+        tests = ROOT.joinpath("Packages", "MapLibreMap", "Tests")
+        count = 0
+        for path in tests.rglob("*.swift"):
+            count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
+        self.assertEqual(count, 175)
+        self.assertIn("struct HeldAddress", hold)
+        self.assertIn("struct AddressHoldCard", card)
+        self.assertIn("var heldAddress", app)
+        self.assertIn("func holdAddress(", app)
+        self.assertIn("func walkHeldAddress(", app)
+        self.assertIn("func markHeldAddress(", app)
+        self.assertIn("AddressHoldCard(", tab)
+        self.assertIn("runtime.heldAddress", tab)
+        self.assertIn("heldAddress!=nil", tab.replace(" ", ""))
+        self.assertIn('Button("WALK")', card)
+        self.assertIn('Button("MARK")', card)
+        self.assertIn("ADDRESS", card)
+        self.assertIn("CITY", card)
+        self.assertIn("POST", card)
+        self.assertIn("COORDINATES", card)
+        self.assertIn("SURE", card)
+        self.assertIn("WHAT", card)
+        self.assertIn("BEARING", card)
+        walk = app.split("func walkHeldAddress(")[1].split("func markHeldAddress(")[0]
+        self.assertIn("pickDestination", walk)
+        self.assertIn("navigate(mode: .walk)", walk)
+        self.assertIn("Task { @MainActor in", walk)
+        self.assertIn('kind=="address"', tab.replace(" ", "") + search.replace(" ", ""))
+        self.assertNotIn("tel://", card.lower())
+        self.assertNotIn("Color.orange", card)
+        self.assertNotIn("Color.green", card)
+        self.assertNotIn("best in class", card.lower())
+        self.assertNotIn(".spring(", card)
+        self.assertNotIn("Waze", card)
+        self.assertIn("case address", search)
+        self.assertIn("holdCardDismissDragPoints", card)
+
+    def test_solo_qa_scores_address_search(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("221 Montana", qa)
+        self.assertIn("ADDRESS", qa)
+        self.assertIn("address card", qa.lower())
+        self.assertIn("WALK", qa)
+        self.assertIn("CITY", qa)
+        self.assertIn("POST", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
 
 
 if __name__ == "__main__":
