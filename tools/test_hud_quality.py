@@ -485,6 +485,31 @@ class HUDSyncTests(unittest.TestCase):
         self.assertIn("reticle", qa.lower())
         self.assertIn("QUIET", qa)
 
+    def test_selected_tab_reticle_glows_red_without_growing(self):
+        theme = read("Blackout", "Theme.swift")
+        root = read("Blackout", "RootChrome.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        qa = read("docs", "SOLO_QA.md")
+        reticle = theme.split("struct HUDReticle")[1].split("struct HUDDockStyle")[0]
+        self.assertIn("hudReticlePoints", reticle)
+        self.assertIn("Theme.accent", reticle)
+        self.assertIn(".shadow(", reticle)
+        self.assertIn("Theme.Motion.beat", reticle)
+        self.assertNotIn("crisis ? Theme.accent : Theme.silver", reticle)
+        self.assertNotIn("Theme.silver", reticle)
+        self.assertNotIn(".spring(", reticle)
+        self.assertNotIn("hudMarkPoints", reticle)
+        self.assertIn("hudReticlePoints: Double = 10", tokens)
+        self.assertIn("hudTabReservePoints: Double = 52", tokens)
+        self.assertIn("VStack(spacing: 3)", root)
+        self.assertIn("HUDReticle(lit: runtime.tab == t", root)
+        tabs = next(
+            line for line in qa.splitlines() if "Selected tab is the reticle tick" in line
+        )
+        self.assertIn("glowing red", tabs)
+        self.assertIn("same size", tabs)
+        self.assertNotIn("best in class", qa.lower())
+
     def test_warn_ink_is_one_token(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         self.assertIn("static let warn", tokens)

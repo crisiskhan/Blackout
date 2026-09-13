@@ -76,13 +76,18 @@ struct HUDMark: View {
 }
 
 /// The logo's center, as a selected-tab tick. Not a random underline.
+/// Lit is HUD red. The frame stays the reticle size — glow is light, not layout.
 struct HUDReticle: View {
     var lit: Bool
     var crisis: Bool = false
+    @State private var beat: Double = 0.28
 
     var body: some View {
-        let ink = lit ? (crisis ? Theme.accent : Theme.silver) : Color.clear
+        let ink = lit ? Theme.accent : Color.clear
         let size = CGFloat(BlackoutTokens.Chrome.hudReticlePoints)
+        let pulse = lit ? beat : 0
+        let glow = (crisis ? 0.42 : 0.28) + 0.58 * pulse
+        let radius = (crisis ? 6.0 : 4.0) + (crisis ? 8.0 : 6.0) * pulse
         return ZStack {
             Circle()
                 .stroke(ink, lineWidth: 1)
@@ -94,7 +99,18 @@ struct HUDReticle: View {
                 .frame(width: 1, height: size)
         }
         .frame(width: size, height: size)
+        .shadow(color: ink.opacity(glow), radius: radius)
+        .shadow(color: ink.opacity(glow * 0.55), radius: radius * 1.6)
         .accessibilityHidden(true)
+        .onChange(of: lit) { _, now in
+            beat = 0.28
+            guard now else { return }
+            withAnimation(Theme.Motion.beat) { beat = 1 }
+        }
+        .onAppear {
+            guard lit else { return }
+            withAnimation(Theme.Motion.beat) { beat = 1 }
+        }
     }
 }
 
