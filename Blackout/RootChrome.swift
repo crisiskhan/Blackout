@@ -7,9 +7,7 @@ struct RootChrome: View {
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
-            if !runtime.unlocked {
-                UnlockView(runtime: runtime)
-            } else if !runtime.armed {
+            if !runtime.armed {
                 ARMINGView(runtime: runtime)
             } else {
                 tabChrome

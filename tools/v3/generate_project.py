@@ -267,7 +267,6 @@ def ios_target_settings(debug: bool) -> dict:
             "INFOPLIST_KEY_NSLocalNetworkUsageDescription": "Mesh uses Bluetooth or peer Wi-Fi only when you join a party. Airplane: no sockets. Deny is supported.",
             "INFOPLIST_KEY_NSBonjourServices": "_blackoutmesh._tcp",
             "INFOPLIST_KEY_NSCameraUsageDescription": "Vision classifies a still on this device. It is a guess. Deny is supported.",
-            "INFOPLIST_KEY_NSFaceIDUsageDescription": "UNLOCK uses Face ID on this device. Deny is supported.",
             "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "GPS for lock-on, dead reckoning start, and last pip. Deny is supported.",
             "INFOPLIST_KEY_NSMicrophoneUsageDescription": "PTT live and 15s clip stay on this device. Deny is supported.",
             "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "SEARCH listens for a spoken question on this device. Deny is supported.",

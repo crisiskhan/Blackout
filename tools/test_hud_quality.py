@@ -749,52 +749,40 @@ class BootFieldTests(unittest.TestCase):
         self.assertIn("field poster", device.lower())
 
 
-class UnlockGlassTests(unittest.TestCase):
-    """Fingerprint glass before ACTIVATE. Inverted print asks before a wipe."""
+class BootGlassTests(unittest.TestCase):
+    """Cold launch is ACTIVATE. No fingerprint lock."""
 
-    def test_fingerprint_unlock_sits_before_activate(self):
+    def test_cold_launch_is_activate_not_fingerprint(self):
         root = read("Blackout", "RootChrome.swift")
-        unlock = read("Blackout", "UnlockView.swift")
         app = read("Blackout", "AppRuntime.swift")
         pbx = read("Blackout.xcodeproj", "project.pbxproj")
         gen = read("tools", "v3", "generate_project.py")
         qa = read("docs", "SOLO_QA.md")
-        self.assertLess(root.find("UnlockView"), root.find("ARMINGView"))
-        self.assertIn("runtime.unlocked", root)
-        self.assertIn("var unlocked", app)
-        self.assertIn("func requestUnlock", app)
-        self.assertIn("import LocalAuthentication", app)
-        self.assertIn("LAContext", app)
-        self.assertIn("deviceOwnerAuthentication", app)
-        self.assertIn("UNLOCK FAILED", app)
-        self.assertIn("func wipeVessel", app)
-        self.assertIn("exit(0)", app)
-        self.assertIn("removePersistentDomain", app)
-        self.assertIn("struct UnlockView", unlock)
-        self.assertIn("UNLOCK", unlock)
-        self.assertIn("ARE YOU SURE", unlock)
-        self.assertIn('Button("YES")', unlock)
-        self.assertIn('Button("NO")', unlock)
-        self.assertIn("Theme.fix", unlock)
-        self.assertIn("Theme.accent", unlock)
-        self.assertIn("RotationGesture", unlock)
-        self.assertIn('Button("INVERT")', unlock)
-        self.assertIn("inverted", unlock)
-        self.assertIn("180", unlock)
-        self.assertNotIn("Color.green", unlock)
-        self.assertNotIn("Color.orange", unlock)
-        self.assertNotIn(".spring(", unlock)
-        self.assertNotIn("tel://", unlock.lower())
-        self.assertNotIn("best in class", unlock.lower())
-        self.assertIn("NSFaceIDUsageDescription", pbx)
-        self.assertIn("NSFaceIDUsageDescription", gen)
-        self.assertIn("UNLOCK", qa)
-        self.assertIn("ARE YOU SURE", qa)
-        self.assertIn("INVERT", qa)
+        self.assertNotIn("UnlockView", root)
+        self.assertIn("ARMINGView", root)
+        self.assertLess(root.find("ARMINGView"), root.find("tabChrome"))
+        self.assertNotIn("runtime.unlocked", root)
+        self.assertNotIn("var unlocked", app)
+        self.assertNotIn("func requestUnlock", app)
+        self.assertNotIn("import LocalAuthentication", app)
+        self.assertNotIn("LAContext", app)
+        self.assertNotIn("deviceOwnerAuthentication", app)
+        self.assertNotIn("UNLOCK FAILED", app)
+        self.assertNotIn("func wipeVessel", app)
+        self.assertFalse((ROOT / "Blackout" / "UnlockView.swift").is_file())
+        self.assertNotIn("NSFaceIDUsageDescription", pbx)
+        self.assertNotIn("NSFaceIDUsageDescription", gen)
+        self.assertIn("Cold launch is ACTIVATE", qa)
+        self.assertIn("No fingerprint", qa)
+        self.assertNotIn("UNLOCK FAILED", qa)
+        self.assertNotIn("ARE YOU SURE", qa)
+        self.assertNotIn("Cold launch is UNLOCK", qa)
+        self.assertNotIn("Fingerprint mark", qa)
         self.assertNotIn("best in class", qa.lower())
-        wipe = app.split("func wipeVessel", 1)[1].split("func joinNet", 1)[0]
-        self.assertIn("temporaryDirectory", wipe)
-        self.assertIn(".libraryDirectory", wipe)
+        self.assertNotIn("tel://", root.lower())
+        self.assertNotIn("Color.green", root)
+        self.assertNotIn("Color.orange", root)
+        self.assertNotIn(".spring(", root)
 
 
 class HUDSyncTests(unittest.TestCase):
@@ -1538,7 +1526,6 @@ class HUDSeductionTests(unittest.TestCase):
             "ExpeditionTab.swift",
             "InstrumentsView.swift",
             "ARMINGView.swift",
-            "UnlockView.swift",
             "Theme.swift",
             "HUDLayout.swift",
         ):
@@ -2167,7 +2154,6 @@ class FacetedMetalHUDTests(unittest.TestCase):
     HUD_FILES = (
         "Theme.swift",
         "RootChrome.swift",
-        "UnlockView.swift",
         "ARMINGView.swift",
         "MapTab.swift",
         "CommsTab.swift",
@@ -2221,17 +2207,11 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertNotIn("Color.green", theme)
         self.assertNotIn("best in class", theme.lower())
 
-    def test_mark_unlock_boot_and_tabs_carry_the_metal_ring(self):
+    def test_mark_boot_and_tabs_carry_the_metal_ring(self):
         theme = read("Blackout", "Theme.swift")
         mark = theme.split("struct HUDMark")[1].split("struct HUDReticle")[0]
         self.assertIn("HUDRing(", mark)
         self.assertIn('Image("Logo")', mark)
-        unlock = read("Blackout", "UnlockView.swift")
-        unlock_mark = unlock.split("private var mark:")[1].split("private var status")[0]
-        self.assertIn("HUDRing(", unlock_mark)
-        self.assertIn('Image(systemName: "touchid")', unlock_mark)
-        self.assertNotIn("Color.orange", unlock)
-        self.assertNotIn(".spring(", unlock)
         arming = read("Blackout", "ARMINGView.swift")
         boot = arming.split("private var mark:")[1].split("private var status")[0]
         self.assertIn("HUDRing(", boot)

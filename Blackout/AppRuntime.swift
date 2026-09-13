@@ -1,7 +1,6 @@
 import Foundation
 import Observation
 import CoreLocation
-import LocalAuthentication
 import UIKit
 import AVFoundation
 import BlackBox
@@ -49,9 +48,6 @@ final class AppRuntime {
     var ptt: PTTDeck
     var speech: SpeechEngine
     var armed = false
-    var unlocked = false
-    var wipeConfirm = false
-    var unlockChrome = ""
     var bootStage: BootStage = .cold
     var bootProgress: Double = 0
     var bootStyleURL: URL?
@@ -124,7 +120,6 @@ final class AppRuntime {
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
-    private var unlockContext: LAContext?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
     private var pttHold = false
     /// CLIP tap is waiting on the mic. Not live yet.
@@ -197,68 +192,6 @@ final class AppRuntime {
         box.log("arming", "activated")
         applyMapKeepAwake()
         pulse()
-    }
-
-    func requestUnlock(inverted: Bool) {
-        if inverted {
-            wipeConfirm = true
-            unlockChrome = ""
-            pulse()
-            return
-        }
-        wipeConfirm = false
-        let ctx = LAContext()
-        unlockContext = ctx
-        var err: NSError?
-        guard ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err) else {
-            unlockContext = nil
-            unlockChrome = "UNLOCK FAILED"
-            pulse()
-            return
-        }
-        ctx.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "UNLOCK") { ok, _ in
-            Task { @MainActor in
-                self.unlockContext = nil
-                if ok {
-                    self.unlocked = true
-                    self.unlockChrome = ""
-                    self.pulse()
-                } else {
-                    self.unlockChrome = "UNLOCK FAILED"
-                    self.pulse()
-                }
-            }
-        }
-    }
-
-    func cancelWipe() {
-        wipeConfirm = false
-        pulse()
-    }
-
-    func confirmWipe() {
-        wipeVessel()
-    }
-
-    func wipeVessel() {
-        let fm = FileManager.default
-        let homes: [FileManager.SearchPathDirectory] = [
-            .documentDirectory,
-            .cachesDirectory,
-            .applicationSupportDirectory,
-            .libraryDirectory,
-        ]
-        for dir in homes {
-            if let url = fm.urls(for: dir, in: .userDomainMask).first {
-                try? fm.removeItem(at: url)
-            }
-        }
-        try? fm.removeItem(at: fm.temporaryDirectory)
-        if let id = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: id)
-            UserDefaults.standard.synchronize()
-        }
-        exit(0)
     }
 
     func joinNet() {
