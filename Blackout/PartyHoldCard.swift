@@ -22,6 +22,8 @@ struct PartyHoldCard: View {
     let timers: TimerBoard
     let kit: KitBag
     let timerSeq: Int
+    let kitSeq: Int
+    let onKitBump: (String, Int) -> Void
 
     @State private var drag: CGFloat = 0
     @State private var nameDraft: String = ""
@@ -257,23 +259,31 @@ struct PartyHoldCard: View {
     }
 
     private var inventoryBlock: some View {
-        Group {
-            if !kitItems.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("INVENTORY")
-                        .font(.system(size: 11, weight: .heavy))
-                        .foregroundStyle(Theme.silver.opacity(0.75))
-                    ForEach(kitItems) { item in
-                        HStack {
-                            Text(item.name.uppercased())
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                            Spacer(minLength: 8)
-                            Text("\(item.count)")
-                                .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(Theme.silver)
-                        }
+        VStack(alignment: .leading, spacing: 6) {
+            let _ = kitSeq
+            Text("INVENTORY")
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Theme.silver.opacity(0.75))
+            if kitItems.isEmpty {
+                Text("NONE")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.7))
+            } else {
+                ForEach(kitItems) { item in
+                    HStack(spacing: 8) {
+                        Text(item.name.uppercased())
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                        Text("\(item.count)")
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.silver)
+                        Spacer(minLength: 8)
+                        Button("+1") { onKitBump(item.id, 1) }
+                            .buttonStyle(HoldActionStyle(filled: false))
+                        Button("−1") { onKitBump(item.id, -1) }
+                            .buttonStyle(HoldActionStyle(filled: false))
                     }
+                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
                 }
             }
         }

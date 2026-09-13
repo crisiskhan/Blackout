@@ -27,4 +27,15 @@ final class KitStoreTests: XCTestCase {
         bag.addNamed("   ")
         XCTAssertEqual(bag.items.filter { $0.name == "Tape" }.count, 1)
     }
+
+    func testYouInventoryKeepsCountAfterBump() {
+        var bag = KitBag(items: [GearItem(id: "tape", name: "Tape", working: true, count: 3)])
+        bag.assign("tape", to: "YOU")
+        XCTAssertEqual(bag.assigned(to: "YOU", name: "Khan", isYou: true).first?.count, 3)
+        bag.bump("tape", by: -1)
+        XCTAssertEqual(bag.assigned(to: "YOU", name: "Khan", isYou: true).first?.count, 2)
+        bag.assign("tape", to: "Khan")
+        XCTAssertEqual(bag.assigned(to: "YOU", name: "Khan", isYou: true).map(\.name), ["Tape"])
+        XCTAssertTrue(bag.assigned(to: "peer", name: "Sam", isYou: false).isEmpty)
+    }
 }

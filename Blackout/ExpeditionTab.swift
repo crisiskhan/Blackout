@@ -7,6 +7,12 @@ import MapLibreMap
 import KitStore
 import MeshDTN
 
+private struct KitAssignPerson: Identifiable {
+    let label: String
+    let token: String
+    var id: String { token }
+}
+
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
     @State private var paperText = ""
@@ -179,30 +185,6 @@ struct ExpeditionTab: View {
                             ForEach(runtime.kit.items) { item in
                                 kitRow(item)
                             }
-                            if let id = assigningID {
-                                Text("ASSIGN")
-                                    .font(.system(size: 11, weight: .heavy))
-                                    .foregroundStyle(Theme.silver.opacity(0.5))
-                                Button("YOU") {
-                                    runtime.assignKitItem(id, to: runtime.timerOwner())
-                                    assigningID = nil
-                                }
-                                .buttonStyle(HUDOverlayChipStyle())
-                                ForEach(runtime.roster.members) { member in
-                                    Button(member.name.uppercased()) {
-                                        runtime.assignKitItem(id, to: member.name)
-                                        assigningID = nil
-                                    }
-                                    .buttonStyle(HUDOverlayChipStyle())
-                                }
-                                ForEach(runtime.mesh.pips, id: \.from) { pip in
-                                    Button((pip.name ?? pip.from).uppercased()) {
-                                        runtime.assignKitItem(id, to: pip.from)
-                                        assigningID = nil
-                                    }
-                                    .buttonStyle(HUDOverlayChipStyle())
-                                }
-                            }
                             ForEach(Array(runtime.kit.hazards.enumerated()), id: \.offset) { _, hazard in
                                 Text(hazard.uppercased())
                                     .font(.caption.weight(.bold))
@@ -326,20 +308,22 @@ struct ExpeditionTab: View {
     private func kitRow(_ item: GearItem) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Text(item.name.uppercased())
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.silver)
-                    .contentShape(Rectangle())
-                    .highPriorityGesture(
-                        LongPressGesture(minimumDuration: Inspect.holdSeconds)
-                            .onEnded { _ in
-                                assigningID = item.id
-                            }
-                    )
-                Text("\(item.count)")
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Theme.silver)
-                Spacer(minLength: 8)
+                HStack(spacing: 8) {
+                    Text(item.name.uppercased())
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                    Text("\(item.count)")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    LongPressGesture(minimumDuration: Inspect.holdSeconds)
+                        .onEnded { _ in
+                            assigningID = item.id
+                        }
+                )
                 Button("+1") { runtime.bumpKit(item.id, by: 1) }
                     .buttonStyle(HUDOverlayChipStyle())
                 Button("−1") { runtime.bumpKit(item.id, by: -1) }
@@ -360,7 +344,55 @@ struct ExpeditionTab: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Theme.silver.opacity(0.7))
             }
+            if assigningID == item.id {
+                Text("ASSIGN")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    Button("YOU") {
+                        runtime.assignKitItem(item.id, to: runtime.timerOwner())
+                        assigningID = nil
+                    }
+                    .buttonStyle(HUDOverlayChipStyle())
+                    ForEach(assignPeople) { person in
+                        Button(person.label.uppercased()) {
+                            runtime.assignKitItem(item.id, to: person.token)
+                            assigningID = nil
+                        }
+                        .buttonStyle(HUDOverlayChipStyle())
+                    }
+                    Button("NONE") {
+                        runtime.assignKitItem(item.id, to: "")
+                        assigningID = nil
+                    }
+                    .buttonStyle(HUDOverlayChipStyle())
+                }
+            }
         }
+    }
+
+    private var assignPeople: [KitAssignPerson] {
+        var seen: [String] = []
+        var rows: [KitAssignPerson] = []
+        let you = runtime.timerOwner().uppercased()
+        func add(_ label: String, token: String) {
+            let token = token.trimmingCharacters(in: .whitespacesAndNewlines)
+            let label = label.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !token.isEmpty else { return }
+            let key = token.uppercased()
+            if key == you { return }
+            if seen.contains(key) { return }
+            seen.append(key)
+            rows.append(KitAssignPerson(label: label.isEmpty ? token : label, token: token))
+        }
+        for member in runtime.roster.members {
+            add(member.name, token: member.name)
+        }
+        for pip in runtime.mesh.pips {
+            let named = (pip.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            add(named.isEmpty ? pip.from : named, token: named.isEmpty ? pip.from : named)
+        }
+        return rows
     }
 
     private func timerWho(_ t: PartyTimer) -> String {

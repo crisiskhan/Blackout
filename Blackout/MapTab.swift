@@ -131,7 +131,9 @@ struct MapTab: View {
                     onFaceHold: { runtime.openEmblemPick() },
                     timers: runtime.timers,
                     kit: runtime.kit,
-                    timerSeq: runtime.timerSeq
+                    timerSeq: runtime.timerSeq,
+                    kitSeq: runtime.kitSeq,
+                    onKitBump: { runtime.bumpKit($0, by: $1) }
                 )
                 .padding(hudReserve)
                 if runtime.pickingEmblem {

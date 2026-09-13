@@ -37,6 +37,7 @@ final class AppRuntime {
     var red: RedPlate
     var timers: TimerBoard
     var timerSeq = 0
+    var kitSeq = 0
     var roster = PartyRoster.create(lead: "Lead")
     var trip = TripFactory.make(brief: "", hours: 2)
     var kit = KitBag(items: [
@@ -977,15 +978,18 @@ final class AppRuntime {
     func bumpKit(_ id: String, by: Int) {
         kit.bump(id, by: by)
         sendKitItem(id)
+        kitSeq += 1
     }
 
     func syncKit(_ id: String) {
         sendKitItem(id)
+        kitSeq += 1
     }
 
     func assignKitItem(_ id: String, to: String) {
         kit.assign(id, to: to)
         sendKitItem(id)
+        kitSeq += 1
     }
 
     func addKitItem(_ name: String) {
@@ -993,6 +997,7 @@ final class AppRuntime {
         kit.addNamed(trimmed)
         if let item = kit.items.last, item.name == trimmed {
             sendKitMesh(item)
+            kitSeq += 1
         }
     }
 
@@ -1099,6 +1104,7 @@ final class AppRuntime {
             if let raw = String(data: env.body, encoding: .utf8),
                let parsed = MeshKitBody.parse(raw) {
                 applyKitMesh(parsed)
+                kitSeq += 1
             }
         case "chip":
             if let raw = String(data: env.body, encoding: .utf8) {
