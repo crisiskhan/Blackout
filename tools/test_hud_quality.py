@@ -446,6 +446,24 @@ class CompassMarkTests(unittest.TestCase):
         self.assertEqual((width, height), (1024, 1024))
         self.assertEqual(color, 2, "App Store icon must be RGB, no alpha")
 
+    def test_home_screen_dark_and_tinted_drop_the_black_plate(self):
+        iconset = ROOT / "Blackout" / "Assets.xcassets" / "AppIcon.appiconset"
+        manifest = read("Blackout", "Assets.xcassets", "AppIcon.appiconset", "Contents.json")
+        dark = iconset / "AppIcon-dark.png"
+        tinted = iconset / "AppIcon-tinted.png"
+        width, height, color = png_ihdr(dark)
+        self.assertEqual((width, height), (1024, 1024))
+        self.assertEqual(color, 6, "dark Home Screen mark has alpha")
+        width, height, color = png_ihdr(tinted)
+        self.assertEqual((width, height), (1024, 1024))
+        self.assertEqual(color, 6, "tinted Home Screen mark has alpha")
+        packed = manifest.replace(" ", "")
+        self.assertIn('"value":"dark"', packed)
+        self.assertIn('"value":"tinted"', manifest.replace(" ", ""))
+        self.assertIn("AppIcon-dark.png", manifest)
+        self.assertIn("AppIcon-tinted.png", manifest)
+        self.assertIn("AppIcon.png", manifest)
+
     def test_boot_logo_is_the_square_mark(self):
         logo_dir = ROOT / "Blackout" / "Assets.xcassets" / "Logo.imageset"
         logo = logo_dir / "Logo.png"
