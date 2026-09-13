@@ -47,12 +47,16 @@ struct FieldTab: View {
                             }
                         } else {
                             searchField
+                            if askBusy {
+                                HUDGlassCard {
+                                    Text("ASK")
+                                        .font(.system(size: 13, weight: .heavy))
+                                        .foregroundStyle(Theme.silver)
+                                }
+                            }
                             if catalogMiss {
                                 HUDGlassCard {
                                     Text("NO MATCH")
-                                        .font(.system(size: 13, weight: .heavy))
-                                        .foregroundStyle(Theme.warn)
-                                    Text("NO ASK MODEL")
                                         .font(.system(size: 13, weight: .heavy))
                                         .foregroundStyle(Theme.warn)
                                 }
