@@ -216,6 +216,7 @@ final class AppRuntime {
     func arm() {
         guard bootReady else { return }
         armed = true
+        fix.arm()
         box.log("arming", "activated")
         applyMapKeepAwake()
         pulse()
@@ -797,17 +798,20 @@ final class AppRuntime {
     }
 
     func tapRuler() {
-        toolChrome = MapRuler.chrome(from: youCoordinate(), to: destination())
+        fix.arm()
+        toolChrome = MapRuler.chrome(from: gnssYou, to: routeTarget)
         showInstruments = false
     }
 
     func tapUSNG() {
-        let you = youCoordinate()
-        toolChrome = USNG.label(lat: you.lat, lon: you.lon)
+        fix.arm()
+        let you = gnssYou
+        toolChrome = USNG.label(lat: you?.lat ?? .nan, lon: you?.lon ?? .nan)
         showInstruments = false
     }
 
     func tapMagTrue() {
+        fix.arm()
         instruments.toggleMagTrue()
         applyInstrumentBoard()
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
@@ -815,12 +819,14 @@ final class AppRuntime {
     }
 
     func setTrueNorth() {
+        fix.arm()
         instruments.setTrueNorth()
         applyInstrumentBoard()
         toolChrome = MagTrueChip.chrome(magNorth: instruments.state.magNorth)
     }
 
     func calibrateCompass() {
+        fix.arm()
         instruments.calibrateCompass()
         fix.requestHeadingCalibration()
     }
@@ -832,6 +838,7 @@ final class AppRuntime {
 
     func attachGNSSPuck(_ present: Bool) {
         instruments.attachGNSSPuck(present)
+        fix.arm()
         applyInstrumentBoard()
     }
 

@@ -10,6 +10,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(s.tools.count, MapTool.allCases.count)
         XCTAssertTrue(USNG.label(lat: 31.76, lon: -106.49).contains("USNG"))
         XCTAssertEqual(USNG.label(lat: .nan, lon: -106.49), "USNG —")
+        XCTAssertEqual(USNG.label(lat: 40, lon: -80), "USNG 17T NE 8536 2823")
+        XCTAssertEqual(USNG.label(lat: 31.76190, lon: -106.49000), "USNG 13R CR 5889 1501")
+        XCTAssertFalse(USNG.label(lat: 31.76, lon: -106.49).contains("/"))
         XCTAssertTrue(s.styleRelativePath().contains("style.json"))
     }
 

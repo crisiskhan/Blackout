@@ -2739,6 +2739,55 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         ).split("enum MapKeepAwake")[1].split("enum MapCanvasHit")[0]
         self.assertIn("pocket: Bool", keep_src)
 
+    def test_instruments_use_live_you_and_a_real_usng(self):
+        app = read("Blackout", "AppRuntime.swift")
+        usng = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        ).split("enum USNG")[1].split("enum PackGeometry")[0]
+        tests = read(
+            "Packages", "MapLibreMap", "Tests", "MapLibreMapTests", "MapLibreMapTests.swift"
+        )
+        qa = read("docs", "SOLO_QA.md")
+        ruler = app.split("func tapRuler()")[1].split("func ", 1)[0]
+        usng_tap = app.split("func tapUSNG()")[1].split("func ", 1)[0]
+        mag = app.split("func tapMagTrue()")[1].split("func ", 1)[0]
+        true_n = app.split("func setTrueNorth()")[1].split("func ", 1)[0]
+        cal = app.split("func calibrateCompass()")[1].split("func ", 1)[0]
+        gnss = app.split("func attachGNSSPuck(")[1].split("func ", 1)[0]
+        activate = app.split("func arm()")[1].split("func joinNet")[0]
+        boot = app.split("func arm(")[0]
+        self.assertIn("gnssYou", ruler)
+        self.assertIn("routeTarget", ruler)
+        self.assertNotIn("youCoordinate()", ruler)
+        self.assertNotIn("destination()", ruler)
+        self.assertIn("fix.arm()", ruler)
+        self.assertIn("gnssYou", usng_tap)
+        self.assertNotIn("youCoordinate()", usng_tap)
+        self.assertIn("fix.arm()", usng_tap)
+        self.assertIn("fix.arm()", mag)
+        self.assertIn("fix.arm()", true_n)
+        self.assertIn("fix.arm()", cal)
+        self.assertIn("fix.arm()", gnss)
+        self.assertIn("fix.arm()", activate)
+        self.assertNotIn("fix.arm()", boot)
+        self.assertIn("CDEFGHJKLMNPQRSTUVWX", usng)
+        self.assertIn("ABCDEFGHJKLMNPQRSTUV", usng)
+        self.assertNotIn("USNG %d / %.4f %.4f", usng)
+        self.assertIn("USNG 17T NE 8536 2823", tests)
+        self.assertIn("USNG 13R CR 5889 1501", tests)
+        inst_line = next(
+            line
+            for line in qa.splitlines()
+            if "COMPASS CAL" in line and "GNSS PUCK" in line
+        )
+        self.assertIn("RULER —", inst_line)
+        self.assertIn("USNG —", inst_line)
+        self.assertIn("13R", inst_line)
+        self.assertIn("live YOU", inst_line)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
+
 
 class MapSearchTests(unittest.TestCase):
     """MAP SEARCH is a local index. Type or SAY. Empty waits. Miss is NO MATCH."""

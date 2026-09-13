@@ -343,10 +343,70 @@ public struct MapSession: Sendable {
 }
 
 public enum USNG {
+    public static let dash = "USNG —"
+    private static let bands = "CDEFGHJKLMNPQRSTUVWX"
+    private static let rows = "ABCDEFGHJKLMNPQRSTUV"
+    private static let columns = ["ABCDEFGH", "JKLMNPQR", "STUVWXYZ"]
+    private static let digits = 4
+    private static let a = 6_378_137.0
+    private static let f = 1.0 / 298.257223563
+    private static let k0 = 0.9996
+
     public static func label(lat: Double, lon: Double) -> String {
-        guard lat.isFinite, lon.isFinite else { return "USNG —" }
-        let zone = Int(floor((lon + 180) / 6) + 1)
-        return String(format: "USNG %d / %.4f %.4f", zone, lat, lon)
+        guard lat.isFinite, lon.isFinite, abs(lat) <= 84, abs(lon) <= 180 else { return dash }
+        let e2 = f * (2 - f)
+        let e4 = e2 * e2
+        let e6 = e4 * e2
+        let ep2 = e2 / (1 - e2)
+        var zone = Int(floor((lon + 180) / 6) + 1)
+        if lon >= 180 { zone = 60 }
+        let latR = lat * .pi / 180
+        let lonR = lon * .pi / 180
+        let lon0 = ((Double(zone) - 1) * 6 - 180 + 3) * .pi / 180
+        let n = a / sqrt(1 - e2 * sin(latR) * sin(latR))
+        let t = tan(latR) * tan(latR)
+        let c = ep2 * cos(latR) * cos(latR)
+        let aa = cos(latR) * (lonR - lon0)
+        let m =
+            a * (
+                (1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256) * latR
+                    - (3 * e2 / 8 + 3 * e4 / 32 + 45 * e6 / 1024) * sin(2 * latR)
+                    + (15 * e4 / 256 + 45 * e6 / 1024) * sin(4 * latR)
+                    - (35 * e6 / 3072) * sin(6 * latR)
+            )
+        let easting =
+            k0 * n * (
+                aa
+                    + (1 - t + c) * pow(aa, 3) / 6
+                    + (5 - 18 * t + t * t + 72 * c - 58 * ep2) * pow(aa, 5) / 120
+            ) + 500_000
+        var northing =
+            k0 * (
+                m + n * tan(latR) * (
+                    pow(aa, 2) / 2
+                        + (5 - t + 9 * c + 4 * c * c) * pow(aa, 4) / 24
+                        + (61 - 58 * t + t * t + 600 * c - 330 * ep2) * pow(aa, 6) / 720
+                )
+            )
+        if lat < 0 { northing += 10_000_000 }
+        let bandIndex = min(Int(floor((lat + 80) / 8)), bands.count - 1)
+        guard bandIndex >= 0 else { return dash }
+        let band = bands[bands.index(bands.startIndex, offsetBy: bandIndex)]
+        let colIdx = Int(floor(easting / 100_000)) - 1
+        let colSet = columns[(zone - 1) % 3]
+        guard colIdx >= 0, colIdx < colSet.count else { return dash }
+        let col = colSet[colSet.index(colSet.startIndex, offsetBy: colIdx)]
+        var rowIdx = Int(floor(northing / 100_000)) % 20
+        if zone.isMultiple(of: 2) {
+            rowIdx = (rowIdx + 5) % 20
+        }
+        let row = rows[rows.index(rows.startIndex, offsetBy: rowIdx)]
+        let scale = pow(10.0, Double(5 - digits))
+        let east = Int(floor(easting.truncatingRemainder(dividingBy: 100_000) / scale))
+        let north = Int(floor(northing.truncatingRemainder(dividingBy: 100_000) / scale))
+        let eastToken = String(format: "%0\(digits)d", east)
+        let northToken = String(format: "%0\(digits)d", north)
+        return "USNG \(zone)\(band) \(col)\(row) \(eastToken) \(northToken)"
     }
 }
 
