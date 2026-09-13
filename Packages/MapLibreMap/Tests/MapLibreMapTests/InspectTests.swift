@@ -3740,6 +3740,13 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(honey.doLine.lowercased().contains("edible"), honey.doLine)
         XCTAssertTrue(honey.doLine.lowercased().contains("not a meal"), honey.doLine)
 
+        let sandiaWash = Inspect.read(
+            tags: ["waterway": "river", "name": "Sandia Wash"],
+            pack: "nm"
+        )
+        XCTAssertEqual(sandiaWash.klass, "River")
+        XCTAssertNotEqual(sandiaWash.klass, "Named tree")
+
         let landry = Inspect.read(
             tags: ["highway": "residential", "name": "Landry Avenue Northwest"],
             pack: "nm"
@@ -4807,6 +4814,14 @@ final class InspectTests: XCTestCase {
             Inspect.pick([
                 ["natural": "tree", "name": "Prosopis velutina / Velvet Mesquite"],
                 ["highway": "residential", "name": "Landry Avenue Northwest"],
+            ])["natural"],
+            "tree"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "tree", "name": "Prosopis torreyana / Western Honey Mesquite"],
+                ["waterway": "river", "name": "Sandia Wash"],
+                ["highway": "motorway"],
             ])["natural"],
             "tree"
         )

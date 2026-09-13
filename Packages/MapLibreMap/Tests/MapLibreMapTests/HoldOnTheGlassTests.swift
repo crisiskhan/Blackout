@@ -1154,12 +1154,21 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// `Prosopis torreyana / Western Honey Mesquite` on the NM
     /// place slice. Named tree — shade and wood, not a meal.
     /// Unique versus the Velvet Mesquite Hold (61 km). No
-    /// nearby name in 200 m. 1045 m from OSM water. The other
-    /// Western Honey Mesquite sits 69 m from Sandia Wash.
+    /// nearby name in 200 m. 1045 m from OSM water. Unique
+    /// versus the Sandia Wash Western Honey Mesquite (40 km).
     /// Texas Honey Mesquite stays unheld — Pinus pinea sits
     /// 26 m off that tree. Do not add matcher `torreyana` or
     /// `honey mesquite`.
     private static let westernHoneyMesquite = CLLocationCoordinate2D(latitude: 35.511273, longitude: -106.234121)
+
+    /// The other `Prosopis torreyana / Western Honey Mesquite` on
+    /// the NM place slice. Named tree — shade and wood, not a
+    /// meal. Unique versus the Western Honey Mesquite Hold
+    /// (40 km). Rank 1 still beats Sandia Wash (63 m). Unnamed
+    /// motorway is rank 11. Texas Honey Mesquite stays unheld —
+    /// Pinus pinea sits 26 m off that tree. Do not add matcher
+    /// `torreyana` or `honey mesquite`.
+    private static let westernHoneyMesquiteSandia = CLLocationCoordinate2D(latitude: 35.263942, longitude: -106.561170)
 
     /// Interior of Randall Davey Audubon Center. NM wildlife range, not
     /// Open reserve.
@@ -4932,6 +4941,24 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertTrue(honeyDo.contains("not a meal"), honey.card?.doLine ?? "")
         XCTAssertFalse(honeyDo.contains("edible"), honey.card?.doLine ?? "")
         XCTAssertFalse(honeyDo.contains("javelina"), honey.card?.doLine ?? "")
+
+        let honeySandia = try hold(at: Self.westernHoneyMesquiteSandia, zoom: 16, packId: "nm")
+        XCTAssertEqual(honeySandia.card?.klass, "Named tree", "\(honeySandia)")
+        XCTAssertEqual(honeySandia.card?.title, "Prosopis torreyana / Western Honey Mesquite", "\(honeySandia)")
+        XCTAssertNotEqual(honeySandia.card?.klass, "Road", "\(honeySandia)")
+        XCTAssertNotEqual(honeySandia.card?.title, "Sandia Wash", "\(honeySandia)")
+        XCTAssertNotEqual(honeySandia.card?.title, "Prosopis velutina / Velvet Mesquite", "\(honeySandia)")
+        XCTAssertNotEqual(honeySandia.card?.title, "Prosopis glandulosa / Texas Honey Mesquite", "\(honeySandia)")
+        XCTAssertNotEqual(honeySandia.card?.title, "Pinus pinea / Italian Stone Pine", "\(honeySandia)")
+        XCTAssertEqual(honeySandia.card?.fieldRoute.first, Inspect.treeUseTXCard, "\(honeySandia)")
+        XCTAssertTrue(
+            honeySandia.card?.fieldRoute.contains(Inspect.treeUseNMCard) ?? false,
+            "a named NM tree dropped the NM tree-use card: \(honeySandia)"
+        )
+        let honeySandiaDo = honeySandia.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(honeySandiaDo.contains("not a meal"), honeySandia.card?.doLine ?? "")
+        XCTAssertFalse(honeySandiaDo.contains("edible"), honeySandia.card?.doLine ?? "")
+        XCTAssertFalse(honeySandiaDo.contains("javelina"), honeySandia.card?.doLine ?? "")
 
         let bearCanyonWest = try hold(at: Self.bearCanyonOpenSpaceWest, zoom: 16, packId: "nm")
         XCTAssertEqual(bearCanyonWest.card?.klass, "Open reserve", "\(bearCanyonWest)")

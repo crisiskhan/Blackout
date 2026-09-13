@@ -3551,8 +3551,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Prosopis torreyana / Western Honey Mesquite", glass)
         self.assertIn("35.511273", glass)
         self.assertIn("-106.234121", glass)
+        self.assertIn("35.263942", glass)
+        self.assertIn("-106.561170", glass)
         self.assertIn("Pinus pinea", glass)
         self.assertIn("westernHoneyMesquite", glass)
+        self.assertIn("westernHoneyMesquiteSandia", glass)
+        self.assertIn("Sandia Wash", glass)
         self.assertIn("Embudo Cave", glass)
         self.assertIn("35.204126", glass)
         self.assertIn("-106.414502", glass)
@@ -6584,6 +6588,7 @@ class GroundFieldSync(unittest.TestCase):
         hot_springs_cave = False
         velvet_tree = False
         western_honey_tree = False
+        western_honey_tree_sandia = False
         for feat in nm_osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -6680,6 +6685,12 @@ class GroundFieldSync(unittest.TestCase):
                     and abs(lon - (-106.234121)) < 1e-6
                 ):
                     western_honey_tree = True
+                if (
+                    props.get("name") == "Prosopis torreyana / Western Honey Mesquite"
+                    and abs(lat - 35.263942) < 1e-6
+                    and abs(lon - (-106.561170)) < 1e-6
+                ):
+                    western_honey_tree_sandia = True
         self.assertTrue(nm_wood, "glass NM woodland hold is not inside Isleta Rectangle")
         self.assertTrue(nm_bosque, "glass NM bosque hold is not inside an unnamed wetland")
         self.assertTrue(nm_peak, "glass NM peak hold is not La Cruz Peak")
@@ -6710,6 +6721,10 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             western_honey_tree,
             "Prosopis torreyana / Western Honey Mesquite is not a named tree in the NM extract",
+        )
+        self.assertTrue(
+            western_honey_tree_sandia,
+            "the Sandia Wash Western Honey Mesquite is not a named tree in the NM extract",
         )
         self.assertIn(
             "Sandia Man Cave",
@@ -6750,6 +6765,11 @@ class GroundFieldSync(unittest.TestCase):
             "Prosopis torreyana / Western Honey Mesquite",
             place_names_in_tile("nm", -106.234121, 35.511273),
             "Western Honey Mesquite did not survive tiling as a named tree",
+        )
+        self.assertIn(
+            "Prosopis torreyana / Western Honey Mesquite",
+            place_names_in_tile("nm", -106.561170, 35.263942),
+            "the Sandia Wash Western Honey Mesquite did not survive tiling as a named tree",
         )
 
     def test_the_next_fetch_asks_for_caves_and_trees(self):
@@ -7326,6 +7346,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("35.119023", qa)
         self.assertIn("Prosopis torreyana / Western Honey Mesquite", qa)
         self.assertIn("35.511273", qa)
+        self.assertIn("35.263942", qa)
+        self.assertIn("Sandia Wash", qa)
         self.assertIn("Prosopis glandulosa / Texas Honey Mesquite", qa)
         self.assertIn("Pinus pinea", qa)
         self.assertIn("torreyana", qa)
