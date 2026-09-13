@@ -1213,11 +1213,39 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// matcher `gardner`.
     private static let gardnerPeak = CLLocationCoordinate2D(latitude: 32.823971, longitude: -106.561392)
 
+    /// `Onate Mountain` on the west place slice. A named peak on
+    /// the San Andres overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus the San Andres overlay Hold
+    /// (10405 m), Gardner Peak (8203 m), and San Andres Peak
+    /// (8775 m). Overlay containment is the nearby name. Unique
+    /// title (one OSM peak). Nearest water ~16040 m. Javelina
+    /// as range, not hog. Goat Mountain stays unheld (two OSM
+    /// peaks). Do not add matcher `onate`.
+    private static let onateMountain = CLLocationCoordinate2D(latitude: 32.750360, longitude: -106.567225)
+
+    /// `Block Mountain` on the west place slice. A named peak on
+    /// the San Andres overlay sheet — rank 1 still beats the
+    /// overlay. Unique versus Gardner Peak (743 m) and the San
+    /// Andres overlay Hold (16107 m). Overlay containment is the
+    /// nearby name. Unique title (one OSM peak). Nearest water
+    /// ~16673 m. Javelina as range, not hog. Goat Mountain stays
+    /// unheld (two OSM peaks). Do not add matcher `block`.
+    private static let blockMountain = CLLocationCoordinate2D(latitude: 32.817304, longitude: -106.561948)
+
     /// `Loma El Gato` on the west place slice. A named peak on the
     /// Samalayuca overlay sheet — rank 1 still beats the overlay.
     /// Unique versus the Samalayuca overlay Hold (11744 m).
     /// Javelina as range, not hog.
     private static let lomaElGato = CLLocationCoordinate2D(latitude: 31.235777, longitude: -106.573797)
+
+    /// `Cerro el Contrabando` on the west place slice. A named
+    /// peak on the Samalayuca overlay sheet — rank 1 still beats
+    /// the overlay. Unique versus the Samalayuca overlay Hold
+    /// (16427 m) and Loma El Gato (28151 m). Overlay containment
+    /// is the nearby name. Unique title (one OSM peak). Nearest
+    /// water ~28670 m. Javelina as range, not hog. Do not add
+    /// matcher `contrabando`.
+    private static let cerroElContrabando = CLLocationCoordinate2D(latitude: 31.251240, longitude: -106.278240)
 
     /// Interior of Jones Canyon ACEC in NM `layers/ground.geojson`. Open
     /// reserve, not Pronoun Cave — rattler and sotol, not a hole.
@@ -4086,6 +4114,7 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertNotEqual(gardner.card?.title, "Mount Franklin", "\(gardner)")
         XCTAssertNotEqual(gardner.card?.title, "Goat Mountain", "\(gardner)")
         XCTAssertNotEqual(gardner.card?.title, "Block Mountain", "\(gardner)")
+        XCTAssertNotEqual(gardner.card?.title, "Onate Mountain", "\(gardner)")
         let gardnerDo = gardner.card?.doLine.lowercased() ?? ""
         XCTAssertTrue(gardnerDo.contains("javelina"), gardner.card?.doLine ?? "")
         XCTAssertTrue(gardnerDo.contains("give it the road"), gardner.card?.doLine ?? "")
@@ -4095,6 +4124,72 @@ final class HoldOnTheGlassTests: XCTestCase {
         XCTAssertEqual(gardnerPresent.first, Inspect.mammalTXCard, "\(gardner)")
         XCTAssertEqual(InspectField.label(for: gardnerPresent.first ?? ""), "FIELD · ANIMAL")
         XCTAssertEqual(InspectField.bookLine(for: gardnerPresent), "ANIMAL · BITE · COLD")
+
+        let onate = try hold(at: Self.onateMountain, zoom: 16)
+        XCTAssertEqual(onate.card?.klass, "Peak", "\(onate)")
+        XCTAssertEqual(onate.card?.title, "Onate Mountain", "\(onate)")
+        XCTAssertNotEqual(onate.card?.klass, "Wildlife range", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "San Andres National Wildlife Refuge", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "San Andres Peak", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Gardner Peak", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Block Mountain", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Bennett Mountain", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Big Brushy Mountain", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Mount Franklin", "\(onate)")
+        XCTAssertNotEqual(onate.card?.title, "Goat Mountain", "\(onate)")
+        let onateDo = onate.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(onateDo.contains("javelina"), onate.card?.doLine ?? "")
+        XCTAssertTrue(onateDo.contains("give it the road"), onate.card?.doLine ?? "")
+        XCTAssertFalse(onateDo.contains("hog"), onate.card?.doLine ?? "")
+        XCTAssertFalse(onateDo.contains("edible"), onate.card?.doLine ?? "")
+        let onatePresent = InspectField.presentRoute(onate.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(onatePresent.first, Inspect.mammalTXCard, "\(onate)")
+        XCTAssertEqual(InspectField.label(for: onatePresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: onatePresent), "ANIMAL · BITE · COLD")
+
+        let block = try hold(at: Self.blockMountain, zoom: 16)
+        XCTAssertEqual(block.card?.klass, "Peak", "\(block)")
+        XCTAssertEqual(block.card?.title, "Block Mountain", "\(block)")
+        XCTAssertNotEqual(block.card?.klass, "Wildlife range", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "San Andres National Wildlife Refuge", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "San Andres Peak", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Gardner Peak", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Onate Mountain", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Bennett Mountain", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Big Brushy Mountain", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Mount Franklin", "\(block)")
+        XCTAssertNotEqual(block.card?.title, "Goat Mountain", "\(block)")
+        let blockDo = block.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(blockDo.contains("javelina"), block.card?.doLine ?? "")
+        XCTAssertTrue(blockDo.contains("give it the road"), block.card?.doLine ?? "")
+        XCTAssertFalse(blockDo.contains("hog"), block.card?.doLine ?? "")
+        XCTAssertFalse(blockDo.contains("edible"), block.card?.doLine ?? "")
+        let blockPresent = InspectField.presentRoute(block.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(blockPresent.first, Inspect.mammalTXCard, "\(block)")
+        XCTAssertEqual(InspectField.label(for: blockPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: blockPresent), "ANIMAL · BITE · COLD")
+
+        let contrabando = try hold(at: Self.cerroElContrabando, zoom: 16)
+        XCTAssertEqual(contrabando.card?.klass, "Peak", "\(contrabando)")
+        XCTAssertEqual(contrabando.card?.title, "Cerro el Contrabando", "\(contrabando)")
+        XCTAssertNotEqual(contrabando.card?.klass, "Wildlife range", "\(contrabando)")
+        XCTAssertNotEqual(
+            contrabando.card?.title,
+            "Área de Protección de Flora y Fauna Médanos de Samalayuca",
+            "\(contrabando)"
+        )
+        XCTAssertNotEqual(contrabando.card?.title, "Loma El Gato", "\(contrabando)")
+        XCTAssertNotEqual(contrabando.card?.title, "San Andres Peak", "\(contrabando)")
+        XCTAssertNotEqual(contrabando.card?.title, "Mount Franklin", "\(contrabando)")
+        let contrabandoDo = contrabando.card?.doLine.lowercased() ?? ""
+        XCTAssertTrue(contrabandoDo.contains("javelina"), contrabando.card?.doLine ?? "")
+        XCTAssertTrue(contrabandoDo.contains("give it the road"), contrabando.card?.doLine ?? "")
+        XCTAssertFalse(contrabandoDo.contains("hog"), contrabando.card?.doLine ?? "")
+        XCTAssertFalse(contrabandoDo.contains("edible"), contrabando.card?.doLine ?? "")
+        let contrabandoPresent = InspectField.presentRoute(contrabando.card?.fieldRoute ?? [], in: texas)
+        XCTAssertEqual(contrabandoPresent.first, Inspect.mammalTXCard, "\(contrabando)")
+        XCTAssertEqual(InspectField.label(for: contrabandoPresent.first ?? ""), "FIELD · ANIMAL")
+        XCTAssertEqual(InspectField.bookLine(for: contrabandoPresent), "ANIMAL · BITE · COLD")
     }
 
     func testHoldingAnEastPeakOpensHogNotJavelina() throws {

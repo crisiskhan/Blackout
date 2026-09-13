@@ -2327,6 +2327,9 @@ class ShippedWaterLayers(unittest.TestCase):
         self.assertNotIn('contains("brushy")', inspect)
         self.assertNotIn('contains("big brushy")', inspect)
         self.assertNotIn('contains("gardner")', inspect)
+        self.assertNotIn('contains("onate")', inspect)
+        self.assertNotIn('contains("block")', inspect)
+        self.assertNotIn('contains("contrabando")', inspect)
         self.assertNotIn('contains("cerritos")', inspect)
         self.assertNotIn('contains("cerritos de la jolla")', inspect)
         self.assertIn("isWildlifeRange", inspect)
@@ -3652,6 +3655,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("Gardner Peak", glass)
         self.assertIn("32.823971", glass)
         self.assertIn("-106.561392", glass)
+        self.assertIn("Onate Mountain", glass)
+        self.assertIn("32.750360", glass)
+        self.assertIn("-106.567225", glass)
+        self.assertIn("onateMountain", glass)
+        self.assertIn("Block Mountain", glass)
+        self.assertIn("32.817304", glass)
+        self.assertIn("-106.561948", glass)
+        self.assertIn("blockMountain", glass)
+        self.assertIn("Cerro el Contrabando", glass)
+        self.assertIn("31.251240", glass)
+        self.assertIn("-106.278240", glass)
+        self.assertIn("cerroElContrabando", glass)
         self.assertIn("Feather Lake Wildlife Refuge", glass)
         self.assertIn("31.690659", glass)
         self.assertIn("-106.305767", glass)
@@ -5538,6 +5553,21 @@ class GroundFieldSync(unittest.TestCase):
             "Gardner Peak did not survive tiling as a peak",
         )
         self.assertIn(
+            "Onate Mountain",
+            place_names_in_tile("tx-west", -106.567225, 32.750360),
+            "Onate Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Block Mountain",
+            place_names_in_tile("tx-west", -106.561948, 32.817304),
+            "Block Mountain did not survive tiling as a peak",
+        )
+        self.assertIn(
+            "Cerro el Contrabando",
+            place_names_in_tile("tx-west", -106.278240, 31.251240),
+            "Cerro el Contrabando did not survive tiling as a peak",
+        )
+        self.assertIn(
             "Mesa Blanca",
             place_names_in_tile("nm", -107.263101, 35.338369),
             "Mesa Blanca did not survive tiling as a peak",
@@ -5816,6 +5846,9 @@ class GroundFieldSync(unittest.TestCase):
         big_brushy_mountain = False
         gardner_peak = False
         loma_el_gato = False
+        onate_mountain = False
+        block_mountain = False
+        cerro_el_contrabando = False
         for feat in osm["features"]:
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -5853,6 +5886,24 @@ class GroundFieldSync(unittest.TestCase):
             ):
                 gardner_peak = True
             if (
+                props.get("name") == "Onate Mountain"
+                and abs(lat - 32.750360) < 1e-6
+                and abs(lon - (-106.567225)) < 1e-6
+            ):
+                onate_mountain = True
+            if (
+                props.get("name") == "Block Mountain"
+                and abs(lat - 32.817304) < 1e-6
+                and abs(lon - (-106.561948)) < 1e-6
+            ):
+                block_mountain = True
+            if (
+                props.get("name") == "Cerro el Contrabando"
+                and abs(lat - 31.251240) < 1e-6
+                and abs(lon - (-106.278240)) < 1e-6
+            ):
+                cerro_el_contrabando = True
+            if (
                 props.get("name") == "Loma El Gato"
                 and abs(lat - 31.235777) < 1e-6
                 and abs(lon - (-106.573797)) < 1e-6
@@ -5872,6 +5923,18 @@ class GroundFieldSync(unittest.TestCase):
         self.assertTrue(
             gardner_peak,
             "Gardner Peak is not a named peak in the west extract",
+        )
+        self.assertTrue(
+            onate_mountain,
+            "Onate Mountain is not a named peak in the west extract",
+        )
+        self.assertTrue(
+            block_mountain,
+            "Block Mountain is not a named peak in the west extract",
+        )
+        self.assertTrue(
+            cerro_el_contrabando,
+            "Cerro el Contrabando is not a named peak in the west extract",
         )
         self.assertTrue(
             loma_el_gato, "Loma El Gato is not a named peak in the west extract"
@@ -7468,6 +7531,12 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("32.598142", qa)
         self.assertIn("Gardner Peak", qa)
         self.assertIn("32.823971", qa)
+        self.assertIn("Onate Mountain", qa)
+        self.assertIn("32.750360", qa)
+        self.assertIn("Block Mountain", qa)
+        self.assertIn("32.817304", qa)
+        self.assertIn("Cerro el Contrabando", qa)
+        self.assertIn("31.251240", qa)
         self.assertIn("Feather Lake Wildlife Refuge", qa)
         self.assertIn("31.690659", qa)
         self.assertIn("Nottingham Drive", qa)

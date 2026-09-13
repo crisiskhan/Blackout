@@ -90,8 +90,9 @@ CAVE_PRESERVE_KEYS = {
 # Phrase `audubon`, not a street — overlay still needs park keys.
 # Phrase `habitat preserve`, not the word `habitat`. Phrase `flora y
 # fauna`, not a street. Loma El Gato is a named peak on that
-# sheet — rank 1 still beats the overlay. Do not add matcher
-# `gato` or `loma el gato`. Phrase `national preserve`, not the word
+# sheet — rank 1 still beats the overlay. Cerro el Contrabando
+# is a named peak on that sheet — rank 1 still beats the overlay.
+# Do not add matcher `gato`, `loma el gato`, or `contrabando`. Phrase `national preserve`, not the word
 # `preserve`. San Antonio Mountain is a named peak on
 # Valles Caldera — rank 1 still beats the overlay. Do not
 # add matcher `san antonio` or `valles`. Phrase `wilderness park`, not the word `wilderness`.
@@ -187,8 +188,11 @@ CAVE_PRESERVE_KEYS = {
 # beats the overlay. Big Brushy Mountain is a named peak
 # on that sheet — rank 1 still beats the overlay. Gardner
 # Peak is a named peak on that sheet — rank 1 still beats
-# the overlay. Do not add matcher `bennett`, `brushy`,
-# `big brushy`, or `gardner`. Goat Mountain stays unheld
+# the overlay. Onate Mountain is a named peak on that
+# sheet — rank 1 still beats the overlay. Block Mountain is
+# a named peak on that sheet — rank 1 still beats the overlay.
+# Do not add matcher `bennett`, `brushy`,
+# `big brushy`, `gardner`, `onate`, or `block`. Goat Mountain stays unheld
 # (two OSM peaks). Do not add matcher `san andres` or
 # `sevilleta`. Phrase `wildlife
 # management area` already matches Marquez Wildlife

@@ -1907,6 +1907,39 @@ final class InspectTests: XCTestCase {
         XCTAssertFalse(gardnerPeak.doLine.lowercased().contains("hog"), gardnerPeak.doLine)
         XCTAssertFalse(gardnerPeak.doLine.lowercased().contains("edible"), gardnerPeak.doLine)
 
+        let onateMountain = Inspect.read(
+            tags: ["natural": "peak", "name": "Onate Mountain"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(onateMountain.klass, "Peak")
+        XCTAssertNotEqual(onateMountain.klass, "Wildlife range")
+        XCTAssertTrue(onateMountain.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(onateMountain.doLine.lowercased().contains("javelina"), onateMountain.doLine)
+        XCTAssertFalse(onateMountain.doLine.lowercased().contains("hog"), onateMountain.doLine)
+        XCTAssertFalse(onateMountain.doLine.lowercased().contains("edible"), onateMountain.doLine)
+
+        let blockMountain = Inspect.read(
+            tags: ["natural": "peak", "name": "Block Mountain"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(blockMountain.klass, "Peak")
+        XCTAssertNotEqual(blockMountain.klass, "Wildlife range")
+        XCTAssertTrue(blockMountain.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(blockMountain.doLine.lowercased().contains("javelina"), blockMountain.doLine)
+        XCTAssertFalse(blockMountain.doLine.lowercased().contains("hog"), blockMountain.doLine)
+        XCTAssertFalse(blockMountain.doLine.lowercased().contains("edible"), blockMountain.doLine)
+
+        let cerroElContrabando = Inspect.read(
+            tags: ["natural": "peak", "name": "Cerro el Contrabando"],
+            pack: "tx-west"
+        )
+        XCTAssertEqual(cerroElContrabando.klass, "Peak")
+        XCTAssertNotEqual(cerroElContrabando.klass, "Wildlife range")
+        XCTAssertTrue(cerroElContrabando.fieldRoute.contains(Inspect.mammalTXCard))
+        XCTAssertTrue(cerroElContrabando.doLine.lowercased().contains("javelina"), cerroElContrabando.doLine)
+        XCTAssertFalse(cerroElContrabando.doLine.lowercased().contains("hog"), cerroElContrabando.doLine)
+        XCTAssertFalse(cerroElContrabando.doLine.lowercased().contains("edible"), cerroElContrabando.doLine)
+
         let featherLake = Inspect.read(
             tags: [
                 "leisure": "nature_reserve",
@@ -4535,6 +4568,38 @@ final class InspectTests: XCTestCase {
                     "leisure": "nature_reserve",
                     "boundary": "protected_area",
                     "name": "San Andres National Wildlife Refuge",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Onate Mountain"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "San Andres National Wildlife Refuge",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Block Mountain"],
+                [
+                    "leisure": "nature_reserve",
+                    "boundary": "protected_area",
+                    "name": "San Andres National Wildlife Refuge",
+                ],
+            ])["natural"],
+            "peak"
+        )
+        XCTAssertEqual(
+            Inspect.pick([
+                ["natural": "peak", "name": "Cerro el Contrabando"],
+                [
+                    "leisure": "nature_reserve",
+                    "name": "Área de Protección de Flora y Fauna Médanos de Samalayuca",
                 ],
             ])["natural"],
             "peak"
