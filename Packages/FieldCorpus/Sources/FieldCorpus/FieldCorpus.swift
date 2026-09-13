@@ -340,6 +340,8 @@ public enum FieldCorpus {
         "compass": ["bearing", "magnetic"],
         "evacuate": ["stay", "fire"],
         "bow": ["friction", "drill"],
+        "bleeding": ["bleed", "blood", "wound"],
+        "bleed": ["blood", "wound"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.
@@ -419,6 +421,7 @@ public enum FieldCorpus {
         "hypothermia": ["env-cold"],
         "frio": ["env-cold"],
         "bleed": ["med-bleed-pack"],
+        "bleeding": ["med-bleed-pack"],
         "blood": ["med-bleed-pack"],
         "tourniquet": ["med-bleed-pack"],
         "cpr": ["med-cpr-adult"],

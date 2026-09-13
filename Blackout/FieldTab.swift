@@ -3,6 +3,7 @@ import UIKit
 import FieldCorpus
 import FieldStepper
 import FieldSpeech
+import FieldAsk
 import MapLibreMap
 import OfflineSpeech
 import Tokens
@@ -19,6 +20,9 @@ struct FieldTab: View {
     @State private var guess: VisionGuess?
     @State private var showVision = false
     @State private var sayFailed = false
+    @State private var askBusy = false
+    @State private var askFailed = false
+    @State private var askSeq = 0
 
     var body: some View {
         HUDPage(
@@ -46,6 +50,9 @@ struct FieldTab: View {
                             if catalogMiss {
                                 HUDGlassCard {
                                     Text("NO MATCH")
+                                        .font(.system(size: 13, weight: .heavy))
+                                        .foregroundStyle(Theme.warn)
+                                    Text("NO ASK MODEL")
                                         .font(.system(size: 13, weight: .heavy))
                                         .foregroundStyle(Theme.warn)
                                 }
@@ -79,11 +86,17 @@ struct FieldTab: View {
         .onChange(of: runtime.packs?.active?.id) { _, _ in
             query = ""
             sayFailed = false
+            askFailed = false
+            askBusy = false
             load()
+        }
+        .onChange(of: query) { _, _ in
+            askFailed = false
         }
     }
 
     private var fieldStatus: String {
+        if askBusy { return "ASK" }
         if let s = stepper {
             // A hold named a trail of plant / bite / use cards. STEP 1 OF 1
             // on every one of them hides that you are walking the biome book.
@@ -93,7 +106,10 @@ struct FieldTab: View {
             }
             return "STEP \(s.index + 1) OF \(s.card.steps.count)"
         }
-        guard let g = guess else { return "" }
+        guard let g = guess else {
+            if askFailed { return "NO ASK MODEL" }
+            return ""
+        }
         if g.noModel { return L10n.t("vision.none", runtime.locale) }
         if g.leaveIt {
             return "\(g.name) · \(L10n.t("vision.leave", runtime.locale))"
@@ -102,6 +118,8 @@ struct FieldTab: View {
     }
 
     private var fieldTone: HUDStatusTone {
+        if askBusy { return .silver }
+        if askFailed { return .warn }
         if stepper != nil { return .silver }
         if let g = guess {
             if g.leaveIt { return .crisis }
@@ -377,16 +395,14 @@ struct FieldTab: View {
 
     /// SEARCH is the menu. Empty is waiting, not a dump of the book. Hits
     /// are not a title list — the SEARCH chip (or keyboard Search) opens the
-    /// first answering card. The loaded `cards` book stays the whole state
-    /// so a javelina still still opens the west mammal card. SEARCH ranks
-    /// this pack's chapter. It does not invent a card the book lacks. ALL
-    /// CARDS on an open card returns here.
+    /// first answering card. A miss opens a live ASK walk on the same card.
+    /// ALL CARDS on an open card returns here.
     private var catalogQuery: String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var catalogMiss: Bool {
-        FieldCorpus.asking(catalogQuery) && listCards.isEmpty
+        askFailed
     }
 
     private var listCards: [FieldCard] {
@@ -464,12 +480,61 @@ struct FieldTab: View {
 
     /// SEARCH ranked a situation. Open the first answering card's steps.
     /// Remaining hits stay out — a title list is a menu of cards, not an
-    /// answer. Unknown words already showed NO MATCH. Invent nothing.
+    /// answer. Unknown words open a live ASK walk on the same stepper.
     private func openAnswer() {
         guard FieldCorpus.asking(catalogQuery) else { return }
-        guard let first = listCards.first else { return }
+        if let first = listCards.first {
+            sayFailed = false
+            askFailed = false
+            openRoute([first.id])
+            return
+        }
+        let q = catalogQuery
+        let chapter = FieldCorpus.chapter(cards, pack: runtime.packs?.active?.id)
+        let locale = runtime.locale
+        let packName = runtime.packs?.active?.name ?? "pack"
+        let packId = runtime.packs?.active?.id
+        let model = FieldAsk.modelURL(in: AppRuntime.resourceRoot())
+        askSeq += 1
+        let seq = askSeq
+        askBusy = true
+        askFailed = false
         sayFailed = false
-        openRoute([first.id])
+        Task.detached {
+            let card = FieldAsk.answer(
+                query: q,
+                chapter: chapter,
+                locale: locale,
+                packName: packName,
+                packId: packId,
+                modelURL: model
+            )
+            await MainActor.run {
+                applyAsk(seq: seq, expected: q, card: card)
+            }
+        }
+    }
+
+    private func applyAsk(seq: Int, expected: String, card: FieldCard?) {
+        guard seq == askSeq else { return }
+        askBusy = false
+        let now = catalogQuery
+        if !now.isEmpty && now != expected { return }
+        if let card {
+            openLive(card)
+        } else {
+            askFailed = true
+        }
+    }
+
+    private func openLive(_ card: FieldCard) {
+        query = ""
+        askFailed = false
+        askBusy = false
+        fieldTrail = []
+        fieldTrailTotal = 1
+        fieldTrailBook = "ASK · LIVE"
+        stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
     }
 
     /// The map's hold card named the cards that answer the ground it held,
@@ -500,6 +565,8 @@ struct FieldTab: View {
         fieldTrail = []
         fieldTrailTotal = 0
         fieldTrailBook = ""
+        askFailed = false
+        askBusy = false
         stepper = nil
     }
 

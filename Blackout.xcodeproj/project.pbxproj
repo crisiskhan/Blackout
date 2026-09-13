@@ -21,6 +21,7 @@
 		DAD876D26694166B9F35594C /* FieldStepper in Frameworks */ = {isa = PBXBuildFile; productRef = CB866CF29E640022662FB5FA /* FieldStepper */; };
 		32610B0D47F20572CBD6FDE0 /* OfflineSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = A443294E97E5F795B4446975 /* OfflineSpeech */; };
 		9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = 8C1039025E2D17CE92E79C01 /* FieldSpeech */; };
+		BF2D63524A24050AD76A805D /* FieldAsk in Frameworks */ = {isa = PBXBuildFile; productRef = 635D413CD909912F4D333731 /* FieldAsk */; };
 		ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */ = {isa = PBXBuildFile; productRef = 23D30BFE8411990E2FC45A88 /* VisionCoreML */; };
 		34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */ = {isa = PBXBuildFile; productRef = CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */; };
 		B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA5F25B4520F0497169C09A /* KitStore */; };
@@ -93,6 +94,7 @@
 				DAD876D26694166B9F35594C /* FieldStepper in Frameworks */,
 				32610B0D47F20572CBD6FDE0 /* OfflineSpeech in Frameworks */,
 				9A7E35B1798301E7953F6BCD /* FieldSpeech in Frameworks */,
+				BF2D63524A24050AD76A805D /* FieldAsk in Frameworks */,
 				ADC813334578AEC8BCF18091 /* VisionCoreML in Frameworks */,
 				34908D756253480D4F19D6C7 /* VisionCapture in Frameworks */,
 				B80C32AD8C6A5802D9E7305E /* KitStore in Frameworks */,
@@ -200,6 +202,7 @@
 				CB866CF29E640022662FB5FA /* FieldStepper */,
 				A443294E97E5F795B4446975 /* OfflineSpeech */,
 				8C1039025E2D17CE92E79C01 /* FieldSpeech */,
+				635D413CD909912F4D333731 /* FieldAsk */,
 				23D30BFE8411990E2FC45A88 /* VisionCoreML */,
 				CD2EDB7FE0A30DDB03F5ECE0 /* VisionCapture */,
 				2AA5F25B4520F0497169C09A /* KitStore */,
@@ -296,6 +299,7 @@
 				A6A74F93A4A27EFFE7C210D5 /* XCLocalSwiftPackageReference "Packages/FieldStepper" */,
 				3545128B03B16CAE2151F1D4 /* XCLocalSwiftPackageReference "Packages/OfflineSpeech" */,
 				1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */,
+				AB685F0E850F09BAF71E9E35 /* XCLocalSwiftPackageReference "Packages/FieldAsk" */,
 				9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */,
 				6C17E6866D31DB03747A7F74 /* XCLocalSwiftPackageReference "Packages/VisionCapture" */,
 				6E7A6AC1AA7CC534597B0DE9 /* XCLocalSwiftPackageReference "Packages/KitStore" */,
@@ -847,6 +851,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/FieldSpeech;
 		};
+		AB685F0E850F09BAF71E9E35 /* XCLocalSwiftPackageReference "Packages/FieldAsk" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/FieldAsk;
+		};
 		9BF1E9C4B2F60E7940500E21 /* XCLocalSwiftPackageReference "Packages/VisionCoreML" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/VisionCoreML;
@@ -979,6 +987,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1104D0C0A7D1B6CC1D83A8BE /* XCLocalSwiftPackageReference "Packages/FieldSpeech" */;
 			productName = FieldSpeech;
+		};
+		635D413CD909912F4D333731 /* FieldAsk */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB685F0E850F09BAF71E9E35 /* XCLocalSwiftPackageReference "Packages/FieldAsk" */;
+			productName = FieldAsk;
 		};
 		23D30BFE8411990E2FC45A88 /* VisionCoreML */ = {
 			isa = XCSwiftPackageProductDependency;

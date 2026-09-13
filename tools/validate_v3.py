@@ -46,6 +46,7 @@ def modules() -> None:
         "FieldCorpus": ROOT / "Packages" / "FieldCorpus" / "Sources" / "FieldCorpus" / "FieldCorpus.swift",
         "FieldStepper": ROOT / "Packages" / "FieldStepper" / "Sources" / "FieldStepper" / "FieldStepper.swift",
         "FieldSpeech": ROOT / "Packages" / "FieldSpeech" / "Sources" / "FieldSpeech" / "FieldSpeech.swift",
+        "FieldAsk": ROOT / "Packages" / "FieldAsk" / "Sources" / "FieldAsk" / "FieldAsk.swift",
         "VisionCapture": ROOT / "Packages" / "VisionCapture" / "Sources" / "VisionCapture" / "VisionCapture.swift",
         "VisionCoreML": ROOT / "Packages" / "VisionCoreML" / "Sources" / "VisionCoreML" / "VisionCoreML.swift",
         "KitStore": ROOT / "Packages" / "KitStore" / "Sources" / "KitStore" / "KitStore.swift",

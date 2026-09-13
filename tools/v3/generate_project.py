@@ -30,6 +30,7 @@ PACKAGES = [
     ("FieldStepper", "FieldStepper"),
     ("OfflineSpeech", "OfflineSpeech"),
     ("FieldSpeech", "FieldSpeech"),
+    ("FieldAsk", "FieldAsk"),
     ("VisionCoreML", "VisionCoreML"),
     ("VisionCapture", "VisionCapture"),
     ("KitStore", "KitStore"),

@@ -12,3 +12,4 @@ __pycache__/
 *.dSYM.zip
 *.dSYM
 style.resolved.json
+*.gguf

@@ -1231,8 +1231,15 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("s.step.image", field)
         self.assertIn("Field/images", field)
         self.assertIn("openRoute([first.id])", field)
+        self.assertIn("openLive(", field)
+        self.assertIn("FieldAsk.answer", field)
+        self.assertIn("import FieldAsk", field)
+        self.assertIn("ASK · LIVE", field)
+        self.assertIn("NO ASK MODEL", field)
+        self.assertIn("Task.detached", field)
         self.assertIn("FieldCorpus.doLines", field)
         self.assertIn("s.step.child", open_fn)
+        self.assertNotIn("best in class", field.lower())
         self.assertLess(
             open_fn.find('sectionLabel("DO")'),
             open_fn.find('L10n.t("stop.if"'),
