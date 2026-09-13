@@ -341,7 +341,7 @@ final class MeshDTNTests: XCTestCase {
             status: "wait",
             vitals: [0.2, 0.45, 0.2, 0.65, 0.2, 0.8]
         )
-        XCTAssertEqual(withRails.split(",").count, 12)
+        XCTAssertEqual(withRails.split(separator: ",", omittingEmptySubsequences: false).count, 12)
         XCTAssertEqual(MeshPOS.parse(withRails)?.vitals?.count, 6)
     }
 }

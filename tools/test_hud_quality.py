@@ -2460,6 +2460,12 @@ class PartyHoldCardTests(unittest.TestCase):
         tests = read("Packages", "MeshDTN", "Tests", "MeshDTNTests", "MeshDTNTests.swift")
         self.assertIn('XCTAssertEqual(railsParsed?.status, "okay")', tests)
         self.assertIn('XCTAssertEqual(net.pips.first?.status, "okay")', tests)
+        self.assertNotIn(
+            'withRails.split(",")',
+            tests,
+            "String.split(\",\") does not compile; use split(separator:)",
+        )
+        self.assertIn("withRails.split(separator:", tests)
         self.assertIn('"water"', mesh)
         self.assertIn('"down"', mesh)
         self.assertIn("case .good", card)
