@@ -215,9 +215,8 @@ struct HUDOverlayChipStyle: ButtonStyle {
     }
 }
 
-/// Dest-slot chips on MAP. Selected beats harder; the other still glows.
-/// The lamp is the green stroke and halo. No raised plate — COORDINATES
-/// sit on void so the map stays in view.
+/// Dest-slot chips on MAP. TURNS still uses the lamp. COORDINATES
+/// are the green numbers on void — no word in a box over the map.
 struct MapFieldDestChipStyle: ButtonStyle {
     var ink: Color
     var expanded: Bool

@@ -23,7 +23,7 @@ unfinished tabs.
 - FIELD on the hold card must not tear the card down on the same turn as the button
   (deferred teardown).
 - MAP COORDINATES rail prints live YOU when idle and dest pin coords while navigating.
-  Numbers sit on void — no grey plate. No MAP BEARING chip — profile BEARING on the
+  Numbers sit on void — no COORDINATES word in a box, no grey plate. No MAP BEARING chip — profile BEARING on the
   party and address cards is enough.
 - WALK is the shortest walkable street path. DRIVE is the fastest packed street path
   (road class on the graph, one-ways bind cars). SPEAK says Walk or Drive turn by turn,

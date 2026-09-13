@@ -344,7 +344,7 @@ struct MapTab: View {
     }
 
     /// Up to three short deduped lines, printed where the thumb already is.
-    /// COORDINATES sit on void — no grey glass plate over the map.
+    /// COORDINATES numbers sit on void — no word in a box, no grey plate.
     private var fieldChrome: some View {
         let dest = runtime.routeTarget
         let you = runtime.gnssYou
@@ -397,13 +397,9 @@ struct MapTab: View {
             let fieldInk = destInk(MapFieldDestMode.coordinates)
             let turn = nextTurn.trimmingCharacters(in: .whitespacesAndNewlines)
             return VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: CGFloat(BlackoutTokens.Chrome.mapActionRailSpacingPoints)) {
-                    chip(MapFieldDestMode.coordinates)
-                    if !turn.isEmpty {
-                        chip(MapFieldDestMode.turns)
-                    }
+                if !turn.isEmpty {
+                    chip(MapFieldDestMode.turns)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 Text(field)
                     .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
                     .foregroundStyle(fieldInk)

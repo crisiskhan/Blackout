@@ -123,6 +123,8 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("MapFieldChrome.destValue", chrome)
         self.assertIn("Text(field)", chrome)
         rail = chrome.split("struct MapFieldDestRail")[1]
+        self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)
+        self.assertIn("chip(MapFieldDestMode.turns)", rail)
         chip = rail.split("func chip(")[1]
         self.assertNotIn("destValue", chip)
         self.assertIn("chipMode.title", chip)
@@ -143,10 +145,14 @@ class QuietBearingTests(unittest.TestCase):
         self.assertNotIn("Color.orange", chip_style)
         qa = read("docs", "SOLO_QA.md")
         self.assertIn("no grey plate", qa.lower())
+        self.assertIn("no `COORDINATES` word", qa)
+        self.assertNotIn("44pt `COORDINATES` chip", qa)
         device = read("docs", "DEVICE.md")
         self.assertIn("no grey plate", device.lower())
+        self.assertIn("no `COORDINATES` word", device)
         agents = read("AGENTS.md")
         self.assertIn("no grey plate", agents.lower())
+        self.assertIn("no COORDINATES word", agents)
         app = read("Blackout", "AppRuntime.swift")
         you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
         self.assertIn("fix.last", you)

@@ -409,6 +409,8 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("MapFieldChrome.destValue", chrome)
         self.assertIn("Text(field)", chrome)
         rail = chrome.split("struct MapFieldDestRail")[1]
+        self.assertNotIn("chip(MapFieldDestMode.coordinates)", rail)
+        self.assertIn("chip(MapFieldDestMode.turns)", rail)
         chip = rail.split("func chip(")[1]
         self.assertNotIn("destValue", chip)
         self.assertIn("chipMode.title", chip)
