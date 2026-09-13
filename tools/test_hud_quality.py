@@ -1485,7 +1485,8 @@ class PartyPlaceMarkTests(unittest.TestCase):
 class ExpeditionKitPaperTests(unittest.TestCase):
     def test_kit_trip_and_paper_are_on_glass(self):
         exped = read("Blackout", "ExpeditionTab.swift")
-        self.assertIn('sectionLabel("KIT")', exped)
+        self.assertIn('sectionLabel("INVENTORY")', exped)
+        self.assertNotIn('sectionLabel("KIT")', exped)
         self.assertIn('sectionLabel("TRIP")', exped)
         self.assertIn("runtime.kit", exped)
         self.assertIn("runtime.trip.brief", exped)
@@ -1537,6 +1538,7 @@ class ExpeditionKitPaperTests(unittest.TestCase):
         self.assertIn('kind: "kit"', mesh)
         self.assertIn('case "kit":', app)
         self.assertIn("INVENTORY", qa)
+        self.assertNotIn("KIT names", qa)
         self.assertIn("ASSIGN", qa)
         self.assertIn("+1", qa)
         self.assertIn("profile glass", qa)
@@ -1570,7 +1572,7 @@ class ExpeditionNamedTimerTests(unittest.TestCase):
         self.assertNotIn('Button("2H")', exped)
         self.assertNotIn('Button("1 MIN TIMER SET")', exped)
         self.assertNotIn('Button("2H WATER TIMER SET")', exped)
-        block = exped.split('sectionLabel("TIMERS")')[1].split('sectionLabel("KIT")')[0]
+        block = exped.split('sectionLabel("TIMERS")')[1].split('sectionLabel("INVENTORY")')[0]
         self.assertLess(block.find('HUDField("NAME"'), block.find('HUDField("TIME"'))
         self.assertLess(block.find('HUDField("TIME"'), block.find('Button("30 MIN")'))
         self.assertLess(block.find('Button("30 MIN")'), block.find('Button("1 HR")'))

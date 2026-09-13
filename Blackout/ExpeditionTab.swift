@@ -147,7 +147,7 @@ struct ExpeditionTab: View {
                         }
                     }
 
-                    sectionLabel("KIT")
+                    sectionLabel("INVENTORY")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 6) {
                             HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true)

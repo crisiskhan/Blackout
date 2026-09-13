@@ -83,7 +83,7 @@ Score the MAP still. Do not score Vision, Field cards, Watch, or new packs.
 - [ ] PASS / FAIL / N/A — APPLY RED BAND with red-band vitals shows the HUD RED plate (`RED`, not a system title). CANCEL RED clears it. Solo send chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — NAME + TIME + SET puts a named timer on the whole group. TIME sits under the name bar. TIME is minutes (`1`, `30`, `120`) or hours (`2H`). Presets are `30 MIN` / `1 HR` / `2 HRS` (not 1 MIN / 5 MIN / 2H). After the duration chrome includes `OVERDUE` plus the task. DONE is one row per timer id. That person's profile glass shows the same timer and remaining bar. JOIN NAV is one `nav Nav` row. A second JOIN NAV is `NAV · SEATED`, not a dead tap. Solo set/done chrome `NO PEERS · LOGGED`.
 - [ ] PASS / FAIL / N/A — Roster QR is visible. JOIN LOCAL NET is not required to see the QR.
-- [ ] PASS / FAIL / N/A — KIT names and counts inventory. `+1` / `−1` stay in sync on mesh when using equipment. Hold an item to ASSIGN it to a party member (`NONE` clears it). Assigned gear shows in INVENTORY on that person's profile glass, with the same `+1` / `−1`. Plates still toggle OK / FAILED and show the hazard. TRIP brief is on the glass. EXPORT PAPER shows the paper on the glass (still logs).
+- [ ] PASS / FAIL / N/A — INVENTORY names and counts. `+1` / `−1` stay in sync on mesh when using equipment. Hold an item to ASSIGN it to a party member (`NONE` clears it). Assigned gear shows in INVENTORY on that person's profile glass, with the same `+1` / `−1`. Plates still toggle OK / FAILED and show the hazard. TRIP brief is on the glass. EXPORT PAPER shows the paper on the glass (still logs).
 - [ ] PASS / FAIL / N/A — No SOS disk on EXPEDITION.
 
 ## INSTRUMENTS
