@@ -53,6 +53,8 @@ public enum BlackoutTokens: Sendable {
         /// Field and Mark. A third button turns a glance into a menu, and SOS
         /// is never one of them — it lives on Comms and nowhere else.
         public static let holdCardMaxActions: Int = 2
+        /// Incoming CALL / MESSAGE glass line. Newest replaces; then it clears.
+        public static let incomingLineSeconds: Double = 8
         /// MAP chrome sleeps so the world can feel like it might disappear.
         public static let chromeIdleSeconds: Double = 3.2
         public static let chromeAsleepOpacity: Double = 0.08

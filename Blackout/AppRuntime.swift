@@ -103,6 +103,8 @@ final class AppRuntime {
     var commsChrome = ""
     /// NOTE field should open after MESSAGE from a profile glass.
     var pendingNoteFocus = false
+    /// One live inbound CALL or MESSAGE. Newest replaces.
+    var incoming: IncomingLine?
     /// 15s CLIP is armed. The pad reads RECORDING until the clip ends.
     var clipLive = false
     /// HUD typewriter. Replaces the iPhone keyboard on every field.
@@ -130,6 +132,7 @@ final class AppRuntime {
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
+    private var incomingTask: Task<Void, Never>?
     /// Thumb is down on HOLD PTT. Live chrome waits on the mic.
     private var pttHold = false
     /// CLIP tap is waiting on the mic. Not live yet.
@@ -223,6 +226,7 @@ final class AppRuntime {
         mesh.stopLocal()
         comms.radioCheck(heard: false)
         commsChrome = ""
+        clearIncoming()
     }
 
     func persistPartyCode() {
@@ -814,7 +818,7 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || markDraft != nil || heldMark != nil { return }
+            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || markDraft != nil || heldMark != nil { return }
             hudFocus = .none
             chromeAwake = false
         }
@@ -1228,6 +1232,9 @@ final class AppRuntime {
                 if let chip = Chip(rawValue: raw) {
                     comms.push(chip)
                 }
+                if raw == "ptt" {
+                    raiseIncoming(from: env, kind: .call)
+                }
             }
         case "mark":
             if let raw = String(data: env.body, encoding: .utf8),
@@ -1266,11 +1273,85 @@ final class AppRuntime {
                 let note = PartyNote.clean(text)
                 if note.hasPrefix("SOS ") {
                     lastConditionSOS = note
+                } else if !note.isEmpty {
+                    raiseIncoming(from: env, kind: .message)
                 }
             }
         default:
             break
         }
+    }
+
+    func raiseIncoming(from env: MeshEnvelope, kind: IncomingKind) {
+        guard env.from != mesh.localID else { return }
+        guard incomingIsForLocal(env) else { return }
+        let pip = mesh.pips.first { $0.from == env.from }
+        let named = MeshPOS.nameToken(pip?.name ?? "")
+        let name = named.isEmpty ? env.from.uppercased() : named.uppercased()
+        let location: String
+        if let pip, pip.lat.isFinite, pip.lon.isFinite {
+            location = MapFieldChrome.destValue(point: (pip.lat, pip.lon))
+        } else {
+            // NO FIX when the pip has no usable coordinate.
+            location = MapFieldChrome.destValue(point: nil)
+        }
+        incoming = IncomingLine(
+            from: env.from,
+            name: name,
+            emblem: pip?.emblem ?? "",
+            location: location,
+            kind: kind,
+            raisedAt: Date()
+        )
+        pulse()
+        let stamp = incoming?.raisedAt
+        incomingTask?.cancel()
+        incomingTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.incomingLineSeconds))
+            if Task.isCancelled { return }
+            if incoming?.raisedAt == stamp {
+                clearIncoming()
+            }
+        }
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+    }
+
+    func answerIncoming() {
+        guard let line = incoming else { return }
+        comms.pickPeer(line.from)
+        switch line.kind {
+        case .call:
+            break
+        case .message:
+            pendingNoteFocus = true
+        }
+        clearIncoming()
+        Task { @MainActor in
+            tab = .comms
+            closeHold()
+            applyMapKeepAwake()
+            switch line.kind {
+            case .call:
+                if mesh.nearby.contains(line.from) {
+                    beginPTTSolo()
+                }
+            case .message:
+                break
+            }
+        }
+    }
+
+    func clearIncoming() {
+        incomingTask?.cancel()
+        incomingTask = nil
+        incoming = nil
+        pulse()
+    }
+
+    private func incomingIsForLocal(_ env: MeshEnvelope) -> Bool {
+        let dest = env.to.trimmingCharacters(in: .whitespacesAndNewlines)
+        if dest.isEmpty || dest == "*" || dest == "YOU" { return true }
+        return dest == mesh.localID
     }
 
     func switchPack(_ id: String) {
@@ -1679,6 +1760,20 @@ enum BootStage: Equatable {
             return why
         }
     }
+}
+
+enum IncomingKind: Equatable {
+    case call
+    case message
+}
+
+struct IncomingLine: Equatable {
+    var from: String
+    var name: String
+    var emblem: String
+    var location: String
+    var kind: IncomingKind
+    var raisedAt: Date
 }
 
 enum BlackoutTab: String, CaseIterable, Identifiable {

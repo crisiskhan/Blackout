@@ -81,6 +81,7 @@ final class TokensTests: XCTestCase {
         XCTAssertEqual(BlackoutTokens.Chrome.hudTabReservePoints, 52)
         XCTAssertEqual(BlackoutTokens.Chrome.hudSideReservePoints, 72)
         XCTAssertEqual(BlackoutTokens.Chrome.mapChipHitPoints, 44)
+        XCTAssertEqual(BlackoutTokens.Chrome.incomingLineSeconds, 8)
         XCTAssertEqual(BlackoutTokens.MapDock.allCases.count, 4)
         XCTAssertEqual(BlackoutTokens.MapOverlay.instrumentsTitle, "INSTRUMENTS")
         XCTAssertEqual(BlackoutTokens.MapOverlay.lockOnTitle, "LOCK-ON")

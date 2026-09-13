@@ -11,6 +11,11 @@ struct RootChrome: View {
                 ARMINGView(runtime: runtime)
             } else {
                 tabChrome
+                IncomingLinePlate(runtime: runtime)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .allowsHitTesting(runtime.incoming != nil)
                 // Map and Comms carry their own I AM OK. Field / Exped get
                 // the corner chip only while SOS or RED is actually lit.
                 if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
@@ -44,6 +49,7 @@ struct RootChrome: View {
             if !now {
                 runtime.hudKeys.close()
                 runtime.closeMark()
+                runtime.clearIncoming()
             }
             runtime.applyMapKeepAwake()
         }

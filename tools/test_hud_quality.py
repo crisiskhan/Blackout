@@ -2254,6 +2254,8 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("YOU and party", person)
         self.assertNotIn("THREAD", person)
         self.assertIn("HUD typewriter", person)
+        self.assertIn("Incoming notes land on COMMS LOG", person)
+        self.assertIn("Incoming CALL and MESSAGE pop a HUD line", person)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("tel://", app.lower())
 
@@ -2274,6 +2276,8 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("CALL starts a 1:1 party call", person)
         self.assertIn("MESSAGE opens COMMS", person)
         self.assertIn("YOU and party", person)
+        self.assertIn("Incoming notes land on COMMS LOG", person)
+        self.assertIn("Incoming CALL and MESSAGE pop a HUD line", person)
         self.assertNotIn("THREAD", person)
         self.assertIn("PTT mesh", person)
         self.assertIn("never `tel://`", qa)
@@ -2340,6 +2344,133 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("FACE", device)
         self.assertNotIn("best in class", device.lower())
         self.assertNotIn("best in class", card.lower())
+
+
+class IncomingLineTests(unittest.TestCase):
+    """Inbound CALL / MESSAGE pop one themed HUD line: emblem, name, location."""
+
+    def test_root_chrome_hosts_a_glass_incoming_line(self):
+        plate_path = ROOT.joinpath("Blackout", "IncomingLinePlate.swift")
+        self.assertTrue(plate_path.is_file(), "IncomingLinePlate.swift")
+        plate = plate_path.read_text()
+        root = read("Blackout", "RootChrome.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        self.assertIn("struct IncomingLinePlate", plate)
+        self.assertIn("IncomingLinePlate(", root)
+        self.assertIn("var incoming", app)
+        self.assertIn("struct IncomingLine", app)
+        self.assertIn("enum IncomingKind", app)
+        self.assertIn("case call", app)
+        self.assertIn("case message", app)
+        self.assertIn("incomingLineSeconds", tokens)
+        self.assertIn("8", tokens.split("incomingLineSeconds")[1].split("\n")[0])
+        armed = root.split("if !runtime.armed")[1]
+        self.assertLess(armed.find("IncomingLinePlate"), armed.find("hudTypewriter"))
+        self.assertGreater(armed.find("IncomingLinePlate"), armed.find("tabChrome"))
+        host = root.split("IncomingLinePlate")[0]
+        self.assertNotIn("chromeVeil", host[-400:])
+        self.assertIn("PersonEmblem.image", plate)
+        self.assertIn("PersonEmblem.resolved", plate)
+        self.assertIn("Theme.glass", plate)
+        self.assertIn("mapChipHitPoints", plate)
+        self.assertIn("line.name", plate)
+        self.assertIn("line.location", plate)
+        self.assertIn('Text("CALL")', plate)
+        self.assertIn('Text("MESSAGE")', plate)
+        self.assertIn("answerIncoming", plate)
+        self.assertIn("clearIncoming", plate)
+        self.assertIn("DragGesture", plate)
+        self.assertIn("case .call", plate)
+        self.assertIn("case .message", plate)
+        self.assertNotIn("tel://", plate.lower())
+        self.assertNotIn(".spring(", plate)
+        self.assertNotIn("best in class", plate.lower())
+        self.assertNotIn("ultraThinMaterial", plate)
+        self.assertNotIn("UNUserNotification", plate)
+        self.assertNotIn("CallKit", plate)
+        self.assertNotIn("Waze", plate)
+        kind = plate.split("func kindTitle")[1].split("func ", 1)[0]
+        self.assertIn("case .call", kind)
+        self.assertIn("case .message", kind)
+        self.assertIn("Never", kind)
+
+    def test_inbound_note_and_ptt_raise_the_line_voice_does_not(self):
+        app = read("Blackout", "AppRuntime.swift")
+        self.assertIn("func raiseIncoming(", app)
+        self.assertIn("func answerIncoming(", app)
+        self.assertIn("func clearIncoming(", app)
+        self.assertIn("func incomingIsForLocal(", app)
+        inbound = app.split("func applyInbound(")[1].split("func switchPack(")[0]
+        chip = inbound.split('case "chip":')[1].split("case ", 1)[0]
+        self.assertIn('raw == "ptt"', chip)
+        self.assertEqual(chip.count("raiseIncoming"), 1)
+        self.assertIn(".call", chip)
+        self.assertNotIn(".message", chip)
+        self.assertNotIn("Chip.rally", chip)
+        voice = inbound.split('case "voice":')[1].split("case ", 1)[0]
+        self.assertNotIn("raiseIncoming", voice)
+        note = inbound.split('case "note":')[1].split("default:")[0]
+        self.assertIn('hasPrefix("SOS ")', note)
+        self.assertIn("raiseIncoming", note)
+        self.assertIn(".message", note)
+        self.assertLess(note.find('hasPrefix("SOS ")'), note.find("raiseIncoming"))
+        filt = app.split("func incomingIsForLocal(")[1].split("func ", 1)[0]
+        self.assertIn('"*"', filt)
+        self.assertIn('"YOU"', filt)
+        self.assertIn("mesh.localID", filt)
+        raise_fn = app.split("func raiseIncoming(")[1].split("func ", 1)[0]
+        self.assertIn("incomingIsForLocal", raise_fn)
+        self.assertIn("localID", raise_fn)
+        self.assertIn("destValue", raise_fn)
+        self.assertIn("isFinite", raise_fn)
+        self.assertIn("pulse()", raise_fn)
+        self.assertIn("incomingLineSeconds", raise_fn)
+        self.assertIn("incomingTask", raise_fn)
+        self.assertIn("NO FIX", raise_fn)
+        answer = app.split("func answerIncoming(")[1].split("func ", 1)[0]
+        self.assertIn("pickPeer", answer)
+        self.assertIn("tab = .comms", answer)
+        self.assertIn("beginPTTSolo()", answer)
+        self.assertIn("pendingNoteFocus", answer)
+        self.assertIn("clearIncoming", answer)
+        self.assertIn("case .call", answer)
+        self.assertIn("case .message", answer)
+        self.assertIn("nearby", answer)
+        self.assertIn("Task { @MainActor in", answer)
+        self.assertNotIn("tel://", answer.lower())
+        clear = app.split("func clearIncoming(")[1].split("func ", 1)[0]
+        self.assertIn("incoming = nil", clear)
+        self.assertIn("incomingTask?.cancel()", clear)
+        leave = app.split("func leaveNet()")[1].split("func persistPartyCode")[0]
+        self.assertIn("clearIncoming", leave)
+        pulse = app.split("func pulse()")[1].split("func resetHUD")[0]
+        self.assertIn("incoming != nil", pulse)
+        self.assertNotIn("best in class", app.lower())
+        self.assertNotIn("tel://", app.lower())
+
+    def test_solo_qa_scores_the_incoming_line(self):
+        qa = read("docs", "SOLO_QA.md")
+        person = next(
+            line for line in qa.splitlines() if "Hold YOU or a party emblem" in line
+        )
+        self.assertIn("Incoming notes land on COMMS LOG", person)
+        self.assertIn("Incoming CALL and MESSAGE pop a HUD line", person)
+        self.assertIn("emblem", person.lower())
+        self.assertIn("location", person.lower())
+        incoming = next(
+            line for line in qa.splitlines() if "Incoming CALL (PTT chip)" in line
+        )
+        self.assertIn("emblem", incoming.lower())
+        self.assertIn("NO FIX", incoming)
+        self.assertIn("Tap opens COMMS", incoming)
+        self.assertIn("Auto-clears", incoming)
+        self.assertIn("Voice packets do not pop", incoming)
+        self.assertNotIn("THREAD", incoming)
+        self.assertIn("COMMS LOG", incoming)
+        self.assertIn("never `tel://`", incoming)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
 
 
 def _rgba(src: str, name: str) -> tuple[float, float, float, float]:
@@ -2711,6 +2842,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "InstrumentsView.swift",
         "HUDKeyboard.swift",
         "PlaceMarkCard.swift",
+        "IncomingLinePlate.swift",
     )
 
     def test_facet_tokens_are_highlight_and_shade_not_flat_grey(self):
