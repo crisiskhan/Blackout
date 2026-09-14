@@ -235,7 +235,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.minimumPitch = CGFloat(PackCamera.holdMinPitch(godsEye: godsEye))
         view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
         view.minimumZoomLevel = PackCamera.minZoom
-        view.maximumZoomLevel = PackCamera.maxZoom
+        view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)
         if let map = view as? FillingMapView {
             map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)
         }
@@ -2088,6 +2088,7 @@ extension PackStyle {
     private static func paintSun(_ layer: MLNStyleLayer, field: UIColor, ink: UIColor) {
         let id = layer.identifier
         if id.hasPrefix("khan-") { return }
+        if id == aerialLayerID || id.hasPrefix("aerial") || id.hasPrefix("naip") { return }
         switch layer {
         case let background as MLNBackgroundStyleLayer:
             background.backgroundColor = NSExpression(forConstantValue: field)
@@ -2136,9 +2137,14 @@ extension PackStyle {
         godsEye: Bool,
         layers: [EyeDesk.Layer]
     ) {
-        let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers)
+        let aerialWanted = godsEye && EyeDesk.layerOn(.aerial, in: layers)
+        let hasAerial = style.layers.contains {
+            let id = $0.identifier
+            return id == aerialLayerID || id.hasPrefix("aerial") || id.hasPrefix("naip")
+        }
+        let aerial = aerialWanted && hasAerial
+        let shade = (!godsEye || EyeDesk.layerOn(.shade, in: layers)) && !aerial
         let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
-        let aerial = godsEye && EyeDesk.layerOn(.aerial, in: layers)
         for layer in style.layers {
             let id = layer.identifier
             if id == "hillshade" || id.hasPrefix("hillshade") {
@@ -2150,11 +2156,14 @@ extension PackStyle {
             if id.hasPrefix("water-detail") {
                 layer.isVisible = water
             }
-            if id == "aerial" || id.hasPrefix("naip") || id.hasPrefix("aerial") {
+            if id == aerialLayerID || id.hasPrefix("naip") || id.hasPrefix("aerial") {
                 layer.isVisible = aerial
             }
+            if coversPhoto(id) {
+                layer.isVisible = !aerial
+            }
             if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
-                fill.fillOpacity = NSExpression(forConstantValue: EyeDesk.khanLandOpacity)
+                fill.fillOpacity = NSExpression(forConstantValue: aerial ? 0 : EyeDesk.khanLandOpacity)
             }
             if godsEye, id == "contours", let line = layer as? MLNLineStyleLayer {
                 line.lineOpacity = NSExpression(forConstantValue: EyeDesk.khanContourOpacity)
@@ -2173,6 +2182,16 @@ extension PackStyle {
                 symbol.textOpacity = NSExpression(forConstantValue: 1)
             }
         }
+    }
+
+    /// Schematic fills and casings that sit on the photo. Hide them while
+    /// packed NAIP is the ground so roofs and yards read. Labels stay.
+    private static func coversPhoto(_ id: String) -> Bool {
+        if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
+        if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
+            return true
+        }
+        return id.hasPrefix("roads")
     }
 
     private static func holdsKhanDetail(_ id: String) -> Bool {

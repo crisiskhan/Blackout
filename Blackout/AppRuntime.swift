@@ -61,7 +61,7 @@ final class AppRuntime {
     var lockOn = false
     /// KHAN EYE holds the desk over our people. Exclusive with LOCK-ON.
     var godsEye = false
-    var eyeLayers: [EyeDesk.Layer] = EyeDesk.Layer.allCases
+    var eyeLayers: [EyeDesk.Layer] = EyeDesk.liveDeskLayers
     var eyePalette: EyeDesk.Palette = .streets
     var eyeFollowID: String?
     var eyeTap: HeldPerson?
@@ -980,7 +980,7 @@ final class AppRuntime {
         lockOn = false
         EyeDesk.save(true)
         eyeLayers = scene.layers.compactMap(EyeDesk.Layer.init(rawValue:))
-        if eyeLayers.isEmpty { eyeLayers = EyeDesk.Layer.allCases }
+        if eyeLayers.isEmpty { eyeLayers = EyeDesk.liveDeskLayers }
         EyeDesk.saveLayers(eyeLayers)
         eyePalette = EyeDesk.Palette(rawValue: scene.palette) ?? .streets
         EyeDesk.savePalette(eyePalette)

@@ -141,6 +141,7 @@
         "streetsVisibleAtWalkingZoom": true
       },
       "files": [
+        "aerial.pmtiles",
         "border.geojson",
         "contours.geojson",
         "corridor.geojson",
@@ -168,7 +169,7 @@
         "style.json",
         "wild.geojson"
       ],
-      "bytes": 47580550
+      "bytes": 82293176
     },
     {
       "id": "tx-east",
@@ -294,6 +295,7 @@
         "streetsVisibleAtWalkingZoom": true
       },
       "files": [
+        "aerial.pmtiles",
         "contours.geojson",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
@@ -320,7 +322,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 61923670
+      "bytes": 91586451
     },
     {
       "id": "nm",
@@ -447,6 +449,7 @@
         "streetsVisibleAtWalkingZoom": true
       },
       "files": [
+        "aerial.pmtiles",
         "contours.geojson",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
@@ -473,7 +476,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 60512093
+      "bytes": 103539058
     }
   ]
 }

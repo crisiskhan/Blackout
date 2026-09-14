@@ -330,11 +330,13 @@ final class MapLibreMapTests: XCTestCase {
         try Data("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"highway\":\"residential\"},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[-81.48,30.46],[-81.47,30.47]]}}]}".utf8)
             .write(to: pack.appendingPathComponent("wild.geojson"))
         try Data("khan".utf8).write(to: pack.appendingPathComponent("khan.pmtiles"))
+        try Data("jpeg".utf8).write(to: pack.appendingPathComponent("aerial.pmtiles"))
         let style = pack.appendingPathComponent("style.json")
         let obj: [String: Any] = [
             "version": 8,
             "sources": ["osm": ["type": "geojson", "data": "osm.geojson"]],
             "layers": [
+                ["id": "land-fill", "type": "fill", "source": "osm"],
                 ["id": "roads", "type": "line", "source": "osm", "filter": ["has", "highway"]],
             ],
         ]
@@ -364,6 +366,15 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanSignalsLayerID && $0["type"] as? String == "circle" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanLampsLayerID && $0["type"] as? String == "circle" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanSignsLayerID && $0["type"] as? String == "symbol" })
+        XCTAssertEqual((sources?["aerial"] as? [String: Any])?["type"] as? String, "raster")
+        let aerialURL = (sources?["aerial"] as? [String: Any])?["url"] as? String ?? ""
+        XCTAssertTrue(aerialURL.hasPrefix("pmtiles://file://"), aerialURL)
+        XCTAssertTrue(aerialURL.hasSuffix("aerial.pmtiles"), aerialURL)
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.aerialLayerID && $0["type"] as? String == "raster" })
+        let layerIDs = layers.compactMap { $0["id"] as? String }
+        let landIndex = layerIDs.firstIndex(of: PackStyle.landFillLayerID)
+        let aerialIndex = layerIDs.firstIndex(of: PackStyle.aerialLayerID)
+        XCTAssertEqual(aerialIndex, landIndex.map { $0 + 1 })
         let houses = layers.first { $0["id"] as? String == PackStyle.khanBuildingsLayerID }
         XCTAssertEqual(houses?["source"] as? String, PackStyle.khanSourceID)
         XCTAssertEqual(houses?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
@@ -1042,6 +1053,9 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(PackCamera.opensOnStreetNames(openZoom: 11, labelMinZoom: 12))
         XCTAssertEqual(PackCamera.minZoom, 6)
         XCTAssertEqual(PackCamera.maxZoom, 16)
+        XCTAssertEqual(PackCamera.godsEyeMaxZoom, 17.5)
+        XCTAssertEqual(PackCamera.holdMaxZoom(godsEye: false), PackCamera.maxZoom)
+        XCTAssertEqual(PackCamera.holdMaxZoom(godsEye: true), PackCamera.godsEyeMaxZoom)
         XCTAssertLessThan(PackCamera.minZoom, PackCamera.streetNameMinZoom)
         XCTAssertLessThanOrEqual(PackCamera.openZoom, PackCamera.maxZoom)
     }
@@ -1140,11 +1154,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: true, godsEye: true))
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: false, godsEye: true))
         XCTAssertFalse(PackCamera.liveGodsEye(lockOn: true, godsEye: false))
-        XCTAssertEqual(PackCamera.godsEyePitch, 50)
-        XCTAssertEqual(PackCamera.godsEyeRangeFactor, 1.6)
+        XCTAssertEqual(PackCamera.godsEyePitch, 45)
+        XCTAssertEqual(PackCamera.godsEyeRangeFactor, 1.15)
         XCTAssertEqual(PackCamera.godsEyeHeading, 0)
         XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
-        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 50)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 45)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
         XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
@@ -1220,7 +1234,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.khanLandOpacity, 0.14, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanShadeContrast, 0.48, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanContourOpacity, 0.9, accuracy: 0.001)
-        XCTAssertEqual(PackStyle.resolverVersion, 10)
+        XCTAssertEqual(PackStyle.resolverVersion, 11)
+        XCTAssertEqual(EyeDesk.soloMeters, 160)
+        XCTAssertEqual(EyeDesk.sceneNames, ["CAMP", "RIDGE", "TRUCK"])
+        XCTAssertEqual(EyeDesk.liveDeskLayers, [.aerial, .water, .party, .marks, .tails])
+        XCTAssertEqual(PackStyle.aerialFileName, "aerial.pmtiles")
         XCTAssertEqual(PackStyle.khanSourceID, "khan")
         XCTAssertEqual(PackStyle.khanBuildingsLayerID, "khan-buildings")
         XCTAssertEqual(PackStyle.khanTreesLayerID, "khan-trees")

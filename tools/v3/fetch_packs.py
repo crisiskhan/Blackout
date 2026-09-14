@@ -26,7 +26,7 @@ from shapely.geometry import Polygon, mapping
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from . import graphbin, ground, khan, search_index, tiles
+from . import aerial, graphbin, ground, khan, search_index, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -1502,6 +1502,25 @@ def build_tiles(dest: Path, pack: dict) -> dict:
     return info
 
 
+def fetch_aerial_pack(pack: dict, dest: Path) -> None:
+    """Cut packed NAIP photo for the KHAN EYE desk. Metro only. No live feed."""
+    dest.mkdir(parents=True, exist_ok=True)
+    info = aerial.build_aerial(dest, pack)
+    if info.get("present"):
+        print(f"  NAIP {pack['id']} {info['tiles']} tiles {info['bytes'] / 1e6:.1f} MB", flush=True)
+    else:
+        print(f"  NAIP {pack['id']} omitted ({info.get('reason')})", flush=True)
+    restyle_existing(dest)
+
+
+def aerial_packs(ids: list[str] | None = None) -> None:
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("AERIAL", pid, flush=True)
+        fetch_aerial_pack(PACKS[pid], root / pid)
+    write_catalog(root)
+
+
 def build_khan_tiles(dest: Path, pack: dict) -> dict:
     """Cut OSM houses and street furniture for the KHAN EYE desk."""
     info = tiles.build_khan(dest, union_bbox(pack["slices"]), pack["name"])
@@ -1527,6 +1546,9 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "wild": {"type": "geojson", "data": "wild.geojson"},
         "khan": khan.style_source(),
     }
+    aerial_file = ROOT / "Resources" / "Packs" / pack_id / aerial.AERIAL_FILE
+    if aerial_file.is_file() and aerial_file.stat().st_size > 1000:
+        sources[aerial.AERIAL_SOURCE_ID] = aerial.style_source()
     layers: list[dict] = [
         {"id": "void", "type": "background", "paint": {"background-color": VOID_INK}},
     ]
@@ -1879,6 +1901,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         ]
     )
     stamp_source_layers(layers)
+    if aerial.AERIAL_SOURCE_ID in sources:
+        aerial.insert_aerial_layer(layers)
     return {
         "version": 8,
         "name": f"Blackout {pack_id}",
@@ -2560,6 +2584,8 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
     if argv and argv[0] == "--khan":
         khan_packs(argv[1:] or None)
+    elif argv and argv[0] == "--aerial":
+        aerial_packs(argv[1:] or None)
     elif argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
     elif argv and argv[0] == "--restyle":

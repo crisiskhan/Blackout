@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""KHAN EYE stands packed OSM houses, trees, signals, lamps and signs.
+"""KHAN EYE paints packed USGS NAIP photo, then packed OSM houses.
 
-Airplane. No live photo mesh. The desk reads `khan.pmtiles` built at pack
-time. Walking MAP keeps those layers off.
+Airplane. No live photo mesh. The desk reads `aerial.pmtiles` and
+`khan.pmtiles` built at pack time. Walking MAP keeps those layers off.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from pmtiles.reader import MmapSource, Reader
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from v3 import khan  # noqa: E402
+from v3 import aerial, khan  # noqa: E402
 from v3.fetch_packs import PACKS, maplibre_style  # noqa: E402
 from v3.tiles import lonlat_to_tile  # noqa: E402
 
@@ -118,6 +118,14 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["paint"]["fill-extrusion-opacity"], 1.0)
         self.assertEqual(khan.HOUSE_INK, "#A39C94")
         self.assertEqual(khan.TREE_INK, "#3F8F4E")
+        self.assertEqual(style["sources"]["aerial"]["type"], "raster")
+        self.assertEqual(style["sources"]["aerial"]["url"], "pmtiles://aerial.pmtiles")
+        self.assertEqual(style["sources"]["aerial"]["attribution"], aerial.NAIP_CREDIT)
+        ids = [item["id"] for item in style["layers"]]
+        self.assertIn("aerial", ids)
+        self.assertEqual(ids.index("aerial"), ids.index("land-fill") + 1)
+        self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_BUILDINGS_ID))
+        self.assertEqual((layers["aerial"].get("layout") or {}).get("visibility"), "none")
         blob = json.dumps(style).lower()
         self.assertNotIn("https://", blob)
         self.assertNotIn("cesium", blob)
@@ -126,26 +134,41 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 10", swift)
+        self.assertIn("resolverVersion = 11", swift)
         self.assertIn("func attachKhanLayers", swift)
+        self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
+        self.assertIn("aerial.pmtiles", swift)
         self.assertIn('"type": "fill-extrusion"', swift)
+        self.assertIn('"type": "raster"', swift)
+        self.assertIn("kind == \"vector\" || kind == \"raster\"", swift)
         self.assertIn("source-layer", swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0])
         self.assertIn('khanBuildingSourceLayer = "building"', swift)
         self.assertIn('khanFurnitureSourceLayer = "furniture"', swift)
         eye = offline.split("public static func applyEyeLayers")[1].split("public static func applyEyePalette")[0]
         self.assertIn('id.hasPrefix("khan-")', eye)
         self.assertIn("layer.isVisible = godsEye", eye)
+        self.assertIn("layer.isVisible = aerial", eye)
+        self.assertIn("coversPhoto", eye)
+        self.assertIn("aerial ? 0", eye)
         self.assertNotIn("URLSession", swift)
         self.assertNotIn("WKWebView", swift)
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
-        desk = tab.split("private var eyeDeskRail")[1].split("private var hitList")[0]
+        inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
+        self.assertNotIn("eyeDeskRail", tab)
+        self.assertNotIn("HUDGlassCard", tab)
+        desk = inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0]
         self.assertIn("HUDGlassCard", desk)
         self.assertIn("eyeDeskCaption", desk)
+        self.assertIn("LAYERS", desk)
+        self.assertIn("LOOK", desk)
+        self.assertIn("MARK", desk)
+        self.assertIn("SCENE", desk)
         self.assertNotIn("padding(.top, 52)", tab)
         hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
-        self.assertIn("VStack(alignment: .leading, spacing: 8)", hud)
-        self.assertIn("if runtime.godsEye", hud)
+        self.assertIn("overlayRail", hud)
+        self.assertIn("if !runtime.godsEye", hud)
+        self.assertNotIn("eyeDeskRail", hud)
         self.assertEqual(tab.count("runtime.hudLayout.overlay"), 2)
         self.assertIn("layers[index] = layer", swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0])
         tests = (
@@ -176,10 +199,19 @@ class PackedArchiveTests(unittest.TestCase):
             files = manifest.get("files") or []
             self.assertIn("khan.pmtiles", files)
             self.assertNotIn("khan.geojson", files)
+            self.assertIn("aerial.pmtiles", files)
+            archive_air = dest / "aerial.pmtiles"
+            self.assertTrue(archive_air.is_file(), f"{pid} missing aerial.pmtiles")
+            self.assertGreater(archive_air.stat().st_size, 1000, f"{pid} aerial.pmtiles is empty")
             style = json.loads((dest / "style.json").read_text())
             self.assertEqual(style["sources"]["khan"]["url"], "pmtiles://khan.pmtiles")
+            self.assertEqual(style["sources"]["aerial"]["url"], "pmtiles://aerial.pmtiles")
+            self.assertEqual(style["sources"]["aerial"]["type"], "raster")
             ids = [layer["id"] for layer in style["layers"]]
             self.assertIn(khan.KHAN_BUILDINGS_ID, ids)
+            self.assertIn("aerial", ids)
+            self.assertEqual(ids.index("aerial"), ids.index("land-fill") + 1)
+            self.assertLess(ids.index("aerial"), ids.index(khan.KHAN_BUILDINGS_ID))
             self.assertEqual(style["light"]["intensity"], 0.7)
             paints = {item["id"]: item for item in style["layers"]}
             self.assertEqual(paints[khan.KHAN_TREES_ID]["minzoom"], 11)
@@ -205,6 +237,18 @@ class PackedArchiveTests(unittest.TestCase):
                         found += 1
                         kinds.add(str(kind))
         self.assertGreater(found, 8, f"downtown El Paso has no packed houses, kinds={kinds}")
+
+    def test_downtown_el_paso_has_photo(self):
+        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
+        self.assertTrue(archive.is_file())
+        with open(archive, "rb") as fh:
+            reader = Reader(MmapSource(fh))
+            cx, cy = lonlat_to_tile(DOWNTOWN["lon"], DOWNTOWN["lat"], 16)
+            blob = reader.get(16, int(cx), int(cy))
+        self.assertIsNotNone(blob, "downtown El Paso has no packed photo at z16")
+        assert blob is not None
+        self.assertTrue(blob.startswith(b"\xff\xd8"), "downtown El Paso aerial is not JPEG")
+        self.assertGreater(len(blob), 800)
 
 
 if __name__ == "__main__":

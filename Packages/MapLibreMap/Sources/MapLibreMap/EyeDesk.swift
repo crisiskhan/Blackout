@@ -7,7 +7,7 @@ public enum EyeDesk {
     public static let layerKey = "hud.eye.layers"
     public static let paletteKey = "hud.eye.palette"
     public static let sceneKey = "hud.eye.scenes"
-    public static let soloMeters: Double = 400
+    public static let soloMeters: Double = 160
     public static let lastAfterSeconds: Double = 30
     public static let lostAfterSeconds: Double = 120
     public static let trailSeconds: Double = 20 * 60
@@ -160,6 +160,7 @@ public enum EyeDesk {
     }
 
     public static let sceneNames = ["CAMP", "RIDGE", "TRUCK"]
+    public static let liveDeskLayers: [Layer] = [.aerial, .water, .party, .marks, .tails]
 
     public static func load(defaults: UserDefaults = .standard) -> Bool {
         defaults.bool(forKey: persistKey)
@@ -178,9 +179,9 @@ public enum EyeDesk {
     }
 
     public static func loadLayers(defaults: UserDefaults = .standard) -> [Layer] {
-        let raw = defaults.stringArray(forKey: layerKey) ?? Layer.allCases.map(\.rawValue)
+        let raw = defaults.stringArray(forKey: layerKey) ?? liveDeskLayers.map(\.rawValue)
         let parsed = raw.compactMap(Layer.init(rawValue:))
-        return parsed.isEmpty ? Layer.allCases : parsed
+        return parsed.isEmpty ? liveDeskLayers : parsed
     }
 
     public static func saveLayers(_ layers: [Layer], defaults: UserDefaults = .standard) {

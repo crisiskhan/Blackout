@@ -530,6 +530,8 @@ public enum PackCamera {
     public static let minZoom: Double = 6
     /// Style overzoom ceiling. Packed streets do not get sharper past this.
     public static let maxZoom: Double = 16
+    /// KHAN EYE may pinch one more zoom so packed photo and houses still read.
+    public static let godsEyeMaxZoom: Double = 17.5
 
     public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
         openZoom >= labelMinZoom
@@ -582,10 +584,10 @@ public enum PackCamera {
     }
 
     /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
-    public static let godsEyePitch: Double = 50
+    public static let godsEyePitch: Double = 45
     /// Viewing distance is this times the framed desk radius. Closer than a
-    /// pack-wide lift so packed names, contours, and shade still read.
-    public static let godsEyeRangeFactor: Double = 1.6
+    /// pack-wide lift so packed photo, names, and houses still read.
+    public static let godsEyeRangeFactor: Double = 1.15
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
@@ -633,6 +635,10 @@ public enum PackCamera {
 
     public static func holdMaxPitch(godsEye: Bool) -> Double {
         godsEye ? godsEyeMaxPitch : 0
+    }
+
+    public static func holdMaxZoom(godsEye: Bool) -> Double {
+        godsEye ? godsEyeMaxZoom : maxZoom
     }
 
     public static func allowsOrbit(godsEye: Bool) -> Bool {
@@ -759,6 +765,9 @@ public enum PackStyle {
     public static let khanSignsLayerID = "khan-signs"
     public static let khanBuildingSourceLayer = "building"
     public static let khanFurnitureSourceLayer = "furniture"
+    public static let aerialSourceID = "aerial"
+    public static let aerialLayerID = "aerial"
+    public static let aerialFileName = "aerial.pmtiles"
     public static let waterInk = "#6E747A"
     /// Peaks and holes live on the pack's place slice from this zoom, same as
     /// the tiler's POI floor. Closer than that they are noise; farther they
@@ -777,9 +786,8 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v10 paints KHAN EYE houses, trees, signals, lamps and
-    /// signs so they read on the pitched desk.
-    public static let resolverVersion = 10
+    /// not keep replaying it. v11 paints packed NAIP photo under KHAN EYE houses.
+    public static let resolverVersion = 11
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -838,7 +846,9 @@ public enum PackStyle {
             } else if kind == "image", let rel = src["url"] as? String, !rel.hasPrefix("file:"), !rel.contains("://") {
                 src["url"] = packRoot.appendingPathComponent(rel).absoluteString
                 sources[key] = src
-            } else if kind == "vector", let rel = src["url"] as? String, PMTilesURL.isRelative(rel) {
+            } else if (kind == "vector" || kind == "raster"),
+                      let rel = src["url"] as? String, PMTilesURL.isRelative(rel)
+            {
                 src["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
                 sources[key] = src
             }
@@ -855,6 +865,7 @@ public enum PackStyle {
         var layers = obj["layers"] as? [[String: Any]] ?? []
         attachWaterLayers(&sources, &layers, packRoot: packRoot)
         attachGroundLayers(&sources, &layers, packRoot: packRoot)
+        attachAerialLayers(&sources, &layers, packRoot: packRoot)
         attachKhanLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
@@ -996,6 +1007,49 @@ public enum PackStyle {
         }
         obj["sources"] = sources
         obj["layers"] = layers
+    }
+
+    /// Packed USGS NAIP photo. Visible only while KHAN EYE is live. Walking MAP
+    /// keeps it off. Not a live feed.
+    public static func attachAerialLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let archive = packRoot.appendingPathComponent(aerialFileName)
+        guard FileManager.default.fileExists(atPath: archive.path) else { return }
+        if var existing = sources[aerialSourceID] as? [String: Any] {
+            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[aerialSourceID] = existing
+            }
+        } else {
+            sources[aerialSourceID] = [
+                "type": "raster",
+                "url": PMTilesURL.shipped(for: archive),
+                "tileSize": 256,
+            ]
+        }
+        let layer: [String: Any] = [
+            "id": aerialLayerID,
+            "type": "raster",
+            "source": aerialSourceID,
+            "minzoom": 14,
+            "layout": ["visibility": "none"],
+            "paint": [
+                "raster-opacity": 1,
+                "raster-fade-duration": 0,
+            ],
+        ]
+        if let index = layers.firstIndex(where: { $0["id"] as? String == aerialLayerID }) {
+            layers[index] = layer
+            return
+        }
+        if let land = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+            layers.insert(layer, at: land + 1)
+        } else {
+            layers.append(layer)
+        }
     }
 
     /// Packed OSM houses, trees, signals, lamps and signs. Visible only while

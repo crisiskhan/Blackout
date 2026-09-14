@@ -3,6 +3,7 @@ import BatteryAuction
 import Tokens
 import Almanac
 import Instruments
+import MapLibreMap
 
 struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
@@ -13,6 +14,9 @@ struct InstrumentsView: View {
             header
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    sectionLabel("KHAN EYE")
+                    eyeDeskPlate
+
                     sectionLabel("PACKS")
                     if let packs = runtime.packs {
                         ForEach(packs.catalog.packs, id: \.id) { p in
@@ -197,6 +201,75 @@ struct InstrumentsView: View {
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Theme.warn)
         }
+    }
+
+    /// Desk tools that used to sit on the map. INSTRUMENTS is the sheet;
+    /// the canvas keeps the photo.
+    @ViewBuilder
+    private var eyeDeskPlate: some View {
+        HUDGlassCard {
+            VStack(alignment: .leading, spacing: 8) {
+                eyeDeskCaption("LAYERS")
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    ForEach(EyeDesk.Layer.allCases, id: \.self) { layer in
+                        if EyeDesk.shows(
+                            layer,
+                            aerial: runtime.packHasAerial,
+                            shade: runtime.packHasShade,
+                            water: runtime.packHasWater
+                        ) {
+                            Button(layer.title) { runtime.toggleEyeLayer(layer) }
+                                .buttonStyle(HUDOverlayChipStyle(filled: EyeDesk.layerOn(layer, in: runtime.eyeLayers)))
+                        }
+                    }
+                }
+                eyeDeskCaption("LOOK")
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    ForEach(EyeDesk.Palette.allCases, id: \.self) { palette in
+                        Button(palette.title) { runtime.setEyePalette(palette) }
+                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyePalette == palette))
+                    }
+                }
+                eyeDeskCaption("MARK")
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
+                        Button(kind.title) {
+                            if let you = runtime.fieldYou {
+                                runtime.plantEyeMark(kind: kind, lat: you.lat, lon: you.lon)
+                            }
+                        }
+                        .buttonStyle(HUDOverlayChipStyle(filled: runtime.marks.contains { $0.kind == kind.rawValue }))
+                    }
+                }
+                eyeDeskCaption("SCENE")
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    ForEach(EyeDesk.sceneNames, id: \.self) { name in
+                        Button(name) {
+                            if runtime.eyeScenes.contains(where: { $0.name == name }) {
+                                runtime.jumpEyeScene(name)
+                            } else {
+                                runtime.saveEyeScene(name)
+                            }
+                        }
+                        .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyeScenes.contains { $0.name == name }))
+                    }
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(runtime.eyeHUDLines().enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                            .foregroundStyle(Theme.silver)
+                    }
+                }
+            }
+            .opacity(runtime.lostKidDesk ? 0.35 : 1)
+        }
+    }
+
+    private func eyeDeskCaption(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 9, weight: .heavy))
+            .foregroundStyle(Theme.silver.opacity(0.55))
     }
 
     private func sectionLabel(_ title: String) -> some View {

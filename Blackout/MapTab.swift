@@ -212,7 +212,8 @@ struct MapTab: View {
 
     /// Everything that is not the map, sitting on the map. Search, lock, KHAN EYE and
     /// instruments at the top; status and the four thumb cells at the bottom.
-    /// KHAN EYE takes the packed canvas as a 3D satellite desk: walking SEARCH recedes.
+    /// KHAN EYE takes the packed canvas as a 3D photo desk: walking SEARCH recedes.
+    /// LAYERS / LOOK / MARK / SCENE live in Instruments so the photo is the glass.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
@@ -236,12 +237,7 @@ struct MapTab: View {
                 onMove: { runtime.hudLayout.overlay = $0 },
                 onStore: { runtime.hudLayout.save() }
             ) {
-                VStack(alignment: .leading, spacing: 8) {
-                    overlayRail
-                    if runtime.godsEye {
-                        eyeDeskRail
-                    }
-                }
+                overlayRail
             }
             if !runtime.godsEye, !hits.isEmpty {
                 hitList
@@ -338,76 +334,6 @@ struct MapTab: View {
         }
         .animation(Theme.Motion.heavy, value: runtime.godsEye)
         .animation(Theme.Motion.heavy, value: runtime.lockOn)
-    }
-
-    @ViewBuilder
-    private var eyeDeskRail: some View {
-        if runtime.godsEye {
-            HUDGlassCard {
-                VStack(alignment: .leading, spacing: 8) {
-                    eyeDeskCaption("LAYERS")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        ForEach(EyeDesk.Layer.allCases, id: \.self) { layer in
-                            if EyeDesk.shows(
-                                layer,
-                                aerial: runtime.packHasAerial,
-                                shade: runtime.packHasShade,
-                                water: runtime.packHasWater
-                            ) {
-                                Button(layer.title) { runtime.toggleEyeLayer(layer) }
-                                    .buttonStyle(HUDOverlayChipStyle(filled: EyeDesk.layerOn(layer, in: runtime.eyeLayers)))
-                            }
-                        }
-                    }
-                    eyeDeskCaption("LOOK")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        ForEach(EyeDesk.Palette.allCases, id: \.self) { palette in
-                            Button(palette.title) { runtime.setEyePalette(palette) }
-                                .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyePalette == palette))
-                        }
-                    }
-                    eyeDeskCaption("MARK")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
-                            Button(kind.title) {
-                                if let you = runtime.fieldYou {
-                                    runtime.plantEyeMark(kind: kind, lat: you.lat, lon: you.lon)
-                                }
-                            }
-                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.marks.contains { $0.kind == kind.rawValue }))
-                        }
-                    }
-                    eyeDeskCaption("SCENE")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        ForEach(EyeDesk.sceneNames, id: \.self) { name in
-                            Button(name) {
-                                if runtime.eyeScenes.contains(where: { $0.name == name }) {
-                                    runtime.jumpEyeScene(name)
-                                } else {
-                                    runtime.saveEyeScene(name)
-                                }
-                            }
-                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyeScenes.contains { $0.name == name }))
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(Array(runtime.eyeHUDLines().enumerated()), id: \.offset) { _, line in
-                            Text(line)
-                                .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                                .foregroundStyle(Theme.silver)
-                                .shadow(color: Theme.void.opacity(0.95), radius: 3)
-                        }
-                    }
-                }
-                .opacity(runtime.lostKidDesk ? 0.35 : 1)
-            }
-        }
-    }
-
-    private func eyeDeskCaption(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 9, weight: .heavy))
-            .foregroundStyle(Theme.silver.opacity(0.55))
     }
 
     private var hitList: some View {

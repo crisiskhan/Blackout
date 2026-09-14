@@ -133,6 +133,7 @@
     "streetsVisibleAtWalkingZoom": true
   },
   "files": [
+    "aerial.pmtiles",
     "border.geojson",
     "contours.geojson",
     "corridor.geojson",
@@ -160,5 +161,5 @@
     "style.json",
     "wild.geojson"
   ],
-  "bytes": 47580550
+  "bytes": 82293176
 }

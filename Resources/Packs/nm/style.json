@@ -33,6 +33,12 @@
       "url": "pmtiles://khan.pmtiles",
       "attribution": "© OpenStreetMap contributors"
     },
+    "aerial": {
+      "type": "raster",
+      "url": "pmtiles://aerial.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
     "hillshade": {
       "type": "image",
       "url": "hillshade.png",
@@ -125,6 +131,20 @@
         ]
       },
       "source-layer": "land"
+    },
+    {
+      "id": "aerial",
+      "type": "raster",
+      "source": "aerial",
+      "minzoom": 14,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
     },
     {
       "id": "public-land-fill",
