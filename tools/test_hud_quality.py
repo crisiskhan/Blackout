@@ -3921,6 +3921,8 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
         self.assertIn("toggleGodsEye()", tab)
         self.assertIn("HUDOverlayChipStyle(filled: runtime.godsEye)", tab)
+        self.assertIn("PackCamera.liveLockOn", tab)
+        self.assertIn("HUDOverlayChipStyle(filled: PackCamera.liveLockOn", tab)
         self.assertNotIn('Button("FIT PACK")', tab)
         self.assertNotIn("best in class", tab.lower())
         overlay = theme.split("struct HUDOverlayChipStyle")[1].split("struct MapFieldDestChipStyle")[0]
@@ -3930,6 +3932,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertNotIn("Rectangle().fill(Theme.silver)", overlay)
         rail = tab.split("private var overlayRail")[1].split("private var hitList")[0]
         self.assertIn("value: runtime.godsEye", rail)
+        self.assertIn("value: runtime.lockOn", rail)
         canvas = tab.split("private func canvas")[1].split("private var coverUp")[0]
         self.assertNotIn("value: runtime.godsEye", canvas)
         self.assertIn("var godsEye", app)
@@ -3941,6 +3944,8 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("godsEye = false", lock)
         self.assertIn("static func shouldHoldPack(", cam)
         self.assertIn("static func shouldLeavePack(", cam)
+        self.assertIn("static func liveLockOn(", cam)
+        self.assertIn("static func liveGodsEye(", cam)
         self.assertIn("static let packPaddingPoints", cam)
         self.assertIn("static let packSidePaddingPoints", cam)
         self.assertIn("godsEye: Bool", cam.split("static func shouldFrameDest(")[1].split("static func destIsOnGlass(")[0])
@@ -3950,6 +3955,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         camera = offline.split("func applyCamera")[1].split("func fitPack")[0]
         self.assertIn("PackCamera.shouldHoldPack", camera)
         self.assertIn("PackCamera.shouldLeavePack", camera)
+        self.assertIn("PackCamera.liveLockOn", camera)
         self.assertIn("godsEye: spec.godsEye", camera)
         fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
         self.assertIn("PackCamera.packPaddingPoints", fit)
@@ -3967,6 +3973,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("GODS EYE", qa)
         self.assertIn("fits the pack", qa)
         self.assertIn("GODS EYE drops LOCK-ON", qa)
+        self.assertIn("never both live", qa)
         self.assertIn("clear of the HUD", qa)
         self.assertIn("leaves pinch", qa)
         self.assertNotIn("best in class", qa.lower())

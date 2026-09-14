@@ -620,6 +620,16 @@ public enum PackCamera {
     public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool) -> Bool {
         wasHolding && !godsEye
     }
+
+    /// Overlay camera holds are exclusive. GODS EYE wins if both flags are set.
+    public static func liveLockOn(lockOn: Bool, godsEye: Bool) -> Bool {
+        lockOn && !godsEye
+    }
+
+    public static func liveGodsEye(lockOn: Bool, godsEye: Bool) -> Bool {
+        _ = lockOn
+        return godsEye
+    }
 }
 
 public enum PackStyle {

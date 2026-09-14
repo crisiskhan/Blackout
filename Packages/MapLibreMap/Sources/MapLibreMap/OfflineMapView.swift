@@ -769,7 +769,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 return
             }
             if puckOK, PackCamera.shouldFollow(
-                lockOn: spec.lockOn,
+                lockOn: PackCamera.liveLockOn(lockOn: spec.lockOn, godsEye: spec.godsEye),
                 wasLocked: storedLockOn,
                 lastFollow: followedPuck,
                 puck: (spec.puckLat, spec.puckLon),

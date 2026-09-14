@@ -1049,6 +1049,12 @@ final class MapLibreMapTests: XCTestCase {
         )
         XCTAssertGreaterThan(PackCamera.packPaddingPoints, PackCamera.routePaddingPoints)
         XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
+        XCTAssertTrue(PackCamera.liveLockOn(lockOn: true, godsEye: false))
+        XCTAssertFalse(PackCamera.liveLockOn(lockOn: true, godsEye: true))
+        XCTAssertFalse(PackCamera.liveLockOn(lockOn: false, godsEye: true))
+        XCTAssertTrue(PackCamera.liveGodsEye(lockOn: true, godsEye: true))
+        XCTAssertTrue(PackCamera.liveGodsEye(lockOn: false, godsEye: true))
+        XCTAssertFalse(PackCamera.liveGodsEye(lockOn: true, godsEye: false))
     }
 
     func testDestinationPinTracksTheChosenTarget() {

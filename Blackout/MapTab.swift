@@ -301,16 +301,17 @@ struct MapTab: View {
                 runtime.showInstruments = true
             }
             .buttonStyle(HUDOverlayChipStyle())
-            Button(BlackoutTokens.MapOverlay.lockTitle(locked: runtime.lockOn)) {
+            Button(BlackoutTokens.MapOverlay.lockTitle(locked: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye))) {
                 runtime.toggleLockOn()
             }
-            .buttonStyle(HUDOverlayChipStyle())
+            .buttonStyle(HUDOverlayChipStyle(filled: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye)))
             Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
                 runtime.toggleGodsEye()
             }
             .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
         }
         .animation(Theme.Motion.heavy, value: runtime.godsEye)
+        .animation(Theme.Motion.heavy, value: runtime.lockOn)
     }
 
     private var hitList: some View {
