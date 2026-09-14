@@ -13,10 +13,14 @@ public enum EyeDesk {
     public static let trailSeconds: Double = 20 * 60
     public static let deadReckonSeconds: Double = 60
     public static let bleRingMaxMeters: Double = 200
-    public static let satelliteShadeOpacity: Double = 0.86
-    public static let satelliteLandOpacity: Double = 0.3
-    public static let satelliteRoadOpacity: Double = 0.28
-    public static let satelliteLabelOpacity: Double = 0.22
+    public static let khanShadeOpacity: Double = 0.94
+    public static let khanShadeContrast: Double = 0.48
+    public static let khanShadeSaturation: Double = -0.1
+    public static let khanShadeBrightnessMax: Double = 0.84
+    public static let khanShadeBrightnessMin: Double = 0.05
+    public static let khanLandOpacity: Double = 0.14
+    public static let khanContourOpacity: Double = 0.9
+    public static let khanContourWidth: Double = 1.25
     public static let noCard = "NO CARD · DON'T GUESS"
     public static let offAerial = "OFF AERIAL"
     public static let packStamp = "PACK"
@@ -332,8 +336,8 @@ public enum EyeDesk {
 
     public static func parseVoice(_ raw: String) -> Voice? {
         let key = raw.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        if key == "eye on" { return .eyeOn }
-        if key == "eye off" { return .eyeOff }
+        if key == "eye on" || key == "khan eye on" { return .eyeOn }
+        if key == "eye off" || key == "khan eye off" { return .eyeOff }
         if key == "mark water" { return .markWater }
         if key.hasPrefix("frame ") {
             let name = String(key.dropFirst(6)).trimmingCharacters(in: .whitespaces)

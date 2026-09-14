@@ -59,7 +59,7 @@ final class AppRuntime {
     var leftHand = false
     var tab: BlackoutTab = .map
     var lockOn = false
-    /// EYE holds the desk over our people. Exclusive with LOCK-ON.
+    /// KHAN EYE holds the desk over our people. Exclusive with LOCK-ON.
     var godsEye = false
     var eyeLayers: [EyeDesk.Layer] = EyeDesk.Layer.allCases
     var eyePalette: EyeDesk.Palette = .streets
@@ -133,7 +133,7 @@ final class AppRuntime {
     private var liveSpokenTurn = ""
     private var liveArrived = false
     private var lastLiveRerouteAt: TimeInterval = 0
-    /// Bumped by GODS EYE. The canvas otherwise opens on YOU at walking zoom.
+    /// Bumped by KHAN EYE. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.

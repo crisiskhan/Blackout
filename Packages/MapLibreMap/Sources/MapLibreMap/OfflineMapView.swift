@@ -22,7 +22,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var destination: (lat: Double, lon: Double)?
     /// The point the inspect card is about, marked so the card never hides it.
     public var held: (lat: Double, lon: Double)?
-    /// Bumped by GODS EYE. Every other value change leaves the camera where the thumb left it.
+    /// Bumped by KHAN EYE. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
     /// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. This is the
     /// value that has to live on the Metal view.
@@ -49,7 +49,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
-    /// GODS EYE holds the pack in frame. Exclusive with LOCK-ON.
+    /// KHAN EYE holds the pack in frame. Exclusive with LOCK-ON.
     public var godsEye: Bool
     /// WALK dashes the accent core. DRIVE keeps it solid. Chrome already
     /// says which; the line has to match.
@@ -227,7 +227,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
-        // EYE is a 3D satellite desk over our people. Pinch, pan, orbit and
+        // KHAN EYE is a 3D satellite desk over our people. Pinch, pan, orbit and
         // tilt stay on the pack. Walking MAP stays flat.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
@@ -1972,6 +1972,7 @@ extension PackStyle {
         var fillOpacity: NSExpression?
         var lineColor: NSExpression?
         var lineOpacity: NSExpression?
+        var lineWidth: NSExpression?
         var textColor: NSExpression?
         var textHaloColor: NSExpression?
         var textOpacity: NSExpression?
@@ -1979,6 +1980,11 @@ extension PackStyle {
         var circleColor: NSExpression?
         var circleStrokeColor: NSExpression?
         var rasterOpacity: NSExpression?
+        var rasterContrast: NSExpression?
+        var rasterSaturation: NSExpression?
+        var maximumRasterBrightness: NSExpression?
+        var minimumRasterBrightness: NSExpression?
+        var minZoom: Float = 0
     }
 
     private static var capturedStyle: ObjectIdentifier?
@@ -2005,30 +2011,43 @@ extension PackStyle {
     }
 
     private static func snapshot(_ layer: MLNStyleLayer) -> LampPaint {
+        var paint: LampPaint
         switch layer {
         case let background as MLNBackgroundStyleLayer:
-            return LampPaint(backgroundColor: background.backgroundColor)
+            paint = LampPaint(backgroundColor: background.backgroundColor)
         case let fill as MLNFillStyleLayer:
-            return LampPaint(fillColor: fill.fillColor, fillOpacity: fill.fillOpacity)
+            paint = LampPaint(fillColor: fill.fillColor, fillOpacity: fill.fillOpacity)
         case let line as MLNLineStyleLayer:
-            return LampPaint(lineColor: line.lineColor, lineOpacity: line.lineOpacity)
+            paint = LampPaint(
+                lineColor: line.lineColor,
+                lineOpacity: line.lineOpacity,
+                lineWidth: line.lineWidth
+            )
         case let symbol as MLNSymbolStyleLayer:
-            return LampPaint(
+            paint = LampPaint(
                 textColor: symbol.textColor,
                 textHaloColor: symbol.textHaloColor,
                 textOpacity: symbol.textOpacity,
                 iconColor: symbol.iconColor
             )
         case let circle as MLNCircleStyleLayer:
-            return LampPaint(
+            paint = LampPaint(
                 circleColor: circle.circleColor,
                 circleStrokeColor: circle.circleStrokeColor
             )
         case let raster as MLNRasterStyleLayer:
-            return LampPaint(rasterOpacity: raster.rasterOpacity)
+            paint = LampPaint(
+                rasterOpacity: raster.rasterOpacity,
+                rasterContrast: raster.rasterContrast,
+                rasterSaturation: raster.rasterSaturation,
+                maximumRasterBrightness: raster.maximumRasterBrightness,
+                minimumRasterBrightness: raster.minimumRasterBrightness
+            )
         default:
-            return LampPaint()
+            paint = LampPaint()
         }
+        paint.minZoom = layer.minimumZoomLevel
+        return paint
     }
 
     private static func restore(_ layer: MLNStyleLayer, _ paint: LampPaint) {
@@ -2041,6 +2060,7 @@ extension PackStyle {
         case let line as MLNLineStyleLayer:
             if let color = paint.lineColor { line.lineColor = color }
             if let opacity = paint.lineOpacity { line.lineOpacity = opacity }
+            if let width = paint.lineWidth { line.lineWidth = width }
         case let symbol as MLNSymbolStyleLayer:
             if let color = paint.textColor { symbol.textColor = color }
             if let halo = paint.textHaloColor { symbol.textHaloColor = halo }
@@ -2051,9 +2071,18 @@ extension PackStyle {
             if let stroke = paint.circleStrokeColor { circle.circleStrokeColor = stroke }
         case let raster as MLNRasterStyleLayer:
             if let opacity = paint.rasterOpacity { raster.rasterOpacity = opacity }
+            if let contrast = paint.rasterContrast { raster.rasterContrast = contrast }
+            if let saturation = paint.rasterSaturation { raster.rasterSaturation = saturation }
+            if let maxBright = paint.maximumRasterBrightness {
+                raster.maximumRasterBrightness = maxBright
+            }
+            if let minBright = paint.minimumRasterBrightness {
+                raster.minimumRasterBrightness = minBright
+            }
         default:
             break
         }
+        layer.minimumZoomLevel = paint.minZoom
     }
 
     private static func paintSun(_ layer: MLNStyleLayer, field: UIColor, ink: UIColor) {
@@ -2114,7 +2143,7 @@ extension PackStyle {
             if id == "hillshade" || id.hasPrefix("hillshade") {
                 layer.isVisible = shade
                 if godsEye, shade, let raster = layer as? MLNRasterStyleLayer {
-                    raster.rasterOpacity = NSExpression(forConstantValue: EyeDesk.satelliteShadeOpacity)
+                    paintKhanShade(raster)
                 }
             }
             if id.hasPrefix("water-detail") {
@@ -2124,19 +2153,42 @@ extension PackStyle {
                 layer.isVisible = aerial
             }
             if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
-                fill.fillOpacity = NSExpression(forConstantValue: EyeDesk.satelliteLandOpacity)
+                fill.fillOpacity = NSExpression(forConstantValue: EyeDesk.khanLandOpacity)
             }
-            if godsEye, let line = layer as? MLNLineStyleLayer, id.hasPrefix("roads") {
-                line.lineOpacity = NSExpression(forConstantValue: EyeDesk.satelliteRoadOpacity)
+            if godsEye, id == "contours", let line = layer as? MLNLineStyleLayer {
+                line.lineOpacity = NSExpression(forConstantValue: EyeDesk.khanContourOpacity)
+                line.lineWidth = NSExpression(forConstantValue: EyeDesk.khanContourWidth)
+            }
+            if godsEye, holdsKhanDetail(id) {
+                layer.minimumZoomLevel = Float(PackCamera.minZoom)
             }
             if let symbol = layer as? MLNSymbolStyleLayer,
-               id == roadLabelsLayerID || id == roadRefsLayerID
+               id == roadLabelsLayerID || id == roadRefsLayerID || id == "water-labels"
+                || id == "place-labels"
             {
-                symbol.textOpacity = NSExpression(
-                    forConstantValue: godsEye ? EyeDesk.satelliteLabelOpacity : 1
-                )
+                symbol.textOpacity = NSExpression(forConstantValue: 1)
             }
         }
+    }
+
+    private static func holdsKhanDetail(_ id: String) -> Bool {
+        id == roadLabelsLayerID
+            || id == roadRefsLayerID
+            || id == "water-labels"
+            || id == "place-labels"
+            || id == "tracks"
+    }
+
+    private static func paintKhanShade(_ raster: MLNRasterStyleLayer) {
+        raster.rasterOpacity = NSExpression(forConstantValue: EyeDesk.khanShadeOpacity)
+        raster.rasterContrast = NSExpression(forConstantValue: EyeDesk.khanShadeContrast)
+        raster.rasterSaturation = NSExpression(forConstantValue: EyeDesk.khanShadeSaturation)
+        raster.maximumRasterBrightness = NSExpression(
+            forConstantValue: EyeDesk.khanShadeBrightnessMax
+        )
+        raster.minimumRasterBrightness = NSExpression(
+            forConstantValue: EyeDesk.khanShadeBrightnessMin
+        )
     }
 
     public static func applyEyePalette(

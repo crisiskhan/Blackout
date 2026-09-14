@@ -210,9 +210,9 @@ struct MapTab: View {
             || runtime.heldMark != nil
     }
 
-    /// Everything that is not the map, sitting on the map. Search, lock, EYE and
+    /// Everything that is not the map, sitting on the map. Search, lock, KHAN EYE and
     /// instruments at the top; status and the four thumb cells at the bottom.
-    /// EYE takes the packed canvas as a 3D satellite desk: walking SEARCH recedes.
+    /// KHAN EYE takes the packed canvas as a 3D satellite desk: walking SEARCH recedes.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {

@@ -583,8 +583,9 @@ public enum PackCamera {
 
     /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
     public static let godsEyePitch: Double = 50
-    /// Viewing distance is this times the pack's bounding-sphere radius.
-    public static let godsEyeRangeFactor: Double = 2.4
+    /// Viewing distance is this times the framed desk radius. Closer than a
+    /// pack-wide lift so packed names, contours, and shade still read.
+    public static let godsEyeRangeFactor: Double = 1.6
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
@@ -663,7 +664,7 @@ public enum PackCamera {
     }
 
     /// Farther of overhead range vs HUD-padded fit. Never closer than the
-    /// 2.4× look; farther when chrome needs more air around the pack.
+    /// 1.6× look; farther when chrome needs more air around the pack.
     public static func godsEyeCameraDistance(gev: Double, hudFit: Double) -> Double {
         max(gev, hudFit)
     }
