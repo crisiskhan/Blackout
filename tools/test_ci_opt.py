@@ -164,6 +164,16 @@ def test_altool_binds_primary_app() -> None:
         fail("altool must keep API key auth")
     if "com.crisiskhan.blackout.maplibre" in step or "com.maplibre.mapbox" in step:
         fail("do not invent an ASC app / apple-id for MapLibre")
+    # 34846431330: altool exit 0 after UPLOAD FAILED (HTTP 429 part 28),
+    # then assign waited 25 min for a build that was never ingested.
+    if "UPLOAD FAILED" not in step:
+        fail("34846431330: fail closed when altool log says UPLOAD FAILED")
+    if "UPLOAD SUCCEEDED" not in step:
+        fail("34846431330: require UPLOAD SUCCEEDED before claiming Uploaded")
+    if "RETRY altool 429" not in step:
+        fail("34846431330: backoff and retry altool HTTP 429")
+    if "too many requests" not in step.lower() and "HTTP status code: 429" not in step:
+        fail("34846431330: detect altool 429 from the log, not only exit code")
     assign = text.split("Assign existing Internal", 1)
     if len(assign) < 2:
         fail("Assign existing Internal group step missing")

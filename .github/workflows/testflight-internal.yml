@@ -183,27 +183,59 @@ jobs:
             exit 1
           fi
           STOP='ASC API key cannot create or reuse signing certificates. In App Store Connect → Users and Access → Integrations → App Store Connect API, the key’s role must be Admin or Account Holder (not Developer, not App Manager). Account Holder/Admin: edit or replace APP_STORE_CONNECT_API_KEY with an Admin key.'
-          set +e
           # 33929367958: without --apple-id/--bundle-id altool picked the nested
           # MapLibre FMWK BID and −19000. Bind the primary ASC app only.
           # --upload-package is the Xcode 16.2 form that consumes these flags;
           # --file keeps the IPA path explicit. No MapLibre ASC app.
-          xcrun altool --upload-package "$IPA" \
-            --type ios \
-            --file "$IPA" \
-            --apple-id "$ASC_APP_ID" \
-            --bundle-id com.crisiskhan.blackout \
-            --bundle-version "$NEXT_BUILD" \
-            --bundle-short-version-string "$SHORT" \
-            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
-            2>&1 | tee "$RUNNER_TEMP/altool.log"
-          UP=${PIPESTATUS[0]}
-          set -e
-          if [ "$UP" -ne 0 ]; then
+          # 34846431330: altool exit 0 after UPLOAD FAILED (HTTP 429 part 28).
+          # Trust the log, not the exit code. Retry 429. Do not assign a missing build.
+          upload_ok=0
+          attempt=0
+          while [ "$attempt" -lt 5 ]; do
+            set +e
+            xcrun altool --upload-package "$IPA" \
+              --type ios \
+              --file "$IPA" \
+              --apple-id "$ASC_APP_ID" \
+              --bundle-id com.crisiskhan.blackout \
+              --bundle-version "$NEXT_BUILD" \
+              --bundle-short-version-string "$SHORT" \
+              --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+              --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+              2>&1 | tee "$RUNNER_TEMP/altool.log"
+            set -e
+            if grep -qi 'UPLOAD SUCCEEDED' "$RUNNER_TEMP/altool.log"; then
+              upload_ok=1
+              break
+            fi
             if grep -qiE 'HTTP 401|HTTP 403|not have permission|Unable to log in|403 Forbidden|401 Unauthorized' "$RUNNER_TEMP/altool.log"; then
               echo "$STOP"
+              echo "Upload failed. Not faked."
+              exit 1
             fi
+            if grep -qiE 'too many requests|HTTP status code: 429' "$RUNNER_TEMP/altool.log"; then
+              attempt=$((attempt + 1))
+              if [ "$attempt" -ge 5 ]; then
+                break
+              fi
+              case "$attempt" in
+                1) wait=15 ;;
+                2) wait=30 ;;
+                3) wait=60 ;;
+                *) wait=90 ;;
+              esac
+              echo "RETRY altool 429 in ${wait} s"
+              sleep "$wait"
+              continue
+            fi
+            if grep -qi 'UPLOAD FAILED' "$RUNNER_TEMP/altool.log"; then
+              echo "Upload failed. Not faked."
+              exit 1
+            fi
+            echo "Upload failed. Not faked."
+            exit 1
+          done
+          if [ "$upload_ok" -ne 1 ]; then
             echo "Upload failed. Not faked."
             exit 1
           fi
