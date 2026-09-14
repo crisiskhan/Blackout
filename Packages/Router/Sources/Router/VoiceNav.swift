@@ -14,6 +14,7 @@ public enum VoiceNav: Sendable {
     public static let offGraphDrivePath = "No drivable street path from YOU."
     public static let startHint = "Set a destination, then WALK or DRIVE."
     public static let destHint = "Tap WALK or DRIVE for the street path."
+    public static let noFixHint = "No GNSS fix."
     public static let minLegMeters: Double = 8
     public static let straightDeg: Double = 35
     public static let uturnDeg: Double = 135
@@ -60,11 +61,14 @@ public enum VoiceNav: Sendable {
         if planChrome == GraphPlan.offGraph {
             return "OFF GRAPH. \(pathFailure(travelMode)) \(packName). \(headingBit)"
         }
-        if let destination, let you {
-            let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
-            return "Destination set. \(metersPhrase(span)). \(packName). \(headingBit) \(destHint)"
+        guard let destination else {
+            return "\(packName). \(headingBit) \(startHint)"
         }
-        return "\(packName). \(headingBit) \(startHint)"
+        guard let you else {
+            return "\(packName). \(headingBit) \(noFixHint)"
+        }
+        let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
+        return "Destination set. \(metersPhrase(span)). \(packName). \(headingBit) \(destHint)"
     }
 
     public static func steps(
@@ -229,6 +233,7 @@ public enum SpeakStatus: Sendable {
     public static let offGraph = GraphPlan.offGraph
     public static let offRoute = "OFF ROUTE"
     public static let setDest = "SET DEST"
+    public static let noFix = "NO FIX"
     public static let ellipsis = "…"
     /// Wide enough for `SPEAK · 999 TURNS · 99999 FT`, narrow enough that no phone has to
     /// wrap it. Anything longer is a text wall, not status.
@@ -251,11 +256,14 @@ public enum SpeakStatus: Sendable {
         if planChrome == offGraph {
             return line([offGraph])
         }
-        if let destination, let you {
-            let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
-            return line(["DEST", metersPhrase(span)])
+        guard let destination else {
+            return line([setDest])
         }
-        return line([setDest])
+        guard let you else {
+            return line([noFix])
+        }
+        let span = GraphRouter.haversine(you.lat, you.lon, destination.lat, destination.lon)
+        return line(["DEST", metersPhrase(span)])
     }
 
     public static func offRouteLine() -> String {

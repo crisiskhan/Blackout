@@ -70,6 +70,7 @@ def off_graph_path(mode: str) -> str:
 
 START_HINT = "Set a destination, then WALK or DRIVE."
 DEST_HINT = "Tap WALK or DRIVE for the street path."
+NO_FIX_HINT = "No GNSS fix."
 
 
 def street_at(streets: list[str | None], index: int) -> str | None:
@@ -230,13 +231,15 @@ def prompt(
         return f"{body} Total {meters_phrase(total)}. {heading_bit}"
     if plan_chrome == OFF_GRAPH:
         return f"OFF GRAPH. {off_graph_path(mode)} {pack_name}. {heading_bit}"
-    if dest is not None and you is not None:
-        span = haversine(you[0], you[1], dest[0], dest[1])
-        return (
-            f"Destination set. {meters_phrase(span)}. "
-            f"{pack_name}. {heading_bit} {DEST_HINT}"
-        )
-    return f"{pack_name}. {heading_bit} {START_HINT}"
+    if dest is None:
+        return f"{pack_name}. {heading_bit} {START_HINT}"
+    if you is None:
+        return f"{pack_name}. {heading_bit} {NO_FIX_HINT}"
+    span = haversine(you[0], you[1], dest[0], dest[1])
+    return (
+        f"Destination set. {meters_phrase(span)}. "
+        f"{pack_name}. {heading_bit} {DEST_HINT}"
+    )
 
 
 LIVE_NAV_ARRIVE = 25.0
@@ -410,6 +413,13 @@ class VoiceNavTests(unittest.TestCase):
         self.assertNotIn("Turn left.", text)
         self.assertNotIn("Arrive at destination.", text)
 
+    def test_dest_without_you_names_no_fix(self):
+        text = prompt("TX WEST", None, [], "", (31.80, -106.50), None)
+        self.assertIn(NO_FIX_HINT, text)
+        self.assertNotIn(START_HINT, text)
+        self.assertNotIn("Destination set.", text)
+        self.assertNotIn("Turn left.", text)
+
     def test_drive_turn_by_turn_uses_drive_not_walk(self):
         coords = [(0.0, 0.0), (0.0, 0.0017966), (0.0008993, 0.0017966)]
         text = prompt("TX WEST", 90, coords, "", None, None, mode="drive")
@@ -541,6 +551,7 @@ class VoiceNavSourceContracts(unittest.TestCase):
         self.assertIn("No drivable street path from YOU.", blob)
         self.assertIn(START_HINT, blob)
         self.assertIn(DEST_HINT, blob)
+        self.assertIn(NO_FIX_HINT, blob)
         self.assertIn('return "Drive"', blob)
         self.assertIn('return "Walk"', blob)
         speak = (ROOT / "Blackout" / "AppRuntime.swift").read_text().split("func speakMap()")[1].split("func beginPTTSolo")[0]
@@ -622,6 +633,8 @@ class VoiceNavSourceContracts(unittest.TestCase):
         tests = (ROOT / "Packages" / "Router" / "Tests" / "RouterTests" / "RouterTests.swift").read_text()
         self.assertIn("testVoiceNavOnGraphLeftTurnIsCompleteNotTruncated", tests)
         self.assertIn("testVoiceNavOffGraphIsFullHonestSentence", tests)
+        self.assertIn("testVoiceNavDestWithoutYouNamesNoFix", tests)
+        self.assertIn("testGraphPlanRefusesAFarSnapAndStitchesANearYou", tests)
         self.assertIn("testVoiceNavDriveTurnByTurnUsesDriveNotWalk", tests)
         self.assertIn("testDriveTakesTheFasterRoadNotTheShortestResidential", tests)
         self.assertIn("testVoiceNavNamesTheStreetsItTurnsOnto", tests)

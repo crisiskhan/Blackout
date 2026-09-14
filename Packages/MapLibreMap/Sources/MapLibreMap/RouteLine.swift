@@ -392,15 +392,16 @@ public enum MapFieldChrome: Sendable {
     }
 }
 
+/// DEST is the pin the thumb set. A leftover MARK is not a destination.
 public enum RouteTarget {
     public static func pick(
         explicit: (lat: Double, lon: Double)?,
         lastMark: (lat: Double, lon: Double)?,
         origin: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double)? {
+        _ = lastMark
         _ = origin
         if let explicit { return explicit }
-        if let lastMark { return lastMark }
         return nil
     }
 }

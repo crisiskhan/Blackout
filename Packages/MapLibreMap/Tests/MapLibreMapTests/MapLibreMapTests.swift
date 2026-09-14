@@ -850,8 +850,7 @@ final class MapLibreMapTests: XCTestCase {
         let picked = RouteTarget.pick(explicit: dest, lastMark: origin, origin: origin)
         XCTAssertEqual(picked?.lat, dest.lat)
         XCTAssertEqual(picked?.lon, dest.lon)
-        let fromMark = RouteTarget.pick(explicit: nil, lastMark: dest, origin: origin)
-        XCTAssertEqual(fromMark?.lat, dest.lat)
+        XCTAssertNil(RouteTarget.pick(explicit: nil, lastMark: dest, origin: origin))
         XCTAssertNil(RouteTarget.pick(explicit: nil, lastMark: nil, origin: origin))
     }
 

@@ -455,6 +455,10 @@ public enum GraphRouter {
 
 public enum GraphPlan {
     public static let offGraph = "OFF GRAPH"
+    /// Beyond this, the nearest street is not a path from YOU. A far snap drew
+    /// a fake line and the live guide immediately called it OFF ROUTE.
+    public static let snapMeters: Double = 150
+    public static let stitchMeters: Double = 1
 
     public static func line(
         graph: RouteGraph?,
@@ -465,14 +469,39 @@ public enum GraphPlan {
         guard let graph, !graph.isEmpty,
               let a = GraphRouter.nearestNode(graph: graph, lat: from.lat, lon: from.lon),
               let b = GraphRouter.nearestNode(graph: graph, lat: to.lat, lon: to.lon),
-              let r = GraphRouter.route(graph: graph, from: a, to: b, mode: mode),
+              let fromPt = graph.point(a),
+              let toPt = graph.point(b)
+        else {
+            return ([], offGraph, 0)
+        }
+        let fromSnap = GraphRouter.haversine(from.lat, from.lon, fromPt.lat, fromPt.lon)
+        let toSnap = GraphRouter.haversine(to.lat, to.lon, toPt.lat, toPt.lon)
+        guard fromSnap <= snapMeters, toSnap <= snapMeters else {
+            return ([], offGraph, 0)
+        }
+        guard let r = GraphRouter.route(graph: graph, from: a, to: b, mode: mode),
               r.fallback == .onGraph
         else {
             return ([], offGraph, 0)
         }
-        let coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
-        if coords.count < 2 { return ([], offGraph, 0) }
-        return (coords, "", r.seconds)
+        var coords = GraphRouter.coordinates(graph: graph, nodeIds: r.nodeIds)
+        if fromSnap >= stitchMeters {
+            coords.insert(from, at: 0)
+        }
+        if toSnap >= stitchMeters {
+            coords.append(to)
+        }
+        guard coords.count >= 2 else {
+            return ([], offGraph, 0)
+        }
+        let extra: Double
+        switch mode {
+        case .walk:
+            extra = (fromSnap + toSnap) / GraphIndex.walkMps
+        case .drive:
+            extra = (fromSnap + toSnap) / GraphIndex.unknownDriveMps
+        }
+        return (coords, "", r.seconds + extra)
     }
 }
 

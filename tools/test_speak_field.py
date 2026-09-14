@@ -84,10 +84,12 @@ def speak_status(
         return SEPARATOR.join(["SPEAK", turn_phrase, distance_hud(meters)])
     if plan_chrome == OFF_GRAPH:
         return SEPARATOR.join(["SPEAK", OFF_GRAPH])
-    if dest is not None and you is not None:
-        span = haversine(you[0], you[1], dest[0], dest[1])
-        return SEPARATOR.join(["SPEAK", "DEST", distance_hud(span)])
-    return SEPARATOR.join(["SPEAK", "SET DEST"])
+    if dest is None:
+        return SEPARATOR.join(["SPEAK", "SET DEST"])
+    if you is None:
+        return SEPARATOR.join(["SPEAK", "NO FIX"])
+    span = haversine(you[0], you[1], dest[0], dest[1])
+    return SEPARATOR.join(["SPEAK", "DEST", distance_hud(span)])
 
 
 def joined(parts: list[str]) -> str:
@@ -188,11 +190,13 @@ class SpeakStatusTests(unittest.TestCase):
             speak_status(True, [], OFF_GRAPH, (31.8, -106.5), (31.76, -106.49)),
             speak_status(True, [], "", (31.8, -106.5), (31.76, -106.49)),
             speak_status(True, [], "", None, None),
+            speak_status(True, [], "", (31.8, -106.5), None),
         ]
         self.assertEqual(outcomes[0], "SPEECH FAILED")
         self.assertEqual(outcomes[1], "SPEAK · OFF GRAPH")
         self.assertTrue(outcomes[2].startswith("SPEAK · DEST "))
         self.assertEqual(outcomes[3], "SPEAK · SET DEST")
+        self.assertEqual(outcomes[4], "SPEAK · NO FIX")
         for outcome in outcomes:
             self.assertTrue(outcome)
             self.assertNotIn("…", outcome)
@@ -321,6 +325,7 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertIn("maxCharacters = 32", self.voice)
         self.assertNotIn("speakBannerHeight", self.tokens)
         status = self.voice.split("enum SpeakStatus")[1]
+        self.assertIn('noFix = "NO FIX"', status)
         for phrase in ("Turn left.", "Arrive at destination.", "Total "):
             self.assertNotIn(phrase, status)
 

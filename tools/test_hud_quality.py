@@ -3622,6 +3622,16 @@ class LiveStreetGuideTests(unittest.TestCase):
         self.assertIn("liveSpokenTurn", app)
         nav = app.split("func navigate(mode: TravelMode)")[1].split("func tapRuler")[0]
         self.assertIn("speakMap()", nav)
+        self.assertNotIn("guard let dest else { return }", nav)
+        self.assertNotIn("guard let from = fieldYou else { return }", nav)
+        dest = app.split("private func destination()")[1].split("private func runBoot")[0]
+        self.assertNotIn("marks.last", dest)
+        pick = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift"
+        ).split("public enum RouteTarget", 1)[1]
+        self.assertNotIn("if let lastMark { return lastMark }", pick)
+        guide = app.split("func applyLiveGuide()")[1].split("static func resourceRoot")[0]
+        self.assertIn("gnssYou", guide)
         self.assertIn("YOU move", qa)
         self.assertIn("OFF ROUTE", qa)
         self.assertIn("SPEAK replays", qa)
@@ -3806,6 +3816,10 @@ class YouIdentitySyncTests(unittest.TestCase):
         self.assertIn("case noYou", route)
         self.assertIn("NO FIX", route)
         self.assertIn("hasYouFix", route)
+        voice = read("Packages", "Router", "Sources", "Router", "VoiceNav.swift")
+        status = voice.split("enum SpeakStatus", 1)[1]
+        self.assertIn('noFix = "NO FIX"', status)
+        self.assertIn("SPEAK · NO FIX", read("docs", "SOLO_QA.md"))
         tests = read(
             "Packages",
             "MapLibreMap",

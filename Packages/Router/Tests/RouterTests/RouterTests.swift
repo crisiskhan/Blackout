@@ -144,6 +144,32 @@ final class RouterTests: XCTestCase {
         XCTAssertEqual(GraphPlan.offGraph, "OFF GRAPH")
     }
 
+    func testGraphPlanRefusesAFarSnapAndStitchesANearYou() {
+        let g = twoHopWalkOnly()
+        let far = GraphPlan.line(
+            graph: g,
+            from: (lat: 1.0, lon: 0.0),
+            to: (lat: 0, lon: 0.02),
+            mode: .walk
+        )
+        XCTAssertEqual(far.chrome, GraphPlan.offGraph)
+        XCTAssertTrue(far.coords.isEmpty)
+
+        let you = (lat: 0.00036, lon: 0.0)
+        let near = GraphPlan.line(
+            graph: g,
+            from: you,
+            to: (lat: 0, lon: 0.02),
+            mode: .walk
+        )
+        XCTAssertEqual(near.chrome, "")
+        XCTAssertEqual(near.coords.first?.lat, you.lat)
+        XCTAssertEqual(near.coords.first?.lon, you.lon)
+        XCTAssertEqual(near.coords.last?.lon, 0.02)
+        XCTAssertGreaterThanOrEqual(near.coords.count, 3)
+        XCTAssertEqual(GraphPlan.snapMeters, 150)
+    }
+
     func testRouteGraphLoadRejectsEmptyOrMissing() throws {
         XCTAssertNil(RouteGraph.load(from: nil))
         let empty = FileManager.default.temporaryDirectory.appendingPathComponent("empty-graph-\(UUID().uuidString).json")
@@ -402,6 +428,22 @@ final class RouterTests: XCTestCase {
         XCTAssertFalse(text.contains("Arrive at destination."))
     }
 
+    func testVoiceNavDestWithoutYouNamesNoFix() {
+        let text = VoiceNav.prompt(
+            packName: "TX WEST",
+            headingDeg: nil,
+            routeCoords: [],
+            planChrome: "",
+            destination: (31.80, -106.50),
+            you: nil,
+            locale: "en"
+        )
+        XCTAssertTrue(text.contains(VoiceNav.noFixHint))
+        XCTAssertFalse(text.contains(VoiceNav.startHint))
+        XCTAssertFalse(text.contains("Destination set."))
+        XCTAssertFalse(text.contains("Turn left."))
+    }
+
     func testSpeakStatusIsOneShortLineNotTheWalkScript() {
         let coords: [(lat: Double, lon: Double)] = [
             (0.0, 0.0),
@@ -456,11 +498,19 @@ final class RouterTests: XCTestCase {
                 destination: nil,
                 you: nil
             ),
+            SpeakStatus.chrome(
+                spoke: true,
+                routeCoords: [],
+                planChrome: "",
+                destination: (31.8, -106.5),
+                you: nil
+            ),
         ]
         XCTAssertEqual(outcomes[0], SpeakStatus.failed)
         XCTAssertEqual(outcomes[1], "SPEAK · OFF GRAPH")
         XCTAssertTrue(outcomes[2].hasPrefix("SPEAK · DEST "))
         XCTAssertEqual(outcomes[3], "SPEAK · SET DEST")
+        XCTAssertEqual(outcomes[4], "SPEAK · NO FIX")
         for outcome in outcomes {
             XCTAssertFalse(outcome.isEmpty)
             XCTAssertFalse(SpeakStatus.isClipped(outcome))

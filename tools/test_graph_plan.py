@@ -130,6 +130,10 @@ def route(graph: Graph, src: int, dst: int, mode: str):
     return path
 
 
+SNAP_METERS = 150.0
+STITCH_METERS = 1.0
+
+
 def plan(graph: Graph | None, frm, to, mode: str):
     if graph is None or not graph.edges or not graph.nodes:
         return [], OFF_GRAPH
@@ -137,10 +141,20 @@ def plan(graph: Graph | None, frm, to, mode: str):
     b = nearest(graph, to[0], to[1])
     if a is None or b is None:
         return [], OFF_GRAPH
+    from_pt = graph.nodes[str(a)]
+    to_pt = graph.nodes[str(b)]
+    from_snap = haversine(frm[0], frm[1], from_pt["lat"], from_pt["lon"])
+    to_snap = haversine(to[0], to[1], to_pt["lat"], to_pt["lon"])
+    if from_snap > SNAP_METERS or to_snap > SNAP_METERS:
+        return [], OFF_GRAPH
     path = route(graph, a, b, mode)
     if not path:
         return [], OFF_GRAPH
     coords = [(graph.nodes[str(i)]["lat"], graph.nodes[str(i)]["lon"]) for i in path]
+    if from_snap >= STITCH_METERS:
+        coords.insert(0, (frm[0], frm[1]))
+    if to_snap >= STITCH_METERS:
+        coords.append((to[0], to[1]))
     if len(coords) < 2:
         return [], OFF_GRAPH
     return coords, ""
@@ -216,6 +230,32 @@ class GraphPlanTests(unittest.TestCase):
             [{**e, "cls": 0} for e in g.edges],
         )
         self.assertEqual(route(unclassified, 1, 4, "drive"), [1, 3, 4])
+
+    def test_far_you_is_off_graph_not_a_bearing_line(self):
+        g = walk_only()
+        coords, chrome = plan(g, (1.0, 0.0), (0.0, 0.02), "walk")
+        self.assertEqual(chrome, OFF_GRAPH)
+        self.assertEqual(coords, [])
+        far_dest, far_chrome = plan(g, (0.0, 0.0), (0.0, 1.0), "walk")
+        self.assertEqual(far_chrome, OFF_GRAPH)
+        self.assertEqual(far_dest, [])
+
+    def test_near_you_stitches_onto_the_street(self):
+        g = walk_only()
+        you = (0.00036, 0.0)
+        coords, chrome = plan(g, you, (0.0, 0.02), "walk")
+        self.assertEqual(chrome, "")
+        self.assertEqual(coords[0], you)
+        self.assertEqual(coords[-1][1], 0.02)
+        self.assertGreaterEqual(len(coords), 3)
+
+    def test_graph_plan_refuses_a_far_snap_in_source(self):
+        body = ROUTER.read_text().split("public enum GraphPlan", 1)[1].split(
+            "struct PackedGraph", 1
+        )[0]
+        self.assertIn("static let snapMeters", body)
+        self.assertIn("snapMeters", body)
+        self.assertNotIn("bearingFallback", body)
 
 
 class WalkDriveChipTests(unittest.TestCase):

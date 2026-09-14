@@ -849,8 +849,18 @@ final class AppRuntime {
             speakMap()
             return
         }
-        guard let dest else { return }
-        guard let from = fieldYou else { return }
+        guard let dest else {
+            let block = RouteBlock.noDestination
+            clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
+            speakMap()
+            return
+        }
+        guard let from = fieldYou else {
+            let block = RouteBlock.noYou
+            clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
+            speakMap()
+            return
+        }
         routeTarget = dest
         routeCoords = []
         navChrome = ""
@@ -1616,7 +1626,7 @@ final class AppRuntime {
     private func destination() -> (lat: Double, lon: Double)? {
         RouteTarget.pick(
             explicit: routeTarget,
-            lastMark: marks.last.map { ($0.lat, $0.lon) },
+            lastMark: nil,
             origin: fieldYou ?? (lat: .nan, lon: .nan)
         )
     }
@@ -1802,7 +1812,7 @@ final class AppRuntime {
 
     private func applyLiveGuide() {
         guard routeCoords.count >= 2 else { return }
-        guard let you = fieldYou else { return }
+        guard let you = gnssYou else { return }
         let streets = searchIndex?.streetNames(along: routeCoords) ?? []
         let cue = LiveNav.progress(
             you: you,
@@ -1812,7 +1822,7 @@ final class AppRuntime {
             travelMode: travelMode
         )
         if cue.arrived {
-            applyRemainingChrome(cue)
+            applyRemainingChrome(cue, you: you)
             if !liveArrived {
                 liveArrived = true
                 applySpeechTone()
@@ -1830,7 +1840,7 @@ final class AppRuntime {
             return
         }
         lastLiveRerouteAt = 0
-        applyRemainingChrome(cue)
+        applyRemainingChrome(cue, you: you)
         if !cue.speakTurn.isEmpty, cue.speakTurn != liveSpokenTurn {
             liveSpokenTurn = cue.speakTurn
             applySpeechTone()
@@ -1838,14 +1848,14 @@ final class AppRuntime {
         }
     }
 
-    private func applyRemainingChrome(_ cue: LiveNav.Cue) {
+    private func applyRemainingChrome(_ cue: LiveNav.Cue, you: (lat: Double, lon: Double)) {
         let names = searchIndex?.streetNames(along: cue.remainingCoords) ?? []
         speechChrome = SpeakStatus.chrome(
             spoke: true,
             routeCoords: cue.remainingCoords,
             planChrome: navChrome,
             destination: destination(),
-            you: fieldYou
+            you: you
         )
         speakHUDTurns = VoiceNav.hudTurns(
             cue.remainingCoords,
