@@ -228,6 +228,7 @@ public enum Inspect {
         RouteLine.casingLayerID, RouteLine.layerID, RouteLine.coreLayerID,
         HoldPin.ringLayerID, HoldPin.coreLayerID,
         PartyPips.haloLayerID, PartyPips.coreLayerID,
+        EyeDesk.tailsLayerID, EyeDesk.ringsLayerID,
     ]
 
     // Core Field cards, which every state ships, so a hold can never open a

@@ -247,11 +247,18 @@ struct HoldCardView: View {
     /// is not how you plant a new one.
     private var actions: some View {
         HStack(spacing: 8) {
-            Button(action: onField) {
-                Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
-                    .frame(maxWidth: .infinity)
+            if fieldRoute.isEmpty {
+                Text(EyeDesk.noCard)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            } else {
+                Button(action: onField) {
+                    Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(HoldActionStyle(filled: false, expand: true))
             }
-            .buttonStyle(HoldActionStyle(filled: false, expand: true))
             if held.marked {
                 Button("MARK") { onMark() }
                     .buttonStyle(HoldActionStyle(filled: true, expand: true))

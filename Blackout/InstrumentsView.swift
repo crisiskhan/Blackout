@@ -48,6 +48,8 @@ struct InstrumentsView: View {
                             .buttonStyle(HUDActionStyle(filled: runtime.lamp == .night))
                         Button("SUN") { runtime.tapLamp(.sun) }
                             .buttonStyle(HUDActionStyle(filled: runtime.lamp == .sun))
+                        Button(BlackoutTokens.MapOverlay.godsEyeTitle) { runtime.toggleGodsEye() }
+                            .buttonStyle(HUDActionStyle(filled: runtime.godsEye))
                     }
                     .clipShape(Theme.plateRect())
                     hudToggle("LAYOUT", Binding(

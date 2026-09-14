@@ -1115,14 +1115,80 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: true, godsEye: true))
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: false, godsEye: true))
         XCTAssertFalse(PackCamera.liveGodsEye(lockOn: true, godsEye: false))
-        XCTAssertEqual(PackCamera.godsEyePitch, 28)
+        XCTAssertEqual(PackCamera.godsEyePitch, 0)
         XCTAssertEqual(PackCamera.godsEyeRangeFactor, 2.4)
         XCTAssertEqual(PackCamera.godsEyeHeading, 0)
         XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
-        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 28)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 0)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
-        XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
+        XCTAssertFalse(PackCamera.allowsOrbit(godsEye: true))
         XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
+        let desk = EyeDesk.framePoints(
+            you: (31.76, -106.49),
+            party: [(31.77, -106.50)],
+            marks: [(31.765, -106.48)]
+        )
+        XCTAssertEqual(desk.count, 3)
+        let box = EyeDesk.bounds(points: desk)!
+        let clamped = EyeDesk.clampToPack(
+            desk: box,
+            pack: (south: 31.65, west: -106.85, north: 32.4, east: -106.2)
+        )
+        XCTAssertGreaterThanOrEqual(clamped.south, 31.65)
+        XCTAssertEqual(EyeDesk.age(seconds: 4), .live)
+        XCTAssertEqual(EyeDesk.age(seconds: 45), .last)
+        XCTAssertEqual(EyeDesk.age(seconds: 200), .lost)
+        XCTAssertEqual(EyeDesk.ageTitle(.last), "LAST")
+        XCTAssertEqual(EyeDesk.netChrome(peers: 2), "NET · 2")
+        XCTAssertEqual(EyeDesk.aerialChrome(hasPackAerial: false), "OFF AERIAL")
+        XCTAssertNil(EyeDesk.aerialChrome(hasPackAerial: true))
+        XCTAssertEqual(EyeDesk.parseVoice("eye on"), .eyeOn)
+        XCTAssertEqual(EyeDesk.parseVoice("eye off"), .eyeOff)
+        XCTAssertEqual(EyeDesk.parseVoice("mark water"), .markWater)
+        XCTAssertEqual(EyeDesk.parseVoice("frame wolf"), .frame(name: "wolf"))
+        XCTAssertEqual(EyeDesk.noCard, "NO CARD · DON'T GUESS")
+        XCTAssertEqual(EyeDesk.rallyTitle, "RALLY")
+        XCTAssertEqual(EyeDesk.powerChrome("quiet"), "QUIET")
+        XCTAssertEqual(EyeDesk.powerChrome("search"), "SEARCH")
+        XCTAssertEqual(EyeDesk.powerChrome("normal"), "NORMAL")
+        XCTAssertEqual(EyeDesk.hudLine(tag: "PHONE", text: "NO FIX"), "PHONE NO FIX")
+        XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: 5), "12°")
+        XCTAssertEqual(EyeDesk.compassChrome(headingDeg: 12, accuracy: -1), "CAL BAD")
+        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 12, hasFix: false), "—")
+        XCTAssertEqual(EyeDesk.fixChrome(ageSeconds: 90, hasFix: false), "NO FIX")
+        XCTAssertEqual(EyeDesk.condition(status: "good"), .green)
+        XCTAssertEqual(EyeDesk.condition(status: "okay"), .yellow)
+        XCTAssertEqual(EyeDesk.condition(status: "emergency"), .red)
+        XCTAssertTrue(EyeDesk.kidMark(name: "INFANT A"))
+        XCTAssertFalse(EyeDesk.kidMark(name: "WOLF"))
+        XCTAssertEqual(EyeDesk.leadScale(isLead: true), 1.18, accuracy: 0.001)
+        XCTAssertEqual(EyeDesk.Palette.packIR.title, "PACK IR")
+        XCTAssertEqual(EyeDesk.MarkKind.lostKid.title, "LOST KID")
+        XCTAssertTrue(EyeDesk.shows(.party, aerial: false, shade: false, water: false))
+        XCTAssertFalse(EyeDesk.shows(.aerial, aerial: false, shade: true, water: true))
+        XCTAssertTrue(EyeDesk.shows(.aerial, aerial: true, shade: false, water: false))
+        XCTAssertEqual(EyeDesk.ageLabel(seconds: 45), "45s")
+        let stacked = EyeDesk.stacked([
+            (id: "a", lat: 31.76, lon: -106.49),
+            (id: "b", lat: 31.76, lon: -106.49),
+        ])
+        XCTAssertNotEqual(stacked["a"]?.lon, stacked["b"]?.lon)
+        let segs = EyeDesk.trailSegments(points: [
+            (31.76, -106.49, 0),
+            (31.761, -106.491, 10),
+            (31.77, -106.50, 80),
+            (31.771, -106.501, 90),
+        ])
+        XCTAssertEqual(segs.count, 2)
+        XCTAssertEqual(EyeDesk.rangeRingMeters(bleMeters: 40), 40)
+        XCTAssertNil(EyeDesk.rangeRingMeters(bleMeters: 2000))
+        XCTAssertEqual(EyeDesk.ringPoints(lat: 31.76, lon: -106.49, meters: 40).count, 49)
+        let suite = UserDefaults(suiteName: "hud.eye.test.\(UUID().uuidString)")!
+        EyeDesk.save(true, defaults: suite)
+        XCTAssertTrue(EyeDesk.load(defaults: suite))
+        let scene = EyeDesk.Scene(name: "CAMP", lat: 31.76, lon: -106.49, layers: ["party"], palette: "streets")
+        EyeDesk.saveScenes(EyeDesk.upsertScene(scene, into: []), defaults: suite)
+        XCTAssertEqual(EyeDesk.loadScenes(defaults: suite).first?.name, "CAMP")
         XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))

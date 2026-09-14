@@ -59,8 +59,14 @@ final class AppRuntime {
     var leftHand = false
     var tab: BlackoutTab = .map
     var lockOn = false
-    /// GODS EYE holds the pack in frame. Exclusive with LOCK-ON.
+    /// EYE holds the desk over our people. Exclusive with LOCK-ON.
     var godsEye = false
+    var eyeLayers: [EyeDesk.Layer] = EyeDesk.Layer.allCases
+    var eyePalette: EyeDesk.Palette = .streets
+    var eyeFollowID: String?
+    var eyeTap: HeldPerson?
+    var eyeScenes: [EyeDesk.Scene] = []
+    var eyeJump: (lat: Double, lon: Double)?
     var showInstruments = false
     var chromeAwake = true
     var hudLayoutMode = false
@@ -140,6 +146,9 @@ final class AppRuntime {
     private var watersByPack: [String: WaterIndex] = [:]
     private var waterPackID: String?
     private var waterWarmup: Task<WaterIndex?, Never>?
+    private var pipHeardAt: [String: TimeInterval] = [:]
+    private var pipTrail: [String: [(lat: Double, lon: Double, at: Double)]] = [:]
+    private var lastFixAt: TimeInterval = 0
     private var bootTask: Task<Void, Never>?
     private var clipTask: Task<Void, Never>?
     private var pulseTask: Task<Void, Never>?
@@ -172,6 +181,11 @@ final class AppRuntime {
         youEmblem = PersonEmblem.load()
         youName = MeshPOS.nameToken(UserDefaults.standard.string(forKey: "you.name") ?? "")
         youStatus = PartyStatus.parse(UserDefaults.standard.string(forKey: "you.status"))
+        godsEye = EyeDesk.load()
+        eyeLayers = EyeDesk.loadLayers()
+        eyePalette = EyeDesk.loadPalette()
+        eyeScenes = EyeDesk.loadScenes()
+        UIDevice.current.isBatteryMonitoringEnabled = true
         if let raw = UserDefaults.standard.string(forKey: "hud.lamp"),
            let saved = HUDLamp(rawValue: raw)
         {
@@ -477,7 +491,8 @@ final class AppRuntime {
             name: named == Inspect.unnamed ? "" : named,
             note: note,
             emblem: emblem,
-            from: mesh.localID
+            from: mesh.localID,
+            kind: existing?.kind ?? ""
         )
         marks = MarkDrop.upsert(marks, mark: mark)
         MarkStore.save(marks)
@@ -558,6 +573,7 @@ final class AppRuntime {
         heldParty = nil
         heldAddress = nil
         pickingEmblem = false
+        eyeTap = nil
         pulse()
     }
 
@@ -824,9 +840,15 @@ final class AppRuntime {
 
     func toggleLockOn() {
         touch(.overlay)
+        if godsEye, eyeFollowID != nil {
+            eyeFollowID = nil
+            return
+        }
         lockOn.toggle()
         if lockOn {
             godsEye = false
+            EyeDesk.save(false)
+            eyeFollowID = nil
         }
         if !lockOn {
             lockChrome = ""
@@ -844,12 +866,149 @@ final class AppRuntime {
         touch(.overlay)
         if godsEye {
             godsEye = false
+            eyeFollowID = nil
+            eyeTap = nil
+            EyeDesk.save(false)
             return
         }
         godsEye = true
         lockOn = false
         lockChrome = ""
+        EyeDesk.save(true)
+        if red.isRed, let id = redFrameID() {
+            eyeFollowID = id
+        }
         fitPack()
+    }
+
+    func toggleEyeLayer(_ layer: EyeDesk.Layer) {
+        eyeLayers = EyeDesk.toggling(layer, in: eyeLayers)
+        EyeDesk.saveLayers(eyeLayers)
+        pulse()
+    }
+
+    func setEyePalette(_ palette: EyeDesk.Palette) {
+        eyePalette = palette
+        EyeDesk.savePalette(palette)
+        pulse()
+    }
+
+    func followEyeContact(_ id: String) {
+        eyeFollowID = id
+        eyeTap = nil
+        fitPack()
+    }
+
+    func tapEyeContact(id: String, lat: Double, lon: Double) {
+        holdParty(id: id, lat: lat, lon: lon)
+        if let person = heldParty {
+            eyeTap = person
+            heldParty = nil
+        }
+    }
+
+    func callEyeTap() {
+        guard let person = eyeTap else { return }
+        heldParty = person
+        callHeldParty()
+        eyeTap = nil
+    }
+
+    func messageEyeTap() {
+        guard let person = eyeTap else { return }
+        heldParty = person
+        messageHeldParty()
+        eyeTap = nil
+    }
+
+    func plantEyeMark(kind: EyeDesk.MarkKind, lat: Double, lon: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
+        let pack = packs?.active
+        let bbox = pack.map { ($0.bbox.south, $0.bbox.west, $0.bbox.north, $0.bbox.east) }
+        let coords = PackChrome.markLabel(
+            lat: lat,
+            lon: lon,
+            packName: pack?.name ?? "mark",
+            bbox: bbox
+        )
+        let mark = MapMark(
+            id: UUID().uuidString,
+            lat: lat,
+            lon: lon,
+            label: "\(kind.title) · \(coords)",
+            name: kind.title,
+            note: "",
+            emblem: PersonEmblem.fallback.rawValue,
+            from: mesh.localID,
+            kind: kind.rawValue
+        )
+        marks = MarkDrop.upsert(marks, mark: mark)
+        MarkStore.save(marks)
+        mesh.sendMark(
+            from: mesh.localID,
+            id: mark.id,
+            lat: mark.lat,
+            lon: mark.lon,
+            name: mark.name,
+            note: mark.note,
+            emblem: mark.emblem,
+            label: mark.label
+        )
+        if kind == .lostKid {
+            eyeFollowID = PlaceMark.canvasID(mark.id)
+        }
+        pulse()
+    }
+
+    func saveEyeScene(_ name: String) {
+        guard let you = fieldYou else { return }
+        let scene = EyeDesk.Scene(
+            name: name,
+            lat: you.lat,
+            lon: you.lon,
+            layers: eyeLayers.map(\.rawValue),
+            palette: eyePalette.rawValue
+        )
+        eyeScenes = EyeDesk.upsertScene(scene, into: eyeScenes)
+        EyeDesk.saveScenes(eyeScenes)
+        pulse()
+    }
+
+    func jumpEyeScene(_ name: String) {
+        guard let scene = eyeScenes.first(where: { $0.name == name }) else { return }
+        godsEye = true
+        lockOn = false
+        EyeDesk.save(true)
+        eyeLayers = scene.layers.compactMap(EyeDesk.Layer.init(rawValue:))
+        if eyeLayers.isEmpty { eyeLayers = EyeDesk.Layer.allCases }
+        EyeDesk.saveLayers(eyeLayers)
+        eyePalette = EyeDesk.Palette(rawValue: scene.palette) ?? .streets
+        EyeDesk.savePalette(eyePalette)
+        eyeFollowID = nil
+        eyeJump = (scene.lat, scene.lon)
+        fitPack()
+    }
+
+    func applyEyeVoice(_ spoken: String) -> Bool {
+        guard let cmd = EyeDesk.parseVoice(spoken) else { return false }
+        switch cmd {
+        case .eyeOn:
+            if !godsEye { toggleGodsEye() }
+        case .eyeOff:
+            if godsEye { toggleGodsEye() }
+        case .markWater:
+            if let you = fieldYou {
+                plantEyeMark(kind: .water, lat: you.lat, lon: you.lon)
+            }
+        case .frame(let name):
+            if let pip = mesh.pips.first(where: {
+                MeshPOS.nameToken($0.name ?? "").lowercased() == name.lowercased()
+            }) {
+                if !godsEye { toggleGodsEye() }
+                followEyeContact(pip.from)
+            }
+        }
+        return true
     }
 
     func pickDestination(lat: Double, lon: Double) {
@@ -1476,7 +1635,8 @@ final class AppRuntime {
                     name: parsed.name,
                     note: parsed.note,
                     emblem: PersonEmblem.resolved(parsed.emblem).rawValue,
-                    from: env.from
+                    from: env.from,
+                    kind: EyeDesk.MarkKind.parse(parsed.name)?.rawValue ?? ""
                 )
                 marks = MarkDrop.upsert(marks, mark: mark)
                 MarkStore.save(marks)
@@ -1487,6 +1647,7 @@ final class AppRuntime {
             }
         case "pos":
             refreshHeldParty()
+            notePipFix(env.from)
         case "roster":
             if let raw = String(data: env.body, encoding: .utf8),
                let parsed = MeshRosterBody.parse(raw),
@@ -1834,7 +1995,8 @@ final class AppRuntime {
                 name: m.name,
                 note: m.note,
                 emblem: m.emblem,
-                from: m.from
+                from: m.from,
+                kind: m.kind
             )
         }
         MarkStore.save(marks)
@@ -1844,10 +2006,173 @@ final class AppRuntime {
         headingDeg = fix.heading
         if let c = fix.last {
             lastKnownFix = (c.latitude, c.longitude)
+            lastFixAt = Date().timeIntervalSince1970
         }
         sendPOSIfPossible()
         refreshHeldParty()
         applyLiveGuide()
+        if godsEye, red.isRed, eyeFollowID == nil, let id = redFrameID() {
+            eyeFollowID = id
+            fitPack()
+        }
+    }
+
+    func notePipFix(_ id: String) {
+        let now = Date().timeIntervalSince1970
+        pipHeardAt[id] = now
+        guard let pip = mesh.pips.first(where: { $0.from == id }),
+              pip.lat.isFinite, pip.lon.isFinite else { return }
+        var trail = pipTrail[id] ?? []
+        trail.append((pip.lat, pip.lon, now))
+        pipTrail[id] = EyeDesk.pruneTrail(points: trail, now: now)
+    }
+
+    func redFrameID() -> String? {
+        if youStatus == .emergency || vitals.band == .red { return UserPuck.title }
+        return mesh.pips.first { PartyStatus.parse($0.status) == .emergency }?.from
+    }
+
+    func eyeCanvasPips() -> [PartyBody] {
+        let now = Date().timeIntervalSince1970
+        let overdueIDs = Set(timers.overduePlate(now: Date()).map(\.who))
+        var bodies: [PartyBody] = mesh.pips
+            .filter { $0.from != mesh.localID && $0.lat.isFinite && $0.lon.isFinite }
+            .map { pip in
+                let ageSeconds = pipHeardAt[pip.from].map { now - $0 } ?? EyeDesk.lostAfterSeconds
+                let age = EyeDesk.age(seconds: ageSeconds)
+                let role = liveRoster.first(where: { $0.id == pip.from })?.role
+                return PartyBody(
+                    id: pip.from,
+                    lat: pip.lat,
+                    lon: pip.lon,
+                    headingDeg: pip.headingDeg,
+                    emblem: pip.emblem,
+                    condition: EyeDesk.condition(status: pip.status ?? "").rawValue,
+                    ageTitle: EyeDesk.ageTitle(age),
+                    ageLabel: age == .live ? "" : EyeDesk.ageLabel(seconds: ageSeconds),
+                    lead: role == .lead,
+                    kid: EyeDesk.kidMark(name: pip.name ?? ""),
+                    ghost: age != .live,
+                    overdue: overdueIDs.contains(pip.from),
+                    rangeMeters: EyeDesk.rangeRingMeters(bleMeters: nil)
+                )
+            }
+        bodies.append(contentsOf: marks.map(PlaceMark.body))
+        let stacked = EyeDesk.stacked(bodies.map { (id: $0.id, lat: $0.lat, lon: $0.lon) })
+        return bodies.map { body in
+            var next = body
+            if let pad = stacked[body.id] {
+                next.lat = pad.lat
+                next.lon = pad.lon
+            }
+            return next
+        }
+    }
+
+    func eyeTrails() -> [[(lat: Double, lon: Double)]] {
+        guard EyeDesk.layerOn(.tails, in: eyeLayers) else { return [] }
+        let now = Date().timeIntervalSince1970
+        return pipTrail.values.flatMap { EyeDesk.trailSegments(points: EyeDesk.pruneTrail(points: $0, now: now)) }
+    }
+
+    func eyeRings() -> [EyeDesk.Ring] {
+        var rings: [EyeDesk.Ring] = []
+        let now = Date()
+        for timer in timers.overduePlate(now: now) {
+            if let pip = mesh.pips.first(where: { $0.from == timer.who }) {
+                rings.append(EyeDesk.Ring(lat: pip.lat, lon: pip.lon, meters: 40, overdue: true))
+            }
+        }
+        for timer in timers.timers where !timer.overdue {
+            if let pip = mesh.pips.first(where: { $0.from == timer.who }) {
+                rings.append(EyeDesk.Ring(lat: pip.lat, lon: pip.lon, meters: 28, overdue: false))
+            }
+        }
+        for mark in marks where mark.kind == EyeDesk.MarkKind.lostKid.rawValue {
+            rings.append(EyeDesk.Ring(lat: mark.lat, lon: mark.lon, meters: 120, overdue: true))
+        }
+        return rings
+    }
+
+    func eyeFrameWater() -> [(lat: Double, lon: Double)] {
+        var extra: [(lat: Double, lon: Double)] = []
+        if let jump = eyeJump { extra.append(jump) }
+        let you = fieldYou
+        let id = packs?.active?.id
+        let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
+        if let you, let hit = index?.nearest(lat: you.lat, lon: you.lon, withinMeters: 800) {
+            extra.append((hit.lat, hit.lon))
+        }
+        for pip in mesh.pips.prefix(4) {
+            if let hit = index?.nearest(lat: pip.lat, lon: pip.lon, withinMeters: 800) {
+                extra.append((hit.lat, hit.lon))
+            }
+        }
+        extra.append(contentsOf: marks.filter { $0.kind == EyeDesk.MarkKind.water.rawValue }.map { ($0.lat, $0.lon) })
+        return extra
+    }
+
+    func eyeHUDLines() -> [String] {
+        var lines: [String] = []
+        var phone: [String] = []
+        let heading = EyeDesk.compassChrome(headingDeg: headingDeg, accuracy: fix.headingAccuracy)
+        if heading == EyeDesk.calBad {
+            lines.append(EyeDesk.hudLine(tag: "PHONE", text: EyeDesk.calBad))
+        } else {
+            phone.append("HDG \(heading)")
+        }
+        if let loc = fix.lastLocation, loc.speed >= 0 {
+            phone.append(String(format: "%.0f m/s", loc.speed))
+        }
+        if let you = gnssYou {
+            phone.append(USNG.label(lat: you.lat, lon: you.lon))
+            if let loc = fix.lastLocation, loc.horizontalAccuracy >= 0 {
+                phone.append(String(format: "acc %.0fm", loc.horizontalAccuracy))
+            }
+            if lastFixAt > 0 {
+                let age = Date().timeIntervalSince1970 - lastFixAt
+                phone.append("GPS \(EyeDesk.ageLabel(seconds: age))")
+            }
+        } else {
+            let age = lastFixAt > 0 ? Date().timeIntervalSince1970 - lastFixAt : nil
+            let fixWord = EyeDesk.fixChrome(ageSeconds: age, hasFix: false)
+            lines.append(EyeDesk.hudLine(tag: "PHONE", text: fixWord.isEmpty ? EyeDesk.noFix : fixWord))
+        }
+        let battery = UIDevice.current.batteryLevel
+        if battery >= 0 {
+            phone.append(String(format: "%.0f%%", battery * 100))
+        }
+        if instruments.state.externalGNSS {
+            phone.append(EyeDesk.puckTitle)
+        }
+        if !phone.isEmpty {
+            lines.append(EyeDesk.hudLine(tag: "PHONE", text: phone.joined(separator: " · ")))
+        }
+        lines.append(EyeDesk.hudLine(tag: "MESH", text: EyeDesk.netChrome(peers: mesh.nearby.count)))
+        lines.append(EyeDesk.powerChrome(power.state.mode.rawValue))
+        if let aerial = EyeDesk.aerialChrome(hasPackAerial: packHasAerial) {
+            lines.append(aerial)
+        }
+        return lines
+    }
+
+    var packHasAerial: Bool {
+        guard let packs, let id = packs.active?.id else { return false }
+        return EyeDesk.hasPackAerial(packRoot: packs.packRoot(id: id))
+    }
+
+    var packHasShade: Bool {
+        guard let packs, let id = packs.active?.id else { return false }
+        return EyeDesk.hasPackShade(packRoot: packs.packRoot(id: id))
+    }
+
+    var packHasWater: Bool {
+        guard let packs, let id = packs.active?.id else { return false }
+        return EyeDesk.hasPackWater(packRoot: packs.packRoot(id: id))
+    }
+
+    var lostKidDesk: Bool {
+        marks.contains { $0.kind == EyeDesk.MarkKind.lostKid.rawValue }
     }
 
     private func applyLiveGuide() {
@@ -1928,7 +2253,9 @@ final class AppRuntime {
 
 final class MeshFix: NSObject, CLLocationManagerDelegate {
     var last: CLLocationCoordinate2D?
+    var lastLocation: CLLocation?
     var heading: Double?
+    var headingAccuracy: Double?
     var onChange: (() -> Void)?
     private var mgr: CLLocationManager?
     private var lastPublish: TimeInterval = 0
@@ -2010,8 +2337,9 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let coordinate = locations.last?.coordinate, CLLocationCoordinate2DIsValid(coordinate) {
-            last = coordinate
+        if let location = locations.last, CLLocationCoordinate2DIsValid(location.coordinate) {
+            lastLocation = location
+            last = location.coordinate
         }
         publishIfNeeded()
     }
@@ -2020,6 +2348,7 @@ final class MeshFix: NSObject, CLLocationManagerDelegate {
         lastTrue = newHeading.trueHeading
         lastMag = newHeading.magneticHeading
         lastAcc = newHeading.headingAccuracy
+        headingAccuracy = lastAcc
         haveHeadingSample = true
         heading = PersonCompass.liveHeading(
             trueHeading: lastTrue,

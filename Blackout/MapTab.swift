@@ -85,25 +85,32 @@ struct MapTab: View {
                 },
                 onPersonHold: { id, lat, lon in
                     runtime.holdParty(id: id, lat: lat, lon: lon)
+                    runtime.eyeTap = nil
                 },
-                pips: runtime.mesh.pips
-                    .filter { $0.from != runtime.mesh.localID && $0.lat.isFinite && $0.lon.isFinite }
-                    .map {
-                        PartyBody(
-                            id: $0.from,
-                            lat: $0.lat,
-                            lon: $0.lon,
-                            headingDeg: $0.headingDeg,
-                            emblem: $0.emblem
-                        )
-                    } + runtime.marks.map(PlaceMark.body),
+                onPersonTap: { id, lat, lon in
+                    runtime.tapEyeContact(id: id, lat: lat, lon: lon)
+                },
+                onPersonDoubleTap: { id, _, _ in
+                    runtime.followEyeContact(id)
+                },
+                onEmptyDoubleTap: { lat, lon in
+                    runtime.plantEyeMark(kind: .rally, lat: lat, lon: lon)
+                },
+                pips: runtime.eyeCanvasPips(),
                 youHeading: runtime.headingDeg,
                 youEmblem: runtime.youEmblem.rawValue,
                 onPulse: { runtime.pulse() },
                 lockOn: runtime.lockOn,
                 godsEye: runtime.godsEye,
                 travelMode: runtime.travelMode,
-                sun: runtime.lamp == .sun
+                sun: runtime.lamp == .sun,
+                eyeLayers: runtime.eyeLayers,
+                eyePalette: runtime.eyePalette,
+                followID: runtime.eyeFollowID,
+                trails: runtime.godsEye ? runtime.eyeTrails() : [],
+                rings: runtime.godsEye ? runtime.eyeRings() : [],
+                frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
+                offAerial: runtime.godsEye && EyeDesk.aerialChrome(hasPackAerial: runtime.packHasAerial) != nil
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the
@@ -118,6 +125,15 @@ struct MapTab: View {
                 SpeakTurnCard(
                     turns: runtime.speakHUDTurns,
                     onClose: { runtime.closeSpeakTurns() }
+                )
+                .padding(hudReserve)
+            }
+            if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
+                EyeTapStrip(
+                    person: tap,
+                    onCall: { runtime.callEyeTap() },
+                    onMessage: { runtime.messageEyeTap() },
+                    onClose: { runtime.eyeTap = nil }
                 )
                 .padding(hudReserve)
             }
@@ -194,7 +210,7 @@ struct MapTab: View {
             || runtime.heldMark != nil
     }
 
-    /// Everything that is not the map, sitting on the map. Search, lock, GODS EYE and
+    /// Everything that is not the map, sitting on the map. Search, lock, EYE and
     /// instruments at the top; status and the four thumb cells at the bottom.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
@@ -218,6 +234,19 @@ struct MapTab: View {
                 onStore: { runtime.hudLayout.save() }
             ) {
                 overlayRail
+            }
+            if runtime.godsEye {
+                HUDPlaced(
+                    offset: runtime.hudLayout.overlay,
+                    arranging: runtime.hudLayoutMode,
+                    veil: runtime.chromeVeil,
+                    alive: runtime.alive(.overlay),
+                    onMove: { runtime.hudLayout.overlay = $0 },
+                    onStore: { runtime.hudLayout.save() }
+                ) {
+                    eyeDeskRail
+                        .padding(.top, 52)
+                }
             }
             if !hits.isEmpty {
                 hitList
@@ -301,10 +330,10 @@ struct MapTab: View {
                 runtime.showInstruments = true
             }
             .buttonStyle(HUDOverlayChipStyle())
-            Button(BlackoutTokens.MapOverlay.lockTitle(locked: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye))) {
+            Button(BlackoutTokens.MapOverlay.lockTitle(locked: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye) || runtime.eyeFollowID != nil)) {
                 runtime.toggleLockOn()
             }
-            .buttonStyle(HUDOverlayChipStyle(filled: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye)))
+            .buttonStyle(HUDOverlayChipStyle(filled: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye) || runtime.eyeFollowID != nil))
             Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
                 runtime.toggleGodsEye()
             }
@@ -312,6 +341,65 @@ struct MapTab: View {
         }
         .animation(Theme.Motion.heavy, value: runtime.godsEye)
         .animation(Theme.Motion.heavy, value: runtime.lockOn)
+    }
+
+    @ViewBuilder
+    private var eyeDeskRail: some View {
+        if runtime.godsEye {
+            VStack(alignment: .leading, spacing: 6) {
+                Group {
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        ForEach(EyeDesk.Layer.allCases, id: \.self) { layer in
+                            if EyeDesk.shows(
+                                layer,
+                                aerial: runtime.packHasAerial,
+                                shade: runtime.packHasShade,
+                                water: runtime.packHasWater
+                            ) {
+                                Button(layer.title) { runtime.toggleEyeLayer(layer) }
+                                    .buttonStyle(HUDOverlayChipStyle(filled: EyeDesk.layerOn(layer, in: runtime.eyeLayers)))
+                            }
+                        }
+                    }
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        ForEach(EyeDesk.Palette.allCases, id: \.self) { palette in
+                            Button(palette.title) { runtime.setEyePalette(palette) }
+                                .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyePalette == palette))
+                        }
+                        ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
+                            Button(kind.title) {
+                                if let you = runtime.fieldYou {
+                                    runtime.plantEyeMark(kind: kind, lat: you.lat, lon: you.lon)
+                                }
+                            }
+                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.marks.contains { $0.kind == kind.rawValue }))
+                        }
+                    }
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                        ForEach(EyeDesk.sceneNames, id: \.self) { name in
+                            Button(name) {
+                                if runtime.eyeScenes.contains(where: { $0.name == name }) {
+                                    runtime.jumpEyeScene(name)
+                                } else {
+                                    runtime.saveEyeScene(name)
+                                }
+                            }
+                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyeScenes.contains { $0.name == name }))
+                        }
+                    }
+                }
+                .opacity(runtime.lostKidDesk ? 0.35 : 1)
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(runtime.eyeHUDLines().enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.silver)
+                            .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                    }
+                }
+                .opacity(runtime.lostKidDesk ? 0.35 : 1)
+            }
+        }
     }
 
     private var hitList: some View {
@@ -646,11 +734,49 @@ struct MapTab: View {
                 sayFailed = true
                 return
             }
+            if runtime.applyEyeVoice(spoken) {
+                query = ""
+                return
+            }
             query = spoken
             search()
         }
         if !started {
             sayFailed = true
         }
+    }
+}
+
+private struct EyeTapStrip: View {
+    let person: HeldPerson
+    let onCall: () -> Void
+    let onMessage: () -> Void
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack {
+            Spacer(minLength: 0)
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(person.name.isEmpty ? "PARTY" : person.name)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Color.white)
+                    Text(person.status.title)
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(Theme.silver)
+                }
+                Spacer(minLength: 8)
+                Button("PTT", action: onCall)
+                    .buttonStyle(HoldActionStyle(filled: true))
+                Button("MESSAGE", action: onMessage)
+                    .buttonStyle(HoldActionStyle(filled: false))
+                Button("CLOSE", action: onClose)
+                    .buttonStyle(HoldActionStyle(filled: false))
+            }
+            .padding(12)
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 }

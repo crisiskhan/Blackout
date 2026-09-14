@@ -33,6 +33,12 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
     /// A thumb held still on YOU or a party emblem. Id is `YOU` or the peer.
     public var onPersonHold: ((String, Double, Double) -> Void)?
+    /// Tap a coin in EYE. Walking MAP still uses empty-map dest taps.
+    public var onPersonTap: ((String, Double, Double) -> Void)?
+    /// Double-tap a coin in EYE: lock-follow that contact.
+    public var onPersonDoubleTap: ((String, Double, Double) -> Void)?
+    /// Double-tap empty ground in EYE: plant RALLY.
+    public var onEmptyDoubleTap: ((Double, Double) -> Void)?
     /// Boot preview must not ask for GPS. The live MAP still does.
     public var trackUser: Bool
     public var pips: [PartyBody]
@@ -49,6 +55,13 @@ public struct OfflineMapView: UIViewRepresentable {
     /// says which; the line has to match.
     public var travelMode: TravelMode
     public var sun: Bool
+    public var eyeLayers: [EyeDesk.Layer]
+    public var eyePalette: EyeDesk.Palette
+    public var followID: String?
+    public var trails: [[(lat: Double, lon: Double)]]
+    public var rings: [EyeDesk.Ring]
+    public var frameExtra: [(lat: Double, lon: Double)]
+    public var offAerial: Bool
 
     public init(
         styleURL: URL,
@@ -70,6 +83,9 @@ public struct OfflineMapView: UIViewRepresentable {
         onMapTap: ((Double, Double) -> Void)? = nil,
         onMapHold: ((Double, Double, [String: String], Double) -> Void)? = nil,
         onPersonHold: ((String, Double, Double) -> Void)? = nil,
+        onPersonTap: ((String, Double, Double) -> Void)? = nil,
+        onPersonDoubleTap: ((String, Double, Double) -> Void)? = nil,
+        onEmptyDoubleTap: ((Double, Double) -> Void)? = nil,
         pips: [PartyBody] = [],
         youHeading: Double? = nil,
         youEmblem: String = PersonEmblem.fallback.rawValue,
@@ -77,7 +93,14 @@ public struct OfflineMapView: UIViewRepresentable {
             lockOn: Bool = false,
             godsEye: Bool = false,
             travelMode: TravelMode = .walk,
-        sun: Bool = false
+        sun: Bool = false,
+        eyeLayers: [EyeDesk.Layer] = EyeDesk.Layer.allCases,
+        eyePalette: EyeDesk.Palette = .streets,
+        followID: String? = nil,
+        trails: [[(lat: Double, lon: Double)]] = [],
+        rings: [EyeDesk.Ring] = [],
+        frameExtra: [(lat: Double, lon: Double)] = [],
+        offAerial: Bool = false
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -98,6 +121,9 @@ public struct OfflineMapView: UIViewRepresentable {
         self.onMapTap = onMapTap
         self.onMapHold = onMapHold
         self.onPersonHold = onPersonHold
+        self.onPersonTap = onPersonTap
+        self.onPersonDoubleTap = onPersonDoubleTap
+        self.onEmptyDoubleTap = onEmptyDoubleTap
         self.pips = pips
         self.youHeading = youHeading
         self.youEmblem = youEmblem
@@ -106,6 +132,13 @@ public struct OfflineMapView: UIViewRepresentable {
         self.godsEye = godsEye
         self.travelMode = travelMode
         self.sun = sun
+        self.eyeLayers = eyeLayers
+        self.eyePalette = eyePalette
+        self.followID = followID
+        self.trails = trails
+        self.rings = rings
+        self.frameExtra = frameExtra
+        self.offAerial = offAerial
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -137,6 +170,11 @@ public struct OfflineMapView: UIViewRepresentable {
         tap.numberOfTapsRequired = 1
         tap.delegate = context.coordinator
         view.addGestureRecognizer(tap)
+        let doubleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDoubleTap(_:)))
+        doubleTap.numberOfTapsRequired = 2
+        doubleTap.delegate = context.coordinator
+        view.addGestureRecognizer(doubleTap)
+        tap.require(toFail: doubleTap)
         let hold = UILongPressGestureRecognizer(
             target: context.coordinator,
             action: #selector(Coordinator.handleHold(_:))
@@ -153,6 +191,9 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
         context.coordinator.onPersonHold = onPersonHold
+        context.coordinator.onPersonTap = onPersonTap
+        context.coordinator.onPersonDoubleTap = onPersonDoubleTap
+        context.coordinator.onEmptyDoubleTap = onEmptyDoubleTap
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -170,6 +211,9 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onMapTap = onMapTap
         context.coordinator.onMapHold = onMapHold
         context.coordinator.onPersonHold = onPersonHold
+        context.coordinator.onPersonTap = onPersonTap
+        context.coordinator.onPersonDoubleTap = onPersonDoubleTap
+        context.coordinator.onEmptyDoubleTap = onEmptyDoubleTap
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -183,9 +227,8 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
-        // Walking MAP is a paper sheet. GODS EYE is the overhead fly over the
-        // packed area; orbit, pinch, tilt, and pan are live while that hold is
-        // on, and the look cannot leave the archive.
+        // EYE is a north-up desk over our people. Pinch and pan stay; orbit is
+        // off so the heading cannot wander. Tilt is still the lift.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
         view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
@@ -193,8 +236,17 @@ public struct OfflineMapView: UIViewRepresentable {
         view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
         view.minimumZoomLevel = PackCamera.minZoom
         view.maximumZoomLevel = PackCamera.maxZoom
-        if !godsEye, abs(view.direction) > 0.5 {
-            view.setDirection(0, animated: false)
+        if godsEye, abs(view.direction - PackCamera.godsEyeHeading) > 0.5 {
+            view.setDirection(PackCamera.godsEyeHeading, animated: false)
+        }
+        if let map = view as? FillingMapView {
+            map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)
+        }
+        for rec in view.gestureRecognizers ?? [] {
+            guard let tap = rec as? UITapGestureRecognizer, tap.numberOfTapsRequired == 2 else { continue }
+            if tap.delegate === nil {
+                tap.isEnabled = !godsEye
+            }
         }
     }
 
@@ -219,7 +271,14 @@ public struct OfflineMapView: UIViewRepresentable {
             lockOn: lockOn,
             godsEye: godsEye,
             travelMode: travelMode,
-            sun: sun
+            sun: sun,
+            eyeLayers: eyeLayers,
+            eyePalette: eyePalette,
+            followID: followID,
+            trails: trails,
+            rings: rings,
+            frameExtra: frameExtra,
+            offAerial: offAerial
         )
     }
 
@@ -245,12 +304,22 @@ public struct OfflineMapView: UIViewRepresentable {
             var godsEye: Bool
             var travelMode: TravelMode
             var sun: Bool
+            var eyeLayers: [EyeDesk.Layer]
+            var eyePalette: EyeDesk.Palette
+            var followID: String?
+            var trails: [[(lat: Double, lon: Double)]]
+            var rings: [EyeDesk.Ring]
+            var frameExtra: [(lat: Double, lon: Double)]
+            var offAerial: Bool
         }
 
         var spec: OverlaySpec?
         var onMapTap: ((Double, Double) -> Void)?
         var onMapHold: ((Double, Double, [String: String], Double) -> Void)?
         var onPersonHold: ((String, Double, Double) -> Void)?
+        var onPersonTap: ((String, Double, Double) -> Void)?
+        var onPersonDoubleTap: ((String, Double, Double) -> Void)?
+        var onEmptyDoubleTap: ((Double, Double) -> Void)?
         var onPulse: (() -> Void)?
         var trackUser = true
         var interactive = true
@@ -274,13 +343,37 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedShowYou = false
         var storedMode: TravelMode?
         var storedSun = false
+        var storedPalette: EyeDesk.Palette?
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
             let point = gesture.location(in: view)
+            if spec?.godsEye == true, let mark = personMark(at: point, on: view) {
+                guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
+                onPersonTap?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
+                onPulse?()
+                return
+            }
+            if spec?.godsEye == true { return }
             let coord = view.convert(point, toCoordinateFrom: view)
             guard CLLocationCoordinate2DIsValid(coord) else { return }
             onMapTap?(coord.latitude, coord.longitude)
+            onPulse?()
+        }
+
+        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+            guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
+            guard spec?.godsEye == true else { return }
+            let point = gesture.location(in: view)
+            if let mark = personMark(at: point, on: view) {
+                guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
+                onPersonDoubleTap?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
+                onPulse?()
+                return
+            }
+            let coord = view.convert(point, toCoordinateFrom: view)
+            guard CLLocationCoordinate2DIsValid(coord) else { return }
+            onEmptyDoubleTap?(coord.latitude, coord.longitude)
             onPulse?()
         }
 
@@ -292,7 +385,9 @@ public struct OfflineMapView: UIViewRepresentable {
                 holdTick.impactOccurred()
                 onPersonHold?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
                 onPulse?()
-                liftIntoView(point, on: view)
+                if spec?.godsEye != true {
+                    liftIntoView(point, on: view)
+                }
                 return
             }
             let coord = view.convert(point, toCoordinateFrom: view)
@@ -300,7 +395,9 @@ public struct OfflineMapView: UIViewRepresentable {
             holdTick.impactOccurred()
             onMapHold?(coord.latitude, coord.longitude, record(under: point, on: view), view.zoomLevel)
             onPulse?()
-            liftIntoView(point, on: view)
+            if spec?.godsEye != true {
+                liftIntoView(point, on: view)
+            }
         }
 
         /// YOU and party emblems win over the ground record under the same thumb.
@@ -531,6 +628,7 @@ public struct OfflineMapView: UIViewRepresentable {
         func apply(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             self.spec = spec
             let lampFlip = storedSun != spec.sun
+            let eyeFlip = storedGodsEye != spec.godsEye
             storedSun = spec.sun
             view.backgroundColor = PackStyle.canvasColor(sun: spec.sun)
             applyCamera(spec, on: view, force: force)
@@ -616,8 +714,15 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
             }
             syncPersonMarks(on: view, spec: spec)
-            if force || lampFlip, let style = view.style {
-                PackStyle.applyHUDLamp(style, sun: spec.sun)
+            if let style = view.style {
+                let paletteFlip = storedPalette != spec.eyePalette
+                storedPalette = spec.eyePalette
+                if force || lampFlip || paletteFlip || eyeFlip {
+                    PackStyle.applyHUDLamp(style, sun: spec.sun)
+                    PackStyle.applyEyePalette(style, godsEye: spec.godsEye, palette: spec.eyePalette)
+                }
+                PackStyle.applyEyeLayers(style, godsEye: spec.godsEye, layers: spec.eyeLayers)
+                syncEyeOverlays(on: view, spec: spec)
             }
         }
 
@@ -649,24 +754,28 @@ public struct OfflineMapView: UIViewRepresentable {
             var next: [PersonMarkAnnotation] = []
             var seen = Set<String>()
             for pip in spec.pips {
+                if spec.godsEye {
+                    if PlaceMark.parse(pip.id) != nil {
+                        if !EyeDesk.layerOn(.marks, in: spec.eyeLayers) { continue }
+                    } else if !EyeDesk.layerOn(.party, in: spec.eyeLayers) {
+                        continue
+                    }
+                }
                 let coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
                 guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
                 seen.insert(pip.id)
                 if let old = existing[pip.id] {
+                    stamp(old, pip: pip)
                     old.coordinate = coordinate
-                    old.emblemID = pip.emblem
-                    old.headingDeg = pip.headingDeg
                     if let mark = view.view(for: old) as? YouPuckAnnotationView {
-                        mark.apply(emblemID: pip.emblem, headingDeg: pip.headingDeg)
+                        applyLook(mark, pip: pip)
                     }
                     next.append(old)
                 } else {
                     let mark = PersonMarkAnnotation()
                     mark.coordinate = coordinate
                     mark.title = "\(PartyPips.titlePrefix)\(pip.id)"
-                    mark.memberID = pip.id
-                    mark.emblemID = pip.emblem
-                    mark.headingDeg = pip.headingDeg
+                    stamp(mark, pip: pip)
                     view.addAnnotation(mark)
                     next.append(mark)
                 }
@@ -676,6 +785,108 @@ public struct OfflineMapView: UIViewRepresentable {
             }
             partyMarks = next
             storedPips = spec.pips
+        }
+
+        func stamp(_ mark: PersonMarkAnnotation, pip: PartyBody) {
+            mark.memberID = pip.id
+            mark.emblemID = pip.emblem
+            mark.headingDeg = pip.ghost ? nil : pip.headingDeg
+            mark.condition = pip.condition
+            mark.ghost = pip.ghost
+            mark.lead = pip.lead
+            mark.kid = pip.kid
+            mark.overdue = pip.overdue
+            mark.badge = pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle
+        }
+
+        func applyLook(_ view: YouPuckAnnotationView, pip: PartyBody) {
+            view.apply(
+                emblemID: pip.emblem,
+                headingDeg: pip.ghost ? nil : pip.headingDeg,
+                tint: EyeLook.tint(pip.condition),
+                ghost: pip.ghost,
+                scale: CGFloat(EyeDesk.leadScale(isLead: pip.lead)),
+                badge: pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle,
+                kid: pip.kid,
+                overdue: pip.overdue
+            )
+        }
+
+        func syncEyeOverlays(on view: MLNMapView, spec: OverlaySpec) {
+            guard let style = view.style else { return }
+            let showTails = spec.godsEye && EyeDesk.layerOn(.tails, in: spec.eyeLayers)
+            let tailShape: MLNShape
+            if showTails, !spec.trails.isEmpty {
+                let features: [[String: Any]] = spec.trails.compactMap { line in
+                    guard line.count >= 2 else { return nil }
+                    return [
+                        "type": "Feature",
+                        "geometry": [
+                            "type": "LineString",
+                            "coordinates": line.map { [$0.lon, $0.lat] },
+                        ],
+                    ]
+                }
+                let blob: [String: Any] = ["type": "FeatureCollection", "features": features]
+                if let data = try? JSONSerialization.data(withJSONObject: blob),
+                   let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+                {
+                    tailShape = shape
+                } else {
+                    tailShape = emptyOverlayShape()
+                }
+            } else {
+                tailShape = emptyOverlayShape()
+            }
+            if let src = style.source(withIdentifier: "eye-tails-src") as? MLNShapeSource {
+                src.shape = tailShape
+            } else {
+                let src = MLNShapeSource(identifier: "eye-tails-src", shape: tailShape, options: nil)
+                style.addSource(src)
+                let layer = MLNLineStyleLayer(identifier: EyeDesk.tailsLayerID, source: src)
+                layer.lineColor = NSExpression(
+                    forConstantValue: UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.72)
+                )
+                layer.lineWidth = NSExpression(forConstantValue: 2)
+                style.addLayer(layer)
+            }
+
+            var ringFeatures: [[String: Any]] = []
+            if spec.godsEye {
+                for ring in spec.rings {
+                    let pts = EyeDesk.ringPoints(lat: ring.lat, lon: ring.lon, meters: ring.meters)
+                    guard pts.count >= 8 else { continue }
+                    ringFeatures.append([
+                        "type": "Feature",
+                        "properties": ["overdue": ring.overdue],
+                        "geometry": [
+                            "type": "LineString",
+                            "coordinates": pts.map { [$0.lon, $0.lat] },
+                        ],
+                    ])
+                }
+            }
+            let ringBlob: [String: Any] = ["type": "FeatureCollection", "features": ringFeatures]
+            let ringShape: MLNShape
+            if let data = try? JSONSerialization.data(withJSONObject: ringBlob),
+               let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+            {
+                ringShape = shape
+            } else {
+                ringShape = emptyOverlayShape()
+            }
+            if let src = style.source(withIdentifier: "eye-rings-src") as? MLNShapeSource {
+                src.shape = ringShape
+            } else {
+                let src = MLNShapeSource(identifier: "eye-rings-src", shape: ringShape, options: nil)
+                style.addSource(src)
+                let layer = MLNLineStyleLayer(identifier: EyeDesk.ringsLayerID, source: src)
+                layer.lineColor = NSExpression(
+                    forConstantValue: UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 0.85)
+                )
+                layer.lineWidth = NSExpression(forConstantValue: 2)
+                style.addLayer(layer)
+            }
         }
 
         func syncRoute(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
@@ -721,6 +932,12 @@ public struct OfflineMapView: UIViewRepresentable {
                 storedGodsEye = true
                 storedLockOn = spec.lockOn
                 followedPuck = nil
+                if let follow = followCoordinate(spec) {
+                    view.setCenter(follow, animated: !force)
+                    fittedPack = pack
+                    fittedSize = size
+                    return
+                }
                 if force || PackCamera.shouldRefit(
                     fittedPack: fittedPack,
                     pack: pack,
@@ -872,13 +1089,45 @@ public struct OfflineMapView: UIViewRepresentable {
             fittedSize = size
         }
 
+        func followCoordinate(_ spec: OverlaySpec) -> CLLocationCoordinate2D? {
+            guard let follow = spec.followID, !follow.isEmpty else { return nil }
+            if follow == UserPuck.title {
+                let coord = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                return CLLocationCoordinate2DIsValid(coord) ? coord : nil
+            }
+            guard let pip = spec.pips.first(where: { $0.id == follow }) else { return nil }
+            let coord = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
+            return CLLocationCoordinate2DIsValid(coord) ? coord : nil
+        }
+
         func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly: Bool) {
-            let box = PackCamera.bounds(
+            let packBox = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
                 north: spec.packNorth,
                 east: spec.packEast
             )
+            let you = spec.showYou ? (lat: spec.puckLat, lon: spec.puckLon) : nil
+            let points: [(lat: Double, lon: Double)]
+            if let follow = followCoordinate(spec) {
+                points = EyeDesk.framePoints(
+                    you: (follow.latitude, follow.longitude),
+                    party: [],
+                    marks: [],
+                    water: []
+                )
+            } else {
+                let party = spec.pips.filter { PlaceMark.parse($0.id) == nil }.map { ($0.lat, $0.lon) }
+                let marks = spec.pips.filter { PlaceMark.parse($0.id) != nil }.map { ($0.lat, $0.lon) }
+                points = EyeDesk.framePoints(
+                    you: you,
+                    party: party,
+                    marks: marks,
+                    water: spec.frameExtra
+                )
+            }
+            let desk = EyeDesk.bounds(points: points) ?? packBox
+            let box = EyeDesk.clampToPack(desk: desk, pack: packBox)
             let bounds = MLNCoordinateBoundsMake(
                 CLLocationCoordinate2D(latitude: box.south, longitude: box.west),
                 CLLocationCoordinate2D(latitude: box.north, longitude: box.east)
@@ -914,6 +1163,8 @@ public struct OfflineMapView: UIViewRepresentable {
                 gev: gev,
                 hudFit: camera.viewingDistance
             )
+            camera.heading = PackCamera.godsEyeHeading
+            camera.pitch = CGFloat(PackCamera.godsEyePitch)
             if fly {
                 view.fly(
                     to: camera,
@@ -1300,7 +1551,16 @@ public struct OfflineMapView: UIViewRepresentable {
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
                 ?? YouPuckAnnotationView(reuseIdentifier: reuse)
             if let mark = annotation as? PersonMarkAnnotation {
-                view.apply(emblemID: mark.emblemID, headingDeg: mark.headingDeg)
+                view.apply(
+                    emblemID: mark.emblemID,
+                    headingDeg: mark.headingDeg,
+                    tint: EyeLook.tint(mark.condition),
+                    ghost: mark.ghost,
+                    scale: CGFloat(EyeDesk.leadScale(isLead: mark.lead)),
+                    badge: mark.badge,
+                    kid: mark.kid,
+                    overdue: mark.overdue
+                )
             } else if you {
                 view.apply(emblemID: spec?.youEmblem, headingDeg: spec?.youHeading)
             }
@@ -1351,10 +1611,58 @@ public struct OfflineMapView: UIViewRepresentable {
 
 final class FillingMapView: MLNMapView {
     var onBoundsChange: ((CGSize) -> Void)?
+    private let osmCredit = UILabel()
+    private let packStamp = UILabel()
+    private let aerialStamp = UILabel()
+    private var deskReady = false
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        installDeskChromeIfNeeded()
+        layoutDeskChrome()
         onBoundsChange?(bounds.size)
+    }
+
+    func setDeskChrome(godsEye: Bool, offAerial: Bool) {
+        installDeskChromeIfNeeded()
+        osmCredit.isHidden = !godsEye
+        packStamp.isHidden = !godsEye
+        aerialStamp.isHidden = !(godsEye && offAerial)
+        layoutDeskChrome()
+    }
+
+    private func installDeskChromeIfNeeded() {
+        guard !deskReady else { return }
+        deskReady = true
+        osmCredit.font = .systemFont(ofSize: 9, weight: .bold)
+        osmCredit.textColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.82)
+        osmCredit.text = OSMCredit.line
+        osmCredit.isHidden = true
+        addSubview(osmCredit)
+        packStamp.font = .systemFont(ofSize: 9, weight: .heavy)
+        packStamp.textColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.82)
+        packStamp.text = EyeDesk.packStamp
+        packStamp.isHidden = true
+        addSubview(packStamp)
+        aerialStamp.font = .systemFont(ofSize: 11, weight: .heavy)
+        aerialStamp.textColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.92)
+        aerialStamp.text = EyeDesk.offAerial
+        aerialStamp.isHidden = true
+        addSubview(aerialStamp)
+    }
+
+    private func layoutDeskChrome() {
+        osmCredit.sizeToFit()
+        packStamp.sizeToFit()
+        aerialStamp.sizeToFit()
+        let left = bounds.minX + 12
+        let bottom = bounds.maxY - 96
+        osmCredit.frame.origin = CGPoint(x: left, y: bottom - osmCredit.bounds.height)
+        packStamp.frame.origin = CGPoint(x: left + osmCredit.bounds.width + 8, y: osmCredit.frame.minY)
+        aerialStamp.frame.origin = CGPoint(
+            x: bounds.midX - aerialStamp.bounds.width / 2,
+            y: bounds.minY + 88
+        )
     }
 }
 
@@ -1388,6 +1696,12 @@ final class PersonMarkAnnotation: MLNPointAnnotation {
     var memberID = ""
     var emblemID: String?
     var headingDeg: Double?
+    var condition = "green"
+    var ghost = false
+    var lead = false
+    var kid = false
+    var overdue = false
+    var badge = ""
 }
 
 final class YouPuckAnnotationView: MLNAnnotationView {
@@ -1395,6 +1709,9 @@ final class YouPuckAnnotationView: MLNAnnotationView {
     private let emblemView = UIImageView()
     private let headingView = UIView()
     private let chevronLayer = CAShapeLayer()
+    private let badgeLabel = UILabel()
+    private let kidDot = UIView()
+    private let pulseLayer = CALayer()
     private var lastHeading: Double?
 
     override init(reuseIdentifier: String?) {
@@ -1442,6 +1759,21 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         chevronLayer.lineWidth = 0.7
         chevronLayer.path = PersonCompassArt.chevronPath(in: bounds).cgPath
         headingView.layer.addSublayer(chevronLayer)
+
+        pulseLayer.borderWidth = 0
+        pulseLayer.opacity = 0
+        layer.insertSublayer(pulseLayer, at: 0)
+
+        badgeLabel.font = .systemFont(ofSize: 8, weight: .heavy)
+        badgeLabel.textAlignment = .center
+        badgeLabel.textColor = .white
+        badgeLabel.isHidden = true
+        addSubview(badgeLabel)
+
+        kidDot.backgroundColor = UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1)
+        kidDot.layer.cornerRadius = 4
+        kidDot.isHidden = true
+        addSubview(kidDot)
     }
 
     required init?(coder: NSCoder) {
@@ -1456,9 +1788,60 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         emblemView.image = nil
     }
 
-    func apply(emblemID: String?, headingDeg: Double?) {
+    func apply(
+        emblemID: String?,
+        headingDeg: Double?,
+        tint: UIColor? = nil,
+        ghost: Bool = false,
+        scale: CGFloat = 1,
+        badge: String = "",
+        kid: Bool = false,
+        overdue: Bool = false
+    ) {
         let emblem = PersonEmblem.resolved(emblemID)
         emblemView.image = PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback)
+        let ink = tint ?? UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+        emblemView.layer.borderColor = ink.cgColor
+        alpha = ghost ? 0.42 : 1
+        let size = CGFloat(PersonCompass.puckPoints) * max(scale, 0.7)
+        bounds = CGRect(x: 0, y: 0, width: size, height: size)
+        rose.frame = bounds
+        headingView.frame = bounds
+        let well = CGFloat(PersonCompass.wellPoints) * max(scale, 0.7)
+        emblemView.frame = CGRect(
+            x: (size - well) / 2,
+            y: (size - well) / 2,
+            width: well,
+            height: well
+        )
+        emblemView.layer.cornerRadius = well / 2
+        if badge.isEmpty {
+            badgeLabel.isHidden = true
+        } else {
+            badgeLabel.isHidden = false
+            badgeLabel.text = badge
+            badgeLabel.frame = CGRect(x: 0, y: size - 12, width: size, height: 12)
+        }
+        kidDot.isHidden = !kid
+        kidDot.frame = CGRect(x: size - 10, y: 2, width: 8, height: 8)
+        if overdue {
+            if pulseLayer.animation(forKey: "overdue") == nil {
+                let pulse = CABasicAnimation(keyPath: "opacity")
+                pulse.fromValue = 1
+                pulse.toValue = 0.35
+                pulse.duration = 0.7
+                pulse.autoreverses = true
+                pulse.repeatCount = .infinity
+                pulseLayer.add(pulse, forKey: "overdue")
+            }
+        } else {
+            pulseLayer.removeAnimation(forKey: "overdue")
+            pulseLayer.opacity = 0
+        }
+        pulseLayer.frame = bounds
+        pulseLayer.cornerRadius = size / 2
+        pulseLayer.borderColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
+        pulseLayer.borderWidth = overdue ? 2 : 0
         guard let headingDeg, headingDeg >= 0 else {
             headingView.isHidden = true
             lastHeading = nil
@@ -1712,5 +2095,107 @@ extension PackStyle {
         if id.contains("hit") { return true }
         if id.hasPrefix("you-puck") || id.hasPrefix("party") { return true }
         return false
+    }
+
+    public static func applyEyeLayers(
+        _ style: MLNStyle,
+        godsEye: Bool,
+        layers: [EyeDesk.Layer]
+    ) {
+        let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers)
+        let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
+        let aerial = godsEye && EyeDesk.layerOn(.aerial, in: layers)
+        for layer in style.layers {
+            let id = layer.identifier
+            if id == "hillshade" || id.hasPrefix("hillshade") {
+                layer.isVisible = shade
+            }
+            if id.hasPrefix("water-detail") {
+                layer.isVisible = water
+            }
+            if id == "aerial" || id.hasPrefix("naip") || id.hasPrefix("aerial") {
+                layer.isVisible = aerial
+            }
+            if let symbol = layer as? MLNSymbolStyleLayer,
+               id == roadLabelsLayerID || id == roadRefsLayerID
+            {
+                symbol.textOpacity = NSExpression(forConstantValue: godsEye ? 0.32 : 1)
+            }
+        }
+    }
+
+    public static func applyEyePalette(
+        _ style: MLNStyle,
+        godsEye: Bool,
+        palette: EyeDesk.Palette
+    ) {
+        guard godsEye else { return }
+        switch palette {
+        case .streets:
+            return
+        case .packIR:
+            let heat = inkColor("#ED510A")
+            let ice = inkColor("#2EE67A")
+            for layer in style.layers {
+                paintFalseColor(layer, heat: heat, ice: ice)
+            }
+        case .nvg:
+            let green = UIColor(red: 0.18, green: 0.92, blue: 0.32, alpha: 1)
+            let void = UIColor(red: 0, green: 0.08, blue: 0, alpha: 1)
+            for layer in style.layers {
+                paintNVG(layer, green: green, field: void)
+            }
+        }
+    }
+
+    private static func paintFalseColor(_ layer: MLNStyleLayer, heat: UIColor, ice: UIColor) {
+        switch layer {
+        case let fill as MLNFillStyleLayer:
+            if layer.identifier == landFillLayerID {
+                fill.fillColor = NSExpression(forConstantValue: heat)
+            }
+        case let raster as MLNRasterStyleLayer:
+            raster.rasterOpacity = NSExpression(forConstantValue: 0.72)
+        case let circle as MLNCircleStyleLayer:
+            if layer.identifier.hasPrefix("water") {
+                circle.circleColor = NSExpression(forConstantValue: ice)
+            }
+        default:
+            break
+        }
+    }
+
+    private static func paintNVG(_ layer: MLNStyleLayer, green: UIColor, field: UIColor) {
+        switch layer {
+        case let background as MLNBackgroundStyleLayer:
+            background.backgroundColor = NSExpression(forConstantValue: field)
+        case let fill as MLNFillStyleLayer:
+            fill.fillColor = NSExpression(forConstantValue: field)
+        case let line as MLNLineStyleLayer:
+            line.lineColor = NSExpression(forConstantValue: green)
+        case let symbol as MLNSymbolStyleLayer:
+            symbol.textColor = NSExpression(forConstantValue: green)
+            symbol.textHaloColor = NSExpression(forConstantValue: field)
+            symbol.iconColor = NSExpression(forConstantValue: green)
+        case let circle as MLNCircleStyleLayer:
+            circle.circleColor = NSExpression(forConstantValue: green)
+        case let raster as MLNRasterStyleLayer:
+            raster.rasterOpacity = NSExpression(forConstantValue: 0.55)
+        default:
+            break
+        }
+    }
+}
+
+enum EyeLook {
+    static func tint(_ condition: String) -> UIColor {
+        switch EyeDesk.condition(status: condition) {
+        case .green:
+            return UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1)
+        case .yellow:
+            return UIColor(red: 0.93, green: 0.75, blue: 0.22, alpha: 1)
+        case .red:
+            return UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+        }
     }
 }

@@ -15,6 +15,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
     public var note: String
     public var emblem: String
     public var from: String
+    public var kind: String
 
     public init(
         id: String,
@@ -24,7 +25,8 @@ public struct MapMark: Equatable, Sendable, Identifiable {
         name: String = "",
         note: String = "",
         emblem: String = PersonEmblem.fallback.rawValue,
-        from: String = ""
+        from: String = "",
+        kind: String = ""
     ) {
         self.id = id
         self.lat = lat
@@ -34,6 +36,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
         self.note = note
         self.emblem = emblem
         self.from = from
+        self.kind = kind
     }
 
     /// Glass row and SEARCH use the chosen NAME. Label keeps pack / OFF PACK.
@@ -45,7 +48,7 @@ public struct MapMark: Equatable, Sendable, Identifiable {
 
 extension MapMark: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, lat, lon, label, name, note, emblem, from
+        case id, lat, lon, label, name, note, emblem, from, kind
     }
 
     public init(from decoder: Decoder) throws {
@@ -58,6 +61,7 @@ extension MapMark: Codable {
         note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
         emblem = try c.decodeIfPresent(String.self, forKey: .emblem) ?? PersonEmblem.fallback.rawValue
         from = try c.decodeIfPresent(String.self, forKey: .from) ?? ""
+        kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? ""
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -70,6 +74,7 @@ extension MapMark: Codable {
         try c.encode(note, forKey: .note)
         try c.encode(emblem, forKey: .emblem)
         try c.encode(from, forKey: .from)
+        try c.encode(kind, forKey: .kind)
     }
 }
 
@@ -120,7 +125,10 @@ public enum PlaceMark {
             lat: mark.lat,
             lon: mark.lon,
             headingDeg: nil,
-            emblem: mark.emblem
+            emblem: mark.emblem,
+            condition: mark.kind == EyeDesk.MarkKind.down.rawValue ? "red" : "green",
+            markKind: mark.kind,
+            kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind)
         )
     }
 }
@@ -200,7 +208,8 @@ public enum MarkDrop {
                 name: mark.name,
                 note: mark.note,
                 emblem: mark.emblem,
-                from: mark.from.isEmpty ? kept.from : mark.from
+                from: mark.from.isEmpty ? kept.from : mark.from,
+                kind: mark.kind.isEmpty ? kept.kind : mark.kind
             )
             return next
         }
@@ -572,9 +581,8 @@ public enum PackCamera {
         )
     }
 
-    /// Overhead look-down over the packed bbox. 0 is nadir; 28° is off the
-    /// pack plane so the mapped area reads as a region, not a paper sheet.
-    public static let godsEyePitch: Double = 28
+    /// North-up desk. 0 is nadir; the lift is range, not pitch.
+    public static let godsEyePitch: Double = 0
     /// Viewing distance is this times the pack's bounding-sphere radius.
     public static let godsEyeRangeFactor: Double = 2.4
     public static let godsEyeHeading: Double = 0
@@ -626,8 +634,8 @@ public enum PackCamera {
         godsEye ? godsEyeMaxPitch : 0
     }
 
-    public static func allowsOrbit(godsEye: Bool) -> Bool {
-        godsEye
+    public static func allowsOrbit(godsEye _: Bool) -> Bool {
+        false
     }
 
     /// Walking MAP can pan. GODS EYE can pan too, but only while the look

@@ -96,19 +96,46 @@ public struct PartyBody: Equatable, Sendable {
     public var lon: Double
     public var headingDeg: Double?
     public var emblem: String?
+    public var condition: String
+    public var ageTitle: String
+    public var ageLabel: String
+    public var lead: Bool
+    public var kid: Bool
+    public var ghost: Bool
+    public var overdue: Bool
+    public var markKind: String
+    public var rangeMeters: Double?
 
     public init(
         id: String,
         lat: Double,
         lon: Double,
         headingDeg: Double? = nil,
-        emblem: String? = nil
+        emblem: String? = nil,
+        condition: String = "green",
+        ageTitle: String = "",
+        ageLabel: String = "",
+        lead: Bool = false,
+        kid: Bool = false,
+        ghost: Bool = false,
+        overdue: Bool = false,
+        markKind: String = "",
+        rangeMeters: Double? = nil
     ) {
         self.id = id
         self.lat = lat
         self.lon = lon
         self.headingDeg = headingDeg
         self.emblem = emblem
+        self.condition = condition
+        self.ageTitle = ageTitle
+        self.ageLabel = ageLabel
+        self.lead = lead
+        self.kid = kid
+        self.ghost = ghost
+        self.overdue = overdue
+        self.markKind = markKind
+        self.rangeMeters = rangeMeters
     }
 }
 
@@ -131,7 +158,15 @@ public enum PartyPips {
         guard let stored else { return true }
         if stored.count != pips.count { return true }
         for (a, b) in zip(stored, pips) {
-            if a.id != b.id || a.emblem != b.emblem {
+            if a.id != b.id || a.emblem != b.emblem
+                || a.condition != b.condition
+                || a.ageTitle != b.ageTitle
+                || a.lead != b.lead
+                || a.kid != b.kid
+                || a.ghost != b.ghost
+                || a.overdue != b.overdue
+                || a.markKind != b.markKind
+            {
                 return true
             }
         }
