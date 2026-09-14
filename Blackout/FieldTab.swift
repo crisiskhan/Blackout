@@ -113,7 +113,7 @@ struct FieldTab: View {
         }
         guard let g = guess else {
             if askFailed { return "NO ASK MODEL" }
-            return ""
+            return "TYPE OR SAY"
         }
         if g.noModel { return L10n.t("vision.none", runtime.locale) }
         if g.leaveIt {
@@ -299,6 +299,7 @@ struct FieldTab: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                    sectionLabel("HANDS")
                     Text(loc(s.step.child))
                         .font(.system(size: 18, weight: .heavy))
                         .foregroundStyle(Theme.silver)
@@ -342,11 +343,7 @@ struct FieldTab: View {
                 .buttonStyle(HUDActionStyle(filled: true))
                 Button("SPEAK") {
                     var x = s; x.speak(); stepper = x
-                    if !FieldSpeech.speak(s.card, locale: runtime.locale, engine: runtime.speech, step: s.index) {
-                        runtime.speechChrome = "SPEECH FAILED"
-                    } else {
-                        runtime.speechChrome = ""
-                    }
+                    speakOpenStep(s.card, step: s.index)
                 }
                 .buttonStyle(HUDActionStyle(filled: false))
             }
@@ -430,7 +427,7 @@ struct FieldTab: View {
                 Button("SEARCH") { openAnswer() }
                     .buttonStyle(HUDOverlayChipStyle())
                 Button("SAY") { say() }
-                    .buttonStyle(HUDOverlayChipStyle())
+                    .buttonStyle(HUDActionStyle(filled: true))
             }
             if sayFailed {
                 Text("SAY FAILED")
@@ -491,7 +488,7 @@ struct FieldTab: View {
         if let first = listCards.first {
             sayFailed = false
             askFailed = false
-            openRoute([first.id])
+            openRoute([first.id], speakFirst: true)
             return
         }
         let q = catalogQuery
@@ -540,6 +537,7 @@ struct FieldTab: View {
         fieldTrailTotal = 1
         fieldTrailBook = "ASK · LIVE"
         stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+        speakOpenStep(card, step: 0)
     }
 
     /// The map's hold card named the cards that answer the ground it held,
@@ -554,7 +552,7 @@ struct FieldTab: View {
         openRoute(route)
     }
 
-    private func openRoute(_ route: [String]) {
+    private func openRoute(_ route: [String], speakFirst: Bool = false) {
         query = ""
         let present = InspectField.presentRoute(route, in: Set(cards.map(\.id)))
         guard let first = present.first,
@@ -564,6 +562,17 @@ struct FieldTab: View {
         fieldTrailTotal = present.count
         fieldTrailBook = InspectField.bookLine(for: present) ?? ""
         stepper = StepperState(card: card, index: 0, speaking: false, sentToParty: false)
+        if speakFirst {
+            speakOpenStep(card, step: 0)
+        }
+    }
+
+    private func speakOpenStep(_ card: FieldCard, step: Int) {
+        if !FieldSpeech.speak(card, locale: runtime.locale, engine: runtime.speech, step: step) {
+            runtime.speechChrome = "SPEECH FAILED"
+        } else {
+            runtime.speechChrome = ""
+        }
     }
 
     private func leaveCard() {

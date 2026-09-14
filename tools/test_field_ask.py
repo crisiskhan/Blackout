@@ -19,8 +19,9 @@ STOP = {
     "a", "an", "the", "to", "of", "for", "in", "on", "at", "is", "be", "as",
     "or", "and", "how", "do", "i", "we", "you", "your", "my", "me", "what",
     "where", "when", "why", "can", "with", "from", "this", "that", "it",
-    "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
-    "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
+        "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
+        "someone", "somebody", "please", "hes", "shes", "theyre",
+        "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
     "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
     "mi", "tu", "su",
 }
@@ -56,6 +57,56 @@ def _swift_map(name: str, as_set: bool) -> dict:
 
 EXPAND = _swift_map("expand", as_set=True)
 BOOST = _swift_map("boost", as_set=False)
+
+
+def _phrase_pairs() -> list[tuple[str, str]]:
+    src = _corpus_src()
+    start = src.index("private static let phrases")
+    lb = src.index("= [", start) + 2
+    depth = 0
+    end = lb
+    for j, ch in enumerate(src[lb:], lb):
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                end = j
+                break
+    block = src[lb:end + 1]
+    return [(a, b) for a, b in re.findall(r'\("([^"]+)",\s*"([^"]+)"\)', block)]
+
+
+PHRASES = _phrase_pairs()
+
+
+def _has_phrase(hay: str, needle: str) -> bool:
+    if " " in needle or len(needle) >= 6:
+        return needle in hay
+    words: list[str] = []
+    cur = ""
+    for ch in hay:
+        if ch.isalnum():
+            cur += ch
+        elif cur:
+            words.append(cur)
+            cur = ""
+    if cur:
+        words.append(cur)
+    return needle in words
+
+
+def _prepare(query: str) -> str:
+    t = _fold(query)
+    for mark in ("'", "’", "`", "´", "‘"):
+        t = t.replace(mark, "")
+    extra: list[str] = []
+    for needle, words in PHRASES:
+        if _has_phrase(t, needle):
+            extra.append(words)
+    if not extra:
+        return t
+    return t + " " + " ".join(extra)
 
 
 def _fold(s: str) -> str:
@@ -119,7 +170,7 @@ def _boost_index(cid: str, expanded: set[str]) -> int:
 
 
 def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
-    q_tokens = _tokens(query)
+    q_tokens = _tokens(_prepare(query))
     if not q_tokens:
         return []
     expanded = set(q_tokens)
@@ -142,10 +193,12 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
         body_tok = _index(card)
         title_hits = len(expanded & title_tok)
         overlap = len(expanded & body_tok)
+        id_hits = len(expanded & id_tok)
+        cat_hits = len(expanded & cat_tok)
         boosted_hit = card["id"] in boosted
-        if overlap == 0 and title_hits == 0 and not boosted_hit:
+        if not boosted_hit and title_hits == 0 and id_hits == 0 and overlap < 2:
             continue
-        score = overlap * 2 + title_hits * 10 + len(expanded & id_tok) * 8 + len(expanded & cat_tok) * 6
+        score = overlap * 2 + title_hits * 10 + id_hits * 8 + cat_hits * 6
         if boosted_hit:
             score += 20
         if "wool" in q_tokens and card["id"] == "camp-layers":
@@ -283,6 +336,11 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertLess(search.find("HStack"), search.find('HUDField("SEARCH"'))
         self.assertIn("FieldCorpus.chapter(", tab)
         self.assertIn("static func doLines", corpus)
+        self.assertIn("static func prepare(", corpus)
+        self.assertIn("where am i", corpus)
+        self.assertIn("got bit", corpus)
+        self.assertIn("not breathing", corpus)
+        self.assertIn("cant breathe", corpus)
         ask = corpus.split("static func ask(")[1].split("private static func index")[0]
         self.assertIn("liveAnimal", ask)
         self.assertIn('category == "food"', ask)
@@ -452,6 +510,15 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("s.step.image", open_fn)
         self.assertIn("FieldCorpus.doLines", open_fn)
         self.assertIn("s.step.child", open_fn)
+        self.assertIn('sectionLabel("HANDS")', open_fn)
+        self.assertLess(
+            open_fn.find('sectionLabel("HANDS")'),
+            open_fn.find("s.step.child"),
+        )
+        self.assertLess(
+            open_fn.find("s.step.child"),
+            open_fn.find("s.step.why"),
+        )
         self.assertLess(
             open_fn.find('sectionLabel("DO")'),
             open_fn.find('L10n.t("stop.if"'),
@@ -488,7 +555,9 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("UIImage(contentsOfFile:", tab)
         self.assertTrue((ROOT / "Resources/Field/images/bleed-pack.png").is_file())
         self.assertIn("x.next()", tab)
-        self.assertIn("openRoute([first.id])", tab)
+        self.assertIn("openRoute([first.id]", tab)
+        self.assertIn("speakFirst: true", tab)
+        self.assertIn("FieldSpeech.speak(", tab)
         self.assertIn("openLive(", tab)
         self.assertNotIn("ForEach(listCards)", tab)
         self.assertIn("NO MATCH", tab)
@@ -507,6 +576,10 @@ class FieldSearchSayAndStepperTests(unittest.TestCase):
         self.assertIn("ASK · LIVE", qa)
         self.assertIn("on this device", qa.lower())
         self.assertIn("Remaining hits stay out", qa)
+        self.assertIn("where am I", qa)
+        self.assertIn("got bit", qa)
+        self.assertIn("not breathing", qa)
+        self.assertIn("HANDS", qa)
         self.assertIn("NEXT sits after DO", qa)
         self.assertIn("VISION stays on SEARCH", qa)
         blob = qa.lower().replace("’", "'")
@@ -552,6 +625,37 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("comida"), "food-cook")
         self.assertFalse(ask_book(cards, "xyzzy plugh"))
         self.assertEqual(ask_book(cards, "javelina")[0]["category"], "animals")
+
+    def test_spoken_field_talk_opens_the_procedure(self):
+        """A scared human does not type catalog ids. SEARCH still has to open a walk."""
+        cards = load_book()
+        first = lambda q: ask_book(cards, q)[0]["id"]
+        self.assertEqual(first("where am I"), "nav-lost")
+        self.assertEqual(first("where are we"), "nav-lost")
+        self.assertEqual(first("I don't know where I am"), "nav-lost")
+        self.assertEqual(first("donde estoy"), "nav-lost")
+        self.assertEqual(first("I got bit"), "animal-bite")
+        self.assertEqual(first("he got bitten"), "animal-bite")
+        self.assertEqual(first("snake bit me"), "animal-bite")
+        self.assertEqual(first("not breathing"), "med-cpr-adult")
+        self.assertEqual(first("no pulse"), "med-cpr-adult")
+        self.assertEqual(first("can't breathe"), "med-airway")
+        self.assertEqual(first("broken leg"), "trauma-fracture")
+        self.assertEqual(first("sprained ankle"), "trauma-fracture")
+        self.assertEqual(first("cut my arm"), "med-bleed-pack")
+        self.assertEqual(first("sangrando"), "med-bleed-pack")
+        self.assertEqual(first("too hot"), "env-heat-collapse")
+        self.assertEqual(first("soaking wet"), "env-cold")
+        self.assertEqual(first("he's choking"), "med-airway")
+        self.assertEqual(first("choking"), "med-airway")
+        self.assertEqual(first("someone collapsed"), "med-cpr-adult")
+        self.assertEqual(first("my ankle hurts"), "trauma-fracture")
+        self.assertEqual(first("I fell"), "trauma-spine")
+        self.assertEqual(first("donde estamos"), "nav-lost")
+        self.assertFalse(ask_book(cards, "how do I"))
+        self.assertFalse(ask_book(cards, "xyzzy plugh"))
+        self.assertFalse(ask_book(cards, "help me"))
+        self.assertFalse(ask_book(cards, "snapshot"))
 
     def test_every_open_step_has_a_picture_and_a_child_line(self):
         cards = load_book()
@@ -718,23 +822,22 @@ def _step(do_en: str, do_es: str, child_en: str, child_es: str, why_en: str, why
 
 
 def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: str) -> dict:
-    q = " ".join(_tokens(query))
     picture = _picture(chapter)
     bleed_pic = _picture(chapter, "bleed-pack.png")
     water_pic = _picture(chapter)
-    toks = set(_tokens(query))
+    toks = set(_tokens(_prepare(query)))
     asked = query.strip() or "this"
-    if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash"}:
+    if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"}:
         family = "bleed"
-    elif toks & {"choke", "choking"}:
+    elif toks & {"choke", "choking", "airway"}:
         family = "choke"
-    elif toks & {"cpr", "unresponsive", "pulse"} or ("breath" in q and "not" in q):
+    elif toks & {"cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"}:
         family = "cpr"
     elif toks & {"burn", "scald"}:
         family = "burn"
     elif toks & {"lost", "gps", "separated"}:
         family = "lost"
-    elif toks & {"break", "broken", "sprain", "sling", "fracture"}:
+    elif toks & {"break", "broken", "broke", "sprain", "sling", "fracture"}:
         family = "break"
     else:
         family = "start"
@@ -1052,7 +1155,7 @@ def answer_ask(
     pack_id: str | None,
     model_text: str | None,
 ) -> dict | None:
-    if not _tokens(query):
+    if not _tokens(_prepare(query)):
         return None
     if ask_book(chapter, query, locale):
         return None
@@ -1073,6 +1176,11 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIsNone(answer_ask("", book, "en", "west", "tx-west", None))
         live = answer_ask("xyzzy plugh", book, "en", "west", "tx-west", None)
         self.assertIsNotNone(live)
+        panic = answer_ask("help me", book, "en", "west", "tx-west", None)
+        self.assertIsNotNone(panic)
+        assert panic is not None
+        self.assertEqual(panic["id"], LIVE_ID)
+        self.assertIn("Stop. Look around", panic["steps"][0]["do"]["en"])
         assert live is not None
         self.assertEqual(live["id"], LIVE_ID)
         self.assertFalse(live["sendToParty"])
@@ -1090,6 +1198,8 @@ class FieldAskLiveTests(unittest.TestCase):
             self.assertNotIn("drinkable", blob)
         bleed = grounded_ask("my friend is bleeding a lot", book, "tx-west", "en")
         self.assertIn("press", json.dumps(bleed).lower())
+        cpr = grounded_ask("not breathing", book, "tx-west", "en")
+        self.assertIn("compression", json.dumps(cpr).lower())
         lost = grounded_ask("I am a kid and I am lost", book, "tx-west", "en")
         assert lost is not None
         self.assertIn("stay", json.dumps(lost).lower())
@@ -1208,7 +1318,8 @@ class FieldAskLiveTests(unittest.TestCase):
         self.assertIn("askBusy", tab)
         open_ans = tab.split("private func openAnswer(")[1].split("private func jump")[0]
         self.assertIn("listCards.first", open_ans)
-        self.assertIn("openRoute([first.id])", open_ans)
+        self.assertIn("openRoute([first.id]", open_ans)
+        self.assertIn("speakFirst: true", open_ans)
         self.assertIn("FieldAsk.answer", open_ans)
         self.assertIn("openLive", open_ans)
         self.assertNotIn("URLSession", tab)

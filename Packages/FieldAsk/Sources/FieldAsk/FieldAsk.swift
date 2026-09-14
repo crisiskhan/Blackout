@@ -85,7 +85,7 @@ public enum FieldAsk {
         packId: String?,
         locale: String
     ) -> FieldCard {
-        let toks = Set(tokens(query))
+        let toks = Set(FieldCorpus.situationWords(query))
         let asked = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let family = family(for: toks)
         let bookPic = picture(chapter)
@@ -411,13 +411,13 @@ public enum FieldAsk {
     }
 
     private static func family(for toks: Set<String>) -> Family {
-        if !toks.isDisjoint(with: ["bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash"]) {
+        if !toks.isDisjoint(with: ["bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"]) {
             return .bleed
         }
-        if !toks.isDisjoint(with: ["choke", "choking"]) {
+        if !toks.isDisjoint(with: ["choke", "choking", "airway"]) {
             return .choke
         }
-        if !toks.isDisjoint(with: ["cpr", "unresponsive", "pulse"]) {
+        if !toks.isDisjoint(with: ["cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"]) {
             return .cpr
         }
         if !toks.isDisjoint(with: ["burn", "scald"]) {
@@ -426,7 +426,7 @@ public enum FieldAsk {
         if !toks.isDisjoint(with: ["lost", "gps", "separated"]) {
             return .lost
         }
-        if !toks.isDisjoint(with: ["break", "broken", "sprain", "sling", "fracture"]) {
+        if !toks.isDisjoint(with: ["break", "broken", "broke", "sprain", "sling", "fracture"]) {
             return .fracture
         }
         return .start
@@ -551,21 +551,6 @@ public enum FieldAsk {
         return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: with)
     }
 
-    private static func tokens(_ query: String) -> [String] {
-        let folded = query.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-        var words: [String] = []
-        var current = ""
-        for ch in folded {
-            if ch.isLetter || ch.isNumber {
-                current.append(ch)
-            } else if !current.isEmpty {
-                words.append(current)
-                current = ""
-            }
-        }
-        if !current.isEmpty { words.append(current) }
-        return words.filter { $0.count >= 2 }
-    }
 }
 
 private struct DraftLoc: Codable {

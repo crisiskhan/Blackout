@@ -9,7 +9,18 @@ public enum FieldSpeech {
 
     public static func line(_ card: FieldCard, step: Int, locale: String) -> String {
         guard card.steps.indices.contains(step) else { return line(card, locale: locale) }
-        return locale == "es" ? card.steps[step].`do`.es : card.steps[step].`do`.en
+        let st = card.steps[step]
+        let doLine = (locale == "es" ? st.`do`.es : st.`do`.en)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let child = (locale == "es" ? st.child.es : st.child.en)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if child.isEmpty || child == doLine {
+            return doLine
+        }
+        if doLine.hasSuffix(".") || doLine.hasSuffix("!") || doLine.hasSuffix("?") {
+            return doLine + " " + child
+        }
+        return doLine + ". " + child
     }
 
     @discardableResult

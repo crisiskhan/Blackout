@@ -1209,6 +1209,8 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn('L10n.t("vision.none"', field)
         self.assertIn("step: s.index", field)
         self.assertIn("step: Int", speech)
+        self.assertIn("child.en", speech)
+        self.assertIn("child.es", speech)
         self.assertNotIn("ForEach(listCards)", field)
         self.assertIn("openAnswer()", field)
         self.assertIn("onSubmit: openAnswer", field)
@@ -1230,7 +1232,7 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertNotIn('sectionLabel("CARE")', field)
         self.assertIn("s.step.image", field)
         self.assertIn("Field/images", field)
-        self.assertIn("openRoute([first.id])", field)
+        self.assertIn("openRoute([first.id]", field)
         self.assertIn("openLive(", field)
         self.assertIn("FieldAsk.answer", field)
         self.assertIn("import FieldAsk", field)
@@ -1239,6 +1241,9 @@ class FieldInstrumentTests(unittest.TestCase):
         self.assertIn("Task.detached", field)
         self.assertIn("FieldCorpus.doLines", field)
         self.assertIn("s.step.child", open_fn)
+        self.assertIn('sectionLabel("HANDS")', open_fn)
+        self.assertIn("speakFirst: true", field)
+        self.assertIn("TYPE OR SAY", field)
         self.assertNotIn("best in class", field.lower())
         self.assertLess(
             open_fn.find('sectionLabel("DO")'),

@@ -105,6 +105,27 @@ final class FieldCorpusTests: XCTestCase {
         )
     }
 
+    func testAskSpokenFieldTalkOpensTheProcedure() {
+        let lost = card("nav-lost", title: "Stay put — people find still kids")
+        let bite = card("animal-bite", title: "Bite or envenomation")
+        let cpr = card("med-cpr-adult", title: "Adult CPR")
+        let choke = card("med-airway", title: "Choking")
+        let bleed = card("med-bleed-pack", title: "Pack a bleed")
+        let bone = card("trauma-fracture", title: "Broken bone")
+        let cards = [lost, bite, cpr, choke, bleed, bone]
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "where am I", locale: "en").first?.id, "nav-lost")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "I got bit", locale: "en").first?.id, "animal-bite")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "not breathing", locale: "en").first?.id, "med-cpr-adult")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "can't breathe", locale: "en").first?.id, "med-airway")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "cut my arm", locale: "en").first?.id, "med-bleed-pack")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "broken leg", locale: "en").first?.id, "trauma-fracture")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "he's choking", locale: "en").first?.id, "med-airway")
+        XCTAssertTrue(FieldCorpus.ask(cards, query: "help me", locale: "en").isEmpty)
+        XCTAssertFalse(FieldCorpus.asking("how do I"))
+        XCTAssertTrue(FieldCorpus.asking("where am I"))
+        XCTAssertTrue(FieldCorpus.asking("help me"))
+    }
+
     func testAskJavelinaOpensGiveSpaceNotTheMeal() {
         let mammal = card(
             "tx-mammal",

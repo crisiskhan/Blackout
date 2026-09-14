@@ -137,8 +137,102 @@ public enum FieldCorpus {
 
     /// True when the query still has a situation word after stopwords.
     /// Empty and "how do I" are waiting, not a dump of the book.
+    /// Spoken field talk is prepared first so "where am I" is still a situation.
     public static func asking(_ query: String) -> Bool {
-        !tokens(query).isEmpty
+        !tokens(prepare(query)).isEmpty
+    }
+
+    /// Fold spoken field talk into the book's situation words. Apostrophes
+    /// drop so "can't breathe" and "dont know where" still match.
+    public static func prepare(_ query: String) -> String {
+        var t = fold(query)
+        for mark in ["'", "’", "`", "´"] {
+            t = t.replacingOccurrences(of: mark, with: "")
+        }
+        var extra: [String] = []
+        for (needle, words) in phrases {
+            if hasPhrase(t, needle) {
+                extra.append(words)
+            }
+        }
+        if extra.isEmpty { return t }
+        return t + " " + extra.joined(separator: " ")
+    }
+
+    /// Spoken needles after apostrophes drop. Short needles are whole words
+    /// so "shot" is a bleed and "snapshot" is not.
+    private static let phrases: [(String, String)] = [
+        ("where am i", "lost"),
+        ("where are we", "lost"),
+        ("dont know where", "lost"),
+        ("do not know where", "lost"),
+        ("donde estoy", "lost"),
+        ("estoy perdido", "lost"),
+        ("no se donde", "lost"),
+        ("got bit", "bite"),
+        ("got bitten", "bite"),
+        ("bit me", "bite"),
+        ("bit him", "bite"),
+        ("bit her", "bite"),
+        ("bitten", "bite"),
+        ("me mordio", "bite"),
+        ("not breathing", "cpr"),
+        ("isnt breathing", "cpr"),
+        ("aint breathing", "cpr"),
+        ("no pulse", "cpr"),
+        ("not waking", "cpr"),
+        ("wont wake", "cpr"),
+        ("unconscious", "cpr"),
+        ("no respira", "cpr"),
+        ("cant breathe", "choke"),
+        ("cannot breathe", "choke"),
+        ("me ahogo", "choke"),
+        ("choking", "choke"),
+        ("choke", "choke"),
+        ("collapsed", "cpr"),
+        ("passed out", "cpr"),
+        ("fainted", "cpr"),
+        ("donde estamos", "lost"),
+        ("ankle", "fracture"),
+        ("broken", "fracture"),
+        ("broke my", "fracture"),
+        ("broke his", "fracture"),
+        ("broke her", "fracture"),
+        ("sprained", "fracture"),
+        ("twisted ankle", "fracture"),
+        ("cut my", "bleed"),
+        ("cut him", "bleed"),
+        ("shot", "bleed"),
+        ("stabbed", "bleed"),
+        ("bleeding out", "bleed"),
+        ("sangrando", "bleed"),
+        ("heat stroke", "heat"),
+        ("too hot", "heat"),
+        ("soaking wet", "cold"),
+    ]
+
+    private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
+        if needle.contains(" ") || needle.count >= 6 {
+            return hay.contains(needle)
+        }
+        var words: [String] = []
+        var current = ""
+        for ch in hay {
+            if ch.isLetter || ch.isNumber {
+                current.append(ch)
+            } else if !current.isEmpty {
+                words.append(current)
+                current = ""
+            }
+        }
+        if !current.isEmpty { words.append(current) }
+        return words.contains(needle)
+    }
+
+    /// Situation words after spoken-field fold. ASK uses the same list so
+    /// "not breathing" is CPR when the book has no hit.
+    public static func situationWords(_ query: String) -> [String] {
+        tokens(prepare(query))
     }
 
     /// One open step can still be several moves. Split on sentence end so
@@ -165,7 +259,7 @@ public enum FieldCorpus {
     /// returns nothing — SEARCH is waiting, not a dump of the book.
     /// Unknown words return nothing — the catalog does not invent a card.
     public static func ask(_ cards: [FieldCard], query: String, locale: String) -> [FieldCard] {
-        let qTokens = tokens(query)
+        let qTokens = tokens(prepare(query))
         if qTokens.isEmpty { return [] }
         var expanded = Set(qTokens)
         for word in qTokens {
@@ -192,12 +286,18 @@ public enum FieldCorpus {
             let bodyTok = index(card)
             let titleHits = expanded.intersection(titleTok).count
             let overlap = expanded.intersection(bodyTok).count
+            let idHits = expanded.intersection(idTok).count
+            let catHits = expanded.intersection(catTok).count
             let boostedHit = boosted.contains(card.id)
-            if overlap == 0 && titleHits == 0 && !boostedHit { continue }
+            // One stray body word is not a procedure. Boost, title, id,
+            // category, or two body hits — otherwise SEARCH is a live walk.
+            if !boostedHit && titleHits == 0 && idHits == 0 && overlap < 2 {
+                continue
+            }
             var score = Double(overlap) * 2
             score += Double(titleHits) * 10
-            score += Double(expanded.intersection(idTok).count) * 8
-            score += Double(expanded.intersection(catTok).count) * 6
+            score += Double(idHits) * 8
+            score += Double(catHits) * 6
             if boostedHit { score += 20 }
             if qTokens.contains("wool") && card.id == "camp-layers" { score += 25 }
             let preferredTitle = Set(tokens(preferEs ? card.title.es : card.title.en))
@@ -292,6 +392,7 @@ public enum FieldCorpus {
         "or", "and", "how", "do", "i", "we", "you", "your", "my", "me", "what",
         "where", "when", "why", "can", "with", "from", "this", "that", "it",
         "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
+        "someone", "somebody", "please", "hes", "shes", "theyre",
         "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
         "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
         "mi", "tu", "su",
@@ -342,6 +443,17 @@ public enum FieldCorpus {
         "bow": ["friction", "drill"],
         "bleeding": ["bleed", "blood", "wound"],
         "bleed": ["blood", "wound"],
+        "bit": ["bite"],
+        "bitten": ["bite"],
+        "broke": ["fracture"],
+        "broken": ["fracture"],
+        "sprain": ["fracture"],
+        "sprained": ["fracture"],
+        "choke": ["airway"],
+        "choking": ["choke", "airway"],
+        "collapsed": ["cpr"],
+        "fainted": ["cpr"],
+        "ankle": ["fracture"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.
@@ -423,6 +535,9 @@ public enum FieldCorpus {
         "bleed": ["med-bleed-pack"],
         "bleeding": ["med-bleed-pack"],
         "blood": ["med-bleed-pack"],
+        "cut": ["med-bleed-pack"],
+        "shot": ["med-bleed-pack"],
+        "sangrando": ["med-bleed-pack"],
         "tourniquet": ["med-bleed-pack"],
         "cpr": ["med-cpr-adult"],
         "rcp": ["med-cpr-adult"],
@@ -431,7 +546,12 @@ public enum FieldCorpus {
         "choke": ["med-airway"],
         "spine": ["trauma-spine"],
         "fracture": ["trauma-fracture"],
+        "broken": ["trauma-fracture"],
+        "broke": ["trauma-fracture"],
+        "sprain": ["trauma-fracture"],
+        "sprained": ["trauma-fracture"],
         "splint": ["trauma-fracture"],
+        "ankle": ["trauma-fracture"],
         "burn": ["med-burn"],
         "scald": ["med-burn"],
         "quemadura": ["med-burn"],
