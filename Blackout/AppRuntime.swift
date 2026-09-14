@@ -592,9 +592,32 @@ final class AppRuntime {
     }
 
     func markHeldAddress() {
-        guard let address = heldAddress, !address.marked else { return }
+        guard let address = heldAddress else { return }
+        if address.marked {
+            openHeldMark()
+            return
+        }
         pickDestination(lat: address.lat, lon: address.lon)
         openMark(lat: address.lat, lon: address.lon, name: address.name)
+    }
+
+    /// Filled MARK on a planted door or ground pin opens that pin — not a silent no-op.
+    func openHeldMark() {
+        let lat: Double
+        let lon: Double
+        if let held {
+            lat = held.lat
+            lon = held.lon
+        } else if let heldAddress {
+            lat = heldAddress.lat
+            lon = heldAddress.lon
+        } else {
+            return
+        }
+        guard let mark = marks.first(where: { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }) else {
+            return
+        }
+        holdPlaceMark(mark)
     }
 
     func addressCourse(lat: Double, lon: Double) -> String {

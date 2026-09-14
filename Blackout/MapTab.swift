@@ -166,6 +166,7 @@ struct MapTab: View {
                     held: held,
                     fieldBook: runtime.fieldBookIDs,
                     onField: { runtime.openFieldFromHold() },
+                    onMark: { runtime.openHeldMark() },
                     onClose: { runtime.closeHold() }
                 )
                 .padding(hudReserve)

@@ -39,31 +39,26 @@ struct HeldAddress: Equatable {
     var marked = false
 }
 
-/// Dark glass over the canvas: what this is, how sure the record is, what to
-/// do, and FIELD as the one action. Tapping the dim map or dragging the card
+/// Dark glass over the canvas. Tapping the dim map or dragging the card
 /// down puts it away. There is no SOS here and there never will be — SOS is a
 /// Comms button, and a thumb resting on a map is not a call for help.
-struct HoldCardView: View {
-    let held: HeldPoint
-    /// Cards the open pack actually ships. The button names the first of
-    /// these, not a New Mexico ice card on a Texas peak.
-    let fieldBook: Set<String>
-    let onField: () -> Void
+struct HoldGlassShell<Content: View>: View {
     let onClose: () -> Void
-
-    private var fieldRoute: [String] {
-        if fieldBook.isEmpty { return held.card.fieldRoute }
-        return InspectField.presentRoute(held.card.fieldRoute, in: fieldBook)
-    }
+    let content: Content
 
     @State private var drag: CGFloat = 0
 
     /// Floor for the cap, for the one layout pass where the canvas has not been
-    /// measured yet. Below this the card cannot show a headline and the FIELD
-    /// button, and a card you cannot press is worse than a tall one.
+    /// measured yet. Below this the card cannot show a headline and the action
+    /// buttons, and a card you cannot press is worse than a tall one.
     private static let smallestUsableCard: CGFloat = 180
 
     private var corner: CGFloat { CGFloat(BlackoutTokens.Chrome.holdCardCornerPoints) }
+
+    init(onClose: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+        self.onClose = onClose
+        self.content = content()
+    }
 
     var body: some View {
         // The cap is measured against the canvas, not the screen. The canvas is
@@ -77,7 +72,7 @@ struct HoldCardView: View {
             )
             ZStack(alignment: .bottom) {
                 scrim
-                card(cappedAt: cap)
+                plate(cappedAt: cap)
                     .offset(y: drag)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -123,19 +118,10 @@ struct HoldCardView: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    /// Sized to its content until it reaches `cap`, then squeezed rather than
-    /// cut off. Nothing here is `fixedSize`, so under a short canvas the
-    /// sentences give up lines while the grabber and the FIELD button — the
-    /// only parts that have to stay hittable — keep their height.
-    private func card(cappedAt cap: CGFloat) -> some View {
+    private func plate(cappedAt cap: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             grabber
-            headline
-            Rectangle()
-                .fill(Theme.silver.opacity(0.22))
-                .frame(height: 1)
-            rows
-            actions
+            content
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -164,6 +150,34 @@ struct HoldCardView: View {
             .frame(width: 36, height: 3)
             .frame(maxWidth: .infinity)
             .accessibilityHidden(true)
+    }
+}
+
+struct HoldCardView: View {
+    let held: HeldPoint
+    /// Cards the open pack actually ships. The button names the first of
+    /// these, not a New Mexico ice card on a Texas peak.
+    let fieldBook: Set<String>
+    let onField: () -> Void
+    let onMark: () -> Void
+    let onClose: () -> Void
+
+    private var fieldRoute: [String] {
+        if fieldBook.isEmpty { return held.card.fieldRoute }
+        return InspectField.presentRoute(held.card.fieldRoute, in: fieldBook)
+    }
+
+    var body: some View {
+        HoldGlassShell(onClose: onClose) {
+            VStack(alignment: .leading, spacing: 10) {
+                headline
+                Rectangle()
+                    .fill(Theme.silver.opacity(0.22))
+                    .frame(height: 1)
+                rows
+                actions
+            }
+        }
     }
 
     private var headline: some View {
@@ -229,13 +243,20 @@ struct HoldCardView: View {
         .accessibilityHint(hint ?? "")
     }
 
-    /// One FIELD action. `holdCardMaxActions` is the contract a guard reads.
+    /// FIELD always. MARK only when a party pin already sits here — inspect
+    /// is not how you plant a new one.
     private var actions: some View {
-        Button(action: onField) {
-            Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
-                .frame(maxWidth: .infinity)
+        HStack(spacing: 8) {
+            Button(action: onField) {
+                Text(InspectField.label(for: fieldRoute.first ?? held.card.fieldCardID))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(HoldActionStyle(filled: false, expand: true))
+            if held.marked {
+                Button("MARK") { onMark() }
+                    .buttonStyle(HoldActionStyle(filled: true, expand: true))
+            }
         }
-        .buttonStyle(HoldActionStyle(filled: false, expand: true))
     }
 }
 

@@ -325,7 +325,9 @@ class PageOpenCloseFadeTests(unittest.TestCase):
         self.assertIn("if scanQR", comms)
         self.assertIn(".transition(.opacity)", comms)
         self.assertIn("animation(Theme.Motion.heavy, value: scanQR)", comms)
-        self.assertIn(".transition(.opacity)", turns)
+        self.assertIn("HoldGlassShell(", turns)
+        shell = read("Blackout", "HoldCard.swift").split("struct HoldGlassShell")[1].split("struct HoldCardView")[0]
+        self.assertIn(".transition(.opacity)", shell)
         self.assertIn("animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)", tab)
         pages = next(
             line
@@ -1687,9 +1689,14 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn("pickDestination(lat: lat, lon: lon)", tab)
         self.assertIn("static let setDest", marks)
         self.assertIn('setDest = "SET DEST"', marks)
-        self.assertNotIn("onMark", hold)
+        view = hold.split("struct HoldCardView")[1]
+        self.assertIn("InspectField.label", view)
+        self.assertIn("if held.marked", view)
+        self.assertIn("onMark", view)
+        self.assertIn('Button("MARK")', view)
+        self.assertNotIn("dropMark", view)
+        self.assertNotIn("openMark", view)
         self.assertNotIn("MARKED", hold)
-        self.assertIn("InspectField.label", hold)
         self.assertIn("holdCardMaxActions: Int = 1", tokens)
         self.assertIn("func markHeldAddress(", app)
         mark_line = next(
@@ -2775,7 +2782,7 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn('Button("SEND")', comms)
         self.assertIn("sendPartyNote", comms)
         self.assertNotIn("emblem: $0.emblem, name:", tab.replace(" ", ""))
-        self.assertIn("holdCardDismissDragPoints", card)
+        self.assertIn("HoldGlassShell(", card)
 
     def test_profile_call_and_message_open_comms_for_you_and_party(self):
         card = read("Blackout", "PartyHoldCard.swift")
@@ -2784,9 +2791,9 @@ class PartyHoldCardTests(unittest.TestCase):
         mesh = read("Packages", "MeshDTN", "Sources", "MeshDTN", "MeshDTN.swift")
         ui = read("Packages", "CommsUI", "Sources", "CommsUI", "CommsUI.swift")
         qa = read("docs", "SOLO_QA.md")
-        chrome = card.split("private func card(")[1].split("private var grabber")[0]
-        self.assertIn("actions", chrome)
-        self.assertNotIn("if !person.isYou", chrome)
+        self.assertIn("HoldGlassShell(", card)
+        self.assertIn("actions", card)
+        self.assertNotIn("if !person.isYou", card.split("private var actions")[1])
         actions = card.split("private var actions")[1].split("private func statusInk")[0]
         self.assertIn('Button("CALL")', actions)
         self.assertIn('Button("MESSAGE")', actions)
@@ -2882,8 +2889,9 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("emblem.title", grid)
         self.assertIn('"FACE"', pick)
         self.assertIn("onPick", pick)
-        self.assertIn("holdCardDismissDragPoints", pick)
-        self.assertIn("Theme.Motion.heavy", pick)
+        self.assertIn("HoldGlassShell(", pick)
+        shell = read("Blackout", "HoldCard.swift").split("struct HoldGlassShell")[1].split("struct HoldCardView")[0]
+        self.assertIn("Theme.Motion.heavy", shell)
         self.assertIn("BlackoutTokens.Chrome.mapChipHitPoints", grid)
         self.assertNotIn("closeHold", pick)
         self.assertNotIn(".spring(", pick)
@@ -3691,7 +3699,7 @@ class AddressHoldCardTests(unittest.TestCase):
         self.assertNotIn(".spring(", card)
         self.assertNotIn("Waze", card)
         self.assertIn("case address", search)
-        self.assertIn("holdCardDismissDragPoints", card)
+        self.assertIn("HoldGlassShell(", card)
 
     def test_search_skips_a_broken_coordinate_instead_of_crashing(self):
         search = read("Packages", "Search", "Sources", "Search", "Search.swift")
@@ -3890,6 +3898,72 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("zoomLevel: PackCamera.openZoom", follow)
 
 
+class GlassCardHonestyTests(unittest.TestCase):
+    """Every overlay card is the same glass. A filled MARK still opens."""
+
+    CARDS = (
+        "HoldCard.swift",
+        "PartyHoldCard.swift",
+        "AddressHoldCard.swift",
+        "PlaceMarkCard.swift",
+        "EmblemPickCard.swift",
+        "SpeakTurnCard.swift",
+    )
+
+    def test_overlay_cards_share_hold_glass(self):
+        hold = read("Blackout", "HoldCard.swift")
+        shell = hold.split("struct HoldGlassShell")[1].split("struct HoldCardView")[0]
+        self.assertIn("holdCardScrimTopOpacity", shell)
+        self.assertIn("holdCardScrimOpacity", shell)
+        self.assertIn("holdCardDismissDragPoints", shell)
+        self.assertIn("holdCardCornerPoints", shell)
+        self.assertIn('accessibilityLabel("Close card")', shell)
+        self.assertIn(".accessibilityAddTraits(.isButton)", shell)
+        self.assertIn("Theme.accent", shell)
+        self.assertIn("frame(height: 2)", shell)
+        self.assertIn("Theme.glass()", shell)
+        self.assertIn("Theme.Motion.heavy", shell)
+        self.assertNotIn(".spring(", shell)
+        for name in self.CARDS:
+            src = read("Blackout", name)
+            if name == "HoldCard.swift":
+                self.assertIn("struct HoldGlassShell", src, name)
+                self.assertIn("HoldGlassShell(", src, name)
+            else:
+                self.assertIn("HoldGlassShell(", src, name)
+            self.assertNotIn(".spring(", src, name)
+            self.assertNotIn("best in class", src.lower(), name)
+            self.assertNotIn("tel://", src.lower(), name)
+        turns = read("Blackout", "SpeakTurnCard.swift")
+        self.assertIn('Button("CLOSE")', turns)
+        self.assertNotIn("ignoresSafeArea()", turns)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("same hold glass", qa)
+        self.assertNotIn("best in class", qa.lower())
+
+    def test_marked_address_mark_opens_the_planted_pin(self):
+        app = read("Blackout", "AppRuntime.swift")
+        mark = app.split("func markHeldAddress(")[1].split("func addressCourse(")[0]
+        self.assertNotIn("!address.marked", mark)
+        self.assertIn("openHeldMark()", mark)
+        open_mark = app.split("func openHeldMark(")[1].split("func ", 1)[0]
+        self.assertIn("holdPlaceMark", open_mark)
+        self.assertIn("MarkDrop.sameCoord", open_mark)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("already marked MARK opens the planted pin", qa)
+
+    def test_ground_hold_mark_opens_the_planted_pin(self):
+        hold = read("Blackout", "HoldCard.swift")
+        card = hold.split("struct HoldCardView")[1]
+        self.assertIn("held.marked", card)
+        self.assertIn('Button("MARK")', card)
+        self.assertIn("onMark", card)
+        tab = read("Blackout", "MapTab.swift")
+        ground = tab.split("HoldCardView(")[1].split(".padding(hudReserve)")[0]
+        self.assertIn("onMark:", ground)
+        self.assertIn("openHeldMark()", ground)
+
+
 class FacetedMetalHUDTests(unittest.TestCase):
     """Void, faceted silver metal, HUD red lamp. No iOS blur mush."""
 
@@ -3999,14 +4073,16 @@ class FacetedMetalHUDTests(unittest.TestCase):
             self.assertNotIn(".spring(", text, name)
         hold = read("Blackout", "HoldCard.swift")
         self.assertIn("Theme.glass", hold)
+        self.assertIn("struct HoldGlassShell", hold)
         party = read("Blackout", "PartyHoldCard.swift")
-        self.assertIn("Theme.glass", party)
+        self.assertIn("HoldGlassShell(", party)
         address = read("Blackout", "AddressHoldCard.swift")
-        self.assertIn("Theme.glass", address)
+        self.assertIn("HoldGlassShell(", address)
         pick = read("Blackout", "EmblemPickCard.swift")
-        self.assertIn("Theme.glass", pick)
+        self.assertIn("HoldGlassShell(", pick)
         turns = read("Blackout", "SpeakTurnCard.swift")
         self.assertIn("Theme.glass", turns)
+        self.assertIn("HoldGlassShell(", turns)
         inst = read("Blackout", "InstrumentsView.swift")
         self.assertIn("Theme.glass", inst)
         self.assertIn("Theme.plateRect", inst)

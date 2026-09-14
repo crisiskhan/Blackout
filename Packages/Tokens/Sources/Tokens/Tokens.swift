@@ -50,7 +50,9 @@ public enum BlackoutTokens: Sendable {
         public static let holdCardScrimTopOpacity: Double = 0.14
         /// How far the card has to be dragged down before it goes.
         public static let holdCardDismissDragPoints: Double = 44
-        /// FIELD only. MARK names DEST on the dock, and SOS lives on Comms.
+        /// Unmarked inspect is FIELD only. Planting a MARK still lives on the
+        /// dock after DEST. A filled MARK on already-planted ground opens that
+        /// pin. SOS lives on Comms.
         public static let holdCardMaxActions: Int = 1
         /// Incoming CALL / MESSAGE glass line. Newest replaces; then it clears.
         public static let incomingLineSeconds: Double = 8

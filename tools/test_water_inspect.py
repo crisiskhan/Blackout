@@ -2684,7 +2684,9 @@ class HoldToInspect(unittest.TestCase):
         self.assertIn("held.card.fieldRoute", card)
         self.assertNotIn("MARKED", card)
         self.assertIn("onField", card)
-        self.assertNotIn("onMark", card)
+        self.assertIn("onMark", card)
+        self.assertIn("if held.marked", card)
+        self.assertIn('Button("MARK")', card)
         self.assertNotIn("animal-icon", card)
         self.assertNotIn("edible", card.lower())
 

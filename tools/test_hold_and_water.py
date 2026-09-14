@@ -137,22 +137,28 @@ def assert_the_glass_has_no_osm_credit() -> None:
 
 
 def assert_the_card_offers_field_and_not_mark() -> None:
-    """Long-press inspects. MARK lives on the dock after DEST, not on this card."""
+    """Long-press inspects. Planting a MARK lives on the dock after DEST.
+
+    A filled MARK on already-planted ground opens that pin. It must not plant
+    a new one from inspect.
+    """
     body = (APP / "HoldCard.swift").read_text()
-    buttons = re.findall(r"Button\(action:", body)
-    if len(buttons) != 1:
-        fail(f"hold card has {len(buttons)} actions, expected 1")
-    if "InspectField.label" not in body:
+    view = body.split("struct HoldCardView", 1)[1]
+    if "InspectField.label" not in view:
         fail("hold card does not name the Field procedure from the route")
-    if "onMark" in body or "MARKED" in body:
+    if "if held.marked" not in view or 'Button("MARK")' not in view:
+        fail("marked ground does not offer MARK that opens the planted pin")
+    if "onMark" not in view:
+        fail("marked MARK has no action")
+    if "dropMark" in view or "openMark" in view:
         fail("hold card still plants a mark from a long-press")
-    if '"MARK"' in body:
-        fail("hold card still offers MARK")
+    if "MARKED" in body:
+        fail("hold card still uses MARKED chrome")
     if "holdCardMaxActions: Int = 1" not in TOKENS:
         fail("holdCardMaxActions is not 1")
     if "holdCardMaxHeightFraction: Double = 0.5" not in TOKENS:
         fail("the card is not capped at half the screen")
-    print("OK   hold card offers FIELD and not MARK")
+    print("OK   hold card offers FIELD; marked MARK opens the planted pin")
 
 
 def assert_a_hold_is_not_a_pan() -> None:
