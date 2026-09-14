@@ -34,6 +34,14 @@ import XCTest
 /// overlays. A city park tagged as scrub fill is still a park.
 @MainActor
 final class HoldOnTheGlassTests: XCTestCase {
+    /// One test method holds many places. A 60s default allowance kills it
+    /// before the rest of the class runs, which is the same leftover as the
+    /// renderer abort: 160/175 and xcodebuild 65.
+    override var executionTimeAllowance: TimeInterval {
+        get { 600 }
+        set { _ = newValue }
+    }
+
     /// `representative_point` of a `content=water` storage tank 3.8 km west of
     /// home, taken from `osm.geojson` — the same point the tiler wrote into
     /// the archive. Do not reverse-project decoded tile pixels: the Python

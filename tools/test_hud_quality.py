@@ -1631,6 +1631,35 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertNotIn("Headlamp", qa)
 
 
+class HoldRenderHarnessReuseTests(unittest.TestCase):
+    """Simulator CI aborted MapLibreMapTests at ~160/175 after packing more
+    Holds into one XCTest process. Each hold booted a fresh MLNMapView.
+    Reuse the renderer per style URL so the 175 tests can finish.
+    """
+
+    def test_render_harness_reuses_the_map_per_style(self):
+        harness = read(
+            "Packages", "MapLibreMap", "Tests", "MapLibreMapTests", "RenderHarness.swift"
+        )
+        glass = read(
+            "Packages",
+            "MapLibreMap",
+            "Tests",
+            "MapLibreMapTests",
+            "HoldOnTheGlassTests.swift",
+        )
+        self.assertIn("static var boots", harness)
+        self.assertIn("boots[style]", harness)
+        self.assertIn("func reset()", harness)
+        self.assertIn("watcher.reset()", harness)
+        self.assertNotIn(
+            "window.isHidden = true",
+            harness,
+            "tearing the window down after every hold is the 160/175 abort",
+        )
+        self.assertIn("override var executionTimeAllowance", glass)
+
+
 class ExpeditionNamedTimerTests(unittest.TestCase):
     def test_named_group_timers_show_progress_on_profile(self):
         timers = read("Packages", "TimerSync", "Sources", "TimerSync", "TimerSync.swift")

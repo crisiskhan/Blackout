@@ -128,14 +128,19 @@ jobs:
           # remembers to add it here.
           for pkg in $(ls -d Packages/*/Tests 2>/dev/null | cut -d/ -f2); do
             echo "::group::$pkg"
+            rc=0
             ( cd "Packages/$pkg" && xcodebuild test \
                 -scheme "$pkg" \
                 -destination "id=${{ steps.sim.outputs.udid }}" \
-                CODE_SIGNING_ALLOWED=NO ) > "/tmp/$pkg.log" 2>&1 || fail=1
+                CODE_SIGNING_ALLOWED=NO ) > "/tmp/$pkg.log" 2>&1 || rc=$?
+            echo "$pkg exit=$rc"
+            if [ "$rc" -ne 0 ]; then fail=1; fi
             # `|| true` on every grep: the step's shell runs with -e, so a grep
             # that simply finds nothing would end the run before the next package.
-            grep -E "error:|Testing failed|XCTAssert" "/tmp/$pkg.log" | sort -u | head -60 || true
-            grep -E "Executed [0-9]+ test" "/tmp/$pkg.log" | tail -2 || true
+            # TEST FAILED / TEST INTERRUPTED / exceeded execution are how the
+            # MapLibreMap 160/175 abort shows up — not XCTAssert.
+            grep -E "error:|Testing failed|XCTAssert|TEST FAILED|TEST INTERRUPTED|exceeded execution" "/tmp/$pkg.log" | sort -u | head -80 || true
+            grep -E "Executed [0-9]+ test|TEST SUCCEEDED|TEST FAILED" "/tmp/$pkg.log" | tail -6 || true
             echo "::endgroup::"
           done
           echo '--- the map put this many streets on the glass ---'

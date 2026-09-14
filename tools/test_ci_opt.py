@@ -600,6 +600,23 @@ def test_no_reserved_resources_in_ios_app_copy() -> None:
     ok("iOS app copy flattens Packs/Field into the .app root (no reserved Resources)")
 
 
+def test_swift_tests_surface_xcodebuild_exit() -> None:
+    """GitHub collapses ::group:: bodies. A package that aborts after
+    Executed N tests, with 0 failures still returns 65, and grepping only
+    error:|Testing failed|XCTAssert hides TEST FAILED / TEST INTERRUPTED.
+    """
+    text = COMPILE_YML.read_text()
+    if "$pkg exit=" not in text:
+        fail("swift-tests must print each package xcodebuild exit")
+    if "TEST FAILED" not in text:
+        fail("swift-tests must grep TEST FAILED — XCTAssert-only grep misses runner abort")
+    if "TEST INTERRUPTED" not in text:
+        fail("swift-tests must grep TEST INTERRUPTED")
+    if "exceeded execution" not in text:
+        fail("swift-tests must grep exceeded execution")
+    ok("swift-tests prints pkg exit and TEST FAILED/INTERRUPTED")
+
+
 def test_crisis_opt_locks() -> None:
     if (ROOT / "tools/strip-app-before-codesign.sh").is_file():
         fail("strip-app-before-codesign.sh must stay deleted")
@@ -627,6 +644,7 @@ def main() -> None:
     test_maplibre_single_embed_via_maplibremap()
     test_no_reserved_resources_in_ios_app_copy()
     test_asc_reuse_not_delete_create()
+    test_swift_tests_surface_xcodebuild_exit()
     test_crisis_opt_locks()
 
 
