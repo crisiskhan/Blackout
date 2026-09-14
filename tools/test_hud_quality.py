@@ -4264,6 +4264,9 @@ class FacetedMetalHUDTests(unittest.TestCase):
         overlay = theme.split("struct HUDOverlayChipStyle")[1].split("struct MapFieldDestChipStyle")[0]
         self.assertIn("Theme.glass", overlay)
         self.assertIn("metalStroke", overlay)
+        self.assertIn("Theme.accent", overlay)
+        self.assertIn("if filled {", overlay)
+        self.assertNotIn("filled ? Theme.accent : Theme.metalStroke", overlay)
         self.assertNotIn("ultraThinMaterial", overlay)
         action = theme.split("struct HUDActionStyle")[1].split("struct HUDWrapRail")[0]
         self.assertIn("Theme.glass", action)

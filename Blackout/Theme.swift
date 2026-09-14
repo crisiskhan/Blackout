@@ -251,13 +251,15 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .foregroundStyle(overlayInk(filled: filled))
             .background(overlayFill(filled: filled))
             .clipShape(Theme.plateRect())
-            .overlay(
-                Theme.plateRect()
-                    .strokeBorder(
-                        filled ? Theme.accent : Theme.metalStroke,
-                        lineWidth: Theme.strokeWidth(filled ? 1.5 : 1)
-                    )
-            )
+            .overlay {
+                if filled {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                }
+            }
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
 
