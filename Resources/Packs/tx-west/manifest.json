@@ -144,6 +144,7 @@
     "glyphs/Open Sans Regular/8192-8447.pbf",
     "graph.bin",
     "hillshade.png",
+    "khan.pmtiles",
     "layers/flood.geojson",
     "layers/ground.geojson",
     "layers/hazards.geojson",
@@ -159,5 +160,5 @@
     "style.json",
     "wild.geojson"
   ],
-  "bytes": 43108349
+  "bytes": 47580370
 }

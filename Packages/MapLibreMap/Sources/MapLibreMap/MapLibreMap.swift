@@ -751,6 +751,14 @@ public enum PackStyle {
     public static let groundWorkedFillLayerID = "ground-worked-fill"
     public static let groundWorkedLineLayerID = "ground-worked-line"
     public static let landFillLayerID = "land-fill"
+    public static let khanSourceID = "khan"
+    public static let khanBuildingsLayerID = "khan-buildings"
+    public static let khanTreesLayerID = "khan-trees"
+    public static let khanSignalsLayerID = "khan-signals"
+    public static let khanLampsLayerID = "khan-lamps"
+    public static let khanSignsLayerID = "khan-signs"
+    public static let khanBuildingSourceLayer = "building"
+    public static let khanFurnitureSourceLayer = "furniture"
     public static let waterInk = "#6E747A"
     /// Peaks and holes live on the pack's place slice from this zoom, same as
     /// the tiler's POI floor. Closer than that they are noise; farther they
@@ -769,10 +777,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v3 injects water class marks from `layers/water.geojson`,
-    /// silver ground marks for peaks, holes and named trees, and the glasshouse
-    /// and cave-preserve overlay from `layers/ground.geojson`.
-    public static let resolverVersion = 8
+    /// not keep replaying it. v9 injects packed KHAN EYE houses, trees, signals,
+    /// lamps and signs from `khan.pmtiles`.
+    public static let resolverVersion = 9
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -848,6 +855,7 @@ public enum PackStyle {
         var layers = obj["layers"] as? [[String: Any]] ?? []
         attachWaterLayers(&sources, &layers, packRoot: packRoot)
         attachGroundLayers(&sources, &layers, packRoot: packRoot)
+        attachKhanLayers(&sources, &layers, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
         if FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
@@ -988,6 +996,141 @@ public enum PackStyle {
         }
         obj["sources"] = sources
         obj["layers"] = layers
+    }
+
+    /// Packed OSM houses, trees, signals, lamps and signs. Visible only while
+    /// KHAN EYE is live. Walking MAP keeps them off.
+    public static func attachKhanLayers(
+        _ sources: inout [String: Any],
+        _ layers: inout [[String: Any]],
+        packRoot: URL
+    ) {
+        let archive = packRoot.appendingPathComponent("khan.pmtiles")
+        guard FileManager.default.fileExists(atPath: archive.path) else { return }
+        if var existing = sources[khanSourceID] as? [String: Any] {
+            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[khanSourceID] = existing
+            }
+        } else {
+            sources[khanSourceID] = [
+                "type": "vector",
+                "url": PMTilesURL.shipped(for: archive),
+            ]
+        }
+        let hidden: [String: Any] = ["visibility": "none"]
+        let buildingColor: [Any] = [
+            "match",
+            ["get", "kind"],
+            "tree", "#245A32",
+            "wood", "#1A3F26",
+            "house", "#6B6560",
+            "detached", "#6B6560",
+            "apartments", "#4E555C",
+            "residential", "#4E555C",
+            "industrial", "#3C4248",
+            "warehouse", "#3C4248",
+            "retail", "#5A5048",
+            "commercial", "#5A5048",
+            "#585E64",
+        ]
+        let wanted: [[String: Any]] = [
+            [
+                "id": khanBuildingsLayerID,
+                "type": "fill-extrusion",
+                "source": khanSourceID,
+                "source-layer": khanBuildingSourceLayer,
+                "minzoom": 11,
+                "filter": ["!", ["in", ["get", "kind"], ["literal", ["tree", "wood"]]]],
+                "layout": hidden,
+                "paint": [
+                    "fill-extrusion-color": buildingColor,
+                    "fill-extrusion-height": ["to-number", ["get", "height_m"]],
+                    "fill-extrusion-base": 0,
+                    "fill-extrusion-opacity": 0.92,
+                    "fill-extrusion-vertical-gradient": true,
+                ],
+            ],
+            [
+                "id": khanTreesLayerID,
+                "type": "fill-extrusion",
+                "source": khanSourceID,
+                "source-layer": khanBuildingSourceLayer,
+                "minzoom": 13,
+                "filter": ["in", ["get", "kind"], ["literal", ["tree", "wood"]]],
+                "layout": hidden,
+                "paint": [
+                    "fill-extrusion-color": [
+                        "match",
+                        ["get", "kind"],
+                        "wood", "#1A3F26",
+                        "#245A32",
+                    ],
+                    "fill-extrusion-height": ["to-number", ["get", "height_m"]],
+                    "fill-extrusion-base": 0,
+                    "fill-extrusion-opacity": 0.78,
+                    "fill-extrusion-vertical-gradient": true,
+                ],
+            ],
+            [
+                "id": khanSignalsLayerID,
+                "type": "circle",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 13,
+                "filter": ["==", ["get", "kind"], "signal"],
+                "layout": hidden,
+                "paint": [
+                    "circle-color": accentInk,
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.2, 16, 5.6],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 1.0,
+                ],
+            ],
+            [
+                "id": khanLampsLayerID,
+                "type": "circle",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 13,
+                "filter": ["==", ["get", "kind"], "lamp"],
+                "layout": hidden,
+                "paint": [
+                    "circle-color": "#E8A040",
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.4],
+                    "circle-stroke-color": voidInk,
+                    "circle-stroke-width": 0.8,
+                ],
+            ],
+            [
+                "id": khanSignsLayerID,
+                "type": "symbol",
+                "source": khanSourceID,
+                "source-layer": khanFurnitureSourceLayer,
+                "minzoom": 14,
+                "filter": ["==", ["get", "kind"], "sign"],
+                "layout": [
+                    "visibility": "none",
+                    "text-field": ["coalesce", ["get", "sign"], ["get", "name"], ""],
+                    "text-size": 12,
+                    "text-font": ["Open Sans Regular"],
+                    "text-anchor": "bottom",
+                    "text-offset": [0, -0.4],
+                    "text-optional": true,
+                ],
+                "paint": [
+                    "text-color": silverInk,
+                    "text-halo-color": voidInk,
+                    "text-halo-width": 1.6,
+                ],
+            ],
+        ]
+        for layer in wanted {
+            let id = layer["id"] as? String
+            if let id, !layers.contains(where: { $0["id"] as? String == id }) {
+                layers.append(layer)
+            }
+        }
     }
 
     /// Water by zoom, on a pack that may predate the class-mark file.

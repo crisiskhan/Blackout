@@ -2087,6 +2087,7 @@ extension PackStyle {
 
     private static func paintSun(_ layer: MLNStyleLayer, field: UIColor, ink: UIColor) {
         let id = layer.identifier
+        if id.hasPrefix("khan-") { return }
         switch layer {
         case let background as MLNBackgroundStyleLayer:
             background.backgroundColor = NSExpression(forConstantValue: field)
@@ -2162,6 +2163,9 @@ extension PackStyle {
             if godsEye, holdsKhanDetail(id) {
                 layer.minimumZoomLevel = Float(PackCamera.minZoom)
             }
+            if id.hasPrefix("khan-") {
+                layer.isVisible = godsEye
+            }
             if let symbol = layer as? MLNSymbolStyleLayer,
                id == roadLabelsLayerID || id == roadRefsLayerID || id == "water-labels"
                 || id == "place-labels"
@@ -2223,6 +2227,8 @@ extension PackStyle {
             }
         case let raster as MLNRasterStyleLayer:
             raster.rasterOpacity = NSExpression(forConstantValue: 0.72)
+        case let extrusion as MLNFillExtrusionStyleLayer:
+            extrusion.fillExtrusionColor = NSExpression(forConstantValue: heat)
         case let circle as MLNCircleStyleLayer:
             if layer.identifier.hasPrefix("water") {
                 circle.circleColor = NSExpression(forConstantValue: ice)
@@ -2248,6 +2254,8 @@ extension PackStyle {
             circle.circleColor = NSExpression(forConstantValue: green)
         case let raster as MLNRasterStyleLayer:
             raster.rasterOpacity = NSExpression(forConstantValue: 0.55)
+        case let extrusion as MLNFillExtrusionStyleLayer:
+            extrusion.fillExtrusionColor = NSExpression(forConstantValue: green)
         default:
             break
         }

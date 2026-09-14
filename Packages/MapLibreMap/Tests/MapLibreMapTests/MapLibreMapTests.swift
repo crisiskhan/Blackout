@@ -329,6 +329,7 @@ final class MapLibreMapTests: XCTestCase {
             .write(to: pack.appendingPathComponent("osm.geojson"))
         try Data("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"highway\":\"residential\"},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[-81.48,30.46],[-81.47,30.47]]}}]}".utf8)
             .write(to: pack.appendingPathComponent("wild.geojson"))
+        try Data("khan".utf8).write(to: pack.appendingPathComponent("khan.pmtiles"))
         let style = pack.appendingPathComponent("style.json")
         let obj: [String: Any] = [
             "version": 8,
@@ -354,6 +355,23 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.roadRefsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.placeLabelsLayerID && $0["type"] as? String == "symbol" })
         XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.tracksLayerID && $0["type"] as? String == "line" })
+        XCTAssertEqual((sources?["khan"] as? [String: Any])?["type"] as? String, "vector")
+        let khanURL = (sources?["khan"] as? [String: Any])?["url"] as? String ?? ""
+        XCTAssertTrue(khanURL.hasPrefix("pmtiles://file://"), khanURL)
+        XCTAssertTrue(khanURL.hasSuffix("khan.pmtiles"), khanURL)
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanBuildingsLayerID && $0["type"] as? String == "fill-extrusion" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanTreesLayerID && $0["type"] as? String == "fill-extrusion" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanSignalsLayerID && $0["type"] as? String == "circle" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanLampsLayerID && $0["type"] as? String == "circle" })
+        XCTAssertTrue(layers.contains { $0["id"] as? String == PackStyle.khanSignsLayerID && $0["type"] as? String == "symbol" })
+        let houses = layers.first { $0["id"] as? String == PackStyle.khanBuildingsLayerID }
+        XCTAssertEqual(houses?["source"] as? String, PackStyle.khanSourceID)
+        XCTAssertEqual(houses?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
+        XCTAssertEqual((houses?["layout"] as? [String: Any])?["visibility"] as? String, "none")
+        let trees = layers.first { $0["id"] as? String == PackStyle.khanTreesLayerID }
+        XCTAssertEqual(trees?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
+        let signals = layers.first { $0["id"] as? String == PackStyle.khanSignalsLayerID }
+        XCTAssertEqual(signals?["source-layer"] as? String, PackStyle.khanFurnitureSourceLayer)
         let roadLabel = layers.first { $0["id"] as? String == PackStyle.roadLabelsLayerID }
         let roadPaint = roadLabel?["paint"] as? [String: Any]
         let roadLayout = roadLabel?["layout"] as? [String: Any]
@@ -1197,6 +1215,15 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.khanLandOpacity, 0.14, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanShadeContrast, 0.48, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanContourOpacity, 0.9, accuracy: 0.001)
+        XCTAssertEqual(PackStyle.resolverVersion, 9)
+        XCTAssertEqual(PackStyle.khanSourceID, "khan")
+        XCTAssertEqual(PackStyle.khanBuildingsLayerID, "khan-buildings")
+        XCTAssertEqual(PackStyle.khanTreesLayerID, "khan-trees")
+        XCTAssertEqual(PackStyle.khanSignalsLayerID, "khan-signals")
+        XCTAssertEqual(PackStyle.khanLampsLayerID, "khan-lamps")
+        XCTAssertEqual(PackStyle.khanSignsLayerID, "khan-signs")
+        XCTAssertEqual(PackStyle.khanBuildingSourceLayer, "building")
+        XCTAssertEqual(PackStyle.khanFurnitureSourceLayer, "furniture")
         XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))

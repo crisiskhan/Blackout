@@ -26,7 +26,7 @@ from shapely.geometry import Polygon, mapping
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from . import graphbin, ground, search_index, tiles
+from . import graphbin, ground, khan, search_index, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -286,7 +286,10 @@ def _http_bytes(url: str, data: bytes | None = None, timeout: int = 120) -> byte
     req = urllib.request.Request(
         url,
         data=data,
-        headers={"User-Agent": "BlackoutPackBuilder/3.0 (offline field vessel; build-time extract)"},
+        headers={
+            "User-Agent": "BlackoutPackBuilder/3.0 (offline field vessel; build-time extract)",
+            "Accept": "*/*",
+        },
         method="POST" if data else "GET",
     )
     last = None
@@ -1437,7 +1440,7 @@ def highway_in(values: list[str]) -> list:
 STAMP = "osm.fetched"
 # Build-time only. The extract is the tiler's input, and the date it carries
 # reaches the phone through the manifest rather than as a loose file.
-NOT_SHIPPED = {"osm.geojson", STAMP}
+NOT_SHIPPED = {"osm.geojson", "khan.geojson", STAMP}
 
 
 def stamp_fetch(dest: Path) -> str:
@@ -1499,6 +1502,13 @@ def build_tiles(dest: Path, pack: dict) -> dict:
     return info
 
 
+def build_khan_tiles(dest: Path, pack: dict) -> dict:
+    """Cut OSM houses and street furniture for the KHAN EYE desk."""
+    info = tiles.build_khan(dest, union_bbox(pack["slices"]), pack["name"])
+    print(f"  khan tiled {pack['id']} {info['tiles']:,} tiles {info['bytes'] / 1e6:.1f} MB", flush=True)
+    return info
+
+
 def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
     """Blackout void/red/silver style. Streets and names must read at walking zoom."""
     sources: dict = {
@@ -1515,6 +1525,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "flood": {"type": "geojson", "data": "layers/flood.geojson"},
         "hazards": {"type": "geojson", "data": "layers/hazards.geojson"},
         "wild": {"type": "geojson", "data": "wild.geojson"},
+        "khan": khan.style_source(),
     }
     layers: list[dict] = [
         {"id": "void", "type": "background", "paint": {"background-color": VOID_INK}},
@@ -1737,6 +1748,11 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
                 "source": "hazards",
                 "paint": {"line-color": ACCENT_INK, "line-width": 1.4},
             },
+        ]
+    )
+    layers.extend(khan.style_layers())
+    layers.extend(
+        [
             {
                 "id": "osm-points",
                 "type": "circle",
@@ -1869,6 +1885,12 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "glyphs": "glyphs/{fontstack}/{range}.pbf",
         "sources": sources,
         "layers": layers,
+        "light": {
+            "anchor": "viewport",
+            "color": "#ffffff",
+            "intensity": 0.55,
+            "position": [1.15, 210, 30],
+        },
         "metadata": {
             "engine": "maplibre-metal-offline",
             "network": "deny-all",
@@ -2042,6 +2064,7 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
     write_compact(dest / "osm.geojson", fc)
     write_graph_binary(dest / "graph.bin", graph)
     build_tiles(dest, pack)
+    build_khan_tiles(dest, pack)
 
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -2244,6 +2267,88 @@ def grow_notable(dest: Path, pack: dict, span: float = 5.0) -> dict:
     return {"before": before, "added": len(added), "after": len(fc["features"])}
 
 
+def overpass_khan(south: float, west: float, north: float, east: float) -> dict:
+    q = khan.overpass_query(south, west, north, east)
+    return _overpass(q, f"khan:{south},{west},{north},{east}", timeout=120)
+
+
+def _fetch_khan_tile(tile: dict, min_span: float = 0.05) -> list[dict]:
+    """One KHAN Overpass tile, split if the city block is too heavy."""
+    try:
+        return [overpass_khan(tile["south"], tile["west"], tile["north"], tile["east"])]
+    except RuntimeError as exc:
+        span = min(tile["north"] - tile["south"], tile["east"] - tile["west"])
+        if span <= min_span:
+            print(f"  khan skip {tile}: {exc}", flush=True)
+            return []
+        print(f"  khan split {tile}: {exc}", flush=True)
+        parts: list[dict] = []
+        for sub in tile_bbox(tile, max_span=max(min_span, span / 2.0)):
+            parts.extend(_fetch_khan_tile(sub, min_span=min_span))
+            time.sleep(1.0)
+        return parts
+
+
+def fetch_khan_pack(pack: dict, dest: Path, max_span: float = 0.2) -> dict:
+    """Pull OSM houses, trees, signals, lamps and signs, then cut khan.pmtiles.
+
+    City slices land first so a refused desert tile cannot wipe El Paso. Each
+    slice writes `khan.geojson` so a killed run still has the houses it paid for.
+    """
+    dest.mkdir(parents=True, exist_ok=True)
+    parts: list[dict] = []
+    order = ("metro", "corridor", "union", "border", "region")
+    seen: set[tuple[float, float, float, float]] = set()
+    for key in order:
+        sl = pack["slices"].get(key)
+        if not sl:
+            continue
+        box = {
+            "south": sl["south"],
+            "west": sl["west"],
+            "north": sl["north"],
+            "east": sl["east"],
+        }
+        span = 0.12 if key in {"metro", "corridor", "union", "border"} else max_span
+        grid = tile_bbox(box, max_span=span)
+        fresh = []
+        for tile in grid:
+            mark = (round(tile["south"], 5), round(tile["west"], 5), round(tile["north"], 5), round(tile["east"], 5))
+            if mark in seen:
+                continue
+            seen.add(mark)
+            fresh.append(tile)
+        if not fresh:
+            continue
+        print(f"  KHAN {pack['id']}/{key} tiles={len(fresh)}", flush=True)
+        for i, tile in enumerate(fresh, 1):
+            print(f"  khan tile {i}/{len(fresh)} {tile}", flush=True)
+            parts.extend(_fetch_khan_tile(tile))
+            time.sleep(1.0)
+        fc = khan.elements_to_geojson(merge_osm(parts))
+        write_compact(dest / "khan.geojson", fc)
+        print(f"  khan checkpoint {pack['id']}/{key} features={len(fc['features']):,}", flush=True)
+    if not (dest / "khan.geojson").is_file():
+        write_compact(dest / "khan.geojson", {"type": "FeatureCollection", "features": [], "attribution": OSM_CREDIT})
+    fc = json.loads((dest / "khan.geojson").read_text())
+    info = build_khan_tiles(dest, pack)
+    restyle_existing(dest)
+    print(
+        f"  khan {pack['id']} features={len(fc['features']):,} "
+        f"tiles={info['tiles']:,} {info['bytes'] / 1e6:.1f} MB",
+        flush=True,
+    )
+    return {"features": len(fc["features"]), **info}
+
+
+def khan_packs(ids: list[str] | None = None) -> None:
+    root = ROOT / "Resources" / "Packs"
+    for pid in ids or list(PACKS):
+        print("KHAN", pid, flush=True)
+        fetch_khan_pack(PACKS[pid], root / pid)
+    write_catalog(root)
+
+
 def finalize_existing(dest: Path) -> dict:
     """Finish a pack after OSM/DEM/3DEP files are already on disk (no re-fetch)."""
     fc = json.loads((dest / "osm.geojson").read_text())
@@ -2259,6 +2364,7 @@ def finalize_existing(dest: Path) -> dict:
 
     pack = PACKS[dest.name]
     build_tiles(dest, pack)
+    build_khan_tiles(dest, pack)
     bb = union_bbox(pack["slices"])
     slice_summaries = {}
     for key, sl in pack["slices"].items():
@@ -2452,7 +2558,9 @@ def classify_packs(ids: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    if argv and argv[0] == "--rebuild":
+    if argv and argv[0] == "--khan":
+        khan_packs(argv[1:] or None)
+    elif argv and argv[0] == "--rebuild":
         rebuild(argv[1:] or None)
     elif argv and argv[0] == "--restyle":
         restyle(argv[1:] or None)
