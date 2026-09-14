@@ -17,8 +17,8 @@ struct MapTab: View {
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
-            if let pack = runtime.packs?.active, let style = styleURL() {
-                canvas(pack: pack, style: style)
+            if let pack = runtime.packs?.active {
+                canvas(pack: pack)
             } else {
                 Text("Packs missing from bundle — honest empty.")
                     .foregroundStyle(Theme.silver.opacity(0.5))
@@ -38,7 +38,7 @@ struct MapTab: View {
     }
 
     @ViewBuilder
-    private func canvas(pack: PackManifest, style: URL) -> some View {
+    private func canvas(pack: PackManifest) -> some View {
         let home = pack.home ?? pack.center
         let you = runtime.fieldYou
         let camera = UserPuck.coordinate(
@@ -54,8 +54,8 @@ struct MapTab: View {
             bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
         ) == PackChrome.offPack
         ZStack(alignment: .bottomLeading) {
-            OfflineMapView(
-                styleURL: style,
+            GlobeView(
+                packID: pack.id,
                 centerLat: camera.lat,
                 centerLon: camera.lon,
                 puckLat: you?.lat ?? camera.lat,
@@ -104,13 +104,18 @@ struct MapTab: View {
                 godsEye: runtime.godsEye,
                 travelMode: runtime.travelMode,
                 sun: runtime.lamp == .sun,
+                night: runtime.lamp == .night,
                 eyeLayers: runtime.eyeLayers,
                 eyePalette: runtime.eyePalette,
+                eyeGround: runtime.eyeGround,
                 followID: runtime.eyeFollowID,
                 trails: runtime.godsEye ? runtime.eyeTrails() : [],
                 rings: runtime.godsEye ? runtime.eyeRings() : [],
                 frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
-                offAerial: runtime.godsEye && EyeDesk.aerialChrome(hasPackAerial: runtime.packHasAerial) != nil
+                aerialURL: packFile("aerial.pmtiles"),
+                demURL: packFile("dem.json"),
+                waterURL: packFile("layers/water.geojson"),
+                contoursURL: packFile("contours.geojson")
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the
@@ -210,10 +215,9 @@ struct MapTab: View {
             || runtime.heldMark != nil
     }
 
-    /// Everything that is not the map, sitting on the map. Search, lock, KHAN EYE and
-    /// instruments at the top; status and the four thumb cells at the bottom.
-    /// KHAN EYE takes the packed canvas as a 3D photo desk: walking SEARCH recedes.
-    /// LAYERS / LOOK / MARK / SCENE live in Instruments so the photo is the glass.
+    /// Everything that is not the map, sitting on the map. Search, lock, UPDATE and
+    /// instruments at the top; NIGHT / SUN / EYE and the four thumb cells at the bottom.
+    /// KHAN EYE is the packed Cesium desk. LAYERS / LOOK / MARK / SCENE live in Instruments.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
@@ -264,7 +268,10 @@ struct MapTab: View {
                 onMove: { runtime.hudLayout.dock = $0 },
                 onStore: { runtime.hudLayout.save() }
             ) {
-                dock
+                VStack(spacing: 6) {
+                    lampRail
+                    dock
+                }
             }
             HUDPlaced(
                 offset: runtime.hudLayout.footer,
@@ -327,13 +334,29 @@ struct MapTab: View {
                 runtime.toggleLockOn()
             }
             .buttonStyle(HUDOverlayChipStyle(filled: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye) || runtime.eyeFollowID != nil))
+            Button(BlackoutTokens.MapOverlay.updateTitle) {
+                runtime.touch(.overlay)
+                runtime.tapUpdate()
+            }
+            .buttonStyle(HUDOverlayChipStyle(filled: runtime.updateSocket.busy))
+        }
+        .animation(Theme.Motion.heavy, value: runtime.updateSocket.busy)
+        .animation(Theme.Motion.heavy, value: runtime.lockOn)
+    }
+
+    private var lampRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            Button("NIGHT") { runtime.tapLamp(.night) }
+                .buttonStyle(HUDOverlayChipStyle(filled: runtime.lamp == .night))
+            Button("SUN") { runtime.tapLamp(.sun) }
+                .buttonStyle(HUDOverlayChipStyle(filled: runtime.lamp == .sun))
             Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
                 runtime.toggleGodsEye()
             }
             .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
         }
         .animation(Theme.Motion.heavy, value: runtime.godsEye)
-        .animation(Theme.Motion.heavy, value: runtime.lockOn)
+        .animation(Theme.Motion.heavy, value: runtime.lamp)
     }
 
     private var hitList: some View {
@@ -571,7 +594,7 @@ struct MapTab: View {
         }
     }
 
-    /// Pack name on the canvas. The map opens on YOU at walking zoom.
+    /// Pack name on the canvas. The globe opens on YOU at walking height.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             if offPack {
@@ -582,15 +605,19 @@ struct MapTab: View {
             Text(packName)
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(Theme.silver)
+            ForEach(runtime.eyeHUDLines(), id: \.self) { line in
+                Text(line)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Theme.silver)
+            }
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 2)
     }
 
-    private func styleURL() -> URL? {
-        guard let style = runtime.packs?.packURL("style.json") else { return nil }
-        let root = style.deletingLastPathComponent()
-        return (try? PackStyle.resolved(styleAt: style, packRoot: root)) ?? style
+    private func packFile(_ name: String) -> URL? {
+        guard let url = runtime.packs?.packURL(name) else { return nil }
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
     private func search() {

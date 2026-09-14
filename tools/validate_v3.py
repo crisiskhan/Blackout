@@ -84,6 +84,8 @@ def no_stubs() -> None:
 
 
 def no_old_engine() -> None:
+    allowed_session = {"UpdateSocket.swift"}
+    allowed_web = {"GlobeView.swift"}
     hits = []
     for p in (ROOT / "Packages").rglob("*.swift"):
         t = p.read_text(errors="ignore")
@@ -91,14 +93,20 @@ def no_old_engine() -> None:
             hits.append(p)
         if "URLSession" in t:
             hits.append(p)
+        if "WKWebView" in t:
+            hits.append(p)
     for p in (ROOT / "Blackout").rglob("*.swift"):
         t = p.read_text(errors="ignore")
-        if "MKMapView(" in t or "URLSession" in t:
+        if "MKMapView(" in t:
+            hits.append(p)
+        if "URLSession" in t and p.name not in allowed_session:
+            hits.append(p)
+        if "WKWebView" in t and p.name not in allowed_web:
             hits.append(p)
     if hits:
         bad(f"forbidden API {hits}")
     else:
-        ok("no MapKit engine / no URLSession in app+packages")
+        ok("MapKit banned; URLSession only UpdateSocket; WKWebView only GlobeView")
 
 
 def field_schema() -> None:
@@ -641,15 +649,20 @@ def tip55_chrome() -> None:
         ok("tokens tab caption 10pt")
 
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    globe = (ROOT / "Blackout" / "GlobeView.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
-    if "OfflineMapView(" not in map_tab:
-        bad("Map tab does not host OfflineMapView")
+    if "GlobeView(" not in map_tab:
+        bad("Map tab does not host GlobeView")
+    elif "OfflineMapView(" in map_tab:
+        bad("Map tab still mounts OfflineMapView")
     elif "RegionalPacks.visible" in map_tab:
         bad("Map tab still renders pack-bullet / Guide FTS list as canvas")
     else:
-        ok("Map tab hosts MapLibre canvas, not pack-bullet list")
-    if "showsUserLocation" not in offline:
+        ok("Map tab hosts Cesium globe, not pack-bullet list")
+    if "WKWebView" not in globe or "loadFileURL" not in globe:
+        bad("GlobeView missing file:// Cesium host")
+    elif "showsUserLocation" not in offline:
         bad("OfflineMapView missing user puck")
     elif "UserPuck" not in offline or "YouPuckAnnotationView" not in offline:
         bad("OfflineMapView missing visible YOU fallback puck")
@@ -1272,6 +1285,7 @@ def main() -> None:
     tip65_speak()
     tip68_speak_field()
     address_search()
+    cesium_globe()
     hud_quality()
     water_inspect()
     sys.exit(fail)
@@ -1382,6 +1396,20 @@ def address_search() -> None:
         bad(f"address search contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: MAP SEARCH addresses — house number + street, glass card")
+
+
+def cesium_globe() -> None:
+    """Cesium is the only map. UPDATE is the only socket."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_cesium_globe.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"Cesium globe contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: Cesium globe + UPDATE socket + CPV tree")
 
 
 def hud_quality() -> None:

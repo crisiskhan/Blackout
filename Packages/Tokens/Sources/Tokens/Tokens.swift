@@ -176,6 +176,7 @@ public enum BlackoutTokens: Sendable {
         public static let lockOnTitle = "LOCK-ON"
         public static let lockedTitle = "LOCKED"
         public static let godsEyeTitle = "KHAN EYE"
+        public static let updateTitle = "UPDATE"
 
         public static func lockTitle(locked: Bool) -> String {
             locked ? lockedTitle : lockOnTitle

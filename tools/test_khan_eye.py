@@ -155,6 +155,8 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertNotIn("WKWebView", swift)
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
+        self.assertIn("GlobeView(", tab)
+        self.assertNotIn("OfflineMapView(", tab)
         self.assertNotIn("eyeDeskRail", tab)
         self.assertNotIn("HUDGlassCard", tab)
         desk = inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0]

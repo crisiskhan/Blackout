@@ -262,6 +262,9 @@ class KeepMapMountedTests(unittest.TestCase):
         self.assertIn("isUserInteractionEnabled = interactive", read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
         ))
+        self.assertIn("GlobeView(", tab)
+        self.assertNotIn("OfflineMapView(", tab)
+        self.assertIn("isUserInteractionEnabled = interactive", read("Blackout", "GlobeView.swift"))
         self.assertIn("HUDPage", read("Blackout", "CommsTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "FieldTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "ExpeditionTab.swift"))
@@ -369,6 +372,7 @@ class WholeWordHUDTests(unittest.TestCase):
         self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
         self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
         self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.updateTitle", tab)
         self.assertNotIn('Button("INST")', tab)
         self.assertNotIn('"LOCKED" : "LOCK"', tab)
         self.assertNotIn('Button("FIT PACK")', tab)
@@ -377,6 +381,7 @@ class WholeWordHUDTests(unittest.TestCase):
         self.assertIn('instrumentsTitle = "INSTRUMENTS"', tokens)
         self.assertIn('lockOnTitle = "LOCK-ON"', tokens)
         self.assertIn('godsEyeTitle = "KHAN EYE"', tokens)
+        self.assertIn('updateTitle = "UPDATE"', tokens)
         self.assertIn(".minimumScaleFactor(1)", read("Blackout", "RootChrome.swift"))
         self.assertNotIn(".minimumScaleFactor(0.55)", read("Blackout", "RootChrome.swift"))
 

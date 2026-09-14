@@ -24,10 +24,10 @@ struct InstrumentsView: View {
                                 runtime.switchPack(p.id)
                             } label: {
                                 HStack {
-                                    Text(p.name)
+                                    Text("\(p.name) · \(max(p.bytes / 1_000_000, 1)) MB")
                                     Spacer()
                                     if runtime.packs?.active?.id == p.id {
-                                        Text("LIVE")
+                                        Text("PACK")
                                             .foregroundStyle(Theme.silver)
                                     }
                                 }
@@ -96,9 +96,6 @@ struct InstrumentsView: View {
                         .font(.caption.weight(.bold))
                         .foregroundStyle(runtime.instruments.state.sosFlash ? Theme.silver : Theme.silver.opacity(0.45))
                     hudButton("COMPASS CAL") { runtime.calibrateCompass() }
-                    Text(runtime.headingDeg == nil ? "NEED" : "CAL")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(runtime.headingDeg == nil ? Theme.silver.opacity(0.45) : Theme.silver)
                     hudButton("TRUE NORTH") { runtime.setTrueNorth() }
                     Text(runtime.instruments.state.magNorth ? "MAG NORTH" : "TRUE NORTH")
                         .font(.caption.weight(.bold))
@@ -169,7 +166,7 @@ struct InstrumentsView: View {
             return runtime.torchAvailable ? "SOS" : "SOS · SCREEN"
         }
         if !runtime.torchAvailable { return "LAMP · NONE" }
-        return "OFF"
+        return "LAMP · READY"
     }
 
     @ViewBuilder
@@ -230,6 +227,12 @@ struct InstrumentsView: View {
                             .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyePalette == palette))
                     }
                 }
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    ForEach(EyeDesk.Ground.allCases, id: \.self) { ground in
+                        Button(ground.title) { runtime.setEyeGround(ground) }
+                            .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyeGround == ground))
+                    }
+                }
                 eyeDeskCaption("MARK")
                 HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                     ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
@@ -259,6 +262,11 @@ struct InstrumentsView: View {
                         Text(line)
                             .font(.system(size: 11, weight: .heavy, design: .monospaced))
                             .foregroundStyle(Theme.silver)
+                    }
+                    ForEach(Array(runtime.updateSocket.offLabels.enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                            .foregroundStyle(Theme.silver.opacity(0.55))
                     }
                 }
             }

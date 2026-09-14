@@ -35,7 +35,7 @@ public struct NightRedState: Equatable, Sendable {
     public init(enabled: Bool) { self.enabled = enabled }
 
     /// Multiply ink. White when the lamp is off so the modifier can stay
-    /// on the tree (MapLibre stays mounted).
+    /// on the tree (the globe stays mounted).
     public var filter: BlackoutTokens.RGBA { multiply }
 
     public var multiply: BlackoutTokens.RGBA {

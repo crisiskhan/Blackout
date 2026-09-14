@@ -63,11 +63,13 @@ final class AppRuntime {
     var godsEye = false
     var eyeLayers: [EyeDesk.Layer] = EyeDesk.liveDeskLayers
     var eyePalette: EyeDesk.Palette = .streets
+    var eyeGround: EyeDesk.Ground = .hybrid
     var eyeFollowID: String?
     var eyeTap: HeldPerson?
     var eyeScenes: [EyeDesk.Scene] = []
     var eyeJump: (lat: Double, lon: Double)?
     var showInstruments = false
+    var updateSocket = UpdateSocket()
     var chromeAwake = true
     var hudLayoutMode = false
     var hudLayout = HUDLayout.load()
@@ -184,6 +186,7 @@ final class AppRuntime {
         godsEye = EyeDesk.load()
         eyeLayers = EyeDesk.loadLayers()
         eyePalette = EyeDesk.loadPalette()
+        eyeGround = EyeDesk.loadGround()
         eyeScenes = EyeDesk.loadScenes()
         UIDevice.current.isBatteryMonitoringEnabled = true
         if let raw = UserDefaults.standard.string(forKey: "hud.lamp"),
@@ -222,6 +225,7 @@ final class AppRuntime {
         loadFieldBookIDs()
         bootVessel()
         applyMapKeepAwake()
+        updateSocket.start()
     }
 
     var bootReady: Bool {
@@ -893,6 +897,12 @@ final class AppRuntime {
         pulse()
     }
 
+    func setEyeGround(_ ground: EyeDesk.Ground) {
+        eyeGround = ground
+        EyeDesk.saveGround(ground)
+        pulse()
+    }
+
     func followEyeContact(_ id: String) {
         eyeFollowID = id
         eyeTap = nil
@@ -1092,6 +1102,25 @@ final class AppRuntime {
                 self.speakMap()
             }
         }
+    }
+
+    func tapUpdate() {
+        touch(.overlay)
+        guard let pack = packs?.active else {
+            updateSocket.chrome = EyeDesk.noPipe
+            return
+        }
+        let home = pack.home ?? pack.center
+        let you = fieldYou
+        updateSocket.tap(
+            south: pack.bbox.south,
+            west: pack.bbox.west,
+            north: pack.bbox.north,
+            east: pack.bbox.east,
+            lat: you?.lat ?? home.lat,
+            lon: you?.lon ?? home.lon,
+            packRoot: packs?.packRoot(id: pack.id)
+        )
     }
 
     func fitPack() {
@@ -2150,15 +2179,25 @@ final class AppRuntime {
         }
         lines.append(EyeDesk.hudLine(tag: "MESH", text: EyeDesk.netChrome(peers: mesh.nearby.count)))
         lines.append(EyeDesk.powerChrome(power.state.mode.rawValue))
+        lines.append(EyeDesk.hudLine(tag: EyeDesk.packStamp, text: packs?.active?.name ?? "NONE"))
         if let aerial = EyeDesk.aerialChrome(hasPackAerial: packHasAerial) {
             lines.append(aerial)
         }
+        if let terrain = EyeDesk.terrainChrome(hasPackTerrain: packHasTerrain) {
+            lines.append(terrain)
+        }
+        lines.append(EyeDesk.hudLine(tag: EyeDesk.snapStamp, text: updateSocket.chrome))
         return lines
     }
 
     var packHasAerial: Bool {
         guard let packs, let id = packs.active?.id else { return false }
         return EyeDesk.hasPackAerial(packRoot: packs.packRoot(id: id))
+    }
+
+    var packHasTerrain: Bool {
+        guard let packs, let id = packs.active?.id else { return false }
+        return EyeDesk.hasPackTerrain(packRoot: packs.packRoot(id: id))
     }
 
     var packHasShade: Bool {

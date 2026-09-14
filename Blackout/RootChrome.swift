@@ -94,7 +94,7 @@ struct RootChrome: View {
     }
 
     /// Overlay pages sit above the tab strip. MapTab stays full-bleed so a
-    /// tab change cannot resize MapLibre and snap the camera back to YOU.
+    /// tab change cannot resize the globe and snap the camera back to YOU.
     private var overlayBottomPad: CGFloat {
         runtime.leftHand ? 0 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
     }
@@ -111,8 +111,8 @@ struct RootChrome: View {
     }
 
     private var tabBody: some View {
-        // MapLibre dies if MapTab is destroyed while Field opens from the
-        // hold card (ASC 72/73). Keep Map mounted under every tab. The other
+        // The globe dies if MapTab is destroyed while Field opens from the
+        // hold card (ASC 72/73). Keep the globe mounted under every tab. The other
         // tabs are glass over it so the ground is still there.
         ZStack {
             MapTab(runtime: runtime)

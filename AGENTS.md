@@ -17,7 +17,7 @@ unfinished tabs.
 - 44pt hits. Nothing disabled: a tap draws, or it says why not.
 - One HUD language on every tab: glass, void, silver, accent. MAP is not allowed to
   look finished while COMMS / FIELD / EXPEDITION are form dumps.
-- Keep MapLibre mounted when another tab opens. Destroying MapTab to open Field
+- Keep the globe mounted when another tab opens. Destroying MapTab to open Field
   crashed on device (ASC 72/73). The ground stays in the tree; the other tabs sit on
   glass over it.
 - FIELD on the hold card must not tear the card down on the same turn as the button
@@ -78,11 +78,13 @@ protects. If a guard is wrong, change the guard on purpose — do not route arou
 
 ## Fail closed
 
-The audit rejects `URLSession`, `WKWebView`, analytics SDKs, CloudKit, `MKMapView(`,
-`tel://911` and coming-soon stub language anywhere under `Blackout/` or `Packages/`. Behind
-those greps: bundled MapLibre tiles only, no Apple or Google base map, no account, no
-backend. SOS logs before it arms and never auto-dials. Dark only. "Unknown" is a valid Vision
-answer. When a capability is unavailable, the UI says so — it never spins.
+The audit rejects `URLSession` except `UpdateSocket.swift`, `WKWebView` except
+`GlobeView.swift`, analytics SDKs, CloudKit, `MKMapView(`, `tel://911` and
+coming-soon stub language anywhere under `Blackout/` or `Packages/`. Behind
+those greps: bundled Cesium globe + packed tiles, no Apple Maps or other live base map,
+no account, no backend except the UPDATE chip's one-shot SNAP. SOS logs before
+it arms and never auto-dials. Dark only. "Unknown" is a valid Vision answer.
+When a capability is unavailable, the UI says so — it never spins.
 
 ## This box cannot build iOS
 

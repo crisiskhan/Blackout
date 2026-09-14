@@ -6,6 +6,7 @@ public enum EyeDesk {
     public static let persistKey = "hud.eye"
     public static let layerKey = "hud.eye.layers"
     public static let paletteKey = "hud.eye.palette"
+    public static let groundKey = "hud.eye.ground"
     public static let sceneKey = "hud.eye.scenes"
     public static let soloMeters: Double = 160
     public static let lastAfterSeconds: Double = 30
@@ -23,6 +24,13 @@ public enum EyeDesk {
     public static let khanContourWidth: Double = 1.25
     public static let noCard = "NO CARD · DON'T GUESS"
     public static let offAerial = "OFF AERIAL"
+    public static let offTerrain = "OFF TERRAIN"
+    public static let noPipe = "NO PIPE"
+    public static let updatingTitle = "UPDATE"
+    public static let snapStamp = "SNAP"
+    public static let meshStamp = "MESH"
+    public static let phoneStamp = "PHONE"
+    public static let normStamp = "NORM"
     public static let packStamp = "PACK"
     public static let rallyTitle = "RALLY"
     public static let calBad = "CAL BAD"
@@ -63,6 +71,8 @@ public enum EyeDesk {
         case party
         case marks
         case tails
+        case vectors
+        case snap
 
         public var title: String {
             switch self {
@@ -78,6 +88,10 @@ public enum EyeDesk {
                 return "MARKS"
             case .tails:
                 return "TAILS"
+            case .vectors:
+                return "VECTORS"
+            case .snap:
+                return "SNAP"
             }
         }
     }
@@ -178,6 +192,14 @@ public enum EyeDesk {
         defaults.set(palette.rawValue, forKey: paletteKey)
     }
 
+    public static func loadGround(defaults: UserDefaults = .standard) -> Ground {
+        Ground(rawValue: defaults.string(forKey: groundKey) ?? "") ?? .hybrid
+    }
+
+    public static func saveGround(_ ground: Ground, defaults: UserDefaults = .standard) {
+        defaults.set(ground.rawValue, forKey: groundKey)
+    }
+
     public static func loadLayers(defaults: UserDefaults = .standard) -> [Layer] {
         let raw = defaults.stringArray(forKey: layerKey) ?? liveDeskLayers.map(\.rawValue)
         let parsed = raw.compactMap(Layer.init(rawValue:))
@@ -200,7 +222,7 @@ public enum EyeDesk {
             return shade
         case .water:
             return water
-        case .party, .marks, .tails:
+        case .party, .marks, .tails, .vectors, .snap:
             return true
         }
     }
@@ -297,11 +319,24 @@ public enum EyeDesk {
     }
 
     public static func netChrome(peers: Int) -> String {
-        "NET · \(max(peers, 0))"
+        if peers <= 0 { return "NET · NONE" }
+        return "NET · \(peers)"
     }
 
     public static func aerialChrome(hasPackAerial: Bool) -> String? {
         hasPackAerial ? nil : offAerial
+    }
+
+    public static func terrainChrome(hasPackTerrain: Bool) -> String? {
+        hasPackTerrain ? nil : offTerrain
+    }
+
+    public static func updatedChrome(pipe: Bool, at: Date?) -> String {
+        if !pipe { return noPipe }
+        guard let at else { return noPipe }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return "UPDATED · \(formatter.string(from: at))"
     }
 
     public static func hasPackAerial(packRoot: URL) -> Bool {
@@ -310,6 +345,10 @@ public enum EyeDesk {
             return true
         }
         return styleHasSource(packRoot: packRoot, ids: ["aerial", "naip"])
+    }
+
+    public static func hasPackTerrain(packRoot: URL) -> Bool {
+        FileManager.default.fileExists(atPath: packRoot.appendingPathComponent("dem.json").path)
     }
 
     public static func hasPackShade(packRoot: URL) -> Bool {

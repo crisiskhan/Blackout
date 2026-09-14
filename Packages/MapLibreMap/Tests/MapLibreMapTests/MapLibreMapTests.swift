@@ -14,6 +14,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(USNG.label(lat: 31.76190, lon: -106.49000), "USNG 13R CR 5889 1501")
         XCTAssertFalse(USNG.label(lat: 31.76, lon: -106.49).contains("/"))
         XCTAssertTrue(s.styleRelativePath().contains("style.json"))
+        XCTAssertGreaterThan(PackCamera.openHeightMeters(lat: 31.76), 100)
     }
 
     func testMarkStorePersistsAcrossLoad() {
@@ -1179,8 +1180,16 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.age(seconds: 200), .lost)
         XCTAssertEqual(EyeDesk.ageTitle(.last), "LAST")
         XCTAssertEqual(EyeDesk.netChrome(peers: 2), "NET · 2")
+        XCTAssertEqual(EyeDesk.netChrome(peers: 0), "NET · NONE")
         XCTAssertEqual(EyeDesk.aerialChrome(hasPackAerial: false), "OFF AERIAL")
         XCTAssertNil(EyeDesk.aerialChrome(hasPackAerial: true))
+        XCTAssertEqual(EyeDesk.terrainChrome(hasPackTerrain: false), "OFF TERRAIN")
+        XCTAssertNil(EyeDesk.terrainChrome(hasPackTerrain: true))
+        XCTAssertEqual(EyeDesk.noPipe, "NO PIPE")
+        XCTAssertEqual(EyeDesk.offTerrain, "OFF TERRAIN")
+        XCTAssertEqual(EyeDesk.Layer.vectors.title, "VECTORS")
+        XCTAssertEqual(EyeDesk.Layer.snap.title, "SNAP")
+        XCTAssertEqual(EyeDesk.Ground.hybrid.title, "HYBRID")
         XCTAssertEqual(EyeDesk.parseVoice("eye on"), .eyeOn)
         XCTAssertEqual(EyeDesk.parseVoice("khan eye on"), .eyeOn)
         XCTAssertEqual(EyeDesk.parseVoice("eye off"), .eyeOff)

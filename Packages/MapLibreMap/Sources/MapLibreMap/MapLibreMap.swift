@@ -525,6 +525,12 @@ public enum PackCamera {
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
     /// The map therefore opens on YOU at walking zoom; GODS EYE still shows the region.
     public static let openZoom: Double = 15
+    /// Cesium camera height that matches walking `openZoom` on the ellipsoid.
+    public static func openHeightMeters(lat: Double) -> Double {
+        let earth = 40_075_017.0
+        let cosine = max(cos(lat * .pi / 180), 0.2)
+        return earth * cosine / pow(2, openZoom + 1)
+    }
     public static let streetNameMinZoom: Double = 12
     /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Pinch below this is void.
     public static let minZoom: Double = 6
