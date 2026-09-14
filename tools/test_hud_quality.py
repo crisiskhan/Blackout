@@ -3957,6 +3957,10 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("PackCamera.shouldLeavePack", camera)
         self.assertIn("PackCamera.liveLockOn", camera)
         self.assertIn("godsEye: spec.godsEye", camera)
+        fit_token = camera.split("if spec.fitToken != fittedFitToken")[1].split("return")[0]
+        self.assertIn("PackCamera.shouldHoldPack", fit_token)
+        self.assertIn("fitPack", fit_token)
+        self.assertIn("godsEye: spec.godsEye", fit_token)
         fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
         self.assertIn("PackCamera.packPaddingPoints", fit)
         self.assertIn("PackCamera.packSidePaddingPoints", fit)
@@ -4007,6 +4011,9 @@ class GlassCardHonestyTests(unittest.TestCase):
         self.assertIn("Theme.glass()", shell)
         self.assertIn("Theme.Motion.heavy", shell)
         self.assertNotIn(".spring(", shell)
+        self.assertNotIn("private static let", shell)
+        self.assertIn("smallestUsableCard", shell)
+        self.assertNotIn("Self.smallestUsableCard", shell)
         for name in self.CARDS:
             src = read("Blackout", name)
             if name == "HoldCard.swift":

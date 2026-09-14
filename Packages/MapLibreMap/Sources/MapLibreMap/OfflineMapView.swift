@@ -703,17 +703,15 @@ public struct OfflineMapView: UIViewRepresentable {
             storedShowYou = spec.showYou
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
-                fitPack(spec, on: view)
-                fittedPack = pack
-                fittedSize = size
-                storedLockOn = spec.lockOn
-                storedGodsEye = spec.godsEye
-                if spec.lockOn, puckOK {
-                    followedPuck = (spec.puckLat, spec.puckLon)
-                } else {
+                if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
+                    fitPack(spec, on: view)
+                    fittedPack = pack
+                    fittedSize = size
+                    storedLockOn = spec.lockOn
+                    storedGodsEye = spec.godsEye
                     followedPuck = nil
+                    return
                 }
-                return
             }
             if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
                 storedGodsEye = true

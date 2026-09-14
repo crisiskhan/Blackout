@@ -51,7 +51,7 @@ struct HoldGlassShell<Content: View>: View {
     /// Floor for the cap, for the one layout pass where the canvas has not been
     /// measured yet. Below this the card cannot show a headline and the action
     /// buttons, and a card you cannot press is worse than a tall one.
-    private static let smallestUsableCard: CGFloat = 180
+    private var smallestUsableCard: CGFloat { 180 }
 
     private var corner: CGFloat { CGFloat(BlackoutTokens.Chrome.holdCardCornerPoints) }
 
@@ -67,7 +67,7 @@ struct HoldGlassShell<Content: View>: View {
         // the card back over the place the camera just lifted into view.
         GeometryReader { canvas in
             let cap = max(
-                Self.smallestUsableCard,
+                smallestUsableCard,
                 canvas.size.height * CGFloat(BlackoutTokens.Chrome.holdCardMaxHeightFraction)
             )
             ZStack(alignment: .bottom) {
