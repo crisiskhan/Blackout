@@ -253,7 +253,10 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                    .strokeBorder(
+                        filled ? Theme.accent : Theme.metalStroke,
+                        lineWidth: Theme.strokeWidth(filled ? 1.5 : 1)
+                    )
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
     }
@@ -426,6 +429,9 @@ struct HUDActionStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .heavy))
+            .lineLimit(2)
+            .minimumScaleFactor(1)
+            .multilineTextAlignment(.center)
             .foregroundStyle(actionInk(filled: filled, crisis: crisis))
             .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
             .contentShape(Rectangle())

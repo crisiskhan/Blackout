@@ -110,6 +110,14 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertEqual(layers[khan.KHAN_TREES_ID]["type"], "fill-extrusion")
         self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["source-layer"], "building")
         self.assertEqual(layers[khan.KHAN_SIGNALS_ID]["source-layer"], "furniture")
+        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["minzoom"], 11)
+        self.assertEqual(layers[khan.KHAN_TREES_ID]["minzoom"], 11)
+        self.assertEqual(layers[khan.KHAN_SIGNALS_ID]["minzoom"], 11)
+        self.assertEqual(layers[khan.KHAN_LAMPS_ID]["minzoom"], 11)
+        self.assertEqual(layers[khan.KHAN_SIGNS_ID]["minzoom"], 12)
+        self.assertEqual(layers[khan.KHAN_BUILDINGS_ID]["paint"]["fill-extrusion-opacity"], 1.0)
+        self.assertEqual(khan.HOUSE_INK, "#A39C94")
+        self.assertEqual(khan.TREE_INK, "#3F8F4E")
         blob = json.dumps(style).lower()
         self.assertNotIn("https://", blob)
         self.assertNotIn("cesium", blob)
@@ -118,7 +126,7 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 9", swift)
+        self.assertIn("resolverVersion = 10", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("khan.pmtiles", swift)
         self.assertIn('"type": "fill-extrusion"', swift)
@@ -130,6 +138,16 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn("layer.isVisible = godsEye", eye)
         self.assertNotIn("URLSession", swift)
         self.assertNotIn("WKWebView", swift)
+        tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+        desk = tab.split("private var eyeDeskRail")[1].split("private var hitList")[0]
+        self.assertIn("HUDGlassCard", desk)
+        self.assertIn("eyeDeskCaption", desk)
+        self.assertNotIn("padding(.top, 52)", tab)
+        hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
+        self.assertIn("VStack(alignment: .leading, spacing: 8)", hud)
+        self.assertIn("if runtime.godsEye", hud)
+        self.assertEqual(tab.count("runtime.hudLayout.overlay"), 2)
+        self.assertIn("layers[index] = layer", swift.split("func attachKhanLayers")[1].split("func attachWaterLayers")[0])
         tests = (
             ROOT
             / "Packages"
@@ -162,6 +180,11 @@ class PackedArchiveTests(unittest.TestCase):
             self.assertEqual(style["sources"]["khan"]["url"], "pmtiles://khan.pmtiles")
             ids = [layer["id"] for layer in style["layers"]]
             self.assertIn(khan.KHAN_BUILDINGS_ID, ids)
+            self.assertEqual(style["light"]["intensity"], 0.7)
+            paints = {item["id"]: item for item in style["layers"]}
+            self.assertEqual(paints[khan.KHAN_TREES_ID]["minzoom"], 11)
+            self.assertEqual(paints[khan.KHAN_SIGNS_ID]["minzoom"], 12)
+            self.assertIn(khan.HOUSE_INK, json.dumps(paints[khan.KHAN_BUILDINGS_ID]))
 
     def test_downtown_el_paso_has_houses(self):
         archive = PACK_ROOT / "tx-west" / "khan.pmtiles"

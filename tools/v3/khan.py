@@ -89,13 +89,14 @@ KHAN_SIGNS_ID = "khan-signs"
 VOID_INK = "#000000"
 ACCENT_INK = "#E10600"
 SILVER_INK = "#B8BDC2"
-TREE_INK = "#245A32"
-WOOD_INK = "#1A3F26"
-HOUSE_INK = "#6B6560"
-APARTMENT_INK = "#4E555C"
-INDUSTRIAL_INK = "#3C4248"
-RETAIL_INK = "#5A5048"
-BLOCK_INK = "#585E64"
+# Pitched desk over 3DEP shade: walls have to read as stone, not mud.
+TREE_INK = "#3F8F4E"
+WOOD_INK = "#2E6A3A"
+HOUSE_INK = "#A39C94"
+APARTMENT_INK = "#8A929A"
+INDUSTRIAL_INK = "#6E767E"
+RETAIL_INK = "#968A7C"
+BLOCK_INK = "#8E949C"
 LAMP_INK = "#E8A040"
 
 
@@ -453,7 +454,7 @@ def style_layers() -> list[dict]:
                 "fill-extrusion-color": building_color,
                 "fill-extrusion-height": ["to-number", ["get", "height_m"]],
                 "fill-extrusion-base": 0,
-                "fill-extrusion-opacity": 0.92,
+                "fill-extrusion-opacity": 1.0,
                 "fill-extrusion-vertical-gradient": True,
             },
         },
@@ -462,7 +463,7 @@ def style_layers() -> list[dict]:
             "type": "fill-extrusion",
             "source": KHAN_SOURCE_ID,
             "source-layer": KHAN_BUILDING_LAYER,
-            "minzoom": 13,
+            "minzoom": 11,
             "filter": ["in", ["get", "kind"], ["literal", ["tree", "wood"]]],
             "layout": dict(hidden),
             "paint": {
@@ -475,7 +476,7 @@ def style_layers() -> list[dict]:
                 ],
                 "fill-extrusion-height": ["to-number", ["get", "height_m"]],
                 "fill-extrusion-base": 0,
-                "fill-extrusion-opacity": 0.78,
+                "fill-extrusion-opacity": 0.9,
                 "fill-extrusion-vertical-gradient": True,
             },
         },
@@ -484,12 +485,12 @@ def style_layers() -> list[dict]:
             "type": "circle",
             "source": KHAN_SOURCE_ID,
             "source-layer": KHAN_FURNITURE_LAYER,
-            "minzoom": 13,
+            "minzoom": 11,
             "filter": ["==", ["get", "kind"], "signal"],
             "layout": dict(hidden),
             "paint": {
                 "circle-color": ACCENT_INK,
-                "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.2, 16, 5.6],
+                "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.8, 16, 5.6],
                 "circle-stroke-color": VOID_INK,
                 "circle-stroke-width": 1.0,
             },
@@ -499,12 +500,12 @@ def style_layers() -> list[dict]:
             "type": "circle",
             "source": KHAN_SOURCE_ID,
             "source-layer": KHAN_FURNITURE_LAYER,
-            "minzoom": 13,
+            "minzoom": 11,
             "filter": ["==", ["get", "kind"], "lamp"],
             "layout": dict(hidden),
             "paint": {
                 "circle-color": LAMP_INK,
-                "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.4],
+                "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.2, 16, 4.4],
                 "circle-stroke-color": VOID_INK,
                 "circle-stroke-width": 0.8,
             },
@@ -514,21 +515,29 @@ def style_layers() -> list[dict]:
             "type": "symbol",
             "source": KHAN_SOURCE_ID,
             "source-layer": KHAN_FURNITURE_LAYER,
-            "minzoom": 14,
+            "minzoom": 12,
             "filter": ["==", ["get", "kind"], "sign"],
             "layout": {
                 "visibility": "none",
                 "text-field": ["coalesce", ["get", "sign"], ["get", "name"], ""],
-                    "text-size": 12,
+                "text-size": 12,
                 "text-font": ["Open Sans Regular"],
                 "text-anchor": "bottom",
                 "text-offset": [0, -0.4],
                 "text-optional": True,
             },
             "paint": {
-                "text-color": SILVER_INK,
+                "text-color": [
+                    "match",
+                    ["get", "sign"],
+                    "STOP",
+                    ACCENT_INK,
+                    "YIELD",
+                    LAMP_INK,
+                    SILVER_INK,
+                ],
                 "text-halo-color": VOID_INK,
-                "text-halo-width": 1.6,
+                "text-halo-width": 2.0,
             },
         },
     ]

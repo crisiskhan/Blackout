@@ -777,9 +777,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v9 injects packed KHAN EYE houses, trees, signals,
-    /// lamps and signs from `khan.pmtiles`.
-    public static let resolverVersion = 9
+    /// not keep replaying it. v10 paints KHAN EYE houses, trees, signals, lamps and
+    /// signs so they read on the pitched desk.
+    public static let resolverVersion = 10
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -1022,17 +1022,17 @@ public enum PackStyle {
         let buildingColor: [Any] = [
             "match",
             ["get", "kind"],
-            "tree", "#245A32",
-            "wood", "#1A3F26",
-            "house", "#6B6560",
-            "detached", "#6B6560",
-            "apartments", "#4E555C",
-            "residential", "#4E555C",
-            "industrial", "#3C4248",
-            "warehouse", "#3C4248",
-            "retail", "#5A5048",
-            "commercial", "#5A5048",
-            "#585E64",
+            "tree", "#3F8F4E",
+            "wood", "#2E6A3A",
+            "house", "#A39C94",
+            "detached", "#A39C94",
+            "apartments", "#8A929A",
+            "residential", "#8A929A",
+            "industrial", "#6E767E",
+            "warehouse", "#6E767E",
+            "retail", "#968A7C",
+            "commercial", "#968A7C",
+            "#8E949C",
         ]
         let wanted: [[String: Any]] = [
             [
@@ -1047,7 +1047,7 @@ public enum PackStyle {
                     "fill-extrusion-color": buildingColor,
                     "fill-extrusion-height": ["to-number", ["get", "height_m"]],
                     "fill-extrusion-base": 0,
-                    "fill-extrusion-opacity": 0.92,
+                    "fill-extrusion-opacity": 1.0,
                     "fill-extrusion-vertical-gradient": true,
                 ],
             ],
@@ -1056,19 +1056,19 @@ public enum PackStyle {
                 "type": "fill-extrusion",
                 "source": khanSourceID,
                 "source-layer": khanBuildingSourceLayer,
-                "minzoom": 13,
+                "minzoom": 11,
                 "filter": ["in", ["get", "kind"], ["literal", ["tree", "wood"]]],
                 "layout": hidden,
                 "paint": [
                     "fill-extrusion-color": [
                         "match",
                         ["get", "kind"],
-                        "wood", "#1A3F26",
-                        "#245A32",
+                        "wood", "#2E6A3A",
+                        "#3F8F4E",
                     ],
                     "fill-extrusion-height": ["to-number", ["get", "height_m"]],
                     "fill-extrusion-base": 0,
-                    "fill-extrusion-opacity": 0.78,
+                    "fill-extrusion-opacity": 0.9,
                     "fill-extrusion-vertical-gradient": true,
                 ],
             ],
@@ -1077,12 +1077,12 @@ public enum PackStyle {
                 "type": "circle",
                 "source": khanSourceID,
                 "source-layer": khanFurnitureSourceLayer,
-                "minzoom": 13,
+                "minzoom": 11,
                 "filter": ["==", ["get", "kind"], "signal"],
                 "layout": hidden,
                 "paint": [
                     "circle-color": accentInk,
-                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 3.2, 16, 5.6],
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.8, 16, 5.6],
                     "circle-stroke-color": voidInk,
                     "circle-stroke-width": 1.0,
                 ],
@@ -1092,12 +1092,12 @@ public enum PackStyle {
                 "type": "circle",
                 "source": khanSourceID,
                 "source-layer": khanFurnitureSourceLayer,
-                "minzoom": 13,
+                "minzoom": 11,
                 "filter": ["==", ["get", "kind"], "lamp"],
                 "layout": hidden,
                 "paint": [
                     "circle-color": "#E8A040",
-                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.4],
+                    "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2.2, 16, 4.4],
                     "circle-stroke-color": voidInk,
                     "circle-stroke-width": 0.8,
                 ],
@@ -1107,7 +1107,7 @@ public enum PackStyle {
                 "type": "symbol",
                 "source": khanSourceID,
                 "source-layer": khanFurnitureSourceLayer,
-                "minzoom": 14,
+                "minzoom": 12,
                 "filter": ["==", ["get", "kind"], "sign"],
                 "layout": [
                     "visibility": "none",
@@ -1119,15 +1119,23 @@ public enum PackStyle {
                     "text-optional": true,
                 ],
                 "paint": [
-                    "text-color": silverInk,
+                    "text-color": [
+                        "match",
+                        ["get", "sign"],
+                        "STOP", accentInk,
+                        "YIELD", "#E8A040",
+                        silverInk,
+                    ],
                     "text-halo-color": voidInk,
-                    "text-halo-width": 1.6,
+                    "text-halo-width": 2.0,
                 ],
             ],
         ]
         for layer in wanted {
-            let id = layer["id"] as? String
-            if let id, !layers.contains(where: { $0["id"] as? String == id }) {
+            guard let id = layer["id"] as? String else { continue }
+            if let index = layers.firstIndex(where: { $0["id"] as? String == id }) {
+                layers[index] = layer
+            } else {
                 layers.append(layer)
             }
         }

@@ -236,19 +236,11 @@ struct MapTab: View {
                 onMove: { runtime.hudLayout.overlay = $0 },
                 onStore: { runtime.hudLayout.save() }
             ) {
-                overlayRail
-            }
-            if runtime.godsEye {
-                HUDPlaced(
-                    offset: runtime.hudLayout.overlay,
-                    arranging: runtime.hudLayoutMode,
-                    veil: runtime.chromeVeil,
-                    alive: runtime.alive(.overlay),
-                    onMove: { runtime.hudLayout.overlay = $0 },
-                    onStore: { runtime.hudLayout.save() }
-                ) {
-                    eyeDeskRail
-                        .padding(.top, 52)
+                VStack(alignment: .leading, spacing: 8) {
+                    overlayRail
+                    if runtime.godsEye {
+                        eyeDeskRail
+                    }
                 }
             }
             if !runtime.godsEye, !hits.isEmpty {
@@ -351,8 +343,9 @@ struct MapTab: View {
     @ViewBuilder
     private var eyeDeskRail: some View {
         if runtime.godsEye {
-            VStack(alignment: .leading, spacing: 6) {
-                Group {
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    eyeDeskCaption("LAYERS")
                     HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         ForEach(EyeDesk.Layer.allCases, id: \.self) { layer in
                             if EyeDesk.shows(
@@ -366,11 +359,15 @@ struct MapTab: View {
                             }
                         }
                     }
+                    eyeDeskCaption("LOOK")
                     HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         ForEach(EyeDesk.Palette.allCases, id: \.self) { palette in
                             Button(palette.title) { runtime.setEyePalette(palette) }
                                 .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyePalette == palette))
                         }
+                    }
+                    eyeDeskCaption("MARK")
+                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
                             Button(kind.title) {
                                 if let you = runtime.fieldYou {
@@ -380,6 +377,7 @@ struct MapTab: View {
                             .buttonStyle(HUDOverlayChipStyle(filled: runtime.marks.contains { $0.kind == kind.rawValue }))
                         }
                     }
+                    eyeDeskCaption("SCENE")
                     HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                         ForEach(EyeDesk.sceneNames, id: \.self) { name in
                             Button(name) {
@@ -392,19 +390,24 @@ struct MapTab: View {
                             .buttonStyle(HUDOverlayChipStyle(filled: runtime.eyeScenes.contains { $0.name == name }))
                         }
                     }
-                }
-                .opacity(runtime.lostKidDesk ? 0.35 : 1)
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(Array(runtime.eyeHUDLines().enumerated()), id: \.offset) { _, line in
-                        Text(line)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Theme.silver)
-                            .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(Array(runtime.eyeHUDLines().enumerated()), id: \.offset) { _, line in
+                            Text(line)
+                                .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                                .foregroundStyle(Theme.silver)
+                                .shadow(color: Theme.void.opacity(0.95), radius: 3)
+                        }
                     }
                 }
                 .opacity(runtime.lostKidDesk ? 0.35 : 1)
             }
         }
+    }
+
+    private func eyeDeskCaption(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 9, weight: .heavy))
+            .foregroundStyle(Theme.silver.opacity(0.55))
     }
 
     private var hitList: some View {

@@ -368,10 +368,15 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(houses?["source"] as? String, PackStyle.khanSourceID)
         XCTAssertEqual(houses?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
         XCTAssertEqual((houses?["layout"] as? [String: Any])?["visibility"] as? String, "none")
+        XCTAssertEqual(houses?["minzoom"] as? Int, 11)
         let trees = layers.first { $0["id"] as? String == PackStyle.khanTreesLayerID }
         XCTAssertEqual(trees?["source-layer"] as? String, PackStyle.khanBuildingSourceLayer)
+        XCTAssertEqual(trees?["minzoom"] as? Int, 11)
         let signals = layers.first { $0["id"] as? String == PackStyle.khanSignalsLayerID }
         XCTAssertEqual(signals?["source-layer"] as? String, PackStyle.khanFurnitureSourceLayer)
+        XCTAssertEqual(signals?["minzoom"] as? Int, 11)
+        let signs = layers.first { $0["id"] as? String == PackStyle.khanSignsLayerID }
+        XCTAssertEqual(signs?["minzoom"] as? Int, 12)
         let roadLabel = layers.first { $0["id"] as? String == PackStyle.roadLabelsLayerID }
         let roadPaint = roadLabel?["paint"] as? [String: Any]
         let roadLayout = roadLabel?["layout"] as? [String: Any]
@@ -1215,7 +1220,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(EyeDesk.khanLandOpacity, 0.14, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanShadeContrast, 0.48, accuracy: 0.001)
         XCTAssertEqual(EyeDesk.khanContourOpacity, 0.9, accuracy: 0.001)
-        XCTAssertEqual(PackStyle.resolverVersion, 9)
+        XCTAssertEqual(PackStyle.resolverVersion, 10)
         XCTAssertEqual(PackStyle.khanSourceID, "khan")
         XCTAssertEqual(PackStyle.khanBuildingsLayerID, "khan-buildings")
         XCTAssertEqual(PackStyle.khanTreesLayerID, "khan-trees")

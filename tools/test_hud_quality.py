@@ -4057,10 +4057,12 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn('id.hasPrefix("khan-")', eye_layers)
         self.assertIn("layer.isVisible = godsEye", eye_layers)
         self.assertNotIn("satelliteRoadOpacity", eye_layers)
+        self.assertIn("HUDGlassCard", tab.split("private var eyeDeskRail")[1].split("private var hitList")[0])
+        self.assertNotIn("padding(.top, 52)", tab)
         self.assertIn("func attachKhanLayers", cam)
         self.assertIn("khan.pmtiles", cam)
         self.assertIn('"type": "fill-extrusion"', cam)
-        self.assertIn("resolverVersion = 9", cam)
+        self.assertIn("resolverVersion = 10", cam)
         interact = offline.split("private func applyInteraction")[1].split("private var overlaySpec")[0]
         self.assertNotIn("setDirection(PackCamera.godsEyeHeading", interact)
         self.assertIn("`KHAN EYE`", qa)

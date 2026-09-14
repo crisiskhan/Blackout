@@ -666,26 +666,26 @@
             "kind"
           ],
           "tree",
-          "#245A32",
+          "#3F8F4E",
           "wood",
-          "#1A3F26",
+          "#2E6A3A",
           "house",
-          "#6B6560",
+          "#A39C94",
           "detached",
-          "#6B6560",
+          "#A39C94",
           "apartments",
-          "#4E555C",
+          "#8A929A",
           "residential",
-          "#4E555C",
+          "#8A929A",
           "industrial",
-          "#3C4248",
+          "#6E767E",
           "warehouse",
-          "#3C4248",
+          "#6E767E",
           "retail",
-          "#5A5048",
+          "#968A7C",
           "commercial",
-          "#5A5048",
-          "#585E64"
+          "#968A7C",
+          "#8E949C"
         ],
         "fill-extrusion-height": [
           "to-number",
@@ -695,7 +695,7 @@
           ]
         ],
         "fill-extrusion-base": 0,
-        "fill-extrusion-opacity": 0.92,
+        "fill-extrusion-opacity": 1.0,
         "fill-extrusion-vertical-gradient": true
       }
     },
@@ -704,7 +704,7 @@
       "type": "fill-extrusion",
       "source": "khan",
       "source-layer": "building",
-      "minzoom": 13,
+      "minzoom": 11,
       "filter": [
         "in",
         [
@@ -730,8 +730,8 @@
             "kind"
           ],
           "wood",
-          "#1A3F26",
-          "#245A32"
+          "#2E6A3A",
+          "#3F8F4E"
         ],
         "fill-extrusion-height": [
           "to-number",
@@ -741,7 +741,7 @@
           ]
         ],
         "fill-extrusion-base": 0,
-        "fill-extrusion-opacity": 0.78,
+        "fill-extrusion-opacity": 0.9,
         "fill-extrusion-vertical-gradient": true
       }
     },
@@ -750,7 +750,7 @@
       "type": "circle",
       "source": "khan",
       "source-layer": "furniture",
-      "minzoom": 13,
+      "minzoom": 11,
       "filter": [
         "==",
         [
@@ -772,8 +772,8 @@
           [
             "zoom"
           ],
-          13,
-          3.2,
+          11,
+          2.8,
           16,
           5.6
         ],
@@ -786,7 +786,7 @@
       "type": "circle",
       "source": "khan",
       "source-layer": "furniture",
-      "minzoom": 13,
+      "minzoom": 11,
       "filter": [
         "==",
         [
@@ -808,8 +808,8 @@
           [
             "zoom"
           ],
-          13,
-          2.4,
+          11,
+          2.2,
           16,
           4.4
         ],
@@ -822,7 +822,7 @@
       "type": "symbol",
       "source": "khan",
       "source-layer": "furniture",
-      "minzoom": 14,
+      "minzoom": 12,
       "filter": [
         "==",
         [
@@ -857,9 +857,20 @@
         "text-optional": true
       },
       "paint": {
-        "text-color": "#B8BDC2",
+        "text-color": [
+          "match",
+          [
+            "get",
+            "sign"
+          ],
+          "STOP",
+          "#E10600",
+          "YIELD",
+          "#E8A040",
+          "#B8BDC2"
+        ],
         "text-halo-color": "#000000",
-        "text-halo-width": 1.6
+        "text-halo-width": 2.0
       }
     },
     {
@@ -1118,7 +1129,7 @@
   "light": {
     "anchor": "viewport",
     "color": "#ffffff",
-    "intensity": 0.55,
+    "intensity": 0.7,
     "position": [
       1.15,
       210,

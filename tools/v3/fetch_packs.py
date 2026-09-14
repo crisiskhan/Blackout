@@ -1888,7 +1888,7 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "light": {
             "anchor": "viewport",
             "color": "#ffffff",
-            "intensity": 0.55,
+            "intensity": 0.7,
             "position": [1.15, 210, 30],
         },
         "metadata": {
