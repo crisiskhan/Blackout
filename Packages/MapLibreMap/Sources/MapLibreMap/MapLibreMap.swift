@@ -504,9 +504,13 @@ public enum UserPuck {
 
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
-    /// HUD chrome around a plotted line. Bigger than FIT PACK so DEST is
-    /// not under the dock.
+    /// HUD chrome around a plotted line so DEST is not under the dock.
     public static let routePaddingPoints: Double = 72
+    /// GODS EYE. Search, overlay, dock, and tabs sit on the canvas, so the
+    /// pack has to land in the clear glass.
+    public static let packPaddingPoints: Double = 112
+    /// Left-hand tab column. Same side inset so west pack is not under tabs.
+    public static let packSidePaddingPoints: Double = 72
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.

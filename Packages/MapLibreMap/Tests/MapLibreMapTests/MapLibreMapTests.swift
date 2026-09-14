@@ -253,6 +253,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(fitted.north, 30.52)
         XCTAssertEqual(fitted.east, -81.38)
         XCTAssertGreaterThan(PackCamera.edgePaddingPoints, 0)
+        XCTAssertGreaterThan(PackCamera.packPaddingPoints, PackCamera.routePaddingPoints)
+        XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
     }
 
     func testPackStyleAttachesWildStreetLinesAndOsmPoints() throws {
@@ -436,6 +438,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertNil(RouteLine.dashPattern(.drive))
         XCTAssertFalse(RouteLine.walkDash.isEmpty)
         XCTAssertGreaterThan(PackCamera.routePaddingPoints, PackCamera.edgePaddingPoints)
+        XCTAssertGreaterThan(PackCamera.packPaddingPoints, PackCamera.routePaddingPoints)
+        XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
         XCTAssertEqual(RouteLine.offGraph, "OFF GRAPH")
         XCTAssertTrue(RouteLine.shouldDraw([(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]))
         XCTAssertFalse(RouteLine.shouldDraw([]))
@@ -1043,6 +1047,8 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(
             PackCamera.shouldFitRoute(lockOn: false, stored: nil, route: line, godsEye: false)
         )
+        XCTAssertGreaterThan(PackCamera.packPaddingPoints, PackCamera.routePaddingPoints)
+        XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
     }
 
     func testDestinationPinTracksTheChosenTarget() {

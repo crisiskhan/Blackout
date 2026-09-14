@@ -874,10 +874,11 @@ public struct OfflineMapView: UIViewRepresentable {
                 CLLocationCoordinate2D(latitude: box.south, longitude: box.west),
                 CLLocationCoordinate2D(latitude: box.north, longitude: box.east)
             )
-            let pad = CGFloat(PackCamera.edgePaddingPoints)
+            let pad = CGFloat(PackCamera.packPaddingPoints)
+            let side = CGFloat(PackCamera.packSidePaddingPoints)
             view.setVisibleCoordinateBounds(
                 bounds,
-                edgePadding: UIEdgeInsets(top: pad, left: 16, bottom: pad, right: 16),
+                edgePadding: UIEdgeInsets(top: pad, left: side, bottom: pad, right: side),
                 animated: false,
                 completionHandler: nil
             )

@@ -248,20 +248,38 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
             .frame(minWidth: hit, minHeight: hit)
             .contentShape(Rectangle())
-            .foregroundStyle(filled ? Theme.void : Theme.silver)
-            .background {
-                if filled {
-                    Rectangle().fill(Theme.silver)
-                } else {
-                    Theme.glass()
-                }
-            }
+            .foregroundStyle(overlayInk(filled: filled))
+            .background(overlayFill(filled: filled))
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()
                     .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
             )
             .opacity(configuration.isPressed ? 0.65 : 1)
+    }
+
+    private func overlayInk(filled: Bool) -> Color {
+        guard filled else { return Theme.silver }
+        switch Theme.lamp {
+        case .sun:
+            return Theme.void
+        case .off, .night:
+            return Color.white
+        }
+    }
+
+    @ViewBuilder
+    private func overlayFill(filled: Bool) -> some View {
+        if filled {
+            switch Theme.lamp {
+            case .sun:
+                Theme.silver
+            case .off, .night:
+                Theme.glass(opacity: 0.92)
+            }
+        } else {
+            Theme.glass()
+        }
     }
 }
 

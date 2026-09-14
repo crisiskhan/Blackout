@@ -183,7 +183,6 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
         .animation(Theme.Motion.heavy, value: runtime.markDraft)
         .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
-        .animation(Theme.Motion.heavy, value: runtime.godsEye)
     }
 
     private var coverUp: Bool {
@@ -311,6 +310,7 @@ struct MapTab: View {
             }
             .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
         }
+        .animation(Theme.Motion.heavy, value: runtime.godsEye)
     }
 
     private var hitList: some View {
