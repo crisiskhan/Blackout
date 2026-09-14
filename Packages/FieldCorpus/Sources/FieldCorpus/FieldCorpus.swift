@@ -209,6 +209,64 @@ public enum FieldCorpus {
         ("heat stroke", "heat"),
         ("too hot", "heat"),
         ("soaking wet", "cold"),
+        ("cant walk", "carry"),
+        ("cannot walk", "carry"),
+        ("cant stand", "carry"),
+        ("no puedo caminar", "carry"),
+        ("no puede caminar", "carry"),
+        ("stung", "sting"),
+        ("bee", "sting"),
+        ("wasp", "sting"),
+        ("scorpion", "sting"),
+        ("picadura", "sting"),
+        ("abeja", "sting"),
+        ("got stung", "sting"),
+        ("stung me", "sting"),
+        ("knee", "fracture"),
+        ("twisted knee", "fracture"),
+        ("twisted my", "fracture"),
+        ("rodilla", "fracture"),
+        ("tobillo", "fracture"),
+        ("wrist", "fracture"),
+        ("im burned", "burn"),
+        ("got burned", "burn"),
+        ("burned my", "burn"),
+        ("burned", "burn"),
+        ("sunburn", "burn"),
+        ("me queme", "burn"),
+        ("im on fire", "burn"),
+        ("theyre on fire", "burn"),
+        ("throwing up", "vomit"),
+        ("threw up", "vomit"),
+        ("can i eat", "unknown"),
+        ("eat this", "unknown"),
+        ("eat that", "unknown"),
+        ("puedo comer", "unknown"),
+        ("comer esto", "unknown"),
+        ("edible", "unknown"),
+        ("food stuck", "choke"),
+        ("swallowed wrong", "choke"),
+        ("se ahoga", "choke"),
+        ("allergic", "choke"),
+        ("anaphylaxis", "choke"),
+        ("epipen", "choke"),
+        ("wheres camp", "lost"),
+        ("where is camp", "lost"),
+        ("cant find camp", "lost"),
+        ("find camp", "lost"),
+        ("dehydration", "thirst"),
+        ("dehydrated", "thirst"),
+        ("deshidratacion", "thirst"),
+        ("drink this", "thirst"),
+        ("head wound", "bleed"),
+        ("me cai", "spine"),
+        ("chest hurts", "heart"),
+        ("chest pain", "heart"),
+        ("heart attack", "heart"),
+        ("dolor de pecho", "heart"),
+        ("mountain lion", "lion"),
+        ("cougar", "lion"),
+        ("puma", "lion"),
     ]
 
     private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
@@ -280,6 +338,10 @@ public enum FieldCorpus {
         var scored: [(FieldCard, Double, Int)] = []
         for card in cards {
             if live && !meal && card.category == "food" { continue }
+            if (expanded.contains("choke") || expanded.contains("unknown")) && card.category == "food" {
+                continue
+            }
+            if qTokens.contains("burn") && card.category == "fire" { continue }
             let titleTok = Set(tokens(card.title.en) + tokens(card.title.es))
             let idTok = Set(tokens(card.id.replacingOccurrences(of: "-", with: " ")))
             let catTok = Set(tokens(card.category))
@@ -300,6 +362,8 @@ public enum FieldCorpus {
             score += Double(catHits) * 6
             if boostedHit { score += 20 }
             if qTokens.contains("wool") && card.id == "camp-layers" { score += 25 }
+            if qTokens.contains("lost") && card.id == "nav-lost" { score += 25 }
+            if qTokens.contains("burn") && card.id == "med-burn" { score += 25 }
             let preferredTitle = Set(tokens(preferEs ? card.title.es : card.title.en))
             score += Double(expanded.intersection(preferredTitle).count) * 3
             if qTokens.count >= 2 {
@@ -454,6 +518,14 @@ public enum FieldCorpus {
         "collapsed": ["cpr"],
         "fainted": ["cpr"],
         "ankle": ["fracture"],
+        "stung": ["sting"],
+        "bee": ["sting"],
+        "wasp": ["sting"],
+        "scorpion": ["sting"],
+        "dehydration": ["thirst"],
+        "dehydrated": ["thirst"],
+        "knee": ["fracture"],
+        "sunburn": ["burn"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.
@@ -481,6 +553,12 @@ public enum FieldCorpus {
         "diamondback": ["animal-bite", "tx-snake", "nm-snake"],
         "bite": ["animal-bite"],
         "sting": ["animal-bite"],
+        "stung": ["animal-bite"],
+        "bee": ["animal-bite"],
+        "wasp": ["animal-bite"],
+        "scorpion": ["animal-bite"],
+        "picadura": ["animal-bite"],
+        "abeja": ["animal-bite"],
         "venom": ["animal-bite"],
         "mordedura": ["animal-bite"],
         "mushroom": ["fungi-leave"],
@@ -492,6 +570,7 @@ public enum FieldCorpus {
         "berry": ["plant-unknown"],
         "plant": ["plant-unknown", "plant-use"],
         "planta": ["plant-unknown", "plant-use"],
+        "unknown": ["plant-unknown"],
         "food": ["food-cook", "food-pantry"],
         "comida": ["food-cook", "food-pantry"],
         "chew": ["plant-unknown", "tx-plant-danger", "nm-plant-danger"],
@@ -552,6 +631,7 @@ public enum FieldCorpus {
         "sprained": ["trauma-fracture"],
         "splint": ["trauma-fracture"],
         "ankle": ["trauma-fracture"],
+        "knee": ["trauma-fracture"],
         "burn": ["med-burn"],
         "scald": ["med-burn"],
         "quemadura": ["med-burn"],
@@ -605,6 +685,9 @@ public enum FieldCorpus {
         "hog": ["tx-east-mammal", "tx-east-game"],
         "coyote": ["tx-mammal", "tx-east-mammal", "nm-mammal"],
         "bear": ["nm-mammal"],
+        "lion": ["nm-mammal"],
+        "cougar": ["nm-mammal"],
+        "puma": ["nm-mammal"],
         "elk": ["nm-mammal", "nm-game"],
         "cattle": ["tx-cattle-guard"],
         "hospital": ["tx-nm-border-hospital"],
@@ -669,6 +752,7 @@ public enum FieldCorpus {
         "compass": ["nav-compass"],
         "sleep": ["camp-sleep"],
         "panic": ["tact-breathe"],
+        "heart": ["tact-breathe"],
         "breathe": ["tact-breathe", "med-airway"],
         "alcohol": ["med-booze"],
         "booze": ["med-booze"],

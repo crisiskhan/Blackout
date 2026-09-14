@@ -187,6 +187,10 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
     for card in cards:
         if live and not meal and card.get("category") == "food":
             continue
+        if ("choke" in expanded or "unknown" in expanded) and card.get("category") == "food":
+            continue
+        if "burn" in q_tokens and card.get("category") == "fire":
+            continue
         title_tok = set(_tokens(card["title"]["en"]) + _tokens(card["title"]["es"]))
         id_tok = set(_tokens(card["id"].replace("-", " ")))
         cat_tok = set(_tokens(card["category"]))
@@ -202,6 +206,10 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
         if boosted_hit:
             score += 20
         if "wool" in q_tokens and card["id"] == "camp-layers":
+            score += 25
+        if "lost" in q_tokens and card["id"] == "nav-lost":
+            score += 25
+        if "burn" in q_tokens and card["id"] == "med-burn":
             score += 25
         preferred = set(_tokens(card["title"]["es"] if prefer_es else card["title"]["en"]))
         score += len(expanded & preferred) * 3
@@ -341,6 +349,8 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("got bit", corpus)
         self.assertIn("not breathing", corpus)
         self.assertIn("cant breathe", corpus)
+        self.assertIn("cant walk", corpus)
+        self.assertIn("stung", corpus)
         ask = corpus.split("static func ask(")[1].split("private static func index")[0]
         self.assertIn("liveAnimal", ask)
         self.assertIn('category == "food"', ask)
@@ -357,7 +367,7 @@ class FieldAskGlassTests(unittest.TestCase):
         self.assertIn("fungi-leave", corpus)
         self.assertIn("plant-unknown", corpus)
         self.assertIn("camp-start", corpus)
-        self.assertNotIn("edible", corpus.lower())
+        self.assertNotIn("safe to eat", corpus.lower())
         self.assertIn("wool", corpus)
         self.assertIn("camp-layers", corpus)
         self.assertIn("tact-breathe", corpus)
@@ -656,6 +666,31 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertFalse(ask_book(cards, "xyzzy plugh"))
         self.assertFalse(ask_book(cards, "help me"))
         self.assertFalse(ask_book(cards, "snapshot"))
+        self.assertEqual(first("I can't walk"), "trauma-carry")
+        self.assertEqual(first("they can't walk"), "trauma-carry")
+        self.assertEqual(first("no puedo caminar"), "trauma-carry")
+        self.assertEqual(first("bee stung me"), "animal-bite")
+        self.assertEqual(first("I got stung"), "animal-bite")
+        self.assertEqual(first("scorpion"), "animal-bite")
+        self.assertEqual(first("I twisted my knee"), "trauma-fracture")
+        self.assertEqual(first("I'm burned"), "med-burn")
+        self.assertEqual(first("sunburn"), "med-burn")
+        self.assertEqual(first("throwing up"), "med-gut")
+        self.assertEqual(first("is this edible"), "plant-unknown")
+        self.assertEqual(first("can I eat this"), "plant-unknown")
+        self.assertEqual(first("food stuck"), "med-airway")
+        self.assertEqual(first("where's camp"), "nav-lost")
+        self.assertEqual(first("can't find camp"), "nav-lost")
+        self.assertEqual(first("dehydration"), "water-disinfect")
+        self.assertEqual(first("drink this water"), "water-disinfect")
+        self.assertEqual(first("head wound"), "med-bleed-pack")
+        self.assertEqual(first("me cai"), "trauma-spine")
+        self.assertEqual(first("se ahoga"), "med-airway")
+        self.assertEqual(first("picadura"), "animal-bite")
+        self.assertEqual(first("I'm on fire"), "med-burn")
+        self.assertEqual(first("my chest hurts"), "tact-breathe")
+        self.assertEqual(first("allergic"), "med-airway")
+        self.assertEqual(first("walk"), "env-sky")
 
     def test_every_open_step_has_a_picture_and_a_child_line(self):
         cards = load_book()
@@ -829,11 +864,11 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
     asked = query.strip() or "this"
     if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"}:
         family = "bleed"
-    elif toks & {"choke", "choking", "airway"}:
+    elif toks & {"choke", "choking", "airway", "allergic", "anaphylaxis", "epipen"}:
         family = "choke"
     elif toks & {"cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"}:
         family = "cpr"
-    elif toks & {"burn", "scald"}:
+    elif toks & {"burn", "scald", "sunburn"}:
         family = "burn"
     elif toks & {"lost", "gps", "separated"}:
         family = "lost"

@@ -112,7 +112,11 @@ final class FieldCorpusTests: XCTestCase {
         let choke = card("med-airway", title: "Choking")
         let bleed = card("med-bleed-pack", title: "Pack a bleed")
         let bone = card("trauma-fracture", title: "Broken bone")
-        let cards = [lost, bite, cpr, choke, bleed, bone]
+        let carry = card("trauma-carry", title: "Move them without making it worse")
+        let burn = card("med-burn", title: "Burn — cool then cover")
+        let plant = card("plant-unknown", title: "Unknown plant")
+        let sky = card("env-sky", title: "Read the sky before the walk")
+        let cards = [lost, bite, cpr, choke, bleed, bone, carry, burn, plant, sky]
         XCTAssertEqual(FieldCorpus.ask(cards, query: "where am I", locale: "en").first?.id, "nav-lost")
         XCTAssertEqual(FieldCorpus.ask(cards, query: "I got bit", locale: "en").first?.id, "animal-bite")
         XCTAssertEqual(FieldCorpus.ask(cards, query: "not breathing", locale: "en").first?.id, "med-cpr-adult")
@@ -120,6 +124,10 @@ final class FieldCorpusTests: XCTestCase {
         XCTAssertEqual(FieldCorpus.ask(cards, query: "cut my arm", locale: "en").first?.id, "med-bleed-pack")
         XCTAssertEqual(FieldCorpus.ask(cards, query: "broken leg", locale: "en").first?.id, "trauma-fracture")
         XCTAssertEqual(FieldCorpus.ask(cards, query: "he's choking", locale: "en").first?.id, "med-airway")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "I can't walk", locale: "en").first?.id, "trauma-carry")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "I'm burned", locale: "en").first?.id, "med-burn")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "can I eat this", locale: "en").first?.id, "plant-unknown")
+        XCTAssertEqual(FieldCorpus.ask(cards, query: "bee stung me", locale: "en").first?.id, "animal-bite")
         XCTAssertTrue(FieldCorpus.ask(cards, query: "help me", locale: "en").isEmpty)
         XCTAssertFalse(FieldCorpus.asking("how do I"))
         XCTAssertTrue(FieldCorpus.asking("where am I"))

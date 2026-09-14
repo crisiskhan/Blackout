@@ -414,13 +414,13 @@ public enum FieldAsk {
         if !toks.isDisjoint(with: ["bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"]) {
             return .bleed
         }
-        if !toks.isDisjoint(with: ["choke", "choking", "airway"]) {
+        if !toks.isDisjoint(with: ["choke", "choking", "airway", "allergic", "anaphylaxis", "epipen"]) {
             return .choke
         }
         if !toks.isDisjoint(with: ["cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"]) {
             return .cpr
         }
-        if !toks.isDisjoint(with: ["burn", "scald"]) {
+        if !toks.isDisjoint(with: ["burn", "scald", "sunburn"]) {
             return .burn
         }
         if !toks.isDisjoint(with: ["lost", "gps", "separated"]) {
