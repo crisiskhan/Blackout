@@ -579,6 +579,7 @@ public enum PackCamera {
     public static let godsEyeRangeFactor: Double = 2.4
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
+    public static let godsEyeFlyPeakFactor: Double = 1.6
 
     public static func packCenter(
         south: Double,
@@ -617,6 +618,21 @@ public enum PackCamera {
 
     public static func allowsOrbit(godsEye: Bool) -> Bool {
         godsEye
+    }
+
+    /// Walking MAP can pan. GODS EYE looks at the packed area only.
+    public static func allowsPan(godsEye: Bool) -> Bool {
+        !godsEye
+    }
+
+    /// Farther of overhead range vs HUD-padded fit. Never closer than the
+    /// 2.4× look; farther when chrome needs more air around the pack.
+    public static func godsEyeCameraDistance(gev: Double, hudFit: Double) -> Double {
+        max(gev, hudFit)
+    }
+
+    public static func godsEyeFlyPeakAltitude(current: Double, target: Double) -> Double {
+        max(current, target) * godsEyeFlyPeakFactor
     }
 
     public static func shouldRefit(

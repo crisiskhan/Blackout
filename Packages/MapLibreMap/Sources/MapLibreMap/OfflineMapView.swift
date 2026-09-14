@@ -184,8 +184,10 @@ public struct OfflineMapView: UIViewRepresentable {
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
         // Walking MAP is a paper sheet. GODS EYE is the overhead fly over the
-        // packed area; two-finger orbit is live only while that hold is on.
+        // packed area; two-finger orbit is live only while that hold is on,
+        // and the thumb cannot drag into empty world.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
+        view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
         view.allowsTilting = false
         let pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye))
         view.minimumPitch = pitch
@@ -890,28 +892,37 @@ public struct OfflineMapView: UIViewRepresentable {
                 north: box.north,
                 east: box.east
             )
+            let gev = PackCamera.godsEyeDistance(
+                radiusMeters: PackCamera.packRadiusMeters(
+                    south: box.south,
+                    west: box.west,
+                    north: box.north,
+                    east: box.east
+                )
+            )
             let seed = MLNMapCamera(
                 lookingAtCenter: CLLocationCoordinate2D(latitude: mid.lat, longitude: mid.lon),
-                acrossDistance: PackCamera.godsEyeDistance(
-                    radiusMeters: PackCamera.packRadiusMeters(
-                        south: box.south,
-                        west: box.west,
-                        north: box.north,
-                        east: box.east
-                    )
-                ),
+                acrossDistance: gev,
                 pitch: CGFloat(PackCamera.godsEyePitch),
                 heading: PackCamera.godsEyeHeading
             )
             let camera = view.camera(
                 seed,
-                fittingCoordinateBounds: bounds,
+                fitting: bounds,
                 edgePadding: UIEdgeInsets(top: pad, left: side, bottom: pad, right: side)
             )
+            camera.viewingDistance = PackCamera.godsEyeCameraDistance(
+                gev: gev,
+                hudFit: camera.viewingDistance
+            )
             if fly {
-                view.flyToCamera(
-                    camera,
+                view.fly(
+                    to: camera,
                     withDuration: PackCamera.godsEyeFlySeconds,
+                    peakAltitude: PackCamera.godsEyeFlyPeakAltitude(
+                        current: view.camera.altitude,
+                        target: camera.altitude
+                    ),
                     completionHandler: nil
                 )
             } else {

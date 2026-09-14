@@ -268,6 +268,13 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertLessThan(radius, 120_000)
         XCTAssertEqual(PackCamera.godsEyeDistance(radiusMeters: radius), radius * 2.4, accuracy: 0.01)
         XCTAssertEqual(PackCamera.godsEyeDistance(radiusMeters: 1000), 2400, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 2400, hudFit: 800), 2400, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 2400, hudFit: 4000), 4000, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeFlyPeakFactor, 1.6, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 1000, target: 2400), 3840, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 5000, target: 2400), 8000, accuracy: 0.01)
+        XCTAssertFalse(PackCamera.allowsPan(godsEye: true))
+        XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
     }
 
     func testPackStyleAttachesWildStreetLinesAndOsmPoints() throws {
@@ -1076,6 +1083,11 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
         XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
+        XCTAssertFalse(PackCamera.allowsPan(godsEye: true))
+        XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
+        XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 3_000), 10_000)
+        XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 12_000), 12_000)
+        XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 200, target: 1000), 1600, accuracy: 0.01)
     }
 
     func testDestinationPinTracksTheChosenTarget() {
