@@ -156,7 +156,7 @@ struct ExpeditionTab: View {
                     sectionLabel("INVENTORY")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 6) {
-                            HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true, submit: "ADD", onSubmit: addKitItem)
+                            HUDField("ITEM", text: $itemDraft, id: "exped.item", submit: "ADD", locked: true, onSubmit: addKitItem)
                             Button("ADD") {
                                 if itemDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                     kitChrome = "NAME ITEM"

@@ -1658,6 +1658,14 @@ class PartyPlaceMarkTests(unittest.TestCase):
         inv = exped.split('sectionLabel("INVENTORY")')[1].split('sectionLabel("TRIP")')[0]
         self.assertIn("NAME ITEM", inv)
         self.assertIn("kitChrome", inv)
+        item = inv.split('HUDField("ITEM"')[1].split(")")[0]
+        self.assertIn("submit:", item)
+        self.assertIn("locked:", item)
+        self.assertLess(
+            item.find("submit:"),
+            item.find("locked:"),
+            "HUDField init requires submit before locked",
+        )
         self.assertIn('Button("+1")', exped)
         self.assertIn('Button("−1")', exped)
         self.assertIn("runtime.bumpKit(", exped)
