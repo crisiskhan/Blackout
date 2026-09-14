@@ -382,7 +382,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("lastKnownFix", chrome)
         self.assertNotIn("youCoordinate()", self.map_tab)
         app = read("Blackout", "AppRuntime.swift")
-        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        you = app.split("var gnssYou")[1].split("var fieldYou")[0]
         self.assertIn("fix.last", you)
         self.assertNotIn("lastKnownFix", you)
         self.assertNotIn("center", you)

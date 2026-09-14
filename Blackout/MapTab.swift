@@ -40,8 +40,9 @@ struct MapTab: View {
     @ViewBuilder
     private func canvas(pack: PackManifest, style: URL) -> some View {
         let home = pack.home ?? pack.center
-        let you = UserPuck.coordinate(
-            lastKnown: runtime.lastKnownFix,
+        let you = runtime.fieldYou
+        let camera = UserPuck.coordinate(
+            lastKnown: you,
             packCenter: (home.lat, home.lon),
             packSouth: pack.bbox.south,
             packWest: pack.bbox.west,
@@ -55,10 +56,11 @@ struct MapTab: View {
         ZStack(alignment: .bottomLeading) {
             OfflineMapView(
                 styleURL: style,
-                centerLat: you.lat,
-                centerLon: you.lon,
-                puckLat: you.lat,
-                puckLon: you.lon,
+                centerLat: camera.lat,
+                centerLon: camera.lon,
+                puckLat: you?.lat ?? camera.lat,
+                puckLon: you?.lon ?? camera.lon,
+                showYou: you != nil,
                 packSouth: pack.bbox.south,
                 packWest: pack.bbox.west,
                 packNorth: pack.bbox.north,

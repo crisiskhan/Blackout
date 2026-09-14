@@ -446,7 +446,10 @@ public enum UserPuck {
         lastKnown: (lat: Double, lon: Double)?,
         packCenter: (lat: Double, lon: Double)
     ) -> (lat: Double, lon: Double) {
-        lastKnown ?? packCenter
+        if let last = lastKnown, last.lat.isFinite, last.lon.isFinite {
+            return last
+        }
+        return packCenter
     }
 
     public static func coordinate(
@@ -457,18 +460,10 @@ public enum UserPuck {
         packNorth: Double,
         packEast: Double
     ) -> (lat: Double, lon: Double) {
-        if let last = lastKnown,
-           contains(
-            lat: last.lat,
-            lon: last.lon,
-            south: packSouth,
-            west: packWest,
-            north: packNorth,
-            east: packEast
-           ) {
-            return last
-        }
-        return packCenter
+        // Pack bbox is the camera rest, not a YOU clamp. Off-pack last known
+        // stays where the body is.
+        _ = (packSouth, packWest, packNorth, packEast)
+        return coordinate(lastKnown: lastKnown, packCenter: packCenter)
     }
 
     public static func haloRing(

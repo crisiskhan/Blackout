@@ -146,13 +146,14 @@ public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
     case noGraph
     case noDestination
     case destinationOffPack
+    case noYou
     case noPath
 
     /// Plan state handed to VoiceNav. Only a real routing failure is OFF GRAPH;
     /// an unset destination is a prompt, not a dead end.
     public var planChrome: String {
         switch self {
-        case .noDestination:
+        case .noDestination, .noYou:
             return ""
         case .noPack, .noGraph, .destinationOffPack, .noPath:
             return RouteLine.offGraph
@@ -171,6 +172,8 @@ public enum RouteBlock: String, Equatable, Sendable, CaseIterable {
             return "\(verb) — TAP THE MAP TO SET A DESTINATION"
         case .destinationOffPack:
             return "\(verb) — DESTINATION IS OUTSIDE \(pack)"
+        case .noYou:
+            return "\(verb) — NO FIX"
         case .noPath:
             return "\(RouteLine.offGraph) — NO \(verb) PATH FROM YOU"
         }
@@ -192,12 +195,14 @@ public enum WalkDriveChip {
         hasPack: Bool,
         hasUsableGraph: Bool,
         hasDestination: Bool,
-        destinationOnPack: Bool
+        destinationOnPack: Bool,
+        hasYouFix: Bool = true
     ) -> RouteBlock? {
         if !hasPack { return .noPack }
         if !hasUsableGraph { return .noGraph }
         if !hasDestination { return .noDestination }
         if !destinationOnPack { return .destinationOffPack }
+        if !hasYouFix { return .noYou }
         return nil
     }
 
@@ -334,7 +339,7 @@ public enum MapFieldChrome: Sendable {
     public static func destValue(
         point: (lat: Double, lon: Double)?
     ) -> String {
-        guard let point else { return "NO FIX" }
+        guard let point, point.lat.isFinite, point.lon.isFinite else { return "NO FIX" }
         return String(format: "%.5f, %.5f", point.lat, point.lon)
     }
 

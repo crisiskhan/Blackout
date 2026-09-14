@@ -12,6 +12,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var centerLon: Double
     public var puckLat: Double
     public var puckLon: Double
+    /// GNSS YOU mark. Pack center may rest the camera, but it is never YOU.
+    public var showYou: Bool
     public var packSouth: Double
     public var packWest: Double
     public var packNorth: Double
@@ -52,6 +54,7 @@ public struct OfflineMapView: UIViewRepresentable {
         centerLon: Double,
         puckLat: Double,
         puckLon: Double,
+        showYou: Bool = true,
         packSouth: Double,
         packWest: Double,
         packNorth: Double,
@@ -78,6 +81,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.centerLon = centerLon
         self.puckLat = puckLat
         self.puckLon = puckLon
+        self.showYou = showYou
         self.packSouth = packSouth
         self.packWest = packWest
         self.packNorth = packNorth
@@ -188,6 +192,7 @@ public struct OfflineMapView: UIViewRepresentable {
         Coordinator.OverlaySpec(
             puckLat: puckLat,
             puckLon: puckLon,
+            showYou: showYou,
             packSouth: packSouth,
             packWest: packWest,
             packNorth: packNorth,
@@ -209,6 +214,7 @@ public struct OfflineMapView: UIViewRepresentable {
         struct OverlaySpec {
             var puckLat: Double
             var puckLon: Double
+            var showYou: Bool
             var packSouth: Double
             var packWest: Double
             var packNorth: Double
@@ -513,13 +519,15 @@ public struct OfflineMapView: UIViewRepresentable {
             let mapHasPuck = (view.annotations ?? []).contains { ann in
                 ann.title == UserPuck.title
             }
-            let puckNeeds = force || UserPuck.needsReapply(
-                storedPack: storedPack,
-                storedPuck: storedPuck,
-                pack: (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast),
-                puck: (spec.puckLat, spec.puckLon),
-                mapHasPuck: mapHasPuck
-            )
+            let puckNeeds = force
+                || spec.showYou != mapHasPuck
+                || UserPuck.needsReapply(
+                    storedPack: storedPack,
+                    storedPuck: storedPuck,
+                    pack: (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast),
+                    puck: (spec.puckLat, spec.puckLon),
+                    mapHasPuck: mapHasPuck || !spec.showYou
+                )
             let routeNeeds = force || lampFlip || RouteLine.needsReapply(
                 stored: storedRoute,
                 route: spec.route,
@@ -566,16 +574,21 @@ public struct OfflineMapView: UIViewRepresentable {
                     view.add(outline)
                     packOutline = outline
 
-                    let you = PersonMarkAnnotation()
-                    you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
-                    you.title = UserPuck.title
-                    you.memberID = UserPuck.title
-                    you.emblemID = spec.youEmblem
-                    you.headingDeg = spec.youHeading
-                    view.addAnnotation(you)
-                    puck = you
+                    if spec.showYou {
+                        let you = PersonMarkAnnotation()
+                        you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                        you.title = UserPuck.title
+                        you.memberID = UserPuck.title
+                        you.emblemID = spec.youEmblem
+                        you.headingDeg = spec.youHeading
+                        view.addAnnotation(you)
+                        puck = you
+                        storedPuck = (spec.puckLat, spec.puckLon)
+                    } else {
+                        puck = nil
+                        storedPuck = nil
+                    }
                     storedPack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
-                    storedPuck = (spec.puckLat, spec.puckLon)
                     syncRoute(on: view, spec: spec, force: true)
                     syncStyleOverlays(on: view, spec: spec)
                     storedDestination = spec.destination
@@ -591,7 +604,13 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
-            if let you = puck as? PersonMarkAnnotation {
+            if !spec.showYou {
+                if let old = puck {
+                    view.removeAnnotation(old)
+                    puck = nil
+                }
+                storedPuck = nil
+            } else if let you = puck as? PersonMarkAnnotation {
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 you.emblemID = spec.youEmblem
                 you.headingDeg = spec.youHeading
@@ -665,7 +684,7 @@ public struct OfflineMapView: UIViewRepresentable {
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
             let puckCoord = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
-            let puckOK = CLLocationCoordinate2DIsValid(puckCoord)
+            let puckOK = spec.showYou && CLLocationCoordinate2DIsValid(puckCoord)
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
                 fitPack(spec, on: view)
@@ -802,12 +821,18 @@ public struct OfflineMapView: UIViewRepresentable {
                 style.addLayer(layer)
             }
 
-            let you = MLNPointFeature()
-            you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
-            if let src = style.source(withIdentifier: "you-puck-src") as? MLNShapeSource {
-                src.shape = you
+            let youShape: MLNShape
+            if spec.showYou {
+                let you = MLNPointFeature()
+                you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                youShape = you
             } else {
-                let src = MLNShapeSource(identifier: "you-puck-src", shape: you, options: nil)
+                youShape = emptyOverlayShape()
+            }
+            if let src = style.source(withIdentifier: "you-puck-src") as? MLNShapeSource {
+                src.shape = youShape
+            } else {
+                let src = MLNShapeSource(identifier: "you-puck-src", shape: youShape, options: nil)
                 style.addSource(src)
                 let halo = MLNCircleStyleLayer(identifier: "you-puck-halo", source: src)
                 halo.circleColor = NSExpression(

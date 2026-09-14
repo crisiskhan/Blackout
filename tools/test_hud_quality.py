@@ -231,7 +231,7 @@ class QuietBearingTests(unittest.TestCase):
         self.assertIn("no grey plate", agents.lower())
         self.assertIn("no COORDINATES word", agents)
         app = read("Blackout", "AppRuntime.swift")
-        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        you = app.split("var gnssYou")[1].split("var fieldYou")[0]
         self.assertIn("fix.last", you)
         self.assertNotIn("lastKnownFix", you)
         self.assertNotIn("center", you)
@@ -3608,8 +3608,9 @@ class AddressHoldCardTests(unittest.TestCase):
         tab = read("Blackout", "MapTab.swift")
         pips = tab.split("pips:", 1)[1].split("youHeading", 1)[0]
         self.assertIn("isFinite", pips)
-        you = app.split("var gnssYou")[1].split("private func youCoordinate")[0]
+        you = app.split("var gnssYou")[1].split("private func destination")[0]
         self.assertIn("isFinite", you)
+        self.assertIn("fieldYou", you)
         offline = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift")
         hold_fn = offline.split("func handleHold", 1)[1].split("func personMark", 1)[0]
         self.assertIn("CLLocationCoordinate2DIsValid", hold_fn)
@@ -3637,6 +3638,85 @@ class AddressHoldCardTests(unittest.TestCase):
         self.assertIn("POST", qa)
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
+
+
+class YouIdentitySyncTests(unittest.TestCase):
+    """YOU is one GNSS place. Pack center is the pack, never YOU."""
+
+    def test_field_you_is_gnss_not_the_pack(self):
+        app = read("Blackout", "AppRuntime.swift")
+        you = app.split("var fieldYou")[1].split("private func destination")[0]
+        self.assertIn("gnssYou", you)
+        self.assertIn("lastKnownFix", you)
+        self.assertNotIn("pack?.lat", you)
+        self.assertNotIn("packCenter", you)
+        self.assertNotIn("UserPuck.coordinate", you)
+
+    def test_pos_and_condition_sos_do_not_broadcast_the_pack(self):
+        app = read("Blackout", "AppRuntime.swift")
+        send = app.split("func sendPOSIfPossible()", 1)[1].split("func applyInbound", 1)[0]
+        self.assertIn("fieldYou", send)
+        self.assertNotIn("pack?.lat", send)
+        self.assertNotIn("pack?.lon", send)
+        self.assertNotIn("pack?.center", send)
+        sos = app.split("func offerConditionSOS", 1)[1].split("func iamOK", 1)[0]
+        self.assertIn("fieldYou", sos)
+        self.assertNotIn("pack?.lat", sos)
+        self.assertNotIn("pack?.lon", sos)
+
+    def test_profile_walk_and_bearing_use_the_same_you(self):
+        app = read("Blackout", "AppRuntime.swift")
+        hold = app.split("func holdParty", 1)[1].split("func setYouName", 1)[0]
+        self.assertIn("fieldYou", hold)
+        refresh = app.split("func refreshHeldParty", 1)[1].split("func toggleLockOn", 1)[0]
+        self.assertIn("fieldYou", refresh)
+        course = app.split("func partyCourse", 1)[1].split("func partyFix", 1)[0]
+        self.assertIn("fieldYou", course)
+        self.assertIn("NO FIX", course)
+        address = app.split("func addressCourse", 1)[1].split("func addressFix", 1)[0]
+        self.assertIn("fieldYou", address)
+        self.assertIn("NO FIX", address)
+        nav = app.split("func navigate(mode:", 1)[1].split("func fitPack", 1)[0]
+        self.assertIn("hasYouFix:", nav)
+        self.assertIn("fieldYou", nav)
+        speak = app.split("func speakMap()", 1)[1].split("func closeSpeakTurns", 1)[0]
+        self.assertIn("fieldYou", speak)
+        self.assertNotIn("youCoordinate()", speak)
+
+    def test_canvas_hides_you_until_a_fix_exists(self):
+        tab = read("Blackout", "MapTab.swift")
+        canvas = tab.split("func canvas(pack:", 1)[1].split("private var hudReserve", 1)[0]
+        self.assertIn("runtime.fieldYou", canvas)
+        self.assertIn("showYou:", canvas)
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        self.assertIn("var showYou: Bool", offline)
+        apply = offline.split("func apply(_ spec: OverlaySpec", 1)[1].split(
+            "func syncPersonMarks", 1
+        )[0]
+        self.assertIn("spec.showYou", apply)
+
+    def test_walk_names_no_fix_when_you_is_missing(self):
+        route = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift")
+        self.assertIn("case noYou", route)
+        self.assertIn("NO FIX", route)
+        self.assertIn("hasYouFix", route)
+        tests = read(
+            "Packages",
+            "MapLibreMap",
+            "Tests",
+            "MapLibreMapTests",
+            "MapLibreMapTests.swift",
+        )
+        self.assertIn("testUserPuckStaysAtLastKnownWhenFixIsOutsideBBox", tests)
+        self.assertNotIn("testUserPuckFallsBackToPackCenterWhenFixIsOutsideBBox", tests)
+
+    def test_solo_qa_scores_one_you(self):
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("Pack center is the pack, never YOU", qa)
+        self.assertIn("WALK — NO FIX", qa)
+        self.assertNotIn("best in class", qa.lower())
 
 
 class FacetedMetalHUDTests(unittest.TestCase):

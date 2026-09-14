@@ -598,7 +598,7 @@ final class AppRuntime {
     }
 
     func addressCourse(lat: Double, lon: Double) -> String {
-        let you = youCoordinate()
+        guard let you = fieldYou else { return "NO FIX" }
         let deg = VoiceNav.bearing(from: you, to: (lat, lon))
         return String(format: "%.0f°", deg)
     }
@@ -640,14 +640,14 @@ final class AppRuntime {
         held = nil
         heldAddress = nil
         if id == UserPuck.title {
-            let you = youCoordinate()
+            let you = fieldYou
             heldParty = HeldPerson(
                 id: id,
                 name: youName,
                 emblem: youEmblem.rawValue,
                 status: youStatus,
-                lat: you.lat,
-                lon: you.lon,
+                lat: you?.lat ?? .nan,
+                lon: you?.lon ?? .nan,
                 headingDeg: headingDeg,
                 isYou: true,
                 vitals: vitals
@@ -756,7 +756,7 @@ final class AppRuntime {
             }
             return "NO HEADING"
         }
-        let you = youCoordinate()
+        guard let you = fieldYou else { return "NO FIX" }
         let deg = VoiceNav.bearing(from: you, to: (person.lat, person.lon))
         return String(format: "%.0f°", deg)
     }
@@ -768,9 +768,9 @@ final class AppRuntime {
     private func refreshHeldParty() {
         guard let card = heldParty else { return }
         if card.isYou {
-            let you = youCoordinate()
-            heldParty?.lat = you.lat
-            heldParty?.lon = you.lon
+            let you = fieldYou
+            heldParty?.lat = you?.lat ?? .nan
+            heldParty?.lon = you?.lon ?? .nan
             heldParty?.headingDeg = headingDeg
             heldParty?.name = youName
             heldParty?.status = youStatus
@@ -834,18 +834,19 @@ final class AppRuntime {
             hasPack: pack != nil,
             hasUsableGraph: canRouteOnGraph,
             hasDestination: dest != nil,
-            destinationOnPack: destinationOnPack(dest)
+            destinationOnPack: destinationOnPack(dest),
+            hasYouFix: fieldYou != nil
         ) {
             clearRoute(plan: block.planChrome, chrome: block.chrome(mode: mode, packName: packName))
             speakMap()
             return
         }
         guard let dest else { return }
+        guard let from = fieldYou else { return }
         routeTarget = dest
         routeCoords = []
         navChrome = ""
         routeChrome = WalkDriveChip.working(mode: mode)
-        let from = youCoordinate()
         let id = pack?.id
         let url = packs?.graphURL()
         let cached = id.flatMap { graphsByPack[$0] } ?? (graphPackID == id ? graphCache : nil)
@@ -992,15 +993,7 @@ final class AppRuntime {
     /// bearing. Same radio as hold SOS. Not a phone call.
     func offerConditionSOS() {
         offerSOS()
-        let pack = packs?.active?.center
-        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? pack?.lat
-        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
-        let coordinates: String
-        if let lat, let lon, lat.isFinite, lon.isFinite {
-            coordinates = MapFieldChrome.destValue(point: (lat, lon))
-        } else {
-            coordinates = MapFieldChrome.destValue(point: nil)
-        }
+        let coordinates = MapFieldChrome.destValue(point: fieldYou)
         let bearing: String
         if let headingDeg, headingDeg >= 0 {
             bearing = String(format: "%.0f°", headingDeg)
@@ -1042,7 +1035,7 @@ final class AppRuntime {
             routeCoords: routeCoords,
             planChrome: navChrome,
             destination: destination(),
-            you: youCoordinate(),
+            you: fieldYou,
             locale: locale,
             travelMode: travelMode,
             streets: streets
@@ -1057,7 +1050,7 @@ final class AppRuntime {
             routeCoords: routeCoords,
             planChrome: navChrome,
             destination: destination(),
-            you: youCoordinate()
+            you: fieldYou
         )
         if spoke, routeCoords.count >= 2 {
             speakHUDTurns = VoiceNav.hudTurns(routeCoords, travelMode: travelMode, streets: streets)
@@ -1350,15 +1343,12 @@ final class AppRuntime {
 
     func sendPOSIfPossible() {
         fix.arm()
-        let pack = packs?.active?.center
-        let lat = fix.last?.latitude ?? lastKnownFix?.lat ?? pack?.lat
-        let lon = fix.last?.longitude ?? lastKnownFix?.lon ?? pack?.lon
-        guard let lat, let lon, lat.isFinite, lon.isFinite else { return }
-        lastKnownFix = (lat, lon)
+        guard let you = fieldYou, you.lat.isFinite, you.lon.isFinite else { return }
+        lastKnownFix = you
         mesh.sendPOS(
             from: mesh.localID,
-            lat: lat,
-            lon: lon,
+            lat: you.lat,
+            lon: you.lon,
             headingDeg: headingDeg,
             emblem: youEmblem.rawValue,
             name: youName,
@@ -1608,24 +1598,18 @@ final class AppRuntime {
         return (lat: c.latitude, lon: c.longitude)
     }
 
-    private func youCoordinate() -> (lat: Double, lon: Double) {
-        let pack = packs?.active
-        let home = packs?.homeCoordinate()
-        return UserPuck.coordinate(
-            lastKnown: lastKnownFix,
-            packCenter: (home?.lat ?? pack?.center.lat ?? 0, home?.lon ?? pack?.center.lon ?? 0),
-            packSouth: pack?.bbox.south ?? 0,
-            packWest: pack?.bbox.west ?? 0,
-            packNorth: pack?.bbox.north ?? 0,
-            packEast: pack?.bbox.east ?? 0
-        )
+    /// GNSS-derived YOU. Live fix, else last known. The pack is never YOU.
+    var fieldYou: (lat: Double, lon: Double)? {
+        if let live = gnssYou { return live }
+        guard let last = lastKnownFix, last.lat.isFinite, last.lon.isFinite else { return nil }
+        return last
     }
 
     private func destination() -> (lat: Double, lon: Double)? {
         RouteTarget.pick(
             explicit: routeTarget,
             lastMark: marks.last.map { ($0.lat, $0.lon) },
-            origin: youCoordinate()
+            origin: fieldYou ?? (lat: .nan, lon: .nan)
         )
     }
 
@@ -1810,7 +1794,7 @@ final class AppRuntime {
 
     private func applyLiveGuide() {
         guard routeCoords.count >= 2 else { return }
-        guard let you = gnssYou ?? lastKnownFix else { return }
+        guard let you = fieldYou else { return }
         let streets = searchIndex?.streetNames(along: routeCoords) ?? []
         let cue = LiveNav.progress(
             you: you,
@@ -1853,7 +1837,7 @@ final class AppRuntime {
             routeCoords: cue.remainingCoords,
             planChrome: navChrome,
             destination: destination(),
-            you: gnssYou ?? lastKnownFix
+            you: fieldYou
         )
         speakHUDTurns = VoiceNav.hudTurns(
             cue.remainingCoords,

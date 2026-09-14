@@ -206,7 +206,7 @@ final class MapLibreMapTests: XCTestCase {
         )
     }
 
-    func testUserPuckFallsBackToPackCenterWhenFixIsOutsideBBox() {
+    func testUserPuckStaysAtLastKnownWhenFixIsOutsideBBox() {
         let elPaso = (lat: 31.8705, lon: -106.5973)
         let albuquerque = (lat: 35.155, lon: -106.53)
         let you = UserPuck.coordinate(
@@ -217,8 +217,9 @@ final class MapLibreMapTests: XCTestCase {
             packNorth: 35.25,
             packEast: -106.38
         )
-        XCTAssertEqual(you.lat, albuquerque.lat)
-        XCTAssertEqual(you.lon, albuquerque.lon)
+        XCTAssertEqual(you.lat, elPaso.lat)
+        XCTAssertEqual(you.lon, elPaso.lon)
+        XCTAssertNotEqual(you.lat, albuquerque.lat)
         XCTAssertFalse(
             UserPuck.contains(
                 lat: elPaso.lat,
@@ -503,6 +504,18 @@ final class MapLibreMapTests: XCTestCase {
             WalkDriveChip.block(hasPack: true, hasUsableGraph: true, hasDestination: true, destinationOnPack: false),
             .destinationOffPack
         )
+        XCTAssertEqual(
+            WalkDriveChip.block(
+                hasPack: true,
+                hasUsableGraph: true,
+                hasDestination: true,
+                destinationOnPack: true,
+                hasYouFix: false
+            ),
+            .noYou
+        )
+        XCTAssertEqual(RouteBlock.noYou.chrome(mode: .walk, packName: "TX WEST"), "WALK — NO FIX")
+        XCTAssertEqual(RouteBlock.noYou.planChrome, "")
         for block in RouteBlock.allCases {
             for mode in [TravelMode.walk, .drive] {
                 let said = block.chrome(mode: mode, packName: "TX WEST")
