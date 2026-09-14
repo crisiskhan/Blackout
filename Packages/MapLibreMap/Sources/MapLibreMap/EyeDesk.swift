@@ -13,6 +13,10 @@ public enum EyeDesk {
     public static let trailSeconds: Double = 20 * 60
     public static let deadReckonSeconds: Double = 60
     public static let bleRingMaxMeters: Double = 200
+    public static let satelliteShadeOpacity: Double = 0.86
+    public static let satelliteLandOpacity: Double = 0.3
+    public static let satelliteRoadOpacity: Double = 0.28
+    public static let satelliteLabelOpacity: Double = 0.22
     public static let noCard = "NO CARD · DON'T GUESS"
     public static let offAerial = "OFF AERIAL"
     public static let packStamp = "PACK"

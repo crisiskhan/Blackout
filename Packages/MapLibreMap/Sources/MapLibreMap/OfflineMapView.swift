@@ -227,8 +227,8 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
-        // EYE is a north-up desk over our people. Pinch and pan stay; orbit is
-        // off so the heading cannot wander. Tilt is still the lift.
+        // EYE is a 3D satellite desk over our people. Pinch, pan, orbit and
+        // tilt stay on the pack. Walking MAP stays flat.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
         view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
@@ -236,9 +236,6 @@ public struct OfflineMapView: UIViewRepresentable {
         view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
         view.minimumZoomLevel = PackCamera.minZoom
         view.maximumZoomLevel = PackCamera.maxZoom
-        if godsEye, abs(view.direction - PackCamera.godsEyeHeading) > 0.5 {
-            view.setDirection(PackCamera.godsEyeHeading, animated: false)
-        }
         if let map = view as? FillingMapView {
             map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)
         }
@@ -1974,8 +1971,10 @@ extension PackStyle {
         var fillColor: NSExpression?
         var fillOpacity: NSExpression?
         var lineColor: NSExpression?
+        var lineOpacity: NSExpression?
         var textColor: NSExpression?
         var textHaloColor: NSExpression?
+        var textOpacity: NSExpression?
         var iconColor: NSExpression?
         var circleColor: NSExpression?
         var circleStrokeColor: NSExpression?
@@ -2012,11 +2011,12 @@ extension PackStyle {
         case let fill as MLNFillStyleLayer:
             return LampPaint(fillColor: fill.fillColor, fillOpacity: fill.fillOpacity)
         case let line as MLNLineStyleLayer:
-            return LampPaint(lineColor: line.lineColor)
+            return LampPaint(lineColor: line.lineColor, lineOpacity: line.lineOpacity)
         case let symbol as MLNSymbolStyleLayer:
             return LampPaint(
                 textColor: symbol.textColor,
                 textHaloColor: symbol.textHaloColor,
+                textOpacity: symbol.textOpacity,
                 iconColor: symbol.iconColor
             )
         case let circle as MLNCircleStyleLayer:
@@ -2040,9 +2040,11 @@ extension PackStyle {
             if let opacity = paint.fillOpacity { fill.fillOpacity = opacity }
         case let line as MLNLineStyleLayer:
             if let color = paint.lineColor { line.lineColor = color }
+            if let opacity = paint.lineOpacity { line.lineOpacity = opacity }
         case let symbol as MLNSymbolStyleLayer:
             if let color = paint.textColor { symbol.textColor = color }
             if let halo = paint.textHaloColor { symbol.textHaloColor = halo }
+            if let opacity = paint.textOpacity { symbol.textOpacity = opacity }
             if let icon = paint.iconColor { symbol.iconColor = icon }
         case let circle as MLNCircleStyleLayer:
             if let color = paint.circleColor { circle.circleColor = color }
@@ -2111,6 +2113,9 @@ extension PackStyle {
             let id = layer.identifier
             if id == "hillshade" || id.hasPrefix("hillshade") {
                 layer.isVisible = shade
+                if godsEye, shade, let raster = layer as? MLNRasterStyleLayer {
+                    raster.rasterOpacity = NSExpression(forConstantValue: EyeDesk.satelliteShadeOpacity)
+                }
             }
             if id.hasPrefix("water-detail") {
                 layer.isVisible = water
@@ -2118,10 +2123,18 @@ extension PackStyle {
             if id == "aerial" || id.hasPrefix("naip") || id.hasPrefix("aerial") {
                 layer.isVisible = aerial
             }
+            if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
+                fill.fillOpacity = NSExpression(forConstantValue: EyeDesk.satelliteLandOpacity)
+            }
+            if godsEye, let line = layer as? MLNLineStyleLayer, id.hasPrefix("roads") {
+                line.lineOpacity = NSExpression(forConstantValue: EyeDesk.satelliteRoadOpacity)
+            }
             if let symbol = layer as? MLNSymbolStyleLayer,
                id == roadLabelsLayerID || id == roadRefsLayerID
             {
-                symbol.textOpacity = NSExpression(forConstantValue: godsEye ? 0.32 : 1)
+                symbol.textOpacity = NSExpression(
+                    forConstantValue: godsEye ? EyeDesk.satelliteLabelOpacity : 1
+                )
             }
         }
     }

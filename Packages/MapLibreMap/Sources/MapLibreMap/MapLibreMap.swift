@@ -581,15 +581,15 @@ public enum PackCamera {
         )
     }
 
-    /// North-up desk. 0 is nadir; the lift is range, not pitch.
-    public static let godsEyePitch: Double = 0
+    /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
+    public static let godsEyePitch: Double = 50
     /// Viewing distance is this times the pack's bounding-sphere radius.
     public static let godsEyeRangeFactor: Double = 2.4
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
-    /// Oblique ceiling while GODS EYE holds. 0 is nadir; walking MAP stays at 0.
-    public static let godsEyeMaxPitch: Double = 55
+    /// Oblique ceiling while EYE holds. Walking MAP stays flat.
+    public static let godsEyeMaxPitch: Double = 60
 
     public static func packCenter(
         south: Double,
@@ -634,8 +634,8 @@ public enum PackCamera {
         godsEye ? godsEyeMaxPitch : 0
     }
 
-    public static func allowsOrbit(godsEye _: Bool) -> Bool {
-        false
+    public static func allowsOrbit(godsEye: Bool) -> Bool {
+        return godsEye
     }
 
     /// Walking MAP can pan. GODS EYE can pan too, but only while the look

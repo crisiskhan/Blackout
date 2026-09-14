@@ -212,18 +212,21 @@ struct MapTab: View {
 
     /// Everything that is not the map, sitting on the map. Search, lock, EYE and
     /// instruments at the top; status and the four thumb cells at the bottom.
+    /// EYE takes the packed canvas as a 3D satellite desk: walking SEARCH recedes.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
-            HUDPlaced(
-                offset: runtime.hudLayout.search,
-                arranging: runtime.hudLayoutMode,
-                veil: runtime.chromeVeil,
-                alive: runtime.alive(.search),
-                onMove: { runtime.hudLayout.search = $0 },
-                onStore: { runtime.hudLayout.save() }
-            ) {
-                searchField
+            if !runtime.godsEye {
+                HUDPlaced(
+                    offset: runtime.hudLayout.search,
+                    arranging: runtime.hudLayoutMode,
+                    veil: runtime.chromeVeil,
+                    alive: runtime.alive(.search),
+                    onMove: { runtime.hudLayout.search = $0 },
+                    onStore: { runtime.hudLayout.save() }
+                ) {
+                    searchField
+                }
             }
             HUDPlaced(
                 offset: runtime.hudLayout.overlay,
@@ -248,18 +251,20 @@ struct MapTab: View {
                         .padding(.top, 52)
                 }
             }
-            if !hits.isEmpty {
+            if !runtime.godsEye, !hits.isEmpty {
                 hitList
                     .opacity(runtime.chromeVeil * runtime.alive(.search))
             }
-            if hits.isEmpty {
+            if !runtime.godsEye, hits.isEmpty {
                 markList
                     .opacity(runtime.chromeVeil * runtime.alive(.search))
             }
             Spacer(minLength: 0)
-            fieldChrome
-                .opacity(runtime.chromeVeil)
-                .allowsHitTesting(false)
+            if !runtime.godsEye {
+                fieldChrome
+                    .opacity(runtime.chromeVeil)
+                    .allowsHitTesting(false)
+            }
             if runtime.hudCrisis {
                 crisisStrip
             }
