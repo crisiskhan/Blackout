@@ -2,6 +2,7 @@
 """Cesium is the only map. UPDATE is the only socket. Airplane otherwise."""
 from __future__ import annotations
 
+import struct
 import unittest
 from pathlib import Path
 
@@ -95,6 +96,44 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn('NET · NONE', desk)
         self.assertIn("case vectors", desk)
         self.assertIn("case snap", desk)
+
+    def test_globe_shows_pack_ground_not_void(self):
+        """Device stills: puck on black. NAIP is metro-only; hillshade+OSM cover the pack."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("XMLHttpRequest", desk)
+        self.assertNotIn("return fetch(url)", desk)
+        self.assertIn("hillshade.png", desk)
+        self.assertIn("osm.pmtiles", desk)
+        self.assertIn("SingleTileImageryProvider", desk)
+        self.assertIn("tileLoadProgressEvent", desk)
+        self.assertNotIn("#141414", desk)
+        self.assertIn("../Packs/", globe)
+        self.assertIn("hillshade.png", globe)
+        self.assertIn("osm.pmtiles", globe)
+        self.assertIn("hillshade.png", tab)
+        self.assertIn("osm.pmtiles", tab)
+
+    def test_tx_west_naip_misses_the_device_puck(self):
+        aerial = (ROOT / "Resources" / "Packs" / "tx-west" / "aerial.pmtiles").read_bytes()[:127]
+        min_lon = struct.unpack_from("<i", aerial, 102)[0] / 1e7
+        min_lat = struct.unpack_from("<i", aerial, 106)[0] / 1e7
+        max_lon = struct.unpack_from("<i", aerial, 110)[0] / 1e7
+        max_lat = struct.unpack_from("<i", aerial, 114)[0] / 1e7
+        lat, lon = 31.87049, -106.597333
+        inside_naip = min_lat <= lat <= max_lat and min_lon <= lon <= max_lon
+        self.assertFalse(inside_naip, "device YOU is outside metro NAIP")
+        shade = ROOT / "Resources" / "Packs" / "tx-west" / "hillshade.png"
+        osm = ROOT / "Resources" / "Packs" / "tx-west" / "osm.pmtiles"
+        self.assertTrue(shade.is_file())
+        self.assertTrue(osm.is_file())
+        header = osm.read_bytes()[:127]
+        o_min_lon = struct.unpack_from("<i", header, 102)[0] / 1e7
+        o_min_lat = struct.unpack_from("<i", header, 106)[0] / 1e7
+        o_max_lon = struct.unpack_from("<i", header, 110)[0] / 1e7
+        o_max_lat = struct.unpack_from("<i", header, 114)[0] / 1e7
+        self.assertTrue(o_min_lat <= lat <= o_max_lat and o_min_lon <= lon <= o_max_lon)
 
     def test_four_tabs_four_dock_no_fifth(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")

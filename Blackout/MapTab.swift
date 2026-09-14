@@ -115,7 +115,9 @@ struct MapTab: View {
                 aerialURL: packFile("aerial.pmtiles"),
                 demURL: packFile("dem.json"),
                 waterURL: packFile("layers/water.geojson"),
-                contoursURL: packFile("contours.geojson")
+                contoursURL: packFile("contours.geojson"),
+                shadeURL: packFile("hillshade.png"),
+                osmURL: packFile("osm.pmtiles")
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the

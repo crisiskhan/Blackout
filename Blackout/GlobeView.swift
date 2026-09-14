@@ -47,6 +47,8 @@ struct GlobeView: UIViewRepresentable {
     var demURL: URL?
     var waterURL: URL?
     var contoursURL: URL?
+    var shadeURL: URL?
+    var osmURL: URL?
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -287,10 +289,23 @@ private extension GlobeView {
         if let destination { obj["dest"] = [destination.lat, destination.lon] }
         if let held { obj["held"] = [held.lat, held.lon] }
         if let followID { obj["followId"] = followID }
-        if let aerialURL { obj["aerialUrl"] = aerialURL.absoluteString }
-        if let demURL { obj["demUrl"] = demURL.absoluteString }
-        if let waterURL { obj["waterUrl"] = waterURL.absoluteString }
-        if let contoursURL { obj["contoursUrl"] = contoursURL.absoluteString }
+        if let path = packWebPath(aerialURL) { obj["aerialUrl"] = path }
+        if let path = packWebPath(demURL) { obj["demUrl"] = path }
+        if let path = packWebPath(waterURL) { obj["waterUrl"] = path }
+        if let path = packWebPath(contoursURL) { obj["contoursUrl"] = path }
+        // Pack ground is hillshade.png + osm.pmtiles. Metro NAIP is extra.
+        obj["shadeUrl"] = packWebPath(shadeURL) ?? "../Packs/\(packID)/hillshade.png"
+        obj["osmUrl"] = packWebPath(osmURL) ?? "../Packs/\(packID)/osm.pmtiles"
         return obj
+    }
+
+    /// Globe/index.html lives next to Packs/. Relative file URLs stay inside
+    /// WKWebView's allowingReadAccessTo tree; absolute file:// fetch() does not.
+    func packWebPath(_ url: URL?) -> String? {
+        guard let url else { return nil }
+        let marker = "/Packs/\(packID)/"
+        let path = url.path
+        guard let range = path.range(of: marker) else { return url.absoluteString }
+        return "../Packs/\(packID)/\(path[range.upperBound...])"
     }
 }

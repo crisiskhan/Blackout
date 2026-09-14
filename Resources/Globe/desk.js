@@ -7,7 +7,13 @@
   var lastFit = -1;
   var lastAerial = "";
   var lastDem = "";
+  var lastShade = "";
+  var lastOsm = "";
+  var lastWater = "";
+  var lastContours = "";
   var aerialLayer = null;
+  var shadeLayer = null;
+  var osmLayer = null;
   var waterSource = null;
   var contourSource = null;
   var holdTimer = null;
@@ -16,6 +22,7 @@
   var lastTapPos = null;
   var pressedId = null;
   var demGrid = null;
+  var GROUND = "#4a463c";
 
   function post(payload) {
     try {
@@ -48,6 +55,50 @@
     });
   }
 
+  function xhr(url, type) {
+    return new Promise(function (resolve, reject) {
+      var req = new XMLHttpRequest();
+      req.open("GET", url, true);
+      if (type) req.responseType = type;
+      req.onload = function () {
+        if (req.status === 0 || (req.status >= 200 && req.status < 300)) {
+          resolve(req.response);
+          return;
+        }
+        reject(new Error("NO PACK"));
+      };
+      req.onerror = function () {
+        reject(new Error("NO PACK"));
+      };
+      req.send();
+    });
+  }
+
+  function xhrImage(url) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        resolve(img);
+      };
+      img.onerror = function () {
+        reject(new Error("NO PACK"));
+      };
+      img.src = url;
+    });
+  }
+
+  function packAsset(spec, name) {
+    if (!spec || !spec.packId) return "";
+    return "../Packs/" + spec.packId + "/" + name;
+  }
+
+  function emptyTile() {
+    var c = document.createElement("canvas");
+    c.width = 256;
+    c.height = 256;
+    return c;
+  }
+
   function colorFor(condition, ghost) {
     var c;
     if (condition === "red") c = Cesium.Color.fromCssColorString("#E10600");
@@ -71,6 +122,251 @@
     return Promise.resolve({ data: this.buffer.slice(offset, offset + length) });
   };
 
+  function Pb(bytes) {
+    this.b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    this.i = 0;
+    this.n = this.b.length;
+  }
+  Pb.prototype.u = function () {
+    var n = 0;
+    var s = 0;
+    var v;
+    while (this.i < this.n) {
+      v = this.b[this.i++];
+      n += (v & 127) * Math.pow(2, s);
+      if (!(v & 128)) return n;
+      s += 7;
+    }
+    return n;
+  };
+  Pb.prototype.bytes = function () {
+    var n = this.u();
+    var s = this.b.subarray(this.i, this.i + n);
+    this.i += n;
+    return s;
+  };
+  Pb.prototype.str = function () {
+    var b = this.bytes();
+    var i;
+    var out = "";
+    for (i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
+    try {
+      return decodeURIComponent(escape(out));
+    } catch (err) {
+      return out;
+    }
+  };
+  Pb.prototype.skip = function (wt) {
+    if (wt === 0) this.u();
+    else if (wt === 1) this.i += 8;
+    else if (wt === 2) this.i += this.u();
+    else if (wt === 5) this.i += 4;
+  };
+
+  function zig(n) {
+    return (n >>> 1) ^ -(n & 1);
+  }
+
+  function packedU(bytes) {
+    var p = new Pb(bytes);
+    var out = [];
+    while (p.i < p.n) out.push(p.u());
+    return out;
+  }
+
+  function decodeValue(bytes) {
+    var p = new Pb(bytes);
+    var v = "";
+    while (p.i < p.n) {
+      var k = p.u();
+      var fn = k >> 3;
+      var wt = k & 7;
+      if (fn === 1 && wt === 2) v = p.str();
+      else if (fn === 7 && wt === 0) v = p.u() ? "true" : "false";
+      else if (wt === 0) v = String(p.u());
+      else p.skip(wt);
+    }
+    return v;
+  }
+
+  function decodeGeom(cmds, extent, size) {
+    var x = 0;
+    var y = 0;
+    var i = 0;
+    var scale = size / (extent || 4096);
+    var rings = [];
+    var ring = [];
+    while (i < cmds.length) {
+      var c = cmds[i++];
+      var cmd = c & 7;
+      var count = c >>> 3;
+      var k;
+      if (cmd === 1 || cmd === 2) {
+        for (k = 0; k < count && i + 1 < cmds.length; k++) {
+          x += zig(cmds[i++]);
+          y += zig(cmds[i++]);
+          if (cmd === 1) {
+            if (ring.length >= 4) rings.push(ring);
+            ring = [];
+          }
+          ring.push(x * scale, y * scale);
+        }
+      } else if (cmd === 7) {
+        if (ring.length >= 4) {
+          ring.push(ring[0], ring[1]);
+          rings.push(ring);
+          ring = [];
+        }
+      }
+    }
+    if (ring.length >= 4) rings.push(ring);
+    return rings;
+  }
+
+  function decodeFeature(bytes, extent, size) {
+    var p = new Pb(bytes);
+    var type = 0;
+    var tags = [];
+    var geom = [];
+    while (p.i < p.n) {
+      var k = p.u();
+      var fn = k >> 3;
+      var wt = k & 7;
+      if (fn === 2 && wt === 2) tags = packedU(p.bytes());
+      else if (fn === 2 && wt === 0) tags.push(p.u());
+      else if (fn === 3 && wt === 0) type = p.u();
+      else if (fn === 4 && wt === 2) geom = packedU(p.bytes());
+      else if (fn === 4 && wt === 0) geom.push(p.u());
+      else p.skip(wt);
+    }
+    return { type: type, tags: tags, rings: decodeGeom(geom, extent, size) };
+  }
+
+  function propsFrom(tags, keys, values) {
+    var out = {};
+    var i;
+    for (i = 0; i + 1 < tags.length; i += 2) {
+      var key = keys[tags[i]];
+      if (key) out[key] = values[tags[i + 1]] || "";
+    }
+    return out;
+  }
+
+  function decodeLayer(bytes, size) {
+    var p = new Pb(bytes);
+    var name = "";
+    var extent = 4096;
+    var keys = [];
+    var values = [];
+    var feats = [];
+    while (p.i < p.n) {
+      var k = p.u();
+      var fn = k >> 3;
+      var wt = k & 7;
+      if (fn === 1 && wt === 2) name = p.str();
+      else if (fn === 2 && wt === 2) feats.push(p.bytes());
+      else if (fn === 3 && wt === 2) keys.push(p.str());
+      else if (fn === 4 && wt === 2) values.push(decodeValue(p.bytes()));
+      else if (fn === 5 && wt === 0) extent = p.u();
+      else p.skip(wt);
+    }
+    return {
+      name: name,
+      features: feats.map(function (raw) {
+        var f = decodeFeature(raw, extent, size);
+        f.props = propsFrom(f.tags, keys, values);
+        return f;
+      })
+    };
+  }
+
+  function decodeMvt(bytes, size) {
+    var p = new Pb(bytes);
+    var layers = {};
+    while (p.i < p.n) {
+      var k = p.u();
+      var fn = k >> 3;
+      var wt = k & 7;
+      if (fn === 3 && wt === 2) {
+        var layer = decodeLayer(p.bytes(), size);
+        if (layer.name) layers[layer.name] = layer.features;
+      } else {
+        p.skip(wt);
+      }
+    }
+    return layers;
+  }
+
+  function strokeRings(ctx, rings) {
+    var i;
+    var j;
+    ctx.beginPath();
+    for (i = 0; i < rings.length; i++) {
+      var r = rings[i];
+      if (r.length < 4) continue;
+      ctx.moveTo(r[0], r[1]);
+      for (j = 2; j < r.length; j += 2) ctx.lineTo(r[j], r[j + 1]);
+    }
+    ctx.stroke();
+  }
+
+  function fillRings(ctx, rings) {
+    var i;
+    var j;
+    ctx.beginPath();
+    for (i = 0; i < rings.length; i++) {
+      var r = rings[i];
+      if (r.length < 6) continue;
+      ctx.moveTo(r[0], r[1]);
+      for (j = 2; j < r.length; j += 2) ctx.lineTo(r[j], r[j + 1]);
+      ctx.closePath();
+    }
+    try {
+      ctx.fill("evenodd");
+    } catch (err) {
+      ctx.fill();
+    }
+  }
+
+  function roadWidth(hw) {
+    if (hw === "motorway" || hw === "trunk") return 3.4;
+    if (hw === "primary" || hw === "motorway_link" || hw === "trunk_link") return 2.6;
+    if (hw === "secondary" || hw === "primary_link") return 2.1;
+    if (hw === "tertiary" || hw === "residential" || hw === "unclassified") return 1.5;
+    return 1.05;
+  }
+
+  function paintMvt(ctx, bytes, size) {
+    var layers = decodeMvt(bytes, size);
+    var water = layers.water || [];
+    var road = layers.road || [];
+    var i;
+    ctx.fillStyle = "rgba(42, 88, 118, 0.58)";
+    for (i = 0; i < water.length; i++) {
+      if (water[i].type === 3) fillRings(ctx, water[i].rings);
+    }
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(214, 210, 198, 0.94)";
+    for (i = 0; i < road.length; i++) {
+      if (road[i].type !== 2 && road[i].type !== 3) continue;
+      ctx.lineWidth = roadWidth(road[i].props.highway);
+      strokeRings(ctx, road[i].rings);
+    }
+  }
+
+  function gunzip(u8) {
+    if (!u8 || u8.length < 2 || u8[0] !== 0x1f || u8[1] !== 0x8b) {
+      return Promise.resolve(u8);
+    }
+    if (typeof DecompressionStream === "undefined") return Promise.resolve(u8);
+    return new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("gzip")))
+      .arrayBuffer()
+      .then(function (buf) {
+        return new Uint8Array(buf);
+      });
+  }
+
   function PMTilesImagery(pm, header) {
     this._pm = pm;
     this.tilingScheme = new Cesium.WebMercatorTilingScheme();
@@ -84,7 +380,7 @@
     this.tileHeight = 256;
     this.minimumLevel = header.minZoom;
     this.maximumLevel = header.maxZoom;
-    this.hasAlphaChannel = false;
+    this.hasAlphaChannel = true;
     this.credit = new Cesium.Credit("USGS NAIP, build-time only", false);
     this.errorEvent = new Cesium.Event();
     this.ready = true;
@@ -94,9 +390,8 @@
     return [];
   };
   PMTilesImagery.prototype.requestImage = function (x, y, level) {
-    var self = this;
     return this._pm.getZxy(level, x, y).then(function (entry) {
-      if (!entry) return undefined;
+      if (!entry || !entry.data) return emptyTile();
       var blob = new Blob([entry.data], { type: "image/jpeg" });
       var url = URL.createObjectURL(blob);
       return Cesium.Resource.fetchImage({ url: url }).then(
@@ -106,11 +401,47 @@
         },
         function () {
           URL.revokeObjectURL(url);
-          return undefined;
+          return emptyTile();
         }
       );
     }).catch(function () {
-      return undefined;
+      return emptyTile();
+    });
+  };
+
+  function PMTilesMVT(pm, header) {
+    this._pm = pm;
+    this.tilingScheme = new Cesium.WebMercatorTilingScheme();
+    this.rectangle = Cesium.Rectangle.fromDegrees(
+      header.minLon,
+      header.minLat,
+      header.maxLon,
+      header.maxLat
+    );
+    this.tileWidth = 256;
+    this.tileHeight = 256;
+    this.minimumLevel = header.minZoom;
+    this.maximumLevel = header.maxZoom;
+    this.hasAlphaChannel = true;
+    this.credit = new Cesium.Credit("OpenStreetMap contributors", false);
+    this.errorEvent = new Cesium.Event();
+    this.ready = true;
+    this.readyPromise = Promise.resolve(true);
+  }
+  PMTilesMVT.prototype.getTileCredits = function () {
+    return [];
+  };
+  PMTilesMVT.prototype.requestImage = function (x, y, level) {
+    return this._pm.getZxy(level, x, y).then(function (entry) {
+      var canvas = emptyTile();
+      if (!entry || !entry.data) return canvas;
+      var raw = entry.data instanceof Uint8Array ? entry.data : new Uint8Array(entry.data);
+      return gunzip(raw).then(function (bytes) {
+        paintMvt(canvas.getContext("2d"), bytes, 256);
+        return canvas;
+      });
+    }).catch(function () {
+      return emptyTile();
     });
   };
 
@@ -137,12 +468,13 @@
   function loadDem(url) {
     if (!url) {
       demGrid = null;
+      lastDem = "";
       viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
       return Promise.resolve(false);
     }
     if (url === lastDem && demGrid) return Promise.resolve(true);
-    return fetch(url)
-      .then(function (res) { return res.json(); })
+    return xhr(url, "text")
+      .then(function (text) { return JSON.parse(text); })
       .then(function (json) {
         demGrid = {
           west: json.west,
@@ -194,63 +526,179 @@
       })
       .catch(function () {
         demGrid = null;
-        lastDem = "";
+        lastDem = url || "";
         viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
         return false;
       });
   }
 
-  function loadAerial(url, on) {
-    if (aerialLayer) {
-      viewer.imageryLayers.remove(aerialLayer, true);
-      aerialLayer = null;
-    }
-    if (!on || !url) {
-      lastAerial = "";
+  function loadShade(url, bbox) {
+    if (!url || !bbox) {
+      if (shadeLayer) {
+        viewer.imageryLayers.remove(shadeLayer, true);
+        shadeLayer = null;
+      }
+      lastShade = "";
       return Promise.resolve(false);
     }
-    return fetch(url)
-      .then(function (res) { return res.arrayBuffer(); })
-      .then(function (buf) {
-        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
-        return pm.getHeader().then(function (header) {
-          aerialLayer = viewer.imageryLayers.addImageryProvider(new PMTilesImagery(pm, header));
-          lastAerial = url;
-          return true;
+    if (url === lastShade && shadeLayer) {
+      shadeLayer.show = true;
+      return Promise.resolve(true);
+    }
+    if (url === lastShade && !shadeLayer) return Promise.resolve(false);
+    if (shadeLayer) {
+      viewer.imageryLayers.remove(shadeLayer, true);
+      shadeLayer = null;
+    }
+    lastShade = url;
+    var rect = Cesium.Rectangle.fromDegrees(bbox.west, bbox.south, bbox.east, bbox.north);
+    return xhrImage(url)
+      .then(function (img) {
+        var dataUrl = url;
+        try {
+          var c = document.createElement("canvas");
+          c.width = img.naturalWidth || img.width;
+          c.height = img.naturalHeight || img.height;
+          c.getContext("2d").drawImage(img, 0, 0);
+          dataUrl = c.toDataURL("image/jpeg", 0.86);
+        } catch (err) {
+          dataUrl = url;
+        }
+        return Cesium.SingleTileImageryProvider.fromUrl(dataUrl, {
+          rectangle: rect,
+          tileWidth: img.naturalWidth || img.width,
+          tileHeight: img.naturalHeight || img.height
         });
       })
+      .then(function (prov) {
+        shadeLayer = viewer.imageryLayers.addImageryProvider(prov, 0);
+        shadeLayer.show = true;
+        viewer.scene.requestRender();
+        return true;
+      })
       .catch(function () {
-        lastAerial = "";
         return false;
       });
   }
 
-  function loadGeo(url, color, width, existing) {
+  function loadOsm(url, on) {
+    if (osmLayer && url === lastOsm) {
+      osmLayer.show = !!on;
+      viewer.scene.requestRender();
+      return Promise.resolve(true);
+    }
+    if (!on || !url) {
+      if (osmLayer) osmLayer.show = false;
+      if (!url) {
+        lastOsm = "";
+        if (osmLayer) {
+          viewer.imageryLayers.remove(osmLayer, true);
+          osmLayer = null;
+        }
+      }
+      return Promise.resolve(false);
+    }
+    if (url === lastOsm && !osmLayer) return Promise.resolve(false);
+    if (osmLayer) {
+      viewer.imageryLayers.remove(osmLayer, true);
+      osmLayer = null;
+    }
+    lastOsm = url;
+    return xhr(url, "arraybuffer")
+      .then(function (buf) {
+        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+        return pm.getHeader().then(function (header) {
+          osmLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header), 1);
+          osmLayer.show = true;
+          viewer.scene.requestRender();
+          return true;
+        });
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
+  function loadAerial(url, on) {
+    if (aerialLayer && url === lastAerial) {
+      aerialLayer.show = !!on;
+      viewer.scene.requestRender();
+      return Promise.resolve(true);
+    }
+    if (!on || !url) {
+      if (aerialLayer) aerialLayer.show = false;
+      if (!url) {
+        lastAerial = "";
+        if (aerialLayer) {
+          viewer.imageryLayers.remove(aerialLayer, true);
+          aerialLayer = null;
+        }
+      }
+      return Promise.resolve(false);
+    }
+    if (url === lastAerial && !aerialLayer) return Promise.resolve(false);
+    if (aerialLayer) {
+      viewer.imageryLayers.remove(aerialLayer, true);
+      aerialLayer = null;
+    }
+    lastAerial = url;
+    return xhr(url, "arraybuffer")
+      .then(function (buf) {
+        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+        return pm.getHeader().then(function (header) {
+          aerialLayer = viewer.imageryLayers.addImageryProvider(new PMTilesImagery(pm, header), 2);
+          aerialLayer.show = true;
+          viewer.scene.requestRender();
+          return true;
+        });
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
+  function loadGeo(url, color, width, existing, slot) {
+    var key = url || "";
+    if (key === (slot === "water" ? lastWater : lastContours)) {
+      return Promise.resolve(existing);
+    }
     if (existing) {
       viewer.dataSources.remove(existing, true);
     }
+    if (slot === "water") {
+      lastWater = key;
+      waterSource = null;
+    } else {
+      lastContours = key;
+      contourSource = null;
+    }
     if (!url) return Promise.resolve(null);
-    return Cesium.GeoJsonDataSource.load(url, {
-      stroke: color,
-      fill: color.withAlpha(0.28),
-      strokeWidth: width || 2,
-      clampToGround: true
-    }).then(function (ds) {
-      ds.entities.values.forEach(function (ent) {
-        if (ent.polygon) {
-          ent.polygon.material = color.withAlpha(0.28);
-          ent.polygon.outline = true;
-          ent.polygon.outlineColor = color;
-        }
-        if (ent.polyline) {
-          ent.polyline.material = color;
-          ent.polyline.width = width || 2;
-          ent.polyline.clampToGround = true;
-        }
-      });
-      viewer.dataSources.add(ds);
-      return ds;
-    }).catch(function () { return null; });
+    return xhr(url, "text")
+      .then(function (text) {
+        return Cesium.GeoJsonDataSource.load(JSON.parse(text), {
+          stroke: color,
+          fill: color.withAlpha(0.28),
+          strokeWidth: width || 2,
+          clampToGround: true
+        });
+      })
+      .then(function (ds) {
+        ds.entities.values.forEach(function (ent) {
+          if (ent.polygon) {
+            ent.polygon.material = color.withAlpha(0.28);
+            ent.polygon.outline = true;
+            ent.polygon.outlineColor = color;
+          }
+          if (ent.polyline) {
+            ent.polyline.material = color;
+            ent.polyline.width = width || 2;
+            ent.polyline.clampToGround = true;
+          }
+        });
+        viewer.dataSources.add(ds);
+        return ds;
+      })
+      .catch(function () { return null; });
   }
 
   function clearCoins() {
@@ -434,19 +882,23 @@
     });
   }
 
+  function paintLayer(layer, spec) {
+    if (!layer) return;
+    layer.saturation = spec.palette === "packIR" ? 0.05 : 1.05;
+    layer.contrast = spec.palette === "packIR" ? 1.35 : spec.lamp === "sun" ? 1.15 : 1.02;
+    layer.brightness = spec.lamp === "sun" ? 1.14 : spec.lamp === "night" ? 0.78 : 1.0;
+    layer.gamma = spec.palette === "nvg" ? 0.85 : 1.0;
+    layer.hue = spec.palette === "nvg" ? 2.1 : 0.0;
+  }
+
   function applyPalette(spec) {
     var globe = viewer.scene.globe;
-    globe.baseColor = Cesium.Color.fromCssColorString("#141414");
+    globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
     globe.showGroundAtmosphere = false;
     globe.enableLighting = spec.lamp === "sun";
-    var layer = aerialLayer;
-    if (layer) {
-      layer.saturation = spec.palette === "packIR" ? 0.05 : 1.2;
-      layer.contrast = spec.palette === "packIR" ? 1.35 : spec.lamp === "sun" ? 1.2 : 1.05;
-      layer.brightness = spec.lamp === "sun" ? 1.18 : spec.lamp === "night" ? 0.72 : 1.0;
-      layer.gamma = spec.palette === "nvg" ? 0.85 : 1.0;
-      layer.hue = spec.palette === "nvg" ? 2.1 : 0.0;
-    }
+    paintLayer(shadeLayer, spec);
+    paintLayer(osmLayer, spec);
+    paintLayer(aerialLayer, spec);
     if (spec.palette === "nvg") {
       globe.baseColor = Cesium.Color.fromCssColorString("#031a08");
     }
@@ -536,9 +988,9 @@
 
   function lonlat(position) {
     var ray = viewer.camera.getPickRay(position);
-    var cart = viewer.scene.globe.pick(ray, viewer.scene);
-    if (!cart) return null;
-    var c = Cesium.Cartographic.fromCartesian(cart);
+    var carto = viewer.scene.globe.pick(ray, viewer.scene);
+    if (!carto) return null;
+    var c = Cesium.Cartographic.fromCartesian(carto);
     return { lat: Cesium.Math.toDegrees(c.latitude), lon: Cesium.Math.toDegrees(c.longitude) };
   }
 
@@ -587,17 +1039,23 @@
     }
     var layers = spec.layers || [];
     var aerialOn = layers.indexOf("aerial") >= 0 && spec.ground !== "streets";
+    var streetsOn = spec.ground !== "aerial";
     var waterOn = layers.indexOf("water") >= 0;
     var vectorsOn = layers.indexOf("vectors") >= 0 || layers.indexOf("shade") >= 0;
+    var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
+    var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
     Promise.resolve()
       .then(function () { return loadDem(spec.demUrl); })
+      .then(function () { return loadShade(shadeUrl, spec.bbox); })
+      .then(function () { return loadOsm(osmUrl, streetsOn); })
       .then(function () { return loadAerial(spec.aerialUrl, aerialOn); })
       .then(function () {
         return loadGeo(
           waterOn ? spec.waterUrl : "",
           Cesium.Color.fromCssColorString("#3FA7C9"),
           2,
-          waterSource
+          waterSource,
+          "water"
         ).then(function (ds) { waterSource = ds; });
       })
       .then(function () {
@@ -605,7 +1063,8 @@
           vectorsOn ? spec.contoursUrl : "",
           Cesium.Color.fromCssColorString("#B8BDC2"),
           1.25,
-          contourSource
+          contourSource,
+          "contours"
         ).then(function (ds) { contourSource = ds; });
       })
       .then(function () {
@@ -644,13 +1103,16 @@
       maximumRenderTimeChange: Infinity,
       contextOptions: { webgl: { alpha: false } }
     });
-    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#141414");
+    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.scene.globe.showGroundAtmosphere = false;
     viewer.scene.moon = undefined;
     viewer.scene.sun = undefined;
     viewer.scene.fog.enabled = false;
     viewer.scene.backgroundColor = Cesium.Color.BLACK;
     viewer.clock.shouldAnimate = false;
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
+      viewer.scene.requestRender();
+    });
     bindInput();
     window.KHAN.viewer = viewer;
     if (pending) {
