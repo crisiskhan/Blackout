@@ -951,6 +951,32 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.opensOnStreetNames())
         XCTAssertGreaterThanOrEqual(PackCamera.openZoom, PackCamera.streetNameMinZoom)
         XCTAssertFalse(PackCamera.opensOnStreetNames(openZoom: 11, labelMinZoom: 12))
+        XCTAssertEqual(PackCamera.minZoom, 6)
+        XCTAssertEqual(PackCamera.maxZoom, 16)
+        XCTAssertLessThan(PackCamera.minZoom, PackCamera.streetNameMinZoom)
+        XCTAssertLessThanOrEqual(PackCamera.openZoom, PackCamera.maxZoom)
+    }
+
+    func testPackCameraFramesDestAndOpensOnYou() {
+        XCTAssertTrue(PackCamera.shouldOpenOnYou(showYou: true, wasShowingYou: false, hasDest: false))
+        XCTAssertFalse(PackCamera.shouldOpenOnYou(showYou: true, wasShowingYou: true, hasDest: false))
+        XCTAssertFalse(PackCamera.shouldOpenOnYou(showYou: false, wasShowingYou: false, hasDest: false))
+        XCTAssertFalse(PackCamera.shouldOpenOnYou(showYou: true, wasShowingYou: false, hasDest: true))
+        XCTAssertTrue(
+            PackCamera.shouldFrameDest(lockOn: false, destChanged: true, destVisible: false)
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFrameDest(lockOn: true, destChanged: true, destVisible: false)
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFrameDest(lockOn: false, destChanged: false, destVisible: false)
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFrameDest(lockOn: false, destChanged: true, destVisible: true)
+        )
+        XCTAssertTrue(PackCamera.destIsOnGlass(x: 195, y: 320, width: 390, height: 640))
+        XCTAssertFalse(PackCamera.destIsOnGlass(x: 10, y: 320, width: 390, height: 640))
+        XCTAssertFalse(PackCamera.destIsOnGlass(x: 195, y: 620, width: 390, height: 640))
     }
 
     func testDestinationPinTracksTheChosenTarget() {

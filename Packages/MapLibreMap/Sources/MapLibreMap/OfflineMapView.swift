@@ -183,6 +183,8 @@ public struct OfflineMapView: UIViewRepresentable {
         // pitch turns a field sheet into a toy globe.
         view.allowsRotating = false
         view.allowsTilting = false
+        view.minimumZoomLevel = PackCamera.minZoom
+        view.maximumZoomLevel = PackCamera.maxZoom
         if abs(view.direction) > 0.5 {
             view.setDirection(0, animated: false)
         }
@@ -254,6 +256,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var fittedFitToken = 0
         var storedLockOn = false
         var followedPuck: (lat: Double, lon: Double)?
+        var storedShowYou = false
         var storedMode: TravelMode?
         var storedSun = false
 
@@ -685,6 +688,8 @@ public struct OfflineMapView: UIViewRepresentable {
             let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
             let puckCoord = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
             let puckOK = spec.showYou && CLLocationCoordinate2DIsValid(puckCoord)
+            let wasShowingYou = storedShowYou
+            storedShowYou = spec.showYou
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
                 fitPack(spec, on: view)
@@ -716,7 +721,15 @@ public struct OfflineMapView: UIViewRepresentable {
                 lastFollow: followedPuck,
                 puck: (spec.puckLat, spec.puckLon)
             ) {
-                view.setCenter(puckCoord, animated: storedLockOn)
+                if !storedLockOn {
+                    view.setCenter(
+                        puckCoord,
+                        zoomLevel: PackCamera.openZoom,
+                        animated: false
+                    )
+                } else {
+                    view.setCenter(puckCoord, animated: true)
+                }
                 followedPuck = (spec.puckLat, spec.puckLon)
             }
             storedLockOn = spec.lockOn
@@ -734,6 +747,48 @@ public struct OfflineMapView: UIViewRepresentable {
                     fittedPack = pack
                     fittedSize = size
                 }
+                return
+            }
+            if let dest = spec.destination {
+                let destCoord = CLLocationCoordinate2D(latitude: dest.lat, longitude: dest.lon)
+                if CLLocationCoordinate2DIsValid(destCoord) {
+                    let point = view.convert(destCoord, toPointTo: view)
+                    if PackCamera.shouldFrameDest(
+                        lockOn: spec.lockOn,
+                        destChanged: DestinationPin.needsReapply(
+                            stored: storedDestination,
+                            destination: spec.destination
+                        ),
+                        destVisible: PackCamera.destIsOnGlass(
+                            x: Double(point.x),
+                            y: Double(point.y),
+                            width: Double(view.bounds.width),
+                            height: Double(view.bounds.height)
+                        )
+                    ) {
+                        view.setCenter(
+                            destCoord,
+                            zoomLevel: view.zoomLevel,
+                            animated: !force
+                        )
+                        fittedPack = pack
+                        fittedSize = size
+                        return
+                    }
+                }
+            }
+            if PackCamera.shouldOpenOnYou(
+                showYou: spec.showYou,
+                wasShowingYou: wasShowingYou,
+                hasDest: spec.destination != nil
+            ), puckOK {
+                view.setCenter(
+                    puckCoord,
+                    zoomLevel: PackCamera.openZoom,
+                    animated: false
+                )
+                fittedPack = pack
+                fittedSize = size
                 return
             }
             if !force, !PackCamera.shouldRefit(

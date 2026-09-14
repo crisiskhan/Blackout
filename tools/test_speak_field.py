@@ -482,6 +482,8 @@ class FieldChromeSourceContracts(unittest.TestCase):
         ))
         self.assertIn("PackCamera.shouldFollow", offline)
         self.assertIn("PackCamera.shouldFitRoute", offline)
+        self.assertIn("PackCamera.shouldFrameDest", offline)
+        self.assertIn("PackCamera.shouldOpenOnYou", offline)
         self.assertIn("func fitRoute(", offline)
         self.assertIn("allowsRotating = false", offline)
         self.assertIn("allowsTilting = false", offline)

@@ -513,9 +513,35 @@ public enum PackCamera {
     /// The map therefore opens on YOU at walking zoom; FIT PACK still shows the region.
     public static let openZoom: Double = 15
     public static let streetNameMinZoom: Double = 12
+    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Pinch below this is void.
+    public static let minZoom: Double = 6
+    /// Style overzoom ceiling. Packed streets do not get sharper past this.
+    public static let maxZoom: Double = 16
 
     public static func opensOnStreetNames(openZoom: Double = openZoom, labelMinZoom: Double = streetNameMinZoom) -> Bool {
         openZoom >= labelMinZoom
+    }
+
+    /// First GNSS after a dark puck. DEST already picked keeps the camera on
+    /// that pin; LOCK-ON is how YOU takes the glass back.
+    public static func shouldOpenOnYou(showYou: Bool, wasShowingYou: Bool, hasDest: Bool) -> Bool {
+        showYou && !wasShowingYou && !hasDest
+    }
+
+    /// Search / MARK dest off the glass. Canvas taps are already under the thumb.
+    public static func shouldFrameDest(lockOn: Bool, destChanged: Bool, destVisible: Bool) -> Bool {
+        !lockOn && destChanged && !destVisible
+    }
+
+    /// HUD search and dock cover the edges, so a pin in that pad is not on glass.
+    public static func destIsOnGlass(
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        pad: Double = routePaddingPoints
+    ) -> Bool {
+        x >= pad && x <= width - pad && y >= pad && y <= height - pad
     }
 
     public static func bounds(

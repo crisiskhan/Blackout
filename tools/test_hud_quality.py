@@ -1620,7 +1620,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 175)
+        self.assertEqual(count, 176)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
@@ -2666,7 +2666,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 175)
+        self.assertEqual(count, 176)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -3660,7 +3660,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 175)
+        self.assertEqual(count, 176)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -3835,6 +3835,59 @@ class YouIdentitySyncTests(unittest.TestCase):
         self.assertIn("Pack center is the pack, never YOU", qa)
         self.assertIn("WALK — NO FIX", qa)
         self.assertNotIn("best in class", qa.lower())
+
+
+class MapCanvasHonestyTests(unittest.TestCase):
+    """MAP camera stays on packed tiles, YOU, or DEST — never a void world."""
+
+    def test_pinch_stays_on_packed_tiles(self):
+        cam = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        self.assertIn("static let minZoom: Double = 6", cam)
+        self.assertIn("static let maxZoom: Double = 16", cam)
+        tiles = read("tools", "v3", "tiles.py")
+        self.assertIn("MIN_ZOOM = 6", tiles)
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        interact = offline.split("private func applyInteraction")[1].split(
+            "public final class Coordinator"
+        )[0]
+        self.assertIn("minimumZoomLevel = PackCamera.minZoom", interact)
+        self.assertIn("maximumZoomLevel = PackCamera.maxZoom", interact)
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn("Pinch stays on packed tiles", qa)
+        self.assertNotIn("best in class", qa.lower())
+
+    def test_off_glass_dest_is_framed_without_stealing_lock_on(self):
+        cam = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        self.assertIn("static func shouldFrameDest(", cam)
+        self.assertIn("static func destIsOnGlass(", cam)
+        self.assertIn("static func shouldOpenOnYou(", cam)
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        camera = offline.split("func applyCamera")[1].split("func fitPack")[0]
+        self.assertIn("PackCamera.shouldFrameDest", camera)
+        self.assertIn("PackCamera.destIsOnGlass", camera)
+        self.assertIn("PackCamera.shouldOpenOnYou", camera)
+        self.assertIn("storedShowYou", camera)
+        tests = read(
+            "Packages",
+            "MapLibreMap",
+            "Tests",
+            "MapLibreMapTests",
+            "MapLibreMapTests.swift",
+        )
+        self.assertIn("testPackCameraFramesDestAndOpensOnYou", tests)
+
+    def test_lock_on_arms_at_walking_zoom(self):
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        camera = offline.split("func applyCamera")[1].split("func fitPack")[0]
+        follow = camera.split("PackCamera.shouldFollow")[1].split("storedLockOn = spec.lockOn")[0]
+        self.assertIn("!storedLockOn", follow)
+        self.assertIn("zoomLevel: PackCamera.openZoom", follow)
 
 
 class FacetedMetalHUDTests(unittest.TestCase):
