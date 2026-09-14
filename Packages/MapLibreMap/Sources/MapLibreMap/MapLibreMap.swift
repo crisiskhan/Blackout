@@ -127,8 +127,8 @@ public enum PlaceMark {
             headingDeg: nil,
             emblem: mark.emblem,
             condition: mark.kind == EyeDesk.MarkKind.down.rawValue ? "red" : "green",
-            markKind: mark.kind,
-            kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind)
+            kid: EyeDesk.kidMark(name: mark.name, kind: mark.kind),
+            markKind: mark.kind
         )
     }
 }

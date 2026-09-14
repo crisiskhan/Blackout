@@ -4058,6 +4058,13 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("runtime.eyeCanvasPips()", tab)
         self.assertIn("PlaceMark.body", app)
         self.assertIn("PartyBody(", app)
+        body = cam.split("public static func body(_ mark: MapMark)")[1].split("public enum MarkStore")[0]
+        self.assertIn("kid:", body)
+        self.assertIn("markKind:", body)
+        self.assertLess(body.find("kid:"), body.find("markKind:"))
+        self.assertIn("tap.delegate is Coordinator", offline)
+        self.assertIn("tap.isEnabled = godsEye", offline)
+        self.assertIn("tap.isEnabled = !godsEye", offline)
         self.assertIn("EyeDesk.noCard", read("Blackout", "HoldCard.swift"))
         self.assertNotIn("chromeNet", tab)
         self.assertIn("func applyEyeVoice", app)

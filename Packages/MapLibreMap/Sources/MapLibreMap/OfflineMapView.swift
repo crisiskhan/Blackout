@@ -244,7 +244,9 @@ public struct OfflineMapView: UIViewRepresentable {
         }
         for rec in view.gestureRecognizers ?? [] {
             guard let tap = rec as? UITapGestureRecognizer, tap.numberOfTapsRequired == 2 else { continue }
-            if tap.delegate === nil {
+            if tap.delegate is Coordinator {
+                tap.isEnabled = godsEye
+            } else if tap.delegate === nil {
                 tap.isEnabled = !godsEye
             }
         }

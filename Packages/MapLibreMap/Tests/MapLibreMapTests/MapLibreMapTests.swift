@@ -1207,6 +1207,30 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 3_000), 10_000)
         XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 12_000), 12_000)
         XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 200, target: 1000), 1600, accuracy: 0.01)
+        let water = PlaceMark.body(
+            MapMark(
+                id: "w1",
+                lat: 31.76,
+                lon: -106.49,
+                label: "WATER",
+                name: "WATER",
+                kind: EyeDesk.MarkKind.water.rawValue
+            )
+        )
+        XCTAssertEqual(water.markKind, "WATER")
+        XCTAssertFalse(water.kid)
+        let lost = PlaceMark.body(
+            MapMark(
+                id: "k1",
+                lat: 31.76,
+                lon: -106.49,
+                label: "LOST",
+                name: "LOST KID",
+                kind: EyeDesk.MarkKind.lostKid.rawValue
+            )
+        )
+        XCTAssertTrue(lost.kid)
+        XCTAssertEqual(lost.markKind, "LOST KID")
     }
 
     func testDestinationPinTracksTheChosenTarget() {
