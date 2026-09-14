@@ -108,6 +108,10 @@ struct ExpeditionTab: View {
                             }
                             VStack(spacing: 1) {
                                 Button("SET") {
+                                    guard TimerDuration.parse(timerTime) != nil else {
+                                        timerChrome = "SET TIME"
+                                        return
+                                    }
                                     setPartyTimer()
                                 }
                                 .buttonStyle(HUDDockStyle())
@@ -154,6 +158,10 @@ struct ExpeditionTab: View {
                         VStack(alignment: .leading, spacing: 6) {
                             HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true, submit: "ADD", onSubmit: addKitItem)
                             Button("ADD") {
+                                if itemDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    kitChrome = "NAME ITEM"
+                                    return
+                                }
                                 addKitItem()
                             }
                             .buttonStyle(HUDActionStyle(filled: false))
