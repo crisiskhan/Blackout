@@ -1430,6 +1430,7 @@ class CommsInstrumentTests(unittest.TestCase):
 
     def test_solo_qa_scores_form_up_and_lost_kid(self):
         qa = read("docs", "SOLO_QA.md")
+        self.assertIn("WRITE NOTE", qa)
         self.assertIn("FORM UP", qa)
         self.assertIn("LOST KID", qa)
         self.assertIn("LEAVE NET", qa)
@@ -1447,6 +1448,9 @@ class InstrumentsSunTorchTests(unittest.TestCase):
         self.assertIn("Almanac.sun", inst)
         self.assertIn("RISE", inst)
         self.assertIn("SET", inst)
+        sun = inst.split("private var sunPlate")[1].split("private func sectionLabel")[0]
+        self.assertIn("fieldYou", sun)
+        self.assertIn("home", sun)
         self.assertIn('Button("SOS FLASHLIGHT")', inst)
         self.assertIn("tapSOSFlashlight()", inst)
         self.assertIn("func tapSOSFlashlight()", runtime)
@@ -1651,6 +1655,9 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn('HUDField("ITEM"', exped)
         self.assertNotIn("TextField(", exped)
         self.assertIn('Button("ADD")', exped)
+        inv = exped.split('sectionLabel("INVENTORY")')[1].split('sectionLabel("TRIP")')[0]
+        self.assertIn("NAME ITEM", inv)
+        self.assertIn("kitChrome", inv)
         self.assertIn('Button("+1")', exped)
         self.assertIn('Button("−1")', exped)
         self.assertIn("runtime.bumpKit(", exped)
@@ -1679,6 +1686,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         self.assertIn('kind: "kit"', mesh)
         self.assertIn('case "kit":', app)
         self.assertIn("INVENTORY", qa)
+        self.assertIn("NAME ITEM", qa)
         self.assertNotIn("KIT names", qa)
         self.assertIn("ASSIGN", qa)
         self.assertIn("+1", qa)
@@ -1770,6 +1778,8 @@ class ExpeditionNamedTimerTests(unittest.TestCase):
         self.assertIn("digits: true", block)
         self.assertIn("TimerDuration.parse", exped)
         self.assertIn("timerTime", exped)
+        self.assertIn("SET TIME", block)
+        self.assertIn("timerChrome", block)
         self.assertIn("timerSeq", exped)
         self.assertIn("timerWho(", exped)
         self.assertIn("remainingFraction", exped)
@@ -1790,6 +1800,7 @@ class ExpeditionNamedTimerTests(unittest.TestCase):
         self.assertIn("MeshTimerBody", mesh)
         self.assertIn("duration:", app.split("case \"timer.set\"")[1].split("case ")[0])
         self.assertIn("NAME + TIME + SET", qa)
+        self.assertIn("SET TIME", qa)
         self.assertIn("30 MIN", qa)
         self.assertIn("1 HR", qa)
         self.assertIn("2 HRS", qa)
@@ -1981,6 +1992,10 @@ class HonestyOnTheGlassTests(unittest.TestCase):
         self.assertIn("failClosed", scan)
         self.assertIn("NO PEERS", comms)
         self.assertNotIn(".prefix(6)", comms)
+        send = app.split("func sendPartyNote")[1].split("func partyCourse")[0]
+        self.assertIn("WRITE NOTE", send)
+        self.assertIn("commsChrome", send)
+        self.assertIn("if runtime.sendPartyNote", comms)
 
     def test_field_empty_and_join_nav_say_why(self):
         field = read("Blackout", "FieldTab.swift")
@@ -2910,7 +2925,8 @@ class IncomingLineTests(unittest.TestCase):
         self.assertNotIn("guard env.from != mesh.localID", raise_fn)
         self.assertIn("displayYouName", raise_fn)
         self.assertIn("youEmblem", raise_fn)
-        self.assertIn("gnssYou", raise_fn)
+        self.assertIn("fieldYou", raise_fn)
+        self.assertNotIn("gnssYou", raise_fn)
         answer = app.split("func answerIncoming(")[1].split("func ", 1)[0]
         self.assertIn("pickPeer", answer)
         self.assertIn('pickPeer("YOU")', answer)
@@ -2948,6 +2964,7 @@ class IncomingLineTests(unittest.TestCase):
         )
         self.assertIn("emblem", incoming.lower())
         self.assertIn("NO FIX", incoming)
+        self.assertIn("live or last known", incoming.lower())
         self.assertIn("Tap opens COMMS", incoming)
         self.assertIn("Auto-clears", incoming)
         self.assertIn("Voice packets do not pop", incoming)
@@ -3378,6 +3395,7 @@ class InstrumentNorthAndBodyTests(unittest.TestCase):
         self.assertIn("USNG —", inst_line)
         self.assertIn("13R", inst_line)
         self.assertIn("live YOU", inst_line)
+        self.assertIn("pack home", inst_line.lower())
         self.assertNotIn("best in class", qa.lower())
         self.assertNotIn("Waze", qa)
         self.assertNotIn("Google", qa)

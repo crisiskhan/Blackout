@@ -20,7 +20,9 @@ struct ExpeditionTab: View {
     @State private var navChrome: String?
     @State private var timerName = ""
     @State private var timerTime = ""
+    @State private var timerChrome: String?
     @State private var itemDraft = ""
+    @State private var kitChrome: String?
     @State private var assigningID: String?
 
     var body: some View {
@@ -83,26 +85,30 @@ struct ExpeditionTab: View {
                             HUDField("TIME",
                                 text: $timerTime,
                                 id: "exped.time",
-                                digits: true
+                                submit: "SET",
+                                digits: true,
+                                onSubmit: setPartyTimer
                             )
                             HStack(spacing: 8) {
-                                Button("30 MIN") { timerTime = "30" }
-                                    .buttonStyle(HoldActionStyle(filled: timerTime == "30", expand: true))
-                                Button("1 HR") { timerTime = "1H" }
-                                    .buttonStyle(HoldActionStyle(filled: timerTime == "1H", expand: true))
-                                Button("2 HRS") { timerTime = "2H" }
-                                    .buttonStyle(HoldActionStyle(filled: timerTime == "2H", expand: true))
+                                Button("30 MIN") {
+                                    timerTime = "30"
+                                    timerChrome = nil
+                                }
+                                .buttonStyle(HoldActionStyle(filled: timerTime == "30", expand: true))
+                                Button("1 HR") {
+                                    timerTime = "1H"
+                                    timerChrome = nil
+                                }
+                                .buttonStyle(HoldActionStyle(filled: timerTime == "1H", expand: true))
+                                Button("2 HRS") {
+                                    timerTime = "2H"
+                                    timerChrome = nil
+                                }
+                                .buttonStyle(HoldActionStyle(filled: timerTime == "2H", expand: true))
                             }
                             VStack(spacing: 1) {
                                 Button("SET") {
-                                    guard let duration = TimerDuration.parse(timerTime) else { return }
-                                    runtime.addPartyTimer(
-                                        task: timerName,
-                                        duration: duration
-                                    )
-                                    timerName = ""
-                                    timerTime = ""
-                                    runtime.hudKeys.close()
+                                    setPartyTimer()
                                 }
                                 .buttonStyle(HUDDockStyle())
                             }
@@ -112,6 +118,14 @@ struct ExpeditionTab: View {
                                 Theme.plateRect()
                                     .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
                             )
+                            if let timerChrome {
+                                Text(timerChrome)
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.warn)
+                                    .textCase(.uppercase)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
+                            }
                             ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.caption.weight(.bold))
@@ -138,12 +152,19 @@ struct ExpeditionTab: View {
                     sectionLabel("INVENTORY")
                     HUDGlassCard {
                         VStack(alignment: .leading, spacing: 6) {
-                            HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true)
+                            HUDField("ITEM", text: $itemDraft, id: "exped.item", locked: true, submit: "ADD", onSubmit: addKitItem)
                             Button("ADD") {
-                                runtime.addKitItem(itemDraft)
-                                itemDraft = ""
+                                addKitItem()
                             }
                             .buttonStyle(HUDActionStyle(filled: false))
+                            if let kitChrome {
+                                Text(kitChrome)
+                                    .font(.system(size: 13, weight: .heavy))
+                                    .foregroundStyle(Theme.warn)
+                                    .textCase(.uppercase)
+                                    .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
+                            }
                             ForEach(runtime.kit.items) { item in
                                 kitRow(item)
                             }
@@ -437,6 +458,29 @@ struct ExpeditionTab: View {
         case .emergency:
             return Theme.accent
         }
+    }
+
+    private func setPartyTimer() {
+        guard let duration = TimerDuration.parse(timerTime) else {
+            timerChrome = "SET TIME"
+            return
+        }
+        timerChrome = nil
+        runtime.addPartyTimer(task: timerName, duration: duration)
+        timerName = ""
+        timerTime = ""
+        runtime.hudKeys.close()
+    }
+
+    private func addKitItem() {
+        let name = itemDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.isEmpty {
+            kitChrome = "NAME ITEM"
+            return
+        }
+        kitChrome = nil
+        runtime.addKitItem(name)
+        itemDraft = ""
     }
 
     private func sectionLabel(_ title: String) -> some View {

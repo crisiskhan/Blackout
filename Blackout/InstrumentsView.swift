@@ -169,8 +169,11 @@ struct InstrumentsView: View {
     @ViewBuilder
     private var sunPlate: some View {
         if let pack = runtime.packs?.active {
+            let packPoint = pack.home ?? pack.center
+            let lat = runtime.fieldYou?.lat ?? packPoint.lat
+            let lon = runtime.fieldYou?.lon ?? packPoint.lon
             let day = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-            let sun = Almanac.sun(lat: pack.center.lat, lon: pack.center.lon, dayOfYear: day)
+            let sun = Almanac.sun(lat: lat, lon: lon, dayOfYear: day)
             HUDGlassCard {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {

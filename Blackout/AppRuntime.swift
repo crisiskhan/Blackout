@@ -743,10 +743,18 @@ final class AppRuntime {
         }
     }
 
-    func sendPartyNote(_ raw: String) {
+    /// Send a party note. Empty SEND chromes `WRITE NOTE` and returns false
+    /// so the draft stays on the glass. A tap draws, or it says why not.
+    @discardableResult
+    func sendPartyNote(_ raw: String) -> Bool {
         let text = PartyNote.clean(raw)
-        guard !text.isEmpty else { return }
+        guard !text.isEmpty else {
+            commsChrome = "WRITE NOTE"
+            return false
+        }
+        commsChrome = ""
         mesh.sendNote(from: mesh.localID, text: text, to: meshDest)
+        return true
     }
 
     func partyCourse(for person: HeldPerson) -> String {
@@ -1468,10 +1476,10 @@ final class AppRuntime {
         if selfLine {
             name = displayYouName.uppercased()
             emblem = youEmblem.rawValue
-            if let you = gnssYou, you.lat.isFinite, you.lon.isFinite {
+            if let you = fieldYou {
                 location = MapFieldChrome.destValue(point: (you.lat, you.lon))
             } else {
-                // NO FIX when YOU has no usable GNSS.
+                // NO FIX when YOU has no live or last-known fix.
                 location = MapFieldChrome.destValue(point: nil)
             }
             from = "YOU"

@@ -95,13 +95,15 @@ struct CommsTab: View {
                     HUDGlassCard {
                         HStack(spacing: 8) {
                             HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND") {
-                                runtime.sendPartyNote(note)
-                                note = ""
+                                if runtime.sendPartyNote(note) {
+                                    note = ""
+                                }
                             }
                             Button("SEND") {
-                                runtime.sendPartyNote(note)
-                                note = ""
-                                runtime.hudKeys.close()
+                                if runtime.sendPartyNote(note) {
+                                    note = ""
+                                    runtime.hudKeys.close()
+                                }
                             }
                             .buttonStyle(HUDOverlayChipStyle())
                         }
@@ -333,8 +335,9 @@ struct CommsTab: View {
             write: { note = $0 },
             onOpen: nil,
             onSubmit: {
-                runtime.sendPartyNote(note)
-                note = ""
+                if runtime.sendPartyNote(note) {
+                    note = ""
+                }
             }
         )
     }
