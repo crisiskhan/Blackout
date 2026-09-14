@@ -10,27 +10,24 @@ struct RootChrome: View {
             Theme.void.ignoresSafeArea()
             if !runtime.armed {
                 ARMINGView(runtime: runtime)
+                    .transition(.opacity)
             } else {
-                tabChrome
-                IncomingLinePlate(runtime: runtime)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 12)
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(runtime.incoming != nil)
-                // Map and Comms carry their own I AM OK. Field / Exped get
-                // the corner chip only while SOS or RED is actually lit.
-                if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
-                    IAMOKBar(runtime: runtime)
-                }
-                contextualSOS
-                if runtime.hudKeys.isOpen {
-                    hudTypewriter
-                }
+                armedHUD
+                    .transition(.opacity)
             }
         }
         .environment(runtime.hudKeys)
         .animation(Theme.Motion.heavy, value: runtime.hudKeys.isOpen)
+        .animation(Theme.Motion.heavy, value: runtime.armed)
+        .animation(Theme.Motion.heavy, value: runtime.showInstruments)
         .nightRedLamp(runtime.night)
+        .overlay {
+            if runtime.armed, runtime.showInstruments {
+                InstrumentsView(runtime: runtime)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+            }
+        }
         .overlay {
             if runtime.instruments.state.sosFlash {
                 sosFlashVeil
@@ -38,10 +35,6 @@ struct RootChrome: View {
         }
         .tint(Theme.silver)
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
-        .sheet(isPresented: $runtime.showInstruments) {
-            InstrumentsView(runtime: runtime)
-                .presentationBackground(Theme.void)
-        }
         .onAppear {
             runtime.applyLampChrome()
             runtime.applyMapKeepAwake()
@@ -58,8 +51,30 @@ struct RootChrome: View {
                 runtime.closeMark()
                 runtime.clearIncoming()
                 runtime.haltSOSFlash()
+                runtime.showInstruments = false
             }
             runtime.applyMapKeepAwake()
+        }
+    }
+
+    private var armedHUD: some View {
+        ZStack {
+            tabChrome
+            IncomingLinePlate(runtime: runtime)
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .allowsHitTesting(runtime.incoming != nil)
+                .animation(Theme.Motion.heavy, value: runtime.incoming)
+            // Map and Comms carry their own I AM OK. Field / Exped get
+            // the corner chip only while SOS or RED is actually lit.
+            if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
+                IAMOKBar(runtime: runtime)
+            }
+            contextualSOS
+            if runtime.hudKeys.isOpen {
+                hudTypewriter
+            }
         }
     }
 
@@ -92,6 +107,7 @@ struct RootChrome: View {
         content()
             .padding(.bottom, overlayBottomPad)
             .padding(.leading, overlayLeadingPad)
+            .transition(.opacity)
     }
 
     private var tabBody: some View {
@@ -114,6 +130,7 @@ struct RootChrome: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(Theme.Motion.heavy, value: runtime.tab)
     }
 
     private var tabBar: some View {

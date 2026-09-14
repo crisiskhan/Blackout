@@ -267,6 +267,84 @@ class KeepMapMountedTests(unittest.TestCase):
         self.assertIn("HUDPage", read("Blackout", "ExpeditionTab.swift"))
 
 
+class PageOpenCloseFadeTests(unittest.TestCase):
+    """Pages open, close, and fade with HUD motion. No iOS sheet bounce."""
+
+    def test_overlay_pages_fade_and_the_map_stays_mounted(self):
+        root = read("Blackout", "RootChrome.swift")
+        overlay = root.split("private func overlayPage")[1].split("private var tabBody")[0]
+        self.assertIn(".transition(.opacity)", overlay)
+        self.assertIn("animation(Theme.Motion.heavy, value: runtime.tab)", root)
+        self.assertIn("animation(Theme.Motion.heavy, value: runtime.armed)", root)
+        self.assertIn(".transition(.opacity)", root.split("if !runtime.armed")[1].split("tabChrome")[0])
+        self.assertIn("MapTab(runtime: runtime)", root)
+        self.assertNotIn(".spring(", root)
+        self.assertNotIn("fullScreenCover", root)
+        self.assertNotIn("best in class", root.lower())
+
+    def test_instruments_fades_as_hud_glass_not_a_system_sheet(self):
+        root = read("Blackout", "RootChrome.swift")
+        self.assertIn("InstrumentsView(runtime: runtime)", root)
+        self.assertIn("animation(Theme.Motion.heavy, value: runtime.showInstruments)", root)
+        inst = root.split("if runtime.armed")[-1]
+        self.assertIn("showInstruments", inst)
+        self.assertIn(".transition(.opacity)", inst)
+        self.assertNotIn(".sheet(isPresented: $runtime.showInstruments)", root)
+        self.assertNotIn("presentationBackground", root)
+        self.assertNotIn(".spring(", root)
+        qa = read("docs", "SOLO_QA.md")
+        inst_line = next(
+            line
+            for line in qa.splitlines()
+            if "COMPASS CAL" in line and "GNSS PUCK" in line
+        )
+        self.assertIn("fade", inst_line.lower())
+        self.assertIn("no bounce", inst_line.lower())
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
+
+    def test_incoming_typewriter_vision_scan_and_turns_fade(self):
+        root = read("Blackout", "RootChrome.swift")
+        plate = read("Blackout", "IncomingLinePlate.swift")
+        field = read("Blackout", "FieldTab.swift")
+        comms = read("Blackout", "CommsTab.swift")
+        turns = read("Blackout", "SpeakTurnCard.swift")
+        tab = read("Blackout", "MapTab.swift")
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn(".transition(.opacity)", plate)
+        self.assertIn("animation(Theme.Motion.heavy, value: runtime.incoming)", root)
+        self.assertIn(".transition(.opacity)", root.split("private var hudTypewriter")[1])
+        self.assertNotIn(".sheet(isPresented: $showVision)", field)
+        self.assertNotIn("presentationBackground", field)
+        self.assertIn("if showVision", field)
+        self.assertIn(".transition(.opacity)", field)
+        self.assertIn("animation(Theme.Motion.heavy, value: showVision)", field)
+        self.assertNotIn(".sheet(isPresented: $scanQR)", comms)
+        self.assertNotIn("presentationBackground", comms)
+        self.assertIn("if scanQR", comms)
+        self.assertIn(".transition(.opacity)", comms)
+        self.assertIn("animation(Theme.Motion.heavy, value: scanQR)", comms)
+        self.assertIn(".transition(.opacity)", turns)
+        self.assertIn("animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)", tab)
+        pages = next(
+            line
+            for line in qa.splitlines()
+            if "glass HUD pages over the still-mounted map" in line
+        )
+        self.assertIn("fade", pages.lower())
+        self.assertIn("no bounce", pages.lower())
+        incoming = next(
+            line for line in qa.splitlines() if "Incoming CALL (PTT chip)" in line
+        )
+        self.assertIn("fade", incoming.lower())
+        self.assertNotIn("best in class", field.lower())
+        self.assertNotIn("best in class", comms.lower())
+        self.assertNotIn(".spring(", field)
+        self.assertNotIn(".spring(", comms)
+        self.assertNotIn(".spring(", turns)
+
+
 class FieldHandoffDefersTeardownTests(unittest.TestCase):
     def test_field_on_the_hold_card_does_not_tear_the_card_in_stack(self):
         runtime = read("Blackout", "AppRuntime.swift")

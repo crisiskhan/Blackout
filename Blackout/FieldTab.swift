@@ -69,23 +69,26 @@ struct FieldTab: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .sheet(isPresented: $showVision) {
-            #if canImport(AVFoundation) && canImport(UIKit)
-            VisionStill(
-                onImage: { image in
-                    showVision = false
-                    applyVision(image: image)
-                },
-                onFail: {
-                    showVision = false
-                    applyVision(image: nil)
-                },
-                onCancel: { showVision = false }
-            )
-            .ignoresSafeArea()
-            .presentationBackground(Theme.void)
-            #endif
+        .overlay {
+            if showVision {
+                #if canImport(AVFoundation) && canImport(UIKit)
+                VisionStill(
+                    onImage: { image in
+                        showVision = false
+                        applyVision(image: image)
+                    },
+                    onFail: {
+                        showVision = false
+                        applyVision(image: nil)
+                    },
+                    onCancel: { showVision = false }
+                )
+                .ignoresSafeArea()
+                .transition(.opacity)
+                #endif
+            }
         }
+        .animation(Theme.Motion.heavy, value: showVision)
         .onAppear(perform: load)
         .onChange(of: runtime.fieldJump) { _, _ in jump() }
         .onChange(of: runtime.packs?.active?.id) { _, _ in

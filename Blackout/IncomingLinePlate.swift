@@ -58,6 +58,7 @@ struct IncomingLinePlate: View {
                         withAnimation(Theme.Motion.heavy) { drag = 0 }
                     }
             )
+            .transition(.opacity)
         }
     }
 

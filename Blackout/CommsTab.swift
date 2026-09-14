@@ -140,25 +140,28 @@ struct CommsTab: View {
                 }
             }
         }
-        .sheet(isPresented: $scanQR) {
-            #if canImport(AVFoundation) && canImport(UIKit)
-            PartyQRScanner(
-                onCode: { raw in
-                    runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
-                    runtime.mesh.partyCode = runtime.roster.code
-                    scanQR = false
-                    runtime.joinNet()
-                },
-                onFail: {
-                    scanQR = false
-                    runtime.commsChrome = "CAMERA DENIED"
-                },
-                onCancel: { scanQR = false }
-            )
-            .ignoresSafeArea()
-            .presentationBackground(Theme.void)
-            #endif
+        .overlay {
+            if scanQR {
+                #if canImport(AVFoundation) && canImport(UIKit)
+                PartyQRScanner(
+                    onCode: { raw in
+                        runtime.roster = runtime.roster.setting(code: PartyQR.parse(raw))
+                        runtime.mesh.partyCode = runtime.roster.code
+                        scanQR = false
+                        runtime.joinNet()
+                    },
+                    onFail: {
+                        scanQR = false
+                        runtime.commsChrome = "CAMERA DENIED"
+                    },
+                    onCancel: { scanQR = false }
+                )
+                .ignoresSafeArea()
+                .transition(.opacity)
+                #endif
+            }
         }
+        .animation(Theme.Motion.heavy, value: scanQR)
         .onAppear { openPendingNote() }
         .onChange(of: runtime.pendingNoteFocus) { _, _ in
             openPendingNote()

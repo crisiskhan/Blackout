@@ -37,6 +37,7 @@ struct SpeakTurnCard: View {
             )
         }
         .ignoresSafeArea()
+        .transition(.opacity)
     }
 
     private var scrim: some View {

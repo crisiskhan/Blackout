@@ -180,6 +180,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
         .animation(Theme.Motion.heavy, value: runtime.markDraft)
+        .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
     }
 
     private var coverUp: Bool {
