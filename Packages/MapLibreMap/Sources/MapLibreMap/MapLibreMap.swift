@@ -580,6 +580,8 @@ public enum PackCamera {
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
+    /// Oblique ceiling while GODS EYE holds. 0 is nadir; walking MAP stays at 0.
+    public static let godsEyeMaxPitch: Double = 55
 
     public static func packCenter(
         south: Double,
@@ -616,13 +618,40 @@ public enum PackCamera {
         godsEye ? godsEyePitch : 0
     }
 
+    public static func holdMinPitch(godsEye: Bool) -> Double {
+        0
+    }
+
+    public static func holdMaxPitch(godsEye: Bool) -> Double {
+        godsEye ? godsEyeMaxPitch : 0
+    }
+
     public static func allowsOrbit(godsEye: Bool) -> Bool {
         godsEye
     }
 
-    /// Walking MAP can pan. GODS EYE looks at the packed area only.
-    public static func allowsPan(godsEye: Bool) -> Bool {
-        !godsEye
+    /// Walking MAP can pan. GODS EYE can pan too, but only while the look
+    /// stays on the packed area.
+    public static func allowsPan(godsEye _: Bool) -> Bool {
+        true
+    }
+
+    public static func allowsTilt(godsEye: Bool) -> Bool {
+        godsEye
+    }
+
+    public static func cameraStaysOnPack(
+        godsEye: Bool,
+        lat: Double,
+        lon: Double,
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> Bool {
+        if !godsEye { return true }
+        let box = bounds(south: south, west: west, north: north, east: east)
+        return lat >= box.south && lat <= box.north && lon >= box.west && lon <= box.east
     }
 
     /// Farther of overhead range vs HUD-padded fit. Never closer than the

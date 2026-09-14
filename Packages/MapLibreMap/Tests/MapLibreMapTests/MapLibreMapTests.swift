@@ -273,8 +273,48 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeFlyPeakFactor, 1.6, accuracy: 0.01)
         XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 1000, target: 2400), 3840, accuracy: 0.01)
         XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 5000, target: 2400), 8000, accuracy: 0.01)
-        XCTAssertFalse(PackCamera.allowsPan(godsEye: true))
+        XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))
+        XCTAssertFalse(PackCamera.allowsTilt(godsEye: false))
+        XCTAssertEqual(PackCamera.godsEyeMaxPitch, 55)
+        XCTAssertEqual(PackCamera.holdMinPitch(godsEye: true), 0)
+        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: true), 55)
+        XCTAssertEqual(PackCamera.holdMinPitch(godsEye: false), 0)
+        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 0)
+        XCTAssertTrue(
+            PackCamera.cameraStaysOnPack(
+                godsEye: true,
+                lat: 31.5,
+                lon: -106.5,
+                south: 31.0,
+                west: -107.0,
+                north: 32.0,
+                east: -106.0
+            )
+        )
+        XCTAssertFalse(
+            PackCamera.cameraStaysOnPack(
+                godsEye: true,
+                lat: 30.0,
+                lon: -106.5,
+                south: 31.0,
+                west: -107.0,
+                north: 32.0,
+                east: -106.0
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.cameraStaysOnPack(
+                godsEye: false,
+                lat: 30.0,
+                lon: -106.5,
+                south: 31.0,
+                west: -107.0,
+                north: 32.0,
+                east: -106.0
+            )
+        )
     }
 
     func testPackStyleAttachesWildStreetLinesAndOsmPoints() throws {
@@ -1083,8 +1123,21 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
         XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
-        XCTAssertFalse(PackCamera.allowsPan(godsEye: true))
+        XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))
+        XCTAssertFalse(PackCamera.allowsTilt(godsEye: false))
+        XCTAssertFalse(
+            PackCamera.cameraStaysOnPack(
+                godsEye: true,
+                lat: 40.0,
+                lon: -74.0,
+                south: 31.65,
+                west: -106.85,
+                north: 32.4,
+                east: -106.2
+            )
+        )
         XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 3_000), 10_000)
         XCTAssertEqual(PackCamera.godsEyeCameraDistance(gev: 10_000, hudFit: 12_000), 12_000)
         XCTAssertEqual(PackCamera.godsEyeFlyPeakAltitude(current: 200, target: 1000), 1600, accuracy: 0.01)

@@ -489,7 +489,7 @@ class FieldChromeSourceContracts(unittest.TestCase):
         self.assertIn("func fitRoute(", offline)
         self.assertIn("allowsRotating = PackCamera.allowsOrbit", offline)
         self.assertIn("isScrollEnabled = PackCamera.allowsPan", offline)
-        self.assertIn("allowsTilting = false", offline)
+        self.assertIn("allowsTilting = PackCamera.allowsTilt", offline)
         self.assertNotIn("allowsTilting = true", offline)
         self.assertNotIn("allowsRotating = true", offline)
         self.assertIn("lockOn: runtime.lockOn", read("Blackout", "MapTab.swift"))

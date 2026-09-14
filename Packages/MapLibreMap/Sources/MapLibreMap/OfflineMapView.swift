@@ -184,14 +184,13 @@ public struct OfflineMapView: UIViewRepresentable {
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
         // Walking MAP is a paper sheet. GODS EYE is the overhead fly over the
-        // packed area; two-finger orbit is live only while that hold is on,
-        // and the thumb cannot drag into empty world.
+        // packed area; orbit, pinch, tilt, and pan are live while that hold is
+        // on, and the look cannot leave the archive.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
-        view.allowsTilting = false
-        let pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye))
-        view.minimumPitch = pitch
-        view.maximumPitch = pitch
+        view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
+        view.minimumPitch = CGFloat(PackCamera.holdMinPitch(godsEye: godsEye))
+        view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
         view.minimumZoomLevel = PackCamera.minZoom
         view.maximumZoomLevel = PackCamera.maxZoom
         if !godsEye, abs(view.direction) > 0.5 {
@@ -1263,6 +1262,25 @@ public struct OfflineMapView: UIViewRepresentable {
         public func mapViewRegionIsChanging(_ mapView: MLNMapView) {
             _ = mapView
             onPulse?()
+        }
+
+        public func mapView(
+            _ mapView: MLNMapView,
+            shouldChangeFrom oldCamera: MLNMapCamera,
+            to newCamera: MLNMapCamera
+        ) -> Bool {
+            _ = mapView
+            _ = oldCamera
+            guard let spec else { return true }
+            return PackCamera.cameraStaysOnPack(
+                godsEye: spec.godsEye,
+                lat: newCamera.centerCoordinate.latitude,
+                lon: newCamera.centerCoordinate.longitude,
+                south: spec.packSouth,
+                west: spec.packWest,
+                north: spec.packNorth,
+                east: spec.packEast
+            )
         }
 
         public func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
