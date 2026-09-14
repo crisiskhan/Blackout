@@ -157,6 +157,114 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertFalse(g.edible)
     }
 
+    func testScorpionIsStingLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Scorpion", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "STING")
+        XCTAssertEqual(g.labelId, "kind:sting")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testWaspBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.9),
+                VisionObservation(identifier: "Wasp", confidence: 0.3),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "STING")
+        XCTAssertEqual(g.labelId, "kind:sting")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testAlligatorIsGatorLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.7),
+                VisionObservation(identifier: "American alligator", confidence: 0.4),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "GATOR")
+        XCTAssertEqual(g.labelId, "kind:gator")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testLakeIsWaterNotLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.85),
+                VisionObservation(identifier: "Lake", confidence: 0.4),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "WATER")
+        XCTAssertEqual(g.labelId, "kind:water")
+        XCTAssertFalse(g.leaveIt)
+        XCTAssertFalse(g.edible)
+        XCTAssertEqual(g.percent, 0)
+    }
+
+    func testBodyOfWaterIsWater() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Body of water", confidence: 0.7)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "WATER")
+        XCTAssertEqual(g.labelId, "kind:water")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testFoxIsMammal() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Red fox", confidence: 0.7)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "MAMMAL")
+        XCTAssertEqual(g.labelId, "kind:mammal")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testHedgehogIsNotAMammal() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Hedgehog", confidence: 0.9)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "UNKNOWN")
+        XCTAssertNotEqual(g.name, "MAMMAL")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testPorcupineIsNotAPineOrATree() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Porcupine", confidence: 0.9)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "UNKNOWN")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.name.contains("PINE"))
+        XCTAssertFalse(g.edible)
+    }
+
+    func testStreetIsNotATree() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Street", confidence: 0.9)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "UNKNOWN")
+        XCTAssertNotEqual(g.name, "TREE")
+        XCTAssertFalse(g.edible)
+    }
+
     func testWoodIsNotACottonwood() {
         let book = VisionBook(
             state: "NM",

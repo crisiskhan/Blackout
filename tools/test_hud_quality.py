@@ -63,6 +63,77 @@ def active_bearing(
     return heading
 
 
+def _vision_has_phrase(hay: str, needle: str) -> bool:
+    """Mirror of VisionCoreML.hasPhrase. Unspaced needles are whole words."""
+    if " " in needle:
+        return needle in hay
+    words: list[str] = []
+    current = ""
+    for ch in hay:
+        if ch.isalnum():
+            current += ch
+        elif current:
+            words.append(current)
+            current = ""
+    if current:
+        words.append(current)
+    return needle in words
+
+
+def _vision_kind_needles(src: str) -> list[tuple[str, list[str]]]:
+    block = src.split("kindNeedles:", 1)[1]
+    pairs: list[tuple[str, list[str]]] = []
+    for match in re.finditer(
+        r"\(\.(\w+),\s*\[(.*?)\]\s*\)",
+        block,
+        re.S,
+    ):
+        kind = match.group(1)
+        needles = re.findall(r'"([^"]+)"', match.group(2))
+        pairs.append((kind, needles))
+    fungi_block = src.split("fungiNeedles = [", 1)[1].split("]", 1)[0]
+    fungi = re.findall(r'"([^"]+)"', fungi_block)
+    return [("fungi", fungi), *pairs]
+
+
+def _vision_kind(needles: list[tuple[str, list[str]]], identifier: str) -> str | None:
+    ident = identifier.lower().replace("_", " ").replace("-", " ")
+    for kind, words in needles:
+        if any(_vision_has_phrase(ident, word) for word in words):
+            return kind
+    return None
+
+
+_VISION_RANK = {
+    "fungi": 50,
+    "snake": 40,
+    "sting": 38,
+    "gator": 36,
+    "cactus": 35,
+    "cactiYucca": 35,
+    "water": 32,
+    "mammal": 30,
+    "tree": 10,
+}
+
+
+def _vision_best(
+    needles: list[tuple[str, list[str]]],
+    observations: list[tuple[str, float]],
+) -> str | None:
+    best: tuple[str, int] | None = None
+    for ident, conf in observations:
+        if conf < 0.2:
+            continue
+        kind = _vision_kind(needles, ident)
+        if kind is None:
+            continue
+        rank = _VISION_RANK.get(kind, 30)
+        if best is None or rank > best[1]:
+            best = (kind, rank)
+    return None if best is None else best[0]
+
+
 class QuietBearingTests(unittest.TestCase):
     def test_heading_alone_is_not_a_mission(self):
         self.assertFalse(dest_rail_visible(False, False, False))
@@ -1793,8 +1864,79 @@ class VisionInstrumentTests(unittest.TestCase):
             "saguaro",
             "peccary",
             "boar",
+            "scorpion",
+            "wasp",
+            "bee",
+            "alligator",
+            "lake",
+            "fox",
+            "bobcat",
         ):
             self.assertIn(needle, vis, needle)
+        self.assertIn("func hasphrase", vis)
+        self.assertIn("kind:sting", vis)
+        self.assertIn("kind:gator", vis)
+        self.assertIn("kind:water", vis)
+
+    def test_matcher_ranks_sting_gator_water_and_refuses_substring_traps(self):
+        vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
+        needles = _vision_kind_needles(vis)
+        kinds = {kind for kind, _ in needles}
+        self.assertIn("sting", kinds)
+        self.assertIn("gator", kinds)
+        self.assertIn("water", kinds)
+        self.assertIn("mammal", kinds)
+        self.assertEqual(_vision_kind(needles, "Scorpion"), "sting")
+        self.assertEqual(_vision_kind(needles, "Wasp"), "sting")
+        self.assertEqual(_vision_kind(needles, "American alligator"), "gator")
+        self.assertEqual(_vision_kind(needles, "Lake"), "water")
+        self.assertEqual(_vision_kind(needles, "Body of water"), "water")
+        self.assertEqual(_vision_kind(needles, "Red fox"), "mammal")
+        self.assertIsNone(_vision_kind(needles, "Hedgehog"))
+        self.assertIsNone(_vision_kind(needles, "Porcupine"))
+        self.assertIsNone(_vision_kind(needles, "Street"))
+        self.assertIsNone(_vision_kind(needles, "Springfield"))
+        self.assertEqual(
+            _vision_best(needles, [("Tree", 0.9), ("Wasp", 0.3)]),
+            "sting",
+        )
+        self.assertEqual(
+            _vision_best(needles, [("Tree", 0.85), ("Lake", 0.4)]),
+            "water",
+        )
+        self.assertEqual(
+            _vision_best(needles, [("Tree", 0.7), ("American alligator", 0.4)]),
+            "gator",
+        )
+        tests = read(
+            "Packages",
+            "VisionCoreML",
+            "Tests",
+            "VisionCoreMLTests",
+            "VisionCoreMLTests.swift",
+        )
+        for name in (
+            "testScorpionIsStingLeaveIt",
+            "testWaspBeatsATreeOnTheSameStill",
+            "testAlligatorIsGatorLeaveIt",
+            "testLakeIsWaterNotLeaveIt",
+            "testHedgehogIsNotAMammal",
+            "testPorcupineIsNotAPineOrATree",
+            "testStreetIsNotATree",
+        ):
+            self.assertIn(name, tests, name)
+
+    def test_vision_speaks_the_guess_and_the_walk(self):
+        field = read("Blackout", "FieldTab.swift")
+        vis_btn = field.split("func visionFieldButton", 1)[1].split("func applyVision", 1)[0]
+        self.assertIn("speakFirst: true", vis_btn)
+        apply = field.split("func applyVision", 1)[1].split("private func loc", 1)[0]
+        self.assertIn("runtime.speech.speak", apply)
+        self.assertIn("SPEECH FAILED", apply)
+        self.assertIn('L10n.t("vision.leave"', apply)
+        self.assertIn('L10n.t("vision.none"', apply)
+        status = field.split("private var fieldStatus", 1)[1].split("private var fieldTone", 1)[0]
+        self.assertIn('speechChrome == "SPEECH FAILED"', status)
 
     def test_generic_wood_is_not_a_tree_name(self):
         vis = read("Packages", "VisionCoreML", "Sources", "VisionCoreML", "VisionCoreML.swift")
@@ -1813,6 +1955,12 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("LEAVE IT", qa)
         self.assertIn("NO VISION MODEL", qa)
         self.assertIn("No percent", qa)
+        self.assertIn("VISION speaks the name", qa)
+        self.assertIn("scorpion still is bite", qa)
+        self.assertIn("lake still is water", qa)
+        self.assertIn("alligator still is animal", qa)
+        self.assertIn("FIELD · WATER", qa)
+        self.assertIn("Hedgehog is not hog", qa)
 
 
 class HonestyOnTheGlassTests(unittest.TestCase):

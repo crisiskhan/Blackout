@@ -102,6 +102,7 @@ struct FieldTab: View {
 
     private var fieldStatus: String {
         if askBusy { return "ASK" }
+        if runtime.speechChrome == "SPEECH FAILED" { return "SPEECH FAILED" }
         if let s = stepper {
             // A hold named a trail of plant / bite / use cards. STEP 1 OF 1
             // on every one of them hides that you are walking the biome book.
@@ -124,6 +125,7 @@ struct FieldTab: View {
 
     private var fieldTone: HUDStatusTone {
         if askBusy { return .silver }
+        if runtime.speechChrome == "SPEECH FAILED" { return .warn }
         if askFailed { return .warn }
         if stepper != nil { return .silver }
         if let g = guess {
@@ -193,13 +195,7 @@ struct FieldTab: View {
         )
         if let first = route.first {
             Button(InspectField.label(for: first)) {
-                openRoute(
-                    InspectField.fieldRoute(
-                        forVision: g.labelId,
-                        state: runtime.packs?.active?.state,
-                        pack: runtime.packs?.active?.id
-                    )
-                )
+                openRoute(route, speakFirst: true)
             }
             .buttonStyle(HUDActionStyle(filled: false))
             if let book = InspectField.bookLine(for: route) {
@@ -213,7 +209,9 @@ struct FieldTab: View {
 
     private func applyVision(image: CGImage?) {
         guard let image else {
-            guess = VisionCoreML.noModelGuess()
+            let next = VisionCoreML.noModelGuess()
+            guess = next
+            speakVision(next)
             return
         }
         let book = runtime.visionBook()
@@ -232,7 +230,27 @@ struct FieldTab: View {
             } else {
                 next = VisionCoreML.noModelGuess()
             }
-            DispatchQueue.main.async { guess = next }
+            DispatchQueue.main.async {
+                guess = next
+                speakVision(next)
+            }
+        }
+    }
+
+    private func speakVision(_ g: VisionGuess) {
+        let locale = runtime.locale
+        let line: String
+        if g.noModel {
+            line = L10n.t("vision.none", locale)
+        } else if g.leaveIt {
+            line = "\(g.name). \(L10n.t("vision.leave", locale))"
+        } else {
+            line = g.name
+        }
+        if !runtime.speech.speak(line, locale: locale) {
+            runtime.speechChrome = "SPEECH FAILED"
+        } else {
+            runtime.speechChrome = ""
         }
     }
 

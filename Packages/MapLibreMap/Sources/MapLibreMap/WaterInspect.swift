@@ -471,7 +471,7 @@ public enum InspectField {
             return .plant
         case Inspect.snakeTXCard, Inspect.snakeNMCard, Inspect.snakeEastCard, Inspect.biteCard:
             return .bite
-        case Inspect.mammalTXCard, Inspect.mammalNMCard, Inspect.mammalEastCard:
+        case Inspect.mammalTXCard, Inspect.mammalNMCard, Inspect.mammalEastCard, Inspect.gatorCard:
             return .animal
         case Inspect.caveCard:
             return .cave
@@ -585,6 +585,9 @@ public enum InspectField {
         case snake
         case mammal
         case fungi
+        case water
+        case sting
+        case gator
     }
 
     /// UNKNOWN and no model stay empty — a missing guess is not a card.
@@ -603,6 +606,12 @@ public enum InspectField {
             return .tree
         case "kind:cactus", "kind:cacti_yucca":
             return .cactus
+        case "kind:water":
+            return .water
+        case "kind:sting":
+            return .sting
+        case "kind:gator":
+            return .gator
         default:
             return visionGroundFromSpecies(id)
         }
@@ -619,14 +628,32 @@ public enum InspectField {
         {
             return .snake
         }
+        if id.contains("scorpion") || id.contains("tarantula") || id.contains("wasp")
+            || id.contains("hornet") || id.contains("sting")
+        {
+            return .sting
+        }
+        if id.contains("alligator") || id.contains("crocodile") || id.contains("caiman")
+            || id.contains("gator")
+        {
+            return .gator
+        }
         if id.contains("coyote") || id.contains("javelina") || id.contains("whitetail")
             || id.contains("elk") || id.contains("deer") || id.contains("bear")
-            || id.contains("hog")
+            || id.contains("hog") || id.contains("fox") || id.contains("bobcat")
+            || id.contains("cougar") || id.contains("puma") || id.contains("raccoon")
+            || id.contains("skunk") || id.contains("armadillo") || id.contains("rabbit")
+            || id.contains("pronghorn") || id.contains("wolf")
         {
             return .mammal
         }
         if id.contains("prickly") || id.contains("cholla") || id.contains("yucca") || id.contains("sotol") {
             return .cactus
+        }
+        if id.contains("lake") || id.contains("pond") || id.contains("reservoir")
+            || id.contains("creek") || id.contains("river") || id.contains("spring")
+        {
+            return .water
         }
         if id.contains("oak") || id.contains("mesquite") || id.contains("elm") || id.contains("pecan")
             || id.contains("pinon") || id.contains("juniper") || id.contains("aspen")
@@ -691,6 +718,12 @@ public enum InspectField {
             ]
         case .cactus:
             return [nm ? Inspect.cactusNMCard : Inspect.cactusTXCard]
+        case .water:
+            return [Inspect.waterCard]
+        case .sting:
+            return [Inspect.biteCard]
+        case .gator:
+            return [Inspect.gatorCard, Inspect.biteCard]
         }
     }
 }

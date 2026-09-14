@@ -4409,6 +4409,29 @@ final class InspectTests: XCTestCase {
         XCTAssertTrue(hogWest.contains(Inspect.biteCard), "a hog still includes bite treatment")
         XCTAssertFalse(hogWest.contains(Inspect.mammalTXCard))
 
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:sting", state: "TX"),
+            [Inspect.biteCard]
+        )
+        XCTAssertEqual(InspectField.label(for: Inspect.biteCard), "FIELD · BITE")
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:water", state: "TX"),
+            [Inspect.waterCard]
+        )
+        XCTAssertEqual(InspectField.label(for: Inspect.waterCard), "FIELD · WATER")
+        XCTAssertEqual(
+            InspectField.fieldRoute(forVision: "kind:gator", state: "TX"),
+            [Inspect.gatorCard, Inspect.biteCard]
+        )
+        XCTAssertEqual(InspectField.label(for: Inspect.gatorCard), "FIELD · ANIMAL")
+        XCTAssertEqual(
+            InspectField.bookLine(for: InspectField.fieldRoute(forVision: "kind:gator", state: "TX")),
+            "ANIMAL · BITE"
+        )
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:sting", state: "NM"), [Inspect.biteCard])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "unknown", state: "NM"), [])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "no-model", state: "NM"), [])
+
         let pineWest = InspectField.fieldRoute(
             forVision: "tx-loblolly-pine",
             state: "TX",

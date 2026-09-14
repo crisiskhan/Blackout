@@ -240,6 +240,7 @@ public enum Inspect {
     public static let lostCard = "nav-lost"
     public static let caveCard = "cave-dark"
     public static let biteCard = "animal-bite"
+    public static let gatorCard = "animal-gator"
     public static let shelterCard = "shelter-tarp"
     public static let fungiCard = "fungi-leave"
     public static let gameCard = "food-game"

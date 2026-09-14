@@ -127,12 +127,16 @@ public enum VisionCoreML {
 
     /// Apple's classifier often ranks Plant/Tree above Cactus or a mushroom
     /// on a log. A generic tree needle must not beat the book kind the still
-    /// also named. Fungi and snake stay leave-it even when tree scored higher.
+    /// also named. Fungi, snake, sting, and gator stay leave-it even when
+    /// tree scored higher. Water and cactus beat a lone tree on the same still.
     private static func specificity(_ guess: VisionGuess) -> Int {
         switch kindRank(guess) {
         case .fungi: return 50
         case .snake: return 40
+        case .sting: return 38
+        case .gator: return 36
         case .cactus: return 35
+        case .water: return 32
         case .specific: return 30
         case .tree: return 10
         }
@@ -141,9 +145,24 @@ public enum VisionCoreML {
     private enum KindRank {
         case fungi
         case snake
+        case sting
+        case gator
         case cactus
+        case water
         case specific
         case tree
+    }
+
+    private enum MatchKind: String {
+        case cactus
+        case cactiYucca = "cacti_yucca"
+        case snake
+        case mammal
+        case tree
+        case fungi
+        case sting
+        case gator
+        case water
     }
 
     private static func kindRank(_ guess: VisionGuess) -> KindRank {
@@ -158,11 +177,22 @@ public enum VisionCoreML {
         {
             return .snake
         }
+        if guess.name == "STING" || id.contains("sting") || id.contains("scorpion") {
+            return .sting
+        }
+        if guess.name == "GATOR" || id.contains("gator") || id.contains("alligator")
+            || id.contains("crocodile")
+        {
+            return .gator
+        }
         if id == "kind:cactus" || id == "kind:cacti_yucca" || id.contains("cactus")
             || id.contains("prickly") || id.contains("cholla") || id.contains("yucca")
             || id.contains("sotol") || guess.name == "CACTUS" || guess.name == "YUCCA"
         {
             return .cactus
+        }
+        if guess.name == "WATER" || id == "kind:water" {
+            return .water
         }
         if id == "kind:tree" || guess.name == "TREE" {
             return .tree
@@ -180,12 +210,18 @@ public enum VisionCoreML {
         if g.labelId.contains("snake") || g.name == "SNAKE" {
             g.leaveIt = true
         }
+        if g.labelId.contains("sting") || g.name == "STING" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("gator") || g.name == "GATOR" {
+            g.leaveIt = true
+        }
         return g
     }
 
     private static func match(_ identifier: String, book: VisionBook, locale: String) -> VisionGuess? {
         let ident = normalize(identifier)
-        if fungiNeedles.contains(where: { ident.contains($0) }) {
+        if fungiNeedles.contains(where: { hasPhrase(ident, $0) }) {
             return fungiGuess(book, locale: locale)
         }
         if ident.contains("javelina") || ident.contains("peccary") {
@@ -205,8 +241,10 @@ public enum VisionCoreML {
                     .replacingOccurrences(of: "tx-", with: "")
                     .replacingOccurrences(of: "nm-", with: "")
             )
-            return names.contains(where: { !$0.isEmpty && (ident.contains($0) || $0.contains(ident) && ident.count >= 4) })
-                || (!shortId.isEmpty && ident.contains(shortId))
+            return names.contains(where: {
+                !$0.isEmpty && (hasPhrase(ident, $0) || (hasPhrase($0, ident) && ident.count >= 4))
+            })
+                || (!shortId.isEmpty && hasPhrase(ident, shortId))
         }
         if species.count == 1 {
             if species[0].kind == "snake" {
@@ -223,15 +261,25 @@ public enum VisionCoreML {
         }
 
         for (kind, needles) in kindNeedles {
-            if needles.contains(where: { ident.contains($0) }) {
-                if kind == "snake" {
+            if needles.contains(where: { hasPhrase(ident, $0) }) {
+                switch kind {
+                case .snake:
                     return snakeGuess()
+                case .sting:
+                    return stingGuess()
+                case .gator:
+                    return gatorGuess()
+                case .water:
+                    return waterGuess()
+                case .fungi:
+                    return fungiGuess(book, locale: locale)
+                case .cactus, .cactiYucca, .mammal, .tree:
+                    let labels = book.labels.filter { $0.kind == kind.rawValue }
+                    if labels.count == 1 {
+                        return speciesGuess(labels[0], locale: locale)
+                    }
+                    return kindGuess(kind, labels: labels, locale: locale)
                 }
-                let labels = book.labels.filter { $0.kind == kind }
-                if labels.count == 1 {
-                    return speciesGuess(labels[0], locale: locale)
-                }
-                return kindGuess(kind, labels: labels, locale: locale)
             }
         }
         return nil
@@ -250,8 +298,8 @@ public enum VisionCoreML {
     }
 
     private static func kindGuess(_ kind: String, labels: [VisionLabel], locale: String) -> VisionGuess {
-        if kind == "fungi" {
-            return fungiGuess(VisionBook(state: "", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: labels), locale: locale)
+        if let match = MatchKind(rawValue: kind) {
+            return kindGuess(match, labels: labels, locale: locale)
         }
         let names = labels.map { $0.displayName(locale).uppercased() }
         let extras = labels.flatMap { $0.lookalikes.map(lookalikeWord) }
@@ -261,13 +309,47 @@ public enum VisionCoreML {
         }
         return VisionGuess(
             labelId: "kind:\(kind)",
-            name: kindWord(kind),
+            name: kind.uppercased(),
             percent: 0,
             lookalikes: Array(words.prefix(4)),
             leaveIt: labels.contains(where: \.leaveIt),
             edible: false,
             noModel: false
         )
+    }
+
+    private static func kindGuess(_ kind: MatchKind, labels: [VisionLabel], locale: String) -> VisionGuess {
+        switch kind {
+        case .fungi:
+            return fungiGuess(
+                VisionBook(state: "", neverEdibleUnlock: true, fungiDefault: "LEAVE_IT", labels: labels),
+                locale: locale
+            )
+        case .snake:
+            return snakeGuess()
+        case .sting:
+            return stingGuess()
+        case .gator:
+            return gatorGuess()
+        case .water:
+            return waterGuess()
+        case .cactus, .cactiYucca, .mammal, .tree:
+            let names = labels.map { $0.displayName(locale).uppercased() }
+            let extras = labels.flatMap { $0.lookalikes.map(lookalikeWord) }
+            var words: [String] = []
+            for word in names + extras where !words.contains(word) {
+                words.append(word)
+            }
+            return VisionGuess(
+                labelId: "kind:\(kind.rawValue)",
+                name: kindWord(kind),
+                percent: 0,
+                lookalikes: Array(words.prefix(4)),
+                leaveIt: labels.contains(where: \.leaveIt),
+                edible: false,
+                noModel: false
+            )
+        }
     }
 
     private static func fungiGuess(_ book: VisionBook, locale: String) -> VisionGuess {
@@ -296,15 +378,53 @@ public enum VisionCoreML {
         )
     }
 
-    private static func kindWord(_ kind: String) -> String {
+    private static func stingGuess() -> VisionGuess {
+        VisionGuess(
+            labelId: "kind:sting",
+            name: "STING",
+            percent: 0,
+            lookalikes: [],
+            leaveIt: true,
+            edible: false,
+            noModel: false
+        )
+    }
+
+    private static func gatorGuess() -> VisionGuess {
+        VisionGuess(
+            labelId: "kind:gator",
+            name: "GATOR",
+            percent: 0,
+            lookalikes: [],
+            leaveIt: true,
+            edible: false,
+            noModel: false
+        )
+    }
+
+    private static func waterGuess() -> VisionGuess {
+        VisionGuess(
+            labelId: "kind:water",
+            name: "WATER",
+            percent: 0,
+            lookalikes: [],
+            leaveIt: false,
+            edible: false,
+            noModel: false
+        )
+    }
+
+    private static func kindWord(_ kind: MatchKind) -> String {
         switch kind {
-        case "cactus": return "CACTUS"
-        case "cacti_yucca": return "YUCCA"
-        case "snake": return "SNAKE"
-        case "mammal": return "MAMMAL"
-        case "tree": return "TREE"
-        case "fungi": return "FUNGI"
-        default: return kind.uppercased()
+        case .cactus: return "CACTUS"
+        case .cactiYucca: return "YUCCA"
+        case .snake: return "SNAKE"
+        case .mammal: return "MAMMAL"
+        case .tree: return "TREE"
+        case .fungi: return "FUNGI"
+        case .sting: return "STING"
+        case .gator: return "GATOR"
+        case .water: return "WATER"
         }
     }
 
@@ -314,9 +434,29 @@ public enum VisionCoreML {
             .replacingOccurrences(of: "-", with: " ")
     }
 
+    /// Unspaced needles are whole words. "hog" is not hedgehog, "pine" is not
+    /// porcupine, "tree" is not street, "spring" is not springfield.
+    private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
+        if needle.contains(" ") {
+            return hay.contains(needle)
+        }
+        var words: [String] = []
+        var current = ""
+        for ch in hay {
+            if ch.isLetter || ch.isNumber {
+                current.append(ch)
+            } else if !current.isEmpty {
+                words.append(current)
+                current = ""
+            }
+        }
+        if !current.isEmpty { words.append(current) }
+        return words.contains(needle)
+    }
+
     private static let genericIdents: Set<String> = [
         "wood", "plant", "animal", "flower", "leaf", "fruit", "food", "wildlife",
-        "flora", "fauna", "nature",
+        "flora", "fauna", "nature", "street", "road",
     ]
 
     private static let fungiNeedles = [
@@ -324,11 +464,21 @@ public enum VisionCoreML {
         "puffball", "bracket",
     ]
 
-    private static let kindNeedles: [(String, [String])] = [
-        ("cactus", ["cactus", "cholla", "opuntia", "succulent", "saguaro", "nopal"]),
-        ("cacti_yucca", ["yucca", "sotol", "agave"]),
-        ("snake", ["rattlesnake", "copperhead", "cottonmouth", "snake", "viper"]),
-        ("mammal", ["coyote", "javelina", "peccary", "deer", "elk", "bear", "hog", "boar"]),
-        ("tree", ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
+    private static let kindNeedles: [(MatchKind, [String])] = [
+        (.cactus, ["cactus", "cholla", "opuntia", "succulent", "saguaro", "nopal", "prickly pear"]),
+        (.cactiYucca, ["yucca", "sotol", "agave"]),
+        (.snake, ["rattlesnake", "copperhead", "cottonmouth", "snake", "viper", "serpent", "sidewinder", "rattler"]),
+        (.sting, ["scorpion", "tarantula", "wasp", "bee", "hornet", "yellowjacket", "yellow jacket", "bumblebee"]),
+        (.gator, ["alligator", "crocodile", "caiman", "gator"]),
+        (.mammal, [
+            "coyote", "javelina", "peccary", "deer", "elk", "bear", "hog", "boar",
+            "fox", "bobcat", "cougar", "mountain lion", "puma", "raccoon", "skunk",
+            "armadillo", "rabbit", "pronghorn", "wolf",
+        ]),
+        (.water, [
+            "lake", "pond", "reservoir", "creek", "river", "spring", "waterfall",
+            "lagoon", "stream", "ocean", "water",
+        ]),
+        (.tree, ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
     ]
 }

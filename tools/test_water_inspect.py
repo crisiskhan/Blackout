@@ -8232,6 +8232,12 @@ class GroundFieldSync(unittest.TestCase):
             "a prickly-pear still is the cactus card, not oleander",
         )
         self.assertNotIn("plantNMCard", cactus_still)
+        self.assertIn("case .water:", vision_fn)
+        self.assertIn("case .sting:", vision_fn)
+        self.assertIn("case .gator:", vision_fn)
+        self.assertIn("Inspect.waterCard", vision_fn)
+        self.assertIn("Inspect.gatorCard", vision_fn)
+        self.assertIn("Inspect.biteCard", vision_fn.split("case .sting:", 1)[1].split("case .gator:", 1)[0])
         self.assertIn("g.labelId", tab)
         self.assertIn("InspectField.fieldRoute(", tab)
         self.assertIn("forVision:", tab)
