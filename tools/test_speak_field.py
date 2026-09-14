@@ -284,6 +284,7 @@ class FieldChromeTests(unittest.TestCase):
         tab = read("Blackout", "MapTab.swift")
         self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
         self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
 
     def test_off_graph_is_a_routing_failure_not_a_missing_dest(self):
         self.assertEqual(route_chrome(has_graph=True, has_dest=False, plan_chrome=""), "")
@@ -312,6 +313,7 @@ class SpeakChromeSourceContracts(unittest.TestCase):
         self.assertNotIn("truncationMode", self.theme)
         self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", self.map_tab)
         self.assertIn("BlackoutTokens.MapOverlay.lockTitle", self.map_tab)
+        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", self.map_tab)
         self.assertIn("HUDWrapRail", self.map_tab)
 
     def test_no_walk_script_text_wall_is_painted_on_the_field(self):

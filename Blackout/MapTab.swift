@@ -101,6 +101,7 @@ struct MapTab: View {
                 youEmblem: runtime.youEmblem.rawValue,
                 onPulse: { runtime.pulse() },
                 lockOn: runtime.lockOn,
+                godsEye: runtime.godsEye,
                 travelMode: runtime.travelMode,
                 sun: runtime.lamp == .sun
             )
@@ -182,6 +183,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
         .animation(Theme.Motion.heavy, value: runtime.markDraft)
         .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
+        .animation(Theme.Motion.heavy, value: runtime.godsEye)
     }
 
     private var coverUp: Bool {
@@ -193,7 +195,7 @@ struct MapTab: View {
             || runtime.heldMark != nil
     }
 
-    /// Everything that is not the map, sitting on the map. Search, lock and
+    /// Everything that is not the map, sitting on the map. Search, lock, GODS EYE and
     /// instruments at the top; status and the four thumb cells at the bottom.
     /// Ruler, grid and north live in Instruments — they are not a walk.
     private func hud(packName: String, offPack: Bool) -> some View {
@@ -304,6 +306,10 @@ struct MapTab: View {
                 runtime.toggleLockOn()
             }
             .buttonStyle(HUDOverlayChipStyle())
+            Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
+                runtime.toggleGodsEye()
+            }
+            .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
         }
     }
 

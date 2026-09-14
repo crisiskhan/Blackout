@@ -510,7 +510,7 @@ public enum PackCamera {
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
-    /// The map therefore opens on YOU at walking zoom; FIT PACK still shows the region.
+    /// The map therefore opens on YOU at walking zoom; GODS EYE still shows the region.
     public static let openZoom: Double = 15
     public static let streetNameMinZoom: Double = 12
     /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Pinch below this is void.
@@ -523,14 +523,24 @@ public enum PackCamera {
     }
 
     /// First GNSS after a dark puck. DEST already picked keeps the camera on
-    /// that pin; LOCK-ON is how YOU takes the glass back.
-    public static func shouldOpenOnYou(showYou: Bool, wasShowingYou: Bool, hasDest: Bool) -> Bool {
-        showYou && !wasShowingYou && !hasDest
+    /// that pin; LOCK-ON is how YOU takes the glass back. GODS EYE holds the pack.
+    public static func shouldOpenOnYou(
+        showYou: Bool,
+        wasShowingYou: Bool,
+        hasDest: Bool,
+        godsEye: Bool = false
+    ) -> Bool {
+        !godsEye && showYou && !wasShowingYou && !hasDest
     }
 
     /// Search / MARK dest off the glass. Canvas taps are already under the thumb.
-    public static func shouldFrameDest(lockOn: Bool, destChanged: Bool, destVisible: Bool) -> Bool {
-        !lockOn && destChanged && !destVisible
+    public static func shouldFrameDest(
+        lockOn: Bool,
+        destChanged: Bool,
+        destVisible: Bool,
+        godsEye: Bool = false
+    ) -> Bool {
+        !godsEye && !lockOn && destChanged && !destVisible
     }
 
     /// HUD search and dock cover the edges, so a pin in that pad is not on glass.
@@ -578,9 +588,10 @@ public enum PackCamera {
         lockOn: Bool,
         wasLocked: Bool,
         lastFollow: (lat: Double, lon: Double)?,
-        puck: (lat: Double, lon: Double)
+        puck: (lat: Double, lon: Double),
+        godsEye: Bool = false
     ) -> Bool {
-        guard lockOn else { return false }
+        guard !godsEye, lockOn else { return false }
         if !wasLocked { return true }
         guard let lastFollow else { return true }
         return GraphRouter.haversine(lastFollow.lat, lastFollow.lon, puck.lat, puck.lon) >= followMeters
@@ -590,11 +601,20 @@ public enum PackCamera {
     public static func shouldFitRoute(
         lockOn: Bool,
         stored: [(lat: Double, lon: Double)]?,
-        route: [(lat: Double, lon: Double)]
+        route: [(lat: Double, lon: Double)],
+        godsEye: Bool = false
     ) -> Bool {
-        guard !lockOn else { return false }
+        guard !godsEye, !lockOn else { return false }
         guard RouteLine.shouldDraw(route) else { return false }
         return RouteLine.needsReapply(stored: stored, route: route)
+    }
+
+    public static func shouldHoldPack(godsEye: Bool) -> Bool {
+        godsEye
+    }
+
+    public static func shouldLeavePack(wasHolding: Bool, godsEye: Bool) -> Bool {
+        wasHolding && !godsEye
     }
 }
 

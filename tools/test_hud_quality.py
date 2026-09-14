@@ -368,12 +368,15 @@ class WholeWordHUDTests(unittest.TestCase):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         self.assertIn("BlackoutTokens.MapOverlay.instrumentsTitle", tab)
         self.assertIn("BlackoutTokens.MapOverlay.lockTitle", tab)
+        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
         self.assertNotIn('Button("INST")', tab)
         self.assertNotIn('"LOCKED" : "LOCK"', tab)
+        self.assertNotIn('Button("FIT PACK")', tab)
         self.assertIn("HUDWrapRail", tab)
         self.assertIn("struct HUDWrapRail", theme)
         self.assertIn('instrumentsTitle = "INSTRUMENTS"', tokens)
         self.assertIn('lockOnTitle = "LOCK-ON"', tokens)
+        self.assertIn('godsEyeTitle = "GODS EYE"', tokens)
         self.assertIn(".minimumScaleFactor(1)", read("Blackout", "RootChrome.swift"))
         self.assertNotIn(".minimumScaleFactor(0.55)", read("Blackout", "RootChrome.swift"))
 
@@ -1622,7 +1625,7 @@ class PartyPlaceMarkTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 176)
+        self.assertEqual(count, 177)
         self.assertIn("var name: String", marks)
         self.assertIn("var note: String", marks)
         self.assertIn("var emblem: String", marks)
@@ -2673,7 +2676,7 @@ class PartyHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 176)
+        self.assertEqual(count, 177)
         self.assertIn("var onPersonHold", offline)
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
@@ -3668,7 +3671,7 @@ class AddressHoldCardTests(unittest.TestCase):
         count = 0
         for path in tests.rglob("*.swift"):
             count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
-        self.assertEqual(count, 176)
+        self.assertEqual(count, 177)
         self.assertIn("struct HeldAddress", hold)
         self.assertIn("struct AddressHoldCard", card)
         self.assertIn("var heldAddress", app)
@@ -3896,6 +3899,65 @@ class MapCanvasHonestyTests(unittest.TestCase):
         follow = camera.split("PackCamera.shouldFollow")[1].split("storedLockOn = spec.lockOn")[0]
         self.assertIn("!storedLockOn", follow)
         self.assertIn("zoomLevel: PackCamera.openZoom", follow)
+
+    def test_gods_eye_fits_the_pack_and_drops_lock_on(self):
+        tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        theme = read("Blackout", "Theme.swift")
+        cam = read("Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift")
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        tests = read(
+            "Packages",
+            "MapLibreMap",
+            "Tests",
+            "MapLibreMapTests",
+            "MapLibreMapTests.swift",
+        )
+        qa = read("docs", "SOLO_QA.md")
+        self.assertIn('godsEyeTitle = "GODS EYE"', tokens)
+        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
+        self.assertIn("toggleGodsEye()", tab)
+        self.assertIn("HUDOverlayChipStyle(filled: runtime.godsEye)", tab)
+        self.assertNotIn('Button("FIT PACK")', tab)
+        self.assertNotIn("best in class", tab.lower())
+        overlay = theme.split("struct HUDOverlayChipStyle")[1].split("struct MapFieldDestChipStyle")[0]
+        self.assertIn("var filled: Bool", overlay)
+        self.assertIn("Theme.glass", overlay)
+        self.assertIn("var godsEye", app)
+        eye = app.split("func toggleGodsEye(")[1].split("func ", 1)[0]
+        self.assertIn("godsEye = true", eye)
+        self.assertIn("lockOn = false", eye)
+        self.assertIn("fitPack()", eye)
+        lock = app.split("func toggleLockOn(")[1].split("func ", 1)[0]
+        self.assertIn("godsEye = false", lock)
+        self.assertIn("static func shouldHoldPack(", cam)
+        self.assertIn("static func shouldLeavePack(", cam)
+        self.assertIn("godsEye: Bool", cam.split("static func shouldFrameDest(")[1].split("static func destIsOnGlass(")[0])
+        self.assertIn("godsEye: Bool", cam.split("static func shouldOpenOnYou(")[1].split("static func shouldFrameDest(")[0])
+        self.assertIn("godsEye: Bool", cam.split("static func shouldFollow(")[1].split("static func shouldFitRoute(")[0])
+        self.assertIn("godsEye: Bool", cam.split("static func shouldFitRoute(")[1].split("public enum PackStyle")[0])
+        camera = offline.split("func applyCamera")[1].split("func fitPack")[0]
+        self.assertIn("PackCamera.shouldHoldPack", camera)
+        self.assertIn("PackCamera.shouldLeavePack", camera)
+        self.assertIn("godsEye: spec.godsEye", camera)
+        spec = offline.split("struct OverlaySpec")[1].split("var spec:")[0]
+        self.assertIn("homeLat", spec)
+        self.assertIn("var godsEye: Bool", spec)
+        self.assertIn("godsEye: runtime.godsEye", tab)
+        count = 0
+        for path in ROOT.joinpath("Packages", "MapLibreMap", "Tests").rglob("*.swift"):
+            count += len(re.findall(r"func test[A-Z]\w+\(", path.read_text()))
+        self.assertEqual(count, 177)
+        self.assertIn("testPackCameraHoldsGodsEyeOverDestAndYou", tests)
+        self.assertIn("GODS EYE", qa)
+        self.assertIn("fits the pack", qa)
+        self.assertIn("GODS EYE drops LOCK-ON", qa)
+        self.assertNotIn("best in class", qa.lower())
+        self.assertNotIn("Waze", qa)
+        self.assertNotIn("Google", qa)
 
 
 class GlassCardHonestyTests(unittest.TestCase):

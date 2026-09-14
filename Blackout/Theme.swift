@@ -236,8 +236,10 @@ struct HUDDockStyle: ButtonStyle {
     }
 }
 
-/// Overlay chip that keeps its whole word. Used for INSTRUMENTS and LOCK-ON.
+/// Overlay chip that keeps its whole word. Used for INSTRUMENTS, LOCK-ON, GODS EYE.
 struct HUDOverlayChipStyle: ButtonStyle {
+    var filled: Bool = false
+
     func makeBody(configuration: Configuration) -> some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
         return configuration.label
@@ -246,8 +248,14 @@ struct HUDOverlayChipStyle: ButtonStyle {
             .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
             .frame(minWidth: hit, minHeight: hit)
             .contentShape(Rectangle())
-            .foregroundStyle(Theme.silver)
-            .background(Theme.glass())
+            .foregroundStyle(filled ? Theme.void : Theme.silver)
+            .background {
+                if filled {
+                    Rectangle().fill(Theme.silver)
+                } else {
+                    Theme.glass()
+                }
+            }
             .clipShape(Theme.plateRect())
             .overlay(
                 Theme.plateRect()

@@ -26,7 +26,7 @@ public enum BlackoutTokens: Sendable {
         public static let bootActivateHeight: Double = 56
         /// Even a warm launch holds the logo long enough to land, then ACTIVATE.
         public static let bootMinSeconds: Double = 0.8
-        /// Overlay chips on the canvas (INSTRUMENTS / LOCK-ON). Fixed point size so an
+        /// Overlay chips on the canvas (INSTRUMENTS / LOCK-ON / GODS EYE). Fixed point size so an
         /// xxxLarge body never squeezes a word into a tail-ellipsis.
         public static let mapActionChipTextPoints: Double = 11
         public static let mapActionChipGutterPoints: Double = 10
@@ -175,6 +175,7 @@ public enum BlackoutTokens: Sendable {
         public static let instrumentsTitle = "INSTRUMENTS"
         public static let lockOnTitle = "LOCK-ON"
         public static let lockedTitle = "LOCKED"
+        public static let godsEyeTitle = "GODS EYE"
 
         public static func lockTitle(locked: Bool) -> String {
             locked ? lockedTitle : lockOnTitle

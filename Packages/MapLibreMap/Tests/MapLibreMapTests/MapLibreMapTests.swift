@@ -979,6 +979,72 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertFalse(PackCamera.destIsOnGlass(x: 195, y: 620, width: 390, height: 640))
     }
 
+    func testPackCameraHoldsGodsEyeOverDestAndYou() {
+        XCTAssertTrue(PackCamera.shouldHoldPack(godsEye: true))
+        XCTAssertFalse(PackCamera.shouldHoldPack(godsEye: false))
+        XCTAssertTrue(PackCamera.shouldLeavePack(wasHolding: true, godsEye: false))
+        XCTAssertFalse(PackCamera.shouldLeavePack(wasHolding: true, godsEye: true))
+        XCTAssertFalse(PackCamera.shouldLeavePack(wasHolding: false, godsEye: false))
+        XCTAssertFalse(
+            PackCamera.shouldOpenOnYou(
+                showYou: true,
+                wasShowingYou: false,
+                hasDest: false,
+                godsEye: true
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldOpenOnYou(
+                showYou: true,
+                wasShowingYou: false,
+                hasDest: false,
+                godsEye: false
+            )
+        )
+        XCTAssertFalse(
+            PackCamera.shouldFrameDest(
+                lockOn: false,
+                destChanged: true,
+                destVisible: false,
+                godsEye: true
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFrameDest(
+                lockOn: false,
+                destChanged: true,
+                destVisible: false,
+                godsEye: false
+            )
+        )
+        let puck = (lat: 31.76, lon: -106.49)
+        XCTAssertFalse(
+            PackCamera.shouldFollow(
+                lockOn: true,
+                wasLocked: false,
+                lastFollow: nil,
+                puck: puck,
+                godsEye: true
+            )
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFollow(
+                lockOn: true,
+                wasLocked: false,
+                lastFollow: nil,
+                puck: puck,
+                godsEye: false
+            )
+        )
+        let line = [(lat: 31.76, lon: -106.49), (lat: 31.80, lon: -106.50)]
+        XCTAssertFalse(
+            PackCamera.shouldFitRoute(lockOn: false, stored: nil, route: line, godsEye: true)
+        )
+        XCTAssertTrue(
+            PackCamera.shouldFitRoute(lockOn: false, stored: nil, route: line, godsEye: false)
+        )
+    }
+
     func testDestinationPinTracksTheChosenTarget() {
         let dest = (lat: 31.7619, lon: -106.4850)
         XCTAssertFalse(DestinationPin.needsReapply(stored: nil, destination: nil))

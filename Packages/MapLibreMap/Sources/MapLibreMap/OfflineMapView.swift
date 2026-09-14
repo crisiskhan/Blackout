@@ -22,7 +22,7 @@ public struct OfflineMapView: UIViewRepresentable {
     public var destination: (lat: Double, lon: Double)?
     /// The point the inspect card is about, marked so the card never hides it.
     public var held: (lat: Double, lon: Double)?
-    /// Bumped by FIT PACK. Every other value change leaves the camera where the thumb left it.
+    /// Bumped by GODS EYE. Every other value change leaves the camera where the thumb left it.
     public var fitToken: Int
     /// UIKit `MLNMapView` ignores SwiftUI `allowsHitTesting`. This is the
     /// value that has to live on the Metal view.
@@ -43,6 +43,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
+    /// GODS EYE holds the pack in frame. Exclusive with LOCK-ON.
+    public var godsEye: Bool
     /// WALK dashes the accent core. DRIVE keeps it solid. Chrome already
     /// says which; the line has to match.
     public var travelMode: TravelMode
@@ -72,8 +74,9 @@ public struct OfflineMapView: UIViewRepresentable {
         youHeading: Double? = nil,
         youEmblem: String = PersonEmblem.fallback.rawValue,
         onPulse: (() -> Void)? = nil,
-        lockOn: Bool = false,
-        travelMode: TravelMode = .walk,
+            lockOn: Bool = false,
+            godsEye: Bool = false,
+            travelMode: TravelMode = .walk,
         sun: Bool = false
     ) {
         self.styleURL = styleURL
@@ -100,6 +103,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.youEmblem = youEmblem
         self.onPulse = onPulse
         self.lockOn = lockOn
+        self.godsEye = godsEye
         self.travelMode = travelMode
         self.sun = sun
     }
@@ -206,7 +210,10 @@ public struct OfflineMapView: UIViewRepresentable {
             pips: pips,
             youHeading: youHeading,
             youEmblem: youEmblem,
+            homeLat: centerLat,
+            homeLon: centerLon,
             lockOn: lockOn,
+            godsEye: godsEye,
             travelMode: travelMode,
             sun: sun
         )
@@ -228,7 +235,10 @@ public struct OfflineMapView: UIViewRepresentable {
             var pips: [PartyBody]
             var youHeading: Double?
             var youEmblem: String
+            var homeLat: Double
+            var homeLon: Double
             var lockOn: Bool
+            var godsEye: Bool
             var travelMode: TravelMode
             var sun: Bool
         }
@@ -255,6 +265,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var fittedSize: (width: Double, height: Double)?
         var fittedFitToken = 0
         var storedLockOn = false
+        var storedGodsEye = false
         var followedPuck: (lat: Double, lon: Double)?
         var storedShowYou = false
         var storedMode: TravelMode?
@@ -696,6 +707,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 fittedPack = pack
                 fittedSize = size
                 storedLockOn = spec.lockOn
+                storedGodsEye = spec.godsEye
                 if spec.lockOn, puckOK {
                     followedPuck = (spec.puckLat, spec.puckLon)
                 } else {
@@ -703,10 +715,51 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
                 return
             }
+            if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
+                storedGodsEye = true
+                storedLockOn = spec.lockOn
+                followedPuck = nil
+                if force || PackCamera.shouldRefit(
+                    fittedPack: fittedPack,
+                    pack: pack,
+                    fittedSize: fittedSize,
+                    size: size
+                ) {
+                    fitPack(spec, on: view)
+                    fittedPack = pack
+                    fittedSize = size
+                }
+                return
+            }
+            if PackCamera.shouldLeavePack(wasHolding: storedGodsEye, godsEye: spec.godsEye) {
+                storedGodsEye = false
+                if puckOK {
+                    view.setCenter(
+                        puckCoord,
+                        zoomLevel: PackCamera.openZoom,
+                        animated: false
+                    )
+                } else {
+                    let home = CLLocationCoordinate2D(latitude: spec.homeLat, longitude: spec.homeLon)
+                    if CLLocationCoordinate2DIsValid(home) {
+                        view.setCenter(
+                            home,
+                            zoomLevel: PackCamera.openZoom,
+                            animated: false
+                        )
+                    }
+                }
+                fittedPack = pack
+                fittedSize = size
+                storedLockOn = spec.lockOn
+                followedPuck = spec.lockOn && puckOK ? (spec.puckLat, spec.puckLon) : nil
+                return
+            }
             if PackCamera.shouldFitRoute(
                 lockOn: spec.lockOn,
                 stored: storedRoute,
-                route: spec.route
+                route: spec.route,
+                godsEye: spec.godsEye
             ) {
                 fitRoute(spec, on: view)
                 fittedPack = pack
@@ -719,7 +772,8 @@ public struct OfflineMapView: UIViewRepresentable {
                 lockOn: spec.lockOn,
                 wasLocked: storedLockOn,
                 lastFollow: followedPuck,
-                puck: (spec.puckLat, spec.puckLon)
+                puck: (spec.puckLat, spec.puckLon),
+                godsEye: spec.godsEye
             ) {
                 if !storedLockOn {
                     view.setCenter(
@@ -764,7 +818,8 @@ public struct OfflineMapView: UIViewRepresentable {
                             y: Double(point.y),
                             width: Double(view.bounds.width),
                             height: Double(view.bounds.height)
-                        )
+                        ),
+                        godsEye: spec.godsEye
                     ) {
                         view.setCenter(
                             destCoord,
@@ -780,7 +835,8 @@ public struct OfflineMapView: UIViewRepresentable {
             if PackCamera.shouldOpenOnYou(
                 showYou: spec.showYou,
                 wasShowingYou: wasShowingYou,
-                hasDest: spec.destination != nil
+                hasDest: spec.destination != nil,
+                godsEye: spec.godsEye
             ), puckOK {
                 view.setCenter(
                     puckCoord,

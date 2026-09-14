@@ -59,6 +59,8 @@ final class AppRuntime {
     var leftHand = false
     var tab: BlackoutTab = .map
     var lockOn = false
+    /// GODS EYE holds the pack in frame. Exclusive with LOCK-ON.
+    var godsEye = false
     var showInstruments = false
     var chromeAwake = true
     var hudLayoutMode = false
@@ -125,7 +127,7 @@ final class AppRuntime {
     private var liveSpokenTurn = ""
     private var liveArrived = false
     private var lastLiveRerouteAt: TimeInterval = 0
-    /// Bumped by FIT PACK. The canvas otherwise opens on YOU at walking zoom.
+    /// Bumped by GODS EYE. The canvas otherwise opens on YOU at walking zoom.
     var fitPackToken = 0
     var canRouteOnGraph: Bool { packs?.hasUsableGraph() ?? false }
     /// Last WALK or DRIVE tap. Drops a stale plot so it cannot speak over a newer one.
@@ -823,6 +825,9 @@ final class AppRuntime {
     func toggleLockOn() {
         touch(.overlay)
         lockOn.toggle()
+        if lockOn {
+            godsEye = false
+        }
         if !lockOn {
             lockChrome = ""
             return
@@ -833,6 +838,18 @@ final class AppRuntime {
         let hasGraph = packs?.hasUsableGraph() ?? false
         lockChrome = LockOnChrome.banner(hasGPS: hasGPS, hasGraph: hasGraph)
         sendPOSIfPossible()
+    }
+
+    func toggleGodsEye() {
+        touch(.overlay)
+        if godsEye {
+            godsEye = false
+            return
+        }
+        godsEye = true
+        lockOn = false
+        lockChrome = ""
+        fitPack()
     }
 
     func pickDestination(lat: Double, lon: Double) {
