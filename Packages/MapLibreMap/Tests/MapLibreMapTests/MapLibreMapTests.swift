@@ -255,6 +255,19 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertGreaterThan(PackCamera.edgePaddingPoints, 0)
         XCTAssertGreaterThan(PackCamera.packPaddingPoints, PackCamera.routePaddingPoints)
         XCTAssertGreaterThanOrEqual(PackCamera.packSidePaddingPoints, 72)
+        let center = PackCamera.packCenter(south: 31.0, west: -107.0, north: 32.0, east: -106.0)
+        XCTAssertEqual(center.lat, 31.5, accuracy: 1e-9)
+        XCTAssertEqual(center.lon, -106.5, accuracy: 1e-9)
+        let radius = PackCamera.packRadiusMeters(
+            south: 31.0,
+            west: -107.0,
+            north: 32.0,
+            east: -106.0
+        )
+        XCTAssertGreaterThan(radius, 50_000)
+        XCTAssertLessThan(radius, 120_000)
+        XCTAssertEqual(PackCamera.godsEyeDistance(radiusMeters: radius), radius * 2.4, accuracy: 0.01)
+        XCTAssertEqual(PackCamera.godsEyeDistance(radiusMeters: 1000), 2400, accuracy: 0.01)
     }
 
     func testPackStyleAttachesWildStreetLinesAndOsmPoints() throws {
@@ -1055,6 +1068,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: true, godsEye: true))
         XCTAssertTrue(PackCamera.liveGodsEye(lockOn: false, godsEye: true))
         XCTAssertFalse(PackCamera.liveGodsEye(lockOn: true, godsEye: false))
+        XCTAssertEqual(PackCamera.godsEyePitch, 28)
+        XCTAssertEqual(PackCamera.godsEyeRangeFactor, 2.4)
+        XCTAssertEqual(PackCamera.godsEyeHeading, 0)
+        XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 28)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
+        XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
+        XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
     }
 
     func testDestinationPinTracksTheChosenTarget() {

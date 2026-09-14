@@ -183,13 +183,16 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
-        // Paper map. Two-finger rotate with the compass hidden loses north;
-        // pitch turns a field sheet into a toy globe.
-        view.allowsRotating = false
+        // Walking MAP is a paper sheet. GODS EYE is the overhead fly over the
+        // packed area; two-finger orbit is live only while that hold is on.
+        view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.allowsTilting = false
+        let pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye))
+        view.minimumPitch = pitch
+        view.maximumPitch = pitch
         view.minimumZoomLevel = PackCamera.minZoom
         view.maximumZoomLevel = PackCamera.maxZoom
-        if abs(view.direction) > 0.5 {
+        if !godsEye, abs(view.direction) > 0.5 {
             view.setDirection(0, animated: false)
         }
     }
@@ -704,7 +707,7 @@ public struct OfflineMapView: UIViewRepresentable {
             if spec.fitToken != fittedFitToken {
                 fittedFitToken = spec.fitToken
                 if PackCamera.shouldHoldPack(godsEye: spec.godsEye) {
-                    fitPack(spec, on: view)
+                    fitPack(spec, on: view, fly: true)
                     fittedPack = pack
                     fittedSize = size
                     storedLockOn = spec.lockOn
@@ -723,7 +726,7 @@ public struct OfflineMapView: UIViewRepresentable {
                     fittedSize: fittedSize,
                     size: size
                 ) {
-                    fitPack(spec, on: view)
+                    fitPack(spec, on: view, fly: false)
                     fittedPack = pack
                     fittedSize = size
                 }
@@ -731,10 +734,12 @@ public struct OfflineMapView: UIViewRepresentable {
             }
             if PackCamera.shouldLeavePack(wasHolding: storedGodsEye, godsEye: spec.godsEye) {
                 storedGodsEye = false
+                let walkPitch = CGFloat(PackCamera.holdPitch(godsEye: false))
                 if puckOK {
                     view.setCenter(
                         puckCoord,
                         zoomLevel: PackCamera.openZoom,
+                        direction: PackCamera.godsEyeHeading,
                         animated: false
                     )
                 } else {
@@ -743,10 +748,15 @@ public struct OfflineMapView: UIViewRepresentable {
                         view.setCenter(
                             home,
                             zoomLevel: PackCamera.openZoom,
+                            direction: PackCamera.godsEyeHeading,
                             animated: false
                         )
                     }
                 }
+                let cam = view.camera
+                cam.pitch = walkPitch
+                cam.heading = PackCamera.godsEyeHeading
+                view.camera = cam
                 fittedPack = pack
                 fittedSize = size
                 storedLockOn = spec.lockOn
@@ -861,7 +871,7 @@ public struct OfflineMapView: UIViewRepresentable {
             fittedSize = size
         }
 
-        func fitPack(_ spec: OverlaySpec, on view: MLNMapView) {
+        func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly: Bool) {
             let box = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
@@ -874,12 +884,39 @@ public struct OfflineMapView: UIViewRepresentable {
             )
             let pad = CGFloat(PackCamera.packPaddingPoints)
             let side = CGFloat(PackCamera.packSidePaddingPoints)
-            view.setVisibleCoordinateBounds(
-                bounds,
-                edgePadding: UIEdgeInsets(top: pad, left: side, bottom: pad, right: side),
-                animated: false,
-                completionHandler: nil
+            let mid = PackCamera.packCenter(
+                south: box.south,
+                west: box.west,
+                north: box.north,
+                east: box.east
             )
+            let seed = MLNMapCamera(
+                lookingAtCenter: CLLocationCoordinate2D(latitude: mid.lat, longitude: mid.lon),
+                acrossDistance: PackCamera.godsEyeDistance(
+                    radiusMeters: PackCamera.packRadiusMeters(
+                        south: box.south,
+                        west: box.west,
+                        north: box.north,
+                        east: box.east
+                    )
+                ),
+                pitch: CGFloat(PackCamera.godsEyePitch),
+                heading: PackCamera.godsEyeHeading
+            )
+            let camera = view.camera(
+                seed,
+                fittingCoordinateBounds: bounds,
+                edgePadding: UIEdgeInsets(top: pad, left: side, bottom: pad, right: side)
+            )
+            if fly {
+                view.flyToCamera(
+                    camera,
+                    withDuration: PackCamera.godsEyeFlySeconds,
+                    completionHandler: nil
+                )
+            } else {
+                view.setCamera(camera, animated: false)
+            }
         }
 
         func fitRoute(_ spec: OverlaySpec, on view: MLNMapView) {

@@ -572,6 +572,53 @@ public enum PackCamera {
         )
     }
 
+    /// Overhead look-down over the packed bbox. 0 is nadir; 28° is off the
+    /// pack plane so the mapped area reads as a region, not a paper sheet.
+    public static let godsEyePitch: Double = 28
+    /// Viewing distance is this times the pack's bounding-sphere radius.
+    public static let godsEyeRangeFactor: Double = 2.4
+    public static let godsEyeHeading: Double = 0
+    public static let godsEyeFlySeconds: Double = 2
+
+    public static func packCenter(
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> (lat: Double, lon: Double) {
+        let box = bounds(south: south, west: west, north: north, east: east)
+        return ((box.south + box.north) / 2, (box.west + box.east) / 2)
+    }
+
+    public static func packRadiusMeters(
+        south: Double,
+        west: Double,
+        north: Double,
+        east: Double
+    ) -> Double {
+        let box = bounds(south: south, west: west, north: north, east: east)
+        let mid = packCenter(south: box.south, west: box.west, north: box.north, east: box.east)
+        let corners = [
+            (box.south, box.west),
+            (box.south, box.east),
+            (box.north, box.west),
+            (box.north, box.east),
+        ]
+        return corners.map { GraphRouter.haversine(mid.lat, mid.lon, $0.0, $0.1) }.max() ?? 0
+    }
+
+    public static func godsEyeDistance(radiusMeters: Double) -> Double {
+        max(radiusMeters, 1) * godsEyeRangeFactor
+    }
+
+    public static func holdPitch(godsEye: Bool) -> Double {
+        godsEye ? godsEyePitch : 0
+    }
+
+    public static func allowsOrbit(godsEye: Bool) -> Bool {
+        godsEye
+    }
+
     public static func shouldRefit(
         fittedPack: (south: Double, west: Double, north: Double, east: Double)?,
         pack: (south: Double, west: Double, north: Double, east: Double),
