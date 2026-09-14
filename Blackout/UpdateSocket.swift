@@ -85,8 +85,8 @@ final class UpdateSocket {
         config.timeoutIntervalForRequest = 8
         config.timeoutIntervalForResource = 12
         config.waitsForConnectivity = false
-        config.allowsExpensiveAccess = true
-        config.allowsConstrainedAccess = true
+        config.allowsExpensiveNetworkAccess = true
+        config.allowsConstrainedNetworkAccess = true
         let session = URLSession(configuration: config)
         self.session = session
         var off: [String] = []
