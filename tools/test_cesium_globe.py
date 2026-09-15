@@ -153,6 +153,13 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("pickDestination(lat: lat, lon: lon)", tap)
         self.assertIn("navigate(mode:", tap)
 
+    def test_shade_request_image_is_a_promise(self):
+        """Device: TypeError a.then is not a function in processImagery."""
+        desk = read("Resources", "Globe", "desk.js")
+        shade = desk.split("ShadeTile.prototype.requestImage")[1].split("function loadShade")[0]
+        self.assertIn("Promise.resolve(this._img)", shade)
+        self.assertIn("showRenderLoopErrors: false", desk)
+
     def test_four_tabs_four_dock_no_fifth(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         tab = read("Blackout", "MapTab.swift")

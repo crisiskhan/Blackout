@@ -566,7 +566,7 @@
     return [];
   };
   ShadeTile.prototype.requestImage = function () {
-    return this._img;
+    return Promise.resolve(this._img);
   };
 
   function loadShade(url, bbox) {
@@ -1113,6 +1113,7 @@
       creditContainer: document.createElement("div"),
       requestRenderMode: true,
       maximumRenderTimeChange: Infinity,
+      showRenderLoopErrors: false,
       contextOptions: { webgl: { alpha: false } }
     });
     viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
