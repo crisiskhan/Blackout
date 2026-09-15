@@ -233,9 +233,6 @@ private extension GlobeView {
             "lon": puckLon,
             "show": showYou
         ]
-        if let youHeading {
-            puck["heading"] = Int(youHeading.rounded())
-        }
         puck["emblem"] = youEmblem
         var obj: [String: Any] = [
             "packId": packID,
@@ -339,7 +336,7 @@ final class PackFileSchemeHandler: NSObject, WKURLSchemeHandler {
                 headerFields: [
                     "Content-Type": mime,
                     "Content-Length": "\(data.count)",
-                    "Cache-Control": "no-store",
+                    "Cache-Control": "max-age=86400",
                     "Access-Control-Allow-Origin": "*"
                 ]
             ) else { throw URLError(.cannotParseResponse) }

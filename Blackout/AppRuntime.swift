@@ -2049,6 +2049,7 @@ final class AppRuntime {
         sendPOSIfPossible()
         refreshHeldParty()
         applyLiveGuide()
+        pulse()
         if godsEye, red.isRed, eyeFollowID == nil, let id = redFrameID() {
             eyeFollowID = id
             fitPack()

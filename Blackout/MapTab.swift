@@ -243,10 +243,6 @@ struct MapTab: View {
                 hitList
                     .opacity(runtime.chromeVeil * runtime.alive(.search))
             }
-            if !runtime.godsEye, hits.isEmpty {
-                markList
-                    .opacity(runtime.chromeVeil * runtime.alive(.search))
-            }
             Spacer(minLength: 0)
                 .allowsHitTesting(false)
             if !runtime.godsEye {

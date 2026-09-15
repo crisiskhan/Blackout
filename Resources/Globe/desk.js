@@ -672,7 +672,6 @@
       .catch(function () {
         demGrid = null;
         lastDem = url || "";
-        viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
         return false;
       });
   }
@@ -1251,6 +1250,7 @@
     var streetsOn = spec.ground !== "aerial";
     var waterOn = layers.indexOf("water") >= 0;
     var vectorsOn = layers.indexOf("vectors") >= 0 || layers.indexOf("shade") >= 0;
+    var shadeOn = layers.indexOf("shade") >= 0 && !aerialOn;
     var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
     var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
     var khanUrl = spec.khanUrl || packAsset(spec, "khan.pmtiles");
@@ -1286,6 +1286,7 @@
       spec.contoursUrl || "",
       streetsOn ? "1" : "0",
       aerialOn ? "1" : "0",
+      shadeOn ? "1" : "0",
       waterOn ? "1" : "0",
       vectorsOn ? "1" : "0",
       spec.ground || "",
@@ -1297,7 +1298,7 @@
     if (groundBusy) return;
     groundBusy = true;
     loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
-    loadShade(shadeUrl, spec.bbox)
+    loadShade(shadeOn ? shadeUrl : "", spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })
       .then(function (osmOk) {
         if (streetsOn && !osmOk) return Promise.reject(new Error("NO PACK"));
@@ -1314,6 +1315,7 @@
       })
       .catch(function () {
         groundBusy = false;
+        lastGroundKey = groundKey;
       });
     loadGeo(
       waterOn ? spec.waterUrl : "",
@@ -1355,6 +1357,7 @@
       showRenderLoopErrors: false,
       contextOptions: { webgl: { alpha: false } }
     });
+    viewer.scene.globe.maximumScreenSpaceError = 2;
     viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.scene.globe.showGroundAtmosphere = false;
     viewer.scene.moon = undefined;

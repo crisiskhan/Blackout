@@ -264,11 +264,33 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertLess(camera.find("lastCam"), camera.find("trackedEntity"))
         self.assertLess(camera.find("lastCam"), camera.find("flyToBoundingSphere"))
         self.assertNotIn('type: "pulse"', apply)
-        self.assertIn("Int(", globe.split("if let youHeading")[1].split("puck[\"emblem\"]")[0])
+        self.assertNotIn('puck["heading"]', globe)
         self.assertIn("transaction { $0.animation = nil }", canvas)
         self.assertNotIn("chromeAwake", canvas)
         self.assertNotIn("chromeAwake", tab_chrome)
         self.assertIn("chromeAwake", hud)
+
+    def test_map_stays_photo_with_readable_hud(self):
+        """137 stills: Oleaster photo, HUD gone, five RALLY rows, brown void."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        tab = read("Blackout", "MapTab.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        dem_catch = desk.split("function loadDem(")[1].split("function ShadeTile")[0].split(".catch")[1]
+        hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
+        pull = app.split("func pullFix()")[1].split("func notePipFix")[0]
+        ground_catch = apply.split("loadAerial")[1].split(".catch")[1].split("loadGeo")[0]
+        self.assertIn("pulse()", pull)
+        self.assertNotIn("markList", hud)
+        self.assertIn("shadeOn", apply)
+        self.assertLess(apply.find("shadeOn"), apply.find("loadShade"))
+        self.assertIn("!aerialOn", apply.split("loadShade")[0])
+        self.assertNotIn("EllipsoidTerrainProvider", dem_catch)
+        self.assertIn("lastGroundKey = groundKey", ground_catch)
+        self.assertIn("max-age", globe)
+        self.assertIn("maximumScreenSpaceError", desk)
+        self.assertNotIn('puck["heading"]', globe)
     def test_globe_looks_at_oleaster_not_the_pack_horizon(self):
         """135 stills: EYE is stretched hillshade; LOCKED is a white disk over YOU."""
         desk = read("Resources", "Globe", "desk.js")
