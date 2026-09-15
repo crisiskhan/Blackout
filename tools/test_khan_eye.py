@@ -252,6 +252,24 @@ class PackedArchiveTests(unittest.TestCase):
         self.assertTrue(blob.startswith(b"\xff\xd8"), "downtown El Paso aerial is not JPEG")
         self.assertGreater(len(blob), 800)
 
+    def test_oleaster_walk_has_photo(self):
+        """Device YOU on Oleaster Dr. Packed USGS NAIP, not a live feed."""
+        you = {"lat": 31.87049, "lon": -106.597333}
+        boxes = aerial.photo_bboxes({"id": "tx-west", "slices": PACKS["tx-west"]["slices"]})
+        union = aerial.union_photo_bbox(boxes)
+        self.assertGreaterEqual(len(boxes), 2)
+        self.assertTrue(union["south"] <= you["lat"] <= union["north"])
+        self.assertTrue(union["west"] <= you["lon"] <= union["east"])
+        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
+        with open(archive, "rb") as fh:
+            reader = Reader(MmapSource(fh))
+            cx, cy = lonlat_to_tile(you["lon"], you["lat"], 16)
+            blob = reader.get(16, int(cx), int(cy))
+        self.assertIsNotNone(blob, "Oleaster walk has no packed photo at z16")
+        assert blob is not None
+        self.assertTrue(blob.startswith(b"\xff\xd8"), "Oleaster aerial is not JPEG")
+        self.assertGreater(len(blob), 800)
+
 
 if __name__ == "__main__":
     unittest.main()

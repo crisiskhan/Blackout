@@ -1503,7 +1503,7 @@ def build_tiles(dest: Path, pack: dict) -> dict:
 
 
 def fetch_aerial_pack(pack: dict, dest: Path) -> None:
-    """Cut packed NAIP photo for the KHAN EYE desk. Metro only. No live feed."""
+    """Cut packed NAIP photo for the KHAN EYE desk. Metro plus walk extras. No live feed."""
     dest.mkdir(parents=True, exist_ok=True)
     info = aerial.build_aerial(dest, pack)
     if info.get("present"):

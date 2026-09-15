@@ -9,6 +9,7 @@
   var lastDem = "";
   var lastShade = "";
   var lastOsm = "";
+  var lastKhan = "";
   var lastWater = "";
   var lastContours = "";
   var lastGroundKey = "";
@@ -16,7 +17,9 @@
   var lastLiveKey = "";
   var aerialLayer = null;
   var shadeLayer = null;
-  var osmLayer = null;
+  var osmGroundLayer = null;
+  var osmInkLayer = null;
+  var khanLayer = null;
   var waterSource = null;
   var contourSource = null;
   var holdTimer = null;
@@ -349,22 +352,146 @@
     return 1.05;
   }
 
+  function landFill(cls) {
+    if (cls === "park" || cls === "bosque" || cls === "woodland") return "rgba(36, 82, 42, 0.58)";
+    if (cls === "farm") return "rgba(78, 82, 32, 0.48)";
+    if (cls === "town") return "rgba(72, 68, 58, 0.46)";
+    if (cls === "desert") return "rgba(102, 74, 40, 0.38)";
+    if (cls === "playa") return "rgba(56, 64, 80, 0.42)";
+    if (cls === "protected") return "rgba(24, 56, 40, 0.42)";
+    return "rgba(58, 56, 48, 0.34)";
+  }
+
+  function houseFill(kind) {
+    if (kind === "tree" || kind === "wood") return "rgba(63, 143, 78, 0.92)";
+    if (kind === "house" || kind === "detached" || kind === "residential") return "rgba(163, 156, 148, 0.94)";
+    if (kind === "apartments") return "rgba(138, 146, 154, 0.94)";
+    if (kind === "industrial" || kind === "warehouse") return "rgba(110, 118, 126, 0.94)";
+    if (kind === "retail" || kind === "commercial") return "rgba(150, 138, 124, 0.94)";
+    return "rgba(142, 148, 156, 0.9)";
+  }
+
+  function ringCenter(rings) {
+    var r = rings && rings[0];
+    if (!r || r.length < 4) return null;
+    var sx = 0;
+    var sy = 0;
+    var n = 0;
+    var i;
+    for (i = 0; i + 1 < r.length; i += 2) {
+      sx += r[i];
+      sy += r[i + 1];
+      n++;
+    }
+    if (!n) return null;
+    return { x: sx / n, y: sy / n };
+  }
+
+  function skipRoadName(hw) {
+    return hw === "service" || hw === "footway" || hw === "path" || hw === "cycleway" || hw === "steps" || hw === "bridleway";
+  }
+
   function paintMvt(ctx, bytes, size) {
     var layers = decodeMvt(bytes, size);
+    var land = layers.land || [];
     var water = layers.water || [];
-    var road = layers.road || [];
+    var building = layers.building || [];
     var i;
+    for (i = 0; i < land.length; i++) {
+      if (land[i].type !== 3) continue;
+      ctx.fillStyle = landFill(land[i].props.class);
+      fillRings(ctx, land[i].rings);
+    }
     ctx.fillStyle = "rgba(42, 88, 118, 0.58)";
     for (i = 0; i < water.length; i++) {
       if (water[i].type === 3) fillRings(ctx, water[i].rings);
     }
+    for (i = 0; i < building.length; i++) {
+      if (building[i].type !== 3) continue;
+      ctx.fillStyle = houseFill(building[i].props.kind || building[i].props.building);
+      fillRings(ctx, building[i].rings);
+    }
+  }
+
+  function paintMvtInk(ctx, bytes, size, level) {
+    var layers = decodeMvt(bytes, size);
+    var road = layers.road || [];
+    var place = layers.place || [];
+    var i;
+    var seen = {};
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    ctx.strokeStyle = "rgba(214, 210, 198, 0.94)";
+    ctx.strokeStyle = "rgba(248, 244, 232, 0.96)";
     for (i = 0; i < road.length; i++) {
       if (road[i].type !== 2 && road[i].type !== 3) continue;
       ctx.lineWidth = roadWidth(road[i].props.highway);
       strokeRings(ctx, road[i].rings);
+    }
+    if ((level || 0) < 13) return;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(20, 18, 14, 0.82)";
+    ctx.fillStyle = "rgba(252, 250, 244, 0.98)";
+    ctx.font = "bold 10px sans-serif";
+    for (i = 0; i < road.length; i++) {
+      var name = road[i].props.name;
+      if (!name || seen[name] || skipRoadName(road[i].props.highway)) continue;
+      var at = ringCenter(road[i].rings);
+      if (!at || at.x < 10 || at.y < 10 || at.x > size - 10 || at.y > size - 10) continue;
+      seen[name] = true;
+      ctx.strokeText(name, at.x, at.y);
+      ctx.fillText(name, at.x, at.y);
+    }
+    if ((level || 0) < 14) return;
+    ctx.font = "bold 11px sans-serif";
+    for (i = 0; i < place.length; i++) {
+      var pname = place[i].props.name;
+      if (!pname) continue;
+      var pc = ringCenter(place[i].rings);
+      if (!pc) continue;
+      ctx.strokeText(pname, pc.x, pc.y);
+      ctx.fillText(pname, pc.x, pc.y);
+    }
+  }
+
+  function paintKhan(ctx, bytes, size) {
+    var layers = decodeMvt(bytes, size);
+    var building = layers.building || [];
+    var furniture = layers.furniture || [];
+    var i;
+    var c;
+    for (i = 0; i < building.length; i++) {
+      if (building[i].type !== 3) continue;
+      ctx.fillStyle = houseFill(building[i].props.kind);
+      fillRings(ctx, building[i].rings);
+    }
+    for (i = 0; i < furniture.length; i++) {
+      c = ringCenter(furniture[i].rings);
+      if (!c) continue;
+      var kind = furniture[i].props.kind;
+      if (kind === "tree" || kind === "wood") {
+        ctx.fillStyle = "#3F8F4E";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (kind === "signal") {
+        ctx.fillStyle = "#E0A100";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (kind === "lamp") {
+        ctx.fillStyle = "#E8A040";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (kind === "sign") {
+        ctx.fillStyle = "#F4F1EA";
+        ctx.strokeStyle = "#14110C";
+        ctx.lineWidth = 1;
+        ctx.fillRect(c.x - 6, c.y - 4, 12, 8);
+        ctx.strokeRect(c.x - 6, c.y - 4, 12, 8);
+      }
     }
   }
 
@@ -422,8 +549,9 @@
     });
   };
 
-  function PMTilesMVT(pm, header) {
+  function PMTilesMVT(pm, header, paint) {
     this._pm = pm;
+    this._paint = paint || paintMvt;
     this.tilingScheme = new Cesium.WebMercatorTilingScheme();
     this.rectangle = Cesium.Rectangle.fromDegrees(
       header.minLon,
@@ -445,12 +573,13 @@
     return [];
   };
   PMTilesMVT.prototype.requestImage = function (x, y, level) {
+    var paint = this._paint;
     return this._pm.getZxy(level, x, y).then(function (entry) {
       var canvas = emptyTile();
       if (!entry || !entry.data) return canvas;
       var raw = entry.data instanceof Uint8Array ? entry.data : new Uint8Array(entry.data);
       return gunzip(raw).then(function (bytes) {
-        paintMvt(canvas.getContext("2d"), bytes, 256);
+        paint(canvas.getContext("2d"), bytes, 256, level);
         return canvas;
       });
     }).catch(function () {
@@ -603,35 +732,78 @@
       });
   }
 
+  function dropLayer(layer) {
+    if (!layer) return;
+    viewer.imageryLayers.remove(layer, true);
+  }
+
   function loadOsm(url, on) {
-    if (osmLayer && url === lastOsm) {
-      osmLayer.show = !!on;
+    if (osmGroundLayer && url === lastOsm) {
+      osmGroundLayer.show = !!on;
+      if (osmInkLayer) osmInkLayer.show = !!on;
       viewer.scene.requestRender();
       return Promise.resolve(true);
     }
     if (!on || !url) {
-      if (osmLayer) osmLayer.show = false;
+      if (osmGroundLayer) osmGroundLayer.show = false;
+      if (osmInkLayer) osmInkLayer.show = false;
       if (!url) {
         lastOsm = "";
-        if (osmLayer) {
-          viewer.imageryLayers.remove(osmLayer, true);
-          osmLayer = null;
-        }
+        dropLayer(osmGroundLayer);
+        dropLayer(osmInkLayer);
+        osmGroundLayer = null;
+        osmInkLayer = null;
       }
       return Promise.resolve(false);
     }
-    if (url === lastOsm && !osmLayer) return Promise.resolve(false);
-    if (osmLayer) {
-      viewer.imageryLayers.remove(osmLayer, true);
-      osmLayer = null;
-    }
+    if (url === lastOsm && !osmGroundLayer) return Promise.resolve(false);
+    dropLayer(osmGroundLayer);
+    dropLayer(osmInkLayer);
+    osmGroundLayer = null;
+    osmInkLayer = null;
     lastOsm = url;
     return xhr(url, "arraybuffer")
       .then(function (buf) {
         var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
         return pm.getHeader().then(function (header) {
-          osmLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header), 1);
-          osmLayer.show = true;
+          osmGroundLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintMvt));
+          osmInkLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintMvtInk));
+          osmGroundLayer.show = true;
+          osmInkLayer.show = true;
+          viewer.scene.requestRender();
+          return true;
+        });
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
+  function loadKhan(url, on) {
+    if (khanLayer && url === lastKhan) {
+      khanLayer.show = !!on;
+      viewer.scene.requestRender();
+      return Promise.resolve(true);
+    }
+    if (!on || !url) {
+      if (khanLayer) khanLayer.show = false;
+      if (!url) {
+        lastKhan = "";
+        dropLayer(khanLayer);
+        khanLayer = null;
+      }
+      return Promise.resolve(false);
+    }
+    if (url === lastKhan && !khanLayer) return Promise.resolve(false);
+    dropLayer(khanLayer);
+    khanLayer = null;
+    lastKhan = url;
+    return xhr(url, "arraybuffer")
+      .then(function (buf) {
+        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+        return pm.getHeader().then(function (header) {
+          khanLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintKhan));
+          khanLayer.show = true;
           viewer.scene.requestRender();
           return true;
         });
@@ -668,7 +840,7 @@
       .then(function (buf) {
         var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
         return pm.getHeader().then(function (header) {
-          aerialLayer = viewer.imageryLayers.addImageryProvider(new PMTilesImagery(pm, header), 2);
+          aerialLayer = viewer.imageryLayers.addImageryProvider(new PMTilesImagery(pm, header));
           aerialLayer.show = true;
           viewer.scene.requestRender();
           return true;
@@ -774,18 +946,28 @@
       position: pos,
       orientation: ori,
       ellipse: {
-        semiMajorAxis: 14,
-        semiMinorAxis: 14,
-        material: Cesium.Color.WHITE.withAlpha(0.92),
+        semiMajorAxis: 18,
+        semiMinorAxis: 18,
+        material: Cesium.Color.WHITE.withAlpha(0.94),
         outline: true,
         outlineColor: Cesium.Color.BLACK,
         height: 2
       },
       point: {
-        pixelSize: 11,
+        pixelSize: 13,
         color: Cesium.Color.WHITE,
         outlineColor: Cesium.Color.BLACK,
         outlineWidth: 2,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY
+      },
+      label: {
+        text: "YOU",
+        font: "bold 14px sans-serif",
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 4,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(0, -22),
         disableDepthTestDistance: Number.POSITIVE_INFINITY
       }
     });
@@ -933,7 +1115,9 @@
     globe.showGroundAtmosphere = false;
     globe.enableLighting = spec.lamp === "sun";
     paintLayer(shadeLayer, spec);
-    paintLayer(osmLayer, spec);
+    paintLayer(osmGroundLayer, spec);
+    paintLayer(osmInkLayer, spec);
+    paintLayer(khanLayer, spec);
     paintLayer(aerialLayer, spec);
     if (spec.palette === "nvg") {
       globe.baseColor = Cesium.Color.fromCssColorString("#031a08");
@@ -1076,6 +1260,7 @@
     var vectorsOn = layers.indexOf("vectors") >= 0 || layers.indexOf("shade") >= 0;
     var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
     var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
+    var khanUrl = spec.khanUrl || packAsset(spec, "khan.pmtiles");
     upsertPuck(spec);
     var liveKey = JSON.stringify({
       route: spec.route || [],
@@ -1102,6 +1287,7 @@
       spec.packId || "",
       shadeUrl,
       osmUrl,
+      khanUrl,
       spec.aerialUrl || "",
       spec.demUrl || "",
       spec.waterUrl || "",
@@ -1120,7 +1306,12 @@
     loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
     loadShade(shadeUrl, spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })
-      .then(function () { return loadAerial(spec.aerialUrl, aerialOn); });
+      .then(function () { return loadKhan(khanUrl, streetsOn); })
+      .then(function () { return loadAerial(spec.aerialUrl, aerialOn); })
+      .then(function () {
+        if (osmInkLayer) viewer.imageryLayers.raiseToTop(osmInkLayer);
+        viewer.scene.requestRender();
+      });
     loadGeo(
       waterOn ? spec.waterUrl : "",
       Cesium.Color.fromCssColorString("#3FA7C9"),
@@ -1166,7 +1357,7 @@
     viewer.scene.moon = undefined;
     viewer.scene.sun = undefined;
     viewer.scene.fog.enabled = false;
-    viewer.scene.backgroundColor = Cesium.Color.BLACK;
+    viewer.scene.backgroundColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.clock.shouldAnimate = false;
     viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
       viewer.scene.requestRender();

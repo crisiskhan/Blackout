@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+from pmtiles.reader import MmapSource, Reader
 from pmtiles.tile import Compression, TileType, zxy_to_tileid
 from pmtiles.writer import Writer
 
@@ -34,15 +35,77 @@ TILE_PX = 256
 WORKERS = 12
 JPEG_MAGIC = b"\xff\xd8"
 
+# Extra packed photo walks. Metro is downtown; YOU on Oleaster sits west of it.
+PHOTO_EXTRA = {
+    "tx-west": [
+        {
+            "name": "Oleaster walk",
+            "south": 31.86,
+            "west": -106.61,
+            "north": 31.88,
+            "east": -106.58,
+        }
+    ]
+}
+
+
+def slice_bbox(sl: dict) -> dict:
+    box = sl.get("bbox") or sl
+    return {
+        "south": float(box["south"]),
+        "west": float(box["west"]),
+        "north": float(box["north"]),
+        "east": float(box["east"]),
+    }
+
 
 def metro_bbox(pack: dict) -> dict:
     metro = pack.get("slices", {}).get("metro") or {}
+    return slice_bbox(metro)
+
+
+def photo_bboxes(pack: dict) -> list[dict]:
+    boxes = [metro_bbox(pack)]
+    for item in PHOTO_EXTRA.get(str(pack.get("id") or ""), []):
+        boxes.append(
+            {
+                "south": float(item["south"]),
+                "west": float(item["west"]),
+                "north": float(item["north"]),
+                "east": float(item["east"]),
+            }
+        )
+    return boxes
+
+
+def union_photo_bbox(boxes: list[dict]) -> dict:
     return {
-        "south": float(metro["south"]),
-        "west": float(metro["west"]),
-        "north": float(metro["north"]),
-        "east": float(metro["east"]),
+        "south": min(b["south"] for b in boxes),
+        "west": min(b["west"] for b in boxes),
+        "north": max(b["north"] for b in boxes),
+        "east": max(b["east"] for b in boxes),
     }
+
+
+def read_archive(path: Path) -> dict[tuple[int, int, int], bytes]:
+    got: dict[tuple[int, int, int], bytes] = {}
+    with open(path, "rb") as fh:
+        reader = Reader(MmapSource(fh))
+        header = reader.header()
+        bbox = {
+            "west": header["min_lon_e7"] / 1e7,
+            "south": header["min_lat_e7"] / 1e7,
+            "east": header["max_lon_e7"] / 1e7,
+            "north": header["max_lat_e7"] / 1e7,
+        }
+        for z in range(int(header["min_zoom"]), int(header["max_zoom"]) + 1):
+            x0, y0, x1, y1 = tile_range(bbox, z)
+            for x in range(x0, x1 + 1):
+                for y in range(y0, y1 + 1):
+                    blob = reader.get(z, x, y)
+                    if blob:
+                        got[(z, x, y)] = blob
+    return got
 
 
 def style_source() -> dict:
@@ -126,25 +189,42 @@ def wanted_tiles(bbox: dict) -> list[tuple[int, int, int]]:
 
 
 def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
-    """Write `aerial.pmtiles` for the pack metro. Skip rather than fake photo."""
-    bbox = metro_bbox(pack)
-    jobs = wanted_tiles(bbox)
+    """Write `aerial.pmtiles` for metro plus any walk extras. Skip rather than fake photo."""
+    boxes = photo_bboxes(pack)
+    bbox = union_photo_bbox(boxes)
+    seen: set[tuple[int, int, int]] = set()
+    jobs: list[tuple[int, int, int]] = []
+    for box in boxes:
+        for zxy in wanted_tiles(box):
+            if zxy in seen:
+                continue
+            seen.add(zxy)
+            jobs.append(zxy)
     got: dict[tuple[int, int, int], bytes] = {}
-    print(f"  NAIP {pack['id']} metro {len(jobs)} tiles", flush=True)
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in jobs}
-        done = 0
-        for fut in as_completed(futs):
-            zxy = futs[fut]
-            done += 1
-            try:
-                blob = fut.result()
-            except Exception:
-                blob = None
-            if blob:
-                got[zxy] = blob
-            if done % 200 == 0 or done == len(jobs):
-                print(f"  NAIP {pack['id']} {done}/{len(jobs)} fetched {len(got)} jpeg", flush=True)
+    existing = dest / AERIAL_FILE
+    if existing.is_file():
+        got = read_archive(existing)
+        print(f"  NAIP {pack['id']} reuse {len(got)} packed jpeg", flush=True)
+    missing = [zxy for zxy in jobs if zxy not in got]
+    print(f"  NAIP {pack['id']} photo {len(jobs)} tiles, fetch {len(missing)}", flush=True)
+    if missing:
+        with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+            futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in missing}
+            done = 0
+            for fut in as_completed(futs):
+                zxy = futs[fut]
+                done += 1
+                try:
+                    blob = fut.result()
+                except Exception:
+                    blob = None
+                if blob:
+                    got[zxy] = blob
+                if done % 40 == 0 or done == len(missing):
+                    print(
+                        f"  NAIP {pack['id']} {done}/{len(missing)} fetched {len(got)} jpeg",
+                        flush=True,
+                    )
     if len(got) < 20:
         return {"present": False, "reason": f"NAIP returned {len(got)} tiles", "tiles": 0}
     out = dest / AERIAL_FILE

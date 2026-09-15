@@ -49,6 +49,7 @@ struct GlobeView: UIViewRepresentable {
     var contoursURL: URL?
     var shadeURL: URL?
     var osmURL: URL?
+    var khanURL: URL?
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -67,7 +68,7 @@ struct GlobeView: UIViewRepresentable {
         let view = WKWebView(frame: .zero, configuration: config)
         view.navigationDelegate = context.coordinator
         view.isOpaque = true
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 74.0 / 255.0, green: 70.0 / 255.0, blue: 60.0 / 255.0, alpha: 1)
         view.scrollView.isScrollEnabled = false
         view.scrollView.bounces = false
         view.scrollView.contentInsetAdjustmentBehavior = .never
@@ -293,9 +294,10 @@ private extension GlobeView {
         if let path = packWebPath(demURL) { obj["demUrl"] = path }
         if let path = packWebPath(waterURL) { obj["waterUrl"] = path }
         if let path = packWebPath(contoursURL) { obj["contoursUrl"] = path }
-        // Pack ground is hillshade.png + osm.pmtiles. Metro NAIP is extra.
+        // Pack ground is hillshade.png + osm.pmtiles + khan.pmtiles. Metro NAIP is extra.
         obj["shadeUrl"] = packWebPath(shadeURL) ?? "../Packs/\(packID)/hillshade.png"
         obj["osmUrl"] = packWebPath(osmURL) ?? "../Packs/\(packID)/osm.pmtiles"
+        obj["khanUrl"] = packWebPath(khanURL) ?? "../Packs/\(packID)/khan.pmtiles"
         return obj
     }
 

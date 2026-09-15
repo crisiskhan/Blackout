@@ -118,7 +118,8 @@ struct MapTab: View {
                 waterURL: packFile("layers/water.geojson"),
                 contoursURL: packFile("contours.geojson"),
                 shadeURL: packFile("hillshade.png"),
-                osmURL: packFile("osm.pmtiles")
+                osmURL: packFile("osm.pmtiles"),
+                khanURL: packFile("khan.pmtiles")
             )
             .ignoresSafeArea()
             // The scrim already keeps a thumb off the canvas. This is the
@@ -252,7 +253,6 @@ struct MapTab: View {
             if !runtime.godsEye {
                 fieldChrome
                     .opacity(runtime.chromeVeil)
-                    .allowsHitTesting(false)
             }
             if runtime.hudCrisis {
                 crisisStrip
@@ -299,6 +299,7 @@ struct MapTab: View {
                     text: $query,
                     id: "map.search",
                     submit: "DONE",
+                    pointSize: 16,
                     onOpen: { runtime.touch(.search) },
                     onSubmit: {
                         runtime.touch(.search)
@@ -616,6 +617,11 @@ struct MapTab: View {
             Text(packName)
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(Theme.silver)
+            if !runtime.godsEye {
+                Text("TAP a street · WALK follows")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Theme.silver)
+            }
             ForEach(runtime.eyeHUDLines(), id: \.self) { line in
                 Text(line)
                     .font(.caption2.weight(.bold))

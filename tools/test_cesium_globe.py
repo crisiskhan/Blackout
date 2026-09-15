@@ -98,21 +98,58 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("case snap", desk)
 
     def test_globe_shows_pack_ground_not_void(self):
-        """Device stills: puck on black. NAIP is metro-only; hillshade+OSM cover the pack."""
+        """Device stills: puck on black. Hillshade + OSM cover the pack; photo is extra."""
         desk = read("Resources", "Globe", "desk.js")
         globe = read("Blackout", "GlobeView.swift")
         tab = read("Blackout", "MapTab.swift")
+        page = read("Resources", "Globe", "index.html")
         self.assertIn("XMLHttpRequest", desk)
         self.assertNotIn("return fetch(url)", desk)
         self.assertIn("hillshade.png", desk)
         self.assertIn("osm.pmtiles", desk)
+        self.assertIn("khan.pmtiles", desk)
         self.assertIn("tileLoadProgressEvent", desk)
         self.assertNotIn("#141414", desk)
+        self.assertIn("#4a463c", page)
+        self.assertIn("backgroundColor = Cesium.Color.fromCssColorString(GROUND)", desk)
         self.assertIn("../Packs/", globe)
         self.assertIn("hillshade.png", globe)
         self.assertIn("osm.pmtiles", globe)
+        self.assertIn("khan.pmtiles", globe)
         self.assertIn("hillshade.png", tab)
         self.assertIn("osm.pmtiles", tab)
+        self.assertIn("khan.pmtiles", tab)
+
+    def test_globe_paints_yards_houses_and_street_names(self):
+        """Oleaster still: houses and yards, not gray lines on black."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        tab = read("Blackout", "MapTab.swift")
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        paint = desk.split("function paintMvt(")[1].split("function gunzip")[0]
+        puck = desk.split("function upsertPuck")[1].split("function drawCoins")[0]
+        self.assertIn("function paintMvtInk", desk)
+        self.assertIn("function paintKhan", desk)
+        self.assertIn("layers.land", paint)
+        self.assertIn("layers.water", paint)
+        self.assertIn("layers.road", paint)
+        self.assertIn("props.name", desk)
+        self.assertIn("layers.building", desk)
+        self.assertIn("layers.furniture", desk)
+        self.assertIn("(level || 0) < 13", desk)
+        self.assertIn("paint(canvas.getContext(\"2d\"), bytes, 256, level)", desk)
+        self.assertIn("loadKhan", apply)
+        self.assertLess(apply.find("loadKhan"), apply.find("loadAerial"))
+        self.assertIn("raiseToTop", apply)
+        self.assertIn("lastKhan", desk)
+        self.assertIn('text: "YOU"', puck)
+        self.assertIn("khanUrl", globe)
+        self.assertIn("TAP a street", tab)
+        field = tab.split("fieldChrome")[1].split("if runtime.hudCrisis")[0]
+        self.assertNotIn("allowsHitTesting(false)", field)
+        self.assertNotIn("best in class", desk.lower())
+        self.assertNotIn("Waze", desk)
+        self.assertNotIn("Google", tab)
 
     def test_globe_paints_puck_before_pack_files(self):
         """128: black AND no puck. apply() waited on hillshade/OSM/NAIP first."""
@@ -125,7 +162,7 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertLess(apply.find("requestRender()"), apply.find("loadAerial"))
         self.assertIn("req.timeout", desk)
 
-    def test_tx_west_naip_misses_the_device_puck(self):
+    def test_tx_west_naip_covers_the_device_puck(self):
         aerial = (ROOT / "Resources" / "Packs" / "tx-west" / "aerial.pmtiles").read_bytes()[:127]
         min_lon = struct.unpack_from("<i", aerial, 102)[0] / 1e7
         min_lat = struct.unpack_from("<i", aerial, 106)[0] / 1e7
@@ -133,11 +170,13 @@ class CesiumGlobeTests(unittest.TestCase):
         max_lat = struct.unpack_from("<i", aerial, 114)[0] / 1e7
         lat, lon = 31.87049, -106.597333
         inside_naip = min_lat <= lat <= max_lat and min_lon <= lon <= max_lon
-        self.assertFalse(inside_naip, "device YOU is outside metro NAIP")
+        self.assertTrue(inside_naip, "device YOU must sit inside packed NAIP")
         shade = ROOT / "Resources" / "Packs" / "tx-west" / "hillshade.png"
         osm = ROOT / "Resources" / "Packs" / "tx-west" / "osm.pmtiles"
+        khan = ROOT / "Resources" / "Packs" / "tx-west" / "khan.pmtiles"
         self.assertTrue(shade.is_file())
         self.assertTrue(osm.is_file())
+        self.assertTrue(khan.is_file())
         header = osm.read_bytes()[:127]
         o_min_lon = struct.unpack_from("<i", header, 102)[0] / 1e7
         o_min_lat = struct.unpack_from("<i", header, 106)[0] / 1e7
