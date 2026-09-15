@@ -118,9 +118,9 @@ class CesiumGlobeTests(unittest.TestCase):
         """128: black AND no puck. apply() waited on hillshade/OSM/NAIP first."""
         desk = read("Resources", "Globe", "desk.js")
         apply = desk.split("function apply(spec)")[1].split("function boot")[0]
-        self.assertIn("drawPuck(spec)", apply)
+        self.assertIn("upsertPuck(spec)", apply)
         self.assertIn("cameraFor(spec)", apply)
-        self.assertLess(apply.find("drawPuck(spec)"), apply.find("loadShade"))
+        self.assertLess(apply.find("upsertPuck(spec)"), apply.find("loadShade"))
         self.assertLess(apply.find("cameraFor(spec)"), apply.find("loadOsm"))
         self.assertLess(apply.find("requestRender()"), apply.find("loadAerial"))
         self.assertIn("req.timeout", desk)
@@ -166,25 +166,36 @@ class CesiumGlobeTests(unittest.TestCase):
         apply = desk.split("function apply(spec)")[1].split("function boot")[0]
         self.assertIn("lastGround", apply)
         self.assertLess(apply.find("lastGround"), apply.find("loadShade"))
+        self.assertIn("lastLive", apply)
+        self.assertLess(apply.find("upsertPuck"), apply.find("clearCoins"))
+        puck = desk.split("function upsertPuck")[1].split("function drawCoins")[0]
+        self.assertIn('getById("puck")', puck)
+        clear = desk.split("function clearCoins")[1].split("function drawPackBox")[0]
+        self.assertNotIn('id === "puck"', clear)
         camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
         lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
         self.assertIn("trackedEntity", lock)
         self.assertNotIn("setView", lock)
 
     def test_turns_do_not_cover_the_globe(self):
-        """Device stills: TURNS hold-glass ate half the Cesium canvas. CLOSE did not stick."""
+        """Device stills: TURNS plate sits on the route. Dest rail already names the next street."""
         tab = read("Blackout", "MapTab.swift")
         card = read("Blackout", "SpeakTurnCard.swift")
         app = read("Blackout", "AppRuntime.swift")
         cover = tab.split("private var coverUp")[1].split("private func hud")[0]
         hud = tab.split("private func hud")[1].split("private var searchField")[0]
         chrome = app.split("func applyRemainingChrome")[1].split("func resetLiveGuide")[0]
+        speak = app.split("func speakMap()")[1].split("func closeSpeakTurns")[0]
+        dest = tab.split("MapFieldDestRail(")[1].split("private struct MapFieldDestRail")[0]
         self.assertNotIn("showSpeakTurns", cover)
         self.assertIn("SpeakTurnCard(", hud)
         self.assertNotIn("HoldGlassShell(", card)
         self.assertIn("prefix(2)", card)
         self.assertIn('Button("CLOSE")', card)
         self.assertNotIn("showSpeakTurns", chrome)
+        self.assertNotIn("showSpeakTurns = !speakHUDTurns.isEmpty", speak)
+        self.assertIn("toggleSpeakTurns", dest)
+        self.assertIn("func toggleSpeakTurns()", app)
 
     def test_four_tabs_four_dock_no_fifth(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")

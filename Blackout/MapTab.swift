@@ -448,7 +448,11 @@ struct MapTab: View {
                                 .shadow(color: Theme.void.opacity(0.95), radius: 3)
                                 .shadow(color: Theme.void.opacity(0.72), radius: 8)
                         case .dest:
-                            MapFieldDestRail(dest: point, nextTurn: runtime.speakNextHUD)
+                            MapFieldDestRail(
+                                dest: point,
+                                nextTurn: runtime.speakNextHUD,
+                                onTurns: { runtime.toggleSpeakTurns() }
+                            )
                         }
                     }
                 }
@@ -461,6 +465,7 @@ struct MapTab: View {
     private struct MapFieldDestRail: View {
         var dest: (lat: Double, lon: Double)?
         var nextTurn: String
+        var onTurns: () -> Void
         @State private var beat: Double = 0.28
 
         var body: some View {
@@ -514,6 +519,7 @@ struct MapTab: View {
 
         private func chip(_ chipMode: MapFieldDestMode) -> some View {
             Button {
+                onTurns()
             } label: {
                 Text(chipMode.title)
             }

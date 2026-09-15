@@ -13,6 +13,7 @@
   var lastContours = "";
   var lastGroundKey = "";
   var lastLook = "";
+  var lastLiveKey = "";
   var aerialLayer = null;
   var shadeLayer = null;
   var osmLayer = null;
@@ -726,7 +727,7 @@
     var drop = [];
     viewer.entities.values.forEach(function (ent) {
       var id = String(ent.id || "");
-      if (id.indexOf("coin:") === 0 || id.indexOf("trail:") === 0 || id.indexOf("ring:") === 0 || id === "puck" || id === "route" || id === "dest" || id === "held" || id === "pack-box") {
+      if (id.indexOf("coin:") === 0 || id.indexOf("trail:") === 0 || id.indexOf("ring:") === 0 || id === "route" || id === "dest" || id === "held" || id === "pack-box") {
         drop.push(ent);
       }
     });
@@ -749,18 +750,29 @@
     });
   }
 
-  function drawPuck(spec) {
+  function upsertPuck(spec) {
     var p = spec.puck;
-    if (!p || !p.show) return;
+    var existing = viewer.entities.getById("puck");
+    if (!p || !p.show) {
+      if (existing) viewer.entities.remove(existing);
+      return;
+    }
+    var pos = cart(p.lat, p.lon, 4);
     var heading = Cesium.Math.toRadians(p.heading == null ? 0 : p.heading);
+    var ori = Cesium.Transforms.headingPitchRollQuaternion(
+      pos,
+      new Cesium.HeadingPitchRoll(heading, 0, 0)
+    );
+    if (existing) {
+      existing.position = pos;
+      existing.orientation = ori;
+      return;
+    }
     viewer.entities.add({
       id: "puck",
       name: "YOU",
-      position: cart(p.lat, p.lon, 4),
-      orientation: Cesium.Transforms.headingPitchRollQuaternion(
-        cart(p.lat, p.lon, 4),
-        new Cesium.HeadingPitchRoll(heading, 0, 0)
-      ),
+      position: pos,
+      orientation: ori,
       ellipse: {
         semiMajorAxis: 14,
         semiMinorAxis: 14,
@@ -1064,11 +1076,24 @@
     var vectorsOn = layers.indexOf("vectors") >= 0 || layers.indexOf("shade") >= 0;
     var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
     var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
-    clearCoins();
-    drawPackBox(spec);
-    drawPuck(spec);
-    drawCoins(spec);
-    drawRoute(spec);
+    upsertPuck(spec);
+    var liveKey = JSON.stringify({
+      route: spec.route || [],
+      dest: spec.dest || null,
+      held: spec.held || null,
+      pips: spec.pips || [],
+      trails: spec.trails || [],
+      rings: spec.rings || [],
+      bbox: spec.bbox || null,
+      travel: spec.travel || ""
+    });
+    if (liveKey !== lastLiveKey) {
+      lastLiveKey = liveKey;
+      clearCoins();
+      drawPackBox(spec);
+      drawCoins(spec);
+      drawRoute(spec);
+    }
     applyPalette(spec);
     cameraFor(spec);
     viewer.scene.requestRender();

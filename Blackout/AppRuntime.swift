@@ -1301,7 +1301,6 @@ final class AppRuntime {
         if spoke, routeCoords.count >= 2 {
             speakHUDTurns = VoiceNav.hudTurns(routeCoords, travelMode: travelMode, streets: streets)
             speakNextHUD = VoiceNav.nextTurnHUD(routeCoords, streets: streets)
-            showSpeakTurns = !speakHUDTurns.isEmpty
         } else {
             clearSpeakTurns()
         }
@@ -1309,6 +1308,16 @@ final class AppRuntime {
 
     func closeSpeakTurns() {
         showSpeakTurns = false
+    }
+
+    func toggleSpeakTurns() {
+        if showSpeakTurns {
+            closeSpeakTurns()
+            return
+        }
+        if !speakHUDTurns.isEmpty {
+            showSpeakTurns = true
+        }
     }
 
     private func clearSpeakTurns() {
