@@ -282,7 +282,7 @@ private extension GlobeView {
             "lockOn": lockOn,
             "fitToken": fitToken,
             "range": range,
-            "pitch": godsEye ? PackCamera.holdPitch(godsEye: true) - 90 : -90,
+            "pitch": -90,
             "heading": godsEye ? PackCamera.godsEyeHeading : 0,
             "height": height,
             "fly": PackCamera.godsEyeFlySeconds,

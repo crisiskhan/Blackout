@@ -131,7 +131,6 @@ class CesiumGlobeTests(unittest.TestCase):
         osm = desk.split("function loadOsm(")[1].split("function loadKhan(")[0]
         self.assertNotIn("function paintMvtInk", desk)
         self.assertNotIn("osmInkLayer", desk)
-        self.assertNotIn("raiseToTop", apply)
         self.assertEqual(osm.count("new PMTilesMVT"), 1)
         self.assertEqual(osm.count("addImageryProvider"), 1)
         self.assertIn("function paintKhan", desk)
@@ -145,6 +144,8 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("paint(canvas.getContext(\"2d\"), bytes, 256, level)", desk)
         self.assertIn("loadKhan", apply)
         self.assertLess(apply.find("loadKhan"), apply.find("loadAerial"))
+        self.assertGreater(apply.find("raiseToTop(osmLayer)"), apply.find("loadAerial"))
+        self.assertGreater(apply.find("raiseToTop(khanLayer)"), apply.find("loadAerial"))
         self.assertIn("lastKhan", desk)
         self.assertIn('text: "YOU"', puck)
         self.assertIn("khanUrl", globe)
@@ -247,6 +248,24 @@ class CesiumGlobeTests(unittest.TestCase):
         lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
         self.assertIn("trackedEntity", lock)
         self.assertNotIn("setView", lock)
+
+    def test_globe_looks_at_oleaster_not_the_pack_horizon(self):
+        """135 stills: EYE is stretched hillshade; LOCKED is a white disk over YOU."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        puck = desk.split("function upsertPuck")[1].split("function drawCoins")[0]
+        camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
+        eye = camera.split("spec.godsEye")[1].split("spec.lockOn")[0]
+        boot = desk.split("function boot()")[1].split("window.KHAN")[0]
+        self.assertNotIn("semiMajorAxis", puck)
+        self.assertNotIn("ellipse:", puck)
+        self.assertIn("viewFrom", puck)
+        self.assertIn("minimumZoomDistance", boot)
+        self.assertIn("sphere.radius", eye)
+        self.assertIn("spec.height", eye)
+        self.assertNotIn("spec.range ||", eye)
+        self.assertNotIn("holdPitch(godsEye: true) - 90", globe)
+        self.assertIn('"pitch": -90', globe)
 
     def test_turns_do_not_cover_the_globe(self):
         """Device stills: TURNS plate sits on the route. Dest rail already names the next street."""

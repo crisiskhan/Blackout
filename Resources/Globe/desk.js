@@ -366,13 +366,13 @@
   }
 
   function landFill(cls) {
-    if (cls === "park" || cls === "bosque" || cls === "woodland") return "rgba(36, 82, 42, 0.58)";
-    if (cls === "farm") return "rgba(78, 82, 32, 0.48)";
-    if (cls === "town") return "rgba(72, 68, 58, 0.46)";
-    if (cls === "desert") return "rgba(102, 74, 40, 0.38)";
-    if (cls === "playa") return "rgba(56, 64, 80, 0.42)";
-    if (cls === "protected") return "rgba(24, 56, 40, 0.42)";
-    return "rgba(58, 56, 48, 0.34)";
+    if (cls === "park" || cls === "bosque" || cls === "woodland") return "rgba(36, 82, 42, 0.16)";
+    if (cls === "farm") return "rgba(78, 82, 32, 0.12)";
+    if (cls === "town") return "rgba(72, 68, 58, 0.1)";
+    if (cls === "desert") return "rgba(102, 74, 40, 0.1)";
+    if (cls === "playa") return "rgba(56, 64, 80, 0.12)";
+    if (cls === "protected") return "rgba(24, 56, 40, 0.12)";
+    return "rgba(58, 56, 48, 0.08)";
   }
 
   function houseFill(kind) {
@@ -408,7 +408,6 @@
     var layers = decodeMvt(bytes, size);
     var land = layers.land || [];
     var water = layers.water || [];
-    var building = layers.building || [];
     var road = layers.road || [];
     var place = layers.place || [];
     var i;
@@ -418,14 +417,9 @@
       ctx.fillStyle = landFill(land[i].props.class);
       fillRings(ctx, land[i].rings);
     }
-    ctx.fillStyle = "rgba(42, 88, 118, 0.58)";
+    ctx.fillStyle = "rgba(42, 88, 118, 0.35)";
     for (i = 0; i < water.length; i++) {
       if (water[i].type === 3) fillRings(ctx, water[i].rings);
-    }
-    for (i = 0; i < building.length; i++) {
-      if (building[i].type !== 3) continue;
-      ctx.fillStyle = houseFill(building[i].props.kind || building[i].props.building);
-      fillRings(ctx, building[i].rings);
     }
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -932,9 +926,11 @@
       pos,
       new Cesium.HeadingPitchRoll(heading, 0, 0)
     );
+    var lookFrom = new Cesium.Cartesian3(0, 0, spec.height || 900);
     if (existing) {
       existing.position = pos;
       existing.orientation = ori;
+      existing.viewFrom = lookFrom;
       return;
     }
     viewer.entities.add({
@@ -942,14 +938,7 @@
       name: "YOU",
       position: pos,
       orientation: ori,
-      ellipse: {
-        semiMajorAxis: 18,
-        semiMinorAxis: 18,
-        material: Cesium.Color.WHITE.withAlpha(0.94),
-        outline: true,
-        outlineColor: Cesium.Color.BLACK,
-        height: 2
-      },
+      viewFrom: lookFrom,
       point: {
         pixelSize: 13,
         color: Cesium.Color.WHITE,
@@ -1153,12 +1142,12 @@
       (spec.frameExtra || []).forEach(function (p) { pts.push(cart(p[0], p[1])); });
       if (!pts.length) pts.push(cart(puck.lat, puck.lon));
       var sphere = Cesium.BoundingSphere.fromPoints(pts);
-      var range = spec.range || Math.max(sphere.radius * 1.15, 160);
+      var range = Math.max(sphere.radius * 1.4, spec.height || 900);
       viewer.camera.flyToBoundingSphere(sphere, {
         duration: spec.fitToken === lastFit ? 0 : (spec.fly || 2),
         offset: new Cesium.HeadingPitchRange(
           Cesium.Math.toRadians(heading),
-          Cesium.Math.toRadians(pitch),
+          Cesium.Math.toRadians(-90),
           range
         )
       });
@@ -1312,6 +1301,8 @@
       .then(function () {
         groundBusy = false;
         lastGroundKey = groundKey;
+        if (osmLayer) viewer.imageryLayers.raiseToTop(osmLayer);
+        if (khanLayer) viewer.imageryLayers.raiseToTop(khanLayer);
         viewer.scene.requestRender();
       })
       .catch(function () {
@@ -1364,6 +1355,7 @@
     viewer.scene.fog.enabled = false;
     viewer.scene.backgroundColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.clock.shouldAnimate = false;
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 80;
     viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
       viewer.scene.requestRender();
     });
