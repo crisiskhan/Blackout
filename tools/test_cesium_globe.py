@@ -145,6 +145,14 @@ class CesiumGlobeTests(unittest.TestCase):
         o_max_lat = struct.unpack_from("<i", header, 114)[0] / 1e7
         self.assertTrue(o_min_lat <= lat <= o_max_lat and o_min_lon <= lon <= o_max_lon)
 
+    def test_map_navigation_is_on_the_globe(self):
+        """Nav is the globe: tap routes on Cesium. Overlay chips must not steal the canvas."""
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("Spacer(minLength: 0)\n                .allowsHitTesting(false)", tab)
+        tap = tab.split("onMapTap:")[1].split("onMapHold:")[0]
+        self.assertIn("pickDestination(lat: lat, lon: lon)", tap)
+        self.assertIn("navigate(mode:", tap)
+
     def test_four_tabs_four_dock_no_fifth(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         tab = read("Blackout", "MapTab.swift")

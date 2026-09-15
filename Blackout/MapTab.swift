@@ -78,6 +78,7 @@ struct MapTab: View {
                 ),
                 onMapTap: { lat, lon in
                     runtime.pickDestination(lat: lat, lon: lon)
+                    runtime.navigate(mode: runtime.travelMode)
                     hits = []
                 },
                 onMapHold: { lat, lon, tags, zoom in
@@ -221,6 +222,7 @@ struct MapTab: View {
     /// instruments at the top; NIGHT / SUN / EYE and the four thumb cells at the bottom.
     /// KHAN EYE is the packed Cesium desk. LAYERS / LOOK / MARK / SCENE live in Instruments.
     /// Ruler, grid and north live in Instruments — they are not a walk.
+    /// The spacer is a hole: pan, tap, and hold belong to the globe, not the HUD.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
             if !runtime.godsEye {
@@ -254,6 +256,7 @@ struct MapTab: View {
                     .opacity(runtime.chromeVeil * runtime.alive(.search))
             }
             Spacer(minLength: 0)
+                .allowsHitTesting(false)
             if !runtime.godsEye {
                 fieldChrome
                     .opacity(runtime.chromeVeil)
@@ -372,6 +375,7 @@ struct MapTab: View {
                         runtime.holdAddress(h)
                     } else {
                         runtime.pickDestination(lat: h.lat, lon: h.lon)
+                        runtime.navigate(mode: runtime.travelMode)
                     }
                     hits = []
                     query = ""
@@ -396,6 +400,7 @@ struct MapTab: View {
                     ForEach(rows) { m in
                         Button(m.title) {
                             runtime.pickDestination(lat: m.lat, lon: m.lon)
+                            runtime.navigate(mode: runtime.travelMode)
                         }
                         .font(.system(size: 13, weight: .heavy))
                         .foregroundStyle(Theme.silver)
