@@ -60,6 +60,7 @@
       var req = new XMLHttpRequest();
       req.open("GET", url, true);
       if (type) req.responseType = type;
+      req.timeout = type === "arraybuffer" ? 20000 : 8000;
       req.onload = function () {
         if (req.status === 0 || (req.status >= 200 && req.status < 300)) {
           resolve(req.response);
@@ -70,6 +71,9 @@
       req.onerror = function () {
         reject(new Error("NO PACK"));
       };
+      req.ontimeout = function () {
+        reject(new Error("NO PACK"));
+      };
       req.send();
     });
   }
@@ -77,10 +81,16 @@
   function xhrImage(url) {
     return new Promise(function (resolve, reject) {
       var img = new Image();
+      var to = setTimeout(function () {
+        img.onload = img.onerror = null;
+        reject(new Error("NO PACK"));
+      }, 8000);
       img.onload = function () {
+        clearTimeout(to);
         resolve(img);
       };
       img.onerror = function () {
+        clearTimeout(to);
         reject(new Error("NO PACK"));
       };
       img.src = url;
@@ -532,6 +542,33 @@
       });
   }
 
+  function ShadeTile(img, bbox) {
+    var w = img.naturalWidth || img.width || 256;
+    var h = img.naturalHeight || img.height || 256;
+    this._img = img;
+    this.rectangle = Cesium.Rectangle.fromDegrees(bbox.west, bbox.south, bbox.east, bbox.north);
+    this.tilingScheme = new Cesium.GeographicTilingScheme({
+      rectangle: this.rectangle,
+      numberOfLevelZeroTilesX: 1,
+      numberOfLevelZeroTilesY: 1
+    });
+    this.tileWidth = w;
+    this.tileHeight = h;
+    this.minimumLevel = 0;
+    this.maximumLevel = 0;
+    this.hasAlphaChannel = false;
+    this.credit = new Cesium.Credit("pack hillshade", false);
+    this.errorEvent = new Cesium.Event();
+    this.ready = true;
+    this.readyPromise = Promise.resolve(true);
+  }
+  ShadeTile.prototype.getTileCredits = function () {
+    return [];
+  };
+  ShadeTile.prototype.requestImage = function () {
+    return this._img;
+  };
+
   function loadShade(url, bbox) {
     if (!url || !bbox) {
       if (shadeLayer) {
@@ -551,27 +588,9 @@
       shadeLayer = null;
     }
     lastShade = url;
-    var rect = Cesium.Rectangle.fromDegrees(bbox.west, bbox.south, bbox.east, bbox.north);
     return xhrImage(url)
       .then(function (img) {
-        var dataUrl = url;
-        try {
-          var c = document.createElement("canvas");
-          c.width = img.naturalWidth || img.width;
-          c.height = img.naturalHeight || img.height;
-          c.getContext("2d").drawImage(img, 0, 0);
-          dataUrl = c.toDataURL("image/jpeg", 0.86);
-        } catch (err) {
-          dataUrl = url;
-        }
-        return Cesium.SingleTileImageryProvider.fromUrl(dataUrl, {
-          rectangle: rect,
-          tileWidth: img.naturalWidth || img.width,
-          tileHeight: img.naturalHeight || img.height
-        });
-      })
-      .then(function (prov) {
-        shadeLayer = viewer.imageryLayers.addImageryProvider(prov, 0);
+        shadeLayer = viewer.imageryLayers.addImageryProvider(new ShadeTile(img, bbox), 0);
         shadeLayer.show = true;
         viewer.scene.requestRender();
         return true;
@@ -1044,40 +1063,33 @@
     var vectorsOn = layers.indexOf("vectors") >= 0 || layers.indexOf("shade") >= 0;
     var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
     var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
-    Promise.resolve()
-      .then(function () { return loadDem(spec.demUrl); })
-      .then(function () { return loadShade(shadeUrl, spec.bbox); })
+    clearCoins();
+    drawPackBox(spec);
+    drawPuck(spec);
+    drawCoins(spec);
+    drawRoute(spec);
+    applyPalette(spec);
+    cameraFor(spec);
+    viewer.scene.requestRender();
+    post({ type: "pulse" });
+    loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
+    loadShade(shadeUrl, spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })
-      .then(function () { return loadAerial(spec.aerialUrl, aerialOn); })
-      .then(function () {
-        return loadGeo(
-          waterOn ? spec.waterUrl : "",
-          Cesium.Color.fromCssColorString("#3FA7C9"),
-          2,
-          waterSource,
-          "water"
-        ).then(function (ds) { waterSource = ds; });
-      })
-      .then(function () {
-        return loadGeo(
-          vectorsOn ? spec.contoursUrl : "",
-          Cesium.Color.fromCssColorString("#B8BDC2"),
-          1.25,
-          contourSource,
-          "contours"
-        ).then(function (ds) { contourSource = ds; });
-      })
-      .then(function () {
-        clearCoins();
-        drawPackBox(spec);
-        drawPuck(spec);
-        drawCoins(spec);
-        drawRoute(spec);
-        applyPalette(spec);
-        cameraFor(spec);
-        viewer.scene.requestRender();
-        post({ type: "pulse" });
-      });
+      .then(function () { return loadAerial(spec.aerialUrl, aerialOn); });
+    loadGeo(
+      waterOn ? spec.waterUrl : "",
+      Cesium.Color.fromCssColorString("#3FA7C9"),
+      2,
+      waterSource,
+      "water"
+    ).then(function (ds) { waterSource = ds; });
+    loadGeo(
+      vectorsOn ? spec.contoursUrl : "",
+      Cesium.Color.fromCssColorString("#B8BDC2"),
+      1.25,
+      contourSource,
+      "contours"
+    ).then(function (ds) { contourSource = ds; });
   }
 
   function boot() {

@@ -106,7 +106,6 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn("return fetch(url)", desk)
         self.assertIn("hillshade.png", desk)
         self.assertIn("osm.pmtiles", desk)
-        self.assertIn("SingleTileImageryProvider", desk)
         self.assertIn("tileLoadProgressEvent", desk)
         self.assertNotIn("#141414", desk)
         self.assertIn("../Packs/", globe)
@@ -114,6 +113,17 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("osm.pmtiles", globe)
         self.assertIn("hillshade.png", tab)
         self.assertIn("osm.pmtiles", tab)
+
+    def test_globe_paints_puck_before_pack_files(self):
+        """128: black AND no puck. apply() waited on hillshade/OSM/NAIP first."""
+        desk = read("Resources", "Globe", "desk.js")
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        self.assertIn("drawPuck(spec)", apply)
+        self.assertIn("cameraFor(spec)", apply)
+        self.assertLess(apply.find("drawPuck(spec)"), apply.find("loadShade"))
+        self.assertLess(apply.find("cameraFor(spec)"), apply.find("loadOsm"))
+        self.assertLess(apply.find("requestRender()"), apply.find("loadAerial"))
+        self.assertIn("req.timeout", desk)
 
     def test_tx_west_naip_misses_the_device_puck(self):
         aerial = (ROOT / "Resources" / "Packs" / "tx-west" / "aerial.pmtiles").read_bytes()[:127]
