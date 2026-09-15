@@ -63,6 +63,7 @@ struct GlobeView: UIViewRepresentable {
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        config.setURLSchemeHandler(PackFileSchemeHandler(), forURLScheme: "packfile")
         let controller = config.userContentController
         controller.add(context.coordinator, name: "khan")
         let view = WKWebView(frame: .zero, configuration: config)
@@ -138,7 +139,7 @@ struct GlobeView: UIViewRepresentable {
                 decisionHandler(.cancel)
                 return
             }
-            if url.isFileURL || url.scheme == "about" || url.scheme == "blob" {
+            if url.isFileURL || url.scheme == "about" || url.scheme == "blob" || url.scheme == "packfile" {
                 decisionHandler(.allow)
                 return
             }
@@ -301,13 +302,91 @@ private extension GlobeView {
         return obj
     }
 
-    /// Globe/index.html lives next to Packs/. Relative file URLs stay inside
-    /// WKWebView's allowingReadAccessTo tree; absolute file:// fetch() does not.
+    /// Globe/index.html stays file://. Pack archives are packfile://blackout/<pack>/<file>
+    /// so the desk can read offset/length slices instead of the whole pmtiles into JS.
     func packWebPath(_ url: URL?) -> String? {
         guard let url else { return nil }
         let marker = "/Packs/\(packID)/"
         let path = url.path
         guard let range = path.range(of: marker) else { return url.absoluteString }
-        return "../Packs/\(packID)/\(path[range.upperBound...])"
+        return "packfile://blackout/\(packID)/\(path[range.upperBound...])"
+    }
+}
+
+/// Serves bundled Packs/ bytes to the Cesium desk. PMTiles must pass offset and length.
+final class PackFileSchemeHandler: NSObject, WKURLSchemeHandler {
+    private let maxSlice = 1_500_000
+
+    func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
+        do {
+            let data = try packBytes(for: urlSchemeTask.request)
+            guard let url = urlSchemeTask.request.url else { throw URLError(.badURL) }
+            let mime: String
+            switch url.pathExtension {
+            case "png":
+                mime = "image/png"
+            case "json":
+                mime = "application/json"
+            case "geojson":
+                mime = "application/geo+json"
+            default:
+                mime = "application/octet-stream"
+            }
+            guard let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: [
+                    "Content-Type": mime,
+                    "Content-Length": "\(data.count)",
+                    "Cache-Control": "no-store",
+                    "Access-Control-Allow-Origin": "*"
+                ]
+            ) else { throw URLError(.cannotParseResponse) }
+            urlSchemeTask.didReceive(response)
+            urlSchemeTask.didReceive(data)
+            urlSchemeTask.didFinish()
+        } catch {
+            urlSchemeTask.didFailWithError(error)
+        }
+    }
+
+    func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
+
+    private func packBytes(for request: URLRequest) throws -> Data {
+        guard let url = request.url else { throw URLError(.badURL) }
+        let parts = url.path.split(separator: "/").map(String.init)
+        guard parts.count == 2 else { throw URLError(.fileDoesNotExist) }
+        let packId = parts[0]
+        let name = parts[1]
+        guard packId.range(of: "^[a-z0-9-]+$", options: .regularExpression) != nil,
+              name.range(of: "^[A-Za-z0-9._-]+$", options: .regularExpression) != nil
+        else { throw URLError(.fileDoesNotExist) }
+        let root = AppRuntime.resourceRoot() ?? Bundle.main.resourceURL
+        guard let root else { throw URLError(.fileDoesNotExist) }
+        let file = root.appendingPathComponent("Packs/\(packId)/\(name)")
+        guard FileManager.default.fileExists(atPath: file.path) else {
+            throw URLError(.fileDoesNotExist)
+        }
+        let comps = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        let offset = comps?.queryItems?.first(where: { $0.name == "offset" }).flatMap { Int($0.value ?? "") }
+        let length = comps?.queryItems?.first(where: { $0.name == "length" }).flatMap { Int($0.value ?? "") }
+        if file.pathExtension == "pmtiles" {
+            guard let offset, let length, offset >= 0, length > 0 else {
+                throw URLError(.dataNotAllowed)
+            }
+            return try readSlice(file: file, offset: offset, length: min(length, maxSlice))
+        }
+        if let offset, let length, offset >= 0, length > 0 {
+            return try readSlice(file: file, offset: offset, length: min(length, maxSlice))
+        }
+        return try Data(contentsOf: file)
+    }
+
+    private func readSlice(file: URL, offset: Int, length: Int) throws -> Data {
+        let handle = try FileHandle(forReadingFrom: file)
+        defer { try? handle.close() }
+        try handle.seek(toOffset: UInt64(offset))
+        return try handle.read(upToCount: length) ?? Data()
     }
 }

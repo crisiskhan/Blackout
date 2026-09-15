@@ -126,21 +126,25 @@ class CesiumGlobeTests(unittest.TestCase):
         globe = read("Blackout", "GlobeView.swift")
         tab = read("Blackout", "MapTab.swift")
         apply = desk.split("function apply(spec)")[1].split("function boot")[0]
-        paint = desk.split("function paintMvt(")[1].split("function gunzip")[0]
+        paint = desk.split("function paintMvt(")[1].split("function paintKhan")[0]
         puck = desk.split("function upsertPuck")[1].split("function drawCoins")[0]
-        self.assertIn("function paintMvtInk", desk)
+        osm = desk.split("function loadOsm(")[1].split("function loadKhan(")[0]
+        self.assertNotIn("function paintMvtInk", desk)
+        self.assertNotIn("osmInkLayer", desk)
+        self.assertNotIn("raiseToTop", apply)
+        self.assertEqual(osm.count("new PMTilesMVT"), 1)
+        self.assertEqual(osm.count("addImageryProvider"), 1)
         self.assertIn("function paintKhan", desk)
         self.assertIn("layers.land", paint)
         self.assertIn("layers.water", paint)
         self.assertIn("layers.road", paint)
-        self.assertIn("props.name", desk)
+        self.assertIn("props.name", paint)
         self.assertIn("layers.building", desk)
         self.assertIn("layers.furniture", desk)
-        self.assertIn("(level || 0) < 13", desk)
+        self.assertIn("(level || 0) < 13", paint)
         self.assertIn("paint(canvas.getContext(\"2d\"), bytes, 256, level)", desk)
         self.assertIn("loadKhan", apply)
         self.assertLess(apply.find("loadKhan"), apply.find("loadAerial"))
-        self.assertIn("raiseToTop", apply)
         self.assertIn("lastKhan", desk)
         self.assertIn('text: "YOU"', puck)
         self.assertIn("khanUrl", globe)
@@ -150,6 +154,34 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn("best in class", desk.lower())
         self.assertNotIn("Waze", desk)
         self.assertNotIn("Google", tab)
+
+    def test_globe_reads_pack_bytes_by_offset(self):
+        """134 brown void: whole osm+khan+aerial ArrayBuffers jetsam WebContent."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        osm = desk.split("function loadOsm(")[1].split("function loadKhan(")[0]
+        khan = desk.split("function loadKhan(")[1].split("function loadAerial(")[0]
+        aerial = desk.split("function loadAerial(")[1].split("function loadGeo(")[0]
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        self.assertIn("function PackSource", desk)
+        self.assertIn("offset=", desk)
+        self.assertIn("length=", desk)
+        self.assertIn("new PackSource(url)", osm)
+        self.assertIn("new PackSource(url)", khan)
+        self.assertIn("new PackSource(url)", aerial)
+        self.assertNotIn('xhr(url, "arraybuffer")', osm)
+        self.assertNotIn('xhr(url, "arraybuffer")', khan)
+        self.assertNotIn('xhr(url, "arraybuffer")', aerial)
+        self.assertGreater(osm.find("lastOsm = url"), osm.find("addImageryProvider"))
+        self.assertGreater(apply.find("lastGroundKey = groundKey"), apply.find("loadOsm"))
+        self.assertIn("groundBusy", apply)
+        self.assertIn("setURLSchemeHandler", globe)
+        self.assertIn("packfile", globe)
+        self.assertIn("FileHandle", globe)
+        self.assertIn("offset", globe)
+        self.assertIn("length", globe)
+        self.assertIn('scheme == "packfile"', globe)
+        self.assertIn("packfile://blackout/", globe)
 
     def test_globe_paints_puck_before_pack_files(self):
         """128: black AND no puck. apply() waited on hillshade/OSM/NAIP first."""

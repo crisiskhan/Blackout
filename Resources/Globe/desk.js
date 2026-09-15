@@ -13,12 +13,12 @@
   var lastWater = "";
   var lastContours = "";
   var lastGroundKey = "";
+  var groundBusy = false;
   var lastLook = "";
   var lastLiveKey = "";
   var aerialLayer = null;
   var shadeLayer = null;
-  var osmGroundLayer = null;
-  var osmInkLayer = null;
+  var osmLayer = null;
   var khanLayer = null;
   var waterSource = null;
   var contourSource = null;
@@ -127,15 +127,28 @@
     return Cesium.Cartesian3.fromDegrees(lon, lat, h || 0);
   }
 
-  function BufferSource(key, buffer) {
-    this.key = key;
-    this.buffer = buffer;
+  function PackSource(url) {
+    this.url = url;
+    this.whole = null;
   }
-  BufferSource.prototype.getKey = function () {
-    return this.key;
+  PackSource.prototype.getKey = function () {
+    return this.url;
   };
-  BufferSource.prototype.getBytes = function (offset, length) {
-    return Promise.resolve({ data: this.buffer.slice(offset, offset + length) });
+  PackSource.prototype.getBytes = function (offset, length) {
+    var self = this;
+    if (self.whole) {
+      return Promise.resolve({ data: self.whole.slice(offset, offset + length) });
+    }
+    var sep = self.url.indexOf("?") >= 0 ? "&" : "?";
+    var piece = self.url + sep + "offset=" + offset + "&length=" + length;
+    return xhr(piece, "arraybuffer").then(function (buf) {
+      if (!buf || buf.byteLength === 0) return Promise.reject(new Error("NO PACK"));
+      if (buf.byteLength > length) {
+        self.whole = buf;
+        return { data: buf.slice(offset, offset + length) };
+      }
+      return { data: buf };
+    });
   };
 
   function Pb(bytes) {
@@ -391,12 +404,15 @@
     return hw === "service" || hw === "footway" || hw === "path" || hw === "cycleway" || hw === "steps" || hw === "bridleway";
   }
 
-  function paintMvt(ctx, bytes, size) {
+  function paintMvt(ctx, bytes, size, level) {
     var layers = decodeMvt(bytes, size);
     var land = layers.land || [];
     var water = layers.water || [];
     var building = layers.building || [];
+    var road = layers.road || [];
+    var place = layers.place || [];
     var i;
+    var seen = {};
     for (i = 0; i < land.length; i++) {
       if (land[i].type !== 3) continue;
       ctx.fillStyle = landFill(land[i].props.class);
@@ -411,14 +427,6 @@
       ctx.fillStyle = houseFill(building[i].props.kind || building[i].props.building);
       fillRings(ctx, building[i].rings);
     }
-  }
-
-  function paintMvtInk(ctx, bytes, size, level) {
-    var layers = decodeMvt(bytes, size);
-    var road = layers.road || [];
-    var place = layers.place || [];
-    var i;
-    var seen = {};
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     ctx.strokeStyle = "rgba(248, 244, 232, 0.96)";
@@ -738,38 +746,29 @@
   }
 
   function loadOsm(url, on) {
-    if (osmGroundLayer && url === lastOsm) {
-      osmGroundLayer.show = !!on;
-      if (osmInkLayer) osmInkLayer.show = !!on;
+    if (osmLayer && url === lastOsm) {
+      osmLayer.show = !!on;
       viewer.scene.requestRender();
       return Promise.resolve(true);
     }
     if (!on || !url) {
-      if (osmGroundLayer) osmGroundLayer.show = false;
-      if (osmInkLayer) osmInkLayer.show = false;
+      if (osmLayer) osmLayer.show = false;
       if (!url) {
         lastOsm = "";
-        dropLayer(osmGroundLayer);
-        dropLayer(osmInkLayer);
-        osmGroundLayer = null;
-        osmInkLayer = null;
+        dropLayer(osmLayer);
+        osmLayer = null;
       }
       return Promise.resolve(false);
     }
-    if (url === lastOsm && !osmGroundLayer) return Promise.resolve(false);
-    dropLayer(osmGroundLayer);
-    dropLayer(osmInkLayer);
-    osmGroundLayer = null;
-    osmInkLayer = null;
-    lastOsm = url;
-    return xhr(url, "arraybuffer")
-      .then(function (buf) {
-        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+    dropLayer(osmLayer);
+    osmLayer = null;
+    return Promise.resolve()
+      .then(function () {
+        var pm = new pmtiles.PMTiles(new PackSource(url));
         return pm.getHeader().then(function (header) {
-          osmGroundLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintMvt));
-          osmInkLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintMvtInk));
-          osmGroundLayer.show = true;
-          osmInkLayer.show = true;
+          osmLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintMvt));
+          osmLayer.show = true;
+          lastOsm = url;
           viewer.scene.requestRender();
           return true;
         });
@@ -794,16 +793,15 @@
       }
       return Promise.resolve(false);
     }
-    if (url === lastKhan && !khanLayer) return Promise.resolve(false);
     dropLayer(khanLayer);
     khanLayer = null;
-    lastKhan = url;
-    return xhr(url, "arraybuffer")
-      .then(function (buf) {
-        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+    return Promise.resolve()
+      .then(function () {
+        var pm = new pmtiles.PMTiles(new PackSource(url));
         return pm.getHeader().then(function (header) {
           khanLayer = viewer.imageryLayers.addImageryProvider(new PMTilesMVT(pm, header, paintKhan));
           khanLayer.show = true;
+          lastKhan = url;
           viewer.scene.requestRender();
           return true;
         });
@@ -830,18 +828,17 @@
       }
       return Promise.resolve(false);
     }
-    if (url === lastAerial && !aerialLayer) return Promise.resolve(false);
     if (aerialLayer) {
       viewer.imageryLayers.remove(aerialLayer, true);
       aerialLayer = null;
     }
-    lastAerial = url;
-    return xhr(url, "arraybuffer")
-      .then(function (buf) {
-        var pm = new pmtiles.PMTiles(new BufferSource(url, buf));
+    return Promise.resolve()
+      .then(function () {
+        var pm = new pmtiles.PMTiles(new PackSource(url));
         return pm.getHeader().then(function (header) {
           aerialLayer = viewer.imageryLayers.addImageryProvider(new PMTilesImagery(pm, header));
           aerialLayer.show = true;
+          lastAerial = url;
           viewer.scene.requestRender();
           return true;
         });
@@ -1115,8 +1112,7 @@
     globe.showGroundAtmosphere = false;
     globe.enableLighting = spec.lamp === "sun";
     paintLayer(shadeLayer, spec);
-    paintLayer(osmGroundLayer, spec);
-    paintLayer(osmInkLayer, spec);
+    paintLayer(osmLayer, spec);
     paintLayer(khanLayer, spec);
     paintLayer(aerialLayer, spec);
     if (spec.palette === "nvg") {
@@ -1302,15 +1298,24 @@
         : ""
     ].join("|");
     if (groundKey === lastGroundKey) return;
-    lastGroundKey = groundKey;
+    if (groundBusy) return;
+    groundBusy = true;
     loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
     loadShade(shadeUrl, spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })
-      .then(function () { return loadKhan(khanUrl, streetsOn); })
+      .then(function (osmOk) {
+        if (streetsOn && !osmOk) return Promise.reject(new Error("NO PACK"));
+        viewer.scene.requestRender();
+        return loadKhan(khanUrl, streetsOn);
+      })
       .then(function () { return loadAerial(spec.aerialUrl, aerialOn); })
       .then(function () {
-        if (osmInkLayer) viewer.imageryLayers.raiseToTop(osmInkLayer);
+        groundBusy = false;
+        lastGroundKey = groundKey;
         viewer.scene.requestRender();
+      })
+      .catch(function () {
+        groundBusy = false;
       });
     loadGeo(
       waterOn ? spec.waterUrl : "",
