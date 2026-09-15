@@ -249,6 +249,26 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("trackedEntity", lock)
         self.assertNotIn("setView", lock)
 
+    def test_globe_does_not_flash_on_live_heading_ticks(self):
+        """136 stills: packed photo, then brown void with no YOU, then photo again."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        tab = read("Blackout", "MapTab.swift")
+        root = read("Blackout", "RootChrome.swift")
+        camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        canvas = tab.split("private func canvas")[1].split("private var coverUp")[0]
+        hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
+        tab_chrome = root.split("private var tabChrome")[1].split("overlayBottomPad")[0]
+        self.assertIn("lastCam", desk)
+        self.assertLess(camera.find("lastCam"), camera.find("trackedEntity"))
+        self.assertLess(camera.find("lastCam"), camera.find("flyToBoundingSphere"))
+        self.assertNotIn('type: "pulse"', apply)
+        self.assertIn("Int(", globe.split("if let youHeading")[1].split("puck[\"emblem\"]")[0])
+        self.assertIn("transaction { $0.animation = nil }", canvas)
+        self.assertNotIn("chromeAwake", canvas)
+        self.assertNotIn("chromeAwake", tab_chrome)
+        self.assertIn("chromeAwake", hud)
     def test_globe_looks_at_oleaster_not_the_pack_horizon(self):
         """135 stills: EYE is stretched hillshade; LOCKED is a white disk over YOU."""
         desk = read("Resources", "Globe", "desk.js")

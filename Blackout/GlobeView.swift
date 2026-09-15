@@ -234,7 +234,7 @@ private extension GlobeView {
             "show": showYou
         ]
         if let youHeading {
-            puck["heading"] = youHeading
+            puck["heading"] = Int(youHeading.rounded())
         }
         puck["emblem"] = youEmblem
         var obj: [String: Any] = [

@@ -88,8 +88,6 @@ struct RootChrome: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
-        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
         .animation(Theme.Motion.heavy, value: runtime.hudLayoutMode)
     }
 
@@ -201,6 +199,8 @@ struct RootChrome: View {
         ) {
             content()
         }
+        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
+        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
     }
 
     private func tabButton(_ t: BlackoutTab) -> some View {

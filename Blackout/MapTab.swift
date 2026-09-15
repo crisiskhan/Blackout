@@ -122,6 +122,7 @@ struct MapTab: View {
                 khanURL: packFile("khan.pmtiles")
             )
             .ignoresSafeArea()
+            .transaction { $0.animation = nil }
             // The scrim already keeps a thumb off the canvas. This is the
             // same thing for VoiceOver, and only the canvas: the tab bar
             // stays reachable, because Comms is on it.
@@ -193,8 +194,6 @@ struct MapTab: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .layoutPriority(1)
-        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
-        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
         .animation(Theme.Motion.heavy, value: runtime.held)
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
@@ -290,6 +289,8 @@ struct MapTab: View {
         .padding(.horizontal, 10)
         .padding(.top, 8)
         .padding(.bottom, 4)
+        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
+        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
     }
 
     private var searchField: some View {

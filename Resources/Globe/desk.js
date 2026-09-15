@@ -5,6 +5,7 @@
   var pending = null;
   var viewer = null;
   var lastFit = -1;
+  var lastCam = "";
   var lastAerial = "";
   var lastDem = "";
   var lastShade = "";
@@ -1128,11 +1129,18 @@
     }
   }
 
+  function cameraKey(spec) {
+    return [spec.godsEye ? 1 : 0, spec.lockOn ? 1 : 0, spec.followId || "", spec.fitToken].join("|");
+  }
+
   function cameraFor(spec) {
     var puck = spec.puck || spec.home || { lat: 31.76, lon: -106.49 };
     var height = spec.height || 900;
     var pitch = spec.pitch == null ? -90 : spec.pitch;
     var heading = spec.heading == null ? 0 : spec.heading;
+    var key = cameraKey(spec);
+    if (key === lastCam) return;
+    lastCam = key;
     if (spec.godsEye) {
       viewer.trackedEntity = undefined;
       viewer.clock.shouldAnimate = false;
@@ -1267,7 +1275,6 @@
     applyPalette(spec);
     cameraFor(spec);
     viewer.scene.requestRender();
-    post({ type: "pulse" });
     var groundKey = [
       spec.packId || "",
       shadeUrl,
