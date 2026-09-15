@@ -12,3 +12,5 @@ __pycache__/
 *.dSYM.zip
 *.dSYM
 style.resolved.json
+*.gguf
+Resources/Packs/*/khan.geojson

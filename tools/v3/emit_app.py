@@ -84,8 +84,7 @@ final class AppRuntime {
     var roster = PartyRoster.create(lead: "Lead")
     var trip = TripBrief.make(brief: "", hours: 2)
     var kit = KitBag(items: [
-        GearItem(id: "water", name: "Water filter", working: true, failureHazard: "no drinkable water"),
-        GearItem(id: "headlamp", name: "Headlamp", working: true, failureHazard: "no night march"),
+        GearItem(id: "water", name: "Water", working: true, count: 0),
     ])
     var power: BatteryAuction
     var night = NightRedState(enabled: false)
@@ -189,7 +188,7 @@ struct RootChrome: View {
                 contextualSOS
             }
             if runtime.night.enabled {
-                Color(red: 0.55, green: 0.05, blue: 0.05).opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
+                Color(red: 1, green: 0.07, blue: 0.02).colorMultiply(Color.white)
             }
         }
         .preferredColorScheme(.dark)
@@ -441,8 +440,9 @@ struct MapTab: View {
                 Button("INSTRUMENTS") { runtime.showInstruments = true }
                 Button(runtime.lockOn ? "LOCKED" : "LOCK-ON") { runtime.lockOn.toggle() }
             }
-            TextField("Search FTS / semantic", text: $query)
+            TextField("SEARCH", text: $query)
                 .textFieldStyle(.roundedBorder)
+                .onChange(of: query) { _, _ in search() }
                 .onSubmit { search() }
             if let pack = runtime.packs?.active {
                 Text("\\(pack.name) · \\(pack.bytes / 1024) KB · \\(pack.state)")
@@ -469,22 +469,13 @@ struct MapTab: View {
     }
 
     private func search() {
-        let idx = SearchIndex(pois: [["name": query, "kind": "place", "lat": 0.0, "lon": 0.0]])
-        if let pack = runtime.packs?.packURL("pois.geojson"),
-           let data = try? Data(contentsOf: pack),
-           let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let feats = obj["features"] as? [[String: Any]] {
-            let pois: [[String: Any]] = feats.compactMap { f in
-                guard let props = f["properties"] as? [String: Any],
-                      let geom = f["geometry"] as? [String: Any],
-                      let coords = geom["coordinates"] as? [Double], coords.count >= 2 else { return nil }
-                return ["name": props["name"] as? String ?? props["amenity"] as? String ?? "poi", "kind": props["amenity"] as? String ?? props["natural"] as? String ?? "poi", "lat": coords[1], "lon": coords[0]]
-            }
-            hits = SearchIndex(pois: pois).fts(query)
-            if hits.isEmpty { hits = SearchIndex(pois: pois).semantic(query) }
-        } else {
-            hits = idx.fts(query)
+        guard SearchIndex.asking(query) else { hits = []; return }
+        let url = runtime.packs?.packURL("search.json") ?? runtime.packs?.packURL("pois.geojson")
+        guard let url, let data = try? Data(contentsOf: url) else {
+            hits = []
+            return
         }
+        hits = SearchIndex.load(data: data).lookup(query, cap: 5)
     }
 }
 ''',
@@ -662,7 +653,7 @@ struct InstrumentsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Button("Torch 3×") { runtime.instruments.torchTap() }
+                Button("SOS FLASHLIGHT") { runtime.tapSOSFlashlight() }
                 Button("Compass cal") { runtime.instruments.calibrateCompass() }
                 Button("True north") { runtime.instruments.setTrueNorth() }
                 Toggle("USB-C PTT present", isOn: Binding(get: { runtime.instruments.state.usbCPTT }, set: { runtime.instruments.attachUSB_C_PTT($0) }))

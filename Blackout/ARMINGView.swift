@@ -1,116 +1,59 @@
 import SwiftUI
 import UIKit
-import MapLibreMap
 import Tokens
 
-/// Cold launch. Not a menu. The world comes up under the mark, then ACTIVATE.
+/// Cold launch. Not a menu. The poster covers the page, then ACTIVATE.
 struct ARMINGView: View {
     @Bindable var runtime: AppRuntime
-    @State private var markIn = false
-    @State private var worldIn = false
+    @State private var chromeIn = false
     private let readyTick = UINotificationFeedbackGenerator()
     private let goTick = UIImpactFeedbackGenerator(style: .rigid)
 
     var body: some View {
         ZStack {
             Theme.void.ignoresSafeArea()
-            world
-            vignette
-            chrome
+            field
+            chrome.ignoresSafeArea()
         }
         .onAppear {
             runtime.bootVessel()
-            withAnimation(.easeOut(duration: 0.9)) { markIn = true }
-            if runtime.bootStyleURL != nil {
-                withAnimation(.easeIn(duration: 1.15)) { worldIn = true }
-            }
+            withAnimation(Theme.Motion.heavy) { chromeIn = true }
             if runtime.bootReady { readyTick.notificationOccurred(.success) }
-        }
-        .onChange(of: runtime.bootStyleURL) { _, url in
-            if url != nil {
-                withAnimation(.easeIn(duration: 1.15)) { worldIn = true }
-            }
         }
         .onChange(of: runtime.bootReady) { _, ready in
             if ready { readyTick.notificationOccurred(.success) }
         }
     }
 
-    /// The active pack, quiet, no GPS, no chrome. Streets are the load.
-    @ViewBuilder
-    private var world: some View {
-        if let style = runtime.bootStyleURL, let pack = runtime.packs?.active {
-            let home = pack.home ?? pack.center
-            OfflineMapView(
-                styleURL: style,
-                centerLat: home.lat,
-                centerLon: home.lon,
-                puckLat: home.lat,
-                puckLon: home.lon,
-                packSouth: pack.bbox.south,
-                packWest: pack.bbox.west,
-                packNorth: pack.bbox.north,
-                packEast: pack.bbox.east,
-                trackUser: false
-            )
-            .allowsHitTesting(false)
+    private var field: some View {
+        Image("BootField")
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
-            .opacity(worldIn ? 0.55 : 0)
-        }
-    }
-
-    private var vignette: some View {
-        RadialGradient(
-            colors: [
-                Theme.void.opacity(0.18),
-                Theme.void.opacity(0.72),
-                Theme.void.opacity(0.94),
-            ],
-            center: .center,
-            startRadius: 20,
-            endRadius: 420
-        )
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+            .allowsHitTesting(false)
+            .accessibilityLabel("Blackout")
     }
 
     private var chrome: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            mark
-            Spacer()
-            status
-            activate
+        ZStack(alignment: .center) {
+            VStack(spacing: 0) {
+                Spacer()
+                status
+                activate
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 36)
         }
-        .padding(.horizontal, 28)
-        .padding(.bottom, 36)
-    }
-
-    private var mark: some View {
-        TimelineView(.animation(minimumInterval: 0.08, paused: runtime.bootReady)) { context in
-            let pulse = runtime.bootReady
-                ? 1.0
-                : (sin(context.date.timeIntervalSinceReferenceDate * 2.2) * 0.5 + 0.5)
-            Image("Logo")
-                .resizable()
-                .scaledToFit()
-                .frame(
-                    width: BlackoutTokens.Chrome.bootLogoPoints,
-                    // Poster is 1152×1712. Keep the wordmark; do not letterbox a square.
-                    height: BlackoutTokens.Chrome.bootLogoPoints * (1712.0 / 1152.0)
-                )
-                .shadow(color: Theme.accent.opacity(0.25 + 0.45 * pulse), radius: 18 + 14 * pulse)
-                .scaleEffect(markIn ? 1 : 0.86)
-                .opacity(markIn ? 1 : 0)
-                .accessibilityLabel("Blackout")
-        }
+        .opacity(chromeIn ? 1 : 0)
     }
 
     private var status: some View {
         VStack(spacing: 10) {
             Text(runtime.bootStage.line)
                 .font(.system(size: 11, weight: .heavy))
-                .foregroundStyle(runtime.bootReady ? Theme.silver : Color(white: 0.55))
+                .tracking(1.6)
+                .foregroundStyle(runtime.bootReady ? Theme.silver : Theme.silver.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: 16)
@@ -135,20 +78,32 @@ struct ARMINGView: View {
         }
         .font(.system(size: 16, weight: .heavy))
         .tracking(4)
-        .foregroundStyle(runtime.bootReady ? Color.white : Color(white: 0.45))
+        .foregroundStyle(runtime.bootReady ? Color.white : Theme.silver.opacity(0.45))
         .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.bootActivateHeight)
-        .background(runtime.bootReady ? Theme.accent : Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(
-                    runtime.bootReady ? Theme.accent : Theme.silver.opacity(0.28),
-                    lineWidth: 1
-                )
-        )
+        .background {
+            if runtime.bootReady {
+                Theme.accent
+            } else {
+                Theme.glass()
+            }
+        }
+        .clipShape(Theme.plateRect())
+        .overlay {
+            if runtime.bootReady {
+                Theme.plateRect()
+                    .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1))
+            } else {
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+            }
+        }
         .opacity(runtime.bootReady ? 1 : 0.55)
+        .shadow(
+            color: Theme.accent.opacity(runtime.bootReady ? 0.42 : 0),
+            radius: runtime.bootReady ? 14 : 0
+        )
         .allowsHitTesting(runtime.bootReady)
         .accessibilityHint("Loads the vessel and opens the map")
-        .animation(.easeOut(duration: 0.25), value: runtime.bootReady)
+        .animation(Theme.Motion.wake, value: runtime.bootReady)
     }
 }

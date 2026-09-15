@@ -23,7 +23,7 @@ Layout, all little-endian, every array 4-byte aligned:
         4(n+1) uint32 rowStart[nodeCount+1] CSR row starts
         4L  uint32  target[linkCount]
         4L  uint32  millimetres[linkCount]
-        1L  uint8   mode[linkCount]         bit0 walk, bit1 drive
+        1L  uint8   mode[linkCount]         bit0 walk, bit1 drive, bits 2-5 class
 
 Mirrored by GraphBinary in Packages/Router. Change one, change both.
 """
@@ -40,6 +40,12 @@ HEADER = struct.Struct("<8sIIII")
 
 WALK_BIT = 1
 DRIVE_BIT = 2
+# Bits 2-5 of the mode byte are the road class (0 unknown, 1 motorway … 7 local).
+# Old packs leave them zero, so drive still costs metres. Classed packs cost time.
+CLASS_SHIFT = 2
+CLASS_MASK = 0x0F
+# Packed JSON flags keep walk/drive in bits 0-3 and the same class in bits 4-7.
+FLAG_CLASS_SHIFT = 4
 
 COORD_SCALE = 10_000_000  # e7: ~1.1 cm, finer than the 5 dp the packs carry.
 METRE_SCALE = 1_000  # millimetres.
@@ -83,11 +89,12 @@ def csr_from_segments(node_count: int, segments: dict) -> dict:
         mm = int(round(metres * METRE_SCALE))
         if mm <= 0 or mm > 0xFFFFFFFF:
             raise SystemExit(f"segment {a}->{b} is {metres} m, which will not fit the wire")
-        forward = (WALK_BIT if flags & SEG_WALK_FORWARD else 0) | (DRIVE_BIT if flags & SEG_DRIVE_FORWARD else 0)
-        backward = (WALK_BIT if flags & SEG_WALK_BACK else 0) | (DRIVE_BIT if flags & SEG_DRIVE_BACK else 0)
-        if forward:
+        cls = ((flags >> FLAG_CLASS_SHIFT) & CLASS_MASK) << CLASS_SHIFT
+        forward = (WALK_BIT if flags & SEG_WALK_FORWARD else 0) | (DRIVE_BIT if flags & SEG_DRIVE_FORWARD else 0) | cls
+        backward = (WALK_BIT if flags & SEG_WALK_BACK else 0) | (DRIVE_BIT if flags & SEG_DRIVE_BACK else 0) | cls
+        if forward & (WALK_BIT | DRIVE_BIT):
             rows[a].append((b, mm, forward))
-        if backward:
+        if backward & (WALK_BIT | DRIVE_BIT):
             rows[b].append((a, mm, backward))
 
     row_start = [0] * (node_count + 1)
@@ -178,5 +185,6 @@ def edges(graph: dict) -> list[dict]:
                 "m": graph["metres"][i],
                 "walk": bool(bits & WALK_BIT),
                 "drive": bool(bits & DRIVE_BIT),
+                "cls": (bits >> CLASS_SHIFT) & CLASS_MASK,
             })
     return out

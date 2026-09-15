@@ -90,20 +90,37 @@ public final class LiveMeshRadio: NSObject, MeshRadio {
         guard let data = try? JSONEncoder().encode(env) else { return }
         var sent = false
         #if canImport(MultipeerConnectivity)
-        if let session, !session.connectedPeers.isEmpty {
-            try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
-            sent = true
+        if let session {
+            let peers: [MCPeerID]
+            if env.to == "*" {
+                peers = session.connectedPeers
+            } else {
+                peers = session.connectedPeers.filter { $0.displayName == env.to }
+            }
+            if !peers.isEmpty {
+                try? session.send(data, toPeers: peers, with: .reliable)
+                sent = true
+            }
         }
         #endif
         #if canImport(CoreBluetooth)
         let frames = BLEEnvelopeCodec.chunk(data)
-        if let char = envelopeChar, let peripheralMgr, !subscribedCentrals.isEmpty {
-            for frame in frames {
-                _ = peripheralMgr.updateValue(frame, for: char, onSubscribedCentrals: subscribedCentrals)
+        if let char = envelopeChar, let peripheralMgr {
+            let dests: [CBCentral]
+            if env.to == "*" {
+                dests = subscribedCentrals
+            } else {
+                dests = subscribedCentrals.filter { $0.identifier.uuidString == env.to }
             }
-            sent = true
+            if !dests.isEmpty {
+                for frame in frames {
+                    _ = peripheralMgr.updateValue(frame, for: char, onSubscribedCentrals: dests)
+                }
+                sent = true
+            }
         }
         for (id, p) in remotes {
+            if env.to != "*" && id.uuidString != env.to { continue }
             guard let ch = remoteChars[id] else { continue }
             let w: CBCharacteristicWriteType = ch.properties.contains(.writeWithoutResponse)
                 ? .withoutResponse

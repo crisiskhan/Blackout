@@ -3,7 +3,7 @@ import Foundation
 enum L10n {
     static let table: [String: [String: String]] = [
         "sos.call": ["en": "CALL SOS", "es": "LLAMAR SOS"],
-        "sos.offer": ["en": "Offers iPhone Emergency SOS. Does not replace 911. Also lights the mesh.", "es": "Ofrece Emergency SOS del iPhone. No reemplaza al 911. También enciende la malla."],
+        "sos.hold": ["en": "Hold to light the mesh", "es": "Mantén para encender la malla"],
         "sos.mesh": ["en": "SOS · MESH", "es": "SOS · MALLA"],
         "red.plate": ["en": "RED", "es": "ROJO"],
         "red.cancel": ["en": "CANCEL RED", "es": "CANCELAR ROJO"],
@@ -15,8 +15,8 @@ enum L10n {
         "chip.wait": ["en": "WAIT", "es": "ESPERA"],
         "chip.water": ["en": "WATER", "es": "AGUA"],
         "net.none": ["en": "NET · NONE", "es": "RED · NINGUNA"],
-        "net.physics": ["en": "Airplane: no sockets. Mesh is Bluetooth tens of meters (MPC+BLE). LoRa never required. NET · NONE is local writes only.", "es": "Avión: sin sockets. Mesh es Bluetooth a decenas de metros (MPC+BLE). LoRa nunca es obligatorio. RED · NINGUNA es solo escritura local."],
         "vision.none": ["en": "NO VISION MODEL", "es": "SIN MODELO DE VISIÓN"],
+        "vision.leave": ["en": "LEAVE IT", "es": "DÉJALO"],
         "chip.rally": ["en": "RALLY", "es": "REUNIR"],
         "chip.down": ["en": "DOWN", "es": "CAÍDO"],
         "scan.qr": ["en": "SCAN QR", "es": "ESCANEAR QR"],

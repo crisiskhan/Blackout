@@ -164,6 +164,16 @@ def test_altool_binds_primary_app() -> None:
         fail("altool must keep API key auth")
     if "com.crisiskhan.blackout.maplibre" in step or "com.maplibre.mapbox" in step:
         fail("do not invent an ASC app / apple-id for MapLibre")
+    # 34846431330: altool exit 0 after UPLOAD FAILED (HTTP 429 part 28),
+    # then assign waited 25 min for a build that was never ingested.
+    if "UPLOAD FAILED" not in step:
+        fail("34846431330: fail closed when altool log says UPLOAD FAILED")
+    if "UPLOAD SUCCEEDED" not in step:
+        fail("34846431330: require UPLOAD SUCCEEDED before claiming Uploaded")
+    if "RETRY altool 429" not in step:
+        fail("34846431330: backoff and retry altool HTTP 429")
+    if "too many requests" not in step.lower() and "HTTP status code: 429" not in step:
+        fail("34846431330: detect altool 429 from the log, not only exit code")
     assign = text.split("Assign existing Internal", 1)
     if len(assign) < 2:
         fail("Assign existing Internal group step missing")
@@ -418,6 +428,8 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
         fail("tf_ipa_inspect.py must name com.maplibre.mapbox so the −19000 stays documented")
     if "strip_framework_identifier" in helper:
         fail("33931992681: do not strip FMWK BID to empty — Apple rejects ''")
+    if "org.ggml.llama" not in helper:
+        fail("tf_ipa_inspect.py must keep vendor llama.framework BID org.ggml.llama")
     if "validate_framework_identifier" not in helper:
         fail("tf_ipa_inspect.py must require nested FMWK CFBundleIdentifier=com.maplibre.mapbox")
     if "flatten_reserved_resources" not in helper:
@@ -560,6 +572,10 @@ def test_asc_reuse_not_delete_create() -> None:
         fail("re-sign widget must pass --identifier com.crisiskhan.blackout.widgets")
     if "--identifier com.maplibre.mapbox" not in archive:
         fail("re-sign MapLibre must pass --identifier com.maplibre.mapbox")
+    if "llama.framework" not in archive:
+        fail("re-sign must name llama.framework so it is not sealed as MapLibre")
+    if "--identifier org.ggml.llama" not in archive:
+        fail("re-sign llama must pass --identifier org.ggml.llama")
     if "check-identifier" not in archive:
         fail("tf-archive.sh must require codesign Identifier to match CFBundleIdentifier")
     if "codesign --verify --deep --strict" not in archive:
@@ -594,6 +610,23 @@ def test_no_reserved_resources_in_ios_app_copy() -> None:
     ok("iOS app copy flattens Packs/Field into the .app root (no reserved Resources)")
 
 
+def test_swift_tests_surface_xcodebuild_exit() -> None:
+    """GitHub collapses ::group:: bodies. A package that aborts after
+    Executed N tests, with 0 failures still returns 65, and grepping only
+    error:|Testing failed|XCTAssert hides TEST FAILED / TEST INTERRUPTED.
+    """
+    text = COMPILE_YML.read_text()
+    if "$pkg exit=" not in text:
+        fail("swift-tests must print each package xcodebuild exit")
+    if "TEST FAILED" not in text:
+        fail("swift-tests must grep TEST FAILED — XCTAssert-only grep misses runner abort")
+    if "TEST INTERRUPTED" not in text:
+        fail("swift-tests must grep TEST INTERRUPTED")
+    if "exceeded execution" not in text:
+        fail("swift-tests must grep exceeded execution")
+    ok("swift-tests prints pkg exit and TEST FAILED/INTERRUPTED")
+
+
 def test_crisis_opt_locks() -> None:
     if (ROOT / "tools/strip-app-before-codesign.sh").is_file():
         fail("strip-app-before-codesign.sh must stay deleted")
@@ -621,6 +654,7 @@ def main() -> None:
     test_maplibre_single_embed_via_maplibremap()
     test_no_reserved_resources_in_ios_app_copy()
     test_asc_reuse_not_delete_create()
+    test_swift_tests_surface_xcodebuild_exit()
     test_crisis_opt_locks()
 
 

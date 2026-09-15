@@ -174,8 +174,8 @@
         }
       ],
       "get_to_care": {
-        "en": "This card lists how to use the pack POIs. It does not replace 911 or a Border Patrol roadblock decision.",
-        "es": "Esta tarjeta dice cómo usar los POI del pack. No reemplaza al 911."
+        "en": "Use the pack POIs for the next water and road.",
+        "es": "Esta tarjeta dice cómo usar los POI del pack."
       },
       "speak": true,
       "sendToParty": true,
@@ -213,8 +213,8 @@
         "es": "Cascabel de Nuevo México"
       },
       "situation": {
-        "en": "Prairie or western diamondback on rock or arroyo shade. Do not pin it with a stick.",
-        "es": "Cascabel de pradera o del oeste en roca o sombra de arroyo. No la claves con un palo."
+        "en": "New Mexico brush, desert, or open reserve. Prairie rattler or western diamondback country. Do not pin it with a stick.",
+        "es": "Matorral, desierto o reserva abierta de Nuevo México. Cascabel de pradera o del oeste. No la claves con un palo."
       },
       "stop_if": [
         {
@@ -235,8 +235,8 @@
       "steps": [
         {
           "do": {
-            "en": "Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
-            "es": "Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora."
+            "en": "Prairie rattler or diamondback. Back away the way you came. Do not kill or bag the snake. If bitten: sit, still the limb at heart level, walk to a road if you can. Note time. No ice, no cut, no suck, no tourniquet.",
+            "es": "Cascabel de pradera o del oeste. Retrocede por donde viniste. No mates ni embolses la culebra. Si hay mordida: sienta, extremidad quieta al corazón, camina a un camino si puedes. Anota la hora."
           },
           "why": {
             "en": "US pit vipers are not treated with jungle-movie first aid. Time to a hospital is the treatment.",
@@ -267,12 +267,12 @@
         "NM"
       ],
       "title": {
-        "en": "Datura and jumping cholla",
-        "es": "Datura y cholla saltarina"
+        "en": "New Mexico plant danger — do not chew",
+        "es": "Planta peligrosa de Nuevo México — no mastiques"
       },
       "situation": {
-        "en": "Sacred datura trumpet or a cholla that jumped onto a calf. Do not eat the flower. No edible unlock.",
-        "es": "Trompeta de datura o cholla que saltó a una pantorrilla. No comas la flor. Sin desbloqueo comestible."
+        "en": "Sacred datura trumpet. Pretty is not food.",
+        "es": "Trompeta de datura. Lo bonito no es comida."
       },
       "stop_if": [
         {
@@ -285,20 +285,20 @@
         }
       ],
       "get_to_care": {
-        "en": "Datura is a poison, not a medicine card. Cholla: comb it out, do not squeeze with bare hands.",
-        "es": "La datura es veneno, no una tarjeta de medicina. Cholla: peine, no aprietes con la mano desnuda."
+        "en": "Datura is a poison, not a medicine card. Do not make tea. Wash sap off skin and eyes with water.",
+        "es": "La datura es veneno, no una tarjeta de medicina. No hagas té. Lava savia de piel y ojos con agua."
       },
       "speak": true,
       "sendToParty": true,
       "steps": [
         {
           "do": {
-            "en": "Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
-            "es": "No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
+            "en": "Datura. Pretty is not food. Do not taste it to 'check'. Brush off, then water on skin and eyes. Do not make a tea or a poultice. Photograph the plant only if you are already clear of sap.",
+            "es": "Datura. Lo bonito no es comida. No lo pruebes para 'ver'. Sacude, luego agua en piel y ojos. No hagas té ni emplasto."
           },
           "why": {
-            "en": "Eat-from-photo is off. Edible unlock is off. A pretty flower is not a calorie.",
-            "es": "Comer-de-foto está apagado. El desbloqueo comestible está apagado."
+            "en": "A pretty flower is not a calorie.",
+            "es": "Una flor bonita no es una caloría."
           },
           "child": {
             "en": "Child does not carry the pretty seed as a toy.",
@@ -309,6 +309,233 @@
             "es": "Para si vomita o ve halos: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
           },
           "image": "nm-plant-danger.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-tree-use",
+      "category": "plants",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico trees — shade, not a meal",
+        "es": "Árboles de Nuevo México — sombra, no comida"
+      },
+      "situation": {
+        "en": "You are in New Mexico woodland, park, or bosque. Rio Grande cottonwood, juniper, piñon. Aspen is high country. Shade and wind. Piñon is not a Field meal ticket.",
+        "es": "Estás en arbolado, parque o bosque de Nuevo México. Álamo del Río Grande, enebro, piñón. El álamo temblón es de alta montaña. Sombra y viento. El piñón no es un ticket de comida de Field."
+      },
+      "stop_if": [
+        {
+          "en": "You already have shade and known food.",
+          "es": "Ya tienes sombra y comida conocida."
+        },
+        {
+          "en": "Lips, tongue, or skin are already burning — that is a medical card, not a use card.",
+          "es": "Labios, lengua o piel ya arden: eso es médico, no uso."
+        }
+      ],
+      "get_to_care": {
+        "en": "If they chewed seed or sap is in both eyes, this is care now.",
+        "es": "Si masticaron semilla o hay savia en los ojos, esto es cuidado ahora."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Rio Grande cottonwood, juniper, piñon. Juniper and piñon are woodland. Aspen is high country. South-side shade, wind break, deadfall only for fire. Do not strip live bark. Do not chew seeds, pods, or pretty flowers. Wash sap off skin.",
+            "es": "Álamo del Río Grande, enebro, piñón. El enebro y el piñón son de arbolado. El álamo temblón es de alta montaña. Sombra al sur, cortaviento, madera muerta para fuego. No descortezces vivo. No mastiques semillas ni flores."
+          },
+          "why": {
+            "en": "A named tree is calories only after a name you already trust. Shade is the honest use today.",
+            "es": "Un árbol es caloría solo con un nombre que ya confías. Hoy la sombra es el uso honesto."
+          },
+          "child": {
+            "en": "Take the leaf or pod out of a child's hand. No tiny taste.",
+            "es": "Saca la hoja o vaina de la mano del niño. Sin probadita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or a rash starts — sit, watch airway, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o sale sarpullido: sienta, vigila vía aérea, ofrece Emergency SOS si hay red."
+          },
+          "image": "nm-tree-use.png",
+          "party": {
+            "1": "Shade and sit.",
+            "2": "One makes shade, one fetches deadfall.",
+            "4": "Shade / fire / water / watch the rest."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-mammal",
+      "category": "animals",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico mammals — give space",
+        "es": "Mamíferos de Nuevo México — da espacio"
+      },
+      "situation": {
+        "en": "Black bear and mule deer country. Elk is high country. This is range, not a pin. Food storage, not photos.",
+        "es": "País de oso negro y venado bura. El wapití es de alta montaña. Esto es rango, no un pin. Guarda comida, no fotos."
+      },
+      "stop_if": [
+        {
+          "en": "The animal is gone and no one is hurt.",
+          "es": "El animal se fue y nadie está herido."
+        },
+        {
+          "en": "They are bleeding or cannot breathe — that is trauma / airway, then this card is secondary.",
+          "es": "Hay sangrado o no respiran: trauma / vía aérea, esta tarjeta es secundaria."
+        }
+      ],
+      "get_to_care": {
+        "en": "A maul is trauma. Don't run from a black bear. This card does not unlock a hunt.",
+        "es": "Un golpe es trauma. No corras de un oso negro. Esta tarjeta no desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Black bear: do not run, stand large, food sealed and away from camp. Elk is high country. Elk in rut: give way. Mule deer at dusk — give it the road. A maul is trauma. If bitten, the bite card. If you already have meat, the food card. Do not hunt from this map.",
+            "es": "Oso negro: no corras, hazte grande, comida sellada y lejos del campamento. El wapití es de alta montaña. Wapití en celo: cede el paso. Venado bura al anochecer — cede el camino. Un golpe es trauma. Si hay mordida, la tarjeta de mordedura. Si ya tienes carne, la tarjeta de comida. No caces desde este mapa."
+          },
+          "why": {
+            "en": "Range is the Field book of the open pack. A coordinate is not an animal.",
+            "es": "El rango es el libro de Field del paquete abierto. Una coordenada no es un animal."
+          },
+          "child": {
+            "en": "A child stays behind the adult. No chasing for a photo.",
+            "es": "El niño detrás del adulto. Sin perseguir para una foto."
+          },
+          "stop": {
+            "en": "Stop if it charges or if anyone is down — trauma card, then this one.",
+            "es": "Para si embiste o si alguien está en el suelo: tarjeta de trauma, luego esta."
+          },
+          "image": "nm-mammal.png",
+          "party": {
+            "1": "Give space. Sit.",
+            "2": "One watches the animal, one moves the party.",
+            "4": "Watch / move kids / food / rear guard."
+          }
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-cactus",
+      "category": "plants",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "New Mexico cactus and yucca — spines, not a meal",
+        "es": "Cactus y yuca de Nuevo México — espinas, no comida"
+      },
+      "situation": {
+        "en": "Cholla, yucca, sotol. Joints hitchhike on skin. Do not chew the flower.",
+        "es": "Cholla, yuca, sotol. Los segmentos se pegan a la piel. No comas la flor."
+      },
+      "stop_if": [
+        {
+          "en": "Spines are off skin and nobody put a pad in a mouth.",
+          "es": "Las espinas están fuera de la piel y nadie se metió un nopal a la boca."
+        },
+        {
+          "en": "Sap is in both eyes or they chewed it — this is care now.",
+          "es": "Hay savia en los dos ojos o lo masticaron: esto es cuidado ahora."
+        }
+      ],
+      "get_to_care": {
+        "en": "A joint in the skin is comb, not squeeze. Sap in the eye is care.",
+        "es": "Un segmento en la piel se peina, no se aprieta. Savia en el ojo es cuidado."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Cholla, yucca, sotol. Give it room. Comb joints and glochids out with a comb or tape, not fingers. Do not chew pads, fruit, or flower. Wash sap off skin and eyes with water.",
+            "es": "Cholla, yuca, sotol. Da espacio. Peina segmentos y globidios con peine o cinta, no con los dedos. No mastiques nopales, fruto ni flor. Lava savia con agua."
+          },
+          "why": {
+            "en": "Spines are the honest use of this plant today: stay clear. A pad is not a Field meal.",
+            "es": "Hoy las espinas son el uso honesto: apártate. Un nopal no es una comida de Field."
+          },
+          "child": {
+            "en": "A child does not carry a joint or a pretty flower.",
+            "es": "El niño no lleva un segmento ni una flor bonita."
+          },
+          "stop": {
+            "en": "Stop if anyone's mouth tingles or an eye swells — sit, water on the eye, offer Emergency SOS if a net exists.",
+            "es": "Para si hormiguea la boca o hincha un ojo: sienta, agua en el ojo, ofrece Emergency SOS si hay red."
+          },
+          "image": "nm-cactus.png"
+        }
+      ]
+    },
+    {
+      "schema": "1.4",
+      "id": "nm-game",
+      "category": "food",
+      "states": [
+        "NM"
+      ],
+      "title": {
+        "en": "Elk or mule deer you already have",
+        "es": "Wapití o venado bura que ya tienes"
+      },
+      "situation": {
+        "en": "You have elk or mule deer you already took, or someone handed you the meat. This is not a hunting map.",
+        "es": "Tienes wapití o venado bura que ya cazaste, o te pasaron la carne. Esto no es un mapa de caza."
+      },
+      "stop_if": [
+        {
+          "en": "The meat is commercially sealed and undamaged.",
+          "es": "La carne es comercial, sellada e intacta."
+        },
+        {
+          "en": "You did not see it die, it smells like death, or flies have had it — leave it.",
+          "es": "No lo viste morir, huele a muerte o ya lo tuvieron las moscas: déjalo."
+        }
+      ],
+      "get_to_care": {
+        "en": "Gut illness is care if they cannot keep fluids down. This card does not unlock a kill.",
+        "es": "El mal de estómago va a cuidado si no retienen líquidos. Esta tarjeta no desbloquea una caza."
+      },
+      "speak": true,
+      "sendToParty": true,
+      "steps": [
+        {
+          "do": {
+            "en": "Elk or mule deer you already have. If you did not see it die, leave it. If you did: keep it cool, gut away from water and camp, cook until the juice runs clear. No raw. Hands and knives washed after. Do not hunt from this map.",
+            "es": "Wapití o venado bura que ya tienes. Si no lo viste morir, déjalo. Si sí: frío, vísceras lejos del agua y del campamento, cocina hasta que el jugo salga claro. Nada crudo. No caces desde este mapa."
+          },
+          "why": {
+            "en": "Mystery meat is how camps get sick. Heat and distance from the creek are the field rules.",
+            "es": "La carne misteriosa enferma al campamento. Calor y distancia del arroyo son las reglas."
+          },
+          "child": {
+            "en": "Child gets fully cooked food, not the 'almost done' middle, and does not help gut.",
+            "es": "El niño come lo bien cocido, no el centro 'casi', y no ayuda a eviscerar."
+          },
+          "stop": {
+            "en": "Stop if grease fire starts — lid, not water. Stop if the meat smells like death.",
+            "es": "Si prende la grasa: tapa, no agua. Para si huele a muerte."
+          },
+          "image": "nm-game.png",
+          "party": {
+            "1": "Cook through or leave it.",
+            "2": "One guts away from camp, one watches the pot.",
+            "4": "Gut / cook / water / keep animals and kids off the pile."
+          }
         }
       ]
     }

@@ -5,44 +5,82 @@ struct RootChrome: View {
     @Bindable var runtime: AppRuntime
 
     var body: some View {
+        let _ = Theme.bind(runtime.lamp)
         ZStack {
             Theme.void.ignoresSafeArea()
             if !runtime.armed {
                 ARMINGView(runtime: runtime)
+                    .transition(.opacity)
             } else {
-                tabChrome
-                // Map and Comms carry their own I AM OK. Field / Exped get
-                // the corner chip only while SOS or RED is actually lit.
-                if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
-                    IAMOKBar(runtime: runtime)
-                }
-                contextualSOS
-            }
-            if runtime.night.enabled {
-                Color(red: 0.55, green: 0.05, blue: 0.05).opacity(0.28).ignoresSafeArea().allowsHitTesting(false)
+                armedHUD
+                    .transition(.opacity)
             }
         }
-        .tint(Theme.accent)
-        .preferredColorScheme(.dark)
-        .sheet(isPresented: $runtime.showInstruments) {
-            InstrumentsView(runtime: runtime)
+        .environment(runtime.hudKeys)
+        .animation(Theme.Motion.heavy, value: runtime.hudKeys.isOpen)
+        .animation(Theme.Motion.heavy, value: runtime.armed)
+        .animation(Theme.Motion.heavy, value: runtime.showInstruments)
+        .nightRedLamp(runtime.night)
+        .overlay {
+            if runtime.armed, runtime.showInstruments {
+                InstrumentsView(runtime: runtime)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+            }
         }
-        .fullScreenCover(isPresented: Binding(
-            get: { runtime.armed && !runtime.sawCannotDo },
-            set: { if !$0 { runtime.acknowledgeCannotDo() } }
-        )) {
-            CannotDoView(runtime: runtime)
+        .overlay {
+            if runtime.instruments.state.sosFlash {
+                sosFlashVeil
+            }
         }
-        .onAppear { runtime.applyMapKeepAwake() }
-        .onChange(of: runtime.tab) { _, _ in runtime.applyMapKeepAwake() }
-        .onChange(of: runtime.armed) { _, _ in runtime.applyMapKeepAwake() }
+        .tint(Theme.silver)
+        .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
+        .onAppear {
+            runtime.applyLampChrome()
+            runtime.applyMapKeepAwake()
+            runtime.pulse()
+        }
+        .onChange(of: runtime.tab) { _, _ in
+            runtime.hudKeys.close()
+            runtime.applyMapKeepAwake()
+            runtime.pulse()
+        }
+        .onChange(of: runtime.armed) { _, now in
+            if !now {
+                runtime.hudKeys.close()
+                runtime.closeMark()
+                runtime.clearIncoming()
+                runtime.haltSOSFlash()
+                runtime.showInstruments = false
+            }
+            runtime.applyMapKeepAwake()
+        }
+    }
+
+    private var armedHUD: some View {
+        ZStack {
+            tabChrome
+            IncomingLinePlate(runtime: runtime)
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .allowsHitTesting(runtime.incoming != nil)
+                .animation(Theme.Motion.heavy, value: runtime.incoming)
+            // Map and Comms carry their own I AM OK. Field / Exped get
+            // the corner chip only while SOS or RED is actually lit.
+            if runtime.hudCrisis && runtime.tab != .map && runtime.tab != .comms {
+                IAMOKBar(runtime: runtime)
+            }
+            contextualSOS
+            if runtime.hudKeys.isOpen {
+                hudTypewriter
+            }
+        }
     }
 
     private var tabChrome: some View {
         ZStack(alignment: runtime.leftHand ? .leading : .bottom) {
             tabBody
-                .padding(.bottom, overlayBottomPad)
-                .padding(.leading, overlayLeadingPad)
             if runtime.leftHand {
                 tabColumn.frame(width: BlackoutTokens.Chrome.hudSideReservePoints)
             } else {
@@ -50,99 +88,205 @@ struct RootChrome: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(Theme.Motion.heavy, value: runtime.hudLayoutMode)
     }
 
-    /// MAP draws under the strip. Other tabs keep their content off it.
+    /// Overlay pages sit above the tab strip. MapTab stays full-bleed so a
+    /// tab change cannot resize the globe and snap the camera back to YOU.
     private var overlayBottomPad: CGFloat {
-        if runtime.leftHand || runtime.tab == .map { return 0 }
-        return CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+        runtime.leftHand ? 0 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
     }
 
     private var overlayLeadingPad: CGFloat {
-        if !runtime.leftHand || runtime.tab == .map { return 0 }
-        return CGFloat(BlackoutTokens.Chrome.hudSideReservePoints)
+        runtime.leftHand ? CGFloat(BlackoutTokens.Chrome.hudSideReservePoints) : 0
+    }
+
+    private func overlayPage<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .padding(.bottom, overlayBottomPad)
+            .padding(.leading, overlayLeadingPad)
+            .transition(.opacity)
     }
 
     private var tabBody: some View {
-        Group {
+        // The globe dies if MapTab is destroyed while Field opens from the
+        // hold card (ASC 72/73). Keep the globe mounted under every tab. The other
+        // tabs are glass over it so the ground is still there.
+        ZStack {
+            MapTab(runtime: runtime)
+                .allowsHitTesting(runtime.tab == .map)
+                .accessibilityHidden(runtime.tab != .map)
             switch runtime.tab {
-            case .map: MapTab(runtime: runtime)
-            case .comms: CommsTab(runtime: runtime)
-            case .field: FieldTab(runtime: runtime)
-            case .expedition: ExpeditionTab(runtime: runtime)
+            case .map:
+                EmptyView()
+            case .comms:
+                overlayPage { CommsTab(runtime: runtime) }
+            case .field:
+                overlayPage { FieldTab(runtime: runtime) }
+            case .expedition:
+                overlayPage { ExpeditionTab(runtime: runtime) }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(Theme.Motion.heavy, value: runtime.tab)
     }
 
     private var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(BlackoutTab.allCases) { t in
-                tabButton(t)
-                    .frame(maxWidth: .infinity, minHeight: 44)
+        placedTabs {
+            HStack(spacing: 0) {
+                ForEach(BlackoutTab.allCases) { t in
+                    tabButton(t)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
             }
-        }
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
-        .padding(.bottom, 2)
-        .background(Theme.void.opacity(0.94))
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Theme.silver.opacity(0.18))
-                .frame(height: 1)
+            .padding(.horizontal, 4)
+            .padding(.top, 4)
+            .padding(.bottom, 2)
+            .background(
+                ZStack {
+                    Theme.void.opacity(0.96)
+                    LinearGradient(
+                        colors: [Theme.metalHigh.opacity(0.18), Color.clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+            )
+            .overlay(alignment: .top) {
+                Rectangle()
+                    .fill(Theme.metalStroke)
+                    .frame(height: 1)
+            }
         }
     }
 
     private var tabColumn: some View {
-        VStack(spacing: 4) {
-            ForEach(BlackoutTab.allCases) { t in
-                tabButton(t)
-                    .rotationEffect(.degrees(-90))
-                    .frame(height: BlackoutTokens.Chrome.hudSideReservePoints)
+        placedTabs {
+            VStack(spacing: 4) {
+                ForEach(BlackoutTab.allCases) { t in
+                    tabButton(t)
+                        .rotationEffect(.degrees(-90))
+                        .frame(height: BlackoutTokens.Chrome.hudSideReservePoints)
+                }
+                Spacer()
             }
-            Spacer()
+            .background(
+                ZStack {
+                    Theme.void.opacity(0.96)
+                    LinearGradient(
+                        colors: [Theme.metalHigh.opacity(0.14), Color.clear],
+                        startPoint: .trailing,
+                        endPoint: .leading
+                    )
+                }
+            )
+            .overlay(alignment: .trailing) {
+                Rectangle()
+                    .fill(Theme.metalStroke)
+                    .frame(width: 1)
+            }
         }
-        .background(Theme.void.opacity(0.94))
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(Theme.silver.opacity(0.18))
-                .frame(width: 1)
+    }
+
+    private func placedTabs<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        HUDPlaced(
+            offset: runtime.hudLayout.tabs,
+            arranging: runtime.hudLayoutMode,
+            veil: runtime.tab == .map ? runtime.chromeVeil : 1,
+            alive: runtime.alive(.tabs),
+            onMove: { runtime.hudLayout.tabs = $0 },
+            onStore: { runtime.hudLayout.save() }
+        ) {
+            content()
         }
+        .animation(runtime.chromeAwake ? Theme.Motion.wake : Theme.Motion.sleep, value: runtime.chromeAwake)
+        .animation(Theme.Motion.heavy, value: runtime.hudFocus)
     }
 
     private func tabButton(_ t: BlackoutTab) -> some View {
         Button {
+            runtime.touch(.tabs)
             runtime.tab = t
         } label: {
             VStack(spacing: 3) {
                 Text(t.title)
                     .font(.system(size: BlackoutTokens.Chrome.tabCaptionPoints, weight: .heavy))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(1)
                     .allowsTightening(true)
                     .multilineTextAlignment(.center)
-                Rectangle()
-                    .fill(runtime.tab == t ? Theme.accent : Color.clear)
-                    .frame(width: 18, height: 2)
+                HUDReticle(lit: runtime.tab == t, crisis: runtime.hudCrisis)
             }
         }
-        .foregroundStyle(runtime.tab == t ? Theme.silver : Color(white: 0.45))
+        .foregroundStyle(runtime.tab == t ? Theme.silver : Theme.silver.opacity(0.45))
     }
 
     @ViewBuilder
     private var contextualSOS: some View {
-        if BlackoutTokens.Chrome.sosFAB(tab: tokenTab, lockOn: runtime.lockOn) {
+        if BlackoutTokens.Chrome.sosFAB(
+            tab: tokenTab,
+            lockOn: runtime.lockOn,
+            arranging: runtime.hudLayoutMode
+        ) {
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
-                    SOSHold(runtime: runtime)
-                        .padding(.trailing, 16)
-                        .padding(.bottom, sosBottomPad)
+                    HUDPlaced(
+                        offset: runtime.hudLayout.sos,
+                        arranging: runtime.hudLayoutMode,
+                        veil: 1,
+                        alive: 1,
+                        onMove: { runtime.hudLayout.sos = $0 },
+                        onStore: { runtime.hudLayout.save() }
+                    ) {
+                        SOSHold(runtime: runtime)
+                            .padding(.trailing, 16)
+                            .padding(.bottom, sosBottomPad)
+                    }
                 }
             }
             .allowsHitTesting(true)
         }
+    }
+
+    private var hudTypewriter: some View {
+        VStack(spacing: 0) {
+            Theme.void.opacity(0.45)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(Theme.Motion.heavy) { runtime.hudKeys.close() }
+                }
+            HUDKeyboard(keys: runtime.hudKeys)
+                .padding(
+                    .bottom,
+                    runtime.leftHand ? 8 : CGFloat(BlackoutTokens.Chrome.hudTabReservePoints)
+                )
+        }
+        .transition(.opacity)
+    }
+
+    private var sosFlashVeil: some View {
+        ZStack(alignment: .topTrailing) {
+            (runtime.sosFlashLit
+                ? Color.white
+                : Color(rgba: BlackoutTokens.Color.void))
+                .ignoresSafeArea()
+            Button("SOS FLASHLIGHT") {
+                runtime.tapSOSFlashlight()
+            }
+            .font(.system(size: BlackoutTokens.Chrome.mapActionChipTextPoints, weight: .heavy))
+            .foregroundStyle(Color.white)
+            .padding(.horizontal, BlackoutTokens.Chrome.mapActionChipGutterPoints)
+            .frame(
+                minWidth: BlackoutTokens.Chrome.mapChipHitPoints,
+                minHeight: BlackoutTokens.Chrome.mapChipHitPoints
+            )
+            .background(Theme.accent)
+            .clipShape(Theme.plateRect())
+            .padding(12)
+        }
+        .allowsHitTesting(true)
     }
 
     private var sosBottomPad: CGFloat {

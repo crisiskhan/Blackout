@@ -60,7 +60,9 @@ public enum BlackoutTokens: Sendable {
         public static let metal = RGBA(r: 0.77, g: 0.80, b: 0.84, a: 1)
         public static let silverEdge = RGBA(r: 0.55, g: 0.58, b: 0.62, a: 1)
         public static let sos = RGBA(r: 0.86, g: 0.14, b: 0.14, a: 1)
-        public static let nightRed = RGBA(r: 0.55, g: 0.05, b: 0.05, a: 1)
+        public static let caution = RGBA(r: 0.86, g: 0.62, b: 0.14, a: 1)
+        public static let heat = RGBA(r: 0.93, g: 0.32, b: 0.04, a: 1)
+        public static let nightRed = RGBA(r: 1, g: 0.07, b: 0.02, a: 1)
     }
 
     public struct RGBA: Equatable, Sendable {
@@ -296,81 +298,18 @@ final class PackIOTests: XCTestCase {
 
 def emit_search() -> None:
     w(PKG / "Search" / "Package.swift", package_swift("Search", []))
-    w(
-        PKG / "Search" / "Sources" / "Search" / "Search.swift",
-        r'''import Foundation
-
-public struct SearchHit: Equatable, Sendable {
-    public var name: String
-    public var kind: String
-    public var lat: Double
-    public var lon: Double
-    public var score: Double
-
-    public init(name: String, kind: String, lat: Double, lon: Double, score: Double) {
-        self.name = name
-        self.kind = kind
-        self.lat = lat
-        self.lon = lon
-        self.score = score
-    }
-}
-
-public struct SearchIndex: Sendable {
-    private let docs: [(name: String, kind: String, lat: Double, lon: Double, tokens: Set<String>)]
-
-    public init(pois: [[String: Any]]) {
-        docs = pois.map { p in
-            let name = (p["name"] as? String) ?? ""
-            let kind = (p["kind"] as? String) ?? (p["amenity"] as? String) ?? ""
-            let lat = p["lat"] as? Double ?? 0
-            let lon = p["lon"] as? Double ?? 0
-            let tokens = Set((name + " " + kind).lowercased().split(separator: " ").map(String.init))
-            return (name, kind, lat, lon, tokens)
-        }
-    }
-
-    public func fts(_ query: String) -> [SearchHit] {
-        let q = Set(query.lowercased().split(separator: " ").map(String.init))
-        return docs.compactMap { d in
-            let overlap = Double(q.intersection(d.tokens).count)
-            guard overlap > 0 else { return nil }
-            return SearchHit(name: d.name, kind: d.kind, lat: d.lat, lon: d.lon, score: overlap)
-        }.sorted { $0.score > $1.score }
-    }
-
-    public func semantic(_ intent: String) -> [SearchHit] {
-        let map: [String: [String]] = [
-            "hospital": ["hospital", "clinic", "doctors"],
-            "water": ["drinking_water", "water", "spring"],
-            "shelter": ["shelter", "ranger"],
-            "peak": ["peak", "summit"],
-        ]
-        let kinds = map[intent.lowercased()] ?? [intent.lowercased()]
-        return docs.filter { kinds.contains($0.kind.lowercased()) }.map {
-            SearchHit(name: $0.name, kind: $0.kind, lat: $0.lat, lon: $0.lon, score: 1)
-        }
-    }
-}
-''',
-    )
-    w(
-        PKG / "Search" / "Tests" / "SearchTests" / "SearchTests.swift",
-        r'''import XCTest
-@testable import Search
-
-final class SearchTests: XCTestCase {
-    func testFTSAndSemantic() {
-        let idx = SearchIndex(pois: [
-            ["name": "County Hospital", "kind": "hospital", "lat": 31.7, "lon": -106.4],
-            ["name": "Spring", "kind": "drinking_water", "lat": 31.8, "lon": -106.5],
-        ])
-        XCTAssertEqual(idx.fts("hospital").first?.name, "County Hospital")
-        XCTAssertEqual(idx.semantic("water").first?.kind, "drinking_water")
-    }
-}
-''',
-    )
+    src = PKG / "Search" / "Sources" / "Search" / "Search.swift"
+    tests = PKG / "Search" / "Tests" / "SearchTests" / "SearchTests.swift"
+    body = src.read_text(encoding="utf-8") if src.is_file() else ""
+    if "func lookup(" not in body:
+        raise SystemExit(
+            "emit_search: Search.swift must keep lookup() — MAP SEARCH is not token-overlap FTS"
+        )
+    tbody = tests.read_text(encoding="utf-8") if tests.is_file() else ""
+    if "testPrefixFindsHospital" not in tbody:
+        raise SystemExit(
+            "emit_search: SearchTests must keep prefix / diacritic / proximity coverage"
+        )
 
 
 def emit_router() -> None:
@@ -662,22 +601,141 @@ final class CryptoPartyTests: XCTestCase {
         PKG / "Vitals" / "Sources" / "Vitals" / "Vitals.swift",
         r'''import Foundation
 
-public enum ConditionBand: String, Sendable { case green, yellow, red }
+public enum ConditionBand: String, CaseIterable, Sendable {
+    case green, yellow, orange, red, black
+}
 
 public struct PartyVitals: Equatable, Sendable {
+    /// Band edges and the ticks on the EXPEDITION rails. One source.
+    public static let yellowAt: Double = 0.45
+    public static let orangeAt: Double = 0.65
+    public static let redAt: Double = 0.8
+    /// The fifth CONDITION color. Past RED. Mesh SOS, not a phone dial.
+    public static let blackAt: Double = 1.0
+    /// Two YELLOW rails is CONDITION ORANGE, not a yellow average.
+    public static let stackYellowToOrange: Int = 2
+    /// Three YELLOW rails is a compounding body.
+    public static let stackYellowToRed: Int = 3
+    /// Two ORANGE rails is CONDITION RED.
+    public static let stackOrangeToRed: Int = 2
+    public static let yellowLoad: Int = 1
+    public static let orangeLoad: Int = 2
+    public static let redLoad: Int = 3
+    public static let blackLoad: Int = 4
+    public static let railSteps: [Double] = [0, 0.2, 0.45, 0.65, 0.8, 1.0]
+    public static let colorSteps: [Double] = [0.2, 0.45, 0.65, 0.8, 1.0]
+    public static let railTitles: [String] = [
+        "HUNGER", "THIRST", "PAIN", "FATIGUE", "EXPOSURE",
+    ]
+
+    public var hunger: Double
+    public var thirst: Double
+    public var pain: Double
     public var water: Double
     public var fatigue: Double
     public var weatherExposure: Double
     public var flags: [String]
-    public init(water: Double, fatigue: Double, weatherExposure: Double, flags: [String] = []) {
-        self.water = water; self.fatigue = fatigue; self.weatherExposure = weatherExposure; self.flags = flags
+    public init(
+        hunger: Double = 0.2,
+        thirst: Double = 0.2,
+        pain: Double = 0.2,
+        water: Double,
+        fatigue: Double,
+        weatherExposure: Double,
+        flags: [String] = []
+    ) {
+        self.hunger = hunger
+        self.thirst = thirst
+        self.pain = pain
+        self.water = water
+        self.fatigue = fatigue
+        self.weatherExposure = weatherExposure
+        self.flags = flags
+    }
+
+    public var rails: [Double] {
+        [hunger, thirst, pain, fatigue, weatherExposure]
     }
 
     public var band: ConditionBand {
-        let worst = max(water, max(fatigue, weatherExposure))
-        if flags.contains("RED") || worst >= 0.8 { return .red }
-        if worst >= 0.45 { return .yellow }
+        Self.band(rails: rails, flags: flags)
+    }
+
+    public static func band(of value: Double) -> ConditionBand {
+        if value >= blackAt { return .black }
+        if value >= redAt { return .red }
+        if value >= orangeAt { return .orange }
+        if value >= yellowAt { return .yellow }
         return .green
+    }
+
+    /// YELLOW is 1, ORANGE is 2, RED is 3, BLACK is 4. Load 2 is ORANGE. Load 3 is RED.
+    public static func load(of value: Double) -> Int {
+        switch band(of: value) {
+        case .green:
+            return 0
+        case .yellow:
+            return yellowLoad
+        case .orange:
+            return orangeLoad
+        case .red:
+            return redLoad
+        case .black:
+            return blackLoad
+        }
+    }
+
+    public static func band(rails: [Double], flags: [String] = []) -> ConditionBand {
+        if rails.contains(where: { band(of: $0) == .black }) { return .black }
+        if flags.contains("RED") { return .red }
+        var total = 0
+        for value in rails {
+            let piece = load(of: value)
+            if piece >= redLoad { return .red }
+            total += piece
+        }
+        if total >= stackYellowToRed { return .red }
+        if total >= stackYellowToOrange { return .orange }
+        if total > 0 { return .yellow }
+        return .green
+    }
+
+    public var blackTitles: [String] {
+        zip(Self.railTitles, rails).compactMap { title, value in
+            PartyVitals.band(of: value) == .black ? title : nil
+        }
+    }
+
+    public func partyAlertLine(coordinates: String, bearing: String) -> String {
+        let titles = blackTitles
+        let condition: String
+        if titles.count == 1 {
+            condition = "\(titles[0]) BLACK"
+        } else {
+            condition = "CONDITION BLACK"
+        }
+        return "SOS \(condition) \(coordinates) \(bearing)"
+    }
+
+    /// Midpoint and above belongs to the worse tick, so CONDITION never sits between bands.
+    public static func snap(_ raw: Double) -> Double {
+        let clamped = min(1, max(0, raw))
+        let steps = railSteps
+        for i in 0..<(steps.count - 1) {
+            let mid = (steps[i] + steps[i + 1]) / 2
+            if clamped < mid {
+                return steps[i]
+            }
+        }
+        return steps[steps.count - 1]
+    }
+
+    public static func step(_ current: Double, _ delta: Int) -> Double {
+        let steps = railSteps
+        let snapped = snap(current)
+        guard let i = steps.firstIndex(of: snapped) else { return snapped }
+        let j = min(steps.count - 1, max(0, i + delta))
+        return steps[j]
     }
 }
 ''',
@@ -690,8 +748,106 @@ public struct PartyVitals: Equatable, Sendable {
 final class VitalsTests: XCTestCase {
     func testBands() {
         XCTAssertEqual(PartyVitals(water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .green)
-        XCTAssertEqual(PartyVitals(water: 0.5, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(thirst: 0.5, water: 0.2, fatigue: 0.2, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(PartyVitals(water: 0.8, fatigue: 0.2, weatherExposure: 0.2).band, .green)
         XCTAssertEqual(PartyVitals(water: 0.2, fatigue: 0.2, weatherExposure: 0.2, flags: ["RED"]).band, .red)
+        XCTAssertEqual(
+            ConditionBand.allCases.map(\.rawValue),
+            ["green", "yellow", "orange", "red", "black"]
+        )
+    }
+
+    func testSixAxesDriveBand() {
+        let axes = PartyVitals(hunger: 0.1, thirst: 0.1, pain: 0.9, water: 0.1, fatigue: 0.1, weatherExposure: 0.1)
+        XCTAssertEqual(axes.band, .red)
+        XCTAssertEqual(PartyVitals(hunger: 0.5, thirst: 0.1, pain: 0.1, water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band, .yellow)
+        XCTAssertEqual(
+            PartyVitals(hunger: 0.65, thirst: 0.1, pain: 0.1, water: 0.1, fatigue: 0.1, weatherExposure: 0.1).band,
+            .orange
+        )
+    }
+
+    func testRailSnapsToBandTicks() {
+        XCTAssertEqual(PartyVitals.yellowAt, 0.45)
+        XCTAssertEqual(PartyVitals.orangeAt, 0.65)
+        XCTAssertEqual(PartyVitals.redAt, 0.8)
+        XCTAssertEqual(PartyVitals.stackYellowToOrange, 2)
+        XCTAssertEqual(PartyVitals.stackYellowToRed, 3)
+        XCTAssertEqual(PartyVitals.stackOrangeToRed, 2)
+        XCTAssertEqual(PartyVitals.railSteps, [0, 0.2, 0.45, 0.65, 0.8, 1.0])
+        XCTAssertEqual(PartyVitals.snap(0.1), 0.2)
+        XCTAssertEqual(PartyVitals.snap(0.625), 0.65)
+        XCTAssertEqual(PartyVitals.snap(0.73), 0.8)
+        XCTAssertEqual(PartyVitals.step(0.2, 1), 0.45)
+        XCTAssertEqual(PartyVitals.step(0.45, 1), 0.65)
+        XCTAssertEqual(PartyVitals.step(0.2, -1), 0.0)
+        XCTAssertEqual(PartyVitals.step(1.0, 1), 1.0)
+        XCTAssertEqual(PartyVitals.band(of: 0.2), .green)
+        XCTAssertEqual(PartyVitals.band(of: 0.45), .yellow)
+        XCTAssertEqual(PartyVitals.band(of: 0.65), .orange)
+        XCTAssertEqual(PartyVitals.band(of: 0.8), .red)
+        XCTAssertEqual(PartyVitals.load(of: 0.2), 0)
+        XCTAssertEqual(PartyVitals.load(of: 0.45), 1)
+        XCTAssertEqual(PartyVitals.load(of: 0.65), 2)
+        XCTAssertEqual(PartyVitals.load(of: 0.8), 3)
+    }
+
+    func testStackedYellowIsARedBody() {
+        let twoYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(twoYellow.band, .orange)
+        let threeYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(threeYellow.band, .red)
+        let everyYellow = PartyVitals(
+            hunger: 0.45,
+            thirst: 0.45,
+            pain: 0.45,
+            water: 0.45,
+            fatigue: 0.45,
+            weatherExposure: 0.45
+        )
+        XCTAssertEqual(everyYellow.band, .red)
+        let oneOrange = PartyVitals(
+            hunger: 0.65,
+            thirst: 0.2,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(oneOrange.band, .orange)
+        let twoOrange = PartyVitals(
+            hunger: 0.65,
+            thirst: 0.65,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(twoOrange.band, .red)
+        let orangePlusYellow = PartyVitals(
+            hunger: 0.65,
+            thirst: 0.45,
+            pain: 0.2,
+            water: 0.2,
+            fatigue: 0.2,
+            weatherExposure: 0.2
+        )
+        XCTAssertEqual(orangePlusYellow.band, .red)
+        XCTAssertEqual(PartyVitals.orangeLoad * PartyVitals.stackOrangeToRed, 4)
     }
 }
 ''',
@@ -736,7 +892,7 @@ import BlackBox
 final class RedAlertTests: XCTestCase {
     func testCancel() {
         let p = RedPlate(box: BlackBox())
-        p.apply(PartyVitals(water: 0.9, fatigue: 0.2, weatherExposure: 0.1))
+        p.apply(PartyVitals(thirst: 0.9, water: 0.2, fatigue: 0.2, weatherExposure: 0.1))
         XCTAssertTrue(p.isRed)
         p.cancelRED()
         XCTAssertTrue(p.cancelled)
@@ -759,27 +915,112 @@ public struct PartyTimer: Equatable, Sendable, Identifiable {
     public var duration: TimeInterval
     public var started: Date
     public var subjectAllTurnaround: Bool
+    public var owner: String
     public var overdue: Bool { Date().timeIntervalSince(started) > duration }
+    public var overdueRowID: String { "overdue:\\(id)" }
+
+    public init(
+        id: String,
+        who: String,
+        task: String,
+        duration: TimeInterval,
+        started: Date,
+        subjectAllTurnaround: Bool,
+        owner: String = ""
+    ) {
+        self.id = id
+        self.who = who
+        self.task = task
+        self.duration = duration
+        self.started = started
+        self.subjectAllTurnaround = subjectAllTurnaround
+        self.owner = owner.isEmpty ? who : owner
+    }
+
+    public func remaining(now: Date = Date()) -> TimeInterval {
+        max(0, duration - now.timeIntervalSince(started))
+    }
+
+    public func remainingFraction(now: Date = Date()) -> Double {
+        guard duration > 0 else { return 0 }
+        return min(1, max(0, remaining(now: now) / duration))
+    }
 }
 
 public final class TimerBoard: @unchecked Sendable {
     public private(set) var timers: [PartyTimer] = []
-    private let box: BlackBox
+    public private(set) var completed: [PartyTimer] = []
+    private let box: EventLog
     public static let maxActive = 4
-    public init(box: BlackBox) { self.box = box }
+    public init(box: EventLog) { self.box = box }
 
     @discardableResult
-    public func add(who: String, task: String, duration: TimeInterval, subjectAll: Bool, now: Date = Date()) -> PartyTimer? {
-        guard timers.filter({ !$0.overdue || true }).count < Self.maxActive else { return nil }
+    public func add(
+        who: String,
+        task: String,
+        duration: TimeInterval,
+        subjectAll: Bool,
+        now: Date = Date(),
+        owner: String = ""
+    ) -> PartyTimer? {
+        let who = who.isEmpty ? "ALL" : who
+        if timers.contains(where: { $0.task == task && $0.who == who }) {
+            return nil
+        }
         guard timers.count < Self.maxActive else { return nil }
-        let t = PartyTimer(id: UUID().uuidString, who: who, task: task, duration: duration, started: now, subjectAllTurnaround: subjectAll)
+        let t = PartyTimer(
+            id: UUID().uuidString,
+            who: who,
+            task: task,
+            duration: duration,
+            started: now,
+            subjectAllTurnaround: subjectAll,
+            owner: owner
+        )
         timers.append(t)
-        box.log("timer", "\(who) \(task) \(duration)")
+        box.log("timer", "\\(who) \\(task) \\(duration)")
         return t
     }
 
     public func overduePlate(now: Date = Date()) -> [PartyTimer] {
         timers.filter { now.timeIntervalSince($0.started) > $0.duration }
+    }
+
+    public func onProfile(personID: String, name: String, isYou: Bool) -> [PartyTimer] {
+        timers.filter { t in
+            if t.who == personID || t.who == name { return true }
+            if !t.owner.isEmpty && (t.owner == personID || t.owner == name) { return true }
+            if isYou && (t.who == "ALL" || t.who == "YOU") { return true }
+            return false
+        }
+    }
+
+    public func markDone(_ id: String) {
+        if let t = timers.first(where: { $0.id == id }) {
+            timers.removeAll { $0.id == id }
+            if !completed.contains(where: { $0.id == id }) {
+                completed.append(t)
+            }
+            box.log("timer", "DONE \\(id)")
+        }
+    }
+
+    public func markDoneTask(_ task: String) {
+        if let t = timers.first(where: { $0.task == task }) {
+            markDone(t.id)
+        }
+    }
+
+    public func doneLines(id: String? = nil) -> [String] {
+        let rows = id == nil ? completed : completed.filter { $0.id == id }
+        var seen: [String] = []
+        var lines: [String] = []
+        for t in rows {
+            if seen.contains(t.id) { continue }
+            seen.append(t.id)
+            lines.append("\\(t.task) \\(t.who) DONE")
+        }
+        return lines
     }
 
     public func isSOS(_ t: PartyTimer) -> Bool { false }
@@ -808,48 +1049,10 @@ final class TimerSyncTests: XCTestCase {
     )
 
     w(PKG / "RosterRoles" / "Package.swift", package_swift("RosterRoles", []))
-    w(
-        PKG / "RosterRoles" / "Sources" / "RosterRoles" / "RosterRoles.swift",
-        r'''import Foundation
-
-public enum PartyRole: String, CaseIterable, Sendable {
-    case lead, medic, nav, tail, guest
-}
-
-public struct PartyMember: Equatable, Sendable, Identifiable {
-    public var id: String
-    public var name: String
-    public var role: PartyRole
-}
-
-public struct PartyRoster: Equatable, Sendable {
-    public var code: String
-    public var members: [PartyMember]
-    public static func create(lead: String) -> PartyRoster {
-        PartyRoster(code: String(UUID().uuidString.prefix(6)), members: [PartyMember(id: "lead", name: lead, role: .lead)])
-    }
-    public func joining(_ name: String, role: PartyRole) -> PartyRoster {
-        var copy = self
-        copy.members.append(PartyMember(id: UUID().uuidString, name: name, role: role))
-        return copy
-    }
-}
-''',
-    )
-    w(
-        PKG / "RosterRoles" / "Tests" / "RosterRolesTests" / "RosterRolesTests.swift",
-        r'''import XCTest
-@testable import RosterRoles
-
-final class RosterRolesTests: XCTestCase {
-    func testCreateJoin() {
-        let r = PartyRoster.create(lead: "A").joining("B", role: .nav)
-        XCTAssertEqual(r.members.count, 2)
-        XCTAssertEqual(r.members[0].role, .lead)
-    }
-}
-''',
-    )
+    roster_src = PKG / "RosterRoles" / "Sources" / "RosterRoles" / "RosterRoles.swift"
+    roster_tests = PKG / "RosterRoles" / "Tests" / "RosterRolesTests" / "RosterRolesTests.swift"
+    w(roster_src, roster_src.read_text(encoding="utf-8"))
+    w(roster_tests, roster_tests.read_text(encoding="utf-8"))
 
     w(PKG / "Almanac" / "Package.swift", package_swift("Almanac", []))
     w(
@@ -948,12 +1151,44 @@ final class BatteryAuctionTests: XCTestCase {
         r'''import Foundation
 import Tokens
 
+public enum HUDLamp: String, Sendable, Equatable, CaseIterable {
+    case off
+    case night
+    case sun
+
+    public static func toggling(current: HUDLamp, tap: HUDLamp) -> HUDLamp {
+        switch tap {
+        case .off:
+            return .off
+        case .night, .sun:
+            return current == tap ? .off : tap
+        }
+    }
+
+    public var nightOn: Bool {
+        switch self {
+        case .night: return true
+        case .off, .sun: return false
+        }
+    }
+
+    public var sunOn: Bool {
+        switch self {
+        case .sun: return true
+        case .off, .night: return false
+        }
+    }
+}
+
 public struct NightRedState: Equatable, Sendable {
     public var enabled: Bool
     public init(enabled: Bool) { self.enabled = enabled }
-    public var filter: BlackoutTokens.RGBA {
-        enabled ? BlackoutTokens.Color.nightRed : BlackoutTokens.Color.void
+    public var filter: BlackoutTokens.RGBA { multiply }
+    public var multiply: BlackoutTokens.RGBA {
+        enabled ? BlackoutTokens.Color.nightRed : Self.identity
     }
+    public static let identity = BlackoutTokens.RGBA(r: 1, g: 1, b: 1, a: 1)
+    public static let dim: Double = -0.04
 }
 ''',
     )
@@ -964,7 +1199,13 @@ public struct NightRedState: Equatable, Sendable {
 
 final class NightRedTests: XCTestCase {
     func testFilter() {
-        XCTAssertEqual(NightRedState(enabled: true).filter.r, 0.55, accuracy: 0.01)
+        let on = NightRedState(enabled: true)
+        XCTAssertEqual(on.filter.r, 1, accuracy: 0.01)
+        XCTAssertEqual(on.filter.g, 0.07, accuracy: 0.02)
+        XCTAssertLessThan(on.filter.b, 0.05)
+        let off = NightRedState(enabled: false)
+        XCTAssertEqual(off.multiply, NightRedState.identity)
+        XCTAssertLessThan(NightRedState.dim, 0)
     }
 }
 ''',
@@ -1068,6 +1309,7 @@ public struct FieldCard: Codable, Equatable, Sendable, Identifiable {
     public var speak: Bool
     public var sendToParty: Bool
     public var steps: [FieldStep]
+    public var packs: [String]?
 }
 
 public struct FieldBook: Codable, Equatable, Sendable {
@@ -1094,6 +1336,15 @@ public enum FieldCorpus {
     public static func visible(_ cards: [FieldCard], state: String) -> [FieldCard] {
         cards.filter { $0.states.contains(state) }
     }
+
+    public static func chapter(_ cards: [FieldCard], pack: String?) -> [FieldCard] {
+        guard let pack, !pack.isEmpty else { return cards }
+        let id = pack.lowercased()
+        return cards.filter { card in
+            guard let packs = card.packs, !packs.isEmpty else { return true }
+            return packs.contains { $0.lowercased() == id }
+        }
+    }
 }
 
 public enum FieldError: Error { case schema, emptySteps, incompleteStep }
@@ -1108,6 +1359,29 @@ final class FieldCorpusTests: XCTestCase {
     func testRejectsBadSchema() {
         let bad = Data(#"{"schema":"1.0","id":"x","cards":[]}"#.utf8)
         XCTAssertTrue(((try? FieldCorpus.load(core: bad, state: bad)) ?? []).isEmpty)
+    }
+
+    func testChapterHidesTheOtherPacksRangeCards() {
+        let loc = FieldLoc(en: "a", es: "a")
+        let step = FieldStep(
+            do: loc, why: loc, child: loc, stop: loc, image: "x.png"
+        )
+        func card(_ id: String, packs: [String]?) -> FieldCard {
+            FieldCard(
+                schema: "1.4", id: id, category: "animals", states: ["TX"],
+                title: loc, situation: loc, stop_if: [], get_to_care: loc,
+                speak: true, sendToParty: true, steps: [step], packs: packs
+            )
+        }
+        let west = card("tx-mammal", packs: ["tx-west"])
+        let east = card("tx-east-mammal", packs: ["tx-east"])
+        let shared = card("tx-plant-danger", packs: nil)
+        let cards = [west, east, shared]
+        let eastList = FieldCorpus.chapter(cards, pack: "tx-east")
+        XCTAssertEqual(eastList.map(\.id), ["tx-east-mammal", "tx-plant-danger"])
+        let westList = FieldCorpus.chapter(cards, pack: "tx-west")
+        XCTAssertEqual(westList.map(\.id), ["tx-mammal", "tx-plant-danger"])
+        XCTAssertEqual(FieldCorpus.chapter(cards, pack: nil).count, 3)
     }
 }
 ''',
@@ -1132,8 +1406,24 @@ public struct StepperState: Equatable, Sendable {
         self.sentToParty = sentToParty
     }
 
-    public var step: FieldStep { card.steps[index] }
-    public var isLast: Bool { index == card.steps.count - 1 }
+    public var step: FieldStep {
+        if card.steps.indices.contains(index) {
+            return card.steps[index]
+        }
+        if let first = card.steps.first {
+            return first
+        }
+        return FieldStep(
+            do: FieldLoc(en: "", es: ""),
+            why: FieldLoc(en: "", es: ""),
+            child: FieldLoc(en: "", es: ""),
+            stop: FieldLoc(en: "", es: ""),
+            image: ""
+        )
+    }
+    public var isLast: Bool {
+        card.steps.count <= 1 || index >= card.steps.count - 1
+    }
     public mutating func next() { if !isLast { index += 1 } }
     public mutating func speak() { speaking = card.speak }
     public mutating func send() { sentToParty = card.sendToParty }
@@ -1156,6 +1446,15 @@ final class FieldStepperTests: XCTestCase {
         XCTAssertEqual(s.index, 1)
         XCTAssertTrue(s.speaking)
         XCTAssertEqual(s.step.metronomeBpm, 110)
+        var stale = StepperState(card: card, index: 99, speaking: false, sentToParty: false)
+        XCTAssertEqual(stale.step.metronomeBpm, 110)
+        XCTAssertTrue(stale.isLast)
+        let emptyCard = FieldCard(schema: "1.4", id: "empty", category: "medical", states: ["TX"], title: loc, situation: loc, stop_if: [loc], get_to_care: loc, speak: true, sendToParty: true, steps: [])
+        var empty = StepperState(card: emptyCard, index: 0, speaking: false, sentToParty: false)
+        XCTAssertTrue(empty.isLast)
+        XCTAssertEqual(empty.step.image, "")
+        empty.next()
+        XCTAssertEqual(empty.index, 0)
     }
 }
 ''',
@@ -1323,10 +1622,11 @@ public struct GuidedCapture: Equatable, Sendable {
         frames.append(CaptureFrame(features: features, added: true))
     }
     public func mergedFeatures() -> [Double] {
-        guard !frames.isEmpty else { return [0, 0, 0]
-        }
+        guard !frames.isEmpty else { return [0, 0, 0] }
+        let width = frames.map(\.features.count).min() ?? 0
+        guard width > 0 else { return [0, 0, 0] }
         let n = Double(frames.count)
-        return (0..<frames[0].features.count).map { i in
+        return (0..<width).map { i in
             frames.map { $0.features[i] }.reduce(0, +) / n
         }
     }
@@ -1349,6 +1649,13 @@ final class VisionCaptureTests: XCTestCase {
         g.addFrame([0, 1, 0])
         XCTAssertEqual(g.frames.count, 2)
         XCTAssertEqual(g.mergedFeatures()[0], 0.5, accuracy: 0.01)
+        g.addFrame([1, 0])
+        XCTAssertEqual(g.mergedFeatures().count, 2)
+        XCTAssertEqual(g.mergedFeatures()[0], 2.0 / 3.0, accuracy: 0.01)
+        var empty = GuidedCapture()
+        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
+        empty.addFrame([])
+        XCTAssertEqual(empty.mergedFeatures(), [0, 0, 0])
     }
 }
 ''',
@@ -1364,12 +1671,16 @@ public struct GearItem: Equatable, Sendable, Identifiable {
     public var name: String
     public var working: Bool
     public var failureHazard: String?
+    public var count: Int
+    public var assignedTo: String?
 
-    public init(id: String, name: String, working: Bool, failureHazard: String? = nil) {
+    public init(id: String, name: String, working: Bool, failureHazard: String? = nil, count: Int = 1, assignedTo: String? = nil) {
         self.id = id
         self.name = name
         self.working = working
         self.failureHazard = failureHazard
+        self.count = count
+        self.assignedTo = assignedTo
     }
 }
 
@@ -1381,6 +1692,48 @@ public struct KitBag: Equatable, Sendable {
         if let i = items.firstIndex(where: { $0.id == id }) {
             items[i].working = false
             items[i].failureHazard = hazard
+        }
+    }
+
+    public mutating func setWorking(_ id: String, working: Bool) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            items[i].working = working
+        }
+    }
+
+    public mutating func bump(_ id: String, by: Int) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            items[i].count = max(0, min(99, items[i].count + by))
+        }
+    }
+
+    public mutating func assign(_ id: String, to: String) {
+        if let i = items.firstIndex(where: { $0.id == id }) {
+            let token = to.trimmingCharacters(in: .whitespacesAndNewlines)
+            items[i].assignedTo = token.isEmpty ? nil : token
+        }
+    }
+
+    public mutating func addNamed(_ name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        items.append(GearItem(id: UUID().uuidString, name: trimmed, working: true, count: 1))
+    }
+
+    public func assigned(to personID: String, name: String, isYou: Bool) -> [GearItem] {
+        items.filter { item in
+            guard let a = item.assignedTo, !a.isEmpty else { return false }
+            if a == personID || a == name { return true }
+            if isYou && a == "YOU" { return true }
+            return false
+        }
+    }
+
+    public mutating func upsert(_ item: GearItem) {
+        if let i = items.firstIndex(where: { $0.id == item.id }) {
+            items[i] = item
+        } else {
+            items.append(item)
         }
     }
 }
@@ -1446,7 +1799,7 @@ import RosterRoles
 public enum PaperGen {
     public static func export(trip: TripSheet, roster: PartyRoster, packName: String) -> String {
         var lines = ["BLACKOUT PAPER", packName, trip.brief, "due \(trip.dueBack)", "roster:"]
-        lines += roster.members.map { "\($0.role.rawValue) \($0.name)" }
+        lines += roster.members.map { "\($0.role.title) \($0.name)" }
         return lines.joined(separator: "\n")
     }
 }
@@ -1463,7 +1816,7 @@ final class PaperGenTests: XCTestCase {
     func testExport() {
         let text = PaperGen.export(trip: TripBrief.make(brief: "loop", hours: 2), roster: PartyRoster.create(lead: "A"), packName: "TX WEST")
         XCTAssertTrue(text.contains("TX WEST"))
-        XCTAssertTrue(text.contains("lead A"))
+        XCTAssertTrue(text.contains("LEAD A"))
     }
 }
 ''',
@@ -1475,26 +1828,67 @@ final class PaperGenTests: XCTestCase {
         r'''import Foundation
 import BlackBox
 
+public enum SOSFlash: Sendable {
+    public static let unitMs: Double = 250
+    public static let cycleUnits: [(Bool, Int)] = [
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 3),
+        (true, 3),
+        (false, 1),
+        (true, 3),
+        (false, 1),
+        (true, 3),
+        (false, 3),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 1),
+        (true, 1),
+        (false, 7),
+    ]
+}
+
 public struct InstrumentState: Equatable, Sendable {
-    public var torchClicks: Int
+    public var sosFlash: Bool
     public var compassCalibrated: Bool
     public var usbCPTT: Bool
     public var externalGNSS: Bool
     public var magNorth: Bool
+    public init(
+        sosFlash: Bool = false,
+        compassCalibrated: Bool = false,
+        usbCPTT: Bool = false,
+        externalGNSS: Bool = false,
+        magNorth: Bool = true
+    ) {
+        self.sosFlash = sosFlash
+        self.compassCalibrated = compassCalibrated
+        self.usbCPTT = usbCPTT
+        self.externalGNSS = externalGNSS
+        self.magNorth = magNorth
+    }
 }
 
-public final class Instruments: @unchecked Sendable {
-    public private(set) var state = InstrumentState(torchClicks: 0, compassCalibrated: false, usbCPTT: false, externalGNSS: false, magNorth: true)
-    private let box: BlackBox
-    public init(box: BlackBox) { self.box = box }
-    public func torchTap() {
-        state.torchClicks = (state.torchClicks + 1) % 4
-        box.log("torch", "\(state.torchClicks)")
+public final class InstrumentBoard: @unchecked Sendable {
+    public private(set) var state = InstrumentState()
+    private let box: EventLog
+    public init(box: EventLog) { self.box = box }
+    public func sosFlashTap() {
+        state.sosFlash.toggle()
+        box.log("sosflash", state.sosFlash ? "on" : "off")
+    }
+    public func setSOSFlash(_ on: Bool) {
+        state.sosFlash = on
     }
     public func calibrateCompass() { state.compassCalibrated = true }
     public func attachUSB_C_PTT(_ present: Bool) { state.usbCPTT = present }
     public func attachGNSSPuck(_ present: Bool) { state.externalGNSS = present }
     public func setTrueNorth() { state.magNorth = false }
+    public func toggleMagTrue() { state.magNorth.toggle() }
 }
 ''',
     )
@@ -1504,13 +1898,28 @@ public final class Instruments: @unchecked Sendable {
 import BlackBox
 @testable import Instruments
 
-final class InstrumentsTests: XCTestCase {
-    func testTorch3() {
-        let i = Instruments(box: BlackBox())
-        i.torchTap(); i.torchTap(); i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 3)
-        i.torchTap()
-        XCTAssertEqual(i.state.torchClicks, 0)
+final class InstrumentBoardTests: XCTestCase {
+    func testSOSFlashTogglesAndKeepsITUMorse() {
+        let i = InstrumentBoard(box: EventLog())
+        XCTAssertFalse(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertTrue(i.state.sosFlash)
+        i.sosFlashTap()
+        XCTAssertFalse(i.state.sosFlash)
+        let on = SOSFlash.cycleUnits.filter(\.0).map(\.1)
+        XCTAssertEqual(on, [1, 1, 1, 3, 3, 3, 1, 1, 1])
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.0, false)
+        XCTAssertEqual(SOSFlash.cycleUnits.last?.1, 7)
+        XCTAssertEqual(SOSFlash.unitMs, 250)
+    }
+
+    func testToggleMagTrueFlipsNorthReference() {
+        let i = InstrumentBoard(box: EventLog())
+        XCTAssertTrue(i.state.magNorth)
+        i.toggleMagTrue()
+        XCTAssertFalse(i.state.magNorth)
+        i.setTrueNorth()
+        XCTAssertFalse(i.state.magNorth)
     }
 }
 ''',

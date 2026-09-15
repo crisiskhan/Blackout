@@ -17,8 +17,23 @@ check() {
   fi
 }
 
-check 'URLSession' 'no URLSession'
-check 'WKWebView' 'no WKWebView'
+check_except() {
+  local pattern="$1"
+  local label="$2"
+  local except="$3"
+  local hits
+  hits="$(grep -RIn --include='*.swift' -E "$pattern" "$root/Blackout" "$root/Packages" | grep -v "/${except}:" || true)"
+  if [[ -n "$hits" ]]; then
+    echo "FAIL $label"
+    echo "$hits"
+    fail=1
+  else
+    echo "OK   $label"
+  fi
+}
+
+check_except 'URLSession' 'URLSession only UpdateSocket' 'UpdateSocket.swift'
+check_except 'WKWebView' 'WKWebView only GlobeView' 'GlobeView.swift'
 check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog' 'no analytics SDKs'
 check 'CKContainer|NSPersistentCloudKitContainer' 'no CloudKit'
 check 'tel://911|telprompt:911' 'no auto-911'
@@ -37,6 +52,13 @@ if [[ -f "$root/Vendor/MapLibre/MapLibre.xcframework/Info.plist" ]]; then
   echo "OK   MapLibre xcframework"
 else
   echo "FAIL MapLibre xcframework"
+  fail=1
+fi
+
+if [[ -f "$root/Resources/Globe/index.html" && -f "$root/Resources/Globe/Cesium/Cesium.js" ]]; then
+  echo "OK   Cesium globe pack"
+else
+  echo "FAIL Cesium globe pack"
   fail=1
 fi
 

@@ -46,6 +46,7 @@ def modules() -> None:
         "FieldCorpus": ROOT / "Packages" / "FieldCorpus" / "Sources" / "FieldCorpus" / "FieldCorpus.swift",
         "FieldStepper": ROOT / "Packages" / "FieldStepper" / "Sources" / "FieldStepper" / "FieldStepper.swift",
         "FieldSpeech": ROOT / "Packages" / "FieldSpeech" / "Sources" / "FieldSpeech" / "FieldSpeech.swift",
+        "FieldAsk": ROOT / "Packages" / "FieldAsk" / "Sources" / "FieldAsk" / "FieldAsk.swift",
         "VisionCapture": ROOT / "Packages" / "VisionCapture" / "Sources" / "VisionCapture" / "VisionCapture.swift",
         "VisionCoreML": ROOT / "Packages" / "VisionCoreML" / "Sources" / "VisionCoreML" / "VisionCoreML.swift",
         "KitStore": ROOT / "Packages" / "KitStore" / "Sources" / "KitStore" / "KitStore.swift",
@@ -83,6 +84,8 @@ def no_stubs() -> None:
 
 
 def no_old_engine() -> None:
+    allowed_session = {"UpdateSocket.swift"}
+    allowed_web = {"GlobeView.swift"}
     hits = []
     for p in (ROOT / "Packages").rglob("*.swift"):
         t = p.read_text(errors="ignore")
@@ -90,14 +93,20 @@ def no_old_engine() -> None:
             hits.append(p)
         if "URLSession" in t:
             hits.append(p)
+        if "WKWebView" in t:
+            hits.append(p)
     for p in (ROOT / "Blackout").rglob("*.swift"):
         t = p.read_text(errors="ignore")
-        if "MKMapView(" in t or "URLSession" in t:
+        if "MKMapView(" in t:
+            hits.append(p)
+        if "URLSession" in t and p.name not in allowed_session:
+            hits.append(p)
+        if "WKWebView" in t and p.name not in allowed_web:
             hits.append(p)
     if hits:
         bad(f"forbidden API {hits}")
     else:
-        ok("no MapKit engine / no URLSession in app+packages")
+        ok("MapKit banned; URLSession only UpdateSocket; WKWebView only GlobeView")
 
 
 def field_schema() -> None:
@@ -127,7 +136,7 @@ def field_schema() -> None:
     else:
         ok(f"field.core {len(core['cards'])} cards categories={sorted(cats)}")
     core_ids = {c["id"] for c in core["cards"]}
-    for need_id in ("med-bleed-pack", "trauma-fracture", "env-heat-collapse", "env-cold", "water-disinfect", "nav-lost", "shelter-tarp", "sig-mirror"):
+    for need_id in ("med-bleed-pack", "trauma-fracture", "env-heat-collapse", "env-cold", "water-disinfect", "nav-lost", "shelter-tarp", "sig-mirror", "plant-use", "cave-dark", "food-game"):
         if need_id not in core_ids:
             bad(f"core missing thickness {need_id}")
         else:
@@ -143,8 +152,33 @@ def field_schema() -> None:
             bad(f"field.{st} missing snake-of-that-state")
         if f"{st}-plant-danger" not in ids:
             bad(f"field.{st} missing plant-danger")
+        if f"{st}-tree-use" not in ids:
+            bad(f"field.{st} missing tree-use")
+        if f"{st}-mammal" not in ids:
+            bad(f"field.{st} missing mammal")
+        if f"{st}-cactus" not in ids:
+            bad(f"field.{st} missing cactus")
+        if f"{st}-game" not in ids:
+            bad(f"field.{st} missing game")
         else:
-            ok(f"field.{st} snake+plant-danger")
+            ok(f"field.{st} snake+plant-danger+tree-use+mammal+cactus+game")
+        if st == "tx":
+            for east_id in ("tx-east-tree-use", "tx-east-mammal", "tx-east-game", "tx-east-snake"):
+                if east_id not in ids:
+                    bad(f"field.tx missing {east_id}")
+                else:
+                    ok(f"field.tx has {east_id}")
+            allowed_packs = {"tx-west", "tx-east", "nm"}
+            for c in book["cards"]:
+                packs = c.get("packs")
+                if not packs:
+                    continue
+                if set(packs) - allowed_packs:
+                    bad(f"{c['id']} packs {packs} not in {sorted(allowed_packs)}")
+                if c["id"].startswith("tx-east-") and packs != ["tx-east"]:
+                    bad(f"{c['id']} must be tx-east only")
+                if c["id"] in {"tx-tree-use", "tx-mammal", "tx-game", "tx-snake"} and packs != ["tx-west"]:
+                    bad(f"{c['id']} must be tx-west only")
     books = {p.stem.split(".")[-1] for p in root.glob("field.*.json")} - {"core"}
     if books != set(SHIPPED_STATES):
         bad(f"field books {sorted(books)} — only {list(SHIPPED_STATES)} ship")
@@ -314,8 +348,11 @@ def walkable_pack() -> None:
     if 'defaultPackID = "tx-west"' not in pack_io or "func hasUsableGraph" not in pack_io:
         bad("PackStore must default to tx-west and expose honest hasUsableGraph")
         return
-    if "OSMCredit.line" not in map_tab or "© OpenStreetMap contributors" not in map_lib:
-        bad("MAP chrome missing © OpenStreetMap contributors")
+    if "OSMCredit.line" in map_tab or "OpenStreetMap" in map_tab or "©" in map_tab:
+        bad("MAP chrome still draws © OpenStreetMap on the glass")
+        return
+    if "© OpenStreetMap contributors" not in map_lib:
+        bad("pack license line missing from MapLibreMap.swift")
         return
     if "hasUsableGraph()" not in app:
         bad("LOCK-ON must use hasUsableGraph for honest OFF GRAPH")
@@ -449,8 +486,16 @@ def vision() -> None:
     field_tab = (ROOT / "Blackout" / "FieldTab.swift").read_text()
     if "VISION ADD FRAME" in field_tab or "g.percent" in field_tab:
         bad("Field tab still presents a fake Vision ID")
+    elif "edible=" in field_tab:
+        bad("Field still dumps edible debug")
+    elif 'Button("VISION")' not in field_tab:
+        bad("FIELD missing VISION capture")
     else:
         ok("Field tab does not present a fake Vision percent")
+    if "classify(observations:" not in vis:
+        bad("Vision has no observation matcher")
+    else:
+        ok("Vision matches system observations to the pack book")
 
 
 def archive_bundle_id() -> None:
@@ -604,15 +649,20 @@ def tip55_chrome() -> None:
         ok("tokens tab caption 10pt")
 
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+    globe = (ROOT / "Blackout" / "GlobeView.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
-    if "OfflineMapView(" not in map_tab:
-        bad("Map tab does not host OfflineMapView")
+    if "GlobeView(" not in map_tab:
+        bad("Map tab does not host GlobeView")
+    elif "OfflineMapView(" in map_tab:
+        bad("Map tab still mounts OfflineMapView")
     elif "RegionalPacks.visible" in map_tab:
         bad("Map tab still renders pack-bullet / Guide FTS list as canvas")
     else:
-        ok("Map tab hosts MapLibre canvas, not pack-bullet list")
-    if "showsUserLocation" not in offline:
+        ok("Map tab hosts Cesium globe, not pack-bullet list")
+    if "WKWebView" not in globe or "loadFileURL" not in globe:
+        bad("GlobeView missing file:// Cesium host")
+    elif "showsUserLocation" not in offline:
         bad("OfflineMapView missing user puck")
     elif "UserPuck" not in offline or "YouPuckAnnotationView" not in offline:
         bad("OfflineMapView missing visible YOU fallback puck")
@@ -670,10 +720,17 @@ def tip55_chrome() -> None:
         bad("ARMING still says INITIATE — the boot is ACTIVATE")
     else:
         ok("ARMING primary is ACTIVATE")
-    if "Logo" not in arming and "AppIcon" not in arming:
-        bad("ARMING missing bundled logo")
+    if 'Image("BootField")' not in arming:
+        bad("ARMING missing field poster")
+    elif "1712.0 / 1152.0" in arming or "Text(\"BLACKOUT\")" in arming:
+        bad("ARMING still uses HUD type BLACKOUT")
     else:
-        ok("ARMING shows bundled logo")
+        ok("ARMING shows the field poster over the page")
+    field = ROOT / "Blackout" / "Assets.xcassets" / "BootField.imageset" / "BootField.png"
+    if not field.is_file():
+        bad("BootField.imageset missing")
+    else:
+        ok("BootField.imageset bundled")
     if "ForEach(packs.catalog.packs" in arming:
         bad("ARMING is still a pack menu")
     else:
@@ -686,12 +743,20 @@ def tip55_chrome() -> None:
 
     exp = (ROOT / "Blackout" / "ExpeditionTab.swift").read_text()
     vitals = (ROOT / "Packages" / "Vitals" / "Sources" / "Vitals" / "Vitals.swift").read_text()
-    for label in ("Hunger", "Thirst", "Pain", "Water", "Fatigue", "Exposure"):
-        if f'slider("{label}"' not in exp and f'slider("{label.lower()}"' not in exp:
-            bad(f"Expedition missing {label} slider")
+    for label in ("HUNGER", "THIRST", "PAIN", "FATIGUE", "EXPOSURE"):
+        if f'slider("{label}"' not in exp:
+            bad(f"Expedition missing {label} rail")
             break
     else:
-        ok("Expedition has six sliders")
+        ok("Expedition has five condition rails")
+    if 'slider("WATER"' in exp:
+        bad("Expedition still has WATER rail; thirst covers hydration")
+    if "Slider(" in exp:
+        bad("Expedition still uses system Slider")
+    elif "PartyVitals.snap" not in exp:
+        bad("Expedition rails do not snap to band ticks")
+    else:
+        ok("Expedition rails are HUD ticks, not system Slider")
     for field in ("hunger", "thirst", "pain", "water", "fatigue", "weatherExposure"):
         if f"var {field}" not in vitals:
             bad(f"PartyVitals missing {field}")
@@ -699,10 +764,10 @@ def tip55_chrome() -> None:
     else:
         ok("PartyVitals has six fields")
 
-    if ".tint(" not in exp and "Theme.accent" not in exp:
-        bad("Expedition sliders still use default system tint")
+    if "Theme.accent" not in exp:
+        bad("Expedition still uses default system tint")
     else:
-        ok("Expedition sliders use token tint")
+        ok("Expedition rails use token ink")
     if "Theme.accent" not in root and ".tint(" not in root:
         bad("root chrome does not apply accent tint (links stay system blue)")
     else:
@@ -759,7 +824,7 @@ def mesh() -> None:
         ok("join is QR plus typed party code")
     if "chip.rally" not in comms or "chip.down" not in comms:
         bad("comms missing RALLY/DOWN chips")
-    if "sendRED" not in app or "sendTimer" not in exp:
+    if "sendRED" not in app or "sendTimer" not in app:
         bad("RED/timer not wired to mesh")
     else:
         ok("RALLY/DOWN chips and RED/timer mesh wiring")
@@ -834,7 +899,7 @@ def tip58_solo_qa() -> None:
     init = app.split("func arm(")[0]
 
     mark_ok = (
-        'Button("MARK")' in map_tab
+        'case .mark:' in map_tab
         and "dropMark()" in app
         and "MarkStore.load" in init
         and "MarkStore.save" in app
@@ -848,17 +913,26 @@ def tip58_solo_qa() -> None:
         and re.search(r"private let synth = AVSpeechSynthesizer\(\)", speech) is None
     )
     timer_ok = (
-        'Button("1 MIN TIMER SET")' in exp
+        'HUDField("TIME"' in exp
+        and 'Button("SET")' in exp
+        and 'Button("30 MIN")' in exp
+        and 'Button("1 HR")' in exp
+        and 'Button("2 HRS")' in exp
+        and 'Button("1 MIN TIMER SET")' not in exp
+        and 'Button("2H WATER TIMER SET")' not in exp
         and 'Button("DONE")' in exp
         and "TimelineView" in exp
         and "overdueRowID" in timers
         and "overduePlate" in exp
         and ("who.isEmpty" in timers)
         and "isSOS" in timers
+        and "enum TimerDuration" in timers
+        and "static func parse(" in timers
     )
     red_ok = (
-        "APPLY RED BAND" in exp
-        and "applySelfRed" in app
+        "APPLY RED BAND" not in exp
+        and "sectionLabel(\"RED\")" not in exp
+        and "redPlate" in exp
         and "cancelSelfRed" in exp
         and "isSOS" in red
         and "openURL" not in red
@@ -963,7 +1037,7 @@ def tip60_map_chrome() -> None:
         and "func merging" in pack_style
         and "sameCoord" in pack_style
         and "func uniqued" in pack_style
-        and 'Button("MARK")' in map_tab
+        and "case .mark:" in map_tab
         and "dropMark()" in app
     )
     sos_ok = (
@@ -972,7 +1046,9 @@ def tip60_map_chrome() -> None:
         and "runtime.lockOn || runtime.tab == .comms" not in root
         and "SOSHold(" not in comms
         and "SOSHold(" in root
-        and "case .map, .field, .expedition" in tokens
+        and "case .map:" in tokens
+        and "return arranging" in tokens
+        and "case .field, .expedition" in tokens
         and "func offerSOS()" in app
         and "Chip.sos" in app
         and "hudCrisis" in app
@@ -1050,11 +1126,12 @@ def tip62_nav() -> None:
         "mapChipHitPoints: Double = 44" in tokens
         and "enum MapDock" in tokens
         and "enum MapInstrument" in tokens
-        and 'Button("MARK")' in map_tab
-        and 'Button("WALK")' in map_tab
-        and 'Button("DRIVE")' in map_tab
-        and 'Button("SPEAK")' in map_tab
-        and 'Button("INST")' in map_tab
+        and "BlackoutTokens.MapDock.allCases" in map_tab
+        and "case .mark:" in map_tab
+        and "case .walk:" in map_tab
+        and "case .drive:" in map_tab
+        and "case .speak:" in map_tab
+        and "BlackoutTokens.MapOverlay.instrumentsTitle" in map_tab
         and 'Button("RULER")' in inst
         and 'Button("USNG")' in inst
         and 'Button("MAG/TRUE")' in inst
@@ -1087,11 +1164,14 @@ def tip62_nav() -> None:
     mark_one_ok = (
         "MarkDrop.merging" in app
         and "dropMark()" in app
-        and 'Button("MARK")' in map_tab
+        and "case .mark:" in map_tab
     )
     canvas_clean_ok = (
-        "OSMCredit.line" in map_tab
+        "OSMCredit.line" not in map_tab
+        and "OpenStreetMap" not in map_tab
+        and "©" not in map_tab
         and "© OpenStreetMap contributors" in (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
+        and "logoView.isHidden = true" in offline
         and "no MapKit engine" not in map_tab
         and "MapLibre Metal offline" not in map_tab
         and "style.json ·" not in map_tab
@@ -1204,6 +1284,10 @@ def main() -> None:
         ok("TX WEST walking-zoom streets and names use Blackout ink")
     tip65_speak()
     tip68_speak_field()
+    address_search()
+    cesium_globe()
+    hud_quality()
+    water_inspect()
     sys.exit(fail)
 
 
@@ -1224,14 +1308,14 @@ def tip65_speak() -> None:
     app = (ROOT / "Blackout" / "AppRuntime.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
-    if 'Button("SPEAK")' not in map_tab or "runtime.speakMap()" not in map_tab:
+    if "BlackoutTokens.MapDock.allCases" not in map_tab or "runtime.speakMap()" not in map_tab:
         bad("tip-65 deleted SPEAK")
         return
     if "VoiceNav.prompt" not in app or "speech.speak(text, locale: locale)" not in app:
         bad("tip-65 Speak still truncated stub")
         return
     if "GraphPlan.line" not in app or "RouteLine.sourceID" not in offline:
-        bad("tip-65 Walk cyan line hooks missing")
+        bad("tip-65 Walk line hooks missing")
         return
     if "CURRENT_PROJECT_VERSION = 1;" not in pbx:
         bad("CPV bumped — tree must stay 1")
@@ -1260,7 +1344,7 @@ def tip68_speak_field() -> None:
     speak_ok = (
         "HUDDockStyle" in map_tab
         and "HUDOverlayChipStyle" in map_tab
-        and 'Button("SPEAK")' in map_tab
+        and "BlackoutTokens.MapDock.allCases" in map_tab
         and "SpeakStatus.chrome(" in app
         and "speech.speak(text, locale: locale)" in app
         and "enum SpeakStatus" in voice
@@ -1291,13 +1375,69 @@ def tip68_speak_field() -> None:
         ("1 Speak is voice + route + short status", speak_ok, "tip-68 Speak FAIL — truncated chrome or a walk-script text wall"),
         ("2 field clean of DEST/TRUE spray", field_ok, "tip-68 field FAIL — chrome rows still spray"),
         ("3 walking-zoom names", names_ok, "tip-68 names FAIL — glyph template still escaped"),
-        ("Walk cyan + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
+        ("Walk line + PERF keep-awake intact", keep_ok, "tip-68 regressed Walk warmup / keep-awake / chips"),
     ]
     for label, passed, fail_msg in checks:
         if passed:
             ok(f"Done: {label}")
         else:
             bad(fail_msg)
+
+
+def address_search() -> None:
+    """MAP SEARCH finds packed house numbers. The card is the address."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_address_search.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"address search contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: MAP SEARCH addresses — house number + street, glass card")
+
+
+def cesium_globe() -> None:
+    """Cesium is the only map. UPDATE is the only socket."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_cesium_globe.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"Cesium globe contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: Cesium globe + UPDATE socket + CPV tree")
+
+
+def hud_quality() -> None:
+    """Quality bar — HUD on every tab, quiet bearing, keep Map mounted, deferred Field."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_hud_quality.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"HUD quality contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: HUD quality — whole words, every tab, keep Map, quiet bearing")
+
+
+def water_inspect() -> None:
+    """Hold names the water the packs already carry — class, nearest, marks."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_water_inspect.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"water inspect contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: hold water classify — STOCK TANK / TINAJA / nearest / FIELD · WATER")
 
 
 if __name__ == "__main__":

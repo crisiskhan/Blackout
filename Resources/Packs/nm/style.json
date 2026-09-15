@@ -28,6 +28,17 @@
       "type": "geojson",
       "data": "wild.geojson"
     },
+    "khan": {
+      "type": "vector",
+      "url": "pmtiles://khan.pmtiles",
+      "attribution": "© OpenStreetMap contributors"
+    },
+    "aerial": {
+      "type": "raster",
+      "url": "pmtiles://aerial.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
     "hillshade": {
       "type": "image",
       "url": "hillshade.png",
@@ -64,10 +75,10 @@
       "type": "raster",
       "source": "hillshade",
       "paint": {
-        "raster-opacity": 0.16,
+        "raster-opacity": 0.2,
         "raster-saturation": -0.65,
         "raster-brightness-max": 0.38,
-        "raster-contrast": 0.12
+        "raster-contrast": 0.16
       }
     },
     {
@@ -82,24 +93,24 @@
             "class"
           ],
           "desert",
-          "#17120c",
+          "#4A2410",
           "playa",
-          "#1a1a1e",
+          "#243048",
           "mountain",
-          "#121417",
+          "#182030",
           "bosque",
-          "#0b1410",
+          "#042818",
           "woodland",
-          "#0a120d",
+          "#0E3018",
           "farm",
-          "#0e1410",
+          "#28280C",
           "town",
-          "#141417",
+          "#282830",
           "park",
-          "#0a140a",
+          "#14301C",
           "protected",
-          "#0c1310",
-          "#101010"
+          "#102820",
+          "#141414"
         ],
         "fill-opacity": [
           "interpolate",
@@ -110,24 +121,48 @@
             "zoom"
           ],
           6,
-          0.62,
+          0.7,
           11,
-          0.46,
+          0.52,
           13,
-          0.22,
-          14,
-          0.12
+          0.3,
+          15,
+          0.18
         ]
       },
       "source-layer": "land"
+    },
+    {
+      "id": "aerial",
+      "type": "raster",
+      "source": "aerial",
+      "minzoom": 14,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
     },
     {
       "id": "public-land-fill",
       "type": "fill",
       "source": "public-land",
       "paint": {
-        "fill-color": "#0a140a",
-        "fill-opacity": 0.34
+        "fill-color": "#0C1810",
+        "fill-opacity": 0.12
+      }
+    },
+    {
+      "id": "public-land-line",
+      "type": "line",
+      "source": "public-land",
+      "paint": {
+        "line-color": "#2A3A28",
+        "line-width": 1.2,
+        "line-opacity": 0.55
       }
     },
     {
@@ -135,8 +170,8 @@
       "type": "fill",
       "source": "flood",
       "paint": {
-        "fill-color": "#0a1822",
-        "fill-opacity": 0.34
+        "fill-color": "#0A2030",
+        "fill-opacity": 0.22
       }
     },
     {
@@ -158,7 +193,7 @@
         ]
       ],
       "paint": {
-        "fill-color": "#142430",
+        "fill-color": "#243844",
         "fill-opacity": 0.82
       },
       "source-layer": "water"
@@ -185,7 +220,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#3d6478",
+        "line-color": "#6E747A",
         "line-width": [
           "interpolate",
           [
@@ -197,7 +232,7 @@
           10,
           0.8,
           15,
-          2.6
+          3.2
         ]
       },
       "source-layer": "water"
@@ -222,7 +257,7 @@
         ]
       ],
       "paint": {
-        "line-color": "#2f4a59",
+        "line-color": "#54595E",
         "line-width": [
           "interpolate",
           [
@@ -234,7 +269,7 @@
           12,
           0.7,
           15,
-          2.0
+          2.4
         ],
         "line-dasharray": [
           2.5,
@@ -265,7 +300,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#6E747A",
         "circle-radius": [
           "interpolate",
           [
@@ -287,7 +322,7 @@
           ],
           "tank_other",
           "#5a5f66",
-          "#6f97a8"
+          "#B8BDC2"
         ],
         "circle-stroke-width": 1.4
       },
@@ -315,7 +350,7 @@
         ]
       ],
       "paint": {
-        "circle-color": "#142430",
+        "circle-color": "#243844",
         "circle-opacity": 0.01,
         "circle-radius": 22,
         "circle-stroke-width": 0
@@ -327,9 +362,9 @@
       "type": "line",
       "source": "contours",
       "paint": {
-        "line-color": "#2a2e28",
-        "line-width": 0.45,
-        "line-opacity": 0.4
+        "line-color": "#3C4438",
+        "line-width": 0.7,
+        "line-opacity": 0.55
       }
     },
     {
@@ -568,6 +603,10 @@
           ]
         ]
       ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
       "paint": {
         "line-color": "#B8BDC2",
         "line-opacity": 0.72,
@@ -611,6 +650,247 @@
       "paint": {
         "line-color": "#E10600",
         "line-width": 1.4
+      }
+    },
+    {
+      "id": "khan-buildings",
+      "type": "fill-extrusion",
+      "source": "khan",
+      "source-layer": "building",
+      "minzoom": 11,
+      "filter": [
+        "!",
+        [
+          "in",
+          [
+            "get",
+            "kind"
+          ],
+          [
+            "literal",
+            [
+              "tree",
+              "wood"
+            ]
+          ]
+        ]
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-extrusion-color": [
+          "match",
+          [
+            "get",
+            "kind"
+          ],
+          "tree",
+          "#3F8F4E",
+          "wood",
+          "#2E6A3A",
+          "house",
+          "#A39C94",
+          "detached",
+          "#A39C94",
+          "apartments",
+          "#8A929A",
+          "residential",
+          "#8A929A",
+          "industrial",
+          "#6E767E",
+          "warehouse",
+          "#6E767E",
+          "retail",
+          "#968A7C",
+          "commercial",
+          "#968A7C",
+          "#8E949C"
+        ],
+        "fill-extrusion-height": [
+          "to-number",
+          [
+            "get",
+            "height_m"
+          ]
+        ],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 1.0,
+        "fill-extrusion-vertical-gradient": true
+      }
+    },
+    {
+      "id": "khan-trees",
+      "type": "fill-extrusion",
+      "source": "khan",
+      "source-layer": "building",
+      "minzoom": 11,
+      "filter": [
+        "in",
+        [
+          "get",
+          "kind"
+        ],
+        [
+          "literal",
+          [
+            "tree",
+            "wood"
+          ]
+        ]
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-extrusion-color": [
+          "match",
+          [
+            "get",
+            "kind"
+          ],
+          "wood",
+          "#2E6A3A",
+          "#3F8F4E"
+        ],
+        "fill-extrusion-height": [
+          "to-number",
+          [
+            "get",
+            "height_m"
+          ]
+        ],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 0.9,
+        "fill-extrusion-vertical-gradient": true
+      }
+    },
+    {
+      "id": "khan-signals",
+      "type": "circle",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 11,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "signal"
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "circle-color": "#E10600",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          2.8,
+          16,
+          5.6
+        ],
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 1.0
+      }
+    },
+    {
+      "id": "khan-lamps",
+      "type": "circle",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 11,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "lamp"
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "circle-color": "#E8A040",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          2.2,
+          16,
+          4.4
+        ],
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 0.8
+      }
+    },
+    {
+      "id": "khan-signs",
+      "type": "symbol",
+      "source": "khan",
+      "source-layer": "furniture",
+      "minzoom": 12,
+      "filter": [
+        "==",
+        [
+          "get",
+          "kind"
+        ],
+        "sign"
+      ],
+      "layout": {
+        "visibility": "none",
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "sign"
+          ],
+          [
+            "get",
+            "name"
+          ],
+          ""
+        ],
+        "text-size": 12,
+        "text-font": [
+          "Open Sans Regular"
+        ],
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.4
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": [
+          "match",
+          [
+            "get",
+            "sign"
+          ],
+          "STOP",
+          "#E10600",
+          "YIELD",
+          "#E8A040",
+          "#B8BDC2"
+        ],
+        "text-halo-color": "#000000",
+        "text-halo-width": 2.0
       }
     },
     {
@@ -682,7 +962,7 @@
         "text-keep-upright": true
       },
       "paint": {
-        "text-color": "#7fa6b8",
+        "text-color": "#8A9AA4",
         "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.15
@@ -816,8 +1096,8 @@
         "symbol-sort-key": 0
       },
       "paint": {
-        "text-color": "#E10600",
-        "text-halo-color": "#B8BDC2",
+        "text-color": "#B8BDC2",
+        "text-halo-color": "#000000",
         "text-halo-width": 2.0,
         "text-halo-blur": 0.05
       },
@@ -866,6 +1146,16 @@
       "source-layer": "place"
     }
   ],
+  "light": {
+    "anchor": "viewport",
+    "color": "#ffffff",
+    "intensity": 0.7,
+    "position": [
+      1.15,
+      210,
+      30
+    ]
+  },
   "metadata": {
     "engine": "maplibre-metal-offline",
     "network": "deny-all",
