@@ -11,6 +11,8 @@
   var lastOsm = "";
   var lastWater = "";
   var lastContours = "";
+  var lastGroundKey = "";
+  var lastLook = "";
   var aerialLayer = null;
   var shadeLayer = null;
   var osmLayer = null;
@@ -911,6 +913,9 @@
   }
 
   function applyPalette(spec) {
+    var look = (spec.lamp || "") + "|" + (spec.palette || "");
+    if (look === lastLook) return;
+    lastLook = look;
     var globe = viewer.scene.globe;
     globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
     globe.showGroundAtmosphere = false;
@@ -948,6 +953,8 @@
     var pitch = spec.pitch == null ? -90 : spec.pitch;
     var heading = spec.heading == null ? 0 : spec.heading;
     if (spec.godsEye) {
+      viewer.trackedEntity = undefined;
+      viewer.clock.shouldAnimate = false;
       var pts = [];
       if (spec.puck && spec.puck.show) pts.push(cart(spec.puck.lat, spec.puck.lon));
       (spec.pips || []).forEach(function (p) { pts.push(cart(p.lat, p.lon)); });
@@ -967,21 +974,15 @@
       return;
     }
     if (spec.lockOn || spec.followId) {
-      var target = puck;
-      if (spec.followId) {
-        var hit = (spec.pips || []).filter(function (p) { return p.id === spec.followId; })[0];
-        if (hit) target = hit;
-      }
-      viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(target.lon, target.lat, height),
-        orientation: {
-          heading: Cesium.Math.toRadians(target.heading || 0),
-          pitch: Cesium.Math.toRadians(-90),
-          roll: 0
-        }
-      });
+      var trackId = spec.followId ? "coin:" + spec.followId : "puck";
+      var tracked = viewer.entities.getById(trackId);
+      if (!tracked) tracked = viewer.entities.getById("puck");
+      viewer.trackedEntity = tracked || undefined;
+      viewer.clock.shouldAnimate = true;
       return;
     }
+    viewer.trackedEntity = undefined;
+    viewer.clock.shouldAnimate = false;
     if (spec.fitToken !== lastFit) {
       viewer.camera.setView({
         destination: Cesium.Cartesian3.fromDegrees(puck.lon, puck.lat, height),
@@ -1072,6 +1073,25 @@
     cameraFor(spec);
     viewer.scene.requestRender();
     post({ type: "pulse" });
+    var groundKey = [
+      spec.packId || "",
+      shadeUrl,
+      osmUrl,
+      spec.aerialUrl || "",
+      spec.demUrl || "",
+      spec.waterUrl || "",
+      spec.contoursUrl || "",
+      streetsOn ? "1" : "0",
+      aerialOn ? "1" : "0",
+      waterOn ? "1" : "0",
+      vectorsOn ? "1" : "0",
+      spec.ground || "",
+      spec.bbox
+        ? [spec.bbox.west, spec.bbox.south, spec.bbox.east, spec.bbox.north].join(",")
+        : ""
+    ].join("|");
+    if (groundKey === lastGroundKey) return;
+    lastGroundKey = groundKey;
     loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
     loadShade(shadeUrl, spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })

@@ -129,13 +129,6 @@ struct MapTab: View {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if runtime.tab == .map, runtime.showSpeakTurns, runtime.held == nil, runtime.heldParty == nil, runtime.heldAddress == nil, runtime.markDraft == nil {
-                SpeakTurnCard(
-                    turns: runtime.speakHUDTurns,
-                    onClose: { runtime.closeSpeakTurns() }
-                )
-                .padding(hudReserve)
-            }
             if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
                 EyeTapStrip(
                     person: tap,
@@ -213,7 +206,6 @@ struct MapTab: View {
         runtime.held != nil
             || runtime.heldParty != nil
             || runtime.heldAddress != nil
-            || runtime.showSpeakTurns
             || runtime.markDraft != nil
             || runtime.heldMark != nil
     }
@@ -264,6 +256,12 @@ struct MapTab: View {
             }
             if runtime.hudCrisis {
                 crisisStrip
+            }
+            if runtime.showSpeakTurns {
+                SpeakTurnCard(
+                    turns: runtime.speakHUDTurns,
+                    onClose: { runtime.closeSpeakTurns() }
+                )
             }
             HUDPlaced(
                 offset: runtime.hudLayout.dock,

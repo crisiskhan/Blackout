@@ -160,6 +160,32 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("Promise.resolve(this._img)", shade)
         self.assertIn("showRenderLoopErrors: false", desk)
 
+    def test_globe_does_not_reload_pack_on_live_ticks(self):
+        """Device stills: streets then void then streets. GPS apply() reloaded pack tiles."""
+        desk = read("Resources", "Globe", "desk.js")
+        apply = desk.split("function apply(spec)")[1].split("function boot")[0]
+        self.assertIn("lastGround", apply)
+        self.assertLess(apply.find("lastGround"), apply.find("loadShade"))
+        camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
+        lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
+        self.assertIn("trackedEntity", lock)
+        self.assertNotIn("setView", lock)
+
+    def test_turns_do_not_cover_the_globe(self):
+        """Device stills: TURNS hold-glass ate half the Cesium canvas. CLOSE did not stick."""
+        tab = read("Blackout", "MapTab.swift")
+        card = read("Blackout", "SpeakTurnCard.swift")
+        app = read("Blackout", "AppRuntime.swift")
+        cover = tab.split("private var coverUp")[1].split("private func hud")[0]
+        hud = tab.split("private func hud")[1].split("private var searchField")[0]
+        chrome = app.split("func applyRemainingChrome")[1].split("func resetLiveGuide")[0]
+        self.assertNotIn("showSpeakTurns", cover)
+        self.assertIn("SpeakTurnCard(", hud)
+        self.assertNotIn("HoldGlassShell(", card)
+        self.assertIn("prefix(2)", card)
+        self.assertIn('Button("CLOSE")', card)
+        self.assertNotIn("showSpeakTurns", chrome)
+
     def test_four_tabs_four_dock_no_fifth(self):
         tokens = read("Packages", "Tokens", "Sources", "Tokens", "Tokens.swift")
         tab = read("Blackout", "MapTab.swift")

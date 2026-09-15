@@ -328,7 +328,8 @@ class PageOpenCloseFadeTests(unittest.TestCase):
         self.assertIn("if scanQR", comms)
         self.assertIn(".transition(.opacity)", comms)
         self.assertIn("animation(Theme.Motion.heavy, value: scanQR)", comms)
-        self.assertIn("HoldGlassShell(", turns)
+        self.assertNotIn("HoldGlassShell(", turns)
+        self.assertIn("prefix(2)", turns)
         shell = read("Blackout", "HoldCard.swift").split("struct HoldGlassShell")[1].split("struct HoldCardView")[0]
         self.assertIn(".transition(.opacity)", shell)
         self.assertIn("animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)", tab)
@@ -4140,7 +4141,6 @@ class GlassCardHonestyTests(unittest.TestCase):
         "AddressHoldCard.swift",
         "PlaceMarkCard.swift",
         "EmblemPickCard.swift",
-        "SpeakTurnCard.swift",
     )
 
     def test_overlay_cards_share_hold_glass(self):
@@ -4321,7 +4321,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("HoldGlassShell(", pick)
         turns = read("Blackout", "SpeakTurnCard.swift")
         self.assertIn("Theme.glass", turns)
-        self.assertIn("HoldGlassShell(", turns)
+        self.assertNotIn("HoldGlassShell(", turns)
         inst = read("Blackout", "InstrumentsView.swift")
         self.assertIn("Theme.glass", inst)
         self.assertIn("Theme.plateRect", inst)

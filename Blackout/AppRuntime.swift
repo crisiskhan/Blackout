@@ -2267,7 +2267,6 @@ final class AppRuntime {
             streets: names
         )
         speakNextHUD = cue.nextHUD
-        showSpeakTurns = !speakHUDTurns.isEmpty
     }
 
     private func resetLiveGuide() {
