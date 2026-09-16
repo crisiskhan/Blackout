@@ -217,6 +217,8 @@ struct HUDReticle: View {
 
 /// Full-width 44pt dock cell. Equal split, no tail-ellipsis.
 struct HUDDockStyle: ButtonStyle {
+    var filled: Bool = false
+
     func makeBody(configuration: Configuration) -> some View {
         let hit = BlackoutTokens.Chrome.mapChipHitPoints
         return configuration.label
@@ -226,13 +228,18 @@ struct HUDDockStyle: ButtonStyle {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: hit, maxHeight: hit)
             .contentShape(Rectangle())
-            .foregroundStyle(Theme.silver)
+            .foregroundStyle(filled ? Color.white : Theme.silver)
             .background(Theme.glass(opacity: configuration.isPressed ? 0.55 : 0.92))
             .clipShape(Theme.plateRect())
-            .overlay(
-                Theme.plateRect()
-                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-            )
+            .overlay {
+                if filled {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.accent, lineWidth: Theme.strokeWidth(1.5))
+                } else {
+                    Theme.plateRect()
+                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                }
+            }
     }
 }
 

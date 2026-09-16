@@ -799,19 +799,26 @@ public struct OfflineMapView: UIViewRepresentable {
             mark.lead = pip.lead
             mark.kid = pip.kid
             mark.overdue = pip.overdue
-            mark.badge = pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle
+            mark.markKind = pip.markKind
+            mark.badge = pip.markKind.isEmpty
+                ? (pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle)
+                : pip.markKind
         }
 
         func applyLook(_ view: YouPuckAnnotationView, pip: PartyBody) {
+            let place = PlaceMark.parse(pip.id) != nil
             view.apply(
                 emblemID: pip.emblem,
                 headingDeg: pip.ghost ? nil : pip.headingDeg,
                 tint: EyeLook.tint(pip.condition),
                 ghost: pip.ghost,
-                scale: CGFloat(EyeDesk.leadScale(isLead: pip.lead)),
-                badge: pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle,
+                scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: pip.lead)),
+                badge: place
+                    ? (pip.markKind.isEmpty ? "MARK" : pip.markKind)
+                    : (pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle),
                 kid: pip.kid,
-                overdue: pip.overdue
+                overdue: pip.overdue,
+                place: place
             )
         }
 
@@ -1537,7 +1544,8 @@ public struct OfflineMapView: UIViewRepresentable {
                 return hidden
             }
             let you = annotation.title == UserPuck.title
-            let reuse = you ? "you-puck" : "party-puck"
+            let place = PlaceMark.parse((annotation as? PersonMarkAnnotation)?.memberID ?? annotation.title ?? "") != nil
+            let reuse = you ? "you-puck" : (place ? "place-pin" : "party-puck")
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
                 ?? YouPuckAnnotationView(reuseIdentifier: reuse)
             if let mark = annotation as? PersonMarkAnnotation {
@@ -1546,10 +1554,11 @@ public struct OfflineMapView: UIViewRepresentable {
                     headingDeg: mark.headingDeg,
                     tint: EyeLook.tint(mark.condition),
                     ghost: mark.ghost,
-                    scale: CGFloat(EyeDesk.leadScale(isLead: mark.lead)),
-                    badge: mark.badge,
+                    scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: mark.lead)),
+                    badge: place ? (mark.markKind.isEmpty ? "MARK" : mark.markKind) : mark.badge,
                     kid: mark.kid,
-                    overdue: mark.overdue
+                    overdue: mark.overdue,
+                    place: place
                 )
             } else if you {
                 view.apply(emblemID: spec?.youEmblem, headingDeg: spec?.youHeading)
@@ -1692,11 +1701,13 @@ final class PersonMarkAnnotation: MLNPointAnnotation {
     var kid = false
     var overdue = false
     var badge = ""
+    var markKind = ""
 }
 
 final class YouPuckAnnotationView: MLNAnnotationView {
     private let rose = UIImageView()
     private let emblemView = UIImageView()
+    private let pinView = UIImageView()
     private let headingView = UIView()
     private let chevronLayer = CAShapeLayer()
     private let badgeLabel = UILabel()
@@ -1738,6 +1749,11 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         emblemView.layer.borderColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.55).cgColor
         addSubview(emblemView)
 
+        pinView.frame = bounds
+        pinView.contentMode = .scaleAspectFit
+        pinView.isHidden = true
+        addSubview(pinView)
+
         headingView.frame = bounds
         headingView.isUserInteractionEnabled = false
         headingView.backgroundColor = .clear
@@ -1776,6 +1792,11 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         headingView.isHidden = true
         headingView.layer.transform = CATransform3DIdentity
         emblemView.image = nil
+        pinView.image = nil
+        pinView.isHidden = true
+        rose.isHidden = false
+        emblemView.isHidden = false
+        centerOffset = .zero
     }
 
     func apply(
@@ -1786,17 +1807,29 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         scale: CGFloat = 1,
         badge: String = "",
         kid: Bool = false,
-        overdue: Bool = false
+        overdue: Bool = false,
+        place: Bool = false
     ) {
+        rose.isHidden = place
+        emblemView.isHidden = place
+        pinView.isHidden = !place
         let emblem = PersonEmblem.resolved(emblemID)
-        emblemView.image = PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback)
+        emblemView.image = place ? nil : (PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback))
         let ink = tint ?? UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
         emblemView.layer.borderColor = ink.cgColor
         alpha = ghost ? 0.42 : 1
         let size = CGFloat(PersonCompass.puckPoints) * max(scale, 0.7)
         bounds = CGRect(x: 0, y: 0, width: size, height: size)
         rose.frame = bounds
+        pinView.frame = bounds
         headingView.frame = bounds
+        if place {
+            pinView.image = PersonCompassArt.pin(tint: ink)
+            centerOffset = CGVector(dx: 0, dy: size / 2)
+        } else {
+            pinView.image = nil
+            centerOffset = .zero
+        }
         let well = CGFloat(PersonCompass.wellPoints) * max(scale, 0.7)
         emblemView.frame = CGRect(
             x: (size - well) / 2,
@@ -1832,6 +1865,11 @@ final class YouPuckAnnotationView: MLNAnnotationView {
         pulseLayer.cornerRadius = size / 2
         pulseLayer.borderColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
         pulseLayer.borderWidth = overdue ? 2 : 0
+        if place {
+            headingView.isHidden = true
+            lastHeading = nil
+            return
+        }
         guard let headingDeg, headingDeg >= 0 else {
             headingView.isHidden = true
             lastHeading = nil
@@ -1859,6 +1897,47 @@ final class YouPuckAnnotationView: MLNAnnotationView {
 
 enum PersonCompassArt {
     static let rose: UIImage = renderRose()
+
+    static func pin(tint: UIColor) -> UIImage {
+        let size = CGFloat(PersonCompass.puckPoints)
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let cg = ctx.cgContext
+            let silver = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
+            let cx = size / 2
+            let r = size * 0.28
+            let top = size * 0.06
+            let tip = CGPoint(x: cx, y: size - 1.2)
+            let head = CGPoint(x: cx, y: top + r)
+            let path = UIBezierPath()
+            path.addArc(
+                withCenter: head,
+                radius: r,
+                startAngle: .pi * 0.78,
+                endAngle: .pi * 2.22,
+                clockwise: true
+            )
+            path.addLine(to: tip)
+            path.close()
+            cg.setFillColor(tint.cgColor)
+            cg.addPath(path.cgPath)
+            cg.fillPath()
+            cg.setStrokeColor(UIColor.black.cgColor)
+            cg.setLineWidth(1.1)
+            cg.addPath(path.cgPath)
+            cg.strokePath()
+            let well = r * 0.58
+            cg.setFillColor(UIColor(red: 0, green: 0, blue: 0, alpha: 0.78).cgColor)
+            cg.fillEllipse(
+                in: CGRect(x: cx - well, y: head.y - well, width: well * 2, height: well * 2)
+            )
+            cg.setStrokeColor(silver.cgColor)
+            cg.setLineWidth(1)
+            cg.strokeEllipse(
+                in: CGRect(x: cx - well, y: head.y - well, width: well * 2, height: well * 2)
+            )
+        }
+    }
 
     static func chevronPath(in bounds: CGRect) -> UIBezierPath {
         let cx = bounds.midX
@@ -2181,6 +2260,7 @@ extension PackStyle {
     /// Schematic fills and casings that sit on the photo. Hide them on walking
     /// MAP and KHAN EYE while packed NAIP is the ground so yards read. Labels stay.
     private static func coversPhoto(_ id: String) -> Bool {
+        if id == landFillLayerID { return true }
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
             return true

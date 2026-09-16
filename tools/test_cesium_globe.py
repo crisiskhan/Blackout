@@ -71,15 +71,18 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn("OSMCredit.line", tab)
         self.assertIn("BlackoutTokens.MapOverlay.updateTitle", tab)
         self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", tab)
-        lamp = tab.split("private var lampRail")[1].split("private var hitList")[0]
-        self.assertIn("NIGHT", lamp)
-        self.assertIn("SUN", lamp)
-        self.assertIn("godsEyeTitle", lamp)
-        overlay = tab.split("private var overlayRail")[1].split("private var lampRail")[0]
+        self.assertNotIn("private var lampRail", tab)
+        overlay = tab.split("private var overlayRail")[1].split("private var hitList")[0]
         self.assertIn("instrumentsTitle", overlay)
         self.assertIn("lockTitle", overlay)
         self.assertIn("updateTitle", overlay)
-        self.assertNotIn("godsEyeTitle", overlay)
+        self.assertIn("godsEyeTitle", overlay)
+        self.assertNotIn("NIGHT", overlay)
+        self.assertNotIn("SUN", overlay)
+        inst = read("Blackout", "InstrumentsView.swift")
+        hud = inst.split('sectionLabel("HUD")')[1].split('sectionLabel("MAP")')[0]
+        self.assertIn('Button("NIGHT")', hud)
+        self.assertIn('Button("SUN")', hud)
 
     def test_update_socket_is_the_only_pipe(self):
         sock = read("Blackout", "UpdateSocket.swift")
@@ -162,7 +165,11 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("lastKhan", desk)
         self.assertIn('text: "YOU"', puck)
         self.assertIn("khanUrl", globe)
-        self.assertIn("TAP a street", tab)
+        self.assertNotIn("TAP a street", tab)
+        footer = tab.split("private func canvasFooter")[1].split("private func deskStyleURL")[0]
+        self.assertNotIn("eyeHUDLines", footer)
+        self.assertIn("packName", footer)
+        self.assertIn("EyeDesk.noPipe", footer)
         field = tab.split("fieldChrome")[1].split("if runtime.hudCrisis")[0]
         self.assertNotIn("allowsHitTesting(false)", field)
         self.assertNotIn("best in class", desk.lower())

@@ -1064,6 +1064,8 @@ class HUDSyncTests(unittest.TestCase):
         self.assertIn("case .walk:", tab)
         self.assertIn("case .drive:", tab)
         self.assertIn("case .speak:", tab)
+        self.assertIn("HUDDockStyle(filled:", tab)
+        self.assertIn("func dockLive", tab)
 
 
 YELLOW_AT = 0.45
@@ -4111,12 +4113,20 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("160m neighborhood", qa)
         self.assertIn("schematic road casings hide on packed photo", qa)
         self.assertIn("hillshade stays the floor", qa)
+        self.assertIn("NIGHT / SUN live in INSTRUMENTS", qa)
+        self.assertIn("Marks are pins, not a second YOU", qa)
+        self.assertIn("MAP footer is the pack name", qa)
+        self.assertIn("sits on the overlay with LOCK-ON", qa)
         self.assertIn("pan stays on the pack", qa)
         self.assertIn("tilt stays on the pack", qa)
         self.assertIn("holds satellite range", device)
         self.assertIn("160m neighborhood", device)
         self.assertIn("schematic road casings hide on packed photo", device)
         self.assertIn("hillshade stays the floor", device)
+        self.assertIn("NIGHT / SUN live in INSTRUMENTS", device)
+        self.assertIn("Marks are pins, not a second YOU", device)
+        self.assertIn("MAP footer is the pack name", device)
+        self.assertIn("sits on the overlay with LOCK-ON", device)
         self.assertIn("pan stays on the pack", device)
         self.assertIn("tilt stays on the pack", device)
         self.assertIn("frames the party", device)
@@ -4296,6 +4306,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
     def test_hud_controls_are_faceted_metal_not_flat_raised(self):
         theme = read("Blackout", "Theme.swift")
         dock = theme.split("struct HUDDockStyle")[1].split("struct HUDOverlayChipStyle")[0]
+        self.assertIn("var filled: Bool", dock)
         self.assertIn("Theme.glass", dock)
         self.assertIn("metalStroke", dock)
         self.assertNotIn("Theme.raised", dock)

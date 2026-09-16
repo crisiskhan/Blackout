@@ -206,11 +206,8 @@ struct MapTab: View {
             || runtime.heldMark != nil
     }
 
-    /// Everything that is not the map, sitting on the map. Search, lock, UPDATE and
-    /// instruments at the top; NIGHT / SUN / EYE and the four thumb cells at the bottom.
-    /// KHAN EYE is the packed 3D desk from above. LAYERS / LOOK / MARK / SCENE live in Instruments.
-    /// Ruler, grid and north live in Instruments — they are not a walk.
-    /// The spacer is a hole: pan, tap, and hold belong to the desk, not the HUD.
+    /// Search, lock, EYE, UPDATE, instruments at the top; four thumb cells
+    /// at the bottom. NIGHT / SUN live in INSTRUMENTS.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
             if !runtime.godsEye {
@@ -262,10 +259,7 @@ struct MapTab: View {
                 onMove: { runtime.hudLayout.dock = $0 },
                 onStore: { runtime.hudLayout.save() }
             ) {
-                VStack(spacing: 6) {
-                    lampRail
-                    dock
-                }
+                dock
             }
             HUDPlaced(
                 offset: runtime.hudLayout.footer,
@@ -331,6 +325,10 @@ struct MapTab: View {
                 runtime.toggleLockOn()
             }
             .buttonStyle(HUDOverlayChipStyle(filled: PackCamera.liveLockOn(lockOn: runtime.lockOn, godsEye: runtime.godsEye) || runtime.eyeFollowID != nil))
+            Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
+                runtime.toggleGodsEye()
+            }
+            .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
             Button(BlackoutTokens.MapOverlay.updateTitle) {
                 runtime.touch(.overlay)
                 runtime.tapUpdate()
@@ -339,21 +337,7 @@ struct MapTab: View {
         }
         .animation(Theme.Motion.heavy, value: runtime.updateSocket.busy)
         .animation(Theme.Motion.heavy, value: runtime.lockOn)
-    }
-
-    private var lampRail: some View {
-        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-            Button("NIGHT") { runtime.tapLamp(.night) }
-                .buttonStyle(HUDOverlayChipStyle(filled: runtime.lamp == .night))
-            Button("SUN") { runtime.tapLamp(.sun) }
-                .buttonStyle(HUDOverlayChipStyle(filled: runtime.lamp == .sun))
-            Button(BlackoutTokens.MapOverlay.godsEyeTitle) {
-                runtime.toggleGodsEye()
-            }
-            .buttonStyle(HUDOverlayChipStyle(filled: runtime.godsEye))
-        }
         .animation(Theme.Motion.heavy, value: runtime.godsEye)
-        .animation(Theme.Motion.heavy, value: runtime.lamp)
     }
 
     private var hitList: some View {
@@ -573,7 +557,7 @@ struct MapTab: View {
         HStack(spacing: 1) {
             ForEach(BlackoutTokens.MapDock.allCases, id: \.self) { cell in
                 Button(cell.title) { tapDock(cell) }
-                    .buttonStyle(HUDDockStyle())
+                    .buttonStyle(HUDDockStyle(filled: dockLive(cell)))
             }
         }
         .background(Theme.glass())
@@ -583,6 +567,9 @@ struct MapTab: View {
                 .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
         )
         .frame(maxWidth: .infinity)
+        .animation(Theme.Motion.heavy, value: runtime.travelMode)
+        .animation(Theme.Motion.heavy, value: runtime.routeCoords.isEmpty)
+        .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
     }
 
     private func tapDock(_ cell: BlackoutTokens.MapDock) {
@@ -599,7 +586,20 @@ struct MapTab: View {
         }
     }
 
-    /// Pack name on the canvas. The desk opens on YOU at walking height.
+    private func dockLive(_ cell: BlackoutTokens.MapDock) -> Bool {
+        switch cell {
+        case .mark:
+            return false
+        case .walk:
+            return runtime.travelMode == .walk && !runtime.routeCoords.isEmpty
+        case .drive:
+            return runtime.travelMode == .drive && !runtime.routeCoords.isEmpty
+        case .speak:
+            return runtime.showSpeakTurns
+        }
+    }
+
+    /// Pack name on the canvas. Phone / mesh / SNAP live in INSTRUMENTS.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             if offPack {
@@ -610,13 +610,8 @@ struct MapTab: View {
             Text(packName)
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(Theme.silver)
-            if !runtime.godsEye {
-                Text("TAP a street · WALK follows")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(Theme.silver)
-            }
-            ForEach(runtime.eyeHUDLines(), id: \.self) { line in
-                Text(line)
+            if runtime.updateSocket.chrome == EyeDesk.noPipe {
+                Text(EyeDesk.noPipe)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(Theme.silver)
             }

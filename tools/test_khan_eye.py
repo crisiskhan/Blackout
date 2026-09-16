@@ -317,6 +317,49 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             self.assertIn("160m neighborhood", blob)
             self.assertIn("schematic road casings hide on packed photo", blob)
             self.assertIn("hillshade stays the floor", blob)
+            self.assertIn("NIGHT / SUN live in INSTRUMENTS", blob)
+            self.assertIn("Marks are pins, not a second YOU", blob)
+            self.assertIn("MAP footer is the pack name", blob)
+            self.assertIn("sits on the overlay with LOCK-ON", blob)
+        covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
+        self.assertIn("landFillLayerID", covers)
+
+    def test_planted_marks_are_pins_not_you_roses(self):
+        offline = OFFLINE.read_text()
+        stamp = offline.split("func stamp(_ mark: PersonMarkAnnotation")[1].split(
+            "func applyLook"
+        )[0]
+        self.assertIn("mark.markKind = pip.markKind", stamp)
+        view_apply = offline.split("final class YouPuckAnnotationView")[1]
+        self.assertIn("place: Bool", view_apply)
+        self.assertIn("rose.isHidden = place", view_apply)
+        self.assertIn("emblemView.isHidden = place", view_apply)
+        self.assertIn("pinView.isHidden = !place", view_apply)
+        self.assertIn("PersonCompassArt.pin", view_apply)
+        self.assertIn("centerOffset", view_apply)
+        self.assertIn(
+            "PlaceMark.parse",
+            offline.split("func mapView(_ mapView: MLNMapView, viewFor")[1].split(
+                "func mapView(_ mapView: MLNMapView, annotationCanShowCallout"
+            )[0],
+        )
+
+    def test_live_nav_chrome_is_overlay_and_lit_dock(self):
+        tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
+        hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
+        overlay = tab.split("private var overlayRail")[1].split("private var hitList")[0]
+        dock = tab.split("private var dock")[1].split("private func tapDock")[0]
+        live = tab.split("private func dockLive")[1].split("private func canvasFooter")[0]
+        self.assertNotIn("lampRail", hud)
+        self.assertNotIn("private var lampRail", tab)
+        self.assertIn("godsEyeTitle", overlay)
+        self.assertLess(overlay.find("lockTitle"), overlay.find("godsEyeTitle"))
+        self.assertLess(overlay.find("godsEyeTitle"), overlay.find("updateTitle"))
+        self.assertIn("HUDDockStyle(filled:", dock)
+        self.assertIn("dockLive(cell)", dock)
+        self.assertIn("travelMode == .walk", live)
+        self.assertIn("travelMode == .drive", live)
+        self.assertIn("routeCoords.isEmpty", live)
 
 
 if __name__ == "__main__":
