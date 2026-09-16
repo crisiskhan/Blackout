@@ -1543,9 +1543,16 @@ public struct OfflineMapView: UIViewRepresentable {
                 hidden.bounds = CGRect(x: 0, y: 0, width: 1, height: 1)
                 return hidden
             }
-            let memberID = (annotation as? PersonMarkAnnotation)?.memberID ?? ""
-            let you = memberID == UserPuck.title
-            let place = PlaceMark.parse(memberID) != nil
+            let you = annotation.title == UserPuck.title
+            // PlaceMark.parse takes String (non-optional). Optional-chain
+            // memberID is String?; never feed that into ?? with another optional path.
+            let raw: String = {
+                if let person = annotation as? PersonMarkAnnotation {
+                    return person.memberID
+                }
+                return annotation.title ?? ""
+            }()
+            let place = PlaceMark.parse(raw) != nil
             let reuse = you ? "you-puck" : (place ? "place-pin" : "party-puck")
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
                 ?? YouPuckAnnotationView(reuseIdentifier: reuse)
