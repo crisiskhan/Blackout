@@ -337,12 +337,13 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("pinView.isHidden = !place", view_apply)
         self.assertIn("PersonCompassArt.pin", view_apply)
         self.assertIn("centerOffset", view_apply)
-        self.assertIn(
-            "PlaceMark.parse",
-            offline.split("func mapView(_ mapView: MLNMapView, viewFor")[1].split(
-                "func mapView(_ mapView: MLNMapView, annotationCanShowCallout"
-            )[0],
-        )
+        view_for = offline.split("func mapView(_ mapView: MLNMapView, viewFor")[1].split(
+            "func mapView(_ mapView: MLNMapView, annotationCanShowCallout"
+        )[0]
+        self.assertIn("PlaceMark.parse", view_for)
+        self.assertNotIn("memberID ?? annotation.title", view_for)
+        self.assertIn('let titled = annotation.title ?? ""', view_for)
+        self.assertIn("PlaceMark.parse(member ?? titled)", view_for)
 
     def test_live_nav_chrome_is_overlay_and_lit_dock(self):
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
