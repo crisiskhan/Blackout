@@ -146,6 +146,7 @@
         "contours.geojson",
         "corridor.geojson",
         "dem.json",
+        "desk3d.geojson",
         "glyphs/Open Sans Regular/0-255.pbf",
         "glyphs/Open Sans Regular/256-511.pbf",
         "glyphs/Open Sans Regular/512-767.pbf",
@@ -167,9 +168,10 @@
         "region.geojson",
         "search.json",
         "style.json",
+        "walk-dem.json",
         "wild.geojson"
       ],
-      "bytes": 85712280
+      "bytes": 85734844
     },
     {
       "id": "tx-east",
