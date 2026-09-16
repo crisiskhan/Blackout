@@ -342,8 +342,13 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         )[0]
         self.assertIn("PlaceMark.parse", view_for)
         self.assertNotIn("memberID ?? annotation.title", view_for)
-        self.assertIn('let titled = annotation.title ?? ""', view_for)
-        self.assertIn("PlaceMark.parse(member ?? titled)", view_for)
+        self.assertNotIn("member ?? titled", view_for)
+        self.assertNotIn("annotation.title ??", view_for)
+        self.assertIn(
+            'let memberID = (annotation as? PersonMarkAnnotation)?.memberID ?? ""',
+            view_for,
+        )
+        self.assertIn("PlaceMark.parse(memberID)", view_for)
 
     def test_live_nav_chrome_is_overlay_and_lit_dock(self):
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
