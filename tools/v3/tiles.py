@@ -597,7 +597,7 @@ def read_khan_layers(pack: Path) -> dict[str, Layer]:
 
 
 def build_khan(pack: Path, bbox: dict, name: str) -> dict:
-    """Write `khan.pmtiles` — 3D houses and furniture, walking MAP never reads it."""
+    """Write `khan.pmtiles` — 3D houses and furniture for the walking desk and KHAN EYE."""
     layers = read_khan_layers(pack)
     out = pack / "khan.pmtiles"
     tiles = 0

@@ -54,80 +54,75 @@ struct MapTab: View {
             bbox: (pack.bbox.south, pack.bbox.west, pack.bbox.north, pack.bbox.east)
         ) == PackChrome.offPack
         ZStack(alignment: .bottomLeading) {
-            GlobeView(
-                packID: pack.id,
-                centerLat: camera.lat,
-                centerLon: camera.lon,
-                puckLat: you?.lat ?? camera.lat,
-                puckLon: you?.lon ?? camera.lon,
-                showYou: you != nil,
-                packSouth: pack.bbox.south,
-                packWest: pack.bbox.west,
-                packNorth: pack.bbox.north,
-                packEast: pack.bbox.east,
-                route: runtime.routeCoords,
-                destination: runtime.routeTarget,
-                held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
-                    ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
-                    ?? runtime.markDraft.map { (lat: $0.lat, lon: $0.lon) },
-                fitToken: runtime.fitPackToken,
-                interactive: MapCanvasHit.enabled(
-                    onMap: runtime.tab == .map,
-                    holding: coverUp,
-                    arranging: runtime.hudLayoutMode
-                ),
-                onMapTap: { lat, lon in
-                    runtime.pickDestination(lat: lat, lon: lon)
-                    runtime.navigate(mode: runtime.travelMode)
-                    hits = []
-                },
-                onMapHold: { lat, lon, tags, zoom in
-                    runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
-                },
-                onPersonHold: { id, lat, lon in
-                    runtime.holdParty(id: id, lat: lat, lon: lon)
-                    runtime.eyeTap = nil
-                },
-                onPersonTap: { id, lat, lon in
-                    runtime.tapEyeContact(id: id, lat: lat, lon: lon)
-                },
-                onPersonDoubleTap: { id, _, _ in
-                    runtime.followEyeContact(id)
-                },
-                onEmptyDoubleTap: { lat, lon in
-                    runtime.plantEyeMark(kind: .rally, lat: lat, lon: lon)
-                },
-                pips: runtime.eyeCanvasPips(),
-                youHeading: runtime.headingDeg,
-                youEmblem: runtime.youEmblem.rawValue,
-                onPulse: { runtime.pulse() },
-                lockOn: runtime.lockOn,
-                godsEye: runtime.godsEye,
-                travelMode: runtime.travelMode,
-                sun: runtime.lamp == .sun,
-                night: runtime.lamp == .night,
-                eyeLayers: runtime.eyeLayers,
-                eyePalette: runtime.eyePalette,
-                eyeGround: runtime.eyeGround,
-                followID: runtime.eyeFollowID,
-                trails: runtime.godsEye ? runtime.eyeTrails() : [],
-                rings: runtime.godsEye ? runtime.eyeRings() : [],
-                frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
-                aerialURL: packFile("aerial.pmtiles"),
-                demURL: packFile("walk-dem.json") ?? packFile("dem.json"),
-                waterURL: packFile("layers/water.geojson"),
-                contoursURL: packFile("contours.geojson"),
-                shadeURL: packFile("hillshade.png"),
-                osmURL: packFile("osm.pmtiles"),
-                khanURL: packFile("khan.pmtiles"),
-                khan3dURL: packFile("desk3d.geojson")
-            )
-            .ignoresSafeArea()
-            .transaction { $0.animation = nil }
-            // The scrim already keeps a thumb off the canvas. This is the
-            // same thing for VoiceOver, and only the canvas: the tab bar
-            // stays reachable, because Comms is on it.
-            .accessibilityHidden(coverUp)
+            if let styleURL = deskStyleURL(pack: pack) {
+                OfflineMapView(
+                    styleURL: styleURL,
+                    centerLat: camera.lat,
+                    centerLon: camera.lon,
+                    puckLat: you?.lat ?? camera.lat,
+                    puckLon: you?.lon ?? camera.lon,
+                    showYou: you != nil,
+                    packSouth: pack.bbox.south,
+                    packWest: pack.bbox.west,
+                    packNorth: pack.bbox.north,
+                    packEast: pack.bbox.east,
+                    route: runtime.routeCoords,
+                    destination: runtime.routeTarget,
+                    held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
+                        ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
+                        ?? runtime.markDraft.map { (lat: $0.lat, lon: $0.lon) },
+                    fitToken: runtime.fitPackToken,
+                    trackUser: true,
+                    interactive: MapCanvasHit.enabled(
+                        onMap: runtime.tab == .map,
+                        holding: coverUp,
+                        arranging: runtime.hudLayoutMode
+                    ),
+                    onMapTap: { lat, lon in
+                        runtime.pickDestination(lat: lat, lon: lon)
+                        runtime.navigate(mode: runtime.travelMode)
+                        hits = []
+                    },
+                    onMapHold: { lat, lon, tags, zoom in
+                        runtime.holdInspect(lat: lat, lon: lon, tags: tags, zoom: zoom)
+                    },
+                    onPersonHold: { id, lat, lon in
+                        runtime.holdParty(id: id, lat: lat, lon: lon)
+                        runtime.eyeTap = nil
+                    },
+                    onPersonTap: { id, lat, lon in
+                        runtime.tapEyeContact(id: id, lat: lat, lon: lon)
+                    },
+                    onPersonDoubleTap: { id, _, _ in
+                        runtime.followEyeContact(id)
+                    },
+                    onEmptyDoubleTap: { lat, lon in
+                        runtime.plantEyeMark(kind: .rally, lat: lat, lon: lon)
+                    },
+                    pips: runtime.eyeCanvasPips(),
+                    youHeading: runtime.headingDeg,
+                    youEmblem: runtime.youEmblem.rawValue,
+                    onPulse: { runtime.pulse() },
+                    lockOn: runtime.lockOn,
+                    godsEye: runtime.godsEye,
+                    travelMode: runtime.travelMode,
+                    sun: runtime.lamp == .sun,
+                    eyeLayers: runtime.eyeLayers,
+                    eyePalette: runtime.eyePalette,
+                    followID: runtime.eyeFollowID,
+                    trails: runtime.godsEye ? runtime.eyeTrails() : [],
+                    rings: runtime.godsEye ? runtime.eyeRings() : [],
+                    frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
+                    offAerial: !runtime.packHasAerial
+                )
+                .ignoresSafeArea()
+                .transaction { $0.animation = nil }
+                .accessibilityHidden(coverUp)
+            } else {
+                Text("Pack style missing from bundle — honest empty.")
+                    .foregroundStyle(Theme.silver.opacity(0.5))
+                    .padding(16)
+            }
             if runtime.tab == .map, !coverUp {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
@@ -213,9 +208,9 @@ struct MapTab: View {
 
     /// Everything that is not the map, sitting on the map. Search, lock, UPDATE and
     /// instruments at the top; NIGHT / SUN / EYE and the four thumb cells at the bottom.
-    /// KHAN EYE is the packed Cesium desk. LAYERS / LOOK / MARK / SCENE live in Instruments.
+    /// KHAN EYE is the packed 3D desk from above. LAYERS / LOOK / MARK / SCENE live in Instruments.
     /// Ruler, grid and north live in Instruments — they are not a walk.
-    /// The spacer is a hole: pan, tap, and hold belong to the globe, not the HUD.
+    /// The spacer is a hole: pan, tap, and hold belong to the desk, not the HUD.
     private func hud(packName: String, offPack: Bool) -> some View {
         VStack(spacing: 8) {
             if !runtime.godsEye {
@@ -604,7 +599,7 @@ struct MapTab: View {
         }
     }
 
-    /// Pack name on the canvas. The globe opens on YOU at walking height.
+    /// Pack name on the canvas. The desk opens on YOU at walking height.
     private func canvasFooter(packName: String, offPack: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             if offPack {
@@ -630,9 +625,13 @@ struct MapTab: View {
         .padding(.bottom, 2)
     }
 
-    private func packFile(_ name: String) -> URL? {
-        guard let url = runtime.packs?.packURL(name) else { return nil }
-        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    private func deskStyleURL(pack: PackManifest) -> URL? {
+        if let url = runtime.bootStyleURL { return url }
+        guard let root = runtime.packs?.packRoot(id: pack.id) else { return nil }
+        return try? PackStyle.resolved(
+            styleAt: root.appendingPathComponent("style.json"),
+            packRoot: root
+        )
     }
 
     private func search() {

@@ -2,7 +2,7 @@
 """KHAN EYE paints packed USGS NAIP photo, then packed OSM houses.
 
 Airplane. No live photo mesh. The desk reads `aerial.pmtiles` and
-`khan.pmtiles` built at pack time. Walking MAP keeps those layers off.
+`khan.pmtiles` built at pack time. Walking MAP is the 3D photo desk.
 """
 from __future__ import annotations
 
@@ -147,16 +147,18 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn('khanFurnitureSourceLayer = "furniture"', swift)
         eye = offline.split("public static func applyEyeLayers")[1].split("public static func applyEyePalette")[0]
         self.assertIn('id.hasPrefix("khan-")', eye)
-        self.assertIn("layer.isVisible = godsEye", eye)
+        self.assertIn("layer.isVisible = true", eye)
         self.assertIn("layer.isVisible = aerial", eye)
+        self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", eye)
+        self.assertIn("layer.isVisible = !(godsEye && aerial)", eye)
         self.assertIn("coversPhoto", eye)
         self.assertIn("aerial ? 0", eye)
         self.assertNotIn("URLSession", swift)
         self.assertNotIn("WKWebView", swift)
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
         inst = (ROOT / "Blackout" / "InstrumentsView.swift").read_text()
-        self.assertIn("GlobeView(", tab)
-        self.assertNotIn("OfflineMapView(", tab)
+        self.assertIn("OfflineMapView(", tab)
+        self.assertNotIn("GlobeView(", tab)
         self.assertNotIn("eyeDeskRail", tab)
         self.assertNotIn("HUDGlassCard", tab)
         desk = inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0]

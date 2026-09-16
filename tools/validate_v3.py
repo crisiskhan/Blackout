@@ -652,14 +652,14 @@ def tip55_chrome() -> None:
     globe = (ROOT / "Blackout" / "GlobeView.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
-    if "GlobeView(" not in map_tab:
-        bad("Map tab does not host GlobeView")
-    elif "OfflineMapView(" in map_tab:
-        bad("Map tab still mounts OfflineMapView")
+    if "OfflineMapView(" not in map_tab:
+        bad("Map tab does not host OfflineMapView")
+    elif "GlobeView(" in map_tab:
+        bad("Map tab still mounts GlobeView")
     elif "RegionalPacks.visible" in map_tab:
         bad("Map tab still renders pack-bullet / Guide FTS list as canvas")
     else:
-        ok("Map tab hosts Cesium globe, not pack-bullet list")
+        ok("Map tab hosts native 3D pack desk, not pack-bullet list")
     if "WKWebView" not in globe or "loadFileURL" not in globe:
         bad("GlobeView missing file:// Cesium host")
     elif "showsUserLocation" not in offline:

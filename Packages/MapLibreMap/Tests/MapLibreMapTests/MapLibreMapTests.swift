@@ -277,14 +277,14 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
-        XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsOrbit(godsEye: false))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))
-        XCTAssertFalse(PackCamera.allowsTilt(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsTilt(godsEye: false))
         XCTAssertEqual(PackCamera.godsEyeMaxPitch, 60)
         XCTAssertEqual(PackCamera.holdMinPitch(godsEye: true), 0)
         XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: true), 60)
         XCTAssertEqual(PackCamera.holdMinPitch(godsEye: false), 0)
-        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 0)
+        XCTAssertEqual(PackCamera.holdMaxPitch(godsEye: false), 60)
         XCTAssertTrue(
             PackCamera.cameraStaysOnPack(
                 godsEye: true,
@@ -1160,9 +1160,18 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertEqual(PackCamera.godsEyeHeading, 0)
         XCTAssertEqual(PackCamera.godsEyeFlySeconds, 2)
         XCTAssertEqual(PackCamera.holdPitch(godsEye: true), 45)
-        XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 0)
+        XCTAssertEqual(PackCamera.holdPitch(godsEye: false), 55)
+        XCTAssertEqual(PackCamera.walkPitch, 55)
+        XCTAssertEqual(
+            PackCamera.followHeading(lockOn: true, godsEye: false, youHeading: 312),
+            312
+        )
+        XCTAssertNil(PackCamera.followHeading(lockOn: false, godsEye: false, youHeading: 312))
+        XCTAssertNil(PackCamera.followHeading(lockOn: true, godsEye: true, youHeading: 312))
+        XCTAssertNil(PackCamera.followHeading(lockOn: true, godsEye: false, youHeading: -1))
+        XCTAssertNil(PackCamera.followHeading(lockOn: true, godsEye: false, youHeading: nil))
         XCTAssertTrue(PackCamera.allowsOrbit(godsEye: true))
-        XCTAssertFalse(PackCamera.allowsOrbit(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsOrbit(godsEye: false))
         let desk = EyeDesk.framePoints(
             you: (31.76, -106.49),
             party: [(31.77, -106.50)],
@@ -1259,7 +1268,7 @@ final class MapLibreMapTests: XCTestCase {
         XCTAssertTrue(PackCamera.allowsPan(godsEye: true))
         XCTAssertTrue(PackCamera.allowsPan(godsEye: false))
         XCTAssertTrue(PackCamera.allowsTilt(godsEye: true))
-        XCTAssertFalse(PackCamera.allowsTilt(godsEye: false))
+        XCTAssertTrue(PackCamera.allowsTilt(godsEye: false))
         XCTAssertFalse(
             PackCamera.cameraStaysOnPack(
                 godsEye: true,

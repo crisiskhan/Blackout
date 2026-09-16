@@ -163,8 +163,13 @@ public struct OfflineMapView: UIViewRepresentable {
             view.setCenter(
                 home,
                 zoomLevel: PackCamera.openZoom,
+                direction: PackCamera.godsEyeHeading,
                 animated: false
             )
+            let cam = view.camera
+            cam.pitch = CGFloat(PackCamera.holdPitch(godsEye: godsEye))
+            cam.heading = PackCamera.godsEyeHeading
+            view.camera = cam
         }
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         tap.numberOfTapsRequired = 1
@@ -227,8 +232,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.attributionButton.isHidden = true
         view.compassView.isHidden = true
         view.scaleBar.isHidden = true
-        // KHAN EYE is a 3D satellite desk over our people. Pinch, pan, orbit and
-        // tilt stay on the pack. Walking MAP stays flat.
+        // Packed 3D neighborhood desk: pinch, pan, orbit, and tilt.
         view.allowsRotating = PackCamera.allowsOrbit(godsEye: godsEye)
         view.isScrollEnabled = PackCamera.allowsPan(godsEye: godsEye)
         view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
@@ -909,6 +913,20 @@ public struct OfflineMapView: UIViewRepresentable {
 
         func applyCamera(_ spec: OverlaySpec, on view: MLNMapView, force: Bool) {
             guard view.bounds.width > 1, view.bounds.height > 1 else { return }
+            defer {
+                if !spec.godsEye {
+                    let cam = view.camera
+                    cam.pitch = CGFloat(PackCamera.holdPitch(godsEye: false))
+                    if let heading = PackCamera.followHeading(
+                        lockOn: spec.lockOn,
+                        godsEye: spec.godsEye,
+                        youHeading: spec.youHeading
+                    ) {
+                        cam.heading = heading
+                    }
+                    view.camera = cam
+                }
+            }
             let pack = (spec.packSouth, spec.packWest, spec.packNorth, spec.packEast)
             let size = (width: Double(view.bounds.width), height: Double(view.bounds.height))
             let puckCoord = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
@@ -2137,13 +2155,15 @@ extension PackStyle {
         godsEye: Bool,
         layers: [EyeDesk.Layer]
     ) {
-        let aerialWanted = godsEye && EyeDesk.layerOn(.aerial, in: layers)
+        let aerialWanted = !godsEye || EyeDesk.layerOn(.aerial, in: layers)
         let hasAerial = style.layers.contains {
             let id = $0.identifier
             return id == aerialLayerID || id.hasPrefix("aerial") || id.hasPrefix("naip")
         }
         let aerial = aerialWanted && hasAerial
-        let shade = (!godsEye || EyeDesk.layerOn(.shade, in: layers)) && !aerial
+        // Walking keeps hillshade under the photo so ground outside NAIP is
+        // not void. EYE with photo hides shade so roofs and yards read.
+        let shade = !godsEye || (EyeDesk.layerOn(.shade, in: layers) && !aerial)
         let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
         for layer in style.layers {
             let id = layer.identifier
@@ -2160,7 +2180,7 @@ extension PackStyle {
                 layer.isVisible = aerial
             }
             if coversPhoto(id) {
-                layer.isVisible = !aerial
+                layer.isVisible = !(godsEye && aerial)
             }
             if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
                 fill.fillOpacity = NSExpression(forConstantValue: aerial ? 0 : EyeDesk.khanLandOpacity)
@@ -2173,7 +2193,7 @@ extension PackStyle {
                 layer.minimumZoomLevel = Float(PackCamera.minZoom)
             }
             if id.hasPrefix("khan-") {
-                layer.isVisible = godsEye
+                layer.isVisible = true
             }
             if let symbol = layer as? MLNSymbolStyleLayer,
                id == roadLabelsLayerID || id == roadRefsLayerID || id == "water-labels"

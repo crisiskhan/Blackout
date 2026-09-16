@@ -591,13 +591,15 @@ public enum PackCamera {
 
     /// Oblique satellite desk. Enter north-up; the lift is pitch, not a globe.
     public static let godsEyePitch: Double = 45
+    /// Walking MAP is the 3D neighborhood desk. Pitch reads house walls on the photo.
+    public static let walkPitch: Double = 55
     /// Viewing distance is this times the framed desk radius. Closer than a
     /// pack-wide lift so packed photo, names, and houses still read.
     public static let godsEyeRangeFactor: Double = 1.15
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
     public static let godsEyeFlyPeakFactor: Double = 1.6
-    /// Oblique ceiling while EYE holds. Walking MAP stays flat.
+    /// Oblique ceiling on the packed desk. Pinch can flatten; it cannot go past this.
     public static let godsEyeMaxPitch: Double = 60
 
     public static func packCenter(
@@ -632,23 +634,31 @@ public enum PackCamera {
     }
 
     public static func holdPitch(godsEye: Bool) -> Double {
-        godsEye ? godsEyePitch : 0
+        godsEye ? godsEyePitch : walkPitch
     }
 
-    public static func holdMinPitch(godsEye: Bool) -> Double {
+    /// LOCK-ON walking is course-up. EYE stays north. A dead compass stays put.
+    public static func followHeading(lockOn: Bool, godsEye: Bool, youHeading: Double?) -> Double? {
+        guard !godsEye, lockOn, let heading = youHeading, heading >= 0, heading.isFinite else {
+            return nil
+        }
+        return heading
+    }
+
+    public static func holdMinPitch(godsEye _: Bool) -> Double {
         0
     }
 
-    public static func holdMaxPitch(godsEye: Bool) -> Double {
-        godsEye ? godsEyeMaxPitch : 0
+    public static func holdMaxPitch(godsEye _: Bool) -> Double {
+        godsEyeMaxPitch
     }
 
     public static func holdMaxZoom(godsEye: Bool) -> Double {
         godsEye ? godsEyeMaxZoom : maxZoom
     }
 
-    public static func allowsOrbit(godsEye: Bool) -> Bool {
-        return godsEye
+    public static func allowsOrbit(godsEye _: Bool) -> Bool {
+        true
     }
 
     /// Walking MAP can pan. GODS EYE can pan too, but only while the look
@@ -657,8 +667,8 @@ public enum PackCamera {
         true
     }
 
-    public static func allowsTilt(godsEye: Bool) -> Bool {
-        godsEye
+    public static func allowsTilt(godsEye _: Bool) -> Bool {
+        true
     }
 
     public static func cameraStaysOnPack(
@@ -1015,8 +1025,8 @@ public enum PackStyle {
         obj["layers"] = layers
     }
 
-    /// Packed USGS NAIP photo. Visible only while KHAN EYE is live. Walking MAP
-    /// keeps it off. Not a live feed.
+    /// Packed USGS NAIP photo. Ground on the walking 3D desk and on KHAN EYE.
+    /// Not a live feed.
     public static func attachAerialLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
@@ -1058,8 +1068,8 @@ public enum PackStyle {
         }
     }
 
-    /// Packed OSM houses, trees, signals, lamps and signs. Visible only while
-    /// KHAN EYE is live. Walking MAP keeps them off.
+    /// Packed OSM houses, trees, signals, lamps and signs. Standing walls on
+    /// the walking 3D desk and on KHAN EYE.
     public static func attachKhanLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],

@@ -259,12 +259,11 @@ class KeepMapMountedTests(unittest.TestCase):
             root,
         )
         self.assertIn("MapCanvasHit.enabled(", tab)
+        self.assertIn("OfflineMapView(", tab)
+        self.assertNotIn("GlobeView(", tab)
         self.assertIn("isUserInteractionEnabled = interactive", read(
             "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
         ))
-        self.assertIn("GlobeView(", tab)
-        self.assertNotIn("OfflineMapView(", tab)
-        self.assertIn("isUserInteractionEnabled = interactive", read("Blackout", "GlobeView.swift"))
         self.assertIn("HUDPage", read("Blackout", "CommsTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "FieldTab.swift"))
         self.assertIn("HUDPage", read("Blackout", "ExpeditionTab.swift"))
@@ -3975,6 +3974,8 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("static let packPaddingPoints", cam)
         self.assertIn("static let packSidePaddingPoints", cam)
         self.assertIn("static let godsEyePitch: Double = 45", cam)
+        self.assertIn("static let walkPitch: Double = 55", cam)
+        self.assertIn("static func followHeading(", cam)
         self.assertIn("static let godsEyeRangeFactor: Double = 1.15", cam)
         self.assertIn("static let godsEyeFlySeconds", cam)
         self.assertIn("static func packCenter(", cam)
@@ -3986,7 +3987,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("static func holdPitch(", cam)
         self.assertIn("static func allowsOrbit(", cam)
         orbit = cam.split("static func allowsOrbit(")[1].split("static func allowsPan(")[0]
-        self.assertIn("return godsEye", orbit)
+        self.assertIn("true", orbit)
         self.assertNotIn("return false", orbit)
         self.assertIn("static func allowsPan(", cam)
         self.assertIn("static func allowsTilt(", cam)
@@ -4002,6 +4003,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("PackCamera.shouldHoldPack", camera)
         self.assertIn("PackCamera.shouldLeavePack", camera)
         self.assertIn("PackCamera.liveLockOn", camera)
+        self.assertIn("PackCamera.followHeading", camera)
         self.assertIn("godsEye: spec.godsEye", camera)
         fit_token = camera.split("if spec.fitToken != fittedFitToken")[1].split("return")[0]
         self.assertIn("PackCamera.shouldHoldPack", fit_token)
@@ -4066,7 +4068,9 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("holdsKhanDetail", eye_layers)
         self.assertIn("minimumZoomLevel = Float(PackCamera.minZoom)", eye_layers)
         self.assertIn('id.hasPrefix("khan-")', eye_layers)
-        self.assertIn("layer.isVisible = godsEye", eye_layers)
+        self.assertIn("layer.isVisible = true", eye_layers)
+        self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", eye_layers)
+        self.assertIn("layer.isVisible = !(godsEye && aerial)", eye_layers)
         self.assertNotIn("satelliteRoadOpacity", eye_layers)
         inst = read("Blackout", "InstrumentsView.swift")
         self.assertIn("HUDGlassCard", inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0])
