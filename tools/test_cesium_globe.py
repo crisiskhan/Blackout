@@ -178,7 +178,9 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("groundBusy", apply)
         self.assertIn("setURLSchemeHandler", globe)
         self.assertIn("packfile", globe)
-        self.assertIn("FileHandle", globe)
+        self.assertIn("archives", globe)
+        self.assertIn("mappedIfSafe", globe)
+        self.assertIn("subdata(in:", globe)
         self.assertIn("offset", globe)
         self.assertIn("length", globe)
         self.assertIn('scheme == "packfile"', globe)
@@ -246,8 +248,10 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn('id === "puck"', clear)
         camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
         lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
-        self.assertIn("trackedEntity", lock)
-        self.assertNotIn("setView", lock)
+        self.assertIn("setView", lock)
+        self.assertIn("cancelFlight", lock)
+        self.assertNotIn("trackedEntity = tracked", lock)
+        self.assertNotIn("shouldAnimate = true", lock)
 
     def test_globe_does_not_flash_on_live_heading_ticks(self):
         """136 stills: packed photo, then brown void with no YOU, then photo again."""
@@ -291,6 +295,37 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("max-age", globe)
         self.assertIn("maximumScreenSpaceError", desk)
         self.assertNotIn('puck["heading"]', globe)
+
+    def test_locked_stays_on_the_neighborhood_photo(self):
+        """138 stills: LOCKED brown void, Oleaster photo, then the globe limb."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        dem = read("Resources", "Packs", "tx-west", "dem.json")
+        camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
+        key = desk.split("function cameraKey(spec)")[1].split("function cameraFor")[0]
+        lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
+        dem_load = desk.split("function loadDem(")[1].split("function ShadeTile")[0]
+        boot = desk.split("function boot()")[1].split("window.KHAN")[0]
+        handler = globe.split("final class PackFileSchemeHandler")[1]
+        self.assertIn("json.grid", dem_load)
+        self.assertIn('"grid"', dem)
+        self.assertNotIn('"heights"', dem[:800])
+        self.assertIn("puck.lat", key)
+        self.assertIn("spec.lockOn", key)
+        self.assertIn("setView", lock)
+        self.assertIn("cancelFlight", lock)
+        self.assertIn("fromDegrees", lock)
+        self.assertIn("spec.height", lock)
+        self.assertNotIn("trackedEntity = tracked", lock)
+        self.assertNotIn("shouldAnimate = true", camera)
+        self.assertIn("maximumZoomDistance", camera)
+        self.assertIn("maximumZoomDistance", boot)
+        self.assertIn("tileCacheSize", boot)
+        self.assertIn("preloadSiblings", boot)
+        self.assertIn("archives", handler)
+        self.assertIn("mappedIfSafe", handler)
+        self.assertIn("subdata(in:", handler)
+
     def test_globe_looks_at_oleaster_not_the_pack_horizon(self):
         """135 stills: EYE is stretched hillshade; LOCKED is a white disk over YOU."""
         desk = read("Resources", "Globe", "desk.js")

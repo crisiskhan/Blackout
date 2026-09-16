@@ -312,7 +312,9 @@ private extension GlobeView {
 
 /// Serves bundled Packs/ bytes to the Cesium desk. PMTiles must pass offset and length.
 final class PackFileSchemeHandler: NSObject, WKURLSchemeHandler {
-    private let maxSlice = 1_500_000
+    private let maxSlice = 8_000_000
+    private static var archives: [String: Data] = [:]
+    private static let archivesLock = NSLock()
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         do {
@@ -381,9 +383,24 @@ final class PackFileSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     private func readSlice(file: URL, offset: Int, length: Int) throws -> Data {
-        let handle = try FileHandle(forReadingFrom: file)
-        defer { try? handle.close() }
-        try handle.seek(toOffset: UInt64(offset))
-        return try handle.read(upToCount: length) ?? Data()
+        let data = try cachedFile(file)
+        guard offset >= 0, offset < data.count else { return Data() }
+        let end = min(offset + min(length, maxSlice), data.count)
+        return data.subdata(in: offset..<end)
+    }
+
+    private func cachedFile(_ file: URL) throws -> Data {
+        let key = file.path
+        Self.archivesLock.lock()
+        if let hit = Self.archives[key] {
+            Self.archivesLock.unlock()
+            return hit
+        }
+        Self.archivesLock.unlock()
+        let data = try Data(contentsOf: file, options: [.mappedIfSafe])
+        Self.archivesLock.lock()
+        Self.archives[key] = data
+        Self.archivesLock.unlock()
+        return data
     }
 }

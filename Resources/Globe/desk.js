@@ -621,14 +621,16 @@
     return xhr(url, "text")
       .then(function (text) { return JSON.parse(text); })
       .then(function (json) {
+        var table = json.grid || json.heights;
+        if (!table || !table.length) return Promise.reject(new Error("NO PACK"));
         demGrid = {
           west: json.west,
           south: json.south,
           east: json.east,
           north: json.north,
-          cols: (json.heights[0] || []).length,
-          rows: json.heights.length,
-          heights: json.heights
+          cols: (table[0] || []).length,
+          rows: table.length,
+          heights: table
         };
         lastDem = url;
         var tile = 32;
@@ -1129,18 +1131,42 @@
   }
 
   function cameraKey(spec) {
-    return [spec.godsEye ? 1 : 0, spec.lockOn ? 1 : 0, spec.followId || "", spec.fitToken].join("|");
+    var puck = spec.puck || spec.home || {};
+    var hold = "";
+    if ((spec.lockOn || spec.followId) && !spec.godsEye) {
+      var lat = puck.lat;
+      var lon = puck.lon;
+      var pips = spec.pips || [];
+      var i;
+      if (spec.followId) {
+        for (i = 0; i < pips.length; i++) {
+          if (pips[i].id === spec.followId) {
+            lat = pips[i].lat;
+            lon = pips[i].lon;
+            break;
+          }
+        }
+      }
+      hold = [
+        Math.round(lat * 2e4) / 2e4,
+        Math.round(lon * 2e4) / 2e4,
+        Math.round(spec.height || 0)
+      ].join(",");
+    }
+    return [spec.godsEye ? 1 : 0, spec.lockOn ? 1 : 0, spec.followId || "", spec.fitToken, hold].join("|");
   }
 
   function cameraFor(spec) {
     var puck = spec.puck || spec.home || { lat: 31.76, lon: -106.49 };
     var height = spec.height || 900;
-    var pitch = spec.pitch == null ? -90 : spec.pitch;
     var heading = spec.heading == null ? 0 : spec.heading;
     var key = cameraKey(spec);
     if (key === lastCam) return;
     lastCam = key;
+    var ctrl = viewer.scene.screenSpaceCameraController;
+    ctrl.minimumZoomDistance = 80;
     if (spec.godsEye) {
+      ctrl.maximumZoomDistance = 500000;
       viewer.trackedEntity = undefined;
       viewer.clock.shouldAnimate = false;
       var pts = [];
@@ -1161,12 +1187,32 @@
       lastFit = spec.fitToken;
       return;
     }
+    ctrl.maximumZoomDistance = Math.max(height * 8, 4000);
     if (spec.lockOn || spec.followId) {
-      var trackId = spec.followId ? "coin:" + spec.followId : "puck";
-      var tracked = viewer.entities.getById(trackId);
-      if (!tracked) tracked = viewer.entities.getById("puck");
-      viewer.trackedEntity = tracked || undefined;
-      viewer.clock.shouldAnimate = true;
+      var lat = puck.lat;
+      var lon = puck.lon;
+      var pips = spec.pips || [];
+      var i;
+      if (spec.followId) {
+        for (i = 0; i < pips.length; i++) {
+          if (pips[i].id === spec.followId) {
+            lat = pips[i].lat;
+            lon = pips[i].lon;
+            break;
+          }
+        }
+      }
+      viewer.trackedEntity = undefined;
+      viewer.clock.shouldAnimate = false;
+      viewer.camera.cancelFlight();
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(lon, lat, spec.height || 900),
+        orientation: {
+          heading: 0,
+          pitch: Cesium.Math.toRadians(-90),
+          roll: 0
+        }
+      });
       return;
     }
     viewer.trackedEntity = undefined;
@@ -1357,15 +1403,21 @@
       showRenderLoopErrors: false,
       contextOptions: { webgl: { alpha: false } }
     });
-    viewer.scene.globe.maximumScreenSpaceError = 2;
+    viewer.scene.globe.maximumScreenSpaceError = 1.5;
+    viewer.scene.globe.tileCacheSize = 1000;
+    viewer.scene.globe.preloadAncestors = true;
+    viewer.scene.globe.preloadSiblings = true;
     viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.scene.globe.showGroundAtmosphere = false;
+    viewer.scene.globe.depthTestAgainstTerrain = true;
     viewer.scene.moon = undefined;
     viewer.scene.sun = undefined;
     viewer.scene.fog.enabled = false;
     viewer.scene.backgroundColor = Cesium.Color.fromCssColorString(GROUND);
     viewer.clock.shouldAnimate = false;
     viewer.scene.screenSpaceCameraController.minimumZoomDistance = 80;
+    viewer.scene.screenSpaceCameraController.maximumZoomDistance = 4000;
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = true;
     viewer.scene.globe.tileLoadProgressEvent.addEventListener(function () {
       viewer.scene.requestRender();
     });
