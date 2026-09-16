@@ -1544,7 +1544,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 return hidden
             }
             let you = annotation.title == UserPuck.title
-            let place = PlaceMark.parse((annotation as? PersonMarkAnnotation)?.memberID ?? annotation.title ?? "") != nil
+            let place = PlaceMark.parse(((annotation as? PersonMarkAnnotation)?.memberID) ?? (annotation.title ?? "")) != nil
             let reuse = you ? "you-puck" : (place ? "place-pin" : "party-puck")
             let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
                 ?? YouPuckAnnotationView(reuseIdentifier: reuse)
