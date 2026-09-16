@@ -114,12 +114,13 @@ struct MapTab: View {
                 rings: runtime.godsEye ? runtime.eyeRings() : [],
                 frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
                 aerialURL: packFile("aerial.pmtiles"),
-                demURL: packFile("dem.json"),
+                demURL: packFile("walk-dem.json") ?? packFile("dem.json"),
                 waterURL: packFile("layers/water.geojson"),
                 contoursURL: packFile("contours.geojson"),
                 shadeURL: packFile("hillshade.png"),
                 osmURL: packFile("osm.pmtiles"),
-                khanURL: packFile("khan.pmtiles")
+                khanURL: packFile("khan.pmtiles"),
+                khan3dURL: packFile("desk3d.geojson")
             )
             .ignoresSafeArea()
             .transaction { $0.animation = nil }

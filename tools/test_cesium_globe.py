@@ -2,6 +2,7 @@
 """Cesium is the only map. UPDATE is the only socket. Airplane otherwise."""
 from __future__ import annotations
 
+import json
 import struct
 import unittest
 from pathlib import Path
@@ -11,6 +12,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def read(*parts: str) -> str:
     return ROOT.joinpath(*parts).read_text(errors="ignore")
+
+
+def _desk3d_covers(feat: dict, lon: float, lat: float) -> bool:
+    geom = feat.get("geometry") or {}
+    coords = geom.get("coordinates")
+    pad = 0.02
+    if geom.get("type") == "Polygon" and coords and coords[0]:
+        xs = [p[0] for p in coords[0]]
+        ys = [p[1] for p in coords[0]]
+        return min(xs) - pad <= lon <= max(xs) + pad and min(ys) - pad <= lat <= max(ys) + pad
+    if geom.get("type") == "Point" and coords:
+        return abs(coords[0] - lon) < pad and abs(coords[1] - lat) < pad
+    return False
 
 
 class CesiumGlobeTests(unittest.TestCase):
@@ -248,7 +262,8 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn('id === "puck"', clear)
         camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
         lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
-        self.assertIn("setView", lock)
+        self.assertIn("lookAt", lock)
+        self.assertIn("HeadingPitchRange", lock)
         self.assertIn("cancelFlight", lock)
         self.assertNotIn("trackedEntity = tracked", lock)
         self.assertNotIn("shouldAnimate = true", lock)
@@ -312,7 +327,8 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertNotIn('"heights"', dem[:800])
         self.assertIn("puck.lat", key)
         self.assertIn("spec.lockOn", key)
-        self.assertIn("setView", lock)
+        self.assertIn("lookAt", lock)
+        self.assertIn("HeadingPitchRange", lock)
         self.assertIn("cancelFlight", lock)
         self.assertIn("fromDegrees", lock)
         self.assertIn("spec.height", lock)
@@ -325,6 +341,39 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("archives", handler)
         self.assertIn("mappedIfSafe", handler)
         self.assertIn("subdata(in:", handler)
+
+    def test_packed_3d_nav_is_usgs_osm_not_google(self):
+        """Off-grid 3D desk: packed NAIP + OSM houses + walk DEM. Never Google tiles."""
+        desk = read("Resources", "Globe", "desk.js")
+        globe = read("Blackout", "GlobeView.swift")
+        tab = read("Blackout", "MapTab.swift")
+        blob = (desk + globe + tab).lower()
+        self.assertNotIn("googleapis", blob)
+        self.assertNotIn("maps.google", blob)
+        self.assertNotIn("mt.google", blob)
+        desk3d = json.loads(read("Resources", "Packs", "tx-west", "desk3d.geojson"))
+        walk = json.loads(read("Resources", "Packs", "tx-west", "walk-dem.json"))
+        feats = desk3d.get("features") or []
+        self.assertGreaterEqual(len(feats), 40)
+        self.assertTrue(any((f.get("properties") or {}).get("height_m") for f in feats))
+        lat, lon = 31.87050, -106.59732
+        self.assertTrue(any(_desk3d_covers(f, lon, lat) for f in feats))
+        self.assertLess(float(walk["cellDegrees"]), 0.002)
+        self.assertLessEqual(walk["west"], lon)
+        self.assertGreaterEqual(walk["east"], lon)
+        self.assertLessEqual(walk["south"], lat)
+        self.assertGreaterEqual(walk["north"], lat)
+        self.assertIn("extrudedHeight", desk)
+        self.assertIn("RELATIVE_TO_GROUND", desk)
+        self.assertIn("loadKhan3d", desk)
+        self.assertIn("desk3d.geojson", tab)
+        self.assertIn("walk-dem.json", tab)
+        self.assertIn("desk3d.geojson", globe)
+        self.assertIn("godsEye ? -90 : -55", globe)
+        camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]
+        lock = camera.split("spec.lockOn")[1].split("spec.fitToken")[0]
+        self.assertIn("lookAt", lock)
+        self.assertIn("HeadingPitchRange", lock)
 
     def test_globe_looks_at_oleaster_not_the_pack_horizon(self):
         """135 stills: EYE is stretched hillshade; LOCKED is a white disk over YOU."""
@@ -342,7 +391,7 @@ class CesiumGlobeTests(unittest.TestCase):
         self.assertIn("spec.height", eye)
         self.assertNotIn("spec.range ||", eye)
         self.assertNotIn("holdPitch(godsEye: true) - 90", globe)
-        self.assertIn('"pitch": -90', globe)
+        self.assertIn("godsEye ? -90 : -55", globe)
 
     def test_turns_do_not_cover_the_globe(self):
         """Device stills: TURNS plate sits on the route. Dest rail already names the next street."""

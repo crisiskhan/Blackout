@@ -11,6 +11,7 @@
   var lastShade = "";
   var lastOsm = "";
   var lastKhan = "";
+  var lastKhan3d = "";
   var lastWater = "";
   var lastContours = "";
   var lastGroundKey = "";
@@ -21,6 +22,7 @@
   var shadeLayer = null;
   var osmLayer = null;
   var khanLayer = null;
+  var khan3dSource = null;
   var waterSource = null;
   var contourSource = null;
   var holdTimer = null;
@@ -633,6 +635,7 @@
           heights: table
         };
         lastDem = url;
+        lastCam = "";
         var tile = 32;
         var scheme = new Cesium.GeographicTilingScheme({
           rectangle: Cesium.Rectangle.fromDegrees(
@@ -803,6 +806,105 @@
         });
       })
       .catch(function () {
+        return false;
+      });
+  }
+
+  function khan3dFill(kind) {
+    if (kind === "tree" || kind === "wood") return Cesium.Color.fromCssColorString("#3F8F4E");
+    if (kind === "house" || kind === "detached" || kind === "residential") {
+      return Cesium.Color.fromCssColorString("#A39C94");
+    }
+    return Cesium.Color.fromCssColorString("#8E949C");
+  }
+
+  function ringDegrees(ring) {
+    var out = [];
+    var i;
+    for (i = 0; i < ring.length; i++) {
+      if (!ring[i] || ring[i].length < 2) continue;
+      out.push(ring[i][0], ring[i][1]);
+    }
+    return out;
+  }
+
+  function addKhan3dPolygon(ds, ring, kind, height) {
+    var flat = ringDegrees(ring);
+    if (flat.length < 6) return;
+    var color = khan3dFill(kind);
+    ds.entities.add({
+      polygon: {
+        hierarchy: Cesium.Cartesian3.fromDegreesArray(flat),
+        height: 0,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        extrudedHeight: height,
+        extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+        material: color.withAlpha(0.94),
+        outline: true,
+        outlineColor: color.withAlpha(0.45)
+      }
+    });
+  }
+
+  function loadKhan3d(url) {
+    if (!url) {
+      if (khan3dSource) {
+        viewer.dataSources.remove(khan3dSource, true);
+        khan3dSource = null;
+      }
+      lastKhan3d = "";
+      return Promise.resolve(false);
+    }
+    if (url === lastKhan3d && khan3dSource) return Promise.resolve(true);
+    if (khan3dSource) {
+      viewer.dataSources.remove(khan3dSource, true);
+      khan3dSource = null;
+    }
+    return xhr(url, "text")
+      .then(function (text) { return JSON.parse(text); })
+      .then(function (fc) {
+        var ds = new Cesium.CustomDataSource("khan3d");
+        var feats = fc.features || [];
+        var i;
+        for (i = 0; i < feats.length; i++) {
+          var feat = feats[i];
+          var props = feat.properties || {};
+          var geom = feat.geometry || {};
+          var kind = props.kind || "yes";
+          if (kind === "signal" || kind === "lamp" || kind === "sign") continue;
+          var height = props.height_m || 7;
+          if (geom.type === "Polygon" && geom.coordinates && geom.coordinates[0]) {
+            addKhan3dPolygon(ds, geom.coordinates[0], kind, height);
+          } else if (geom.type === "MultiPolygon" && geom.coordinates) {
+            geom.coordinates.forEach(function (poly) {
+              if (poly && poly[0]) addKhan3dPolygon(ds, poly[0], kind, height);
+            });
+          } else if (geom.type === "Point" && geom.coordinates) {
+            var lon = geom.coordinates[0];
+            var lat = geom.coordinates[1];
+            var d = 0.000034;
+            addKhan3dPolygon(
+              ds,
+              [
+                [lon - d, lat - d],
+                [lon + d, lat - d],
+                [lon + d, lat + d],
+                [lon - d, lat + d],
+                [lon - d, lat - d]
+              ],
+              kind,
+              height
+            );
+          }
+        }
+        viewer.dataSources.add(ds);
+        khan3dSource = ds;
+        lastKhan3d = url;
+        viewer.scene.requestRender();
+        return true;
+      })
+      .catch(function () {
+        lastKhan3d = url || "";
         return false;
       });
   }
@@ -1167,6 +1269,8 @@
     ctrl.minimumZoomDistance = 80;
     if (spec.godsEye) {
       ctrl.maximumZoomDistance = 500000;
+      ctrl.enableTilt = false;
+      viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
       viewer.trackedEntity = undefined;
       viewer.clock.shouldAnimate = false;
       var pts = [];
@@ -1188,6 +1292,10 @@
       return;
     }
     ctrl.maximumZoomDistance = Math.max(height * 8, 4000);
+    ctrl.enableTilt = true;
+    ctrl.enableLook = true;
+    ctrl.enableRotate = true;
+    ctrl.enableTranslate = true;
     if (spec.lockOn || spec.followId) {
       var lat = puck.lat;
       var lon = puck.lon;
@@ -1202,27 +1310,30 @@
           }
         }
       }
+      ctrl.enableTranslate = false;
       viewer.trackedEntity = undefined;
       viewer.clock.shouldAnimate = false;
       viewer.camera.cancelFlight();
-      viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(lon, lat, spec.height || 900),
-        orientation: {
-          heading: 0,
-          pitch: Cesium.Math.toRadians(-90),
-          roll: 0
-        }
-      });
+      viewer.camera.lookAt(
+        Cesium.Cartesian3.fromDegrees(lon, lat, sampleDem(lon, lat) || 0),
+        new Cesium.HeadingPitchRange(
+          0,
+          Cesium.Math.toRadians(spec.pitch == null ? -55 : spec.pitch),
+          spec.height || 900
+        )
+      );
       return;
     }
     viewer.trackedEntity = undefined;
     viewer.clock.shouldAnimate = false;
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
     if (spec.fitToken !== lastFit) {
+      var ground = sampleDem(puck.lon, puck.lat) || 0;
       viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(puck.lon, puck.lat, height),
+        destination: Cesium.Cartesian3.fromDegrees(puck.lon, puck.lat, height + ground),
         orientation: {
           heading: 0,
-          pitch: Cesium.Math.toRadians(-90),
+          pitch: Cesium.Math.toRadians(spec.pitch == null ? -55 : spec.pitch),
           roll: 0
         }
       });
@@ -1300,6 +1411,7 @@
     var shadeUrl = spec.shadeUrl || packAsset(spec, "hillshade.png");
     var osmUrl = spec.osmUrl || packAsset(spec, "osm.pmtiles");
     var khanUrl = spec.khanUrl || packAsset(spec, "khan.pmtiles");
+    var khan3dUrl = spec.khan3dUrl || packAsset(spec, "desk3d.geojson");
     upsertPuck(spec);
     var liveKey = JSON.stringify({
       route: spec.route || [],
@@ -1326,6 +1438,7 @@
       shadeUrl,
       osmUrl,
       khanUrl,
+      khan3dUrl,
       spec.aerialUrl || "",
       spec.demUrl || "",
       spec.waterUrl || "",
@@ -1343,7 +1456,10 @@
     if (groundKey === lastGroundKey) return;
     if (groundBusy) return;
     groundBusy = true;
-    loadDem(spec.demUrl).then(function () { viewer.scene.requestRender(); });
+    loadDem(spec.demUrl).then(function () {
+      cameraFor(spec);
+      viewer.scene.requestRender();
+    });
     loadShade(shadeOn ? shadeUrl : "", spec.bbox)
       .then(function () { return loadOsm(osmUrl, streetsOn); })
       .then(function (osmOk) {
@@ -1351,6 +1467,7 @@
         viewer.scene.requestRender();
         return loadKhan(khanUrl, streetsOn);
       })
+      .then(function () { return loadKhan3d(khan3dUrl); })
       .then(function () { return loadAerial(spec.aerialUrl, aerialOn); })
       .then(function () {
         groundBusy = false;

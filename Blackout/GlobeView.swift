@@ -50,6 +50,7 @@ struct GlobeView: UIViewRepresentable {
     var shadeURL: URL?
     var osmURL: URL?
     var khanURL: URL?
+    var khan3dURL: URL?
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -279,7 +280,7 @@ private extension GlobeView {
             "lockOn": lockOn,
             "fitToken": fitToken,
             "range": range,
-            "pitch": -90,
+            "pitch": godsEye ? -90 : -55,
             "heading": godsEye ? PackCamera.godsEyeHeading : 0,
             "height": height,
             "fly": PackCamera.godsEyeFlySeconds,
@@ -296,6 +297,7 @@ private extension GlobeView {
         obj["shadeUrl"] = packWebPath(shadeURL) ?? "../Packs/\(packID)/hillshade.png"
         obj["osmUrl"] = packWebPath(osmURL) ?? "../Packs/\(packID)/osm.pmtiles"
         obj["khanUrl"] = packWebPath(khanURL) ?? "../Packs/\(packID)/khan.pmtiles"
+        obj["khan3dUrl"] = packWebPath(khan3dURL) ?? "../Packs/\(packID)/desk3d.geojson"
         return obj
     }
 
