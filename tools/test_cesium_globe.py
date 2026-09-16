@@ -376,7 +376,12 @@ class CesiumGlobeTests(unittest.TestCase):
         layers = offline.split("public static func applyEyeLayers")[1].split("public static func applyEyePalette")[0]
         self.assertNotIn("godsEye && EyeDesk.layerOn(.aerial", layers)
         self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", layers)
-        self.assertIn("layer.isVisible = !(godsEye && aerial)", layers)
+        self.assertIn("layer.isVisible = !aerial", layers)
+        self.assertNotIn("layer.isVisible = !(godsEye && aerial)", layers)
+        self.assertIn(
+            "let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted",
+            layers,
+        )
         self.assertIn('id.hasPrefix("khan-")', layers)
         self.assertIn("layer.isVisible = true", layers)
         camera = desk.split("function cameraFor(spec)")[1].split("function pickId")[0]

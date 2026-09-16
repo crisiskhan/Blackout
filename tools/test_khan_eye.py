@@ -150,9 +150,15 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn("layer.isVisible = true", eye)
         self.assertIn("layer.isVisible = aerial", eye)
         self.assertIn("!godsEye || EyeDesk.layerOn(.aerial, in: layers)", eye)
-        self.assertIn("layer.isVisible = !(godsEye && aerial)", eye)
+        self.assertIn("layer.isVisible = !aerial", eye)
+        self.assertNotIn("layer.isVisible = !(godsEye && aerial)", eye)
         self.assertIn("coversPhoto", eye)
         self.assertIn("aerial ? 0", eye)
+        self.assertIn(
+            "let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted",
+            eye,
+        )
+        self.assertNotIn("&& !aerial", eye)
         self.assertNotIn("URLSession", swift)
         self.assertNotIn("WKWebView", swift)
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
@@ -271,6 +277,46 @@ class PackedArchiveTests(unittest.TestCase):
         assert blob is not None
         self.assertTrue(blob.startswith(b"\xff\xd8"), "Oleaster aerial is not JPEG")
         self.assertGreater(len(blob), 800)
+
+
+class NeighborhoodDeskStillsTests(unittest.TestCase):
+    """141 stills: EYE was Hatch-to-Tularosa black; walking casings buried yards."""
+
+    def test_eye_looks_at_the_desk_not_the_pack_horizon(self):
+        offline = OFFLINE.read_text()
+        fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
+        self.assertIn("acrossDistance: gev", fit)
+        self.assertIn("lookingAtCenter", fit)
+        self.assertIn("PackCamera.godsEyeDistance", fit)
+        self.assertIn("view.setCamera", fit)
+        self.assertNotIn("fitting:", fit)
+        self.assertNotIn("edgePadding:", fit)
+        self.assertNotIn("view.fly(", fit)
+        self.assertNotIn("peakAltitude", fit)
+        self.assertNotIn("godsEyeCameraDistance", fit)
+        self.assertNotIn("packPaddingPoints", fit)
+        leave = offline.split("func applyCamera")[1].split("func fitPack")[0].split(
+            "PackCamera.shouldLeavePack"
+        )[1].split("if PackCamera.shouldFitRoute")[0]
+        self.assertIn("setCamera", leave)
+        self.assertIn("animated: false", leave)
+        self.assertIn("openZoom", leave)
+
+    def test_photo_desk_hides_schematic_roads_and_keeps_hillshade_floor(self):
+        eye = OFFLINE.read_text().split("public static func applyEyeLayers")[1].split(
+            "public static func applyEyePalette"
+        )[0]
+        self.assertIn("layer.isVisible = !aerial", eye)
+        self.assertIn(
+            "let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted",
+            eye,
+        )
+        qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
+        device = (ROOT / "docs" / "DEVICE.md").read_text()
+        for blob in (qa, device):
+            self.assertIn("160m neighborhood", blob)
+            self.assertIn("schematic road casings hide on packed photo", blob)
+            self.assertIn("hillshade stays the floor", blob)
 
 
 if __name__ == "__main__":

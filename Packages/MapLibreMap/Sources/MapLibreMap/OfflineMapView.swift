@@ -991,7 +991,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 let cam = view.camera
                 cam.pitch = walkPitch
                 cam.heading = PackCamera.godsEyeHeading
-                view.camera = cam
+                view.setCamera(cam, animated: false)
                 fittedPack = pack
                 fittedSize = size
                 storedLockOn = spec.lockOn
@@ -1117,7 +1117,7 @@ public struct OfflineMapView: UIViewRepresentable {
             return CLLocationCoordinate2DIsValid(coord) ? coord : nil
         }
 
-        func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly: Bool) {
+        func fitPack(_ spec: OverlaySpec, on view: MLNMapView, fly _: Bool) {
             let packBox = PackCamera.bounds(
                 south: spec.packSouth,
                 west: spec.packWest,
@@ -1145,12 +1145,6 @@ public struct OfflineMapView: UIViewRepresentable {
             }
             let desk = EyeDesk.bounds(points: points) ?? packBox
             let box = EyeDesk.clampToPack(desk: desk, pack: packBox)
-            let bounds = MLNCoordinateBoundsMake(
-                CLLocationCoordinate2D(latitude: box.south, longitude: box.west),
-                CLLocationCoordinate2D(latitude: box.north, longitude: box.east)
-            )
-            let pad = CGFloat(PackCamera.packPaddingPoints)
-            let side = CGFloat(PackCamera.packSidePaddingPoints)
             let mid = PackCamera.packCenter(
                 south: box.south,
                 west: box.west,
@@ -1165,36 +1159,15 @@ public struct OfflineMapView: UIViewRepresentable {
                     east: box.east
                 )
             )
-            let seed = MLNMapCamera(
+            // Pitch 45 + fitting the desk bounds + HUD padding pulls MapLibre
+            // to pack scale (Hatch to Tularosa). Look at the desk mid at gev.
+            let camera = MLNMapCamera(
                 lookingAtCenter: CLLocationCoordinate2D(latitude: mid.lat, longitude: mid.lon),
                 acrossDistance: gev,
                 pitch: CGFloat(PackCamera.godsEyePitch),
                 heading: PackCamera.godsEyeHeading
             )
-            let camera = view.camera(
-                seed,
-                fitting: bounds,
-                edgePadding: UIEdgeInsets(top: pad, left: side, bottom: pad, right: side)
-            )
-            camera.viewingDistance = PackCamera.godsEyeCameraDistance(
-                gev: gev,
-                hudFit: camera.viewingDistance
-            )
-            camera.heading = PackCamera.godsEyeHeading
-            camera.pitch = CGFloat(PackCamera.godsEyePitch)
-            if fly {
-                view.fly(
-                    to: camera,
-                    withDuration: PackCamera.godsEyeFlySeconds,
-                    peakAltitude: PackCamera.godsEyeFlyPeakAltitude(
-                        current: view.camera.altitude,
-                        target: camera.altitude
-                    ),
-                    completionHandler: nil
-                )
-            } else {
-                view.setCamera(camera, animated: false)
-            }
+            view.setCamera(camera, animated: false)
         }
 
         func fitRoute(_ spec: OverlaySpec, on view: MLNMapView) {
@@ -2161,9 +2134,10 @@ extension PackStyle {
             return id == aerialLayerID || id.hasPrefix("aerial") || id.hasPrefix("naip")
         }
         let aerial = aerialWanted && hasAerial
-        // Walking keeps hillshade under the photo so ground outside NAIP is
-        // not void. EYE with photo hides shade so roofs and yards read.
-        let shade = !godsEye || (EyeDesk.layerOn(.shade, in: layers) && !aerial)
+        // USGS 3DEP hillshade is the pack floor. Walking keeps it under NAIP
+        // so ground outside the photo is not void. EYE keeps it too: packed
+        // NAIP starts at z14, so a pack-wide camera would otherwise be black.
+        let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted
         let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
         for layer in style.layers {
             let id = layer.identifier
@@ -2180,7 +2154,7 @@ extension PackStyle {
                 layer.isVisible = aerial
             }
             if coversPhoto(id) {
-                layer.isVisible = !(godsEye && aerial)
+                layer.isVisible = !aerial
             }
             if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
                 fill.fillOpacity = NSExpression(forConstantValue: aerial ? 0 : EyeDesk.khanLandOpacity)
@@ -2204,8 +2178,8 @@ extension PackStyle {
         }
     }
 
-    /// Schematic fills and casings that sit on the photo. Hide them while
-    /// packed NAIP is the ground so roofs and yards read. Labels stay.
+    /// Schematic fills and casings that sit on the photo. Hide them on walking
+    /// MAP and KHAN EYE while packed NAIP is the ground so yards read. Labels stay.
     private static func coversPhoto(_ id: String) -> Bool {
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
