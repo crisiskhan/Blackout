@@ -8,6 +8,7 @@ Not a live photo mesh, not a world feed.
 from __future__ import annotations
 
 import shutil
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -334,25 +335,33 @@ def _fetch_missing(dest: Path, jobs: list[tuple[int, int, int]], pack_id: str) -
     print(f"  NAIP {pack_id} photo {len(jobs)} tiles, fetch {len(missing)}", flush=True)
     if not missing:
         return
+    done = 0
+    got = 0
+    t0 = time.time()
+    batch = max(WORKERS * 8, 256)
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in missing}
-        done = 0
-        got = 0
-        for fut in as_completed(futs):
-            zxy = futs[fut]
-            done += 1
-            try:
-                blob = fut.result()
-            except Exception:
-                blob = None
-            if blob:
-                cache_put(dest, *zxy, blob)
-                got += 1
-            if done % 100 == 0 or done == len(missing):
-                print(
-                    f"  NAIP {pack_id} {done}/{len(missing)} fetched {got} jpeg",
-                    flush=True,
-                )
+        for i in range(0, len(missing), batch):
+            chunk = missing[i : i + batch]
+            futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in chunk}
+            for fut in as_completed(futs):
+                zxy = futs[fut]
+                done += 1
+                try:
+                    blob = fut.result()
+                except Exception:
+                    blob = None
+                if blob:
+                    cache_put(dest, *zxy, blob)
+                    got += 1
+                if done % 100 == 0 or done == len(missing):
+                    dt = max(time.time() - t0, 0.001)
+                    rate = done / dt
+                    remain = (len(missing) - done) / rate if rate else 0
+                    print(
+                        f"  NAIP {pack_id} {done}/{len(missing)} fetched {got} jpeg "
+                        f"{rate:.1f}/s eta {remain / 60:.0f}m",
+                        flush=True,
+                    )
 
 
 def _write_one_shard(
