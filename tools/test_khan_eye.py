@@ -170,7 +170,7 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 13", swift)
+        self.assertIn("resolverVersion = 14", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
@@ -598,7 +598,7 @@ class FullExtractPhotoTests(unittest.TestCase):
         self.assertIn("contentsOfDirectory", attach)
         self.assertIn('hasPrefix("aerial")', attach)
         self.assertIn("hasSuffix(\".pmtiles\")", attach)
-        self.assertIn("resolverVersion = 13", SWIFT.read_text())
+        self.assertIn("resolverVersion = 14", SWIFT.read_text())
         copy = (ROOT / "tools" / "copy_resources.sh").read_text()
         self.assertIn("Packs/*/.naip-cache", copy)
         ignore = (ROOT / ".gitignore").read_text()

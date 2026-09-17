@@ -838,8 +838,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v13 merges sharded NAIP on the phone and reads overlay tiles.
-    public static let resolverVersion = 13
+    /// not keep replaying it. v14 strips missing NAIP so a 147→150 upgrade cannot
+    /// keep file:// URLs to aerial archives the IPA no longer ships.
+    public static let resolverVersion = 14
 
     private static var resolvedMemory: [String: URL] = [:]
 

@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -96,6 +97,7 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         self.assertIn("def merge_phone_archives", aerial)
         self.assertIn("merge_phone_archives", phone)
         self.assertIn("collapse_style_aerial", phone)
+        self.assertIn("def strip_style_aerial", phone)
         self.assertIn("writes the bundle copy", phone)
         self.assertIn("pack_phone.py", copy)
         self.assertIn("--exclude 'Packs/nm/aerial*.pmtiles'", copy)
@@ -110,6 +112,39 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         )[0]
         self.assertIn("aerialFileName", attach)
         self.assertIn('hasPrefix("aerial")', attach)
+        self.assertIn("resolverVersion = 14", swift)
+
+    def test_phone_style_drops_aerial_when_the_archive_is_off_the_phone(self):
+        from pack_phone import pack_phone
+
+        style = {
+            "sources": {
+                "osm": {"type": "vector", "url": "pmtiles://osm.pmtiles"},
+                "aerial": {"type": "raster", "url": "pmtiles://aerial.pmtiles"},
+                "aerial-1": {"type": "raster", "url": "pmtiles://aerial-1.pmtiles"},
+            },
+            "layers": [
+                {"id": "land-fill", "type": "background"},
+                {"id": "aerial", "type": "raster", "source": "aerial"},
+                {"id": "aerial-1", "type": "raster", "source": "aerial-1"},
+                {"id": "road", "type": "line", "source": "osm"},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            pack = dest / "Packs" / "nm"
+            pack.mkdir(parents=True)
+            (pack / "style.json").write_text(json.dumps(style))
+            pack_phone(dest)
+            out = json.loads((pack / "style.json").read_text())
+        self.assertNotIn("aerial", out["sources"])
+        self.assertNotIn("aerial-1", out["sources"])
+        self.assertIn("osm", out["sources"])
+        ids = [item["id"] for item in out["layers"]]
+        self.assertNotIn("aerial", ids)
+        self.assertNotIn("aerial-1", ids)
+        self.assertIn("land-fill", ids)
+        self.assertIn("road", ids)
 
     def test_copy_phase_imports_without_mapbox_vector_tile(self):
         # Unsigned compile and TestFlight run copy_resources.sh with the

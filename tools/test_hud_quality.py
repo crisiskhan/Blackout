@@ -4189,7 +4189,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("khan.pmtiles", cam)
         self.assertIn("aerial.pmtiles", cam)
         self.assertIn('"type": "fill-extrusion"', cam)
-        self.assertIn("resolverVersion = 13", cam)
+        self.assertIn("resolverVersion = 14", cam)
         interact = offline.split("private func applyInteraction")[1].split("private var overlaySpec")[0]
         self.assertNotIn("setDirection(PackCamera.godsEyeHeading", interact)
         self.assertIn("`KHAN EYE`", qa)
