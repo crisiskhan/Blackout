@@ -1468,8 +1468,19 @@ def osm_fetched(dest: Path) -> str | None:
     return day or None
 
 
+SKIP_SHIP_DIRS = {aerial.CACHE_DIR, aerial.WRITE_DIR}
+
+
 def shipped_files(dest: Path) -> list[Path]:
-    return [p for p in dest.rglob("*") if p.is_file() and p.name not in NOT_SHIPPED]
+    out: list[Path] = []
+    for path in dest.rglob("*"):
+        if not path.is_file() or path.name in NOT_SHIPPED:
+            continue
+        rel = path.relative_to(dest)
+        if any(part in SKIP_SHIP_DIRS for part in rel.parts):
+            continue
+        out.append(path)
+    return out
 
 
 def write_manifest(dest: Path, manifest: dict | None = None) -> dict:
@@ -1503,7 +1514,7 @@ def build_tiles(dest: Path, pack: dict) -> dict:
 
 
 def fetch_aerial_pack(pack: dict, dest: Path) -> None:
-    """Cut packed NAIP photo for the KHAN EYE desk. Metro plus walk extras. No live feed."""
+    """Cut packed NAIP photo for the KHAN EYE desk. Extract fill plus walk yards."""
     dest.mkdir(parents=True, exist_ok=True)
     info = aerial.build_aerial(dest, pack)
     if info.get("present"):
@@ -1546,9 +1557,9 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         "wild": {"type": "geojson", "data": "wild.geojson"},
         "khan": khan.style_source(),
     }
-    aerial_file = ROOT / "Resources" / "Packs" / pack_id / aerial.AERIAL_FILE
-    if aerial_file.is_file() and aerial_file.stat().st_size > 1000:
-        sources[aerial.AERIAL_SOURCE_ID] = aerial.style_source()
+    aerial_names = aerial.shard_names(ROOT / "Resources" / "Packs" / pack_id)
+    for name in aerial_names:
+        sources[aerial.source_id_for_file(name)] = aerial.style_source(name)
     layers: list[dict] = [
         {"id": "void", "type": "background", "paint": {"background-color": VOID_INK}},
     ]
@@ -1901,8 +1912,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
         ]
     )
     stamp_source_layers(layers)
-    if aerial.AERIAL_SOURCE_ID in sources:
-        aerial.insert_aerial_layer(layers)
+    if aerial_names:
+        aerial.insert_aerial_layer(layers, aerial_names)
     return {
         "version": 8,
         "name": f"Blackout {pack_id}",

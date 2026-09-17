@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+from v3.aerial import PACK_BUDGET_MIB
 from v3.fetch_packs import GRAPH_WIRE_VERSION, read_graph
 from v3.generate_project import assert_openstep_plist
 
@@ -441,8 +442,8 @@ def walkable_next_pack(pack_id: str) -> None:
         bad(f"{pack_id} graph too thin walk={len(walk_edges)} drive={len(drive_edges)}")
         return
     mb = (man.get("bytes") or 0) / (1024 * 1024)
-    if mb > 160:
-        bad(f"{pack_id} {mb:.1f} MB exceeds 160 MB iOS budget")
+    if mb > PACK_BUDGET_MIB:
+        bad(f"{pack_id} {mb:.1f} MB exceeds {PACK_BUDGET_MIB} MB iOS budget")
         return
     if not (man.get("stats") or {}).get("streetsVisibleAtWalkingZoom"):
         bad(f"{pack_id} streetsVisibleAtWalkingZoom is not yes")

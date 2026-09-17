@@ -1,13 +1,13 @@
-"""Packed KHAN EYE photo: USGS NAIP over each pack's metro, build-time only.
+"""Packed KHAN EYE photo: USGS NAIP over each pack extract, build-time only.
 
-Airplane. The phone never asks the network. This is the public-domain NAIP
-sheet for the city the pack actually walks, cut to raster tiles so a pitched
-desk can read yards and roofs. Empty desert stays hillshade. Not a live photo
-mesh, not a world feed.
+Airplane. The phone never asks the network. Street-scale NAIP covers the
+whole packed extract; walking zoom is yard-scale on the walkable ground.
+Not a live photo mesh, not a world feed.
 """
 
 from __future__ import annotations
 
+import shutil
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-from pmtiles.reader import MmapSource, Reader
+from pmtiles.reader import MmapSource, Reader, all_tiles
 from pmtiles.tile import Compression, TileType, zxy_to_tileid
 from pmtiles.writer import Writer
 
@@ -32,10 +32,17 @@ AERIAL_FILE = "aerial.pmtiles"
 AERIAL_FLOOR_ZOOM = 12
 AERIAL_MIN_ZOOM = 12
 AERIAL_DETAIL_MIN = 14
+AERIAL_FILL_ZOOM = 15
 AERIAL_MAX_ZOOM = 17
 TILE_PX = 256
-WORKERS = 12
+WORKERS = 32
 JPEG_MAGIC = b"\xff\xd8"
+SHARD_MAX_BYTES = 90 * 1024 * 1024
+PACK_BUDGET_MIB = 4096
+CACHE_DIR = ".naip-cache"
+WRITE_DIR = ".aerial-write"
+# Leave room for the PMTiles directory so a shard stays under GitHub's 100 MB.
+SHARD_PAYLOAD_BYTES = SHARD_MAX_BYTES - (2 * 1024 * 1024)
 
 # Extra packed photo walks. Metro is downtown; YOU on Oleaster sits west of it.
 PHOTO_EXTRA = {
@@ -80,12 +87,24 @@ def region_bbox(pack: dict) -> dict:
     return slice_bbox(region)
 
 
+def walkable_bbox(pack: dict) -> dict:
+    """Union of every slice except the wide region extract."""
+    boxes = [
+        slice_bbox(sl)
+        for key, sl in (pack.get("slices") or {}).items()
+        if key != "region"
+    ]
+    if not boxes:
+        return region_bbox(pack)
+    return union_photo_bbox(boxes)
+
+
 def extra_maxzoom(item: dict) -> int:
     return int(item.get("maxzoom") or AERIAL_MAX_ZOOM)
 
 
 def photo_bboxes(pack: dict) -> list[dict]:
-    boxes = [metro_bbox(pack)]
+    boxes = [region_bbox(pack), walkable_bbox(pack), metro_bbox(pack)]
     for item in PHOTO_EXTRA.get(str(pack.get("id") or ""), []):
         boxes.append(
             {
@@ -105,6 +124,31 @@ def union_photo_bbox(boxes: list[dict]) -> dict:
         "north": max(b["north"] for b in boxes),
         "east": max(b["east"] for b in boxes),
     }
+
+
+def source_id_for_file(name: str) -> str:
+    if name.endswith(".pmtiles"):
+        return name[: -len(".pmtiles")]
+    return name
+
+
+def shard_file_name(index: int) -> str:
+    if index == 0:
+        return AERIAL_FILE
+    return f"aerial-{index}.pmtiles"
+
+
+def shard_names(dest: Path) -> list[str]:
+    files = [p.name for p in dest.glob("aerial*.pmtiles") if p.is_file()]
+
+    def key(name: str) -> tuple[int, int]:
+        stem = name.removesuffix(".pmtiles")
+        if stem == "aerial":
+            return (0, 0)
+        _, _, rest = stem.partition("-")
+        return (1, int(rest) if rest.isdigit() else 0)
+
+    return sorted(files, key=key)
 
 
 def read_archive(path: Path) -> dict[tuple[int, int, int], bytes]:
@@ -128,20 +172,21 @@ def read_archive(path: Path) -> dict[tuple[int, int, int], bytes]:
     return got
 
 
-def style_source() -> dict:
+def style_source(name: str = AERIAL_FILE) -> dict:
     return {
         "type": "raster",
-        "url": f"pmtiles://{AERIAL_FILE}",
+        "url": f"pmtiles://{name}",
         "tileSize": TILE_PX,
         "attribution": NAIP_CREDIT,
     }
 
 
-def style_layer() -> dict:
+def style_layer(name: str = AERIAL_FILE) -> dict:
+    sid = source_id_for_file(name)
     return {
-        "id": AERIAL_LAYER_ID,
+        "id": sid,
         "type": "raster",
-        "source": AERIAL_SOURCE_ID,
+        "source": sid,
         "minzoom": AERIAL_MIN_ZOOM,
         "maxzoom": 22,
         "layout": {"visibility": "none"},
@@ -149,14 +194,16 @@ def style_layer() -> dict:
     }
 
 
-def insert_aerial_layer(layers: list[dict]) -> None:
-    if any(item.get("id") == AERIAL_LAYER_ID for item in layers):
-        return
+def insert_aerial_layer(layers: list[dict], names: list[str] | None = None) -> None:
+    names = names or [AERIAL_FILE]
+    kept = [item for item in layers if not str(item.get("id") or "").startswith("aerial")]
+    layers.clear()
+    layers.extend(kept)
     ids = [item.get("id") for item in layers]
-    if "land-fill" in ids:
-        layers.insert(ids.index("land-fill") + 1, style_layer())
-    else:
-        layers.append(style_layer())
+    at = ids.index("land-fill") + 1 if "land-fill" in ids else len(layers)
+    for name in names:
+        layers.insert(at, style_layer(name))
+        at += 1
 
 
 def _http_jpeg(url: str, timeout: int = 90) -> bytes | None:
@@ -168,7 +215,7 @@ def _http_jpeg(url: str, timeout: int = 90) -> bytes | None:
         },
     )
     last: Exception | None = None
-    for attempt in range(4):
+    for _attempt in range(4):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 raw = resp.read()
@@ -209,7 +256,7 @@ def wanted_tiles(bbox: dict, z0: int, z1: int) -> list[tuple[int, int, int]]:
 
 
 def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
-    """Pack-wide z12 floor plus metro/walk detail. z17 stays on the yards extra."""
+    """Street-scale fill on the extract; yard-scale on the walkable ground."""
     seen: set[tuple[int, int, int]] = set()
     jobs: list[tuple[int, int, int]] = []
 
@@ -220,9 +267,16 @@ def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
             seen.add(zxy)
             jobs.append(zxy)
 
-    add(region_bbox(pack), AERIAL_FLOOR_ZOOM, AERIAL_FLOOR_ZOOM)
+    pid = str(pack.get("id") or "")
+    region = region_bbox(pack)
+    walk = walkable_bbox(pack)
+    add(region, AERIAL_FLOOR_ZOOM, AERIAL_FLOOR_ZOOM)
+    add(region, AERIAL_DETAIL_MIN, AERIAL_FILL_ZOOM)
+    add(walk, 16, 16)
+    if pid == "tx-west":
+        add(walk, AERIAL_MAX_ZOOM, AERIAL_MAX_ZOOM)
     add(metro_bbox(pack), AERIAL_DETAIL_MIN, AERIAL_MAX_ZOOM)
-    for item in PHOTO_EXTRA.get(str(pack.get("id") or ""), []):
+    for item in PHOTO_EXTRA.get(pid, []):
         box = {
             "south": float(item["south"]),
             "west": float(item["west"]),
@@ -233,47 +287,85 @@ def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
     return jobs
 
 
-def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
-    """Write `aerial.pmtiles` for pack floor plus metro/walk extras. Skip rather than fake photo."""
-    jobs = aerial_jobs(pack)
-    bbox = region_bbox(pack)
-    got: dict[tuple[int, int, int], bytes] = {}
-    existing = dest / AERIAL_FILE
-    if existing.is_file():
-        with open(existing, "rb") as fh:
-            reader = Reader(MmapSource(fh))
-            for z, x, y in jobs:
-                blob = reader.get(z, x, y)
-                if blob:
-                    got[(z, x, y)] = blob
-        print(f"  NAIP {pack['id']} reuse {len(got)} packed jpeg", flush=True)
-    missing = [zxy for zxy in jobs if zxy not in got]
-    print(f"  NAIP {pack['id']} photo {len(jobs)} tiles, fetch {len(missing)}", flush=True)
-    if missing:
-        with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-            futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in missing}
-            done = 0
-            for fut in as_completed(futs):
-                zxy = futs[fut]
-                done += 1
-                try:
-                    blob = fut.result()
-                except Exception:
-                    blob = None
-                if blob:
-                    got[zxy] = blob
-                if done % 40 == 0 or done == len(missing):
-                    print(
-                        f"  NAIP {pack['id']} {done}/{len(missing)} fetched {len(got)} jpeg",
-                        flush=True,
-                    )
-    if len(got) < 20:
-        return {"present": False, "reason": f"NAIP returned {len(got)} tiles", "tiles": 0}
-    out = dest / AERIAL_FILE
-    with open(out, "wb") as fh:
+def cache_path(dest: Path, z: int, x: int, y: int) -> Path:
+    return dest / CACHE_DIR / str(z) / str(x) / f"{y}.jpg"
+
+
+def cache_get(dest: Path, z: int, x: int, y: int) -> bytes | None:
+    path = cache_path(dest, z, x, y)
+    if not path.is_file():
+        return None
+    raw = path.read_bytes()
+    if raw.startswith(JPEG_MAGIC) and len(raw) > 800:
+        return raw
+    return None
+
+
+def cache_put(dest: Path, z: int, x: int, y: int, blob: bytes) -> None:
+    path = cache_path(dest, z, x, y)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_bytes(blob)
+    tmp.replace(path)
+
+
+def _reuse_into_cache(dest: Path, jobs: list[tuple[int, int, int]], pack_id: str) -> int:
+    names = shard_names(dest)
+    if not names:
+        return 0
+    wanted = set(jobs)
+    reused = 0
+    for name in names:
+        with open(dest / name, "rb") as fh:
+            for zxy, blob in all_tiles(MmapSource(fh)):
+                if zxy not in wanted:
+                    continue
+                if cache_path(dest, *zxy).is_file():
+                    continue
+                if blob and blob.startswith(JPEG_MAGIC) and len(blob) > 800:
+                    cache_put(dest, *zxy, blob)
+                    reused += 1
+    print(f"  NAIP {pack_id} reuse {reused} packed jpeg", flush=True)
+    return reused
+
+
+def _fetch_missing(dest: Path, jobs: list[tuple[int, int, int]], pack_id: str) -> None:
+    missing = [zxy for zxy in jobs if not cache_path(dest, *zxy).is_file()]
+    print(f"  NAIP {pack_id} photo {len(jobs)} tiles, fetch {len(missing)}", flush=True)
+    if not missing:
+        return
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        futs = {pool.submit(fetch_tile_jpeg, z, x, y): (z, x, y) for z, x, y in missing}
+        done = 0
+        got = 0
+        for fut in as_completed(futs):
+            zxy = futs[fut]
+            done += 1
+            try:
+                blob = fut.result()
+            except Exception:
+                blob = None
+            if blob:
+                cache_put(dest, *zxy, blob)
+                got += 1
+            if done % 100 == 0 or done == len(missing):
+                print(
+                    f"  NAIP {pack_id} {done}/{len(missing)} fetched {got} jpeg",
+                    flush=True,
+                )
+
+
+def _write_one_shard(
+    path: Path,
+    tiles: list[tuple[tuple[int, int, int], bytes]],
+    bbox: dict,
+    pack: dict,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as fh:
         writer = Writer(fh)
-        for z, x, y in sorted(got):
-            writer.write_tile(zxy_to_tileid(z, x, y), got[(z, x, y)])
+        for zxy, blob in tiles:
+            writer.write_tile(zxy_to_tileid(*zxy), blob)
         writer.finalize(
             {
                 "tile_type": TileType.JPEG,
@@ -294,10 +386,73 @@ def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
                 "attribution": NAIP_CREDIT,
             },
         )
+
+
+def write_shards(
+    dest: Path,
+    jobs: list[tuple[int, int, int]],
+    pack: dict,
+) -> list[str]:
+    bbox = region_bbox(pack)
+    staging = dest / WRITE_DIR
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True, exist_ok=True)
+    names: list[str] = []
+    current: list[tuple[tuple[int, int, int], bytes]] = []
+    size = 0
+    tiles = 0
+
+    def flush() -> None:
+        nonlocal current, size
+        if not current:
+            return
+        name = shard_file_name(len(names))
+        _write_one_shard(staging / name, current, bbox, pack)
+        names.append(name)
+        current = []
+        size = 0
+
+    for zxy in sorted(jobs, key=lambda item: zxy_to_tileid(*item)):
+        blob = cache_get(dest, *zxy)
+        if not blob:
+            continue
+        tiles += 1
+        payload = len(blob)
+        if current and size + payload > SHARD_PAYLOAD_BYTES:
+            flush()
+        current.append((zxy, blob))
+        size += payload
+    flush()
+    if tiles < 20:
+        shutil.rmtree(staging, ignore_errors=True)
+        return []
+    for old in dest.glob("aerial*.pmtiles"):
+        old.unlink()
+    for name in names:
+        (staging / name).replace(dest / name)
+    shutil.rmtree(staging, ignore_errors=True)
+    return names
+
+
+def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
+    """Write `aerial*.pmtiles` shards for the extract plus walkable yards."""
+    dest.mkdir(parents=True, exist_ok=True)
+    jobs = aerial_jobs(pack)
+    pack_id = str(pack.get("id") or dest.name)
+    _reuse_into_cache(dest, jobs, pack_id)
+    _fetch_missing(dest, jobs, pack_id)
+    names = write_shards(dest, jobs, pack)
+    if not names:
+        present = sum(1 for zxy in jobs if cache_get(dest, *zxy))
+        return {"present": False, "reason": f"NAIP returned {present} tiles", "tiles": 0}
+    tiles = sum(1 for zxy in jobs if cache_get(dest, *zxy))
+    bytes_out = sum((dest / name).stat().st_size for name in names)
     return {
         "present": True,
-        "file": AERIAL_FILE,
-        "tiles": len(got),
-        "bytes": out.stat().st_size,
+        "file": names[0],
+        "files": names,
+        "tiles": tiles,
+        "bytes": bytes_out,
         "attribution": NAIP_CREDIT,
     }

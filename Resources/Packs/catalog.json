@@ -141,6 +141,7 @@
         "streetsVisibleAtWalkingZoom": true
       },
       "files": [
+        "aerial-1.pmtiles",
         "aerial.pmtiles",
         "border.geojson",
         "contours.geojson",
@@ -171,7 +172,7 @@
         "walk-dem.json",
         "wild.geojson"
       ],
-      "bytes": 148385603
+      "bytes": 148368855
     },
     {
       "id": "tx-east",
@@ -324,7 +325,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 93118975
+      "bytes": 93113383
     },
     {
       "id": "nm",
@@ -478,7 +479,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 109717255
+      "bytes": 109708285
     }
   ]
 }

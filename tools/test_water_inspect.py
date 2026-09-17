@@ -23,7 +23,7 @@ from pmtiles.reader import MmapSource, Reader
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from v3 import ground, water
+from v3 import aerial, ground, water
 from v3.fetch_packs import PACKS, clip_features, osm_to_geojson
 from v3.tiles import lonlat_to_tile, read_layers
 
@@ -87,7 +87,11 @@ class ShippedWaterLayers(unittest.TestCase):
                 if (PACK_ROOT / pid / rel).is_file()
             )
             self.assertEqual(manifest["bytes"], on_disk, f"{pid} manifest bytes disagree with disk")
-            self.assertLessEqual(manifest["bytes"] / (1024 * 1024), 160, f"{pid} over the iOS budget")
+            self.assertLessEqual(
+                manifest["bytes"] / (1024 * 1024),
+                aerial.PACK_BUDGET_MIB,
+                f"{pid} over the iOS budget",
+            )
 
     def test_the_catalog_agrees_with_the_manifests(self):
         catalog = json.loads((PACK_ROOT / "catalog.json").read_text())
@@ -3289,7 +3293,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("groundWorkedFillLayerID", swift)
         self.assertIn("groundWorkedLineLayerID", swift)
         self.assertNotIn("edible", swift.lower())
-        self.assertIn("resolverVersion = 11", swift)
+        self.assertIn("resolverVersion = 12", swift)
 
     def test_a_hold_asks_the_overlay_source_and_the_glass_holds_real_sheets(self):
         """Faint fill and walking-zoom are for the eye. The hold still has to

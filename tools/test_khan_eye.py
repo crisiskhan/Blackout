@@ -26,6 +26,42 @@ PACK_ROOT = ROOT / "Resources" / "Packs"
 SWIFT = ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift"
 OFFLINE = ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift"
 DOWNTOWN = {"lat": 31.7587, "lon": -106.4869}
+HATCH = {"lat": 32.665, "lon": -107.154}
+LAS_CRUCES = {"lat": 32.3199, "lon": -106.778}
+TULAROSA = {"lat": 33.074, "lon": -106.018}
+BUDA = {"lat": 30.085, "lon": -97.840}
+AUSTIN = {"lat": 30.2672, "lon": -97.7431}
+ISLETA = {"lat": 34.909, "lon": -106.693}
+ALBUQUERQUE = {"lat": 35.0844, "lon": -106.6504}
+
+
+def _aerial_paths(dest: Path) -> list[Path]:
+    files = [p for p in dest.glob("aerial*.pmtiles") if p.is_file()]
+
+    def key(path: Path) -> tuple[int, int]:
+        stem = path.name.removesuffix(".pmtiles")
+        if stem == "aerial":
+            return (0, 0)
+        _, _, rest = stem.partition("-")
+        return (1, int(rest) if rest.isdigit() else 0)
+
+    return sorted(files, key=key)
+
+
+def _packed_jpeg(dest: Path, lon: float, lat: float, z: int) -> bytes | None:
+    cx, cy = lonlat_to_tile(lon, lat, z)
+    x, y = int(cx), int(cy)
+    for path in _aerial_paths(dest):
+        with open(path, "rb") as fh:
+            blob = Reader(MmapSource(fh)).get(z, x, y)
+        if blob:
+            return blob
+    return None
+
+
+def _job_has(pack: dict, lon: float, lat: float, z: int) -> bool:
+    cx, cy = lonlat_to_tile(lon, lat, z)
+    return (z, int(cx), int(cy)) in set(aerial.aerial_jobs(pack))
 
 
 class HeightAndKindTests(unittest.TestCase):
@@ -134,7 +170,7 @@ class StyleAndResolverTests(unittest.TestCase):
     def test_resolver_and_eye_layers_lock(self):
         swift = SWIFT.read_text()
         offline = OFFLINE.read_text()
-        self.assertIn("resolverVersion = 11", swift)
+        self.assertIn("resolverVersion = 12", swift)
         self.assertIn("func attachKhanLayers", swift)
         self.assertIn("func attachAerialLayers", swift)
         self.assertIn("khan.pmtiles", swift)
@@ -251,10 +287,7 @@ class PackedArchiveTests(unittest.TestCase):
     def test_downtown_el_paso_has_photo(self):
         archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
         self.assertTrue(archive.is_file())
-        with open(archive, "rb") as fh:
-            reader = Reader(MmapSource(fh))
-            cx, cy = lonlat_to_tile(DOWNTOWN["lon"], DOWNTOWN["lat"], 16)
-            blob = reader.get(16, int(cx), int(cy))
+        blob = _packed_jpeg(PACK_ROOT / "tx-west", DOWNTOWN["lon"], DOWNTOWN["lat"], 16)
         self.assertIsNotNone(blob, "downtown El Paso has no packed photo at z16")
         assert blob is not None
         self.assertTrue(blob.startswith(b"\xff\xd8"), "downtown El Paso aerial is not JPEG")
@@ -268,11 +301,7 @@ class PackedArchiveTests(unittest.TestCase):
         self.assertGreaterEqual(len(boxes), 2)
         self.assertTrue(union["south"] <= you["lat"] <= union["north"])
         self.assertTrue(union["west"] <= you["lon"] <= union["east"])
-        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
-        with open(archive, "rb") as fh:
-            reader = Reader(MmapSource(fh))
-            cx, cy = lonlat_to_tile(you["lon"], you["lat"], 16)
-            blob = reader.get(16, int(cx), int(cy))
+        blob = _packed_jpeg(PACK_ROOT / "tx-west", you["lon"], you["lat"], 16)
         self.assertIsNotNone(blob, "Oleaster walk has no packed photo at z16")
         assert blob is not None
         self.assertTrue(blob.startswith(b"\xff\xd8"), "Oleaster aerial is not JPEG")
@@ -431,11 +460,7 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertLessEqual(extra["west"], -106.63)
         self.assertGreaterEqual(extra["north"], 31.94)
         self.assertGreaterEqual(extra["east"], -106.55)
-        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
-        with open(archive, "rb") as fh:
-            reader = Reader(MmapSource(fh))
-            cx, cy = lonlat_to_tile(canutillo["lon"], canutillo["lat"], 16)
-            blob = reader.get(16, int(cx), int(cy))
+        blob = _packed_jpeg(PACK_ROOT / "tx-west", canutillo["lon"], canutillo["lat"], 16)
         self.assertIsNotNone(blob, "Canutillo has no packed photo at z16")
         assert blob is not None
         self.assertTrue(blob.startswith(b"\xff\xd8"), "Canutillo aerial is not JPEG")
@@ -471,20 +496,16 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
         self.assertNotIn("landFillLayerID", covers)
         self.assertNotIn("aerial ? 0", eye)
-        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
-        with open(archive, "rb") as fh:
-            reader = Reader(MmapSource(fh))
-            for name, pt, z in (
-                ("Vinton", vinton, 16),
-                ("Anthony", anthony, 16),
-                ("YOU floor", you, 12),
-            ):
-                cx, cy = lonlat_to_tile(pt["lon"], pt["lat"], z)
-                blob = reader.get(z, int(cx), int(cy))
-                self.assertIsNotNone(blob, f"{name} has no packed photo at z{z}")
-                assert blob is not None
-                self.assertTrue(blob.startswith(b"\xff\xd8"), f"{name} aerial is not JPEG")
-                self.assertGreater(len(blob), 800)
+        for name, pt, z in (
+            ("Vinton", vinton, 16),
+            ("Anthony", anthony, 16),
+            ("YOU floor", you, 12),
+        ):
+            blob = _packed_jpeg(PACK_ROOT / "tx-west", pt["lon"], pt["lat"], z)
+            self.assertIsNotNone(blob, f"{name} has no packed photo at z{z}")
+            assert blob is not None
+            self.assertTrue(blob.startswith(b"\xff\xd8"), f"{name} aerial is not JPEG")
+            self.assertGreater(len(blob), 800)
         for blob in (
             (ROOT / "docs" / "SOLO_QA.md").read_text(),
             (ROOT / "docs" / "DEVICE.md").read_text(),
@@ -504,14 +525,102 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             archive = PACK_ROOT / pid / "aerial.pmtiles"
             self.assertTrue(archive.is_file(), f"{pid} missing aerial.pmtiles")
             with open(archive, "rb") as fh:
-                reader = Reader(MmapSource(fh))
-                header = reader.header()
-                self.assertLessEqual(int(header["min_zoom"]), 12, f"{pid} aerial min_zoom")
-                cx, cy = lonlat_to_tile(home["lon"], home["lat"], 12)
-                blob = reader.get(12, int(cx), int(cy))
+                header = Reader(MmapSource(fh)).header()
+            self.assertLessEqual(int(header["min_zoom"]), 12, f"{pid} aerial min_zoom")
+            blob = _packed_jpeg(PACK_ROOT / pid, home["lon"], home["lat"], 12)
             self.assertIsNotNone(blob, f"{pid} pack center has no z12 photo floor")
             assert blob is not None
             self.assertTrue(blob.startswith(b"\xff\xd8"), f"{pid} z12 floor is not JPEG")
+
+
+class FullExtractPhotoTests(unittest.TestCase):
+    """The whole packed extract is NAIP, not a metro postage stamp."""
+
+    def test_jobs_fill_every_extract_and_walk_at_max_zoom(self):
+        west = {"id": "tx-west", **PACKS["tx-west"]}
+        east = {"id": "tx-east", **PACKS["tx-east"]}
+        nm = {"id": "nm", **PACKS["nm"]}
+        self.assertTrue(_job_has(west, HATCH["lon"], HATCH["lat"], 15), "Hatch is off TX WEST z15 fill")
+        self.assertTrue(
+            _job_has(west, TULAROSA["lon"], TULAROSA["lat"], 15),
+            "Tularosa is off TX WEST z15 fill",
+        )
+        self.assertTrue(
+            _job_has(west, LAS_CRUCES["lon"], LAS_CRUCES["lat"], 17),
+            "Las Cruces walk is off TX WEST z17",
+        )
+        self.assertTrue(_job_has(east, BUDA["lon"], BUDA["lat"], 15), "Buda is off TX EAST z15 fill")
+        self.assertTrue(
+            _job_has(east, AUSTIN["lon"], AUSTIN["lat"], 16),
+            "Austin walk is off TX EAST z16",
+        )
+        self.assertTrue(_job_has(nm, ISLETA["lon"], ISLETA["lat"], 15), "Isleta is off NM z15 fill")
+        self.assertTrue(
+            _job_has(nm, ALBUQUERQUE["lon"], ALBUQUERQUE["lat"], 16),
+            "Albuquerque walk is off NM z16",
+        )
+        union = aerial.union_photo_bbox(
+            aerial.photo_bboxes({"id": "tx-west", "slices": PACKS["tx-west"]["slices"]})
+        )
+        self.assertTrue(union["south"] <= HATCH["lat"] <= union["north"], union)
+        self.assertTrue(union["west"] <= HATCH["lon"] <= union["east"], union)
+
+    def test_github_and_ipa_budgets_let_the_photo_grow(self):
+        self.assertLessEqual(aerial.SHARD_MAX_BYTES, 90 * 1024 * 1024)
+        self.assertGreater(aerial.SHARD_MAX_BYTES, 50 * 1024 * 1024)
+        self.assertEqual(aerial.PACK_BUDGET_MIB, 4096)
+        validate = (ROOT / "tools" / "validate_v3.py").read_text()
+        self.assertNotIn("exceeds 160 MB iOS budget", validate)
+        self.assertIn("PACK_BUDGET_MIB", validate)
+        water = (ROOT / "tools" / "test_water_inspect.py").read_text()
+        self.assertIn("PACK_BUDGET_MIB", water)
+        self.assertNotIn("<= 160, f\"{pid} over the iOS budget\"", water)
+        for pid in PACKS:
+            for path in _aerial_paths(PACK_ROOT / pid):
+                self.assertLessEqual(
+                    path.stat().st_size,
+                    aerial.SHARD_MAX_BYTES,
+                    f"{path} over GitHub 100 MB hard limit",
+                )
+
+    def test_attach_and_style_list_every_aerial_shard(self):
+        attach = SWIFT.read_text().split("public static func attachAerialLayers")[1].split(
+            "Packed OSM houses"
+        )[0]
+        self.assertIn("contentsOfDirectory", attach)
+        self.assertIn('hasPrefix("aerial")', attach)
+        self.assertIn("hasSuffix(\".pmtiles\")", attach)
+        self.assertIn("resolverVersion = 12", SWIFT.read_text())
+        pbx = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+        self.assertIn("Packs/*/.naip-cache", pbx)
+        ignore = (ROOT / ".gitignore").read_text()
+        self.assertIn(".naip-cache", ignore)
+
+    def test_extract_and_walk_are_on_packed_photo(self):
+        west = PACK_ROOT / "tx-west"
+        east = PACK_ROOT / "tx-east"
+        nm = PACK_ROOT / "nm"
+        cases = (
+            (west, "Hatch", HATCH, 15),
+            (west, "Tularosa", TULAROSA, 15),
+            (west, "Las Cruces", LAS_CRUCES, 17),
+            (east, "Buda", BUDA, 15),
+            (east, "Austin", AUSTIN, 16),
+            (nm, "Isleta", ISLETA, 15),
+            (nm, "Albuquerque", ALBUQUERQUE, 16),
+        )
+        for dest, name, pt, z in cases:
+            blob = _packed_jpeg(dest, pt["lon"], pt["lat"], z)
+            self.assertIsNotNone(blob, f"{name} has no packed photo at z{z}")
+            assert blob is not None
+            self.assertTrue(blob.startswith(b"\xff\xd8"), f"{name} aerial is not JPEG")
+            self.assertGreater(len(blob), 800)
+        for blob in (
+            (ROOT / "docs" / "SOLO_QA.md").read_text(),
+            (ROOT / "docs" / "DEVICE.md").read_text(),
+        ):
+            self.assertIn("Street-scale photo covers every pack extract", blob)
+            self.assertIn("yard-scale on the walkable ground", blob)
 
 
 if __name__ == "__main__":

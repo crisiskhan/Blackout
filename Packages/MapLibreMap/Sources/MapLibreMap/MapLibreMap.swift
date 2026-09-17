@@ -809,8 +809,8 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v11 paints packed NAIP photo under KHAN EYE houses.
-    public static let resolverVersion = 11
+    /// not keep replaying it. v12 paints sharded packed NAIP photo under KHAN EYE houses.
+    public static let resolverVersion = 12
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -1033,45 +1033,61 @@ public enum PackStyle {
     }
 
     /// Packed USGS NAIP photo. Ground on the walking 3D desk and on KHAN EYE.
-    /// Not a live feed.
+    /// Not a live feed. Archives may be sharded under GitHub's 100 MB file cap.
     public static func attachAerialLayers(
         _ sources: inout [String: Any],
         _ layers: inout [[String: Any]],
         packRoot: URL
     ) {
-        let archive = packRoot.appendingPathComponent(aerialFileName)
-        guard FileManager.default.fileExists(atPath: archive.path) else { return }
-        if var existing = sources[aerialSourceID] as? [String: Any] {
-            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
-                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
-                sources[aerialSourceID] = existing
+        let names = ((try? FileManager.default.contentsOfDirectory(atPath: packRoot.path)) ?? [])
+            .filter { $0.hasPrefix("aerial") && $0.hasSuffix(".pmtiles") }
+            .sorted { lhs, rhs in
+                func rank(_ name: String) -> Int {
+                    if name == aerialFileName { return 0 }
+                    let trimmed = name.dropFirst("aerial-".count).dropLast(".pmtiles".count)
+                    return (Int(trimmed) ?? 0) + 1
+                }
+                return rank(lhs) < rank(rhs)
             }
-        } else {
-            sources[aerialSourceID] = [
+        guard !names.isEmpty else { return }
+        var insertAt = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }).map { $0 + 1 }
+            ?? layers.count
+        for name in names {
+            let archive = packRoot.appendingPathComponent(name)
+            guard FileManager.default.fileExists(atPath: archive.path) else { continue }
+            let sourceID = String(name.dropLast(8))
+            if var existing = sources[sourceID] as? [String: Any] {
+                if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                    existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                    sources[sourceID] = existing
+                }
+            } else {
+                sources[sourceID] = [
+                    "type": "raster",
+                    "url": PMTilesURL.shipped(for: archive),
+                    "tileSize": 256,
+                ]
+            }
+            let layer: [String: Any] = [
+                "id": sourceID,
                 "type": "raster",
-                "url": PMTilesURL.shipped(for: archive),
-                "tileSize": 256,
+                "source": sourceID,
+                "minzoom": 12,
+                "layout": ["visibility": "none"],
+                "paint": [
+                    "raster-opacity": 1,
+                    "raster-fade-duration": 0,
+                ],
             ]
-        }
-        let layer: [String: Any] = [
-            "id": aerialLayerID,
-            "type": "raster",
-            "source": aerialSourceID,
-            "minzoom": 12,
-            "layout": ["visibility": "none"],
-            "paint": [
-                "raster-opacity": 1,
-                "raster-fade-duration": 0,
-            ],
-        ]
-        if let index = layers.firstIndex(where: { $0["id"] as? String == aerialLayerID }) {
-            layers[index] = layer
-            return
-        }
-        if let land = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
-            layers.insert(layer, at: land + 1)
-        } else {
-            layers.append(layer)
+            if let index = layers.firstIndex(where: { $0["id"] as? String == sourceID }) {
+                layers[index] = layer
+                if index >= insertAt {
+                    insertAt = index + 1
+                }
+            } else {
+                layers.insert(layer, at: insertAt)
+                insertAt += 1
+            }
         }
     }
 
