@@ -1761,7 +1761,7 @@ enum PersonCompassArt {
             )
             cg.saveGState()
             cg.addEllipse(in: wellRect)
-            cg.addClip()
+            cg.clip()
             let emblem = PersonEmblem.resolved(emblemID)
             (PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback))?.draw(in: wellRect)
             cg.restoreGState()
