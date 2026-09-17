@@ -3876,7 +3876,8 @@ class MapCanvasHonestyTests(unittest.TestCase):
         interact = offline.split("private func applyInteraction")[1].split(
             "public final class Coordinator"
         )[0]
-        self.assertIn("minimumZoomLevel = PackCamera.minZoom", interact)
+        self.assertIn("minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)", interact)
+        self.assertNotIn("minimumZoomLevel = PackCamera.minZoom", interact)
         self.assertIn("maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)", interact)
         self.assertIn("godsEye ? godsEyeMaxZoom : maxZoom", cam)
         qa = read("docs", "SOLO_QA.md")

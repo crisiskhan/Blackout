@@ -238,7 +238,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.allowsTilting = PackCamera.allowsTilt(godsEye: godsEye)
         view.minimumPitch = CGFloat(PackCamera.holdMinPitch(godsEye: godsEye))
         view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
-        view.minimumZoomLevel = PackCamera.minZoom
+        view.minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)
         view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)
         if let map = view as? FillingMapView {
             map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)

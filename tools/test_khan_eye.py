@@ -367,6 +367,27 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         self.assertIn("travelMode == .drive", live)
         self.assertIn("routeCoords.isEmpty", live)
 
+    def test_pinch_out_stays_on_packed_photo_not_pack_horizon(self):
+        cam = SWIFT.read_text().split("public enum PackCamera")[1].split(
+            "public enum PackStyle"
+        )[0]
+        self.assertIn("static let photoMinZoom: Double = 14", cam)
+        self.assertIn("static func holdMinZoom", cam)
+        self.assertIn("return photoMinZoom", cam.split("static func holdMinZoom")[1].split(
+            "static func holdMaxZoom"
+        )[0])
+        interact = OFFLINE.read_text().split("private func applyInteraction")[1].split(
+            "public final class Coordinator"
+        )[0]
+        self.assertIn("minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)", interact)
+        self.assertNotIn("minimumZoomLevel = PackCamera.minZoom", interact)
+        for blob in (
+            (ROOT / "docs" / "SOLO_QA.md").read_text(),
+            (ROOT / "docs" / "DEVICE.md").read_text(),
+        ):
+            self.assertIn("Pinch-out stays on packed photo", blob)
+            self.assertIn("pack diamond on black is a FAIL", blob)
+
 
 if __name__ == "__main__":
     unittest.main()

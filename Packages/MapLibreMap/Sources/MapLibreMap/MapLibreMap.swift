@@ -523,7 +523,7 @@ public enum PackCamera {
 
     /// Street names only render from `PackStyle` road-labels `minzoom` up. Fitting a
     /// whole 0.3° pack lands near z11, which is why TX WEST opened as nameless lines.
-    /// The map therefore opens on YOU at walking zoom; GODS EYE still shows the region.
+    /// The map therefore opens on YOU at walking zoom; pinch-out stays on photo.
     public static let openZoom: Double = 15
     /// Cesium camera height that matches walking `openZoom` on the ellipsoid.
     public static func openHeightMeters(lat: Double) -> Double {
@@ -532,7 +532,10 @@ public enum PackCamera {
         return earth * cosine / pow(2, openZoom + 1)
     }
     public static let streetNameMinZoom: Double = 12
-    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Pinch below this is void.
+    /// Packed NAIP starts at z14. Pinch below that is gray schematic streets,
+    /// then the pack extract as a diamond on black (Hatch to Tularosa).
+    public static let photoMinZoom: Double = 14
+    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Not the camera pinch floor.
     public static let minZoom: Double = 6
     /// Style overzoom ceiling. Packed streets do not get sharper past this.
     public static let maxZoom: Double = 16
@@ -651,6 +654,10 @@ public enum PackCamera {
 
     public static func holdMaxPitch(godsEye _: Bool) -> Double {
         godsEyeMaxPitch
+    }
+
+    public static func holdMinZoom(godsEye _: Bool) -> Double {
+        return photoMinZoom
     }
 
     public static func holdMaxZoom(godsEye: Bool) -> Double {
