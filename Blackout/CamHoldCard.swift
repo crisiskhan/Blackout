@@ -15,9 +15,15 @@ struct CamHoldCard: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
-                stillWell
-                rows
                 actions
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        stillWell
+                        rows
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
     }

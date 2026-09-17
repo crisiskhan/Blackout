@@ -5,11 +5,27 @@ import Tokens
 import MapLibreMap
 import UIKit
 
+private enum CommsPlate: String, CaseIterable {
+    case party, face, net, call, note, chips
+
+    var title: String {
+        switch self {
+        case .party: return "PARTY"
+        case .face: return "FACE"
+        case .net: return "NET"
+        case .call: return "CALL"
+        case .note: return "NOTE"
+        case .chips: return "CHIPS"
+        }
+    }
+}
+
 struct CommsTab: View {
     @Bindable var runtime: AppRuntime
     @State private var scanQR = false
     @State private var pttDown = false
     @State private var note = ""
+    @State private var plate: CommsPlate = .party
 
     var body: some View {
         HUDPage(
@@ -17,127 +33,18 @@ struct CommsTab: View {
             status: pageStatus,
             statusTone: pageTone
         ) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    if meshSOS {
-                        sosPlate
-                    }
-
-                    sectionLabel("PARTY")
-                    partyCard
-
-                    sectionLabel("FACE")
-                    faceCard
-
-                    sectionLabel("NET")
-                    Button(runtime.mesh.listening ? "LEAVE NET" : "JOIN LOCAL NET") {
-                        if runtime.mesh.listening {
-                            runtime.leaveNet()
-                        } else {
-                            runtime.joinNet()
-                        }
-                    }
-                    .buttonStyle(HUDActionStyle(filled: !runtime.mesh.listening))
-                    HStack(spacing: 1) {
-                        Button("ALL") { runtime.comms.setChannel("ALL") }
-                            .buttonStyle(HUDDockStyle())
-                        Button("1:1") {
-                            if runtime.mesh.nearby.isEmpty && runtime.comms.peer != "YOU" {
-                                runtime.commsChrome = "NO PEERS"
-                                return
-                            }
-                            runtime.comms.setChannel("1:1")
-                        }
-                            .buttonStyle(HUDDockStyle())
-                    }
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-                    )
-                    sectionLabel("PEERS")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        chip(peerWord("YOU")) {
-                            runtime.comms.pickPeer("YOU")
-                        }
-                        ForEach(Array(runtime.mesh.nearby.enumerated()), id: \.offset) { _, name in
-                            if name != "YOU" {
-                                chip(peerWord(name)) {
-                                    runtime.comms.pickPeer(name)
-                                }
-                            }
-                        }
-                    }
-
-                    sectionLabel("CALL")
-                    HStack(spacing: 1) {
-                        pttPad
-                        Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
-                            .buttonStyle(HUDDockStyle())
-                    }
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-                    )
-                    Button("RADIO CHECK") { runtime.radioCheckParty() }
-                        .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
-                    if !runtime.commsChrome.isEmpty {
-                        Text(runtime.commsChrome)
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.warn)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    sectionLabel("NOTE")
-                    HUDGlassCard {
-                        HStack(spacing: 8) {
-                            HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND") {
-                                if runtime.sendPartyNote(note) {
-                                    note = ""
-                                }
-                            }
-                            Button("SEND") {
-                                if runtime.sendPartyNote(note) {
-                                    note = ""
-                                    runtime.hudKeys.close()
-                                }
-                            }
-                            .buttonStyle(HUDOverlayChipStyle())
-                        }
-                        .padding(.horizontal, 10)
-                        .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                    }
-
-                    sectionLabel("CHIPS")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        chip(L10n.t("chip.rally", runtime.locale)) {
-                            runtime.sendPartyChip(.rally)
-                        }
-                        chip(L10n.t("chip.down", runtime.locale)) {
-                            runtime.sendPartyChip(.down)
-                        }
-                        chip(L10n.t("form.up", runtime.locale)) {
-                            runtime.sendPartyChip(.formUp)
-                        }
-                        chip(L10n.t("lost.kid", runtime.locale)) {
-                            runtime.sendPartyChip(.lostKid)
-                        }
-                        chip(L10n.t("chip.wait", runtime.locale)) {
-                            runtime.sendPartyChip(.wait)
-                        }
-                        chip(L10n.t("chip.water", runtime.locale)) {
-                            runtime.sendPartyChip(.water)
-                        }
-                    }
-
-                    if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
-                        sectionLabel("LOG")
-                        HUDGlassCard { log }
+            VStack(alignment: .leading, spacing: 10) {
+                if meshSOS {
+                    sosPlate
+                }
+                plateRail
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        plateBody
                     }
                 }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
         .overlay {
@@ -162,9 +69,166 @@ struct CommsTab: View {
             }
         }
         .animation(Theme.Motion.heavy, value: scanQR)
-        .onAppear { openPendingNote() }
-        .onChange(of: runtime.pendingNoteFocus) { _, _ in
+        .onAppear {
+            if runtime.pendingNoteFocus { plate = .note }
             openPendingNote()
+        }
+        .onChange(of: runtime.pendingNoteFocus) { _, now in
+            if now { plate = .note }
+            openPendingNote()
+        }
+    }
+
+    private var plateRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            ForEach(CommsPlate.allCases, id: \.self) { item in
+                Button(item.title) { plate = item }
+                    .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var plateBody: some View {
+        switch plate {
+        case .party:
+            sectionLabel("PARTY")
+            partyCard
+        case .face:
+            sectionLabel("FACE")
+            faceCard
+        case .net:
+            netPlate
+        case .call:
+            callPlate
+        case .note:
+            notePlate
+        case .chips:
+            chipsPlate
+        }
+    }
+
+    private var netPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("NET")
+            Button(runtime.mesh.listening ? "LEAVE NET" : "JOIN LOCAL NET") {
+                if runtime.mesh.listening {
+                    runtime.leaveNet()
+                } else {
+                    runtime.joinNet()
+                }
+            }
+            .buttonStyle(HUDActionStyle(filled: !runtime.mesh.listening))
+            HStack(spacing: 1) {
+                Button("ALL") { runtime.comms.setChannel("ALL") }
+                    .buttonStyle(HUDDockStyle())
+                Button("1:1") {
+                    if runtime.mesh.nearby.isEmpty && runtime.comms.peer != "YOU" {
+                        runtime.commsChrome = "NO PEERS"
+                        return
+                    }
+                    runtime.comms.setChannel("1:1")
+                }
+                    .buttonStyle(HUDDockStyle())
+            }
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+            )
+            sectionLabel("PEERS")
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                chip(peerWord("YOU")) {
+                    runtime.comms.pickPeer("YOU")
+                }
+                ForEach(Array(runtime.mesh.nearby.enumerated()), id: \.offset) { _, name in
+                    if name != "YOU" {
+                        chip(peerWord(name)) {
+                            runtime.comms.pickPeer(name)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var callPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("CALL")
+            HStack(spacing: 1) {
+                pttPad
+                Button(runtime.clipLive ? "RECORDING" : "15s CLIP") { runtime.captureClip() }
+                    .buttonStyle(HUDDockStyle())
+            }
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+            )
+            Button("RADIO CHECK") { runtime.radioCheckParty() }
+                .buttonStyle(HUDActionStyle(filled: runtime.comms.radioCheckOK && runtime.mesh.joined))
+            if !runtime.commsChrome.isEmpty {
+                Text(runtime.commsChrome)
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.warn)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var notePlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("NOTE")
+            HUDGlassCard {
+                HStack(spacing: 8) {
+                    HUDField("NOTE", text: $note, id: "comms.note", submit: "SEND") {
+                        if runtime.sendPartyNote(note) {
+                            note = ""
+                        }
+                    }
+                    Button("SEND") {
+                        if runtime.sendPartyNote(note) {
+                            note = ""
+                            runtime.hudKeys.close()
+                        }
+                    }
+                    .buttonStyle(HUDOverlayChipStyle())
+                }
+                .padding(.horizontal, 10)
+                .frame(minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            }
+        }
+    }
+
+    private var chipsPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("CHIPS")
+            HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                chip(L10n.t("chip.rally", runtime.locale)) {
+                    runtime.sendPartyChip(.rally)
+                }
+                chip(L10n.t("chip.down", runtime.locale)) {
+                    runtime.sendPartyChip(.down)
+                }
+                chip(L10n.t("form.up", runtime.locale)) {
+                    runtime.sendPartyChip(.formUp)
+                }
+                chip(L10n.t("lost.kid", runtime.locale)) {
+                    runtime.sendPartyChip(.lostKid)
+                }
+                chip(L10n.t("chip.wait", runtime.locale)) {
+                    runtime.sendPartyChip(.wait)
+                }
+                chip(L10n.t("chip.water", runtime.locale)) {
+                    runtime.sendPartyChip(.water)
+                }
+            }
+            if !runtime.comms.chips.isEmpty || !runtime.mesh.inboundChips.isEmpty {
+                sectionLabel("LOG")
+                HUDGlassCard { log }
+            }
         }
     }
 

@@ -24,7 +24,6 @@ struct RootChrome: View {
         .overlay {
             if runtime.armed, runtime.showInstruments {
                 InstrumentsView(runtime: runtime)
-                    .ignoresSafeArea()
                     .transition(.opacity)
             }
         }

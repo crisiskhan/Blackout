@@ -18,8 +18,12 @@ struct AddressHoldCard: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
-                rows
                 actions
+                ScrollView {
+                    rows
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
     }

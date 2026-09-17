@@ -4636,6 +4636,88 @@ def hud_tap(state: dict, key) -> None:
     state["text"] += glyph
 
 
+class MapHoldScrollAndPlateRailTests(unittest.TestCase):
+    """Hold cards scroll. INSTRUMENTS / COMMS / EXPEDITION are one plate, not a dump."""
+
+    def test_hold_dismiss_does_not_steal_the_card_scroll(self):
+        hold = read("Blackout", "HoldCard.swift")
+        shell = hold.split("struct HoldGlassShell")[1].split("struct HoldCardView")[0]
+        stack = shell.split("ZStack(alignment: .bottom)")[1].split("private var scrim")[0]
+        self.assertNotIn(".gesture(", stack)
+        self.assertIn("private var dismissDrag", shell)
+        grabber = shell.split("private var grabber")[1]
+        self.assertIn("dismissDrag", grabber)
+        self.assertIn("mapChipHitPoints", grabber)
+        scrim = shell.split("private var scrim")[1].split("private var dismissDrag")[0]
+        self.assertIn("dismissDrag", scrim)
+        ground = hold.split("struct HoldCardView")[1]
+        self.assertIn("ScrollView", ground)
+        self.assertIn("scrollBounceBehavior", ground)
+        self.assertLess(ground.find("actions"), ground.find("ScrollView"))
+        address = read("Blackout", "AddressHoldCard.swift")
+        self.assertIn("ScrollView", address)
+        self.assertLess(address.find("actions"), address.find("ScrollView"))
+        cam = read("Blackout", "CamHoldCard.swift")
+        self.assertIn("ScrollView", cam)
+        self.assertLess(cam.find("actions"), cam.find("ScrollView"))
+        party = read("Blackout", "PartyHoldCard.swift")
+        self.assertIn("scrollBounceBehavior", party)
+        mark = read("Blackout", "PlaceMarkCard.swift")
+        self.assertIn("scrollBounceBehavior", mark)
+        self.assertLess(mark.find('Button("DROP")'), mark.find("ScrollView"))
+
+    def test_instruments_is_a_plate_rail_not_one_long_dump(self):
+        inst = read("Blackout", "InstrumentsView.swift")
+        self.assertIn("enum InstrumentPlate", inst)
+        self.assertIn("HUDWrapRail", inst)
+        self.assertIn("@State private var plate", inst)
+        for title in ("PACKS", "HUD", "MAP", "SUN", "BODY", "VOICE", "POWER"):
+            self.assertIn(f'case .{title.lower()}: return "{title}"', inst, title)
+        self.assertIn("BlackoutTokens.MapOverlay.godsEyeTitle", inst)
+        hud = inst.split('sectionLabel("HUD")')[1].split('sectionLabel("MAP")')[0]
+        self.assertIn('Button("NIGHT")', hud)
+        self.assertIn('Button("SUN")', hud)
+        self.assertNotIn("godsEyeTitle", hud)
+        eye = inst.split("private var eyeDeskPlate")[1].split("private func eyeDeskCaption")[0]
+        self.assertIn("EyeDesk.noFix", eye)
+        self.assertIn("fieldYou == nil", eye)
+        self.assertIn("saveEyeScene", eye)
+        root = read("Blackout", "RootChrome.swift")
+        overlay = root.split("if runtime.armed, runtime.showInstruments")[1].split(".overlay {")[0]
+        self.assertNotIn(".ignoresSafeArea()", overlay)
+        comms = read("Blackout", "CommsTab.swift")
+        self.assertIn("enum CommsPlate", comms)
+        self.assertIn("pendingNoteFocus { plate = .note }", comms)
+        exped = read("Blackout", "ExpeditionTab.swift")
+        self.assertIn("enum ExpeditionPlate", exped)
+        tab = read("Blackout", "MapTab.swift")
+        search = tab.split("private var searchField")[1].split("private var overlayRail")[0]
+        self.assertIn("markList", search)
+        hud_fn = tab.split("private func hud")[1].split("private var searchField")[0]
+        self.assertNotIn("markList", hud_fn)
+        self.assertIn("HUDWrapRail", tab.split("private struct EyeTapStrip")[1])
+        qa = read("docs", "SOLO_QA.md")
+        inst_line = next(
+            line
+            for line in qa.splitlines()
+            if "COMPASS CAL" in line and "GNSS PUCK" in line
+        )
+        self.assertIn("plate rail", inst_line.lower())
+        hold_line = next(
+            line for line in qa.splitlines() if "same hold glass" in line
+        )
+        self.assertIn("scroll", hold_line.lower())
+        self.assertIn("grabber", hold_line.lower())
+        pages = next(
+            line
+            for line in qa.splitlines()
+            if "glass HUD pages over the still-mounted map" in line
+        )
+        self.assertIn("plate", pages.lower())
+        self.assertNotIn("best in class", inst.lower())
+        self.assertNotIn(".spring(", inst)
+
+
 if __name__ == "__main__":
     unittest.main()
 

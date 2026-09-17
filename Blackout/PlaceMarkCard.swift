@@ -39,6 +39,8 @@ struct PlaceMarkCard: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
+                Button("DROP") { runtime.commitMark() }
+                    .buttonStyle(HoldActionStyle(filled: true, expand: true))
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
                         HUDField("NAME",
@@ -60,11 +62,10 @@ struct PlaceMarkCard: View {
                         )
                         faceGrid
                         row(key: "COORDINATES", value: coordinates)
-                        Button("DROP") { runtime.commitMark() }
-                            .buttonStyle(HoldActionStyle(filled: true, expand: true))
                     }
                 }
                 .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
     }
