@@ -179,7 +179,7 @@ class NativeMapTests(unittest.TestCase):
     def test_map_stays_photo_with_readable_hud(self):
         tab = read("Blackout", "MapTab.swift")
         app = read("Blackout", "AppRuntime.swift")
-        hud = tab.split("private func hud")[1].split("private var overlayRail")[0]
+        hud = tab.split("private func hud")[1].split("private var searchField")[0]
         pull = app.split("func pullFix()")[1].split("func notePipFix")[0]
         self.assertIn("pulse()", pull)
         self.assertNotIn("markList", hud)

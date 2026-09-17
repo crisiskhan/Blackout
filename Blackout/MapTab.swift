@@ -325,6 +325,9 @@ struct MapTab: View {
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(Theme.warn)
             }
+            if hits.isEmpty {
+                markList
+            }
         }
     }
 
@@ -740,7 +743,7 @@ private struct EyeTapStrip: View {
     var body: some View {
         VStack {
             Spacer(minLength: 0)
-            HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(person.name.isEmpty ? "PARTY" : person.name)
                         .font(.system(size: 13, weight: .heavy))
@@ -749,13 +752,14 @@ private struct EyeTapStrip: View {
                         .font(.system(size: 11, weight: .heavy))
                         .foregroundStyle(Theme.silver)
                 }
-                Spacer(minLength: 8)
-                Button("PTT", action: onCall)
-                    .buttonStyle(HoldActionStyle(filled: true))
-                Button("MESSAGE", action: onMessage)
-                    .buttonStyle(HoldActionStyle(filled: false))
-                Button("CLOSE", action: onClose)
-                    .buttonStyle(HoldActionStyle(filled: false))
+                HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+                    Button("PTT", action: onCall)
+                        .buttonStyle(HoldActionStyle(filled: true))
+                    Button("MESSAGE", action: onMessage)
+                        .buttonStyle(HoldActionStyle(filled: false))
+                    Button("CLOSE", action: onClose)
+                        .buttonStyle(HoldActionStyle(filled: false))
+                }
             }
             .padding(12)
             .background(Theme.glass())

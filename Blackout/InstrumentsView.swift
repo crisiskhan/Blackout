@@ -5,145 +5,81 @@ import Almanac
 import Instruments
 import MapLibreMap
 
+private enum InstrumentPlate: String, CaseIterable {
+    case eye
+    case packs
+    case hud
+    case map
+    case sun
+    case body
+    case voice
+    case power
+
+    var title: String {
+        switch self {
+        case .eye: return BlackoutTokens.MapOverlay.godsEyeTitle
+        case .packs: return "PACKS"
+        case .hud: return "HUD"
+        case .map: return "MAP"
+        case .sun: return "SUN"
+        case .body: return "BODY"
+        case .voice: return "VOICE"
+        case .power: return "POWER"
+        }
+    }
+}
+
 struct InstrumentsView: View {
     @Bindable var runtime: AppRuntime
+    @State private var plate: InstrumentPlate = .eye
 
     var body: some View {
         let _ = Theme.bind(runtime.lamp)
         VStack(alignment: .leading, spacing: 0) {
             header
+            plateRail
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    sectionLabel("KHAN EYE")
-                    eyeDeskPlate
-
-                    sectionLabel("PACKS")
-                    if let packs = runtime.packs {
-                        ForEach(packs.catalog.packs, id: \.id) { p in
-                            Button {
-                                runtime.switchPack(p.id)
-                            } label: {
-                                HStack {
-                                    Text("\(p.name) · \(max(p.bytes / 1_000_000, 1)) MB")
-                                    Spacer()
-                                    if runtime.packs?.active?.id == p.id {
-                                        Text("PACK")
-                                            .foregroundStyle(Theme.silver)
-                                    }
-                                }
-                            }
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.silver)
-                            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
-                            .padding(.horizontal, 12)
-                            .background(Theme.glass())
-                            .clipShape(Theme.plateRect())
-                        }
-                    } else {
-                        Text("PACKS · NONE")
-                            .font(.system(size: 13, weight: .heavy))
-                            .foregroundStyle(Theme.warn)
-                    }
-
-                    sectionLabel("HUD")
-                    hudToggle("LEFT HAND", $runtime.leftHand)
-                    HStack(spacing: 1) {
-                        Button("NIGHT") { runtime.tapLamp(.night) }
-                            .buttonStyle(HUDActionStyle(filled: runtime.lamp == .night))
-                        Button("SUN") { runtime.tapLamp(.sun) }
-                            .buttonStyle(HUDActionStyle(filled: runtime.lamp == .sun))
-                        Button(BlackoutTokens.MapOverlay.godsEyeTitle) { runtime.toggleGodsEye() }
-                            .buttonStyle(HUDActionStyle(filled: runtime.godsEye))
-                    }
-                    .clipShape(Theme.plateRect())
-                    hudToggle("LAYOUT", Binding(
-                        get: { runtime.hudLayoutMode },
-                        set: { on in
-                            runtime.hudLayoutMode = on
-                            runtime.pulse()
-                            if on { runtime.showInstruments = false }
-                        }
-                    ))
-                    Button("RESET HUD") { runtime.resetHUD() }
-                        .buttonStyle(HUDActionStyle(filled: false))
-
-                    sectionLabel("MAP")
-                    HStack(spacing: 1) {
-                        Button("RULER") { runtime.tapRuler() }
-                            .buttonStyle(HUDDockStyle())
-                        Button("USNG") { runtime.tapUSNG() }
-                            .buttonStyle(HUDDockStyle())
-                        Button("MAG/TRUE") { runtime.tapMagTrue() }
-                            .buttonStyle(HUDDockStyle())
-                    }
-                    .background(Theme.glass())
-                    .clipShape(Theme.plateRect())
-                    .overlay(
-                        Theme.plateRect()
-                        .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-                    )
-
-                    sectionLabel("SUN")
-                    sunPlate
-
-                    sectionLabel("BODY")
-                    Button("SOS FLASHLIGHT") { runtime.tapSOSFlashlight() }
-                        .buttonStyle(HUDActionStyle(
-                            filled: runtime.instruments.state.sosFlash,
-                            crisis: runtime.instruments.state.sosFlash
-                        ))
-                    Text(lampWord)
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(runtime.instruments.state.sosFlash ? Theme.silver : Theme.silver.opacity(0.45))
-                    hudButton("COMPASS CAL") { runtime.calibrateCompass() }
-                    hudButton("TRUE NORTH") { runtime.setTrueNorth() }
-                    Text(runtime.instruments.state.magNorth ? "MAG NORTH" : "TRUE NORTH")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(Theme.silver.opacity(0.55))
-                    hudToggle("USB-C PTT", Binding(
-                        get: { runtime.instruments.state.usbCPTT },
-                        set: { runtime.attachUSB_C_PTT($0) }
-                    ))
-                    hudToggle("GNSS PUCK", Binding(
-                        get: { runtime.instruments.state.externalGNSS },
-                        set: { runtime.attachGNSSPuck($0) }
-                    ))
-
-                    sectionLabel("VOICE")
-                    HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
-                        ForEach(NavVoice.allCases, id: \.self) { voice in
-                            Button(voice.title) { runtime.setNavVoice(voice) }
-                                .buttonStyle(HUDActionStyle(filled: runtime.instruments.state.voice == voice))
-                        }
-                    }
-
-                    sectionLabel("POWER")
-                    HStack(spacing: 1) {
-                        ForEach(PowerMode.allCases, id: \.self) { mode in
-                            Button(mode.rawValue.uppercased()) { runtime.power.set(mode) }
-                                .buttonStyle(HUDActionStyle(filled: runtime.power.state.mode == mode))
-                        }
-                    }
-                    .clipShape(Theme.plateRect())
-                    hudToggle("POCKET", Binding(
-                        get: { runtime.power.state.pocket },
-                        set: { runtime.setPocket($0) }
-                    ))
-                    Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(Theme.silver.opacity(0.55))
-
-                    hudButton("ES / EN") {
-                        runtime.locale = runtime.locale == "es" ? "en" : "es"
-                        runtime.applySpeechTone()
-                    }
+                    plateBody
                 }
                 .padding(16)
             }
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .background(Theme.void)
+        .background(Theme.void.ignoresSafeArea())
         .preferredColorScheme(runtime.lamp == .sun ? .light : .dark)
         .nightRedLamp(runtime.night)
+    }
+
+    @ViewBuilder
+    private var plateBody: some View {
+        switch plate {
+        case .eye:
+            sectionLabel(BlackoutTokens.MapOverlay.godsEyeTitle)
+            eyeDeskPlate
+        case .packs:
+            sectionLabel("PACKS")
+            packsPlate
+        case .hud:
+            hudPlate
+        case .map:
+            mapPlate
+        case .sun:
+            sectionLabel("SUN")
+            sunPlate
+        case .body:
+            sectionLabel("BODY")
+            bodyPlate
+        case .voice:
+            sectionLabel("VOICE")
+            voicePlate
+        case .power:
+            sectionLabel("POWER")
+            powerPlate
+        }
     }
 
     private var header: some View {
@@ -157,8 +93,150 @@ struct InstrumentsView: View {
                 .buttonStyle(HUDOverlayChipStyle())
         }
         .padding(.horizontal, 16)
-        .padding(.top, 16)
+        .padding(.top, 8)
         .padding(.bottom, 8)
+        .safeAreaPadding(.top)
+    }
+
+    private var plateRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            ForEach(InstrumentPlate.allCases, id: \.self) { item in
+                Button(item.title) { plate = item }
+                    .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var packsPlate: some View {
+        if let packs = runtime.packs {
+            ForEach(packs.catalog.packs, id: \.id) { p in
+                Button {
+                    runtime.switchPack(p.id)
+                } label: {
+                    HStack {
+                        Text("\(p.name) · \(max(p.bytes / 1_000_000, 1)) MB")
+                        Spacer()
+                        if runtime.packs?.active?.id == p.id {
+                            Text("PACK")
+                                .foregroundStyle(Theme.silver)
+                        }
+                    }
+                }
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.silver)
+                .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+                .padding(.horizontal, 12)
+                .background(Theme.glass())
+                .clipShape(Theme.plateRect())
+            }
+        } else {
+            Text("PACKS · NONE")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Theme.warn)
+        }
+    }
+
+    private var hudPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("HUD")
+            hudToggle("LEFT HAND", $runtime.leftHand)
+            HStack(spacing: 1) {
+                Button("NIGHT") { runtime.tapLamp(.night) }
+                    .buttonStyle(HUDActionStyle(filled: runtime.lamp == .night))
+                Button("SUN") { runtime.tapLamp(.sun) }
+                    .buttonStyle(HUDActionStyle(filled: runtime.lamp == .sun))
+            }
+            .clipShape(Theme.plateRect())
+            hudToggle("LAYOUT", Binding(
+                get: { runtime.hudLayoutMode },
+                set: { on in
+                    runtime.hudLayoutMode = on
+                    runtime.pulse()
+                    if on { runtime.showInstruments = false }
+                }
+            ))
+            Button("RESET HUD") { runtime.resetHUD() }
+                .buttonStyle(HUDActionStyle(filled: false))
+            hudButton("ES / EN") {
+                runtime.locale = runtime.locale == "es" ? "en" : "es"
+                runtime.applySpeechTone()
+            }
+        }
+    }
+
+    private var mapPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("MAP")
+            HStack(spacing: 1) {
+                Button("RULER") { runtime.tapRuler() }
+                    .buttonStyle(HUDDockStyle())
+                Button("USNG") { runtime.tapUSNG() }
+                    .buttonStyle(HUDDockStyle())
+                Button("MAG/TRUE") { runtime.tapMagTrue() }
+                    .buttonStyle(HUDDockStyle())
+            }
+            .background(Theme.glass())
+            .clipShape(Theme.plateRect())
+            .overlay(
+                Theme.plateRect()
+                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+            )
+        }
+    }
+
+    private var bodyPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Button("SOS FLASHLIGHT") { runtime.tapSOSFlashlight() }
+                .buttonStyle(HUDActionStyle(
+                    filled: runtime.instruments.state.sosFlash,
+                    crisis: runtime.instruments.state.sosFlash
+                ))
+            Text(lampWord)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(runtime.instruments.state.sosFlash ? Theme.silver : Theme.silver.opacity(0.45))
+            hudButton("COMPASS CAL") { runtime.calibrateCompass() }
+            hudButton("TRUE NORTH") { runtime.setTrueNorth() }
+            Text(runtime.instruments.state.magNorth ? "MAG NORTH" : "TRUE NORTH")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Theme.silver.opacity(0.55))
+            hudToggle("USB-C PTT", Binding(
+                get: { runtime.instruments.state.usbCPTT },
+                set: { runtime.attachUSB_C_PTT($0) }
+            ))
+            hudToggle("GNSS PUCK", Binding(
+                get: { runtime.instruments.state.externalGNSS },
+                set: { runtime.attachGNSSPuck($0) }
+            ))
+        }
+    }
+
+    private var voicePlate: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            ForEach(NavVoice.allCases, id: \.self) { voice in
+                Button(voice.title) { runtime.setNavVoice(voice) }
+                    .buttonStyle(HUDActionStyle(filled: runtime.instruments.state.voice == voice))
+            }
+        }
+    }
+
+    private var powerPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 1) {
+                ForEach(PowerMode.allCases, id: \.self) { mode in
+                    Button(mode.rawValue.uppercased()) { runtime.power.set(mode) }
+                        .buttonStyle(HUDActionStyle(filled: runtime.power.state.mode == mode))
+                }
+            }
+            .clipShape(Theme.plateRect())
+            hudToggle("POCKET", Binding(
+                get: { runtime.power.state.pocket },
+                set: { runtime.setPocket($0) }
+            ))
+            Text("SPARE \(Int(runtime.power.state.powerBankWh)) WH")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Theme.silver.opacity(0.55))
+        }
     }
 
     private var lampWord: String {
@@ -234,6 +312,11 @@ struct InstrumentsView: View {
                     }
                 }
                 eyeDeskCaption("MARK")
+                if runtime.fieldYou == nil {
+                    Text(EyeDesk.noFix)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Theme.warn)
+                }
                 HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
                     ForEach(EyeDesk.MarkKind.allCases, id: \.self) { kind in
                         Button(kind.title) {
@@ -250,7 +333,7 @@ struct InstrumentsView: View {
                         Button(name) {
                             if runtime.eyeScenes.contains(where: { $0.name == name }) {
                                 runtime.jumpEyeScene(name)
-                            } else {
+                            } else if let you = runtime.fieldYou {
                                 runtime.saveEyeScene(name)
                             }
                         }

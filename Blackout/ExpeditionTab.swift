@@ -14,6 +14,20 @@ private struct KitAssignPerson: Identifiable {
     var id: String { token }
 }
 
+private enum ExpeditionPlate: String, CaseIterable {
+    case condition, roster, timers, inventory, trip
+
+    var title: String {
+        switch self {
+        case .condition: return "CONDITION"
+        case .roster: return "ROSTER"
+        case .timers: return "TIMERS"
+        case .inventory: return "INVENTORY"
+        case .trip: return "TRIP"
+        }
+    }
+}
+
 struct ExpeditionTab: View {
     @Bindable var runtime: AppRuntime
     @State private var paperText = ""
@@ -24,6 +38,7 @@ struct ExpeditionTab: View {
     @State private var itemDraft = ""
     @State private var kitChrome: String?
     @State private var assigningID: String?
+    @State private var plate: ExpeditionPlate = .condition
 
     var body: some View {
         HUDPage(
@@ -31,190 +46,240 @@ struct ExpeditionTab: View {
             status: "CONDITION \(runtime.vitals.band.rawValue.uppercased())",
             statusTone: statusTone
         ) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    sectionLabel("CONDITION")
-                    HUDGlassCard {
-                        VStack(alignment: .leading, spacing: 10) {
-                            slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.setYouRail(\.hunger, $0) }))
-                            slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.setYouRail(\.thirst, $0) }))
-                            slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.setYouRail(\.pain, $0) }))
-                            slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.setYouRail(\.fatigue, $0) }))
-                            slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.setYouRail(\.weatherExposure, $0) }))
-                        }
+            VStack(alignment: .leading, spacing: 10) {
+                if runtime.red.isRed || runtime.mesh.lastRedOn == true {
+                    redPlate
+                }
+                plateRail
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        plateBody
                     }
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
+            }
+        }
+    }
 
-                    if runtime.red.isRed || runtime.mesh.lastRedOn == true {
-                        redPlate
-                    }
+    private var plateRail: some View {
+        HUDWrapRail(spacing: BlackoutTokens.Chrome.mapActionRailSpacingPoints) {
+            ForEach(ExpeditionPlate.allCases, id: \.self) { item in
+                Button(item.title) { plate = item }
+                    .buttonStyle(HUDOverlayChipStyle(filled: plate == item))
+            }
+        }
+    }
 
-                    sectionLabel("ROSTER")
-                    HUDGlassCard {
+    @ViewBuilder
+    private var plateBody: some View {
+        switch plate {
+        case .condition:
+            conditionPlate
+        case .roster:
+            rosterPlate
+        case .timers:
+            timersPlate
+        case .inventory:
+            inventoryPlate
+        case .trip:
+            tripPlate
+        }
+    }
+
+    private var conditionPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("CONDITION")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 10) {
+                    slider("HUNGER", Binding(get: { runtime.vitals.hunger }, set: { runtime.setYouRail(\.hunger, $0) }))
+                    slider("THIRST", Binding(get: { runtime.vitals.thirst }, set: { runtime.setYouRail(\.thirst, $0) }))
+                    slider("PAIN", Binding(get: { runtime.vitals.pain }, set: { runtime.setYouRail(\.pain, $0) }))
+                    slider("FATIGUE", Binding(get: { runtime.vitals.fatigue }, set: { runtime.setYouRail(\.fatigue, $0) }))
+                    slider("EXPOSURE", Binding(get: { runtime.vitals.weatherExposure }, set: { runtime.setYouRail(\.weatherExposure, $0) }))
+                }
+            }
+        }
+    }
+
+    private var rosterPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("ROSTER")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 12) {
+                        PartyQRImage(code: runtime.roster.code)
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack(alignment: .top, spacing: 12) {
-                                PartyQRImage(code: runtime.roster.code)
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("ROSTER \(runtime.roster.code)")
-                                        .font(.system(size: 13, weight: .heavy))
-                                        .foregroundStyle(Theme.silver)
-                                    Text(runtime.mesh.chromeNet)
-                                        .font(.caption.weight(.bold))
-                                        .foregroundStyle(Theme.warn)
-                                }
-                            }
-                            ForEach(runtime.liveRoster) { row in
-                                rosterRow(row)
-                            }
-                            if let navChrome {
-                                Text(navChrome)
-                                    .font(.system(size: 13, weight: .heavy))
-                                    .foregroundStyle(Theme.warn)
-                            }
-                            Button("JOIN NAV") {
-                                navChrome = runtime.seatNav() == nil ? nil : "NAV · SEATED"
-                            }
-                            .buttonStyle(HUDActionStyle(filled: false))
-                        }
-                    }
-
-                    sectionLabel("TIMERS")
-                    HUDGlassCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            let _ = runtime.timerSeq
-                            HUDField("NAME", text: $timerName, id: "exped.timer", locked: true)
-                            HUDField("TIME",
-                                text: $timerTime,
-                                id: "exped.time",
-                                submit: "SET",
-                                digits: true,
-                                onSubmit: setPartyTimer
-                            )
-                            HStack(spacing: 8) {
-                                Button("30 MIN") {
-                                    timerTime = "30"
-                                    timerChrome = nil
-                                }
-                                .buttonStyle(HoldActionStyle(filled: timerTime == "30", expand: true))
-                                Button("1 HR") {
-                                    timerTime = "1H"
-                                    timerChrome = nil
-                                }
-                                .buttonStyle(HoldActionStyle(filled: timerTime == "1H", expand: true))
-                                Button("2 HRS") {
-                                    timerTime = "2H"
-                                    timerChrome = nil
-                                }
-                                .buttonStyle(HoldActionStyle(filled: timerTime == "2H", expand: true))
-                            }
-                            VStack(spacing: 1) {
-                                Button("SET") {
-                                    guard TimerDuration.parse(timerTime) != nil else {
-                                        timerChrome = "SET TIME"
-                                        return
-                                    }
-                                    setPartyTimer()
-                                }
-                                .buttonStyle(HUDDockStyle())
-                            }
-                            .background(Theme.glass())
-                            .clipShape(Theme.plateRect())
-                            .overlay(
-                                Theme.plateRect()
-                                    .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
-                            )
-                            if let timerChrome {
-                                Text(timerChrome)
-                                    .font(.system(size: 13, weight: .heavy))
-                                    .foregroundStyle(Theme.warn)
-                                    .textCase(.uppercase)
-                                    .lineLimit(2)
-                                    .minimumScaleFactor(0.8)
-                            }
-                            ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
-                                Text(line)
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(Theme.silver.opacity(0.7))
-                            }
-                            ForEach(runtime.mesh.inboundTimers) { ev in
-                                Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(Theme.warn)
-                            }
-                            TimelineView(.periodic(from: .now, by: 1)) { context in
-                                VStack(alignment: .leading, spacing: 6) {
-                                    ForEach(runtime.timers.timers, id: \.id) { t in
-                                        timerRow(t, now: context.date)
-                                    }
-                                    ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
-                                        overdueRow(t)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    sectionLabel("INVENTORY")
-                    HUDGlassCard {
-                        VStack(alignment: .leading, spacing: 6) {
-                            HUDField("ITEM", text: $itemDraft, id: "exped.item", submit: "ADD", locked: true, onSubmit: addKitItem)
-                            Button("ADD") {
-                                if itemDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    kitChrome = "NAME ITEM"
-                                    return
-                                }
-                                addKitItem()
-                            }
-                            .buttonStyle(HUDActionStyle(filled: false))
-                            if let kitChrome {
-                                Text(kitChrome)
-                                    .font(.system(size: 13, weight: .heavy))
-                                    .foregroundStyle(Theme.warn)
-                                    .textCase(.uppercase)
-                                    .lineLimit(2)
-                                    .minimumScaleFactor(0.8)
-                            }
-                            ForEach(runtime.kit.items) { item in
-                                kitRow(item)
-                            }
-                            ForEach(Array(runtime.kit.hazards.enumerated()), id: \.offset) { _, hazard in
-                                Text(hazard.uppercased())
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(Theme.accent)
-                            }
-                        }
-                    }
-
-                    sectionLabel("TRIP")
-                    HUDGlassCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HUDField("BRIEF",
-                                text: Binding(
-                                    get: { runtime.trip.brief },
-                                    set: { runtime.trip.brief = $0 }
-                                ),
-                                id: "exped.brief"
-                            )
-                            Text("DUE \(dueClock)")
+                            Text("ROSTER \(runtime.roster.code)")
                                 .font(.system(size: 13, weight: .heavy))
-                                .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)
+                                .foregroundStyle(Theme.silver)
+                            Text(runtime.mesh.chromeNet)
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Theme.warn)
                         }
                     }
-
-                    sectionLabel("PAPER")
-                    Button("EXPORT PAPER") {
-                        let text = PaperGen.export(trip: runtime.trip, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
-                        paperText = text
-                        runtime.box.log("paper", text)
+                    ForEach(runtime.liveRoster) { row in
+                        rosterRow(row)
+                    }
+                    if let navChrome {
+                        Text(navChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                    }
+                    Button("JOIN NAV") {
+                        navChrome = runtime.seatNav() == nil ? nil : "NAV · SEATED"
                     }
                     .buttonStyle(HUDActionStyle(filled: false))
-                    if !paperText.isEmpty {
-                        HUDGlassCard {
-                            Text(paperText)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Theme.silver)
-                                .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private var timersPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("TIMERS")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    let _ = runtime.timerSeq
+                    HUDField("NAME", text: $timerName, id: "exped.timer", locked: true)
+                    HUDField("TIME",
+                        text: $timerTime,
+                        id: "exped.time",
+                        submit: "SET",
+                        digits: true,
+                        onSubmit: setPartyTimer
+                    )
+                    HStack(spacing: 8) {
+                        Button("30 MIN") {
+                            timerTime = "30"
+                            timerChrome = nil
+                        }
+                        .buttonStyle(HoldActionStyle(filled: timerTime == "30", expand: true))
+                        Button("1 HR") {
+                            timerTime = "1H"
+                            timerChrome = nil
+                        }
+                        .buttonStyle(HoldActionStyle(filled: timerTime == "1H", expand: true))
+                        Button("2 HRS") {
+                            timerTime = "2H"
+                            timerChrome = nil
+                        }
+                        .buttonStyle(HoldActionStyle(filled: timerTime == "2H", expand: true))
+                    }
+                    VStack(spacing: 1) {
+                        Button("SET") {
+                            guard TimerDuration.parse(timerTime) != nil else {
+                                timerChrome = "SET TIME"
+                                return
+                            }
+                            setPartyTimer()
+                        }
+                        .buttonStyle(HUDDockStyle())
+                    }
+                    .background(Theme.glass())
+                    .clipShape(Theme.plateRect())
+                    .overlay(
+                        Theme.plateRect()
+                            .strokeBorder(Theme.metalStroke, lineWidth: Theme.strokeWidth(1))
+                    )
+                    if let timerChrome {
+                        Text(timerChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .textCase(.uppercase)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
+                    ForEach(Array(runtime.timers.doneLines().enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.silver.opacity(0.7))
+                    }
+                    ForEach(runtime.mesh.inboundTimers) { ev in
+                        Text("RX TIMER \(ev.done ? "DONE" : "SET") \(ev.task) \(ev.from)")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.warn)
+                    }
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(runtime.timers.timers, id: \.id) { t in
+                                timerRow(t, now: context.date)
+                            }
+                            ForEach(runtime.timers.overduePlate(now: context.date), id: \.overdueRowID) { t in
+                                overdueRow(t)
+                            }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private var inventoryPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("INVENTORY")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 6) {
+                    HUDField("ITEM", text: $itemDraft, id: "exped.item", submit: "ADD", locked: true, onSubmit: addKitItem)
+                    Button("ADD") {
+                        if itemDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            kitChrome = "NAME ITEM"
+                            return
+                        }
+                        addKitItem()
+                    }
+                    .buttonStyle(HUDActionStyle(filled: false))
+                    if let kitChrome {
+                        Text(kitChrome)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Theme.warn)
+                            .textCase(.uppercase)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
+                    ForEach(runtime.kit.items) { item in
+                        kitRow(item)
+                    }
+                    ForEach(Array(runtime.kit.hazards.enumerated()), id: \.offset) { _, hazard in
+                        Text(hazard.uppercased())
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
+        }
+    }
+
+    private var tripPlate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionLabel("TRIP")
+            HUDGlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    HUDField("BRIEF",
+                        text: Binding(
+                            get: { runtime.trip.brief },
+                            set: { runtime.trip.brief = $0 }
+                        ),
+                        id: "exped.brief"
+                    )
+                    Text("DUE \(dueClock)")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(runtime.trip.overdue() ? Theme.accent : Theme.silver)
+                }
+            }
+            sectionLabel("PAPER")
+            Button("EXPORT PAPER") {
+                let text = PaperGen.export(trip: runtime.trip, roster: runtime.paperRoster(), packName: runtime.packs?.active?.name ?? "")
+                paperText = text
+                runtime.box.log("paper", text)
+            }
+            .buttonStyle(HUDActionStyle(filled: false))
+            if !paperText.isEmpty {
+                HUDGlassCard {
+                    Text(paperText)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.silver)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }

@@ -86,21 +86,9 @@ struct HoldGlassShell<Content: View>: View {
                     .offset(y: drag)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // The drag sits on the stack rather than on the card, so a swipe
-            // down over the dim map puts the card away exactly like a swipe
-            // down over the card does. On the card alone, the whole top half
-            // of the screen answers a swipe with nothing, and a surface that
-            // ignores you is one people decide is broken.
-            .gesture(
-                DragGesture(minimumDistance: 8)
-                    .onChanged { drag = max(0, $0.translation.height) }
-                    .onEnded { value in
-                        if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
-                            onClose()
-                        }
-                        withAnimation(Theme.Motion.heavy) { drag = 0 }
-                    }
-            )
+            // Dismiss lives on the dim map and the grabber. Putting it on the
+            // whole stack stole the scroll from party, FACE, MARK, and any
+            // card that grew past the 50% cap.
             // Deliberately not `.isModal`. It would be the tidy thing for a
             // card over a map, and it hides everything outside its own
             // subtree from VoiceOver — including the tab bar, and Comms is on
@@ -124,8 +112,22 @@ struct HoldGlassShell<Content: View>: View {
         )
         .contentShape(Rectangle())
         .onTapGesture(perform: onClose)
+        .gesture(dismissDrag)
         .accessibilityLabel("Close card")
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// Swipe down on the dim map or the grabber puts the card away. The body
+    /// keeps its own scroll — a surface that eats the thumb is broken.
+    private var dismissDrag: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .onChanged { drag = max(0, $0.translation.height) }
+            .onEnded { value in
+                if value.translation.height > CGFloat(BlackoutTokens.Chrome.holdCardDismissDragPoints) {
+                    onClose()
+                }
+                withAnimation(Theme.Motion.heavy) { drag = 0 }
+            }
     }
 
     private func plate(cappedAt cap: CGFloat) -> some View {
@@ -158,7 +160,9 @@ struct HoldGlassShell<Content: View>: View {
         Rectangle()
             .fill(Theme.silver.opacity(0.4))
             .frame(width: 36, height: 3)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: BlackoutTokens.Chrome.mapChipHitPoints)
+            .contentShape(Rectangle())
+            .gesture(dismissDrag)
             .accessibilityHidden(true)
     }
 }
@@ -184,8 +188,12 @@ struct HoldCardView: View {
                 Rectangle()
                     .fill(Theme.silver.opacity(0.22))
                     .frame(height: 1)
-                rows
                 actions
+                ScrollView {
+                    rows
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
     }

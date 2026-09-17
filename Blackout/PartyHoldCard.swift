@@ -45,6 +45,7 @@ struct PartyHoldCard: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
         .onAppear { nameDraft = person.name }
