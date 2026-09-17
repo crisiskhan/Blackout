@@ -481,11 +481,12 @@ final class HoldOnTheGlassTests: XCTestCase {
     /// off this pip.
     private static let lakePerspectives = CLLocationCoordinate2D(latitude: 30.420633, longitude: -97.872138)
 
-    /// Interior of Valles Caldera National Preserve. Phrase `national
-    /// preserve`. Elk country, not Open reserve. San Antonio
-    /// Mountain is held 16092 m off this pip — rank 1 still
-    /// beats the overlay.
-    private static let vallesCaldera = CLLocationCoordinate2D(latitude: 36.000815, longitude: -106.455062)
+    /// Interior of Valles Caldera National Preserve, south of the NM
+    /// pack north edge (35.95). The listed centroid 36.000815 sits
+    /// off the extract — CI held empty ground. Phrase `national
+    /// preserve`. Elk country, not Open reserve. Rabbit Mountain
+    /// is held 7879 m off this pip — rank 1 still beats the overlay.
+    private static let vallesCaldera = CLLocationCoordinate2D(latitude: 35.853899, longitude: -106.554304)
 
     /// Interior of Leonora Curtin Wetland Preserve. Phrase `wetland
     /// preserve`, animals first, not bosque overlay. 417 m from water.

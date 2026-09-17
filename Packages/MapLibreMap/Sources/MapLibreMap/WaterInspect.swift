@@ -451,6 +451,11 @@ public enum InspectField {
         case fungi
         case food
         case animal
+        case wildfire
+        case smoke
+        case flood
+        case lightning
+        case bleed
         case field
     }
 
@@ -487,6 +492,16 @@ public enum InspectField {
             return .fungi
         case Inspect.gameCard, Inspect.gameTXCard, Inspect.gameNMCard, Inspect.gameEastCard, "food-cook":
             return .food
+        case "env-wildfire":
+            return .wildfire
+        case "env-smoke":
+            return .smoke
+        case "env-flood":
+            return .flood
+        case "env-lightning":
+            return .lightning
+        case "med-bleed-pack":
+            return .bleed
         default:
             return .field
         }
@@ -507,6 +522,11 @@ public enum InspectField {
         case .fungi: return "FIELD · FUNGI"
         case .food: return "FIELD · FOOD"
         case .animal: return "FIELD · ANIMAL"
+        case .wildfire: return "FIELD · FIRE"
+        case .smoke: return "FIELD · SMOKE"
+        case .flood: return "FIELD · FLOOD"
+        case .lightning: return "FIELD · STORM"
+        case .bleed: return "FIELD · BLEED"
         case .field: return "FIELD"
         }
     }
@@ -527,6 +547,11 @@ public enum InspectField {
         case .fungi: return "NEXT · FUNGI"
         case .food: return "NEXT · FOOD"
         case .animal: return "NEXT · ANIMAL"
+        case .wildfire: return "NEXT · FIRE"
+        case .smoke: return "NEXT · SMOKE"
+        case .flood: return "NEXT · FLOOD"
+        case .lightning: return "NEXT · STORM"
+        case .bleed: return "NEXT · BLEED"
         case .field: return "NEXT"
         }
     }
@@ -544,6 +569,11 @@ public enum InspectField {
         case .fungi: return "FUNGI"
         case .food: return "FOOD"
         case .animal: return "ANIMAL"
+        case .wildfire: return "FIRE"
+        case .smoke: return "SMOKE"
+        case .flood: return "FLOOD"
+        case .lightning: return "STORM"
+        case .bleed: return "BLEED"
         case .field: return "FIELD"
         }
     }
@@ -588,6 +618,13 @@ public enum InspectField {
         case water
         case sting
         case gator
+        case fire
+        case flood
+        case ice
+        case smoke
+        case lightning
+        case shelter
+        case wound
     }
 
     /// UNKNOWN and no model stay empty — a missing guess is not a card.
@@ -612,6 +649,20 @@ public enum InspectField {
             return .sting
         case "kind:gator":
             return .gator
+        case "kind:fire":
+            return .fire
+        case "kind:flood":
+            return .flood
+        case "kind:ice":
+            return .ice
+        case "kind:smoke":
+            return .smoke
+        case "kind:lightning":
+            return .lightning
+        case "kind:shelter":
+            return .shelter
+        case "kind:wound":
+            return .wound
         default:
             return visionGroundFromSpecies(id)
         }
@@ -660,6 +711,27 @@ public enum InspectField {
             || id.contains("cottonwood") || id.contains("pine") || id.contains("loblolly")
         {
             return .tree
+        }
+        if id.contains("wildfire") || id.contains("bushfire") {
+            return .fire
+        }
+        if id.contains("flood") {
+            return .flood
+        }
+        if id.contains("glacier") || id.hasSuffix("ice") || id.contains("frost") {
+            return .ice
+        }
+        if id.contains("smoke") {
+            return .smoke
+        }
+        if id.contains("lightning") || id.contains("thunderbolt") {
+            return .lightning
+        }
+        if id.contains("tent") || id.contains("campsite") || id.contains("bivouac") {
+            return .shelter
+        }
+        if id.contains("wound") || id.contains("bleed") {
+            return .wound
         }
         return nil
     }
@@ -724,6 +796,20 @@ public enum InspectField {
             return [Inspect.biteCard]
         case .gator:
             return [Inspect.gatorCard, Inspect.biteCard]
+        case .fire:
+            return ["env-wildfire"]
+        case .flood:
+            return ["env-flood"]
+        case .ice:
+            return [nm ? Inspect.iceRockCard : "env-cold"]
+        case .smoke:
+            return ["env-smoke"]
+        case .lightning:
+            return ["env-lightning"]
+        case .shelter:
+            return ["shelter-tarp"]
+        case .wound:
+            return ["med-bleed-pack"]
         }
     }
 }

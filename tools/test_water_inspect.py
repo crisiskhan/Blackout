@@ -3620,8 +3620,8 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("30.420633", glass)
         self.assertIn("-97.872138", glass)
         self.assertIn("Valles Caldera National Preserve", glass)
-        self.assertIn("36.000815", glass)
-        self.assertIn("-106.455062", glass)
+        self.assertIn("35.853899", glass)
+        self.assertIn("-106.554304", glass)
         self.assertIn("San Antonio Mountain", glass)
         self.assertIn("35.937521", glass)
         self.assertIn("-106.615869", glass)
@@ -5813,7 +5813,7 @@ class GroundFieldSync(unittest.TestCase):
                     audubon_hit = (
                         props.get("name") == "Randall Davey Audubon Center & Sanctuary"
                     )
-                if kind == "wildlife" and pip(-106.455062, 36.000815, ring):
+                if kind == "wildlife" and pip(-106.554304, 35.853899, ring):
                     caldera_hit = (
                         props.get("name") == "Valles Caldera National Preserve"
                     )
@@ -7787,7 +7787,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("31.235777", qa)
         self.assertIn("31.247021", qa)
         self.assertIn("30.243962", qa)
-        self.assertIn("36.000815", qa)
+        self.assertIn("35.853899", qa)
         self.assertIn("Balcones Canyonlands Preserve", qa)
         self.assertIn("30.416444", qa)
         self.assertIn("Canyonlands Trail Park", qa)
@@ -8243,6 +8243,15 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("case .water:", vision_fn)
         self.assertIn("case .sting:", vision_fn)
         self.assertIn("case .gator:", vision_fn)
+        self.assertIn("case .fire:", vision_fn)
+        self.assertIn("case .flood:", vision_fn)
+        self.assertIn("case .ice:", vision_fn)
+        self.assertIn("case .smoke:", vision_fn)
+        self.assertIn("case .lightning:", vision_fn)
+        self.assertIn("case .shelter:", vision_fn)
+        self.assertIn("case .wound:", vision_fn)
+        self.assertIn("env-wildfire", vision_fn)
+        self.assertIn("env-flood", vision_fn)
         self.assertIn("Inspect.waterCard", vision_fn)
         self.assertIn("Inspect.gatorCard", vision_fn)
         self.assertIn("Inspect.biteCard", vision_fn.split("case .sting:", 1)[1].split("case .gator:", 1)[0])

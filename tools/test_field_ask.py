@@ -21,6 +21,7 @@ STOP = {
     "where", "when", "why", "can", "with", "from", "this", "that", "it",
         "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
         "someone", "somebody", "please", "hes", "shes", "theyre",
+        "they", "them", "their", "something",
         "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
     "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
     "mi", "tu", "su",
@@ -191,6 +192,38 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
             continue
         if "burn" in q_tokens and card.get("category") == "fire":
             continue
+        if "cardiac" in expanded:
+            continue
+        if "drown" in expanded:
+            continue
+        if "seizure" in expanded:
+            continue
+        if "tornado" in expanded:
+            continue
+        if "nose" in expanded:
+            continue
+        if "shock" in expanded and "choke" not in expanded:
+            continue
+        if "eye" in expanded and "glare" not in expanded:
+            continue
+        if "allergy" in expanded:
+            continue
+        if "stroke" in expanded and "heat" not in expanded:
+            continue
+        if "poison" in expanded and not ({"ivy", "oak", "sumac"} & expanded):
+            continue
+        if "asthma" in expanded:
+            continue
+        if "avalanche" in expanded:
+            continue
+        if "rip" in expanded:
+            continue
+        if "head" in expanded and "bleed" not in expanded and "wound" not in q_tokens:
+            continue
+        if ("warm" in q_tokens or "cool" in q_tokens) and card.get("id") == "tact-staygo":
+            continue
+        if "tick" in q_tokens and card.get("id") == "animal-bite":
+            continue
         title_tok = set(_tokens(card["title"]["en"]) + _tokens(card["title"]["es"]))
         id_tok = set(_tokens(card["id"].replace("-", " ")))
         cat_tok = set(_tokens(card["category"]))
@@ -210,6 +243,22 @@ def ask_book(cards: list[dict], query: str, locale: str = "en") -> list[dict]:
         if "lost" in q_tokens and card["id"] == "nav-lost":
             score += 25
         if "burn" in q_tokens and card["id"] == "med-burn":
+            score += 25
+        if "tick" in q_tokens and card["id"] == "env-insect":
+            score += 25
+        if ("heat" in expanded or "cool" in q_tokens) and card["id"] == "env-heat-collapse":
+            score += 25
+        if (
+            "cold" in expanded or "warm" in q_tokens or "freezing" in q_tokens
+        ) and card["id"] == "env-cold":
+            score += 25
+        if "deer" in q_tokens and card["id"] in {
+            "tx-mammal",
+            "tx-east-mammal",
+            "nm-mammal",
+        }:
+            score += 25
+        if "signal" in expanded and card["id"] in {"sig-mirror", "sig-ground"}:
             score += 25
         preferred = set(_tokens(card["title"]["es"] if prefer_es else card["title"]["en"]))
         score += len(expanded & preferred) * 3
@@ -688,8 +737,10 @@ class FieldRankedBookTests(unittest.TestCase):
         self.assertEqual(first("se ahoga"), "med-airway")
         self.assertEqual(first("picadura"), "animal-bite")
         self.assertEqual(first("I'm on fire"), "med-burn")
-        self.assertEqual(first("my chest hurts"), "tact-breathe")
-        self.assertEqual(first("allergic"), "med-airway")
+        self.assertFalse(ask_book(cards, "my chest hurts"))
+        self.assertFalse(ask_book(cards, "heart attack"))
+        self.assertFalse(ask_book(cards, "allergic"))
+        self.assertFalse(ask_book(cards, "anaphylaxis"))
         self.assertEqual(first("walk"), "env-sky")
 
     def test_every_open_step_has_a_picture_and_a_child_line(self):
@@ -856,27 +907,82 @@ def _step(do_en: str, do_es: str, child_en: str, child_es: str, why_en: str, why
     }
 
 
+def _walk_family(toks: set[str]) -> str:
+    if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"} and not (
+        toks & {"nose", "nosebleed"}
+    ):
+        return "bleed"
+    if toks & {"cardiac", "chest"}:
+        return "cardiac"
+    if toks & {"allergy", "allergic", "anaphylaxis", "epipen"}:
+        return "allergy"
+    if toks & {"choke", "choking", "airway"}:
+        return "choke"
+    if toks & {"cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"}:
+        return "cpr"
+    if toks & {"drown", "drowning", "drowned"}:
+        return "drown"
+    if toks & {"shock"}:
+        return "shock"
+    if toks & {"seizure", "seizing", "convulsion"}:
+        return "seizure"
+    if toks & {"burn", "scald", "sunburn"}:
+        return "burn"
+    if toks & {"heat", "hot", "calor"}:
+        return "heat"
+    if toks & {"cold", "freezing", "hypothermia", "frio"}:
+        return "cold"
+    if toks & {"flood", "arroyo", "wash"}:
+        return "flood"
+    if toks & {"lightning", "thunder", "thunderstorm", "rayo"}:
+        return "lightning"
+    if toks & {"tornado", "twister", "storm"}:
+        return "tornado"
+    if toks & {"break", "broken", "broke", "sprain", "sling", "fracture"}:
+        return "break"
+    if toks & {"lost", "gps", "separated"}:
+        return "lost"
+    if toks & {"eye"}:
+        return "eye"
+    if toks & {"nose", "nosebleed"}:
+        return "nose"
+    if toks & {"deer", "hog", "javelina", "coyote", "bear", "lion", "cougar", "puma", "elk", "mammal"}:
+        return "animal"
+    if toks & {"stroke", "slurred", "droop"}:
+        return "stroke"
+    if toks & {"concussion", "head"} and not (toks & {"bleed", "wound", "nose", "nosebleed"}):
+        return "head"
+    if toks & {"poison", "ingested", "bleach", "overdose"} and not (toks & {"ivy", "oak", "sumac"}):
+        return "poison"
+    if toks & {"asthma", "inhaler", "wheezing", "wheeze"}:
+        return "asthma"
+    if toks & {"avalanche"}:
+        return "avalanche"
+    if toks & {"rip", "undertow"}:
+        return "rip"
+    return "start"
+
+
 def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: str) -> dict:
     picture = _picture(chapter)
     bleed_pic = _picture(chapter, "bleed-pack.png")
-    water_pic = _picture(chapter)
     toks = set(_tokens(_prepare(query)))
     asked = query.strip() or "this"
-    if toks & {"bleed", "bleeding", "blood", "cut", "wound", "shot", "stab", "gash", "sangrando"}:
-        family = "bleed"
-    elif toks & {"choke", "choking", "airway", "allergic", "anaphylaxis", "epipen"}:
-        family = "choke"
-    elif toks & {"cpr", "unresponsive", "pulse", "unconscious", "collapsed", "fainted"}:
-        family = "cpr"
-    elif toks & {"burn", "scald", "sunburn"}:
-        family = "burn"
-    elif toks & {"lost", "gps", "separated"}:
-        family = "lost"
-    elif toks & {"break", "broken", "broke", "sprain", "sling", "fracture"}:
-        family = "break"
-    else:
-        family = "start"
-    start = [
+    family = _walk_family(toks)
+    urgent = {
+        "bleed",
+        "cardiac",
+        "allergy",
+        "choke",
+        "cpr",
+        "drown",
+        "stroke",
+        "poison",
+        "asthma",
+        "avalanche",
+        "rip",
+    }
+    start = [] if family in urgent else [
         _step(
             "Stop. Look around. Do not run.",
             "Para. Mira alrededor. No corras.",
@@ -924,10 +1030,61 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
                 "Deja de presionar solo si la ayuda entrenada toma el relevo.",
                 bleed_pic,
             ),
+            _step(
+                "Keep them lying down and warm while you press. Do not leave the cloth to go look for a number.",
+                "Mantenlos acostados y calientes mientras presionas. No sueltes el paño para ir a buscar un número.",
+                "Kneel. Both hands on the cloth. Talk to them.",
+                "Arrodíllate. Las dos manos en el paño. Háblales.",
+                "A bleed that waits on a phone starts again.",
+                "Un sangrado que espera un teléfono vuelve a salir.",
+                "Stop if trained help takes the cloth.",
+                "Para si la ayuda entrenada toma el paño.",
+                bleed_pic,
+            ),
         ]
         care = _loc(
             "Keep pressure and get to trained help. Do not wait on a number the glass cannot dial.",
             "Sigue la presión y llega a ayuda entrenada. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "allergy":
+        body = [
+            _step(
+                "If they have their own injector, use it in the outer thigh now. Hold three seconds. Do not wait to see if it 'gets better'.",
+                "Si tienen su inyector, úsalo en el muslo de afuera ya. Sostén tres segundos. No esperes a ver si 'mejora'.",
+                "Take the injector. Orange to the thigh. Click. Hold.",
+                "Toma el inyector. Naranja al muslo. Clic. Sostén.",
+                "The injector is the first move. Waiting is how a throat closes.",
+                "El inyector es el primer movimiento. Esperar es cómo se cierra la garganta.",
+                "If there is no injector, skip to lying them down.",
+                "Si no hay inyector, pasa a acostarlos.",
+                picture,
+            ),
+            _step(
+                "Lay them down. Legs up if they can breathe. Do not make them walk or stand. Do not put anything in the mouth.",
+                "Acuéstalos. Piernas arriba si pueden respirar. No los hagas caminar ni pararse. No metas nada en la boca.",
+                "Jacket under the legs. Hands off the mouth.",
+                "Chaqueta bajo las piernas. Manos fuera de la boca.",
+                "Walking an allergic person is how they collapse. Back blows are for a block, not a swell.",
+                "Hacer caminar a alguien alérgico es cómo se caen. Los golpes en la espalda son para un bloqueo, no para una hinchazón.",
+                "Sit them up if they cannot breathe lying down.",
+                "Siéntalos si no pueden respirar acostados.",
+                picture,
+            ),
+            _step(
+                "If they stop breathing, start hard fast compressions in the center of the chest. Stay with them.",
+                "Si dejan de respirar, empieza compresiones fuertes y rápidas al centro del pecho. Quédate.",
+                "Keep other children back. One person pushes.",
+                "Aleja a otros niños. Una persona empuja.",
+                "A closed throat becomes no pulse. Delay kills.",
+                "Una garganta cerrada se vuelve sin pulso. La demora mata.",
+                "Stop compressions if they cough, move, or breathe normally.",
+                "Para las compresiones si tosen, se mueven o respiran normal.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+        ]
+        care = _loc(
+            "Get to trained help even if they look better. A second wave can close the throat later.",
+            "Llega a ayuda entrenada aunque se vean mejor. Una segunda ola puede cerrar la garganta después.",
         )
     elif family == "choke":
         body = [
@@ -949,6 +1106,17 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
                 "Ponte a un lado. Apunta a la espalda, no al cuello.",
                 "A hard back blow can move the block.",
                 "Un golpe fuerte en la espalda puede mover el bloqueo.",
+                "Stop if they start coughing or breathing.",
+                "Para si empiezan a toser o respirar.",
+                picture,
+            ),
+            _step(
+                "If the block will not move, wrap your arms around their middle from behind and pull in and up. Then back blows again.",
+                "Si el bloqueo no sale, abraza su medio por detrás y tira adentro y arriba. Luego otra vez golpes en la espalda.",
+                "Stand behind. Fist above the navel. Pull. Do not squeeze the ribs of a small child the same way — keep back blows.",
+                "Ponte detrás. Puño sobre el ombligo. Tira. No aprietes las costillas de un niño igual — sigue con la espalda.",
+                "The second move is for a block that back blows did not shift.",
+                "El segundo movimiento es para un bloqueo que los golpes no movieron.",
                 "Stop if they start coughing or breathing.",
                 "Para si empiezan a toser o respirar.",
                 picture,
@@ -980,6 +1148,17 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
                 "La sangre tiene que llegar al cerebro. Las palmaditas no sirven.",
                 "Stop if an AED is attached and says stay clear, or if they start breathing.",
                 "Para si un DEA dice apartarse o si empiezan a respirar.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+            _step(
+                "Keep going. Swap every two minutes if someone else can push. Do not stop to check a pulse with your fingers.",
+                "Sigue. Cambia cada dos minutos si otra persona puede empujar. No pares a buscar pulso con los dedos.",
+                "Count out loud. Then swap. Hands off the neck.",
+                "Cuenta en voz alta. Luego cambia. Manos fuera del cuello.",
+                "A pulse check with untrained fingers wastes the pumps that keep the brain.",
+                "Buscar pulso con dedos sin oficio gasta las bombas que sostienen el cerebro.",
+                "Stop if they breathe or trained help takes over.",
+                "Para si respiran o la ayuda entrenada toma el relevo.",
                 _picture(chapter, "cpr-compress.png"),
             ),
         ]
@@ -1074,28 +1253,482 @@ def grounded_ask(query: str, chapter: list[dict], pack_id: str | None, locale: s
             "Carry them if you can. Get to trained help. Do not wait on a number the glass cannot dial.",
             "Cárgalos si puedes. Llega a ayuda entrenada. No esperes un número que el visor no puede marcar.",
         )
+    elif family == "cardiac":
+        body = [
+            _step(
+                "Sit them still. Loosen the collar. Do not make them walk or stand to 'get air'.",
+                "Siéntalos quietos. Afloja el cuello. No los hagas caminar ni pararse a 'tomar aire'.",
+                "Sit next to them. Hold their hand. Do not bounce or jog them.",
+                "Siéntate a su lado. Toma su mano. No los sacudas ni los hagas trotar.",
+                "A working heart wants rest. Walking a chest-pain person is how they collapse.",
+                "Un corazón que aún late quiere reposo. Hacer caminar a alguien con dolor de pecho es cómo se caen.",
+                "If they collapse or stop breathing, go to compressions next.",
+                "Si se caen o dejan de respirar, pasa a compresiones.",
+                picture,
+            ),
+            _step(
+                "Watch the chest. If they collapse or stop normal breathing, start hard fast compressions in the center of the chest.",
+                "Mira el pecho. Si se caen o deja la respiración normal, empieza compresiones fuertes y rápidas al centro.",
+                "Keep other children back. One person pushes.",
+                "Aleja a otros niños. Una persona empuja.",
+                "Chest pain can become no pulse. Delay kills.",
+                "El dolor de pecho puede volverse sin pulso. La demora mata.",
+                "Stop compressions if they cough, move, or breathe normally.",
+                "Para las compresiones si tosen, se mueven o respiran normal.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+            _step(
+                "Stay with them. If they collapse again, go back to compressions. Do not leave them alone to 'get help'.",
+                "Quédate. Si se caen otra vez, vuelve a las compresiones. No los dejes solos a 'buscar ayuda'.",
+                "Sit next to them. Watch the chest.",
+                "Siéntate a su lado. Mira el pecho.",
+                "A person left alone with chest pain is the one who dies on the walk for help.",
+                "Quien se queda solo con dolor de pecho es el que muere en el camino a pedir ayuda.",
+                "Stop if trained help takes over.",
+                "Para si la ayuda entrenada toma el relevo.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help. Stay with them. Do not wait on a number the glass cannot dial.",
+            "Llega a ayuda entrenada. Quédate con ellos. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "drown":
+        body = [
+            _step(
+                "Get them onto land. Throw a branch or cloth. Do not go in if you cannot stand.",
+                "Sácalos a tierra. Lanza una rama o un paño. No entres si no puedes hacer pie.",
+                "Stay on the bank. Hold the cloth. Do not jump in after them.",
+                "Quédate en la orilla. Sostén el paño. No saltes detrás.",
+                "A second drowning starts when a helper goes in over their head.",
+                "Un segundo ahogo empieza cuando el que ayuda entra sin pie.",
+                "Stop if the water is taking you. Get back on land and yell.",
+                "Para si el agua te lleva. Vuelve a tierra y grita.",
+                picture,
+            ),
+            _step(
+                "On land, tap and look at the chest. No normal breathing means hard fast compressions in the center of the chest.",
+                "En tierra, toca y mira el pecho. Sin respiración normal, compresiones fuertes y rápidas al centro.",
+                "Keep other children back. One person pushes.",
+                "Aleja a otros niños. Una persona empuja.",
+                "Water in the lungs does not change the first move. Blood still has to reach the brain.",
+                "El agua en los pulmones no cambia el primer movimiento. La sangre tiene que llegar al cerebro.",
+                "Roll them if they vomit. Then resume compressions.",
+                "Gíralos si vomitan. Luego reanuda las compresiones.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+            _step(
+                "If they start breathing, roll them onto their side and keep them warm. Watch the chest.",
+                "Si empiezan a respirar, gíralos de lado y mantenlos calientes. Mira el pecho.",
+                "Jacket on the trunk. Sit by the head.",
+                "Chaqueta en el tronco. Siéntate junto a la cabeza.",
+                "Water can come back up. The side keeps it out of the airway.",
+                "El agua puede volver. De lado no tapa el aire.",
+                "If the chest stops again, go back to compressions.",
+                "Si el pecho para otra vez, vuelve a las compresiones.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get trained help even if they cough it out. Water can swell later.",
+            "Consigue ayuda entrenada aunque tosan el agua. Puede hincharse después.",
+        )
+    elif family == "shock":
+        body = [
+            _step(
+                "Lay them down. Keep them warm. Legs up only if they can breathe and no bone is broken.",
+                "Acuéstalos. Mantenlos calientes. Piernas arriba solo si respiran y no hay hueso roto.",
+                "Cover them with a jacket. Sit by their head.",
+                "Cúbrelos con una chaqueta. Siéntate junto a la cabeza.",
+                "Shock is the body running out of blood or heat. Flat and warm buys time.",
+                "El shock es el cuerpo sin sangre o sin calor. Plano y caliente compra tiempo.",
+                "Sit them up if they cannot breathe lying down.",
+                "Siéntalos si no pueden respirar acostados.",
+                picture,
+            ),
+            _step(
+                "If they are bleeding, press that first. Do not give food or drink.",
+                "Si sangran, presiónalo primero. No des comida ni bebida.",
+                "Hands on the cloth. Not on a bottle.",
+                "Manos en el paño. No en una botella.",
+                "A drink they cannot swallow is how a shock case chokes.",
+                "Una bebida que no pueden tragar es cómo un shock se ahoga.",
+                "Stop if they vomit — roll them and keep the pressure.",
+                "Para si vomitan — gíralos y sigue la presión.",
+                bleed_pic,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help. Stay with them. Do not wait on a number the glass cannot dial.",
+            "Llega a ayuda entrenada. Quédate. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "seizure":
+        body = [
+            _step(
+                "Clear hard things around them. Do not hold them down. Do not put anything in the mouth.",
+                "Quita cosas duras alrededor. No los sujetes. No metas nada en la boca.",
+                "Move rocks and sticks. Hands off their jaw.",
+                "Mueve piedras y palos. Manos fuera de la mandíbula.",
+                "A seized jaw bites a finger. Holding them breaks a bone.",
+                "Una mandíbula en convulsión muerde un dedo. Sujetarlos rompe un hueso.",
+                "Stop if the scene is on fire or in traffic — drag them by the clothes, not the neck.",
+                "Para si hay fuego o tráfico — arrástralos de la ropa, no del cuello.",
+                picture,
+            ),
+            _step(
+                "Time it. When it stops, roll them onto their side. Stay until they talk sense.",
+                "Mídele el tiempo. Cuando pare, gíralos de lado. Quédate hasta que hablen con sentido.",
+                "Count out loud. Then roll. Then sit with them.",
+                "Cuenta en voz alta. Luego gira. Luego siéntate con ellos.",
+                "The side keeps the tongue and spit out of the airway.",
+                "De lado la lengua y la saliva no tapan el aire.",
+                "If it lasts longer than they can stay pink, get to care now.",
+                "Si dura más de lo que pueden seguir rosados, busca cuidado ya.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help after any first seizure, or any that repeats. Stay on their side.",
+            "Llega a ayuda entrenada después de la primera convulsión o si se repite. Sigue de lado.",
+        )
+    elif family == "eye":
+        body = [
+            _step(
+                "Do not rub. Rinse with clean water from the inside corner out.",
+                "No frotes. Enjuaga con agua limpia del lagrimal hacia afuera.",
+                "Hold the water. Tilt the head. Do not poke.",
+                "Sostén el agua. Inclina la cabeza. No pinches.",
+                "Rubbing scratches the eye. A rinse can float the speck out.",
+                "Frotar raya el ojo. Un enjuague puede sacar la mota.",
+                "Stop if the eye is cut or the pupil looks wrong — cover loose and go.",
+                "Para si el ojo está cortado o la pupila se ve rara — cubre flojo y vete.",
+                picture,
+            ),
+            _step(
+                "Cover loose with a clean cloth. Do not tape the eye shut.",
+                "Cubre flojo con un paño limpio. No tapes el ojo cerrado.",
+                "Touch the cloth, not the eye.",
+                "Toca el paño, no el ojo.",
+                "Pressure on a hurt eye makes it worse.",
+                "La presión en un ojo herido lo empeora.",
+                "Stop if they cannot see or the pain grows — get to care.",
+                "Para si no ven o el dolor crece — busca cuidado.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help if it still hurts or they cannot see. Do not wait on a number the glass cannot dial.",
+            "Llega a ayuda entrenada si aún duele o no ven. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "nose":
+        body = [
+            _step(
+                "Sit up. Lean forward. Pinch the soft part of the nose. Do not tip the head back.",
+                "Siéntate. Inclínate adelante. Pellizca la parte blanda de la nariz. No eches la cabeza atrás.",
+                "Pinch. Lean. Breathe through the mouth.",
+                "Pellizca. Inclínate. Respira por la boca.",
+                "Head back dumps blood into the throat. Forward lets it out.",
+                "La cabeza atrás tira sangre a la garganta. Adelante la saca.",
+                "Stop if they faint or the blood will not slow — press and get care.",
+                "Para si se desmayan o la sangre no afloja — aprieta y busca cuidado.",
+                picture,
+            ),
+            _step(
+                "Spit blood out. Keep the pinch for a full ten minutes. Do not pack the nose with tissue.",
+                "Escupe la sangre. Sigue el pellizco diez minutos enteros. No rellenes la nariz con papel.",
+                "Hold the pinch. Count. Spit.",
+                "Sostén el pellizco. Cuenta. Escupe.",
+                "A tissue plug is how a nosebleed becomes a choke.",
+                "Un tapón de papel es cómo una hemorragia nasal se ahoga.",
+                "Stop if they cannot breathe through the mouth.",
+                "Para si no pueden respirar por la boca.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help if it will not stop or they feel faint. Sit forward on the way.",
+            "Llega a ayuda entrenada si no para o se marean. Adelante en el camino.",
+        )
+    elif family == "tornado":
+        body = [
+            _step(
+                "Get low. A ditch or the lowest room. Not under a lone tree. Cover the head.",
+                "Ponte bajo. Una zanja o el cuarto más bajo. No bajo un árbol solo. Cubre la cabeza.",
+                "Lie down. Hands on the head. Cloth over the face if dirt flies.",
+                "Acuéstate. Manos en la cabeza. Un paño en la cara si vuela tierra.",
+                "Flying wood kills more than the wind.",
+                "La madera que vuela mata más que el viento.",
+                "Stop if a wall is coming down — crawl to the open ditch.",
+                "Para si un muro se cae — gatea a la zanja abierta.",
+                picture,
+            ),
+            _step(
+                "Stay down until the wind has been quiet. Then move to visible ground and yell in threes.",
+                "Quédate abajo hasta que el viento esté quieto. Luego muévete a tierra visible y grita de a tres.",
+                "Listen. Then stand. Then three yells.",
+                "Escucha. Luego párate. Luego tres gritos.",
+                "A second cell can sit behind a quiet minute.",
+                "Otra celda puede venir detrás de un minuto quieto.",
+                "Move only if fire or flood will hit you in that ditch.",
+                "Muévete solo si el fuego o la crecida te van a pegar en esa zanja.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Stay put until a known voice reaches you. Do not walk a debris field alone.",
+            "Quédate hasta que una voz conocida te alcance. No camines solo entre escombros.",
+        )
+    elif family == "stroke":
+        body = [
+            _step(
+                "Sit them still. Note the time. One side of the face, one arm, or speech gone wrong is enough.",
+                "Siéntalos quietos. Anota la hora. Un lado de la cara, un brazo o el habla rara basta.",
+                "Sit next to them. Look at the face. Say the time out loud.",
+                "Siéntate a su lado. Mira la cara. Di la hora en voz alta.",
+                "Time is the drug. Walking a stroke off is how the brain keeps dying.",
+                "El tiempo es el fármaco. Hacer caminar un derrame es cómo el cerebro sigue muriendo.",
+                "If they collapse or stop breathing, go to compressions.",
+                "Si se caen o dejan de respirar, pasa a compresiones.",
+                picture,
+            ),
+            _step(
+                "Do not give food, drink, or pills. Do not make them walk. Keep them sitting or lying with the head a little up.",
+                "No des comida, bebida ni pastillas. No los hagas caminar. Manténlos sentados o acostados con la cabeza un poco alta.",
+                "Hands off the bottle and the pills. Hold their hand.",
+                "Manos fuera de la botella y las pastillas. Toma su mano.",
+                "A swallow they cannot control is how a stroke becomes a choke.",
+                "Un trago que no controlan es cómo un derrame se ahoga.",
+                "If they vomit, roll them onto the weak side.",
+                "Si vomitan, gíralos hacia el lado débil.",
+                picture,
+            ),
+            _step(
+                "Stay with them. If they stop breathing, start hard fast compressions in the center of the chest.",
+                "Quédate. Si dejan de respirar, empieza compresiones fuertes y rápidas al centro del pecho.",
+                "Watch the chest. One person pushes if it stops.",
+                "Mira el pecho. Una persona empuja si para.",
+                "A stroke can become no pulse. Delay kills.",
+                "Un derrame puede volverse sin pulso. La demora mata.",
+                "Stop compressions if they breathe or trained help takes over.",
+                "Para las compresiones si respiran o la ayuda entrenada toma el relevo.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+        ]
+        care = _loc(
+            "Get to trained help now. Say the time it started. Do not wait on a number the glass cannot dial.",
+            "Llega a ayuda entrenada ya. Di la hora en que empezó. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "head":
+        body = [
+            _step(
+                "If they fell or were hit, do not move the neck. Keep the head in line with the back.",
+                "Si se cayeron o los golpearon, no muevas el cuello. La cabeza en línea con la espalda.",
+                "Hands on the ears. Hold the head still. Do not twist.",
+                "Manos en las orejas. Sostén la cabeza quieta. No gires.",
+                "A broken neck can cut the rest of the body when you sit them up.",
+                "Un cuello roto puede cortar el resto del cuerpo si los sientas.",
+                "Move them only if fire, water, or traffic will hit them here.",
+                "Muévelos solo si el fuego, el agua o el tráfico los va a pegar aquí.",
+                picture,
+            ),
+            _step(
+                "Watch the chest. If they vomit, roll the whole body as one piece. Do not stuff a wound in the scalp.",
+                "Mira el pecho. Si vomitan, gira el cuerpo entero de una pieza. No rellenes una herida en el cuero.",
+                "Hold the head. Let someone else roll the hips.",
+                "Sostén la cabeza. Que otro gire las caderas.",
+                "Stuffing a scalp wound hides a bleed you still have to press.",
+                "Rellenar el cuero esconde un sangrado que aún hay que presionar.",
+                "If they stop breathing, start compressions and keep the neck still.",
+                "Si dejan de respirar, empieza compresiones y sigue el cuello quieto.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Get to trained help after any knock-out or a head that will not stop bleeding. Keep the neck still on the way.",
+            "Llega a ayuda entrenada si se desmayaron o la cabeza no para de sangrar. Cuello quieto en el camino.",
+        )
+    elif family == "poison":
+        body = [
+            _step(
+                "Take the bottle or plant away. Do not make them vomit. Do not give milk or salt water.",
+                "Quita la botella o la planta. No los hagas vomitar. No des leche ni agua con sal.",
+                "Hands on the bottle. Not on their throat.",
+                "Manos en la botella. No en su garganta.",
+                "Forced vomit burns the throat twice and can choke them.",
+                "El vómito forzado quema la garganta dos veces y puede ahogarlos.",
+                "If they are already vomiting, roll them and keep the bottle.",
+                "Si ya vomitan, gíralos y quédate con la botella.",
+                picture,
+            ),
+            _step(
+                "Rinse the mouth with clean water. If it is on the skin, water for fifteen minutes. Keep the container.",
+                "Enjuaga la boca con agua limpia. Si está en la piel, agua quince minutos. Quédate con el envase.",
+                "Hold the water. Tilt. Spit. Do not swallow the rinse.",
+                "Sostén el agua. Inclina. Escupe. No tragues el enjuague.",
+                "The label is what trained help reads. The rinse is what stops more going in.",
+                "La etiqueta es lo que lee la ayuda. El enjuague es lo que para más entrada.",
+                "Stop rinsing if they cannot swallow or cannot stay awake.",
+                "Para el enjuague si no pueden tragar o no se mantienen despiertos.",
+                picture,
+            ),
+            _step(
+                "If they stop breathing, start hard fast compressions. Stay with them and the container.",
+                "Si dejan de respirar, empieza compresiones fuertes y rápidas. Quédate con ellos y el envase.",
+                "One person pushes. Another holds the bottle.",
+                "Una persona empuja. Otra sostiene la botella.",
+                "A swallowed poison can stop the chest. The bottle still has to go with them.",
+                "Un veneno tragado puede parar el pecho. La botella tiene que ir con ellos.",
+                "Stop compressions if they breathe or trained help takes over.",
+                "Para las compresiones si respiran o la ayuda entrenada toma el relevo.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+        ]
+        care = _loc(
+            "Get to trained help with the container. Do not wait on a number the glass cannot dial.",
+            "Llega a ayuda entrenada con el envase. No esperes un número que el visor no puede marcar.",
+        )
+    elif family == "asthma":
+        body = [
+            _step(
+                "Sit them up. Their own inhaler, two puffs, then wait. Do not make them lie flat or walk.",
+                "Siéntalos. Su inhalador, dos puff, luego espera. No los acuestes ni los hagas caminar.",
+                "Shake the inhaler. One puff. Breathe. Then the second.",
+                "Agita el inhalador. Un puff. Respira. Luego el segundo.",
+                "Flat and walking both steal the air they have left.",
+                "Acostados y caminando les roban el aire que les queda.",
+                "If there is no inhaler, keep them sitting and go to the next move.",
+                "Si no hay inhalador, síguelos sentados y pasa al siguiente.",
+                picture,
+            ),
+            _step(
+                "If they cannot speak a full sentence, stay sitting and get to care. Watch the chest.",
+                "Si no pueden decir una frase entera, sigue sentado y busca cuidado. Mira el pecho.",
+                "Sit behind them. Hands on their shoulders. Count breaths out loud.",
+                "Siéntate detrás. Manos en los hombros. Cuenta las respiraciones.",
+                "A silent chest is the danger, not the wheeze.",
+                "El peligro es el pecho silencioso, no el silbido.",
+                "If the chest stops, start compressions.",
+                "Si el pecho para, empieza compresiones.",
+                picture,
+            ),
+            _step(
+                "If they stop breathing, start hard fast compressions in the center of the chest. Stay sitting them up until then.",
+                "Si dejan de respirar, empieza compresiones fuertes y rápidas al centro. Hasta entonces síguelos sentados.",
+                "Keep other children back. One person pushes.",
+                "Aleja a otros niños. Una persona empuja.",
+                "An empty inhaler does not change the first move when the chest stops.",
+                "Un inhalador vacío no cambia el primer movimiento cuando el pecho para.",
+                "Stop compressions if they breathe or trained help takes over.",
+                "Para las compresiones si respiran o la ayuda entrenada toma el relevo.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+        ]
+        care = _loc(
+            "Get to trained help if two puffs do not open the chest. Sit them on the way.",
+            "Llega a ayuda entrenada si dos puff no abren el pecho. Siéntalos en el camino.",
+        )
+    elif family == "avalanche":
+        body = [
+            _step(
+                "Mark the last place you saw them. Dig from downhill of that mark, not from below the pile.",
+                "Marca el último sitio donde los viste. Cava río abajo de esa marca, no desde abajo del montón.",
+                "Plant a stick at the last-seen. Dig toward it, not under it.",
+                "Clava un palo en el último visto. Cava hacia él, no debajo.",
+                "Digging from below drops more snow on the face.",
+                "Cavar desde abajo tira más nieve a la cara.",
+                "Stop if a second slide is coming — get off the slope, then come back.",
+                "Para si viene otra placa — sal de la pendiente, luego vuelve.",
+                picture,
+            ),
+            _step(
+                "Clear the face first. Then the chest. Then get them onto something dry.",
+                "Limpia la cara primero. Luego el pecho. Luego ponlos en algo seco.",
+                "Hands at the mouth. Then the chest. Then drag onto a pack.",
+                "Manos en la boca. Luego el pecho. Luego arrastra a una mochila.",
+                "Air is the first minute. Wet snow on the trunk is the second death.",
+                "El aire es el primer minuto. Nieve mojada en el tronco es la segunda muerte.",
+                "If they are not breathing on the dry spot, start compressions.",
+                "Si no respiran en el sitio seco, empieza compresiones.",
+                picture,
+            ),
+            _step(
+                "On dry ground, tap and look at the chest. No normal breathing means hard fast compressions.",
+                "En tierra seca, toca y mira el pecho. Sin respiración normal, compresiones fuertes y rápidas.",
+                "Keep other children back. One person pushes.",
+                "Aleja a otros niños. Una persona empuja.",
+                "Snow in the lungs does not change the first move. Blood still has to reach the brain.",
+                "La nieve en los pulmones no cambia el primer movimiento. La sangre tiene que llegar al cerebro.",
+                "Stop if they breathe or trained help takes over.",
+                "Para si respiran o la ayuda entrenada toma el relevo.",
+                _picture(chapter, "cpr-compress.png"),
+            ),
+        ]
+        care = _loc(
+            "Get to trained help even if they cough it out. Stay dry and visible.",
+            "Llega a ayuda entrenada aunque tosan la nieve. Sigue seco y visible.",
+        )
+    elif family == "rip":
+        body = [
+            _step(
+                "Do not swim against the current. Float. Face the beach. Wave.",
+                "No nades contra la corriente. Flota. Mira la playa. Saluda.",
+                "On your back. Hand up. Do not fight the pull.",
+                "De espaldas. Mano arriba. No pelees el tiro.",
+                "A rip is a conveyor. Fighting it is how you empty the tank.",
+                "Una resaca es una cinta. Pelearla es cómo se acaba el aire.",
+                "If you can stand, walk out to the side, not straight in.",
+                "Si haces pie, sal de lado, no derecho.",
+                picture,
+            ),
+            _step(
+                "Swim parallel to the beach until the pull lets go, then in. Do not aim at the place you left.",
+                "Nada paralelo a la playa hasta que suelte, luego hacia adentro. No apuntes al sitio de donde saliste.",
+                "Look down the beach. Swim that way. Then in.",
+                "Mira a lo largo de la playa. Nada ahí. Luego hacia adentro.",
+                "The rip is a narrow river. Sideways is out of it.",
+                "La resaca es un río estrecho. De lado sales.",
+                "If you cannot swim, keep floating and waving until a throw-line reaches you.",
+                "Si no sabes nadar, sigue flotando y saludando hasta que llegue una cuerda.",
+                picture,
+            ),
+            _step(
+                "Once you can stand, walk out. Do not go back in for a board or a bag. Yell in threes from the sand.",
+                "Cuando hagas pie, sal. No vuelvas por una tabla o una bolsa. Grita de a tres desde la arena.",
+                "Walk. Then sit. Then three yells.",
+                "Camina. Luego siéntate. Luego tres gritos.",
+                "Most second drownings are the trip back for gear.",
+                "La mayoría de los segundos ahogos son el viaje de vuelta por el equipo.",
+                "If someone else is still in it, throw a branch or cloth. Do not go in if you cannot stand.",
+                "Si alguien más sigue adentro, lanza una rama o un paño. No entres si no haces pie.",
+                picture,
+            ),
+        ]
+        care = _loc(
+            "Stay on the sand until a known voice reaches you. Do not go back in.",
+            "Quédate en la arena hasta que una voz conocida te alcance. No vuelvas al agua.",
+        )
     else:
         body = [
             _step(
-                f"Do one first move for this ask: {asked}. Use your hands. One thing only.",
-                f"Haz un primer movimiento para esto: {asked}. Usa las manos. Una sola cosa.",
-                CHILD_HANDS_EN,
-                CHILD_HANDS_ES,
-                "First time means one action, then check.",
-                "La primera vez es un acto, luego revisar.",
-                "Stop if it hurts more or the scene turns unsafe.",
-                "Para si duele más o la escena se vuelve insegura.",
-                water_pic,
-            ),
-            _step(
-                "Check the person or the camp after that one move. Then do the next one move, not three.",
-                "Revisa a la persona o el campamento después de ese movimiento. Luego haz el siguiente, no tres.",
-                "Look. Then one more hand move. Then tap NEXT.",
-                "Mira. Luego un movimiento más. Luego toca NEXT.",
-                "Stacking jobs is how first-timers skip the one that saves them.",
-                "Apilar tareas es cómo los principiantes saltan la que los salva.",
+                "If someone is hurt: stop bleeding or start breaths first. If no one is hurt, stay visible and stay with the party.",
+                "Si alguien está herido: para el sangrado o empieza respiraciones primero. Si nadie está herido, quédate visible y con el grupo.",
+                "Look at the person. Then one hand move. Then tap NEXT.",
+                "Mira a la persona. Luego un movimiento. Luego toca NEXT.",
+                "The first job is the thing that is killing them. Stacking jobs skips that.",
+                "Lo primero es lo que los está matando. Apilar tareas se salta eso.",
                 "Stop if you cannot see, cannot stand, or cannot hear.",
                 "Para si no ves, no te sostienes o no oyes.",
+                picture,
+            ),
+            _step(
+                "From that spot, yell in threes and wave a bright cloth. Do not wander. Do not eat wild plants. Do not drink untreated water.",
+                "Desde ese sitio, grita de a tres y agita un paño brillante. No deambules. No comas plantas silvestres. No bebas agua sin tratar.",
+                "Three yells. Then sit. Hands off plants and standing water.",
+                "Tres gritos. Luego siéntate. Manos fuera de plantas y agua estancada.",
+                "Searchers walk a line. Unknown plants and untreated water make two problems.",
+                "Los buscadores caminan una línea. Plantas desconocidas y agua sin tratar hacen dos problemas.",
+                "Stop if you feel faint. Sit. Yell.",
+                "Para si te desmayas. Siéntate. Grita.",
                 picture,
             ),
         ]
@@ -1163,7 +1796,7 @@ def prompt_ask(query: str, pack_name: str, excerpts: list[dict], locale: str) ->
         "who has never done this. Answer with schema 1.4 JSON only. One action per "
         "step. child is what the child's hands do. First time: name the object, "
         "where to put hands, when to stop. 4 to 8 steps. STOP-IF and GET-TO-CARE. "
-        "Never edible. Never a drinkable number. Never a phone number or tel://. "
+        "Never edible. Never a drinkable number. Never a phone number or a tel link. "
         "Use the pack book excerpts as ground when they apply. If they do not, "
         "still give a first-time walk that keeps them alive and getting to care. JSON only."
     )
@@ -1233,6 +1866,11 @@ class FieldAskLiveTests(unittest.TestCase):
             self.assertNotIn("drinkable", blob)
         bleed = grounded_ask("my friend is bleeding a lot", book, "tx-west", "en")
         self.assertIn("press", json.dumps(bleed).lower())
+        allergy = grounded_ask("anaphylaxis", book, "tx-west", "en")
+        allergy_blob = json.dumps(allergy).lower()
+        self.assertIn("thigh", allergy_blob)
+        self.assertNotIn("between the shoulders", allergy_blob)
+        self.assertGreaterEqual(len(allergy["steps"]), 4)
         cpr = grounded_ask("not breathing", book, "tx-west", "en")
         self.assertIn("compression", json.dumps(cpr).lower())
         lost = grounded_ask("I am a kid and I am lost", book, "tx-west", "en")

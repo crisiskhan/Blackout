@@ -4431,6 +4431,17 @@ final class InspectTests: XCTestCase {
         XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:sting", state: "NM"), [Inspect.biteCard])
         XCTAssertEqual(InspectField.fieldRoute(forVision: "unknown", state: "NM"), [])
         XCTAssertEqual(InspectField.fieldRoute(forVision: "no-model", state: "NM"), [])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:fire", state: "TX"), ["env-wildfire"])
+        XCTAssertEqual(InspectField.label(for: "env-wildfire"), "FIELD · FIRE")
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:flood", state: "TX"), ["env-flood"])
+        XCTAssertEqual(InspectField.label(for: "env-flood"), "FIELD · FLOOD")
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:smoke", state: "TX"), ["env-smoke"])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:lightning", state: "TX"), ["env-lightning"])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:shelter", state: "TX"), [Inspect.shelterCard])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:wound", state: "TX"), ["med-bleed-pack"])
+        XCTAssertEqual(InspectField.label(for: "med-bleed-pack"), "FIELD · BLEED")
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:ice", state: "TX"), [Inspect.coldCard])
+        XCTAssertEqual(InspectField.fieldRoute(forVision: "kind:ice", state: "NM"), [Inspect.iceRockCard])
 
         let pineWest = InspectField.fieldRoute(
             forVision: "tx-loblolly-pine",

@@ -78,4 +78,62 @@ final class FieldAskTests: XCTestCase {
         XCTAssertTrue(prompt.contains("Never edible"))
         XCTAssertFalse(prompt.lowercased().contains("best in class"))
     }
+
+    func testCardiacWalkSitsThemBeforeCompressions() {
+        let live = FieldAsk.grounded(
+            query: "heart attack",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        XCTAssertEqual(live.id, FieldAsk.liveID)
+        XCTAssertTrue(live.steps[0].do.en.lowercased().contains("sit"))
+        XCTAssertTrue(live.steps[0].do.en.lowercased().contains("still"))
+        let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+        XCTAssertTrue(blob.contains("compress"))
+        XCTAssertFalse(blob.contains("three slow breaths"))
+    }
+
+    func testAllergyWalkIsNotBackBlows() {
+        let live = FieldAsk.grounded(
+            query: "anaphylaxis",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        let first = live.steps[0].do.en.lowercased()
+        let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+        XCTAssertTrue(first.contains("injector") || first.contains("thigh"))
+        XCTAssertTrue(blob.contains("thigh"))
+        XCTAssertFalse(blob.contains("back hard"))
+        XCTAssertFalse(blob.contains("between the shoulders"))
+        XCTAssertGreaterThanOrEqual(live.steps.count, 4)
+    }
+
+    func testStrokeWalkSitsThemAndNotesTheTime() {
+        let live = FieldAsk.grounded(
+            query: "stroke",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        let first = live.steps[0].do.en.lowercased()
+        let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+        XCTAssertTrue(first.contains("sit"))
+        XCTAssertTrue(first.contains("time"))
+        XCTAssertTrue(blob.contains("food") || blob.contains("drink") || blob.contains("pills"))
+        XCTAssertFalse(first.contains("compression"))
+    }
+
+    func testDrownWalkGetsThemOntoLandFirst() {
+        let live = FieldAsk.grounded(
+            query: "someone is drowning",
+            chapter: [],
+            packId: "tx-west",
+            locale: "en"
+        )
+        XCTAssertTrue(live.steps[0].do.en.lowercased().contains("land"))
+        let blob = live.steps.map { $0.do.en }.joined(separator: " ").lowercased()
+        XCTAssertTrue(blob.contains("compression"))
+    }
 }
