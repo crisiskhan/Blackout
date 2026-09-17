@@ -257,7 +257,11 @@ def wanted_tiles(bbox: dict, z0: int, z1: int) -> list[tuple[int, int, int]]:
 
 
 def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
-    """Street-scale fill on the extract; yard-scale on the walkable ground."""
+    """Street-scale fill on the extract; yard-scale on the walkable ground.
+
+    z17 stays on metro + PHOTO_EXTRA (Oleaster yards). Pack-wide z17 blows
+    the 4 GiB IPA/ZIP32 ceiling once the ASK model is in the archive.
+    """
     seen: set[tuple[int, int, int]] = set()
     jobs: list[tuple[int, int, int]] = []
 
@@ -274,8 +278,6 @@ def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
     add(region, AERIAL_FLOOR_ZOOM, AERIAL_FLOOR_ZOOM)
     add(region, AERIAL_DETAIL_MIN, AERIAL_FILL_ZOOM)
     add(walk, 16, 16)
-    if pid == "tx-west":
-        add(walk, AERIAL_MAX_ZOOM, AERIAL_MAX_ZOOM)
     add(metro_bbox(pack), AERIAL_DETAIL_MIN, AERIAL_MAX_ZOOM)
     for item in PHOTO_EXTRA.get(pid, []):
         box = {

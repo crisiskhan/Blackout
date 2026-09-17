@@ -145,19 +145,7 @@
         "aerial-10.pmtiles",
         "aerial-11.pmtiles",
         "aerial-12.pmtiles",
-        "aerial-13.pmtiles",
-        "aerial-14.pmtiles",
-        "aerial-15.pmtiles",
-        "aerial-16.pmtiles",
-        "aerial-17.pmtiles",
-        "aerial-18.pmtiles",
-        "aerial-19.pmtiles",
         "aerial-2.pmtiles",
-        "aerial-20.pmtiles",
-        "aerial-21.pmtiles",
-        "aerial-22.pmtiles",
-        "aerial-23.pmtiles",
-        "aerial-24.pmtiles",
         "aerial-3.pmtiles",
         "aerial-4.pmtiles",
         "aerial-5.pmtiles",
@@ -195,7 +183,7 @@
         "walk-dem.json",
         "wild.geojson"
       ],
-      "bytes": 2241030729
+      "bytes": 1191246905
     },
     {
       "id": "tx-east",
@@ -321,6 +309,8 @@
         "streetsVisibleAtWalkingZoom": true
       },
       "files": [
+        "aerial-1.pmtiles",
+        "aerial-2.pmtiles",
         "aerial.pmtiles",
         "contours.geojson",
         "dem.json",
@@ -348,7 +338,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 93113383
+      "bytes": 315377334
     },
     {
       "id": "nm",

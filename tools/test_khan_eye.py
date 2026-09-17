@@ -546,8 +546,8 @@ class FullExtractPhotoTests(unittest.TestCase):
             "Tularosa is off TX WEST z15 fill",
         )
         self.assertTrue(
-            _job_has(west, LAS_CRUCES["lon"], LAS_CRUCES["lat"], 17),
-            "Las Cruces walk is off TX WEST z17",
+            _job_has(west, LAS_CRUCES["lon"], LAS_CRUCES["lat"], 16),
+            "Las Cruces walk is off TX WEST z16",
         )
         self.assertTrue(_job_has(east, BUDA["lon"], BUDA["lat"], 15), "Buda is off TX EAST z15 fill")
         self.assertTrue(
@@ -603,7 +603,7 @@ class FullExtractPhotoTests(unittest.TestCase):
         packed = (
             (west, "Hatch", HATCH, 15),
             (west, "Tularosa", TULAROSA, 15),
-            (west, "Las Cruces", LAS_CRUCES, 17),
+            (west, "Las Cruces", LAS_CRUCES, 16),
         )
         pending = (
             (east, "Buda", BUDA, 15),

@@ -39,6 +39,18 @@
       "tileSize": 256,
       "attribution": "USGS NAIP, build-time only"
     },
+    "aerial-1": {
+      "type": "raster",
+      "url": "pmtiles://aerial-1.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-2": {
+      "type": "raster",
+      "url": "pmtiles://aerial-2.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
     "hillshade": {
       "type": "image",
       "url": "hillshade.png",
@@ -136,6 +148,34 @@
       "id": "aerial",
       "type": "raster",
       "source": "aerial",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-1",
+      "type": "raster",
+      "source": "aerial-1",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-2",
+      "type": "raster",
+      "source": "aerial-2",
       "minzoom": 12,
       "maxzoom": 22,
       "layout": {
