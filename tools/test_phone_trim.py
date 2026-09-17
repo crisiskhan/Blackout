@@ -160,7 +160,7 @@ class PauseOffMapTests(unittest.TestCase):
         )[0]
         self.assertIn("interactive", chrome)
         self.assertIn("preferredFramesPerSecond", chrome)
-        self.assertIn("MLNMapViewPreferredFramesPerSecondDefault", chrome)
+        self.assertIn("MLNMapViewPreferredFramesPerSecond.default", chrome)
         self.assertIn("MLNMapViewPreferredFramesPerSecond(rawValue: 1)", chrome)
         self.assertNotIn("\n            : 1\n", chrome)
 

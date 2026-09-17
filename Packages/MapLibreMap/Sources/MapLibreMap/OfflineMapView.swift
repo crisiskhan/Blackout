@@ -259,7 +259,7 @@ public struct OfflineMapView: UIViewRepresentable {
         view.minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)
         view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)
         view.preferredFramesPerSecond = interactive
-            ? MLNMapViewPreferredFramesPerSecondDefault
+            ? MLNMapViewPreferredFramesPerSecond.default
             : MLNMapViewPreferredFramesPerSecond(rawValue: 1)
         if let map = view as? FillingMapView {
             map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)
