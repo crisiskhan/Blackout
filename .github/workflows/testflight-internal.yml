@@ -33,7 +33,7 @@ jobs:
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/tf-')) ||
       (github.event_name == 'push' && github.ref == 'refs/heads/cursor/blackout-bible-v3-64d0' && startsWith(github.event.head_commit.message, 'tf:'))
     runs-on: macos-15
-    timeout-minutes: 90
+    timeout-minutes: 180
     permissions:
       contents: read
     env:
