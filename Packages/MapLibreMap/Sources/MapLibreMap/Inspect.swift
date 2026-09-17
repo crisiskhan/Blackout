@@ -224,10 +224,11 @@ public enum Inspect {
     /// so a hold looks straight through them.
     public static let overlayLayerIDs: Set<String> = [
         "pack-bbox-line", "you-puck-halo", "you-puck-core",
+        UserPuck.markLayerID,
         DestinationPin.ringLayerID, DestinationPin.coreLayerID,
         RouteLine.casingLayerID, RouteLine.layerID, RouteLine.coreLayerID,
         HoldPin.ringLayerID, HoldPin.coreLayerID,
-        PartyPips.haloLayerID, PartyPips.coreLayerID,
+        PartyPips.haloLayerID, PartyPips.coreLayerID, PartyPips.markLayerID,
         EyeDesk.tailsLayerID, EyeDesk.ringsLayerID,
     ]
 

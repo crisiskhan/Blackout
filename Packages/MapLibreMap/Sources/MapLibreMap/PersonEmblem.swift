@@ -113,6 +113,7 @@ public enum PersonEmblem: String, CaseIterable, Sendable, Equatable {
 public enum PersonCompass: Sendable {
     public static let puckPoints: Double = 44
     public static let wellPoints: Double = 34
+    public static let statusRingPoints: Double = 3
     public static let minorTickEvery = 5
     public static let majorTickEvery = 15
 

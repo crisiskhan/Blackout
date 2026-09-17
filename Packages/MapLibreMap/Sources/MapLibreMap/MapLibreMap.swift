@@ -434,6 +434,8 @@ public enum PackGeometry {
 /// Self marker when MapLibre `showsUserLocation` has no GPS fix yet.
 public enum UserPuck {
     public static let title = "YOU"
+    public static let markLayerID = "you-mark"
+    public static let markImageName = "you-mark"
     public static let haloRadiusMeters: Double = 80
     public static let haloSteps = 32
 

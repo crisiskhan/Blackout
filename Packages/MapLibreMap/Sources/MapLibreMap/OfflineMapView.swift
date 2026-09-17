@@ -46,6 +46,8 @@ public struct OfflineMapView: UIViewRepresentable {
     public var youHeading: Double?
     /// Face on YOU. Party faces arrive on each pip.
     public var youEmblem: String
+    /// CONDITION on YOU. Party condition arrives on each pip.
+    public var youCondition: String
     public var onPulse: (() -> Void)?
     /// LOCK-ON follows YOU. Off, the thumb owns the camera.
     public var lockOn: Bool
@@ -89,6 +91,7 @@ public struct OfflineMapView: UIViewRepresentable {
         pips: [PartyBody] = [],
         youHeading: Double? = nil,
         youEmblem: String = PersonEmblem.fallback.rawValue,
+        youCondition: String = EyeDesk.Condition.green.rawValue,
         onPulse: (() -> Void)? = nil,
             lockOn: Bool = false,
             godsEye: Bool = false,
@@ -127,6 +130,7 @@ public struct OfflineMapView: UIViewRepresentable {
         self.pips = pips
         self.youHeading = youHeading
         self.youEmblem = youEmblem
+        self.youCondition = youCondition
         self.onPulse = onPulse
         self.lockOn = lockOn
         self.godsEye = godsEye
@@ -269,6 +273,7 @@ public struct OfflineMapView: UIViewRepresentable {
             pips: pips,
             youHeading: youHeading,
             youEmblem: youEmblem,
+            youCondition: youCondition,
             homeLat: centerLat,
             homeLon: centerLon,
             lockOn: lockOn,
@@ -301,6 +306,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var pips: [PartyBody]
             var youHeading: Double?
             var youEmblem: String
+            var youCondition: String
             var homeLat: Double
             var homeLon: Double
             var lockOn: Bool
@@ -635,9 +641,7 @@ public struct OfflineMapView: UIViewRepresentable {
             storedSun = spec.sun
             view.backgroundColor = PackStyle.canvasColor(sun: spec.sun)
             applyCamera(spec, on: view, force: force)
-            let mapHasPuck = (view.annotations ?? []).contains { ann in
-                ann.title == UserPuck.title
-            }
+            let mapHasPuck = puck != nil
             let puckNeeds = force
                 || spec.showYou != mapHasPuck
                 || UserPuck.needsReapply(
@@ -700,7 +704,7 @@ public struct OfflineMapView: UIViewRepresentable {
                         you.memberID = UserPuck.title
                         you.emblemID = spec.youEmblem
                         you.headingDeg = spec.youHeading
-                        view.addAnnotation(you)
+                        you.condition = spec.youCondition
                         puck = you
                         storedPuck = (spec.puckLat, spec.puckLon)
                     } else {
@@ -730,22 +734,31 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
+            for leftover in (view.annotations ?? []).compactMap({ $0 as? PersonMarkAnnotation }) {
+                view.removeAnnotation(leftover)
+            }
             if !spec.showYou {
-                if let old = puck {
-                    view.removeAnnotation(old)
-                    puck = nil
-                }
+                puck = nil
                 storedPuck = nil
             } else if let you = puck as? PersonMarkAnnotation {
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 you.emblemID = spec.youEmblem
                 you.headingDeg = spec.youHeading
+                you.condition = spec.youCondition
                 storedPuck = (spec.puckLat, spec.puckLon)
-                if let mark = view.view(for: you) as? YouPuckAnnotationView {
-                    mark.apply(emblemID: spec.youEmblem, headingDeg: spec.youHeading)
-                }
+            } else {
+                let you = PersonMarkAnnotation()
+                you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                you.title = UserPuck.title
+                you.memberID = UserPuck.title
+                you.emblemID = spec.youEmblem
+                you.headingDeg = spec.youHeading
+                you.condition = spec.youCondition
+                puck = you
+                storedPuck = (spec.puckLat, spec.puckLon)
             }
             syncPartyMarks(on: view, spec: spec)
+            paintPersonMarks(on: view, spec: spec)
         }
 
         func syncPartyMarks(on view: MLNMapView, spec: OverlaySpec) {
@@ -755,36 +768,20 @@ public struct OfflineMapView: UIViewRepresentable {
                 existing[mark.memberID] = mark
             }
             var next: [PersonMarkAnnotation] = []
-            var seen = Set<String>()
-            for pip in spec.pips {
-                if spec.godsEye {
-                    if PlaceMark.parse(pip.id) != nil {
-                        if !EyeDesk.layerOn(.marks, in: spec.eyeLayers) { continue }
-                    } else if !EyeDesk.layerOn(.party, in: spec.eyeLayers) {
-                        continue
-                    }
-                }
+            for pip in visiblePips(spec) {
                 let coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
                 guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
-                seen.insert(pip.id)
                 if let old = existing[pip.id] {
                     stamp(old, pip: pip)
                     old.coordinate = coordinate
-                    if let mark = view.view(for: old) as? YouPuckAnnotationView {
-                        applyLook(mark, pip: pip)
-                    }
                     next.append(old)
                 } else {
                     let mark = PersonMarkAnnotation()
                     mark.coordinate = coordinate
                     mark.title = "\(PartyPips.titlePrefix)\(pip.id)"
                     stamp(mark, pip: pip)
-                    view.addAnnotation(mark)
                     next.append(mark)
                 }
-            }
-            for old in partyMarks where !seen.contains(old.memberID) {
-                view.removeAnnotation(old)
             }
             partyMarks = next
             storedPips = spec.pips
@@ -805,21 +802,83 @@ public struct OfflineMapView: UIViewRepresentable {
                 : pip.markKind
         }
 
-        func applyLook(_ view: YouPuckAnnotationView, pip: PartyBody) {
-            let place = PlaceMark.parse(pip.id) != nil
-            view.apply(
-                emblemID: pip.emblem,
-                headingDeg: pip.ghost ? nil : pip.headingDeg,
-                tint: EyeLook.tint(pip.condition),
-                ghost: pip.ghost,
-                scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: pip.lead)),
-                badge: place
-                    ? (pip.markKind.isEmpty ? "MARK" : pip.markKind)
-                    : (pip.ageTitle.isEmpty ? pip.ageLabel : pip.ageTitle),
-                kid: pip.kid,
-                overdue: pip.overdue,
-                place: place
-            )
+        func visiblePips(_ spec: OverlaySpec) -> [PartyBody] {
+            spec.pips.filter { pip in
+                if spec.godsEye {
+                    if PlaceMark.parse(pip.id) != nil {
+                        return EyeDesk.layerOn(.marks, in: spec.eyeLayers)
+                    }
+                    return EyeDesk.layerOn(.party, in: spec.eyeLayers)
+                }
+                return true
+            }
+        }
+
+        func paintPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
+            guard let style = view.style else { return }
+            let youShape: MLNShape
+            if spec.showYou {
+                let you = MLNPointFeature()
+                you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
+                youShape = you
+                style.setImage(
+                    PersonCompassArt.mark(
+                        emblemID: spec.youEmblem,
+                        headingDeg: spec.youHeading,
+                        tint: EyeLook.tint(spec.youCondition)
+                    ),
+                    forName: UserPuck.markImageName
+                )
+            } else {
+                youShape = emptyOverlayShape()
+            }
+            if let src = style.source(withIdentifier: "you-puck-src") as? MLNShapeSource {
+                src.shape = youShape
+            }
+            let pips = visiblePips(spec)
+            for pip in pips {
+                let place = PlaceMark.parse(pip.id) != nil
+                style.setImage(
+                    PersonCompassArt.mark(
+                        emblemID: pip.emblem,
+                        headingDeg: pip.ghost ? nil : pip.headingDeg,
+                        tint: EyeLook.tint(pip.condition),
+                        ghost: pip.ghost,
+                        overdue: pip.overdue,
+                        place: place,
+                        kid: pip.kid,
+                        scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: pip.lead))
+                    ),
+                    forName: PartyPips.markImageName(id: pip.id)
+                )
+            }
+            if let src = style.source(withIdentifier: PartyPips.sourceID) as? MLNShapeSource {
+                src.shape = partyShape(pips)
+            }
+            if let src = style.source(withIdentifier: "you-puck-src"),
+               style.layer(withIdentifier: UserPuck.markLayerID) == nil
+            {
+                let layer = MLNSymbolStyleLayer(identifier: UserPuck.markLayerID, source: src)
+                layer.iconImageName = NSExpression(forConstantValue: UserPuck.markImageName)
+                paintMarkSymbol(layer)
+                style.addLayer(layer)
+            }
+            if let src = style.source(withIdentifier: PartyPips.sourceID),
+               style.layer(withIdentifier: PartyPips.markLayerID) == nil
+            {
+                let layer = MLNSymbolStyleLayer(identifier: PartyPips.markLayerID, source: src)
+                layer.iconImageName = NSExpression(forKeyPath: "icon")
+                layer.iconAnchor = NSExpression(forKeyPath: "anchor")
+                paintMarkSymbol(layer)
+                style.addLayer(layer)
+            }
+        }
+
+        func paintMarkSymbol(_ layer: MLNSymbolStyleLayer) {
+            layer.iconAllowsOverlap = NSExpression(forConstantValue: true)
+            layer.iconIgnoresPlacement = NSExpression(forConstantValue: true)
+            layer.iconPitchAlignment = NSExpression(forConstantValue: "viewport")
+            layer.iconRotationAlignment = NSExpression(forConstantValue: "map")
         }
 
         func syncEyeOverlays(on view: MLNMapView, spec: OverlaySpec) {
@@ -1325,7 +1384,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 src.shape = emptyOverlayShape()
             }
 
-            let party = partyShape(spec.pips)
+            let party = partyShape(visiblePips(spec))
             if let src = style.source(withIdentifier: PartyPips.sourceID) as? MLNShapeSource {
                 src.shape = party
             } else {
@@ -1421,9 +1480,13 @@ public struct OfflineMapView: UIViewRepresentable {
             let features: [[String: Any]] = pips.compactMap { pip in
                 let coordinate = CLLocationCoordinate2D(latitude: pip.lat, longitude: pip.lon)
                 guard CLLocationCoordinate2DIsValid(coordinate) else { return nil }
+                let place = PlaceMark.parse(pip.id) != nil
                 return [
                     "type": "Feature",
-                    "properties": [:] as [String: Any],
+                    "properties": [
+                        "icon": PartyPips.markImageName(id: pip.id),
+                        "anchor": place ? "bottom" : "center",
+                    ] as [String: Any],
                     "geometry": [
                         "type": "Point",
                         "coordinates": [pip.lon, pip.lat],
@@ -1521,28 +1584,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 hidden.bounds = CGRect(x: 0, y: 0, width: 1, height: 1)
                 return hidden
             }
-            let memberID = (annotation as? PersonMarkAnnotation)?.memberID ?? ""
-            let you = memberID == UserPuck.title
-            let place = PlaceMark.parse(memberID) != nil
-            let reuse = you ? "you-puck" : (place ? "place-pin" : "party-puck")
-            let view = (mapView.dequeueReusableAnnotationView(withIdentifier: reuse) as? YouPuckAnnotationView)
-                ?? YouPuckAnnotationView(reuseIdentifier: reuse)
-            if let mark = annotation as? PersonMarkAnnotation {
-                view.apply(
-                    emblemID: mark.emblemID,
-                    headingDeg: mark.headingDeg,
-                    tint: EyeLook.tint(mark.condition),
-                    ghost: mark.ghost,
-                    scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: mark.lead)),
-                    badge: place ? (mark.markKind.isEmpty ? "MARK" : mark.markKind) : mark.badge,
-                    kid: mark.kid,
-                    overdue: mark.overdue,
-                    place: place
-                )
-            } else if you {
-                view.apply(emblemID: spec?.youEmblem, headingDeg: spec?.youHeading)
-            }
-            return view
+            return nil
         }
 
         public func mapView(_ mapView: MLNMapView, annotationCanShowCallout annotation: MLNAnnotation) -> Bool {
@@ -1683,199 +1725,70 @@ final class PersonMarkAnnotation: MLNPointAnnotation {
     var markKind = ""
 }
 
-final class YouPuckAnnotationView: MLNAnnotationView {
-    private let rose = UIImageView()
-    private let emblemView = UIImageView()
-    private let pinView = UIImageView()
-    private let headingView = UIView()
-    private let chevronLayer = CAShapeLayer()
-    private let badgeLabel = UILabel()
-    private let kidDot = UIView()
-    private let pulseLayer = CALayer()
-    private var lastHeading: Double?
-
-    override init(reuseIdentifier: String?) {
-        super.init(reuseIdentifier: reuseIdentifier)
-        let size = CGFloat(PersonCompass.puckPoints)
-        bounds = CGRect(x: 0, y: 0, width: size, height: size)
-        backgroundColor = .clear
-        isOpaque = false
-        isEnabled = false
-        isUserInteractionEnabled = false
-        scalesWithViewingDistance = false
-        rotatesToMatchCamera = false
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.72
-        layer.shadowRadius = 3.5
-        layer.shadowOffset = .zero
-
-        rose.frame = bounds
-        rose.image = PersonCompassArt.rose
-        rose.contentMode = .scaleAspectFit
-        addSubview(rose)
-
-        let well = CGFloat(PersonCompass.wellPoints)
-        emblemView.frame = CGRect(
-            x: (size - well) / 2,
-            y: (size - well) / 2,
-            width: well,
-            height: well
-        )
-        emblemView.contentMode = .scaleAspectFill
-        emblemView.clipsToBounds = true
-        emblemView.layer.cornerRadius = well / 2
-        emblemView.layer.borderWidth = 1
-        emblemView.layer.borderColor = UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 0.55).cgColor
-        addSubview(emblemView)
-
-        pinView.frame = bounds
-        pinView.contentMode = .scaleAspectFit
-        pinView.isHidden = true
-        addSubview(pinView)
-
-        headingView.frame = bounds
-        headingView.isUserInteractionEnabled = false
-        headingView.backgroundColor = .clear
-        headingView.isHidden = true
-        addSubview(headingView)
-
-        chevronLayer.fillColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
-        chevronLayer.strokeColor = UIColor.black.cgColor
-        chevronLayer.lineWidth = 0.7
-        chevronLayer.path = PersonCompassArt.chevronPath(in: bounds).cgPath
-        headingView.layer.addSublayer(chevronLayer)
-
-        pulseLayer.borderWidth = 0
-        pulseLayer.opacity = 0
-        layer.insertSublayer(pulseLayer, at: 0)
-
-        badgeLabel.font = .systemFont(ofSize: 8, weight: .heavy)
-        badgeLabel.textAlignment = .center
-        badgeLabel.textColor = .white
-        badgeLabel.isHidden = true
-        addSubview(badgeLabel)
-
-        kidDot.backgroundColor = UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1)
-        kidDot.layer.cornerRadius = 4
-        kidDot.isHidden = true
-        addSubview(kidDot)
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        lastHeading = nil
-        headingView.isHidden = true
-        headingView.layer.transform = CATransform3DIdentity
-        emblemView.image = nil
-        pinView.image = nil
-        pinView.isHidden = true
-        rose.isHidden = false
-        emblemView.isHidden = false
-        centerOffset = .zero
-    }
-
-    func apply(
-        emblemID: String?,
-        headingDeg: Double?,
-        tint: UIColor? = nil,
-        ghost: Bool = false,
-        scale: CGFloat = 1,
-        badge: String = "",
-        kid: Bool = false,
-        overdue: Bool = false,
-        place: Bool = false
-    ) {
-        rose.isHidden = place
-        emblemView.isHidden = place
-        pinView.isHidden = !place
-        let emblem = PersonEmblem.resolved(emblemID)
-        emblemView.image = place ? nil : (PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback))
-        let ink = tint ?? UIColor(red: 0.77, green: 0.80, blue: 0.84, alpha: 1)
-        emblemView.layer.borderColor = ink.cgColor
-        alpha = ghost ? 0.42 : 1
-        let size = CGFloat(PersonCompass.puckPoints) * max(scale, 0.7)
-        bounds = CGRect(x: 0, y: 0, width: size, height: size)
-        rose.frame = bounds
-        pinView.frame = bounds
-        headingView.frame = bounds
-        if place {
-            pinView.image = PersonCompassArt.pin(tint: ink)
-            centerOffset = CGVector(dx: 0, dy: size / 2)
-        } else {
-            pinView.image = nil
-            centerOffset = .zero
-        }
-        let well = CGFloat(PersonCompass.wellPoints) * max(scale, 0.7)
-        emblemView.frame = CGRect(
-            x: (size - well) / 2,
-            y: (size - well) / 2,
-            width: well,
-            height: well
-        )
-        emblemView.layer.cornerRadius = well / 2
-        if badge.isEmpty {
-            badgeLabel.isHidden = true
-        } else {
-            badgeLabel.isHidden = false
-            badgeLabel.text = badge
-            badgeLabel.frame = CGRect(x: 0, y: size - 12, width: size, height: 12)
-        }
-        kidDot.isHidden = !kid
-        kidDot.frame = CGRect(x: size - 10, y: 2, width: 8, height: 8)
-        if overdue {
-            if pulseLayer.animation(forKey: "overdue") == nil {
-                let pulse = CABasicAnimation(keyPath: "opacity")
-                pulse.fromValue = 1
-                pulse.toValue = 0.35
-                pulse.duration = 0.7
-                pulse.autoreverses = true
-                pulse.repeatCount = .infinity
-                pulseLayer.add(pulse, forKey: "overdue")
-            }
-        } else {
-            pulseLayer.removeAnimation(forKey: "overdue")
-            pulseLayer.opacity = 0
-        }
-        pulseLayer.frame = bounds
-        pulseLayer.cornerRadius = size / 2
-        pulseLayer.borderColor = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1).cgColor
-        pulseLayer.borderWidth = overdue ? 2 : 0
-        if place {
-            headingView.isHidden = true
-            lastHeading = nil
-            return
-        }
-        guard let headingDeg, headingDeg >= 0 else {
-            headingView.isHidden = true
-            lastHeading = nil
-            return
-        }
-        headingView.isHidden = false
-        let radians = PersonCompass.tickRadians(headingDeg: headingDeg)
-        let transform = CATransform3DMakeRotation(CGFloat(radians), 0, 0, 1)
-        if let lastHeading {
-            let delta = abs(PersonCompass.shortestDelta(from: lastHeading, to: headingDeg))
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(delta > 0.4 ? 0.16 : 0)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .linear))
-            headingView.layer.transform = transform
-            CATransaction.commit()
-        } else {
-            CATransaction.begin()
-            CATransaction.setDisableActions(true)
-            headingView.layer.transform = transform
-            CATransaction.commit()
-        }
-        lastHeading = headingDeg
-    }
-}
 
 enum PersonCompassArt {
     static let rose: UIImage = renderRose()
+
+    static func mark(
+        emblemID: String?,
+        headingDeg: Double?,
+        tint: UIColor,
+        ghost: Bool = false,
+        overdue: Bool = false,
+        place: Bool = false,
+        kid: Bool = false,
+        scale: CGFloat = 1
+    ) -> UIImage {
+        let size = CGFloat(PersonCompass.puckPoints) * max(scale, 0.7)
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { ctx in
+            let cg = ctx.cgContext
+            if ghost {
+                cg.setAlpha(0.42)
+            }
+            let bounds = CGRect(x: 0, y: 0, width: size, height: size)
+            if place {
+                PersonCompassArt.pin(tint: tint).draw(in: bounds)
+                return
+            }
+            PersonCompassArt.rose.draw(in: bounds)
+            let well = CGFloat(PersonCompass.wellPoints)
+            let wellRect = CGRect(
+                x: (size - well) / 2,
+                y: (size - well) / 2,
+                width: well,
+                height: well
+            )
+            cg.saveGState()
+            cg.addEllipse(in: wellRect)
+            cg.addClip()
+            let emblem = PersonEmblem.resolved(emblemID)
+            (PersonEmblem.image(emblem) ?? PersonEmblem.image(.fallback))?.draw(in: wellRect)
+            cg.restoreGState()
+            let ring = CGFloat(PersonCompass.statusRingPoints)
+            cg.setStrokeColor(tint.cgColor)
+            cg.setLineWidth(ring)
+            cg.strokeEllipse(in: wellRect.insetBy(dx: -ring / 2, dy: -ring / 2))
+            if overdue {
+                let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                cg.setStrokeColor(accent.cgColor)
+                cg.setLineWidth(2)
+                cg.strokeEllipse(in: bounds.insetBy(dx: 1.2, dy: 1.2))
+            }
+            if let headingDeg, headingDeg >= 0 {
+                let accent = UIColor(red: 225.0 / 255.0, green: 6.0 / 255.0, blue: 0, alpha: 1)
+                cg.setFillColor(accent.cgColor)
+                cg.setStrokeColor(UIColor.black.cgColor)
+                cg.setLineWidth(0.7)
+                cg.addPath(chevronPath(in: bounds, headingDeg: headingDeg).cgPath)
+                cg.drawPath(using: .fillStroke)
+            }
+            if kid {
+                cg.setFillColor(UIColor(red: 46.0 / 255.0, green: 230.0 / 255.0, blue: 122.0 / 255.0, alpha: 1).cgColor)
+                cg.fillEllipse(in: CGRect(x: size - 10, y: 2, width: 8, height: 8))
+            }
+        }
+    }
 
     static func pin(tint: UIColor) -> UIImage {
         let size = CGFloat(PersonCompass.puckPoints)
@@ -1918,17 +1831,26 @@ enum PersonCompassArt {
         }
     }
 
-    static func chevronPath(in bounds: CGRect) -> UIBezierPath {
+    static func chevronPath(in bounds: CGRect, headingDeg: Double = 0) -> UIBezierPath {
         let cx = bounds.midX
+        let cy = bounds.midY
         let top = bounds.minY + max(0.6, bounds.height * 0.02)
         let wing = max(2.4, bounds.width * 0.07)
         let height = max(3.6, bounds.height * 0.11)
         let notch = max(2.8, bounds.height * 0.085)
+        let rad = CGFloat(PersonCompass.tickRadians(headingDeg: headingDeg))
+        let sine = sin(rad)
+        let cosine = cos(rad)
+        func mapped(_ point: CGPoint) -> CGPoint {
+            let dx = point.x - cx
+            let dy = point.y - cy
+            return CGPoint(x: cx + dx * cosine - dy * sine, y: cy + dx * sine + dy * cosine)
+        }
         let path = UIBezierPath()
-        path.move(to: CGPoint(x: cx, y: top))
-        path.addLine(to: CGPoint(x: cx + wing, y: top + height))
-        path.addLine(to: CGPoint(x: cx, y: top + notch))
-        path.addLine(to: CGPoint(x: cx - wing, y: top + height))
+        path.move(to: mapped(CGPoint(x: cx, y: top)))
+        path.addLine(to: mapped(CGPoint(x: cx + wing, y: top + height)))
+        path.addLine(to: mapped(CGPoint(x: cx, y: top + notch)))
+        path.addLine(to: mapped(CGPoint(x: cx - wing, y: top + height)))
         path.close()
         return path
     }
@@ -2137,6 +2059,7 @@ extension PackStyle {
     private static func paintSun(_ layer: MLNStyleLayer, field: UIColor, ink: UIColor) {
         let id = layer.identifier
         if id.hasPrefix("khan-") { return }
+        if keepsSymbol(id) { return }
         if id == aerialLayerID || id.hasPrefix("aerial") || id.hasPrefix("naip") { return }
         switch layer {
         case let background as MLNBackgroundStyleLayer:
@@ -2161,6 +2084,10 @@ extension PackStyle {
         default:
             break
         }
+    }
+
+    private static func keepsSymbol(_ id: String) -> Bool {
+        id == UserPuck.markLayerID || id == PartyPips.markLayerID
     }
 
     private static func keepsLine(_ id: String) -> Bool {
@@ -2311,6 +2238,9 @@ extension PackStyle {
     }
 
     private static func paintNVG(_ layer: MLNStyleLayer, green: UIColor, field: UIColor) {
+        if layer.identifier == UserPuck.markLayerID || layer.identifier == PartyPips.markLayerID {
+            return
+        }
         switch layer {
         case let background as MLNBackgroundStyleLayer:
             background.backgroundColor = NSExpression(forConstantValue: field)

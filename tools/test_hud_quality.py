@@ -2605,9 +2605,10 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         self.assertNotIn("best in class", comms.lower())
         self.assertNotIn("best in class", offline.lower())
         self.assertIn("PersonCompassArt", offline)
-        self.assertIn("headingView", offline)
-        self.assertIn("YouPuckAnnotationView", offline)
+        self.assertIn("static func mark(", offline)
         self.assertIn("you-puck-core", offline)
+        self.assertIn("UserPuck.markLayerID", offline)
+        self.assertIn("PartyPips.markLayerID", offline)
         puck = person_compass_const("puckPoints")
         well = person_compass_const("wellPoints")
         self.assertLessEqual(puck, 48)
@@ -2669,6 +2670,95 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         ):
             self.assertTrue((folder / f"{name}.jpg").is_file(), name)
 
+    def test_emblem_compass_and_status_ring_are_metal_sprites(self):
+        """YOU/party are a baked rose + face + condition ring, not the red pin."""
+        offline = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "OfflineMapView.swift"
+        )
+        emblem = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "PersonEmblem.swift"
+        )
+        puck = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "MapLibreMap.swift"
+        )
+        route = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "RouteLine.swift"
+        )
+        inspect = read(
+            "Packages", "MapLibreMap", "Sources", "MapLibreMap", "Inspect.swift"
+        )
+        tab = read("Blackout", "MapTab.swift")
+        self.assertIn("enum PersonCompassArt", offline)
+        self.assertIn("static func mark(", offline)
+        self.assertIn("static let statusRingPoints", emblem)
+        art = offline.split("enum PersonCompassArt")[1]
+        mark = art.split("static func mark(")[1].split("static func pin(")[0]
+        view_for = offline.split("func mapView(_ mapView: MLNMapView, viewFor")[1].split(
+            "func mapView(_ mapView: MLNMapView, annotationCanShowCallout"
+        )[0]
+        spec = offline.split("struct OverlaySpec")[1].split("var spec:")[0]
+        you_sync = offline.split("func syncPersonMarks")[1].split("func syncPartyMarks")[0]
+        party_sync = offline.split("func syncPartyMarks")[1].split("func stamp(")[0]
+        sun = offline.split("private static func paintSun")[1].split(
+            "private static func keepsLine"
+        )[0]
+        nvg = offline.split("private static func paintNVG")[1].split("enum EyeLook")[0]
+        ring = person_compass_const("statusRingPoints")
+        well = person_compass_const("wellPoints")
+        size = person_compass_const("puckPoints")
+        self.assertGreaterEqual(ring, 2.5)
+        self.assertLess(ring, well / 4)
+        self.assertGreaterEqual(size, 44)
+        self.assertIn("emblemID:", mark)
+        self.assertIn("headingDeg:", mark)
+        self.assertIn("tint:", mark)
+        self.assertIn("place: Bool", mark)
+        self.assertIn("PersonCompassArt.rose", mark)
+        self.assertIn("PersonEmblem.image", mark)
+        self.assertIn("PersonCompass.statusRingPoints", mark)
+        self.assertIn("chevronPath", mark)
+        self.assertIn("headingDeg >= 0", mark)
+        self.assertIn("addClip", mark)
+        self.assertNotIn("rotatesToMatchCamera", mark)
+        self.assertNotIn("CGAffineTransform", mark)
+        self.assertIn("var youCondition: String", spec)
+        self.assertIn(
+            "self.youCondition = youCondition",
+            offline.split("self.youEmblem = youEmblem")[1].split("self.onPulse")[0],
+        )
+        self.assertIn("youCondition: youCondition", offline)
+        self.assertIn(
+            "youCondition: EyeDesk.condition(status: runtime.youStatus.rawValue).rawValue",
+            tab,
+        )
+        self.assertIn("you.condition = spec.youCondition", you_sync)
+        self.assertIn("style.setImage", offline)
+        self.assertIn('static let markLayerID = "you-mark"', puck)
+        self.assertIn('static let markImageName = "you-mark"', puck)
+        self.assertIn('static let markLayerID = "party-mark"', route)
+        self.assertIn("MLNSymbolStyleLayer(identifier: UserPuck.markLayerID", offline)
+        self.assertIn("MLNSymbolStyleLayer(identifier: PartyPips.markLayerID", offline)
+        self.assertIn("iconAllowsOverlap", offline)
+        self.assertIn("iconIgnoresPlacement", offline)
+        self.assertIn('iconPitchAlignment = NSExpression(forConstantValue: "viewport")', offline)
+        self.assertIn('iconRotationAlignment = NSExpression(forConstantValue: "map")', offline)
+        self.assertNotIn("view.addAnnotation(you)", offline)
+        self.assertNotIn("view.addAnnotation(mark)", party_sync)
+        self.assertNotIn("ann.title == UserPuck.title", offline)
+        self.assertIn("let mapHasPuck = puck != nil", offline)
+        self.assertIn("HiddenUserLocationView", view_for)
+        self.assertNotIn("YouPuckAnnotationView", view_for)
+        self.assertIn("return nil", view_for)
+        self.assertNotIn("final class YouPuckAnnotationView", offline)
+        self.assertIn("UserPuck.markLayerID", inspect.split("overlayLayerIDs")[1].split("waterCard")[0])
+        self.assertIn("PartyPips.markLayerID", inspect.split("overlayLayerIDs")[1].split("waterCard")[0])
+        self.assertIn("keepsSymbol", sun)
+        self.assertIn("UserPuck.markLayerID", sun)
+        self.assertIn("PartyPips.markLayerID", nvg)
+        self.assertIn("func personMark(at:", offline)
+        self.assertIn("func paintPersonMarks", offline)
+        self.assertIn("PersonCompass.puckPoints", offline)
+
 
 class PartyHoldCardTests(unittest.TestCase):
     """Hold a person emblem: glass profile, status, course, party call, note."""
@@ -2692,7 +2782,7 @@ class PartyHoldCardTests(unittest.TestCase):
         self.assertIn("onPersonHold:", tab)
         self.assertIn("func personMark(at:", offline)
         self.assertIn("toPointTo:", offline)
-        self.assertIn("isUserInteractionEnabled = false", offline.split("final class YouPuckAnnotationView")[1])
+        self.assertIn("isUserInteractionEnabled = false", offline.split("final class HiddenUserLocationView")[1])
         hold_fn = offline.split("func handleHold")[1].split("func liftIntoView")[0]
         self.assertLess(hold_fn.find("personMark(at:"), hold_fn.find("onMapHold"))
         self.assertIn("onPersonHold?", hold_fn)

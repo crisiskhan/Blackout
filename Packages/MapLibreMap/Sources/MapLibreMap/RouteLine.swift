@@ -144,6 +144,11 @@ public enum PartyPips {
     public static let sourceID = "party-pips-src"
     public static let haloLayerID = "party-pips-halo"
     public static let coreLayerID = "party-pips-core"
+    public static let markLayerID = "party-mark"
+
+    public static func markImageName(id: String) -> String {
+        "party-mark-\(id)"
+    }
     public static let haloRadius: Double = 16
     public static let coreRadius: Double = 7
     public static let titlePrefix = "PARTY·"

@@ -665,7 +665,7 @@ def tip55_chrome() -> None:
         bad("GlobeView missing file:// Cesium host")
     elif "showsUserLocation" not in offline:
         bad("OfflineMapView missing user puck")
-    elif "UserPuck" not in offline or "YouPuckAnnotationView" not in offline:
+    elif "UserPuck" not in offline or "PersonCompassArt.mark" not in offline:
         bad("OfflineMapView missing visible YOU fallback puck")
     elif "viewFor" not in offline:
         bad("OfflineMapView missing annotation view for YOU puck")
@@ -865,10 +865,11 @@ def tip57_map() -> None:
         and "MLNPolyline" in offline
     )
     you_ok = (
-        "YouPuckAnnotationView" in offline
+        "PersonCompassArt.mark" in offline
         and 'static let title = "YOU"' in pack_style
         and "showsUserLocation" in offline
         and "you-puck-core" in offline
+        and "UserPuck.markLayerID" in offline
         and re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab) is not None
     )
     if not tiles_ok:
@@ -1028,9 +1029,10 @@ def tip60_map_chrome() -> None:
     outline_puck_ok = (
         "MLNPolyline" in offline
         and "pack-bbox-line" in offline
-        and "YouPuckAnnotationView" in offline
+        and "PersonCompassArt.mark" in offline
         and 'static let title = "YOU"' in pack_style
         and "you-puck-core" in offline
+        and "UserPuck.markLayerID" in offline
         and re.search(r"UserPuck\.coordinate\([\s\S]{0,400}?packSouth:", map_tab) is not None
     )
     mark_ok = (

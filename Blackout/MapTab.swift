@@ -102,6 +102,7 @@ struct MapTab: View {
                     pips: runtime.eyeCanvasPips(),
                     youHeading: runtime.headingDeg,
                     youEmblem: runtime.youEmblem.rawValue,
+                    youCondition: EyeDesk.condition(status: runtime.youStatus.rawValue).rawValue,
                     onPulse: { runtime.pulse() },
                     lockOn: runtime.lockOn,
                     godsEye: runtime.godsEye,

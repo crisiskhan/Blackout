@@ -366,28 +366,24 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
     def test_planted_marks_are_pins_not_you_roses(self):
         offline = OFFLINE.read_text()
         stamp = offline.split("func stamp(_ mark: PersonMarkAnnotation")[1].split(
-            "func applyLook"
+            "func visiblePips"
         )[0]
         self.assertIn("mark.markKind = pip.markKind", stamp)
-        view_apply = offline.split("final class YouPuckAnnotationView")[1]
-        self.assertIn("place: Bool", view_apply)
-        self.assertIn("rose.isHidden = place", view_apply)
-        self.assertIn("emblemView.isHidden = place", view_apply)
-        self.assertIn("pinView.isHidden = !place", view_apply)
-        self.assertIn("PersonCompassArt.pin", view_apply)
-        self.assertIn("centerOffset", view_apply)
-        view_for = offline.split("func mapView(_ mapView: MLNMapView, viewFor")[1].split(
-            "func mapView(_ mapView: MLNMapView, annotationCanShowCallout"
+        self.assertIn("static func mark(", offline)
+        mark = offline.split("enum PersonCompassArt")[1].split("static func mark(")[1].split(
+            "static func pin("
         )[0]
-        self.assertIn("PlaceMark.parse", view_for)
-        self.assertNotIn("memberID ?? annotation.title", view_for)
-        self.assertNotIn("member ?? titled", view_for)
-        self.assertNotIn("annotation.title ??", view_for)
-        self.assertIn(
-            'let memberID = (annotation as? PersonMarkAnnotation)?.memberID ?? ""',
-            view_for,
-        )
-        self.assertIn("PlaceMark.parse(memberID)", view_for)
+        self.assertIn("place: Bool", mark)
+        self.assertIn("PersonCompassArt.pin", mark)
+        self.assertIn("func visiblePips", offline)
+        vis = offline.split("func visiblePips")[1].split("func paintPersonMarks")[0]
+        self.assertIn("PlaceMark.parse", vis)
+        party = offline.split("func partyShape")[1].split("func emptyOverlayShape")[0]
+        self.assertIn("PlaceMark.parse", party)
+        self.assertIn('"bottom"', party)
+        self.assertIn('"center"', party)
+        self.assertNotIn("memberID ?? annotation.title", offline)
+        self.assertNotIn("member ?? titled", offline)
 
     def test_live_nav_chrome_is_overlay_and_lit_dock(self):
         tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
