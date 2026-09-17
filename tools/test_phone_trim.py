@@ -98,6 +98,10 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         self.assertIn("collapse_style_aerial", phone)
         self.assertIn("writes the bundle copy", phone)
         self.assertIn("pack_phone.py", copy)
+        self.assertIn("--exclude 'Packs/nm/aerial*.pmtiles'", copy)
+        self.assertIn('test ! -f "${DST}/Packs/nm/aerial.pmtiles"', copy)
+        self.assertNotIn("--exclude 'Packs/tx-west/aerial", copy)
+        self.assertIn("if merged is None", phone)
         head = aerial.split("def ")[0]
         self.assertNotIn("from .tiles import", head)
         self.assertIn("all_tiles", aerial.split("def read_archive")[1].split("def style_source")[0])

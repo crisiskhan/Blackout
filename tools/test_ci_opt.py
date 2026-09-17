@@ -440,6 +440,8 @@ def test_maplibre_framework_not_owned_bundle_id() -> None:
         fail("tf_ipa_inspect.py must not rewrite FMWK onto com.crisiskhan.blackout")
     if "tf_ipa_inspect.py" not in archive:
         fail("tf-archive.sh must run tools/tf_ipa_inspect.py after the IPA exists")
+    if "4_000_000_000" not in archive:
+        fail("tf-archive.sh must fail closed at 4 GB (tf-174/176 ASC INVALID)")
     inspect_at = archive.find("tf_ipa_inspect.py --ipa")
     ready_at = archive.find('echo "IPA ready:')
     if inspect_at < 0 or ready_at < 0 or inspect_at > ready_at:

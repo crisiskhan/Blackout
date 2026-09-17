@@ -42,7 +42,9 @@ def pack_phone(dst: Path) -> None:
     if not packs.is_dir():
         return
     for dest in sorted(p for p in packs.iterdir() if p.is_dir()):
-        aerial.merge_phone_archives(dest)
+        merged = aerial.merge_phone_archives(dest)
+        if merged is None and not (dest / aerial.AERIAL_FILE).is_file():
+            continue
         collapse_style_aerial(dest / "style.json")
 
 
