@@ -136,7 +136,7 @@
       "id": "aerial",
       "type": "raster",
       "source": "aerial",
-      "minzoom": 14,
+      "minzoom": 12,
       "maxzoom": 22,
       "layout": {
         "visibility": "none"

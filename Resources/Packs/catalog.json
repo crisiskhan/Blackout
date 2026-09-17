@@ -171,7 +171,7 @@
         "walk-dem.json",
         "wild.geojson"
       ],
-      "bytes": 107655059
+      "bytes": 148385603
     },
     {
       "id": "tx-east",
@@ -324,7 +324,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 91586451
+      "bytes": 93118975
     },
     {
       "id": "nm",
@@ -478,7 +478,7 @@
         "union.geojson",
         "wild.geojson"
       ],
-      "bytes": 103539058
+      "bytes": 109717255
     }
   ]
 }

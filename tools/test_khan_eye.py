@@ -153,7 +153,7 @@ class StyleAndResolverTests(unittest.TestCase):
         self.assertIn("layer.isVisible = !aerial", eye)
         self.assertNotIn("layer.isVisible = !(godsEye && aerial)", eye)
         self.assertIn("coversPhoto", eye)
-        self.assertIn("aerial ? 0", eye)
+        self.assertNotIn("aerial ? 0", eye)
         self.assertIn(
             "let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted",
             eye,
@@ -322,7 +322,8 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             self.assertIn("MAP footer is the pack name", blob)
             self.assertIn("sits on the overlay with LOCK-ON", blob)
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
-        self.assertIn("landFillLayerID", covers)
+        self.assertNotIn("landFillLayerID", covers)
+        self.assertIn("tracks", covers)
 
     def test_planted_marks_are_pins_not_you_roses(self):
         offline = OFFLINE.read_text()
@@ -439,6 +440,78 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         assert blob is not None
         self.assertTrue(blob.startswith(b"\xff\xd8"), "Canutillo aerial is not JPEG")
         self.assertGreater(len(blob), 800)
+
+    def test_vinton_anthony_and_pack_floor_fill_the_map(self):
+        """7:45 still: looking north to Vinton / TX 20 / Anthony was gray schematic."""
+        vinton = {"lat": 31.95, "lon": -106.599}
+        anthony = {"lat": 32.006, "lon": -106.606}
+        you = {"lat": 31.87055, "lon": -106.59732}
+        boxes = aerial.photo_bboxes({"id": "tx-west", "slices": PACKS["tx-west"]["slices"]})
+        union = aerial.union_photo_bbox(boxes)
+        for name, pt in (("YOU", you), ("Vinton", vinton), ("Anthony", anthony)):
+            self.assertTrue(
+                union["south"] <= pt["lat"] <= union["north"],
+                f"{name} lat {pt['lat']} is off packed photo {union}",
+            )
+            self.assertTrue(
+                union["west"] <= pt["lon"] <= union["east"],
+                f"{name} lon {pt['lon']} is off packed photo {union}",
+            )
+        self.assertEqual(aerial.AERIAL_FLOOR_ZOOM, 12)
+        self.assertEqual(aerial.AERIAL_MIN_ZOOM, 12)
+        self.assertEqual(aerial.style_layer()["minzoom"], 12)
+        attach = SWIFT.read_text().split("public static func attachAerialLayers")[1].split(
+            "Packed OSM houses"
+        )[0]
+        self.assertIn('"minzoom": 12', attach)
+        self.assertNotIn('"minzoom": 14', attach)
+        eye = OFFLINE.read_text().split("public static func applyEyeLayers")[1].split(
+            "public static func applyEyePalette"
+        )[0]
+        covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
+        self.assertNotIn("landFillLayerID", covers)
+        self.assertNotIn("aerial ? 0", eye)
+        archive = PACK_ROOT / "tx-west" / "aerial.pmtiles"
+        with open(archive, "rb") as fh:
+            reader = Reader(MmapSource(fh))
+            for name, pt, z in (
+                ("Vinton", vinton, 16),
+                ("Anthony", anthony, 16),
+                ("YOU floor", you, 12),
+            ):
+                cx, cy = lonlat_to_tile(pt["lon"], pt["lat"], z)
+                blob = reader.get(z, int(cx), int(cy))
+                self.assertIsNotNone(blob, f"{name} has no packed photo at z{z}")
+                assert blob is not None
+                self.assertTrue(blob.startswith(b"\xff\xd8"), f"{name} aerial is not JPEG")
+                self.assertGreater(len(blob), 800)
+        for blob in (
+            (ROOT / "docs" / "SOLO_QA.md").read_text(),
+            (ROOT / "docs" / "DEVICE.md").read_text(),
+        ):
+            self.assertIn("Looking north to Vinton and Anthony is packed photo", blob)
+            self.assertIn("Pack-wide photo fills the extract", blob)
+
+    def test_every_pack_ships_a_photo_floor(self):
+        """Gray schematic past the metro stamp is a FAIL. z12 NAIP covers each pack bbox."""
+        for pid, pack in PACKS.items():
+            region = pack["slices"]["region"]
+            box = aerial.slice_bbox(region)
+            home = {
+                "lat": (box["south"] + box["north"]) / 2,
+                "lon": (box["west"] + box["east"]) / 2,
+            }
+            archive = PACK_ROOT / pid / "aerial.pmtiles"
+            self.assertTrue(archive.is_file(), f"{pid} missing aerial.pmtiles")
+            with open(archive, "rb") as fh:
+                reader = Reader(MmapSource(fh))
+                header = reader.header()
+                self.assertLessEqual(int(header["min_zoom"]), 12, f"{pid} aerial min_zoom")
+                cx, cy = lonlat_to_tile(home["lon"], home["lat"], 12)
+                blob = reader.get(12, int(cx), int(cy))
+            self.assertIsNotNone(blob, f"{pid} pack center has no z12 photo floor")
+            assert blob is not None
+            self.assertTrue(blob.startswith(b"\xff\xd8"), f"{pid} z12 floor is not JPEG")
 
 
 if __name__ == "__main__":

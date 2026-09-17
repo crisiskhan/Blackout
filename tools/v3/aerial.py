@@ -29,7 +29,9 @@ NAIP_CREDIT = "USGS NAIP, build-time only"
 AERIAL_SOURCE_ID = "aerial"
 AERIAL_LAYER_ID = "aerial"
 AERIAL_FILE = "aerial.pmtiles"
-AERIAL_MIN_ZOOM = 14
+AERIAL_FLOOR_ZOOM = 12
+AERIAL_MIN_ZOOM = 12
+AERIAL_DETAIL_MIN = 14
 AERIAL_MAX_ZOOM = 17
 TILE_PX = 256
 WORKERS = 12
@@ -44,7 +46,16 @@ PHOTO_EXTRA = {
             "west": -106.63,
             "north": 31.94,
             "east": -106.55,
-        }
+            "maxzoom": 17,
+        },
+        {
+            "name": "Vinton–Anthony walk",
+            "south": 31.82,
+            "west": -106.68,
+            "north": 32.06,
+            "east": -106.50,
+            "maxzoom": 16,
+        },
     ]
 }
 
@@ -62,6 +73,15 @@ def slice_bbox(sl: dict) -> dict:
 def metro_bbox(pack: dict) -> dict:
     metro = pack.get("slices", {}).get("metro") or {}
     return slice_bbox(metro)
+
+
+def region_bbox(pack: dict) -> dict:
+    region = pack.get("slices", {}).get("region") or {}
+    return slice_bbox(region)
+
+
+def extra_maxzoom(item: dict) -> int:
+    return int(item.get("maxzoom") or AERIAL_MAX_ZOOM)
 
 
 def photo_bboxes(pack: dict) -> list[dict]:
@@ -178,9 +198,9 @@ def fetch_tile_jpeg(z: int, x: int, y: int) -> bytes | None:
     return _http_jpeg(f"{NAIP_EXPORT}?{qs}")
 
 
-def wanted_tiles(bbox: dict) -> list[tuple[int, int, int]]:
+def wanted_tiles(bbox: dict, z0: int, z1: int) -> list[tuple[int, int, int]]:
     out: list[tuple[int, int, int]] = []
-    for z in range(AERIAL_MIN_ZOOM, AERIAL_MAX_ZOOM + 1):
+    for z in range(z0, z1 + 1):
         x0, y0, x1, y1 = tile_range(bbox, z)
         for x in range(x0, x1 + 1):
             for y in range(y0, y1 + 1):
@@ -188,22 +208,44 @@ def wanted_tiles(bbox: dict) -> list[tuple[int, int, int]]:
     return out
 
 
-def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
-    """Write `aerial.pmtiles` for metro plus any walk extras. Skip rather than fake photo."""
-    boxes = photo_bboxes(pack)
-    bbox = union_photo_bbox(boxes)
+def aerial_jobs(pack: dict) -> list[tuple[int, int, int]]:
+    """Pack-wide z12 floor plus metro/walk detail. z17 stays on the yards extra."""
     seen: set[tuple[int, int, int]] = set()
     jobs: list[tuple[int, int, int]] = []
-    for box in boxes:
-        for zxy in wanted_tiles(box):
+
+    def add(box: dict, z0: int, z1: int) -> None:
+        for zxy in wanted_tiles(box, z0, z1):
             if zxy in seen:
                 continue
             seen.add(zxy)
             jobs.append(zxy)
+
+    add(region_bbox(pack), AERIAL_FLOOR_ZOOM, AERIAL_FLOOR_ZOOM)
+    add(metro_bbox(pack), AERIAL_DETAIL_MIN, AERIAL_MAX_ZOOM)
+    for item in PHOTO_EXTRA.get(str(pack.get("id") or ""), []):
+        box = {
+            "south": float(item["south"]),
+            "west": float(item["west"]),
+            "north": float(item["north"]),
+            "east": float(item["east"]),
+        }
+        add(box, AERIAL_DETAIL_MIN, extra_maxzoom(item))
+    return jobs
+
+
+def build_aerial(dest: Path, pack: dict) -> dict[str, Any]:
+    """Write `aerial.pmtiles` for pack floor plus metro/walk extras. Skip rather than fake photo."""
+    jobs = aerial_jobs(pack)
+    bbox = region_bbox(pack)
     got: dict[tuple[int, int, int], bytes] = {}
     existing = dest / AERIAL_FILE
     if existing.is_file():
-        got = read_archive(existing)
+        with open(existing, "rb") as fh:
+            reader = Reader(MmapSource(fh))
+            for z, x, y in jobs:
+                blob = reader.get(z, x, y)
+                if blob:
+                    got[(z, x, y)] = blob
         print(f"  NAIP {pack['id']} reuse {len(got)} packed jpeg", flush=True)
     missing = [zxy for zxy in jobs if zxy not in got]
     print(f"  NAIP {pack['id']} photo {len(jobs)} tiles, fetch {len(missing)}", flush=True)

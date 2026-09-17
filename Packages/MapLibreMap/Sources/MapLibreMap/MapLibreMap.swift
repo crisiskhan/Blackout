@@ -1057,7 +1057,7 @@ public enum PackStyle {
             "id": aerialLayerID,
             "type": "raster",
             "source": aerialSourceID,
-            "minzoom": 14,
+            "minzoom": 12,
             "layout": ["visibility": "none"],
             "paint": [
                 "raster-opacity": 1,

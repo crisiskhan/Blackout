@@ -2237,7 +2237,7 @@ extension PackStyle {
                 layer.isVisible = !aerial
             }
             if godsEye, let fill = layer as? MLNFillStyleLayer, id == landFillLayerID {
-                fill.fillOpacity = NSExpression(forConstantValue: aerial ? 0 : EyeDesk.khanLandOpacity)
+                fill.fillOpacity = NSExpression(forConstantValue: EyeDesk.khanLandOpacity)
             }
             if godsEye, id == "contours", let line = layer as? MLNLineStyleLayer {
                 line.lineOpacity = NSExpression(forConstantValue: EyeDesk.khanContourOpacity)
@@ -2261,7 +2261,6 @@ extension PackStyle {
     /// Schematic fills and casings that sit on the photo. Hide them on walking
     /// MAP and KHAN EYE while packed NAIP is the ground so yards read. Labels stay.
     private static func coversPhoto(_ id: String) -> Bool {
-        if id == landFillLayerID { return true }
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
             return true
