@@ -392,7 +392,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nSRC=\"${SRCROOT}/Resources\"\nDST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ ! -f \"${SRC}/Packs/catalog.json\" ]; then\n  echo \"error: Resources/Packs/catalog.json missing\" >&2\n  exit 1\nfi\nmkdir -p \"${DST}\"\n# osm.geojson and khan.geojson are the source the vector tiles are built from, not something\n# the phone reads. Shipping them too would put hundreds of MB of dead weight in the\n# IPA. Guarded by tools/test_tx_west_style.py.\nrsync -a --exclude 'Packs/*/osm.geojson' --exclude 'Packs/*/khan.geojson' --exclude 'Packs/*/osm.fetched' --exclude 'Packs/*/.naip-cache' --exclude 'Packs/*/.aerial-write' \"${SRC}/\" \"${DST}/\"\nrm -rf \"${DST}/Resources\"\ntest -f \"${DST}/Packs/catalog.json\"\ntest -f \"${DST}/Field/field.core.json\"\ntest -f \"${DST}/Vision/labels.tx.json\"\n";
+			shellScript = "set -e\nbash \"${SRCROOT}/tools/copy_resources.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

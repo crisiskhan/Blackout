@@ -402,6 +402,48 @@ def _write_one_shard(
         )
 
 
+def merge_phone_archives(dest: Path) -> Path | None:
+    """GitHub keeps 90 MB shards. The phone draws one raster source."""
+    names = shard_names(dest)
+    if not names:
+        return None
+    out = dest / AERIAL_FILE
+    if len(names) == 1 and names[0] == AERIAL_FILE:
+        return out if out.is_file() else None
+    tiles: dict[tuple[int, int, int], bytes] = {}
+    west = south = 180.0
+    east = north = -180.0
+    for name in names:
+        path = dest / name
+        if not path.is_file():
+            continue
+        with open(path, "rb") as fh:
+            header = Reader(MmapSource(fh)).header()
+        west = min(west, header["min_lon_e7"] / 1e7)
+        south = min(south, header["min_lat_e7"] / 1e7)
+        east = max(east, header["max_lon_e7"] / 1e7)
+        north = max(north, header["max_lat_e7"] / 1e7)
+        tiles.update(read_archive(path))
+    if not tiles:
+        return None
+    bbox = {"west": west, "south": south, "east": east, "north": north}
+    pack = {"id": dest.name, "name": dest.name}
+    staging = dest / WRITE_DIR
+    staging.mkdir(parents=True, exist_ok=True)
+    merged = staging / AERIAL_FILE
+    ordered = sorted(tiles.items(), key=lambda item: zxy_to_tileid(*item[0]))
+    _write_one_shard(merged, ordered, bbox, pack)
+    merged.replace(out)
+    for name in names:
+        if name == AERIAL_FILE:
+            continue
+        path = dest / name
+        if path.is_file():
+            path.unlink()
+    shutil.rmtree(staging, ignore_errors=True)
+    return out
+
+
 def write_shards(
     dest: Path,
     jobs: list[tuple[int, int, int]],

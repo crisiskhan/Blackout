@@ -86,7 +86,6 @@ def no_stubs() -> None:
 
 def no_old_engine() -> None:
     allowed_session = {"UpdateSocket.swift"}
-    allowed_web = {"GlobeView.swift"}
     hits = []
     for p in (ROOT / "Packages").rglob("*.swift"):
         t = p.read_text(errors="ignore")
@@ -102,12 +101,12 @@ def no_old_engine() -> None:
             hits.append(p)
         if "URLSession" in t and p.name not in allowed_session:
             hits.append(p)
-        if "WKWebView" in t and p.name not in allowed_web:
+        if "WKWebView" in t:
             hits.append(p)
     if hits:
         bad(f"forbidden API {hits}")
     else:
-        ok("MapKit banned; URLSession only UpdateSocket; WKWebView only GlobeView")
+        ok("MapKit banned; URLSession only UpdateSocket; no WKWebView")
 
 
 def field_schema() -> None:
@@ -263,7 +262,7 @@ def packs() -> None:
     ok("catalog ships TX/NM only; FL/NY packs dropped")
     for p in cat["packs"]:
         d = ROOT / "Resources" / "Packs" / p["id"]
-        for req in ("manifest.json", "osm.geojson", "graph.bin", "contours.geojson", "style.json", "dem.json"):
+        for req in ("manifest.json", "osm.geojson", "graph.bin", "contours.geojson", "style.json", "dem.json", "overlay.pmtiles"):
             if not (d / req).is_file():
                 bad(f"{p['id']} missing {req}")
                 return
@@ -650,7 +649,6 @@ def tip55_chrome() -> None:
         ok("tokens tab caption 10pt")
 
     map_tab = (ROOT / "Blackout" / "MapTab.swift").read_text()
-    globe = (ROOT / "Blackout" / "GlobeView.swift").read_text()
     offline = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "OfflineMapView.swift").read_text()
     pack_style = (ROOT / "Packages" / "MapLibreMap" / "Sources" / "MapLibreMap" / "MapLibreMap.swift").read_text()
     if "OfflineMapView(" not in map_tab:
@@ -661,9 +659,7 @@ def tip55_chrome() -> None:
         bad("Map tab still renders pack-bullet / Guide FTS list as canvas")
     else:
         ok("Map tab hosts native 3D pack desk, not pack-bullet list")
-    if "WKWebView" not in globe or "loadFileURL" not in globe:
-        bad("GlobeView missing file:// Cesium host")
-    elif "showsUserLocation" not in offline:
+    if "showsUserLocation" not in offline:
         bad("OfflineMapView missing user puck")
     elif "UserPuck" not in offline or "PersonCompassArt.mark" not in offline:
         bad("OfflineMapView missing visible YOU fallback puck")
@@ -846,15 +842,16 @@ def tip57_map() -> None:
         if (f.get("geometry") or {}).get("type") in {"LineString", "MultiLineString"}
         and "highway" in (f.get("properties") or {})
     ]
-    wild_src = (sources.get("wild") or {}).get("data")
-    has_wild_roads = any(
-        layer.get("id") == "wild-roads" and layer.get("source") == "wild" for layer in layers
-    )
+    overlay = sources.get("overlay") or {}
+    wild_roads = next((layer for layer in layers if layer.get("id") == "wild-roads"), None)
     tiles_ok = (
         len(lines) >= 20
-        and wild_src == "wild.geojson"
-        and has_wild_roads
-        and "wild.geojson" in pack_style
+        and overlay.get("type") == "vector"
+        and overlay.get("url") == "pmtiles://overlay.pmtiles"
+        and wild_roads is not None
+        and wild_roads.get("source") == "overlay"
+        and wild_roads.get("source-layer") == "wild"
+        and "overlay.pmtiles" in pack_style
         and "wild-roads" in pack_style
         and "prefetchesTiles = false" in offline
     )
@@ -875,7 +872,7 @@ def tip57_map() -> None:
     if not tiles_ok:
         bad("tiles FAIL — NM offline street lines not locked")
     else:
-        ok("Done: tiles — offline NM vector streets (wild.geojson), not maroon void")
+        ok("Done: tiles — offline NM vector streets (overlay tiles), not maroon void")
     if not bbox_ok:
         bad("bbox FAIL — pack region fit/outline not locked")
     else:
@@ -1291,6 +1288,7 @@ def main() -> None:
     cesium_globe()
     hud_quality()
     water_inspect()
+    phone_trim()
     sys.exit(fail)
 
 
@@ -1402,7 +1400,7 @@ def address_search() -> None:
 
 
 def cesium_globe() -> None:
-    """Cesium is the only map. UPDATE is the only socket."""
+    """MapLibre is the only map. UPDATE is the only socket."""
     contracts = subprocess.run(
         [sys.executable, str(ROOT / "tools" / "test_cesium_globe.py")],
         cwd=ROOT,
@@ -1410,9 +1408,23 @@ def cesium_globe() -> None:
         text=True,
     )
     if contracts.returncode != 0:
-        bad(f"Cesium globe contracts failed\n{contracts.stdout}{contracts.stderr}")
+        bad(f"native map contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
-    ok("Done: Cesium globe + UPDATE socket + CPV tree")
+    ok("Done: MapLibre canvas + UPDATE socket + CPV tree")
+
+
+def phone_trim() -> None:
+    """Dead engines stay off the phone. Map coverage stays."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_phone_trim.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"phone trim contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: phone trim — Cesium gone, llama unlinked, overlay tiles, one aerial")
 
 
 def hud_quality() -> None:

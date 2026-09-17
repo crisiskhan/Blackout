@@ -244,6 +244,9 @@ public struct OfflineMapView: UIViewRepresentable {
         view.maximumPitch = CGFloat(PackCamera.holdMaxPitch(godsEye: godsEye))
         view.minimumZoomLevel = PackCamera.holdMinZoom(godsEye: godsEye)
         view.maximumZoomLevel = PackCamera.holdMaxZoom(godsEye: godsEye)
+        view.preferredFramesPerSecond = interactive
+            ? MLNMapViewPreferredFramesPerSecondDefault
+            : 1
         if let map = view as? FillingMapView {
             map.setDeskChrome(godsEye: godsEye, offAerial: offAerial)
         }
@@ -353,6 +356,12 @@ public struct OfflineMapView: UIViewRepresentable {
         var storedMode: TravelMode?
         var storedSun = false
         var storedPalette: EyeDesk.Palette?
+        var storedEyeLayers: [EyeDesk.Layer]?
+        var paintedShowYou = false
+        var paintedEmblem: String?
+        var paintedCondition: String?
+        var paintedHeading: Double?
+        var paintedPipKey: String?
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -488,20 +497,33 @@ public struct OfflineMapView: UIViewRepresentable {
         }
 
         /// Overlay sheets `visibleFeatures` will miss when the fill is too
-        /// faint or the camera is below walking zoom. Restricted to the
-        /// pack's ground geojson so a hold cannot read a pin. Exact press,
-        /// not the 44pt box. Bbox-reject via overlayBounds before copying
-        /// rings: NM is ~102 sheets / ~13k verts, and walking every ring on
-        /// the HUD is the same stall class as ranking 34k packed names.
+        /// faint or the camera is below walking zoom. Ask the overlay tiles
+        /// first; an older pack that still carries `layers/ground.geojson`
+        /// keeps the shape source. Exact press, not the 44pt box.
+        /// Bbox-reject via overlayBounds before copying rings: NM is ~102
+        /// sheets / ~13k verts, and walking every ring on the HUD is the
+        /// same stall class as ranking 34k packed names.
         private func packWorkedGround(
             at coordinate: CLLocationCoordinate2D,
             style: MLNStyle
         ) -> [MLNFeature] {
             guard CLLocationCoordinate2DIsValid(coordinate) else { return [] }
-            guard let source = style.source(withIdentifier: PackStyle.groundWorkedSourceID)
-                    as? MLNShapeSource
-            else { return [] }
-            return source.features(matching: nil).filter { feature in
+            let candidates: [MLNFeature]
+            if let vector = style.source(withIdentifier: PackStyle.overlaySourceID)
+                as? MLNVectorTileSource
+            {
+                candidates = vector.features(
+                    sourceLayerIdentifiers: [PackStyle.overlayGroundLayer],
+                    predicate: nil
+                )
+            } else if let source = style.source(withIdentifier: PackStyle.groundWorkedSourceID)
+                as? MLNShapeSource
+            {
+                candidates = source.features(matching: nil)
+            } else {
+                return []
+            }
+            return candidates.filter { feature in
                 if let overlay = feature as? MLNOverlay,
                    !MLNCoordinateInCoordinateBounds(coordinate, overlay.overlayBounds) {
                     return false
@@ -720,20 +742,28 @@ public struct OfflineMapView: UIViewRepresentable {
                     storedMode = spec.travelMode
                 }
             }
-            syncPersonMarks(on: view, spec: spec)
+            syncPersonMarks(on: view, spec: spec, force: force)
             if let style = view.style {
                 let paletteFlip = storedPalette != spec.eyePalette
                 storedPalette = spec.eyePalette
-                if force || lampFlip || paletteFlip || eyeFlip {
+                let layersChanged = storedEyeLayers != spec.eyeLayers
+                storedEyeLayers = spec.eyeLayers
+                if OverlaySync.needsEyeLayerPass(
+                    force: force,
+                    lampFlip: lampFlip,
+                    paletteFlip: paletteFlip,
+                    eyeFlip: eyeFlip,
+                    layersChanged: layersChanged
+                ) {
                     PackStyle.applyHUDLamp(style, sun: spec.sun)
                     PackStyle.applyEyePalette(style, godsEye: spec.godsEye, palette: spec.eyePalette)
+                    PackStyle.applyEyeLayers(style, godsEye: spec.godsEye, layers: spec.eyeLayers)
                 }
-                PackStyle.applyEyeLayers(style, godsEye: spec.godsEye, layers: spec.eyeLayers)
                 syncEyeOverlays(on: view, spec: spec)
             }
         }
 
-        func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
+        func syncPersonMarks(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
             for leftover in (view.annotations ?? []).compactMap({ $0 as? PersonMarkAnnotation }) {
                 view.removeAnnotation(leftover)
             }
@@ -758,7 +788,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 storedPuck = (spec.puckLat, spec.puckLon)
             }
             syncPartyMarks(on: view, spec: spec)
-            paintPersonMarks(on: view, spec: spec)
+            paintPersonMarks(on: view, spec: spec, force: force)
         }
 
         func syncPartyMarks(on view: MLNMapView, spec: OverlaySpec) {
@@ -814,43 +844,66 @@ public struct OfflineMapView: UIViewRepresentable {
             }
         }
 
-        func paintPersonMarks(on view: MLNMapView, spec: OverlaySpec) {
+        func paintPersonMarks(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
             guard let style = view.style else { return }
+            let pips = visiblePips(spec)
+            let pipKey = PersonMarkPaint.pipKey(pips)
+            let bake = PersonMarkPaint.needsImage(
+                force: force,
+                showYou: spec.showYou,
+                lastShowYou: paintedShowYou,
+                emblem: spec.youEmblem,
+                lastEmblem: paintedEmblem,
+                condition: spec.youCondition,
+                lastCondition: paintedCondition,
+                heading: spec.youHeading,
+                lastHeading: paintedHeading,
+                pipKey: pipKey,
+                lastPipKey: paintedPipKey
+            )
             let youShape: MLNShape
             if spec.showYou {
                 let you = MLNPointFeature()
                 you.coordinate = CLLocationCoordinate2D(latitude: spec.puckLat, longitude: spec.puckLon)
                 youShape = you
-                style.setImage(
-                    PersonCompassArt.mark(
-                        emblemID: spec.youEmblem,
-                        headingDeg: spec.youHeading,
-                        tint: EyeLook.tint(spec.youCondition)
-                    ),
-                    forName: UserPuck.markImageName
-                )
+                if bake {
+                    style.setImage(
+                        PersonCompassArt.mark(
+                            emblemID: spec.youEmblem,
+                            headingDeg: spec.youHeading,
+                            tint: EyeLook.tint(spec.youCondition)
+                        ),
+                        forName: UserPuck.markImageName
+                    )
+                }
             } else {
                 youShape = emptyOverlayShape()
             }
             if let src = style.source(withIdentifier: "you-puck-src") as? MLNShapeSource {
                 src.shape = youShape
             }
-            let pips = visiblePips(spec)
-            for pip in pips {
-                let place = PlaceMark.parse(pip.id) != nil
-                style.setImage(
-                    PersonCompassArt.mark(
-                        emblemID: pip.emblem,
-                        headingDeg: pip.ghost ? nil : pip.headingDeg,
-                        tint: EyeLook.tint(pip.condition),
-                        ghost: pip.ghost,
-                        overdue: pip.overdue,
-                        place: place,
-                        kid: pip.kid,
-                        scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: pip.lead))
-                    ),
-                    forName: PartyPips.markImageName(id: pip.id)
-                )
+            if bake {
+                for pip in pips {
+                    let place = PlaceMark.parse(pip.id) != nil
+                    style.setImage(
+                        PersonCompassArt.mark(
+                            emblemID: pip.emblem,
+                            headingDeg: pip.ghost ? nil : pip.headingDeg,
+                            tint: EyeLook.tint(pip.condition),
+                            ghost: pip.ghost,
+                            overdue: pip.overdue,
+                            place: place,
+                            kid: pip.kid,
+                            scale: CGFloat(place ? 0.78 : EyeDesk.leadScale(isLead: pip.lead))
+                        ),
+                        forName: PartyPips.markImageName(id: pip.id)
+                    )
+                }
+                paintedShowYou = spec.showYou
+                paintedEmblem = spec.youEmblem
+                paintedCondition = spec.youCondition
+                paintedHeading = spec.youHeading
+                paintedPipKey = pipKey
             }
             if let src = style.source(withIdentifier: PartyPips.sourceID) as? MLNShapeSource {
                 src.shape = partyShape(pips)

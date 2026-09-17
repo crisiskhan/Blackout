@@ -1952,7 +1952,7 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIn("AVCapturePhotoOutput", still)
         self.assertIn("CAPTURE", still)
         self.assertIn("requestAccess", still)
-        self.assertIn("Vision/labels.tx.json", read("Blackout.xcodeproj", "project.pbxproj"))
+        self.assertIn("Vision/labels.tx.json", read("tools", "copy_resources.sh"))
         classify = vis.split("func classify(observations:")[1].split("func lookalikeWord")[0]
         self.assertNotIn("return sealed(hit)", classify)
         self.assertIn("specificity(", classify)
@@ -4186,7 +4186,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("khan.pmtiles", cam)
         self.assertIn("aerial.pmtiles", cam)
         self.assertIn('"type": "fill-extrusion"', cam)
-        self.assertIn("resolverVersion = 12", cam)
+        self.assertIn("resolverVersion = 13", cam)
         interact = offline.split("private func applyInteraction")[1].split("private var overlaySpec")[0]
         self.assertNotIn("setDirection(PackCamera.godsEyeHeading", interact)
         self.assertIn("`KHAN EYE`", qa)

@@ -146,11 +146,7 @@
     "aerial-8.pmtiles",
     "aerial-9.pmtiles",
     "aerial.pmtiles",
-    "border.geojson",
-    "contours.geojson",
-    "corridor.geojson",
     "dem.json",
-    "desk3d.geojson",
     "glyphs/Open Sans Regular/0-255.pbf",
     "glyphs/Open Sans Regular/256-511.pbf",
     "glyphs/Open Sans Regular/512-767.pbf",
@@ -159,21 +155,12 @@
     "graph.bin",
     "hillshade.png",
     "khan.pmtiles",
-    "layers/flood.geojson",
-    "layers/ground.geojson",
-    "layers/hazards.geojson",
-    "layers/public_land.geojson",
     "layers/water.bin",
-    "layers/water.geojson",
     "manifest.json",
-    "metro.geojson",
     "osm.pmtiles",
-    "pois.geojson",
-    "region.geojson",
+    "overlay.pmtiles",
     "search.json",
-    "style.json",
-    "walk-dem.json",
-    "wild.geojson"
+    "style.json"
   ],
-  "bytes": 1191246905
+  "bytes": 1189160908
 }

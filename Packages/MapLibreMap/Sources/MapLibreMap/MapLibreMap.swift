@@ -794,6 +794,12 @@ public enum PackStyle {
     public static let aerialSourceID = "aerial"
     public static let aerialLayerID = "aerial"
     public static let aerialFileName = "aerial.pmtiles"
+    public static let overlaySourceID = "overlay"
+    public static let overlayFileName = "overlay.pmtiles"
+    public static let overlayContoursLayer = "contours"
+    public static let overlayWildLayer = "wild"
+    public static let overlayGroundLayer = "ground"
+    public static let overlayWaterDetailLayer = "water-detail"
     public static let waterInk = "#6E747A"
     /// Peaks and holes live on the pack's place slice from this zoom, same as
     /// the tiler's POI floor. Closer than that they are noise; farther they
@@ -812,8 +818,8 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v12 paints sharded packed NAIP photo under KHAN EYE houses.
-    public static let resolverVersion = 12
+    /// not keep replaying it. v13 merges sharded NAIP on the phone and reads overlay tiles.
+    public static let resolverVersion = 13
 
     private static var resolvedMemory: [String: URL] = [:]
 
@@ -893,8 +899,10 @@ public enum PackStyle {
         attachGroundLayers(&sources, &layers, packRoot: packRoot)
         attachAerialLayers(&sources, &layers, packRoot: packRoot)
         attachKhanLayers(&sources, &layers, packRoot: packRoot)
+        attachOverlaySource(&sources, packRoot: packRoot)
         let wildFile = packRoot.appendingPathComponent("wild.geojson")
-        if FileManager.default.fileExists(atPath: wildFile.path) {
+        if !FileManager.default.fileExists(atPath: packRoot.appendingPathComponent(overlayFileName).path),
+           FileManager.default.fileExists(atPath: wildFile.path) {
             if var existing = sources[wildSourceID] as? [String: Any] {
                 if let rel = existing["data"] as? String, !rel.hasPrefix("file:"), !rel.hasPrefix("{") {
                     existing["data"] = packRoot.appendingPathComponent(rel).absoluteString
@@ -1035,6 +1043,25 @@ public enum PackStyle {
         obj["layers"] = layers
     }
 
+    public static func attachOverlaySource(
+        _ sources: inout [String: Any],
+        packRoot: URL
+    ) {
+        let archive = packRoot.appendingPathComponent(overlayFileName)
+        guard FileManager.default.fileExists(atPath: archive.path) else { return }
+        if var existing = sources[overlaySourceID] as? [String: Any] {
+            if let rel = existing["url"] as? String, PMTilesURL.isRelative(rel) {
+                existing["url"] = PMTilesURL.resolve(rel, packRoot: packRoot)
+                sources[overlaySourceID] = existing
+            }
+        } else {
+            sources[overlaySourceID] = [
+                "type": "vector",
+                "url": PMTilesURL.shipped(for: archive),
+            ]
+        }
+    }
+
     /// Packed USGS NAIP photo. Ground on the walking 3D desk and on KHAN EYE.
     /// Not a live feed. Archives may be sharded under GitHub's 100 MB file cap.
     public static func attachAerialLayers(
@@ -1052,6 +1079,14 @@ public enum PackStyle {
                 }
                 return rank(lhs) < rank(rhs)
             }
+        let wanted = Set(names.map { String($0.dropLast(8)) })
+        for key in sources.keys where key.hasPrefix("aerial") && !wanted.contains(key) {
+            sources.removeValue(forKey: key)
+        }
+        layers.removeAll { layer in
+            let id = layer["id"] as? String ?? ""
+            return id.hasPrefix("aerial") && !wanted.contains(id)
+        }
         guard !names.isEmpty else { return }
         var insertAt = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }).map { $0 + 1 }
             ?? layers.count
@@ -1254,6 +1289,27 @@ public enum PackStyle {
         }
         layers.removeAll { $0["id"] as? String == waterDetailLabelsLayerID }
 
+        let overlayFile = packRoot.appendingPathComponent(overlayFileName)
+        if FileManager.default.fileExists(atPath: overlayFile.path) {
+            attachOverlaySource(&sources, packRoot: packRoot)
+            if !layers.contains(where: { $0["id"] as? String == waterDetailPointsLayerID }) {
+                layers.append([
+                    "id": waterDetailPointsLayerID,
+                    "type": "circle",
+                    "source": overlaySourceID,
+                    "source-layer": overlayWaterDetailLayer,
+                    "minzoom": WaterZoom.detailMinZoom,
+                    "paint": [
+                        "circle-color": waterInk,
+                        "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 2.6, 17, 5.2],
+                        "circle-stroke-color": silverInk,
+                        "circle-stroke-width": 1.1,
+                    ],
+                ])
+            }
+            return
+        }
+
         let detailFile = packRoot.appendingPathComponent("layers/water.geojson")
         guard FileManager.default.fileExists(atPath: detailFile.path) else { return }
         if var existing = sources[waterDetailSourceID] as? [String: Any] {
@@ -1337,6 +1393,48 @@ public enum PackStyle {
         _ layers: inout [[String: Any]],
         packRoot: URL
     ) {
+        let overlayFile = packRoot.appendingPathComponent(overlayFileName)
+        if FileManager.default.fileExists(atPath: overlayFile.path) {
+            attachOverlaySource(&sources, packRoot: packRoot)
+            let fill: [String: Any] = [
+                "id": groundWorkedFillLayerID,
+                "type": "fill",
+                "source": overlaySourceID,
+                "source-layer": overlayGroundLayer,
+                "minzoom": groundMinZoom,
+                "paint": [
+                    "fill-color": silverInk,
+                    "fill-opacity": 0.01,
+                ],
+            ]
+            let line: [String: Any] = [
+                "id": groundWorkedLineLayerID,
+                "type": "line",
+                "source": overlaySourceID,
+                "source-layer": overlayGroundLayer,
+                "minzoom": groundMinZoom,
+                "layout": [
+                    "line-cap": "round",
+                    "line-join": "round",
+                ],
+                "paint": [
+                    "line-color": silverInk,
+                    "line-opacity": 0.88,
+                    "line-width": 2.2,
+                ],
+            ]
+            if !layers.contains(where: { $0["id"] as? String == groundWorkedFillLayerID }) {
+                if let idx = layers.firstIndex(where: { $0["id"] as? String == landFillLayerID }) {
+                    layers.insert(fill, at: idx + 1)
+                } else {
+                    layers.append(fill)
+                }
+            }
+            if !layers.contains(where: { $0["id"] as? String == groundWorkedLineLayerID }) {
+                layers.append(line)
+            }
+            return
+        }
         let groundFile = packRoot.appendingPathComponent("layers/ground.geojson")
         guard FileManager.default.fileExists(atPath: groundFile.path) else { return }
         if var existing = sources[groundWorkedSourceID] as? [String: Any] {
@@ -1402,6 +1500,55 @@ public enum OverlaySync: Sendable {
         partyNeedsReapply: Bool = false
     ) -> Bool {
         force || puckNeedsReapply || routeNeedsReapply || destinationNeedsReapply || inspectNeedsReapply || partyNeedsReapply
+    }
+
+    public static func needsEyeLayerPass(
+        force: Bool,
+        lampFlip: Bool,
+        paletteFlip: Bool,
+        eyeFlip: Bool,
+        layersChanged: Bool
+    ) -> Bool {
+        force || lampFlip || paletteFlip || eyeFlip || layersChanged
+    }
+}
+
+public enum PersonMarkPaint: Sendable {
+    public static func quantizedHeading(_ heading: Double?) -> Int {
+        guard let heading, heading >= 0, heading.isFinite else { return -1 }
+        let stepped = (PersonCompass.normalized(heading) / FixPublish.minHeadingDelta).rounded()
+            * FixPublish.minHeadingDelta
+        return Int(stepped)
+    }
+
+    public static func needsImage(
+        force: Bool,
+        showYou: Bool,
+        lastShowYou: Bool?,
+        emblem: String,
+        lastEmblem: String?,
+        condition: String,
+        lastCondition: String?,
+        heading: Double?,
+        lastHeading: Double?,
+        pipKey: String,
+        lastPipKey: String?
+    ) -> Bool {
+        if force { return true }
+        if showYou != (lastShowYou ?? false) { return true }
+        if emblem != lastEmblem { return true }
+        if condition != lastCondition { return true }
+        if quantizedHeading(heading) != quantizedHeading(lastHeading) { return true }
+        if pipKey != lastPipKey { return true }
+        return false
+    }
+
+    public static func pipKey(_ pips: [PartyBody]) -> String {
+        pips.map { pip in
+            let heading = quantizedHeading(pip.ghost ? nil : pip.headingDeg)
+            return "\(pip.id)|\(pip.emblem)|\(pip.condition)|\(heading)|\(pip.markKind)|\(pip.lead)|\(pip.kid)"
+        }
+        .joined(separator: ";")
     }
 }
 

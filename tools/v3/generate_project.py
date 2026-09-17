@@ -380,18 +380,7 @@ def generate() -> None:
     )
 
     copy_script_raw = """set -e
-SRC="${SRCROOT}/Resources"
-DST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
-if [ ! -f "${SRC}/Packs/catalog.json" ]; then
-  echo "error: Resources/Packs/catalog.json missing" >&2
-  exit 1
-fi
-mkdir -p "${DST}"
-ditto "${SRC}" "${DST}"
-rm -rf "${DST}/Resources"
-test -f "${DST}/Packs/catalog.json"
-test -f "${DST}/Field/field.core.json"
-test -f "${DST}/Vision/labels.tx.json"
+bash "${SRCROOT}/tools/copy_resources.sh"
 """
     copy_script = copy_script_raw.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 

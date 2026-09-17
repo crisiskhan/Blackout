@@ -1884,44 +1884,37 @@ final class AppRuntime {
             bootStage = .failed("Packs missing from bundle — honest empty.")
             return
         }
-        let steps = Double(catalog.count * 2 + 1)
-        var done = 0.0
+        guard let active = store.active else {
+            bootStage = .failed("Packs missing from bundle — honest empty.")
+            return
+        }
+        bootStage = .loading(active.name.uppercased())
+        bootProgress = 0.2
+        let root = store.packRoot(id: active.id)
+        let style = root.appendingPathComponent("style.json")
+        bootStyleURL = try? PackStyle.resolved(styleAt: style, packRoot: root)
+        bootProgress = 0.45
+        let url = store.graphURL(for: active.id)
+        let waterURL = root.appendingPathComponent("layers/water.bin")
+        let graph = await Task.detached { RouteGraph.load(from: url) }.value
+        let water = await Task.detached { WaterIndex.load(from: waterURL) }.value
+        bootProgress = 0.85
+        prefetchField()
+        bootProgress = 1
         var loaded: [String: RouteGraph] = [:]
         var waters: [String: WaterIndex] = [:]
-        for pack in catalog {
-            bootStage = .loading(pack.name.uppercased())
-            let root = store.packRoot(id: pack.id)
-            let style = root.appendingPathComponent("style.json")
-            let resolved = try? PackStyle.resolved(styleAt: style, packRoot: root)
-            if pack.id == store.active?.id {
-                bootStyleURL = resolved
-            }
-            done += 1
-            bootProgress = done / steps
-            let url = store.graphURL(for: pack.id)
-            let waterURL = root.appendingPathComponent("layers/water.bin")
-            let graph = await Task.detached { RouteGraph.load(from: url) }.value
-            let water = await Task.detached { WaterIndex.load(from: waterURL) }.value
-            if let graph {
-                loaded[pack.id] = graph
-            }
-            if let water {
-                waters[pack.id] = water
-            }
-            done += 1
-            bootProgress = done / steps
+        if let graph {
+            loaded[active.id] = graph
         }
-        prefetchField()
-        done += 1
-        bootProgress = 1
+        if let water {
+            waters[active.id] = water
+        }
         graphsByPack = loaded
         watersByPack = waters
-        if let id = store.active?.id {
-            graphCache = loaded[id]
-            graphPackID = id
-            waterCache = waters[id]
-            waterPackID = id
-        }
+        graphCache = graph
+        graphPackID = active.id
+        waterCache = water
+        waterPackID = active.id
         let remain = BlackoutTokens.Chrome.bootMinSeconds - Date().timeIntervalSince(started)
         if remain > 0 {
             try? await Task.sleep(nanoseconds: UInt64(remain * 1_000_000_000))

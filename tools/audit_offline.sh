@@ -33,7 +33,7 @@ check_except() {
 }
 
 check_except 'URLSession' 'URLSession only UpdateSocket' 'UpdateSocket.swift'
-check_except 'WKWebView' 'WKWebView only GlobeView' 'GlobeView.swift'
+check 'WKWebView' 'no WKWebView'
 check 'FirebaseAnalytics|Amplitude|Mixpanel|TelemetryDeck|PostHog' 'no analytics SDKs'
 check 'CKContainer|NSPersistentCloudKitContainer' 'no CloudKit'
 check 'tel://911|telprompt:911' 'no auto-911'
@@ -55,11 +55,11 @@ else
   fail=1
 fi
 
-if [[ -f "$root/Resources/Globe/index.html" && -f "$root/Resources/Globe/Cesium/Cesium.js" ]]; then
-  echo "OK   Cesium globe pack"
-else
-  echo "FAIL Cesium globe pack"
+if [[ -e "$root/Resources/Globe" || -f "$root/Blackout/GlobeView.swift" ]]; then
+  echo "FAIL Cesium leftover"
   fail=1
+else
+  echo "OK   no Cesium leftover"
 fi
 
 python3 "$root/tools/validate_v3.py" || fail=1

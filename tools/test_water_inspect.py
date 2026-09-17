@@ -79,8 +79,9 @@ class ShippedWaterLayers(unittest.TestCase):
         for pid in PACKS:
             manifest = json.loads((PACK_ROOT / pid / "manifest.json").read_text())
             files = set(manifest["files"])
-            self.assertIn("layers/water.geojson", files, pid)
+            self.assertNotIn("layers/water.geojson", files, pid)
             self.assertIn("layers/water.bin", files, pid)
+            self.assertIn("overlay.pmtiles", files, pid)
             on_disk = sum(
                 (PACK_ROOT / pid / rel).stat().st_size
                 for rel in manifest["files"]
@@ -2402,7 +2403,8 @@ class ShippedWaterLayers(unittest.TestCase):
     def test_the_manifest_counts_the_ground_it_ships(self):
         for pid in PACKS:
             manifest = json.loads((PACK_ROOT / pid / "manifest.json").read_text())
-            self.assertIn("layers/ground.geojson", manifest["files"], pid)
+            self.assertNotIn("layers/ground.geojson", manifest["files"], pid)
+            self.assertIn("overlay.pmtiles", manifest["files"], pid)
 
     def test_regenerating_ground_from_the_shipped_osm_reproduces_the_shipped_bytes(self):
         for pid in PACKS:
@@ -3293,7 +3295,7 @@ class GroundFieldSync(unittest.TestCase):
         self.assertIn("groundWorkedFillLayerID", swift)
         self.assertIn("groundWorkedLineLayerID", swift)
         self.assertNotIn("edible", swift.lower())
-        self.assertIn("resolverVersion = 12", swift)
+        self.assertIn("resolverVersion = 13", swift)
 
     def test_a_hold_asks_the_overlay_source_and_the_glass_holds_real_sheets(self):
         """Faint fill and walking-zoom are for the eye. The hold still has to

@@ -8,26 +8,6 @@
       "url": "pmtiles://osm.pmtiles",
       "attribution": "© OpenStreetMap contributors"
     },
-    "contours": {
-      "type": "geojson",
-      "data": "contours.geojson"
-    },
-    "public-land": {
-      "type": "geojson",
-      "data": "layers/public_land.geojson"
-    },
-    "flood": {
-      "type": "geojson",
-      "data": "layers/flood.geojson"
-    },
-    "hazards": {
-      "type": "geojson",
-      "data": "layers/hazards.geojson"
-    },
-    "wild": {
-      "type": "geojson",
-      "data": "wild.geojson"
-    },
     "khan": {
       "type": "vector",
       "url": "pmtiles://khan.pmtiles",
@@ -132,6 +112,11 @@
           30.95
         ]
       ]
+    },
+    "overlay": {
+      "type": "vector",
+      "url": "pmtiles://overlay.pmtiles",
+      "attribution": "© OpenStreetMap contributors"
     }
   },
   "layers": [
@@ -389,30 +374,33 @@
     {
       "id": "public-land-fill",
       "type": "fill",
-      "source": "public-land",
+      "source": "overlay",
       "paint": {
         "fill-color": "#0C1810",
         "fill-opacity": 0.12
-      }
+      },
+      "source-layer": "public-land"
     },
     {
       "id": "public-land-line",
       "type": "line",
-      "source": "public-land",
+      "source": "overlay",
       "paint": {
         "line-color": "#2A3A28",
         "line-width": 1.2,
         "line-opacity": 0.55
-      }
+      },
+      "source-layer": "public-land"
     },
     {
       "id": "flood-fill",
       "type": "fill",
-      "source": "flood",
+      "source": "overlay",
       "paint": {
         "fill-color": "#0A2030",
         "fill-opacity": 0.22
-      }
+      },
+      "source-layer": "flood"
     },
     {
       "id": "water-fill",
@@ -600,12 +588,13 @@
     {
       "id": "contours",
       "type": "line",
-      "source": "contours",
+      "source": "overlay",
       "paint": {
         "line-color": "#3C4438",
         "line-width": 0.7,
         "line-opacity": 0.55
-      }
+      },
+      "source-layer": "contours"
     },
     {
       "id": "roads-casing",
@@ -873,7 +862,7 @@
     {
       "id": "wild-roads",
       "type": "line",
-      "source": "wild",
+      "source": "overlay",
       "filter": [
         "has",
         "highway"
@@ -881,16 +870,18 @@
       "paint": {
         "line-color": "#B8BDC2",
         "line-width": 2.6
-      }
+      },
+      "source-layer": "wild"
     },
     {
       "id": "hazards",
       "type": "line",
-      "source": "hazards",
+      "source": "overlay",
       "paint": {
         "line-color": "#E10600",
         "line-width": 1.4
-      }
+      },
+      "source-layer": "hazards"
     },
     {
       "id": "khan-buildings",

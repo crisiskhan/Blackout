@@ -404,7 +404,7 @@ def assert_source_geojson_stays_off_the_phone(pack_id: str) -> None:
         fail(f"{pack_id} manifest does not list osm.pmtiles")
     if "khan.pmtiles" not in files:
         fail(f"{pack_id} manifest does not list khan.pmtiles")
-    script = (ROOT / "Blackout.xcodeproj" / "project.pbxproj").read_text()
+    script = (ROOT / "tools" / "copy_resources.sh").read_text()
     if "--exclude 'Packs/*/osm.geojson'" not in script:
         fail("the resource copy step no longer excludes osm.geojson; the IPA would carry it again")
     if "--exclude 'Packs/*/khan.geojson'" not in script:

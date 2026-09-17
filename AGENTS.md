@@ -70,7 +70,8 @@ python3 tools/test_hud_quality.py
 
 `audit_offline.sh` runs `validate_v3.py`, which runs `test_graph_plan.py`,
 `test_walkable_next_pack.py`, `test_tx_west_style.py`, `test_voice_nav.py`,
-`test_speak_field.py`, `test_hud_quality.py` and `test_water_inspect.py`. That chain is the
+`test_speak_field.py`, `test_hud_quality.py`, `test_water_inspect.py` and
+`test_phone_trim.py`. That chain is the
 executable form of the "Locked (do not regress)" list every tip PR restates by hand.
 
 A new invariant ships as a new check in that chain, in the same commit as the behavior it
@@ -78,10 +79,10 @@ protects. If a guard is wrong, change the guard on purpose — do not route arou
 
 ## Fail closed
 
-The audit rejects `URLSession` except `UpdateSocket.swift`, `WKWebView` except
-`GlobeView.swift`, analytics SDKs, CloudKit, `MKMapView(`, `tel://911` and
+The audit rejects `URLSession` except `UpdateSocket.swift`, no WKWebView,
+analytics SDKs, CloudKit, `MKMapView(`, `tel://911` and
 coming-soon stub language anywhere under `Blackout/` or `Packages/`. Behind
-those greps: bundled Cesium globe + packed tiles, no Apple Maps or other live base map,
+those greps: packed MapLibre tiles, no Apple Maps or other live base map,
 no account, no backend except the UPDATE chip's one-shot SNAP. SOS logs before
 it arms and never auto-dials. Dark only. "Unknown" is a valid Vision answer.
 When a capability is unavailable, the UI says so — it never spins.

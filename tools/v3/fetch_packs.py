@@ -26,7 +26,7 @@ from shapely.geometry import Polygon, mapping
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from . import aerial, graphbin, ground, khan, search_index, tiles
+from . import aerial, graphbin, ground, khan, overlay, search_index, tiles
 from .common import ROOT, haversine_m, write_json
 
 OVERPASS_ENDPOINTS = [
@@ -1440,7 +1440,26 @@ def highway_in(values: list[str]) -> list:
 STAMP = "osm.fetched"
 # Build-time only. The extract is the tiler's input, and the date it carries
 # reaches the phone through the manifest rather than as a loose file.
-NOT_SHIPPED = {"osm.geojson", "khan.geojson", STAMP}
+NOT_SHIPPED = {
+    "osm.geojson",
+    "khan.geojson",
+    STAMP,
+    "metro.geojson",
+    "region.geojson",
+    "union.geojson",
+    "corridor.geojson",
+    "border.geojson",
+    "desk3d.geojson",
+    "pois.geojson",
+    "walk-dem.json",
+    "contours.geojson",
+    "wild.geojson",
+    "public_land.geojson",
+    "flood.geojson",
+    "hazards.geojson",
+    "ground.geojson",
+    "water.geojson",
+}
 
 
 def stamp_fetch(dest: Path) -> str:
@@ -1550,11 +1569,11 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             "url": "pmtiles://osm.pmtiles",
             "attribution": OSM_CREDIT,
         },
-        "contours": {"type": "geojson", "data": "contours.geojson"},
-        "public-land": {"type": "geojson", "data": "layers/public_land.geojson"},
-        "flood": {"type": "geojson", "data": "layers/flood.geojson"},
-        "hazards": {"type": "geojson", "data": "layers/hazards.geojson"},
-        "wild": {"type": "geojson", "data": "wild.geojson"},
+        "overlay": {
+            "type": "vector",
+            "url": "pmtiles://overlay.pmtiles",
+            "attribution": OSM_CREDIT,
+        },
         "khan": khan.style_source(),
     }
     aerial_names = aerial.shard_names(ROOT / "Resources" / "Packs" / pack_id)
@@ -1601,13 +1620,15 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             {
                 "id": "public-land-fill",
                 "type": "fill",
-                "source": "public-land",
+                "source": "overlay",
+                "source-layer": "public-land",
                 "paint": {"fill-color": "#0C1810", "fill-opacity": 0.12},
             },
             {
                 "id": "public-land-line",
                 "type": "line",
-                "source": "public-land",
+                "source": "overlay",
+                "source-layer": "public-land",
                 "paint": {
                     "line-color": "#2A3A28",
                     "line-width": 1.2,
@@ -1617,7 +1638,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             {
                 "id": "flood-fill",
                 "type": "fill",
-                "source": "flood",
+                "source": "overlay",
+                "source-layer": "flood",
                 "paint": {"fill-color": "#0A2030", "fill-opacity": 0.22},
             },
             {
@@ -1705,7 +1727,8 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             {
                 "id": "contours",
                 "type": "line",
-                "source": "contours",
+                "source": "overlay",
+                "source-layer": "contours",
                 "paint": {"line-color": "#3C4438", "line-width": 0.7, "line-opacity": 0.55},
             },
             {
@@ -1771,14 +1794,16 @@ def maplibre_style(pack_id: str, hillshade: dict | None = None) -> dict:
             {
                 "id": "wild-roads",
                 "type": "line",
-                "source": "wild",
+                "source": "overlay",
+                "source-layer": "wild",
                 "filter": ["has", "highway"],
                 "paint": {"line-color": SILVER_INK, "line-width": 2.6},
             },
             {
                 "id": "hazards",
                 "type": "line",
-                "source": "hazards",
+                "source": "overlay",
+                "source-layer": "hazards",
                 "paint": {"line-color": ACCENT_INK, "line-width": 1.4},
             },
         ]
@@ -2167,6 +2192,8 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
         n_glyphs = fetch_glyphs(dest / "glyphs")
         print(f"  glyphs {n_glyphs}", flush=True)
 
+    print(f"  overlay tiles {pack['id']}", flush=True)
+    overlay.write_overlay(dest)
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
@@ -2451,6 +2478,8 @@ def finalize_existing(dest: Path) -> dict:
         }
     n_glyphs = fetch_glyphs(dest / "glyphs")
     print(f"  glyphs {n_glyphs}", flush=True)
+    print(f"  overlay tiles {pack['id']}", flush=True)
+    overlay.write_overlay(dest)
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
