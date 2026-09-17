@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -96,11 +98,29 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         self.assertIn("collapse_style_aerial", phone)
         self.assertIn("writes the bundle copy", phone)
         self.assertIn("pack_phone.py", copy)
+        head = aerial.split("def ")[0]
+        self.assertNotIn("from .tiles import", head)
+        self.assertIn("all_tiles", aerial.split("def read_archive")[1].split("def style_source")[0])
         attach = swift.split("public static func attachAerialLayers")[1].split(
             "Packed OSM houses"
         )[0]
         self.assertIn("aerialFileName", attach)
         self.assertIn('hasPrefix("aerial")', attach)
+
+    def test_copy_phase_imports_without_mapbox_vector_tile(self):
+        # Unsigned compile and TestFlight run copy_resources.sh with the
+        # runner's python3. Only tools/third_party is on that PYTHONPATH.
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{ROOT / 'tools' / 'third_party'}:{ROOT / 'tools'}"
+        proc = subprocess.run(
+            [sys.executable, "-S", "-c", "import pack_phone"],
+            cwd=str(ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_repo_may_keep_shards_under_github_cap(self):
         from v3 import aerial as aerial_mod
