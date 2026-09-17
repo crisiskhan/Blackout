@@ -39,6 +39,16 @@ struct HeldAddress: Equatable {
     var marked = false
 }
 
+/// A packed public camera. The still is a SNAP, never a live pipe.
+struct HeldCam: Equatable {
+    var id: String
+    var name: String
+    var lat: Double
+    var lon: Double
+    var ink: String
+    var provider: String
+}
+
 /// Dark glass over the canvas. Tapping the dim map or dragging the card
 /// down puts it away. There is no SOS here and there never will be — SOS is a
 /// Comms button, and a thumb resting on a map is not a call for help.

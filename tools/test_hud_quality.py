@@ -1026,6 +1026,7 @@ class HUDSyncTests(unittest.TestCase):
             "PartyHoldCard.swift",
             "EmblemPickCard.swift",
             "AddressHoldCard.swift",
+            "CamHoldCard.swift",
             "SOSHold.swift",
             "InstrumentsView.swift",
             "RootChrome.swift",
@@ -2529,6 +2530,7 @@ class HUDSeductionTests(unittest.TestCase):
             "PartyHoldCard.swift",
             "EmblemPickCard.swift",
             "AddressHoldCard.swift",
+            "CamHoldCard.swift",
             "CommsTab.swift",
             "FieldTab.swift",
             "ExpeditionTab.swift",
@@ -4187,7 +4189,7 @@ class MapCanvasHonestyTests(unittest.TestCase):
         self.assertIn("khan.pmtiles", cam)
         self.assertIn("aerial.pmtiles", cam)
         self.assertIn('"type": "fill-extrusion"', cam)
-        self.assertIn("resolverVersion = 13", cam)
+        self.assertIn("resolverVersion = 14", cam)
         interact = offline.split("private func applyInteraction")[1].split("private var overlaySpec")[0]
         self.assertNotIn("setDirection(PackCamera.godsEyeHeading", interact)
         self.assertIn("`KHAN EYE`", qa)
@@ -4262,6 +4264,7 @@ class GlassCardHonestyTests(unittest.TestCase):
         "AddressHoldCard.swift",
         "PlaceMarkCard.swift",
         "EmblemPickCard.swift",
+        "CamHoldCard.swift",
     )
 
     def test_overlay_cards_share_hold_glass(self):
@@ -4336,6 +4339,7 @@ class FacetedMetalHUDTests(unittest.TestCase):
         "PartyHoldCard.swift",
         "AddressHoldCard.swift",
         "EmblemPickCard.swift",
+        "CamHoldCard.swift",
         "SpeakTurnCard.swift",
         "SOSHold.swift",
         "InstrumentsView.swift",
@@ -4439,6 +4443,8 @@ class FacetedMetalHUDTests(unittest.TestCase):
         self.assertIn("HoldGlassShell(", party)
         address = read("Blackout", "AddressHoldCard.swift")
         self.assertIn("HoldGlassShell(", address)
+        cam = read("Blackout", "CamHoldCard.swift")
+        self.assertIn("HoldGlassShell(", cam)
         pick = read("Blackout", "EmblemPickCard.swift")
         self.assertIn("HoldGlassShell(", pick)
         turns = read("Blackout", "SpeakTurnCard.swift")

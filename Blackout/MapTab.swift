@@ -70,6 +70,7 @@ struct MapTab: View {
                     destination: runtime.routeTarget,
                     held: runtime.held.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.heldAddress.map { (lat: $0.lat, lon: $0.lon) }
+                        ?? runtime.heldCam.map { (lat: $0.lat, lon: $0.lon) }
                         ?? runtime.markDraft.map { (lat: $0.lat, lon: $0.lon) },
                     fitToken: runtime.fitPackToken,
                     trackUser: true,
@@ -114,7 +115,14 @@ struct MapTab: View {
                     trails: runtime.godsEye ? runtime.eyeTrails() : [],
                     rings: runtime.godsEye ? runtime.eyeRings() : [],
                     frameExtra: runtime.godsEye ? runtime.eyeFrameWater() : [],
-                    offAerial: !runtime.packHasAerial
+                    offAerial: !runtime.packHasAerial,
+                    onCctvHold: { id, lat, lon in
+                        runtime.holdCam(id: id, lat: lat, lon: lon)
+                    },
+                    onCctvTap: { id, lat, lon in
+                        runtime.holdCam(id: id, lat: lat, lon: lon)
+                    },
+                    cams: runtime.packCams.map { CctvMark(id: $0.id, lat: $0.lat, lon: $0.lon) }
                 )
                 .ignoresSafeArea()
                 .transaction { $0.animation = nil }
@@ -128,7 +136,7 @@ struct MapTab: View {
                 hud(packName: pack.name, offPack: offPack)
                     .padding(hudReserve)
             }
-            if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
+            if runtime.tab == .map, runtime.godsEye, runtime.heldParty == nil, runtime.held == nil, runtime.heldCam == nil, runtime.markDraft == nil, let tap = runtime.eyeTap {
                 EyeTapStrip(
                     person: tap,
                     onCall: { runtime.callEyeTap() },
@@ -168,6 +176,9 @@ struct MapTab: View {
                     )
                     .padding(hudReserve)
                 }
+            } else if runtime.tab == .map, let cam = runtime.heldCam {
+                CamHoldCard(runtime: runtime, cam: cam)
+                    .padding(hudReserve)
             } else if runtime.tab == .map, let address = runtime.heldAddress {
                 AddressHoldCard(
                     address: address,
@@ -194,6 +205,7 @@ struct MapTab: View {
         .animation(Theme.Motion.heavy, value: runtime.held)
         .animation(Theme.Motion.heavy, value: runtime.heldParty)
         .animation(Theme.Motion.heavy, value: runtime.heldAddress)
+        .animation(Theme.Motion.heavy, value: runtime.heldCam)
         .animation(Theme.Motion.heavy, value: runtime.pickingEmblem)
         .animation(Theme.Motion.heavy, value: runtime.markDraft)
         .animation(Theme.Motion.heavy, value: runtime.showSpeakTurns)
@@ -203,6 +215,7 @@ struct MapTab: View {
         runtime.held != nil
             || runtime.heldParty != nil
             || runtime.heldAddress != nil
+            || runtime.heldCam != nil
             || runtime.markDraft != nil
             || runtime.heldMark != nil
     }

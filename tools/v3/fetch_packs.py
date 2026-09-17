@@ -2194,6 +2194,9 @@ def fetch_pack(pack: dict, dest: Path) -> dict:
 
     print(f"  overlay tiles {pack['id']}", flush=True)
     overlay.write_overlay(dest)
+    from . import cams as pack_cams
+
+    pack_cams.write_cams(dest)
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})
@@ -2480,6 +2483,9 @@ def finalize_existing(dest: Path) -> dict:
     print(f"  glyphs {n_glyphs}", flush=True)
     print(f"  overlay tiles {pack['id']}", flush=True)
     overlay.write_overlay(dest)
+    from . import cams as pack_cams
+
+    pack_cams.write_cams(dest)
     write_json(dest / "style.json", maplibre_style(pack["id"], hillshade_meta if hillshade_meta.get("present") else None))
     pois = [f for f in fc["features"] if f["geometry"]["type"] == "Point"]
     write_compact(dest / "pois.geojson", {"type": "FeatureCollection", "features": pois[:800], "attribution": OSM_CREDIT})

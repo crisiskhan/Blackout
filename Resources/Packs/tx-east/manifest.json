@@ -125,6 +125,7 @@
     "aerial-1.pmtiles",
     "aerial-2.pmtiles",
     "aerial.pmtiles",
+    "cameras.json",
     "dem.json",
     "glyphs/Open Sans Regular/0-255.pbf",
     "glyphs/Open Sans Regular/256-511.pbf",
@@ -141,5 +142,5 @@
     "search.json",
     "style.json"
   ],
-  "bytes": 313578233
+  "bytes": 313827780
 }

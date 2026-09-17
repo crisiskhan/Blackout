@@ -539,6 +539,22 @@ if [ -z "${IPA:-}" ] || [ ! -f "$IPA" ]; then
   exit 1
 fi
 ls -la "$IPA"
+# tf-173 CPV 147 IPA 3521459907 VALID. tf-174 CPV 148 IPA 4212485648 and
+# tf-176 CPV 149 IPA 4207460012 uploaded then ASC INVALID. Stay under 4e9.
+python3 - "$IPA" <<'PY'
+import sys
+from pathlib import Path
+
+ipa = Path(sys.argv[1])
+limit = 4_000_000_000
+size = ipa.stat().st_size
+print(f"IPA bytes={size} limit={limit}")
+if size >= limit:
+    raise SystemExit(
+        f"IPA {size} bytes is at/over Apple's 4 GB ceiling. "
+        "tf-174/176 uploaded then INVALID. No upload."
+    )
+PY
 if unzip -l "$IPA" | grep -qiE 'Payload/Blackout\.app/Watch/|\.watchkitapp|BlackoutWatch\.app'; then
   echo "IPA still embeds Watch. altool would require ASC watchkitapp. No upload."
   unzip -l "$IPA" | grep -iE 'Watch/|watchkitapp|BlackoutWatch' || true

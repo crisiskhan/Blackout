@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -94,13 +97,69 @@ class OneAerialOnPhoneTests(unittest.TestCase):
         self.assertIn("def merge_phone_archives", aerial)
         self.assertIn("merge_phone_archives", phone)
         self.assertIn("collapse_style_aerial", phone)
+        self.assertIn("def strip_style_aerial", phone)
         self.assertIn("writes the bundle copy", phone)
         self.assertIn("pack_phone.py", copy)
+        self.assertIn("--exclude 'Packs/nm/aerial*.pmtiles'", copy)
+        self.assertIn('test ! -f "${DST}/Packs/nm/aerial.pmtiles"', copy)
+        self.assertNotIn("--exclude 'Packs/tx-west/aerial", copy)
+        self.assertIn("if merged is None", phone)
+        head = aerial.split("def ")[0]
+        self.assertNotIn("from .tiles import", head)
+        self.assertIn("all_tiles", aerial.split("def read_archive")[1].split("def style_source")[0])
         attach = swift.split("public static func attachAerialLayers")[1].split(
             "Packed OSM houses"
         )[0]
         self.assertIn("aerialFileName", attach)
         self.assertIn('hasPrefix("aerial")', attach)
+        self.assertIn("resolverVersion = 14", swift)
+
+    def test_phone_style_drops_aerial_when_the_archive_is_off_the_phone(self):
+        from pack_phone import pack_phone
+
+        style = {
+            "sources": {
+                "osm": {"type": "vector", "url": "pmtiles://osm.pmtiles"},
+                "aerial": {"type": "raster", "url": "pmtiles://aerial.pmtiles"},
+                "aerial-1": {"type": "raster", "url": "pmtiles://aerial-1.pmtiles"},
+            },
+            "layers": [
+                {"id": "land-fill", "type": "background"},
+                {"id": "aerial", "type": "raster", "source": "aerial"},
+                {"id": "aerial-1", "type": "raster", "source": "aerial-1"},
+                {"id": "road", "type": "line", "source": "osm"},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp)
+            pack = dest / "Packs" / "nm"
+            pack.mkdir(parents=True)
+            (pack / "style.json").write_text(json.dumps(style))
+            pack_phone(dest)
+            out = json.loads((pack / "style.json").read_text())
+        self.assertNotIn("aerial", out["sources"])
+        self.assertNotIn("aerial-1", out["sources"])
+        self.assertIn("osm", out["sources"])
+        ids = [item["id"] for item in out["layers"]]
+        self.assertNotIn("aerial", ids)
+        self.assertNotIn("aerial-1", ids)
+        self.assertIn("land-fill", ids)
+        self.assertIn("road", ids)
+
+    def test_copy_phase_imports_without_mapbox_vector_tile(self):
+        # Unsigned compile and TestFlight run copy_resources.sh with the
+        # runner's python3. Only tools/third_party is on that PYTHONPATH.
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{ROOT / 'tools' / 'third_party'}:{ROOT / 'tools'}"
+        proc = subprocess.run(
+            [sys.executable, "-S", "-c", "import pack_phone"],
+            cwd=str(ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_repo_may_keep_shards_under_github_cap(self):
         from v3 import aerial as aerial_mod
@@ -160,7 +219,9 @@ class PauseOffMapTests(unittest.TestCase):
         )[0]
         self.assertIn("interactive", chrome)
         self.assertIn("preferredFramesPerSecond", chrome)
-        self.assertIn("MLNMapViewPreferredFramesPerSecondDefault", chrome)
+        self.assertIn("MLNMapViewPreferredFramesPerSecond.default", chrome)
+        self.assertIn("MLNMapViewPreferredFramesPerSecond(rawValue: 1)", chrome)
+        self.assertNotIn("\n            : 1\n", chrome)
 
 
 class OverlayTilesTests(unittest.TestCase):

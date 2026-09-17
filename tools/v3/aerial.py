@@ -20,8 +20,6 @@ from pmtiles.reader import MmapSource, Reader, all_tiles
 from pmtiles.tile import Compression, TileType, zxy_to_tileid
 from pmtiles.writer import Writer
 
-from .tiles import tile_bounds, tile_range
-
 NAIP_EXPORT = (
     "https://imagery.nationalmap.gov/arcgis/rest/services/"
     "USGSNAIPImagery/ImageServer/exportImage"
@@ -156,23 +154,13 @@ def shard_names(dest: Path) -> list[str]:
 
 
 def read_archive(path: Path) -> dict[tuple[int, int, int], bytes]:
+    # Walk the PMTiles directory. Do not import tiles.py here: that module
+    # pulls mapbox_vector_tile, which the copy-resources python3 does not have.
     got: dict[tuple[int, int, int], bytes] = {}
     with open(path, "rb") as fh:
-        reader = Reader(MmapSource(fh))
-        header = reader.header()
-        bbox = {
-            "west": header["min_lon_e7"] / 1e7,
-            "south": header["min_lat_e7"] / 1e7,
-            "east": header["max_lon_e7"] / 1e7,
-            "north": header["max_lat_e7"] / 1e7,
-        }
-        for z in range(int(header["min_zoom"]), int(header["max_zoom"]) + 1):
-            x0, y0, x1, y1 = tile_range(bbox, z)
-            for x in range(x0, x1 + 1):
-                for y in range(y0, y1 + 1):
-                    blob = reader.get(z, x, y)
-                    if blob:
-                        got[(z, x, y)] = blob
+        for zxy, blob in all_tiles(MmapSource(fh)):
+            if blob:
+                got[zxy] = blob
     return got
 
 
@@ -235,6 +223,8 @@ def _http_jpeg(url: str, timeout: int = 90) -> bytes | None:
 
 
 def fetch_tile_jpeg(z: int, x: int, y: int) -> bytes | None:
+    from .tiles import tile_bounds
+
     west, south, east, north = tile_bounds(z, x, y)
     qs = urllib.parse.urlencode(
         {
@@ -250,6 +240,8 @@ def fetch_tile_jpeg(z: int, x: int, y: int) -> bytes | None:
 
 
 def wanted_tiles(bbox: dict, z0: int, z1: int) -> list[tuple[int, int, int]]:
+    from .tiles import tile_range
+
     out: list[tuple[int, int, int]] = []
     for z in range(z0, z1 + 1):
         x0, y0, x1, y1 = tile_range(bbox, z)

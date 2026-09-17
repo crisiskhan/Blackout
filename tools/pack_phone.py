@@ -13,6 +13,24 @@ sys.path.insert(0, str(ROOT / "tools"))
 from v3 import aerial  # noqa: E402
 
 
+def strip_style_aerial(style_path: Path) -> None:
+    """NM photo stays in git. The phone copy must not name a missing archive."""
+    if not style_path.is_file():
+        return
+    style = json.loads(style_path.read_text())
+    sources = style.get("sources") or {}
+    for key in list(sources):
+        if key.startswith("aerial"):
+            del sources[key]
+    style["sources"] = sources
+    style["layers"] = [
+        item
+        for item in (style.get("layers") or [])
+        if not str(item.get("id") or "").startswith("aerial")
+    ]
+    style_path.write_text(json.dumps(style, ensure_ascii=False, indent=2) + "\n")
+
+
 def collapse_style_aerial(style_path: Path) -> None:
     if not style_path.is_file():
         return
@@ -42,8 +60,12 @@ def pack_phone(dst: Path) -> None:
     if not packs.is_dir():
         return
     for dest in sorted(p for p in packs.iterdir() if p.is_dir()):
-        aerial.merge_phone_archives(dest)
-        collapse_style_aerial(dest / "style.json")
+        merged = aerial.merge_phone_archives(dest)
+        style = dest / "style.json"
+        if merged is None and not (dest / aerial.AERIAL_FILE).is_file():
+            strip_style_aerial(style)
+            continue
+        collapse_style_aerial(style)
 
 
 def main() -> None:

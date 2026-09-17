@@ -230,6 +230,7 @@ public enum Inspect {
         HoldPin.ringLayerID, HoldPin.coreLayerID,
         PartyPips.haloLayerID, PartyPips.coreLayerID, PartyPips.markLayerID,
         EyeDesk.tailsLayerID, EyeDesk.ringsLayerID,
+        CctvMarks.layerID,
     ]
 
     // Core Field cards, which every state ships, so a hold can never open a

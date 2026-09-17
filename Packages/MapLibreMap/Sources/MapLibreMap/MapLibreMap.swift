@@ -513,6 +513,26 @@ public enum UserPuck {
     }
 }
 
+/// Packed CCTV access. Split red/blue disc on the desk. Stills SNAP, never a stream.
+public enum CctvMarks {
+    public static let sourceID = "cctv-src"
+    public static let layerID = "cctv-mark"
+    public static let imageName = "cctv-dot"
+    public static let snapCap = 16
+}
+
+public struct CctvMark: Equatable, Sendable {
+    public var id: String
+    public var lat: Double
+    public var lon: Double
+
+    public init(id: String, lat: Double, lon: Double) {
+        self.id = id
+        self.lat = lat
+        self.lon = lon
+    }
+}
+
 public enum PackCamera {
     public static let edgePaddingPoints: Double = 28
     /// HUD chrome around a plotted line so DEST is not under the dock.
@@ -818,8 +838,9 @@ public enum PackStyle {
         public static let sunInkHex = "#141414"
     public static let glyphTokens = ["{fontstack}", "{range}"]
     /// Bump when the resolver changes: a phone that already cached a resolved style must
-    /// not keep replaying it. v13 merges sharded NAIP on the phone and reads overlay tiles.
-    public static let resolverVersion = 13
+    /// not keep replaying it. v14 strips missing NAIP so a 147→150 upgrade cannot
+    /// keep file:// URLs to aerial archives the IPA no longer ships.
+    public static let resolverVersion = 14
 
     private static var resolvedMemory: [String: URL] = [:]
 
