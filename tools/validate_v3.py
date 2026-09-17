@@ -1288,6 +1288,8 @@ def main() -> None:
     cesium_globe()
     hud_quality()
     water_inspect()
+    field_ask()
+    survival_ask()
     phone_trim()
     cctv_stills()
     sys.exit(fail)
@@ -1454,6 +1456,34 @@ def hud_quality() -> None:
         bad(f"HUD quality contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: HUD quality — whole words, every tab, keep Map, quiet bearing")
+
+
+def field_ask() -> None:
+    """FIELD SEARCH ranks the packed book. A miss opens a live walk."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_field_ask.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"FIELD ASK contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: FIELD ASK — book first, live walk, never edible")
+
+
+def survival_ask() -> None:
+    """Any survival question opens the right first move. Airplane only."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_survival_ask.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"survival ASK contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: survival ASK — timely first move, vision stills, ring 3")
 
 
 def water_inspect() -> None:

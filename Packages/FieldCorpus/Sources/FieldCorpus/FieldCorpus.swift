@@ -207,6 +207,9 @@ public enum FieldCorpus {
         ("bleeding out", "bleed"),
         ("sangrando", "bleed"),
         ("heat stroke", "heat"),
+        ("heatstroke", "heat"),
+        ("sunstroke", "heat"),
+        ("sun stroke", "heat"),
         ("too hot", "heat"),
         ("soaking wet", "cold"),
         ("cant walk", "carry"),
@@ -247,9 +250,11 @@ public enum FieldCorpus {
         ("food stuck", "choke"),
         ("swallowed wrong", "choke"),
         ("se ahoga", "choke"),
-        ("allergic", "choke"),
-        ("anaphylaxis", "choke"),
-        ("epipen", "choke"),
+        ("allergic", "allergy"),
+        ("allergic reaction", "allergy"),
+        ("anaphylaxis", "allergy"),
+        ("epipen", "allergy"),
+        ("epi pen", "allergy"),
         ("wheres camp", "lost"),
         ("where is camp", "lost"),
         ("cant find camp", "lost"),
@@ -260,13 +265,60 @@ public enum FieldCorpus {
         ("drink this", "thirst"),
         ("head wound", "bleed"),
         ("me cai", "spine"),
-        ("chest hurts", "heart"),
-        ("chest pain", "heart"),
-        ("heart attack", "heart"),
-        ("dolor de pecho", "heart"),
+        ("chest hurts", "cardiac"),
+        ("chest pain", "cardiac"),
+        ("heart attack", "cardiac"),
+        ("dolor de pecho", "cardiac"),
+        ("ataque al corazon", "cardiac"),
         ("mountain lion", "lion"),
         ("cougar", "lion"),
         ("puma", "lion"),
+        ("stay warm", "cold"),
+        ("keep warm", "cold"),
+        ("stay cool", "heat"),
+        ("keep cool", "heat"),
+        ("im freezing", "cold"),
+        ("freezing", "cold"),
+        ("too cold", "cold"),
+        ("get rescued", "signal"),
+        ("rescue me", "signal"),
+        ("how do i get rescued", "signal"),
+        ("drowning", "drown"),
+        ("drowned", "drown"),
+        ("under water", "drown"),
+        ("in shock", "shock"),
+        ("going into shock", "shock"),
+        ("seizure", "seizure"),
+        ("seizing", "seizure"),
+        ("convulsion", "seizure"),
+        ("snow blindness", "glare"),
+        ("snow blind", "glare"),
+        ("nosebleed", "nose"),
+        ("nose bleed", "nose"),
+        ("tornado", "tornado"),
+        ("twister", "tornado"),
+        ("in my eye", "eye"),
+        ("something in my eye", "eye"),
+        ("stroke", "stroke"),
+        ("slurred speech", "stroke"),
+        ("face droop", "stroke"),
+        ("one side limp", "stroke"),
+        ("hit my head", "head"),
+        ("head injury", "head"),
+        ("concussion", "head"),
+        ("swallowed bleach", "poison"),
+        ("drank bleach", "poison"),
+        ("swallowed poison", "poison"),
+        ("ate poison", "poison"),
+        ("overdose", "poison"),
+        ("asthma", "asthma"),
+        ("inhaler", "asthma"),
+        ("wheezing", "asthma"),
+        ("avalanche", "avalanche"),
+        ("buried in snow", "avalanche"),
+        ("rip current", "rip"),
+        ("undertow", "rip"),
+        ("thunderstorm", "lightning"),
     ]
 
     private static func hasPhrase(_ hay: String, _ needle: String) -> Bool {
@@ -342,6 +394,37 @@ public enum FieldCorpus {
                 continue
             }
             if qTokens.contains("burn") && card.category == "fire" { continue }
+            // Heart attack is not panic breathing. Shock is not an airway
+            // lecture. Stay warm is the cold card, not stay-or-go.
+            if expanded.contains("cardiac") { continue }
+            if expanded.contains("drown") { continue }
+            if expanded.contains("seizure") { continue }
+            if expanded.contains("tornado") { continue }
+            if expanded.contains("nose") { continue }
+            if expanded.contains("shock") && !expanded.contains("choke") { continue }
+            if expanded.contains("eye") && !expanded.contains("glare") { continue }
+            if expanded.contains("allergy") { continue }
+            if expanded.contains("stroke") && !expanded.contains("heat") { continue }
+            if expanded.contains("poison")
+                && !expanded.contains("ivy")
+                && !expanded.contains("oak")
+                && !expanded.contains("sumac")
+            {
+                continue
+            }
+            if expanded.contains("asthma") { continue }
+            if expanded.contains("avalanche") { continue }
+            if expanded.contains("rip") { continue }
+            if expanded.contains("head")
+                && !expanded.contains("bleed")
+                && !qTokens.contains("wound")
+            {
+                continue
+            }
+            if (qTokens.contains("warm") || qTokens.contains("cool")) && card.id == "tact-staygo" {
+                continue
+            }
+            if qTokens.contains("tick") && card.id == "animal-bite" { continue }
             let titleTok = Set(tokens(card.title.en) + tokens(card.title.es))
             let idTok = Set(tokens(card.id.replacingOccurrences(of: "-", with: " ")))
             let catTok = Set(tokens(card.category))
@@ -364,6 +447,25 @@ public enum FieldCorpus {
             if qTokens.contains("wool") && card.id == "camp-layers" { score += 25 }
             if qTokens.contains("lost") && card.id == "nav-lost" { score += 25 }
             if qTokens.contains("burn") && card.id == "med-burn" { score += 25 }
+            if qTokens.contains("tick") && card.id == "env-insect" { score += 25 }
+            if (expanded.contains("heat") || qTokens.contains("cool")) && card.id == "env-heat-collapse" {
+                score += 25
+            }
+            if (expanded.contains("cold") || qTokens.contains("warm") || qTokens.contains("freezing"))
+                && card.id == "env-cold"
+            {
+                score += 25
+            }
+            if qTokens.contains("deer")
+                && (card.id == "tx-mammal" || card.id == "tx-east-mammal" || card.id == "nm-mammal")
+            {
+                score += 25
+            }
+            if expanded.contains("signal")
+                && (card.id == "sig-mirror" || card.id == "sig-ground")
+            {
+                score += 25
+            }
             let preferredTitle = Set(tokens(preferEs ? card.title.es : card.title.en))
             score += Double(expanded.intersection(preferredTitle).count) * 3
             if qTokens.count >= 2 {
@@ -457,6 +559,7 @@ public enum FieldCorpus {
         "where", "when", "why", "can", "with", "from", "this", "that", "it",
         "if", "not", "no", "yes", "am", "are", "was", "have", "has", "any",
         "someone", "somebody", "please", "hes", "shes", "theyre",
+        "they", "them", "their", "something",
         "el", "la", "los", "las", "de", "un", "una", "y", "o", "que", "en",
         "es", "se", "te", "lo", "al", "del", "para", "por", "con", "como",
         "mi", "tu", "su",
@@ -526,6 +629,17 @@ public enum FieldCorpus {
         "dehydrated": ["thirst"],
         "knee": ["fracture"],
         "sunburn": ["burn"],
+        "cardiac": ["chest"],
+        "freezing": ["cold"],
+        "rescued": ["rescue", "signal"],
+        "deer": ["mammal"],
+        "tornado": ["storm"],
+        "nosebleed": ["nose"],
+        "allergy": ["allergic", "anaphylaxis"],
+        "stroke": ["face", "slurred"],
+        "asthma": ["inhaler", "wheeze"],
+        "avalanche": ["snow", "bury"],
+        "thunderstorm": ["lightning", "thunder"],
     ]
 
     /// Card ids to raise when the query names a situation the title omitted.
@@ -752,8 +866,12 @@ public enum FieldCorpus {
         "compass": ["nav-compass"],
         "sleep": ["camp-sleep"],
         "panic": ["tact-breathe"],
-        "heart": ["tact-breathe"],
         "breathe": ["tact-breathe", "med-airway"],
+        "deer": ["tx-mammal", "tx-east-mammal", "nm-mammal"],
+        "freezing": ["env-cold"],
+        "rescued": ["sig-mirror", "sig-ground"],
+        "warm": ["env-cold"],
+        "cool": ["env-heat-collapse"],
         "alcohol": ["med-booze"],
         "booze": ["med-booze"],
         "weather": ["env-sky"],

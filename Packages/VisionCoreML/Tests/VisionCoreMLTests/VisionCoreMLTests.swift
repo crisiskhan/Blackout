@@ -234,6 +234,68 @@ final class VisionCoreMLTests: XCTestCase {
         XCTAssertFalse(g.edible)
     }
 
+    func testWildfireIsFireLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.8),
+                VisionObservation(identifier: "Wildfire", confidence: 0.4),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "FIRE")
+        XCTAssertEqual(g.labelId, "kind:fire")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+    }
+
+    func testFloodBeatsATreeOnTheSameStill() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.9),
+                VisionObservation(identifier: "Flood", confidence: 0.35),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "FLOOD")
+        XCTAssertEqual(g.labelId, "kind:flood")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testLightningIsLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Lightning", confidence: 0.8)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "LIGHTNING")
+        XCTAssertEqual(g.labelId, "kind:lightning")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+    }
+
+    func testCampfireIsNotFire() {
+        let g = VisionCoreML.classify(
+            observations: [VisionObservation(identifier: "Campfire", confidence: 0.9)],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "UNKNOWN")
+        XCTAssertNotEqual(g.labelId, "kind:fire")
+        XCTAssertFalse(g.edible)
+    }
+
+    func testLacerationIsWoundLeaveIt() {
+        let g = VisionCoreML.classify(
+            observations: [
+                VisionObservation(identifier: "Tree", confidence: 0.8),
+                VisionObservation(identifier: "Laceration", confidence: 0.4),
+            ],
+            book: txBook()
+        )
+        XCTAssertEqual(g.name, "WOUND")
+        XCTAssertEqual(g.labelId, "kind:wound")
+        XCTAssertTrue(g.leaveIt)
+        XCTAssertFalse(g.edible)
+    }
+
     func testHedgehogIsNotAMammal() {
         let g = VisionCoreML.classify(
             observations: [VisionObservation(identifier: "Hedgehog", confidence: 0.9)],

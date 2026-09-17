@@ -133,11 +133,18 @@ public enum VisionCoreML {
         switch kindRank(guess) {
         case .fungi: return 50
         case .snake: return 40
+        case .wound: return 39
         case .sting: return 38
+        case .fire: return 37
         case .gator: return 36
         case .cactus: return 35
+        case .flood: return 34
+        case .lightning: return 33
         case .water: return 32
+        case .smoke: return 31
         case .specific: return 30
+        case .ice: return 29
+        case .shelter: return 28
         case .tree: return 10
         }
     }
@@ -145,11 +152,18 @@ public enum VisionCoreML {
     private enum KindRank {
         case fungi
         case snake
+        case wound
         case sting
+        case fire
         case gator
         case cactus
+        case flood
+        case lightning
         case water
+        case smoke
         case specific
+        case ice
+        case shelter
         case tree
     }
 
@@ -163,6 +177,13 @@ public enum VisionCoreML {
         case sting
         case gator
         case water
+        case fire
+        case flood
+        case ice
+        case smoke
+        case lightning
+        case shelter
+        case wound
     }
 
     private static func kindRank(_ guess: VisionGuess) -> KindRank {
@@ -194,6 +215,27 @@ public enum VisionCoreML {
         if guess.name == "WATER" || id == "kind:water" {
             return .water
         }
+        if guess.name == "FIRE" || id == "kind:fire" || id.contains("wildfire") {
+            return .fire
+        }
+        if guess.name == "FLOOD" || id == "kind:flood" {
+            return .flood
+        }
+        if guess.name == "ICE" || id == "kind:ice" {
+            return .ice
+        }
+        if guess.name == "SMOKE" || id == "kind:smoke" {
+            return .smoke
+        }
+        if guess.name == "LIGHTNING" || id == "kind:lightning" {
+            return .lightning
+        }
+        if guess.name == "SHELTER" || id == "kind:shelter" {
+            return .shelter
+        }
+        if guess.name == "WOUND" || id == "kind:wound" || id.contains("bleed") {
+            return .wound
+        }
         if id == "kind:tree" || guess.name == "TREE" {
             return .tree
         }
@@ -214,6 +256,18 @@ public enum VisionCoreML {
             g.leaveIt = true
         }
         if g.labelId.contains("gator") || g.name == "GATOR" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("fire") || g.name == "FIRE" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("smoke") || g.name == "SMOKE" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("lightning") || g.name == "LIGHTNING" {
+            g.leaveIt = true
+        }
+        if g.labelId.contains("wound") || g.name == "WOUND" {
             g.leaveIt = true
         }
         return g
@@ -271,6 +325,20 @@ public enum VisionCoreML {
                     return gatorGuess()
                 case .water:
                     return waterGuess()
+                case .fire:
+                    return namedGuess("kind:fire", "FIRE", leaveIt: true)
+                case .flood:
+                    return namedGuess("kind:flood", "FLOOD", leaveIt: false)
+                case .ice:
+                    return namedGuess("kind:ice", "ICE", leaveIt: false)
+                case .smoke:
+                    return namedGuess("kind:smoke", "SMOKE", leaveIt: true)
+                case .lightning:
+                    return namedGuess("kind:lightning", "LIGHTNING", leaveIt: true)
+                case .shelter:
+                    return namedGuess("kind:shelter", "SHELTER", leaveIt: false)
+                case .wound:
+                    return namedGuess("kind:wound", "WOUND", leaveIt: true)
                 case .fungi:
                     return fungiGuess(book, locale: locale)
                 case .cactus, .cactiYucca, .mammal, .tree:
@@ -333,6 +401,20 @@ public enum VisionCoreML {
             return gatorGuess()
         case .water:
             return waterGuess()
+        case .fire:
+            return namedGuess("kind:fire", "FIRE", leaveIt: true)
+        case .flood:
+            return namedGuess("kind:flood", "FLOOD", leaveIt: false)
+        case .ice:
+            return namedGuess("kind:ice", "ICE", leaveIt: false)
+        case .smoke:
+            return namedGuess("kind:smoke", "SMOKE", leaveIt: true)
+        case .lightning:
+            return namedGuess("kind:lightning", "LIGHTNING", leaveIt: true)
+        case .shelter:
+            return namedGuess("kind:shelter", "SHELTER", leaveIt: false)
+        case .wound:
+            return namedGuess("kind:wound", "WOUND", leaveIt: true)
         case .cactus, .cactiYucca, .mammal, .tree:
             let names = labels.map { $0.displayName(locale).uppercased() }
             let extras = labels.flatMap { $0.lookalikes.map(lookalikeWord) }
@@ -414,6 +496,18 @@ public enum VisionCoreML {
         )
     }
 
+    private static func namedGuess(_ id: String, _ name: String, leaveIt: Bool) -> VisionGuess {
+        VisionGuess(
+            labelId: id,
+            name: name,
+            percent: 0,
+            lookalikes: [],
+            leaveIt: leaveIt,
+            edible: false,
+            noModel: false
+        )
+    }
+
     private static func kindWord(_ kind: MatchKind) -> String {
         switch kind {
         case .cactus: return "CACTUS"
@@ -425,6 +519,13 @@ public enum VisionCoreML {
         case .sting: return "STING"
         case .gator: return "GATOR"
         case .water: return "WATER"
+        case .fire: return "FIRE"
+        case .flood: return "FLOOD"
+        case .ice: return "ICE"
+        case .smoke: return "SMOKE"
+        case .lightning: return "LIGHTNING"
+        case .shelter: return "SHELTER"
+        case .wound: return "WOUND"
         }
     }
 
@@ -479,6 +580,13 @@ public enum VisionCoreML {
             "lake", "pond", "reservoir", "creek", "river", "spring", "waterfall",
             "lagoon", "stream", "ocean", "water",
         ]),
+        (.fire, ["wildfire", "bushfire", "forest fire", "grass fire", "brush fire"]),
+        (.flood, ["flood", "flash flood"]),
+        (.ice, ["ice", "glacier", "frost"]),
+        (.smoke, ["smoke", "smoke plume"]),
+        (.lightning, ["lightning", "thunderstorm", "thunderbolt"]),
+        (.shelter, ["tent", "campsite", "bivouac"]),
+        (.wound, ["open wound", "bleeding wound", "laceration", "gash"]),
         (.tree, ["oak", "mesquite", "elm", "pecan", "pine", "pinon", "juniper", "aspen", "cottonwood", "tree"]),
     ]
 }

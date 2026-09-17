@@ -107,12 +107,19 @@ def _vision_kind(needles: list[tuple[str, list[str]]], identifier: str) -> str |
 _VISION_RANK = {
     "fungi": 50,
     "snake": 40,
+    "wound": 39,
     "sting": 38,
+    "fire": 37,
     "gator": 36,
     "cactus": 35,
     "cactiYucca": 35,
+    "flood": 34,
+    "lightning": 33,
     "water": 32,
+    "smoke": 31,
     "mammal": 30,
+    "ice": 29,
+    "shelter": 28,
     "tree": 10,
 }
 
@@ -1988,6 +1995,12 @@ class VisionInstrumentTests(unittest.TestCase):
             "lake",
             "fox",
             "bobcat",
+            "wildfire",
+            "flood",
+            "lightning",
+            "smoke",
+            "tent",
+            "laceration",
         ):
             self.assertIn(needle, vis, needle)
         self.assertIn("func hasphrase", vis)
@@ -2013,6 +2026,9 @@ class VisionInstrumentTests(unittest.TestCase):
         self.assertIsNone(_vision_kind(needles, "Porcupine"))
         self.assertIsNone(_vision_kind(needles, "Street"))
         self.assertIsNone(_vision_kind(needles, "Springfield"))
+        self.assertIsNone(_vision_kind(needles, "Campfire"))
+        self.assertEqual(_vision_kind(needles, "Laceration"), "wound")
+        self.assertEqual(_vision_kind(needles, "Wildfire"), "fire")
         self.assertEqual(
             _vision_best(needles, [("Tree", 0.9), ("Wasp", 0.3)]),
             "sting",
@@ -2037,6 +2053,11 @@ class VisionInstrumentTests(unittest.TestCase):
             "testWaspBeatsATreeOnTheSameStill",
             "testAlligatorIsGatorLeaveIt",
             "testLakeIsWaterNotLeaveIt",
+            "testWildfireIsFireLeaveIt",
+            "testFloodBeatsATreeOnTheSameStill",
+            "testLightningIsLeaveIt",
+            "testCampfireIsNotFire",
+            "testLacerationIsWoundLeaveIt",
             "testHedgehogIsNotAMammal",
             "testPorcupineIsNotAPineOrATree",
             "testStreetIsNotATree",
@@ -2708,6 +2729,7 @@ class PersonMarkOnTheMapTests(unittest.TestCase):
         ring = person_compass_const("statusRingPoints")
         well = person_compass_const("wellPoints")
         size = person_compass_const("puckPoints")
+        self.assertEqual(ring, 3)
         self.assertGreaterEqual(ring, 2.5)
         self.assertLess(ring, well / 4)
         self.assertGreaterEqual(size, 44)
