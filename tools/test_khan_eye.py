@@ -311,13 +311,22 @@ class PackedArchiveTests(unittest.TestCase):
 class NeighborhoodDeskStillsTests(unittest.TestCase):
     """141 stills: EYE was Hatch-to-Tularosa black; walking casings buried yards."""
 
-    def test_eye_looks_at_the_desk_not_the_pack_horizon(self):
+    def test_eye_looks_at_the_packed_extract(self):
+        """4:21 still: KHAN EYE sat on a 160m WSMR desk. Tap EYE → whole pack."""
         offline = OFFLINE.read_text()
         fit = offline.split("func fitPack")[1].split("func fitRoute")[0]
         self.assertIn("acrossDistance: gev", fit)
         self.assertIn("lookingAtCenter", fit)
         self.assertIn("PackCamera.godsEyeDistance", fit)
         self.assertIn("view.setCamera", fit)
+        self.assertIn("south: packBox.south", fit)
+        self.assertIn("west: packBox.west", fit)
+        self.assertIn("north: packBox.north", fit)
+        self.assertIn("east: packBox.east", fit)
+        self.assertNotIn("EyeDesk.framePoints", fit)
+        self.assertNotIn("EyeDesk.clampToPack", fit)
+        self.assertNotIn("EyeDesk.bounds", fit)
+        self.assertNotIn("followCoordinate", fit)
         self.assertNotIn("fitting:", fit)
         self.assertNotIn("edgePadding:", fit)
         self.assertNotIn("view.fly(", fit)
@@ -343,7 +352,7 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
         qa = (ROOT / "docs" / "SOLO_QA.md").read_text()
         device = (ROOT / "docs" / "DEVICE.md").read_text()
         for blob in (qa, device):
-            self.assertIn("160m neighborhood", blob)
+            self.assertIn("entire packed extract", blob)
             self.assertIn("schematic road casings hide on packed photo", blob)
             self.assertIn("hillshade stays the floor", blob)
             self.assertIn("NIGHT / SUN live in INSTRUMENTS", blob)
@@ -351,7 +360,7 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             self.assertIn("MAP footer is the pack name", blob)
             self.assertIn("sits on the overlay with LOCK-ON", blob)
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
-        self.assertNotIn("landFillLayerID", covers)
+        self.assertIn("landFillLayerID", covers)
         self.assertIn("tracks", covers)
 
     def test_planted_marks_are_pins_not_you_roses(self):
@@ -402,10 +411,11 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             "public enum PackStyle"
         )[0]
         self.assertIn("static let photoMinZoom: Double = 14", cam)
+        self.assertIn("static let minZoom: Double = 6", cam)
         self.assertIn("static func holdMinZoom", cam)
-        self.assertIn("return photoMinZoom", cam.split("static func holdMinZoom")[1].split(
-            "static func holdMaxZoom"
-        )[0])
+        hold = cam.split("static func holdMinZoom")[1].split("static func holdMaxZoom")[0]
+        self.assertIn("godsEye ? minZoom : photoMinZoom", hold)
+        self.assertNotIn("godsEye _", hold)
         interact = OFFLINE.read_text().split("private func applyInteraction")[1].split(
             "public final class Coordinator"
         )[0]
@@ -415,7 +425,8 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             (ROOT / "docs" / "SOLO_QA.md").read_text(),
             (ROOT / "docs" / "DEVICE.md").read_text(),
         ):
-            self.assertIn("Pinch-out stays on packed photo", blob)
+            self.assertIn("Walking pinch-out stays on packed photo", blob)
+            self.assertIn("KHAN EYE pinches out to the entire packed extract", blob)
             self.assertIn("pack diamond on black is a FAIL", blob)
 
     def test_walk_hillshade_paints_the_floor_off_photo(self):
@@ -484,17 +495,18 @@ class NeighborhoodDeskStillsTests(unittest.TestCase):
             )
         self.assertEqual(aerial.AERIAL_FLOOR_ZOOM, 12)
         self.assertEqual(aerial.AERIAL_MIN_ZOOM, 12)
-        self.assertEqual(aerial.style_layer()["minzoom"], 12)
+        self.assertEqual(aerial.style_layer()["minzoom"], 6)
         attach = SWIFT.read_text().split("public static func attachAerialLayers")[1].split(
             "Packed OSM houses"
         )[0]
-        self.assertIn('"minzoom": 12', attach)
+        self.assertIn('"minzoom": 6', attach)
         self.assertNotIn('"minzoom": 14', attach)
+        self.assertNotIn('"minzoom": 12', attach)
         eye = OFFLINE.read_text().split("public static func applyEyeLayers")[1].split(
             "public static func applyEyePalette"
         )[0]
         covers = eye.split("func coversPhoto")[1].split("func holdsKhanDetail")[0]
-        self.assertNotIn("landFillLayerID", covers)
+        self.assertIn("landFillLayerID", covers)
         self.assertNotIn("aerial ? 0", eye)
         for name, pt, z in (
             ("Vinton", vinton, 16),

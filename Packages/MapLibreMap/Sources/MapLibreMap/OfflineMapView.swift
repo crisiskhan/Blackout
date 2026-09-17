@@ -1131,43 +1131,21 @@ public struct OfflineMapView: UIViewRepresentable {
                 north: spec.packNorth,
                 east: spec.packEast
             )
-            let you = spec.showYou ? (lat: spec.puckLat, lon: spec.puckLon) : nil
-            let points: [(lat: Double, lon: Double)]
-            if let follow = followCoordinate(spec) {
-                points = EyeDesk.framePoints(
-                    you: (follow.latitude, follow.longitude),
-                    party: [],
-                    marks: [],
-                    water: []
-                )
-            } else {
-                let party = spec.pips.filter { PlaceMark.parse($0.id) == nil }.map { ($0.lat, $0.lon) }
-                let marks = spec.pips.filter { PlaceMark.parse($0.id) != nil }.map { ($0.lat, $0.lon) }
-                points = EyeDesk.framePoints(
-                    you: you,
-                    party: party,
-                    marks: marks,
-                    water: spec.frameExtra
-                )
-            }
-            let desk = EyeDesk.bounds(points: points) ?? packBox
-            let box = EyeDesk.clampToPack(desk: desk, pack: packBox)
             let mid = PackCamera.packCenter(
-                south: box.south,
-                west: box.west,
-                north: box.north,
-                east: box.east
+                south: packBox.south,
+                west: packBox.west,
+                north: packBox.north,
+                east: packBox.east
             )
             let gev = PackCamera.godsEyeDistance(
                 radiusMeters: PackCamera.packRadiusMeters(
-                    south: box.south,
-                    west: box.west,
-                    north: box.north,
-                    east: box.east
+                    south: packBox.south,
+                    west: packBox.west,
+                    north: packBox.north,
+                    east: packBox.east
                 )
             )
-            // Pitch 45 + fitting the desk bounds + HUD padding pulls MapLibre
-            // to pack scale (Hatch to Tularosa). Look at the desk mid at gev.
+            // Pitch 45 + the packed extract, not the 160m YOU desk.
             let camera = MLNMapCamera(
                 lookingAtCenter: CLLocationCoordinate2D(latitude: mid.lat, longitude: mid.lon),
                 acrossDistance: gev,
@@ -2215,8 +2193,8 @@ extension PackStyle {
         }
         let aerial = aerialWanted && hasAerial
         // USGS 3DEP hillshade is the pack floor. Walking keeps it under NAIP
-        // so ground outside the photo is not void. EYE keeps it too: packed
-        // NAIP starts at z14, so a pack-wide camera would otherwise be black.
+        // so ground outside the photo is not void. EYE keeps it too: below
+        // packed z12 the extract camera would otherwise be black.
         let shade = !godsEye || EyeDesk.layerOn(.shade, in: layers) || aerialWanted
         let water = !godsEye || EyeDesk.layerOn(.water, in: layers)
         for layer in style.layers {
@@ -2261,6 +2239,7 @@ extension PackStyle {
     /// Schematic fills and casings that sit on the photo. Hide them on walking
     /// MAP and KHAN EYE while packed NAIP is the ground so yards read. Labels stay.
     private static func coversPhoto(_ id: String) -> Bool {
+        if id == landFillLayerID { return true }
         if id == "tracks" || id == "wild-roads" || id == "contours" { return true }
         if id == "public-land-fill" || id == "public-land-line" || id == "flood-fill" {
             return true

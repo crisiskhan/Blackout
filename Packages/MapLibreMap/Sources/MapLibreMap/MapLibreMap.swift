@@ -532,10 +532,11 @@ public enum PackCamera {
         return earth * cosine / pow(2, openZoom + 1)
     }
     public static let streetNameMinZoom: Double = 12
-    /// Packed NAIP starts at z14. Pinch below that is gray schematic streets,
-    /// then the pack extract as a diamond on black (Hatch to Tularosa).
+    /// Walking MAP pinch floor. Packed NAIP is sharp here; below this, LOCKED
+    /// walking would drop into schematic streets.
     public static let photoMinZoom: Double = 14
-    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). Not the camera pinch floor.
+    /// Archive floor (`tools/v3/tiles.py` MIN_ZOOM). KHAN EYE pinch floor so
+    /// the packed extract fits the glass.
     public static let minZoom: Double = 6
     /// Style overzoom ceiling. Packed streets do not get sharper past this.
     public static let maxZoom: Double = 16
@@ -596,8 +597,8 @@ public enum PackCamera {
     public static let godsEyePitch: Double = 45
     /// Walking MAP is the 3D neighborhood desk. Pitch reads house walls on the photo.
     public static let walkPitch: Double = 55
-    /// Viewing distance is this times the framed desk radius. Closer than a
-    /// pack-wide lift so packed photo, names, and houses still read.
+    /// Viewing distance is this times the packed-extract radius so KHAN EYE
+    /// lifts to the whole archive, not a 160m neighborhood desk.
     public static let godsEyeRangeFactor: Double = 1.15
     public static let godsEyeHeading: Double = 0
     public static let godsEyeFlySeconds: Double = 2
@@ -656,8 +657,8 @@ public enum PackCamera {
         godsEyeMaxPitch
     }
 
-    public static func holdMinZoom(godsEye _: Bool) -> Double {
-        return photoMinZoom
+    public static func holdMinZoom(godsEye: Bool) -> Double {
+        godsEye ? minZoom : photoMinZoom
     }
 
     public static func holdMaxZoom(godsEye: Bool) -> Double {
@@ -1072,7 +1073,7 @@ public enum PackStyle {
                 "id": sourceID,
                 "type": "raster",
                 "source": sourceID,
-                "minzoom": 12,
+                "minzoom": 6,
                 "layout": ["visibility": "none"],
                 "paint": [
                     "raster-opacity": 1,

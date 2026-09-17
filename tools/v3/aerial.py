@@ -32,6 +32,9 @@ AERIAL_LAYER_ID = "aerial"
 AERIAL_FILE = "aerial.pmtiles"
 AERIAL_FLOOR_ZOOM = 12
 AERIAL_MIN_ZOOM = 12
+# Packed tiles start at z12. Style minzoom is the EYE pack camera so MapLibre
+# can underzoom that floor instead of dropping to yellow land-fill.
+AERIAL_STYLE_MIN_ZOOM = 6
 AERIAL_DETAIL_MIN = 14
 AERIAL_FILL_ZOOM = 15
 AERIAL_MAX_ZOOM = 17
@@ -188,7 +191,7 @@ def style_layer(name: str = AERIAL_FILE) -> dict:
         "id": sid,
         "type": "raster",
         "source": sid,
-        "minzoom": AERIAL_MIN_ZOOM,
+        "minzoom": AERIAL_STYLE_MIN_ZOOM,
         "maxzoom": 22,
         "layout": {"visibility": "none"},
         "paint": {"raster-opacity": 1, "raster-fade-duration": 0},
