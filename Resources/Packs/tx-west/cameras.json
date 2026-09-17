@@ -1,0 +1,1901 @@
+[
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA4Ny41",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2087.5&districtCode=ELP",
+    "lat": 31.171028,
+    "lon": -105.65722699999999,
+    "name": "IH-10 @ MM 87.5",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SS0xMCBAIE1NIDEwNy4xOQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=I-10%20%40%20MM%20107.19&districtCode=ELP",
+    "lat": 31.173579999999998,
+    "lon": -105.357883,
+    "name": "IH-10 @ MM 107.19",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA4OQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2089&districtCode=ELP",
+    "lat": 31.177664999999998,
+    "lon": -105.636856,
+    "name": "IH-10 @ MM 89",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSAxMDU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%20105&districtCode=ELP",
+    "lat": 31.182661,
+    "lon": -105.39218799999999,
+    "name": "IH-10 @ MM 105",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA5MA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2090&districtCode=ELP",
+    "lat": 31.184255,
+    "lon": -105.61819899999999,
+    "name": "IH-10 @ MM 90",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSAxMDMuMw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%20103.3&districtCode=ELP",
+    "lat": 31.189443999999998,
+    "lon": -105.41945,
+    "name": "IH-10 @ MM 103.3",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSAxMDIuMw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%20102.3&districtCode=ELP",
+    "lat": 31.192763,
+    "lon": -105.434016,
+    "name": "IH-10 @ MM 102.3",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA5Ng",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2096&districtCode=ELP",
+    "lat": 31.197305,
+    "lon": -105.52272099999999,
+    "name": "IH-10 @ MM 96",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSAxMDAuNg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%20100.6&districtCode=ELP",
+    "lat": 31.206308999999997,
+    "lon": -105.463465,
+    "name": "IH-10 @ MM 100.6",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA5OS44",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2099.8&districtCode=ELP",
+    "lat": 31.212132999999998,
+    "lon": -105.470424,
+    "name": "IH-10 @ MM 99.8",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNTSA5OC42",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20MM%2098.6&districtCode=ELP",
+    "lat": 31.215761999999998,
+    "lon": -105.490218,
+    "name": "IH-10 @ MM 98.6",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBY2FsYSBSZCBNTSA2OA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Acala%20Rd%20MM%2068&districtCode=ELP",
+    "lat": 31.344075999999998,
+    "lon": -105.892377,
+    "name": "IH-10 @ Acala Rd MM 68",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBGYWJlbnM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Fabens&districtCode=ELP",
+    "lat": 31.518442999999998,
+    "lon": -106.13058099999999,
+    "name": "IH-10 @ Fabens",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBDbGludA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Clint&districtCode=ELP",
+    "lat": 31.600416,
+    "lon": -106.194189,
+    "name": "IH-10 @ Clint",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBIb3Jpem9u",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Horizon&districtCode=ELP",
+    "lat": 31.659543999999997,
+    "lon": -106.240032,
+    "name": "IH-10 @ Horizon",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBIYXJub3Nl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Harnose&districtCode=ELP",
+    "lat": 31.668429999999997,
+    "lon": -106.246909,
+    "name": "IH-10 @ Harnose",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgSm9lIFJvZHJpZ3Vleg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Joe%20Rodriguez&districtCode=ELP",
+    "lat": 31.674179,
+    "lon": -106.329971,
+    "name": "LP-375 @ Joe Rodriguez",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgWmFyYWdvemE",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Zaragoza&districtCode=ELP",
+    "lat": 31.674785999999997,
+    "lon": -106.336627,
+    "name": "LP-375 @ Zaragoza",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgWmFyYWdvemEgMg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Zaragoza%202&districtCode=ELP",
+    "lat": 31.675327,
+    "lon": -106.335996,
+    "name": "LP-375 @ Zaragoza 2",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGFuIEFtZXJpY2Fu",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pan%20American&districtCode=ELP",
+    "lat": 31.676019999999998,
+    "lon": -106.324062,
+    "name": "LP-375 @ Pan American",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBIYWxzdGVhZA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Halstead&districtCode=ELP",
+    "lat": 31.677097999999997,
+    "lon": -106.25647099999999,
+    "name": "IH-10 @ Halstead",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgVyBaYXJhZ296YQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20W%20Zaragoza&districtCode=ELP",
+    "lat": 31.678611,
+    "lon": -106.33952699999999,
+    "name": "LP-375 @ W Zaragoza",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgU29jb3Jybw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Socorro&districtCode=ELP",
+    "lat": 31.678701,
+    "lon": -106.31494599999999,
+    "name": "LP-375 @ Socorro",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQWxhbWVkYQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Alameda&districtCode=ELP",
+    "lat": 31.680153999999998,
+    "lon": -106.31253,
+    "name": "LP-375 @ Alameda",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBFYXN0bGFrZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Eastlake&districtCode=ELP",
+    "lat": 31.6864,
+    "lon": -106.26714199999999,
+    "name": "IH-10 @ Eastlake",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTm9ydGggTG9vcA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20North%20Loop&districtCode=ELP",
+    "lat": 31.687013,
+    "lon": -106.29782399999999,
+    "name": "LP-375 @ North Loop",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGFkcmVz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Padres&districtCode=ELP",
+    "lat": 31.691526999999997,
+    "lon": -106.34472199999999,
+    "name": "LP-375 @ Padres",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIFphcmFnb3ph",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Zaragoza&districtCode=ELP",
+    "lat": 31.691769999999998,
+    "lon": -106.32783599999999,
+    "name": "SH-20/Alameda @ Zaragoza",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBIGFuZCBNIENpcmNsZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20A%20and%20M%20Circle&districtCode=ELP",
+    "lat": 31.699993,
+    "lon": -106.28417499999999,
+    "name": "IH-10 @ A and M Circle",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBSViBEcml2ZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20RV%20Drive&districtCode=ELP",
+    "lat": 31.700619,
+    "lon": -106.28284699999999,
+    "name": "IH-10 @ RV Drive",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBbWVyaWNhcw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Americas&districtCode=ELP",
+    "lat": 31.700699999999998,
+    "lon": -106.284054,
+    "name": "IH-10 @ Americas",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Sm9lIEJhdHRsZSBAIEdhdGV3YXkgV2VzdA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Joe%20Battle%20%40%20Gateway%20West&districtCode=ELP",
+    "lat": 31.702795,
+    "lon": -106.28389999999999,
+    "name": "Joe Battle @ Gateway West",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMUC0zNzUgSE0gUw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20LP-375%20HM%20S&districtCode=ELP",
+    "lat": 31.702827,
+    "lon": -106.284024,
+    "name": "IH-10 @ LP-375 HM S",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMUC0zNzUgSE0gTg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20LP-375%20HM%20N&districtCode=ELP",
+    "lat": 31.702844,
+    "lon": -106.28396199999999,
+    "name": "IH-10 @ LP-375 HM N",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGxhbnQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Plant&districtCode=ELP",
+    "lat": 31.703567999999997,
+    "lon": -106.35400899999999,
+    "name": "LP-375 @ Plant",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgWmFyYWdvemE",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Zaragoza&districtCode=ELP",
+    "lat": 31.704822999999998,
+    "lon": -106.31775499999999,
+    "name": "FM-76/N Loop @ Zaragoza",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Sm9lIEJhdHRsZSBAIFJvamFz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Joe%20Battle%20%40%20Rojas&districtCode=ELP",
+    "lat": 31.705491,
+    "lon": -106.28133799999999,
+    "name": "Joe Battle @ Rojas",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBKb2UgQmF0dGxl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Joe%20Battle&districtCode=ELP",
+    "lat": 31.705848999999997,
+    "lon": -106.289065,
+    "name": "IH-10 @ Joe Battle",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUm9qYXM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Rojas&districtCode=ELP",
+    "lat": 31.711111,
+    "lon": -106.275222,
+    "name": "LP-375 @ Rojas",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgWWFyYnJvdWdo",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Yarbrough&districtCode=ELP",
+    "lat": 31.711527,
+    "lon": -106.367555,
+    "name": "LP-375 @ Yarbrough",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBaYXJhZ296YQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Zaragoza&districtCode=ELP",
+    "lat": 31.720055,
+    "lon": -106.304555,
+    "name": "IH-10 @ Zaragoza",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIFlhcmJyb3VnaA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Yarbrough&districtCode=ELP",
+    "lat": 31.720487,
+    "lon": -106.353872,
+    "name": "SH-20/Alameda @ Yarbrough",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQm9iIEhvcGU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Bob%20Hope&districtCode=ELP",
+    "lat": 31.720806999999997,
+    "lon": -106.268256,
+    "name": "LP-375 @ Bob Hope",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgTGVlIFRyZXZpbm8",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Lee%20Trevino&districtCode=ELP",
+    "lat": 31.720969,
+    "lon": -106.33241199999999,
+    "name": "FM-76/N Loop @ Lee Trevino",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQnJvYWR3YXk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Broadway&districtCode=ELP",
+    "lat": 31.724897,
+    "lon": -106.375219,
+    "name": "LP-375 @ Broadway",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgR2VvcmdlIERlaXRlcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20George%20Deiter&districtCode=ELP",
+    "lat": 31.725203999999998,
+    "lon": -106.302666,
+    "name": "FM-659/Zaragoza @ George Deiter",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMZWUgVHJldmlubyBETVM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Lee%20Trevino%20DMS&districtCode=ELP",
+    "lat": 31.730943999999997,
+    "lon": -106.31516599999999,
+    "name": "IH-10 @ Lee Trevino DMS",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTWlkd2F5",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Midway&districtCode=ELP",
+    "lat": 31.731565999999997,
+    "lon": -106.378084,
+    "name": "LP-375 @ Midway",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGVsbGljYW5v",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pellicano&districtCode=ELP",
+    "lat": 31.7323,
+    "lon": -106.26717099999999,
+    "name": "LP-375 @ Pellicano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQmFsc2Ft",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Balsam&districtCode=ELP",
+    "lat": 31.735222,
+    "lon": -106.383583,
+    "name": "LP-375 @ Balsam",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGVsaWNhbm8gRE1T",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pelicano%20DMS&districtCode=ELP",
+    "lat": 31.735827999999998,
+    "lon": -106.267737,
+    "name": "LP-375 @ Pellicano DMS",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMZWUgVHJldmlubw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Lee%20Trevino&districtCode=ELP",
+    "lat": 31.739887999999997,
+    "lon": -106.325499,
+    "name": "IH-10 @ Lee Trevino",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgUGVsbGljYW5v",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Pellicano&districtCode=ELP",
+    "lat": 31.740403999999998,
+    "lon": -106.289901,
+    "name": "FM-659/Zaragoza @ Pellicano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgVmlzdGEgZGVsIFNvbA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Vista%20del%20Sol&districtCode=ELP",
+    "lat": 31.741477,
+    "lon": -106.267423,
+    "name": "LP-375 @ Vista del Sol",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIENhcm9saW5h",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Carolina&districtCode=ELP",
+    "lat": 31.741712,
+    "lon": -106.377518,
+    "name": "SH-20/Alameda @ Carolina",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMb21hbGFuZA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Lomaland&districtCode=ELP",
+    "lat": 31.744166999999997,
+    "lon": -106.331829,
+    "name": "IH-10 @ Lomaland",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQXNjYXJhdGUgTGFrZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Ascarate%20Lake&districtCode=ELP",
+    "lat": 31.747218999999998,
+    "lon": -106.405841,
+    "name": "LP-375 @ Ascarate Lake",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TGVlIFRyZXZpbm8gQCBQZWxsaWNhbm8",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Lee%20Trevino%20%40%20Pellicano&districtCode=ELP",
+    "lat": 31.747619999999998,
+    "lon": -106.318984,
+    "name": "Lee Trevino @ Pellicano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgT3JlZ29u",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Oregon&districtCode=ELP",
+    "lat": 31.749053,
+    "lon": -106.485148,
+    "name": "LP-375 @ Oregon",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgU2FudGEgRmU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Santa%20Fe&districtCode=ELP",
+    "lat": 31.749682,
+    "lon": -106.487259,
+    "name": "LP-375 @ Santa Fe",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRm9uZXNjYQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Fonesca&districtCode=ELP",
+    "lat": 31.751305,
+    "lon": -106.413416,
+    "name": "LP-375 @ Fonseca",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-R2VvcmdlIERpZXRlciBAIFZpc3RhIGRlbCBTb2w",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=George%20Dieter%20%40%20Vista%20del%20Sol&districtCode=ELP",
+    "lat": 31.75151,
+    "lon": -106.30188799999999,
+    "name": "George Deiter @ Vista del Sol",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGFyaw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Park&districtCode=ELP",
+    "lat": 31.751725999999998,
+    "lon": -106.47421299999999,
+    "name": "LP-375 @ Park",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgSGF3a2lucw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Hawkins&districtCode=ELP",
+    "lat": 31.752209999999998,
+    "lon": -106.37670899999999,
+    "name": "FM-76/N Loop @ Hawkins",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBZYXJicm91Z2g",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Yarbrough&districtCode=ELP",
+    "lat": 31.752637999999997,
+    "lon": -106.345722,
+    "name": "IH-10 @ Yarbrough",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTmV3IFdvcmxk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20New%20World&districtCode=ELP",
+    "lat": 31.754189,
+    "lon": -106.26793099999999,
+    "name": "LP-375 @ New World",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUHJvc3BlY3Q",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Prospect&districtCode=ELP",
+    "lat": 31.754243,
+    "lon": -106.49569199999999,
+    "name": "LP-375 @ Prospect",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNY1JhZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20McRae&districtCode=ELP",
+    "lat": 31.758665999999998,
+    "lon": -106.35544399999999,
+    "name": "IH-10 @ McRae",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBQb3JmaXJpbyBEaWF6",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Porfirio%20Diaz&districtCode=ELP",
+    "lat": 31.758705,
+    "lon": -106.49851199999999,
+    "name": "IH-10 @ Porfirio Diaz",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRGVsdGE",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Delta&districtCode=ELP",
+    "lat": 31.759187999999998,
+    "lon": -106.469793,
+    "name": "LP-375 @ Delta",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUG9yZmlyaW8gRGlheg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Porfirio%20Diaz&districtCode=ELP",
+    "lat": 31.759316,
+    "lon": -106.50330299999999,
+    "name": "LP-375 @ Porfirio Diaz",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvUGFpc2FubyBAIENvbGVz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2FPaisano%20%40%20Coles&districtCode=ELP",
+    "lat": 31.760429,
+    "lon": -106.47099399999999,
+    "name": "US-62/Paisano @ Coles",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Sm9lIEJhdHRsZSBAIE1vbnR3b29k",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Joe%20Battle%20%40%20Montwood&districtCode=ELP",
+    "lat": 31.760458,
+    "lon": -106.267056,
+    "name": "Joe Battle @ Montwood",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBQcm9zcGVjdA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Prospect&districtCode=ELP",
+    "lat": 31.76046,
+    "lon": -106.493709,
+    "name": "IH-10 @ Prospect",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgTW9udHdvb2Q",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Montwood&districtCode=ELP",
+    "lat": 31.760496999999997,
+    "lon": -106.269419,
+    "name": "FM-659/Zaragoza @ Montwood",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvQWxhbWVkYSBAIERlbHRh",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FAlameda%20%40%20Delta&districtCode=ELP",
+    "lat": 31.76082,
+    "lon": -106.400447,
+    "name": "SH-20/Alameda @ Delta",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMgNjIvMTgwIEAgUk0gMTExMQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US%2062%2F180%20%40%20RM%201111&districtCode=ELP",
+    "lat": 31.761353999999997,
+    "lon": -105.36798999999999,
+    "name": "US 62/180 @ RM 1111",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTW9udHdvb2Q",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Montwood&districtCode=ELP",
+    "lat": 31.761521,
+    "lon": -106.26753599999999,
+    "name": "LP-375 @ Montwood",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgVVMtNTQvQkg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20US-54%2FBH&districtCode=ELP",
+    "lat": 31.761893999999998,
+    "lon": -106.445483,
+    "name": "LP-375 @ US-54/BH",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIFd5b21pbmc",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Wyoming&districtCode=ELP",
+    "lat": 31.762321999999998,
+    "lon": -106.49037299999999,
+    "name": "SH-20/Mesa @ Wyoming",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNzYvTiBMb29wIEAgRGVsdGE",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-76%2FN%20Loop%20%40%20Delta&districtCode=ELP",
+    "lat": 31.762387999999998,
+    "lon": -106.395061,
+    "name": "FM-76/N Loop @ Delta",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgU2FuIE1hcmNpYWw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20San%20Marcial&districtCode=ELP",
+    "lat": 31.763111,
+    "lon": -106.459722,
+    "name": "LP-375 @ San Marcial",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTiBNb250d29vZA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20N%20Montwood&districtCode=ELP",
+    "lat": 31.763158999999998,
+    "lon": -106.268022,
+    "name": "LP-375 @ N Montwood",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TWlzc291cmkgQCBDYW1wYmVsbA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Missouri%20%40%20Campbell&districtCode=ELP",
+    "lat": 31.763371,
+    "lon": -106.48720399999999,
+    "name": "Missouri @ Campbell",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBLYW5zYXM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Kansas&districtCode=ELP",
+    "lat": 31.763814999999997,
+    "lon": -106.48895399999999,
+    "name": "IH-10 @ Kansas",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBMUC0zNzUgSE0gTg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20LP-375%20HM%20N&districtCode=ELP",
+    "lat": 31.764367,
+    "lon": -106.44791099999999,
+    "name": "US-54 @ LP-375 HM N",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNaXNzb3VyaQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Missouri&districtCode=ELP",
+    "lat": 31.764388,
+    "lon": -106.48686099999999,
+    "name": "IH-10 @ Missouri",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBMUC0zNzUvQkg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20LP-375%2FBH&districtCode=ELP",
+    "lat": 31.764407,
+    "lon": -106.447542,
+    "name": "US-54 @ LP-375/BH",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBWaXNjb3VudA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Viscount&districtCode=ELP",
+    "lat": 31.764442,
+    "lon": -106.36426399999999,
+    "name": "IH-10 @ Viscount",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBMUC0zNzUgSE0gUw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20LP-375%20HM%20S&districtCode=ELP",
+    "lat": 31.764470999999997,
+    "lon": -106.448095,
+    "name": "US-54 @ LP-375 HM S",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgU1AtMTk2Ng",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20SP-1966&districtCode=ELP",
+    "lat": 31.764515,
+    "lon": -106.508202,
+    "name": "LP-375 @ SP-1966",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvUGFpc2FubyBAIFBpZWRyYXM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2FPaisano%20%40%20Piedras&districtCode=ELP",
+    "lat": 31.76628,
+    "lon": -106.46151599999999,
+    "name": "US-62/Paisano @ Piedras",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBTY2h1c3Rlcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Schuster&districtCode=ELP",
+    "lat": 31.766491,
+    "lon": -106.508269,
+    "name": "IH-10 @ Schuster",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBQYWlzYW5v",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Paisano&districtCode=ELP",
+    "lat": 31.766665999999997,
+    "lon": -106.447138,
+    "name": "US-54 @ Paisano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgU3VuIEZpcmU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Sun%20Fire&districtCode=ELP",
+    "lat": 31.768119,
+    "lon": -106.26055,
+    "name": "FM-659/Zaragoza @ Sun Fire",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBCcm93bg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Brown&districtCode=ELP",
+    "lat": 31.768158,
+    "lon": -106.47966799999999,
+    "name": "IH-10 @ Brown",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVM2Mi9QYWlzYW5vIEAgQWxhbWVkYQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US62%2FPaisano%20%40%20Alameda&districtCode=ELP",
+    "lat": 31.768573,
+    "lon": -106.42691599999999,
+    "name": "US-62/Paisano @ Alameda",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTEwIEAgVVMtNjIgUGFpc2Fubw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-110%20%40%20US-62%20Paisano&districtCode=ELP",
+    "lat": 31.769807,
+    "lon": -106.45075,
+    "name": "IH-110 @ US-62 Paisano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvUGFpc2FubyBFYXN0IEAgQk9UQQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2FPaisano%20East%20%40%20BOTA&districtCode=ELP",
+    "lat": 31.769959,
+    "lon": -106.45170399999999,
+    "name": "US-62/Paisano East @ BOTA",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgU2NodXN0ZXI",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Schuster&districtCode=ELP",
+    "lat": 31.770754,
+    "lon": -106.512322,
+    "name": "LP-375  @ Schuster",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTEwIEAgTGF0dGE",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-110%20%40%20Latta&districtCode=ELP",
+    "lat": 31.771024999999998,
+    "lon": -106.44729,
+    "name": "IH-110 @ Latta",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBIYXdraW5z",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Hawkins&districtCode=ELP",
+    "lat": 31.771137999999997,
+    "lon": -106.377,
+    "name": "IH-10 @ Hawkins",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBSaXZlcmEgSE0gTg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Rivera%20HM%20N&districtCode=ELP",
+    "lat": 31.771528,
+    "lon": -106.445771,
+    "name": "US-54 @ Rivera HM N",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBSaXZlcmEgSE0gUw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Rivera%20HM%20S&districtCode=ELP",
+    "lat": 31.771528,
+    "lon": -106.445771,
+    "name": "US-54 @ Rivera HM S",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBBbGFtZWRh",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Alameda&districtCode=ELP",
+    "lat": 31.773014999999997,
+    "lon": -106.445574,
+    "name": "US-54 @ Alameda",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgVGllcnJhIEVzdGU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Tierra%20Este&districtCode=ELP",
+    "lat": 31.775796999999997,
+    "lon": -106.252669,
+    "name": "FM-659/Zaragoza @ Tierra Este",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGViYmxlIEhpbGxz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Pebble%20Hills&districtCode=ELP",
+    "lat": 31.776721,
+    "lon": -106.26785,
+    "name": "LP-375 @ Pebble Hills",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBVUyA1NCBNTiBO",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20US%2054%20MN%20N&districtCode=ELP",
+    "lat": 31.776933999999997,
+    "lon": -106.442664,
+    "name": "IH-10 @ US 54 HM N",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBSYXlub2xkcw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Raynolds&districtCode=ELP",
+    "lat": 31.777137999999997,
+    "lon": -106.43330499999999,
+    "name": "IH-10 @ Raynolds",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBVUyA1NCBITSBT",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20US%2054%20HM%20S&districtCode=ELP",
+    "lat": 31.777326,
+    "lon": -106.44431,
+    "name": "IH-10 @ US 54 HM S",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBCb29uZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Boone&districtCode=ELP",
+    "lat": 31.777447,
+    "lon": -106.44699,
+    "name": "IH-10 @ Boone",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBDaGVsc2Vh",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Chelsea&districtCode=ELP",
+    "lat": 31.777579999999997,
+    "lon": -106.42576,
+    "name": "IH-10 @ Chelsea",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBXZXN0bW9yZWxhbmQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Westmoreland&districtCode=ELP",
+    "lat": 31.777613,
+    "lon": -106.39042099999999,
+    "name": "IH-10 @ Westmoreland",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBDb3BpYQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Copia&districtCode=ELP",
+    "lat": 31.777832999999998,
+    "lon": -106.450638,
+    "name": "IH-10 @ Copia",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBc2FyY28",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Asarco&districtCode=ELP",
+    "lat": 31.777834,
+    "lon": -106.51667499999999,
+    "name": "IH-10 @ Asarco",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBQYWlzYW5v",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Paisano&districtCode=ELP",
+    "lat": 31.778026999999998,
+    "lon": -106.421611,
+    "name": "IH-10 @ Paisano",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBQaWVkcmFz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Piedras&districtCode=ELP",
+    "lat": 31.778111,
+    "lon": -106.463777,
+    "name": "IH-10 @ Piedras",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBaXJ3YXk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Airway&districtCode=ELP",
+    "lat": 31.778861,
+    "lon": -106.393694,
+    "name": "IH-10 @ Airway",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgQXNhcmNv",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Asarco&districtCode=ELP",
+    "lat": 31.780769,
+    "lon": -106.519553,
+    "name": "LP-375 @ Asarco",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBHZXJvbmltbw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Geronimo&districtCode=ELP",
+    "lat": 31.781305,
+    "lon": -106.407972,
+    "name": "IH-10 @ Geronimo",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMgNjIvMTgwIEAgUk0gMjMxNw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US%2062%2F180%20%40%20RM%202317&districtCode=ELP",
+    "lat": 31.78134,
+    "lon": -105.481854,
+    "name": "US 62/180 @ RM 2317",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBNb250YW5h",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Montana&districtCode=ELP",
+    "lat": 31.783416,
+    "lon": -106.440944,
+    "name": "US-54 @ Montana",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIFN1bmJvd2w",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Sunbowl&districtCode=ELP",
+    "lat": 31.785681999999998,
+    "lon": -106.506035,
+    "name": "SH-20/Mesa @ Sunbowl",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBTYW4gTWFyY29z",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20San%20Marcos&districtCode=ELP",
+    "lat": 31.785712,
+    "lon": -106.519103,
+    "name": "IH-10 @ San Marcos",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtODUvUGFpc2FubyBAIEV4ZWN1dGl2ZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-85%2FPaisano%20%40%20Executive&districtCode=ELP",
+    "lat": 31.788334,
+    "lon": -106.525945,
+    "name": "US-85/Paisano @ Executive",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBUcm93YnJpZGdl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Trowbridge&districtCode=ELP",
+    "lat": 31.788376999999997,
+    "lon": -106.440951,
+    "name": "US-54 @ Trowbridge",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBBaXJ3YXk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Airway&districtCode=ELP",
+    "lat": 31.789986,
+    "lon": -106.39537899999999,
+    "name": "US-62/180-Montana @ Airway",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgUmljaCBCZWVt",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Rich%20Beem&districtCode=ELP",
+    "lat": 31.791369,
+    "lon": -106.236025,
+    "name": "FM-659/Zaragoza @ Rich Beem",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRXhlY3V0aXZl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Executive&districtCode=ELP",
+    "lat": 31.792513,
+    "lon": -106.520895,
+    "name": "LP-375 @ Executive",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRWRnZW1lcmU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Edgemere&districtCode=ELP",
+    "lat": 31.792676,
+    "lon": -106.26790299999999,
+    "name": "LP-375 @ Edgemere",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBIYXdraW5z",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Hawkins&districtCode=ELP",
+    "lat": 31.793084999999998,
+    "lon": -106.372053,
+    "name": "US-62/180-Montana @ Hawkins",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBFeGVjdXRpdmU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Executive&districtCode=ELP",
+    "lat": 31.793187999999997,
+    "lon": -106.520057,
+    "name": "IH-10 @ Executive",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIEV4ZWN1dGl2ZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Executive&districtCode=ELP",
+    "lat": 31.795289999999998,
+    "lon": -106.51132199999999,
+    "name": "SH-20/Mesa @ Executive",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRG9uaXBoYW4",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Doniphan&districtCode=ELP",
+    "lat": 31.795500999999998,
+    "lon": -106.53130499999999,
+    "name": "LP-375 @ Doniphan",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-QWlyd2F5IEJsdmQgQCBBaXJwb3J0",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Airway%20Blvd%20%40%20Airport&districtCode=ELP",
+    "lat": 31.795833,
+    "lon": -106.404055,
+    "name": "Airway Blvd @ Airport",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMaW1lcmljaw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Limerick&districtCode=ELP",
+    "lat": 31.797006999999997,
+    "lon": -106.341974,
+    "name": "US-62/180-Montana @ Limerick",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-Rk0tNjU5L1phcmFnb3phIEAgRWRnZW1lcmU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=FM-659%2FZaragoza%20%40%20Edgemere&districtCode=ELP",
+    "lat": 31.797383,
+    "lon": -106.22945,
+    "name": "FM-659/Zaragoza @ Edgemere",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBZYXJicm91Z2g",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Yarbrough&districtCode=ELP",
+    "lat": 31.797822,
+    "lon": -106.33274,
+    "name": "US-62/180-Montana @ Yarbrough",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMZWUgVHJldmlubw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Lee%20Trevino&districtCode=ELP",
+    "lat": 31.799288999999998,
+    "lon": -106.32248899999999,
+    "name": "US-62/180-Montana @ Lee Trevino",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBQZXJzaGluZw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Pershing&districtCode=ELP",
+    "lat": 31.800110999999998,
+    "lon": -106.440944,
+    "name": "US-54 @ Pershing",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBHZW9yZ2UgRGlldGVy",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20George%20Dieter&districtCode=ELP",
+    "lat": 31.801975,
+    "lon": -106.302216,
+    "name": "US-62/180-Montana @ George Dieter",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBTYXVsIEtsZWluZmVsZA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Saul%20Kleinfeld&districtCode=ELP",
+    "lat": 31.804278999999998,
+    "lon": -106.284819,
+    "name": "US-62/180-Montana @ Saul Kleinfeld",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNb250ZWNpbGxv",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Montecillo&districtCode=ELP",
+    "lat": 31.804368999999998,
+    "lon": -106.521656,
+    "name": "IH-10 @ Montecillo",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAgMzc1IEAgUmFjZXRyYWNr",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP%20375%20%40%20Racetrack&districtCode=ELP",
+    "lat": 31.805481999999998,
+    "lon": -106.541247,
+    "name": "LP 375 @ Racetrack",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBMUCAzNzU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20LP%20375&districtCode=ELP",
+    "lat": 31.806739,
+    "lon": -106.27050399999999,
+    "name": "US-62/180-Montana @ LP 375",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNjIvMTgwLU1vbnRhbmEgQCBUaWVycmEgRXN0ZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-62%2F180-Montana%20%40%20Tierra%20Este&districtCode=ELP",
+    "lat": 31.80762,
+    "lon": -106.26153099999999,
+    "name": "US-62/180-Montana @ Tierra Este",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBCdWVuYSBWaXN0YQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Buena%20Vista&districtCode=ELP",
+    "lat": 31.809231999999998,
+    "lon": -106.53007,
+    "name": "IH-10 @ Buena Vista",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBSdWJpbg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Rubin&districtCode=ELP",
+    "lat": 31.809624,
+    "lon": -106.531504,
+    "name": "IH-10 @ Rubin",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBDcm9ja2V0dA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Crockett&districtCode=ELP",
+    "lat": 31.810879,
+    "lon": -106.545367,
+    "name": "IH-10 @ Crockett",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBWYW4gQnVyZW4",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Van%20Buren&districtCode=ELP",
+    "lat": 31.812721999999997,
+    "lon": -106.442555,
+    "name": "US-54 @ Van Buren",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvRG9uaXBoYW4gQCBTdW5sYW5kIFBhcms",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FDoniphan%20%40%20Sunland%20Park&districtCode=ELP",
+    "lat": 31.812855,
+    "lon": -106.55765799999999,
+    "name": "SH-20/Doniphan @ Sunland Park",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBTdW5sYW5kIFBhcms",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Sunland%20Park&districtCode=ELP",
+    "lat": 31.814873,
+    "lon": -106.54927099999999,
+    "name": "IH-10 @ Sunland Park",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-QWlycG9ydCBAIEZvdW5kZXJz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Airport%20%40%20Founders&districtCode=ELP",
+    "lat": 31.817401,
+    "lon": -106.404614,
+    "name": "Airport @ Founders",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgTHVrZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Luke&districtCode=ELP",
+    "lat": 31.820764999999998,
+    "lon": -106.389484,
+    "name": "SP-601 @ Luke",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgUk0tMjQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20RM-24&districtCode=ELP",
+    "lat": 31.821899,
+    "lon": -106.377799,
+    "name": "SP-601 @ RM-24",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgTWFyc2hhbGw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Marshall&districtCode=ELP",
+    "lat": 31.82615,
+    "lon": -106.430596,
+    "name": "SP-601 @ Marshall",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgQWlycG9ydA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Airport&districtCode=ELP",
+    "lat": 31.826278,
+    "lon": -106.40514999999999,
+    "name": "SP-601 @ Airport",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBGcmVkIFdpbHNvbg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Fred%20Wilson&districtCode=ELP",
+    "lat": 31.826361,
+    "lon": -106.438361,
+    "name": "US-54 @ Fred Wilson",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgQ2hhZmZlZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Chaffee&districtCode=ELP",
+    "lat": 31.826413,
+    "lon": -106.416608,
+    "name": "SP-601 @ Chaffee",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBSZXNsZXI",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Resler&districtCode=ELP",
+    "lat": 31.826942,
+    "lon": -106.561224,
+    "name": "IH-10 @ Resler",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIFN1bmxhbmQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Sunland&districtCode=ELP",
+    "lat": 31.828666,
+    "lon": -106.527333,
+    "name": "SH-20/Mesa @ Sunland",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgR2xvYmFsIFJlYWNo",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Global%20Reach&districtCode=ELP",
+    "lat": 31.830567,
+    "lon": -106.3664,
+    "name": "SP-601 @ Global Reach",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBPc2Jvcm5l",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Osborne&districtCode=ELP",
+    "lat": 31.830827,
+    "lon": -106.565111,
+    "name": "IH-10 @ Osborne",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIFJlc2xlcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Resler&districtCode=ELP",
+    "lat": 31.835798999999998,
+    "lon": -106.550204,
+    "name": "SH-20/Mesa @ Resler",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgUk0tMjU",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20RM-25&districtCode=ELP",
+    "lat": 31.838994999999997,
+    "lon": -106.352334,
+    "name": "SP-601 @ RM-25",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBNZXNh",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Mesa&districtCode=ELP",
+    "lat": 31.839040999999998,
+    "lon": -106.57021499999999,
+    "name": "IH-10 @ Mesa",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvTWVzYSBAIERvbmlwaGFu",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FMesa%20%40%20Doniphan&districtCode=ELP",
+    "lat": 31.841321999999998,
+    "lon": -106.579663,
+    "name": "SH-20/Mesa @ Doniphan",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtNjAxIEAgQ29uc3RpdHV0aW9u",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-601%20%40%20Constitution&districtCode=ELP",
+    "lat": 31.841583999999997,
+    "lon": -106.337378,
+    "name": "SP-601 @ Constitution",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBFbGxlcnRob3JwZQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Ellerthorpe&districtCode=ELP",
+    "lat": 31.842083,
+    "lon": -106.439944,
+    "name": "US-54 @ Ellerthorpe",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBEeWVy",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Dyer&districtCode=ELP",
+    "lat": 31.852280999999998,
+    "lon": -106.440011,
+    "name": "US-54 @ Dyer",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBUaG9ybg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Thorn&districtCode=ELP",
+    "lat": 31.852570999999998,
+    "lon": -106.57428999999999,
+    "name": "IH-10 @ Thorn",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-UmVzbGVyIEAgUmVkZA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=Resler%20%40%20Redd&districtCode=ELP",
+    "lat": 31.859543,
+    "lon": -106.557712,
+    "name": "Resler @ Redd",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMjAvRG9uaXBoYW4gQCBSZWRk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-20%2FDoniphan%20%40%20Redd&districtCode=ELP",
+    "lat": 31.860277,
+    "lon": -106.58706199999999,
+    "name": "SH-20/Doniphan @ Redd",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBSZWRk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Redd&districtCode=ELP",
+    "lat": 31.8631,
+    "lon": -106.576859,
+    "name": "IH-10 @ Redd",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBIb25kbyBQYXNz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Hondo%20Pass&districtCode=ELP",
+    "lat": 31.869387,
+    "lon": -106.44075699999999,
+    "name": "US-54 @ Hondo Pass",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTU0gMTcuMw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20MM%2017.3&districtCode=ELP",
+    "lat": 31.877957,
+    "lon": -106.493719,
+    "name": "LP-375 @ MM 17.3",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U0gtMTc4L0FydGNyYWZ0IEAgRG9uaXBoYW4",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SH-178%2FArtcraft%20%40%20Doniphan&districtCode=ELP",
+    "lat": 31.879089999999998,
+    "lon": -106.593871,
+    "name": "SH-178/Artcraft @ Doniphan",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBEaWFuYQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Diana&districtCode=ELP",
+    "lat": 31.882555,
+    "lon": -106.440833,
+    "name": "US-54 @ Diana",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBBcnRjcmFmdA",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Artcraft&districtCode=ELP",
+    "lat": 31.882975,
+    "lon": -106.58143899999999,
+    "name": "IH-10 @ Artcraft",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtMTYgQCBEb25pcGhhbg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-16%20%40%20Doniphan&districtCode=ELP",
+    "lat": 31.893219,
+    "lon": -106.59709199999999,
+    "name": "SP-16 @ Doniphan",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTU0gMTk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20MM%2019&districtCode=ELP",
+    "lat": 31.894419,
+    "lon": -106.473636,
+    "name": "LP-375 @ MM 19",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBUcmFkZSBDZW50ZXI",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Trade%20Center&districtCode=ELP",
+    "lat": 31.897509,
+    "lon": -106.58252999999999,
+    "name": "IH-10 @ Trade Center",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBUcmFuc01vdW50YWlu",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20TransMountain&districtCode=ELP",
+    "lat": 31.897637999999997,
+    "lon": -106.441555,
+    "name": "US-54 @ TransMountain",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgS2Vud29ydGh5",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Kenworthy&districtCode=ELP",
+    "lat": 31.898491999999997,
+    "lon": -106.433358,
+    "name": "LP-375 @ Kenworthy",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUnVzaGluZw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Rushing&districtCode=ELP",
+    "lat": 31.898902999999997,
+    "lon": -106.418281,
+    "name": "LP-375 @ Rushing",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgRHllcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Dyer&districtCode=ELP",
+    "lat": 31.899224,
+    "lon": -106.408974,
+    "name": "LP-375 @ Dyer",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUmFpbHJvYWQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Railroad&districtCode=ELP",
+    "lat": 31.899310999999997,
+    "lon": -106.377568,
+    "name": "LP-375 @ Railroad",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgVVMtNTQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20US-54&districtCode=ELP",
+    "lat": 31.901501,
+    "lon": -106.44740499999999,
+    "name": "LP-375 @ US-54",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTXVzZXVtcw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Museums&districtCode=ELP",
+    "lat": 31.904097,
+    "lon": -106.452511,
+    "name": "LP-375 @ Museums",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGFzZW8gRGVsIE5vcnRl",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Paseo%20Del%20Norte&districtCode=ELP",
+    "lat": 31.904522999999998,
+    "lon": -106.547631,
+    "name": "LP-375 @ Paseo Del Norte",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUGxleHhhcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Plexxar&districtCode=ELP",
+    "lat": 31.905725999999998,
+    "lon": -106.557476,
+    "name": "LP-375 @ Plexxar",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgVG9tIE1heXMgUGFyaw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Tom%20Mays%20Park&districtCode=ELP",
+    "lat": 31.906194,
+    "lon": -106.52323,
+    "name": "LP-375 @ Tom Mays Park",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgUmVzbGVy",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Resler&districtCode=ELP",
+    "lat": 31.907148999999997,
+    "lon": -106.565787,
+    "name": "LP-375 @ Resler",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtMTYgQCBUYWxib3Q",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-16%20%40%20Talbot&districtCode=ELP",
+    "lat": 31.907715,
+    "lon": -106.58731499999999,
+    "name": "SP-16 @ Talbot",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-TFAtMzc1IEAgTm9ydGh3ZXN0ZXJu",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=LP-375%20%40%20Northwestern&districtCode=ELP",
+    "lat": 31.907913999999998,
+    "lon": -106.574912,
+    "name": "LP-375 @ Northwestern",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBUcmFuc01vdW50YWlu",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20TransMountain&districtCode=ELP",
+    "lat": 31.909595,
+    "lon": -106.58263,
+    "name": "IH-10 @ TransMountain",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBTdW4gVmFsbGV5",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Sun%20Valley&districtCode=ELP",
+    "lat": 31.912471999999998,
+    "lon": -106.44188799999999,
+    "name": "US-54 @ Sun Valley",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBLZW53b3J0aHk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Kenworthy&districtCode=ELP",
+    "lat": 31.922361,
+    "lon": -106.440305,
+    "name": "US-54 @ Kenworthy",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBMb3MgTW9jaGlz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Los%20Mochis&districtCode=ELP",
+    "lat": 31.925736999999998,
+    "lon": -106.582506,
+    "name": "IH-10 @ Los Mochis",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBTZWFuIEhhZ2dlcnR5",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Sean%20Haggerty&districtCode=ELP",
+    "lat": 31.930501,
+    "lon": -106.423864,
+    "name": "US-54 @ Sean Haggerty",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtMzIwIEAgUmFpbHJvYWQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-320%20%40%20Railroad&districtCode=ELP",
+    "lat": 31.935788,
+    "lon": -106.36675,
+    "name": "SP-320 @ Railroad",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBNY0NvbWJz",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20McCombs&districtCode=ELP",
+    "lat": 31.939830999999998,
+    "lon": -106.40735099999999,
+    "name": "US-54 @ McCombs",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-U1AtMzIwIEAgRHllcg",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=SP-320%20%40%20Dyer&districtCode=ELP",
+    "lat": 31.942301999999998,
+    "lon": -106.37249399999999,
+    "name": "SP-320 @ Dyer",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBSTS0zNQ",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20RM-35&districtCode=ELP",
+    "lat": 31.952925999999998,
+    "lon": -106.39018499999999,
+    "name": "US-54 @ RM-35",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBWaW50b24",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Vinton&districtCode=ELP",
+    "lat": 31.9576,
+    "lon": -106.582186,
+    "name": "IH-10 @ Vinton",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBNZXNxdWl0ZSBIaWxscw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Mesquite%20Hills&districtCode=ELP",
+    "lat": 31.965836999999997,
+    "lon": -106.37432199999999,
+    "name": "US-54 @ Mesquite Hills",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBSTS0zNw",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20RM-37&districtCode=ELP",
+    "lat": 31.973384999999997,
+    "lon": -106.36442,
+    "name": "US-54 @ RM-37",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBUcmF2ZWwgSW5mb3JtYXRpb24gQ2VudGVy",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20Travel%20Information%20Center&districtCode=ELP",
+    "lat": 31.981333,
+    "lon": -106.58248999999999,
+    "name": "IH-10 @ Travel Information Center",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBTdGFuIFJvYmVydHM",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20Stan%20Roberts&districtCode=ELP",
+    "lat": 31.986493,
+    "lon": -106.345124,
+    "name": "US-54 @ Stan Roberts",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-SUgtMTAgQCBGTS0xOTA1L0FudGhvbnk",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=IH-10%20%40%20FM-1905%2FAnthony&districtCode=ELP",
+    "lat": 31.997424,
+    "lon": -106.58235499999999,
+    "name": "IH-10 @ FM-1905/Anthony",
+    "ink": "blue",
+    "provider": "TxDOT"
+  },
+  {
+    "id": "txdot-elp-VVMtNTQgQCBTdGF0ZSBMaW5l",
+    "url": "https://its.txdot.gov/its/DistrictIts/GetCctvSnapshotByIcdId?icdId=US-54%20%40%20State%20Line&districtCode=ELP",
+    "lat": 32.001197,
+    "lon": -106.327271,
+    "name": "US-54 @ State Line",
+    "ink": "blue",
+    "provider": "TxDOT"
+  }
+]

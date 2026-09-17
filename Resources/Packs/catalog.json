@@ -154,6 +154,7 @@
         "aerial-8.pmtiles",
         "aerial-9.pmtiles",
         "aerial.pmtiles",
+        "cameras.json",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
         "glyphs/Open Sans Regular/256-511.pbf",
@@ -170,7 +171,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 1189160908
+      "bytes": 1189226994
     },
     {
       "id": "tx-east",
@@ -299,6 +300,7 @@
         "aerial-1.pmtiles",
         "aerial-2.pmtiles",
         "aerial.pmtiles",
+        "cameras.json",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
         "glyphs/Open Sans Regular/256-511.pbf",
@@ -315,7 +317,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 313578233
+      "bytes": 313827780
     },
     {
       "id": "nm",
@@ -451,6 +453,7 @@
         "aerial-7.pmtiles",
         "aerial-8.pmtiles",
         "aerial.pmtiles",
+        "cameras.json",
         "dem.json",
         "glyphs/Open Sans Regular/0-255.pbf",
         "glyphs/Open Sans Regular/256-511.pbf",
@@ -467,7 +470,7 @@
         "search.json",
         "style.json"
       ],
-      "bytes": 828522026
+      "bytes": 828522049
     }
   ]
 }

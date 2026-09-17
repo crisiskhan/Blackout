@@ -144,19 +144,35 @@ final class UpdateSocket {
         if packedCams.isEmpty {
             off.append(SnapKind.cams.offTitle)
         } else {
-            for cam in packedCams {
-                if let jpeg = await get(session, cam.url), jpeg.count > 32 {
+            let nearest = packedCams
+                .sorted { range2($0, lat: lat, lon: lon) < range2($1, lat: lat, lon: lon) }
+                .prefix(CctvMarks.snapCap)
+            var byID: [String: SnapCam] = [:]
+            if let old = lastManifest?.cams {
+                for cam in old where !cam.id.isEmpty {
+                    byID[cam.id] = cam
+                }
+            }
+            for cam in nearest {
+                if let data = await get(session, cam.url),
+                   let jpeg = Self.stillJPEG(data),
+                   jpeg.count > 32
+                {
                     let name = "cam-\(cam.id).jpg"
                     write(name, jpeg)
                     files.append(name)
-                    camStill.append(SnapCam(
+                    byID[cam.id] = SnapCam(
                         id: cam.id,
                         lat: cam.lat,
                         lon: cam.lon,
                         file: name,
                         at: Date()
-                    ))
+                    )
                 }
+            }
+            camStill = Array(byID.values)
+            for cam in camStill where !files.contains(cam.file) {
+                files.append(cam.file)
             }
             if camStill.isEmpty { off.append(SnapKind.cams.offTitle) }
         }
@@ -260,6 +276,30 @@ final class UpdateSocket {
         return rows.filter { !$0.id.isEmpty && $0.url.hasPrefix("http") }
     }
 
+    /// Raw JPEG, or TxDOT JSON `{snippet: base64 jpeg}`. Nothing else.
+    static func stillJPEG(_ data: Data) -> Data? {
+        if data.count >= 3, data[0] == 0xFF, data[1] == 0xD8 {
+            return data
+        }
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        let snippet = (obj["snippet"] as? String) ?? (obj["Snippet"] as? String)
+        guard let snippet, !snippet.isEmpty, let raw = Data(base64Encoded: snippet) else {
+            return nil
+        }
+        if raw.count >= 3, raw[0] == 0xFF, raw[1] == 0xD8 {
+            return raw
+        }
+        return nil
+    }
+
+    private func range2(_ cam: PackCam, lat: Double, lon: Double) -> Double {
+        let dlat = cam.lat - lat
+        let dlon = (cam.lon - lon) * cos(lat * .pi / 180)
+        return dlat * dlat + dlon * dlon
+    }
+
     private func write(_ name: String, _ data: Data) {
         let dir = SnapManifest.folder()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -316,6 +356,35 @@ struct PackCam: Codable, Sendable {
     var url: String
     var lat: Double
     var lon: Double
+    var name: String
+    var ink: String
+    var provider: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, url, lat, lon, name, ink, provider
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        url = try c.decode(String.self, forKey: .url)
+        lat = try c.decode(Double.self, forKey: .lat)
+        lon = try c.decode(Double.self, forKey: .lon)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? id
+        ink = try c.decodeIfPresent(String.self, forKey: .ink) ?? "blue"
+        provider = try c.decodeIfPresent(String.self, forKey: .provider) ?? ""
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(url, forKey: .url)
+        try c.encode(lat, forKey: .lat)
+        try c.encode(lon, forKey: .lon)
+        try c.encode(name, forKey: .name)
+        try c.encode(ink, forKey: .ink)
+        try c.encode(provider, forKey: .provider)
+    }
 }
 
 struct SnapCam: Codable, Sendable {

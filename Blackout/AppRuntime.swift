@@ -91,6 +91,10 @@ final class AppRuntime {
     var heldParty: HeldPerson?
     /// A packed door the search book interpolated. Mutually exclusive with ground and party.
     var heldAddress: HeldAddress?
+    /// A packed CCTV still. Mutually exclusive with ground, party, and doors.
+    var heldCam: HeldCam?
+    /// Packed cameras for the open extract. Empty is honest (NM).
+    var packCams: [PackCam] = []
     /// Party place composer. NAME / NOTE / FACE live here until DROP.
     var markDraft: MapMarkDraft?
     /// Planted place the thumb is holding. Mutually exclusive with ground and party.
@@ -223,6 +227,7 @@ final class AppRuntime {
         marks = MarkStore.load()
         relabelMarksForActivePack()
         loadFieldBookIDs()
+        loadPackCams()
         bootVessel()
         applyMapKeepAwake()
         updateSocket.start()
@@ -440,6 +445,7 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldAddress = nil
+        heldCam = nil
         let pref = MeshMarkBody.clean(name ?? "")
         let unnamed = pref.isEmpty || pref == Inspect.unnamed
         if let existing = marks.first(where: { MarkDrop.sameCoord(($0.lat, $0.lon), (lat, lon)) }) {
@@ -527,6 +533,7 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldAddress = nil
+        heldCam = nil
         heldMark = mark
         markDraft = MapMarkDraft(
             lat: mark.lat,
@@ -553,6 +560,7 @@ final class AppRuntime {
         heldMark = nil
         heldParty = nil
         heldAddress = nil
+        heldCam = nil
         let id = packs?.active?.id
         let index = id.flatMap { watersByPack[$0] } ?? (waterPackID == id ? waterCache : nil)
         held = HeldPoint(
@@ -576,9 +584,33 @@ final class AppRuntime {
         held = nil
         heldParty = nil
         heldAddress = nil
+        heldCam = nil
         pickingEmblem = false
         eyeTap = nil
         pulse()
+    }
+
+    func holdCam(id: String, lat: Double, lon: Double) {
+        guard lat.isFinite, lon.isFinite else { return }
+        pulse()
+        pickingEmblem = false
+        closeSpeakTurns()
+        markDraft = nil
+        heldMark = nil
+        held = nil
+        heldParty = nil
+        heldAddress = nil
+        eyeTap = nil
+        let packed = packCams.first { $0.id == id }
+        let named = packed?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        heldCam = HeldCam(
+            id: id,
+            name: named.isEmpty ? id : named,
+            lat: packed?.lat ?? lat,
+            lon: packed?.lon ?? lon,
+            ink: packed?.ink ?? "blue",
+            provider: packed?.provider ?? ""
+        )
     }
 
     func holdAddress(_ hit: SearchHit) {
@@ -590,6 +622,7 @@ final class AppRuntime {
         heldMark = nil
         held = nil
         heldParty = nil
+        heldCam = nil
         let what = hit.what.trimmingCharacters(in: .whitespacesAndNewlines)
         heldAddress = HeldAddress(
             name: hit.name,
@@ -684,6 +717,7 @@ final class AppRuntime {
         heldMark = nil
         held = nil
         heldAddress = nil
+        heldCam = nil
         if id == UserPuck.title {
             let you = fieldYou
             heldParty = HeldPerson(
@@ -1207,7 +1241,7 @@ final class AppRuntime {
         pulseTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(BlackoutTokens.Chrome.chromeIdleSeconds))
             if Task.isCancelled { return }
-            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || markDraft != nil || heldMark != nil { return }
+            if hudCrisis || incoming != nil || hudLayoutMode || held != nil || heldParty != nil || heldAddress != nil || heldCam != nil || markDraft != nil || heldMark != nil { return }
             hudFocus = .none
             chromeAwake = false
         }
@@ -1834,6 +1868,8 @@ final class AppRuntime {
             warmupActiveWater()
         }
         loadFieldBookIDs()
+        loadPackCams()
+        heldCam = nil
     }
 
     func applyMapKeepAwake() {
@@ -1948,6 +1984,22 @@ final class AppRuntime {
         } else {
             fieldBookIDs = Set(cards.map(\.id))
         }
+    }
+
+    func loadPackCams() {
+        guard let pack = packs?.active, let root = packs?.packRoot(id: pack.id) else {
+            packCams = []
+            return
+        }
+        let url = root.appendingPathComponent("cameras.json")
+        guard
+            let data = try? Data(contentsOf: url),
+            let rows = try? JSONDecoder().decode([PackCam].self, from: data)
+        else {
+            packCams = []
+            return
+        }
+        packCams = rows.filter { !$0.id.isEmpty && $0.lat.isFinite && $0.lon.isFinite }
     }
 
     private func warmupActiveGraph() {

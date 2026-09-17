@@ -1289,6 +1289,7 @@ def main() -> None:
     hud_quality()
     water_inspect()
     phone_trim()
+    cctv_stills()
     sys.exit(fail)
 
 
@@ -1425,6 +1426,20 @@ def phone_trim() -> None:
         bad(f"phone trim contracts failed\n{contracts.stdout}{contracts.stderr}")
         return
     ok("Done: phone trim — Cesium gone, llama unlinked, overlay tiles, one aerial")
+
+
+def cctv_stills() -> None:
+    """Packed CCTV dots. UPDATE SNAPs stills. Never a live stream."""
+    contracts = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "test_cctv_stills.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if contracts.returncode != 0:
+        bad(f"CCTV stills contracts failed\n{contracts.stdout}{contracts.stderr}")
+        return
+    ok("Done: packed CCTV dots + SNAP stills")
 
 
 def hud_quality() -> None:

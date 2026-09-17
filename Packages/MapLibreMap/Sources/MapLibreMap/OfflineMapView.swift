@@ -64,6 +64,10 @@ public struct OfflineMapView: UIViewRepresentable {
     public var rings: [EyeDesk.Ring]
     public var frameExtra: [(lat: Double, lon: Double)]
     public var offAerial: Bool
+    /// Packed CCTV access. Tap or hold opens the still card, not DEST.
+    public var onCctvHold: ((String, Double, Double) -> Void)?
+    public var onCctvTap: ((String, Double, Double) -> Void)?
+    public var cams: [CctvMark]
 
     public init(
         styleURL: URL,
@@ -103,7 +107,10 @@ public struct OfflineMapView: UIViewRepresentable {
         trails: [[(lat: Double, lon: Double)]] = [],
         rings: [EyeDesk.Ring] = [],
         frameExtra: [(lat: Double, lon: Double)] = [],
-        offAerial: Bool = false
+        offAerial: Bool = false,
+        onCctvHold: ((String, Double, Double) -> Void)? = nil,
+        onCctvTap: ((String, Double, Double) -> Void)? = nil,
+        cams: [CctvMark] = []
     ) {
         self.styleURL = styleURL
         self.centerLat = centerLat
@@ -143,6 +150,9 @@ public struct OfflineMapView: UIViewRepresentable {
         self.rings = rings
         self.frameExtra = frameExtra
         self.offAerial = offAerial
+        self.onCctvHold = onCctvHold
+        self.onCctvTap = onCctvTap
+        self.cams = cams
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -203,6 +213,8 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onPersonTap = onPersonTap
         context.coordinator.onPersonDoubleTap = onPersonDoubleTap
         context.coordinator.onEmptyDoubleTap = onEmptyDoubleTap
+        context.coordinator.onCctvHold = onCctvHold
+        context.coordinator.onCctvTap = onCctvTap
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -223,6 +235,8 @@ public struct OfflineMapView: UIViewRepresentable {
         context.coordinator.onPersonTap = onPersonTap
         context.coordinator.onPersonDoubleTap = onPersonDoubleTap
         context.coordinator.onEmptyDoubleTap = onEmptyDoubleTap
+        context.coordinator.onCctvHold = onCctvHold
+        context.coordinator.onCctvTap = onCctvTap
         context.coordinator.onPulse = onPulse
         context.coordinator.trackUser = trackUser
         context.coordinator.interactive = interactive
@@ -289,7 +303,8 @@ public struct OfflineMapView: UIViewRepresentable {
             trails: trails,
             rings: rings,
             frameExtra: frameExtra,
-            offAerial: offAerial
+            offAerial: offAerial,
+            cams: cams
         )
     }
 
@@ -323,6 +338,7 @@ public struct OfflineMapView: UIViewRepresentable {
             var rings: [EyeDesk.Ring]
             var frameExtra: [(lat: Double, lon: Double)]
             var offAerial: Bool
+            var cams: [CctvMark]
         }
 
         var spec: OverlaySpec?
@@ -332,6 +348,8 @@ public struct OfflineMapView: UIViewRepresentable {
         var onPersonTap: ((String, Double, Double) -> Void)?
         var onPersonDoubleTap: ((String, Double, Double) -> Void)?
         var onEmptyDoubleTap: ((Double, Double) -> Void)?
+        var onCctvHold: ((String, Double, Double) -> Void)?
+        var onCctvTap: ((String, Double, Double) -> Void)?
         var onPulse: (() -> Void)?
         var trackUser = true
         var interactive = true
@@ -362,6 +380,7 @@ public struct OfflineMapView: UIViewRepresentable {
         var paintedCondition: String?
         var paintedHeading: Double?
         var paintedPipKey: String?
+        var storedCams: [CctvMark]?
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard interactive, gesture.state == .ended, let view = gesture.view as? MLNMapView else { return }
@@ -369,6 +388,11 @@ public struct OfflineMapView: UIViewRepresentable {
             if spec?.godsEye == true, let mark = personMark(at: point, on: view) {
                 guard CLLocationCoordinate2DIsValid(mark.coordinate) else { return }
                 onPersonTap?(mark.memberID, mark.coordinate.latitude, mark.coordinate.longitude)
+                onPulse?()
+                return
+            }
+            if let cam = cctvMark(at: point, on: view) {
+                onCctvTap?(cam.id, cam.lat, cam.lon)
                 onPulse?()
                 return
             }
@@ -408,6 +432,15 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
                 return
             }
+            if let cam = cctvMark(at: point, on: view) {
+                holdTick.impactOccurred()
+                onCctvHold?(cam.id, cam.lat, cam.lon)
+                onPulse?()
+                if spec?.godsEye != true {
+                    liftIntoView(point, on: view)
+                }
+                return
+            }
             let coord = view.convert(point, toCoordinateFrom: view)
             guard CLLocationCoordinate2DIsValid(coord) else { return }
             holdTick.impactOccurred()
@@ -435,6 +468,27 @@ public struct OfflineMapView: UIViewRepresentable {
                 if d <= reach, d < best {
                     best = d
                     hit = mark
+                }
+            }
+            return hit
+        }
+
+        /// Packed CCTV wins over dest and inspect. Person emblems still win.
+        func cctvMark(at: CGPoint, on view: MLNMapView) -> CctvMark? {
+            guard let cams = spec?.cams, !cams.isEmpty else { return nil }
+            let reach = CGFloat(Inspect.holdProbePoints) / 2
+            var hit: CctvMark?
+            var best = CGFloat.greatestFiniteMagnitude
+            for cam in cams {
+                let coordinate = CLLocationCoordinate2D(latitude: cam.lat, longitude: cam.lon)
+                guard CLLocationCoordinate2DIsValid(coordinate) else { continue }
+                let screen = view.convert(coordinate, toPointTo: view)
+                let dx = screen.x - at.x
+                let dy = screen.y - at.y
+                let d = (dx * dx + dy * dy).squareRoot()
+                if d <= reach, d < best {
+                    best = d
+                    hit = cam
                 }
             }
             return hit
@@ -743,6 +797,7 @@ public struct OfflineMapView: UIViewRepresentable {
                 }
             }
             syncPersonMarks(on: view, spec: spec, force: force)
+            paintCctv(on: view, spec: spec, force: force)
             if let style = view.style {
                 let paletteFlip = storedPalette != spec.eyePalette
                 storedPalette = spec.eyePalette
@@ -925,6 +980,66 @@ public struct OfflineMapView: UIViewRepresentable {
                 paintMarkSymbol(layer)
                 style.addLayer(layer)
             }
+        }
+
+        func paintCctv(on view: MLNMapView, spec: OverlaySpec, force: Bool) {
+            guard let style = view.style else { return }
+            if !force,
+               let stored = storedCams,
+               stored == spec.cams,
+               style.layer(withIdentifier: CctvMarks.layerID) != nil
+            {
+                return
+            }
+            storedCams = spec.cams
+            if force || style.layer(withIdentifier: CctvMarks.layerID) == nil {
+                style.setImage(CctvArt.dot(), forName: CctvMarks.imageName)
+            }
+            let shape = cctvShape(spec.cams)
+            if let src = style.source(withIdentifier: CctvMarks.sourceID) as? MLNShapeSource {
+                src.shape = shape
+            } else {
+                let src = MLNShapeSource(identifier: CctvMarks.sourceID, shape: shape, options: nil)
+                style.addSource(src)
+            }
+            if let src = style.source(withIdentifier: CctvMarks.sourceID),
+               style.layer(withIdentifier: CctvMarks.layerID) == nil
+            {
+                let layer = MLNSymbolStyleLayer(identifier: CctvMarks.layerID, source: src)
+                layer.iconImageName = NSExpression(forConstantValue: CctvMarks.imageName)
+                paintMarkSymbol(layer)
+                layer.iconRotationAlignment = NSExpression(forConstantValue: "viewport")
+                if let you = style.layer(withIdentifier: UserPuck.markLayerID) {
+                    style.insertLayer(layer, below: you)
+                } else {
+                    style.addLayer(layer)
+                }
+            }
+        }
+
+        func cctvShape(_ cams: [CctvMark]) -> MLNShape {
+            let features: [[String: Any]] = cams.compactMap { cam in
+                let coordinate = CLLocationCoordinate2D(latitude: cam.lat, longitude: cam.lon)
+                guard CLLocationCoordinate2DIsValid(coordinate) else { return nil }
+                return [
+                    "type": "Feature",
+                    "properties": ["id": cam.id] as [String: Any],
+                    "geometry": [
+                        "type": "Point",
+                        "coordinates": [cam.lon, cam.lat],
+                    ] as [String: Any],
+                ]
+            }
+            let geo: [String: Any] = [
+                "type": "FeatureCollection",
+                "features": features,
+            ]
+            if let data = try? JSONSerialization.data(withJSONObject: geo),
+               let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+            {
+                return shape
+            }
+            return emptyOverlayShape()
         }
 
         func paintMarkSymbol(_ layer: MLNSymbolStyleLayer) {
@@ -2140,7 +2255,7 @@ extension PackStyle {
     }
 
     private static func keepsSymbol(_ id: String) -> Bool {
-        id == UserPuck.markLayerID || id == PartyPips.markLayerID
+        id == UserPuck.markLayerID || id == PartyPips.markLayerID || id == CctvMarks.layerID
     }
 
     private static func keepsLine(_ id: String) -> Bool {
@@ -2291,7 +2406,10 @@ extension PackStyle {
     }
 
     private static func paintNVG(_ layer: MLNStyleLayer, green: UIColor, field: UIColor) {
-        if layer.identifier == UserPuck.markLayerID || layer.identifier == PartyPips.markLayerID {
+        if layer.identifier == UserPuck.markLayerID
+            || layer.identifier == PartyPips.markLayerID
+            || layer.identifier == CctvMarks.layerID
+        {
             return
         }
         switch layer {
