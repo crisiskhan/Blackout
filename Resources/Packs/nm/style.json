@@ -39,6 +39,54 @@
       "tileSize": 256,
       "attribution": "USGS NAIP, build-time only"
     },
+    "aerial-1": {
+      "type": "raster",
+      "url": "pmtiles://aerial-1.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-2": {
+      "type": "raster",
+      "url": "pmtiles://aerial-2.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-3": {
+      "type": "raster",
+      "url": "pmtiles://aerial-3.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-4": {
+      "type": "raster",
+      "url": "pmtiles://aerial-4.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-5": {
+      "type": "raster",
+      "url": "pmtiles://aerial-5.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-6": {
+      "type": "raster",
+      "url": "pmtiles://aerial-6.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-7": {
+      "type": "raster",
+      "url": "pmtiles://aerial-7.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
+    "aerial-8": {
+      "type": "raster",
+      "url": "pmtiles://aerial-8.pmtiles",
+      "tileSize": 256,
+      "attribution": "USGS NAIP, build-time only"
+    },
     "hillshade": {
       "type": "image",
       "url": "hillshade.png",
@@ -136,6 +184,118 @@
       "id": "aerial",
       "type": "raster",
       "source": "aerial",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-1",
+      "type": "raster",
+      "source": "aerial-1",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-2",
+      "type": "raster",
+      "source": "aerial-2",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-3",
+      "type": "raster",
+      "source": "aerial-3",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-4",
+      "type": "raster",
+      "source": "aerial-4",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-5",
+      "type": "raster",
+      "source": "aerial-5",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-6",
+      "type": "raster",
+      "source": "aerial-6",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-7",
+      "type": "raster",
+      "source": "aerial-7",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "raster-opacity": 1,
+        "raster-fade-duration": 0
+      }
+    },
+    {
+      "id": "aerial-8",
+      "type": "raster",
+      "source": "aerial-8",
       "minzoom": 12,
       "maxzoom": 22,
       "layout": {
