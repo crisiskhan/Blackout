@@ -161,6 +161,8 @@ class PauseOffMapTests(unittest.TestCase):
         self.assertIn("interactive", chrome)
         self.assertIn("preferredFramesPerSecond", chrome)
         self.assertIn("MLNMapViewPreferredFramesPerSecondDefault", chrome)
+        self.assertIn("MLNMapViewPreferredFramesPerSecond(rawValue: 1)", chrome)
+        self.assertNotIn("\n            : 1\n", chrome)
 
 
 class OverlayTilesTests(unittest.TestCase):
